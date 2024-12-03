@@ -14,13 +14,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class UpgradeDatabaseServerV4Response {
 
     @NotNull
-    @Schema(description = ModelDescriptions.UpgradeModelDescriptions.CURRENT_VERSION)
+    @Schema(description = ModelDescriptions.UpgradeModelDescriptions.CURRENT_VERSION, requiredMode = Schema.RequiredMode.REQUIRED)
     private MajorVersion currentVersion;
 
     @Schema(description = ModelDescriptions.UpgradeModelDescriptions.UPGRADE_REASON)
     private String reason;
 
-    @Schema(description = ModelDescriptions.UpgradeModelDescriptions.UPGRADE_REASON_WARNING)
+    @Schema(description = ModelDescriptions.UpgradeModelDescriptions.UPGRADE_REASON_WARNING, requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean warning;
 
     @Schema(description = ModelDescriptions.FLOW_IDENTIFIER)

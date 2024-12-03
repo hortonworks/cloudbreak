@@ -21,7 +21,7 @@ public abstract class DatabaseV4Base implements Serializable {
     @Size(max = 100, min = 5, message = "The length of the database's name must be between 5 to 100, inclusive")
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The database's name may only contain lowercase characters, digits, and hyphens, and must start with an alphanumeric character")
-    @Schema(description = Database.NAME, required = true)
+    @Schema(description = Database.NAME, requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
     @Size(max = 1000000)
@@ -30,7 +30,7 @@ public abstract class DatabaseV4Base implements Serializable {
 
     @NotNull
     @ValidJdbcConnectionUrl
-    @Schema(description = Database.CONNECTION_URL, required = true)
+    @Schema(description = Database.CONNECTION_URL, requiredMode = Schema.RequiredMode.REQUIRED)
     private String connectionURL;
 
     @NotNull
@@ -38,7 +38,7 @@ public abstract class DatabaseV4Base implements Serializable {
     @Pattern(regexp = "(^[a-zA-Z_][-a-zA-Z0-9_]*[a-zA-Z0-9_]$)",
             message = "The database's type may only contain alphanumeric characters, underscores, and hyphens, and must "
                 + "start with an alphanumeric character or underscore")
-    @Schema(description = Database.TYPE, required = true)
+    @Schema(description = Database.TYPE, requiredMode = Schema.RequiredMode.REQUIRED)
     private String type;
 
     @Schema(description = Database.CONNECTION_DRIVER)
@@ -46,7 +46,7 @@ public abstract class DatabaseV4Base implements Serializable {
 
     @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
     @NotNull
-    @Schema(description = Database.ENVIRONMENT_CRN)
+    @Schema(description = Database.ENVIRONMENT_CRN, requiredMode = Schema.RequiredMode.REQUIRED)
     private String environmentCrn;
 
     public String getConnectionURL() {

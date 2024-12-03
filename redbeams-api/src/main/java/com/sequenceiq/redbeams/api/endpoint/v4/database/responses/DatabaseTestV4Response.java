@@ -13,7 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @NotNull
 public class DatabaseTestV4Response implements Serializable {
 
-    @Schema(description = DatabaseTest.RESULT, required = true)
+    @Schema(description = DatabaseTest.RESULT, requiredMode = Schema.RequiredMode.REQUIRED)
     private String result;
 
     public DatabaseTestV4Response() {

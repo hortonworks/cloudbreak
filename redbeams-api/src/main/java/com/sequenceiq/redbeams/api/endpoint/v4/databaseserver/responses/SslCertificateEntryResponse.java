@@ -13,7 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(name = "SslCertificateEntryResponse")
 public class SslCertificateEntryResponse {
 
-    @Schema(description = ModelDescriptions.SslCertificate.VERSION)
+    @Schema(description = ModelDescriptions.SslCertificate.VERSION, requiredMode = Schema.RequiredMode.REQUIRED)
     private int version;
 
     @Schema(description = ModelDescriptions.SslCertificate.CLOUDKEY)
@@ -31,10 +31,10 @@ public class SslCertificateEntryResponse {
     @Schema(description = ModelDescriptions.SslCertificate.FINGERPRINT)
     private String fingerprint;
 
-    @Schema(description = ModelDescriptions.SslCertificate.EXPIRATIONDATE)
+    @Schema(description = ModelDescriptions.SslCertificate.EXPIRATIONDATE, requiredMode = Schema.RequiredMode.REQUIRED)
     private long expirationDate;
 
-    @Schema(description = ModelDescriptions.SslCertificate.DEPRECATED)
+    @Schema(description = ModelDescriptions.SslCertificate.DEPRECATED, requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean deprecated;
 
     public int getVersion() {

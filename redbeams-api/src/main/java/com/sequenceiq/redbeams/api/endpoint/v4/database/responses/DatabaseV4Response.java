@@ -20,13 +20,13 @@ public class DatabaseV4Response extends DatabaseV4Base {
     @Schema(description = Database.CREATION_DATE)
     private Long creationDate;
 
-    @Schema(description = Database.DB_ENGINE, required = true)
+    @Schema(description = Database.DB_ENGINE, requiredMode = Schema.RequiredMode.REQUIRED)
     private String databaseEngine;
 
-    @Schema(description = Database.CONNECTION_DRIVER, required = true)
+    @Schema(description = Database.CONNECTION_DRIVER, requiredMode = Schema.RequiredMode.REQUIRED)
     private String connectionDriver;
 
-    @Schema(description = Database.DB_ENGINE_DISPLAYNAME, required = true)
+    @Schema(description = Database.DB_ENGINE_DISPLAYNAME, requiredMode = Schema.RequiredMode.REQUIRED)
     private String databaseEngineDisplayName;
 
     @Schema(description = Database.USERNAME)

@@ -22,12 +22,12 @@ public class DatabaseV4Identifiers implements Serializable {
     @Size(max = 100, min = 5, message = "The length of the database's name must be between 5 to 100, inclusive")
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The database's name may only contain lowercase characters, digits, and hyphens, and must start with an alphanumeric character")
-    @Schema(description = Database.NAME, required = true)
+    @Schema(description = Database.NAME, requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
     @NotNull
     @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
-    @Schema(description = Database.ENVIRONMENT_CRN, required = true)
+    @Schema(description = Database.ENVIRONMENT_CRN, requiredMode = Schema.RequiredMode.REQUIRED)
     private String environmentCrn;
 
     public String getName() {

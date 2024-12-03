@@ -22,7 +22,7 @@ public abstract class DatabaseServerV4Base implements Serializable {
     @Size(max = 100, min = 5, message = "The length of the database server's name must be between 5 and 100, inclusive")
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The database server's name may only contain lowercase letters, digits, and hyphens, and must start with an alphanumeric character")
-    @Schema(description = DatabaseServer.NAME, required = true)
+    @Schema(description = DatabaseServer.NAME, requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
     @Size(max = 1000000)
@@ -30,16 +30,16 @@ public abstract class DatabaseServerV4Base implements Serializable {
     private String description;
 
     @NotNull
-    @Schema(description = DatabaseServer.HOST, required = true)
+    @Schema(description = DatabaseServer.HOST, requiredMode = Schema.RequiredMode.REQUIRED)
     private String host;
 
     @NotNull
-    @Schema(description = DatabaseServer.PORT, required = true)
+    @Schema(description = DatabaseServer.PORT, requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer port;
 
     @NotNull
     @ValidDatabaseVendor
-    @Schema(description = DatabaseServer.DATABASE_VENDOR, required = true)
+    @Schema(description = DatabaseServer.DATABASE_VENDOR, requiredMode = Schema.RequiredMode.REQUIRED)
     private String databaseVendor;
 
     @Schema(description = DatabaseServer.CONNECTION_DRIVER)
@@ -47,7 +47,7 @@ public abstract class DatabaseServerV4Base implements Serializable {
 
     @NotNull
     @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
-    @Schema(description = DatabaseServer.ENVIRONMENT_CRN, required = true)
+    @Schema(description = DatabaseServer.ENVIRONMENT_CRN, requiredMode = Schema.RequiredMode.REQUIRED)
     private String environmentCrn;
 
     public String getName() {

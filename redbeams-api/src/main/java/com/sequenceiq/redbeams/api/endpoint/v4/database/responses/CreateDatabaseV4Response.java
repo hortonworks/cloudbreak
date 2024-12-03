@@ -11,7 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = ModelDescriptions.CREATE_DATABASE_RESPONSE)
 public class CreateDatabaseV4Response {
 
-    @Schema(description = Database.CREATE_RESULT, required = true)
+    @Schema(description = Database.CREATE_RESULT, requiredMode = Schema.RequiredMode.REQUIRED)
     private String result;
 
     public CreateDatabaseV4Response() {

@@ -15,21 +15,21 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DatabaseServerStatusV4Response {
     @NotNull
-    @Schema(description = DatabaseServer.ENVIRONMENT_CRN, required = true)
+    @Schema(description = DatabaseServer.ENVIRONMENT_CRN, requiredMode = Schema.RequiredMode.REQUIRED)
     private String environmentCrn;
 
     @NotNull
-    @Schema(description = DatabaseServer.NAME, required = true)
+    @Schema(description = DatabaseServer.NAME, requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
     @NotNull
-    @Schema(description = DatabaseServer.CRN, required = true)
+    @Schema(description = DatabaseServer.CRN, requiredMode = Schema.RequiredMode.REQUIRED)
     private String resourceCrn;
 
-    @Schema(description = DatabaseServer.STATUS, required = true)
+    @Schema(description = DatabaseServer.STATUS, requiredMode = Schema.RequiredMode.REQUIRED)
     private Status status;
 
-    @Schema(description = DatabaseServer.STATUS_REASON, required = true)
+    @Schema(description = DatabaseServer.STATUS_REASON, requiredMode = Schema.RequiredMode.REQUIRED)
     private String statusReason;
 
     public String getEnvironmentCrn() {

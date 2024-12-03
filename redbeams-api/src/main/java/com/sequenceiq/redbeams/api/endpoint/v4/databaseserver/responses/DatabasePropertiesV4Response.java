@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = ModelDescriptions.DATABASE_PROPERTIES_RESPONSE)
 public class DatabasePropertiesV4Response {
-    @Schema(description = DatabaseServer.CONNECTION_NAME_FORMAT, required = true)
+    @Schema(description = DatabaseServer.CONNECTION_NAME_FORMAT, requiredMode = Schema.RequiredMode.REQUIRED)
     private ConnectionNameFormat connectionNameFormat = ConnectionNameFormat.USERNAME_ONLY;
 
     public ConnectionNameFormat getConnectionNameFormat() {

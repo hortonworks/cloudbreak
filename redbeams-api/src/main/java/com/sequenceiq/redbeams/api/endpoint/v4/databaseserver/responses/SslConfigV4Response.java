@@ -1,6 +1,7 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.common.domain.SslCertStatus;
@@ -13,19 +14,19 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = ModelDescriptions.SSL_CONFIG_RESPONSE)
 public class SslConfigV4Response implements Serializable {
 
-    @Schema(description = DatabaseServer.SSL_CERTIFICATES)
-    private Set<String> sslCertificates;
+    @Schema(description = DatabaseServer.SSL_CERTIFICATES, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Set<String> sslCertificates = new HashSet<>();
 
-    @Schema(description = DatabaseServer.SSL_CERTIFICATE_TYPE)
+    @Schema(description = DatabaseServer.SSL_CERTIFICATE_TYPE, requiredMode = Schema.RequiredMode.REQUIRED)
     private SslCertificateType sslCertificateType = SslCertificateType.NONE;
 
     @Schema(description = DatabaseServer.SSL_MODE)
     private SslMode sslMode = SslMode.DISABLED;
 
-    @Schema(description = DatabaseServer.SSL_CERTIFICATE_ACTIVE_VERSION)
+    @Schema(description = DatabaseServer.SSL_CERTIFICATE_ACTIVE_VERSION, requiredMode = Schema.RequiredMode.REQUIRED)
     private int sslCertificateActiveVersion;
 
-    @Schema(description = DatabaseServer.SSL_CERTIFICATE_HIGHEST_AVAILABLE_VERSION)
+    @Schema(description = DatabaseServer.SSL_CERTIFICATE_HIGHEST_AVAILABLE_VERSION, requiredMode = Schema.RequiredMode.REQUIRED)
     private int sslCertificateHighestAvailableVersion;
 
     @Schema(description = DatabaseServer.SSL_CERTIFICATE_ACTIVE_CLOUD_PROVIDER_IDENTIFIER)
@@ -34,7 +35,7 @@ public class SslConfigV4Response implements Serializable {
     @Schema(description = DatabaseServer.SSL_CERTIFICATE_STATUS)
     private SslCertStatus sslCertificatesStatus;
 
-    @Schema(description = DatabaseServer.SSL_CERTIFICATE_EXPIRATION_DATE_AS_LONG)
+    @Schema(description = DatabaseServer.SSL_CERTIFICATE_EXPIRATION_DATE_AS_LONG, requiredMode = Schema.RequiredMode.REQUIRED)
     private long sslCertificateExpirationDate;
 
     @Schema(description = DatabaseServer.SSL_CERTIFICATE_EXPIRATION_DATE_AS_STRING)

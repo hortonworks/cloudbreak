@@ -3,6 +3,7 @@ package com.sequenceiq.redbeams.api.endpoint.v4.support;
 import static com.sequenceiq.redbeams.doc.ModelDescriptions.SupportModelDescriptions.CERTIFICATES;
 
 import java.security.cert.X509Certificate;
+import java.util.HashSet;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -15,8 +16,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonInclude(Include.NON_NULL)
 public class CertificateSwapV4Response {
 
-    @Schema(description = CERTIFICATES)
-    private Set<X509Certificate> certificates;
+    @Schema(description = CERTIFICATES, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Set<X509Certificate> certificates = new HashSet<>();
 
     public Set<X509Certificate> getCertificates() {
         return certificates;

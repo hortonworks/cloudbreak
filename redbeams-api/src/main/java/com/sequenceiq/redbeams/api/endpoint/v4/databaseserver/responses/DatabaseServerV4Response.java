@@ -22,10 +22,10 @@ public class DatabaseServerV4Response extends DatabaseServerV4Base {
     @Schema(description = DatabaseServer.CRN)
     private String crn;
 
-    @Schema(description = DatabaseServer.DATABASE_VENDOR_DISPLAY_NAME, required = true)
+    @Schema(description = DatabaseServer.DATABASE_VENDOR_DISPLAY_NAME, requiredMode = Schema.RequiredMode.REQUIRED)
     private String databaseVendorDisplayName;
 
-    @Schema(description = DatabaseServer.CONNECTION_DRIVER, required = true)
+    @Schema(description = DatabaseServer.CONNECTION_DRIVER, requiredMode = Schema.RequiredMode.REQUIRED)
     private String connectionDriver;
 
     @Schema(description = DatabaseServer.USERNAME)
@@ -55,7 +55,7 @@ public class DatabaseServerV4Response extends DatabaseServerV4Base {
     @Schema(description = DatabaseServer.MAJOR_VERSION)
     private MajorVersion majorVersion;
 
-    @Schema(description = DatabaseServer.DATABASE_PROPERTIES, required = true)
+    @Schema(description = DatabaseServer.DATABASE_PROPERTIES, requiredMode = Schema.RequiredMode.REQUIRED)
     private DatabasePropertiesV4Response databasePropertiesV4Response;
 
     @Schema(description = DatabaseServer.INSTANCE_TYPE)
