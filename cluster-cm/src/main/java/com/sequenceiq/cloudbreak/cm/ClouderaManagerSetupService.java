@@ -623,7 +623,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             mgmtSetupService.setupMgmtServices(stack, apiClient, cmHostRef,
                     telemetry, sdxContextName, sdxCrn, proxyConfig);
         } else {
-            LOGGER.warn("Unable to determine Cloudera Manager host. Skipping management services installation.");
+            LOGGER.warn("Unable to determine Cloudera Manager host. Skipping management services installation for {}.", sdxCrn);
         }
     }
 

@@ -165,8 +165,9 @@ public class ClouderaManagerMgmtTelemetryService {
             telemetryPublisher.setType(TELEMETRYPUBLISHER);
             telemetryPublisher.setHostRef(cmHostRef);
             mgmtRoles.addItemsItem(telemetryPublisher);
+            LOGGER.info("Added Telemetry management role for {}", stack.getResourceCrn());
         } else {
-            LOGGER.info("Telemetry WA is disabled");
+            LOGGER.info("Telemetry WA is disabled for {}", stack.getResourceCrn());
         }
     }
 

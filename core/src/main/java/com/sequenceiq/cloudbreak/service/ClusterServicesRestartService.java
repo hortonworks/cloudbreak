@@ -70,7 +70,7 @@ public class ClusterServicesRestartService {
     }
 
     public void refreshClusterOnRestart(Stack stack, SdxBasicView sdxBasicView, CmTemplateProcessor blueprintProcessor) throws CloudbreakException {
-        LOGGER.info("Triggering update of remote data context");
+        LOGGER.info("Triggering update of remote data context for {}", stack.getResourceCrn());
         clusterBuilderService.configureManagementServices(stack.getId());
         if (shouldReloadDatabaseConfig(blueprintProcessor)) {
             //Update Hive service database configuration

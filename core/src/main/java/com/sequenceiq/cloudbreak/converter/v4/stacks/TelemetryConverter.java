@@ -127,6 +127,8 @@ public class TelemetryConverter {
             telemetry.setDatabusEndpoint(databusEndpoint);
         }
         telemetry.setFeatures(features);
+        LOGGER.info("Created telemetry object for stack type: {} with workload analytics: {}, features: {} and databus endpoint: {}",
+                type, telemetry.getWorkloadAnalytics(), features, telemetry.getDatabusEndpoint());
         return telemetry;
     }
 
