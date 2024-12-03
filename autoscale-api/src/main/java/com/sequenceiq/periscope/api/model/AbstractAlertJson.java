@@ -14,7 +14,7 @@ public abstract class AbstractAlertJson implements Json {
             message = "The name can only contain alphanumeric characters and hyphens and has to start with an alphabetic character")
     @NotEmpty
     @Size(max = 250)
-    @Schema(description = BaseAlertJsonProperties.ALERTNAME)
+    @Schema(description = BaseAlertJsonProperties.ALERTNAME, requiredMode = Schema.RequiredMode.REQUIRED)
     private String alertName;
 
     @Schema(description = BaseAlertJsonProperties.DESCRIPTION)

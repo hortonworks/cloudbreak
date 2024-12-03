@@ -1,5 +1,6 @@
 package com.sequenceiq.periscope.api.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -22,17 +23,17 @@ public class DistroXAutoscaleClusterResponse implements Json {
     @Schema(description = ClusterJsonsProperties.STACK_TYPE)
     private StackType stackType;
 
-    @Schema(description = ClusterJsonsProperties.AUTOSCALING_ENABLED)
-    private Boolean autoscalingEnabled;
+    @Schema(description = ClusterJsonsProperties.AUTOSCALING_ENABLED, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Boolean autoscalingEnabled = Boolean.FALSE;
 
-    @Schema(description = ClusterJsonsProperties.STOP_START_SCALING_ENABLED)
-    private Boolean stopStartScalingEnabled;
+    @Schema(description = ClusterJsonsProperties.STOP_START_SCALING_ENABLED, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Boolean stopStartScalingEnabled = Boolean.FALSE;
 
-    @Schema(description = ClusterJsonsProperties.TIME_ALERTS)
-    private List<TimeAlertResponse> timeAlerts;
+    @Schema(description = ClusterJsonsProperties.TIME_ALERTS, requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<TimeAlertResponse> timeAlerts = new ArrayList<>();
 
-    @Schema(description = ClusterJsonsProperties.LOAD_ALERTS)
-    private List<LoadAlertResponse> loadAlerts;
+    @Schema(description = ClusterJsonsProperties.LOAD_ALERTS, requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<LoadAlertResponse> loadAlerts = new ArrayList<>();
 
     public DistroXAutoscaleClusterResponse() {
     }

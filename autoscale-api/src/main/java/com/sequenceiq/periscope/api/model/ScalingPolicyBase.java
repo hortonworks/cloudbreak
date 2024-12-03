@@ -22,7 +22,7 @@ public class ScalingPolicyBase implements Json {
     @NotNull
     private AdjustmentType adjustmentType;
 
-    @Schema(description = ScalingPolicyJsonProperties.SCALINGADJUSTMENT)
+    @Schema(description = ScalingPolicyJsonProperties.SCALINGADJUSTMENT, requiredMode = Schema.RequiredMode.REQUIRED)
     private int scalingAdjustment;
 
     @Schema(description = ScalingPolicyJsonProperties.HOSTGROUP)

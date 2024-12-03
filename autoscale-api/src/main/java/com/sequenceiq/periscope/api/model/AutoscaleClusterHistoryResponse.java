@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema
 public class AutoscaleClusterHistoryResponse implements Json {
 
-    @Schema(description = HistoryJsonProperties.CBSTACKCRN)
+    @Schema(description = HistoryJsonProperties.CBSTACKCRN, requiredMode = Schema.RequiredMode.REQUIRED)
     private String stackCrn;
 
     @Schema(description = HistoryJsonProperties.SCALINGSTATUS)
@@ -17,7 +17,7 @@ public class AutoscaleClusterHistoryResponse implements Json {
     @Schema(description = HistoryJsonProperties.STATUSREASON)
     private String statusReason;
 
-    @Schema(description = HistoryJsonProperties.TIMESTAMP)
+    @Schema(description = HistoryJsonProperties.TIMESTAMP, requiredMode = Schema.RequiredMode.REQUIRED)
     private long timestamp;
 
     @Schema(description = HistoryJsonProperties.SCALINGACTIVITY)

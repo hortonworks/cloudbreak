@@ -18,16 +18,16 @@ public class AutoscaleClusterHistoryActivity {
     @Schema(description = ApiDescription.HistoryJsonProperties.ADJUSTMENTTYPE)
     private AdjustmentType adjustmentType;
 
-    @Schema(description = ApiDescription.HistoryJsonProperties.ADJUSTMENT)
+    @Schema(description = ApiDescription.HistoryJsonProperties.ADJUSTMENT, requiredMode = Schema.RequiredMode.REQUIRED)
     private int adjustment;
 
     @Schema(description = ApiDescription.HistoryJsonProperties.HOSTGROUP)
     private String hostGroup;
 
-    @Schema(description = ApiDescription.HistoryJsonProperties.ORIGINALNODECOUNT)
+    @Schema(description = ApiDescription.HistoryJsonProperties.ORIGINALNODECOUNT, requiredMode = Schema.RequiredMode.REQUIRED)
     private int originalNodeCount;
 
-    @Schema(description = ApiDescription.HistoryJsonProperties.PROPERTIES)
+    @Schema(description = ApiDescription.HistoryJsonProperties.PROPERTIES, requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, String> properties = new HashMap<>();
 
     public String getAlertType() {
