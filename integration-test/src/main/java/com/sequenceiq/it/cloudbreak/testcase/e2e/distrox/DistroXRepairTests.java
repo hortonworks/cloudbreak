@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CM_DB_PASS
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CM_INTERMEDIATE_CA_CERT;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CM_MGMT_ADMIN_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CM_SERVICES_DB_PASSWORD;
-import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CM_SERVICE_SHARED_DB;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.EXTERNAL_DATABASE_ROOT_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.LDAP_BIND_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY;
@@ -112,7 +111,6 @@ public class DistroXRepairTests extends AbstractE2ETest {
                     EXTERNAL_DATABASE_ROOT_PASSWORD,
                     CM_INTERMEDIATE_CA_CERT,
                     NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY,
-                    CM_SERVICE_SHARED_DB,
                     CM_SERVICES_DB_PASSWORD);
         } else {
             return Set.of(

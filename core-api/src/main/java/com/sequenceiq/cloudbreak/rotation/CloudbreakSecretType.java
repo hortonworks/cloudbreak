@@ -32,7 +32,9 @@ public enum CloudbreakSecretType implements SecretType {
     GATEWAY_CERT(List.of(VAULT, CUSTOM_JOB, CM_SERVICE_ROLE_RESTART, CLUSTER_PROXY_UPDATE)),
     CM_SERVICES_DB_PASSWORD(List.of(VAULT, SALT_PILLAR, SALT_STATE_APPLY, CM_SERVICE)),
     SALT_BOOT_SECRETS(List.of(VAULT, CUSTOM_JOB, SALTBOOT_CONFIG, USER_DATA)),
-    CM_SERVICE_SHARED_DB(List.of(CUSTOM_JOB)),
+    // making shared service DB rotation internal to prevent subsequent issues during runtime upgrade,
+    // since it fails when DH cluster has unique, non schema owner HMS database user
+    CM_SERVICE_SHARED_DB(List.of(CUSTOM_JOB), Set.of(INTERNAL)),
     CM_INTERMEDIATE_CA_CERT(List.of(CUSTOM_JOB), Set.of(POST_FLOW)),
     LDAP_BIND_PASSWORD(List.of(FREEIPA_ROTATE_POLLING, CUSTOM_JOB, SALT_STATE_APPLY)),
     SSSD_IPA_PASSWORD(List.of(FREEIPA_ROTATE_POLLING, SALT_PILLAR), Set.of(SKIP_SALT_UPDATE)),
