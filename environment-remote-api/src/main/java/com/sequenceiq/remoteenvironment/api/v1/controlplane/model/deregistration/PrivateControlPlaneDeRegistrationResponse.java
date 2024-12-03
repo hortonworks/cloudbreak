@@ -15,7 +15,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class PrivateControlPlaneDeRegistrationResponse {
 
     @NotEmpty
-    @Schema
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private String crn;
 
     public String getCrn() {

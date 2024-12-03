@@ -13,7 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PrivateControlPlaneRegistrationResponses {
 
-    @Schema
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Set<PrivateControlPlaneRegistrationResponse> items = new HashSet<>();
 
     public Set<PrivateControlPlaneRegistrationResponse> getItems() {
