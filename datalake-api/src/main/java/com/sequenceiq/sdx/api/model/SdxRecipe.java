@@ -15,11 +15,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class SdxRecipe implements Serializable {
 
     @NotBlank
-    @Schema(description = ModelDescriptions.RECIPE_NAME)
+    @Schema(description = ModelDescriptions.RECIPE_NAME, requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
     @NotBlank
-    @Schema(description = ModelDescriptions.HOST_GROUP_NAME)
+    @Schema(description = ModelDescriptions.HOST_GROUP_NAME, requiredMode = Schema.RequiredMode.REQUIRED)
     private String hostGroup;
 
     public String getName() {

@@ -17,7 +17,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxRefreshDatahubResponse {
 
-    @Schema(description = DATAHUB_CRNS_REFRESHED)
+    @Schema(description = DATAHUB_CRNS_REFRESHED, requiredMode = Schema.RequiredMode.REQUIRED)
     private List<StackViewV4Response> refreshedDatahubs;
 
     public SdxRefreshDatahubResponse() {

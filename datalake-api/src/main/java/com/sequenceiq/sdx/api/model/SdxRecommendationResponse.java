@@ -18,7 +18,7 @@ public class SdxRecommendationResponse {
     @Schema(description = ModelDescriptions.TEMPLATE_DETAILS)
     private StackV4Request template;
 
-    @Schema(description = ModelDescriptions.AVAILABLE_VM_TYPES)
+    @Schema(description = ModelDescriptions.AVAILABLE_VM_TYPES, requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, List<VmTypeResponse>> availableVmTypesByInstanceGroup = new HashMap<>();
 
     public SdxRecommendationResponse() {

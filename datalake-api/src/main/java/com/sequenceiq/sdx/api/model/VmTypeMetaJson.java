@@ -19,10 +19,10 @@ public class VmTypeMetaJson {
 
     public static final String MEMORY = "Memory";
 
-    @Schema(description = ModelDescriptions.VM_TYPE_CONFIGS)
+    @Schema(description = ModelDescriptions.VM_TYPE_CONFIGS, requiredMode = Schema.RequiredMode.REQUIRED)
     private List<VolumeParameterConfigResponse> configs = new ArrayList<>();
 
-    @Schema(description = ModelDescriptions.VM_TYPE_PROPERTIES)
+    @Schema(description = ModelDescriptions.VM_TYPE_PROPERTIES, requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, Object> properties = new HashMap<>();
 
     public VmTypeMetaJson() {

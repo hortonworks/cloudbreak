@@ -15,7 +15,7 @@ public class AdvertisedRuntime {
     @Schema(description = ModelDescriptions.RUNTIME_VERSION)
     private String runtimeVersion;
 
-    @Schema(description = ModelDescriptions.DEFAULT_RUNTIME_VERSION)
+    @Schema(description = ModelDescriptions.DEFAULT_RUNTIME_VERSION, requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean defaultRuntimeVersion;
 
     public String getRuntimeVersion() {

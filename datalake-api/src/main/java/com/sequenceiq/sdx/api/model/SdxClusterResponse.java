@@ -1,5 +1,6 @@
 package com.sequenceiq.sdx.api.model;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -19,10 +20,10 @@ public class SdxClusterResponse {
     @Schema(description = ModelDescriptions.DATA_LAKE_CRN)
     private String crn;
 
-    @Schema(description = ModelDescriptions.DATA_LAKE_NAME)
+    @Schema(description = ModelDescriptions.DATA_LAKE_NAME, requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
-    @Schema(description = ModelDescriptions.CLUSTER_SHAPE)
+    @Schema(description = ModelDescriptions.CLUSTER_SHAPE, requiredMode = Schema.RequiredMode.REQUIRED)
     private SdxClusterShape clusterShape;
 
     @Schema(description = ModelDescriptions.DATA_LAKE_STATUS)
@@ -31,7 +32,7 @@ public class SdxClusterResponse {
     @Schema(description = ModelDescriptions.DATA_LAKE_STATUS_REASON)
     private String statusReason;
 
-    @Schema(description = ModelDescriptions.ENVIRONMENT_NAME)
+    @Schema(description = ModelDescriptions.ENVIRONMENT_NAME, requiredMode = Schema.RequiredMode.REQUIRED)
     private String environmentName;
 
     @Schema(description = ModelDescriptions.ENVIRONMENT_CRN)
@@ -58,17 +59,17 @@ public class SdxClusterResponse {
     @Schema(description = ModelDescriptions.FLOW_IDENTIFIER)
     private FlowIdentifier flowIdentifier;
 
-    @Schema(description = ModelDescriptions.RANGER_RAZ_ENABLED)
+    @Schema(description = ModelDescriptions.RANGER_RAZ_ENABLED, requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean rangerRazEnabled;
 
-    @Schema(description = ModelDescriptions.RANGER_RMS_ENABLED)
+    @Schema(description = ModelDescriptions.RANGER_RMS_ENABLED, requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean rangerRmsEnabled;
 
-    @Schema(description = ModelDescriptions.MULTI_AZ_ENABLED)
+    @Schema(description = ModelDescriptions.MULTI_AZ_ENABLED, requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean enableMultiAz;
 
-    @Schema(description = ModelDescriptions.TAGS)
-    private Map<String, String> tags;
+    @Schema(description = ModelDescriptions.TAGS, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Map<String, String> tags = new HashMap<>();
 
     @Schema(description = ClusterModelDescription.CERT_EXPIRATION)
     private CertExpirationState certExpirationState;
@@ -76,7 +77,7 @@ public class SdxClusterResponse {
     @Schema(description = ModelDescriptions.DATA_LAKE_CLUSTER_SERVICE_VERSION)
     private String sdxClusterServiceVersion;
 
-    @Schema(description = ModelDescriptions.DETACHED)
+    @Schema(description = ModelDescriptions.DETACHED, requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean detached;
 
     @Schema(description = ModelDescriptions.DATABASE_ENGINE_VERSION)

@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxStopValidationResponse {
 
-    @Schema(description = ModelDescriptions.STOPPABLE)
+    @Schema(description = ModelDescriptions.STOPPABLE, requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean stoppable;
 
     @Schema(description = ModelDescriptions.UNSTOPPABLE_REASON)

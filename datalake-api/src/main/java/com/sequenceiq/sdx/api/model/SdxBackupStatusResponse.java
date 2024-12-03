@@ -1,5 +1,6 @@
 package com.sequenceiq.sdx.api.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -21,8 +22,8 @@ public class SdxBackupStatusResponse {
     @Schema(description = ModelDescriptions.OPERATION_STATUS_REASON)
     private String reason;
 
-    @Schema(description = ModelDescriptions.BACKUP_INCLUDED_DATA)
-    private List<String> includedData;
+    @Schema(description = ModelDescriptions.BACKUP_INCLUDED_DATA, requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<String> includedData = new ArrayList<>();
 
     @Schema(description = ModelDescriptions.BACKUP_TIMESTAMP)
     private String timestamp;

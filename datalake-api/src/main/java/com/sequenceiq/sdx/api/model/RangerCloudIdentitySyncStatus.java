@@ -1,5 +1,6 @@
 package com.sequenceiq.sdx.api.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.validation.constraints.NotNull;
@@ -28,8 +29,8 @@ public class RangerCloudIdentitySyncStatus {
     @Schema(description = ModelDescriptions.OPERATION_STATUS_REASON)
     private String statusReason;
 
-    @Schema(description = ModelDescriptions.COMMAND_ID)
-    private List<Long> commandIds;
+    @Schema(description = ModelDescriptions.COMMAND_ID, requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<Long> commandIds = new ArrayList<>();
 
     /**
      * @deprecated use {@link #getCommandIds()}

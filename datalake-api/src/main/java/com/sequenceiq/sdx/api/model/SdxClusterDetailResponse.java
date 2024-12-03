@@ -1,5 +1,6 @@
 package com.sequenceiq.sdx.api.model;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -109,7 +110,7 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
 
         private boolean enableMultiAz;
 
-        private Map<String, String> tags;
+        private Map<String, String> tags = new HashMap<>();
 
         private CertExpirationState certExpirationState;
 
