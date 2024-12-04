@@ -1,12 +1,15 @@
 package com.sequenceiq.cloudbreak.structuredevent.event.rest;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.sequenceiq.cloudbreak.structuredevent.json.AnonymizingBase64Serializer;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Deserializer;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public class RestRequestDetails implements Serializable {
     private String requestUri;
@@ -15,9 +18,10 @@ public class RestRequestDetails implements Serializable {
 
     private String method;
 
-    private Map<String, String> headers;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private Map<String, String> headers = new HashMap<>();
 
-    private Map<String, String> cookies;
+    private Map<String, String> cookies = new HashMap<>();
 
     @JsonSerialize(using = AnonymizingBase64Serializer.class)
     @JsonDeserialize(using = Base64Deserializer.class)

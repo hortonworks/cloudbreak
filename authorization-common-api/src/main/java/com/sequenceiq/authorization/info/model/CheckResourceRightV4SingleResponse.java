@@ -1,5 +1,6 @@
 package com.sequenceiq.authorization.info.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -9,7 +10,8 @@ public class CheckResourceRightV4SingleResponse {
 
     private String resourceCrn;
 
-    private List<CheckRightV4SingleResponse> rights;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<CheckRightV4SingleResponse> rights = new ArrayList<>();
 
     public CheckResourceRightV4SingleResponse() {
     }

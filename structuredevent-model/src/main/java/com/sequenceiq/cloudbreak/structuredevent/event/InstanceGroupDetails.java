@@ -1,11 +1,15 @@
 package com.sequenceiq.cloudbreak.structuredevent.event;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -18,13 +22,15 @@ public class InstanceGroupDetails implements Serializable {
 
     private String instanceType;
 
-    private List<VolumeDetails> volumes;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<VolumeDetails> volumes = new ArrayList<>();
 
     private String temporaryStorage;
 
     private Integer rootVolumeSize;
 
-    private Map<String, Object> attributes;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private Map<String, Object> attributes = new HashMap<>();
 
     public String getGroupName() {
         return groupName;

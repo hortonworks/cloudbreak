@@ -2,21 +2,28 @@ package com.sequenceiq.flow.api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FlowLogResponse {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Long resourceId;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Long created;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private String flowId;
 
     private String flowChainId;
 
     private String nextEvent;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private String currentState;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Boolean finalized;
 
     private String nodeId;

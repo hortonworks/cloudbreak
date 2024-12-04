@@ -1,5 +1,6 @@
 package com.sequenceiq.common.api.telemetry.response;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -25,8 +26,8 @@ public class TelemetryResponse extends TelemetryBase {
     @Schema(description = TelemetryModelDescription.TELEMETRY_FEATURES)
     private FeaturesResponse features;
 
-    @Schema(description = TelemetryModelDescription.TELEMETRY_RULES)
-    private List<AnonymizationRule> rules;
+    @Schema(description = TelemetryModelDescription.TELEMETRY_RULES, requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<AnonymizationRule> rules = new ArrayList<>();
 
     public LoggingResponse getLogging() {
         return logging;

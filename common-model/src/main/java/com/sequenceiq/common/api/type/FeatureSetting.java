@@ -13,7 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class FeatureSetting implements Serializable {
 
     @NotNull
-    @Schema(description = "enabled", required = true)
+    @Schema(description = "enabled", requiredMode = Schema.RequiredMode.REQUIRED)
     private Boolean enabled;
 
     public Boolean getEnabled() {

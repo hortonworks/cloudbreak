@@ -5,10 +5,13 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 public class ProxyDetails {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProxyDetails.class);
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private final boolean enabled;
 
     private String protocol;

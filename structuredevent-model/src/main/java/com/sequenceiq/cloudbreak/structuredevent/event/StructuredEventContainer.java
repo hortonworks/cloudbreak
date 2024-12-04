@@ -1,20 +1,26 @@
 package com.sequenceiq.cloudbreak.structuredevent.event;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StructuredEventContainer {
 
-    private List<StructuredFlowEvent> flow;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<StructuredFlowEvent> flow = new ArrayList<>();
 
-    private List<StructuredRestCallEvent> rest;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<StructuredRestCallEvent> rest = new ArrayList<>();
 
-    private List<StructuredNotificationEvent> notification;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<StructuredNotificationEvent> notification = new ArrayList<>();
 
     public StructuredEventContainer() {
     }

@@ -7,6 +7,7 @@ public class CheckResourceRightV4Response {
 
     private String resourceCrn;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean result;
 
     public String getResourceCrn() {

@@ -5,13 +5,18 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CDPStructuredEventContainer {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private List<CDPStructuredFlowEvent> flow = Collections.emptyList();
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private List<CDPStructuredRestCallEvent> rest = Collections.emptyList();
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private List<CDPStructuredNotificationEvent> notification = Collections.emptyList();
 
     public CDPStructuredEventContainer() {

@@ -12,10 +12,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema
 public class AzureCredentialPrerequisites extends CredentialBasePrerequisites implements Serializable {
 
-    @Schema(description = AZURE_APP_CREATION_COMMAND, required = true)
+    @Schema(description = AZURE_APP_CREATION_COMMAND, requiredMode = Schema.RequiredMode.REQUIRED)
     private String appCreationCommand;
 
-    @Schema(description = AZURE_ROLE_DEF_JSON, required = true)
+    @Schema(description = AZURE_ROLE_DEF_JSON, requiredMode = Schema.RequiredMode.REQUIRED)
     private String roleDefitionJson;
 
     public AzureCredentialPrerequisites() {

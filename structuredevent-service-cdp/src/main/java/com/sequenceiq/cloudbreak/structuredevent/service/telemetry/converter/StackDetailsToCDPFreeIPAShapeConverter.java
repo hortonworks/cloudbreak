@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.structuredevent.event.InstanceGroupDetails;
@@ -20,7 +21,7 @@ public class StackDetailsToCDPFreeIPAShapeConverter {
         CDPFreeIPAShape.Builder cdpFreeIPAShape = CDPFreeIPAShape.newBuilder();
         cdpFreeIPAShape.setNodes(DEFAULT_INTEGER_VALUE);
 
-        if (stackDetails != null && stackDetails.getInstanceGroups() != null) {
+        if (stackDetails != null && CollectionUtils.isNotEmpty(stackDetails.getInstanceGroups())) {
             List<String> hostGroupNodeCount = new ArrayList<>();
             int nodeCnt = 0;
             for (InstanceGroupDetails instanceGroupDetails : stackDetails.getInstanceGroups()) {

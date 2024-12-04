@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.event;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -13,6 +14,8 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Deserializer;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Serializer;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -53,7 +56,8 @@ public class StackDetails implements Serializable {
 
     private String clusterVersion;
 
-    private List<InstanceGroupDetails> instanceGroups;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<InstanceGroupDetails> instanceGroups = new ArrayList<>();
 
     /**
      * @deprecated this is value is not set anymore, this might be sensitive, we shall use CRN
@@ -65,6 +69,7 @@ public class StackDetails implements Serializable {
 
     private String databaseType;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean multiAz;
 
     private String seLinux;

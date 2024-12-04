@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.event;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -9,6 +10,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.sequenceiq.cloudbreak.structuredevent.json.AnonymizingBase64Serializer;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Deserializer;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -35,13 +38,15 @@ public class ClusterDetails implements Serializable {
 
     private String clusterVersion;
 
-    private List<String> hostGroups;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<String> hostGroups = new ArrayList<>();
 
     private Boolean externalDatabase;
 
     private String databaseType;
 
-    private List<RdsDetails> databases;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<RdsDetails> databases = new ArrayList<>();
 
     private String fileSystemType;
 
@@ -51,8 +56,10 @@ public class ClusterDetails implements Serializable {
 
     private Long upSince;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean razEnabled;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean rmsEnabled;
 
     private Boolean dbSslEnabled;

@@ -14,7 +14,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema
 public class CredentialPrerequisitesResponse implements Serializable {
 
-    @Schema(description = CLOUD_PLATFORM, required = true)
+    @Schema(description = CLOUD_PLATFORM, requiredMode = Schema.RequiredMode.REQUIRED)
     private String cloudPlatform;
 
     @Schema(description = ACCOUNT_IDENTIFIER)

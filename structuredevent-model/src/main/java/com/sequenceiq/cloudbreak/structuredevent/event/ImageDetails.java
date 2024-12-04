@@ -1,9 +1,12 @@
 package com.sequenceiq.cloudbreak.structuredevent.event;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ImageDetails implements Serializable {
@@ -20,7 +23,8 @@ public class ImageDetails implements Serializable {
 
     private String imageCatalogName;
 
-    private Map<String, String> packageVersions;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private Map<String, String> packageVersions = new HashMap<>();
 
     public String getImageName() {
         return imageName;

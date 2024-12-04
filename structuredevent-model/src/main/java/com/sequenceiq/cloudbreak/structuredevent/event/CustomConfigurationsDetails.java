@@ -1,10 +1,13 @@
 package com.sequenceiq.cloudbreak.structuredevent.event;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -13,9 +16,11 @@ public class CustomConfigurationsDetails implements Serializable {
 
     private String customConfigurationsName;
 
-    private List<String> services;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<String> services = new ArrayList<>();
 
-    private List<String> roles;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<String> roles = new ArrayList<>();
 
     private String runtimeVersion;
 

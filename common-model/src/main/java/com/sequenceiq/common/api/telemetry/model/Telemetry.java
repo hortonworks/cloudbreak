@@ -1,6 +1,7 @@
 package com.sequenceiq.common.api.telemetry.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -33,13 +36,16 @@ public class Telemetry implements Serializable {
     private Features features;
 
     @JsonProperty("fluentAttributes")
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, Object> fluentAttributes = new HashMap<>();
 
     @JsonProperty("dynamicEntitlements")
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, Boolean> dynamicEntitlements = new HashMap<>();
 
     @JsonProperty("rules")
-    private List<AnonymizationRule> rules;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<AnonymizationRule> rules = new ArrayList<>();
 
     public Logging getLogging() {
         return logging;

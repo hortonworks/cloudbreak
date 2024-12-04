@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class VmLogsResponse implements Serializable {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private List<VmLog> logs = List.of();
 
     public List<VmLog> getLogs() {

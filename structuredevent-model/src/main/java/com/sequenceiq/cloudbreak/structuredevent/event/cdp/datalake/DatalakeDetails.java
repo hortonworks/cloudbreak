@@ -7,14 +7,18 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.structuredevent.event.DatabaseDetails;
 import com.sequenceiq.common.model.SeLinux;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DatalakeDetails implements Serializable {
 
     private String cloudPlatform;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean razEnabled;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean multiAzEnabled;
 
     private DatabaseDetails databaseDetails;

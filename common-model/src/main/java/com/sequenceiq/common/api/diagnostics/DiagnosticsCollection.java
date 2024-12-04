@@ -6,6 +6,8 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DiagnosticsCollection implements Serializable {
@@ -20,6 +22,7 @@ public class DiagnosticsCollection implements Serializable {
 
     private Integer progressPercentage;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, Object> properties;
 
     public DiagnosticsCollectionStatus getStatus() {

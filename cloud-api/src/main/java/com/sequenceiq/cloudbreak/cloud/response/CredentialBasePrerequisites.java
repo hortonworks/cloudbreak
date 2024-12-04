@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 public class CredentialBasePrerequisites {
 
-    @Schema(description = POLICIES)
+    @Schema(description = POLICIES, requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, String> policies = new LinkedHashMap<>();
 
     public Map<String, String> getPolicies() {

@@ -12,10 +12,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema
 public class AwsCredentialPrerequisites extends CredentialBasePrerequisites implements Serializable {
 
-    @Schema(description = AWS_EXTERNAL_ID, required = true)
+    @Schema(description = AWS_EXTERNAL_ID, requiredMode = Schema.RequiredMode.REQUIRED)
     private String externalId;
 
-    @Schema(description = AWS_POLICY_JSON, required = true)
+    @Schema(description = AWS_POLICY_JSON, requiredMode = Schema.RequiredMode.REQUIRED)
     private String policyJson;
 
     public AwsCredentialPrerequisites() {

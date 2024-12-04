@@ -11,7 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema
 public class GcpCredentialPrerequisites extends CredentialBasePrerequisites implements Serializable {
 
-    @Schema(description = GCP_CREDENTIAL_PREREQUISITES_CREATION_COMMAND, required = true)
+    @Schema(description = GCP_CREDENTIAL_PREREQUISITES_CREATION_COMMAND, requiredMode = Schema.RequiredMode.REQUIRED)
     private String creationCommand;
 
     public GcpCredentialPrerequisites() {

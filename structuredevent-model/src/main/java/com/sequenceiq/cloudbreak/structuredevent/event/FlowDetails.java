@@ -5,6 +5,8 @@ import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FlowDetails implements Serializable {
@@ -22,6 +24,7 @@ public class FlowDetails implements Serializable {
 
     private String flowEvent;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private long duration;
 
     public FlowDetails() {

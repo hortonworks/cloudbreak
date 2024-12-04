@@ -15,7 +15,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CloudwatchParams implements Serializable {
 
-    @Schema
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull
     private String instanceProfile;
 

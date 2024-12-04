@@ -7,11 +7,14 @@ import jakarta.validation.constraints.NotBlank;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AnonymizationRule implements Serializable {
 
     @NotBlank
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private String value;
 
     private String replacement = "[REDACTED]";
