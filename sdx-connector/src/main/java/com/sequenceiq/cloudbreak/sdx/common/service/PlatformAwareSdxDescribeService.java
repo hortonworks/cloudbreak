@@ -33,8 +33,12 @@ public interface PlatformAwareSdxDescribeService extends PlatformAwareSdxCommonS
     Optional<SdxAccessView> getSdxAccessViewByEnvironmentCrn(String environmentCrn);
 
     default Map<String, String> getHmsServiceConfig(String crn) {
+        Optional<String> remoteDataContext = getRemoteDataContext(crn);
+        return getHmsServiceConfig(remoteDataContext);
+    }
+
+    default Map<String, String> getHmsServiceConfig(Optional<String> remoteDataContext) {
         try {
-            Optional<String> remoteDataContext = getRemoteDataContext(crn);
             if (remoteDataContext.isPresent()) {
                 ObjectMapper objectMapper = new ObjectMapper();
                 objectMapper.setDefaultSetterInfo(JsonSetter.Value.construct(Nulls.AS_EMPTY, Nulls.AS_EMPTY));

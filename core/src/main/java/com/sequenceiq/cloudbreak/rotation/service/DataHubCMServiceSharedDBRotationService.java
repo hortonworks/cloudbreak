@@ -82,12 +82,12 @@ public class DataHubCMServiceSharedDBRotationService {
                     .orElseThrow();
             executeDbUserOperation(datalakeStack, newDbUser, CREATION);
             RDSConfig pooledHmsRdsConfig = replaceCurrentRdsConfigWithPooledRdsConfig(stack, datalakeHmsRdsConfig);
-            restartCMServices(pooledHmsRdsConfig, stack);
+            updateConfigInCM(pooledHmsRdsConfig, stack);
         } else {
             LOGGER.info("Replacing separated HMS database user/password of Data Hub.");
             executeDbUserOperation(datalakeStack, newDbUser, CREATION);
             RDSConfig pooledHmsRdsConfig = replaceCurrentRdsConfigWithPooledRdsConfig(stack, currentOwnHmsRdsConfig.get());
-            restartCMServices(pooledHmsRdsConfig, stack);
+            updateConfigInCM(pooledHmsRdsConfig, stack);
             executeDbUserOperation(datalakeStack, currentOwnHmsRdsConfig.get().getConnectionUserName(), DELETION);
         }
     }
@@ -109,7 +109,7 @@ public class DataHubCMServiceSharedDBRotationService {
         return pooledHmsRdsConfig;
     }
 
-    private void restartCMServices(RDSConfig rdsConfig, StackDto stackDto) {
+    private void updateConfigInCM(RDSConfig rdsConfig, StackDto stackDto) {
         try {
             clusterApiConnectors.getConnector(stackDto)
                     .clusterModificationService()

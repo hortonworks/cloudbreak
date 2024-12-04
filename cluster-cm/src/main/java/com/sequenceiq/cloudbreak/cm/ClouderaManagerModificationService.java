@@ -92,7 +92,6 @@ import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedExce
 import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerParcelActivationTimeoutException;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cm.polling.PollingResultErrorHandler;
-import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterCommand;
@@ -1141,7 +1140,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         if (!hosts.isEmpty()) {
             ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(stack.getCluster().getId());
             LOGGER.info("CM version is: {}", clouderaManagerRepoDetails.getVersion());
-            if (CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails.getVersion(), CLOUDERAMANAGER_VERSION_7_9_0)) {
+            if (isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails.getVersion(), CLOUDERAMANAGER_VERSION_7_9_0)) {
                 LOGGER.info("Current action is repair and CM version is newer than 7.9.0, start services on hosts because services were stopped");
                 try {
                     LOGGER.info("Start roles on hosts: {}", hosts);

@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.message.FlowMessageService;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeFailedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeSuccess;
+import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.hms.HmsDbUserUpgradeWorkaroundService;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -67,6 +68,9 @@ public class ClusterUpgradeHandler extends ExceptionCatcherEventHandler<ClusterU
     @Inject
     private PlatformAwareSdxConnector platformAwareSdxConnector;
 
+    @Inject
+    private HmsDbUserUpgradeWorkaroundService hmsDbUserUpgradeWorkaroundService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(ClusterUpgradeRequest.class);
@@ -93,8 +97,10 @@ public class ClusterUpgradeHandler extends ExceptionCatcherEventHandler<ClusterU
                 clusterService.updateClusterStatusByStackId(stackId, DetailedStackStatus.CLUSTER_UPGRADE_IN_PROGRESS);
                 flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_UPGRADE);
                 Optional<String> remoteDataContext = getRemoteDataContext(stackDto.getStack());
+                hmsDbUserUpgradeWorkaroundService.switchToSdxHmsDbUserBeforeUpgradeIfNeeded(stackDto, request, remoteDataContext);
                 connector.upgradeClusterRuntime(request.getUpgradeCandidateProducts(), request.isPatchUpgrade(), remoteDataContext,
                         request.isRollingUpgradeEnabled());
+                hmsDbUserUpgradeWorkaroundService.switchBackToOriginalHmsDbUserIfNeeded(stackDto, request);
                 return removeUnusedParcelsAfterRuntimeUpgrade(stackDto);
             }
         } catch (Exception e) {

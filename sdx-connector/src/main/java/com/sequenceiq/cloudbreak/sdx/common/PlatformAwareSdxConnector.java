@@ -56,6 +56,10 @@ public class PlatformAwareSdxConnector {
         return platformDependentSdxDescribeServices.get(TargetPlatform.getByCrn(sdxCrn)).getHmsServiceConfig(sdxCrn);
     }
 
+    public Map<String, String> getHmsServiceConfig(String sdxCrn, Optional<String> rdc) {
+        return platformDependentSdxDescribeServices.get(TargetPlatform.getByCrn(sdxCrn)).getHmsServiceConfig(rdc);
+    }
+
     public void tearDownDatahub(String sdxCrn, String datahubCrn) {
         platformDependentSdxDhTearDownServices.get(TargetPlatform.getByCrn(sdxCrn)).tearDownDataHub(sdxCrn, datahubCrn);
     }
