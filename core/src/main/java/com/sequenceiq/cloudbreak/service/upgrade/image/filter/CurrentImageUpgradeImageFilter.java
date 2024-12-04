@@ -59,6 +59,6 @@ public class CurrentImageUpgradeImageFilter implements UpgradeImageFilter {
     }
 
     private boolean isCurrentImageUsedOnInstances(ImageFilterParams imageFilterParams, String currentImageId) {
-        return currentImageUsageCondition.currentImageUsedOnInstances(imageFilterParams.getStackId(), currentImageId);
+        return currentImageUsageCondition.isCurrentImageUsedOnInstances(imageFilterParams.getStackId(), currentImageId);
     }
 }

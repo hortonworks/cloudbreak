@@ -5,10 +5,12 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
@@ -24,20 +26,29 @@ public class CurrentImageUsageCondition {
     @Inject
     private ImageConverter imageConverter;
 
-    public boolean currentImageUsedOnInstances(Long stackId, String currentImageId) {
-        Map<String, String> imageByInstances = getImagesByInstance(stackId);
+    public boolean isCurrentImageUsedOnInstances(Long stackId, String currentImageId) {
+        Map<String, Image> imageByInstances = getImagesByInstance(stackId);
         LOGGER.debug("The current image of the stack: {}. The available images on instances: {}", currentImageId, imageByInstances);
-        return !imageByInstances.isEmpty() && imageByInstances.values().stream().allMatch(imageIdOnInstance -> imageIdOnInstance.equals(currentImageId));
+        return !imageByInstances.isEmpty() && imageByInstances.values().stream()
+                .map(Image::getImageId)
+                .allMatch(imageIdOnInstance -> imageIdOnInstance.equals(currentImageId));
     }
 
-    private Map<String, String> getImagesByInstance(Long stackId) {
+    public boolean isCurrentOsUsedOnInstances(Long stackId, String currentImageOs) {
+        Map<String, Image> imageByInstances = getImagesByInstance(stackId);
+        return !imageByInstances.isEmpty() && imageByInstances.values().stream()
+                .map(Image::getOs)
+                .allMatch(osUsedOnInstance -> StringUtils.equalsIgnoreCase(osUsedOnInstance, currentImageOs));
+    }
+
+    private Map<String, Image> getImagesByInstance(Long stackId) {
         return instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(stackId)
                 .stream()
                 .filter(instanceMetaData -> !instanceMetaData.getImage().getMap().isEmpty())
                 .collect(Collectors.toMap(InstanceMetaData::getInstanceId, instanceMetaData -> convertJsonToImage(instanceMetaData.getImage())));
     }
 
-    private String convertJsonToImage(Json image) {
-        return imageConverter.convertJsonToImage(image).getImageId();
+    private Image convertJsonToImage(Json image) {
+        return imageConverter.convertJsonToImage(image);
     }
 }

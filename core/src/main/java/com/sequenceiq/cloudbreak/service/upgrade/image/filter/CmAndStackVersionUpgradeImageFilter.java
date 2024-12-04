@@ -105,7 +105,7 @@ public class CmAndStackVersionUpgradeImageFilter implements UpgradeImageFilter {
     }
 
     private boolean isCentOSToRedhatOsUpgrade(ImageFilterParams imageFilterParams, Image candidateImage) {
-        return centOSToRedHatUpgradeAvailabilityService.isOsUpgradePermitted(imageFilterParams.getCurrentImage(), candidateImage,
+        return centOSToRedHatUpgradeAvailabilityService.isOsUpgradePermitted(imageFilterParams.getStackId(), imageFilterParams.getCurrentImage(), candidateImage,
                 imageFilterParams.getStackRelatedParcels());
     }
 

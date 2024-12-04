@@ -61,7 +61,7 @@ class PythonVersionBasedRuntimeVersionValidatorTest {
         when(stack.getType()).thenReturn(stackType);
         lenient().when(currentImagePackageProvider.currentInstancesContainsPackage(STACK_ID, CDH_IMAGES_FROM_CATALOG, PYTHON38))
                 .thenReturn(allInstanceContainsPython);
-        lenient().when(currentImageUsageCondition.currentImageUsedOnInstances(STACK_ID, currentImage.getImageId())).thenReturn(currentImageContainsPython);
+        lenient().when(currentImageUsageCondition.isCurrentImageUsedOnInstances(STACK_ID, currentImage.getImageId())).thenReturn(currentImageContainsPython);
 
         assertEquals(expectedValue, underTest.isUpgradePermittedForRuntime(stack, CDH_IMAGES_FROM_CATALOG, currentImage, targetImage));
     }
