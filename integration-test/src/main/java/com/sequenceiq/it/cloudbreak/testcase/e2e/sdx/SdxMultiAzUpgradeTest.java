@@ -5,19 +5,18 @@ import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
-import org.assertj.core.api.Assertions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
-import org.testng.annotations.Ignore;
+import org.springframework.util.StringUtils;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
@@ -41,6 +40,8 @@ import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class SdxMultiAzUpgradeTest extends PreconditionSdxE2ETest {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SdxMultiAzUpgradeTest.class);
+
     @Inject
     private SdxTestClient sdxTestClient;
 
@@ -62,7 +63,6 @@ public class SdxMultiAzUpgradeTest extends PreconditionSdxE2ETest {
         initializeAzureMarketplaceTermsPolicy(testContext);
     }
 
-    @Ignore("This test case should be re-enabled in case 7.2.18 released")
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
@@ -71,13 +71,15 @@ public class SdxMultiAzUpgradeTest extends PreconditionSdxE2ETest {
             then = "the MultiAz stack should be upgraded and the cluster should be up and running"
     )
     public void testSDXMultiAzUpgrade(TestContext testContext) {
+        String runTimeVersion = commonClusterManagerProperties.getRuntimeVersion();
         List<ImageV4Response> cdhImages = new ArrayList<>();
         testContext
                 .given(ImageCatalogTestDto.class)
                 .when(imageCatalogTestClient.getV4WithAdvertisedImages())
                 .then((testContext1, entity, cloudbreakClient) -> {
                     List<ImageV4Response> sortedImages = entity.getResponse().getImages().getCdhImages().stream()
-                            .filter(im -> im.getVersion().equals("7.2.17") && im.getImageSetsByProvider().containsKey("azure"))
+                            .filter(im -> im.getVersion().equals(runTimeVersion)
+                                    && im.getImageSetsByProvider().containsKey(testContext.getCloudPlatform().name().toLowerCase()))
                             .sorted(Comparator.comparing(ImageV4Response::getCreated)).toList();
                     cdhImages.addAll(sortedImages);
                     return entity;
@@ -92,13 +94,14 @@ public class SdxMultiAzUpgradeTest extends PreconditionSdxE2ETest {
                     .given(sdx, SdxTestDto.class)
                     .withCloudStorage()
                     .withClusterShape(SdxClusterShape.ENTERPRISE)
-                    .withImageId(cdhImages.get(0).getUuid())
                     .withRuntimeVersion(null)
                     .withEnableMultiAz(true)
+                    .withImageId(cdhImages.get(0).getUuid())
                     .when(sdxTestClient.createWithImageId(), key(sdx))
                     .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                     .awaitForHealthyInstances()
                     .then((tc, testDto, client) -> {
+                        validateMultiAz(testDto, tc, "provisioning");
                         List<String> instances = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
                         instances.addAll(sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName()));
                         expectedVolumeIds.addAll(getCloudFunctionality(tc).listInstancesVolumeIds(testDto.getName(), instances));
@@ -116,39 +119,66 @@ public class SdxMultiAzUpgradeTest extends PreconditionSdxE2ETest {
                     .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
                     .when(sdxTestClient.describe(), key(sdx))
                     .then((tc, testDto, client) -> {
-                        validateMultiAz(testDto, tc);
+                        validateMultiAz(testDto, tc, "Upgrade");
                         return testDto;
                     })
                     .validate();
         }
     }
 
-    private void validateMultiAz(SdxTestDto sdxTestDto, TestContext tc) {
+    private void validateMultiAz(SdxTestDto sdxTestDto, TestContext tc, String operation) {
         SdxClusterDetailResponse sdxClusterDetailResponse = sdxTestDto.getResponse();
         if (!sdxClusterDetailResponse.isEnableMultiAz()) {
             throw new TestFailException(String.format("MultiAz is not enabled for %s", sdxClusterDetailResponse.getName()));
         }
-        List<InstanceMetaDataV4Response> instanceMetaDataV4Responses = sdxClusterDetailResponse.getStackV4Response().getInstanceGroups().stream()
-                .map(InstanceGroupV4Response::getMetadata)
-                .filter(Objects::nonNull)
-                .flatMap(Collection::stream).toList();
-        List<String> instanceIds = instanceMetaDataV4Responses.stream()
-                .map(InstanceMetaDataV4Response::getInstanceId)
-                .collect(Collectors.toList());
-        List<String> availabilityZones = instanceMetaDataV4Responses.stream()
-                .map(InstanceMetaDataV4Response::getAvailabilityZone).toList();
-        List<String> rackIds = instanceMetaDataV4Responses.stream()
-                .map(res -> res.getRackId().substring(1)).toList();
-        Assertions.assertThat(availabilityZones).withFailMessage("Rack ID and Availability zones are different")
-                .containsAll(rackIds);
-        String sdxName = sdxClusterDetailResponse.getStackV4Response().getName();
-        Map<String, Set<String>> availabilityZoneForVms = getCloudFunctionality(tc).listAvailabilityZonesForVms(sdxName, instanceIds);
-        List<String> instancesWithNoAz = instanceIds.stream().filter(instance -> CollectionUtils.isEmpty(availabilityZoneForVms.get(instance)))
+        for (InstanceGroupV4Response instanceGroup : sdxClusterDetailResponse.getStackV4Response().getInstanceGroups()) {
+            if (!CollectionUtils.isEmpty(instanceGroup.getMetadata())) {
+                Map<String, String> instanceZoneMap = instanceGroup.getMetadata().stream()
+                        .collect(Collectors.toMap(InstanceMetaDataV4Response::getInstanceId, InstanceMetaDataV4Response::getAvailabilityZone));
+                validateMultiAzDistribution(sdxClusterDetailResponse.getName(), tc, operation, instanceZoneMap, instanceGroup.getName());
+            }
+        }
+    }
+
+    private void validateMultiAzDistribution(String dataLakeName, TestContext tc, String operation, Map<String, String> instanceZoneMap,
+            String hostGroup) {
+        Map<String, String> availabilityZoneForVms = getCloudFunctionality(tc).listAvailabilityZonesForVms(dataLakeName, instanceZoneMap);
+        LOGGER.info("Availability Zone for Vms {}", availabilityZoneForVms);
+        List<String> instancesWithNoAz = instanceZoneMap.keySet().stream().filter(instance -> StringUtils.isEmpty(availabilityZoneForVms.get(instance)))
                 .collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(instancesWithNoAz)) {
             throw new TestFailException(String.format("Availability Zones is missing for instances %s in %s",
-                    String.join(",", instancesWithNoAz), sdxName));
+                    String.join(",", instancesWithNoAz), dataLakeName));
         }
+        Map<String, Integer> zoneToNodeCountMap = new HashMap<>();
+        for (Map.Entry<String, String> entry : availabilityZoneForVms.entrySet()) {
+            zoneToNodeCountMap.put(entry.getValue(), zoneToNodeCountMap.getOrDefault(entry.getValue(), 0) + 1);
+        }
+        LOGGER.info("Zone to Node count {} after  {}", zoneToNodeCountMap, operation);
+        int numInstances = instanceZoneMap.size();
+        int numZones = zoneToNodeCountMap.size();
+        int numZonesWithDesiredNumInstances;
+        if (instanceZoneMap.size() >= zoneToNodeCountMap.size()) {
+            numZonesWithDesiredNumInstances = countZonesWithDesiredNumberOfInstances(zoneToNodeCountMap, numInstances / numZones);
+            if (numZones - numInstances % numZones != numZonesWithDesiredNumInstances) {
+                throw new TestFailException(String.format("Distribution of nodes in AZs is not correct in host group: %s after %s for %s." +
+                                "There are %s instance and %s zones.Number of Zones with number of instances %s should be %s but is %s",
+                        hostGroup, operation, dataLakeName, numInstances, numZones, numInstances / numZones, numZones - numInstances % numZones,
+                        numZonesWithDesiredNumInstances));
+            }
+        }
+        numZonesWithDesiredNumInstances = countZonesWithDesiredNumberOfInstances(zoneToNodeCountMap, numInstances / numZones + 1);
+        if (numInstances % numZones != numZonesWithDesiredNumInstances) {
+            throw new TestFailException(String.format("Distribution of nodes in AZs is not correct in host group: %s after %s for %s." +
+                            "There are %s instance and %s zones.Number of Zones with number of instances %s should be %s but is %s",
+                    hostGroup, operation, dataLakeName, numInstances, numZones, numInstances / numZones + 1, numInstances % numZones,
+                    numZonesWithDesiredNumInstances));
+        }
+    }
+
+    private int countZonesWithDesiredNumberOfInstances(Map<String, Integer> zoneToNodeCountMap, int desiredCount) {
+        return (int) zoneToNodeCountMap.entrySet().stream()
+                .filter(entry -> entry.getValue() == desiredCount).count();
     }
 
     protected CloudFunctionality getCloudFunctionality(TestContext testContext) {
