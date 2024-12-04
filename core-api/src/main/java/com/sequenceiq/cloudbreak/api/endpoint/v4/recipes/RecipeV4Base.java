@@ -26,7 +26,7 @@ public abstract class RecipeV4Base implements JsonEntity {
     private String description;
 
     @NotNull
-    @Schema(description = RecipeModelDescription.TYPE)
+    @Schema(description = RecipeModelDescription.TYPE, requiredMode = Schema.RequiredMode.REQUIRED)
     private RecipeV4Type type = RecipeV4Type.PRE_CLOUDERA_MANAGER_START;
 
     @Schema(description = RecipeModelDescription.CONTENT)

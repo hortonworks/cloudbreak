@@ -16,7 +16,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @NotNull
 public class ImageCatalogV4Response extends ImageCatalogV4Base {
 
-    @Schema(description = ImageCatalogDescription.DEFAULT, required = true)
+    @Schema(description = ImageCatalogDescription.DEFAULT, requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean usedAsDefault;
 
     @Schema(description = ImageCatalogDescription.IMAGE_RESPONSES)

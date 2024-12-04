@@ -19,7 +19,7 @@ public class PlacementSettingsV4Response implements JsonEntity {
     private String availabilityZone;
 
     @NotNull
-    @Schema(description = StackModelDescription.REGION)
+    @Schema(description = StackModelDescription.REGION, requiredMode = Schema.RequiredMode.REQUIRED)
     private String region;
 
     public String getAvailabilityZone() {

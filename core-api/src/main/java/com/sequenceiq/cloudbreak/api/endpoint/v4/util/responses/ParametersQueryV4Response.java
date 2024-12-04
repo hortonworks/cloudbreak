@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -14,8 +15,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonInclude(Include.NON_NULL)
 public class ParametersQueryV4Response implements JsonEntity {
 
-    @Schema(description = StackModelDescription.CUSTOM, required = true)
-    private Map<String, String> custom;
+    @Schema(description = StackModelDescription.CUSTOM, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Map<String, String> custom = new HashMap<>();
 
     public Map<String, String> getCustom() {
         return custom;

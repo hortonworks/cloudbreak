@@ -3,10 +3,14 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses;
 import java.util.HashSet;
 import java.util.Set;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 public class ServiceDependencyMatrixV4Response {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Set<String> dependencies = new HashSet<>();
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Set<String> services = new HashSet<>();
 
     public Set<String> getDependencies() {

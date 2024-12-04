@@ -12,13 +12,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 public class TagsV4Response implements JsonEntity, TaggedResponse {
 
-    @Schema(description = StackModelDescription.APPLICATION_TAGS)
+    @Schema(description = StackModelDescription.APPLICATION_TAGS, requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, String> application = new HashMap<>();
 
-    @Schema(description = StackModelDescription.USERDEFINED_TAGS)
+    @Schema(description = StackModelDescription.USERDEFINED_TAGS, requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, String> userDefined = new HashMap<>();
 
-    @Schema(description = StackModelDescription.DEFAULT_TAGS)
+    @Schema(description = StackModelDescription.DEFAULT_TAGS, requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, String> defaults = new HashMap<>();
 
     public Map<String, String> getApplication() {

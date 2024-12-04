@@ -10,11 +10,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 public class GcpTargetGroupResponse implements Serializable {
 
-    @Schema(description = StackModelDescription.GCP_LB_INSTANCE_GROUP)
+    @Schema(description = StackModelDescription.GCP_LB_INSTANCE_GROUP, requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull
     private String gcpInstanceGroupName;
 
-    @Schema(description = StackModelDescription.GCP_LB_BACKEND_SERVICE)
+    @Schema(description = StackModelDescription.GCP_LB_BACKEND_SERVICE, requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull
     private String gcpBackendServiceName;
 

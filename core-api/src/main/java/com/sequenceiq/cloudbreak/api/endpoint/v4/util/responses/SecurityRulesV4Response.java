@@ -12,10 +12,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SecurityRulesV4Response {
 
-    @Schema(description = SecurityRulesModelDescription.CORE)
+    @Schema(description = SecurityRulesModelDescription.CORE, requiredMode = Schema.RequiredMode.REQUIRED)
     private List<SecurityRuleV4Response> core = new ArrayList<>();
 
-    @Schema(description = SecurityRulesModelDescription.GATEWAY)
+    @Schema(description = SecurityRulesModelDescription.GATEWAY, requiredMode = Schema.RequiredMode.REQUIRED)
     private List<SecurityRuleV4Response> gateway = new ArrayList<>();
 
     public List<SecurityRuleV4Response> getCore() {

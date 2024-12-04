@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 public class AwsLoadBalancerResponse implements Serializable {
 
-    @Schema(description = StackModelDescription.AWS_LB_ARN)
+    @Schema(description = StackModelDescription.AWS_LB_ARN, requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull
     private String arn;
 

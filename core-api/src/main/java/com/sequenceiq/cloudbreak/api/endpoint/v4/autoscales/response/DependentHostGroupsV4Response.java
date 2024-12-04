@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -11,8 +12,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DependentHostGroupsV4Response {
 
-    @Schema
-    private Map<String, Set<String>> dependentHostGroups;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private Map<String, Set<String>> dependentHostGroups = new HashMap<>();
 
     public Map<String, Set<String>> getDependentHostGroups() {
         return dependentHostGroups;

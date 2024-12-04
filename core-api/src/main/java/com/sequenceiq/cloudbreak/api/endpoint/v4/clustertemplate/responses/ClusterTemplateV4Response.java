@@ -47,7 +47,7 @@ public class ClusterTemplateV4Response extends ClusterTemplateV4Base {
     private String stackVersion;
 
     @NotNull
-    @Schema(description = ModelDescriptions.CRN)
+    @Schema(description = ModelDescriptions.CRN, requiredMode = Schema.RequiredMode.REQUIRED)
     private String crn;
 
     public FeatureState getFeatureState() {

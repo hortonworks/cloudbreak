@@ -14,6 +14,7 @@ public class UserProfileV4Response {
 
     private String tenant;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private List<String> entitlements = new ArrayList<>();
 
     public String getUsername() {

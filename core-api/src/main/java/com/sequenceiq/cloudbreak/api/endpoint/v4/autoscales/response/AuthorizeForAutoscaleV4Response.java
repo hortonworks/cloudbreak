@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 public class AuthorizeForAutoscaleV4Response {
 
-    @Schema
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean success;
 
     public boolean isSuccess() {

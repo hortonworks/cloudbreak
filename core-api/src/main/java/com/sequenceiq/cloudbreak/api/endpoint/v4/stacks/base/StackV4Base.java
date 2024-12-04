@@ -23,7 +23,7 @@ public abstract class StackV4Base extends ProviderParametersBase implements Json
     @ValidStackNameFormat
     @ValidStackNameLength
     @NotNull
-    @Schema(description = StackModelDescription.STACK_NAME, required = true)
+    @Schema(description = StackModelDescription.STACK_NAME, requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
     @Schema(description = StackModelDescription.AWS_PARAMETERS)

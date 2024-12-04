@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -25,7 +26,8 @@ public class InstanceTemplateV4Response extends InstanceTemplateV4Base {
 
     private VolumeV4Response ephemeralVolume;
 
-    private Set<VolumeV4Response> attachedVolumes;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private Set<VolumeV4Response> attachedVolumes = new HashSet<>();
 
     private DatabaseVolumeV4Response databaseVolume;
 

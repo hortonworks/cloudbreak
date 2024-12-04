@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -27,8 +28,8 @@ public class GatewayV4Response implements JsonEntity {
     @Schema(description = GatewayModelDescription.KNOX_PATH)
     private String path;
 
-    @Schema(description = GatewayModelDescription.GATEWAY_TOPOLOGIES)
-    private List<GatewayTopologyV4Response> topologies;
+    @Schema(description = GatewayModelDescription.GATEWAY_TOPOLOGIES, requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<GatewayTopologyV4Response> topologies = new ArrayList<>();
 
     @JsonIgnore
     @Schema(description = GatewayModelDescription.KNOX_SSO_PROVIDER)

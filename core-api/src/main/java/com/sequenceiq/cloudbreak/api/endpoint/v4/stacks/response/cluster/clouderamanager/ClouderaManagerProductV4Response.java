@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
@@ -18,11 +19,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class ClouderaManagerProductV4Response implements JsonEntity {
 
     @NotNull
-    @Schema(description = ModelDescriptions.ClouderaManagerProductDescription.NAME)
+    @Schema(description = ModelDescriptions.ClouderaManagerProductDescription.NAME, requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
     @NotNull
-    @Schema(description = ModelDescriptions.ClouderaManagerProductDescription.DISPLAY_NAME)
+    @Schema(description = ModelDescriptions.ClouderaManagerProductDescription.DISPLAY_NAME, requiredMode = Schema.RequiredMode.REQUIRED)
     private String displayName;
 
     @Schema(description = ModelDescriptions.ClouderaManagerProductDescription.VERSION)
@@ -31,8 +32,8 @@ public class ClouderaManagerProductV4Response implements JsonEntity {
     @Schema(description = ModelDescriptions.ClouderaManagerProductDescription.PARCEL)
     private String parcel;
 
-    @Schema(description = ModelDescriptions.ClouderaManagerProductDescription.CSD)
-    private List<String> csd;
+    @Schema(description = ModelDescriptions.ClouderaManagerProductDescription.CSD, requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<String> csd = new ArrayList<>();
 
     public String getName() {
         return name;

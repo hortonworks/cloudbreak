@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -8,16 +9,20 @@ import org.apache.commons.lang3.StringUtils;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 public class UpgradeV4Response {
 
     private ImageInfoV4Response current;
 
-    private List<ImageInfoV4Response> upgradeCandidates;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<ImageInfoV4Response> upgradeCandidates = new ArrayList<>();
 
     private String reason;
 
     private FlowIdentifier flowIdentifier;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean replaceVms;
 
     public UpgradeV4Response() {

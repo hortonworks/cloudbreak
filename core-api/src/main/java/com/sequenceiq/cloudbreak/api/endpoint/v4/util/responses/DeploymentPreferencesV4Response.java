@@ -10,14 +10,19 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema
 public class DeploymentPreferencesV4Response {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Set<SupportedExternalDatabaseServiceEntryV4Response> supportedExternalDatabases = new HashSet<>();
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Set<FeatureSwitchV4> featureSwitchV4s = new HashSet<>();
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean platformSelectionDisabled;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, Boolean> platformEnablement = new HashMap<>();
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, Boolean> govPlatformEnablement = new HashMap<>();
 
     private String controlPlaneRegion;

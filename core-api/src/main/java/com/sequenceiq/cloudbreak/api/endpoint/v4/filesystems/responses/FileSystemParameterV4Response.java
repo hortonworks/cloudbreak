@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -7,6 +8,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.common.model.JsonEntity;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
@@ -20,9 +23,11 @@ public class FileSystemParameterV4Response implements JsonEntity {
 
     private String defaultPath;
 
-    private Set<String> relatedServices;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private Set<String> relatedServices = new HashSet<>();
 
-    private Set<String> relatedMissingServices;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private Set<String> relatedMissingServices = new HashSet<>();
 
     private String propertyFile;
 
@@ -30,6 +35,7 @@ public class FileSystemParameterV4Response implements JsonEntity {
 
     private String propertyDisplayName;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean secure;
 
     public String getType() {

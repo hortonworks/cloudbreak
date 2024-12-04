@@ -58,6 +58,7 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
 
     private String credentialCrn;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean govCloud;
 
     private String region;
@@ -75,7 +76,7 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
     private NetworkV4Response network;
 
     @Valid
-    @Schema
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private List<InstanceGroupV4Response> instanceGroups = new ArrayList<>();
 
     @Schema(description = StackModelDescription.CREATED)
@@ -99,10 +100,10 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
     @Schema(description = StackModelDescription.NODE_COUNT)
     private Integer nodeCount;
 
-    @Schema(description = StackModelDescription.HARDWARE_INFO_RESPONSE)
+    @Schema(description = StackModelDescription.HARDWARE_INFO_RESPONSE, requiredMode = Schema.RequiredMode.REQUIRED)
     private Set<HardwareInfoGroupV4Response> hardwareInfoGroups = new HashSet<>();
 
-    @Schema(description = StackModelDescription.EVENTS)
+    @Schema(description = StackModelDescription.EVENTS, requiredMode = Schema.RequiredMode.REQUIRED)
     private List<CloudbreakEventV4Response> cloudbreakEvents = new ArrayList<>();
 
     @Schema(description = StackModelDescription.TAGS)
@@ -118,7 +119,7 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
     private CustomDomainSettingsV4Response customDomains;
 
     @NotNull
-    @Schema(description = PLACEMENT_SETTINGS, required = true)
+    @Schema(description = PLACEMENT_SETTINGS, requiredMode = Schema.RequiredMode.REQUIRED)
     @Valid
     private PlacementSettingsV4Response placement;
 
@@ -140,10 +141,10 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
     @Schema(description = StackModelDescription.EXTERNAL_DATABASE)
     private DatabaseResponse externalDatabase;
 
-    @Schema(description = StackModelDescription.LOAD_BALANCER)
-    private List<LoadBalancerResponse> loadBalancers;
+    @Schema(description = StackModelDescription.LOAD_BALANCER, requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<LoadBalancerResponse> loadBalancers = new ArrayList<>();
 
-    @Schema(description = StackModelDescription.ENABLE_LOAD_BALANCER)
+    @Schema(description = StackModelDescription.ENABLE_LOAD_BALANCER, requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean enableLoadBalancer;
 
     @Schema(description = StackModelDescription.JAVA_VERSION)
@@ -155,10 +156,11 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
     @Schema(description = ModelDescriptions.ARCHITECTURE)
     private String architecture;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean enableMultiAz;
 
-    @Schema(description = StackModelDescription.ATTACHED_RESOURCES)
-    private List<ResourceV4Response> resources;
+    @Schema(description = StackModelDescription.ATTACHED_RESOURCES, requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<ResourceV4Response> resources = new ArrayList<>();
 
     @Schema(description = StackModelDescription.SECURITY)
     private SecurityV4Response security;

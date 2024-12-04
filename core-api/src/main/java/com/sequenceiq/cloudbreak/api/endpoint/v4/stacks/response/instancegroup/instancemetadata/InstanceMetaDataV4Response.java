@@ -62,7 +62,7 @@ public class InstanceMetaDataV4Response implements JsonEntity {
     @Schema(description = HostMetadataModelDescription.STATUS_REASON)
     private String statusReason;
 
-    @Schema
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private List<MountedVolumeV4Response> mountedVolumes = Lists.newArrayList();
 
     @Schema

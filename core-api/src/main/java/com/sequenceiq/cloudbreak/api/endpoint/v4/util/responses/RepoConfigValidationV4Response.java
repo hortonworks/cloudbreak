@@ -12,23 +12,23 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonInclude(Include.NON_NULL)
 public class RepoConfigValidationV4Response {
 
-    @Schema(description = RepositoryConfigValidationDescription.FIELDS)
-    private Boolean ambariBaseUrl;
+    @Schema(description = RepositoryConfigValidationDescription.FIELDS, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Boolean ambariBaseUrl = Boolean.FALSE;
 
-    @Schema(description = RepositoryConfigValidationDescription.FIELDS)
-    private Boolean ambariGpgKeyUrl;
+    @Schema(description = RepositoryConfigValidationDescription.FIELDS, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Boolean ambariGpgKeyUrl = Boolean.FALSE;
 
-    @Schema(description = RepositoryConfigValidationDescription.FIELDS)
-    private Boolean stackBaseURL;
+    @Schema(description = RepositoryConfigValidationDescription.FIELDS, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Boolean stackBaseURL = Boolean.FALSE;
 
-    @Schema(description = RepositoryConfigValidationDescription.FIELDS)
-    private Boolean utilsBaseURL;
+    @Schema(description = RepositoryConfigValidationDescription.FIELDS, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Boolean utilsBaseURL = Boolean.FALSE;
 
-    @Schema(description = RepositoryConfigValidationDescription.FIELDS)
-    private Boolean versionDefinitionFileUrl;
+    @Schema(description = RepositoryConfigValidationDescription.FIELDS, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Boolean versionDefinitionFileUrl = Boolean.FALSE;
 
-    @Schema(description = RepositoryConfigValidationDescription.FIELDS)
-    private Boolean mpackUrl;
+    @Schema(description = RepositoryConfigValidationDescription.FIELDS, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Boolean mpackUrl = Boolean.FALSE;
 
     public Boolean getAmbariBaseUrl() {
         return ambariBaseUrl;

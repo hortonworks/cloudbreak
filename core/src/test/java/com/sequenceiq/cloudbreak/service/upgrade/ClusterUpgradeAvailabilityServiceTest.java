@@ -197,7 +197,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         UpgradeV4Response actual = underTest.checkForUpgradesByName(stack, lockComponents, true, INTERNAL_UPGRADE_SETTINGS, false, null);
 
         assertNull(actual.getCurrent());
-        assertNull(actual.getUpgradeCandidates());
+        assertEquals(Collections.emptyList(), actual.getUpgradeCandidates());
         assertEquals("Failed to retrieve image due to Image not found.", actual.getReason());
     }
 

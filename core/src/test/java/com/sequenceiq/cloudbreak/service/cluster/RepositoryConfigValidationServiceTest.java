@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
@@ -41,12 +40,12 @@ public class RepositoryConfigValidationServiceTest {
     public void testValidateForRequestsIsNull() {
         RepoConfigValidationV4Response result = underTest.validate(null);
 
-        assertNull(result.getAmbariBaseUrl());
-        assertNull(result.getAmbariGpgKeyUrl());
-        assertNull(result.getVersionDefinitionFileUrl());
-        assertNull(result.getMpackUrl());
-        assertNull(result.getStackBaseURL());
-        assertNull(result.getUtilsBaseURL());
+        assertFalse(result.getAmbariBaseUrl());
+        assertFalse(result.getAmbariGpgKeyUrl());
+        assertFalse(result.getVersionDefinitionFileUrl());
+        assertFalse(result.getMpackUrl());
+        assertFalse(result.getStackBaseURL());
+        assertFalse(result.getUtilsBaseURL());
     }
 
     @Test
@@ -54,12 +53,12 @@ public class RepositoryConfigValidationServiceTest {
         RepoConfigValidationV4Request request = new RepoConfigValidationV4Request();
         RepoConfigValidationV4Response result = underTest.validate(request);
 
-        assertNull(result.getAmbariBaseUrl());
-        assertNull(result.getAmbariGpgKeyUrl());
-        assertNull(result.getVersionDefinitionFileUrl());
-        assertNull(result.getMpackUrl());
-        assertNull(result.getStackBaseURL());
-        assertNull(result.getUtilsBaseURL());
+        assertFalse(result.getAmbariBaseUrl());
+        assertFalse(result.getAmbariGpgKeyUrl());
+        assertFalse(result.getVersionDefinitionFileUrl());
+        assertFalse(result.getMpackUrl());
+        assertFalse(result.getStackBaseURL());
+        assertFalse(result.getUtilsBaseURL());
     }
 
     @Test
@@ -73,11 +72,11 @@ public class RepositoryConfigValidationServiceTest {
 
         verify(urlAccessValidationService, times(1)).isAccessible(anyString());
         assertTrue(result.getAmbariBaseUrl());
-        assertNull(result.getAmbariGpgKeyUrl());
-        assertNull(result.getVersionDefinitionFileUrl());
-        assertNull(result.getMpackUrl());
-        assertNull(result.getStackBaseURL());
-        assertNull(result.getUtilsBaseURL());
+        assertFalse(result.getAmbariGpgKeyUrl());
+        assertFalse(result.getVersionDefinitionFileUrl());
+        assertFalse(result.getMpackUrl());
+        assertFalse(result.getStackBaseURL());
+        assertFalse(result.getUtilsBaseURL());
     }
 
     @Test

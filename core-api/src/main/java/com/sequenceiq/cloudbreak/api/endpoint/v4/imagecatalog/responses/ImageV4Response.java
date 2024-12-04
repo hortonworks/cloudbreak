@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -48,10 +50,12 @@ public class ImageV4Response extends ImageBasicInfoV4Response implements JsonEnt
     private String cmBuildNumber;
 
     @JsonProperty("repository")
-    private Map<String, String> repository;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private Map<String, String> repository = new HashMap<>();
 
     @JsonProperty("images")
-    private Map<String, Map<String, String>> imageSetsByProvider;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private Map<String, Map<String, String>> imageSetsByProvider = new HashMap<>();
 
     @JsonProperty("stackDetails")
     @JsonInclude(NON_EMPTY)
@@ -59,17 +63,21 @@ public class ImageV4Response extends ImageBasicInfoV4Response implements JsonEnt
 
     @JsonProperty("preWarmParcels")
     @JsonInclude(NON_EMPTY)
-    private List<List<String>> preWarmParcels;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<List<String>> preWarmParcels = new ArrayList<>();
 
     @JsonProperty("preWarmCsd")
     @JsonInclude(NON_EMPTY)
-    private List<String> preWarmCsd;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<String> preWarmCsd = new ArrayList<>();
 
     @JsonProperty("defaultImage")
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean defaultImage;
 
     @JsonProperty("packageVersions")
-    private Map<String, String> packageVersions;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private Map<String, String> packageVersions = new HashMap<>();
 
     @JsonProperty("baseParcelUrl")
     private String baseParcelUrl;
@@ -78,6 +86,7 @@ public class ImageV4Response extends ImageBasicInfoV4Response implements JsonEnt
     private String sourceImageId;
 
     @JsonProperty("advertised")
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean advertised;
 
     public String getDate() {

@@ -20,7 +20,7 @@ public class StackViewV4Response implements JsonEntity {
     @Schema(description = StackModelDescription.CRN)
     private String crn;
 
-    @Schema(description = StackModelDescription.STACK_NAME, required = true)
+    @Schema(description = StackModelDescription.STACK_NAME, requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
     @Schema(description = StackModelDescription.HDP_VERSION)
@@ -51,6 +51,7 @@ public class StackViewV4Response implements JsonEntity {
 
     private String credentialName;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean govCloud;
 
     @Schema(description = StackModelDescription.CLOUD_PLATFORM)
@@ -65,6 +66,7 @@ public class StackViewV4Response implements JsonEntity {
     @Schema(description = StackModelDescription.STACK_VERSION)
     private String stackVersion;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean upgradeable;
 
     @Schema(description = StackModelDescription.EXTERNAL_DATABASE)

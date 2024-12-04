@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gatewa
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.common.model.JsonEntity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 public class ClusterExposedServiceV4Response implements JsonEntity {
 
     private String serviceName;
@@ -13,6 +15,7 @@ public class ClusterExposedServiceV4Response implements JsonEntity {
 
     private String serviceUrl;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean open;
 
     private SSOType mode;

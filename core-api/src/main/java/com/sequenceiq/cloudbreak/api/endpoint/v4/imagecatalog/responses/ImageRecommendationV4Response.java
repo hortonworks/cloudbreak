@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ImageRecommendationV4Response implements JsonEntity {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean hasValidationError;
 
     private String validationMessage;

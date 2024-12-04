@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 public class GcpLoadBalancerResponse implements Serializable {
 
-    @Schema(description = StackModelDescription.GCP_LOAD_BALANCER_NAME)
+    @Schema(description = StackModelDescription.GCP_LOAD_BALANCER_NAME, requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull
     private String name;
 

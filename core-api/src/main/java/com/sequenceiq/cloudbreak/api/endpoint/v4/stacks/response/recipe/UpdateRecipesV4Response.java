@@ -13,8 +13,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UpdateRecipesV4Response implements JsonEntity {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private List<UpdateHostGroupRecipes> recipesAttached = new ArrayList<>();
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private List<UpdateHostGroupRecipes> recipesDetached = new ArrayList<>();
 
     public List<UpdateHostGroupRecipes> getRecipesAttached() {

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -12,8 +13,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonInclude(Include.NON_NULL)
 public class DatabaseServerSslConfig {
 
-    @Schema(description = DatabaseServerModelDescription.SSL_CERTIFICATES)
-    private Set<String> sslCertificates;
+    @Schema(description = DatabaseServerModelDescription.SSL_CERTIFICATES, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Set<String> sslCertificates = new HashSet<>();
 
     @Schema(description = DatabaseServerModelDescription.SSL_CERTIFICATE_TYPE)
     private DatabaseServerSslCertificateType sslCertificateType;
@@ -24,16 +25,16 @@ public class DatabaseServerSslConfig {
     @Schema(description = DatabaseServerModelDescription.SSL_CERTIFICATE_STATUS)
     private String sslCertificatesStatus;
 
-    @Schema(description = DatabaseServerModelDescription.SSL_CERTIFICATE_EXPIRATION_DATE_AS_LONG)
+    @Schema(description = DatabaseServerModelDescription.SSL_CERTIFICATE_EXPIRATION_DATE_AS_LONG, requiredMode = Schema.RequiredMode.REQUIRED)
     private long sslCertificateExpirationDate;
 
     @Schema(description = DatabaseServerModelDescription.SSL_CERTIFICATE_EXPIRATION_DATE_AS_STRING)
     private String sslCertificateExpirationDateAsDateString;
 
-    @Schema(description = DatabaseServerModelDescription.SSL_CERTIFICATE_ACTIVE_VERSION)
+    @Schema(description = DatabaseServerModelDescription.SSL_CERTIFICATE_ACTIVE_VERSION, requiredMode = Schema.RequiredMode.REQUIRED)
     private int sslCertificateActiveVersion;
 
-    @Schema(description = DatabaseServerModelDescription.SSL_CERTIFICATE_HIGHEST_AVAILABLE_VERSION)
+    @Schema(description = DatabaseServerModelDescription.SSL_CERTIFICATE_HIGHEST_AVAILABLE_VERSION, requiredMode = Schema.RequiredMode.REQUIRED)
     private int sslCertificateHighestAvailableVersion;
 
     @Schema(description = DatabaseServerModelDescription.SSL_CERTIFICATE_ACTIVE_CLOUD_PROVIDER_IDENTIFIER)

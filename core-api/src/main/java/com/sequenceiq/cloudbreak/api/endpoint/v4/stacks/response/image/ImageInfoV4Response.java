@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image;
 import java.util.Comparator;
 import java.util.Objects;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 public class ImageInfoV4Response implements Comparable<ImageInfoV4Response> {
 
     private String imageName;
@@ -17,6 +19,7 @@ public class ImageInfoV4Response implements Comparable<ImageInfoV4Response> {
 
     private ImageComponentVersions componentVersions;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean prepared;
 
     public ImageInfoV4Response() {

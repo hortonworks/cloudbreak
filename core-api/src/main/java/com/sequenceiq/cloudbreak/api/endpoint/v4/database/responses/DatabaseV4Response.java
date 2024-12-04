@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -23,16 +24,16 @@ public class DatabaseV4Response extends DatabaseV4Base {
     @Schema(description = ModelDescriptions.CREATED)
     private Long creationDate;
 
-    @Schema(description = RDSConfigModelDescription.CLUSTER_NAMES)
-    private Set<String> clusterNames;
+    @Schema(description = RDSConfigModelDescription.CLUSTER_NAMES, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Set<String> clusterNames = new HashSet<>();
 
-    @Schema(description = Database.DB_ENGINE, required = true)
+    @Schema(description = Database.DB_ENGINE, requiredMode = Schema.RequiredMode.REQUIRED)
     private String databaseEngine;
 
-    @Schema(description = Database.CONNECTION_DRIVER_NAME, required = true)
+    @Schema(description = Database.CONNECTION_DRIVER_NAME, requiredMode = Schema.RequiredMode.REQUIRED)
     private String connectionDriver;
 
-    @Schema(description = Database.DB_ENGINE_DISPLAYNAME, required = true)
+    @Schema(description = Database.DB_ENGINE_DISPLAYNAME, requiredMode = Schema.RequiredMode.REQUIRED)
     private String databaseEngineDisplayName;
 
     @Schema(description = Database.USERNAME)

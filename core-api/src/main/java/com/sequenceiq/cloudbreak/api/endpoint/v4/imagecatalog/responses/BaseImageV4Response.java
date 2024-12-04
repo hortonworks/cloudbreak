@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -11,7 +12,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class BaseImageV4Response extends ImageV4Response {
 
-    private List<ClouderaManagerStackDetailsV4Response> cdhStacks;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<ClouderaManagerStackDetailsV4Response> cdhStacks = new ArrayList<>();
 
     private ClouderaManagerRepositoryV4Response clouderaManagerRepo;
 

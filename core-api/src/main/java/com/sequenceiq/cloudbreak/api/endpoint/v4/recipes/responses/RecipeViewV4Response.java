@@ -11,7 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema
 public class RecipeViewV4Response extends CompactViewV4Response {
     @NotNull
-    @Schema(description = RecipeModelDescription.TYPE)
+    @Schema(description = RecipeModelDescription.TYPE, requiredMode = Schema.RequiredMode.REQUIRED)
     private RecipeV4Type type;
 
     private Long created;

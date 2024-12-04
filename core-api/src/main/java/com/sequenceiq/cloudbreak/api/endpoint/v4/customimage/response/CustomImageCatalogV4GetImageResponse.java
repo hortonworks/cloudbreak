@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -33,7 +34,8 @@ public class CustomImageCatalogV4GetImageResponse implements JsonEntity {
     private Long sourceImageDate;
 
     @JsonProperty
-    private Map<String, String> versions;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private Map<String, String> versions = new HashMap<>();
 
     @JsonProperty
     private String cloudProvider;
@@ -42,6 +44,7 @@ public class CustomImageCatalogV4GetImageResponse implements JsonEntity {
     private String baseParcelUrl;
 
     @JsonProperty
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Set<CustomImageCatalogV4VmImageResponse> vmImages = new HashSet<>();
 
     public String getImageId() {

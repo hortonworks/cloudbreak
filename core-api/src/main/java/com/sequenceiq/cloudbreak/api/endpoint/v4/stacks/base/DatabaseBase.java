@@ -9,9 +9,12 @@ import jakarta.validation.constraints.Pattern;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 public abstract class DatabaseBase implements Serializable {
 
     @NotNull
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private DatabaseAvailabilityType availabilityType;
 
     private DatabaseAvailabilityType datalakeDatabaseAvailabilityType;

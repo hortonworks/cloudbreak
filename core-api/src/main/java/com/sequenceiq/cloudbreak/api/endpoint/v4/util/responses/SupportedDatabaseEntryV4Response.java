@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses;
 
 
+import java.util.HashSet;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -22,8 +23,8 @@ public class SupportedDatabaseEntryV4Response implements JsonEntity {
     @Schema(description = SupportedDatabaseModelDescription.JDBCPREFIX)
     private String jdbcPrefix;
 
-    @Schema(description = SupportedDatabaseModelDescription.VERSIONS)
-    private  Set<String> versions;
+    @Schema(description = SupportedDatabaseModelDescription.VERSIONS, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Set<String> versions = new HashSet<>();
 
     public SupportedDatabaseEntryV4Response() {
     }

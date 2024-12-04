@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Set;
 
 import jakarta.validation.constraints.NotNull;
@@ -14,13 +15,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonInclude(Include.NON_NULL)
 public class TargetGroupResponse implements Serializable {
 
-    @Schema(description = StackModelDescription.TARGET_GROUP_PORT)
+    @Schema(description = StackModelDescription.TARGET_GROUP_PORT, requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull
     private long port;
 
-    @Schema(description = StackModelDescription.TARGET_GROUP_INSTANCES)
+    @Schema(description = StackModelDescription.TARGET_GROUP_INSTANCES, requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull
-    private Set<String> targetInstances;
+    private Set<String> targetInstances = new HashSet<>();
 
     @Schema(description = StackModelDescription.TARGET_GROUP_AWS)
     private AwsTargetGroupResponse awsResourceIds;

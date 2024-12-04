@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.hardware;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.StringJoiner;
 
@@ -23,11 +24,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class HardwareInfoV4Response implements JsonEntity {
 
     @NotNull
-    @Schema(description = ModelDescriptions.NAME, required = true)
+    @Schema(description = ModelDescriptions.NAME, requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
     @NotNull
-    @Schema(description = HostGroupModelDescription.HOST_GROUP_NAME, required = true)
+    @Schema(description = HostGroupModelDescription.HOST_GROUP_NAME, requiredMode = Schema.RequiredMode.REQUIRED)
     private String groupName;
 
     @Schema(description = HostMetadataModelDescription.STATE)
@@ -72,7 +73,8 @@ public class HardwareInfoV4Response implements JsonEntity {
 
     private String imageCatalogName;
 
-    private Map<String, String> packageVersions;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private Map<String, String> packageVersions = new HashMap<>();
 
     private String availabilityZone;
 

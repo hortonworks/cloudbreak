@@ -5,8 +5,11 @@ import java.util.List;
 
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 public class UsedImagesListV4Response {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private List<UsedImageStacksV4Response> usedImages;
 
     public UsedImagesListV4Response() {

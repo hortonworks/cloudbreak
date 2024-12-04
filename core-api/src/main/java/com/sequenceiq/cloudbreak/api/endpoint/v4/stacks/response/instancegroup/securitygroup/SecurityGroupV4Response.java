@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.securitygroup;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -20,11 +21,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonInclude(Include.NON_NULL)
 public class SecurityGroupV4Response implements JsonEntity {
 
-    @Schema(description = SecurityGroupModelDescription.SECURITY_GROUP_IDS)
-    private Set<String> securityGroupIds;
+    @Schema(description = SecurityGroupModelDescription.SECURITY_GROUP_IDS, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Set<String> securityGroupIds = new HashSet<>();
 
     @Valid
-    @Schema(description = SecurityGroupModelDescription.SECURITY_RULES)
+    @Schema(description = SecurityGroupModelDescription.SECURITY_RULES, requiredMode = Schema.RequiredMode.REQUIRED)
     private List<SecurityRuleV4Response> securityRules = new LinkedList<>();
 
     public List<SecurityRuleV4Response> getSecurityRules() {

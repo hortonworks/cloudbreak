@@ -29,6 +29,7 @@ public class CustomImageCatalogV4CreateImageResponse implements JsonEntity {
     private String baseParcelUrl;
 
     @JsonProperty
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Set<CustomImageCatalogV4VmImageResponse> vmImages = new HashSet<>();
 
     public String getImageId() {

@@ -13,7 +13,7 @@ public class StackEndpointV4Response {
     @Schema
     private String crn;
 
-    @Schema
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, Collection<ClusterExposedServiceV4Response>> endpoints = new HashMap<>();
 
     public String getCrn() {

@@ -20,7 +20,7 @@ public class SupportedExternalDatabaseServiceEntryV4Response implements JsonEnti
     @Schema(description = SupportedDatabaseModelDescription.SERVICE_DISPLAYNAME)
     private String displayName;
 
-    @Schema(description = SupportedDatabaseModelDescription.DATABASES)
+    @Schema(description = SupportedDatabaseModelDescription.DATABASES, requiredMode = Schema.RequiredMode.REQUIRED)
     private Set<SupportedDatabaseEntryV4Response> databases = new HashSet<>();
 
     public String getName() {

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -15,13 +17,17 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @NotNull
 public class ImagesV4Response implements JsonEntity {
 
-    private List<BaseImageV4Response> baseImages;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<BaseImageV4Response> baseImages = new ArrayList<>();
 
-    private List<ImageV4Response> cdhImages;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<ImageV4Response> cdhImages = new ArrayList<>();
 
-    private List<ImageV4Response> freeipaImages;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<ImageV4Response> freeipaImages = new ArrayList<>();
 
-    private Set<String> supportedVersions;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private Set<String> supportedVersions = new HashSet<>();
 
     public List<BaseImageV4Response> getBaseImages() {
         return baseImages;

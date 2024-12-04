@@ -20,7 +20,7 @@ public class ClusterViewV4Response extends CompactViewV4Response {
     @Schema(description = ClusterModelDescription.STATUS)
     private Status status;
 
-    @Schema(description = ClusterModelDescription.HOSTGROUPS)
+    @Schema(description = ClusterModelDescription.HOSTGROUPS, requiredMode = Schema.RequiredMode.REQUIRED)
     private Set<HostGroupViewV4Response> hostGroups = new HashSet<>();
 
     @Schema(description = ClusterModelDescription.SHARED_SERVICE)

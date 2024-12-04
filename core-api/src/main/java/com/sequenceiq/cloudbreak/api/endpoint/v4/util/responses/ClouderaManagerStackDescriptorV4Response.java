@@ -6,6 +6,8 @@ import java.util.List;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ClouderaManagerStackRepoDetailsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerProductV4Response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 public class ClouderaManagerStackDescriptorV4Response {
 
     private String version;
@@ -18,8 +20,10 @@ public class ClouderaManagerStackDescriptorV4Response {
 
     private ClouderaManagerInfoV4Response clouderaManager;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private List<ClouderaManagerProductV4Response> products = new ArrayList<>();
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private List<String> productDefinitions = new ArrayList<>();
 
     public String getVersion() {

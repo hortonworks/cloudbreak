@@ -21,7 +21,7 @@ public class HardwareInfoGroupV4Response implements JsonEntity {
 
     private String name;
 
-    @Schema(description = HardwareModelDescription.METADATA)
+    @Schema(description = HardwareModelDescription.METADATA, requiredMode = Schema.RequiredMode.REQUIRED)
     private Set<HardwareInfoV4Response> hardwareInfos = new HashSet<>();
 
     public RecoveryMode getRecoveryMode() {

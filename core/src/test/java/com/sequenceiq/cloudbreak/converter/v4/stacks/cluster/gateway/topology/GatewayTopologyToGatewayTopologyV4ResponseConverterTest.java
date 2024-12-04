@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.topology;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -43,7 +42,7 @@ public class GatewayTopologyToGatewayTopologyV4ResponseConverterTest {
 
         assertNotNull(result);
         assertEquals(TOPOLOGY, result.getTopologyName());
-        assertNull(result.getExposedServices());
+        assertEquals(Collections.emptyList(), result.getExposedServices());
     }
 
     @Test

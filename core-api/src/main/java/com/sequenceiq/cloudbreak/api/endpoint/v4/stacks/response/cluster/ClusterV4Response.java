@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -44,10 +45,10 @@ public class ClusterV4Response implements JsonEntity {
     @Schema(description = ClusterModelDescription.STATUS)
     private Status status;
 
-    @Schema(description = ClusterModelDescription.HOURS)
+    @Schema(description = ClusterModelDescription.HOURS, requiredMode = Schema.RequiredMode.REQUIRED)
     private int hoursUp;
 
-    @Schema(description = ClusterModelDescription.MINUTES)
+    @Schema(description = ClusterModelDescription.MINUTES, requiredMode = Schema.RequiredMode.REQUIRED)
     private int minutesUp;
 
     @Schema(description = ModelDescriptions.DESCRIPTION)
@@ -56,8 +57,8 @@ public class ClusterV4Response implements JsonEntity {
     @Schema(description = ClusterModelDescription.STATUS_REASON)
     private String statusReason;
 
-    @Schema(description = ClusterModelDescription.DATABASES)
-    private List<DatabaseV4Response> databases;
+    @Schema(description = ClusterModelDescription.DATABASES, requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<DatabaseV4Response> databases = new ArrayList<>();
 
     @Schema(description = ClusterModelDescription.PROXY_CRN)
     private String proxyConfigCrn;
@@ -71,7 +72,7 @@ public class ClusterV4Response implements JsonEntity {
 
     private GatewayV4Response gateway;
 
-    @Schema(description = ClusterModelDescription.CLUSTER_ATTRIBUTES)
+    @Schema(description = ClusterModelDescription.CLUSTER_ATTRIBUTES, requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, Object> attributes = new HashMap<>();
 
     @Schema(description = ClusterModelDescription.CUSTOM_CONTAINERS)
@@ -86,8 +87,8 @@ public class ClusterV4Response implements JsonEntity {
     @Schema(description = ClusterModelDescription.UPTIME)
     private Long uptime;
 
-    @Schema(description = ClusterModelDescription.CLUSTER_EXPOSED_SERVICES)
-    private Map<String, Collection<ClusterExposedServiceV4Response>> exposedServices;
+    @Schema(description = ClusterModelDescription.CLUSTER_EXPOSED_SERVICES, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Map<String, Collection<ClusterExposedServiceV4Response>> exposedServices = new HashMap<>();
 
     @Schema(description = ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
     private WorkspaceResourceV4Response workspace;
@@ -124,16 +125,16 @@ public class ClusterV4Response implements JsonEntity {
     @Schema(description = ClusterModelDescription.REDBEAMS_DB_SERVER_CRN)
     private String databaseServerCrn;
 
-    @Schema(description = ClusterModelDescription.ENABLE_RANGER_RAZ)
+    @Schema(description = ClusterModelDescription.ENABLE_RANGER_RAZ, requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean rangerRazEnabled;
 
-    @Schema(description = ClusterModelDescription.ENABLE_RANGER_RMS)
+    @Schema(description = ClusterModelDescription.ENABLE_RANGER_RMS, requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean rangerRmsEnabled;
 
     @Schema(description = ClusterModelDescription.CERT_EXPIRATION)
     private CertExpirationState certExpirationState;
 
-    @Schema(description = ClusterModelDescription.DATABASE_SSL_ENABLED)
+    @Schema(description = ClusterModelDescription.DATABASE_SSL_ENABLED, requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean dbSSLEnabled;
 
     private String dbSslRootCertBundle;

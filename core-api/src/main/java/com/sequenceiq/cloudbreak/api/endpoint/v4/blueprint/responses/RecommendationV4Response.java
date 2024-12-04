@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -14,17 +16,23 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.ResizeRecom
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VmTypeV4Response;
 import com.sequenceiq.common.model.JsonEntity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class RecommendationV4Response implements JsonEntity {
 
-    private Map<String, VmTypeV4Response> recommendations;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private Map<String, VmTypeV4Response> recommendations = new HashMap<>();
 
-    private Set<VmTypeV4Response> virtualMachines;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private Set<VmTypeV4Response> virtualMachines = new HashSet<>();
 
-    private Set<DiskV4Response> diskResponses;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private Set<DiskV4Response> diskResponses = new HashSet<>();
 
-    private Map<String, InstanceCountV4Response> instanceCounts;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private Map<String, InstanceCountV4Response> instanceCounts = new HashMap<>();
 
     private GatewayRecommendationV4Response gatewayRecommendation;
 

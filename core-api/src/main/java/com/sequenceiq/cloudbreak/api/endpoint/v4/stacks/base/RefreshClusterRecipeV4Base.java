@@ -5,13 +5,17 @@ import jakarta.validation.constraints.NotBlank;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.model.JsonEntity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class RefreshClusterRecipeV4Base implements JsonEntity {
 
     @NotBlank
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private String recipeName;
 
     @NotBlank
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private String hostGroupName;
 
     public String getRecipeName() {

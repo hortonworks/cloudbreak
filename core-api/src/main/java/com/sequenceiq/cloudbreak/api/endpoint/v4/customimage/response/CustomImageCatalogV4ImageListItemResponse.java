@@ -1,10 +1,13 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.common.model.JsonEntity;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CustomImageCatalogV4ImageListItemResponse implements JsonEntity {
@@ -25,7 +28,8 @@ public class CustomImageCatalogV4ImageListItemResponse implements JsonEntity {
     private Long sourceImageDate;
 
     @JsonProperty
-    private Map<String, String> versions;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private Map<String, String> versions = new HashMap<>();
 
     @JsonProperty
     private String cloudProvider;

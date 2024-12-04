@@ -17,7 +17,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonInclude(Include.NON_NULL)
 public class BlueprintV4Response extends BlueprintV4Base {
 
-    @Schema(description = ModelDescriptions.NAME, required = true)
+    @Schema(description = ModelDescriptions.NAME, requiredMode = Schema.RequiredMode.REQUIRED)
     @Size(max = 100, min = 1, message = "The length of the blueprint's name has to be in range of 1 to 100 and should not contain semicolon "
             + "and percentage character.")
     @NotNull
@@ -25,7 +25,7 @@ public class BlueprintV4Response extends BlueprintV4Base {
     private String name;
 
     @NotNull
-    @Schema(description = ModelDescriptions.CRN)
+    @Schema(description = ModelDescriptions.CRN, requiredMode = Schema.RequiredMode.REQUIRED)
     private String crn;
 
     @Schema(description = BlueprintModelDescription.HOST_GROUP_COUNT)

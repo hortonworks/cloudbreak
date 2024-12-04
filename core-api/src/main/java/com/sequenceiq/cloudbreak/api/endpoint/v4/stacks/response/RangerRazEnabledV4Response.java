@@ -1,9 +1,13 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 public class RangerRazEnabledV4Response {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean rangerRazEnabled;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean rangerRMsEnabled;
 
     public RangerRazEnabledV4Response() {

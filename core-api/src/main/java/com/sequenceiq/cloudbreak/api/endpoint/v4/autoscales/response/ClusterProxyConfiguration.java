@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ClusterProxyConfiguration {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean enabled;
 
     private String url;

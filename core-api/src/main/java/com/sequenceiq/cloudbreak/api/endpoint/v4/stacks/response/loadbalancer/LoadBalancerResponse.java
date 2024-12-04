@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.validation.constraints.NotNull;
@@ -24,11 +25,11 @@ public class LoadBalancerResponse implements Serializable {
     @Schema(description = StackModelDescription.LOAD_BALANCER_IP)
     private String ip;
 
-    @Schema(description = StackModelDescription.LOAD_BALANCER_TARGETS)
+    @Schema(description = StackModelDescription.LOAD_BALANCER_TARGETS, requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull
-    private List<TargetGroupResponse> targets;
+    private List<TargetGroupResponse> targets = new ArrayList<>();
 
-    @Schema(description = StackModelDescription.LOAD_BALANCER_TYPE)
+    @Schema(description = StackModelDescription.LOAD_BALANCER_TYPE, requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull
     private LoadBalancerType type;
 

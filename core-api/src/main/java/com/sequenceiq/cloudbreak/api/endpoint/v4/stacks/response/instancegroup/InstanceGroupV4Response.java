@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -26,7 +27,7 @@ public class InstanceGroupV4Response extends InstanceGroupV4Base {
     @Schema(description = ModelDescriptions.ID)
     private Long id;
 
-    @Schema(description = InstanceGroupModelDescription.METADATA)
+    @Schema(description = InstanceGroupModelDescription.METADATA, requiredMode = Schema.RequiredMode.REQUIRED)
     private Set<InstanceMetaDataV4Response> metadata = new HashSet<>();
 
     @Schema(description = InstanceGroupModelDescription.TEMPLATE)
@@ -35,9 +36,10 @@ public class InstanceGroupV4Response extends InstanceGroupV4Base {
     @Schema(description = InstanceGroupModelDescription.SECURITYGROUP)
     private SecurityGroupV4Response securityGroup;
 
-    private List<RecipeV4Response> recipes;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<RecipeV4Response> recipes = new ArrayList<>();
 
-    @Schema(description = InstanceGroupModelDescription.AVAILABILITY_ZONES)
+    @Schema(description = InstanceGroupModelDescription.AVAILABILITY_ZONES, requiredMode = Schema.RequiredMode.REQUIRED)
     private Set<String> availabilityZones = new HashSet<>();
 
     @Schema(description = InstanceGroupModelDescription.NETWORK)

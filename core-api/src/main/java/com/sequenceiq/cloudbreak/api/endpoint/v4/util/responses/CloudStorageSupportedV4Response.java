@@ -5,10 +5,13 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CloudStorageSupportedV4Response {
     private String provider;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Set<String> fileSystemType = new HashSet<>();
 
     public String getProvider() {

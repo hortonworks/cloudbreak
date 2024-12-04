@@ -10,11 +10,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 public class AwsTargetGroupResponse implements Serializable {
 
-    @Schema(description = StackModelDescription.AWS_LISTENER_ARN)
+    @Schema(description = StackModelDescription.AWS_LISTENER_ARN, requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull
     private String listenerArn;
 
-    @Schema(description = StackModelDescription.AWS_TARGETGROUP_ARN)
+    @Schema(description = StackModelDescription.AWS_TARGETGROUP_ARN, requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull
     private String targetGroupArn;
 

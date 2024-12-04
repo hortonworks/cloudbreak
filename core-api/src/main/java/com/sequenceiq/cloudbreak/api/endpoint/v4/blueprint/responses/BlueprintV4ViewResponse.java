@@ -28,7 +28,7 @@ public class BlueprintV4ViewResponse extends CompactViewV4Response {
     @Schema(description = BlueprintModelDescription.STATUS)
     private ResourceStatus status;
 
-    @Schema(description = BlueprintModelDescription.TAGS)
+    @Schema(description = BlueprintModelDescription.TAGS, requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, Object> tags = new HashMap<>();
 
     @Schema(description = BlueprintModelDescription.UPGRADEABLE)

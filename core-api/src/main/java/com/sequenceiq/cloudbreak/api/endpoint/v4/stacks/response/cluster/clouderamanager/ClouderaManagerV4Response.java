@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
@@ -23,10 +24,10 @@ public class ClouderaManagerV4Response implements JsonEntity {
     private ClouderaManagerRepositoryV4Response repository;
 
     @Valid
-    @Schema(description = ClusterModelDescription.CM_PRODUCT_DETAILS)
-    private List<ClouderaManagerProductV4Response> products;
+    @Schema(description = ClusterModelDescription.CM_PRODUCT_DETAILS, requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<ClouderaManagerProductV4Response> products = new ArrayList<>();
 
-    @Schema(description = ClusterModelDescription.CM_ENABLE_AUTOTLS)
+    @Schema(description = ClusterModelDescription.CM_ENABLE_AUTOTLS, requiredMode = Schema.RequiredMode.REQUIRED)
     private Boolean enableAutoTls = Boolean.FALSE;
 
     public ClouderaManagerRepositoryV4Response getRepository() {

@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 public class AzureLoadBalancerResponse implements Serializable {
 
-    @Schema(description = StackModelDescription.AZURE_LB_NAME)
+    @Schema(description = StackModelDescription.AZURE_LB_NAME, requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull
     private String name;
 

@@ -1,7 +1,10 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public class ImageComponentVersions implements Comparable<ImageComponentVersions> {
 
@@ -17,7 +20,8 @@ public class ImageComponentVersions implements Comparable<ImageComponentVersions
 
     private String osPatchLevel;
 
-    private List<ParcelInfoResponse> parcelInfoResponseList;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<ParcelInfoResponse> parcelInfoResponseList = new ArrayList<>();
 
     public ImageComponentVersions() {
     }

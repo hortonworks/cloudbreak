@@ -17,7 +17,7 @@ public class CompactViewV4Response implements JsonEntity {
     @Size(max = 100, min = 5, message = "The length of the resource's name has to be in range of 5 to 100")
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The resource's name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
-    @Schema(description = ModelDescriptions.NAME, required = true)
+    @Schema(description = ModelDescriptions.NAME, requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
     @Size(max = 1000)

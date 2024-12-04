@@ -18,10 +18,10 @@ public class HostGroupViewV4Response implements JsonEntity {
     @Schema(description = ID)
     private Long id;
 
-    @Schema(description = NAME, required = true)
+    @Schema(description = NAME, requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
-    @Schema(description = METADATA)
+    @Schema(description = METADATA, requiredMode = Schema.RequiredMode.REQUIRED)
     private Set<HostMetadataViewV4Response> metadata = new HashSet<>();
 
     public Long getId() {

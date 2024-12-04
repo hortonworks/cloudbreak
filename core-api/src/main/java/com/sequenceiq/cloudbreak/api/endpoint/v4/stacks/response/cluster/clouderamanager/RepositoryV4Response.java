@@ -16,7 +16,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class RepositoryV4Response implements JsonEntity {
 
     @NotNull
-    @Schema(description = ClusterManagerRepositoryDescription.VERSION, required = true)
+    @Schema(description = ClusterManagerRepositoryDescription.VERSION, requiredMode = Schema.RequiredMode.REQUIRED)
     private String version;
 
     @Schema(description = ClusterManagerRepositoryDescription.BASE_URL)

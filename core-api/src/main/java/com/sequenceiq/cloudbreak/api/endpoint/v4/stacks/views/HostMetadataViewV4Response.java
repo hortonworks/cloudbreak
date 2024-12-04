@@ -13,7 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class HostMetadataViewV4Response implements JsonEntity {
 
-    @Schema(description = NAME, required = true)
+    @Schema(description = NAME, requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
     @Schema(description = ID)

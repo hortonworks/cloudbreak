@@ -1,11 +1,14 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.common.model.JsonEntity;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
@@ -21,9 +24,11 @@ public class VolumeParameterConfigV4Response implements JsonEntity {
 
     private Integer maximumNumber;
 
-    private Set<Integer> possibleSizeValues;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private Set<Integer> possibleSizeValues = new HashSet<>();
 
-    private Set<Integer> possibleNumberValues;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private Set<Integer> possibleNumberValues = new HashSet<>();
 
     public String getVolumeParameterType() {
         return volumeParameterType;

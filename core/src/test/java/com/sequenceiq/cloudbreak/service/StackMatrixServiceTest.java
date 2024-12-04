@@ -10,6 +10,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -75,7 +76,7 @@ public class StackMatrixServiceTest {
 
         ClouderaManagerStackDescriptorV4Response cdh = stackMatrixV4Response.getCdh().get(CLUSTER_VERSION);
         assertEquals("6.1.0-1.cdh6.1.0.p0.770702", cdh.getVersion());
-        assertNull(cdh.getClouderaManager().getRepository());
+        assertEquals(Collections.emptyMap(), cdh.getClouderaManager().getRepository());
         assertNull(cdh.getClouderaManager().getVersion());
         assertEquals(cdh.getOs(), OS);
         assertEquals(cdh.getArchitecture(), ARCH.getName());

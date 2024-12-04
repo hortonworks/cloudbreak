@@ -23,6 +23,7 @@ public class SharedServiceV4Response implements JsonEntity {
 
     private String sdxCrn;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Set<AttachedClusterInfoV4Response> attachedClusters = new HashSet<>();
 
     public String getSharedClusterName() {
