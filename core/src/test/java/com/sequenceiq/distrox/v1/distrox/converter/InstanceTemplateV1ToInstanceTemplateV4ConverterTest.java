@@ -56,7 +56,7 @@ class InstanceTemplateV1ToInstanceTemplateV4ConverterTest {
         when(instanceTemplateParameterConverter.convert(any(AzureInstanceTemplateV1Parameters.class), eq(environment)))
                 .thenReturn(azureInstanceTemplateV4Parameters);
 
-        InstanceTemplateV4Request instanceTemplateV4Request = underTest.convert(source, environment);
+        InstanceTemplateV4Request instanceTemplateV4Request = underTest.convert(source, environment, true);
 
         assertThat(instanceTemplateV4Request).isNotNull();
         assertThat(instanceTemplateV4Request.getRootVolume()).isNull();
@@ -76,13 +76,13 @@ class InstanceTemplateV1ToInstanceTemplateV4ConverterTest {
 
         environment.setCloudPlatform("AZURE");
         RootVolumeV4Request rootVolumeV4Request = new RootVolumeV4Request();
-        when(volumeConverter.convert(rootVolumeV1Request, "AZURE")).thenReturn(rootVolumeV4Request);
+        when(volumeConverter.convert(rootVolumeV1Request, "AZURE", true)).thenReturn(rootVolumeV4Request);
 
         AzureInstanceTemplateV4Parameters azureInstanceTemplateV4Parameters = new AzureInstanceTemplateV4Parameters();
         when(instanceTemplateParameterConverter.convert(any(AwsInstanceTemplateV1Parameters.class), eq(environment))).thenReturn(null);
         when(instanceTemplateParameterConverter.convert(azureInstanceTemplateV1Parameters, environment)).thenReturn(azureInstanceTemplateV4Parameters);
 
-        InstanceTemplateV4Request instanceTemplateV4Request = underTest.convert(source, environment);
+        InstanceTemplateV4Request instanceTemplateV4Request = underTest.convert(source, environment, true);
 
         assertThat(instanceTemplateV4Request).isNotNull();
         assertThat(instanceTemplateV4Request.getRootVolume()).isSameAs(rootVolumeV4Request);
@@ -96,7 +96,7 @@ class InstanceTemplateV1ToInstanceTemplateV4ConverterTest {
         InstanceTemplateV4Request source = new InstanceTemplateV4Request();
         source.setInstanceType(INSTANCE_TYPE);
 
-        InstanceTemplateV1Request instanceTemplateV1Request = underTest.convert(source, environment);
+        InstanceTemplateV1Request instanceTemplateV1Request = underTest.convert(source, environment, true);
 
         assertThat(instanceTemplateV1Request).isNotNull();
         assertThat(instanceTemplateV1Request.getRootVolume()).isNull();
@@ -117,12 +117,12 @@ class InstanceTemplateV1ToInstanceTemplateV4ConverterTest {
 
         environment.setCloudPlatform("AZURE");
         RootVolumeV1Request rootVolumeV1Request = new RootVolumeV1Request();
-        when(volumeConverter.convert(rootVolumeV4Request, "AZURE")).thenReturn(rootVolumeV1Request);
+        when(volumeConverter.convert(rootVolumeV4Request, "AZURE", true)).thenReturn(rootVolumeV1Request);
 
         AzureInstanceTemplateV1Parameters azureInstanceTemplateV1Parameters = new AzureInstanceTemplateV1Parameters();
         when(instanceTemplateParameterConverter.convert(azureInstanceTemplateV4Parameters)).thenReturn(azureInstanceTemplateV1Parameters);
 
-        InstanceTemplateV1Request instanceTemplateV1Request = underTest.convert(source, environment);
+        InstanceTemplateV1Request instanceTemplateV1Request = underTest.convert(source, environment, true);
 
         assertThat(instanceTemplateV1Request).isNotNull();
         assertThat(instanceTemplateV1Request.getRootVolume()).isSameAs(rootVolumeV1Request);
@@ -142,12 +142,12 @@ class InstanceTemplateV1ToInstanceTemplateV4ConverterTest {
 
         environment.setCloudPlatform("AWS");
         RootVolumeV4Request rootVolumeV4Request = new RootVolumeV4Request();
-        when(volumeConverter.convert(rootVolumeV1Request, "AWS")).thenReturn(rootVolumeV4Request);
+        when(volumeConverter.convert(rootVolumeV1Request, "AWS", true)).thenReturn(rootVolumeV4Request);
 
         AwsInstanceTemplateV4Parameters awsInstanceTemplateV4Parameters = new AwsInstanceTemplateV4Parameters();
         when(instanceTemplateParameterConverter.convert(awsParameters, environment)).thenReturn(awsInstanceTemplateV4Parameters);
 
-        InstanceTemplateV4Request instanceTemplateV4Request = underTest.convert(source, environment);
+        InstanceTemplateV4Request instanceTemplateV4Request = underTest.convert(source, environment, true);
 
         assertThat(instanceTemplateV4Request).isNotNull();
         assertThat(instanceTemplateV4Request.getRootVolume()).isSameAs(rootVolumeV4Request);
@@ -166,7 +166,7 @@ class InstanceTemplateV1ToInstanceTemplateV4ConverterTest {
         when(instanceTemplateParameterConverter.convert(any(AwsInstanceTemplateV1Parameters.class), eq(environment)))
                 .thenReturn(awsInstanceTemplateV4Parameters);
 
-        InstanceTemplateV4Request instanceTemplateV4Request = underTest.convert(source, environment);
+        InstanceTemplateV4Request instanceTemplateV4Request = underTest.convert(source, environment, true);
 
         assertThat(instanceTemplateV4Request).isNotNull();
         assertThat(instanceTemplateV4Request.getRootVolume()).isNull();
@@ -186,12 +186,12 @@ class InstanceTemplateV1ToInstanceTemplateV4ConverterTest {
 
         environment.setCloudPlatform("AWS");
         RootVolumeV1Request rootVolumeV1Request = new RootVolumeV1Request();
-        when(volumeConverter.convert(rootVolumeV4Request, "AWS")).thenReturn(rootVolumeV1Request);
+        when(volumeConverter.convert(rootVolumeV4Request, "AWS", true)).thenReturn(rootVolumeV1Request);
 
         AwsInstanceTemplateV1Parameters awsInstanceTemplateV1Parameters = new AwsInstanceTemplateV1Parameters();
         when(instanceTemplateParameterConverter.convert(awsInstanceTemplateV4Parameters, environment)).thenReturn(awsInstanceTemplateV1Parameters);
 
-        InstanceTemplateV1Request instanceTemplateV1Request = underTest.convert(source, environment);
+        InstanceTemplateV1Request instanceTemplateV1Request = underTest.convert(source, environment, true);
 
         assertThat(instanceTemplateV1Request).isNotNull();
         assertThat(instanceTemplateV1Request.getRootVolume()).isSameAs(rootVolumeV1Request);

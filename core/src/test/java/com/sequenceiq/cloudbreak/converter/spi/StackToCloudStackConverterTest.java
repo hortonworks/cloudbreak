@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -101,6 +102,7 @@ import com.sequenceiq.cloudbreak.service.stack.TargetGroupPersistenceService;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.api.type.EncryptionType;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -503,9 +505,10 @@ public class StackToCloudStackConverterTest {
         when(template.getCloudPlatform()).thenReturn("AWS");
         int expected = Integer.MAX_VALUE;
         when(instanceGroup.getTemplate()).thenReturn(template);
+        when(instanceGroup.getInstanceGroupType()).thenReturn(InstanceGroupType.GATEWAY);
         when(stack.getInstanceGroupDtos()).thenReturn(instanceGroups);
         when(template.getRootVolumeSize()).thenReturn(null);
-        when(defaultRootVolumeSizeProvider.getForPlatform("AWS")).thenReturn(expected);
+        when(defaultRootVolumeSizeProvider.getDefaultRootVolumeForPlatform("AWS", true)).thenReturn(expected);
         when(stack.getStack()).thenReturn(stack);
         SecurityConfig securityConfig = new SecurityConfig();
         securityConfig.setSeLinux(SeLinux.PERMISSIVE);
@@ -527,6 +530,8 @@ public class StackToCloudStackConverterTest {
         when(template.getVolumeTemplates()).thenReturn(Set.of());
         int expected = Integer.MAX_VALUE;
         when(instanceGroup.getTemplate()).thenReturn(template);
+        when(instanceGroup.getInstanceGroupType()).thenReturn(InstanceGroupType.GATEWAY);
+
         when(stack.getStack()).thenReturn(stack);
         when(stack.getCloudPlatform()).thenReturn("AWS");
         when(stack.getInstanceGroupDtos()).thenReturn(instanceGroups);
@@ -544,7 +549,7 @@ public class StackToCloudStackConverterTest {
 
         assertEquals(1L, result.getGroups().size());
         assertEquals(expected, result.getGroups().get(0).getRootVolumeSize());
-        verify(defaultRootVolumeSizeProvider, times(0)).getForPlatform(any(String.class));
+        verify(defaultRootVolumeSizeProvider, times(0)).getDefaultRootVolumeForPlatform(any(String.class), eq(true));
         assertEquals("gp2", result.getGroups().get(0).getRootVolumeType());
     }
 
@@ -1601,7 +1606,7 @@ public class StackToCloudStackConverterTest {
         instanceGroups.add(new InstanceGroupDto(instanceGroup, List.of(instanceMetadata1, instanceMetadata2)));
         String groupName = TEST_NAME;
         int expected = 100;
-        when(defaultRootVolumeSizeProvider.getForPlatform("AWS")).thenReturn(expected);
+        when(defaultRootVolumeSizeProvider.getDefaultRootVolumeForPlatform("AWS", false)).thenReturn(expected);
         Template template = mock(Template.class);
         when(instanceMetadata1.isDeletedOnProvider()).thenReturn(true);
         when(instanceMetadata2.isDeletedOnProvider()).thenReturn(true);
@@ -1610,6 +1615,7 @@ public class StackToCloudStackConverterTest {
         when(template.getRootVolumeSize()).thenReturn(null);
         when(instanceGroup.getGroupName()).thenReturn(groupName);
         when(instanceGroup.getTemplate()).thenReturn(template);
+        when(instanceGroup.getInstanceGroupType()).thenReturn(InstanceGroupType.CORE);
         when(stack.getInstanceGroupDtos()).thenReturn(instanceGroups);
         CloudStack result = underTest.convert(stack, new ArrayList<>(), diskUpdateRequest);
 

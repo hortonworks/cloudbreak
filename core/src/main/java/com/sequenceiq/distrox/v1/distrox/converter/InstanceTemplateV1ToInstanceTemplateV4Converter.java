@@ -24,10 +24,10 @@ public class InstanceTemplateV1ToInstanceTemplateV4Converter {
     @Inject
     private InstanceTemplateParameterConverter instanceTemplateParameterConverter;
 
-    public InstanceTemplateV4Request convert(InstanceTemplateV1Request source, DetailedEnvironmentResponse environment) {
+    public InstanceTemplateV4Request convert(InstanceTemplateV1Request source, DetailedEnvironmentResponse environment, boolean gatewayType) {
         InstanceTemplateV4Request response = new InstanceTemplateV4Request();
         response.setRootVolume(getIfNotNull(source.getRootVolume(),
-                rootVolumeV1Request -> volumeConverter.convert(rootVolumeV1Request, environment.getCloudPlatform())));
+                rootVolumeV1Request -> volumeConverter.convert(rootVolumeV1Request, environment.getCloudPlatform(), gatewayType)));
         response.setAttachedVolumes(getIfNotNull(source.getAttachedVolumes(), volumeConverter::convertTo));
         response.setEphemeralVolume(getIfNotNull(source.getEphemeralVolume(), volumeConverter::convert));
         AwsInstanceTemplateV1Parameters awsParametersEffective = Objects.requireNonNullElse(source.getAws(),
@@ -46,10 +46,10 @@ public class InstanceTemplateV1ToInstanceTemplateV4Converter {
         return response;
     }
 
-    public InstanceTemplateV1Request convert(InstanceTemplateV4Request source, DetailedEnvironmentResponse environment) {
+    public InstanceTemplateV1Request convert(InstanceTemplateV4Request source, DetailedEnvironmentResponse environment, boolean gatewayType) {
         InstanceTemplateV1Request response = new InstanceTemplateV1Request();
         response.setRootVolume(getIfNotNull(source.getRootVolume(), rootVolumeV4Request ->
-                volumeConverter.convert(rootVolumeV4Request, environment.getCloudPlatform())));
+                volumeConverter.convert(rootVolumeV4Request, environment.getCloudPlatform(), gatewayType)));
         response.setAttachedVolumes(getIfNotNull(source.getAttachedVolumes(), volumeConverter::convertFrom));
         response.setEphemeralVolume(getIfNotNull(source.getEphemeralVolume(), volumeConverter::convert));
         response.setAws(getIfNotNull(source.getAws(), environment, instanceTemplateParameterConverter::convert));

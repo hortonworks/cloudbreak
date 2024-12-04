@@ -427,7 +427,7 @@ public class CloudResourceAdvisor {
                 if (hasMasterComponentType == containsMasterComponent) {
                     defaultRecommendation = getVmRecommendation(defaultRecommendation, entry.getKey(), recommendations);
                     VmType vmType = availableVmType.get();
-                    decorateWithRecommendation(vmType, defaultRecommendation, cloudPlatform, diskTypes);
+                    decorateWithRecommendation(vmType, defaultRecommendation, cloudPlatform, diskTypes, hasMasterComponentType);
                     result.put(entry.getKey(), vmType);
                 }
             }
@@ -449,7 +449,8 @@ public class CloudResourceAdvisor {
         return availableVmTypes.stream().filter(vm -> vm.value().equals(flavor)).findFirst();
     }
 
-    private void decorateWithRecommendation(VmType vmType, VmRecommendation recommendation, String cloudPlatform, DiskTypes diskTypes) {
+    private void decorateWithRecommendation(VmType vmType, VmRecommendation recommendation, String cloudPlatform, DiskTypes diskTypes,
+            boolean hasMasterComponentType) {
         Map<String, Object> vmMetaDataProps = vmType.getMetaData().getProperties();
         vmMetaDataProps.put("recommendedVolumeType", recommendation.getVolumeType());
         VolumeParameterType volumeParameterType = VolumeParameterType.valueOf(recommendation.getVolumeType());
@@ -470,7 +471,7 @@ public class CloudResourceAdvisor {
         }
         vmMetaDataProps.put("recommendedvolumeCount", recommendation.getVolumeCount());
         vmMetaDataProps.put("recommendedvolumeSizeGB", recommendation.getVolumeSizeGB());
-        vmMetaDataProps.put("recommendedRootVolumeSize", defaultRootVolumeSizeProvider.getForPlatform(cloudPlatform));
+        vmMetaDataProps.put("recommendedRootVolumeSize", defaultRootVolumeSizeProvider.getDefaultRootVolumeForPlatform(cloudPlatform, hasMasterComponentType));
     }
 
 }

@@ -344,13 +344,11 @@ public class StackCommonService {
         return flowIdentifier;
     }
 
-    public FlowIdentifier putVerticalScalingInWorkspace(NameOrCrn nameOrCrn, String accountId, StackVerticalScaleV4Request stackVerticalScaleV4Request) {
-        StackView stackView = stackDtoService.getStackViewByNameOrCrn(nameOrCrn, accountId);
-        Stack stack = stackService.getByIdWithLists(stackView.getId());
-        MDCBuilder.buildMdcContext(stackView);
-        stackVerticalScaleV4Request.setStackId(stackView.getId());
+    public FlowIdentifier putVerticalScalingInWorkspace(Stack stack, StackVerticalScaleV4Request stackVerticalScaleV4Request) {
+        MDCBuilder.buildMdcContext(stack);
+        stackVerticalScaleV4Request.setStackId(stack.getId());
         validateVerticalScalingRequest(stack, stackVerticalScaleV4Request);
-        return clusterCommonService.putVerticalScaling(stackView.getResourceCrn(), stackVerticalScaleV4Request);
+        return clusterCommonService.putVerticalScaling(stack.getResourceCrn(), stackVerticalScaleV4Request);
     }
 
     private void validateScalingRequest(StackView stack, Integer scalingAdjustment) {

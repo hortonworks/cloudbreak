@@ -112,7 +112,7 @@ public class TemplateDecoratorTest {
                 eq(CdpResourceType.DATAHUB), anyMap())).thenReturn(cloudVmTypes);
         when(locationService.location(REGION, AVAILABILITY_ZONE)).thenReturn(REGION);
 
-        Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT, CdpResourceType.DATAHUB);
+        Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT, CdpResourceType.DATAHUB, false);
 
         VolumeTemplate next = actual.getVolumeTemplates().iterator().next();
         assertEquals(maximumNumber, next.getVolumeCount().longValue());
@@ -140,7 +140,7 @@ public class TemplateDecoratorTest {
         Platform platform = Platform.platform(PLATFORM_1);
         when(cloudParameterService.getDiskTypes()).thenReturn(new PlatformDisks(emptyMap(), emptyMap(), Map.of(platform, map), emptyMap()));
 
-        underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT, CdpResourceType.DATAHUB);
+        underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT, CdpResourceType.DATAHUB, false);
 
         assertNull(volumeTemplate.getVolumeSize());
         assertNull(volumeTemplate.getVolumeCount());
@@ -181,7 +181,7 @@ public class TemplateDecoratorTest {
                 eq(CdpResourceType.DATAHUB), anyMap())).thenReturn(cloudVmTypes);
         when(locationService.location(REGION, AVAILABILITY_ZONE)).thenReturn(REGION);
 
-        Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT, CdpResourceType.DATAHUB);
+        Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT, CdpResourceType.DATAHUB, false);
 
         VolumeTemplate next = actual.getVolumeTemplates().iterator().next();
         assertNull(next.getVolumeCount());
@@ -195,7 +195,7 @@ public class TemplateDecoratorTest {
 
         template.setRootVolumeSize(70);
 
-        Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT, CdpResourceType.DATAHUB);
+        Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT, CdpResourceType.DATAHUB, false);
         assertEquals(70L, (long) actual.getRootVolumeSize());
         verify(cloudParameterService, never()).getVmTypesV2(any(), any(), any(), any(), any());
     }
@@ -204,9 +204,9 @@ public class TemplateDecoratorTest {
     public void testDecorateWithoutRootVolumeSizeInRequestAndDefaultIsSet() {
         Template template = initTemplate();
 
-        when(defaultRootVolumeSizeProvider.getForPlatform(any())).thenReturn(100);
+        when(defaultRootVolumeSizeProvider.getDefaultRootVolumeForPlatform(any(), eq(false))).thenReturn(100);
 
-        Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT, CdpResourceType.DATAHUB);
+        Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT, CdpResourceType.DATAHUB, false);
         assertEquals(100L, (long) actual.getRootVolumeSize());
         verify(cloudParameterService, never()).getVmTypesV2(any(), any(), any(), any(), any());
     }
@@ -219,9 +219,9 @@ public class TemplateDecoratorTest {
         volumeTemplate.setVolumeSize(1);
         volumeTemplate.setVolumeCount(1);
         template.setVolumeTemplates(Sets.newHashSet(volumeTemplate));
-        when(defaultRootVolumeSizeProvider.getForPlatform(any())).thenReturn(100);
+        when(defaultRootVolumeSizeProvider.getDefaultRootVolumeForPlatform(any(), eq(true))).thenReturn(100);
 
-        Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT, CdpResourceType.DATAHUB);
+        Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT, CdpResourceType.DATAHUB, true);
         assertEquals(1, actual.getVolumeTemplates().iterator().next().getVolumeSize());
         assertEquals(1, actual.getVolumeTemplates().iterator().next().getVolumeCount());
         verify(cloudParameterService, never()).getVmTypesV2(any(), any(), any(), any(), any());

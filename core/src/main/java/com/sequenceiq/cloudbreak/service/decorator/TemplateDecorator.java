@@ -44,8 +44,9 @@ public class TemplateDecorator {
     @Inject
     private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
 
-    public Template decorate(Credential credential, Template template, String region, String availabilityZone, String variant, CdpResourceType cdpResourceType) {
-        setRootVolumeSize(template);
+    public Template decorate(Credential credential, Template template, String region, String availabilityZone, String variant, CdpResourceType cdpResourceType,
+            boolean gatewayType) {
+        setRootVolumeSize(template, gatewayType);
         boolean needToFetchVolumeCountAndSize = template.getVolumeTemplates().stream()
                 .anyMatch(it -> it.getVolumeCount() == null || it.getVolumeSize() == null);
         if (needToFetchVolumeCountAndSize) {
@@ -96,10 +97,10 @@ public class TemplateDecorator {
         return vmType.getVolumeParameterbyVolumeParameterType(volumeParameterType);
     }
 
-    private void setRootVolumeSize(Template template) {
+    private void setRootVolumeSize(Template template, boolean gatewayType) {
         if (template.getRootVolumeSize() == null) {
             LOGGER.debug("No root volume size was set in the request. Getting default value for platform '{}'", template.getCloudPlatform());
-            template.setRootVolumeSize(defaultRootVolumeSizeProvider.getForPlatform(template.getCloudPlatform()));
+            template.setRootVolumeSize(defaultRootVolumeSizeProvider.getDefaultRootVolumeForPlatform(template.getCloudPlatform(), gatewayType));
         }
     }
 }

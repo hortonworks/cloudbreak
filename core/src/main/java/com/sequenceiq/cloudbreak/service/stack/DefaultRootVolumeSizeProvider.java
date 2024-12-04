@@ -32,33 +32,61 @@ public class DefaultRootVolumeSizeProvider {
 
     private static final Integer DEFAULT_ROOT_VOLUME_SIZE = 200;
 
+    private static final Integer GATEWAY_DEFAULT_ROOT_VOLUME_SIZE = 300;
+
     private static final String ROOT_VOLUME_SIZE_PROPERTY_PREFIX = "cb.platform.default.rootVolumeSize.";
 
+    private static final String GATEWAY_ROOT_VOLUME_SIZE_PROPERTY_PREFIX = "cb.platform.default.gatewayRootVolumeSize.";
+
     private final Map<String, Integer> platformVolumeSizeMap;
+
+    private final Map<String, Integer> platformGatewayVolumeSizeMap;
 
     public DefaultRootVolumeSizeProvider(CloudPlatformConnectors cloudPlatformConnectors, Environment environment) {
         PlatformVariants platformVariants = cloudPlatformConnectors.getPlatformVariants();
         platformVolumeSizeMap = Collections.unmodifiableMap(
                 platformVariants.getDefaultVariants().keySet()
                         .stream()
-                        .collect(Collectors.toMap(StringType::value, p -> initPlatform(environment, p)))
+                        .collect(Collectors.toMap(StringType::value, platform ->
+                                getDefaultVolumeSizeValue(environment, platform, ROOT_VOLUME_SIZE_PROPERTY_PREFIX, DEFAULT_ROOT_VOLUME_SIZE)))
+        );
+        platformGatewayVolumeSizeMap = Collections.unmodifiableMap(
+                platformVariants.getDefaultVariants().keySet()
+                        .stream()
+                        .collect(Collectors.toMap(StringType::value, platform ->
+                                getDefaultVolumeSizeValue(environment, platform, GATEWAY_ROOT_VOLUME_SIZE_PROPERTY_PREFIX, GATEWAY_DEFAULT_ROOT_VOLUME_SIZE)))
         );
     }
 
-    public int getForPlatform(String platform) {
-        if (!platformVolumeSizeMap.containsKey(platform.toUpperCase(Locale.ROOT))) {
-            LOGGER.debug("No default root volume size found for platform: {}. Falling back to default value of {} GB. "
-                            + "Set '{}' property if '{}' is a valid cloud provider.", platform, DEFAULT_ROOT_VOLUME_SIZE,
-                    ROOT_VOLUME_SIZE_PROPERTY_PREFIX + platform, platform);
+    public int getDefaultRootVolumeForPlatform(String platform, boolean gatewayType) {
+        String upperPlatform = platform.toUpperCase(Locale.ROOT);
+
+        if (gatewayType) {
+            if (!platformGatewayVolumeSizeMap.containsKey(upperPlatform)) {
+                logDefaultSizeUsage(platform, GATEWAY_DEFAULT_ROOT_VOLUME_SIZE, GATEWAY_ROOT_VOLUME_SIZE_PROPERTY_PREFIX);
+            }
+            return platformGatewayVolumeSizeMap.getOrDefault(upperPlatform, GATEWAY_DEFAULT_ROOT_VOLUME_SIZE);
+        } else {
+            if (!platformVolumeSizeMap.containsKey(upperPlatform)) {
+                logDefaultSizeUsage(platform, DEFAULT_ROOT_VOLUME_SIZE, ROOT_VOLUME_SIZE_PROPERTY_PREFIX);
+            }
+            return platformVolumeSizeMap.getOrDefault(upperPlatform, DEFAULT_ROOT_VOLUME_SIZE);
         }
-        return platformVolumeSizeMap.getOrDefault(platform.toUpperCase(Locale.ROOT), DEFAULT_ROOT_VOLUME_SIZE);
     }
 
-    private Integer initPlatform(Environment environment, Platform platform) {
-        String propetyKey = ROOT_VOLUME_SIZE_PROPERTY_PREFIX + platform.value();
-        if (!environment.containsProperty(propetyKey)) {
-            LOGGER.debug("{} property is not set. Defaulting its value to 50.", propetyKey);
+    private void logDefaultSizeUsage(String platform, int defaultSize, String propertyPrefix) {
+        LOGGER.debug("No default root volume size found for platform: {}. " +
+                        "Falling back to default value of {} GB. " +
+                        "Set '{}' property if '{}' is a valid cloud provider.",
+                platform, defaultSize, propertyPrefix + platform, platform);
+    }
+
+    private Integer getDefaultVolumeSizeValue(Environment environment, Platform platform,
+            String propertyPrefix, Integer defaultSize) {
+        String propertyKey = propertyPrefix + platform.value();
+        if (!environment.containsProperty(propertyKey)) {
+            LOGGER.debug("{} property is not set. Defaulting its value to {}", propertyKey, defaultSize);
         }
-        return Integer.valueOf(environment.getProperty(propetyKey, DEFAULT_ROOT_VOLUME_SIZE.toString()));
+        return Integer.valueOf(environment.getProperty(propertyKey, defaultSize.toString()));
     }
 }

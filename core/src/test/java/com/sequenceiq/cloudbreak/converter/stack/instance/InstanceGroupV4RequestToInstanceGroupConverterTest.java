@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.stack.instance;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 
 import java.util.HashMap;
@@ -58,7 +59,7 @@ public class InstanceGroupV4RequestToInstanceGroupConverterTest extends Abstract
         InstanceGroupV4Request request = getRequest("instance-group.json");
         // GIVEN
         given(providerParameterCalculator.get(request)).willReturn(getMappable());
-        given(instanceTemplateV4RequestToTemplateConverter.convert(any(InstanceTemplateV4Request.class))).willReturn(new Template());
+        given(instanceTemplateV4RequestToTemplateConverter.convert(any(InstanceTemplateV4Request.class), eq(true))).willReturn(new Template());
         given(securityGroupV4RequestToSecurityGroupConverter.convert(any(SecurityGroupV4Request.class))).willReturn(new SecurityGroup());
         given(instanceGroupNetworkV4RequestToInstanceGroupNetworkConverter.convert(any(InstanceGroupNetworkV4Request.class)))
                 .willReturn(new InstanceGroupNetwork());

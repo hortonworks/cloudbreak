@@ -81,7 +81,7 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
         when(providerParameterCalculator.get(source)).thenReturn(mappable);
         when(mappable.asMap()).thenReturn(parameters);
 
-        Template result = underTest.convert(source);
+        Template result = underTest.convert(source, true);
 
         assertThat(result.getStatus()).isEqualTo(ResourceStatus.USER_MANAGED);
         assertThat(result.getCloudPlatform()).isEqualTo(source.getCloudPlatform().name());
@@ -109,7 +109,7 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
         when(providerParameterCalculator.get(source)).thenReturn(mappable);
         when(mappable.asMap()).thenReturn(attributeMap);
 
-        Template result = underTest.convert(source);
+        Template result = underTest.convert(source, true);
 
         assertThat(result.getStatus()).isEqualTo(ResourceStatus.USER_MANAGED);
         assertThat(result.getCloudPlatform()).isEqualTo(source.getCloudPlatform().name());
@@ -134,12 +134,12 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
                 PlatformParametersConsts.CUSTOM_INSTANCETYPE_CPUS, 1);
 
         int rootVolumeSize = 60;
-        when(defaultRootVolumeSizeProvider.getForPlatform(CloudPlatform.GCP.name())).thenReturn(rootVolumeSize);
+        when(defaultRootVolumeSizeProvider.getDefaultRootVolumeForPlatform(CloudPlatform.GCP.name(), true)).thenReturn(rootVolumeSize);
         when(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE)).thenReturn("name");
         when(providerParameterCalculator.get(source)).thenReturn(mappable);
         when(mappable.asMap()).thenReturn(attributeMap);
 
-        Template result = underTest.convert(source);
+        Template result = underTest.convert(source, true);
 
         assertThat(result.getStatus()).isEqualTo(ResourceStatus.USER_MANAGED);
         assertThat(result.getCloudPlatform()).isEqualTo(source.getCloudPlatform().name());
@@ -156,7 +156,7 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
     public void convertWithGcpEncryption() {
         InstanceTemplateV4Request source = getSampleGcpRequest();
 
-        Template result = underTest.convert(source);
+        Template result = underTest.convert(source, true);
 
         assertGcpEncryptionConvertResult(source, result);
         assertThat(new Json(result.getSecretAttributes()).getMap().get(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID)).isEqualTo("myKey");
@@ -167,7 +167,7 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
         InstanceTemplateV4Request source = getSampleGcpRequest();
         source.setTemporaryStorage(null);
 
-        Template result = underTest.convert(source);
+        Template result = underTest.convert(source, true);
         assertThat(result.getTemporaryStorage()).isEqualTo(TemporaryStorage.ATTACHED_VOLUMES);
     }
 
@@ -176,7 +176,7 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
         InstanceTemplateV4Request source = getSampleGcpRequest();
         source.setTemporaryStorage(TemporaryStorage.EPHEMERAL_VOLUMES);
 
-        Template result = underTest.convert(source);
+        Template result = underTest.convert(source, true);
         assertThat(result.getTemporaryStorage()).isEqualTo(TemporaryStorage.EPHEMERAL_VOLUMES);
     }
 
@@ -185,7 +185,7 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
         InstanceTemplateV4Request source = getSampleGcpRequest();
         source.getGcp().getEncryption().setKey(null);
 
-        Template result = underTest.convert(source);
+        Template result = underTest.convert(source, true);
 
         assertGcpEncryptionConvertResult(source, result);
         assertThat(new Json(result.getSecretAttributes()).getMap().get(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID)).isNull();
@@ -229,7 +229,7 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
     public void convertWithAwsEncryption() {
         InstanceTemplateV4Request source = getSampleAwsRequest();
 
-        Template result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(source));
+        Template result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(source, true));
 
         assertAwsEncryptionConvertResult(source, result);
         assertThat(new Json(result.getSecretAttributes()).getMap().get(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID)).isEqualTo("myKey");
@@ -240,7 +240,7 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
         InstanceTemplateV4Request source = getSampleAwsRequest();
         source.getAws().getEncryption().setKey(null);
 
-        Template result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(source));
+        Template result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(source, true));
 
         assertAwsEncryptionConvertResult(source, result);
         assertThat(new Json(result.getSecretAttributes()).getMap().get(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID)).isNull();

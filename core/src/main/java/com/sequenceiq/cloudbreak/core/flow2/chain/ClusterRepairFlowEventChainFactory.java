@@ -233,7 +233,8 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
                     .filter(instanceGroupDto -> group.equals(instanceGroupDto.getInstanceGroup().getGroupName()))
                     .findFirst().ifPresent(instanceGroupDto -> {
                         Template groupTemplate = instanceGroupDto.getInstanceGroup().getTemplate();
-                        int defaultRootVolumeSize = rootVolumeSizeProvider.getForPlatform(stackDto.getCloudPlatform());
+                        int defaultRootVolumeSize = rootVolumeSizeProvider.getDefaultRootVolumeForPlatform(stackDto.getCloudPlatform(),
+                                InstanceGroupType.isGateway(instanceGroupDto.getInstanceGroup().getInstanceGroupType()));
                         if (groupTemplate.getRootVolumeSize() < defaultRootVolumeSize) {
                             StackVerticalScaleV4Request stackVerticalScaleV4Request =
                                     createStackVerticalScaleV4Request(event, group, defaultRootVolumeSize, groupTemplate.getInstanceType());

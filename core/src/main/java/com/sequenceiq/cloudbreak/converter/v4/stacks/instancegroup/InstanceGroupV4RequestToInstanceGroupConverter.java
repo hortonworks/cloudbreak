@@ -42,7 +42,7 @@ public class InstanceGroupV4RequestToInstanceGroupConverter {
     public InstanceGroup convert(InstanceGroupV4Request source, String variant) {
         InstanceGroup instanceGroup = new InstanceGroup();
         source.getTemplate().setCloudPlatform(source.getCloudPlatform());
-        instanceGroup.setTemplate(instanceTemplateV4RequestToTemplateConverter.convert(source.getTemplate()));
+        instanceGroup.setTemplate(instanceTemplateV4RequestToTemplateConverter.convert(source.getTemplate(), InstanceGroupType.isGateway(source.getType())));
         instanceGroup.setSecurityGroup(getIfNotNull(source.getSecurityGroup(), securityGroupV4RequestToSecurityGroupConverter
                 ::convert));
         instanceGroup.setGroupName(source.getName().toLowerCase(Locale.ROOT));

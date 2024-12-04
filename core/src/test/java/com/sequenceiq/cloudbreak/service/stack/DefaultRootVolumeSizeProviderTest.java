@@ -41,24 +41,48 @@ public class DefaultRootVolumeSizeProviderTest {
     }
 
     @Test
-    public void testNoPropertySetForKnownPlatform() {
+    public void testNoPropertySetForKnownPlatformGW() {
         underTest = new DefaultRootVolumeSizeProvider(mockConnectors, environment);
-        int rootVolumeSize = underTest.getForPlatform("AWS");
+        int rootVolumeSize = underTest.getDefaultRootVolumeForPlatform("AWS", true);
+        assertEquals(300L, rootVolumeSize);
+    }
+
+    @Test
+    public void testNoPropertySetForKnownPlatformNotGW() {
+        underTest = new DefaultRootVolumeSizeProvider(mockConnectors, environment);
+        int rootVolumeSize = underTest.getDefaultRootVolumeForPlatform("AWS", false);
         assertEquals(200L, rootVolumeSize);
     }
 
     @Test
-    public void testPropertySetForKnownPlatform() {
+    public void testPropertySetForKnownPlatformGW() {
         System.setProperty("cb.platform.default.rootVolumeSize.GCP", "100");
+        System.setProperty("cb.platform.default.gatewayRootVolumeSize.GCP", "150");
         underTest = new DefaultRootVolumeSizeProvider(mockConnectors, environment);
-        int rootVolumeSize = underTest.getForPlatform("gcp");
+        int rootVolumeSize = underTest.getDefaultRootVolumeForPlatform("gcp", true);
+        assertEquals(150L, rootVolumeSize);
+    }
+
+    @Test
+    public void testPropertySetForKnownPlatformNotGW() {
+        System.setProperty("cb.platform.default.rootVolumeSize.GCP", "100");
+        System.setProperty("cb.platform.default.gatewayRootVolumeSize.GCP", "150");
+        underTest = new DefaultRootVolumeSizeProvider(mockConnectors, environment);
+        int rootVolumeSize = underTest.getDefaultRootVolumeForPlatform("gcp", false);
         assertEquals(100L, rootVolumeSize);
     }
 
     @Test
-    public void testWithUnknownPlatform() {
+    public void testWithUnknownPlatformGW() {
         underTest = new DefaultRootVolumeSizeProvider(mockConnectors, environment);
-        int rootVolumeSize = underTest.getForPlatform("UNKNOWN_PLATFORM");
+        int rootVolumeSize = underTest.getDefaultRootVolumeForPlatform("UNKNOWN_PLATFORM", true);
+        assertEquals(300L, rootVolumeSize);
+    }
+
+    @Test
+    public void testWithUnknownPlatformNotGW() {
+        underTest = new DefaultRootVolumeSizeProvider(mockConnectors, environment);
+        int rootVolumeSize = underTest.getDefaultRootVolumeForPlatform("UNKNOWN_PLATFORM", false);
         assertEquals(200L, rootVolumeSize);
     }
 }

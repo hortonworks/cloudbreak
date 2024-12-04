@@ -25,15 +25,15 @@ public class VolumeConverter {
     @Inject
     private DefaultRootVolumeSizeProvider rootVolumeSizeProvider;
 
-    public RootVolumeV4Request convert(RootVolumeV1Request source, String cloudPlatform) {
-        overrideSizeIfNecessary(source, cloudPlatform);
+    public RootVolumeV4Request convert(RootVolumeV1Request source, String cloudPlatform, boolean gatewayType) {
+        overrideSizeIfNecessary(source, cloudPlatform, gatewayType);
         RootVolumeV4Request response = new RootVolumeV4Request();
         response.setSize(source.getSize());
         return response;
     }
 
-    public RootVolumeV1Request convert(RootVolumeV4Request source, String cloudPlatform) {
-        overrideSizeIfNecessary(source, cloudPlatform);
+    public RootVolumeV1Request convert(RootVolumeV4Request source, String cloudPlatform, boolean gatewayType) {
+        overrideSizeIfNecessary(source, cloudPlatform, gatewayType);
         RootVolumeV1Request response = new RootVolumeV1Request();
         response.setSize(source.getSize());
         return response;
@@ -63,8 +63,8 @@ public class VolumeConverter {
         return attachedVolumes.stream().map(this::convert).collect(toSet());
     }
 
-    private void overrideSizeIfNecessary(RootVolumeRequest source, String cloudPlatform) {
-        int defaultRootVolumeSize = rootVolumeSizeProvider.getForPlatform(cloudPlatform);
+    private void overrideSizeIfNecessary(RootVolumeRequest source, String cloudPlatform, boolean gatewayType) {
+        int defaultRootVolumeSize = rootVolumeSizeProvider.getDefaultRootVolumeForPlatform(cloudPlatform, gatewayType);
         if (source.getSize() == null || source.getSize() < defaultRootVolumeSize) {
             LOGGER.warn("Root volume size {} is smaller than the minimum {} for platform {}, so it is increased",
                     source.getSize(), defaultRootVolumeSize, cloudPlatform);

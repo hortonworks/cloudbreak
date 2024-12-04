@@ -21,6 +21,7 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.SecurityRuleUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
@@ -28,6 +29,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.util.CidrUtil;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.InstanceGroupNetworkV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.aws.InstanceGroupAwsNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.azure.InstanceGroupAzureNetworkV1Parameters;
@@ -38,6 +40,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAcce
 
 @Component
 public class InstanceGroupV1ToInstanceGroupV4Converter {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceGroupV1ToInstanceGroupV4Converter.class);
 
     @Inject
@@ -65,7 +68,7 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
         response.setType(source.getType());
         response.setCloudPlatform(source.getCloudPlatform());
         response.setName(source.getName());
-        response.setTemplate(getIfNotNull(source.getTemplate(), environment, instanceTemplateConverter::convert));
+        response.setTemplate(getTemplateV4(source.getTemplate(), environment, InstanceGroupType.isGateway(source.getType())));
         response.setRecoveryMode(source.getRecoveryMode());
         response.setScalabilityOption(source.getScalabilityOption());
         response.setSecurityGroup(createSecurityGroupFromEnvironment(source.getType(), environment));
@@ -84,7 +87,7 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
         response.setNodeCount(source.getNodeCount());
         response.setType(source.getType());
         response.setName(source.getName());
-        response.setTemplate(getIfNotNull(source.getTemplate(), environment, instanceTemplateConverter::convert));
+        response.setTemplate(getTemplateV1(source.getTemplate(), environment, InstanceGroupType.isGateway(source.getType())));
         response.setRecoveryMode(source.getRecoveryMode());
         response.setRecipeNames(source.getRecipeNames());
         response.setScalabilityOption(source.getScalabilityOption());
@@ -93,6 +96,22 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
         response.setGcp(getIfNotNull(source.getGcp(), instanceGroupParameterConverter::convert));
         response.setNetwork(getInstanceGroupNetworkV1Request(stackNetwork, environment));
         return response;
+    }
+
+    private InstanceTemplateV4Request getTemplateV4(InstanceTemplateV1Request request, DetailedEnvironmentResponse environment, boolean gatewayType) {
+        if (request != null && environment != null) {
+            return instanceTemplateConverter.convert(request, environment, gatewayType);
+        } else {
+            return null;
+        }
+    }
+
+    private InstanceTemplateV1Request getTemplateV1(InstanceTemplateV4Request request, DetailedEnvironmentResponse environment, boolean gatewayType) {
+        if (request != null && environment != null) {
+            return instanceTemplateConverter.convert(request, environment, gatewayType);
+        } else {
+            return null;
+        }
     }
 
     private SecurityGroupV4Request createSecurityGroupFromEnvironment(InstanceGroupType type, DetailedEnvironmentResponse environment) {

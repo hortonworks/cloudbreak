@@ -17,6 +17,7 @@ import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NA
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -82,11 +83,13 @@ import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterDiagnosticsService;
 import com.sequenceiq.cloudbreak.service.diagnostics.DiagnosticsService;
 import com.sequenceiq.cloudbreak.service.operation.OperationService;
 import com.sequenceiq.cloudbreak.service.rotaterdscert.StackRotateRdsCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.StackInstanceMetadataUpdateService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -95,6 +98,7 @@ import com.sequenceiq.cloudbreak.telemetry.converter.VmLogsToVmLogsResponseConve
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.common.api.diagnostics.ListDiagnosticsCollectionResponse;
 import com.sequenceiq.common.api.telemetry.response.VmLogsResponse;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXGenerateImageCatalogV1Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXInstanceMetadataUpdateV1Request;
@@ -191,6 +195,9 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @Inject
     private StackRotateRdsCertificateService rotateRdsCertificateService;
 
+    @Inject
+    private StackService stackService;
+
     @Override
     @FilterListBasedOnPermissions
     public StackViewV4Responses list(@FilterParam(DataHubFiltering.ENV_NAME) String environmentName,
@@ -279,6 +286,19 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
                 .map(NameOrCrn::ofCrn)
                 .collect(Collectors.toSet());
         nameOrCrns.forEach(accessDto -> stackOperations.delete(accessDto, ThreadBasedUserCrnProvider.getAccountId(), forced));
+    }
+
+    private FlowIdentifier verticalScaling(NameOrCrn nameOrCrn, DistroXVerticalScaleV1Request updateRequest) {
+        Stack stack = stackService.getByNameOrCrnAndWorkspaceIdWithLists(nameOrCrn, getWorkspaceIdForCurrentUser());
+        Optional<InstanceGroup> instanceGroupOptional = stack.getInstanceGroups().stream()
+                .filter(instanceGroup -> updateRequest.getGroup().equals(instanceGroup.getGroupName())).findFirst();
+        boolean gateway = false;
+        if (instanceGroupOptional.isPresent()) {
+            gateway = InstanceGroupType.isGateway(instanceGroupOptional.get().getInstanceGroupType());
+        }
+        StackVerticalScaleV4Request stackVerticalScaleV4Request = verticalScaleV4RequestConverter.convert(updateRequest, gateway);
+        stackVerticalScaleV4Request.setStackId(stack.getId());
+        return stackOperations.putVerticalScaling(stack, stackVerticalScaleV4Request);
     }
 
     @Override
@@ -406,18 +426,14 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DATAHUB_VERTICAL_SCALING)
     public FlowIdentifier verticalScalingByName(@ResourceName String name, @Valid DistroXVerticalScaleV1Request updateRequest) {
-        StackVerticalScaleV4Request stackVerticalScaleV4Request = verticalScaleV4RequestConverter.convert(updateRequest);
-        stackVerticalScaleV4Request.setStackId(stackOperations.getResourceIdByResourceName(name));
-        return stackOperations.putVerticalScaling(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId(), stackVerticalScaleV4Request);
+        return verticalScaling(NameOrCrn.ofName(name), updateRequest);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DATAHUB_VERTICAL_SCALING)
     public FlowIdentifier verticalScalingByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @TenantAwareParam @ResourceCrn String crn,
             @Valid DistroXVerticalScaleV1Request updateRequest) {
-        StackVerticalScaleV4Request stackVerticalScaleV4Request = verticalScaleV4RequestConverter.convert(updateRequest);
-        stackVerticalScaleV4Request.setStackId(stackOperations.getResourceIdByResourceCrn(crn));
-        return stackOperations.putVerticalScaling(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(), stackVerticalScaleV4Request);
+        return verticalScaling(NameOrCrn.ofCrn(crn), updateRequest);
     }
 
     @Override

@@ -19,6 +19,8 @@ public class VolumeConverterTest {
 
     public static final int DEFAULT_ROOT_DISK_SIZE = 200;
 
+    public static final int GATEWAY_DEFAULT_ROOT_VOLUME_SIZE = 270;
+
     @Mock
     private DefaultRootVolumeSizeProvider rootVolumeSizeProvider;
 
@@ -40,30 +42,30 @@ public class VolumeConverterTest {
 
     @Test
     public void testRootVolumeSizeConvert() {
-        when(rootVolumeSizeProvider.getForPlatform("AWS")).thenReturn(DEFAULT_ROOT_DISK_SIZE);
+        when(rootVolumeSizeProvider.getDefaultRootVolumeForPlatform("AWS", false)).thenReturn(DEFAULT_ROOT_DISK_SIZE);
         RootVolumeV1Request smallRootVolumeSizeRequest = new RootVolumeV1Request();
         smallRootVolumeSizeRequest.setSize(50);
-        RootVolumeV4Request convertedRootVolumeV4Request = underTest.convert(smallRootVolumeSizeRequest, "AWS");
+        RootVolumeV4Request convertedRootVolumeV4Request = underTest.convert(smallRootVolumeSizeRequest, "AWS", false);
         assertEquals(DEFAULT_ROOT_DISK_SIZE, convertedRootVolumeV4Request.getSize());
 
         RootVolumeV4Request smallRootVolumeV4Request = new RootVolumeV4Request();
         smallRootVolumeV4Request.setSize(50);
-        RootVolumeV1Request convertedRootVolumeV1Request = underTest.convert(smallRootVolumeV4Request, "AWS");
+        RootVolumeV1Request convertedRootVolumeV1Request = underTest.convert(smallRootVolumeV4Request, "AWS", false);
         assertEquals(DEFAULT_ROOT_DISK_SIZE, convertedRootVolumeV1Request.getSize());
 
         RootVolumeV4Request nullRootVolumeV4Request = new RootVolumeV4Request();
-        RootVolumeV1Request convertedNullRootVolumeV1Request = underTest.convert(nullRootVolumeV4Request, "AWS");
+        RootVolumeV1Request convertedNullRootVolumeV1Request = underTest.convert(nullRootVolumeV4Request, "AWS", false);
         assertEquals(DEFAULT_ROOT_DISK_SIZE, convertedNullRootVolumeV1Request.getSize());
 
-        when(rootVolumeSizeProvider.getForPlatform("AWS")).thenReturn(DEFAULT_ROOT_DISK_SIZE);
+        when(rootVolumeSizeProvider.getDefaultRootVolumeForPlatform("AWS", true)).thenReturn(GATEWAY_DEFAULT_ROOT_VOLUME_SIZE);
         RootVolumeV1Request goodRootVolumeV1Request = new RootVolumeV1Request();
         goodRootVolumeV1Request.setSize(300);
-        convertedRootVolumeV4Request = underTest.convert(goodRootVolumeV1Request, "AWS");
+        convertedRootVolumeV4Request = underTest.convert(goodRootVolumeV1Request, "AWS", true);
         assertEquals(300, convertedRootVolumeV4Request.getSize());
 
         RootVolumeV4Request goodRootVolumeV4Request = new RootVolumeV4Request();
         goodRootVolumeV4Request.setSize(300);
-        convertedRootVolumeV1Request = underTest.convert(goodRootVolumeV4Request, "AWS");
+        convertedRootVolumeV1Request = underTest.convert(goodRootVolumeV4Request, "AWS", true);
         assertEquals(300, convertedRootVolumeV1Request.getSize());
     }
 

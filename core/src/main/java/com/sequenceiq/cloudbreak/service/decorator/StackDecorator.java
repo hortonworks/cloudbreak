@@ -326,7 +326,7 @@ public class StackDecorator {
 
                     CdpResourceType cdpResourceType = cdpResourceTypeProvider.fromStackType(request.getType());
                     template = templateDecorator.decorate(credential, template, region, availabilityZone, subject.getPlatformVariant(),
-                            cdpResourceType);
+                            cdpResourceType, InstanceGroupType.isGateway(instanceGroup.getInstanceGroupType()));
                     template.setWorkspace(subject.getWorkspace());
                     setupDatabaseAttachedVolume(subject, instanceGroup, template);
                     template = templateService.create(user, template);

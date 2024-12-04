@@ -563,7 +563,7 @@ class ClusterRepairFlowEventChainFactoryTest {
     @Test
     void testRootDiskMigration() {
         ReflectionTestUtils.setField(underTest, "rootDiskRepairMigrationEnabled", true);
-        when(rootVolumeSizeProvider.getForPlatform(any())).thenReturn(200);
+        when(rootVolumeSizeProvider.getDefaultRootVolumeForPlatform(any(), eq(false))).thenReturn(200);
         Stack stack = getStack();
         setupHostGroup(InstanceGroupType.CORE);
         InstanceGroupDto instanceGroupDto = mock(InstanceGroupDto.class);

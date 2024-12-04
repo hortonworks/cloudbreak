@@ -121,11 +121,6 @@ altus:
 cb:
   enabledplatforms: AWS,AZURE,YARN,GCP,MOCK
   enabledgovplatforms: AWS
-  platform.default.rootVolumeSize:
-    AWS: 200
-    AZURE: 200
-    GCP: 200
-    MOCK: 200
   enabled.linux.types: redhat6,redhat7,redhat8,centos6,centos7
   default.gateway.cidr: 0.0.0.0/0
   ccmRevertJob:
@@ -621,6 +616,16 @@ cb:
     variants: AWS:AWS
     govVariants: AWS:AWS_NATIVE_GOV
     regions: AWS:eu-west-1,AZURE:North Europe,GCP:europe-west1,YARN:default,MOCK:USA
+    rootVolumeSize:
+      AWS: 200
+      AZURE: 200
+      GCP: 200
+      MOCK: 200
+    gatewayRootVolumeSize:
+      AWS: 300
+      AZURE: 300
+      GCP: 300
+      MOCK: 300
 
   gcp:
     hostkey.verify: false

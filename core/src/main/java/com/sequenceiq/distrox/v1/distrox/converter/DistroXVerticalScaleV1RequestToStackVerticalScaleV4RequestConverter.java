@@ -14,11 +14,11 @@ public class DistroXVerticalScaleV1RequestToStackVerticalScaleV4RequestConverter
     @Inject
     private InstanceTemplateV1ToInstanceTemplateV4Converter instanceTemplateV1ToInstanceTemplateV4Converter;
 
-    public StackVerticalScaleV4Request convert(DistroXVerticalScaleV1Request source) {
+    public StackVerticalScaleV4Request convert(DistroXVerticalScaleV1Request source, boolean gatewayType) {
         StackVerticalScaleV4Request stackVerticalScaleV4Request = new StackVerticalScaleV4Request();
 
         InstanceTemplateV4Request instanceTemplateV4Request = instanceTemplateV1ToInstanceTemplateV4Converter
-                .convert(source.getTemplate(), null);
+                .convert(source.getTemplate(), null, gatewayType);
 
         stackVerticalScaleV4Request.setTemplate(instanceTemplateV4Request);
         stackVerticalScaleV4Request.setGroup(source.getGroup());

@@ -83,6 +83,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.SubnetIdWithResourceNameAndCrn;
 import com.sequenceiq.cloudbreak.service.rotaterdscert.StackRotateRdsCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.StackInstanceMetadataUpdateService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackRotationService;
 import com.sequenceiq.cloudbreak.service.upgrade.ccm.StackCcmUpgradeService;
@@ -128,6 +129,9 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Inject
     private StackRotateRdsCertificateService rotateRdsCertificateService;
+
+    @Inject
+    private StackService stackService;
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
@@ -660,7 +664,8 @@ public class StackV4Controller extends NotificationController implements StackV4
             String name,
             @InitiatorUserCrn String initiatorUserCrn,
             @Valid StackVerticalScaleV4Request updateRequest) {
-        return stackOperations.putVerticalScaling(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId(), updateRequest);
+        Stack stack = stackService.getByNameOrCrnAndWorkspaceIdWithLists(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());
+        return stackOperations.putVerticalScaling(stack, updateRequest);
     }
 
     @Override

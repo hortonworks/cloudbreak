@@ -312,8 +312,8 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         return stackCommonService.putScalingInWorkspace(nameOrCrn, accountId, updateRequest);
     }
 
-    public FlowIdentifier putVerticalScaling(@NotNull NameOrCrn nameOrCrn, String accountId, @Valid StackVerticalScaleV4Request updateRequest) {
-        return stackCommonService.putVerticalScalingInWorkspace(nameOrCrn, accountId, updateRequest);
+    public FlowIdentifier putVerticalScaling(@NotNull Stack stack, @Valid StackVerticalScaleV4Request updateRequest) {
+        return stackCommonService.putVerticalScalingInWorkspace(stack, updateRequest);
     }
 
     public FlowIdentifier repairCluster(@NotNull NameOrCrn nameOrCrn, Long workspaceId, @Valid ClusterRepairV4Request clusterRepairRequest) {

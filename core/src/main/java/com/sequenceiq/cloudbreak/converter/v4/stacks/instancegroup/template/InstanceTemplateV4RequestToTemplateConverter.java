@@ -41,13 +41,13 @@ public class InstanceTemplateV4RequestToTemplateConverter {
     @Inject
     private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
 
-    public Template convert(InstanceTemplateV4Request source) {
+    public Template convert(InstanceTemplateV4Request source, boolean gatewayType) {
         Template template = new Template();
         template.setName(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE));
         template.setStatus(ResourceStatus.USER_MANAGED);
         template.setCloudPlatform(source.getCloudPlatform().name());
         template.setVolumeTemplates(Sets.newHashSet());
-        setVolumesProperty(source.getAttachedVolumes(), Optional.ofNullable(source.getRootVolume()), template);
+        setVolumesProperty(source.getAttachedVolumes(), Optional.ofNullable(source.getRootVolume()), template, gatewayType);
         template.setInstanceType(source.getInstanceType() == null ? "" : source.getInstanceType());
         Map<String, Object> parameters = providerParameterCalculator.get(source).asMap();
         Optional.ofNullable(parameters).map(toJson()).ifPresent(template::setAttributes);
@@ -70,7 +70,7 @@ public class InstanceTemplateV4RequestToTemplateConverter {
         };
     }
 
-    private void setVolumesProperty(Set<VolumeV4Request> attachedVolumes, Optional<RootVolumeV4Request> rootVolume, Template template) {
+    private void setVolumesProperty(Set<VolumeV4Request> attachedVolumes, Optional<RootVolumeV4Request> rootVolume, Template template, boolean gatewayType) {
         if (!attachedVolumes.isEmpty()) {
             attachedVolumes.stream().forEach(v -> {
                 String volumeType = v.getType();
@@ -94,6 +94,6 @@ public class InstanceTemplateV4RequestToTemplateConverter {
         }
         template.setRootVolumeSize(rootVolume.map(RootVolumeV4Request::getSize).isPresent()
                 ? rootVolume.get().getSize()
-                : defaultRootVolumeSizeProvider.getForPlatform(template.getCloudPlatform()));
+                : defaultRootVolumeSizeProvider.getDefaultRootVolumeForPlatform(template.getCloudPlatform(), gatewayType));
     }
 }

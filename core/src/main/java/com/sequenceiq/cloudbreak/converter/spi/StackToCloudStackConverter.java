@@ -186,8 +186,10 @@ public class StackToCloudStackConverter {
         if (diskUpdateRequest != null && diskUpdateRequest.getDiskType().equals(DiskType.ROOT_DISK)) {
             for (Group group : instanceGroups) {
                 if (group.getName().equals(diskUpdateRequest.getGroup())) {
-                    int rootVolumeSize = diskUpdateRequest.getSize() > defaultRootVolumeSizeProvider.getForPlatform(stack.getCloudPlatform()) ?
-                            diskUpdateRequest.getSize() : group.getRootVolumeSize();
+                    int defaultRootVolumeForPlatform = defaultRootVolumeSizeProvider.getDefaultRootVolumeForPlatform(stack.getCloudPlatform(),
+                            InstanceGroupType.isGateway(group.getType()));
+                    int rootVolumeSize = diskUpdateRequest.getSize() >
+                            defaultRootVolumeForPlatform ? diskUpdateRequest.getSize() : group.getRootVolumeSize();
                     group.setRootVolumeSize(rootVolumeSize);
                     String volumeType = StringUtils.defaultIfEmpty(diskUpdateRequest.getVolumeType(), null);
                     group.setRootVolumeType(volumeType);
@@ -494,7 +496,8 @@ public class StackToCloudStackConverter {
         Template template = instanceGroup.getTemplate();
         Integer rootVolumeSize = template.getRootVolumeSize();
         if (Objects.isNull(rootVolumeSize)) {
-            rootVolumeSize = defaultRootVolumeSizeProvider.getForPlatform(template.getCloudPlatform());
+            rootVolumeSize = defaultRootVolumeSizeProvider.getDefaultRootVolumeForPlatform(template.getCloudPlatform(),
+                    InstanceGroupType.isGateway(instanceGroup.getInstanceGroupType()));
         }
         return rootVolumeSize;
     }
