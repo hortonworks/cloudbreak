@@ -14,6 +14,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -24,6 +25,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import jakarta.ws.rs.BadRequestException;
@@ -75,6 +77,7 @@ import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.model.AzureDatabaseType;
+import com.sequenceiq.common.model.DatabaseType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
 import com.sequenceiq.environment.api.v1.platformresource.EnvironmentPlatformResourceEndpoint;
@@ -624,7 +627,8 @@ class ExternalDatabaseServiceTest {
 
     @ParameterizedTest
     @MethodSource("dbUpgradeMigrationScenarios")
-    void testIsMigrationNeededDuringUpgrade(boolean externalDb, String platform, String current, String target, boolean migrationRequired) {
+    void testIsMigrationNeededDuringUpgrade(boolean externalDb, String platform, String current, String target, DatabaseType databaseType,
+            boolean migrationRequired) {
         StackView stack = mock(StackView.class);
         ClusterView clusterView = mock(ClusterView.class);
         when(clusterView.hasExternalDatabase()).thenReturn(externalDb);
@@ -634,6 +638,8 @@ class ExternalDatabaseServiceTest {
         UpgradeRdsContext upgradeRdsContext = new UpgradeRdsContext(null, stack, clusterView, database, majorVersion);
         when(stack.getCloudPlatform()).thenReturn(platform);
         when(majorVersion.getMajorVersion()).thenReturn(target);
+        when(parameterDecoratorMap.get(CloudPlatform.valueOf(platform))).thenReturn(dbServerParameterDecorator);
+        doReturn(Optional.ofNullable(databaseType)).when(dbServerParameterDecorator).getDatabaseType(any());
         boolean actualMigrationNeeded = underTest.isMigrationNeededDuringUpgrade(upgradeRdsContext);
         assertEquals(actualMigrationNeeded, migrationRequired);
     }
@@ -641,7 +647,7 @@ class ExternalDatabaseServiceTest {
     @ParameterizedTest
     @MethodSource("dbUpgradeMigrationScenarios")
     void testMigrateDatabaseSettingsAzureBothConditionsMetThenMigration(boolean externalDb, String platform, String current, String target,
-            boolean migrationRequired, boolean datalake) {
+            DatabaseType databaseType, boolean migrationRequired, boolean datalake) {
         StackDto stack = mock(StackDto.class);
         TargetMajorVersion majorVersion = mock(TargetMajorVersion.class);
 
@@ -651,6 +657,11 @@ class ExternalDatabaseServiceTest {
         ClusterView clusterView = mock(ClusterView.class);
         when(clusterView.hasExternalDatabase()).thenReturn(externalDb);
         when(stack.getCluster()).thenReturn(clusterView);
+        when(stack.getDatabase()).thenReturn(new Database());
+        when(parameterDecoratorMap.get(CloudPlatform.valueOf(platform))).thenReturn(dbServerParameterDecorator);
+        doReturn(Optional.ofNullable(databaseType)).when(dbServerParameterDecorator).getDatabaseType(any());
+        lenient().when(dbConfigs.get(new DatabaseStackConfigKey(CloudPlatform.valueOf(platform), databaseType)))
+                .thenReturn(new DatabaseStackConfig(INSTANCE_TYPE, VENDOR, VOLUME_SIZE));
         if (migrationRequired) {
             lenient().when(stack.getExternalDatabaseCreationType()).thenReturn(DatabaseAvailabilityType.HA);
             Stack realStack = new Stack();
@@ -684,17 +695,18 @@ class ExternalDatabaseServiceTest {
 
     private static Object[][] dbUpgradeMigrationScenarios() {
         return new Object[][]{
-                // ExternalDB, Platform, currentVersion, targetVersion, migrationRequired, datalake
-                {true, "AZURE", "10", "11", false, true},
-                {true, "AZURE", "10", "14", true, true},
-                {true, "AZURE", "10", "14", true, false},
-                {true, "AZURE", "14", "14", false, false},
-                {true, "AZURE", "14", "11", false, false},
-                {true, "AWS", "10", "11", false, false},
-                {true, "AWS", "10", "14", false, false},
-                {true, "AWS", "14", "14", false, false},
-                {true, "AWS", "14", "11", false, false},
-                {false, "AZURE", "10", "14", false, true},
+                // ExternalDB, Platform, currentVersion, targetVersion, originalDBType, migrationRequired, datalake
+                {true, "AZURE", "10", "11", AzureDatabaseType.SINGLE_SERVER, false, true},
+                {true, "AZURE", "10", "14", AzureDatabaseType.SINGLE_SERVER, true, true},
+                {true, "AZURE", "10", "14", AzureDatabaseType.SINGLE_SERVER, true, false},
+                {true, "AZURE", "14", "14", AzureDatabaseType.FLEXIBLE_SERVER, false, false},
+                {true, "AZURE", "14", "11", null, false, false},
+                {true, "AWS", "10", "11", null, false, false},
+                {true, "AWS", "10", "14", null, false, false},
+                {true, "AWS", "14", "14", null, false, false},
+                {true, "AWS", "14", "11", null, false, false},
+                {false, "AZURE", "10", "14", AzureDatabaseType.SINGLE_SERVER, false, true},
+                {true, "AZURE", "11", "14", AzureDatabaseType.FLEXIBLE_SERVER, false, true},
         };
     }
 

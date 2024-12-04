@@ -22,8 +22,7 @@ public class AzureRDSAutoMigrationValidator {
 
     private static final String ERROR_MSG_TEMPLATE = "Automigration happened from Single to Flexible Server for the %s database server on Azure." +
             " Currently your database is Flexible Server with Postgres11." +
-            " Database inplace upgrade on Flexible Server is currently under development," +
-            " until it's finished database upgrade is not needed. The cluster remains available.";
+            " Database in-place upgrade to Flexible Server 14 will be initiated.";
 
     @Inject
     private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
@@ -39,10 +38,6 @@ public class AzureRDSAutoMigrationValidator {
                 LOGGER.warn(errorMsg);
                 throw new AzureRDSAutoMigrationException(errorMsg, new AzureRDSAutoMigrationParams(AzureDatabaseType.FLEXIBLE_SERVER, server.id()));
             }
-        } else if (azureDatabaseServerView.getAzureDatabaseType() == AzureDatabaseType.FLEXIBLE_SERVER) {
-            String errorMsg = String.format(ERROR_MSG_TEMPLATE, dbStack.getDatabaseServer().getServerId());
-            LOGGER.warn(errorMsg);
-            throw new AzureRDSAutoMigrationException(errorMsg, null);
         }
     }
 

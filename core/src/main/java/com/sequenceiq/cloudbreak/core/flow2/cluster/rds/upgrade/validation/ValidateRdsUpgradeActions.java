@@ -88,7 +88,7 @@ public class ValidateRdsUpgradeActions {
         return new AbstractValidateRdsUpgradeAction<>(ValidateRdsUpgradeOnCloudProviderResult.class) {
             @Override
             protected void doExecute(ValidateRdsUpgradeContext context, ValidateRdsUpgradeOnCloudProviderResult payload, Map<Object, Object> variables) {
-                validateRdsUpgradeService.validateRdsUpgradeFinished(payload.getResourceId(), context.getClusterId());
+                validateRdsUpgradeService.validateRdsUpgradeFinished(payload.getResourceId(), context.getClusterId(), payload.getReason());
                 sendEvent(context);
             }
 

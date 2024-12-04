@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageUtil;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePermissionProvider;
 import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeAvailabilityService;
+import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeCondition;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentChecker;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.PythonVersionBasedRuntimeVersionValidator;
 
@@ -80,6 +81,9 @@ public class UpgradeImageFilterConfigTest {
 
         @MockBean
         private ImageUtil imageUtil;
+
+        @MockBean
+        private CentosToRedHatUpgradeCondition centosToRedHatUpgradeCondition;
 
     }
 }

@@ -294,6 +294,15 @@ public interface SdxEndpoint {
             @PathParam("envCrn") @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) String envCrn,
             @QueryParam("commandId") long commandId);
 
+    @GET
+    @Path("/envcrn/{envCrn}/ranger_cloud_identity_sync_status/multicommand")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Get status of a ranger cloud identity sync multiple command IDs", operationId = "getRangerCloudIdentitySyncStatus",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    RangerCloudIdentitySyncStatus getRangerCloudIdentitySyncStatus(
+            @PathParam("envCrn") @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) String envCrn,
+            @QueryParam("commandIds") List<Long> commandIds);
+
     @PUT
     @Path("{name}/rotate_autotls_certificates")
     @Produces(MediaType.APPLICATION_JSON)

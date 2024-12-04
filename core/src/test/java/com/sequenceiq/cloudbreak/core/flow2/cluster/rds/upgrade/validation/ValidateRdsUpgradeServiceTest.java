@@ -59,15 +59,27 @@ class ValidateRdsUpgradeServiceTest {
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
     @Mock
-    private RdsUpgradeValidationErrorHandler rdsUpgradeValidationErrorHandler;
+    private RdsUpgradeValidationResultHandler rdsUpgradeValidationResultHandler;
 
     @InjectMocks
     private ValidateRdsUpgradeService underTest;
 
     @Test
     public void testValidateRdsUpgradeFinished() {
-        underTest.validateRdsUpgradeFinished(STACK_ID, CLUSTER_ID);
+        underTest.validateRdsUpgradeFinished(STACK_ID, CLUSTER_ID, null);
 
+        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_VALIDATION_FINISHED),
+                eq("Validate RDS upgrade finished"));
+        verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(AVAILABLE.name()), eq(ResourceEvent.CLUSTER_RDS_UPGRADE_VALIDATION_FINISHED));
+
+    }
+
+    @Test
+    public void testValidateRdsUpgradeFinishedWithWarning() {
+        underTest.validateRdsUpgradeFinished(STACK_ID, CLUSTER_ID, "warning");
+
+        verify(rdsUpgradeValidationResultHandler).handleUpgradeValidationWarning(STACK_ID, "warning");
+        verify(flowMessageService).fireEventAndLog(STACK_ID, AVAILABLE.name(), ResourceEvent.CLUSTER_RDS_UPGRADE_VALIDATION_WARNING, "warning");
         verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_VALIDATION_FINISHED),
                 eq("Validate RDS upgrade finished"));
         verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(AVAILABLE.name()), eq(ResourceEvent.CLUSTER_RDS_UPGRADE_VALIDATION_FINISHED));
@@ -81,7 +93,6 @@ class ValidateRdsUpgradeServiceTest {
 
         underTest.validateRdsUpgradeFailed(STACK_ID, CLUSTER_ID, exception);
 
-        verify(rdsUpgradeValidationErrorHandler).handleUpgradeValidationError(STACK_ID, exception.getMessage());
         verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_VALIDATION_FAILED),
                 eq("Validate RDS upgrade failed with exception: " + exception.getMessage()));
         verify(flowMessageService).fireEventAndLog(

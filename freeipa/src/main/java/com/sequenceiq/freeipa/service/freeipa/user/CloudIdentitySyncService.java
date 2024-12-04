@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -103,15 +104,17 @@ public class CloudIdentitySyncService {
             case ACTIVE:
                 // NOTE: Although it's synchronously polling, in practice this sync takes less than a second to complete
                 LOGGER.info("Sync is still in progress, attempting to poll sync status for envCrn = {}", envCrn);
-                pollSyncStatus(envCrn, syncStatus.getCommandId(), warnings);
+                pollSyncStatus(envCrn,
+                        CollectionUtils.isEmpty(syncStatus.getCommandIds()) ? List.of(syncStatus.getCommandId()) : syncStatus.getCommandIds(),
+                        warnings);
                 break;
             default:
                 warnings.accept(envCrn, "Encountered unknown cloud identity sync state");
         }
     }
 
-    private void pollSyncStatus(String environmentCrn, long commandId, BiConsumer<String, String> warnings) {
-        CloudIdSyncPollerObject pollerObject = new CloudIdSyncPollerObject(environmentCrn, commandId);
+    private void pollSyncStatus(String environmentCrn, List<Long> commandIds, BiConsumer<String, String> warnings) {
+        CloudIdSyncPollerObject pollerObject = new CloudIdSyncPollerObject(environmentCrn, commandIds);
         ExtendedPollingResult result = cloudIdSyncPollingService.pollWithAbsoluteTimeout(cloudIdSyncStatusListenerTask, pollerObject,
                 config.getPollerSleepIntervalMs(), config.getPollerTimeoutSeconds(), ONE_MAX_CONSECUTIVE_FAILURE);
         if (!result.isSuccess()) {
@@ -123,7 +126,7 @@ public class CloudIdentitySyncService {
     }
 
     private Map<String, String> getAzureObjectIdMap(Map<String, List<CloudIdentity>> cloudIdentityMapping) {
-        LOGGER.debug("Exracting Azure Object ID mapping from {}", cloudIdentityMapping);
+        LOGGER.debug("Extracting Azure Object ID mapping from {}", cloudIdentityMapping);
         ImmutableMap.Builder<String, String> azureObjectIdMap = ImmutableMap.builder();
         cloudIdentityMapping.forEach((key, cloudIdentities) -> {
             Optional<String> azureObjectId = getOptionalAzureObjectId(cloudIdentities);

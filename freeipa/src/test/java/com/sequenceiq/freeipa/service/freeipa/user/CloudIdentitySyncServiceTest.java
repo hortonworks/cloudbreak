@@ -103,7 +103,7 @@ class CloudIdentitySyncServiceTest {
         RangerCloudIdentitySyncStatus status = new RangerCloudIdentitySyncStatus();
         status.setState(RangerCloudIdentitySyncState.ACTIVE);
         status.setCommandId(1L);
-        CloudIdSyncPollerObject expectedPollerObject = new CloudIdSyncPollerObject("envcrn", 1L);
+        CloudIdSyncPollerObject expectedPollerObject = new CloudIdSyncPollerObject("envcrn", List.of(1L));
         testSyncAzureIdentitiesWithStatus(status);
         verify(cloudIdSyncPollingService, never()).pollWithAbsoluteTimeout(any(), eq(expectedPollerObject), anyLong(), anyLong(), anyInt());
     }

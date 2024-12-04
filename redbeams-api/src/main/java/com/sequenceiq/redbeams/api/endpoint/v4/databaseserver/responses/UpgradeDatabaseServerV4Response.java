@@ -20,6 +20,9 @@ public class UpgradeDatabaseServerV4Response {
     @Schema(description = ModelDescriptions.UpgradeModelDescriptions.UPGRADE_REASON)
     private String reason;
 
+    @Schema(description = ModelDescriptions.UpgradeModelDescriptions.UPGRADE_REASON_WARNING)
+    private boolean warning;
+
     @Schema(description = ModelDescriptions.FLOW_IDENTIFIER)
     private FlowIdentifier flowIdentifier;
 
@@ -39,6 +42,14 @@ public class UpgradeDatabaseServerV4Response {
         this.reason = reason;
     }
 
+    public boolean isWarning() {
+        return warning;
+    }
+
+    public void setWarning(boolean warning) {
+        this.warning = warning;
+    }
+
     public FlowIdentifier getFlowIdentifier() {
         return flowIdentifier;
     }
@@ -52,6 +63,7 @@ public class UpgradeDatabaseServerV4Response {
         return "UpgradeDatabaseServerV4Response{" +
                 "currentVersion=" + currentVersion +
                 ", reason='" + reason + '\'' +
+                ", warning=" + warning +
                 ", flowIdentifier=" + flowIdentifier +
                 '}';
     }

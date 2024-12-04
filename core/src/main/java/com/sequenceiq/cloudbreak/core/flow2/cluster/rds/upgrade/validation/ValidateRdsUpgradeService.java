@@ -8,6 +8,7 @@ import java.util.Objects;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -47,7 +48,7 @@ public class ValidateRdsUpgradeService {
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
     @Inject
-    private RdsUpgradeValidationErrorHandler rdsUpgradeValidationErrorHandler;
+    private RdsUpgradeValidationResultHandler rdsUpgradeValidationResultHandler;
 
     void pushSaltStates(Long stackId) {
         setStatusAndNotify(stackId, UPDATE_IN_PROGRESS, DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_VALIDATION_IN_PROGRESS,
@@ -70,10 +71,14 @@ public class ValidateRdsUpgradeService {
                 version.getMajorVersion());
     }
 
-    void validateRdsUpgradeFinished(Long stackId, Long clusterId) {
+    void validateRdsUpgradeFinished(Long stackId, Long clusterId, String statusReasonWarning) {
         String statusReason = "Validate RDS upgrade finished";
         InMemoryStateStore.deleteStack(stackId);
         InMemoryStateStore.deleteCluster(clusterId);
+        if (StringUtils.isNotEmpty(statusReasonWarning)) {
+            rdsUpgradeValidationResultHandler.handleUpgradeValidationWarning(stackId, statusReasonWarning);
+            flowMessageService.fireEventAndLog(stackId, AVAILABLE.name(), ResourceEvent.CLUSTER_RDS_UPGRADE_VALIDATION_WARNING, statusReasonWarning);
+        }
         setStatusAndNotify(stackId, AVAILABLE, DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_VALIDATION_FINISHED,
                 statusReason, ResourceEvent.CLUSTER_RDS_UPGRADE_VALIDATION_FINISHED);
     }
@@ -86,7 +91,6 @@ public class ValidateRdsUpgradeService {
         if (Objects.nonNull(clusterId)) {
             InMemoryStateStore.deleteCluster(clusterId);
         }
-        rdsUpgradeValidationErrorHandler.handleUpgradeValidationError(stackId, exception.getMessage());
         updateStatus(stackId, DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_VALIDATION_FAILED, statusReason);
         flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), ResourceEvent.CLUSTER_RDS_UPGRADE_VALIDATION_FAILED, errorMsg);
     }

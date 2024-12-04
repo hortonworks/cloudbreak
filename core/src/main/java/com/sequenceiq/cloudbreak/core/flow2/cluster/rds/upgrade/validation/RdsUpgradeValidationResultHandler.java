@@ -16,8 +16,8 @@ import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.common.model.AzureDatabaseType;
 
 @Component
-public class RdsUpgradeValidationErrorHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RdsUpgradeValidationErrorHandler.class);
+public class RdsUpgradeValidationResultHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RdsUpgradeValidationResultHandler.class);
 
     @Inject
     private StackDtoService stackDtoService;
@@ -25,7 +25,7 @@ public class RdsUpgradeValidationErrorHandler {
     @Inject
     private DatabaseService databaseService;
 
-    public void handleUpgradeValidationError(Long stackId, String validationReason) {
+    public void handleUpgradeValidationWarning(Long stackId, String validationReason) {
         updateDBServerTypeIfAutomigrationHappened(stackId, validationReason);
     }
 
