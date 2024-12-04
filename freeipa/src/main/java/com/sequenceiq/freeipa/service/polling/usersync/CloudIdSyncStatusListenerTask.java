@@ -21,24 +21,34 @@ public class CloudIdSyncStatusListenerTask implements StatusCheckerTask<CloudIdS
 
     @Override
     public boolean checkStatus(CloudIdSyncPollerObject pollerObject) {
-        RangerCloudIdentitySyncStatus syncStatus = sdxEndpoint.getRangerCloudIdentitySyncStatus(pollerObject.getEnvironmentCrn(), pollerObject.getCommandId());
+        RangerCloudIdentitySyncStatus syncStatus = fetchRangerCloudIdentitySyncStatus(pollerObject);
         LOGGER.info("syncStatus = {}", syncStatus);
-        switch (syncStatus.getState()) {
-            case SUCCESS:
+        return switch (syncStatus.getState()) {
+            case SUCCESS -> {
                 LOGGER.info("Successfully synced cloud identity, envCrn = {}", pollerObject.getEnvironmentCrn());
-                return true;
-            case NOT_APPLICABLE:
+                yield true;
+            }
+            case NOT_APPLICABLE -> {
                 LOGGER.info("Cloud identity sync not applicable, envCrn = {}", pollerObject.getEnvironmentCrn());
-                return true;
-            case FAILED:
+                yield true;
+            }
+            case FAILED -> {
                 LOGGER.error("Failed to sync cloud identity, envCrn = {}", pollerObject.getEnvironmentCrn());
-                throw new CloudbreakServiceException("Failed to sync cloud identity");
-            case ACTIVE:
+                throw new CloudbreakServiceException("Failed to sync cloud identity. Reason: " + syncStatus.getStatusReason());
+            }
+            case ACTIVE -> {
                 LOGGER.info("Sync is still in progress");
-                return false;
-            default:
-                LOGGER.error("Encountered unknown cloud identity sync state");
-                throw new CloudbreakServiceException("Failed to sync cloud identity");
+                yield false;
+            }
+        };
+    }
+
+    private RangerCloudIdentitySyncStatus fetchRangerCloudIdentitySyncStatus(CloudIdSyncPollerObject pollerObject) {
+        try {
+            return sdxEndpoint.getRangerCloudIdentitySyncStatus(pollerObject.getEnvironmentCrn(), pollerObject.getCommandIds());
+        } catch (Exception e) {
+            LOGGER.warn("Error occurred while fetching ranger cloudidentity sync status with multiple endpoint, fallback to old endpoint for single status", e);
+            return sdxEndpoint.getRangerCloudIdentitySyncStatus(pollerObject.getEnvironmentCrn(), pollerObject.getCommandIds().getFirst());
         }
     }
 

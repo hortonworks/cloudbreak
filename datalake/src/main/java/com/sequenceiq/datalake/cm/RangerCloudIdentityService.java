@@ -1,8 +1,10 @@
 package com.sequenceiq.datalake.cm;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.google.common.collect.Iterables;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
@@ -50,12 +53,13 @@ public class RangerCloudIdentityService {
                 return newSyncStatus(RangerCloudIdentitySyncState.NOT_APPLICABLE,
                         "The datalake does not support cloud identity sync. Sync request is ignored.");
             }
-            Optional<ApiCommand> apiCommand = clouderaManagerRangerUtil.setAzureCloudIdentityMapping(stackCrn, azureUserMapping);
-            if (apiCommand.isEmpty()) {
-                return newSyncStatus(RangerCloudIdentitySyncState.SUCCESS, "Sucessfully synced, no role refresh required");
+            List<ApiCommand> apiCommands = clouderaManagerRangerUtil.setAzureCloudIdentityMapping(stackCrn, azureUserMapping);
+            if (apiCommands.isEmpty()) {
+                return newSyncStatus(RangerCloudIdentitySyncState.SUCCESS, "Successfully synced, no role refresh required");
+            } else {
+                return toRangerCloudIdentitySyncStatus(apiCommands);
             }
-            return toRangerCloudIdentitySyncStatus(apiCommand.get());
-        } catch (ApiException e) {
+        } catch (CloudbreakServiceException | ApiException e) {
             LOGGER.error("Encountered api exception", e);
             return newSyncStatus(RangerCloudIdentitySyncState.FAILED, "Encountered cloudera manager api exception");
         }
@@ -93,27 +97,51 @@ public class RangerCloudIdentityService {
         return checkIfUnapplicable(sdxCluster).orElseGet(() -> setAzureCloudIdentityMapping(envCrn, sdxCluster.get(), azureUserMapping));
     }
 
-    public RangerCloudIdentitySyncStatus getRangerCloudIdentitySyncStatus(String envCrn, long commandId) {
+    public RangerCloudIdentitySyncStatus getRangerCloudIdentitySyncStatus(String envCrn, List<Long> commandIds) {
         Optional<SdxCluster> sdxCluster = getSdxCluster(envCrn);
-        return checkIfUnapplicable(sdxCluster).orElseGet(() -> getRangerCloudIdentitySyncStatus(sdxCluster.get(), commandId));
+        return checkIfUnapplicable(sdxCluster).orElseGet(() -> getRangerCloudIdentitySyncStatus(sdxCluster.get(), commandIds));
     }
 
-    private RangerCloudIdentitySyncStatus getRangerCloudIdentitySyncStatus(SdxCluster sdxCluster, long commandId) {
+    private RangerCloudIdentitySyncStatus getRangerCloudIdentitySyncStatus(SdxCluster sdxCluster, List<Long> commandIds) {
         try {
-            ApiCommand apiCommand = clouderaManagerRangerUtil.getApiCommand(sdxCluster.getStackCrn(), commandId);
-            return toRangerCloudIdentitySyncStatus(apiCommand);
-        } catch (ApiException e) {
+            List<ApiCommand> apiCommands = commandIds.stream().map(commandId -> {
+                try {
+                    return clouderaManagerRangerUtil.getApiCommand(sdxCluster.getStackCrn(), commandId);
+                } catch (ApiException e) {
+                    throw new CloudbreakServiceException(e);
+                }
+            }).toList();
+            return toRangerCloudIdentitySyncStatus(apiCommands);
+        } catch (CloudbreakServiceException e) {
             LOGGER.error("Encountered cloudera manager api exception", e);
             return newSyncStatus(RangerCloudIdentitySyncState.FAILED, "Encountered cloudera manager api exception");
         }
     }
 
-    private RangerCloudIdentitySyncStatus toRangerCloudIdentitySyncStatus(ApiCommand apiCommand) {
+    private RangerCloudIdentitySyncStatus toRangerCloudIdentitySyncStatus(List<ApiCommand> apiCommands) {
         RangerCloudIdentitySyncStatus status = new RangerCloudIdentitySyncStatus();
-        status.setCommandId(apiCommand.getId().longValue());
-        status.setStatusReason(apiCommand.getResultMessage());
-        status.setState(toRangerCloudIdentitySyncState(apiCommand));
+        status.setCommandId(apiCommands.getFirst().getId().longValue());
+        status.setCommandIds(apiCommands.stream().map(ApiCommand::getId).mapToLong(BigDecimal::longValue).boxed().toList());
+        status.setStatusReason(collectReasonForCommands(apiCommands));
+        status.setState(toRangerCloudIdentitySyncState(apiCommands));
         return status;
+    }
+
+    private String collectReasonForCommands(List<ApiCommand> apiCommands) {
+        return apiCommands.stream()
+                .map(command -> String.format("Command [%s] reason: %s", command.getId(), command.getResultMessage()))
+                .collect(Collectors.joining("; "));
+    }
+
+    private RangerCloudIdentitySyncState toRangerCloudIdentitySyncState(List<ApiCommand> apiCommands) {
+        List<RangerCloudIdentitySyncState> syncStates = apiCommands.stream().map(this::toRangerCloudIdentitySyncState).toList();
+        if (syncStates.stream().anyMatch(RangerCloudIdentitySyncState.FAILED::equals)) {
+            return RangerCloudIdentitySyncState.FAILED;
+        } else if (syncStates.stream().anyMatch(RangerCloudIdentitySyncState.ACTIVE::equals)) {
+            return RangerCloudIdentitySyncState.ACTIVE;
+        } else {
+            return RangerCloudIdentitySyncState.SUCCESS;
+        }
     }
 
     private RangerCloudIdentitySyncState toRangerCloudIdentitySyncState(ApiCommand apiCommand) {

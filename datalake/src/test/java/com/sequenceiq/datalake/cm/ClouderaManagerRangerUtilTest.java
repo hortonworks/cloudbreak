@@ -1,9 +1,9 @@
 package com.sequenceiq.datalake.cm;
 
 import static org.hamcrest.CoreMatchers.hasItems;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -14,7 +14,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -130,9 +129,9 @@ class ClouderaManagerRangerUtilTest {
         setupRoleRefreshResponse(true);
         setupExistingAzureUserMapping("");
 
-        Optional<ApiCommand> apiCommand = underTest.setAzureCloudIdentityMapping("stackCrn", Map.of("user01", "val01", "user02", "val02"));
+        List<ApiCommand> apiCommand = underTest.setAzureCloudIdentityMapping("stackCrn", Map.of("user01", "val01", "user02", "val02"));
 
-        assertTrue(apiCommand.isPresent());
+        assertFalse(apiCommand.isEmpty());
 
         ArgumentCaptor<ApiConfigList> apiConfigListCaptor = ArgumentCaptor.forClass(ApiConfigList.class);
         verify(rolesResourceApi, times(1)).updateRoleConfig(eq(CLUSTER), eq(RANGER_USER_SYNC_ROLE), anyString(), anyString(), apiConfigListCaptor.capture());
@@ -155,7 +154,7 @@ class ClouderaManagerRangerUtilTest {
         setupExistingAzureUserMapping("user01=val01;user02=val02");
         setupRoleRefreshRequired(false);
 
-        Optional<ApiCommand> apiCommand = underTest.setAzureCloudIdentityMapping("stackCrn", Map.of("user01", "val01", "user02", "val02"));
+        List<ApiCommand> apiCommand = underTest.setAzureCloudIdentityMapping("stackCrn", Map.of("user01", "val01", "user02", "val02"));
         assertTrue(apiCommand.isEmpty());
 
         ArgumentCaptor<ApiConfigList> apiConfigListCaptor = ArgumentCaptor.forClass(ApiConfigList.class);
@@ -174,7 +173,7 @@ class ClouderaManagerRangerUtilTest {
         setupRoleRefreshRequired(true);
         setupRoleRefreshResponse(true);
 
-        Optional<ApiCommand> apiCommand = underTest.setAzureCloudIdentityMapping("stackCrn", Map.of("user01", "val01", "user02", "val02"));
+        List<ApiCommand> apiCommand = underTest.setAzureCloudIdentityMapping("stackCrn", Map.of("user01", "val01", "user02", "val02"));
         assertFalse(apiCommand.isEmpty());
 
         ArgumentCaptor<ApiConfigList> apiConfigListCaptor = ArgumentCaptor.forClass(ApiConfigList.class);

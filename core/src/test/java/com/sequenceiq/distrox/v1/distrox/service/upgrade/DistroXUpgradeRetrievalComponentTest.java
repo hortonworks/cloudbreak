@@ -114,6 +114,7 @@ import com.sequenceiq.cloudbreak.service.upgrade.ccm.StackCcmUpgradeService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.BlueprintUpgradeOptionCondition;
 import com.sequenceiq.cloudbreak.service.upgrade.image.BlueprintUpgradeOptionValidator;
 import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeAvailabilityService;
+import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeCondition;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ClusterUpgradeImageFilter;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
 import com.sequenceiq.cloudbreak.service.upgrade.image.filter.CentosToRedHatUpgradeImageFilter;
@@ -271,7 +272,7 @@ public class DistroXUpgradeRetrievalComponentTest {
                 Optional.of(SdxBasicView.builder().withName(CLUSTER_NAME).build()));
         when(imageCatalogService.getAllCdhImages(any(), any(), any(), any())).thenReturn(imageCatalogMock.getAllCdhImages(CLOUD_PLATFORM));
         when(currentImagePackageProvider.currentInstancesContainsPackage(STACK_ID, imageCatalogMock.getAllCdhImages(CLOUD_PLATFORM), PYTHON38)).thenReturn(true);
-        when(currentImageUsageCondition.currentImageUsedOnInstances(any(), any())).thenReturn(true);
+        when(currentImageUsageCondition.isCurrentImageUsedOnInstances(any(), any())).thenReturn(true);
     }
 
     @Test
@@ -290,7 +291,7 @@ public class DistroXUpgradeRetrievalComponentTest {
     void testUpgradeClusterByNameWhenTheCurrentIs7216WithoutPython() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         Image currentCatalogImage = imageCatalogMock.getLatestImageByRuntimeAndPlatformAndOs("7.2.16", CLOUD_PLATFORM, CENTOS7);
         setupImageCatalogMocks(currentCatalogImage);
-        when(currentImageUsageCondition.currentImageUsedOnInstances(any(), any())).thenReturn(false);
+        when(currentImageUsageCondition.isCurrentImageUsedOnInstances(any(), any())).thenReturn(false);
         when(currentImagePackageProvider.currentInstancesContainsPackage(STACK_ID, imageCatalogMock.getAllCdhImages(CLOUD_PLATFORM), PYTHON38))
                 .thenReturn(false);
 
@@ -347,7 +348,9 @@ public class DistroXUpgradeRetrievalComponentTest {
     void testUpgradeClusterByNameWhenTheCurrentIs7217WithoutOsUpgrade() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         Image currentCatalogImage = imageCatalogMock.getLatestImageByRuntimeAndPlatformAndOs("7.2.17", CLOUD_PLATFORM, CENTOS7);
         setupImageCatalogMocks(currentCatalogImage);
-        when(currentImageUsageCondition.currentImageUsedOnInstances(any(), any())).thenReturn(false);
+        when(currentImageUsageCondition.isCurrentImageUsedOnInstances(any(), any())).thenReturn(false);
+        when(currentImageUsageCondition.isCurrentOsUsedOnInstances(STACK_ID, RHEL8.getOs())).thenReturn(false);
+        when(currentImageUsageCondition.isCurrentOsUsedOnInstances(STACK_ID, CENTOS7.getOs())).thenReturn(true);
 
         DistroXUpgradeV1Response actual = doAs(USER_CRN, () -> distroXUpgradeV1Controller.upgradeClusterByName(CLUSTER_NAME, createRequest(LATEST_ONLY)));
 
@@ -361,6 +364,8 @@ public class DistroXUpgradeRetrievalComponentTest {
     void testUpgradeClusterByNameWhenTheCurrentIs7217Centos() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         Image currentCatalogImage = imageCatalogMock.getLatestImageByRuntimeAndPlatformAndOs("7.2.17", CLOUD_PLATFORM, CENTOS7);
         setupImageCatalogMocks(currentCatalogImage);
+        when(currentImageUsageCondition.isCurrentOsUsedOnInstances(STACK_ID, RHEL8.getOs())).thenReturn(false);
+        when(currentImageUsageCondition.isCurrentOsUsedOnInstances(STACK_ID, CENTOS7.getOs())).thenReturn(true);
 
         DistroXUpgradeV1Response actual = doAs(USER_CRN, () -> distroXUpgradeV1Controller.upgradeClusterByName(CLUSTER_NAME, createRequest(LATEST_ONLY)));
 
@@ -569,7 +574,8 @@ public class DistroXUpgradeRetrievalComponentTest {
             CloudbreakRestRequestThreadLocalService.class,
             VersionComparisonContextFactory.class,
             CdhPatchVersionProvider.class,
-            UpgradePathRestrictionService.class
+            UpgradePathRestrictionService.class,
+            CentosToRedHatUpgradeCondition.class
     })
     static class Config {
 

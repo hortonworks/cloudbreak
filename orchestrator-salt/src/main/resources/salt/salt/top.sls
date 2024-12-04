@@ -23,6 +23,7 @@ base:
     - cdpluksvolumebackup
     {% endif %}
     - hostname
+    - selinux
 
   'G@roles:ad_member and G@os_family:RedHat':
     - match: compound

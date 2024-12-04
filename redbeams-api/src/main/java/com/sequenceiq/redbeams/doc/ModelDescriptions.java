@@ -208,6 +208,8 @@ public final class ModelDescriptions {
         public static final String MAJOR_VERSION = "The major version to which the database server should be upgraded";
         public static final String CURRENT_VERSION = "The current version of the database server";
         public static final String UPGRADE_REASON = "The status reason if upgrade flow is not started due to some validation";
+        public static final String UPGRADE_REASON_WARNING =
+                "The status reason indicates a warning instead of an error. In case of a warning the upgrade flow could be started";
         public static final String UPGRADED_DATABASE_SETTINGS = "The relevant settings for the upgraded database, present in case migration is required";
     }
 

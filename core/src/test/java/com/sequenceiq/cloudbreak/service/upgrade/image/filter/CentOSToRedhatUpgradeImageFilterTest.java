@@ -18,7 +18,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.service.image.CurrentImageUsageCondition;
 import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeAvailabilityService;
+import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeCondition;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
 import com.sequenceiq.common.model.OsType;
@@ -34,6 +36,8 @@ class CentosToRedHatUpgradeImageFilterTest {
 
     private static final String VERSION_7_2_18 = "7.2.18";
 
+    private static final long STACK_ID = 1L;
+
     @Mock
     private EntitlementService entitlementService;
 
@@ -43,6 +47,12 @@ class CentosToRedHatUpgradeImageFilterTest {
     @InjectMocks
     private CentosToRedHatUpgradeImageFilter underTest;
 
+    @Mock
+    private CentosToRedHatUpgradeCondition centosToRedHatUpgradeCondition;
+
+    @Mock
+    private CurrentImageUsageCondition currentImageUsageCondition;
+
     private AtomicLong imageCreationTimeSequence = new AtomicLong(1);
 
     @Test
@@ -51,6 +61,8 @@ class CentosToRedHatUpgradeImageFilterTest {
         //CHECKSTYLE:ON
         ImageFilterParams imageFilterParams = centosImageFilterParams(VERSION_7_2_16);
         Image redhatImage = redhatCatalogImage(VERSION_7_2_17);
+        when(currentImageUsageCondition.isCurrentOsUsedOnInstances(STACK_ID, OsType.RHEL8.getOs())).thenReturn(false);
+        when(centosToRedHatUpgradeCondition.isCentosToRedhatUpgrade(STACK_ID, redhatImage)).thenReturn(true);
 
         ImageFilterResult result = testImageFiltering(imageFilterParams, redhatImage);
 
@@ -64,7 +76,9 @@ class CentosToRedHatUpgradeImageFilterTest {
         ImageFilterParams imageFilterParams = centosImageFilterParams(VERSION_7_2_16);
         Image redhatImage = redhatCatalogImage(VERSION_7_2_17);
         Image centosImage = centOSCatalogImage(VERSION_7_2_17);
-        when(centOSToRedHatUpgradeAvailabilityService.isOsUpgradePermitted(imageFilterParams.getCurrentImage(), redhatImage,
+        when(currentImageUsageCondition.isCurrentOsUsedOnInstances(STACK_ID, OsType.RHEL8.getOs())).thenReturn(false);
+        when(centosToRedHatUpgradeCondition.isCentosToRedhatUpgrade(STACK_ID, redhatImage)).thenReturn(true);
+        when(centOSToRedHatUpgradeAvailabilityService.isOsUpgradePermitted(STACK_ID, imageFilterParams.getCurrentImage(), redhatImage,
                 imageFilterParams.getStackRelatedParcels())).thenReturn(false);
         when(centOSToRedHatUpgradeAvailabilityService.isHelperImageAvailable(List.of(redhatImage, centosImage), redhatImage,
                 imageFilterParams.getStackRelatedParcels().keySet())).thenReturn(true);
@@ -80,12 +94,14 @@ class CentosToRedHatUpgradeImageFilterTest {
         //CHECKSTYLE:ON
         //ImageFilterParams imageFilterParams = centosImageFilterParams(VERSION_7_2_16);
         ImageFilterParams imageFilterParams = new ImageFilterParams("target-image-id", image(OsType.CENTOS7.getOs(), OsType.CENTOS7.getOsType(), VERSION_7_2_16),
-                "image-catalog-name", false, Map.of(CDH.name(), "7.2.17"), null, null, 1L, null, null, null, null, false);
+                "image-catalog-name", false, Map.of(CDH.name(), "7.2.17"), null, null, STACK_ID, null, null, null, null, false);
         Image redhatImage = redhatCatalogImage(VERSION_7_2_17);
         Image centosImage = centOSCatalogImage(VERSION_7_2_17);
-        when(centOSToRedHatUpgradeAvailabilityService.isOsUpgradePermitted(imageFilterParams.getCurrentImage(), redhatImage,
+        when(currentImageUsageCondition.isCurrentOsUsedOnInstances(STACK_ID, OsType.RHEL8.getOs())).thenReturn(false);
+        when(centosToRedHatUpgradeCondition.isCentosToRedhatUpgrade(STACK_ID, redhatImage)).thenReturn(true);
+        when(centOSToRedHatUpgradeAvailabilityService.isOsUpgradePermitted(STACK_ID, imageFilterParams.getCurrentImage(), redhatImage,
                 imageFilterParams.getStackRelatedParcels())).thenReturn(false);
-        when(centOSToRedHatUpgradeAvailabilityService.isHelperImageAvailable(1L, "image-catalog-name", redhatImage,
+        when(centOSToRedHatUpgradeAvailabilityService.isHelperImageAvailable(STACK_ID, "image-catalog-name", redhatImage,
                 imageFilterParams.getStackRelatedParcels().keySet())).thenReturn(true);
 
         ImageFilterResult result = testImageFiltering(imageFilterParams, redhatImage, centosImage);
@@ -99,7 +115,9 @@ class CentosToRedHatUpgradeImageFilterTest {
         //CHECKSTYLE:ON
         ImageFilterParams imageFilterParams = centosImageFilterParams(VERSION_7_2_17);
         Image redhatImage = redhatCatalogImage(VERSION_7_2_17);
-        when(centOSToRedHatUpgradeAvailabilityService.isOsUpgradePermitted(imageFilterParams.getCurrentImage(), redhatImage,
+        when(currentImageUsageCondition.isCurrentOsUsedOnInstances(STACK_ID, OsType.RHEL8.getOs())).thenReturn(false);
+        when(centosToRedHatUpgradeCondition.isCentosToRedhatUpgrade(STACK_ID, redhatImage)).thenReturn(true);
+        when(centOSToRedHatUpgradeAvailabilityService.isOsUpgradePermitted(STACK_ID, imageFilterParams.getCurrentImage(), redhatImage,
                 imageFilterParams.getStackRelatedParcels())).thenReturn(true);
 
         ImageFilterResult result = testImageFiltering(imageFilterParams, redhatImage);
@@ -126,7 +144,11 @@ class CentosToRedHatUpgradeImageFilterTest {
         Image redhatImage = redhatCatalogImage(VERSION_7_2_17);
         Image centOSImage1 = centOSCatalogImage(VERSION_7_2_17);
         Image centOSImage2 = centOSCatalogImage(VERSION_7_2_18);
-        when(centOSToRedHatUpgradeAvailabilityService.isOsUpgradePermitted(imageFilterParams.getCurrentImage(), redhatImage,
+        when(currentImageUsageCondition.isCurrentOsUsedOnInstances(STACK_ID, OsType.RHEL8.getOs())).thenReturn(false);
+        when(centosToRedHatUpgradeCondition.isCentosToRedhatUpgrade(STACK_ID, redhatImage)).thenReturn(true);
+        when(centosToRedHatUpgradeCondition.isCentosToRedhatUpgrade(STACK_ID, centOSImage1)).thenReturn(false);
+        when(centosToRedHatUpgradeCondition.isCentosToRedhatUpgrade(STACK_ID, centOSImage2)).thenReturn(false);
+        when(centOSToRedHatUpgradeAvailabilityService.isOsUpgradePermitted(STACK_ID, imageFilterParams.getCurrentImage(), redhatImage,
                 imageFilterParams.getStackRelatedParcels())).thenReturn(true);
 
         ImageFilterResult result = testImageFiltering(imageFilterParams, centOSImage1, redhatImage, centOSImage2);
@@ -147,7 +169,7 @@ class CentosToRedHatUpgradeImageFilterTest {
     }
 
     private ImageFilterParams imageFilterParams(com.sequenceiq.cloudbreak.cloud.model.Image image) {
-        return new ImageFilterParams(null, image, null, false, Map.of(CDH.name(), "7.2.17"), null, null, null, null, null, null, null, false);
+        return new ImageFilterParams(null, image, null, false, Map.of(CDH.name(), "7.2.17"), null, null, STACK_ID, null, null, null, null, false);
     }
 
     private com.sequenceiq.cloudbreak.cloud.model.Image image(String os, String osType, String version) {

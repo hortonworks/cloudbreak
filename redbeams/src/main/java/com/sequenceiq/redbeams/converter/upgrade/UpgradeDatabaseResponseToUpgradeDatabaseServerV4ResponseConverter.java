@@ -12,6 +12,7 @@ public class UpgradeDatabaseResponseToUpgradeDatabaseServerV4ResponseConverter {
         UpgradeDatabaseServerV4Response response = new UpgradeDatabaseServerV4Response();
         response.setCurrentVersion(upgradeDatabaseResponse.getCurrentVersion());
         response.setReason(upgradeDatabaseResponse.getReason());
+        response.setWarning(upgradeDatabaseResponse.isWarning());
         response.setFlowIdentifier(upgradeDatabaseResponse.getFlowIdentifier());
         return response;
     }

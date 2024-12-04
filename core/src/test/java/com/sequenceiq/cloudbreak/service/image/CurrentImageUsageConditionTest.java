@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.common.model.OsType;
 
 @ExtendWith(MockitoExtension.class)
 public class CurrentImageUsageConditionTest {
@@ -40,20 +41,20 @@ public class CurrentImageUsageConditionTest {
 
     @Test
     public void testFilterCurrentImageShouldReturnTrueWhenThereAreInstanceWithOtherImage() {
-        Set<InstanceMetaData> instanceMetaData = createInstanceMetaData(NEW_IMAGE, OLD_IMAGE);
+        Set<InstanceMetaData> instanceMetaData = createInstanceMetaDataWithImage(NEW_IMAGE, OLD_IMAGE);
         when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
 
-        assertFalse(underTest.currentImageUsedOnInstances(STACK_ID, NEW_IMAGE));
+        assertFalse(underTest.isCurrentImageUsedOnInstances(STACK_ID, NEW_IMAGE));
 
         verify(instanceMetaDataService).getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID);
     }
 
     @Test
     public void testFilterCurrentImageShouldReturnTrueWhenThereAreNoInstanceWithOtherImage() {
-        Set<InstanceMetaData> instanceMetaData = createInstanceMetaData(NEW_IMAGE, NEW_IMAGE);
+        Set<InstanceMetaData> instanceMetaData = createInstanceMetaDataWithImage(NEW_IMAGE, NEW_IMAGE);
         when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
 
-        assertTrue(underTest.currentImageUsedOnInstances(STACK_ID, NEW_IMAGE));
+        assertTrue(underTest.isCurrentImageUsedOnInstances(STACK_ID, NEW_IMAGE));
 
         verify(instanceMetaDataService).getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID);
     }
@@ -62,11 +63,11 @@ public class CurrentImageUsageConditionTest {
     public void testFilterCurrentImageShouldReturnFalseWhenOneOfTheImageJsonIsNull() {
         InstanceMetaData nullImageInstanceMetadata = new InstanceMetaData();
         nullImageInstanceMetadata.setImage(new Json(null));
-        Set<InstanceMetaData> instanceMetaData = createInstanceMetaData(NEW_IMAGE);
+        Set<InstanceMetaData> instanceMetaData = createInstanceMetaDataWithImage(NEW_IMAGE);
         instanceMetaData.add(nullImageInstanceMetadata);
         when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
 
-        assertTrue(underTest.currentImageUsedOnInstances(STACK_ID, NEW_IMAGE));
+        assertTrue(underTest.isCurrentImageUsedOnInstances(STACK_ID, NEW_IMAGE));
 
         verify(instanceMetaDataService).getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID);
     }
@@ -75,11 +76,11 @@ public class CurrentImageUsageConditionTest {
     public void testFilterCurrentImageShouldReturnTrueWhenOneOfTheImageJsonIsNullButTheOtherIsOnOldImage() {
         InstanceMetaData nullImageInstanceMetadata = new InstanceMetaData();
         nullImageInstanceMetadata.setImage(new Json(null));
-        Set<InstanceMetaData> instanceMetaData = createInstanceMetaData(OLD_IMAGE);
+        Set<InstanceMetaData> instanceMetaData = createInstanceMetaDataWithImage(OLD_IMAGE);
         instanceMetaData.add(nullImageInstanceMetadata);
         when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
 
-        assertFalse(underTest.currentImageUsedOnInstances(STACK_ID, NEW_IMAGE));
+        assertFalse(underTest.isCurrentImageUsedOnInstances(STACK_ID, NEW_IMAGE));
 
         verify(instanceMetaDataService).getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID);
     }
@@ -93,22 +94,52 @@ public class CurrentImageUsageConditionTest {
         Set<InstanceMetaData> instanceMetaData = Set.of(nullImageInstanceMetadata, nullImageInstanceMetadata2);
         when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
 
-        assertFalse(underTest.currentImageUsedOnInstances(STACK_ID, NEW_IMAGE));
+        assertFalse(underTest.isCurrentImageUsedOnInstances(STACK_ID, NEW_IMAGE));
 
         verify(instanceMetaDataService).getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID);
     }
 
-    private com.sequenceiq.cloudbreak.cloud.model.Image createImage(String imageId) {
-        return Image.builder().withImageId(imageId).build();
+    @Test
+    public void testIsCurrentOsUsedOnInstancesShouldReturnTrueWhenAllInstanceUsingTheSameOS() {
+        Set<InstanceMetaData> instanceMetaData = createInstanceMetaDataWithOs(OsType.CENTOS7, OsType.CENTOS7, OsType.CENTOS7);
+        when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
+
+        assertTrue(underTest.isCurrentOsUsedOnInstances(STACK_ID, OsType.CENTOS7.getOs()));
+
+        verify(instanceMetaDataService).getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID);
     }
 
-    private Set<InstanceMetaData> createInstanceMetaData(String... imageId) {
+    @Test
+    public void testIsCurrentOsUsedOnInstancesShouldReturnFalseWhenAnInstanceUsingADifferentOS() {
+        Set<InstanceMetaData> instanceMetaData = createInstanceMetaDataWithOs(OsType.CENTOS7, OsType.RHEL8, OsType.CENTOS7);
+        when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
+
+        assertFalse(underTest.isCurrentOsUsedOnInstances(STACK_ID, OsType.CENTOS7.getOs()));
+
+        verify(instanceMetaDataService).getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID);
+    }
+
+    private com.sequenceiq.cloudbreak.cloud.model.Image createImage(String imageId, OsType osType) {
+        return Image.builder().withImageId(imageId).withOs(osType.getOs()).withOsType(osType.getOsType()).build();
+    }
+
+    private Set<InstanceMetaData> createInstanceMetaDataWithImage(String... imageId) {
         Set<InstanceMetaData> instanceMetaDataSet = new HashSet<>();
         for (int i = 0; i < imageId.length; i++) {
-            String s = imageId[i];
             InstanceMetaData instanceMetaData = new InstanceMetaData();
             instanceMetaData.setInstanceId("instance-" + i);
-            instanceMetaData.setImage(new Json(createImage(imageId[i])));
+            instanceMetaData.setImage(new Json(createImage(imageId[i], OsType.CENTOS7)));
+            instanceMetaDataSet.add(instanceMetaData);
+        }
+        return instanceMetaDataSet;
+    }
+
+    private Set<InstanceMetaData> createInstanceMetaDataWithOs(OsType... osTypes) {
+        Set<InstanceMetaData> instanceMetaDataSet = new HashSet<>();
+        for (int i = 0; i < osTypes.length; i++) {
+            InstanceMetaData instanceMetaData = new InstanceMetaData();
+            instanceMetaData.setInstanceId("instance-" + i);
+            instanceMetaData.setImage(new Json(createImage("image-id" + i, osTypes[i])));
             instanceMetaDataSet.add(instanceMetaData);
         }
         return instanceMetaDataSet;

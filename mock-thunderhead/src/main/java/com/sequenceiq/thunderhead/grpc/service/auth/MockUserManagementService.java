@@ -766,6 +766,15 @@ public class MockUserManagementService extends UserManagementImplBase {
                 .setCrn(userCrn)
                 .setEmail(userName.contains("@") ? userName : userName + "@ums.mock")
                 .setWorkloadUsername(sanitizeWorkloadUsername(userName))
+                .addCloudIdentities(UserManagementProto.CloudIdentity.newBuilder()
+                        .setCloudIdentityName(UserManagementProto.CloudIdentityName
+                                .newBuilder()
+                                .setAzureCloudIdentityName(UserManagementProto.AzureCloudIdentityName
+                                        .newBuilder()
+                                        .setObjectId(userCrn + "-aoid")
+                                        .build())
+                                .build())
+                        .build())
                 .build();
     }
 

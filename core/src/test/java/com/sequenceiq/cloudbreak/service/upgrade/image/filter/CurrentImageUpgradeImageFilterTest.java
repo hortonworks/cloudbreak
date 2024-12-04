@@ -38,27 +38,27 @@ class CurrentImageUpgradeImageFilterTest {
     @Test
     public void testFilterShouldReturnAllImage() {
         List<Image> images = List.of(createImage("image1"), createImage(CURRENT_IMAGE_ID));
-        when(currentImageUsageCondition.currentImageUsedOnInstances(CURRENT_STACK_ID, CURRENT_IMAGE_ID)).thenReturn(false);
+        when(currentImageUsageCondition.isCurrentImageUsedOnInstances(CURRENT_STACK_ID, CURRENT_IMAGE_ID)).thenReturn(false);
 
         ImageFilterResult actual = underTest.filter(createImageFilterResult(images), imageFilterParams);
 
         assertEquals(images, actual.getImages());
         assertTrue(actual.getReason().isEmpty());
-        verify(currentImageUsageCondition).currentImageUsedOnInstances(CURRENT_STACK_ID, CURRENT_IMAGE_ID);
+        verify(currentImageUsageCondition).isCurrentImageUsedOnInstances(CURRENT_STACK_ID, CURRENT_IMAGE_ID);
     }
 
     @Test
     public void testFilterShouldReturnImagesWithoutCurrentImageWhenTheCurrentImageFilteringIsNotAllowed() {
         Image image1 = createImage("image1");
         Image currentImage = createImage(CURRENT_IMAGE_ID);
-        when(currentImageUsageCondition.currentImageUsedOnInstances(CURRENT_STACK_ID, CURRENT_IMAGE_ID)).thenReturn(true);
+        when(currentImageUsageCondition.isCurrentImageUsedOnInstances(CURRENT_STACK_ID, CURRENT_IMAGE_ID)).thenReturn(true);
 
         ImageFilterResult actual = underTest.filter(createImageFilterResult(List.of(image1, currentImage)), imageFilterParams);
 
         assertTrue(actual.getImages().contains(image1));
         assertFalse(actual.getImages().contains(currentImage));
         assertTrue(actual.getReason().isEmpty());
-        verify(currentImageUsageCondition).currentImageUsedOnInstances(CURRENT_STACK_ID, CURRENT_IMAGE_ID);
+        verify(currentImageUsageCondition).isCurrentImageUsedOnInstances(CURRENT_STACK_ID, CURRENT_IMAGE_ID);
     }
 
     @Test

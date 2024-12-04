@@ -9,6 +9,8 @@ public class UpgradeDatabaseResponse {
 
     private String reason;
 
+    private boolean warning;
+
     private FlowIdentifier flowIdentifier;
 
     private MajorVersion currentVersion;
@@ -29,7 +31,12 @@ public class UpgradeDatabaseResponse {
     }
 
     public UpgradeDatabaseResponse(String reason, FlowIdentifier flowIdentifier, MajorVersion currentVersion) {
+        this(reason, false, flowIdentifier, currentVersion);
+    }
+
+    public UpgradeDatabaseResponse(String reason, boolean warning, FlowIdentifier flowIdentifier, MajorVersion currentVersion) {
         this.reason = reason;
+        this.warning = warning;
         this.flowIdentifier = flowIdentifier;
         this.currentVersion = currentVersion;
     }
@@ -50,21 +57,20 @@ public class UpgradeDatabaseResponse {
         this.reason = reason;
     }
 
+    public boolean isWarning() {
+        return warning;
+    }
+
+    public void setWarning(boolean warning) {
+        this.warning = warning;
+    }
+
     public FlowIdentifier getFlowIdentifier() {
         return flowIdentifier;
     }
 
     public void setFlowIdentifier(FlowIdentifier flowIdentifier) {
         this.flowIdentifier = flowIdentifier;
-    }
-
-    @Override
-    public String toString() {
-        return "UpgradeDatabaseResponse{" +
-                "reason='" + reason + '\'' +
-                ", flowIdentifier=" + flowIdentifier +
-                ", currentVersion=" + currentVersion +
-                '}';
     }
 
     @Override
@@ -76,11 +82,22 @@ public class UpgradeDatabaseResponse {
             return false;
         }
         UpgradeDatabaseResponse that = (UpgradeDatabaseResponse) o;
-        return Objects.equals(reason, that.reason) && Objects.equals(flowIdentifier, that.flowIdentifier) && currentVersion == that.currentVersion;
+        return warning == that.warning && Objects.equals(reason, that.reason) && Objects.equals(flowIdentifier, that.flowIdentifier) &&
+                currentVersion == that.currentVersion;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(reason, flowIdentifier, currentVersion);
+        return Objects.hash(reason, warning, flowIdentifier, currentVersion);
+    }
+
+    @Override
+    public String toString() {
+        return "UpgradeDatabaseResponse{" +
+                "reason='" + reason + '\'' +
+                ", warning=" + warning +
+                ", flowIdentifier=" + flowIdentifier +
+                ", currentVersion=" + currentVersion +
+                '}';
     }
 }

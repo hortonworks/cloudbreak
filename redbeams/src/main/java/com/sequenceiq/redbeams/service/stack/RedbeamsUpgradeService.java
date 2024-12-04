@@ -117,7 +117,7 @@ public class RedbeamsUpgradeService {
             return new UpgradeDatabaseResponse(dbStack.getMajorVersion());
         } catch (RdsAutoMigrationException autoMigrationException) {
             databaseAutoMigrationUpdater.updateDatabaseIfAutoMigrationHappened(dbStack, autoMigrationException);
-            return new UpgradeDatabaseResponse(autoMigrationException.getMessage(), dbStack.getMajorVersion());
+            return new UpgradeDatabaseResponse(autoMigrationException.getMessage(), true, null, dbStack.getMajorVersion());
         } catch (Exception ex) {
             LOGGER.warn("RDS upgrade validation failed on provider side", ex);
             return new UpgradeDatabaseResponse(ex.getMessage(), dbStack.getMajorVersion());

@@ -102,10 +102,8 @@ public class AzureRDSAutoMigrationValidatorTest {
     void testValidateWhenFlexibleServer() {
         when(databaseServer.getStringParameter(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY)).thenReturn(AzureDatabaseType.FLEXIBLE_SERVER.name());
 
-        AzureRDSAutoMigrationException azureRDSAutoMigrationException = assertThrows(AzureRDSAutoMigrationException.class,
-                () -> underTest.validate(authenticatedContext, databaseStack));
+        underTest.validate(authenticatedContext, databaseStack);
 
-        assertTrue(azureRDSAutoMigrationException.getAzureRDSAutoMigrationParams().isEmpty());
         verify(azureResourceGroupMetadataProvider, never()).getResourceGroupName(any(), any(DatabaseStack.class));
         verify(azureFlexibleServerClient, never()).getFlexibleServer(anyString(), anyString());
     }

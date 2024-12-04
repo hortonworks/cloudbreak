@@ -406,7 +406,13 @@ public class SdxController implements SdxEndpoint {
     @Override
     @InternalOnly
     public RangerCloudIdentitySyncStatus getRangerCloudIdentitySyncStatus(@TenantAwareParam String envCrn, long commandId) {
-        return rangerCloudIdentityService.getRangerCloudIdentitySyncStatus(envCrn, commandId);
+        return rangerCloudIdentityService.getRangerCloudIdentitySyncStatus(envCrn, List.of(commandId));
+    }
+
+    @Override
+    @InternalOnly
+    public RangerCloudIdentitySyncStatus getRangerCloudIdentitySyncStatus(@TenantAwareParam String envCrn, List<Long> commandIds) {
+        return rangerCloudIdentityService.getRangerCloudIdentitySyncStatus(envCrn, commandIds);
     }
 
     @Override
