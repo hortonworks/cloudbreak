@@ -59,7 +59,7 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
-import com.sequenceiq.cloudbreak.service.salt.SaltVersionValidatorService;
+import com.sequenceiq.cloudbreak.service.salt.SaltVersionUpgradeService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
@@ -130,7 +130,7 @@ public class ClusterRepairService {
     private StackUpgradeService stackUpgradeService;
 
     @Inject
-    private SaltVersionValidatorService saltVersionValidatorService;
+    private SaltVersionUpgradeService saltVersionUpgradeService;
 
     public FlowIdentifier repairAll(StackView stackView, boolean upgrade, boolean keepVariant) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
@@ -239,7 +239,7 @@ public class ClusterRepairService {
     }
 
     private boolean isAllGatewaySelectedWhenSaltVersionIsOutdated(ManualClusterRepairMode repairMode, Set<String> selectedParts, StackDto stack) {
-        Set<String> gatewayInstancesWithOutdatedSaltVersion = saltVersionValidatorService.getGatewayInstancesWithOutdatedSaltVersion(stack);
+        Set<String> gatewayInstancesWithOutdatedSaltVersion = saltVersionUpgradeService.getGatewayInstancesWithOutdatedSaltVersion(stack);
         if (!selectedParts.isEmpty() && !gatewayInstancesWithOutdatedSaltVersion.isEmpty()) {
             if (ManualClusterRepairMode.HOST_GROUP.equals(repairMode)) {
                 return selectedParts.contains(stack.getPrimaryGatewayGroup().getGroupName());

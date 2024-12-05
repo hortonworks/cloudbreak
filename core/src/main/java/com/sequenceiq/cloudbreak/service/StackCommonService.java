@@ -58,7 +58,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
-import com.sequenceiq.cloudbreak.service.salt.SaltVersionValidatorService;
+import com.sequenceiq.cloudbreak.service.salt.SaltVersionUpgradeService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -136,7 +136,7 @@ public class StackCommonService {
     private NodeCountLimitValidator nodeCountLimitValidator;
 
     @Inject
-    private SaltVersionValidatorService saltVersionValidatorService;
+    private SaltVersionUpgradeService saltVersionUpgradeService;
 
     @Inject
     private StackScaleV4RequestToUpdateStackV4RequestConverter stackScaleV4RequestToUpdateStackV4RequestConverter;
@@ -331,7 +331,7 @@ public class StackCommonService {
         Integer scalingAdjustment = updateStackJson.getInstanceGroupAdjustment().getScalingAdjustment();
         validateScalingRequest(stack.getStack(), scalingAdjustment);
         if (scalingAdjustment > 0) {
-            saltVersionValidatorService.validateSaltVersion(stack);
+            saltVersionUpgradeService.validateSaltVersion(stack);
         }
 
         FlowIdentifier flowIdentifier;

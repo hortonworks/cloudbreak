@@ -75,7 +75,7 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
-import com.sequenceiq.cloudbreak.service.salt.SaltVersionValidatorService;
+import com.sequenceiq.cloudbreak.service.salt.SaltVersionUpgradeService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -176,7 +176,7 @@ class StackCommonServiceTest {
     private ClusterOperationService clusterOperationService;
 
     @Mock
-    private SaltVersionValidatorService saltVersionValidatorService;
+    private SaltVersionUpgradeService saltVersionUpgradeService;
 
     @InjectMocks
     private StackCommonService underTest;
@@ -241,7 +241,7 @@ class StackCommonServiceTest {
         if (!inputAdjustmentType.equals(finalAdjustmentType)) {
             verify(eventService).fireCloudbreakEvent(any(), any(), eq(STACK_UPSCALE_ADJUSTMENT_TYPE_FALLBACK));
         }
-        verify(saltVersionValidatorService, times(1)).validateSaltVersion(eq(stack));
+        verify(saltVersionUpgradeService, times(1)).validateSaltVersion(eq(stack));
     }
 
     @Test

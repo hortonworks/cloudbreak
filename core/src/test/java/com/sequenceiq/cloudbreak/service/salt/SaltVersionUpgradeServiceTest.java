@@ -1,15 +1,24 @@
 package com.sequenceiq.cloudbreak.service.salt;
 
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.SALT_MASTER_KEY_PAIR;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.SALT_SIGN_KEY_PAIR;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import org.apache.commons.codec.binary.Base64;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,20 +30,30 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
+import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
+import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @ExtendWith(MockitoExtension.class)
-class SaltVersionValidatorServiceTest {
+class SaltVersionUpgradeServiceTest {
 
     private static final Long STACK_ID = 1L;
 
     @InjectMocks
-    private SaltVersionValidatorService underTest;
+    private SaltVersionUpgradeService underTest;
 
     @Mock
     private ImageService imageService;
+
+    @Mock
+    private StackDtoService stackDtoService;
+
+    @Mock
+    private StackDto stackDto;
 
     @Test
     void testanyGatewayInstanceHasOutdatedSaltVersionsWhenTheyMatch() throws CloudbreakImageNotFoundException {
@@ -95,6 +114,37 @@ class SaltVersionValidatorServiceTest {
         when(imageService.getImage(STACK_ID)).thenReturn(getImage(""));
         StackDto stackDto = stack(List.of(instanceMetadata("1", "")));
         assertDoesNotThrow(() -> underTest.validateSaltVersion(stackDto));
+    }
+
+    @Test
+    void testGetSaltSecretRotationTriggerEventWhenSaltMasterAndSaltSignKeysAreIncompatible() {
+        SecurityConfig securityConfig = new SecurityConfig();
+        SaltSecurityConfig saltSecurityConfig = new SaltSecurityConfig();
+        saltSecurityConfig.setSaltSignPublicKey(new String(Base64.encodeBase64("ssh-rsa".getBytes())));
+        securityConfig.setSaltSecurityConfig(saltSecurityConfig);
+        when(stackDto.getSecurityConfig()).thenReturn(securityConfig);
+        when(stackDto.getAllAvailableGatewayInstances()).thenReturn(List.of(mock(InstanceMetadataView.class), mock(InstanceMetadataView.class)));
+        when(stackDtoService.getByIdWithoutResources(eq(STACK_ID))).thenReturn(stackDto);
+        Optional<SecretRotationFlowChainTriggerEvent> triggerEvent = underTest.getSaltSecretRotationTriggerEvent(STACK_ID);
+        assertTrue(triggerEvent.isPresent());
+        SecretRotationFlowChainTriggerEvent secretRotationTriggerEvent = triggerEvent.get();
+        assertThat(secretRotationTriggerEvent.getSecretTypes()).containsExactlyInAnyOrder(SALT_MASTER_KEY_PAIR, SALT_SIGN_KEY_PAIR);
+        assertNull(secretRotationTriggerEvent.getExecutionType());
+        assertNull(secretRotationTriggerEvent.getAdditionalProperties());
+    }
+
+    @Test
+    void testGetSaltSecretRotationTriggerEventWhenSaltMasterAndSaltSignKeysAreCompatible() {
+        SecurityConfig securityConfig = new SecurityConfig();
+        SaltSecurityConfig saltSecurityConfig = new SaltSecurityConfig();
+        saltSecurityConfig.setSaltSignPublicKey(new String(Base64.encodeBase64("-----BEGIN PUBLIC KEY-----publickey-----END PUBLIC KEY-----".getBytes())));
+        saltSecurityConfig.setSaltMasterPrivateKey("masterkey");
+        securityConfig.setSaltSecurityConfig(saltSecurityConfig);
+        when(stackDto.getSecurityConfig()).thenReturn(securityConfig);
+        when(stackDto.getAllAvailableGatewayInstances()).thenReturn(List.of(mock(InstanceMetadataView.class), mock(InstanceMetadataView.class)));
+        when(stackDtoService.getByIdWithoutResources(eq(STACK_ID))).thenReturn(stackDto);
+        Optional<SecretRotationFlowChainTriggerEvent> triggerEvent = underTest.getSaltSecretRotationTriggerEvent(STACK_ID);
+        assertFalse(triggerEvent.isPresent());
     }
 
     private StackDto stack(List<InstanceMetadataView> instances) {

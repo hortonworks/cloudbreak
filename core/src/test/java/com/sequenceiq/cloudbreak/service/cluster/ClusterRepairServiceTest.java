@@ -82,7 +82,7 @@ import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
-import com.sequenceiq.cloudbreak.service.salt.SaltVersionValidatorService;
+import com.sequenceiq.cloudbreak.service.salt.SaltVersionUpgradeService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
@@ -176,7 +176,7 @@ class ClusterRepairServiceTest {
     private StackUpgradeService stackUpgradeService;
 
     @Mock
-    private SaltVersionValidatorService saltVersionValidatorService;
+    private SaltVersionUpgradeService saltVersionUpgradeService;
 
     private Stack stack;
 
@@ -655,7 +655,7 @@ class ClusterRepairServiceTest {
         when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
         when(stackStopRestrictionService.isInfrastructureStoppable(stackDto)).thenReturn(StopRestrictionReason.NONE);
-        when(saltVersionValidatorService.getGatewayInstancesWithOutdatedSaltVersion(eq(stackDto))).thenReturn(Set.of("instance1"));
+        when(saltVersionUpgradeService.getGatewayInstancesWithOutdatedSaltVersion(eq(stackDto))).thenReturn(Set.of("instance1"));
 
         HostGroup hostGroup1 = new HostGroup();
         hostGroup1.setName("hostGroup1");
@@ -677,7 +677,7 @@ class ClusterRepairServiceTest {
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
         when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
-        when(saltVersionValidatorService.getGatewayInstancesWithOutdatedSaltVersion(eq(stackDto))).thenReturn(Set.of("instance1"));
+        when(saltVersionUpgradeService.getGatewayInstancesWithOutdatedSaltVersion(eq(stackDto))).thenReturn(Set.of("instance1"));
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> actual =
@@ -692,7 +692,7 @@ class ClusterRepairServiceTest {
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
         when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
-        when(saltVersionValidatorService.getGatewayInstancesWithOutdatedSaltVersion(eq(stackDto))).thenReturn(Set.of("instance1"));
+        when(saltVersionUpgradeService.getGatewayInstancesWithOutdatedSaltVersion(eq(stackDto))).thenReturn(Set.of("instance1"));
         InstanceGroupView gatewayGroup = mock(InstanceGroupView.class);
         when(gatewayGroup.getGroupName()).thenReturn("gateway");
         doReturn(gatewayGroup).when(stackDto).getPrimaryGatewayGroup();

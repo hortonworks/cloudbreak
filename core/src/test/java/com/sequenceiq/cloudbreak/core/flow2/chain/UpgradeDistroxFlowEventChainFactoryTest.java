@@ -7,6 +7,8 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.prep
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_VALIDATION_INIT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent.SALT_UPDATE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleEvent.STOPSTART_UPSCALE_TRIGGER_EVENT;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.SALT_MASTER_KEY_PAIR;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
@@ -48,11 +50,13 @@ import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType;
+import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
 import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
+import com.sequenceiq.cloudbreak.service.salt.SaltVersionUpgradeService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeAvailabilityService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -67,10 +71,10 @@ class UpgradeDistroxFlowEventChainFactoryTest {
 
     private static final String RH_IMAGE = "rh-image";
 
+    private final ImageChangeDto imageChangeDto = new ImageChangeDto(STACK_ID, IMAGE_ID, "imageCatalogName", "imageCatUrl");
+
     @InjectMocks
     private UpgradeDistroxFlowEventChainFactory underTest;
-
-    private final ImageChangeDto imageChangeDto = new ImageChangeDto(STACK_ID, IMAGE_ID, "imageCatalogName", "imageCatUrl");
 
     @Mock
     private ClusterRepairService clusterRepairService;
@@ -87,29 +91,35 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     @Mock
     private EmbeddedDbUpgradeFlowTriggersFactory embeddedDbUpgradeFlowTriggersFactory;
 
+    @Mock
+    private SaltVersionUpgradeService saltVersionUpgradeService;
+
     @Test
-    public void testInitEvent() {
+    void testInitEvent() {
         assertEquals(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, underTest.initEvent());
     }
 
     @Test
-    public void testChainQueueForNonReplaceVms() {
+    void testChainQueueForNonReplaceVms() {
         when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
+        when(saltVersionUpgradeService.getSaltSecretRotationTriggerEvent(1L))
+                .thenReturn(Optional.of(new SecretRotationFlowChainTriggerEvent(null, 1L, null, List.of(SALT_MASTER_KEY_PAIR), null, null)));
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
         DistroXUpgradeTriggerEvent event = new DistroXUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
                 new Promise<>(), imageChangeDto, false, false, "variant", true, "runtime");
         FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
-        assertEquals(5, flowChainQueue.getQueue().size());
+        assertEquals(6, flowChainQueue.getQueue().size());
         assertUpdateValidationEvent(flowChainQueue, IMAGE_ID, event.isReplaceVms(), event.isLockComponents(), event.isRollingUpgradeEnabled());
         assertUpdatePreparationEvent(flowChainQueue, IMAGE_ID);
+        assertSaltSecretRotationTriggerEvent(flowChainQueue);
         assertSaltUpdateEvent(flowChainQueue);
         assertUpgradeEvent(flowChainQueue, IMAGE_ID);
         assertImageUpdateEvent(flowChainQueue);
     }
 
     @Test
-    public void testChainQueueForUpgradeWithStoppedNodes() {
+    void testChainQueueForUpgradeWithStoppedNodes() {
         when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
 
         HostGroup hostGroup1 = new HostGroup();
@@ -140,7 +150,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     }
 
     @Test
-    public void testChainQueueForRollingUpgradeWithReplaceVms() {
+    void testChainQueueForRollingUpgradeWithReplaceVms() {
         when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
@@ -159,7 +169,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     }
 
     @Test
-    public void testChainQueueForReplaceVmsWithHundredNodes() {
+    void testChainQueueForReplaceVmsWithHundredNodes() {
         when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
@@ -187,7 +197,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     }
 
     @Test
-    public void testCreateFlowTriggerEventQueueWhenCentosToRedHadRuntimeUpgradeIsAvailable() {
+    void testCreateFlowTriggerEventQueueWhenCentosToRedHadRuntimeUpgradeIsAvailable() {
         when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID))
                 .thenReturn(Optional.of(Image.builder().withUuid(RH_IMAGE).build()));
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
@@ -229,6 +239,13 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         assertEquals(STOPSTART_UPSCALE_TRIGGER_EVENT.event(), clusterScaleEvent.selector());
         assertEquals(STACK_ID, clusterScaleEvent.getResourceId());
         assertInstanceOf(StopStartUpscaleTriggerEvent.class, clusterScaleEvent);
+    }
+
+    private void assertSaltSecretRotationTriggerEvent(FlowTriggerEventQueue flowChainQueue) {
+        Selectable saltSecretRotationEvent = flowChainQueue.getQueue().remove();
+        assertInstanceOf(SecretRotationFlowChainTriggerEvent.class, saltSecretRotationEvent);
+        SecretRotationFlowChainTriggerEvent secretRotationFlowChainTriggerEvent = (SecretRotationFlowChainTriggerEvent) saltSecretRotationEvent;
+        assertThat(secretRotationFlowChainTriggerEvent.getSecretTypes()).containsExactlyInAnyOrder(SALT_MASTER_KEY_PAIR);
     }
 
     private void assertSaltUpdateEvent(FlowTriggerEventQueue flowChainQueue) {
