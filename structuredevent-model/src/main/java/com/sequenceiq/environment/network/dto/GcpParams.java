@@ -49,6 +49,11 @@ public class GcpParams {
         return availabilityZones;
     }
 
+    public void updateAvailabilityZones(Set<String> availabilityZones) {
+        this.availabilityZones.clear();
+        this.availabilityZones.addAll(availabilityZones);
+    }
+
     public static Builder builder() {
         return new Builder();
     }

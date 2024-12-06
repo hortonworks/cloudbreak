@@ -166,6 +166,18 @@ public class GcpEnvironmentNetworkValidator implements EnvironmentNetworkValidat
                             zonesInRegion.stream().map(AvailabilityZone::value).collect(Collectors.joining(",")));
                     LOGGER.info(msg);
                     resultBuilder.error(msg);
+                } else {
+                    Set<String> existingAvailabilityZones = getAvailabilityZones(environmentDto);
+                    if (CollectionUtils.isNotEmpty(existingAvailabilityZones)) {
+                        if (!CollectionUtils.containsAll(networkDto.getGcp().getAvailabilityZones(), existingAvailabilityZones)) {
+                            String message = String.format("Provided Availability Zones for environment do not contain the existing Availability Zones. " +
+                                            "Provided Availability Zones : %s. Existing Availability Zones : %s", networkDto.getGcp().getAvailabilityZones()
+                                            .stream().sorted().collect(Collectors.joining(",")),
+                                    existingAvailabilityZones.stream().sorted().collect(Collectors.joining(",")));
+                            LOGGER.info(message);
+                            resultBuilder.error(message);
+                        }
+                    }
                 }
             } else {
                 String errorMessage = String.format(INVALID_REGION_PATTERN, requestedRegion.getRegionName());
@@ -174,6 +186,15 @@ public class GcpEnvironmentNetworkValidator implements EnvironmentNetworkValidat
             }
 
         }
+    }
+
+    private Set<String> getAvailabilityZones(EnvironmentDto environmentDto) {
+        Set<String> availabilityZones = null;
+        if (environmentDto != null && environmentDto.getNetwork() != null
+                && environmentDto.getNetwork().getGcp() != null) {
+            availabilityZones = environmentDto.getNetwork().getGcp().getAvailabilityZones();
+        }
+        return availabilityZones;
     }
 
     @Override

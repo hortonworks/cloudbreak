@@ -512,6 +512,8 @@ public class NetworkDto {
         public Builder withAvailabilityZones(Set<String> availabilityZones) {
             if (azure != null) {
                 azure.setAvailabilityZones(availabilityZones);
+            } else if (gcp != null) {
+                gcp.updateAvailabilityZones(availabilityZones);
             }
             return this;
         }

@@ -270,6 +270,76 @@ class GcpEnvironmentNetworkValidatorTest {
     }
 
     @Test
+    void testCheckAvailabilityZoneDuringValidateDuringFlowWhenRequestedZonesDoesNotContainExistingZones() {
+        Region region = Region.region("region");
+        GcpParams gcpParams = GcpParams.builder()
+                .withAvailabilityZones(Set.of("us-west2-c"))
+                .build();
+        NetworkDto networkDto = NetworkDto.builder()
+                .withGcp(gcpParams)
+                .build();
+        GcpParams existingGcpParams = GcpParams.builder()
+                .withAvailabilityZones(Set.of("us-west2-c", "us-west2-a"))
+                .build();
+        NetworkDto existingNetworkDto = NetworkDto.builder()
+                .withGcp(existingGcpParams)
+                .build();
+        EnvironmentDto environmentDto = EnvironmentDto.builder()
+                .withLocationDto(LocationDto.builder()
+                                .withName(region.getRegionName())
+                                .build()).build();
+        environmentDto.setNetwork(existingNetworkDto);
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder()
+                .withEnvironmentDto(environmentDto)
+                .build();
+
+        setupRegionsByCredential(region, "us-west2-c", "us-west2-a");
+
+        underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
+
+        verify(cloudNetworkService, times(1)).retrieveSubnetMetadata(any(EnvironmentDto.class), any(NetworkDto.class));
+        verifyNoMoreInteractions(cloudNetworkService);
+        verify(platformParameterService, times(1)).getRegionsByCredential(any(), eq(Boolean.TRUE));
+        String expectedErrorMsg = "Provided Availability Zones for environment do not contain the existing Availability Zones. " +
+                "Provided Availability Zones : us-west2-c. Existing Availability Zones : us-west2-a,us-west2-c";
+        verify(validationResultBuilder, times(1)).error(expectedErrorMsg);
+    }
+
+    @Test
+    void testCheckAvailabilityZoneDuringValidateDuringFlowWhenRequestedZonesContainExistingZones() {
+        Region region = Region.region("region");
+        GcpParams gcpParams = GcpParams.builder()
+                .withAvailabilityZones(Set.of("us-west2-c", "us-west2-a"))
+                .build();
+        NetworkDto networkDto = NetworkDto.builder()
+                .withGcp(gcpParams)
+                .build();
+        GcpParams existingGcpParams = GcpParams.builder()
+                .withAvailabilityZones(Set.of("us-west2-c"))
+                .build();
+        NetworkDto existingNetworkDto = NetworkDto.builder()
+                .withGcp(existingGcpParams)
+                .build();
+        EnvironmentDto environmentDto = EnvironmentDto.builder()
+                .withLocationDto(LocationDto.builder()
+                        .withName(region.getRegionName())
+                        .build()).build();
+        environmentDto.setNetwork(existingNetworkDto);
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder()
+                .withEnvironmentDto(environmentDto)
+                .build();
+
+        setupRegionsByCredential(region, "us-west2-c", "us-west2-a");
+
+        underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
+
+        verify(cloudNetworkService, times(1)).retrieveSubnetMetadata(any(EnvironmentDto.class), any(NetworkDto.class));
+        verifyNoMoreInteractions(cloudNetworkService);
+        verify(platformParameterService, times(1)).getRegionsByCredential(any(), eq(Boolean.TRUE));
+        verifyNoInteractions(validationResultBuilder);
+    }
+
+    @Test
     void testCheckAvailabilityZoneDuringValidateDuringFlowWhenAllTheRequestedRegionExistOnGcpSide() {
         Region region = Region.region("region");
         GcpParams gcpParams = GcpParams.builder()
