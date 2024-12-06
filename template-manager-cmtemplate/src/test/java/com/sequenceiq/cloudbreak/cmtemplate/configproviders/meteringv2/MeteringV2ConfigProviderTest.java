@@ -14,11 +14,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -37,6 +39,12 @@ class MeteringV2ConfigProviderTest {
 
     @InjectMocks
     private MeteringV2ConfigProvider underTest;
+
+    @BeforeEach
+    void setup() {
+        ReflectionTestUtils.setField(underTest, "dbusAppName", "manowar_dev-mow-MeteringV2");
+        ReflectionTestUtils.setField(underTest, "dbusStreamName", "manowar_dev-mow-MeteringV2");
+    }
 
     @Test
     void getAdditionalServicesButDLMIsNotPresent() {

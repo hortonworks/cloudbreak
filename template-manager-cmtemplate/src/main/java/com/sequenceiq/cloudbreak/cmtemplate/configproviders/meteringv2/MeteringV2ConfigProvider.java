@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,10 +42,10 @@ public class MeteringV2ConfigProvider extends AbstractRoleConfigProvider {
     @Inject
     private AltusDatabusConfiguration altusDatabusConfiguration;
 
-    @Value("${meteringv2.dbus.app.name:}")
+    @Value("${meteringv2.dbus.app.name:manowar_dev-mow-MeteringV2}")
     private String dbusAppName;
 
-    @Value("${meteringv2.dbus.stream.name:}")
+    @Value("${meteringv2.dbus.stream.name:manowar_dev-mow-MeteringV2}")
     private String dbusStreamName;
 
     @Value("${crn.region:}")
@@ -123,6 +124,8 @@ public class MeteringV2ConfigProvider extends AbstractRoleConfigProvider {
     @Override
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
         // If DLM is present, return true.
-        return cmTemplateProcessor.isRoleTypePresentInService(DLM_SERVICE, Lists.newArrayList(DLM_SERVER));
+        return cmTemplateProcessor.isRoleTypePresentInService(DLM_SERVICE, Lists.newArrayList(DLM_SERVER))
+                && StringUtils.isNotBlank(dbusAppName)
+                && StringUtils.isNotBlank(dbusStreamName);
     }
 }
