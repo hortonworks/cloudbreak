@@ -860,8 +860,9 @@ We are using Openapi to create API definitions for our services. The following l
 |    Environment    |     https://environment-swagger.s3.us-east-2.amazonaws.com/openapi-<VERSION>.json     |
 |     DataLake      |      https://datalake-swagger.s3.us-east-2.amazonaws.com/openapi-<VERSION>.json       |
 |     RedBeams      |      https://redbeams-swagger.s3.us-east-2.amazonaws.com/openapi-<VERSION>.json       |
+|     Periscope     |      https://autoscale-swagger.s3.us-east-2.amazonaws.com/openapi-<VERSION>.json      |
 | RemoteEnvironment |  https://remoteenvironment-swagger.s3.us-east-2.amazonaws.com/openapi-<VERSION>.json  |
-|  ExternalCompute  |https://externalizedcompute-swagger.s3.us-east-2.amazonaws.com/openapi-<VERSION>.json |
+|  ExternalCompute  | https://externalizedcompute-swagger.s3.us-east-2.amazonaws.com/openapi-<VERSION>.json |
 
 # How to Contribute
 

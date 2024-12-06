@@ -12,12 +12,12 @@ echo -e "OpenAPI check\n"
 mkdir -p ./apidefinitions
 cp ../core/build/openapi/cb.json ./apidefinitions/cloudbreak.json
 cp ../environment/build/openapi/environment.json ./apidefinitions/environment.json
-cp ../environment-remote/build/openapi/remoteenvironment.json ./apidefinitions/remoteenvironment.json
 cp ../freeipa/build/openapi/freeipa.json ./apidefinitions/freeipa.json
 cp ../redbeams/build/openapi/redbeams.json ./apidefinitions/redbeams.json
 cp ../datalake/build/openapi/datalake.json ./apidefinitions/datalake.json
 cp ../autoscale/build/openapi/autoscale.json ./apidefinitions/autoscale.json
 cp ../environment-remote/build/openapi/remoteenvironment.json ./apidefinitions/remoteenvironment.json
+cp ../externalized-compute/build/openapi/externalizedcompute.json ./apidefinitions/externalizedcompute.json
 
 verlte() {
     [  "$1" = "`echo -e "$1\n$2" | sort -V | head -n1`" ]
@@ -75,8 +75,8 @@ echo where major version number is: $MAJOR_VERSION, minor: $MINOR_VERSION, patch
 PREVIOUS_MINOR_VERSION=$MAJOR_VERSION.$(expr $MINOR_VERSION - 1).$PATCH_VERSION
 PREVIOUS_MINOR_BUILD=$(curl "http://release.infra.cloudera.com/hwre-api/listbuilds?stack=CB&release=${PREVIOUS_MINOR_VERSION}" | jq -r '.latest_build_version')
 PREVIOUS_BUILD=$(curl "http://release.infra.cloudera.com/hwre-api/listbuilds?stack=CB&release=$VERSION" | jq '.full_list_versions[0]' | tr -d '"')
-Services="cloudbreak,freeipa,environment,datalake,redbeams,remoteenvironment"
-declare -A zone=( ["cloudbreak"]="eu-central-1" ["environment"]="us-east-2" ["datalake"]="us-east-2" ["redbeams"]="us-east-2" ["freeipa"]="us-east-2" ["remoteenvironment"]="us-east-2")
+Services="cloudbreak,freeipa,environment,datalake,redbeams,autoscale,remoteenvironment,externalizedcompute"
+declare -A zone=( ["cloudbreak"]="eu-central-1" ["freeipa"]="us-east-2" ["environment"]="us-east-2" ["datalake"]="us-east-2" ["redbeams"]="us-east-2" ["autoscale"]="us-east-2" ["remoteenvironment"]="us-east-2" ["externalizedcompute"]="us-east-2")
 Field_Separator=$IFS
 IFS=,
 set +e
