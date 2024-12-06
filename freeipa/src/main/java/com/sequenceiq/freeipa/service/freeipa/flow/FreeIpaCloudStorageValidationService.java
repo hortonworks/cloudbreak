@@ -2,7 +2,6 @@ package com.sequenceiq.freeipa.service.freeipa.flow;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -14,12 +13,8 @@ import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
-import com.sequenceiq.cloudbreak.orchestrator.host.TelemetryOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.telemetry.converter.DiagnosticCloudStorageConverter;
 import com.sequenceiq.cloudbreak.util.DocumentationLinkProvider;
-import com.sequenceiq.common.model.diagnostics.CloudStorageDiagnosticsParameters;
-import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
 import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -37,12 +32,6 @@ public class FreeIpaCloudStorageValidationService {
     private HostOrchestrator hostOrchestrator;
 
     @Inject
-    private TelemetryOrchestrator telemetryOrchestrator;
-
-    @Inject
-    private DiagnosticCloudStorageConverter diagnosticCloudStorageConverter;
-
-    @Inject
     private GatewayConfigService gatewayConfigService;
 
     @Inject
@@ -56,30 +45,13 @@ public class FreeIpaCloudStorageValidationService {
         validateCloudStorageBackup(stack, allGateways, allNodes, exitCriteriaModel);
     }
 
-    private void validateCloudStorageBackup(Stack stack, List<GatewayConfig> allGateways, Set<Node> allNodes, StackBasedExitCriteriaModel exitCriteriaModel) {
+    private void validateCloudStorageBackup(Stack stack, List<GatewayConfig> allGateways, Set<Node> allNodes, StackBasedExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorFailedException {
         try {
             GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
             hostOrchestrator.validateCloudStorageBackup(primaryGatewayConfig, allGateways, allNodes, exitCriteriaModel);
         } catch (CloudbreakOrchestratorException e) {
             String errorMessage = getErrorMessage(stack, "backup");
-            LOGGER.error(errorMessage, e);
-        }
-    }
-
-    private void validateCloudStorage(Stack stack, List<GatewayConfig> allGateways, Set<Node> allNodes, StackBasedExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorFailedException {
-        try {
-            if (stack.getTelemetry() != null && stack.getTelemetry().isCloudStorageLoggingEnabled()) {
-                Set<String> targetHostNames = allNodes.stream().map(Node::getHostname).limit(1).collect(Collectors.toSet());
-                CloudStorageDiagnosticsParameters cloudStorageParameters = diagnosticCloudStorageConverter
-                        .loggingToCloudStorageDiagnosticsParameters(stack.getTelemetry().getLogging(), stack.getRegion());
-                DiagnosticParameters parameters = new DiagnosticParameters();
-                parameters.setRoot(DiagnosticParameters.TELEMETRY_ROOT);
-                parameters.setCloudStorageDiagnosticsParameters(cloudStorageParameters);
-                telemetryOrchestrator.validateCloudStorage(allGateways, allNodes, targetHostNames, parameters.toMap(), exitCriteriaModel);
-            }
-        } catch (CloudbreakOrchestratorException e) {
-            String errorMessage = getErrorMessage(stack, "logging");
             LOGGER.error(errorMessage, e);
             throw new CloudbreakOrchestratorFailedException(errorMessage, e);
         }
