@@ -14,7 +14,7 @@ ext {
   springFrameworkVersion = '6.1.14'
   springRetryVersion = '2.0.9'
   springSecurityJwtVersion = '1.1.1.RELEASE'
-  springSecurityVersion = '6.4.0'
+  springSecurityVersion = '6.4.1'
   springStateMachineCoreVersion = '2.5.0'
   springVaultCoreVersion = '3.0.4'
   aspectjVersion = '1.9.22.1'
