@@ -178,5 +178,9 @@
   {
     "label": "ipa-restore-update-dns-log",
     "path": "/var/log/ipa-restore-update-dns.log"
+  },
+  {
+    "path": "/var/log/audit/audit.log",
+    "label": "audit_log"
   }
 ]

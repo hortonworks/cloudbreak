@@ -450,5 +450,9 @@
   {
     "label": "add_dns_record_log",
     "path": "/var/log/dnsrecord-add*.log"
+  },
+  {
+    "path": "/var/log/audit/audit.log",
+    "label": "audit_log"
   }
 ]
