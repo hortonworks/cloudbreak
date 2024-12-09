@@ -87,7 +87,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         Cluster result = underTest.convert(request);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason",
-                "clusterManagerIp", "fileSystem", "additionalFileSystem", "rdsConfigs", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfigCrn",
+                "clusterManagerIp", "fileSystem", "additionalFileSystem", "rdsConfigs", "attributes", "uptime", "proxyConfigCrn",
                 "configStrategy", "extendedBlueprintText", "environmentCrn", "variant", "description", "databaseServerCrn", "fqdn", "customConfigurations",
                 "dbSslEnabled", "dbSslRootCertBundle"));
     }
@@ -107,7 +107,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         Cluster result = ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.convert(request));
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason",
-                "clusterManagerIp", "additionalFileSystem", "rdsConfigs", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfigCrn",
+                "clusterManagerIp", "additionalFileSystem", "rdsConfigs", "attributes", "uptime", "proxyConfigCrn",
                 "extendedBlueprintText", "environmentCrn", "variant", "description", "databaseServerCrn", "fqdn", "configStrategy", "customConfigurations",
                 "dbSslEnabled", "dbSslRootCertBundle"));
     }
@@ -123,7 +123,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         Cluster result = underTest.convert(clusterRequest);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason",
-                "clusterManagerIp", "fileSystem", "additionalFileSystem", "rdsConfigs", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfigCrn",
+                "clusterManagerIp", "fileSystem", "additionalFileSystem", "rdsConfigs", "attributes", "uptime", "proxyConfigCrn",
                 "configStrategy", "extendedBlueprintText", "gateway", "environmentCrn", "variant", "description", "databaseServerCrn", "fqdn",
                 "customConfigurations", "dbSslEnabled", "dbSslRootCertBundle"));
         assertNull(result.getGateway());

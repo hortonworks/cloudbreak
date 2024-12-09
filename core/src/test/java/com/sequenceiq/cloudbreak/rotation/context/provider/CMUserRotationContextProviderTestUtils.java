@@ -44,16 +44,6 @@ public class CMUserRotationContextProviderTestUtils {
             }
 
             @Override
-            public Secret getDpAmbariUserSecret() {
-                return createSecret("dpolduser");
-            }
-
-            @Override
-            public Secret getDpAmbariPasswordSecret() {
-                return createSecret("dpoldpassword");
-            }
-
-            @Override
             public Secret getCloudbreakClusterManagerUserSecretObject() {
                 return createSecret("cbuser");
             }
@@ -61,16 +51,6 @@ public class CMUserRotationContextProviderTestUtils {
             @Override
             public Secret getCloudbreakClusterManagerPasswordSecretObject() {
                 return createSecret("cbpassword");
-            }
-
-            @Override
-            public Secret getCloudbreakAmbariUserSecret() {
-                return createSecret("cbolduser");
-            }
-
-            @Override
-            public Secret getCloudbreakAmbariPasswordSecret() {
-                return createSecret("cboldpassword");
             }
         };
         FieldUtils.writeDeclaredField(stack, "cluster", cluster, true);

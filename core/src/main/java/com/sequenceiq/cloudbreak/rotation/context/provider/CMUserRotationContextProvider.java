@@ -3,8 +3,6 @@ package com.sequenceiq.cloudbreak.rotation.context.provider;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -43,8 +41,6 @@ public abstract class CMUserRotationContextProvider implements RotationContextPr
         String newPassword = PasswordUtil.generatePassword();
 
         Map<String, String> vaultPathMap = Maps.newHashMap();
-        vaultPathMap.putAll(getDuplicatedUserSecrets(cluster).stream().collect(Collectors.toMap(Secret::getSecret, secret -> newUser)));
-        vaultPathMap.putAll(getDuplicatedPasswordSecrets(cluster).stream().collect(Collectors.toMap(Secret::getSecret, secret -> newPassword)));
         vaultPathMap.put(userSecret.getSecret(), newUser);
         vaultPathMap.put(passwordSecret.getSecret(), newPassword);
         VaultRotationContext vaultRotationContext = VaultRotationContext.builder()
@@ -79,11 +75,4 @@ public abstract class CMUserRotationContextProvider implements RotationContextPr
     protected abstract Secret getUserSecret(ClusterView cluster);
 
     protected abstract Secret getPasswordSecret(ClusterView cluster);
-
-    // created different getters for duplicated secrets intentionally
-    // should be removed if duplicated secrets are also removed from entity (Cluster typically)
-    // these should be used only to update duplicated vault paths, every other use case should ignore/not use these getters but the ones above
-    protected abstract Set<Secret> getDuplicatedUserSecrets(ClusterView cluster);
-
-    protected abstract Set<Secret> getDuplicatedPasswordSecrets(ClusterView cluster);
 }

@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.rotation.context.provider;
 
-import java.util.Set;
-
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
@@ -17,16 +15,6 @@ public class CBCMAdminPasswordRotationContextProvider extends CMUserRotationCont
     @Override
     protected String getUserPrefix() {
         return USER_PREFIX;
-    }
-
-    @Override
-    protected Set<Secret> getDuplicatedUserSecrets(ClusterView cluster) {
-        return Set.of(cluster.getCloudbreakAmbariUserSecret());
-    }
-
-    @Override
-    protected Set<Secret> getDuplicatedPasswordSecrets(ClusterView cluster) {
-        return Set.of(cluster.getCloudbreakAmbariPasswordSecret());
     }
 
     @Override

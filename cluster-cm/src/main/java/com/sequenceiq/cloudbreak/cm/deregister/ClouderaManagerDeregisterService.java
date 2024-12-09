@@ -57,8 +57,8 @@ public class ClouderaManagerDeregisterService {
 
     public void deregister(HttpClientConfig clientConfig, StackDtoDelegate stack, Optional<DatalakeDto> datalakeDto) {
         ClusterView cluster = stack.getCluster();
-        String user = cluster.getCloudbreakAmbariUser();
-        String password = cluster.getCloudbreakAmbariPassword();
+        String user = cluster.getCloudbreakClusterManagerUser();
+        String password = cluster.getCloudbreakClusterManagerPassword();
         ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentConfigProvider.getClouderaManagerRepoDetails(cluster.getId());
         try {
             CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(stack.getBlueprint().getBlueprintJsonText());

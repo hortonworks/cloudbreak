@@ -86,8 +86,8 @@ public class DeregisterPrePositionFactoryTest {
 
         // Mock the stack's cluster
         Cluster cluster = mock(Cluster.class);
-        when(cluster.getCloudbreakAmbariUser()).thenReturn("user");
-        when(cluster.getCloudbreakAmbariPassword()).thenReturn("password");
+        when(cluster.getCloudbreakClusterManagerUser()).thenReturn("user");
+        when(cluster.getCloudbreakClusterManagerPassword()).thenReturn("password");
         when(stack.getCluster()).thenReturn(cluster);
 
         // Mock the tlsSecurityService to return an HttpClientConfig

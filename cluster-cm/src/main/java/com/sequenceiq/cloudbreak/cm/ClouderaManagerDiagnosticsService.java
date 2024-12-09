@@ -64,8 +64,8 @@ public class ClouderaManagerDiagnosticsService implements ClusterDiagnosticsServ
     @PostConstruct
     public void initApiClient() throws ClusterClientInitException {
         ClusterView cluster = stack.getCluster();
-        String cloudbreakAmbariUser = cluster.getCloudbreakAmbariUser();
-        String cloudbreakAmbariPassword = cluster.getCloudbreakAmbariPassword();
+        String cloudbreakAmbariUser = cluster.getCloudbreakClusterManagerUser();
+        String cloudbreakAmbariPassword = cluster.getCloudbreakClusterManagerPassword();
         try {
             client = clouderaManagerApiClientProvider
                     .getV31Client(stack.getGatewayPort(), cloudbreakAmbariUser, cloudbreakAmbariPassword, clientConfig);

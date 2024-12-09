@@ -23,7 +23,7 @@ public class GeneralClusterConfigs {
 
     private String password;
 
-    private String cloudbreakAmbariUser;
+    private String cloudbreakClusterManagerUser;
 
     private String cloudbreakAmbariPassword;
 
@@ -91,8 +91,8 @@ public class GeneralClusterConfigs {
         this.uuid = uuid;
     }
 
-    public void setCloudbreakAmbariUser(String cloudbreakAmbariUser) {
-        this.cloudbreakAmbariUser = cloudbreakAmbariUser;
+    public void setCloudbreakClusterManagerUser(String cloudbreakClusterManagerUser) {
+        this.cloudbreakClusterManagerUser = cloudbreakClusterManagerUser;
     }
 
     public void setCloudbreakAmbariPassword(String cloudbreakAmbariPassword) {
@@ -143,11 +143,11 @@ public class GeneralClusterConfigs {
         return password;
     }
 
-    public String getCloudbreakAmbariUser() {
-        return cloudbreakAmbariUser;
+    public String getCloudbreakClusterManagerUser() {
+        return cloudbreakClusterManagerUser;
     }
 
-    public String getCloudbreakAmbariPassword() {
+    public String getCloudbreakClusterManagerPassword() {
         return cloudbreakAmbariPassword;
     }
 

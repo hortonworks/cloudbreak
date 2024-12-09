@@ -76,8 +76,8 @@ public class StreamsMessagingManagerServiceConfigProvider extends AbstractRdsRol
             boolean ssl = source.getGeneralClusterConfigs().getAutoTlsEnabled();
             config = Lists.newArrayList(
                     config("cm.metrics.host", cmHost),
-                    config("cm.metrics.username", source.getGeneralClusterConfigs().getCloudbreakAmbariUser()),
-                    config("cm.metrics.password", source.getGeneralClusterConfigs().getCloudbreakAmbariPassword()),
+                    config("cm.metrics.username", source.getGeneralClusterConfigs().getCloudbreakClusterManagerUser()),
+                    config("cm.metrics.password", source.getGeneralClusterConfigs().getCloudbreakClusterManagerPassword()),
                     config("cm.metrics.protocol", ssl ? "https" : "http"),
                     config("cm.metrics.port", ssl ? "7183" : "7180")
             );

@@ -202,8 +202,8 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     @PostConstruct
     public void initApiClient() throws ClusterClientInitException {
         ClusterView cluster = stack.getCluster();
-        String user = cluster.getCloudbreakAmbariUser();
-        String password = cluster.getCloudbreakAmbariPassword();
+        String user = cluster.getCloudbreakClusterManagerUser();
+        String password = cluster.getCloudbreakClusterManagerPassword();
         try {
             v31Client = clouderaManagerApiClientProvider.getV31Client(stack.getGatewayPort(), user, password, clientConfig);
         } catch (ClouderaManagerClientInitException e) {
@@ -375,8 +375,8 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     private ApiClient buildv46ApiClient() throws CloudbreakException {
         ClusterView cluster = stack.getCluster();
-        String user = cluster.getCloudbreakAmbariUser();
-        String password = cluster.getCloudbreakAmbariPassword();
+        String user = cluster.getCloudbreakClusterManagerUser();
+        String password = cluster.getCloudbreakClusterManagerPassword();
         try {
             return clouderaManagerApiClientProvider.getV46Client(stack.getGatewayPort(), user, password, clientConfig);
         } catch (ClouderaManagerClientInitException e) {
@@ -494,8 +494,8 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_UPGRADE_START_POST_UPGRADE);
             clouderaManagerRestartService.waitForRestartExecutionIfPresent(v31Client, stack, rollingUpgradeEnabled);
             ClusterView cluster = stack.getCluster();
-            String user = cluster.getCloudbreakAmbariUser();
-            String password = cluster.getCloudbreakAmbariPassword();
+            String user = cluster.getCloudbreakClusterManagerUser();
+            String password = cluster.getCloudbreakClusterManagerPassword();
             try {
                 ApiClient v45Client = clouderaManagerApiClientProvider.getV45Client(stack.getGatewayPort(), user, password, clientConfig);
                 ClustersResourceApi clustersResourceV45Api = clouderaManagerApiFactory.getClustersResourceApi(v45Client);

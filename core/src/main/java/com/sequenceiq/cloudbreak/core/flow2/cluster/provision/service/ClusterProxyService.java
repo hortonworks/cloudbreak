@@ -223,11 +223,11 @@ public class ClusterProxyService {
     private ClusterServiceConfig cmServiceConfig(Stack stack, ClientCertificate clientCertificate, String serviceName, String clusterManagerUrl) {
         Cluster cluster = stack.getCluster();
 
-        String cloudbreakUser = cluster.getCloudbreakAmbariUser();
-        String cloudbreakPasswordVaultPath = vaultPath(cluster.getCloudbreakAmbariPasswordSecretPath(), false);
+        String cloudbreakUser = cluster.getCloudbreakClusterManagerUser();
+        String cloudbreakPasswordVaultPath = vaultPath(cluster.getCloudbreakClusterManagerPasswordSecretPath(), false);
 
-        String dpUser = cluster.getDpAmbariUser();
-        String dpPasswordVaultPath = vaultPath(cluster.getDpAmbariPasswordSecretPath(), false);
+        String dpUser = cluster.getDpClusterManagerUser();
+        String dpPasswordVaultPath = vaultPath(cluster.getDpClusterManagerPasswordSecretPath(), false);
 
         List<ClusterServiceCredential> credentials = asList(new ClusterServiceCredential(cloudbreakUser, cloudbreakPasswordVaultPath),
                 new ClusterServiceCredential(dpUser, dpPasswordVaultPath, true));

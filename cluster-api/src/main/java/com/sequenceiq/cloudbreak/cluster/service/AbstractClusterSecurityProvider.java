@@ -4,19 +4,19 @@ import com.sequenceiq.cloudbreak.view.ClusterView;
 
 public abstract class AbstractClusterSecurityProvider {
     public String getCloudbreakClusterUserName(ClusterView cluster) {
-        return cluster.getCloudbreakAmbariUser();
+        return cluster.getCloudbreakClusterManagerUser();
     }
 
     public String getCloudbreakClusterPassword(ClusterView cluster) {
-        return cluster.getCloudbreakAmbariPassword();
+        return cluster.getCloudbreakClusterManagerPassword();
     }
 
     public String getDataplaneClusterUserName(ClusterView cluster) {
-        return cluster.getDpAmbariUser();
+        return cluster.getDpClusterManagerUser();
     }
 
     public String getDataplaneClusterPassword(ClusterView cluster) {
-        return cluster.getDpAmbariPassword();
+        return cluster.getDpClusterManagerPassword();
     }
 
     public String getClusterUserProvidedPassword(ClusterView cluster) {

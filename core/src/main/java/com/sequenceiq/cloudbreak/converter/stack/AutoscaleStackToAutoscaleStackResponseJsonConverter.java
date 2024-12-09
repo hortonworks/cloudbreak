@@ -33,8 +33,8 @@ public class AutoscaleStackToAutoscaleStackResponseJsonConverter {
         if (source.getClusterStatus() != null) {
             String gatewayIp = gatewayConfigService.getPrimaryGatewayIp(source);
             result.setClusterManagerIp(gatewayIp);
-            result.setUserNamePath(source.getCloudbreakAmbariUser().getSecret());
-            result.setPasswordPath(source.getCloudbreakAmbariPassword().getSecret());
+            result.setUserNamePath(source.getCloudbreakClusterManagerUser().getSecret());
+            result.setPasswordPath(source.getCloudbreakClusterManagerPassword().getSecret());
             result.setClusterStatus(source.getClusterStatus());
             result.setClusterManagerVariant(source.getClusterManagerVariant());
         }

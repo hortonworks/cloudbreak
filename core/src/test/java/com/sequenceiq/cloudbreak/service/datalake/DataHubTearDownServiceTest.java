@@ -104,8 +104,8 @@ class DataHubTearDownServiceTest {
     private Stack getDatalakeStack() {
         Cluster cluster = new Cluster();
         cluster.setName(TEST_DATALAKE_NAME);
-        cluster.setCloudbreakAmbariUser(TEST_CM_USER);
-        cluster.setCloudbreakAmbariPassword(TEST_CM_PASSWORD);
+        cluster.setCloudbreakClusterManagerUser(TEST_CM_USER);
+        cluster.setCloudbreakClusterManagerPassword(TEST_CM_PASSWORD);
         cluster.setClusterManagerIp("test-cm-ip");
 
         Stack stack = new Stack();

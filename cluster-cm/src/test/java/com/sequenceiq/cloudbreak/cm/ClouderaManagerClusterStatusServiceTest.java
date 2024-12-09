@@ -126,7 +126,7 @@ public class ClouderaManagerClusterStatusServiceTest {
         ReflectionTestUtils.setField(subject, "connectQuickTimeoutSeconds", 1);
         ReflectionTestUtils.setField(subject, "metricService", metricService);
         when(client.getHttpClient()).thenReturn(okHttpClient);
-        when(clouderaManagerApiClientProvider.getV31Client(stack.getGatewayPort(), cluster.getCloudbreakAmbariUser(),
+        when(clouderaManagerApiClientProvider.getV31Client(stack.getGatewayPort(), cluster.getCloudbreakClusterManagerUser(),
                 cluster.getPassword(), clientConfig)).thenReturn(client);
         lenient().when(clouderaManagerApiFactory.getClouderaManagerResourceApi(client)).thenReturn(clouderaManagerResourceApi);
         lenient().when(clouderaManagerApiFactory.getServicesResourceApi(client)).thenReturn(servicesResourceApi);

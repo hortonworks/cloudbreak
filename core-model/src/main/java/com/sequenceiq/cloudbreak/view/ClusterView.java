@@ -55,17 +55,9 @@ public interface ClusterView extends MdcContextInfoProvider {
 
     Json getCustomContainerDefinition();
 
-    Secret getDpAmbariUserSecret();
-
-    Secret getDpAmbariPasswordSecret();
-
     Secret getDpClusterManagerUserSecret();
 
     Secret getDpClusterManagerPasswordSecret();
-
-    Secret getCloudbreakAmbariUserSecret();
-
-    Secret getCloudbreakAmbariPasswordSecret();
 
     Secret getCloudbreakClusterManagerUserSecretObject();
 
@@ -114,11 +106,27 @@ public interface ClusterView extends MdcContextInfoProvider {
         return getIfNotNull(getAttributesSecret(), Secret::getRaw);
     }
 
-    default String getDpAmbariUser() {
+    default String getCloudbreakClusterManagerUser() {
+        return getIfNotNull(getCloudbreakClusterManagerUserSecretObject(), Secret::getRaw);
+    }
+
+    default String getCloudbreakClusterManagerPassword() {
+        return getIfNotNull(getCloudbreakClusterManagerPasswordSecretObject(), Secret::getRaw);
+    }
+
+    default String getCloudbreakClusterManagerUserSecretPath() {
+        return getIfNotNull(getCloudbreakClusterManagerUserSecretObject(), Secret::getSecret);
+    }
+
+    default String getCloudbreakClusterManagerPasswordSecretPath() {
+        return getIfNotNull(getCloudbreakClusterManagerPasswordSecretObject(), Secret::getSecret);
+    }
+
+    default String getDpClusterManagerUser() {
         return getIfNotNull(getDpClusterManagerUserSecret(), Secret::getRaw);
     }
 
-    default String getDpAmbariPassword() {
+    default String getDpClusterManagerPassword() {
         return getIfNotNull(getDpClusterManagerPasswordSecret(), Secret::getRaw);
     }
 
@@ -128,14 +136,6 @@ public interface ClusterView extends MdcContextInfoProvider {
 
     default String getDpClusterManagerPasswordSecretPath() {
         return getIfNotNull(getDpClusterManagerPasswordSecret(), Secret::getSecret);
-    }
-
-    default String getCloudbreakAmbariUser() {
-        return getIfNotNull(getCloudbreakAmbariUserSecret(), Secret::getRaw);
-    }
-
-    default String getCloudbreakAmbariPassword() {
-        return getIfNotNull(getCloudbreakAmbariPasswordSecret(), Secret::getRaw);
     }
 
     default String getCloudbreakClusterManagerMonitoringUser() {
@@ -164,12 +164,12 @@ public interface ClusterView extends MdcContextInfoProvider {
 
     default String getKeyStorePwd() {
         String pwd = getIfNotNull(getKeyStorePwdSecret(), Secret::getRaw);
-        return isNotEmpty(pwd) ? pwd : getCloudbreakAmbariPassword();
+        return isNotEmpty(pwd) ? pwd : getCloudbreakClusterManagerPassword();
     }
 
     default String getTrustStorePwd() {
         String pwd = getIfNotNull(getTrustStorePwdSecret(), Secret::getRaw);
-        return isNotEmpty(pwd) ? pwd : getCloudbreakAmbariPassword();
+        return isNotEmpty(pwd) ? pwd : getCloudbreakClusterManagerPassword();
     }
 
     default boolean hasExternalDatabase() {
