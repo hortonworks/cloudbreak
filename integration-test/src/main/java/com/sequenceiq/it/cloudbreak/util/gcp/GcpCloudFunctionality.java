@@ -14,9 +14,11 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
+import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
 
 @Component
 public class GcpCloudFunctionality implements CloudFunctionality {
@@ -30,6 +32,9 @@ public class GcpCloudFunctionality implements CloudFunctionality {
 
     @Inject
     private GcpLabelUtil gcpLabelUtil;
+
+    @Inject
+    private SshJUtil sshJUtil;
 
     @Override
     public List<String> listInstancesVolumeIds(String clusterName, List<String> instanceIds) {
@@ -165,5 +170,11 @@ public class GcpCloudFunctionality implements CloudFunctionality {
     @Override
     public Map<String, String> listAvailabilityZonesForVms(String clusterName, Map<String, String> instanceZoneMap) {
         return gcpUtil.listAvailabilityZonesForVms(instanceZoneMap);
+    }
+
+    @Override
+    public List<String> executeSshCommandsOnInstances(List<InstanceGroupResponse> instanceGroups, List<String> hostGroupNames, String privateKeyFilePath,
+            String command) {
+        return sshJUtil.executeSshCommandsOnInstances(instanceGroups, hostGroupNames, privateKeyFilePath, command);
     }
 }
