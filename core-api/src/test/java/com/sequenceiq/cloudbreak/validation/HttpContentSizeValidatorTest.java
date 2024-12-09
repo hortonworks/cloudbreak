@@ -107,7 +107,8 @@ class HttpContentSizeValidatorTest {
 
         assertFalse(underTest.isValid("http://unknown.error.com", constraintValidatorContext));
 
-        verify(constraintValidatorContext, times(1)).buildConstraintViolationWithTemplate(anyString());
+        verify(constraintValidatorContext, times(1)).
+                buildConstraintViolationWithTemplate(eq("The content length of the image catalog URL is not returned by the server!"));
         verify(constraintViolationBuilder, times(1)).addConstraintViolation();
     }
 
@@ -122,7 +123,8 @@ class HttpContentSizeValidatorTest {
 
         assertFalse(underTest.isValid("http://empty.content.com", constraintValidatorContext));
 
-        verify(constraintValidatorContext, times(1)).buildConstraintViolationWithTemplate(anyString());
+        verify(constraintValidatorContext, times(1))
+                .buildConstraintViolationWithTemplate(eq("The content length of the image catalog URL is 0!"));
         verify(constraintViolationBuilder, times(1)).addConstraintViolation();
     }
 
@@ -137,7 +139,8 @@ class HttpContentSizeValidatorTest {
 
         assertFalse(underTest.isValid("http://big.content.com", constraintValidatorContext));
 
-        verify(constraintValidatorContext, times(1)).buildConstraintViolationWithTemplate(anyString());
+        verify(constraintValidatorContext, times(1))
+                .buildConstraintViolationWithTemplate(eq("The content of the image catalog URL must be less than {6 MB}"));
         verify(constraintViolationBuilder, times(1)).addConstraintViolation();
     }
 

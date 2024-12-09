@@ -50,10 +50,18 @@ public class HttpContentSizeValidator implements ConstraintValidator<ValidHttpCo
                 return false;
             }
             int maxSizeInBytes = contentSizeProvider.getMaxSizeInBytes();
-            boolean valid = contentLength.getValue() > 0 && contentLength.getValue() <= maxSizeInBytes;
-            if (!valid) {
-                String message = String.format("The content of the given URL must be less than {%s}", FileUtils.byteCountToDisplaySize(maxSizeInBytes));
-                ValidatorUtil.addConstraintViolation(context, message);
+            boolean valid = true;
+
+            if (contentLength.getValue() == null || contentLength.getValue() < 0) {
+                logAndAddViolation(context, "The content length of the image catalog URL is not returned by the server!");
+                valid = false;
+            } else if (contentLength.getValue() == 0) {
+                logAndAddViolation(context, "The content length of the image catalog URL is 0!");
+                valid = false;
+            } else if (contentLength.getValue() > maxSizeInBytes) {
+                String message = String.format("The content of the image catalog URL must be less than {%s}", FileUtils.byteCountToDisplaySize(maxSizeInBytes));
+                logAndAddViolation(context, message);
+                valid = false;
             }
 
             return valid;
@@ -62,5 +70,10 @@ public class HttpContentSizeValidator implements ConstraintValidator<ValidHttpCo
             ValidatorUtil.addConstraintViolation(context, FAILED_TO_GET_WITH_EXCEPTION);
         }
         return false;
+    }
+
+    private void logAndAddViolation(ConstraintValidatorContext context, String message) {
+        LOGGER.info(message);
+        ValidatorUtil.addConstraintViolation(context, message);
     }
 }
