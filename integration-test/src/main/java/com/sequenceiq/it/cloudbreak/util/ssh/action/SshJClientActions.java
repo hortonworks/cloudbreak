@@ -685,32 +685,4 @@ public class SshJClientActions {
         return getInstanceGroupIps(instanceGroups, hostGroupNames, false).stream()
                 .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, "cloudbreak", null, privateKeyFilePath, dbSslConnectionUrlCmd)));
     }
-
-    public List<String> executeSshCommandsOnInstances(List<InstanceGroupResponse> instanceGroups, List<String> hostGroupNames, String privateKeyFilePath,
-            String command) {
-        return getInstanceGroupIps(instanceGroups, hostGroupNames).stream()
-                .map(ip -> executeSshCommand(ip, "cloudbreak", null, privateKeyFilePath, command).getValue().toLowerCase(Locale.ROOT))
-                .toList();
-    }
-
-    private List<String> getInstanceGroupIps(List<InstanceGroupResponse> instanceGroups, List<String> hostGroupNames) {
-        List<String> instanceIPs = new ArrayList<>();
-
-        hostGroupNames.forEach(hostGroupName -> {
-            List<String> instanceGroupIpList = instanceGroups.stream()
-                    .filter(instanceGroup -> instanceGroup.getName().equals(hostGroupName))
-                    .map(InstanceGroupResponse::getMetaData)
-                    .filter(Objects::nonNull)
-                    .flatMap(Collection::stream)
-                    .map(x -> StringUtils.isNotEmpty(x.getPublicIp()) ? x.getPublicIp() : x.getPrivateIp())
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-            assert !instanceGroupIpList.isEmpty();
-            LOGGER.info("The selected Instance Group [{}] and the available IPs [{}].",
-                    hostGroupName, instanceGroupIpList);
-            instanceIPs.addAll(instanceGroupIpList);
-        });
-
-        return instanceIPs;
-    }
 }

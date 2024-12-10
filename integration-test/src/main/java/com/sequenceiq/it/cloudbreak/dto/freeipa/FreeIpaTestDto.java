@@ -57,7 +57,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.Securit
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.SecurityRuleRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.StackAuthenticationRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.SecurityRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
 import com.sequenceiq.it.cloudbreak.Prototype;
@@ -629,12 +628,5 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
     @Override
     public CloudPlatform getCloudPlatform() {
         return (cloudPlatformFromStack != null) ? cloudPlatformFromStack : super.getCloudPlatform();
-    }
-
-    public FreeIpaTestDto withSeLinuxSecurity(String seLinux) {
-        SecurityRequest securityRequest = new SecurityRequest();
-        securityRequest.setSeLinux(seLinux);
-        getRequest().setSecurity(securityRequest);
-        return this;
     }
 }
