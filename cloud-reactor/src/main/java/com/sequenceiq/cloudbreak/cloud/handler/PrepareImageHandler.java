@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -50,15 +51,20 @@ public class PrepareImageHandler implements CloudPlatformEventHandler<PrepareIma
             request.getResult().onNext(result);
             eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
             LOGGER.debug("Prepare image finished for {}", cloudContext);
-        } catch (CloudImageFallbackException e) {
-            LOGGER.info("Image fallback requested for {}", cloudContext.getName());
-            PrepareImageFallbackRequiredResult result = new PrepareImageFallbackRequiredResult(request.getResourceId());
-            request.getResult().onNext(result);
-            eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
         } catch (RuntimeException e) {
-            PrepareImageResult failure = new PrepareImageResult(e, request.getResourceId());
-            request.getResult().onNext(failure);
-            eventBus.notify(failure.selector(), new Event<>(event.getHeaders(), failure));
+            LOGGER.debug("Should prepare fallback image: {}, fallback target exists: {}", e instanceof CloudImageFallbackException,
+                    StringUtils.hasText(request.getImageFallbackTarget()));
+            if (e instanceof CloudImageFallbackException && StringUtils.hasText(request.getImageFallbackTarget())) {
+                LOGGER.info("Image fallback requested for {}", cloudContext.getName());
+                PrepareImageFallbackRequiredResult result = new PrepareImageFallbackRequiredResult(request.getResourceId());
+                request.getResult().onNext(result);
+                eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
+            } else {
+                LOGGER.info("Prepare image failed.", e);
+                PrepareImageResult failure = new PrepareImageResult(e, request.getResourceId());
+                request.getResult().onNext(failure);
+                eventBus.notify(failure.selector(), new Event<>(event.getHeaders(), failure));
+            }
         }
     }
 }

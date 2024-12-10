@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -191,6 +192,39 @@ class ImageFallbackServiceTest {
 
         assertNotNull(result);
         verify(imageService).determineImageNameByRegion(eq("AZURE"), eq(azure), eq("region"), any());
+    }
+
+    @Test
+    public void testGetFallbackImageNameShouldNotFallbackIfNoImageName() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        StatedImage statedImage = mock(StatedImage.class);
+        Image image = mock(Image.class);
+
+        Image currentImage =
+                new Image("originalImage", Map.of(), "centos7", "redhat", "arch", null, null, null, Map.of(), null, 0L);
+        com.sequenceiq.cloudbreak.domain.stack.Component component  =
+                new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(currentImage), null);
+
+        when(stackDtoService.getStackViewById(STACK_ID)).thenReturn(stackView);
+        when(azureImageFormatValidator.isMarketplaceImageFormat(anyString())).thenReturn(true);
+        when(componentConfigProviderService.getImageComponent(anyLong())).thenReturn(component);
+        doThrow(new CloudbreakImageNotFoundException("Image not found")).when(imageCatalogService).getImage(anyLong(), any(), any(), any());
+        when(stackView.getCloudPlatform()).thenReturn("AZURE");
+        when(stackView.getPlatformVariant()).thenReturn("AZURE");
+        ImageCatalogPlatform azure = imageCatalogPlatform("AZURE");
+        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(azure);
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                imageFallbackService.fallbackToVhd(STACK_ID);
+            } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException | IOException e) {
+                throw new RuntimeException(e);
+            }
+        }));
+
+        assertEquals("Your image originalImage seems to be an Azure Marketplace image, however its Terms and Conditions are not accepted! " +
+                "Please either enable automatic consent or accept the terms manually and initiate the provisioning or upgrade again. " +
+                "On how to accept the Terms and Conditions of the image please refer to azure documentation at " +
+                "https://docs.microsoft.com/en-us/cli/azure/vm/image/terms?view=azure-cli-latest.", exception.getMessage());
     }
 
     @Test
