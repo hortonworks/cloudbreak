@@ -377,8 +377,7 @@ public class StackCreatorService {
                     throw new BadRequestException(String.format("The selected architecture (%s) is not enabled in your account",
                             Architecture.ARM64.getName()));
                 }
-            }
-            if (!entitlementService.isDataHubArmEnabled(accountId)) {
+            } else if (!entitlementService.isDataHubArmEnabled(accountId)) {
                 throw new BadRequestException(String.format("The selected architecture (%s) is not enabled in your account",
                         Architecture.ARM64.getName()));
 
