@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.azure.image;
 
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ACCEPTANCE_POLICY_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.azure.AzureDeploymentMarketplaceError.MARKETPLACE_PURCHASE_ELIGIBILITY_FAILED;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -43,14 +44,17 @@ import com.sequenceiq.cloudbreak.cloud.azure.AzureTestUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureImageTermStatus;
 import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureImageTermsSignerService;
+import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage;
 import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImageProviderService;
 import com.sequenceiq.cloudbreak.cloud.azure.template.AzureTemplateDeploymentService;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageFormatValidator;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.PrepareImageType;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 
 @ExtendWith(MockitoExtension.class)
 class AzureMarketplaceValidatorServiceTest {
@@ -79,6 +83,15 @@ class AzureMarketplaceValidatorServiceTest {
 
     @Mock
     private AzureExceptionHandler azureExceptionHandler;
+
+    @Mock
+    private Image image;
+
+    @Mock
+    private AzureClient client;
+
+    @Mock
+    private CloudStack stack;
 
     @InjectMocks
     private AzureMarketplaceValidatorService azureMarketplaceValidatorService;
@@ -351,5 +364,101 @@ class AzureMarketplaceValidatorServiceTest {
                 Arguments.of(false, MARKETPLACE_PURCHASE_ELIGIBILITY_FAILED.getCode(), false, true),
                 Arguments.of(true, "randomCode", false, true),
                 Arguments.of(false, "randomCode", false, true));
+    }
+
+    @Test
+    void testValidateMarketplaceImageTermsImageNotMarketplaceFormat() {
+        when(azureImageFormatValidator.isMarketplaceImageFormat(image)).thenReturn(false);
+
+        assertDoesNotThrow(() -> azureMarketplaceValidatorService.validateMarketplaceImageTerms(image, client, stack, ac));
+
+        verify(azureImageFormatValidator).isMarketplaceImageFormat(image);
+        verifyNoMoreInteractions(azureImageFormatValidator, azureMarketplaceImageProviderService, azureImageTermsSignerService);
+    }
+
+    @Test
+    void testValidateMarketplaceImageTermsTermsNonReadable() {
+        when(azureImageFormatValidator.isMarketplaceImageFormat(image)).thenReturn(true);
+        AzureMarketplaceImage marketplaceImage = mock(AzureMarketplaceImage.class);
+        when(azureMarketplaceImageProviderService.get(image)).thenReturn(marketplaceImage);
+        AzureClient azureClient = mock(AzureClient.class);
+        Subscription currentSubscription = mock(Subscription.class);
+        when(azureClient.getCurrentSubscription()).thenReturn(currentSubscription);
+        when(currentSubscription.subscriptionId()).thenReturn("sub");
+        when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
+        when(azureImageTermsSignerService.getImageTermStatus(
+                azureClient.getCurrentSubscription().subscriptionId(), marketplaceImage, azureClient))
+                .thenReturn(AzureImageTermStatus.NON_READABLE);
+
+        CloudConnectorException exception = assertThrows(CloudConnectorException.class, () ->
+                azureMarketplaceValidatorService.validateMarketplaceImageTerms(image, client, stack, ac));
+
+        assertTrue(exception.getMessage().contains("Cannot read image terms for Azure Marketplace image"));
+    }
+
+    @Test
+    void testValidateMarketplaceImageTermsTermsNotAcceptedSignFails() {
+        when(azureImageFormatValidator.isMarketplaceImageFormat(image)).thenReturn(true);
+        AzureMarketplaceImage marketplaceImage = mock(AzureMarketplaceImage.class);
+        when(azureMarketplaceImageProviderService.get(image)).thenReturn(marketplaceImage);
+        AzureClient azureClient = mock(AzureClient.class);
+        Subscription currentSubscription = mock(Subscription.class);
+        when(azureClient.getCurrentSubscription()).thenReturn(currentSubscription);
+        when(currentSubscription.subscriptionId()).thenReturn("sub");
+        when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
+        when(azureImageTermsSignerService.getImageTermStatus(
+                azureClient.getCurrentSubscription().subscriptionId(), marketplaceImage, azureClient))
+                .thenReturn(AzureImageTermStatus.NOT_ACCEPTED);
+        when(stack.getParameters()).thenReturn(Map.of(ACCEPTANCE_POLICY_PARAMETER, "true"));
+        when(azureImageTermsSignerService.sign(
+                azureClient.getCurrentSubscription().subscriptionId(), marketplaceImage, azureClient))
+                .thenReturn(AzureImageTermStatus.NOT_ACCEPTED);
+
+        CloudConnectorException exception = assertThrows(CloudConnectorException.class, () ->
+                azureMarketplaceValidatorService.validateMarketplaceImageTerms(image, client, stack, ac));
+
+        assertTrue(exception.getMessage().contains("Cannot accept image terms for Azure Marketplace image"));
+    }
+
+    @Test
+    void testValidateMarketplaceImageTermsValidationFails() {
+        when(azureImageFormatValidator.isMarketplaceImageFormat(image)).thenReturn(true);
+        AzureMarketplaceImage marketplaceImage = mock(AzureMarketplaceImage.class);
+        when(azureMarketplaceImageProviderService.get(image)).thenReturn(marketplaceImage);
+        AzureClient azureClient = mock(AzureClient.class);
+        Subscription currentSubscription = mock(Subscription.class);
+        when(azureClient.getCurrentSubscription()).thenReturn(currentSubscription);
+        when(currentSubscription.subscriptionId()).thenReturn("sub");
+        when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
+        when(azureImageTermsSignerService.getImageTermStatus(
+                azureClient.getCurrentSubscription().subscriptionId(), marketplaceImage, azureClient))
+                .thenReturn(AzureImageTermStatus.ACCEPTED);
+        Optional<ManagementError> managementErrors =
+                Optional.of(new ManagementError(MARKETPLACE_PURCHASE_ELIGIBILITY_FAILED.getCode(), MARKETPLACE_PURCHASE_ELIGIBILITY_FAILED.value()));
+        when(azureTemplateDeploymentService.runWhatIfAnalysis(any(), any(), any())).thenReturn(managementErrors);
+
+        CloudConnectorException exception = assertThrows(CloudConnectorException.class, () ->
+                azureMarketplaceValidatorService.validateMarketplaceImageTerms(image, client, stack, ac));
+
+        assertTrue(exception.getMessage().contains("Image validation error: [MarketplacePurchaseEligibilityFailed]"));
+    }
+
+    @Test
+    void testValidateMarketplaceImageTermsSuccessfulValidation() {
+        when(azureImageFormatValidator.isMarketplaceImageFormat(image)).thenReturn(true);
+        AzureMarketplaceImage marketplaceImage = mock(AzureMarketplaceImage.class);
+        when(azureMarketplaceImageProviderService.get(image)).thenReturn(marketplaceImage);
+        AzureClient azureClient = mock(AzureClient.class);
+        Subscription currentSubscription = mock(Subscription.class);
+        when(azureClient.getCurrentSubscription()).thenReturn(currentSubscription);
+        when(currentSubscription.subscriptionId()).thenReturn("sub");
+        when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
+        when(azureImageTermsSignerService.getImageTermStatus(
+                azureClient.getCurrentSubscription().subscriptionId(), marketplaceImage, azureClient))
+                .thenReturn(AzureImageTermStatus.ACCEPTED);
+        CloudStack newStack = mock(CloudStack.class);
+        ValidationResult validationResult = mock(ValidationResult.class);
+
+        assertDoesNotThrow(() -> azureMarketplaceValidatorService.validateMarketplaceImageTerms(image, client, stack, ac));
     }
 }

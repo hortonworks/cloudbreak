@@ -75,4 +75,13 @@ public interface Setup {
      * @param upscale              true in case of upscale, false in case of downscale
      */
     void scalingPrerequisites(AuthenticatedContext authenticatedContext, CloudStack stack, boolean upscale);
+
+    /**
+     * Checks image of it is available to use on the cloud provider, eg. check image terms on Azure
+     *
+     * @param auth  the context which already contains the authenticated client
+     * @param stack stack the definition of infrastructure
+     * @param image image to validate
+     */
+    void validateImage(AuthenticatedContext auth, CloudStack stack, Image image);
 }

@@ -16,6 +16,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImage
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateEvent.STACK_IMAGE_UPDATE_FAILE_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateEvent.STACK_IMAGE_UPDATE_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateEvent.UPDATE_IMAGE_FINESHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateEvent.VALIDATE_IMAGE_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateState.CHECK_IMAGE_VERSIONS_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateState.CHECK_PACKAGE_VERSIONS_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateState.FINAL_STATE;
@@ -27,6 +28,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImage
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateState.STACK_IMAGE_UPDATE_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateState.STACK_IMAGE_UPDATE_FINISHED;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateState.UPDATE_IMAGE_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateState.VALIDATE_IMAGE_STATE;
 
 import java.util.List;
 
@@ -43,7 +45,8 @@ public class StackImageUpdateFlowConfig extends StackStatusFinalizerAbstractFlow
             new Builder<StackImageUpdateState, StackImageUpdateEvent>().defaultFailureEvent(STACK_IMAGE_UPDATE_FAILED_EVENT)
                     .from(INIT_STATE).to(CHECK_IMAGE_VERSIONS_STATE).event(STACK_IMAGE_UPDATE_EVENT).noFailureEvent()
                     .from(CHECK_IMAGE_VERSIONS_STATE).to(CHECK_PACKAGE_VERSIONS_STATE).event(CHECK_IMAGE_VERESIONS_FINISHED_EVENT).defaultFailureEvent()
-                    .from(CHECK_PACKAGE_VERSIONS_STATE).to(UPDATE_IMAGE_STATE).event(CHECK_PACKAGE_VERSIONS_FINISHED_EVENT).defaultFailureEvent()
+                    .from(CHECK_PACKAGE_VERSIONS_STATE).to(VALIDATE_IMAGE_STATE).event(CHECK_PACKAGE_VERSIONS_FINISHED_EVENT).defaultFailureEvent()
+                    .from(VALIDATE_IMAGE_STATE).to(UPDATE_IMAGE_STATE).event(VALIDATE_IMAGE_FINISHED_EVENT).defaultFailureEvent()
                     .from(UPDATE_IMAGE_STATE).to(IMAGE_PREPARE_STATE).event(UPDATE_IMAGE_FINESHED_EVENT).defaultFailureEvent()
                     .from(IMAGE_PREPARE_STATE).to(IMAGE_CHECK_STATE).event(IMAGE_PREPARATION_FINISHED_EVENT).failureEvent(IMAGE_PREPARATION_FAILED_EVENT)
 

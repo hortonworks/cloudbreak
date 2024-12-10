@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.vali
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -42,6 +43,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeImageValidationFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFailureEvent;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelAvailabilityService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.ParcelSizeService;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
@@ -81,6 +83,9 @@ public class ClusterUpgradeImageValidationHandlerTest {
     @Mock
     private ParcelSizeService parcelSizeService;
 
+    @Mock
+    private StackDtoService stackDtoService;
+
     @Test
     void testDoAcceptWhenImageTermsAreSignedThenSuccess() {
         setupCloudContext();
@@ -100,7 +105,7 @@ public class ClusterUpgradeImageValidationHandlerTest {
         verify(parcelSizeService).getRequiredFreeSpace(responses);
         verify(cloudContext).getPlatformVariant();
         verify(cloudPlatformConnectors).get(CLOUD_PLATFORM_VARIANT);
-        verify(imageValidator).validate(authenticatedContext, cloudStack);
+        verify(imageValidator).validate(eq(authenticatedContext), any(CloudStack.class));
     }
 
     @Test
@@ -147,7 +152,7 @@ public class ClusterUpgradeImageValidationHandlerTest {
         verify(parcelSizeService).getRequiredFreeSpace(any());
         verify(cloudContext).getPlatformVariant();
         verify(cloudPlatformConnectors).get(CLOUD_PLATFORM_VARIANT);
-        verify(imageValidator).validate(authenticatedContext, cloudStack);
+        verify(imageValidator).validate(eq(authenticatedContext), any(CloudStack.class));
         ClusterUpgradeValidationFailureEvent failureEvent = (ClusterUpgradeValidationFailureEvent) nextFlowStepSelector;
         assertEquals(VALIDATION_EXCEPTION_MESSAGE, failureEvent.getException().getMessage());
     }

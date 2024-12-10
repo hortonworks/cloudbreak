@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.image.update;
 
+import java.util.HashMap;
 import java.util.List;
 
 import jakarta.inject.Inject;
@@ -27,6 +28,7 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.StackTypeResolver;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
+import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeCondition;
@@ -62,6 +64,9 @@ public class StackImageUpdateService {
 
     @Inject
     private StackImageService stackImageService;
+
+    @Inject
+    private ImageService imageService;
 
     @Inject
     private PlatformStringTransformer platformStringTransformer;
@@ -129,6 +134,18 @@ public class StackImageUpdateService {
                 ? imageCatalogService.getImage(workspaceId, imageCatalogUrl, imageCatalogName, newImageId)
                 : imageCatalogService.getImage(workspaceId, currentImage.getImageCatalogUrl(), currentImage.getImageCatalogName(), newImageId);
         return newImage;
+    }
+
+    public Image getImageFromStated(StackDtoDelegate stack, StatedImage image) throws CloudbreakImageNotFoundException {
+        String imageName = imageService.determineImageName(
+                stack.getCloudPlatform(),
+                platformStringTransformer.getPlatformStringForImageCatalog(stack.getCloudPlatform(), stack.getPlatformVariant()),
+                stack.getRegion(),
+                image.getImage()
+        );
+        return new Image(imageName, new HashMap<>(), image.getImage().getOs(), image.getImage().getOsType(), image.getImage().getArchitecture(),
+                image.getImageCatalogUrl(), image.getImageCatalogName(), image.getImage().getUuid(),
+                image.getImage().getPackageVersions(), image.getImage().getDate(), image.getImage().getCreated());
     }
 
     public boolean isCbVersionOk(StackDtoDelegate stack) {

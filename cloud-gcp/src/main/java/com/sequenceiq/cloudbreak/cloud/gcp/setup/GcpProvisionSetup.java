@@ -99,6 +99,11 @@ public class GcpProvisionSetup implements Setup {
         }
     }
 
+    @Override
+    public void validateImage(AuthenticatedContext auth, CloudStack stack, com.sequenceiq.cloudbreak.cloud.model.Image image) {
+        LOGGER.debug("validate image has been executed");
+    }
+
     private Image getGcpImage(String projectId, String imageName, Compute compute) throws IOException {
         try {
             return compute.images().get(projectId, imageName).execute();

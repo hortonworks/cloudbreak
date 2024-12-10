@@ -40,16 +40,19 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.PrepareImageResultToStackEventConverter;
+import com.sequenceiq.cloudbreak.core.flow2.stack.provision.ValidateImageResultToStackEventConverter;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.ImageFallbackSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.ImageUpdateEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.ValidateImageRequest;
 import com.sequenceiq.cloudbreak.reactor.handler.ImageFallbackService;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.PayloadConverter;
 
 @Configuration
@@ -89,6 +92,27 @@ public class StackImageUpdateActions {
         };
     }
 
+    @Bean(name = "VALIDATE_IMAGE_STATE")
+    public AbstractStackImageUpdateAction<?> validateImage() {
+        return new AbstractStackImageUpdateAction<>(ImageUpdateEvent.class) {
+            @Override
+            protected void doExecute(StackContext context, ImageUpdateEvent payload, Map<Object, Object> variables) {
+                StackView stack = context.getStack().getStack();
+                Image image;
+                try {
+                    Image currentImage = getImageService().getImage(context.getStack().getId());
+                    image = getStackImageService().getImageModelFromStatedImage(stack, currentImage, payload.getImage());
+                } catch (CloudbreakImageNotFoundException e) {
+                    LOGGER.debug("Image not found", e);
+                    throw new CloudbreakServiceException(e.getMessage(), e);
+                }
+                ValidateImageRequest<Selectable> request =
+                        new ValidateImageRequest<>(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack(), payload.getImage(), image);
+                sendEvent(context, request);
+            }
+        };
+    }
+
     @Bean(name = "UPDATE_IMAGE_STATE")
     public AbstractStackImageUpdateAction<?> updateImage() {
         return new AbstractStackImageUpdateAction<>(ImageUpdateEvent.class) {
@@ -103,6 +127,11 @@ public class StackImageUpdateActions {
                 getImageComponentUpdaterService().updateComponentsForUpgrade(payload.getImage(), context.getStack().getId());
                 getStackImageService().storeNewImageComponent(context.getStack(), payload.getImage());
                 sendEvent(context, new StackEvent(StackImageUpdateEvent.UPDATE_IMAGE_FINESHED_EVENT.event(), context.getStack().getId()));
+            }
+
+            @Override
+            protected void initPayloadConverterMap(List<PayloadConverter<ImageUpdateEvent>> payloadConverters) {
+                payloadConverters.add(new ValidateImageResultToStackEventConverter());
             }
         };
     }
