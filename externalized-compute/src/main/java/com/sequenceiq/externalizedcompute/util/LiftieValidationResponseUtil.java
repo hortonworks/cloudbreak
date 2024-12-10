@@ -6,13 +6,13 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto;
+import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ValidationResponse;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
 @Component
 public class LiftieValidationResponseUtil {
 
-    public void throwException(LiftiePublicProto.ValidationResponse validationResponse) {
+    public void throwException(ValidationResponse validationResponse) {
         if (validationResponse != null) {
             Set<String> failedValidationMessages = new LinkedHashSet<>();
             validationResponse.getValidationsList().forEach(validation -> {

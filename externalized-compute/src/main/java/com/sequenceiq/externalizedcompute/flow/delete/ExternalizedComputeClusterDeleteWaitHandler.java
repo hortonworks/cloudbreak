@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.DescribeClusterResponse;
+import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.DescribeClusterResponse;
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptResults;
 import com.dyngr.exception.PollerStoppedException;

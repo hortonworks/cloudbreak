@@ -9,7 +9,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto;
+import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ValidationResponse;
+import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ValidationResult;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
 @ExtendWith(MockitoExtension.class)
@@ -20,17 +21,17 @@ class LiftieValidationResponseUtilTest {
 
     @Test
     public void testWhenValidationContainsFailedValidation() {
-        LiftiePublicProto.ValidationResponse validationResponse = LiftiePublicProto.ValidationResponse.newBuilder()
-                .addValidations(LiftiePublicProto.ValidationResult.newBuilder()
+        ValidationResponse validationResponse = ValidationResponse.newBuilder()
+                .addValidations(ValidationResult.newBuilder()
                         .setStatus("FAILED")
                         .setMessage("Failed 1 message.")
                         .setDetailedMessage("Detailed message 1.")
                         .build())
-                .addValidations(LiftiePublicProto.ValidationResult.newBuilder()
+                .addValidations(ValidationResult.newBuilder()
                         .setStatus("SKIPPED")
                         .setDetailedMessage("Skipped")
                         .build())
-                .addValidations(LiftiePublicProto.ValidationResult.newBuilder()
+                .addValidations(ValidationResult.newBuilder()
                         .setStatus("FAILED")
                         .setMessage("Failed 2 message.")
                         .setDetailedMessage("Detailed message 2.")
@@ -46,17 +47,17 @@ class LiftieValidationResponseUtilTest {
 
     @Test
     public void testWhenValidationDoesNotContainFailedValidation() {
-        LiftiePublicProto.ValidationResponse validationResponse = LiftiePublicProto.ValidationResponse.newBuilder()
-                .addValidations(LiftiePublicProto.ValidationResult.newBuilder()
+        ValidationResponse validationResponse = ValidationResponse.newBuilder()
+                .addValidations(ValidationResult.newBuilder()
                         .setStatus("SUCCESS")
                         .setMessage("Success 1.")
                         .setDetailedMessage("Detailed message 1.")
                         .build())
-                .addValidations(LiftiePublicProto.ValidationResult.newBuilder()
+                .addValidations(ValidationResult.newBuilder()
                         .setStatus("SKIPPED")
                         .setDetailedMessage("Detailed message 2.")
                         .build())
-                .addValidations(LiftiePublicProto.ValidationResult.newBuilder()
+                .addValidations(ValidationResult.newBuilder()
                         .setStatus("SKIPPED")
                         .setMessage("Skipped 1.")
                         .setDetailedMessage("Detailed message 3.")

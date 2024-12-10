@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -86,7 +87,7 @@ class ExternalizedComputeClusterDeleteActionsTest {
         new AbstractActionTestSupport<>(externalizedComputeClusterDelete).doExecute(context, deleteEvent, Map.of());
 
         verify(externalizedComputeClusterStatusService, times(1)).setStatus(1L, REINITIALIZE_IN_PROGRESS, "Cluster delete initiated");
-        verify(externalizedComputeClusterService, times(1)).initiateDelete(1L);
+        verify(externalizedComputeClusterService, times(1)).initiateDelete(1L, false);
         verify(eventBus).notify(eq(EXTERNALIZED_COMPUTE_CLUSTER_DELETE_STARTED_EVENT.selector()), eq(event));
     }
 
@@ -102,7 +103,26 @@ class ExternalizedComputeClusterDeleteActionsTest {
         new AbstractActionTestSupport<>(externalizedComputeClusterDelete).doExecute(context, deleteEvent, Map.of());
 
         verify(externalizedComputeClusterStatusService, times(1)).setStatus(1L, DELETE_IN_PROGRESS, "Cluster delete initiated");
-        verify(externalizedComputeClusterService, times(1)).initiateDelete(1L);
+        verify(externalizedComputeClusterService, times(1)).initiateDelete(1L, false);
+        verify(eventBus).notify(eq(EXTERNALIZED_COMPUTE_CLUSTER_DELETE_STARTED_EVENT.selector()), eq(event));
+    }
+
+    @Test
+    public void testExternalizedComputeClusterDeleteWithForce() throws Exception {
+        AbstractExternalizedComputeClusterAction<ExternalizedComputeClusterDeleteEvent> externalizedComputeClusterDelete =
+                (AbstractExternalizedComputeClusterAction<ExternalizedComputeClusterDeleteEvent>) underTest.externalizedComputeClusterDelete();
+        initActionPrivateFields(externalizedComputeClusterDelete);
+        ExternalizedComputeClusterDeleteEvent deleteEvent = new ExternalizedComputeClusterDeleteEvent(1L, USER_CRN, true, false);
+
+        Event event = mock(Event.class);
+        when(reactorEventFactory.createEvent(anyMap(), eq(deleteEvent))).thenReturn(event);
+        doThrow(new RuntimeException("error")).when(externalizedComputeClusterService).initiateDelete(1L, false);
+        doThrow(new RuntimeException("error")).when(externalizedComputeClusterService).initiateDelete(1L, true);
+        new AbstractActionTestSupport<>(externalizedComputeClusterDelete).doExecute(context, deleteEvent, Map.of());
+
+        verify(externalizedComputeClusterStatusService, times(1)).setStatus(1L, DELETE_IN_PROGRESS, "Cluster delete initiated");
+        verify(externalizedComputeClusterService, times(1)).initiateDelete(1L, false);
+        verify(externalizedComputeClusterService, times(1)).initiateDelete(1L, true);
         verify(eventBus).notify(eq(EXTERNALIZED_COMPUTE_CLUSTER_DELETE_STARTED_EVENT.selector()), eq(event));
     }
 
@@ -153,7 +173,28 @@ class ExternalizedComputeClusterDeleteActionsTest {
 
         verify(externalizedComputeClusterStatusService, times(1)).setStatus(1L, DELETE_IN_PROGRESS,
                 "Auxiliary cluster delete initiated");
-        verify(externalizedComputeClusterService).initiateAuxClusterDelete(1L, USER_CRN);
+        verify(externalizedComputeClusterService).initiateAuxClusterDelete(1L, USER_CRN, false);
+        verify(eventBus).notify(eq(EXTERNALIZED_COMPUTE_CLUSTER_DELETE_AUX_CLUSTER_DELETE_STARTED.selector()), eq(event));
+    }
+
+    @Test
+    public void testAuxiliaryClusterDeleteForce() throws Exception {
+        AbstractExternalizedComputeClusterAction<ExternalizedComputeClusterDeleteEvent> externalizedComputeClusterDelete =
+                (AbstractExternalizedComputeClusterAction<ExternalizedComputeClusterDeleteEvent>) underTest.auxiliaryClusterDelete();
+        initActionPrivateFields(externalizedComputeClusterDelete);
+
+        ExternalizedComputeClusterDeleteEvent deleteEvent = new ExternalizedComputeClusterDeleteEvent(1L, USER_CRN, true, false);
+
+        Event event = mock(Event.class);
+        when(reactorEventFactory.createEvent(anyMap(), eq(deleteEvent))).thenReturn(event);
+        doThrow(new RuntimeException("error")).when(externalizedComputeClusterService).initiateAuxClusterDelete(1L, USER_CRN, false);
+        doThrow(new RuntimeException("error")).when(externalizedComputeClusterService).initiateAuxClusterDelete(1L, USER_CRN, true);
+        new AbstractActionTestSupport<>(externalizedComputeClusterDelete).doExecute(context, deleteEvent, Map.of());
+
+        verify(externalizedComputeClusterStatusService, times(1)).setStatus(1L, DELETE_IN_PROGRESS,
+                "Auxiliary cluster delete initiated");
+        verify(externalizedComputeClusterService).initiateAuxClusterDelete(1L, USER_CRN, false);
+        verify(externalizedComputeClusterService).initiateAuxClusterDelete(1L, USER_CRN, true);
         verify(eventBus).notify(eq(EXTERNALIZED_COMPUTE_CLUSTER_DELETE_AUX_CLUSTER_DELETE_STARTED.selector()), eq(event));
     }
 

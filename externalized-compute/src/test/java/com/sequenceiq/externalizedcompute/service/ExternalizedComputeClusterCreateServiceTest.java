@@ -20,8 +20,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.CreateClusterRequest;
-import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.CreateClusterResponse;
+import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.CreateClusterRequest;
+import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.CreateClusterResponse;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;

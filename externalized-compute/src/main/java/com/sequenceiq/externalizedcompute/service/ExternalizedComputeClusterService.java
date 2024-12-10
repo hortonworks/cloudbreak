@@ -15,11 +15,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.DeleteClusterResponse;
-import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ListClusterItem;
-import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ValidateCredentialRequest;
-import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ValidateCredentialResponse;
-import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ValidationResult;
+import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.DeleteClusterResponse;
+import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ListClusterItem;
+import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ValidateCredentialRequest;
+import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ValidateCredentialResponse;
+import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ValidationResult;
 import com.sequenceiq.cloudbreak.auth.CrnUser;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -165,7 +165,7 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
         }
     }
 
-    public void initiateAuxClusterDelete(Long externalizedComputeClusterId, String actorCrn) {
+    public void initiateAuxClusterDelete(Long externalizedComputeClusterId, String actorCrn, boolean force) {
         ExternalizedComputeCluster externalizedComputeCluster = getExternalizedComputeCluster(externalizedComputeClusterId);
         LOGGER.info("Initiate auxiliary cluster delete for: {}", externalizedComputeCluster.getName());
 
@@ -175,7 +175,7 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
             try {
                 liftieGrpcClient.deleteCluster(listClusterItem.getClusterCrn(),
                         regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                        environmentCrn);
+                        environmentCrn, force);
             } catch (Exception e) {
                 if (!e.getMessage().contains("already deleted") && !e.getMessage().contains("not found in database")
                         && !e.getMessage().contains("existing operation 'Delete'")) {
@@ -186,7 +186,7 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
         }
     }
 
-    public void initiateDelete(Long id) {
+    public void initiateDelete(Long id, boolean force) {
         ExternalizedComputeCluster externalizedComputeCluster = getExternalizedComputeCluster(id);
         LOGGER.info("Initiate delete for: {}", externalizedComputeCluster.getName());
         try {
@@ -194,7 +194,7 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
                 DeleteClusterResponse deleteClusterResponse =
                         liftieGrpcClient.deleteCluster(getLiftieClusterCrn(externalizedComputeCluster),
                                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                                externalizedComputeCluster.getEnvironmentCrn());
+                                externalizedComputeCluster.getEnvironmentCrn(), force);
                 LOGGER.info("Liftie delete response: {}", deleteClusterResponse);
             }
         } catch (Exception e) {

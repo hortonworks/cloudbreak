@@ -43,11 +43,17 @@ public class ExternalizedComputeClusterDeleteActions {
                 externalizedComputeClusterStatusService.setStatus(context.getExternalizedComputeId(), ExternalizedComputeClusterStatusEnum.DELETE_IN_PROGRESS,
                         "Auxiliary cluster delete initiated");
                 try {
-                    externalizedComputeClusterService.initiateAuxClusterDelete(context.getExternalizedComputeId(), context.getActorCrn());
+                    externalizedComputeClusterService.initiateAuxClusterDelete(context.getExternalizedComputeId(), context.getActorCrn(), false);
                     sendEvent(context, EXTERNALIZED_COMPUTE_CLUSTER_DELETE_AUX_CLUSTER_DELETE_STARTED.event(), payload);
-                } catch (Exception e) {
+                } catch (RuntimeException e) {
+                    LOGGER.warn("Auxiliary cluster delete failed: {}", e.getMessage(), e);
                     if (payload.isForce()) {
-                        LOGGER.warn("Auxiliary cluster delete failed: {}", e.getMessage(), e);
+                        try {
+                            LOGGER.debug("Auxiliary cluster delete failed, trying to force delete", e);
+                            externalizedComputeClusterService.initiateAuxClusterDelete(context.getExternalizedComputeId(), context.getActorCrn(), true);
+                        } catch (RuntimeException forceException) {
+                            LOGGER.warn("Auxiliary cluster force delete failed, ignore it as force flag is true", forceException);
+                        }
                         sendEvent(context, EXTERNALIZED_COMPUTE_CLUSTER_DELETE_AUX_CLUSTER_DELETE_STARTED.event(), payload);
                     } else {
                         ExternalizedComputeClusterDeleteFailedEvent failedEvent = ExternalizedComputeClusterDeleteFailedEvent.from(payload, e);
@@ -94,7 +100,22 @@ public class ExternalizedComputeClusterDeleteActions {
                         ExternalizedComputeClusterStatusEnum.REINITIALIZE_IN_PROGRESS : ExternalizedComputeClusterStatusEnum.DELETE_IN_PROGRESS;
                 externalizedComputeClusterStatusService.setStatus(context.getExternalizedComputeId(), deleteStatus,
                         "Cluster delete initiated");
-                externalizedComputeClusterService.initiateDelete(context.getExternalizedComputeId());
+                try {
+                    externalizedComputeClusterService.initiateDelete(context.getExternalizedComputeId(), false);
+                } catch (RuntimeException e) {
+                    LOGGER.warn("Externalized cluster delete failed: {}", e.getMessage(), e);
+                    if (payload.isForce()) {
+                        try {
+                            LOGGER.debug("Externalized cluster delete failed, trying to force delete", e);
+                            externalizedComputeClusterService.initiateDelete(context.getExternalizedComputeId(), true);
+                        } catch (RuntimeException forceException) {
+                            LOGGER.warn("Externalized cluster force delete failed, ignore it as force flag is true", forceException);
+                        }
+                    } else {
+                        ExternalizedComputeClusterDeleteFailedEvent failedEvent = ExternalizedComputeClusterDeleteFailedEvent.from(payload, e);
+                        sendEvent(context, failedEvent.selector(), failedEvent);
+                    }
+                }
                 sendEvent(context, EXTERNALIZED_COMPUTE_CLUSTER_DELETE_STARTED_EVENT.event(), payload);
             }
 

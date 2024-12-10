@@ -32,9 +32,11 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto;
-import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.DeleteClusterResponse;
-import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ListClusterItem;
+import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.DeleteClusterResponse;
+import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ListClusterItem;
+import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ValidateCredentialRequest;
+import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ValidateCredentialResponse;
+import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ValidationResult;
 import com.sequenceiq.cloudbreak.auth.CrnUser;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -196,9 +198,9 @@ class ExternalizedComputeClusterServiceTest {
         String internalCrn = "internalCrn";
         when(internalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(internalCrn);
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(internalCrnGenerator);
-        clusterService.initiateDelete(1L);
+        clusterService.initiateDelete(1L, true);
 
-        verify(liftieGrpcClient).deleteCluster("crn:cdp:compute:us-west-1:account:cluster:liftie1", internalCrn, envCrn);
+        verify(liftieGrpcClient).deleteCluster("crn:cdp:compute:us-west-1:account:cluster:liftie1", internalCrn, envCrn, true);
     }
 
     @Test
@@ -320,11 +322,11 @@ class ExternalizedComputeClusterServiceTest {
         when(internalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(internalCrn);
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(internalCrnGenerator);
 
-        clusterService.initiateAuxClusterDelete(externalizedComputeClusterId, USER_CRN);
+        clusterService.initiateAuxClusterDelete(externalizedComputeClusterId, USER_CRN, false);
 
         ArgumentCaptor<String> crnCaptor = ArgumentCaptor.forClass(String.class);
-        verify(liftieGrpcClient).deleteCluster(eq("clusterCrn1"), crnCaptor.capture(), eq("envCrn"));
-        verify(liftieGrpcClient).deleteCluster(eq("clusterCrn2"), crnCaptor.capture(), eq("envCrn"));
+        verify(liftieGrpcClient).deleteCluster(eq("clusterCrn1"), crnCaptor.capture(), eq("envCrn"), eq(false));
+        verify(liftieGrpcClient).deleteCluster(eq("clusterCrn2"), crnCaptor.capture(), eq("envCrn"), eq(false));
         assertEquals("internalCrn", crnCaptor.getValue());
     }
 
@@ -343,11 +345,11 @@ class ExternalizedComputeClusterServiceTest {
         when(internalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(internalCrn);
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(internalCrnGenerator);
 
-        when(liftieGrpcClient.deleteCluster("clusterCrn1", internalCrn, ENV_CRN)).thenReturn(DeleteClusterResponse.newBuilder().build());
-        doThrow(new RuntimeException("liftie error happened")).when(liftieGrpcClient).deleteCluster("clusterCrn2", internalCrn, ENV_CRN);
+        when(liftieGrpcClient.deleteCluster("clusterCrn1", internalCrn, ENV_CRN, false)).thenReturn(DeleteClusterResponse.newBuilder().build());
+        doThrow(new RuntimeException("liftie error happened")).when(liftieGrpcClient).deleteCluster("clusterCrn2", internalCrn, ENV_CRN, false);
 
         RuntimeException runtimeException = assertThrows(RuntimeException.class,
-                () -> clusterService.initiateAuxClusterDelete(externalizedComputeClusterId, USER_CRN));
+                () -> clusterService.initiateAuxClusterDelete(externalizedComputeClusterId, USER_CRN, false));
         assertEquals("Auxiliary compute cluster deletion failed. Cause: " + "liftie error happened", runtimeException.getMessage());
     }
 
@@ -366,13 +368,13 @@ class ExternalizedComputeClusterServiceTest {
         when(internalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(internalCrn);
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(internalCrnGenerator);
 
-        when(liftieGrpcClient.deleteCluster("clusterCrn1", internalCrn, ENV_CRN)).thenReturn(DeleteClusterResponse.newBuilder().build());
-        doThrow(new RuntimeException("clusterCrn2 already deleted")).when(liftieGrpcClient).deleteCluster("clusterCrn2", internalCrn, ENV_CRN);
-        clusterService.initiateAuxClusterDelete(externalizedComputeClusterId, USER_CRN);
-        doThrow(new RuntimeException("clusterCrn2 not found in database")).when(liftieGrpcClient).deleteCluster("clusterCrn2", internalCrn, ENV_CRN);
-        clusterService.initiateAuxClusterDelete(externalizedComputeClusterId, USER_CRN);
-        doThrow(new RuntimeException("existing operation 'Delete'")).when(liftieGrpcClient).deleteCluster("clusterCrn2", internalCrn, ENV_CRN);
-        clusterService.initiateAuxClusterDelete(externalizedComputeClusterId, USER_CRN);
+        when(liftieGrpcClient.deleteCluster("clusterCrn1", internalCrn, ENV_CRN, false)).thenReturn(DeleteClusterResponse.newBuilder().build());
+        doThrow(new RuntimeException("clusterCrn2 already deleted")).when(liftieGrpcClient).deleteCluster("clusterCrn2", internalCrn, ENV_CRN, false);
+        clusterService.initiateAuxClusterDelete(externalizedComputeClusterId, USER_CRN, false);
+        doThrow(new RuntimeException("clusterCrn2 not found in database")).when(liftieGrpcClient).deleteCluster("clusterCrn2", internalCrn, ENV_CRN, false);
+        clusterService.initiateAuxClusterDelete(externalizedComputeClusterId, USER_CRN, false);
+        doThrow(new RuntimeException("existing operation 'Delete'")).when(liftieGrpcClient).deleteCluster("clusterCrn2", internalCrn, ENV_CRN, false);
+        clusterService.initiateAuxClusterDelete(externalizedComputeClusterId, USER_CRN, false);
     }
 
     @Test
@@ -380,15 +382,15 @@ class ExternalizedComputeClusterServiceTest {
         String actorCrn = "actorCrn";
         String credential = "credential";
         String region = "region";
-        when(liftieGrpcClient.validateCredential(any(LiftiePublicProto.ValidateCredentialRequest.class), eq(actorCrn))).thenReturn(
-                LiftiePublicProto.ValidateCredentialResponse.newBuilder().setResult("PASSED").build());
+        when(liftieGrpcClient.validateCredential(any(ValidateCredentialRequest.class), eq(actorCrn))).thenReturn(
+                ValidateCredentialResponse.newBuilder().setResult("PASSED").build());
         ExternalizedComputeClusterCredentialValidationResponse validateCredentialResult =
                 clusterService.validateCredential(credential, region, actorCrn);
-        ArgumentCaptor<LiftiePublicProto.ValidateCredentialRequest> validateCredentialRequestArgumentCaptor = ArgumentCaptor.forClass(
-                LiftiePublicProto.ValidateCredentialRequest.class);
+        ArgumentCaptor<ValidateCredentialRequest> validateCredentialRequestArgumentCaptor = ArgumentCaptor.forClass(
+                ValidateCredentialRequest.class);
         verify(liftieGrpcClient, times(1))
                 .validateCredential(validateCredentialRequestArgumentCaptor.capture(), eq(actorCrn));
-        LiftiePublicProto.ValidateCredentialRequest capturedRequest = validateCredentialRequestArgumentCaptor.getValue();
+        ValidateCredentialRequest capturedRequest = validateCredentialRequestArgumentCaptor.getValue();
         assertEquals(credential, capturedRequest.getCredential());
         assertEquals(region, capturedRequest.getRegion());
         assertTrue(validateCredentialResult.isSuccessful());
@@ -399,9 +401,9 @@ class ExternalizedComputeClusterServiceTest {
         String actorCrn = "actorCrn";
         String credential = "credential";
         String region = "region";
-        when(liftieGrpcClient.validateCredential(any(LiftiePublicProto.ValidateCredentialRequest.class), eq(actorCrn))).thenReturn(
-                LiftiePublicProto.ValidateCredentialResponse.newBuilder().setResult("FAILED")
-                        .addValidations(LiftiePublicProto.ValidationResult.newBuilder().setStatus("FAILED")
+        when(liftieGrpcClient.validateCredential(any(ValidateCredentialRequest.class), eq(actorCrn))).thenReturn(
+                ValidateCredentialResponse.newBuilder().setResult("FAILED")
+                        .addValidations(ValidationResult.newBuilder().setStatus("FAILED")
                                 .setName("IAM Policy Permissions Check")
                                 .setDescription("For a given role, the attached policies should have all the necessary permissions " +
                                         "of a default cross account role in AWS ")
@@ -413,11 +415,11 @@ class ExternalizedComputeClusterServiceTest {
                         .build());
         ExternalizedComputeClusterCredentialValidationResponse validateCredentialResult =
                 clusterService.validateCredential(credential, region, actorCrn);
-        ArgumentCaptor<LiftiePublicProto.ValidateCredentialRequest> validateCredentialRequestArgumentCaptor = ArgumentCaptor.forClass(
-                LiftiePublicProto.ValidateCredentialRequest.class);
+        ArgumentCaptor<ValidateCredentialRequest> validateCredentialRequestArgumentCaptor = ArgumentCaptor.forClass(
+                ValidateCredentialRequest.class);
         verify(liftieGrpcClient, times(1))
                 .validateCredential(validateCredentialRequestArgumentCaptor.capture(), eq(actorCrn));
-        LiftiePublicProto.ValidateCredentialRequest capturedRequest = validateCredentialRequestArgumentCaptor.getValue();
+        ValidateCredentialRequest capturedRequest = validateCredentialRequestArgumentCaptor.getValue();
         assertEquals(credential, capturedRequest.getCredential());
         assertEquals(region, capturedRequest.getRegion());
         assertFalse(validateCredentialResult.isSuccessful());

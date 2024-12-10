@@ -21,7 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ListClusterItem;
+import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ListClusterItem;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeCluster;
 import com.sequenceiq.externalizedcompute.service.ExternalizedComputeClusterService;

@@ -9,17 +9,17 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
-import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.CreateClusterRequest;
-import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.CreateClusterResponse;
-import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.DeleteClusterRequest;
-import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.DeleteClusterResponse;
-import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.DescribeClusterRequest;
-import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.DescribeClusterResponse;
-import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ListClusterItem;
-import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ListClustersRequest;
-import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ListClustersResponse;
-import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ValidateCredentialRequest;
-import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ValidateCredentialResponse;
+import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.CreateClusterRequest;
+import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.CreateClusterResponse;
+import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.DeleteClusterRequest;
+import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.DeleteClusterResponse;
+import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.DescribeClusterRequest;
+import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.DescribeClusterResponse;
+import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ListClusterItem;
+import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ListClustersRequest;
+import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ListClustersResponse;
+import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ValidateCredentialRequest;
+import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ValidateCredentialResponse;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 
 import io.grpc.ManagedChannel;
@@ -50,9 +50,10 @@ public class LiftieGrpcClient {
     }
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
-    public DeleteClusterResponse deleteCluster(String liftieCrn, String actorCrn, String envCrn) {
+    public DeleteClusterResponse deleteCluster(String liftieCrn, String actorCrn, String envCrn, boolean force) {
         LiftieServiceClient liftieServiceClient = makeClient(channelWrapper.getChannel(), actorCrn);
-        return liftieServiceClient.deleteCluster(DeleteClusterRequest.newBuilder().setClusterCrn(liftieCrn).build(), envCrn);
+        return liftieServiceClient.deleteCluster(DeleteClusterRequest.newBuilder().setClusterCrn(liftieCrn).setSkipValidation(true)
+                .setForce(force).build(), envCrn);
     }
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))

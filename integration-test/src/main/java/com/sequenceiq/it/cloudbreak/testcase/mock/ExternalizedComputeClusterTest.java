@@ -10,9 +10,9 @@ import jakarta.inject.Inject;
 import org.springframework.http.HttpMethod;
 import org.testng.annotations.Test;
 
-import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.CreateClusterRequest;
-import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.CreateClusterRequest.Builder;
-import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ListClusterItem;
+import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.CreateClusterRequest;
+import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.CreateClusterRequest.Builder;
+import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ListClusterItem;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterApiStatus;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;

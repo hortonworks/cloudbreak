@@ -28,7 +28,7 @@ public class ReInitializeFlowEventChainFactory implements FlowEventChainFactory<
         Long resourceId = event.getResourceId();
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         flowEventChain.add(new ExternalizedComputeClusterDeleteEvent(EXTERNALIZED_COMPUTE_CLUSTER_DELETE_INITIATED_EVENT.event(), resourceId,
-                event.getActorCrn(), false, true, event.accepted()));
+                event.getActorCrn(), true, true, event.accepted()));
         flowEventChain.add(new ExternalizedComputeClusterEvent(EXTERNALIZED_COMPUTE_CLUSTER_CREATE_INITIATED_EVENT.event(), resourceId,
                         event.getActorCrn()));
 
