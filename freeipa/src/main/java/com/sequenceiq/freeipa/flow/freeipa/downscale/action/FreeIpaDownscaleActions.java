@@ -444,7 +444,7 @@ public class FreeIpaDownscaleActions {
                 Stack stack = context.getStack();
                 stackUpdater.updateStackStatus(stack, getDownscaleCompleteStatus(variables), "Downscale complete");
                 if (!isChainedAction(variables)) {
-                    environmentService.setFreeIpaNodeCount(stack.getEnvironmentCrn(),  stack.getAllInstanceMetaDataList().size());
+                    environmentService.setFreeIpaNodeCount(stack.getEnvironmentCrn(),  stack.getNotDeletedInstanceMetaDataList().size());
                 }
                 if (shouldCompleteOperation(variables)) {
                     SuccessDetails successDetails = new SuccessDetails(stack.getEnvironmentCrn());

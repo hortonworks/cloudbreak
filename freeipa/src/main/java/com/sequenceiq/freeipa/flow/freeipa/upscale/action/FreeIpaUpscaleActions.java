@@ -710,7 +710,7 @@ public class FreeIpaUpscaleActions {
                 Stack stack = context.getStack();
                 stackUpdater.updateStackStatus(stack, getUpscaleCompleteStatus(variables), "Upscale complete");
                 if (!isChainedAction(variables)) {
-                    environmentService.setFreeIpaNodeCount(stack.getEnvironmentCrn(), stack.getAllInstanceMetaDataList().size());
+                    environmentService.setFreeIpaNodeCount(stack.getEnvironmentCrn(), stack.getNotDeletedInstanceMetaDataList().size());
                 }
                 if (shouldCompleteOperation(variables)) {
                     SuccessDetails successDetails = new SuccessDetails(stack.getEnvironmentCrn());
