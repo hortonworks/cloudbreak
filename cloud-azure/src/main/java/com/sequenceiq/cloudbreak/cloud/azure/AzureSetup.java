@@ -95,6 +95,15 @@ public class AzureSetup implements Setup {
     }
 
     @Override
+    public void validateImage(AuthenticatedContext auth, CloudStack stack, Image image) {
+        LOGGER.debug("Validate image: {}", image);
+
+        AzureClient client = auth.getParameter(AzureClient.class);
+        azureImageSetupService.validateImage(auth, stack, image, client);
+        LOGGER.debug("Validate image has been executed");
+    }
+
+    @Override
     public ImageStatusResult checkImageStatus(AuthenticatedContext ac, CloudStack stack, Image image) {
         return azureImageSetupService.checkImageStatus(ac, stack, image);
     }

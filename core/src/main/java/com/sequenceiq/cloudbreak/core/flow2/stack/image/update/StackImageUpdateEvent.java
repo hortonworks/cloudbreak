@@ -6,6 +6,7 @@ import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageFallbackRequiredR
 import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.ImageFallbackFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.ImageFallbackSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.ValidateImageResult;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 
@@ -15,6 +16,8 @@ public enum StackImageUpdateEvent implements FlowEvent {
     STACK_IMAGE_UPDATE_FAILE_HANDLED_EVENT("STACK_IMAGE_UPDATE_FAILE_HANDLED_EVENT"),
     CHECK_IMAGE_VERESIONS_FINISHED_EVENT("CHECK_IMAGE_VERESIONS_FINISHED_EVENT"),
     CHECK_PACKAGE_VERSIONS_FINISHED_EVENT("CHECK_PACKAGE_VERSIONS_FINISHED_EVENT"),
+    VALIDATE_IMAGE_FINISHED_EVENT(CloudPlatformResult.selector(ValidateImageResult.class)),
+    VALIDATE_IMAGE_FAILED_EVENT(CloudPlatformResult.failureSelector(ValidateImageResult.class)),
     IMAGE_PREPARATION_FINISHED_EVENT(CloudPlatformResult.selector(PrepareImageResult.class)),
     IMAGE_PREPARATION_FAILED_EVENT(CloudPlatformResult.failureSelector(PrepareImageResult.class)),
     IMAGE_FALLBACK_EVENT(CloudPlatformResult.selector(PrepareImageFallbackRequiredResult.class)),

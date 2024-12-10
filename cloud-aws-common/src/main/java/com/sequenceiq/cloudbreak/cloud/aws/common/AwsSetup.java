@@ -61,16 +61,7 @@ public abstract class AwsSetup implements Setup {
 
     private static final String IGWVPC_DOES_NOT_EXIST_MSG = "The given internet gateway '%s' does not belong to the given VPC '%s'.";
 
-    private static final String IMAGE_OPT_IN_REQUIRED_MSG = "Unable to create cluster because AWS Marketplace subscription to the Hortonworks Data Cloud"
-            + " HDP Services is required. In order to create a cluster, you need to accept terms and subscribe to the AWS Marketplace product.";
-
-    private static final String LINK_TO_MARKETPLACE_MSG = "To do so please visit ";
-
-    private static final String MARKETPLACE_HTTP_LINK = "http://aws.amazon.com/marketplace";
-
     private static final int FINISHED_PROGRESS_VALUE = 100;
-
-    private static final int UNAUTHORIZED = 403;
 
     @Value("${cb.aws.spotinstances.enabled:}")
     private boolean awsSpotinstanceEnabled;
@@ -93,6 +84,11 @@ public abstract class AwsSetup implements Setup {
     public void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack, Image image, PrepareImageType prepareImageType,
             String fallbackTargetImage) {
         LOGGER.debug("prepare image has been executed");
+    }
+
+    @Override
+    public void validateImage(AuthenticatedContext auth, CloudStack stack, Image image) {
+        LOGGER.debug("validate image has been executed");
     }
 
     @Override

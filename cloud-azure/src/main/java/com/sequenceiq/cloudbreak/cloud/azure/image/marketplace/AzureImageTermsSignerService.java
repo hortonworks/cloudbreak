@@ -68,7 +68,7 @@ public class AzureImageTermsSignerService {
      * @param azureClient           Azure client
      */
     @Retryable(maxAttempts = 15, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
-    public void sign(String subscriptionId, AzureMarketplaceImage azureMarketplaceImage, AzureClient azureClient) {
+    public AzureImageTermStatus sign(String subscriptionId, AzureMarketplaceImage azureMarketplaceImage, AzureClient azureClient) {
         URI agreementUri = getAgreementUri(subscriptionId, azureMarketplaceImage);
         ErrorMessageBuilder errorMessageBuilder =
                 new ErrorMessageBuilder(String.format(SIGN_ERROR_MESSAGE_TEMPLATE, azureMarketplaceImage)).withPostfix(SIGN_ERROR_MESSAGE_HINTS);
@@ -87,12 +87,14 @@ public class AzureImageTermsSignerService {
                 String message = errorMessageBuilder.buildWithReason(String.format(
                         "authorization error when signing vm image terms and conditions, message is '%s', skipping it", azureException.getMessage()));
                 LOGGER.warn(message, azureException);
+                return AzureImageTermStatus.NOT_ACCEPTED;
             } else {
                 throwCloudImageException(errorMessageBuilder, azureException);
             }
         } catch (Exception e) {
             throwCloudImageException(errorMessageBuilder, e);
         }
+        return AzureImageTermStatus.ACCEPTED;
     }
 
     private void throwCloudImageException(ErrorMessageBuilder errorMessageBuilder, Exception exception) {

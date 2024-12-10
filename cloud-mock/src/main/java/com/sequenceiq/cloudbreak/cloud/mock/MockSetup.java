@@ -31,6 +31,11 @@ public class MockSetup implements Setup {
     }
 
     @Override
+    public void validateImage(AuthenticatedContext auth, CloudStack stack, Image image) {
+        LOGGER.debug("validate image has been executed");
+    }
+
+    @Override
     public ImageStatusResult checkImageStatus(AuthenticatedContext authenticatedContext, CloudStack stack, Image image) {
         return new ImageStatusResult(ImageStatus.CREATE_FINISHED, FINISHED_PROGRESS_VALUE);
     }

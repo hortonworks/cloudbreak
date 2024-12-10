@@ -37,6 +37,8 @@ public class AzureImageFormatValidator implements Validator {
 
     private static final Pattern VHD_PATTERN = Pattern.compile("^(http).*(\\.vhd)$");
 
+    private static final String VHD_AVAILABLE = "vhdAvailable";
+
     @Inject
     private EntitlementService entitlementService;
 
@@ -53,7 +55,7 @@ public class AzureImageFormatValidator implements Validator {
 
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         boolean onlyMarketplaceImagesEnabled = entitlementService.azureOnlyMarketplaceImagesEnabled(accountId);
-
+        boolean vhdAvailable = Boolean.parseBoolean(cloudStack.getParameters().get(VHD_AVAILABLE));
         if (isVhdImageFormat(image)) {
             validateVhdPermitted(imageUri, onlyMarketplaceImagesEnabled);
         } else if (isMarketplaceImageFormat(image)) {
@@ -63,8 +65,8 @@ public class AzureImageFormatValidator implements Validator {
             AzureImageTermStatus termsStatus = getTermsStatus(ac, azureMarketplaceImage);
             if (!isAutomaticTermsSignerAccepted(cloudStack)) {
                 switch (termsStatus) {
-                    case NOT_ACCEPTED -> handleTermsNotAccepted(imageUri, onlyMarketplaceImagesEnabled);
-                    case NON_READABLE -> handleTermsNonReadable(imageUri, onlyMarketplaceImagesEnabled);
+                    case NOT_ACCEPTED -> handleTermsNotAccepted(imageUri, onlyMarketplaceImagesEnabled, vhdAvailable);
+                    case NON_READABLE -> handleTermsNonReadable(imageUri, onlyMarketplaceImagesEnabled, vhdAvailable);
                     default -> LOGGER.debug("Image terms are already accepted for image {}, there is nothing to do here", imageUri);
                 }
 
@@ -77,8 +79,8 @@ public class AzureImageFormatValidator implements Validator {
         }
     }
 
-    private void handleTermsNonReadable(String imageUri, boolean onlyMarketplaceImagesEnabled) {
-        if (onlyMarketplaceImagesEnabled) {
+    private void handleTermsNonReadable(String imageUri, boolean onlyMarketplaceImagesEnabled, boolean vhdAvailable) {
+        if (onlyMarketplaceImagesEnabled && !vhdAvailable) {
             String warningMessage = String.format("Cloudera Management Console does not have sufficient permissions to read if "
                     + "Terms and Conditions are accepted for the Azure Marketplace image %s. "
                     + "Please either enable automatic consent or ensure that the terms are already accepted!", imageUri);
@@ -89,8 +91,8 @@ public class AzureImageFormatValidator implements Validator {
         }
     }
 
-    private void handleTermsNotAccepted(String imageUri, boolean onlyMarketplaceImagesEnabled) {
-        if (onlyMarketplaceImagesEnabled) {
+    private void handleTermsNotAccepted(String imageUri, boolean onlyMarketplaceImagesEnabled, boolean vhdAvailable) {
+        if (onlyMarketplaceImagesEnabled && !vhdAvailable) {
             String errorMessage = String.format("Your image %s seems to be an Azure Marketplace image, "
                     + "however its Terms and Conditions are not accepted! "
                     + "Please either enable automatic consent or accept the terms manually and initiate the provisioning or upgrade again. " +

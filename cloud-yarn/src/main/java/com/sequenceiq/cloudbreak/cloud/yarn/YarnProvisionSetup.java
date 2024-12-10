@@ -25,6 +25,11 @@ public class YarnProvisionSetup implements Setup {
     }
 
     @Override
+    public void validateImage(AuthenticatedContext auth, CloudStack stack, Image image) {
+
+    }
+
+    @Override
     public ImageStatusResult checkImageStatus(AuthenticatedContext authenticatedContext, CloudStack stack, Image image) {
         return new ImageStatusResult(ImageStatus.CREATE_FINISHED, ImageStatusResult.COMPLETED);
     }

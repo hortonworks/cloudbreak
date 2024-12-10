@@ -123,6 +123,25 @@ public class CloudStack {
                 .build();
     }
 
+    public static CloudStack replaceParameters(CloudStack cloudStack, Map<String, String> parameters) {
+        return builder()
+                .groups(cloudStack.getGroups())
+                .network(cloudStack.getNetwork())
+                .image(cloudStack.getImage())
+                .template(cloudStack.getTemplate())
+                .parameters(parameters)
+                .tags(cloudStack.getTags())
+                .instanceAuthentication(cloudStack.getInstanceAuthentication())
+                .fileSystem(cloudStack.getFileSystem().orElse(null))
+                .additionalFileSystem(cloudStack.getAdditionalFileSystem().orElse(null))
+                .loadBalancers(cloudStack.getLoadBalancers())
+                .gatewayUserData(cloudStack.getGatewayUserData())
+                .coreUserData(cloudStack.getCoreUserData())
+                .multiAz(cloudStack.multiAz)
+                .supportedImdsVersion(cloudStack.getSupportedImdsVersion())
+                .build();
+    }
+
     public List<Group> getGroups() {
         return groups;
     }
