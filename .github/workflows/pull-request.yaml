@@ -103,6 +103,7 @@ jobs:
           export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
           export DOCKERHUB_PASSWORD=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_PASSWORD}}")
           export DOCKERHUB_USERNAME=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}")
+          ./gradlew -q javaToolchains
           ./gradlew -Penv=jenkins -b build.gradle --quiet \
             test \
             jacocoTestReport \
