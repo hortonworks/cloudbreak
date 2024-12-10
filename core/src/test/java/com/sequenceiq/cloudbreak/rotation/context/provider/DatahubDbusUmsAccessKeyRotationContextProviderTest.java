@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.core.cluster.ClusterBuilderService;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
@@ -70,6 +71,9 @@ public class DatahubDbusUmsAccessKeyRotationContextProviderTest {
     @Mock
     private SecretRotationSaltService saltService;
 
+    @Mock
+    private ClusterBuilderService clusterBuilderService;
+
     @InjectMocks
     private DatahubDbusUmsAccessKeyRotationContextProvider underTest;
 
@@ -82,8 +86,12 @@ public class DatahubDbusUmsAccessKeyRotationContextProviderTest {
 
     @Test
     void testGetContexts() {
-        when(stackService.getByCrn(any())).thenReturn(new StackDto());
-        assertEquals(2, underTest.getContexts("").size());
+        StackDto stackDto = mock(StackDto.class);
+        when(stackService.getByCrn(any())).thenReturn(stackDto);
+        ClusterView clusterView = mock(ClusterView.class);
+        when(stackDto.getCluster()).thenReturn(clusterView);
+        when(clusterView.getDatabusCredential()).thenReturn("{\"privateKey\":\"anything\", \"accessKey\":\"anything\"}");
+        assertEquals(3, underTest.getContexts("").size());
     }
 
     @Test
@@ -107,7 +115,7 @@ public class DatahubDbusUmsAccessKeyRotationContextProviderTest {
         StackDto stackDto = mock(StackDto.class);
         ClusterView clusterView = mock(ClusterView.class);
         when(stackDto.getCluster()).thenReturn(clusterView);
-        when(clusterView.getDatabusCredential()).thenReturn("{\"privateKey\":\"anything\"}");
+        when(clusterView.getDatabusCredential()).thenReturn("{\"privateKey\":\"anything\", \"accessKey\":\"anything\"}");
         when(stackService.getByCrn(any())).thenReturn(stackDto);
         doThrow(new CloudbreakOrchestratorFailedException("failed")).when(saltService).updateSaltPillar(any(), any());
         CustomJobRotationContext customJobRotationContext = (CustomJobRotationContext) underTest.getContexts("").get(CUSTOM_JOB);
@@ -126,7 +134,7 @@ public class DatahubDbusUmsAccessKeyRotationContextProviderTest {
         StackDto stackDto = mock(StackDto.class);
         ClusterView clusterView = mock(ClusterView.class);
         when(stackDto.getCluster()).thenReturn(clusterView);
-        when(clusterView.getDatabusCredential()).thenReturn("{\"privateKey\":\"anything\"}");
+        when(clusterView.getDatabusCredential()).thenReturn("{\"privateKey\":\"anything\", \"accessKey\":\"anything\"}");
         when(stackService.getByCrn(any())).thenReturn(stackDto);
         doNothing().when(saltService).updateSaltPillar(any(), any());
         when(stackUtil.collectReachableNodes(any())).thenReturn(Set.of());
@@ -147,7 +155,7 @@ public class DatahubDbusUmsAccessKeyRotationContextProviderTest {
         StackDto stackDto = mock(StackDto.class);
         ClusterView clusterView = mock(ClusterView.class);
         when(stackDto.getCluster()).thenReturn(clusterView);
-        when(clusterView.getDatabusCredential()).thenReturn("{\"privateKey\":\"anything\"}");
+        when(clusterView.getDatabusCredential()).thenReturn("{\"privateKey\":\"anything\", \"accessKey\":\"anything\"}");
         when(stackService.getByCrn(any())).thenReturn(stackDto);
         doNothing().when(saltService).updateSaltPillar(any(), any());
         when(stackUtil.collectReachableNodes(any())).thenReturn(Set.of());
@@ -173,7 +181,7 @@ public class DatahubDbusUmsAccessKeyRotationContextProviderTest {
         StackDto stackDto = mock(StackDto.class);
         ClusterView clusterView = mock(ClusterView.class);
         when(stackDto.getCluster()).thenReturn(clusterView);
-        when(clusterView.getDatabusCredential()).thenReturn("{\"privateKey\":\"anything\"}");
+        when(clusterView.getDatabusCredential()).thenReturn("{\"privateKey\":\"anything\", \"accessKey\":\"anything\"}");
         when(stackService.getByCrn(any())).thenReturn(stackDto);
         doNothing().when(saltService).updateSaltPillar(any(), any());
         when(stackUtil.collectReachableNodes(any())).thenReturn(Set.of());

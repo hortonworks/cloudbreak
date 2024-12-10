@@ -42,6 +42,8 @@ public class ClouderaManagerExternalAccountService {
         apiExternalAccount.setAccountConfigs(accountConfigList);
         if (!accountFound) {
             externalAccountsResourceApi.createAccount(apiExternalAccount);
+        } else {
+            externalAccountsResourceApi.updateAccount(apiExternalAccount);
         }
         return apiExternalAccount;
     }

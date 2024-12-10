@@ -1,5 +1,10 @@
 package com.sequenceiq.cloudbreak.rotation.context.provider;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.meteringv2.MeteringV2ServiceRoles.METERINGV2_DATABUS_ACCESS_KEY_ID;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.meteringv2.MeteringV2ServiceRoles.METERINGV2_DATABUS_ACCESS_SECRET_KEY;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.meteringv2.MeteringV2ServiceRoles.METERINGV2_DATABUS_ACCESS_SECRET_KEY_ALGO;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.meteringv2.MeteringV2ServiceRoles.METERINGV2_SERVICE;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.CM_SERVICE;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.UMS_DATABUS_CREDENTIAL;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DBUS_UMS_ACCESS_KEY;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM_JOB;
@@ -13,12 +18,18 @@ import java.util.stream.Collectors;
 import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
+import com.sequenceiq.cloudbreak.core.cluster.ClusterBuilderService;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
@@ -28,6 +39,7 @@ import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
+import com.sequenceiq.cloudbreak.rotation.context.CMServiceConfigRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
@@ -41,6 +53,8 @@ import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 @Component
 public class DatahubDbusUmsAccessKeyRotationContextProvider implements RotationContextProvider {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatahubDbusUmsAccessKeyRotationContextProvider.class);
 
     private static final String DATABUS_KEY = "databus";
 
@@ -67,19 +81,41 @@ public class DatahubDbusUmsAccessKeyRotationContextProvider implements RotationC
     @Inject
     private SecretRotationSaltService saltService;
 
+    @Inject
+    private ClusterBuilderService clusterBuilderService;
+
     @Override
     public Map<SecretRotationStep, ? extends RotationContext> getContexts(String resourceCrn) {
         StackDto stackDto = stackService.getByCrn(resourceCrn);
+        CMServiceConfigRotationContext cmServiceConfigRotationContext = getCMServiceConfigRotationContext(stackDto);
         RotationContext customJobRotationContext = CustomJobRotationContext.builder()
                 .withResourceCrn(resourceCrn)
                 .withRotationJob(() -> updateClusterWithDatabusCredentials(stackDto))
                 .withRollbackJob(() -> updateClusterWithDatabusCredentials(stackDto))
                 .build();
         return Map.of(UMS_DATABUS_CREDENTIAL, new RotationContext(resourceCrn),
-                CUSTOM_JOB, customJobRotationContext);
+                CUSTOM_JOB, customJobRotationContext,
+                CM_SERVICE, cmServiceConfigRotationContext);
+    }
+
+    private CMServiceConfigRotationContext getCMServiceConfigRotationContext(StackDto stackDto) {
+        Table<String, String, String> cmConfigTable = HashBasedTable.create();
+        String credentials = stackDto.getCluster().getDatabusCredential();
+        if (StringUtils.isNotBlank(credentials)) {
+            try {
+                DataBusCredential dataBusCredential = new Json(credentials).get(DataBusCredential.class);
+                cmConfigTable.put(METERINGV2_SERVICE, METERINGV2_DATABUS_ACCESS_KEY_ID, dataBusCredential.getAccessKey());
+                cmConfigTable.put(METERINGV2_SERVICE, METERINGV2_DATABUS_ACCESS_SECRET_KEY, dataBusCredential.getPrivateKey());
+                cmConfigTable.put(METERINGV2_SERVICE, METERINGV2_DATABUS_ACCESS_SECRET_KEY_ALGO, dataBusCredential.getAccessKeyType());
+            } catch (IOException e) {
+                LOGGER.error("Cannot read DataBusCredential from cluster entity. Continue without value.", e);
+            }
+        }
+        return new CMServiceConfigRotationContext(stackDto.getResourceCrn(), cmConfigTable);
     }
 
     private void updateClusterWithDatabusCredentials(StackDto stackDto) {
+        clusterBuilderService.configureManagementServices(stackDto.getId());
         refreshDatabusPillars(stackDto);
         executeDbusRelatedSaltStates(stackDto);
         restartMgmtServicesInCM(stackDto);
