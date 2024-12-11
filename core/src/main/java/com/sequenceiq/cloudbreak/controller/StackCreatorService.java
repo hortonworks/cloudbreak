@@ -43,7 +43,6 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hue.HueRoles;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -354,14 +353,10 @@ public class StackCreatorService {
     }
 
     private boolean isCodRequest(StackV4Request stackRequest) {
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        if (RegionAwareInternalCrnGeneratorUtil.isInternalCrn(userCrn)) {
-            return Optional.ofNullable(stackRequest.getTags())
-                    .map(TagsV4Request::getApplication)
-                    .map(map -> Boolean.parseBoolean(map.get("is_cod_cluster")))
-                    .orElse(Boolean.FALSE);
-        }
-        return false;
+        return Optional.ofNullable(stackRequest.getTags())
+                .map(TagsV4Request::getApplication)
+                .map(map -> Boolean.parseBoolean(map.get("is_cod_cluster")))
+                .orElse(Boolean.FALSE);
     }
 
     private String getCrnForCreation(Optional<String> externalCrn) {

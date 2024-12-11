@@ -301,7 +301,7 @@ public class StackCreatorServiceTest {
     }
 
     @Test
-    void testArm64ShouldNotBeUsedOnCODbWhenCODArmEntitlementIsNotEnabled() {
+    void testArm64ShouldNotBeUsedOnCODWhenCODArmEntitlementIsNotEnabled() {
         User user = new User();
         Workspace workspace = getWorkspace();
         StackV4Request stackRequest = getStackV4Request();
@@ -322,28 +322,7 @@ public class StackCreatorServiceTest {
     }
 
     @Test
-    void testArm64ShouldNotBeUsedOnCODbWhenCODArmEntitlementIsEnabledButUserIsNotInternal() {
-        User user = new User();
-        Workspace workspace = getWorkspace();
-        StackV4Request stackRequest = getStackV4Request();
-        stackRequest.setArchitecture(Architecture.ARM64.getName());
-        stackRequest.setTags(isCodClusterTag(true));
-        when(regionAwareCrnGenerator.generateCrnStringWithUuid(any(), anyString())).thenReturn(STACK_CRN);
-        when(stackDtoService.getStackViewByNameOrCrnOpt(any(), anyString())).thenReturn(Optional.empty());
-
-        assertThrows(BadRequestException.class, () ->
-                        ThreadBasedUserCrnProvider.doAsInternalActor(USER_CRN, () -> underTest.createStack(user, workspace, stackRequest, true)),
-                "The selected architecture (arm64) is not enabled in your account");
-
-        verify(recipeValidatorService).validateRecipeExistenceOnInstanceGroups(any(), any());
-        verify(stackDtoService).getStackViewByNameOrCrnOpt(NameOrCrn.ofName(STACK_NAME), ACCOUNT_ID);
-        verify(entitlementService, never()).isCODUseGraviton(any());
-        verify(entitlementService, never()).isArmInstanceEnabled(any());
-        verify(entitlementService, times(1)).isDataHubArmEnabled(any());
-    }
-
-    @Test
-    void testArm64ShouldNotBeUsedOnCODbWhenDataHubArmEntitlementIsNotEnabledAndUserIsInternal() {
+    void testArm64ShouldNotBeUsedOnCODWhenDataHubArmEntitlementIsNotEnabledAndUserIsInternal() {
         User user = new User();
         Workspace workspace = getWorkspace();
         StackV4Request stackRequest = getStackV4Request();
