@@ -2432,6 +2432,13 @@ message CDPClusterStatus {
 
     // The status when the datalake resize validation failed
     DATALAKE_RESIZE_VALIDATION_FAILED = 73;
+
+    // The status when the process of setting the default Java version has started.
+    SET_DEFAULT_JAVA_VERSION_STARTED = 74;
+    // The status when the process of setting the default Java version has completed successfully.
+    SET_DEFAULT_JAVA_VERSION_FINISHED = 75;
+    // The status when the process of setting the default Java version has failed.
+    SET_DEFAULT_JAVA_VERSION_FAILED = 76;
   }
 }
 
