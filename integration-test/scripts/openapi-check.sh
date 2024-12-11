@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 set -e
-DOCKER_SSC_IMAGE=docker-private.infra.cloudera.com/cloudera_thirdparty/openapitools/openapi-diff:2.1.0-beta.8
+DOCKER_SSC_IMAGE=docker-private.infra.cloudera.com/cloudera_thirdparty/tufin/oasdiff:v1.10.27
 INCOMPATIBLE_CHANGES=()
 
 date
@@ -38,24 +38,23 @@ compatible() {
     compat_results=$(docker run --rm -t \
       -v ${PWD}/apidefinitions:/apidefinitions:rw \
       "${DOCKER_SSC_IMAGE}" \
+      "changelog" \
       "/apidefinitions/${service}-openapi-${previous_build}.json" \
       "/apidefinitions/${service}.json" \
-      --config-prop incompatible.response.enum.increased:false \
-      --markdown /apidefinitions/${service}.markdown \
-      --html /apidefinitions/${service}.html \
-      --fail-on-incompatible)
+      --color never \
+      -o ERR)
+    compat_exit_code=$?
 
-    if [[ ${compat_results} =~ .*"API changes broke backward compatibility".* ]]; then
-      echo
-      echo "================ COMPATIBILITY BREAKS in ${service} ================"
-      echo "$compat_results"
-      echo "==============================================================================="
-      echo
-      compat_exit_code=1
+    echo
+    if [[ $compat_exit_code == 1 ]]; then
+      echo "COMPATIBILITY BREAKS in ${service}"
     else
-      echo "change is compatible"
-      compat_exit_code=0
+      echo "CHANGE IS COMPATIBLE in ${service}"
     fi
+    echo "==============================================================================="
+    echo "$compat_results"
+    echo "==============================================================================="
+    echo
   fi
   return $compat_exit_code
 }
