@@ -445,7 +445,8 @@ class YarnBasedScalingAdjustmentServiceTest {
         doReturn(TEST_MESSAGE).when(messagesService).getMessageWithArgs(anyString(), anyInt(), anyList(), anyInt(), anyList());
         doNothing().when(metricService).recordYarnInvocation(any(Cluster.class), anyLong());
         lenient().doCallRealMethod().when(clock).getCurrentTimeMillis();
-        lenient().doReturn(scalingActivity).when(scalingActivityService).create(any(Cluster.class), any(ActivityStatus.class), anyString(), anyLong());
+        lenient().doReturn(scalingActivity).when(scalingActivityService)
+                .create(any(Cluster.class), any(ActivityStatus.class), anyString(), anyLong(), anyLong(), anyString());
         lenient().doCallRealMethod().when(scalingEventSender).sendScaleUpEvent(any(BaseAlert.class), anyInt(), anyInt(), anyInt(), anyInt(), anyLong());
         lenient().doCallRealMethod().when(scalingEventSender).sendStopStartScaleUpEvent(any(BaseAlert.class), anyInt(), anyInt(), anyInt(), anyLong());
         lenient().doCallRealMethod().when(scalingEventSender).sendScaleDownEvent(any(BaseAlert.class), anyInt(), anyList(), anyInt(),

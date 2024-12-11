@@ -84,6 +84,20 @@ public class ScalingActivityService implements AuthorizationResourceCrnProvider,
                 .orElseThrow(NotFoundException.notFound("cluster", stackName));
     }
 
+    public ScalingActivity create(Cluster cluster, ActivityStatus activityStatus, String reason, long creationTimestamp, long yarnRecommendationTime,
+            String yarnRecommendation) {
+        ScalingActivity scalingActivity = new ScalingActivity();
+        scalingActivity.setCluster(cluster);
+        scalingActivity.setOperationId(UUID.randomUUID().toString());
+        scalingActivity.setActivityStatus(activityStatus);
+        scalingActivity.setScalingActivityReason(reason);
+        scalingActivity.setYarnRecommendation(yarnRecommendation);
+        scalingActivity.setYarnRecommendationTime(new Date(yarnRecommendationTime));
+        scalingActivity.setStartTime(new Date(creationTimestamp));
+        LOGGER.info("Creating ScalingActivity with creation timestamp: {} for cluster: {}", creationTimestamp, cluster.getStackCrn());
+        return save(scalingActivity);
+    }
+
     public ScalingActivity create(Cluster cluster, ActivityStatus activityStatus, String reason, long creationTimestamp) {
         ScalingActivity scalingActivity = new ScalingActivity();
         scalingActivity.setCluster(cluster);

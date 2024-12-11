@@ -5,6 +5,7 @@ import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALE_YARN_RECOMME
 import static com.sequenceiq.periscope.model.ScalingAdjustmentType.REGULAR;
 import static com.sequenceiq.periscope.model.ScalingAdjustmentType.STOPSTART;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -40,6 +41,15 @@ public class YarnBasedScalingAdjustmentService {
     private static final String UPSCALE_MESSAGE = "Proceeding with cluster upscale";
 
     private static final String DOWNSCALE_MESSAGE = "Proceeding with cluster downscale";
+
+    private static final String UPSCALE_NOT_POSSIBLE = "Cannot trigger upscale because there are no stopped nodes present.";
+
+    private static final String DOWNSCALE_NOT_POSSIBLE = "Cannot trigger downscale for this nodes as the cluster is " +
+            "already at the min number of nodes as per autoscaling policy";
+
+    private static final String NO_YARN_RECOMMENDATION = " Cannot trigger any scaling operation as there was no recommendation for scaling from yarn";
+
+    private static final String COOLDOWN_TIME_NOT_ELAPSED = "Cannot trigger upscale or downscale as the cooldown period has not been completed";
 
     @Inject
     private YarnResponseUtils yarnResponseUtils;
@@ -130,8 +140,29 @@ public class YarnBasedScalingAdjustmentService {
 
         ScalingAdjustmentType adjustmentType = !stopStartEnabled ? REGULAR : STOPSTART;
 
+        String scalingReason = getScalingReasonBasedOnConditions(yarnRecommendedScaleUpCount, yarnRecommendedDecommissionHosts,
+                finalScaleUpCount, finalHostsToDecommission);
+
+        if (scalingReason != null) {
+            scalingActivityService.create(cluster, METRICS_COLLECTION_SUCCESS, scalingReason, start, start, yarnRecommendationMessage);
+        }
+
+        SimpleEntry<String, Long> yarnRecommendation = new SimpleEntry<>(yarnRecommendationMessage, start);
+
         publishScalingEventIfNeeded(cluster, finalScaleUpCount, stackV4Response, finalHostsToDecommission, adjustmentType, policyHostGroupInstanceInfo,
-                yarnRecommendationMessage);
+                yarnRecommendation);
+    }
+
+    private String getScalingReasonBasedOnConditions(int yarnRecommendedScaleUpCount, List<String> yarnRecommendedDecommissionHosts,
+            int finalScaleUpCount, List<String> finalHostsToDecommission) {
+        if (yarnRecommendedScaleUpCount == 0 && yarnRecommendedDecommissionHosts.isEmpty()) {
+            return NO_YARN_RECOMMENDATION;
+        } else if (finalScaleUpCount == 0 && yarnRecommendedScaleUpCount != 0) {
+            return UPSCALE_NOT_POSSIBLE;
+        } else if (finalHostsToDecommission.isEmpty() && !yarnRecommendedDecommissionHosts.isEmpty()) {
+            return DOWNSCALE_NOT_POSSIBLE;
+        }
+        return null;
     }
 
     protected boolean isCoolDownTimeElapsed(String clusterCrn, String coolDownAction, long expectedCoolDownMillis, long lastClusterScalingActivity) {
@@ -152,12 +183,14 @@ public class YarnBasedScalingAdjustmentService {
     }
 
     private void publishScalingEventIfNeeded(Cluster cluster, int finalScaleUpCount, StackV4Response stackV4Response, List<String> hostsToDecommission,
-            ScalingAdjustmentType adjustmentType, LoadAlertPolicyHostGroupInstanceInfo policyHostGroupInstanceInfo, String yarnRecommendationMessage) {
+            ScalingAdjustmentType adjustmentType, LoadAlertPolicyHostGroupInstanceInfo policyHostGroupInstanceInfo,
+            SimpleEntry<String, Long> yarnRecommendation) {
         LoadAlert loadAlert = policyHostGroupInstanceInfo.getLoadAlert();
-        StringBuilder sb = new StringBuilder(yarnRecommendationMessage);
+        StringBuilder sb = new StringBuilder(yarnRecommendation.getKey());
         if (upscalable(cluster, loadAlert.getLoadAlertConfiguration(), finalScaleUpCount)) {
             ScalingActivity scalingActivity =
-                    scalingActivityService.create(cluster, METRICS_COLLECTION_SUCCESS, sb.append(UPSCALE_MESSAGE).toString(), clock.getCurrentTimeMillis());
+                    scalingActivityService.create(cluster, METRICS_COLLECTION_SUCCESS, sb.append(UPSCALE_MESSAGE).toString(), clock.getCurrentTimeMillis(),
+                            yarnRecommendation.getValue(), yarnRecommendation.getKey());
             if (STOPSTART.equals(adjustmentType)) {
                 Integer existingClusterNodeCount = stackV4Response.getNodeCount() - policyHostGroupInstanceInfo.getStoppedHostInstanceIds().size();
                 eventSender.sendStopStartScaleUpEvent(loadAlert, existingClusterNodeCount, policyHostGroupInstanceInfo.getServicesHealthyInstanceIds().size(),
@@ -168,9 +201,12 @@ public class YarnBasedScalingAdjustmentService {
             }
         } else if (downscalable(cluster, loadAlert.getLoadAlertConfiguration(), hostsToDecommission)) {
             ScalingActivity scalingActivity = scalingActivityService.create(cluster, METRICS_COLLECTION_SUCCESS, sb.append(DOWNSCALE_MESSAGE).toString(),
-                    clock.getCurrentTimeMillis());
+                    clock.getCurrentTimeMillis(), yarnRecommendation.getValue(), yarnRecommendation.getKey());
             eventSender.sendScaleDownEvent(loadAlert, policyHostGroupInstanceInfo.getServicesHealthyInstanceIds().size(), hostsToDecommission,
                     policyHostGroupInstanceInfo.getServicesHealthyInstanceIds().size(), adjustmentType, scalingActivity.getId());
+        } else if (finalScaleUpCount > 0 || !hostsToDecommission.isEmpty()) {
+            scalingActivityService.create(cluster, METRICS_COLLECTION_SUCCESS, COOLDOWN_TIME_NOT_ELAPSED,
+                    yarnRecommendation.getValue(), yarnRecommendation.getValue(), yarnRecommendation.getKey());
         }
     }
 

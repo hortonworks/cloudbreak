@@ -36,6 +36,10 @@ public class ScalingActivity implements Clustered {
     @Column(name = "flow_id")
     private String flowId;
 
+    @Column(name = "yarn_recommendation_time")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date yarnRecommendationTime;
+
     @Column(name = "start_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date startTime;
@@ -46,6 +50,9 @@ public class ScalingActivity implements Clustered {
 
     @Column(name = "activity_reason")
     private String scalingActivityReason;
+
+    @Column(name = "yarn_recommendation")
+    private String yarnRecommendation;
 
     @Column(name = "activity_status")
     @Convert(converter = ActivityStatusAttributeConverter.class)
@@ -88,6 +95,14 @@ public class ScalingActivity implements Clustered {
         this.flowId = flowId;
     }
 
+    public Date getYarnRecommendationTime() {
+        return yarnRecommendationTime;
+    }
+
+    public void setYarnRecommendationTime(Date yarnRecommendationTime) {
+        this.yarnRecommendationTime = yarnRecommendationTime;
+    }
+
     public Date getStartTime() {
         return startTime;
     }
@@ -102,6 +117,14 @@ public class ScalingActivity implements Clustered {
 
     public void setEndTime(Date endTime) {
         this.endTime = endTime;
+    }
+
+    public String getYarnRecommendation() {
+        return yarnRecommendation;
+    }
+
+    public void setYarnRecommendation(String yarnRecommendation) {
+        this.yarnRecommendation = yarnRecommendation;
     }
 
     public String getScalingActivityReason() {
@@ -137,6 +160,8 @@ public class ScalingActivity implements Clustered {
                 ", flowId='" + flowId + '\'' +
                 ", startTime=" + startTime +
                 ", endTime=" + endTime +
+                ", yarnRecommendationTime=" + yarnRecommendationTime +
+                ", yarnRecommendation='" + yarnRecommendation + '\'' +
                 ", scalingActivityReason='" + scalingActivityReason + '\'' +
                 ", activityStatus=" + activityStatus +
                 ", cluster=" + cluster +

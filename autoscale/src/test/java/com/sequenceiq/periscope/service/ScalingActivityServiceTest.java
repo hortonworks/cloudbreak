@@ -85,6 +85,22 @@ class ScalingActivityServiceTest {
     }
 
     @Test
+    void testCreateWithYarnRecommendationFields() {
+        Cluster cluster = getCluster();
+        ActivityStatus status = METRICS_COLLECTION_SUCCESS;
+        CrnTestUtil.mockCrnGenerator(crnGenerator);
+        long now = Instant.now().toEpochMilli();
+        underTest.create(cluster, status, TEST_ACTIVITY_REASON, now, now, TEST_ACTIVITY_REASON);
+
+        verify(scalingActivityRepository, times(1)).save(captor.capture());
+        ScalingActivity result = captor.getValue();
+
+        assertThat(result).isInstanceOf(ScalingActivity.class);
+        assertThat(result.getStartTime()).isEqualTo(new Date(now));
+        assertThat(result.getActivityStatus()).isEqualTo(status);
+    }
+
+    @Test
     void testUpdate() {
         ActivityStatus newStatus = SCALING_FLOW_IN_PROGRESS;
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, TEST_FLOW_ID);
