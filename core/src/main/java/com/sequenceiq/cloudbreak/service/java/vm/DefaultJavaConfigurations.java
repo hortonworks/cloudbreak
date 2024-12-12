@@ -10,28 +10,29 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "vm.default")
 public class DefaultJavaConfigurations {
 
-    private List<DefaultJavaConfiguration> javaVersions;
+    private List<JavaConfiguration> javaVersions;
 
-    public List<DefaultJavaConfiguration> getJavaVersions() {
+    public List<JavaConfiguration> getJavaVersions() {
         return javaVersions;
     }
 
-    public void setJavaVersions(List<DefaultJavaConfiguration> javaVersions) {
+    public void setJavaVersions(List<JavaConfiguration> javaVersions) {
         this.javaVersions = javaVersions;
     }
 
-    public List<DefaultJavaConfiguration> defaultJavaConfigurationsAsList() {
+    public List<JavaConfiguration> defaultJavaConfigurationsAsList() {
         return javaVersions
                 .stream()
                 .sorted(new DefaultJavaConfigurationComparator())
                 .collect(Collectors.toList());
     }
 
-    class DefaultJavaConfigurationComparator implements java.util.Comparator<DefaultJavaConfiguration> {
+    static class DefaultJavaConfigurationComparator implements java.util.Comparator<JavaConfiguration> {
 
         @Override
-        public int compare(DefaultJavaConfiguration o1, DefaultJavaConfiguration o2) {
+        public int compare(JavaConfiguration o1, JavaConfiguration o2) {
             return o1.getVersion() - o2.getVersion();
         }
     }
+
 }

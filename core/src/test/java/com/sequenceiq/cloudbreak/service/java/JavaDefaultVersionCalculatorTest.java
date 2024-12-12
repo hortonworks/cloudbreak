@@ -12,8 +12,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.service.java.vm.DefaultJavaConfiguration;
 import com.sequenceiq.cloudbreak.service.java.vm.DefaultJavaConfigurations;
+import com.sequenceiq.cloudbreak.service.java.vm.JavaConfiguration;
 
 @ExtendWith(MockitoExtension.class)
 class JavaDefaultVersionCalculatorTest {
@@ -58,12 +58,12 @@ class JavaDefaultVersionCalculatorTest {
     @MethodSource("scenarios")
     void constructionTest(String runtime, Integer javaVersion, int expectedVersion) {
         if (javaVersion == null) {
-            DefaultJavaConfiguration java8 = new DefaultJavaConfiguration();
+            JavaConfiguration java8 = new JavaConfiguration();
             java8.setVersion(8);
             java8.setMinRuntimeVersion("7.1.0");
             java8.setMaxRuntimeVersion("7.2.18");
 
-            DefaultJavaConfiguration java17 = new DefaultJavaConfiguration();
+            JavaConfiguration java17 = new JavaConfiguration();
             java17.setVersion(17);
             java17.setMinRuntimeVersion("7.3.1");
 

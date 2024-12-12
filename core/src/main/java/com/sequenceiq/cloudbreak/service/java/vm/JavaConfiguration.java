@@ -5,7 +5,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVer
 
 import org.apache.commons.lang3.StringUtils;
 
-public class DefaultJavaConfiguration {
+public class JavaConfiguration {
 
     private int version;
 
@@ -38,7 +38,7 @@ public class DefaultJavaConfiguration {
     }
 
     public boolean isRuntimeCompatible(String runtimeVersion) {
-        if (StringUtils.isBlank(this.maxRuntimeVersion)) {
+        if (StringUtils.isBlank(maxRuntimeVersion)) {
             if (isRuntimeVersionHigherThenTheMinimumAndNoMaximumDefined(runtimeVersion)) {
                 return true;
             }
