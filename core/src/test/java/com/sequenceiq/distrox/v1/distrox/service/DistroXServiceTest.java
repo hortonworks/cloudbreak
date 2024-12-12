@@ -60,6 +60,8 @@ class DistroXServiceTest {
 
     private static final String DATALAKE_CRN = "crn:cdp:datalake:us-west-1:acc1:datalake:cluster1";
 
+    private static final boolean NOT_INTERNAL_REQUEST = false;
+
     @Mock
     private DistroXV1RequestToStackV4RequestConverter stackRequestConverter;
 
@@ -109,7 +111,7 @@ class DistroXServiceTest {
         r.setEnvironmentName(invalidEnvNameValue);
         when(environmentClientService.getByName(invalidEnvNameValue)).thenReturn(null);
 
-        BadRequestException err = assertThrows(BadRequestException.class, () -> underTest.post(r));
+        BadRequestException err = assertThrows(BadRequestException.class, () -> underTest.post(r, NOT_INTERNAL_REQUEST));
 
         assertEquals("No environment name provided hence unable to obtain some important data", err.getMessage());
 
@@ -135,7 +137,7 @@ class DistroXServiceTest {
         when(environmentClientService.getByName(envName)).thenReturn(envResponse);
         when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any())).thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
 
-        underTest.post(request);
+        underTest.post(request, NOT_INTERNAL_REQUEST);
 
         verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any());
     }
@@ -162,7 +164,7 @@ class DistroXServiceTest {
 
             when(environmentClientService.getByName(envName)).thenReturn(envResponse);
 
-            BadRequestException err = assertThrows(BadRequestException.class, () -> underTest.post(r));
+            BadRequestException err = assertThrows(BadRequestException.class, () -> underTest.post(r, NOT_INTERNAL_REQUEST));
 
             assertEquals(String.format("If you want to provision a Data Hub then the FreeIPA instance must be running in the '%s' Environment.", envName),
                     err.getMessage());
@@ -198,7 +200,7 @@ class DistroXServiceTest {
         lenient().when(platformAwareSdxConnector.listSdxCrns(any())).thenReturn(Set.of(DATALAKE_CRN));
         lenient().when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
 
-        BadRequestException err = assertThrows(BadRequestException.class, () -> underTest.post(r));
+        BadRequestException err = assertThrows(BadRequestException.class, () -> underTest.post(r, NOT_INTERNAL_REQUEST));
 
         assertEquals(String.format("'someAwesomeEnvironment' Environment can not be delete in progress state."),
                 err.getMessage());
@@ -227,7 +229,7 @@ class DistroXServiceTest {
         when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any())).thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
 
-        underTest.post(r);
+        underTest.post(r, NOT_INTERNAL_REQUEST);
 
         verify(environmentClientService, calledOnce()).getByName(any());
         verify(environmentClientService, calledOnce()).getByName(envName);
@@ -254,7 +256,7 @@ class DistroXServiceTest {
         when(environmentClientService.getByName(envName)).thenReturn(envResponse);
         when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any())).thenReturn(Set.of());
 
-        assertThatThrownBy(() -> underTest.post(request))
+        assertThatThrownBy(() -> underTest.post(request, NOT_INTERNAL_REQUEST))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Data Lake stack cannot be found for environment: %s (%s)", envName, envResponse.getCrn());
 
@@ -277,7 +279,7 @@ class DistroXServiceTest {
         when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any()))
                 .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.NOT_AVAILABLE)));
 
-        assertThatThrownBy(() -> underTest.post(request))
+        assertThatThrownBy(() -> underTest.post(request, NOT_INTERNAL_REQUEST))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Data Lake stacks of environment should be available.");
 
@@ -306,7 +308,7 @@ class DistroXServiceTest {
         when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any()))
                 .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
 
-        underTest.post(request);
+        underTest.post(request, NOT_INTERNAL_REQUEST);
 
         verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any());
     }
@@ -333,7 +335,7 @@ class DistroXServiceTest {
         when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any()))
                 .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.ROLLING_UPGRADE_IN_PROGRESS)));
 
-        underTest.post(request);
+        underTest.post(request, NOT_INTERNAL_REQUEST);
 
         verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any());
     }
@@ -363,7 +365,7 @@ class DistroXServiceTest {
         when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any()))
                 .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
 
-        assertThatThrownBy(() -> underTest.post(request))
+        assertThatThrownBy(() -> underTest.post(request, NOT_INTERNAL_REQUEST))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Image request can not have both image id and os parameters set.");
 
@@ -395,7 +397,7 @@ class DistroXServiceTest {
                 .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
         when(imageOsService.isSupported(any())).thenReturn(false);
 
-        assertThatThrownBy(() -> underTest.post(request))
+        assertThatThrownBy(() -> underTest.post(request, NOT_INTERNAL_REQUEST))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Image os 'os' is not supported in your account.");
 

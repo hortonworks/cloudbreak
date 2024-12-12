@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.status.StatusCheckResult;
+import com.sequenceiq.cloudbreak.service.ReservedTagValidatorService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageOsService;
@@ -60,9 +61,12 @@ public class DistroXService {
     @Inject
     private ImageOsService imageOsService;
 
-    public StackV4Response post(DistroXV1Request request) {
+    @Inject
+    private ReservedTagValidatorService reservedTagValidatorService;
+
+    public StackV4Response post(DistroXV1Request request, boolean internalRequest) {
         Workspace workspace = workspaceService.getForCurrentUser();
-        validate(request);
+        validate(request, internalRequest);
         fedRampModificationService.prepare(request, workspace.getTenant().getName());
         return stackOperations.post(
                 workspace.getId(),
@@ -71,7 +75,14 @@ public class DistroXService {
                 true);
     }
 
-    private void validate(DistroXV1Request request) {
+    private void validate(DistroXV1Request request, boolean internalRequest) {
+        if (!internalRequest) {
+            Optional.of(request).map(DistroXV1Request::getTags).ifPresent(tagRequest -> {
+                reservedTagValidatorService.validateInternalTags(tagRequest.getApplication());
+                reservedTagValidatorService.validateInternalTags(tagRequest.getDefaults());
+                reservedTagValidatorService.validateInternalTags(tagRequest.getUserDefined());
+            });
+        }
         DetailedEnvironmentResponse environment = Optional.ofNullable(environmentClientService.getByName(request.getEnvironmentName()))
                 .orElseThrow(() -> new BadRequestException("No environment name provided hence unable to obtain some important data"));
         if (environment.getEnvironmentStatus().isDeleteInProgress()) {

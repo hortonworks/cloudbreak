@@ -211,14 +211,14 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @CheckPermissionByRequestProperty(path = "cluster.blueprintName", type = NAME, action = DESCRIBE_CLUSTER_TEMPLATE)
     @CheckPermissionByRequestProperty(path = "allRecipes", type = NAME_LIST, action = DESCRIBE_RECIPE)
     public StackV4Response post(@Valid @RequestObject DistroXV1Request request) {
-        return distroxService.post(request);
+        return distroxService.post(request, false);
     }
 
     @Override
     @InternalOnly
     public StackV4Response postInternal(@InitiatorUserCrn @NotEmpty String initiatorUserCrn,
             String accountId, @Valid DistroXV1Request request) {
-        return post(request);
+        return distroxService.post(request, true);
     }
 
     @Override
@@ -460,7 +460,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     public RotateRdsCertificateV1Response rotateRdsCertificateByName(@ResourceName String name) {
         return rotateRdsCertificateConverter.convert(
                 rotateRdsCertificateService.rotateRdsCertificate(NameOrCrn.ofName(name),
-                ThreadBasedUserCrnProvider.getAccountId()));
+                        ThreadBasedUserCrnProvider.getAccountId()));
     }
 
     @Override
@@ -468,7 +468,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     public RotateRdsCertificateV1Response rotateRdsCertificateByCrn(@ResourceCrn String crn) {
         return rotateRdsCertificateConverter.convert(
                 rotateRdsCertificateService.rotateRdsCertificate(NameOrCrn.ofCrn(crn),
-                ThreadBasedUserCrnProvider.getAccountId()));
+                        ThreadBasedUserCrnProvider.getAccountId()));
     }
 
     @Override
