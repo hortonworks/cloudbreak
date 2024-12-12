@@ -149,8 +149,11 @@ public class InstanceGroupNetworkParameterConverter {
                         .orElse(null);
                 setFallbackSubnetIdForInstanceGroupNetwork(stackLevelSubnetId, envNetwork, response::setSubnetIds);
             }
+            Set<String> availabilityZones = groupGcpNetworkV1Parameters.getAvailabilityZones();
+            if (CollectionUtils.isNotEmpty(availabilityZones)) {
+                response.setAvailabilityZones(availabilityZones);
+            }
         }
-
         return response;
     }
 

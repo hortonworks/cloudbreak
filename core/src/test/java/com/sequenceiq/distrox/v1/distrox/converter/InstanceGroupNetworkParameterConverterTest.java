@@ -1,5 +1,6 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -9,6 +10,8 @@ import java.util.Set;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -56,7 +59,7 @@ class InstanceGroupNetworkParameterConverterTest {
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
                 () -> underTest.convert(providerSpecificNetworkParam, environmentNetworkResponse, CloudPlatform.MOCK, networkV4Request));
 
-        Assertions.assertEquals("Subnet could not be selected for you request, please check your environment and it's network configuration.",
+        assertEquals("Subnet could not be selected for you request, please check your environment and it's network configuration.",
                 exception.getMessage());
     }
 
@@ -100,7 +103,7 @@ class InstanceGroupNetworkParameterConverterTest {
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
                 () -> underTest.convert(providerSpecificNetworkParam, environmentNetworkResponse, CloudPlatform.AWS, networkV4Request));
 
-        Assertions.assertEquals("Subnet could not be selected for you request, please check your environment and it's network configuration.",
+        assertEquals("Subnet could not be selected for you request, please check your environment and it's network configuration.",
                 exception.getMessage());
     }
 
@@ -161,7 +164,7 @@ class InstanceGroupNetworkParameterConverterTest {
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
                 () -> underTest.convert(providerSpecificNetworkParam, environmentNetworkResponse, CloudPlatform.AZURE, networkV4Request));
 
-        Assertions.assertEquals("Subnet could not be selected for you request, please check your environment and it's network configuration.",
+        assertEquals("Subnet could not be selected for you request, please check your environment and it's network configuration.",
                 exception.getMessage());
     }
 
@@ -222,7 +225,7 @@ class InstanceGroupNetworkParameterConverterTest {
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
                 () -> underTest.convert(providerSpecificNetworkParam, environmentNetworkResponse, CloudPlatform.GCP, networkV4Request));
 
-        Assertions.assertEquals("Subnet could not be selected for you request, please check your environment and it's network configuration.",
+        assertEquals("Subnet could not be selected for you request, please check your environment and it's network configuration.",
                 exception.getMessage());
     }
 
@@ -257,5 +260,24 @@ class InstanceGroupNetworkParameterConverterTest {
                 networkV4Request);
 
         Assertions.assertTrue(actual.getSubnetIds().containsAll(INSTANCE_GROUP_SUBNETS));
+    }
+
+    static Object [] [] getAvailabilityZones() {
+        return new Object [] [] {
+                {Set.of()},
+                {Set.of("us-west2-a", "us-west2-b")}
+        };
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("getAvailabilityZones")
+    void convertGcpParametersWithAvailabilityZones(Set<String> availabilityZones) {
+        InstanceGroupGcpNetworkV1Parameters networkV1Parameters = new InstanceGroupGcpNetworkV1Parameters();
+        networkV1Parameters.setSubnetIds(INSTANCE_GROUP_SUBNETS);
+        networkV1Parameters.setAvailabilityZones(availabilityZones);
+
+        InstanceGroupGcpNetworkV4Parameters actual = underTest.convert(networkV1Parameters, environmentNetworkResponse, CloudPlatform.GCP,
+                networkV4Request);
+        assertEquals(availabilityZones, actual.getAvailabilityZones());
     }
 }
