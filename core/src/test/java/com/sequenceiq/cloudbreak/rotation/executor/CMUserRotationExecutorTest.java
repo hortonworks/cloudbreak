@@ -14,6 +14,9 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.Set;
+
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -42,7 +45,11 @@ public class CMUserRotationExecutorTest {
 
     private static final String PASS = "pass";
 
+    private static final String SECOND_USER_POSTFIX = "2";
+
     private static final String CLIENT_PREFIX = "client";
+
+    private static final String BACKUP_SECRET_PREFIX = "old";
 
     @Mock
     private ClusterApiConnectors clusterApiConnectors;
@@ -68,11 +75,17 @@ public class CMUserRotationExecutorTest {
         underTest.executeRotate(rotationContext, null);
 
         verify(clusterSecurityService, times(1)).createNewUser(
-                eq("old" + USER),
+                eq(BACKUP_SECRET_PREFIX + USER),
                 eq(USER),
                 eq(PASS),
-                eq(CLIENT_PREFIX + USER),
-                eq(CLIENT_PREFIX + PASS));
+                eq(BACKUP_SECRET_PREFIX + CLIENT_PREFIX + USER),
+                eq(BACKUP_SECRET_PREFIX + CLIENT_PREFIX + PASS));
+        verify(clusterSecurityService, times(1)).createNewUser(
+                eq(BACKUP_SECRET_PREFIX + USER + SECOND_USER_POSTFIX),
+                eq(USER + SECOND_USER_POSTFIX),
+                eq(PASS + SECOND_USER_POSTFIX),
+                eq(BACKUP_SECRET_PREFIX + CLIENT_PREFIX + USER),
+                eq(BACKUP_SECRET_PREFIX + CLIENT_PREFIX + PASS));
     }
 
     @Test
@@ -87,6 +100,10 @@ public class CMUserRotationExecutorTest {
                 eq(USER),
                 eq(CLIENT_PREFIX + USER),
                 eq(CLIENT_PREFIX + PASS));
+        verify(clusterSecurityService, times(1)).checkUser(
+                eq(USER + SECOND_USER_POSTFIX),
+                eq(CLIENT_PREFIX + USER),
+                eq(CLIENT_PREFIX + PASS));
     }
 
     @Test
@@ -98,7 +115,7 @@ public class CMUserRotationExecutorTest {
         assertThrows(SecretRotationException.class, () -> underTest.executePreValidation(rotationContext, null));
 
         verify(clusterSecurityService, times(1)).checkUser(
-                eq(USER),
+                any(),
                 eq(CLIENT_PREFIX + USER),
                 eq(CLIENT_PREFIX + PASS));
     }
@@ -124,13 +141,14 @@ public class CMUserRotationExecutorTest {
         assertThrows(SecretRotationException.class, () -> underTest.executePostValidation(rotationContext, null));
 
         verify(clusterSecurityService, times(1)).checkUser(
-                eq(USER),
+                any(),
                 eq(CLIENT_PREFIX + USER),
                 eq(CLIENT_PREFIX + PASS));
     }
 
     @Test
     public void testRotationIfVaultCompromised() {
+        setup();
         when(uncachedSecretServiceForRotation.getRotation(anyString())).thenAnswer(i ->
                 new RotationSecret(String.valueOf(i.getArguments()[0]), null));
         CMUserRotationContext rotationContext = getRotationContext();
@@ -141,6 +159,7 @@ public class CMUserRotationExecutorTest {
 
     @Test
     public void testRollbackIfVaultCompromised() {
+        setup();
         when(uncachedSecretServiceForRotation.getRotation(anyString())).thenAnswer(i ->
                 new RotationSecret(String.valueOf(i.getArguments()[0]), null));
         CMUserRotationContext rotationContext = getRotationContext();
@@ -151,6 +170,7 @@ public class CMUserRotationExecutorTest {
 
     @Test
     public void testFinalizeIfVaultCompromised() {
+        setup();
         when(uncachedSecretServiceForRotation.getRotation(anyString())).thenAnswer(i ->
                 new RotationSecret(String.valueOf(i.getArguments()[0]), null));
         CMUserRotationContext rotationContext = getRotationContext();
@@ -170,11 +190,11 @@ public class CMUserRotationExecutorTest {
                 RotationMetadataTestUtil.metadataForRotation("resource", null)));
 
         verify(clusterSecurityService, times(1)).createNewUser(
-                eq("old" + USER),
-                eq(USER),
-                eq(PASS),
-                eq(CLIENT_PREFIX + USER),
-                eq(CLIENT_PREFIX + PASS));
+                any(),
+                any(),
+                any(),
+                eq(BACKUP_SECRET_PREFIX + CLIENT_PREFIX + USER),
+                eq(BACKUP_SECRET_PREFIX + CLIENT_PREFIX + PASS));
     }
 
     @Test
@@ -186,8 +206,12 @@ public class CMUserRotationExecutorTest {
 
         verify(clusterSecurityService, times(1)).deleteUser(
                 eq(USER),
-                eq(CLIENT_PREFIX + USER),
-                eq(CLIENT_PREFIX + PASS));
+                eq(BACKUP_SECRET_PREFIX + CLIENT_PREFIX + USER),
+                eq(BACKUP_SECRET_PREFIX + CLIENT_PREFIX + PASS));
+        verify(clusterSecurityService, times(1)).deleteUser(
+                eq(USER + SECOND_USER_POSTFIX),
+                eq(BACKUP_SECRET_PREFIX + CLIENT_PREFIX + USER),
+                eq(BACKUP_SECRET_PREFIX + CLIENT_PREFIX + PASS));
     }
 
     @Test
@@ -198,7 +222,11 @@ public class CMUserRotationExecutorTest {
         underTest.executeFinalize(rotationContext, RotationMetadataTestUtil.metadataForFinalize("resource", null));
 
         verify(clusterSecurityService, times(1)).deleteUser(
-                eq("old" + USER),
+                eq(BACKUP_SECRET_PREFIX + USER),
+                eq(CLIENT_PREFIX + USER),
+                eq(CLIENT_PREFIX + PASS));
+        verify(clusterSecurityService, times(1)).deleteUser(
+                eq(BACKUP_SECRET_PREFIX + USER + SECOND_USER_POSTFIX),
                 eq(CLIENT_PREFIX + USER),
                 eq(CLIENT_PREFIX + PASS));
     }
@@ -213,6 +241,8 @@ public class CMUserRotationExecutorTest {
 
         verify(clusterSecurityService).checkUser(eq(USER), anyString(), anyString());
         verify(clusterSecurityService).testUser(eq(USER), eq(PASS));
+        verify(clusterSecurityService).checkUser(eq(USER + SECOND_USER_POSTFIX), anyString(), anyString());
+        verify(clusterSecurityService).testUser(eq(USER + SECOND_USER_POSTFIX), eq(PASS + SECOND_USER_POSTFIX));
     }
 
     @Test
@@ -224,8 +254,8 @@ public class CMUserRotationExecutorTest {
 
         assertThrows(SecretRotationException.class, () -> underTest.executePostValidation(rotationContext, null));
 
-        verify(clusterSecurityService).checkUser(eq(USER), anyString(), anyString());
-        verify(clusterSecurityService).testUser(eq(USER), eq(PASS));
+        verify(clusterSecurityService).checkUser(any(), anyString(), anyString());
+        verify(clusterSecurityService).testUser(any(), any());
     }
 
     @Test
@@ -236,14 +266,14 @@ public class CMUserRotationExecutorTest {
 
         assertThrows(SecretRotationException.class, () -> underTest.executePostValidation(rotationContext, null));
 
-        verify(clusterSecurityService).checkUser(eq(USER), anyString(), anyString());
+        verify(clusterSecurityService).checkUser(any(), anyString(), anyString());
         verifyNoMoreInteractions(clusterSecurityService);
     }
 
     private static CMUserRotationContext getRotationContext() {
         return CMUserRotationContext.builder()
-                .withUserSecret(USER)
-                .withPasswordSecret(PASS)
+                .withRotatableSecrets(Set.of(Pair.of(USER, PASS),
+                        Pair.of(USER + SECOND_USER_POSTFIX, PASS + SECOND_USER_POSTFIX)))
                 .withClientUserSecret(CLIENT_PREFIX + USER)
                 .withClientPasswordSecret(CLIENT_PREFIX + PASS)
                 .withResourceCrn("resource")
@@ -258,7 +288,7 @@ public class CMUserRotationExecutorTest {
         lenient().when(clusterApiConnectors.getConnector(any(StackDtoDelegate.class))).thenReturn(clusterApi);
         lenient().when(uncachedSecretServiceForRotation.get(anyString())).thenAnswer(i -> i.getArguments()[0]);
         lenient().when(uncachedSecretServiceForRotation.getRotation(anyString())).thenAnswer(i ->
-                new RotationSecret(String.valueOf(i.getArguments()[0]), "old" + i.getArguments()[0]));
+                new RotationSecret(String.valueOf(i.getArguments()[0]), BACKUP_SECRET_PREFIX + i.getArguments()[0]));
         return clusterSecurityService;
     }
 }

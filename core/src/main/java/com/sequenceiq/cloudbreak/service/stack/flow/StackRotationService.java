@@ -13,13 +13,11 @@ import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
-import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.SecretTypeConverter;
@@ -59,10 +57,6 @@ public class StackRotationService {
         secretRotationValidationService.validateSecretRotationEntitlement(crn);
         List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(secrets,
                 enabledSecretTypes.stream().map(SecretType::getClass).collect(Collectors.toSet()));
-        if (secretTypes.stream().anyMatch(CloudbreakSecretType.CM_ADMIN_PASSWORD::equals)) {
-            secretTypes = Lists.newArrayList(secretTypes);
-            secretTypes.add(CloudbreakSecretType.CM_MGMT_ADMIN_PASSWORD);
-        }
         secretRotationValidationService.validateEnabledSecretTypes(secretTypes, requestedExecutionType);
         StackView stack = stackDtoService.getStackViewByCrn(crn);
         Optional<RotationFlowExecutionType> usedExecutionType =

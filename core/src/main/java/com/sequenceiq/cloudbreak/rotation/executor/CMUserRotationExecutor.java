@@ -35,87 +35,124 @@ public class CMUserRotationExecutor extends AbstractRotationExecutor<CMUserRotat
 
     @Override
     protected void rotate(CMUserRotationContext rotationContext) throws Exception {
-        LOGGER.info("Starting rotation of CM user by creating a new user.");
-        RotationSecret userRotationSecret = uncachedSecretServiceForRotation.getRotation(rotationContext.getUserSecret());
-        RotationSecret passwordRotationSecret = uncachedSecretServiceForRotation.getRotation(rotationContext.getPasswordSecret());
-        if (userRotationSecret.isRotation() && passwordRotationSecret.isRotation()) {
-            ClusterSecurityService clusterSecurityService = getClusterSecurityService(rotationContext);
-            String clientUser = uncachedSecretServiceForRotation.get(rotationContext.getClientUserSecret());
-            String clientPassword = uncachedSecretServiceForRotation.get(rotationContext.getClientPasswordSecret());
-            clusterSecurityService.createNewUser(
-                    userRotationSecret.getBackupSecret(),
-                    userRotationSecret.getSecret(),
-                    passwordRotationSecret.getSecret(),
-                    clientUser,
-                    clientPassword);
-        } else {
-            throw new SecretRotationException("User or password is not in rotation state in Vault, thus rotation of CM user is not possible.");
-        }
+        ClusterSecurityService clusterSecurityService = getClusterSecurityService(rotationContext);
+        RotationSecret clientUser = uncachedSecretServiceForRotation.getRotation(rotationContext.getClientUserSecret());
+        RotationSecret clientPassword = uncachedSecretServiceForRotation.getRotation(rotationContext.getClientPasswordSecret());
+        rotationContext.getRotatableSecrets().forEach(secretPair -> {
+            try {
+                RotationSecret userRotationSecret = uncachedSecretServiceForRotation.getRotation(secretPair.getKey());
+                RotationSecret passwordRotationSecret = uncachedSecretServiceForRotation.getRotation(secretPair.getValue());
+                if (userRotationSecret.isRotation() && passwordRotationSecret.isRotation()) {
+                    LOGGER.info("Starting rotation of CM user by creating a new user {} using {} as API client user.",
+                            userRotationSecret.getSecret(), clientUser.getBackupSecret());
+                    clusterSecurityService.createNewUser(
+                            userRotationSecret.getBackupSecret(),
+                            userRotationSecret.getSecret(),
+                            passwordRotationSecret.getSecret(),
+                            clientUser.getBackupSecret(),
+                            clientPassword.getBackupSecret());
+                } else {
+                    throw new SecretRotationException("User or password is not in rotation state in Vault, thus rotation of CM user is not possible.");
+                }
+            } catch (CloudbreakException e) {
+                throw new SecretRotationException(e);
+            }
+        });
     }
 
     @Override
     protected void rollback(CMUserRotationContext rotationContext) throws CloudbreakException {
-        LOGGER.info("Starting to rollback rotation of CM user by deleting the new user");
-        RotationSecret userRotationSecret = uncachedSecretServiceForRotation.getRotation(rotationContext.getUserSecret());
-        if (userRotationSecret.isRotation()) {
-            deleteUser(userRotationSecret.getSecret(), rotationContext);
-        } else {
-            throw new SecretRotationException("User is not in rotation state in Vault, thus we cannot rollback it.");
-        }
+        ClusterSecurityService clusterSecurityService = getClusterSecurityService(rotationContext);
+        RotationSecret clientUser = uncachedSecretServiceForRotation.getRotation(rotationContext.getClientUserSecret());
+        RotationSecret clientPassword = uncachedSecretServiceForRotation.getRotation(rotationContext.getClientPasswordSecret());
+        rotationContext.getRotatableSecrets().forEach(secretPair -> {
+            try {
+                RotationSecret userRotationSecret = uncachedSecretServiceForRotation.getRotation(secretPair.getKey());
+                if (userRotationSecret.isRotation()) {
+                    LOGGER.info("Starting to rollback rotation of CM user by deleting the new user {} using {} as API client user.",
+                            userRotationSecret.getSecret(), clientUser.getBackupSecret());
+                    clusterSecurityService.deleteUser(
+                            userRotationSecret.getSecret(),
+                            clientUser.getBackupSecret(),
+                            clientPassword.getBackupSecret());
+                } else {
+                    throw new SecretRotationException("User is not in rotation state in Vault, thus we cannot rollback it.");
+                }
+            } catch (CloudbreakException e) {
+                throw new SecretRotationException(e);
+            }
+        });
     }
 
     @Override
     protected void finalize(CMUserRotationContext rotationContext) throws Exception {
-        LOGGER.info("Finalizing rotation of CM user by deleting the old user");
-        RotationSecret userRotationSecret = uncachedSecretServiceForRotation.getRotation(rotationContext.getUserSecret());
-        if (userRotationSecret.isRotation()) {
-            deleteUser(userRotationSecret.getBackupSecret(), rotationContext);
-        } else {
-            throw new SecretRotationException("User or password is not in rotation state in Vault, thus we cannot finalize it.");
-        }
+        ClusterSecurityService clusterSecurityService = getClusterSecurityService(rotationContext);
+        RotationSecret clientUser = uncachedSecretServiceForRotation.getRotation(rotationContext.getClientUserSecret());
+        RotationSecret clientPassword = uncachedSecretServiceForRotation.getRotation(rotationContext.getClientPasswordSecret());
+        rotationContext.getRotatableSecrets().forEach(secretPair -> {
+            try {
+                RotationSecret userRotationSecret = uncachedSecretServiceForRotation.getRotation(secretPair.getKey());
+                if (userRotationSecret.isRotation()) {
+                    LOGGER.info("Finalizing rotation of CM user by deleting the old user {} using {} as API client user.",
+                            userRotationSecret.getBackupSecret(), clientUser.getSecret());
+                    clusterSecurityService.deleteUser(
+                            userRotationSecret.getBackupSecret(),
+                            clientUser.getSecret(),
+                            clientPassword.getSecret());
+                } else {
+                    throw new SecretRotationException("User is not in rotation state in Vault, thus we cannot finalize it.");
+                }
+            } catch (CloudbreakException e) {
+                throw new SecretRotationException(e);
+            }
+        });
     }
 
     @Override
     protected void preValidate(CMUserRotationContext rotationContext) throws Exception {
-        String user = uncachedSecretServiceForRotation.get(rotationContext.getUserSecret());
-        checkUser(rotationContext, user);
+        ClusterSecurityService clusterSecurityService = getClusterSecurityService(rotationContext);
+        String clientUser = uncachedSecretServiceForRotation.get(rotationContext.getClientUserSecret());
+        String clientPassword = uncachedSecretServiceForRotation.get(rotationContext.getClientPasswordSecret());
+        rotationContext.getRotatableSecrets().forEach(secretPair -> {
+            try {
+                String userSecret = uncachedSecretServiceForRotation.get(secretPair.getKey());
+                String passwordRotationSecret = uncachedSecretServiceForRotation.get(secretPair.getValue());
+                LOGGER.info("Checking if user {} is present in CM!", userSecret);
+                clusterSecurityService.checkUser(userSecret, clientUser, clientPassword);
+                LOGGER.info("Checking if CM API call is possible with user {}!", userSecret);
+                getClusterSecurityService(rotationContext).testUser(userSecret, passwordRotationSecret);
+            } catch (Exception e) {
+                throw new SecretRotationException(e);
+            }
+        });
     }
 
     @Override
     protected void postValidate(CMUserRotationContext rotationContext) throws Exception {
-        RotationSecret userRotationSecret = uncachedSecretServiceForRotation.getRotation(rotationContext.getUserSecret());
-        RotationSecret passwordRotationSecret = uncachedSecretServiceForRotation.getRotation(rotationContext.getPasswordSecret());
-        if (userRotationSecret.isRotation() && passwordRotationSecret.isRotation()) {
-            LOGGER.info("Checking if new user is present in CM!");
-            checkUser(rotationContext, userRotationSecret.getSecret());
-            LOGGER.info("Checking if CM API call is possible with new user!");
-            getClusterSecurityService(rotationContext).testUser(userRotationSecret.getSecret(), passwordRotationSecret.getSecret());
-        } else {
-            throw new SecretRotationException("User and password is not in rotation state in Vault, thus rotation of CM user have been failed.");
-        }
-    }
-
-    private void checkUser(CMUserRotationContext rotationContext, String user) throws Exception {
         ClusterSecurityService clusterSecurityService = getClusterSecurityService(rotationContext);
-        String clientUser = uncachedSecretServiceForRotation.get(rotationContext.getClientUserSecret());
-        String clientPassword = uncachedSecretServiceForRotation.get(rotationContext.getClientPasswordSecret());
-        clusterSecurityService.checkUser(user, clientUser, clientPassword);
-    }
-
-    private void deleteUser(String user, CMUserRotationContext rotationContext) throws CloudbreakException {
-        ClusterSecurityService clusterSecurityService = getClusterSecurityService(rotationContext);
-        String clientUser = uncachedSecretServiceForRotation.get(rotationContext.getClientUserSecret());
-        String clientPassword = uncachedSecretServiceForRotation.get(rotationContext.getClientPasswordSecret());
-        clusterSecurityService.deleteUser(
-                user,
-                clientUser,
-                clientPassword);
+        RotationSecret clientUser = uncachedSecretServiceForRotation.getRotation(rotationContext.getClientUserSecret());
+        RotationSecret clientPassword = uncachedSecretServiceForRotation.getRotation(rotationContext.getClientPasswordSecret());
+        rotationContext.getRotatableSecrets().forEach(secretPair -> {
+            try {
+                RotationSecret userRotationSecret = uncachedSecretServiceForRotation.getRotation(secretPair.getKey());
+                RotationSecret passwordRotationSecret = uncachedSecretServiceForRotation.getRotation(secretPair.getValue());
+                if (userRotationSecret.isRotation() && passwordRotationSecret.isRotation()) {
+                    LOGGER.info("Checking if new user {} is present in CM!", userRotationSecret.getSecret());
+                    clusterSecurityService.checkUser(userRotationSecret.getSecret(), clientUser.getSecret(), clientPassword.getSecret());
+                    LOGGER.info("Checking if CM API call is possible with new user {}!", userRotationSecret.getSecret());
+                    getClusterSecurityService(rotationContext).testUser(userRotationSecret.getSecret(), passwordRotationSecret.getSecret());
+                } else {
+                    throw new SecretRotationException("User and password is not in rotation state in Vault, thus rotation of CM user have been failed.");
+                }
+            } catch (Exception e) {
+                throw new SecretRotationException(e);
+            }
+        });
     }
 
     private ClusterSecurityService getClusterSecurityService(RotationContext rotationContext) {
         StackDto stack = stackService.getByCrn(rotationContext.getResourceCrn());
-        ClusterSecurityService clusterSecurityService = clusterApiConnectors.getConnector(stack).clusterSecurityService();
-        return clusterSecurityService;
+        return clusterApiConnectors.getConnector(stack).clusterSecurityService();
     }
 
     @Override

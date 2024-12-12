@@ -138,6 +138,7 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
     }
 
     @Override
+    @Retryable(value = UnauthorizedException.class, maxAttempts = TEST_MAX_ATTEMPTS, backoff = @Backoff(delay = TEST_BACKOFF))
     public void deleteUser(String userName, String clientUser, String clientPassword) throws CloudbreakException {
         try {
             ApiClient client = getClient(stack.getGatewayPort(), clientUser, clientPassword, clientConfig);

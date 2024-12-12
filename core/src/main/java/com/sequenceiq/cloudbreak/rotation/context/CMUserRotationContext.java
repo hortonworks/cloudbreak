@@ -1,5 +1,10 @@
 package com.sequenceiq.cloudbreak.rotation.context;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 
 public class CMUserRotationContext extends RotationContext {
@@ -8,16 +13,13 @@ public class CMUserRotationContext extends RotationContext {
 
     private final String clientPasswordSecret;
 
-    private final String userSecret;
+    private final Set<Pair<String, String>> rotatableSecrets;
 
-    private final String passwordSecret;
-
-    public CMUserRotationContext(String resourceCrn, String clientUserSecret, String clientPasswordSecret, String userSecret, String passwordSecret) {
+    public CMUserRotationContext(String resourceCrn, String clientUserSecret, String clientPasswordSecret, Set<Pair<String, String>> rotatableSecrets) {
         super(resourceCrn);
         this.clientUserSecret = clientUserSecret;
         this.clientPasswordSecret = clientPasswordSecret;
-        this.userSecret = userSecret;
-        this.passwordSecret = passwordSecret;
+        this.rotatableSecrets = rotatableSecrets;
     }
 
     public String getClientUserSecret() {
@@ -28,12 +30,8 @@ public class CMUserRotationContext extends RotationContext {
         return clientPasswordSecret;
     }
 
-    public String getUserSecret() {
-        return userSecret;
-    }
-
-    public String getPasswordSecret() {
-        return passwordSecret;
+    public Set<Pair<String, String>> getRotatableSecrets() {
+        return rotatableSecrets;
     }
 
     public static CMUserRotationContextBuilder builder() {
@@ -46,9 +44,7 @@ public class CMUserRotationContext extends RotationContext {
 
         private String clientPasswordSecret;
 
-        private String userSecret;
-
-        private String passwordSecret;
+        private Set<Pair<String, String>> rotatableSecrets = new HashSet<>();
 
         private String resourceCrn;
 
@@ -62,13 +58,8 @@ public class CMUserRotationContext extends RotationContext {
             return this;
         }
 
-        public CMUserRotationContextBuilder withUserSecret(String userSecret) {
-            this.userSecret = userSecret;
-            return this;
-        }
-
-        public CMUserRotationContextBuilder withPasswordSecret(String passwordSecret) {
-            this.passwordSecret = passwordSecret;
+        public CMUserRotationContextBuilder withRotatableSecrets(Set<Pair<String, String>> rotatableSecrets) {
+            this.rotatableSecrets = rotatableSecrets;
             return this;
         }
 
@@ -78,7 +69,7 @@ public class CMUserRotationContext extends RotationContext {
         }
 
         public CMUserRotationContext build() {
-            return new CMUserRotationContext(resourceCrn, clientUserSecret, clientPasswordSecret, userSecret, passwordSecret);
+            return new CMUserRotationContext(resourceCrn, clientUserSecret, clientPasswordSecret, rotatableSecrets);
         }
 
     }
