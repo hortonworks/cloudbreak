@@ -31,7 +31,8 @@ public class PaasSdxStatusService extends AbstractPaasSdxService implements Plat
     @Override
     public Set<Pair<String, SdxClusterStatusResponse>> listSdxCrnStatusPair(String environmentCrn) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                () -> sdxEndpoint.getByEnvCrn(environmentCrn)).stream()
+                () -> sdxEndpoint.getByEnvCrn(environmentCrn, false))
+                .stream()
                 .map(sdxResponse -> Pair.of(sdxResponse.getCrn(), sdxResponse.getStatus()))
                 .collect(Collectors.toSet());
     }

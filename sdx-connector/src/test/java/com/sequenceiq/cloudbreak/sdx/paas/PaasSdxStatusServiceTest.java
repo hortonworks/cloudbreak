@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.sdx.paas;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -54,10 +55,10 @@ public class PaasSdxStatusServiceTest {
     @Test
     public void testListStatusPairsCrn() {
         SdxClusterResponse sdxClusterResponse = getSdxClusterResponse();
-        when(sdxEndpoint.getByEnvCrn(any())).thenReturn(List.of(sdxClusterResponse));
+        when(sdxEndpoint.getByEnvCrn(any(), eq(false))).thenReturn(List.of(sdxClusterResponse));
         assertTrue(underTest.listSdxCrnStatusPair(ENV_CRN)
                 .contains(Pair.of(PAAS_CRN, SdxClusterStatusResponse.RUNNING)));
-        verify(sdxEndpoint).getByEnvCrn(any());
+        verify(sdxEndpoint).getByEnvCrn(any(), eq(false));
     }
 
     @Test

@@ -255,22 +255,22 @@ public class SdxController implements SdxEndpoint {
     @FilterListBasedOnPermissions
     public List<SdxClusterResponse> list(@FilterParam(DataLakeFiltering.ENV_NAME) String envName, boolean includeDetached) {
         List<SdxCluster> sdxClusters = dataLakeFiltering.filterDataLakesByEnvNameOrAll(DESCRIBE_DATALAKE, envName);
-        return includeDetached ? convertSdxClusters(sdxClusters) : convertAttachedSdxClusters(sdxClusters);
+        return includeDetached ? convertSdxClusters(sdxClusters) : convertAttachedSdxClusters(sdxClusters, false);
     }
 
     @Override
     @InternalOnly
     public List<SdxClusterResponse> internalList(@AccountId String accountId) {
         List<SdxCluster> sdxClusters = sdxService.listSdx(ThreadBasedUserCrnProvider.getUserCrn(), null);
-        return convertAttachedSdxClusters(sdxClusters);
+        return convertAttachedSdxClusters(sdxClusters, false);
     }
 
     @Override
     @FilterListBasedOnPermissions
     public List<SdxClusterResponse> getByEnvCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @FilterParam(DataLakeFiltering.ENV_CRN)
-    @TenantAwareParam String envCrn) {
-        List<SdxCluster> sdxClusters = dataLakeFiltering.filterDataLakesByEnvCrn(DESCRIBE_DATALAKE, envCrn);
-        return convertAttachedSdxClusters(sdxClusters);
+    @TenantAwareParam String envCrn, boolean includeDetached) {
+        List<SdxCluster> sdxClusters = dataLakeFiltering.filterDataLakesByEnvCrn(DESCRIBE_DATALAKE, envCrn, includeDetached);
+        return convertAttachedSdxClusters(sdxClusters, includeDetached);
     }
 
     @Override
@@ -649,10 +649,9 @@ public class SdxController implements SdxEndpoint {
         return sdxCluster;
     }
 
-    private List<SdxClusterResponse> convertAttachedSdxClusters(List<SdxCluster> sdxClusters) {
-        // Filters out detached clusters.
+    private List<SdxClusterResponse> convertAttachedSdxClusters(List<SdxCluster> sdxClusters, boolean includeDetached) {
         return sdxClusters.stream()
-                .filter(sdx -> !sdx.isDetached())
+                .filter(sdx -> includeDetached || !sdx.isDetached())
                 .map(sdx -> sdxClusterConverter.sdxClusterToResponse(sdx))
                 .collect(Collectors.toList());
     }

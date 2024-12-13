@@ -32,6 +32,8 @@ public interface PlatformAwareSdxDescribeService extends PlatformAwareSdxCommonS
 
     Optional<SdxAccessView> getSdxAccessViewByEnvironmentCrn(String environmentCrn);
 
+    Set<String> listSdxCrnsDetachedIncluded(String environmentCrn);
+
     default Map<String, String> getHmsServiceConfig(String crn) {
         Optional<String> remoteDataContext = getRemoteDataContext(crn);
         return getHmsServiceConfig(remoteDataContext);

@@ -136,6 +136,11 @@ public class CdlSdxDescribeService extends AbstractCdlSdxService implements Plat
         return Optional.empty();
     }
 
+    @Override
+    public Set<String> listSdxCrnsDetachedIncluded(String environmentCrn) {
+        return listSdxCrns(environmentCrn);
+    }
+
     private SdxFileSystemView describeServicesResponseToFileSystem(CdlCrudProto.DescribeServicesResponse servicesResponse, String cloudStorageLocation) {
         String fileSystemType = null;
         Map<String, String> fileSystemLocations = new HashMap<>();

@@ -43,9 +43,12 @@ public class DataLakeFiltering extends AbstractAuthorizationFiltering<List<SdxCl
         return filterResources(Crn.safeFromString(ThreadBasedUserCrnProvider.getUserCrn()), action, args);
     }
 
-    public List<SdxCluster> filterDataLakesByEnvCrn(AuthorizationResourceAction action, String environmentCrn) {
+    public List<SdxCluster> filterDataLakesByEnvCrn(AuthorizationResourceAction action, String environmentCrn, boolean includeDetached) {
         Map<String, Object> args = new HashMap<>();
         args.put(ENV_CRN, environmentCrn);
+        if (includeDetached) {
+            args.put(INCLUDE_DETACHED, "yes");
+        }
         return filterResources(Crn.safeFromString(ThreadBasedUserCrnProvider.getUserCrn()), action, args);
     }
 

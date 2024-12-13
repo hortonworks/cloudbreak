@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.datalake;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -52,12 +53,12 @@ public class SdxClientServiceTest {
     public void testGetByEnvironmentCrn() {
         String environmentCrn = "testEnvironmentCrn";
         List<SdxClusterResponse> clusters = new ArrayList<>();
-        when(sdxEndpoint.getByEnvCrn(environmentCrn)).thenReturn(clusters);
+        when(sdxEndpoint.getByEnvCrn(eq(environmentCrn), eq(false))).thenReturn(clusters);
 
         List<SdxClusterResponse> result = sdxClientService.getByEnvironmentCrn(environmentCrn);
 
         assertEquals(clusters, result);
-        verify(sdxEndpoint, times(1)).getByEnvCrn(environmentCrn);
+        verify(sdxEndpoint, times(1)).getByEnvCrn(environmentCrn, false);
     }
 
     @Test

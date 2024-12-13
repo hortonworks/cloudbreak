@@ -1,7 +1,9 @@
 package com.sequenceiq.datalake.controller.sdx;
 
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_DATALAKE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -12,12 +14,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -37,6 +42,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.model.SeLinux;
+import com.sequenceiq.datalake.authorization.DataLakeFiltering;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxDatabase;
@@ -103,6 +109,9 @@ class SdxControllerTest {
 
     @Mock
     private VerticalScaleService verticalScaleService;
+
+    @Mock
+    private DataLakeFiltering dataLakeFiltering;
 
     @InjectMocks
     private SdxController sdxController;
@@ -453,5 +462,44 @@ class SdxControllerTest {
         SdxClusterDetailResponse sdxClusterDetailResponse = sdxController.getSdxDetailWithResourcesByName("TEST", entries);
         assertEquals(stackV4Response, sdxClusterDetailResponse.getStackV4Response());
         assertEquals(sdxCluster.getClusterName(), sdxClusterDetailResponse.getName());
+    }
+
+    private static Object[][] getByEnvCrnSource() {
+        return new Object[][]{
+                {true, 2},
+                {false, 1},
+        };
+    }
+
+    @ParameterizedTest
+    @MethodSource("getByEnvCrnSource")
+    void testGetByEnvCrn(boolean includeDetached, int numberOfDatalakes) {
+        ReflectionTestUtils.setField(sdxClusterConverter, "sdxStatusService", sdxStatusService);
+
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setClusterName("new-sdx-cluster");
+        sdxCluster.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
+        sdxCluster.setEnvName("test-env");
+        sdxCluster.setCrn("crn:sdxcluster:new");
+        sdxCluster.setSdxDatabase(new SdxDatabase());
+        sdxCluster.setSeLinux(SeLinux.PERMISSIVE);
+
+        SdxCluster detachedCluster = new SdxCluster();
+        detachedCluster.setClusterName("old-sdx-cluster");
+        detachedCluster.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
+        detachedCluster.setEnvName("test-env");
+        detachedCluster.setCrn("crn:sdxcluster:old");
+        detachedCluster.setSdxDatabase(new SdxDatabase());
+        detachedCluster.setSeLinux(SeLinux.PERMISSIVE);
+        detachedCluster.setDetached(true);
+
+        when(dataLakeFiltering.filterDataLakesByEnvCrn(DESCRIBE_DATALAKE, "envCrn", includeDetached))
+                .thenReturn(List.of(sdxCluster, detachedCluster));
+
+        List<SdxClusterResponse> sdxClusters = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> sdxController.getByEnvCrn("envCrn", includeDetached));
+
+        assertEquals(numberOfDatalakes, sdxClusters.size());
+        assertTrue(sdxClusters.stream().map(SdxClusterResponse::getName).anyMatch("new-sdx-cluster"::equals));
     }
 }

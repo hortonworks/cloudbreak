@@ -52,31 +52,40 @@ public class PaasSdxDescribeService extends AbstractPaasSdxService implements Pl
             return localPaasSdxService.get().listSdxCrns(environmentCrn);
         }
         return ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                () -> sdxEndpoint.getByEnvCrn(environmentCrn)).stream().map(SdxClusterResponse::getCrn).collect(Collectors.toSet());
+                () -> sdxEndpoint.getByEnvCrn(environmentCrn, false)).stream().map(SdxClusterResponse::getCrn).collect(Collectors.toSet());
     }
 
     @Override
     public Optional<SdxBasicView> getSdxByEnvironmentCrn(String environmentCrn) {
         return localPaasSdxService.flatMap(localPaasService -> localPaasService.getSdxBasicView(environmentCrn)).or(() ->
                 ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                                () -> sdxEndpoint.getByEnvCrn(environmentCrn))
-                        .stream()
-                        .filter(Predicate.not(SdxClusterResponse::isDetached))
-                        .map(sdx -> SdxBasicView.builder()
-                                .withName(sdx.getName())
-                                .withCrn(sdx.getCrn())
-                                .withRuntime(sdx.getRuntime())
-                                .withRazEnabled(sdx.getRangerRazEnabled())
-                                .withCreated(sdx.getCreated())
-                                .withDbServerCrn(sdx.getDatabaseServerCrn())
-                                .withPlatform(TargetPlatform.PAAS)
-                                .build())
-                        .findFirst());
+                        () -> sdxEndpoint.getByEnvCrn(environmentCrn, false))
+                    .stream()
+                    .filter(Predicate.not(SdxClusterResponse::isDetached))
+                    .map(sdx -> SdxBasicView.builder()
+                            .withName(sdx.getName())
+                            .withCrn(sdx.getCrn())
+                            .withRuntime(sdx.getRuntime())
+                            .withRazEnabled(sdx.getRangerRazEnabled())
+                            .withCreated(sdx.getCreated())
+                            .withDbServerCrn(sdx.getDatabaseServerCrn())
+                            .withPlatform(TargetPlatform.PAAS)
+                            .build())
+                    .findFirst());
     }
 
     @Override
     public Optional<SdxAccessView> getSdxAccessViewByEnvironmentCrn(String environmentCrn) {
         return localPaasSdxService.flatMap(localPaasService -> localPaasService.getSdxAccessView(environmentCrn));
+    }
+
+    @Override
+    public Set<String> listSdxCrnsDetachedIncluded(String environmentCrn) {
+        if (localPaasSdxService.isPresent()) {
+            return localPaasSdxService.get().listSdxCrns(environmentCrn);
+        }
+        return ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> sdxEndpoint.getByEnvCrn(environmentCrn, true)).stream().map(SdxClusterResponse::getCrn).collect(Collectors.toSet());
     }
 
 }

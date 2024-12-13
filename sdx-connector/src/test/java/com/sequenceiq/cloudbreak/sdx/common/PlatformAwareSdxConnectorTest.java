@@ -105,8 +105,8 @@ public class PlatformAwareSdxConnectorTest {
 
     @Test
     public void testDelete() {
-        when(paasSdxDescribeService.listSdxCrns(anyString())).thenReturn(Set.of(PAAS_CRN));
-        when(cdlSdxDescribeService.listSdxCrns(anyString())).thenReturn(Set.of(SAAS_CRN));
+        when(paasSdxDescribeService.listSdxCrnsDetachedIncluded(anyString())).thenReturn(Set.of(PAAS_CRN));
+        when(cdlSdxDescribeService.listSdxCrnsDetachedIncluded(anyString())).thenReturn(Set.of(SAAS_CRN));
         doNothing().when(cdlSdxDeleteService).deleteSdx(any(), anyBoolean());
         doNothing().when(paasSdxDeleteService).deleteSdx(any(), anyBoolean());
         underTest.deleteByEnvironment("env", false);

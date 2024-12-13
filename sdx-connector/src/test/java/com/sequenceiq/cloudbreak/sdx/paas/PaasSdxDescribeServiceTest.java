@@ -81,10 +81,10 @@ public class PaasSdxDescribeServiceTest {
     @Test
     public void testDlServiceListCrn() throws IllegalAccessException {
         FieldUtils.writeField(underTest, "localPaasSdxService", Optional.empty(), true);
-        when(sdxEndpoint.getByEnvCrn(any())).thenReturn(List.of(getSdxClusterResponse(false)));
+        when(sdxEndpoint.getByEnvCrn(any(), eq(false))).thenReturn(List.of(getSdxClusterResponse(false)));
         Set<String> sdxCrns = underTest.listSdxCrns(ENV_CRN);
         assertTrue(sdxCrns.contains(PAAS_CRN));
-        verify(sdxEndpoint).getByEnvCrn(eq(ENV_CRN));
+        verify(sdxEndpoint).getByEnvCrn(eq(ENV_CRN), eq(false));
     }
 
     @Test
@@ -102,11 +102,11 @@ public class PaasSdxDescribeServiceTest {
     @Test
     void testGetPaasSdxUsingDlService() throws IllegalAccessException {
         FieldUtils.writeField(underTest, "localPaasSdxService", Optional.empty(), true);
-        when(sdxEndpoint.getByEnvCrn(anyString())).thenReturn(List.of(getSdxClusterResponse(false)));
+        when(sdxEndpoint.getByEnvCrn(anyString(), eq(false))).thenReturn(List.of(getSdxClusterResponse(false)));
 
         underTest.getSdxByEnvironmentCrn("envCrn");
 
-        verify(sdxEndpoint).getByEnvCrn(anyString());
+        verify(sdxEndpoint).getByEnvCrn(anyString(), eq(false));
     }
 
     @Test
@@ -151,11 +151,11 @@ public class PaasSdxDescribeServiceTest {
     @MethodSource("detachedDatalakeSource")
     void testGetPaasSdxUsingDlServiceUsingFilterOutDetached(boolean detachedDatalake, boolean datalakeFound) throws IllegalAccessException {
         FieldUtils.writeField(underTest, "localPaasSdxService", Optional.empty(), true);
-        when(sdxEndpoint.getByEnvCrn(anyString())).thenReturn(List.of(getSdxClusterResponse(detachedDatalake)));
+        when(sdxEndpoint.getByEnvCrn(anyString(), eq(false))).thenReturn(List.of(getSdxClusterResponse(detachedDatalake)));
 
         Optional<SdxBasicView> response = underTest.getSdxByEnvironmentCrn("envCrn");
 
-        verify(sdxEndpoint).getByEnvCrn(anyString());
+        verify(sdxEndpoint).getByEnvCrn(anyString(), eq(false));
         assertEquals(response.isPresent(), datalakeFound);
     }
 

@@ -64,8 +64,9 @@ public class PlatformAwareSdxConnector {
         platformDependentSdxDhTearDownServices.get(TargetPlatform.getByCrn(sdxCrn)).tearDownDataHub(sdxCrn, datahubCrn);
     }
 
-    public void deleteByEnvironment(String environmentCrn, Boolean force) {
-        platformDependentSdxDescribeServices.values().forEach(describeService -> describeService.listSdxCrns(environmentCrn).forEach(crn ->
+    public void deleteByEnvironment(String environmentName, Boolean force) {
+        platformDependentSdxDescribeServices.values().forEach(describeService ->
+                describeService.listSdxCrnsDetachedIncluded(environmentName).forEach(crn ->
                         platformDependentSdxDeleteServices.get(TargetPlatform.getByCrn(crn)).deleteSdx(crn, force)));
     }
 

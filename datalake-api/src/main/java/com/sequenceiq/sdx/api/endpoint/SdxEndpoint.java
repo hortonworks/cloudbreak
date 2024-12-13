@@ -123,7 +123,8 @@ public interface SdxEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "get SDX cluster by environment crn", operationId = "getSdxByEnvCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    List<SdxClusterResponse> getByEnvCrn(@PathParam("envCrn") @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) String envCrn);
+    List<SdxClusterResponse> getByEnvCrn(@PathParam("envCrn") @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) String envCrn,
+            @DefaultValue("false") @QueryParam("includeDetached") boolean includeDetached);
 
     @GET
     @Path("{name}/detail")
