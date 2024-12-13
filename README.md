@@ -900,6 +900,16 @@ https://github.infra.cloudera.com/cloudbreak/cloudbreak/commit/f50f5c8f38941db95
 
 - Use strings instead of enums on APIs for better backward compatibility - enums are useful for the service layer but on the API layer each new value can break compatibility.
 
+- API guidelines:
+  - New `POST`, `PUT` and `DELETE` endpoints should have the request body marked with `@RequestBody(required = true)`, if the request doesn't make sense without a request body
+      - Note, that there are two `@RequestBody` annotations. You need to use the one from `io.swagger.v3.oas.annotations.parameters`
+  - Prefer using primitive types over their wrapper classes wherever possible, and mark them required in response classes (and even in request classes if it makes sense)
+      - a field can be marked required, by adding the following annotation to it: `@Schema(requiredMode = Schema.RequiredMode.REQUIRED)`
+  - Strongly prefer `boolean` over `Boolean`, and if you must use the wrapper type, give it a default value
+  - For fields extending `Collection<T>` in response classes, give them a default value of an empty collection and mark them required
+      - when giving a default value to a collection, prefer using mutable collections instead of constructs like `List.of()` or `Map.of()`
+  - In general, mark any field you deem essential required, and give it a default value if possible
+
 ## Catching Up
 
 When you're working on your precious change on your beloved branch and all of a sudden you face the issue of getting your branch drop behind from the desired/initial branch where you would like to open your future pull request, our way of catching up is [rebasing](https://git-scm.com/docs/git-rebase).
