@@ -62,6 +62,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
+import com.sequenceiq.cloudbreak.cloud.template.init.SshKeyNameGenerator;
 import com.sequenceiq.cloudbreak.cloud.util.UserdataSecretsUtil;
 import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -153,6 +154,9 @@ class AwsNativeInstanceResourceBuilderTest {
     private AwsStackNameCommonUtil awsStackNameCommonUtil;
 
     @Mock
+    private SshKeyNameGenerator sshKeyNameGenerator;
+
+    @Mock
     private UserdataSecretsUtil userdataSecretsUtil;
 
     static Object[][] testBuildWhenInstanceNoExistSource() {
@@ -203,7 +207,6 @@ class AwsNativeInstanceResourceBuilderTest {
         when(group.getName()).thenReturn("groupName");
         when(cloudStack.getImage()).thenReturn(image);
         when(image.getImageName()).thenReturn("img-name");
-        when(cloudStack.getInstanceAuthentication()).thenReturn(authentication);
         when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
         when(securityGroupBuilderUtil.getSecurityGroupIds(awsContext, group)).thenReturn(List.of("sg-id"));
         when(awsStackNameCommonUtil.getInstanceName(ac, "groupName", privateId)).thenReturn("stackname");
@@ -236,6 +239,7 @@ class AwsNativeInstanceResourceBuilderTest {
                 .anyMatch(t -> "Name".equals(t.key()) && "stackname".equals(t.value())));
         verify(awsTaggingService, times(1)).prepareEc2TagSpecification(anyMap(),
                 eq(software.amazon.awssdk.services.ec2.model.ResourceType.INSTANCE));
+        verify(sshKeyNameGenerator, times(1)).getKeyPairName(any(), any());
         verify(awsTaggingService, times(1)).prepareEc2TagSpecification(anyMap(),
                 eq(software.amazon.awssdk.services.ec2.model.ResourceType.VOLUME));
         verify(instanceTemplate, times(1)).putParameter(eq(CloudResource.ARCHITECTURE), eq(ArchitectureValues.X86_64.name()));
@@ -264,7 +268,6 @@ class AwsNativeInstanceResourceBuilderTest {
         when(cloudStack.getImage()).thenReturn(image);
         when(cloudStack.getTags()).thenReturn(Map.of("Name", "doNotOverride"));
         when(image.getImageName()).thenReturn("img-name");
-        when(cloudStack.getInstanceAuthentication()).thenReturn(authentication);
         when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
         when(securityGroupBuilderUtil.getSecurityGroupIds(awsContext, group)).thenReturn(List.of("sg-id"));
         when(cloudInstance.getTemplate()).thenReturn(instanceTemplate);
@@ -352,7 +355,6 @@ class AwsNativeInstanceResourceBuilderTest {
         when(group.getReferenceInstanceTemplate()).thenReturn(instanceTemplate);
         when(cloudStack.getImage()).thenReturn(image);
         when(image.getImageName()).thenReturn("img-name");
-        when(cloudStack.getInstanceAuthentication()).thenReturn(authentication);
         when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
         when(group.getName()).thenReturn("groupName");
         when(awsStackNameCommonUtil.getInstanceName(ac, "groupName", privateId)).thenReturn("stackname");

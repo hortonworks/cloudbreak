@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.database.ExternalDatabaseParameters;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.cloud.template.authentication.AuthenticationResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.compute.ComputeResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.compute.DatabaseServerCheckerService;
 import com.sequenceiq.cloudbreak.cloud.template.compute.DatabaseServerLaunchService;
@@ -67,6 +68,9 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
 
     @Inject
     private NetworkResourceService networkResourceService;
+
+    @Inject
+    private AuthenticationResourceService authenticationResourceService;
 
     @Inject
     private GroupResourceService groupResourceService;
@@ -110,6 +114,10 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
 
         //context
         ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, auth, stack.getNetwork(), true);
+
+        //authentication
+        List<CloudResourceStatus> authenticationStatuses = authenticationResourceService.buildResources(context, auth, stack);
+        context.addAuthenticationResources(getCloudResources(authenticationStatuses));
 
         //network
         List<CloudResourceStatus> cloudResourceStatuses = networkResourceService.buildResources(context, auth, stack.getNetwork(), stack.getCloudSecurity());
@@ -169,6 +177,10 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
         List<CloudResourceStatus> networkStatuses = networkResourceService.deleteResources(context, auth, cloudResources, stack.getNetwork(), false);
         cloudResourceStatuses.addAll(networkStatuses);
 
+        //authentication
+        List<CloudResourceStatus> authenticationStatuses = authenticationResourceService.deleteResources(context, auth, cloudResources, stack, false);
+        cloudResourceStatuses.addAll(authenticationStatuses);
+
         return cloudResourceStatuses;
     }
 
@@ -212,6 +224,9 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
 
         //context
         ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, auth, stack.getNetwork(), true);
+
+        //authentication
+        context.addAuthenticationResources(authenticationResourceService.getAuthenticationResources(variant, resources));
 
         //network
         context.addNetworkResources(networkResourceService.getNetworkResources(variant, resources));
@@ -314,6 +329,11 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
         List<CloudResourceStatus> networkStatuses = networkResourceService.update(context, auth, stack.getNetwork(),
                 stack.getCloudSecurity(), networkResources);
         cloudResourceStatuses.addAll(networkStatuses);
+
+        //authentication
+        List<CloudResource> authenticationResources = authenticationResourceService.getAuthenticationResources(variant, resources);
+        List<CloudResourceStatus> authenticationStatuses = authenticationResourceService.update(context, auth, stack, authenticationResources);
+        cloudResourceStatuses.addAll(authenticationStatuses);
 
         //compute
         List<CloudResource> computeResources = computeResourceService.getComputeResources(variant, resources);

@@ -49,6 +49,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.cloud.template.ResourceContextBuilder;
+import com.sequenceiq.cloudbreak.cloud.template.authentication.AuthenticationResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.compute.ComputeResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.group.GroupResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.init.ContextBuilders;
@@ -112,6 +113,9 @@ public class AwsNativeResourceConnectorTest {
     private NetworkResourceService networkResourceService;
 
     @Mock
+    private AuthenticationResourceService authenticationResourceService;
+
+    @Mock
     private ComputeResourceService computeResourceService;
 
     @Mock
@@ -140,6 +144,7 @@ public class AwsNativeResourceConnectorTest {
         List<CloudResource> resources = List.of(instance1CloudResource, instance2CloudResource, volumeSet1, volumeSet2);
 
         when(ac.getCloudContext()).thenReturn(cloudContext);
+        when(authenticationResourceService.getAuthenticationResources(any(), any())).thenReturn(Collections.emptyList());
         when(contextBuilders.get(any())).thenReturn(resourceContextBuilder);
         when(resourceContextBuilder.contextInit(any(), any(), any(), anyBoolean())).thenReturn(awsContext);
         when(networkResourceService.getNetworkResources(any(), any())).thenReturn(Collections.emptyList());

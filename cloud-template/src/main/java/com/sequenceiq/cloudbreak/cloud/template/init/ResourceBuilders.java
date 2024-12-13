@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
+import com.sequenceiq.cloudbreak.cloud.template.AuthenticationResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.GroupResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.LoadBalancerResourceBuilder;
@@ -42,6 +43,9 @@ public class ResourceBuilders {
     private List<NetworkResourceBuilder> network = new ArrayList<>();
 
     @Autowired(required = false)
+    private List<AuthenticationResourceBuilder> authentication = new ArrayList<>();
+
+    @Autowired(required = false)
     private List<ComputeResourceBuilder> compute = new ArrayList<>();
 
     @Autowired(required = false)
@@ -51,6 +55,8 @@ public class ResourceBuilders {
     private List<LoadBalancerResourceBuilder> loadBalancer = new ArrayList<>();
 
     private final Map<Variant, List<NetworkResourceBuilder<ResourceBuilderContext>>> networkChain = new HashMap<>();
+
+    private final Map<Variant, List<AuthenticationResourceBuilder<ResourceBuilderContext>>> authenticationChain = new HashMap<>();
 
     private final Map<Variant, List<GroupResourceBuilder<ResourceBuilderContext>>> groupChain = new HashMap<>();
 
@@ -66,6 +72,7 @@ public class ResourceBuilders {
     public void init() {
         Comparator<OrderedBuilder> comparator = new BuilderComparator();
         initNetwork(comparator);
+        initAuthentication(comparator);
         initGroup(comparator);
         initCompute(comparator);
         initLoadBalancer(comparator);
@@ -80,6 +87,15 @@ public class ResourceBuilders {
             return Collections.emptyList();
         }
         return new ArrayList<>(networkResourceBuilders);
+    }
+
+    public List<AuthenticationResourceBuilder<ResourceBuilderContext>> authentication(Variant platformVariant) {
+        List<AuthenticationResourceBuilder<ResourceBuilderContext>> authenticationResourceBuilders = authenticationChain.get(platformVariant);
+        if (authenticationResourceBuilders == null) {
+            LOGGER.info("Cannot find AuthenticationResourceBuilder for platform variant: '{}'", platformVariant);
+            return Collections.emptyList();
+        }
+        return new ArrayList<>(authenticationResourceBuilders);
     }
 
     public List<ComputeResourceBuilder<ResourceBuilderContext>> compute(Variant platformVariant) {
@@ -122,6 +138,14 @@ public class ResourceBuilders {
     private void initNetwork(Comparator<OrderedBuilder> comparator) {
         for (NetworkResourceBuilder<ResourceBuilderContext> builder : network) {
             List<NetworkResourceBuilder<ResourceBuilderContext>> chain = networkChain.computeIfAbsent(builder.variant(), k -> new LinkedList<>());
+            chain.add(builder);
+            chain.sort(comparator);
+        }
+    }
+
+    private void initAuthentication(Comparator<OrderedBuilder> comparator) {
+        for (AuthenticationResourceBuilder<ResourceBuilderContext> builder : authentication) {
+            List<AuthenticationResourceBuilder<ResourceBuilderContext>> chain = authenticationChain.computeIfAbsent(builder.variant(), k -> new LinkedList<>());
             chain.add(builder);
             chain.sort(comparator);
         }

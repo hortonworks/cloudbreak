@@ -30,6 +30,8 @@ public class ResourceBuilderContext extends DynamicModel {
 
     private final Queue<CloudResource> networkResources = new ConcurrentLinkedQueue<>();
 
+    private final Queue<CloudResource> authenticationResources = new ConcurrentLinkedQueue<>();
+
     private final Map<String, List<CloudResource>> groupResources = new HashMap<>();
 
     private final Map<Long, List<CloudResource>> computeResources = new HashMap<>();
@@ -77,6 +79,10 @@ public class ResourceBuilderContext extends DynamicModel {
 
     public void addNetworkResources(Collection<CloudResource> resources) {
         networkResources.addAll(resources);
+    }
+
+    public void addAuthenticationResources(Collection<CloudResource> resources) {
+        authenticationResources.addAll(resources);
     }
 
     public List<CloudResource> getGroupResources(String groupName) {

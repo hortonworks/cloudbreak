@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.template.ResourceContextBuilder;
+import com.sequenceiq.cloudbreak.cloud.template.authentication.AuthenticationResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.compute.ComputeResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.group.GroupResourceService;
@@ -64,6 +65,9 @@ public class GcpResourceConnectorTest {
 
     @InjectMocks
     private GcpResourceConnector underTest;
+
+    @Mock
+    private AuthenticationResourceService authenticationResourceService;
 
     @Mock
     private NetworkResourceService networkResourceService;
@@ -207,6 +211,7 @@ public class GcpResourceConnectorTest {
                 any(Network.class),
                 anyBoolean())).thenReturn(resourceBuilderContext);
         when(networkResourceService.getNetworkResources(any(Variant.class), anyList())).thenReturn(new ArrayList<>());
+        when(authenticationResourceService.getAuthenticationResources(any(Variant.class), anyList())).thenReturn(new ArrayList<>());
         doNothing().when(resourceBuilderContext).addNetworkResources(anyCollection());
         when(groupResourceService.getGroupResources(any(Variant.class), anyCollection()))
                 .thenReturn(List.of(cloudResource("test-1", GCP_INSTANCE)));

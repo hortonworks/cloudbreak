@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
+import com.sequenceiq.cloudbreak.cloud.template.init.SshKeyNameGenerator;
 import com.sequenceiq.cloudbreak.cloud.util.UserdataSecretsUtil;
 import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.common.api.type.CommonStatus;
@@ -102,6 +103,9 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
 
     @Inject
     private UserdataSecretsUtil userdataSecretsUtil;
+
+    @Inject
+    private SshKeyNameGenerator sshKeyNameGenerator;
 
     @Override
     public List<CloudResource> create(AwsContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
@@ -159,7 +163,7 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
                     .minCount(1)
                     .maxCount(1)
                     .blockDeviceMappings(blocks(group, cloudStack, ac))
-                    .keyName(cloudStack.getInstanceAuthentication().getPublicKeyId());
+                    .keyName(sshKeyNameGenerator.getKeyPairName(ac, cloudStack));
             if (StringUtils.equals(cloudStack.getSupportedImdsVersion(), AWS_IMDS_VERSION_V2)) {
                 builder.metadataOptions(InstanceMetadataOptionsRequest.builder()
                         .httpTokens(HttpTokensState.REQUIRED)
