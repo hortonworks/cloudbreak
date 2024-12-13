@@ -57,24 +57,6 @@ remove_prometheus_pwd:
     - user: "root"
     - group: "root"
     - mode: 600
-{%- else %}
-  {%- if monitoring.password %}
-/opt/cdp-prometheus/remote_pwd_file:
-  file.managed:
-    - source: salt://monitoring/template/remote_pwd_file.j2
-    - template: jinja
-    - user: "root"
-    - group: "root"
-    - mode: 600
-  {%- elif monitoring.token %}
-/opt/cdp-prometheus/remote_token_file:
-  file.managed:
-    - source: salt://monitoring/template/remote_token_file.j2
-    - template: jinja
-    - user: "root"
-    - group: "root"
-    - mode: 600
-  {%- endif %}
 {%- endif %}
 
 /var/log/cdp-prometheus:
@@ -94,12 +76,6 @@ start_cdp_prometheus:
       - file: /opt/cdp-prometheus/prometheus-web-config.yml
 {%- if monitoring.requestSignerEnabled %}
       - file: /opt/cdp-prometheus/request_signer_pwd_file
-{%- else %}
-  {%- if monitoring.password %}
-      - file: /opt/cdp-prometheus/remote_pwd_file
-  {%- elif monitoring.token %}
-      - file: /opt/cdp-prometheus/remote_token_file
-  {%- endif %}
 {%- endif %}
 {%- else %}
 kill_cdp_prometheus:
@@ -112,7 +88,5 @@ delete_config_files:
       - /opt/cdp-prometheus/prometheus.yml
       - /opt/cdp-prometheus/prometheus-web-config.yml
       - /opt/cdp-prometheus/request_signer_pwd_file
-      - /opt/cdp-prometheus/remote_pwd_file
-      - /opt/cdp-prometheus/remote_token_file
       - /etc/systemd/system/cdp-prometheus.service
 {%- endif %}

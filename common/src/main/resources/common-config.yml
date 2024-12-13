@@ -50,11 +50,6 @@ telemetry:
       workers: 1
       queue-size-limit: 1000
       http-timeout-seconds: 30
-    global-auth:
-      enabled: false
-      username: ""
-      password: ""
-      token: ""
     agent:
       user: vmagent
       port: 8429

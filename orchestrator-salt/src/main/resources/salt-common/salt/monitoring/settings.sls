@@ -17,9 +17,6 @@
 {% set type = salt['pillar.get']('monitoring:type') %}
 {% set cm_username = salt['pillar.get']('monitoring:cmUsername') %}
 {% set cm_password = salt['pillar.get']('monitoring:cmPassword') %}
-{% set username = salt['pillar.get']('monitoring:username') %}
-{% set password = salt['pillar.get']('monitoring:password') %}
-{% set token = salt['pillar.get']('monitoring:token') %}
 {% set agent_user = salt['pillar.get']('monitoring:agentUser', 'vmagent') %}
 {% set agent_port = salt['pillar.get']('monitoring:agentPort', 8429) %}
 {% set agent_max_disk_usage = salt['pillar.get']('monitoring:agentMaxDiskUsage', '4GB') %}
@@ -71,9 +68,6 @@
     "enabled": monitoring_enabled,
     "is_systemd": is_systemd,
     "type": type,
-    "username": username,
-    "password": password,
-    "token": token,
     "remoteWriteUrl": remote_write_url,
     "scrapeIntervalSeconds": scrape_interval_seconds,
     "cmUsername": cm_username,

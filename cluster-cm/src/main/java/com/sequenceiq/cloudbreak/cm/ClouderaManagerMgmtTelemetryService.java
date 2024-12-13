@@ -183,8 +183,7 @@ public class ClouderaManagerMgmtTelemetryService {
         }
     }
 
-    public void updateServiceMonitorConfigs(final StackDtoDelegate stack, final ApiClient client,
-            final Telemetry telemetry) throws ApiException {
+    public void updateServiceMonitorConfigs(StackDtoDelegate stack, ApiClient client, Telemetry telemetry) throws ApiException {
         if (isMonitoringSupported(telemetry)) {
             MgmtRoleConfigGroupsResourceApi mgmtRoleConfigGroupsResourceApi = clouderaManagerApiFactory.getMgmtRoleConfigGroupsResourceApi(client);
             ApiConfigList serviecMonitorConfigList = mgmtRoleConfigGroupsResourceApi.readConfig(

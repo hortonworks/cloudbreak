@@ -46,6 +46,7 @@ public interface ClusterDtoRepository extends Repository<Cluster, Long> {
             "c.cloudbreakClusterManagerMonitoringPassword as cloudbreakClusterManagerMonitoringPasswordSecret, " +
             "c.cloudbreakClusterManagerMonitoringUser as cloudbreakClusterManagerMonitoringUserSecret, " +
             "c.databusCredential as databusCredentialSecret, " +
+            "c.monitoringCredential as monitoringCredentialSecret, " +
             "c.embeddedDatabaseOnAttachedDisk as embeddedDatabaseOnAttachedDisk, " +
             "cc as customConfigurations, " +
 

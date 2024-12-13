@@ -3,17 +3,20 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 
 import java.util.List;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAvailabilityType;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
+import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
@@ -23,6 +26,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaRotationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
@@ -34,6 +38,7 @@ import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETest;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
+import com.sequenceiq.sdx.rotation.DatalakeSecretType;
 
 public class MonitoringTests extends AbstractE2ETest implements ImageValidatorE2ETest {
 
@@ -149,6 +154,10 @@ public class MonitoringTests extends AbstractE2ETest implements ImageValidatorE2
                     sshJUtil.checkFilesystemFreeBytesGeneratedMetric(testDto, testDto.getEnvironmentCrn(), client);
                     return testDto;
                 })
+                .given(FreeIpaRotationTestDto.class)
+                .withSecrets(List.of(FreeIpaSecretType.COMPUTE_MONITORING_CREDENTIALS))
+                .when(freeIpaTestClient.rotateSecret())
+                .awaitForFlow()
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.describe())
                 .given(SdxInternalTestDto.class)
@@ -172,6 +181,8 @@ public class MonitoringTests extends AbstractE2ETest implements ImageValidatorE2
                             List.of(MASTER.getName()));
                     return testDto;
                 })
+                .when(sdxTestClient.rotateSecret(Set.of(DatalakeSecretType.COMPUTE_MONITORING_CREDENTIALS)))
+                .awaitForFlow()
                 .given(DistroXTestDto.class)
                     .withExternalDatabase(distroXDatabaseRequest)
                     .withEnvironment()
@@ -189,6 +200,8 @@ public class MonitoringTests extends AbstractE2ETest implements ImageValidatorE2
                             List.of(MASTER.getName()));
                     return testDto;
                 })
+                .when(distroXTestClient.rotateSecret(Set.of(CloudbreakSecretType.COMPUTE_MONITORING_CREDENTIALS)))
+                .awaitForFlow()
                 .validate();
     }
 }

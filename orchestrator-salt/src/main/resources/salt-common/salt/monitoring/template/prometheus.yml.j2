@@ -31,16 +31,6 @@ remote_write:
     {%- if telemetry.proxyUrl %}
     proxy_url: {{ telemetry.proxyUrl }}
     {%- endif %}
-    {%- if monitoring.username %}
-    basic_auth:
-      username: {{ monitoring.username }}
-      {%- if monitoring.password %}
-      password_file: /opt/cdp-prometheus/remote_pwd_file
-      {%- endif %}
-    {%- elif monitoring.token %}
-    authorization:
-      credentials_file: /opt/cdp-prometheus/remote_token_file
-    {%- endif %}
   {%- endif %}
     queue_config:
       min_backoff: {{ monitoring.minBackoff }}

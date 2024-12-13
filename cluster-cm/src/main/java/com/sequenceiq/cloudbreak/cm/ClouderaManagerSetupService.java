@@ -627,6 +627,15 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         }
     }
 
+    @Override
+    public void updateSmonConfigs(Telemetry telemetry) {
+        try {
+            mgmtSetupService.updateSmonConfigs(stack, apiClient, telemetry);
+        } catch (ApiException e) {
+            throw mapApiException(e);
+        }
+    }
+
     private void configureCmSupportTag(TemplatePreparationObject templatePreparationObject) throws ApiException {
         Optional<ApiHost> optionalCmHost = getCmHost(templatePreparationObject, apiClient);
         if (optionalCmHost.isPresent()) {

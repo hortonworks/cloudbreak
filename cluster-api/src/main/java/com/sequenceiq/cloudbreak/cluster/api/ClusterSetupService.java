@@ -36,6 +36,8 @@ public interface ClusterSetupService {
         Telemetry telemetry,
         ProxyConfig proxyConfig);
 
+    void updateSmonConfigs(Telemetry telemetry);
+
     void configureSupportTags(TemplatePreparationObject templatePreparationObject);
 
     void updateConfig();

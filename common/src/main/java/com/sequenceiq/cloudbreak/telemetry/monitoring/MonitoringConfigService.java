@@ -36,14 +36,10 @@ public class MonitoringConfigService implements TelemetryPillarConfigGenerator<M
 
     private final MonitoringConfiguration monitoringConfiguration;
 
-    private final MonitoringGlobalAuthConfig monitoringGlobalAuthConfig;
-
     private final AdlsGen2ConfigGenerator adlsGen2ConfigGenerator;
 
-    public MonitoringConfigService(MonitoringConfiguration monitoringConfiguration, MonitoringGlobalAuthConfig monitoringGlobalAuthConfig,
-            AdlsGen2ConfigGenerator adlsGen2ConfigGenerator) {
+    public MonitoringConfigService(MonitoringConfiguration monitoringConfiguration, AdlsGen2ConfigGenerator adlsGen2ConfigGenerator) {
         this.monitoringConfiguration = monitoringConfiguration;
-        this.monitoringGlobalAuthConfig = monitoringGlobalAuthConfig;
         this.adlsGen2ConfigGenerator = adlsGen2ConfigGenerator;
     }
 
@@ -78,15 +74,6 @@ public class MonitoringConfigService implements TelemetryPillarConfigGenerator<M
         }
         fillExporterConfigs(builder, monitoringContext.getSharedPassword(), context);
         fillRequestSignerConfigs(monitoringConfiguration.getRequestSigner(), builder);
-        if (monitoringGlobalAuthConfig.isEnabled()) {
-            builder.withUsername(monitoringGlobalAuthConfig.getUsername());
-            if (StringUtils.isNotBlank(monitoringGlobalAuthConfig.getPassword())) {
-                builder.withPassword(monitoringGlobalAuthConfig.getPassword());
-            }
-            if (StringUtils.isNotBlank(monitoringGlobalAuthConfig.getToken())) {
-                builder.withToken(monitoringGlobalAuthConfig.getToken().toCharArray());
-            }
-        }
         return builder
                 .withEnabled(monitoringContext.isEnabled())
                 .build();

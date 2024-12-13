@@ -125,6 +125,10 @@ public class ClouderaManagerMgmtSetupService {
         setUpAutoConfiguration(mgmtServiceResourceApi);
     }
 
+    public void updateSmonConfigs(StackDtoDelegate stack, ApiClient apiClient, Telemetry telemetry) throws ApiException {
+        telemetryService.updateServiceMonitorConfigs(stack, apiClient, telemetry);
+    }
+
     private void waitForGenerateCredentialsToFinish(StackDtoDelegate stack, ApiClient apiClient) throws ApiException {
         LOGGER.debug("Wait if Generate Credentials command is still active.");
         ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);

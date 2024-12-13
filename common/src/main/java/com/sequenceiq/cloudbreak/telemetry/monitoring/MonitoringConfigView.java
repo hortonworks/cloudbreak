@@ -94,12 +94,6 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
     private final Integer scrapeIntervalSeconds;
 
-    private final String username;
-
-    private final String password;
-
-    private final char[] token;
-
     private final String accessKeyId;
 
     private final char[] privateKey;
@@ -133,9 +127,6 @@ public class MonitoringConfigView implements TelemetryConfigView {
         this.clusterDetails = builder.clusterDetails;
         this.remoteWriteUrl = builder.remoteWriteUrl;
         this.scrapeIntervalSeconds = builder.scrapeIntervalSeconds;
-        this.username = builder.username;
-        this.password = builder.password;
-        this.token = builder.token;
         this.requestSigner = builder.requestSigner;
         this.retentionMinTime = builder.retentionMinTime;
         this.retentionMaxTime = builder.retentionMaxTime;
@@ -227,18 +218,6 @@ public class MonitoringConfigView implements TelemetryConfigView {
         return agentMaxDiskUsage;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public char[] getToken() {
-        return token;
-    }
-
     public boolean isCmAutoTls() {
         return cmAutoTls;
     }
@@ -304,9 +283,6 @@ public class MonitoringConfigView implements TelemetryConfigView {
         map.put("maxSamplesPerSend", defaultIfNull(this.maxSamplesPerSend, MAX_SAMPLES_PER_SEND));
         map.put("capacity", defaultIfNull(this.capacity, CAPACITY));
         map.put("walTruncateFrequency", defaultIfNull(this.walTruncateFrequency, WAL_TRUNCATE_FREQUENCY));
-        map.put("username", defaultIfNull(this.username, EMPTY_CONFIG_DEFAULT));
-        map.put("password", this.password != null ? this.password : EMPTY_CONFIG_DEFAULT);
-        map.put("token", this.token != null ? new String(this.token) : EMPTY_CONFIG_DEFAULT);
         map.put("monitoringAccessKeyId", defaultIfNull(this.accessKeyId, EMPTY_CONFIG_DEFAULT));
         map.put("monitoringPrivateKey", this.privateKey != null ? new String(this.privateKey) : EMPTY_CONFIG_DEFAULT);
         map.put("monitoringAccessKeyType", defaultIfNull(this.accessKeyType, EMPTY_CONFIG_DEFAULT));
@@ -328,12 +304,6 @@ public class MonitoringConfigView implements TelemetryConfigView {
         private Integer scrapeIntervalSeconds;
 
         private String type;
-
-        private String username;
-
-        private String password;
-
-        private char[] token;
 
         private String cmUsername;
 
@@ -418,21 +388,6 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
         public Builder withType(String type) {
             this.type = type;
-            return this;
-        }
-
-        public Builder withUsername(String username) {
-            this.username = username;
-            return this;
-        }
-
-        public Builder withPassword(String password) {
-            this.password = password;
-            return this;
-        }
-
-        public Builder withToken(char[] token) {
-            this.token = token;
             return this;
         }
 

@@ -366,6 +366,10 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
         return getIfNotNull(cdpNodeStatusMonitorPassword, Secret::getRaw);
     }
 
+    public Secret getCdpNodeStatusMonitorPasswordSecret() {
+        return cdpNodeStatusMonitorPassword;
+    }
+
     public void setCdpNodeStatusMonitorPassword(String cdpNodeStatusMonitorPassword) {
         this.cdpNodeStatusMonitorPassword = new Secret(cdpNodeStatusMonitorPassword);
     }

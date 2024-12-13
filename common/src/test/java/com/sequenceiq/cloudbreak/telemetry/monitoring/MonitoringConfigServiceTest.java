@@ -50,9 +50,6 @@ public class MonitoringConfigServiceTest {
     private BlackboxExporterConfiguration blackboxExporterConfiguration;
 
     @Mock
-    private MonitoringGlobalAuthConfig monitoringGlobalAuthConfig;
-
-    @Mock
     private MonitoringAgentConfiguration monitoringAgentConfiguration;
 
     @Mock
@@ -64,7 +61,7 @@ public class MonitoringConfigServiceTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        underTest = new MonitoringConfigService(monitoringConfiguration, monitoringGlobalAuthConfig, adlsGen2ConfigGenerator);
+        underTest = new MonitoringConfigService(monitoringConfiguration, adlsGen2ConfigGenerator);
     }
 
     @Test
