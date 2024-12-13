@@ -156,11 +156,11 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     @Override
     protected void prepareDeletion(ClusterTemplate resource) {
         if (resource.getStatus() == ResourceStatus.DEFAULT || resource.getStatus() == ResourceStatus.DEFAULT_DELETED) {
-            throw new AccessDeniedException("Default cluster definition deletion is forbidden");
+            throw new AccessDeniedException(format("Default cluster definition deletion is forbidden: '%s'", resource.getName()));
         }
         String accountId = resource.getWorkspace().getTenant().getName();
         if (internalClusterTemplateValidator.isInternalTemplateInNotInternalTenant(entitlementService.internalTenant(accountId), resource.getFeatureState())) {
-            throw new AccessDeniedException("Internal Cluster definition deletion is forbidden");
+            LOGGER.warn("About to delete internal cluster definition in non-internal tenant: '{}'", resource.getName());
         }
     }
 
