@@ -115,6 +115,13 @@ public interface InstanceGroupRepository extends CrudRepository<InstanceGroup, L
     )
     List<AvailabilityZoneView> findAvailabilityZonesByStackId(@Param("stackId") Long stackId);
 
+    @Query("SELECT az.availabilityZone " +
+            "FROM AvailabilityZone az " +
+            "LEFT JOIN az.instanceGroup ig " +
+            "WHERE ig.id= :groupId"
+    )
+    List<String> findAvailabilityZonesByStackIdAndGroupId(@Param("groupId") Long groupId);
+
     @Modifying
     @Query("UPDATE InstanceGroup ig SET ig.securityGroup = null, ig.template = null, ig.instanceGroupNetwork = null WHERE ig.id in :instanceGroupIds")
     void updateToNullForTermination(@Param("instanceGroupIds") List<Long> instanceGroupIds);

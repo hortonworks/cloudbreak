@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.multiaz.MultiAzCalculatorService;
 import com.sequenceiq.cloudbreak.service.multiaz.ProviderBasedMultiAzSetupValidator;
+import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.verticalscale.VerticalScaleInstanceProvider;
 import com.sequenceiq.common.api.type.CdpResourceType;
 
@@ -62,6 +63,9 @@ public class VerticalScalingValidatorService {
 
     @Inject
     private MultiAzCalculatorService multiAzCalculatorService;
+
+    @Inject
+    private InstanceGroupService instanceGroupService;
 
     @Inject
     private ProviderBasedMultiAzSetupValidator providerBasedMultiAzSetupValidator;
@@ -113,13 +117,14 @@ public class VerticalScalingValidatorService {
                 .findFirst();
         String requestedInstanceType = verticalScaleV4Request.getTemplate().getInstanceType();
         if (instanceGroupOptional.isPresent()) {
+            InstanceGroup instanceGroup = instanceGroupOptional.get();
             boolean validateMultiAz = stack.isMultiAz() && providerBasedMultiAzSetupValidator.getAvailabilityZoneConnector(stack) != null;
             String availabilityZone = stack.getAvailabilityZone();
             String region = stack.getRegion();
-            String currentInstanceType = instanceGroupOptional.get().getTemplate().getInstanceType();
+            String currentInstanceType = instanceGroup.getTemplate().getInstanceType();
             Credential credential = credentialService.getByEnvironmentCrn(stack.getEnvironmentCrn());
             ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
-            Json attributes = instanceGroupOptional.get().getTemplate().getAttributes();
+            Json attributes = instanceGroup.getTemplate().getAttributes();
             CloudVmTypes allVmTypes = cloudParameterService.getVmTypesV2(
                     cloudCredential,
                     stack.getRegion(),
@@ -129,7 +134,7 @@ public class VerticalScalingValidatorService {
             verticalScaleInstanceProvider.validateInstanceTypeForVerticalScaling(
                     getInstance(region, availabilityZone, currentInstanceType, allVmTypes),
                     getInstance(region, availabilityZone, requestedInstanceType, allVmTypes),
-                    validateMultiAz ? instanceGroupOptional.get().getAvailabilityZones() : null,
+                    validateMultiAz ? instanceGroupService.findAvailabilityZonesByStackIdAndGroupId(instanceGroup.getId()) : null,
                     attributes == null ? Map.of() : attributes.getMap()
             );
         } else {

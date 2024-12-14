@@ -54,6 +54,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.multiaz.ProviderBasedMultiAzSetupValidator;
+import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.verticalscale.VerticalScaleInstanceProvider;
 import com.sequenceiq.common.model.Architecture;
 
@@ -88,6 +89,9 @@ public class VerticalScalingValidatorServiceTest {
 
     @Mock
     private Stack stack;
+
+    @Mock
+    private InstanceGroupService instanceGroupService;
 
     @Test
     public void testRequestValidateInstanceTypeForDeleteVolumesSuccess() {
@@ -196,6 +200,7 @@ public class VerticalScalingValidatorServiceTest {
         when(stack.getPlatformVariant()).thenReturn("AWS");
         when(stack.getArchitectureName()).thenReturn(Architecture.X86_64.getName());
         when(cloudParameterService.getVmTypesV2(any(), anyString(), anyString(), any(), any())).thenReturn(cloudVmTypes);
+        when(instanceGroupService.findAvailabilityZonesByStackIdAndGroupId(any())).thenReturn(Set.of("1", "2"));
         CloudConnector connector = mock(CloudConnector.class);
         when(providerBasedMultiAzSetupValidator.getAvailabilityZoneConnector(any())).thenReturn(new AzureAvailabilityZoneConnector());
 
@@ -209,6 +214,7 @@ public class VerticalScalingValidatorServiceTest {
 
         underTest.validateInstanceType(stack, stackVerticalScaleV4Request);
 
+        verify(instanceGroupService, times(1)).findAvailabilityZonesByStackIdAndGroupId(any());
         verify(credentialClientService, times(1)).getByEnvironmentCrn(anyString());
         verify(credentialToExtendedCloudCredentialConverter, times(1)).convert(any());
         verify(cloudParameterService, times(1)).getVmTypesV2(any(), anyString(), anyString(), any(), any());

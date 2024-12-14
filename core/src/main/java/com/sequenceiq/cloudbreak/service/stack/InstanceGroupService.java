@@ -109,6 +109,12 @@ public class InstanceGroupService {
         return repository.findOneByStackIdAndGroupName(stackId, groupName);
     }
 
+    public Set<String> findAvailabilityZonesByStackIdAndGroupId(Long groupId) {
+        return repository.findAvailabilityZonesByStackIdAndGroupId(groupId)
+                .stream()
+                .collect(Collectors.toSet());
+    }
+
     public Optional<com.sequenceiq.cloudbreak.view.InstanceGroupView> findInstanceGroupViewByStackIdAndGroupName(Long stackId, String groupName) {
         return Optional.ofNullable(repository.findInstanceGroupViewByStackIdAndGroupName(stackId, groupName).orElse(null));
     }
