@@ -53,4 +53,12 @@ create_httpd_script_context_crt_tracking_initrc_exec_t:
   selinux.fcontext_policy_present:
     - name: '/cdp/ipahealthagent/httpd-crt-tracking.sh'
     - sel_type: initrc_exec_t
+
+restorecon_crt_tracking:
+  cmd.run:
+    - name: restorecon -v '/cdp/ipahealthagent/httpd-crt-tracking.sh'
+
+restorecon_log_filter:
+  cmd.run:
+    - name: restorecon -v '/etc/httpd/conf/httpd-log-filter.sh'
 {% endif %}

@@ -82,12 +82,15 @@ public class AzurePlatformParameters implements PlatformParameters {
 
     private String roleDefJson;
 
+    private String minimalRoleDefJson;
+
     private String auditRoleDefJson;
 
     @PostConstruct
     public void init() {
         vmRecommendations = initVmRecommendations();
         roleDefJson = initRoleDefJson();
+        minimalRoleDefJson = initMinimalRoleDefJson();
         auditRoleDefJson = initAuditRoleDefJson();
     }
 
@@ -216,6 +219,10 @@ public class AzurePlatformParameters implements PlatformParameters {
         return roleDefJson;
     }
 
+    public String getMinimalRoleDefJson() {
+        return minimalRoleDefJson;
+    }
+
     public String getAuditRoleDefJson() {
         return auditRoleDefJson;
     }
@@ -233,6 +240,10 @@ public class AzurePlatformParameters implements PlatformParameters {
 
     private String initRoleDefJson() {
         return readRoleDef("role-def");
+    }
+
+    private String initMinimalRoleDefJson() {
+        return readRoleDef("minimal-role-def");
     }
 
     private String initAuditRoleDefJson() {

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -92,9 +94,11 @@ public class AzureCredentialConnector implements CredentialConnector {
         String auditCredentialCreationCommand = appCreationCommand.generateAuditCredentialCommand(deploymentAddress);
         String encodedCommand;
         String roleDefJson;
+        Map<String, String> minimalRoleDef = new HashMap<>();
         switch (type) {
             case ENVIRONMENT:
                 roleDefJson = azurePlatformParameters.getRoleDefJson();
+                minimalRoleDef.put("MinimalRoleDefinition", azurePlatformParameters.getMinimalRoleDefJson());
                 encodedCommand = Base64.encodeBase64String(credentialCreationCommand.getBytes());
                 break;
             case AUDIT:
@@ -106,8 +110,9 @@ public class AzureCredentialConnector implements CredentialConnector {
                 roleDefJson = null;
                 break;
         }
-        AzureCredentialPrerequisites azurePrerequisites = new AzureCredentialPrerequisites(encodedCommand, roleDefJson);
+        AzureCredentialPrerequisites azurePrerequisites = new AzureCredentialPrerequisites(encodedCommand, roleDefJson, minimalRoleDef);
         return new CredentialPrerequisitesResponse(cloudContext.getPlatform().value(), azurePrerequisites);
     }
+
 }
 
