@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure.upscale;
 
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ACCEPTANCE_POLICY_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.model.CloudResource.PRIVATE_ID;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_INSTANCE;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -9,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
@@ -206,7 +206,6 @@ public class AzureUpscaleServiceTest {
         assertEquals(template, actual.get(0).getCloudResource());
         assertEquals(ResourceStatus.IN_PROGRESS, actual.get(0).getStatus());
 
-        verify(azureImageTermsSignerService).signImageTermsIfAllowed(eq(stack), eq(client), eq(azureMpImage), isNull());
         verify(cloudResourceHelper).getScaledGroups(stack);
         verify(azureTemplateDeploymentService).getTemplateDeployment(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE);
         verify(templateDeployment).exportTemplate();
@@ -247,14 +246,15 @@ public class AzureUpscaleServiceTest {
         when(azureMarketplaceImageProviderService.getSourceImage(eq(image))).thenReturn(azureMpImage);
         when(azureImageFormatValidator.isMarketplaceImageFormat(eq(image))).thenReturn(false);
         when(azureImageFormatValidator.hasSourceImagePlan(eq(image))).thenReturn(true);
-        doThrow(new CloudImageException("")).when(azureImageTermsSignerService).signImageTermsIfAllowed(any(), any(), eq(azureMpImage), any());
+        when(stack.getParameters()).thenReturn(Map.of(ACCEPTANCE_POLICY_PARAMETER, Boolean.TRUE.toString()));
+        doThrow(new CloudImageException("")).when(azureImageTermsSignerService).sign(any(), eq(azureMpImage), any());
 
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 0L);
         CloudConnectorException exception = assertThrows(CloudConnectorException.class, () -> underTest.upscale(ac, stack, resources, azureStackView, client,
                 adjustmentTypeWithThreshold));
         assertFalse(exception instanceof CloudImageException, "Should not fallback in case of source image signing");
 
-        verify(azureImageTermsSignerService).signImageTermsIfAllowed(eq(stack), eq(client), eq(azureMpImage), isNull());
+        verify(azureImageTermsSignerService).sign(any(), eq(azureMpImage), any());
         verify(azureTemplateDeploymentService, never()).getTemplateDeployment(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE);
     }
 

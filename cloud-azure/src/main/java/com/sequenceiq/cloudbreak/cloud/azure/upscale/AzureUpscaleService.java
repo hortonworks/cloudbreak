@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure.upscale;
 
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ACCEPTANCE_POLICY_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.model.CloudResource.PRIVATE_ID;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_INSTANCE;
 
@@ -179,7 +180,12 @@ public class AzureUpscaleService {
             AzureCredentialView azureCredentialView = new AzureCredentialView(ac.getCloudCredential());
             LOGGER.debug("Attempt to sign Azure Marketplace image {}", azureMarketplaceImage.toString());
             try {
-                azureImageTermsSignerService.signImageTermsIfAllowed(stack, client, azureMarketplaceImage, azureCredentialView.getSubscriptionId());
+                Boolean automaticTermsAcceptance = Boolean.valueOf(stack.getParameters().get(ACCEPTANCE_POLICY_PARAMETER));
+                if (automaticTermsAcceptance) {
+                    azureImageTermsSignerService.sign(azureCredentialView.getSubscriptionId(), azureMarketplaceImage, client);
+                } else {
+                    LOGGER.debug("Azure automatic image term signing skipped: [automaticTermsAcceptancePolicy={}]", automaticTermsAcceptance);
+                }
             } catch (CloudImageException e) {
                 if (hasSourceImagePlan) {
                     LOGGER.debug("Failed to sign source image: {}. Unboxing exception, because we have no fallback path for this case.", e.getMessage());

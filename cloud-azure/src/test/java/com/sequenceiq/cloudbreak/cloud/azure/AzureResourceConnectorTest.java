@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ACCEPTANCE_POLICY_PARAMETER;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -15,6 +16,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -151,6 +153,7 @@ public class AzureResourceConnectorTest {
         lenient().when(stack.getGroups()).thenReturn(groups);
         lenient().when(stack.getNetwork()).thenReturn(network);
         lenient().when(stack.getImage()).thenReturn(imageModel);
+        lenient().when(stack.getParameters()).thenReturn(Map.of(ACCEPTANCE_POLICY_PARAMETER, Boolean.TRUE.toString()));
         lenient().when(ac.getCloudContext()).thenReturn(cloudContext);
         lenient().when(ac.getParameter(AzureClient.class)).thenReturn(client);
         lenient().when(ac.getCloudCredential()).thenReturn(new CloudCredential("aCredentialId", "aCredentialName", "account"));
@@ -232,7 +235,6 @@ public class AzureResourceConnectorTest {
 
         verify(azureMarketplaceImageProviderService, times(1)).get(imageModel);
         verify(azureMarketplaceImageProviderService, never()).getSourceImage(eq(imageModel));
-        verify(azureImageTermsSignerService, times(1)).signImageTermsIfAllowed(eq(stack), eq(client), eq(null), any());
     }
 
     @Test
@@ -240,6 +242,7 @@ public class AzureResourceConnectorTest {
         when(client.templateDeploymentExists(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(false);
         when(client.createTemplateDeployment(any(), any(), any(), any())).thenReturn(deployment);
         when(azureImageFormatValidator.isMarketplaceImageFormat(any(Image.class))).thenReturn(true);
+        when(stack.getParameters()).thenReturn(Map.of(ACCEPTANCE_POLICY_PARAMETER, Boolean.FALSE.toString()));
 
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(ADJUSTMENT_TYPE, THRESHOLD);
         underTest.launch(ac, stack, notifier, adjustmentTypeWithThreshold);
@@ -270,7 +273,6 @@ public class AzureResourceConnectorTest {
         verify(azureUtils, times(1)).getCustomSubnetIds(network);
         verify(azureMarketplaceImageProviderService, times(0)).get(imageModel);
         verify(azureMarketplaceImageProviderService, times(2)).getSourceImage(eq(imageModel));
-        verify(azureImageTermsSignerService).signImageTermsIfAllowed(any(), any(), eq(azureMarketplaceImage), any());
         verify(azureTemplateBuilder).build(eq(STACK_NAME), any(), any(), any(), any(), eq(stack), eq(AzureInstanceTemplateOperation.PROVISION),
                 eq(azureMarketplaceImage));
     }
@@ -282,7 +284,7 @@ public class AzureResourceConnectorTest {
         when(azureImageFormatValidator.isMarketplaceImageFormat(any(Image.class))).thenReturn(false);
         when(azureImageFormatValidator.hasSourceImagePlan(any(Image.class))).thenReturn(true);
         when(azureMarketplaceImageProviderService.getSourceImage(imageModel)).thenReturn(azureMarketplaceImage);
-        doThrow(new CloudImageException("")).when(azureImageTermsSignerService).signImageTermsIfAllowed(any(), any(), eq(azureMarketplaceImage), any());
+        doThrow(new CloudImageException("")).when(azureImageTermsSignerService).sign(any(), any(), any());
 
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(ADJUSTMENT_TYPE, THRESHOLD);
         CloudConnectorException exception =
@@ -294,7 +296,6 @@ public class AzureResourceConnectorTest {
         verify(azureCloudResourceService, never()).getInstanceCloudResources(STACK_NAME, instances, groups, RESOURCE_GROUP_NAME);
         verify(azureMarketplaceImageProviderService, times(0)).get(imageModel);
         verify(azureMarketplaceImageProviderService, times(1)).getSourceImage(eq(imageModel));
-        verify(azureImageTermsSignerService).signImageTermsIfAllowed(any(), any(), eq(azureMarketplaceImage), any());
         verify(azureTemplateBuilder, never()).build(eq(STACK_NAME), any(), any(), any(), any(), eq(stack), eq(AzureInstanceTemplateOperation.PROVISION),
                 eq(azureMarketplaceImage));
     }

@@ -47,8 +47,10 @@ public class AzureCredentialConnectorTest {
     public void testGetPrerequisitesReturnsTheExpectedValue() {
         String expectedCommand = "someAppCreationCommandValue";
         String expectedRoleDef = "roleDefJson";
+        String expectedMinimalRoleDef = "minimalRoleDefJson";
         when(appCreationCommand.generateEnvironmentCredentialCommand(anyString())).thenReturn(expectedCommand);
         when(azurePlatformParameters.getRoleDefJson()).thenReturn(expectedRoleDef);
+        when(azurePlatformParameters.getMinimalRoleDefJson()).thenReturn(expectedMinimalRoleDef);
 
         CredentialPrerequisitesResponse result = underTest.getPrerequisites(TEST_CLOUD_CONTEXT, "2", "3", DEPLOYMENT_ADDRESS,
                 CredentialType.ENVIRONMENT);
