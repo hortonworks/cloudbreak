@@ -18,4 +18,5 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxMultiAzScaleTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXMultiAzScaleTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxMultiAzUpgradeTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXMultiAzUpgradeTests
 
