@@ -688,9 +688,15 @@ public class SshJClientActions {
                 .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, "cloudbreak", null, privateKeyFilePath, dbSslConnectionUrlCmd)));
     }
 
-    public List<String> executeSshCommandsOnInstances(List<InstanceGroupResponse> instanceGroups, List<String> hostGroupNames, String privateKeyFilePath,
+    public List<String> executeSshCommandsOnInstances(List<?> instanceGroups, List<String> hostGroupNames, String privateKeyFilePath,
             String command) {
-        return getInstanceGroupIps(instanceGroups, hostGroupNames).stream()
+        List<String> instanceIps = new ArrayList<>();
+        if (!instanceGroups.isEmpty() && instanceGroups.getFirst() instanceof InstanceGroupResponse) {
+            instanceIps = getInstanceGroupIps((List<InstanceGroupResponse>) instanceGroups, hostGroupNames);
+        } else if (!instanceGroups.isEmpty() && instanceGroups.getFirst() instanceof InstanceGroupV4Response) {
+            instanceIps = getInstanceGroupIps((List<InstanceGroupV4Response>) instanceGroups, hostGroupNames, true);
+        }
+        return instanceIps.stream()
                 .map(ip -> executeSshCommand(ip, "cloudbreak", null, privateKeyFilePath, command).getValue().toLowerCase(Locale.ROOT))
                 .toList();
     }

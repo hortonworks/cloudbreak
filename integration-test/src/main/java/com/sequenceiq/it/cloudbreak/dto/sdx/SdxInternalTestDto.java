@@ -35,6 +35,7 @@ import org.testng.util.Strings;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SecurityV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.CustomDomainSettingsV4Request;
@@ -727,5 +728,12 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         } else {
             return instanceGroupV4Response.get().getMetadata();
         }
+    }
+
+    public SdxInternalTestDto withSeLinuxSecurity(String seLinux) {
+        SecurityV4Request securityRequest = new SecurityV4Request();
+        securityRequest.setSeLinux(seLinux);
+        getRequest().setSecurity(securityRequest);
+        return this;
     }
 }

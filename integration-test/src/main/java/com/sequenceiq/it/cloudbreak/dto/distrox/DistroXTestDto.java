@@ -44,6 +44,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseReque
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsInstanceTemplateV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsInstanceTemplateV1SpotParameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.security.SecurityV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Request;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
@@ -504,5 +505,12 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
                 .findFirst()
                 .orElseThrow(() -> new TestFailException(format("The expected '%s' host group is NOT present at DistroX!", hostGroupName)))
                 .getMetadata();
+    }
+
+    public DistroXTestDto withSeLinuxSecurity(String seLinux) {
+        SecurityV1Request securityRequest = new SecurityV1Request();
+        securityRequest.setSeLinux(seLinux);
+        getRequest().setSecurity(securityRequest);
+        return this;
     }
 }

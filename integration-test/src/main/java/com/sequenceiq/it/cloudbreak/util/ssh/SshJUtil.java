@@ -10,7 +10,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.it.cloudbreak.dto.AbstractFreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.AbstractSdxTestDto;
@@ -111,7 +110,7 @@ public class SshJUtil {
         return sshJClientActions.getSSLModeForExternalDBByIp(instanceGroups, hostGroupNames, privateKeyFilePath);
     }
 
-    public List<String> executeSshCommandsOnInstances(List<InstanceGroupResponse> instanceGroups, List<String> hostGroupNames, String privateKeyFilePath,
+    public List<String> executeSshCommandsOnInstances(List<?> instanceGroups, List<String> hostGroupNames, String privateKeyFilePath,
             String command) {
         return sshJClientActions.executeSshCommandsOnInstances(instanceGroups, hostGroupNames, privateKeyFilePath, command);
     }
