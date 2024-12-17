@@ -55,7 +55,7 @@ public class DistroXVolumesModificationTest extends AbstractE2ETest {
 
     private static final int UPDATE_SIZE = 500;
 
-    private static final int ROOT_UPDATE_SIZE = 210;
+    private static final int ROOT_UPDATE_SIZE = 310;
 
     private static final String AWS_DISK_TYPE = "gp2";
 

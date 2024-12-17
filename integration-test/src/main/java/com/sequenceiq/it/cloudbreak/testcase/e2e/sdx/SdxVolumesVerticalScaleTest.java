@@ -48,7 +48,7 @@ public class SdxVolumesVerticalScaleTest extends PreconditionSdxE2ETest {
 
     private static final Long ADD_DISKS_SIZE = 200L;
 
-    private static final int ROOT_UPDATE_SIZE = 210;
+    private static final int ROOT_UPDATE_SIZE = 310;
 
     private static final Long DISKS_COUNT = 2L;
 
