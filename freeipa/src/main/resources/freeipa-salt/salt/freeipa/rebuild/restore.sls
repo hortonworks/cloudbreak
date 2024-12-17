@@ -53,8 +53,8 @@ update_dns_record:
     - require:
         - file: /opt/salt/scripts/update_dns_record_rebuild.sh
     - retry:
-        attempts: 3
-        interval: 15
+        attempts: 10
+        interval: 30
 
 stop_sssd:
   service.dead:
