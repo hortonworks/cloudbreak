@@ -974,12 +974,12 @@ public class AzureClient {
         });
     }
 
+    public Vault getKeyVault(String resourceGroupName, String vaultName) {
+        return handleException(() -> azure.vaults().getByResourceGroup(resourceGroupName, vaultName));
+    }
+
     public boolean keyVaultExists(String resourceGroupName, String vaultName) {
-        return handleException(() -> {
-            Vault keyVault = azure.vaults()
-                    .getByResourceGroup(resourceGroupName, vaultName);
-            return keyVault != null;
-        });
+        return getKeyVault(resourceGroupName, vaultName) != null;
     }
 
     public void grantKeyVaultAccessPolicyToServicePrincipal(String resourceGroupName, String vaultName, String principalObjectId) {
@@ -1007,23 +1007,29 @@ public class AzureClient {
         });
     }
 
-    public boolean checkKeyVaultAccessPolicyForServicePrincipal(String resourceGroupName, String vaultName, String principalObjectId) {
+    public boolean isValidKeyVaultAccessPolicyListForServicePrincipal(String resourceGroupName, String vaultName, String principalObjectId) {
         return handleException(() -> {
             List<AccessPolicy> accessPolicies = azure.vaults()
                     .getByResourceGroup(resourceGroupName, vaultName)
                     .accessPolicies();
-            return checkKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, principalObjectId);
+            return isValidKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, principalObjectId);
         });
     }
 
-    @VisibleForTesting
-    boolean checkKeyVaultAccessPolicyListForServicePrincipal(List<AccessPolicy> accessPolicies, String principalObjectId) {
+    public boolean isValidKeyVaultAccessPolicyListForServicePrincipal(List<AccessPolicy> accessPolicies, String principalObjectId) {
         if (accessPolicies != null) {
             for (int i = accessPolicies.size() - 1; i >= 0; i--) {
                 AccessPolicyEntry accessPolicyEntry = accessPolicies.get(i).innerModel();
                 if (principalObjectId.equals(accessPolicyEntry.objectId())) {
-                    return accessPolicyEntry.permissions().keys()
-                            .containsAll(List.of(KeyPermissions.WRAP_KEY, KeyPermissions.UNWRAP_KEY, KeyPermissions.GET));
+                    Set<String> requiredPolicies = Set.of(KeyPermissions.WRAP_KEY.getValue().toLowerCase(),
+                            KeyPermissions.UNWRAP_KEY.getValue().toLowerCase(),
+                            KeyPermissions.GET.getValue().toLowerCase());
+                    Set<String> convertedPolicies = accessPolicyEntry.permissions().keys().stream()
+                            .map(keyPermissions -> keyPermissions.getValue().toLowerCase())
+                            .filter(requiredPolicies::contains)
+                            .collect(Collectors.toSet());
+                    LOGGER.debug("Required policies: {}, accesspolicies: {}", requiredPolicies, convertedPolicies);
+                    return convertedPolicies.equals(requiredPolicies);
                 }
             }
         }

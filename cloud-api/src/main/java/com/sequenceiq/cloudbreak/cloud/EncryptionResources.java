@@ -7,9 +7,13 @@ import com.sequenceiq.cloudbreak.cloud.model.encryption.DiskEncryptionSetDeletio
 import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeyCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeyEnableAutoRotationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeyRotationRequest;
+import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionParametersValidationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.UpdateEncryptionKeyResourceAccessRequest;
 
 public interface EncryptionResources extends CloudPlatformAware {
+
+    default void validateEncryptionParameters(EncryptionParametersValidationRequest validationRequest) {
+    }
 
     default CreatedDiskEncryptionSet createDiskEncryptionSet(DiskEncryptionSetCreationRequest request) {
         throw new UnsupportedOperationException("Interface not implemented.");

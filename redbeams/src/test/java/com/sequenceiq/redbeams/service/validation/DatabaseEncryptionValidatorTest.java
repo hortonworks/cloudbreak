@@ -8,6 +8,7 @@ import static com.sequenceiq.common.model.AzureDatabaseType.FLEXIBLE_SERVER;
 import static com.sequenceiq.common.model.AzureDatabaseType.SINGLE_SERVER;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.common.model.AzureDatabaseType;
@@ -41,39 +43,63 @@ class DatabaseEncryptionValidatorTest {
     private EnvironmentService environmentService;
 
     @Test
-    void testValidateEncryptionShouldNotThrowExceptionWhenTheDatabaseIsEncryptedAndTheEnvironmentContainsEncryptionKey() {
-        underTest.validateEncryption(AZURE.name(), ENVIRONMENT_CRN, createDatabaseStack(FLEXIBLE_SERVER, "url"), VERSION14);
-    }
-
-    @Test
     void testValidateEncryptionShouldNotThrowExceptionWhenTheCloudPlatformIsNotAzure() {
-        underTest.validateEncryption(AWS.name(), ENVIRONMENT_CRN, createDatabaseStack(FLEXIBLE_SERVER, "url"), VERSION14);
+        underTest.validateEncryption(AWS.name(), createDatabaseStack(FLEXIBLE_SERVER, "url"));
         verifyNoInteractions(environmentService);
     }
 
     @Test
-    void testValidateEncryptionShouldThrowExceptionWhenTheDatabaseTypeIsSingleServer() {
+    void testValidateEncryptionShouldNotThrowExceptionWhenEnvryptedSingleServerAndNoManagedIdentity() {
+        underTest.validateEncryption(AZURE.name(), createDatabaseStack(SINGLE_SERVER, "url"));
+        verifyNoInteractions(environmentService);
+    }
+
+    @Test
+    void testValidateEncryptionShouldThrowExceptionWhenEnvryptedFlexibleServerAndNoManagedIdentity() {
         assertThrows(BadRequestException.class,
-                () -> underTest.validateEncryption(AZURE.name(), ENVIRONMENT_CRN, createDatabaseStack(SINGLE_SERVER, "url"), VERSION14));
-        verifyNoInteractions(environmentService);
+                () -> underTest.validateEncryption(AZURE.name(), createDatabaseStack(FLEXIBLE_SERVER, "url")));
     }
 
     @Test
-    void testValidateEncryptionShouldNotThrowExceptionWhenTheDatabaseIsNotEncrypted() {
-        underTest.validateEncryption(AZURE.name(), ENVIRONMENT_CRN, createDatabaseStack(FLEXIBLE_SERVER, null), VERSION14);
-        verifyNoInteractions(environmentService);
-    }
-
-    @Test
-    void testValidateEncryptionShouldThrowExceptionWhenTheDatabaseIsEncryptedAndTheEnvironmentNotContainsEncryptionKey() {
+    void testValidateEncryptionShouldNotThrowExceptionWhenEnvryptedFlexibleServerAndManagedIdentity() {
         assertThrows(BadRequestException.class,
-                () -> underTest.validateEncryption(AZURE.name(), ENVIRONMENT_CRN, createDatabaseStack(SINGLE_SERVER, "url"), VERSION14));
+                () -> underTest.validateEncryption(AZURE.name(), createDatabaseStack(FLEXIBLE_SERVER, "url")));
+    }
+
+    @Test
+    void testValidateEncryptionDuringUpgradeShouldNotThrowExceptionWhenTheDatabaseIsEncryptedAndTheEnvironmentContainsEncryptionKey() {
+        underTest.validateEncryptionDuringUpgrade(AZURE.name(), ENVIRONMENT_CRN, createDatabaseStack(FLEXIBLE_SERVER, "url"), VERSION14);
+    }
+
+    @Test
+    void testValidateEncryptionDuringUpgradeShouldNotThrowExceptionWhenTheCloudPlatformIsNotAzure() {
+        underTest.validateEncryptionDuringUpgrade(AWS.name(), ENVIRONMENT_CRN, createDatabaseStack(FLEXIBLE_SERVER, "url"), VERSION14);
+        verifyNoInteractions(environmentService);
+    }
+
+    @Test
+    void testValidateEncryptionDuringUpgradeShouldNotThrowExceptionWhenTheDatabaseIsNotEncrypted() {
+        underTest.validateEncryptionDuringUpgrade(AZURE.name(), ENVIRONMENT_CRN, createDatabaseStack(FLEXIBLE_SERVER, null), VERSION14);
+        verifyNoInteractions(environmentService);
+    }
+
+    @Test
+    void testValidateEncryptionDuringUpgradeShouldThrowExceptionWhenTheDatabaseIsEncryptedAndTheEnvironmentNotContainsManagedIdentity() {
+        when(environmentService.getByCrn(ENVIRONMENT_CRN)).thenReturn(createEnvironmentResponse(null));
+        assertThrows(BadRequestException.class,
+                () -> underTest.validateEncryptionDuringUpgrade(AZURE.name(), ENVIRONMENT_CRN, createDatabaseStack(SINGLE_SERVER, "url"), VERSION14));
     }
 
     private DatabaseServer createDatabaseStack(AzureDatabaseType azureDatabaseType, String keyVaultUrl) {
+        return createDatabaseStack(azureDatabaseType, keyVaultUrl, null);
+    }
+
+    private DatabaseServer createDatabaseStack(AzureDatabaseType azureDatabaseType, String keyVaultUrl, String managedIdentity) {
         Map<String, Object> databaseServerParams = new HashMap<>();
         databaseServerParams.put(AZURE_DATABASE_TYPE_KEY, azureDatabaseType.name());
         Optional.ofNullable(keyVaultUrl).ifPresent(url -> databaseServerParams.put(KEY_VAULT_URL, url));
+        Optional.ofNullable(managedIdentity).ifPresent(identity ->
+                databaseServerParams.put(PlatformParametersConsts.ENCRYPTION_USER_MANAGED_IDENTITY, identity));
         return DatabaseServer.builder()
                 .withParams(databaseServerParams)
                 .build();
