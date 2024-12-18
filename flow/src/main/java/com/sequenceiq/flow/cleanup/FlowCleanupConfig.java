@@ -6,6 +6,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class FlowCleanupConfig {
 
+    @Value("${flowcleanup.purpeflowchain:false}")
+    private boolean purgeFlowChain;
+
     @Value("${flowcleanup.intervalhours:24}")
     private int intervalInHours;
 
@@ -14,6 +17,10 @@ public class FlowCleanupConfig {
 
     @Value("${flowcleanup.retention.period.hours.failed:336}")
     private int retentionPeriodInHoursForFailedFlows;
+
+    public boolean isPurgeFlowChain() {
+        return purgeFlowChain;
+    }
 
     public int getIntervalInHours() {
         return intervalInHours;
