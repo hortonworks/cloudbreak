@@ -13,7 +13,6 @@ import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -32,7 +31,6 @@ import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.HostsResourceApi;
 import com.cloudera.api.swagger.RolesResourceApi;
-import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
@@ -44,7 +42,6 @@ import com.cloudera.api.swagger.model.ApiRole;
 import com.cloudera.api.swagger.model.ApiRoleList;
 import com.cloudera.api.swagger.model.ApiRoleRef;
 import com.cloudera.api.swagger.model.ApiRoleState;
-import com.cloudera.api.swagger.model.ApiService;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
@@ -128,24 +125,6 @@ public class ClouderaManagerClusterHealthService implements ClusterHealthService
             LOGGER.info("Failed to get version info from CM");
             return false;
         }
-    }
-
-    @Override
-    public Map<String, String> readServicesHealth(String clusterName) {
-        ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(apiClient);
-        List<ApiService> apiServiceList = null;
-        try {
-            apiServiceList = servicesResourceApi.readServices(clusterName, DataView.FULL.name()).getItems();
-        } catch (ApiException e) {
-            throw new RuntimeException(e);
-        }
-        Map<String, String> componentWithHealthCheck = new HashMap<>();
-        for (ApiService apiService : apiServiceList) {
-            for (ApiHealthCheck apiHealthCheck : apiService.getHealthChecks()) {
-                componentWithHealthCheck.put(apiHealthCheck.getName(), apiHealthCheck.getSummary().toString());
-            }
-        }
-        return componentWithHealthCheck;
     }
 
     @Override
