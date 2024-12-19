@@ -132,7 +132,7 @@ public class StopStartDownscaleDecommissionViaCMHandler extends ExceptionCatcher
                     LOGGER.info("Fetched yarn recommendation for decommission InstanceId(s)=[{}], Instance(s) from periscope request to decommission " +
                             "InstanceId(s)=[{}]", yarnRecommendedDecommissionNodeIds,
                             hostsToRemove.values().stream().map(InstanceMetadataView::getInstanceId).collect(Collectors.toList()));
-                    hostsToRemove.entrySet().removeIf(entry -> !yarnRecommendedDecommissionNodeIds.contains(entry.getValue().getInstanceId()));
+                    hostsToRemove.entrySet().removeIf(entry -> shouldRemoveHost(entry, yarnRecommendedDecommissionNodeIds, additionalHostNamesToDecommission));
                 } catch (Exception e) {
                     LOGGER.info("Not able to fetch Recommendation from yarn in given time. Decommissioning the instance(s)=[{}] without filtering",
                             hostsToRemove.keySet());
@@ -189,6 +189,14 @@ public class StopStartDownscaleDecommissionViaCMHandler extends ExceptionCatcher
             LOGGER.error(message, e);
             return new StopStartDownscaleDecommissionViaCMResult(message, e, request);
         }
+    }
+
+    private boolean shouldRemoveHost(Map.Entry<String, InstanceMetadataView> entry, List<String> yarnRecommendedDecommissionNodeIds,
+            Set<String> additionalHostNamesToDecommission) {
+        boolean recommendedForDecommission = yarnRecommendedDecommissionNodeIds.contains(entry.getValue().getInstanceId());
+        boolean recoveryCandidate = additionalHostNamesToDecommission.contains(entry.getKey());
+
+        return !(recommendedForDecommission || recoveryCandidate);
     }
 
     private void excludeAndLogDisconnectedNMsForDownscale(Stack stack, Map<String, InstanceMetadataView> hostsToRemove,
