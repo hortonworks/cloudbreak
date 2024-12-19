@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter.spi;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.REQUESTED;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ACCEPTANCE_POLICY_PARAMETER;
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ENVIRONMENT_RESOURCE_ENCRYPTION_KEY;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_CRN_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_NAME_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_USAGE_PARAMETER;
@@ -108,6 +109,8 @@ import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
@@ -681,6 +684,8 @@ public class StackToCloudStackConverter {
         Optional<Boolean> acceptancePolicy = getAzureMarketplaceTermsAcceptancePolicy(stack.getResourceCrn(), CloudPlatform.valueOf(stack.getCloudPlatform()));
         acceptancePolicy.ifPresent(acceptance -> params.put(ACCEPTANCE_POLICY_PARAMETER, acceptance.toString()));
         params.put(RESOURCE_CRN_PARAMETER, stack.getResourceCrn());
+        Optional<String> gcpResourceEncryptionKey = getGcpResourceEncryptionKey(environment);
+        gcpResourceEncryptionKey.ifPresent(key -> params.put(ENVIRONMENT_RESOURCE_ENCRYPTION_KEY, key));
         return params;
     }
 
@@ -698,4 +703,10 @@ public class StackToCloudStackConverter {
                 .map(AzureEnvironmentParameters::getResourceGroup);
     }
 
+    private Optional<String> getGcpResourceEncryptionKey(DetailedEnvironmentResponse environment) {
+        return Optional.ofNullable(environment)
+                .map(DetailedEnvironmentResponse::getGcp)
+                .map(GcpEnvironmentParameters::getGcpResourceEncryptionParameters)
+                .map(GcpResourceEncryptionParameters::getEncryptionKey);
+    }
 }

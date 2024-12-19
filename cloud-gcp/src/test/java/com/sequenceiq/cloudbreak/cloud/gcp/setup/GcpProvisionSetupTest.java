@@ -302,7 +302,7 @@ public class GcpProvisionSetupTest {
         when(gcpStorageFactory.buildStorage(any(CloudCredential.class), anyString())).thenReturn(storage);
         when(gcpStackUtil.getBucket(anyString())).thenReturn("bucketName");
         when(gcpBucketRegisterService.register(any(AuthenticatedContext.class))).thenReturn("bucket");
-        doNothing().when(gcpImageRegisterService).register(any(AuthenticatedContext.class), anyString(), anyString());
+        doNothing().when(gcpImageRegisterService).register(any(AuthenticatedContext.class), anyString(), anyString(), any(CloudStack.class));
         when(storage.objects()).thenReturn(storageObjects);
         when(rewriteResponse.getRewriteToken()).thenReturn("token");
         when(storageObjects.rewrite(anyString(), anyString(), anyString(), anyString(), any(StorageObject.class))).thenReturn(storageObjectsRewrite);
@@ -316,7 +316,8 @@ public class GcpProvisionSetupTest {
         verify(gcpImageAttemptMakerFactory, times(1))
                 .create(anyString(), anyString(), anyString(), anyString(), anyString(), any(Storage.class));
         verify(gcpBucketRegisterService, times(1)).register(any(AuthenticatedContext.class));
-        verify(gcpImageRegisterService, times(1)).register(any(AuthenticatedContext.class), anyString(), anyString());
+        verify(gcpImageRegisterService, times(1))
+                .register(any(AuthenticatedContext.class), anyString(), anyString(), any(CloudStack.class));
     }
 
     @Test
@@ -362,7 +363,8 @@ public class GcpProvisionSetupTest {
         verify(gcpImageAttemptMakerFactory, times(1))
                 .create(anyString(), anyString(), anyString(), anyString(), anyString(), any(Storage.class));
         verify(gcpBucketRegisterService, times(1)).register(any(AuthenticatedContext.class));
-        verify(gcpImageRegisterService, times(0)).register(any(AuthenticatedContext.class), anyString(), anyString());
+        verify(gcpImageRegisterService, times(0))
+                .register(any(AuthenticatedContext.class), anyString(), anyString(), any(CloudStack.class));
         assertTrue(cloudConnectorException.getMessage().contains("Image copy failed because the copy take too long time"));
     }
 
@@ -409,7 +411,8 @@ public class GcpProvisionSetupTest {
         verify(gcpImageAttemptMakerFactory, times(1))
                 .create(anyString(), anyString(), anyString(), anyString(), anyString(), any(Storage.class));
         verify(gcpBucketRegisterService, times(1)).register(any(AuthenticatedContext.class));
-        verify(gcpImageRegisterService, times(0)).register(any(AuthenticatedContext.class), anyString(), anyString());
+        verify(gcpImageRegisterService, times(0))
+                .register(any(AuthenticatedContext.class), anyString(), anyString(), any(CloudStack.class));
         assertTrue(cloudConnectorException.getMessage().contains("Image copy failed because"));
     }
 
@@ -452,7 +455,8 @@ public class GcpProvisionSetupTest {
         verify(gcpImageAttemptMakerFactory, times(0))
                 .create(anyString(), anyString(), anyString(), anyString(), anyString(), any(Storage.class));
         verify(gcpBucketRegisterService, times(1)).register(any(AuthenticatedContext.class));
-        verify(gcpImageRegisterService, times(0)).register(any(AuthenticatedContext.class), anyString(), anyString());
+        verify(gcpImageRegisterService, times(0))
+                .register(any(AuthenticatedContext.class), anyString(), anyString(), any(CloudStack.class));
     }
 
     private com.sequenceiq.cloudbreak.cloud.model.Image createImage() {

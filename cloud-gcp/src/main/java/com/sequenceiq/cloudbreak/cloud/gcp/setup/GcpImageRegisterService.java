@@ -1,7 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.setup;
 
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ENVIRONMENT_RESOURCE_ENCRYPTION_KEY;
+
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 import jakarta.inject.Inject;
 
@@ -12,12 +15,14 @@ import org.springframework.stereotype.Service;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
+import com.google.api.services.compute.model.CustomerEncryptionKey;
 import com.google.api.services.compute.model.GuestOsFeature;
 import com.google.api.services.compute.model.Image;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpComputeFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 
 @Service
 public class GcpImageRegisterService {
@@ -29,7 +34,7 @@ public class GcpImageRegisterService {
     @Inject
     private GcpComputeFactory gcpComputeFactory;
 
-    public void register(AuthenticatedContext authenticatedContext, String bucketName, String imageName) throws IOException {
+    public void register(AuthenticatedContext authenticatedContext, String bucketName, String imageName, CloudStack cloudStack) throws IOException {
         CloudCredential credential = authenticatedContext.getCloudCredential();
         String projectId = gcpStackUtil.getProjectId(credential);
         Compute compute = gcpComputeFactory.buildCompute(credential);
@@ -44,6 +49,8 @@ public class GcpImageRegisterService {
         GuestOsFeature uefiCompatible = new GuestOsFeature().setType("UEFI_COMPATIBLE");
         GuestOsFeature multiIpSubnet = new GuestOsFeature().setType("MULTI_IP_SUBNET");
         gcpApiImage.setGuestOsFeatures(List.of(uefiCompatible, multiIpSubnet));
+        Optional.ofNullable(cloudStack.getParameters().get(ENVIRONMENT_RESOURCE_ENCRYPTION_KEY))
+                .ifPresent(key -> gcpApiImage.setImageEncryptionKey(new CustomerEncryptionKey().setKmsKeyName(key)));
         try {
             Compute.Images.Insert ins = compute.images().insert(projectId, gcpApiImage);
             ins.execute();

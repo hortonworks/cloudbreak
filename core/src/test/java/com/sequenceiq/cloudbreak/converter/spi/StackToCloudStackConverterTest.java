@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ACCEPTANCE_POLICY_PARAMETER;
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ENVIRONMENT_RESOURCE_ENCRYPTION_KEY;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_NAME_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_USAGE_PARAMETER;
 import static java.util.Collections.emptyList;
@@ -111,6 +112,8 @@ import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @ExtendWith(MockitoExtension.class)
@@ -1195,6 +1198,23 @@ public class StackToCloudStackConverterTest {
         assertFalse(parameters.containsKey(RESOURCE_GROUP_USAGE_PARAMETER));
         assertEquals(parameters.get(ACCEPTANCE_POLICY_PARAMETER), Boolean.FALSE.toString());
         assertEquals(3, parameters.size());
+    }
+
+    @Test
+    void testBuildCloudStackParametersGcpEncryptionKey() {
+        when(stack.getStack()).thenReturn(stack);
+        when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
+        DetailedEnvironmentResponse environment = mock(DetailedEnvironmentResponse.class);
+        GcpEnvironmentParameters gcp = mock(GcpEnvironmentParameters.class);
+        GcpResourceEncryptionParameters gcpResourceEncryptionParameters = mock(GcpResourceEncryptionParameters.class);
+        when(environmentClientService.getByCrnAsInternal(ENV_CRN)).thenReturn(environment);
+        when(environment.getGcp()).thenReturn(gcp);
+        when(gcp.getGcpResourceEncryptionParameters()).thenReturn(gcpResourceEncryptionParameters);
+        when(gcpResourceEncryptionParameters.getEncryptionKey()).thenReturn("encryptionKey");
+
+        CloudStack cloudStack = underTest.convert(stack);
+
+        assertEquals("encryptionKey", cloudStack.getParameters().get(ENVIRONMENT_RESOURCE_ENCRYPTION_KEY));
     }
 
     private StackAuthentication createStackAuthentication() {

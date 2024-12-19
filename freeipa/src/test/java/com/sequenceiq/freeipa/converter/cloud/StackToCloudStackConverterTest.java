@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.converter.cloud;
 
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ENVIRONMENT_RESOURCE_ENCRYPTION_KEY;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_NAME_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_USAGE_PARAMETER;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
@@ -46,6 +47,8 @@ import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
@@ -166,9 +169,20 @@ public class StackToCloudStackConverterTest {
         when(stack.getInstanceGroups()).thenReturn(Set.of(instanceGroup));
         Network network = mock(Network.class);
         when(stack.getNetwork()).thenReturn(network);
+        DetailedEnvironmentResponse environment = mock(DetailedEnvironmentResponse.class);
+        GcpEnvironmentParameters gcp = mock(GcpEnvironmentParameters.class);
+        GcpResourceEncryptionParameters gcpResourceEncryptionParameters = mock(GcpResourceEncryptionParameters.class);
+        when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
+        when(cachedEnvironmentClientService.getByCrn(ENV_CRN)).thenReturn(environment);
+        when(environment.getGcp()).thenReturn(gcp);
+        when(gcp.getGcpResourceEncryptionParameters()).thenReturn(gcpResourceEncryptionParameters);
+        when(gcpResourceEncryptionParameters.getEncryptionKey()).thenReturn("encryptionKey");
+
         CloudStack cloudStack = underTest.convert(stack);
+
         assertEquals(new HashSet<>(az), cloudStack.getGroups().get(0).getNetwork().getAvailabilityZones());
         assertEquals("gp2", cloudStack.getGroups().get(0).getRootVolumeType());
+        assertEquals("encryptionKey", cloudStack.getParameters().get(ENVIRONMENT_RESOURCE_ENCRYPTION_KEY));
     }
 
     @Test

@@ -88,7 +88,7 @@ public class GcpProvisionSetup implements Setup {
                 String bucketName = gcpBucketRegisterService.register(authenticatedContext);
                 String tarName = gcpStackUtil.getTarName(imageName);
                 copyImage(gcpStackUtil.getBucket(imageName), tarName, bucketName, tarName, storage);
-                gcpImageRegisterService.register(authenticatedContext, bucketName, imageName);
+                gcpImageRegisterService.register(authenticatedContext, bucketName, imageName, stack);
             }
         } catch (Exception e) {
             String msg = String.format("Error occurred on %s stack during the image creation process%s: %s", cloudContext.getName(),

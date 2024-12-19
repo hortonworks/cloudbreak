@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.converter.cloud;
 
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ACCEPTANCE_POLICY_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.CLOUD_STACK_TYPE_PARAMETER;
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ENVIRONMENT_RESOURCE_ENCRYPTION_KEY;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.FREEIPA_STACK_TYPE;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_NAME_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_USAGE_PARAMETER;
@@ -74,6 +75,8 @@ import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
@@ -533,6 +536,8 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
         }
         Optional<Boolean> acceptancePolicy = getAzureMarketplaceTermsAcceptancePolicy(cloudPlatform);
         acceptancePolicy.ifPresent(acceptance -> params.put(ACCEPTANCE_POLICY_PARAMETER, acceptance.toString()));
+        Optional<String> gcpResourceEncryptionKey = getGcpResourceEncryptionKey(environmentCrn);
+        gcpResourceEncryptionKey.ifPresent(key -> params.put(ENVIRONMENT_RESOURCE_ENCRYPTION_KEY, key));
         return params;
     }
 
@@ -551,6 +556,15 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
         return Optional.ofNullable(environment)
                 .map(DetailedEnvironmentResponse::getAzure)
                 .map(AzureEnvironmentParameters::getResourceGroup);
+    }
+
+    private Optional<String> getGcpResourceEncryptionKey(String environmentCrn) {
+        DetailedEnvironmentResponse environment = measure(() -> cachedEnvironmentClientService.getByCrn(environmentCrn),
+                LOGGER, "Environment properties were queried under {} ms for environment {}", environmentCrn);
+        return Optional.ofNullable(environment)
+                .map(DetailedEnvironmentResponse::getGcp)
+                .map(GcpEnvironmentParameters::getGcpResourceEncryptionParameters)
+                .map(GcpResourceEncryptionParameters::getEncryptionKey);
     }
 
     private String getRootVolumeType(Long stackId, String platform, String groupName) {

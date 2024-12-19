@@ -34,6 +34,8 @@ public class PlatformParametersConsts {
 
     public static final String RESOURCE_GROUP_USAGE_PARAMETER = "resourceGroupUsage";
 
+    public static final String ENVIRONMENT_RESOURCE_ENCRYPTION_KEY = "environmentResourceEncryptionKey";
+
     public static final String RESOURCE_CRN_PARAMETER = "resourceCrn";
 
     public static final String ACCEPTANCE_POLICY_PARAMETER = "acceptancePolicy";
