@@ -53,6 +53,8 @@ import net.schmizz.sshj.SSHClient;
 public class SshJClientActions {
     private static final Logger LOGGER = LoggerFactory.getLogger(SshJClientActions.class);
 
+    private static final String NOT_AVAILABLE = "N/A";
+
     @Inject
     private SshJClient sshJClient;
 
@@ -702,7 +704,7 @@ public class SshJClientActions {
                     .map(InstanceGroupResponse::getMetaData)
                     .filter(Objects::nonNull)
                     .flatMap(Collection::stream)
-                    .map(x -> StringUtils.isNotEmpty(x.getPublicIp()) ? x.getPublicIp() : x.getPrivateIp())
+                    .map(x -> isPublicIpAvailable(x) ? x.getPublicIp() : x.getPrivateIp())
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
             assert !instanceGroupIpList.isEmpty();
@@ -713,4 +715,9 @@ public class SshJClientActions {
 
         return instanceIPs;
     }
+
+    private boolean isPublicIpAvailable(InstanceMetaDataResponse instanceMetaData) {
+        return StringUtils.isNotEmpty(instanceMetaData.getPublicIp()) && !NOT_AVAILABLE.equals(instanceMetaData.getPublicIp());
+    }
+
 }
