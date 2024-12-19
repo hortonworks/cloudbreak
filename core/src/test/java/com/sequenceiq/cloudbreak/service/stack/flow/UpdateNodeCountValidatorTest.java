@@ -203,27 +203,31 @@ public class UpdateNodeCountValidatorTest {
             Optional<String> errorMessageSegment,
             String instancegroup,
             boolean unDefinedDependencyPresent,
-            boolean unhealthyDependentComponent,
+            boolean unhealthyHostgroup,
             Integer scalingAdjustment) {
         StackDto stackdto = mock(StackDto.class);
         StackView stackView = mock(StackView.class);
         setupMocksForStopStartInstanceGroupValidation(stackdto);
         CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
         InstanceGroupAdjustmentV4Request instanceGroupAdjustmentV4Request = mock(InstanceGroupAdjustmentV4Request.class);
-        Set<String> unHealthyDependentComponents = new HashSet<>();
-        if (unhealthyDependentComponent) {
-            unHealthyDependentComponents.add("RESOURCEMANAGER");
+        Set<String> dependComponents = new HashSet<>();
+        List<String> unHealthyHosts = new ArrayList<>();
+        if (unhealthyHostgroup) {
+            unHealthyHosts.add("master");
         }
-        if (unDefinedDependencyPresent) {
-            unHealthyDependentComponents.add(UNDEFINED_DEPENDENCY);
-        }
+        dependComponents.add("RESOURCEMANAGER");
 
         when(instanceGroupAdjustmentV4Request.getInstanceGroup()).thenReturn(instancegroup);
         when(cmTemplateProcessorFactory.get(anyString())).thenReturn(cmTemplateProcessor);
         when(stackdto.getStack()).thenReturn(stackView);
         when(stackdto.getStack().getName()).thenReturn("master-stack");
         when(stackdto.getStack().getStatus()).thenReturn(status);
-        when(dependentRolesHealthCheckService.getUnhealthyDependentComponents(any(), any(), any())).thenReturn(unHealthyDependentComponents);
+        when(dependentRolesHealthCheckService.getUnhealthyDependentHostGroups(any(), any(), any())).thenReturn(unHealthyHosts);
+
+        if (unDefinedDependencyPresent) {
+            dependComponents.add(UNDEFINED_DEPENDENCY);
+        }
+        when(dependentRolesHealthCheckService.getDependentComponentsForHostGroup(any(), any())).thenReturn(dependComponents);
 
         if (status == UPDATE_IN_PROGRESS) {
             when(stackdto.getStack().isModificationInProgress()).thenReturn(true);
@@ -260,10 +264,10 @@ public class UpdateNodeCountValidatorTest {
                 Arguments.of(AVAILABLE, NO_ERROR, "compute", false, false, -1),
                 Arguments.of(AVAILABLE,
                         Optional.of("Upscaling is Not Allowed for HostGroup: 'compute' as Data hub 'master-stack' " +
-                                "has this service components which are not healthy: [[RESOURCEMANAGER]]"), "compute", false, true, 1),
+                                "has services which may not be healthy for instances in hostGroup(s): [[master]]"), "compute", false, true, 1),
                 Arguments.of(AVAILABLE,
                         Optional.of("Downscaling is Not Allowed for HostGroup: 'compute' as Data hub 'master-stack' " +
-                                "has this service components which are not healthy: [[RESOURCEMANAGER]]"), "compute", false, true, -1),
+                                "has services which may not be healthy for instances in hostGroup(s): [[master]]"), "compute", false, true, -1),
                 Arguments.of(AVAILABLE, NO_ERROR, "compute", true, false, 1),
                 Arguments.of(AVAILABLE, NO_ERROR, "compute", true, false, -1),
                 Arguments.of(UPDATE_IN_PROGRESS,
@@ -278,10 +282,10 @@ public class UpdateNodeCountValidatorTest {
                 Arguments.of(NODE_FAILURE, NO_ERROR, "compute", false, false, -1),
                 Arguments.of(NODE_FAILURE,
                         Optional.of("Upscaling is Not Allowed for HostGroup: 'compute' as Data hub 'master-stack' " +
-                                "has this service components which are not healthy: [[RESOURCEMANAGER]]"), "compute", false, true, 1),
+                                "has services which may not be healthy for instances in hostGroup(s): [[master]]"), "compute", false, true, 1),
                 Arguments.of(NODE_FAILURE,
                         Optional.of("Downscaling is Not Allowed for HostGroup: 'compute' as Data hub 'master-stack' " +
-                                "has this service components which are not healthy: [[RESOURCEMANAGER]]"), "compute", false, true, -1),
+                                "has services which may not be healthy for instances in hostGroup(s): [[master]]"), "compute", false, true, -1),
                 Arguments.of(NODE_FAILURE,
                         Optional.of("Data Hub 'master-stack' has 'NODE_FAILURE' state. Node group start operation is not allowed for this state."),
                         "compute", true, false, 1),

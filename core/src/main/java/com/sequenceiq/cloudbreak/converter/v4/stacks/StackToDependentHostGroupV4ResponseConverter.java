@@ -33,7 +33,7 @@ public class StackToDependentHostGroupV4ResponseConverter {
             LOGGER.debug("Adding dependent hostgroups with roles health to response");
             CmTemplateProcessor processor = cmTemplateProcessorFactory.get(stack.getBlueprint().getBlueprintJsonText());
             hostGroups.forEach(hg -> dependentHostGroupsForHostGroup.put(hg,
-                    dependentRolesHealthCheckService.getUnhealthyDependentComponents(stack, processor, hg)));
+                    dependentRolesHealthCheckService.getDependentHostGroupsForHostGroup(processor, hg)));
         } else {
             LOGGER.info("No blueprint for stack: '{}', returning with empty response", stack.getName());
         }

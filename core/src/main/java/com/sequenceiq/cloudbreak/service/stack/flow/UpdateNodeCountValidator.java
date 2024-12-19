@@ -146,23 +146,25 @@ public class UpdateNodeCountValidator {
         }
 
         CmTemplateProcessor processor = cmTemplateProcessorFactory.get(stack.getBlueprint().getBlueprintJsonText());
-        Set<String> unhealthyDependentComponents = dependentRolesHealthCheckService.getUnhealthyDependentComponents(stack, processor, instanceGroup);
+        Set<String> dependentComponents = dependentRolesHealthCheckService.getDependentComponentsForHostGroup(processor,
+                instanceGroup);
 
-        if (unhealthyDependentComponents.contains(UNDEFINED_DEPENDENCY)) {
+        if (dependentComponents.contains(UNDEFINED_DEPENDENCY)) {
             if (!(stack.getStack().isAvailable() || stack.getStack().isAvailableWithStoppedInstances())) {
                 throw new BadRequestException(format("Data Hub '%s' has '%s' state. Node group start operation is not allowed for this state.",
                         stack.getStack().getName(), stack.getStack().getStatus()));
             }
         } else {
-            if (!unhealthyDependentComponents.isEmpty()) {
+            List<String> unhealthyHostGroupNames = dependentRolesHealthCheckService.getUnhealthyDependentHostGroups(stack, processor, dependentComponents);
+            if (!unhealthyHostGroupNames.isEmpty()) {
                 if (scalingAdjustment > 0) {
                     throw new BadRequestException(format("Upscaling is Not Allowed for HostGroup: '%s' as Data hub '%s' has " +
-                                    "this service components which are not healthy: [%s]",
-                            instanceGroup, stack.getStack().getName(), unhealthyDependentComponents));
+                                    "services which may not be healthy for instances in hostGroup(s): [%s]",
+                            instanceGroup, stack.getStack().getName(), unhealthyHostGroupNames));
                 } else if (scalingAdjustment < 0) {
                     throw new BadRequestException(format("Downscaling is Not Allowed for HostGroup: '%s' as Data hub '%s' has " +
-                                    "this service components which are not healthy: [%s]",
-                            instanceGroup, stack.getStack().getName(), unhealthyDependentComponents));
+                                    "services which may not be healthy for instances in hostGroup(s): [%s]",
+                            instanceGroup, stack.getStack().getName(), unhealthyHostGroupNames));
                 }
             }
         }

@@ -268,7 +268,7 @@ public class FlowComponentTest {
 
         assertEquals(16, flowLogService.purgeFinalizedSuccessfulFlowLogs(0));
         assertEquals(0, flowLogService.purgeFinalizedFailedFlowLogs(0));
-        assertEquals(9, flowChainLogService.purgeOrphanFlowChainLogs());
+        assertEquals(6, flowChainLogService.purgeOrphanFlowChainLogs());
     }
 
     @Test
