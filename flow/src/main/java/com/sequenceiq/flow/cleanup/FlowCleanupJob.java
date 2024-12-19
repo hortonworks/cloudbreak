@@ -70,9 +70,13 @@ public class FlowCleanupJob extends MdcQuartzJob {
             LOGGER.debug("Cleaning failed finalised flowlogs");
             int purgedFinalizedFailedFlowLogs = flowLogService.purgeFinalizedFailedFlowLogs(retentionPeriodHoursForFailedFlows);
             LOGGER.debug("Deleted failed flowlog count: {}", purgedFinalizedFailedFlowLogs);
-            LOGGER.debug("Cleaning orphan flowchainlogs");
-            int purgedOrphanFLowChainLogs = flowChainLogService.purgeOrphanFlowChainLogs();
-            LOGGER.debug("Deleted flowchainlog count: {}", purgedOrphanFLowChainLogs);
+            if (flowCleanupConfig.isPurgeFlowChain()) {
+                LOGGER.debug("Cleaning orphan flowchainlogs");
+                int purgedOrphanFLowChainLogs = flowChainLogService.purgeOrphanFlowChainLogs();
+                LOGGER.debug("Deleted flowchainlog count: {}", purgedOrphanFLowChainLogs);
+            } else {
+                LOGGER.info("Cleanup flowchainlogs is skipped");
+            }
             return null;
         });
     }

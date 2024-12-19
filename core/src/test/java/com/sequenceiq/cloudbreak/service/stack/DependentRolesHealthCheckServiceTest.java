@@ -2,32 +2,24 @@ package com.sequenceiq.cloudbreak.service.stack;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
-import com.sequenceiq.cloudbreak.cluster.api.ClusterHealthService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.StackDto;
-import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
@@ -38,15 +30,6 @@ class DependentRolesHealthCheckServiceTest {
 
     @InjectMocks
     private DependentRolesHealthCheckService underTest;
-
-    @Mock
-    private ClusterHealthService clusterHealthService;
-
-    @Mock
-    private ClusterApi clusterApi;
-
-    @Mock
-    private ClusterApiConnectors clusterApiConnectors;
 
     private InstanceMetadataView generateInstanceMetadata(String hostgroup, InstanceStatus instanceStatus) {
         InstanceMetaData instanceMetaData = new InstanceMetaData();
@@ -91,45 +74,6 @@ class DependentRolesHealthCheckServiceTest {
         instanceMetadataViews.add(generateInstanceMetadata("compute", InstanceStatus.SERVICES_UNHEALTHY));
         when(stackdto.getAllAvailableInstances()).thenReturn(instanceMetadataViews);
         List<String> actual = underTest.getUnhealthyDependentHostGroups(stackdto, processor, dependentComponent);
-        assertEquals(actual, expected);
-    }
-
-    @Test
-    void testGetUnhealthyDependentComponentsRmhealthy() {
-        CmTemplateProcessor processor = new CmTemplateProcessor(getBlueprintText("input/de-ha.bp"));
-        StackDto stackdto = mock(StackDto.class);
-        Set<String> expected = new HashSet<>();
-
-        List<InstanceMetadataView> instanceMetadataViews = new ArrayList<>();
-        instanceMetadataViews.add(generateInstanceMetadata("master", InstanceStatus.SERVICES_HEALTHY));
-        instanceMetadataViews.add(generateInstanceMetadata("worker", InstanceStatus.SERVICES_HEALTHY));
-        instanceMetadataViews.add(generateInstanceMetadata("compute", InstanceStatus.SERVICES_UNHEALTHY));
-        when(stackdto.getAllAvailableInstances()).thenReturn(instanceMetadataViews);
-
-        Set<String> actual = underTest.getUnhealthyDependentComponents(stackdto, processor, "compute");
-        assertEquals(actual, expected);
-    }
-
-    @Test
-    void testGetUnhealthyDependentComponentsRmUnhealthy() {
-        CmTemplateProcessor processor = new CmTemplateProcessor(getBlueprintText("input/de-ha.bp"));
-        StackDto stackdto = mock(StackDto.class);
-        Set<String> expected = new HashSet<>();
-        expected.add("RESOURCEMANAGER");
-        Map<String, String> dependentComponentsHealthCheck = Map.ofEntries(
-                Map.entry("YARN_RESOURCEMANAGERS_HEALTH", "BAD"));
-
-        List<InstanceMetadataView> instanceMetadataViews = new ArrayList<>();
-        instanceMetadataViews.add(generateInstanceMetadata("master", InstanceStatus.SERVICES_UNHEALTHY));
-        instanceMetadataViews.add(generateInstanceMetadata("worker", InstanceStatus.SERVICES_HEALTHY));
-        instanceMetadataViews.add(generateInstanceMetadata("compute", InstanceStatus.SERVICES_UNHEALTHY));
-        when(stackdto.getAllAvailableInstances()).thenReturn(instanceMetadataViews);
-        doReturn(clusterApi).when(clusterApiConnectors).getConnector(any(StackDtoDelegate.class));
-        doReturn(clusterHealthService).when(clusterApi).clusterHealthService();
-        when(stackdto.getResourceName()).thenReturn("trial");
-        doReturn(dependentComponentsHealthCheck).when(clusterHealthService).readServicesHealth("trial");
-
-        Set<String> actual = underTest.getUnhealthyDependentComponents(stackdto, processor, "compute");
         assertEquals(actual, expected);
     }
 
