@@ -65,6 +65,7 @@ auth:
       native.variant.migration.enable: false
       arm.datahub: true
     gcp:
+        secureboot.enabled: false
     conclusion.checker.send.user.event.enable: true
     ha.repair.enable: true
     ui:

@@ -258,6 +258,9 @@ public class MockUserManagementServiceTest {
 
                 {"secretEncryptionEnabled false", "secretEncryptionEnabled", false, "CDP_CB_SECRET_ENCRYPTION", false},
                 {"secretEncryptionEnabled true", "secretEncryptionEnabled", true, "CDP_CB_SECRET_ENCRYPTION", true},
+
+                {"gcpSecureBootEnabled false", "gcpSecureBootEnabled", false, "CDP_CB_GCP_SECURE_BOOT", false},
+                {"gcpSecureBootEnabled true", "gcpSecureBootEnabled", true, "CDP_CB_GCP_SECURE_BOOT", true},
         };
     }
 

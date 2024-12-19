@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -44,9 +45,12 @@ import com.google.api.services.compute.model.NetworkInterface;
 import com.google.api.services.compute.model.Operation;
 import com.google.api.services.compute.model.Scheduling;
 import com.google.api.services.compute.model.ServiceAccount;
+import com.google.api.services.compute.model.ShieldedInstanceConfig;
 import com.google.api.services.compute.model.Tags;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.UpdateType;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -119,6 +123,9 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
     @Inject
     private GcpInstanceStateChecker instanceStateChecker;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     @Override
     public List<CloudResource> create(GcpContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
@@ -198,6 +205,10 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         metadata.getItems().add(startupScript);
         metadata.getItems().add(blockProjectWideSsh);
         instance.setMetadata(metadata);
+
+        ShieldedInstanceConfig shieldedInstanceConfig = Objects.requireNonNullElse(instance.getShieldedInstanceConfig(), new ShieldedInstanceConfig());
+        shieldedInstanceConfig.setEnableSecureBoot(entitlementService.isGcpSecureBootEnabled(ThreadBasedUserCrnProvider.getAccountId()));
+        instance.setShieldedInstanceConfig(shieldedInstanceConfig);
 
         Insert insert = compute.instances().insert(projectId, cloudInstance.getAvailabilityZone(), instance);
         insert.setPrettyPrint(Boolean.TRUE);

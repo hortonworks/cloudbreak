@@ -26,6 +26,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFO
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_FREEIPA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_MULTIAZ;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_SECURE_BOOT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SECRET_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SECRET_ROTATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CENTRAL_COMPUTE_MONITORING;
@@ -551,6 +552,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.aws.arm.datahub}")
     private boolean awsArmDataHubEnabled;
 
+    @Value("${auth.mock.gcp.secureboot.enabled}")
+    private boolean gcpSecureBootEnabled;
+
     private final Set<String> grantedEntitlements = new ConcurrentSkipListSet<>();
 
     private final Set<String> revokedEntitlements = new ConcurrentSkipListSet<>();
@@ -1031,6 +1035,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (awsArmDataHubEnabled) {
             builder.addEntitlements(createEntitlement(CDP_AWS_ARM_DATAHUB));
+        }
+        if (gcpSecureBootEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_CB_GCP_SECURE_BOOT));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

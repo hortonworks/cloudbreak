@@ -171,6 +171,9 @@ class EntitlementServiceTest {
 
                 {"CDP_SECURITY_ENFORCING_SELINUX", (EntitlementCheckFunction) EntitlementService::isCdpSecurityEnforcingSELinux, false},
                 {"CDP_SECURITY_ENFORCING_SELINUX", (EntitlementCheckFunction) EntitlementService::isCdpSecurityEnforcingSELinux, true},
+
+                {"CDP_CB_GCP_SECURE_BOOT", (EntitlementCheckFunction) EntitlementService::isGcpSecureBootEnabled, false},
+                {"CDP_CB_GCP_SECURE_BOOT", (EntitlementCheckFunction) EntitlementService::isGcpSecureBootEnabled, true}
         };
     }
 

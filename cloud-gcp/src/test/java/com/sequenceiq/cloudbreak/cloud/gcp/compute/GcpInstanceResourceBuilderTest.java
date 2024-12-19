@@ -34,6 +34,8 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -58,6 +60,8 @@ import com.google.api.services.compute.model.InstanceGroup;
 import com.google.api.services.compute.model.InstancesStartWithEncryptionKeyRequest;
 import com.google.api.services.compute.model.Operation;
 import com.google.common.collect.ImmutableMap;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
@@ -98,7 +102,7 @@ import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.common.model.FileSystemType;
 
 @ExtendWith(MockitoExtension.class)
-public class GcpInstanceResourceBuilderTest {
+class GcpInstanceResourceBuilderTest {
 
     private static final Long WORKSPACE_ID = 1L;
 
@@ -107,6 +111,8 @@ public class GcpInstanceResourceBuilderTest {
     private static final String PROJECT_ID = "projectId";
 
     private static final String AVAILABILITY_ZONE = "az1";
+
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:hortonworks:user:test@test.com";
 
     @InjectMocks
     private GcpInstanceResourceBuilder builder;
@@ -160,11 +166,14 @@ public class GcpInstanceResourceBuilderTest {
     @Mock
     private CustomGcpDiskEncryptionCreatorService customGcpDiskEncryptionCreatorService;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     @Captor
     private ArgumentCaptor<Instance> instanceArg;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         privateId = 0L;
         String privateCrn = "crn";
         name = "master";
@@ -209,11 +218,13 @@ public class GcpInstanceResourceBuilderTest {
                 .build();
     }
 
+    //CHECKSTYLE:OFF
     @Test
-    public void isSchedulingPreemptibleTest() throws Exception {
+    void isSchedulingPreemptibleTest() throws Throwable {
+        //CHECKSTYLE:ON
         // GIVEN
         Group group = newGroupWithParams(ImmutableMap.of("preemptible", true));
-        List<CloudResource> buildableResources = builder.create(context, group.getInstances().get(0), privateId, authenticatedContext, group, image);
+        List<CloudResource> buildableResources = builder.create(context, group.getInstances().getFirst(), privateId, authenticatedContext, group, image);
         context.addComputeResources(0L, buildableResources);
 
         // WHEN
@@ -222,7 +233,8 @@ public class GcpInstanceResourceBuilderTest {
         when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
 
-        builder.build(context, group.getInstances().get(0), privateId, authenticatedContext, group, buildableResources, cloudStack);
+        ThreadBasedUserCrnProvider.doAsAndThrow(USER_CRN, () ->
+                builder.build(context, group.getInstances().getFirst(), privateId, authenticatedContext, group, buildableResources, cloudStack));
 
         // THEN
         verify(compute).instances();
@@ -231,11 +243,13 @@ public class GcpInstanceResourceBuilderTest {
         assertNull(instanceArg.getValue().getHostname());
     }
 
+    //CHECKSTYLE:OFF
     @Test
-    public void isSchedulingNotPreemptibleTest() throws Exception {
+    void isSchedulingNotPreemptibleTest() throws Throwable {
+        //CHECKSTYLE:ON
         // GIVEN
         Group group = newGroupWithParams(ImmutableMap.of("preemptible", false));
-        List<CloudResource> buildableResources = builder.create(context, group.getInstances().get(0), privateId, authenticatedContext, group, image);
+        List<CloudResource> buildableResources = builder.create(context, group.getInstances().getFirst(), privateId, authenticatedContext, group, image);
         context.addComputeResources(0L, buildableResources);
 
         // WHEN
@@ -244,7 +258,8 @@ public class GcpInstanceResourceBuilderTest {
         when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
 
-        builder.build(context, group.getInstances().get(0), privateId, authenticatedContext, group, buildableResources, cloudStack);
+        ThreadBasedUserCrnProvider.doAsAndThrow(USER_CRN, () ->
+                builder.build(context, group.getInstances().getFirst(), privateId, authenticatedContext, group, buildableResources, cloudStack));
 
         // THEN
         verify(compute).instances();
@@ -253,11 +268,13 @@ public class GcpInstanceResourceBuilderTest {
         assertNull(instanceArg.getValue().getHostname());
     }
 
+    //CHECKSTYLE:OFF
     @Test
-    public void preemptibleParameterNotSetTest() throws Exception {
+    void preemptibleParameterNotSetTest() throws Throwable {
+        //CHECKSTYLE:ON
         // GIVEN
         Group group = newGroupWithParams(ImmutableMap.of());
-        List<CloudResource> buildableResources = builder.create(context, group.getInstances().get(0), privateId, authenticatedContext, group, image);
+        List<CloudResource> buildableResources = builder.create(context, group.getInstances().getFirst(), privateId, authenticatedContext, group, image);
         context.addComputeResources(0L, buildableResources);
 
         // WHEN
@@ -266,7 +283,8 @@ public class GcpInstanceResourceBuilderTest {
         when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
 
-        builder.build(context, group.getInstances().get(0), privateId, authenticatedContext, group, buildableResources, cloudStack);
+        ThreadBasedUserCrnProvider.doAsAndThrow(USER_CRN, () ->
+                builder.build(context, group.getInstances().getFirst(), privateId, authenticatedContext, group, buildableResources, cloudStack));
 
         // THEN
         verify(compute).instances();
@@ -275,11 +293,13 @@ public class GcpInstanceResourceBuilderTest {
         assertNull(instanceArg.getValue().getHostname());
     }
 
+    //CHECKSTYLE:OFF
     @Test
-    public void extraxtServiceAccountWhenServiceEmailEmpty() throws Exception {
+    void extraxtServiceAccountWhenServiceEmailEmpty() throws Throwable {
+        //CHECKSTYLE:ON
         // GIVEN
         Group group = newGroupWithParams(ImmutableMap.of(DISCOVERY_NAME, "idbroker"));
-        List<CloudResource> buildableResources = builder.create(context, group.getInstances().get(0), privateId, authenticatedContext, group, image);
+        List<CloudResource> buildableResources = builder.create(context, group.getInstances().getFirst(), privateId, authenticatedContext, group, image);
         context.addComputeResources(0L, buildableResources);
 
         // WHEN
@@ -288,7 +308,8 @@ public class GcpInstanceResourceBuilderTest {
         when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
 
-        builder.build(context, group.getInstances().get(0), privateId, authenticatedContext, group, buildableResources, cloudStack);
+        ThreadBasedUserCrnProvider.doAsAndThrow(USER_CRN, () ->
+                builder.build(context, group.getInstances().getFirst(), privateId, authenticatedContext, group, buildableResources, cloudStack));
 
         // THEN
         verify(compute).instances();
@@ -297,12 +318,14 @@ public class GcpInstanceResourceBuilderTest {
         assertNull(instanceArg.getValue().getHostname());
     }
 
+    //CHECKSTYLE:OFF
     @Test
-    public void freeipaHostnameSet() throws Exception {
+    void freeipaHostnameSet() throws Throwable {
+        //CHECKSTYLE:ON
         // GIVEN
         String ipaserver = "ipaserver";
         Group group = newGroupWithParams(ImmutableMap.of(DISCOVERY_NAME, ipaserver));
-        List<CloudResource> buildableResources = builder.create(context, group.getInstances().get(0), privateId, authenticatedContext, group, image);
+        List<CloudResource> buildableResources = builder.create(context, group.getInstances().getFirst(), privateId, authenticatedContext, group, image);
         context.addComputeResources(0L, buildableResources);
         cloudStack = CloudStack.builder()
                 .groups(singletonList(group))
@@ -317,7 +340,8 @@ public class GcpInstanceResourceBuilderTest {
         when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
 
-        builder.build(context, group.getInstances().get(0), privateId, authenticatedContext, group, buildableResources, cloudStack);
+        ThreadBasedUserCrnProvider.doAsAndThrow(USER_CRN, () ->
+                builder.build(context, group.getInstances().getFirst(), privateId, authenticatedContext, group, buildableResources, cloudStack));
 
         // THEN
         verify(compute).instances();
@@ -326,11 +350,13 @@ public class GcpInstanceResourceBuilderTest {
         assertEquals(ipaserver, instanceArg.getValue().getHostname());
     }
 
+    //CHECKSTYLE:OFF
     @Test
-    public void labelsAndTagsSetCorrectly() throws Exception {
+    void labelsAndTagsSetCorrectly() throws Throwable {
+        //CHECKSTYLE:ON
         // GIVEN
         Group group = newGroupWithParams(ImmutableMap.of(DISCOVERY_NAME, "idbroker"));
-        List<CloudResource> buildableResources = builder.create(context, group.getInstances().get(0), privateId, authenticatedContext, group, image);
+        List<CloudResource> buildableResources = builder.create(context, group.getInstances().getFirst(), privateId, authenticatedContext, group, image);
         context.addComputeResources(0L, buildableResources);
         Map<String, String> cdpTags = new HashMap<>();
         cdpTags.put("owner", "cdpUser");
@@ -344,7 +370,8 @@ public class GcpInstanceResourceBuilderTest {
         when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
 
-        builder.build(context, group.getInstances().get(0), privateId, authenticatedContext, group, buildableResources, cloudStack);
+        ThreadBasedUserCrnProvider.doAsAndThrow(USER_CRN, () ->
+                builder.build(context, group.getInstances().getFirst(), privateId, authenticatedContext, group, buildableResources, cloudStack));
 
         // THEN
         verify(compute).instances();
@@ -354,8 +381,10 @@ public class GcpInstanceResourceBuilderTest {
         assertEquals("cdpUser", instanceArg.getValue().getLabels().get("owner"));
     }
 
+    //CHECKSTYLE:OFF
     @Test
-    public void extraxtServiceAccountWhenServiceEmailNotEmpty() throws Exception {
+    void extraxtServiceAccountWhenServiceEmailNotEmpty() throws Throwable {
+        //CHECKSTYLE:ON
         // GIVEN
         String email = "service@email.com";
         CloudGcsView cloudGcsView = new CloudGcsView(CloudIdentityType.LOG);
@@ -368,7 +397,7 @@ public class GcpInstanceResourceBuilderTest {
                 .build();
 
         Group group = newGroupWithParams(ImmutableMap.of(), cloudGcsView);
-        List<CloudResource> buildableResources = builder.create(context, group.getInstances().get(0), privateId, authenticatedContext, group, image);
+        List<CloudResource> buildableResources = builder.create(context, group.getInstances().getFirst(), privateId, authenticatedContext, group, image);
         context.addComputeResources(0L, buildableResources);
 
         // WHEN
@@ -377,19 +406,22 @@ public class GcpInstanceResourceBuilderTest {
         when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
 
-        builder.build(context, group.getInstances().get(0), privateId, authenticatedContext, group, buildableResources, cloudStack);
+        ThreadBasedUserCrnProvider.doAsAndThrow(USER_CRN, () ->
+                builder.build(context, group.getInstances().getFirst(), privateId, authenticatedContext, group, buildableResources, cloudStack));
 
         // THEN
         verify(compute).instances();
         verify(instances).insert(anyString(), anyString(), instanceArg.capture());
-        assertEquals(instanceArg.getValue().getServiceAccounts().get(0).getEmail(), email);
+        assertEquals(email, instanceArg.getValue().getServiceAccounts().getFirst().getEmail());
     }
 
+    //CHECKSTYLE:OFF
     @Test
-    public void addToInstanceGroupFailsAuth() throws Exception {
+    void addToInstanceGroupFailsAuth() throws Throwable {
+        //CHECKSTYLE:ON
         // GIVEN
         Group group = newGroupWithParams(ImmutableMap.of());
-        List<CloudResource> buildableResources = builder.create(context, group.getInstances().get(0), privateId, authenticatedContext, group, image);
+        List<CloudResource> buildableResources = builder.create(context, group.getInstances().getFirst(), privateId, authenticatedContext, group, image);
         List<CloudResource> resourcesWithGroup = buildableResources.stream()
                 .map(b -> CloudResource.builder().cloudResource(b).withGroup(group.getName()).build())
                 .collect(Collectors.toList());
@@ -424,8 +456,8 @@ public class GcpInstanceResourceBuilderTest {
         when(get.execute()).thenReturn(ig);
         when(addInstances.execute()).thenReturn(addOperation);
 
-        assertThrows(GcpResourceException.class,
-                () -> builder.build(context, group.getInstances().get(0), privateId, authenticatedContext, group, resourcesWithGroup, cloudStack));
+        assertThrows(GcpResourceException.class, () -> ThreadBasedUserCrnProvider.doAsAndThrow(USER_CRN, () ->
+                builder.build(context, group.getInstances().getFirst(), privateId, authenticatedContext, group, resourcesWithGroup, cloudStack)));
 
         // THEN
         verify(compute).instances();
@@ -433,11 +465,13 @@ public class GcpInstanceResourceBuilderTest {
         assertNull(instanceArg.getValue().getHostname());
     }
 
+    //CHECKSTYLE:OFF
     @Test
-    public void addInstanceGroupFromUpscale() throws Exception {
+    void addInstanceGroupFromUpscale() throws Throwable {
+        //CHECKSTYLE:ON
         // GIVEN
         Group group = newGroupWithParams(ImmutableMap.of());
-        List<CloudResource> buildableResources = builder.create(context, group.getInstances().get(0), privateId, authenticatedContext, group, image);
+        List<CloudResource> buildableResources = builder.create(context, group.getInstances().getFirst(), privateId, authenticatedContext, group, image);
         context.addComputeResources(0L, buildableResources);
 
         // WHEN
@@ -488,7 +522,8 @@ public class GcpInstanceResourceBuilderTest {
         when(get.execute()).thenReturn(ig);
         when(addInstances.execute()).thenReturn(addOperation);
 
-        builder.build(context, group.getInstances().get(0), privateId, authenticatedContext, group, buildableResources, cloudStack);
+        ThreadBasedUserCrnProvider.doAsAndThrow(USER_CRN, () ->
+                builder.build(context, group.getInstances().getFirst(), privateId, authenticatedContext, group, buildableResources, cloudStack));
 
         // THEN
         verify(compute).instances();
@@ -497,11 +532,13 @@ public class GcpInstanceResourceBuilderTest {
         assertNull(instanceArg.getValue().getHostname());
     }
 
+    //CHECKSTYLE:OFF
     @Test
-    public void noInstanceGroupsExist() throws Exception {
+    void noInstanceGroupsExist() throws Throwable {
+        //CHECKSTYLE:ON
         // GIVEN
         Group group = newGroupWithParams(ImmutableMap.of());
-        List<CloudResource> buildableResources = builder.create(context, group.getInstances().get(0), privateId, authenticatedContext, group, image);
+        List<CloudResource> buildableResources = builder.create(context, group.getInstances().getFirst(), privateId, authenticatedContext, group, image);
         context.addComputeResources(0L, buildableResources);
 
         // WHEN
@@ -510,7 +547,8 @@ public class GcpInstanceResourceBuilderTest {
         when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
 
-        builder.build(context, group.getInstances().get(0), privateId, authenticatedContext, group, buildableResources, cloudStack);
+        ThreadBasedUserCrnProvider.doAsAndThrow(USER_CRN, () ->
+                builder.build(context, group.getInstances().getFirst(), privateId, authenticatedContext, group, buildableResources, cloudStack));
 
         // THEN
         verify(compute).instances();
@@ -519,14 +557,16 @@ public class GcpInstanceResourceBuilderTest {
         verifyNoInteractions(addInstances);
     }
 
+    //CHECKSTYLE:OFF
     @Test
-    public void noSubnetInformationOnInstance() throws Exception {
+    void noSubnetInformationOnInstance() throws Throwable {
+        //CHECKSTYLE:ON
 
         // GIVEN
         Group group = newGroupWithParams(ImmutableMap.of());
-        List<CloudResource> buildableResources = builder.create(context, group.getInstances().get(0), privateId, authenticatedContext, group, image);
+        List<CloudResource> buildableResources = builder.create(context, group.getInstances().getFirst(), privateId, authenticatedContext, group, image);
         context.addComputeResources(0L, buildableResources);
-        group.getInstances().get(0).setSubnetId(null);
+        group.getInstances().getFirst().setSubnetId(null);
         when(gcpStackUtil.getSubnetId(any())).thenReturn("default");
 
         ArgumentCaptor<String> subnetCaptor = ArgumentCaptor.forClass(String.class);
@@ -539,22 +579,23 @@ public class GcpInstanceResourceBuilderTest {
         when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
 
-        builder.build(context, group.getInstances().get(0), privateId, authenticatedContext, group, buildableResources, cloudStack);
+        ThreadBasedUserCrnProvider.doAsAndThrow(USER_CRN, () ->
+                builder.build(context, group.getInstances().getFirst(), privateId, authenticatedContext, group, buildableResources, cloudStack));
 
         // THEN
         verify(compute).instances();
         verify(instances).insert(anyString(), anyString(), instanceArg.capture());
         assertEquals("https://www.googleapis.com/compute/v1/projects/projectId/regions/region/subnetworks/default",
-                instanceArg.getValue().getNetworkInterfaces().get(0).getSubnetwork());
+                instanceArg.getValue().getNetworkInterfaces().getFirst().getSubnetwork());
         assertNull(instanceArg.getValue().getHostname());
-        assertEquals(subnetCaptor.getValue(), "default");
+        assertEquals("default", subnetCaptor.getValue());
     }
 
-    public Group newGroupWithParams(Map<String, Object> params) {
+    private Group newGroupWithParams(Map<String, Object> params) {
         return newGroupWithParams(params, null);
     }
 
-    public Group newGroupWithParams(Map<String, Object> params, CloudFileSystemView cloudFileSystemView) {
+    private Group newGroupWithParams(Map<String, Object> params, CloudFileSystemView cloudFileSystemView) {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         CloudInstance cloudInstance = newCloudInstance(params, instanceAuthentication);
         return Group.builder()
@@ -569,27 +610,33 @@ public class GcpInstanceResourceBuilderTest {
                 .build();
     }
 
-    public CloudInstance newCloudInstance(Map<String, Object> params, InstanceAuthentication instanceAuthentication) {
+    private CloudInstance newCloudInstance(Map<String, Object> params, InstanceAuthentication instanceAuthentication) {
         InstanceTemplate instanceTemplate = new InstanceTemplate(flavor, name, privateId, volumes, InstanceStatus.CREATE_REQUESTED, params,
                 0L, "cb-centos66-amb200-2015-05-25", TemporaryStorage.ATTACHED_VOLUMES, 0L);
         return new CloudInstance(instanceId, instanceTemplate, instanceAuthentication, "subnet-1", AVAILABILITY_ZONE, params);
     }
 
+    //CHECKSTYLE:OFF
     @Test
-    public void testInstanceEncryptionWithDefault() throws Exception {
+    void testInstanceEncryptionWithDefault() throws Throwable {
+        //CHECKSTYLE:ON
         ImmutableMap<String, Object> params = ImmutableMap.of(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name());
         doTestDefaultDiskEncryption(params);
     }
 
+    //CHECKSTYLE:OFF
     @Test
-    public void testInstanceEncryptionWithEmptyType() throws Exception {
+    void testInstanceEncryptionWithEmptyType() throws Throwable {
+        //CHECKSTYLE:ON
         ImmutableMap<String, Object> params = ImmutableMap.of(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, "");
         doTestDefaultDiskEncryption(params);
     }
 
-    public void doTestDefaultDiskEncryption(ImmutableMap<String, Object> params) throws Exception {
+    //CHECKSTYLE:OFF
+    void doTestDefaultDiskEncryption(ImmutableMap<String, Object> params) throws Throwable {
+        //CHECKSTYLE:ON
         Group group = newGroupWithParams(params);
-        List<CloudResource> buildableResources = builder.create(context, group.getInstances().get(0), privateId, authenticatedContext, group, image);
+        List<CloudResource> buildableResources = builder.create(context, group.getInstances().getFirst(), privateId, authenticatedContext, group, image);
         context.addComputeResources(0L, buildableResources);
 
         when(compute.instances()).thenReturn(instances);
@@ -597,48 +644,61 @@ public class GcpInstanceResourceBuilderTest {
         when(instances.insert(anyString(), anyString(), instanceArgumentCaptor.capture())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
 
-        builder.build(context, group.getInstances().get(0), privateId, authenticatedContext, group, buildableResources, cloudStack);
+        ThreadBasedUserCrnProvider.doAsAndThrow(USER_CRN, () ->
+                builder.build(context, group.getInstances().getFirst(), privateId, authenticatedContext, group, buildableResources, cloudStack));
 
         verify(customGcpDiskEncryptionService, times(0)).addEncryptionKeyToDisk(any(InstanceTemplate.class), any(AttachedDisk.class));
 
         instanceArgumentCaptor.getValue().getDisks().forEach(attachedDisk -> assertNull(attachedDisk.getDiskEncryptionKey()));
     }
 
+    //CHECKSTYLE:OFF
     @Test
-    public void testInstanceEncryptionWithRawMethodEmptyKey() throws Exception {
+    void testInstanceEncryptionWithRawMethodEmptyKey() throws Throwable {
+        //CHECKSTYLE:ON
         ImmutableMap<String, Object> params = ImmutableMap.of(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name(),
                 "keyEncryptionMethod", "RAW");
         doTestDiskEncryption(params);
     }
 
+    //CHECKSTYLE:OFF
     @Test
-    public void testInstanceEncryptionWithRawMethod() throws Exception {
+    void testInstanceEncryptionWithRawMethod() throws Throwable {
+        //CHECKSTYLE:ON
         ImmutableMap<String, Object> params = ImmutableMap.of(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name(),
                 "keyEncryptionMethod", "RAW", InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, ENCRYPTION_KEY);
         doTestDiskEncryption(params);
     }
 
+    //CHECKSTYLE:OFF
     @Test
-    public void testInstanceEncryptionWithEmptyMethod() throws Exception {
+    void testInstanceEncryptionWithEmptyMethod() throws Throwable {
+        //CHECKSTYLE:ON
         ImmutableMap<String, Object> params = ImmutableMap.of(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name());
         doTestDiskEncryption(params);
     }
 
+    //CHECKSTYLE:OFF
     @Test
-    public void testInstanceEncryptionWithRsaMethodEmptyKey() throws Exception {
+    void testInstanceEncryptionWithRsaMethodEmptyKey() throws Throwable {
+        //CHECKSTYLE:ON
         ImmutableMap<String, Object> params = ImmutableMap.of(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name(),
                 "keyEncryptionMethod", "RSA");
         doTestDiskEncryption(params);
     }
 
+    //CHECKSTYLE:OFF
     @Test
-    public void testInstanceEncryptionWithRsaMethod() throws Exception {
+    void testInstanceEncryptionWithRsaMethod() throws Throwable {
+        //CHECKSTYLE:ON
         ImmutableMap<String, Object> params = ImmutableMap.of(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name(),
                 "keyEncryptionMethod", "RSA", InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, ENCRYPTION_KEY);
         doTestDiskEncryption(params);
     }
 
-    private void doTestDiskEncryption(ImmutableMap<String, Object> templateParams) throws Exception {
+    //CHECKSTYLE:OFF
+    private void doTestDiskEncryption(ImmutableMap<String, Object> templateParams) throws Throwable {
+        //CHECKSTYLE:ON
         Group group = newGroupWithParams(templateParams);
         CloudResource requestedDisk = CloudResource.builder()
                 .withType(ResourceType.GCP_DISK)
@@ -662,7 +722,8 @@ public class GcpInstanceResourceBuilderTest {
             return invocation;
         }).when(customGcpDiskEncryptionService).addEncryptionKeyToDisk(any(InstanceTemplate.class), any(AttachedDisk.class));
 
-        builder.build(context, group.getInstances().get(0), privateId, authenticatedContext, group, buildableResources, cloudStack);
+        ThreadBasedUserCrnProvider.doAsAndThrow(USER_CRN, () ->
+                builder.build(context, group.getInstances().getFirst(), privateId, authenticatedContext, group, buildableResources, cloudStack));
 
         verify(customGcpDiskEncryptionService, times(1)).addEncryptionKeyToDisk(any(InstanceTemplate.class), any(AttachedDisk.class));
 
@@ -673,7 +734,7 @@ public class GcpInstanceResourceBuilderTest {
     }
 
     @Test
-    public void testStartWithDefaultEncryption() throws Exception {
+    void testStartWithDefaultEncryption() throws Exception {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         CloudInstance cloudInstance = newCloudInstance(Map.of(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name()),
                 instanceAuthentication);
@@ -681,7 +742,7 @@ public class GcpInstanceResourceBuilderTest {
         doTestDefaultEncryption(cloudInstance);
     }
 
-    public void doTestDefaultEncryption(CloudInstance cloudInstance) throws IOException {
+    private void doTestDefaultEncryption(CloudInstance cloudInstance) throws IOException {
         when(compute.instances()).thenReturn(instances);
 
         Get get = mock(Get.class);
@@ -710,7 +771,7 @@ public class GcpInstanceResourceBuilderTest {
     }
 
     @Test
-    public void testStartWithDefaultEncryptionNoTemplateParams() throws Exception {
+    void testStartWithDefaultEncryptionNoTemplateParams() throws Exception {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         CloudInstance cloudInstance = newCloudInstance(Map.of(), instanceAuthentication);
 
@@ -718,7 +779,7 @@ public class GcpInstanceResourceBuilderTest {
     }
 
     @Test
-    public void testStartWithRawEncryptedKey() throws Exception {
+    void testStartWithRawEncryptedKey() throws Exception {
         CustomerEncryptionKey customerEncryptionKey = new CustomerEncryptionKey();
         customerEncryptionKey.setRawKey("HelloWorld==");
 
@@ -727,7 +788,7 @@ public class GcpInstanceResourceBuilderTest {
         doTestCustomEncryption(params, customerEncryptionKey);
     }
 
-    public void doTestCustomEncryption(Map<String, Object> params, CustomerEncryptionKey encryptionKey) throws IOException {
+    private void doTestCustomEncryption(Map<String, Object> params, CustomerEncryptionKey encryptionKey) throws IOException {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         CloudInstance cloudInstance = newCloudInstance(params, instanceAuthentication);
         when(compute.instances()).thenReturn(instances);
@@ -764,13 +825,13 @@ public class GcpInstanceResourceBuilderTest {
         assertNotNull(keyRequest.getDisks());
         assertEquals(1, keyRequest.getDisks().size());
 
-        CustomerEncryptionKeyProtectedDisk protectedDisk = keyRequest.getDisks().iterator().next();
+        CustomerEncryptionKeyProtectedDisk protectedDisk = keyRequest.getDisks().getFirst();
         assertEquals(encryptionKey, protectedDisk.getDiskEncryptionKey());
         assertEquals(expectedSource, protectedDisk.getSource());
     }
 
     @Test
-    public void testStartWithRsaEncryptedKey() throws Exception {
+    void testStartWithRsaEncryptedKey() throws Exception {
         CustomerEncryptionKey customerEncryptionKey = new CustomerEncryptionKey();
         customerEncryptionKey.setRawKey("HelloWorld==");
 
@@ -780,7 +841,7 @@ public class GcpInstanceResourceBuilderTest {
     }
 
     @Test
-    public void testStartWithEmptyMethodRsaEncryptedKey() throws Exception {
+    void testStartWithEmptyMethodRsaEncryptedKey() throws Exception {
         CustomerEncryptionKey customerEncryptionKey = new CustomerEncryptionKey();
         customerEncryptionKey.setRawKey("HelloWorld==");
 
@@ -790,7 +851,7 @@ public class GcpInstanceResourceBuilderTest {
     }
 
     @Test
-    public void testPublicKeyWhenHasEmailAtTheEndShouldCutTheEmail() {
+    void testPublicKeyWhenHasEmailAtTheEndShouldCutTheEmail() {
         String loginName = "cloudbreak";
         String sshKey = "ssh-rsa key cloudbreak@cloudbreak.com";
         String publicKey = builder.getPublicKey(sshKey, loginName);
@@ -798,7 +859,7 @@ public class GcpInstanceResourceBuilderTest {
     }
 
     @Test
-    public void testPublicKeyWhenHasNoEmailAtTheEndShouldCutTheEmail() {
+    void testPublicKeyWhenHasNoEmailAtTheEndShouldCutTheEmail() {
         String loginName = "cloudbreak";
         String sshKey = "ssh-rsa key";
         String publicKey = builder.getPublicKey(sshKey, loginName);
@@ -806,10 +867,33 @@ public class GcpInstanceResourceBuilderTest {
     }
 
     @Test
-    public void testPublicKeyWhenHasLotOfSegmentAtTheEndShouldCutTheEmail() {
+    void testPublicKeyWhenHasLotOfSegmentAtTheEndShouldCutTheEmail() {
         String loginName = "cloudbreak";
         String sshKey = "ssh-rsa key cloudbreak cloudbreak cloudbreak cloudbreak cloudbreak cloudbreak";
         String publicKey = builder.getPublicKey(sshKey, loginName);
         assertEquals("cloudbreak:ssh-rsa key cloudbreak", publicKey);
+    }
+
+    //CHECKSTYLE:OFF
+    @ValueSource(booleans = {true, false})
+    @ParameterizedTest
+    void testBuildWithSecureBoot(boolean enabled) throws Throwable {
+        //CHECKSTYLE:ON
+        Group group = newGroupWithParams(Map.of());
+        List<CloudResource> buildableResources = builder.create(context, group.getInstances().getFirst(), privateId, authenticatedContext, group, image);
+        context.addComputeResources(0L, buildableResources);
+
+        when(compute.instances()).thenReturn(instances);
+        when(instances.insert(anyString(), anyString(), any(Instance.class))).thenReturn(insert);
+        when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
+        when(insert.execute()).thenReturn(operation);
+        when(entitlementService.isGcpSecureBootEnabled(anyString())).thenReturn(enabled);
+
+        ThreadBasedUserCrnProvider.doAsAndThrow(USER_CRN, () ->
+                builder.build(context, group.getInstances().getFirst(), privateId, authenticatedContext, group, buildableResources, cloudStack));
+
+        verify(compute).instances();
+        verify(instances).insert(anyString(), anyString(), instanceArg.capture());
+        assertEquals(enabled, instanceArg.getValue().getShieldedInstanceConfig().getEnableSecureBoot());
     }
 }
