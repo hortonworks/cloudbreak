@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -148,13 +149,21 @@ public class GcpClientActions extends GcpClient {
     }
 
     public void deleteHostGroupInstances(List<String> instanceIds) {
-        LOGGER.info("Deleting instances: '{}'", String.join(", ", instanceIds));
+        Map<String, String> instancesWithAz = instanceIds.stream().collect(
+                Collectors.toMap(Function.identity(), instance -> getAvailabilityZone()));
+        deleteHostGroupInstancesWithAz(instancesWithAz);
+    }
+
+    public void deleteHostGroupInstancesWithAz(Map<String, String> instancesWithAz) {
+        LOGGER.info("Deleting instances: '{}'", String.join(", ", instancesWithAz.keySet()));
         Compute compute = buildCompute();
-        for (String instanceId : instanceIds) {
+        for (Map.Entry<String, String> instance : instancesWithAz.entrySet()) {
+            String instanceId = instance.getKey();
+            String availabilityZone = instance.getValue();
             try {
                 Operation deleteOperation = compute
                         .instances()
-                        .delete(getProjectId(), getAvailabilityZone(), instanceId)
+                        .delete(getProjectId(), availabilityZone, instanceId)
                         .execute();
                 Log.log(LOGGER, format(" Gcp instance [%s] state is [%s] with message: %s", instanceId, deleteOperation.getStatus(),
                         deleteOperation.getStatusMessage()));
@@ -177,7 +186,7 @@ public class GcpClientActions extends GcpClient {
                 }
             } catch (GoogleJsonResponseException e) {
                 if (!e.getMessage().contains("Not Found")) {
-                    handleGeneralInstanceDeletionError(instanceId, e);
+                    handleGeneralInstanceDeletionError(instance.getKey(), e);
                 } else {
                     LOGGER.info(format("Gcp instance [%s] is not found, thus it is deleted.", instanceId));
                 }

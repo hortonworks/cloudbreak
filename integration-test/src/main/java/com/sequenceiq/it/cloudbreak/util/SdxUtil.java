@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.util;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
@@ -17,6 +18,12 @@ public class SdxUtil {
         List<InstanceGroupV4Response> instanceGroups = getSdxClusterDetailResponse(testDto, sdxClient)
                 .getStackV4Response().getInstanceGroups();
         return InstanceUtil.getInstanceIds(instanceGroups, hostGroupName);
+    }
+
+    public Map<String, String> getInstancesWithAz(AbstractSdxTestDto testDto, SdxClient sdxClient, String hostGroupName) {
+        List<InstanceGroupV4Response> instanceGroups = getSdxClusterDetailResponse(testDto, sdxClient)
+                .getStackV4Response().getInstanceGroups();
+        return InstanceUtil.getInstancesWithAz(instanceGroups, hostGroupName);
     }
 
     public String getShape(AbstractSdxTestDto testDto, SdxClient sdxClient) {

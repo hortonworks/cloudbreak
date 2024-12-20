@@ -52,6 +52,10 @@ public class GcpUtil {
         gcpClientActions.deleteHostGroupInstances(instanceIds);
     }
 
+    public void deleteHostGroupInstances(Map<String, String> instances) {
+        gcpClientActions.deleteHostGroupInstancesWithAz(instances);
+    }
+
     public void stopHostGroupInstances(List<String> instanceIds) {
         gcpClientActions.stopHostGroupInstances(instanceIds);
     }

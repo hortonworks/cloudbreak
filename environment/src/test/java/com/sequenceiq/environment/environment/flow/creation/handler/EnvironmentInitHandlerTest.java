@@ -23,7 +23,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
@@ -128,7 +127,6 @@ class EnvironmentInitHandlerTest {
                 Collections.emptyMap(),
                 Collections.emptyMap(), "apple", true);
         when(environmentService.getRegionsByEnvironment(environment)).thenReturn(cloudRegions);
-        ReflectionTestUtils.setField(environmentInitHandler, "maxAvailabilityZones", 3);
 
         environmentInitHandler.accept(event);
 

@@ -75,6 +75,14 @@ public interface CloudFunctionality {
             maxAttempts = ATTEMPTS,
             backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)
     )
+    default void deleteInstances(String clusterName, Map<String, String> instances) {
+
+    }
+
+    @Retryable(
+            maxAttempts = ATTEMPTS,
+            backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)
+    )
     void stopInstances(String clusterName, List<String> instanceIds);
 
     @Retryable(

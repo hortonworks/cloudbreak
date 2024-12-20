@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -59,9 +58,6 @@ public class EnvironmentInitHandler extends EventSenderAwareHandler<EnvironmentD
     private final Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap;
 
     private final PemBasedEnvironmentDomainProvider domainProvider;
-
-    @Value("${cb.multiaz.availabilityZones.max:3}")
-    private Integer maxAvailabilityZones;
 
     protected EnvironmentInitHandler(
             EventSender eventSender,
@@ -187,7 +183,7 @@ public class EnvironmentInitHandler extends EventSenderAwareHandler<EnvironmentD
                 List<AvailabilityZone> availabilityZones = cloudRegions.getCloudRegions().getOrDefault(Region.region(region.getName()), new ArrayList<>());
                 LOGGER.info("Update Availability zones {} for environment {}", availabilityZones, environment.getName());
                 environmentNetworkConverter.updateAvailabilityZones(environment.getNetwork(),
-                        availabilityZones.stream().map(AvailabilityZone::getValue).sorted().limit(maxAvailabilityZones).collect(Collectors.toSet()));
+                        availabilityZones.stream().map(AvailabilityZone::getValue).collect(Collectors.toSet()));
             }
         }
     }

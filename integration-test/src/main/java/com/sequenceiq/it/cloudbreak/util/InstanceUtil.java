@@ -21,6 +21,13 @@ public class InstanceUtil {
                 .getMetadata().stream().map(InstanceMetaDataV4Response::getInstanceId).collect(Collectors.toList());
     }
 
+    public static Map<String, String> getInstancesWithAz(List<InstanceGroupV4Response> instanceGroupV4Responses, String hostGroupName) {
+        InstanceGroupV4Response instanceGroupV4Response = instanceGroupV4Responses.stream().filter(instanceGroup ->
+                instanceGroup.getName().equals(hostGroupName)).findFirst().orElse(null);
+        return Objects.requireNonNull(instanceGroupV4Response)
+                .getMetadata().stream().collect(Collectors.toMap(InstanceMetaDataV4Response::getInstanceId, InstanceMetaDataV4Response::getAvailabilityZone));
+    }
+
     public static Map<List<String>, InstanceStatus> getInstanceStatusMapForStatus(StackV4Response stackV4Response, InstanceStatus status) {
         return stackV4Response.getInstanceGroups().stream()
                 .filter(instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream()
