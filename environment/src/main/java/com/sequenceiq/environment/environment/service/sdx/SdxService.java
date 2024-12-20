@@ -71,26 +71,6 @@ public class SdxService {
         }
     }
 
-    public FlowIdentifier startByCrn(String crn) {
-        try {
-            return sdxEndpoint.startByCrn(crn);
-        } catch (WebApplicationException e) {
-            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error(String.format("Failed to start SDX cluster by crn '%s' due to '%s'.", crn, errorMessage), e);
-            throw new SdxOperationFailedException(errorMessage, e);
-        }
-    }
-
-    public FlowIdentifier stopByCrn(String crn) {
-        try {
-            return sdxEndpoint.stopByCrn(crn);
-        } catch (WebApplicationException e) {
-            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error(String.format("Failed to stop SDX cluster by crn '%s' due to '%s'.", crn, errorMessage), e);
-            throw new SdxOperationFailedException(errorMessage, e);
-        }
-    }
-
     public SdxStopValidationResponse isStoppable(String crn) {
         try {
             String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();

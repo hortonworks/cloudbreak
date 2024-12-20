@@ -49,6 +49,18 @@ public class GrpcSdxCdlClient {
         return response.getCrn();
     }
 
+    public String startDatalake(String datalakeNameOrCrn) {
+        SdxCdlClient sdxCdlClient = makeClient();
+        CdlCrudProto.StartDatalakeResponse response = sdxCdlClient.startDatalake(datalakeNameOrCrn);
+        return response.getCrn();
+    }
+
+    public String stopDatalake(String datalakeNameOrCrn) {
+        SdxCdlClient sdxCdlClient = makeClient();
+        CdlCrudProto.StopDatalakeResponse response = sdxCdlClient.stopDatalake(datalakeNameOrCrn);
+        return response.getCrn();
+    }
+
     public CdlCrudProto.DatalakeResponse findDatalake(String environmentNameOrCrn, String datalakeNameOrCrn) {
         SdxCdlClient sdxCdlClient = makeClient();
         return sdxCdlClient.findDatalake(environmentNameOrCrn, datalakeNameOrCrn);

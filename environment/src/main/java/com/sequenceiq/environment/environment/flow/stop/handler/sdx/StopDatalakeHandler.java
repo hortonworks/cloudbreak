@@ -1,26 +1,26 @@
-package com.sequenceiq.environment.environment.flow.stop.handler;
+package com.sequenceiq.environment.environment.flow.stop.handler.sdx;
 
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopEvent;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopFailedEvent;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopHandlerSelectors;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopStateSelectors;
-import com.sequenceiq.environment.environment.service.sdx.SdxPollerService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 
 @Component
 public class StopDatalakeHandler extends EventSenderAwareHandler<EnvironmentDto> {
 
-    private final SdxPollerService sdxPollerService;
+    private final PlatformAwareSdxConnector platformAwareSdxConnector;
 
-    protected StopDatalakeHandler(EventSender eventSender, SdxPollerService sdxPollerService) {
+    protected StopDatalakeHandler(EventSender eventSender, PlatformAwareSdxConnector platformAwareSdxConnector) {
         super(eventSender);
-        this.sdxPollerService = sdxPollerService;
+        this.platformAwareSdxConnector = platformAwareSdxConnector;
     }
 
     @Override
@@ -32,7 +32,7 @@ public class StopDatalakeHandler extends EventSenderAwareHandler<EnvironmentDto>
     public void accept(Event<EnvironmentDto> environmentDtoEvent) {
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
-            sdxPollerService.stopAttachedDatalakeClusters(environmentDto.getId(), environmentDto.getName());
+            platformAwareSdxConnector.stopByEnvironment(environmentDto.getResourceCrn());
             EnvStopEvent envStopEvent = EnvStopEvent.builder()
                     .withSelector(EnvStopStateSelectors.ENV_STOP_FREEIPA_EVENT.selector())
                     .withResourceId(environmentDto.getId())

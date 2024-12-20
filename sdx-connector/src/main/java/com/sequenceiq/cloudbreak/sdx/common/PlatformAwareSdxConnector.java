@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.sdx.common.polling.PollingResult;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDeleteService;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDescribeService;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDhTearDownService;
+import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxStartStopService;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxStatusService;
 import com.sequenceiq.cloudbreak.sdx.common.status.StatusCheckResult;
 
@@ -40,6 +41,9 @@ public class PlatformAwareSdxConnector {
 
     @Inject
     private Map<TargetPlatform, PlatformAwareSdxDeleteService<?>> platformDependentSdxDeleteServices;
+
+    @Inject
+    private Map<TargetPlatform, PlatformAwareSdxStartStopService> platformDependentSdxStartStopServices;
 
     @Inject
     private Map<TargetPlatform, PlatformAwareSdxDescribeService> platformDependentSdxDescribeServices;
@@ -76,6 +80,18 @@ public class PlatformAwareSdxConnector {
                 .flatMap(Collection::stream)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         return getAttemptResultForPolling(pollingResultForDeletion, "SDX deletion is failed for these: %s");
+    }
+
+    public void startByEnvironment(String environmentCrn) {
+        getSdxBasicViewByEnvironmentCrn(environmentCrn)
+                .ifPresent(sdx -> platformDependentSdxStartStopServices.get(TargetPlatform.getByCrn(sdx.crn()))
+                        .startSdx(sdx.crn()));
+    }
+
+    public void stopByEnvironment(String environmentCrn) {
+        getSdxBasicViewByEnvironmentCrn(environmentCrn)
+                .ifPresent(sdx -> platformDependentSdxStartStopServices.get(TargetPlatform.getByCrn(sdx.crn()))
+                        .stopSdx(sdx.crn()));
     }
 
     public Set<String> listSdxCrns(String environmentCrn) {

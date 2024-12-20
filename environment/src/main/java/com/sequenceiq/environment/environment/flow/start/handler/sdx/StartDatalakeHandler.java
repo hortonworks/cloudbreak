@@ -1,8 +1,9 @@
-package com.sequenceiq.environment.environment.flow.start.handler;
+package com.sequenceiq.environment.environment.flow.start.handler.sdx;
 
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentStartDto;
@@ -10,18 +11,17 @@ import com.sequenceiq.environment.environment.flow.start.event.EnvStartEvent;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartFailedEvent;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartHandlerSelectors;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartStateSelectors;
-import com.sequenceiq.environment.environment.service.sdx.SdxPollerService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 
 @Component
 public class StartDatalakeHandler extends EventSenderAwareHandler<EnvironmentStartDto> {
 
-    private final SdxPollerService sdxPollerService;
+    private final PlatformAwareSdxConnector platformAwareSdxConnector;
 
-    protected StartDatalakeHandler(EventSender eventSender, SdxPollerService sdxPollerService) {
+    protected StartDatalakeHandler(EventSender eventSender, PlatformAwareSdxConnector platformAwareSdxConnector) {
         super(eventSender);
-        this.sdxPollerService = sdxPollerService;
+        this.platformAwareSdxConnector = platformAwareSdxConnector;
     }
 
     @Override
@@ -33,7 +33,7 @@ public class StartDatalakeHandler extends EventSenderAwareHandler<EnvironmentSta
     public void accept(Event<EnvironmentStartDto> environmentStartDtoEvent) {
         EnvironmentDto environmentDto = environmentStartDtoEvent.getData().getEnvironmentDto();
         try {
-            sdxPollerService.startAttachedDatalake(environmentDto.getId(), environmentDto.getName());
+            platformAwareSdxConnector.startByEnvironment(environmentDto.getResourceCrn());
             EnvStartEvent envStartEvent = EnvStartEvent.builder()
                     .withSelector(EnvStartStateSelectors.ENV_START_DATAHUB_EVENT.selector())
                     .withResourceId(environmentDto.getId())

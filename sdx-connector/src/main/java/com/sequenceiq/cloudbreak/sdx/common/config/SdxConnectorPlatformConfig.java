@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDeleteService;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDescribeService;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDhTearDownService;
+import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxStartStopService;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxStatusService;
 
 @Configuration
@@ -25,6 +26,9 @@ public class SdxConnectorPlatformConfig {
 
     @Inject
     private Optional<List<PlatformAwareSdxDeleteService<?>>> platformDependentSdxDeleteServices;
+
+    @Inject
+    private Optional<List<PlatformAwareSdxStartStopService>> platformDependentSdxStartStopServices;
 
     @Inject
     private Optional<List<PlatformAwareSdxDescribeService>> platformDependentSdxDescribeServices;
@@ -51,6 +55,19 @@ public class SdxConnectorPlatformConfig {
             Map<TargetPlatform, PlatformAwareSdxDeleteService<?>> bean = new EnumMap<>(TargetPlatform.class);
             for (PlatformAwareSdxDeleteService<?> platformAwareSdxDeleteService : platformDependentSdxDeleteServices.get()) {
                 bean.put(platformAwareSdxDeleteService.targetPlatform(), platformAwareSdxDeleteService);
+            }
+            return Maps.immutableEnumMap(bean);
+        } else {
+            return Map.of();
+        }
+    }
+
+    @Bean
+    public Map<TargetPlatform, PlatformAwareSdxStartStopService> platformDependentSdxStartStopServicesMap() {
+        if (platformDependentSdxStartStopServices.isPresent()) {
+            Map<TargetPlatform, PlatformAwareSdxStartStopService> bean = new EnumMap<>(TargetPlatform.class);
+            for (PlatformAwareSdxStartStopService platformAwareSdxStartStopService : platformDependentSdxStartStopServices.get()) {
+                bean.put(platformAwareSdxStartStopService.targetPlatform(), platformAwareSdxStartStopService);
             }
             return Maps.immutableEnumMap(bean);
         } else {

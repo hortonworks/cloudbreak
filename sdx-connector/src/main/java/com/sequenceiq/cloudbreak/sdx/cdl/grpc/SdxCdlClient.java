@@ -48,6 +48,20 @@ public class SdxCdlClient {
         return newStub().deleteDatalake(request);
     }
 
+    public CdlCrudProto.StartDatalakeResponse startDatalake(String datalakeNameOrCrn) {
+        CdlCrudProto.StartDatalakeRequest request = CdlCrudProto.StartDatalakeRequest.newBuilder()
+                .setDatalake(datalakeNameOrCrn)
+                .build();
+        return newStub().startDatalake(request);
+    }
+
+    public CdlCrudProto.StopDatalakeResponse stopDatalake(String datalakeNameOrCrn) {
+        CdlCrudProto.StopDatalakeRequest request = CdlCrudProto.StopDatalakeRequest.newBuilder()
+                .setDatalake(datalakeNameOrCrn)
+                .build();
+        return newStub().stopDatalake(request);
+    }
+
     public CdlCrudProto.DatalakeResponse findDatalake(String environmentNameOrCrn, String datalakeNameOrCrn) {
         CdlCrudProto.FindDatalakeRequest request = CdlCrudProto.FindDatalakeRequest.newBuilder()
                 .setEnvironment(environmentNameOrCrn)

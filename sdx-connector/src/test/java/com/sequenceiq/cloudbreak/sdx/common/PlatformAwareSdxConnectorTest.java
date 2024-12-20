@@ -29,18 +29,21 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.cdl.service.CdlSdxDeleteService;
 import com.sequenceiq.cloudbreak.sdx.cdl.service.CdlSdxDescribeService;
+import com.sequenceiq.cloudbreak.sdx.cdl.service.CdlSdxStartStopService;
 import com.sequenceiq.cloudbreak.sdx.cdl.service.CdlSdxStatusService;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.sdx.common.polling.PollingResult;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDeleteService;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDescribeService;
+import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxStartStopService;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxStatusService;
 import com.sequenceiq.cloudbreak.sdx.paas.service.PaasSdxDeleteService;
 import com.sequenceiq.cloudbreak.sdx.paas.service.PaasSdxDescribeService;
+import com.sequenceiq.cloudbreak.sdx.paas.service.PaasSdxStartStopService;
 import com.sequenceiq.cloudbreak.sdx.paas.service.PaasSdxStatusService;
 
 @ExtendWith(MockitoExtension.class)
-public class PlatformAwareSdxConnectorTest {
+class PlatformAwareSdxConnectorTest {
 
     private static final String PAAS_CRN = "crn:cdp:datalake:us-west-1:tenant:datalake:crn1";
 
@@ -68,6 +71,12 @@ public class PlatformAwareSdxConnectorTest {
     @Mock
     private PaasSdxDeleteService paasSdxDeleteService;
 
+    @Mock
+    private PaasSdxStartStopService paasSdxStartStopService;
+
+    @Mock
+    private CdlSdxStartStopService cdlSdxStartStopService;
+
     @InjectMocks
     private PlatformAwareSdxConnector underTest;
 
@@ -82,9 +91,13 @@ public class PlatformAwareSdxConnectorTest {
         Map<TargetPlatform, PlatformAwareSdxDeleteService<?>> delete = Maps.newHashMap();
         delete.put(TargetPlatform.CDL, cdlSdxDeleteService);
         delete.put(TargetPlatform.PAAS, paasSdxDeleteService);
+        Map<TargetPlatform, PlatformAwareSdxStartStopService> startStop = Maps.newHashMap();
+        startStop.put(TargetPlatform.CDL, cdlSdxStartStopService);
+        startStop.put(TargetPlatform.PAAS, paasSdxStartStopService);
         FieldUtils.setProtectedFieldValue("platformDependentSdxStatusServicesMap", underTest, status);
         FieldUtils.setProtectedFieldValue("platformDependentSdxDescribeServices", underTest, describe);
         FieldUtils.setProtectedFieldValue("platformDependentSdxDeleteServices", underTest, delete);
+        FieldUtils.setProtectedFieldValue("platformDependentSdxStartStopServices", underTest, startStop);
     }
 
     @Test
@@ -171,5 +184,37 @@ public class PlatformAwareSdxConnectorTest {
         underTest.getSdxBasicViewByEnvironmentCrn("");
 
         verify(paasSdxDescribeService).getSdxByEnvironmentCrn(any());
+    }
+
+    @Test
+    public void testStopPaaS() {
+        when(paasSdxDescribeService.listSdxCrns(anyString())).thenReturn(Set.of(PAAS_CRN));
+        when(paasSdxDescribeService.getSdxByEnvironmentCrn(anyString())).thenReturn(Optional.of(SdxBasicView.builder().withCrn(PAAS_CRN).build()));
+        underTest.stopByEnvironment("env");
+        verify(paasSdxStartStopService).stopSdx(anyString());
+    }
+
+    @Test
+    public void testStopCDL() {
+        when(cdlSdxDescribeService.listSdxCrns(anyString())).thenReturn(Set.of(SAAS_CRN));
+        when(cdlSdxDescribeService.getSdxByEnvironmentCrn(anyString())).thenReturn(Optional.of(SdxBasicView.builder().withCrn(SAAS_CRN).build()));
+        underTest.stopByEnvironment("env");
+        verify(cdlSdxStartStopService).stopSdx(anyString());
+    }
+
+    @Test
+    public void testStartPaaS() {
+        when(paasSdxDescribeService.listSdxCrns(anyString())).thenReturn(Set.of(PAAS_CRN));
+        when(paasSdxDescribeService.getSdxByEnvironmentCrn(anyString())).thenReturn(Optional.of(SdxBasicView.builder().withCrn(PAAS_CRN).build()));
+        underTest.startByEnvironment("env");
+        verify(paasSdxStartStopService).startSdx(anyString());
+    }
+
+    @Test
+    public void testStartCDL() {
+        when(cdlSdxDescribeService.listSdxCrns(anyString())).thenReturn(Set.of(SAAS_CRN));
+        when(cdlSdxDescribeService.getSdxByEnvironmentCrn(anyString())).thenReturn(Optional.of(SdxBasicView.builder().withCrn(SAAS_CRN).build()));
+        underTest.startByEnvironment("env");
+        verify(cdlSdxStartStopService).startSdx(anyString());
     }
 }
