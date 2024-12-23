@@ -430,6 +430,74 @@ public class StopStartDownscaleDecommissionViaCMHandlerTest {
     }
 
     @Test
+    void testInstancesWithServiceNotRunningDecommissionYarnReverification() throws Exception {
+        int instancesToDecommissionCount = 5;
+        int expectedInstanceToCollectCount = 5;
+        int expectedInstancesDecommissionedCount = 5;
+        int recoveryCandidatesCount = 3;
+        List<InstanceMetadataView> instancesToDecommission = getInstancesWithStatus(0, instancesToDecommissionCount, INSTANCE_ID_PREFIX, FQDN_PREFIX,
+                InstanceStatus.SERVICES_HEALTHY);
+        List<InstanceMetadataView> recoveryCandidates = getInstancesWithStatus(100, recoveryCandidatesCount, INSTANCE_ID_PREFIX_RC, FQDN_PREFIX_RC,
+                InstanceStatus.SERVICES_HEALTHY);
+        List<CloudInstance> recoveryCandidatesCloudInstances = generateCloudInstances(100, 3, INSTANCE_ID_PREFIX_RC);
+        Map<String, InstanceMetadataView> collected = recoveryCandidates.stream().collect(Collectors.toMap(InstanceMetadataView::getDiscoveryFQDN,
+                imv -> imv));
+        collected.putAll(instancesToDecommission.stream().limit(expectedInstanceToCollectCount)
+                .collect(Collectors.toMap(InstanceMetadataView::getDiscoveryFQDN, i -> i)));
+
+        List<InstanceMetadataView> combinedDecommissionList = Stream.of(instancesToDecommission, recoveryCandidates)
+                .flatMap(Collection::stream).collect(Collectors.toList());
+
+        List<InstanceMetadataView> decommissionedMetadataList = new ArrayList<>(collected.values());
+        Set<String> fqdnsDecommissioned = decommissionedMetadataList.stream()
+                .map(InstanceMetadataView::getDiscoveryFQDN)
+                .collect(Collectors.toUnmodifiableSet());
+
+        Set<Long> instanceIdsToDecommission = instancesToDecommission.stream().map(InstanceMetadataView::getPrivateId).collect(Collectors.toUnmodifiableSet());
+        Set<String> hostnamesToDecommission = combinedDecommissionList.stream()
+                .map(InstanceMetadataView::getDiscoveryFQDN)
+                .collect(Collectors.toUnmodifiableSet());
+
+        StopStartDownscaleDecommissionViaCMRequest request =
+                new StopStartDownscaleDecommissionViaCMRequest(1L, INSTANCE_GROUP_NAME, instanceIdsToDecommission, recoveryCandidatesCloudInstances);
+
+        doReturn(combinedDecommissionList).when(stack).getNotTerminatedInstanceMetaData();
+        when(periscopeClientService.getYarnRecommendedInstanceIds(RESOURCE_CRN)).thenReturn(instancesToDecommission.stream()
+                .map(InstanceMetadataView::getInstanceId).collect(Collectors.toList()));
+        doCallRealMethod().when(stackService).getInstanceMetadata(any(), any());
+
+        Set<String> rcHostIds = recoveryCandidatesCloudInstances.stream().map(CloudInstance::getInstanceId).collect(Collectors.toSet());
+        doReturn(recoveryCandidates).when(instanceIdToInstanceMetaDataConverter).getNotDeletedAndNotZombieInstances(anyList(), anyString(),
+                eq(rcHostIds));
+
+        doReturn(fqdnsDecommissioned).when(clusterDecomissionService).decommissionClusterNodesStopStart(anyMap(), anyLong());
+
+        doReturn(collected).when(clusterDecomissionService).collectHostsToRemove(eq(INSTANCE_GROUP_NAME), anySet());
+
+        HandlerEvent handlerEvent = new HandlerEvent(Event.wrap(request));
+        Selectable selectable = underTest.doAccept(handlerEvent);
+
+
+        assertThat(selectable).isInstanceOf(StopStartDownscaleDecommissionViaCMResult.class);
+        StopStartDownscaleDecommissionViaCMResult result = (StopStartDownscaleDecommissionViaCMResult) selectable;
+
+        List<Long> decommissionedMetadataIdList = decommissionedMetadataList.stream()
+                .map(InstanceMetadataView::getId)
+                .sorted()
+                .collect(Collectors.toList());
+
+        ArgumentCaptor<List<Long>> argCap = ArgumentCaptor.forClass(List.class);
+        verify(instanceMetaDataService).updateInstanceStatuses(argCap.capture(), eq(InstanceStatus.DECOMMISSIONED), anyString());
+        assertThat(decommissionedMetadataIdList).hasSameElementsAs(argCap.getValue());
+
+        verify(clusterDecomissionService).collectHostsToRemove(eq(INSTANCE_GROUP_NAME), eq(hostnamesToDecommission));
+        verify(clusterDecomissionService).decommissionClusterNodesStopStart(eq(collected), anyLong());
+
+        assertThat(result.getDecommissionedHostFqdns()).hasSize(expectedInstancesDecommissionedCount + recoveryCandidatesCount);
+        assertThat(result.getNotDecommissionedHostFqdns()).isEmpty();
+    }
+
+    @Test
     void testExcludeLostNodesFromCmDecommission() throws Exception {
         int instancesToDecommissionCount = 5;
         int lostInstancesToExcludeCount = 2;
