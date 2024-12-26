@@ -218,6 +218,7 @@ cb:
     database.template.batchSize: 1
   multiaz:
     azure.availabilityZones: 1,2,3
+    availabilityZones.max: 3
 spring:
   application:
     name: EnvironmentsService
