@@ -186,13 +186,11 @@ public class StackV4RequestToStackConverter {
                     LOGGER, "Environment responded in {} ms for stack {}", source.getName());
         }
         if (isTemplate(source)) {
-            LOGGER.info("Creating stack from template for {}", source.getResourceCrn());
             updateCustomDomainOrKerberos(source, stack);
             updateCloudPlatformAndRelatedFields(source, stack, environment);
             convertAsStackTemplate(source, stack, environment);
             setNetworkAsTemplate(source, stack);
         } else {
-            LOGGER.info("Creating stack for {}", stack.getResourceCrn());
             convertAsStack(source, stack);
             updateCloudPlatformAndRelatedFields(source, stack, environment);
             setNetworkIfApplicable(source, stack, environment);

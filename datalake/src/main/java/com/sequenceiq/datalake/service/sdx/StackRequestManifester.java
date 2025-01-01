@@ -352,6 +352,8 @@ public class StackRequestManifester {
                 addAzureIdbrokerMsiToTelemetry(fluentAttributes, stackV4Request);
                 telemetryRequest.setFluentAttributes(fluentAttributes);
             }
+            LOGGER.info("Environment {} workload analytics: {}, features: {}",
+                    environment.getCrn(), envTelemetry.getWorkloadAnalytics(), envTelemetry.getFeatures());
             if (envTelemetry.getWorkloadAnalytics() != null && envTelemetry.getWorkloadAnalytics().getAttributes() != null) {
                 WorkloadAnalyticsRequest workloadAnalyticsRequest = new WorkloadAnalyticsRequest();
                 workloadAnalyticsRequest.setAttributes(envTelemetry.getWorkloadAnalytics().getAttributes());
