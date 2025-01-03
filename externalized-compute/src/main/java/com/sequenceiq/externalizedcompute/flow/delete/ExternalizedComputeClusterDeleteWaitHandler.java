@@ -16,7 +16,6 @@ import com.dyngr.exception.PollerStoppedException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeCluster;
-import com.sequenceiq.externalizedcompute.flow.create.ExternalizedComputeClusterCreateFailedEvent;
 import com.sequenceiq.externalizedcompute.service.ExternalizedComputeClusterService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -113,7 +112,7 @@ public class ExternalizedComputeClusterDeleteWaitHandler extends ExceptionCatche
                 DescribeClusterResponse cluster =
                         liftieGrpcClient.describeCluster(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster), actorCrn);
                 LOGGER.warn("Liftie cluster deletion timed out: {}. Cluster response: {}", externalizedComputeCluster.getLiftieName(), cluster, e);
-                return new ExternalizedComputeClusterCreateFailedEvent(resourceId, actorCrn, new RuntimeException("Compute cluster deletion timed out. " +
+                return new ExternalizedComputeClusterDeleteFailedEvent(resourceId, actorCrn, new RuntimeException("Compute cluster deletion timed out. " +
                         "The last known status is:" + cluster.getStatus() + ". Message: " + cluster.getMessage()));
             }
         }
