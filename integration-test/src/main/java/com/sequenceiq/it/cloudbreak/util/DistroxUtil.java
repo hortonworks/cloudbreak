@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.util;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
@@ -15,5 +16,11 @@ public class DistroxUtil {
         List<InstanceGroupV4Response> instanceGroups = cloudbreakClient.getDefaultClient().distroXV1Endpoint()
                 .getByName(testDto.getName(), new HashSet<>()).getInstanceGroups();
         return InstanceUtil.getInstanceIds(instanceGroups, hostGroupName);
+    }
+
+    public Map<String, String> getInstancesWithAz(DistroXTestDto testDto, CloudbreakClient cloudbreakClient, String hostGroupName) {
+        List<InstanceGroupV4Response> instanceGroups = cloudbreakClient.getDefaultClient().distroXV1Endpoint()
+                .getByName(testDto.getName(), new HashSet<>()).getInstanceGroups();
+        return InstanceUtil.getInstancesWithAz(instanceGroups, hostGroupName);
     }
 }
