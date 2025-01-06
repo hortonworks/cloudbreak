@@ -122,7 +122,7 @@ public class SharedServiceConfigProvider {
                 setRdsConfigsForCluster(requestedCluster, List.of(rdsConfigWithoutCluster.get()));
             } else {
                 // we should reach this point only in case of CDL
-                String userVaultPath = getHmsServiceConfigValue(configuration, HIVE_METASTORE_DATABASE_USER);
+                String userName = getHmsServiceConfigValue(configuration, HIVE_METASTORE_DATABASE_USER);
                 String passwordVaultPath = getHmsServiceConfigValue(configuration, HIVE_METASTORE_DATABASE_PASSWORD);
 
                 RDSConfig config = new RDSConfig();
@@ -130,7 +130,7 @@ public class SharedServiceConfigProvider {
                 config.setConnectionURL(connectionUrl);
                 config.setConnectionPassword(secretService.getSecretFromExternalVault(passwordVaultPath));
                 config.setStatus(ResourceStatus.DEFAULT);
-                config.setConnectionUserName(secretService.getSecretFromExternalVault(userVaultPath));
+                config.setConnectionUserName(userName);
                 config.setName(String.format("%s_%s_%s", stack.getName(), stack.getId(), dbName));
                 config.setType(databaseType);
                 config.setClusters(Set.of(requestedCluster));

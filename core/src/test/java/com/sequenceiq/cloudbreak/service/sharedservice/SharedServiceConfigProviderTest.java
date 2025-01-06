@@ -13,6 +13,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -111,7 +112,7 @@ public class SharedServiceConfigProviderTest {
         underTest.configureCluster(cluster);
 
         assertEquals(cluster.getRdsConfigs().size(), 1);
-        verifyNoInteractions(stackService, remoteDataContextWorkaroundService, clusterService);
+        verifyNoInteractions(stackService, remoteDataContextWorkaroundService, clusterService, secretService);
     }
 
     @Test
@@ -137,6 +138,8 @@ public class SharedServiceConfigProviderTest {
         assertEquals(rdsConfig.getType(), "HIVE");
         assertEquals(rdsConfig.getConnectionURL(), "jdbc:postgresql://host:5432/hive");
         verifyNoInteractions(stackService, remoteDataContextWorkaroundService);
+        verify(secretService, times(1)).getSecretFromExternalVault("pass");
+        verify(secretService, times(0)).getSecretFromExternalVault("hive");
     }
 
     private Cluster cluster() {
