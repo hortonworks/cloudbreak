@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
-import static org.apache.commons.lang3.StringUtils.substringBefore;
 
 import java.util.HashSet;
 import java.util.List;
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
@@ -36,13 +34,10 @@ import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
-import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
 public class MountDisks {
-
-    private static final String MIN_VERSION = "2.16.0";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MountDisks.class);
 
@@ -98,17 +93,11 @@ public class MountDisks {
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
             ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
 
-            Map<String, Map<String, String>> mountInfo;
-            if (isCbVersionPostOptimisation(stack)) {
-                hostOrchestrator.updateMountDiskPillar(stack, gatewayConfigs, stackUtil.collectNodesWithDiskData(stack), exitCriteriaModel,
-                        stack.getPlatformVariant());
-                LOGGER.debug("Execute format and mount states.");
-                mountInfo = hostOrchestrator.formatAndMountDisksOnNodes(stack, gatewayConfigs, nodesWithDiskData, allNodes, exitCriteriaModel);
-            } else {
-                LOGGER.debug("Legacy execute format and mount states.");
-                mountInfo = hostOrchestrator.formatAndMountDisksOnNodesLegacy(gatewayConfigs, nodesWithDiskData, allNodes, exitCriteriaModel,
-                        stack.getPlatformVariant());
-            }
+            hostOrchestrator.updateMountDiskPillar(stack, gatewayConfigs, stackUtil.collectNodesWithDiskData(stack), exitCriteriaModel,
+                    stack.getPlatformVariant());
+            LOGGER.debug("Execute format and mount states.");
+            Map<String, Map<String, String>> mountInfo =
+                    hostOrchestrator.formatAndMountDisksOnNodes(stack, gatewayConfigs, nodesWithDiskData, allNodes, exitCriteriaModel);
 
             mountInfo.forEach((hostname, value) -> {
                 Optional<String> instanceIdOptional = stack.getInstanceMetaDataAsList().stream()
@@ -146,13 +135,5 @@ public class MountDisks {
                     resourceAttributeUtil.setTypedAttributes(volumeSet, volumeSetAttributes);
                 }))
                 .collect(Collectors.toList()));
-    }
-
-    private boolean isCbVersionPostOptimisation(Stack stack) {
-        CloudbreakDetails cloudbreakDetails = componentConfigProviderService.getCloudbreakDetails(stack.getId());
-        VersionComparator versionComparator = new VersionComparator();
-        String version = substringBefore(cloudbreakDetails.getVersion(), "-");
-        int compare = versionComparator.compare(() -> version, () -> MIN_VERSION);
-        return compare >= 0;
     }
 }

@@ -130,9 +130,6 @@ public interface HostOrchestrator extends HostRecipeExecutor {
     void uploadKeytabs(List<GatewayConfig> allGatewayConfigs, Set<KeytabModel> keytabModels, ExitCriteriaModel exitModel)
             throws CloudbreakOrchestratorFailedException;
 
-    Map<String, Map<String, String>> formatAndMountDisksOnNodesLegacy(List<GatewayConfig> gatewayConfigs, Set<Node> targets, Set<Node> allNodes,
-            ExitCriteriaModel exitCriteriaModel, String platformVariant) throws CloudbreakOrchestratorFailedException;
-
     void backupDatabase(GatewayConfig primaryGateway, Set<String> target, SaltConfig saltConfig, ExitCriteriaModel exitModel, int databaseMaxDurationInMin)
             throws CloudbreakOrchestratorFailedException;
 

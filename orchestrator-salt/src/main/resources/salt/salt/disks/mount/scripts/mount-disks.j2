@@ -240,6 +240,7 @@ main() {
     return_code=$?
     [[ ! $return_code -eq 0 ]] && exit_with_code $LOG_FILE $return_code "Error creating directories on /hadoopfs/fs1"
 
+    script_executed_successfully $script_name
     exit_with_code $LOG_FILE 0 "Script $script_name ended"
 }
 

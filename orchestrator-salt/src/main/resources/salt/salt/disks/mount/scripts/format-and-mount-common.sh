@@ -50,6 +50,10 @@ was_script_executed() {
         log $log_file "script $script_name was already executed, line from semaphore file: $script_executed. Exiting"
         exit
     fi
+}
+
+script_executed_successfully() {
+    local script_name=$1
     echo "$(date +%Y-%m-%d:%H:%M:%S) - $script_name executed" >> $SEMAPHORE_FILE
 }
 

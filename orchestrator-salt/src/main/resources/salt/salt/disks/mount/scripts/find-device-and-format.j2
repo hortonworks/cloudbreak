@@ -145,6 +145,7 @@ main() {
     log $LOG_FILE exit code of get_uuid_list: $?, uuids: $uuid_list
     output $uuid_list
     export ATTACHED_VOLUME_UUID_LIST=$uuid_list
+    script_executed_successfully $script_name
     exit_with_code $LOG_FILE $EXIT_CODE_OK "script ran ok"
 }
 

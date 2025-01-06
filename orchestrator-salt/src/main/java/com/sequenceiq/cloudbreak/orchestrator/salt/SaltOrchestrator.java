@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.SALT;
 import static com.sequenceiq.cloudbreak.common.type.RecipeExecutionPhase.PRE_CLOUDERA_MANAGER_START;
 import static com.sequenceiq.cloudbreak.common.type.RecipeExecutionPhase.PRE_SERVICE_DEPLOYMENT;
 import static com.sequenceiq.cloudbreak.common.type.RecipeExecutionPhase.convert;
-import static com.sequenceiq.cloudbreak.util.FileReaderUtils.readFileFromClasspath;
 import static java.util.function.Predicate.not;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
@@ -147,15 +146,9 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     private static final String CREATE_USER_HOME_CRON = "cloudera.createuserhome";
 
-    private static final String DISK_INITIALIZE = "format-and-mount-initialize.sh";
-
-    private static final String DISK_COMMON = "format-and-mount-common.sh";
-
     private static final String DISK_FORMAT = "find-device-and-format.sh";
 
     private static final String DISK_MOUNT = "mount-disks.sh";
-
-    private static final String DISK_SCRIPT_PATH = "salt/bootstrapnodes/";
 
     private static final String SRV_SALT_DISK = "/srv/salt/disk";
 
@@ -433,32 +426,6 @@ public class SaltOrchestrator implements HostOrchestrator {
         String command = "(cd " + SRV_SALT_DISK + ';' + formatCommandParams + "./" + DISK_FORMAT + ')';
         Map<String, String> formatResponse = saltStateService.runCommandOnHosts(retry, sc, hostname, command);
         return formatResponse.getOrDefault(node.getHostname(), "");
-    }
-
-    private void uploadMountScriptsAndMakeThemExecutable(Set<Node> nodes, ExitCriteriaModel exitModel, Set<String> allTargets, Target<String> allHosts,
-            SaltConnector sc) throws IOException {
-        Map.of(
-                        DISK_INITIALIZE, readFileFromClasspath(DISK_SCRIPT_PATH + DISK_INITIALIZE).getBytes(),
-                        DISK_COMMON, readFileFromClasspath(DISK_SCRIPT_PATH + DISK_COMMON).getBytes(),
-                        DISK_FORMAT, readFileFromClasspath(DISK_SCRIPT_PATH + DISK_FORMAT).getBytes(),
-                        DISK_MOUNT, readFileFromClasspath(DISK_SCRIPT_PATH + DISK_MOUNT).getBytes())
-                .entrySet()
-                .stream()
-                .map(script -> {
-                    String scriptName = script.getKey();
-                    try {
-                        LOGGER.debug("Uploading script {} to targets {}", scriptName, nodes);
-                        uploadFileToTargets(sc, allTargets, exitModel, SRV_SALT_DISK, scriptName, script.getValue());
-                        return SRV_SALT_DISK + '/' + scriptName;
-                    } catch (CloudbreakOrchestratorFailedException e) {
-                        String message = String.format("Failed to upload file %s, to targets %s", scriptName, allTargets.toString());
-                        throw new CloudbreakServiceException(message, e);
-                    }
-                })
-                .forEach(path -> {
-                    LOGGER.debug("Making script {} executable on targets {}", path, nodes);
-                    saltStateService.runCommandOnHosts(retry, sc, allHosts, "chmod 755 " + path);
-                });
     }
 
     @Override
@@ -1204,31 +1171,6 @@ public class SaltOrchestrator implements HostOrchestrator {
             runner.call();
         } catch (Exception e) {
             LOGGER.info("Error occurred during keytab upload", e);
-            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public Map<String, Map<String, String>> formatAndMountDisksOnNodesLegacy(List<GatewayConfig> gatewayConfigs, Set<Node> nodesWithDiskData,
-            Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel, String platformVariant) throws CloudbreakOrchestratorFailedException {
-        GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(gatewayConfigs);
-        Set<String> allTargets = nodesWithDiskData.stream().map(Node::getHostname).collect(Collectors.toSet());
-        Target<String> allHosts = new HostList(nodesWithDiskData.stream().map(Node::getHostname).collect(Collectors.toSet()));
-        try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
-            uploadMountScriptsAndMakeThemExecutable(nodesWithDiskData, exitCriteriaModel, allTargets, allHosts, sc);
-
-            saltStateService.runCommandOnHosts(retry, sc, allHosts, "(cd " + SRV_SALT_DISK + ";./" + DISK_INITIALIZE + ')');
-            return nodesWithDiskData.stream()
-                    .map(node -> {
-                        Glob hostname = new Glob(node.getHostname());
-                        String uuidList = formatDisks(platformVariant, sc, node, hostname);
-                        Map<String, String> fstabResponse = mountDisks(platformVariant, sc, hostname, uuidList, node.getNodeVolumes().getFstab());
-                        String fstab = fstabResponse.getOrDefault(node.getHostname(), "");
-                        return new SimpleImmutableEntry<>(node.getHostname(), Map.of("uuids", uuidList, "fstab", fstab));
-                    })
-                    .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
-        } catch (Exception e) {
-            LOGGER.info("Error occurred during the salt bootstrap", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }

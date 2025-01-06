@@ -17,7 +17,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
@@ -76,9 +75,6 @@ public class MountDisksTest {
         when(stack.getPlatformVariant()).thenReturn(CloudConstants.MOCK);
         when(stack.getCluster()).thenReturn(new Cluster());
         when(stack.getDiskResourceType()).thenReturn(ResourceType.MOCK_VOLUME);
-        CloudbreakDetails cloudbreakDetails = new CloudbreakDetails();
-        cloudbreakDetails.setVersion("2.34.0");
-        when(componentConfigProviderService.getCloudbreakDetails(any())).thenReturn(cloudbreakDetails);
         Node node1 = new Node("1.1.1.1", "1.1.1.1", "id1", "m5.xlarge", "node-1", "worker");
         Node node2 = new Node("1.1.1.2", "1.1.1.2", "id2", "m5.xlarge", "node-2", "worker");
         Set<Node> reachableNodes = new HashSet<>();
