@@ -172,6 +172,33 @@ public class MonitoringConfigServiceTest {
     }
 
     @Test
+    public void testCreateConfigsAzureLoggingNull() {
+        // GIVEN
+        given(monitoringConfiguration.getRequestSigner()).willReturn(requestSignerConfiguration);
+        given(requestSignerConfiguration.isEnabled()).willReturn(true);
+        given(monitoringConfiguration.getClouderaManagerExporter()).willReturn(cmMonitoringConfiguration);
+        given(monitoringConfiguration.getAgent()).willReturn(monitoringAgentConfiguration);
+        given(cmMonitoringConfiguration.getPort()).willReturn(DEFAULT_CM_SMON_PORT);
+        given(monitoringConfiguration.getBlackboxExporter()).willReturn(blackboxExporterConfiguration);
+        given(blackboxExporterConfiguration.getClouderaIntervalSeconds()).willReturn(1000);
+        // WHEN
+        TelemetryContext loggingNullContext = telemetryContext("AZURE", "");
+        loggingNullContext.getTelemetry().setLogging(null);
+        Map<String, Object> result = underTest.createConfigs(loggingNullContext).toMap();
+        // THEN
+        assertEquals("myendpoint", result.get("remoteWriteUrl"));
+        assertEquals(true, result.get("cmAutoTls"));
+        assertEquals(ACCESS_KEY_TYPE, result.get("monitoringAccessKeyType"));
+        assertEquals(true, result.get("enabled"));
+        assertEquals("user", result.get("cmUsername"));
+        assertEquals(1000, result.get("blackboxExporterClouderaIntervalSeconds"));
+        assertEquals(1, ((List) result.get("blackboxExporterCloudLinks")).size());
+        assertEquals(4, ((List) result.get("blackboxExporterClouderaLinks")).size());
+        assertTrue(((List) result.get("blackboxExporterCloudLinks")).contains("https://management.azure.com"));
+        assertFalse(((List) result.get("blackboxExporterCloudLinks")).contains("https://storageaccount.dfs.core.windows.net"));
+    }
+
+    @Test
     public void testCreateConfigsGcp() {
         // GIVEN
         given(monitoringConfiguration.getRequestSigner()).willReturn(requestSignerConfiguration);
