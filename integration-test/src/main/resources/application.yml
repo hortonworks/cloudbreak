@@ -148,7 +148,7 @@ integrationtest:
       supported: true
       datalake:
         group: master
-        instanceType: m5.4xlarge
+        instanceType: m5.8xlarge
       datahub:
         group: master
         instanceType: m5.4xlarge
@@ -168,7 +168,7 @@ integrationtest:
       accessKeyId:
       secretKey:
     instance:
-      type: m5.2xlarge
+      type: m5.4xlarge
       rootVolumeSize: 200
       volumeSize: 100
       volumeCount: 1
@@ -304,7 +304,7 @@ integrationtest:
       supported: true
       datalake:
         group: master
-        instanceType: n1-standard-16
+        instanceType: n1-standard-32
       datahub:
         group: master
         instanceType: n1-standard-16
@@ -327,7 +327,7 @@ integrationtest:
         serviceAccountPrivateKey:
         projectId:
     instance:
-      type: n1-standard-8
+      type: n1-standard-16
       rootVolumeSize: 200
       volumeSize: 100
       volumeCount: 1

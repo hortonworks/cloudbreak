@@ -71,7 +71,7 @@ public class SdxVolumesVerticalScaleTest extends PreconditionSdxE2ETest {
     )
     public void testSdxVolumesVerticalScale(TestContext testContext) {
         CloudPlatform cloudPlatform = testContext.getCloudPlatform();
-        String instanceType = CloudPlatform.AWS.equals(cloudPlatform) ? "m5.2xlarge" : "Standard_D8s_v3";
+        String instanceType = CloudPlatform.AWS.equals(cloudPlatform) ? "m5.4xlarge" : "Standard_D8s_v3";
         testContext
             .given("telemetry", TelemetryTestDto.class)
             .withLogging()

@@ -130,7 +130,7 @@ public class SdxResizeTestUtil {
     private void populateSdxClusterResizeRequestWithCustomInstances(SdxClusterResizeRequest sdxClusterResizeRequest) {
         SdxInstanceGroupRequest sdxInstanceGroupRequest = new SdxInstanceGroupRequest();
         sdxInstanceGroupRequest.setName("master");
-        sdxInstanceGroupRequest.setInstanceType("m5.2xlarge");
+        sdxInstanceGroupRequest.setInstanceType("m5.4xlarge");
         SdxInstanceGroupDiskRequest sdxInstanceGroupDiskRequest = new SdxInstanceGroupDiskRequest();
         sdxInstanceGroupDiskRequest.setName("master");
         sdxInstanceGroupDiskRequest.setInstanceDiskSize(300);
