@@ -6,9 +6,13 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -16,6 +20,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.DefaultClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.common.gov.CommonGovService;
@@ -26,6 +32,8 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultClusterTemplateCacheTest {
+
+    private String defaultTemplateDir = "defaults/clustertemplates";
 
     @InjectMocks
     private DefaultClusterTemplateCache underTest;
@@ -241,6 +249,16 @@ public class DefaultClusterTemplateCacheTest {
     }
 
     @Test
+    public void testClusterTemplatesForGovOnlyPresentedFor7218AndNothingElse() throws IOException {
+        Set<String> actual = getFiles().stream()
+                .filter(e -> e.contains("aws_gov"))
+                .filter(e -> !e.contains("7.2.18"))
+                .collect(Collectors.toSet());
+
+        assertThat(actual.size(), is(0));
+    }
+
+    @Test
     public void testLoadClusterTemplatesFromFileWhenResourceDirEmpty() {
         underTest.setClusterTemplates(Collections.emptyList());
         underTest.setDefaultTemplateDir("test/defaults/clustertemplates/empty");
@@ -248,5 +266,19 @@ public class DefaultClusterTemplateCacheTest {
 
         Map<String, ClusterTemplate> actual = underTest.defaultClusterTemplates();
         assertThat(actual.size(), is(0));
+    }
+
+    private List<String> getFiles() throws IOException {
+        ResourcePatternResolver patternResolver = new PathMatchingResourcePatternResolver();
+        return Arrays.stream(patternResolver.getResources("classpath:" + defaultTemplateDir + "/**/*.json"))
+                .map(resource -> {
+                    try {
+                        String[] path = resource.getURL().getPath().split(defaultTemplateDir);
+                        return String.format("%s%s", defaultTemplateDir, path[1]);
+                    } catch (IOException e) {
+                        // wrap to runtime exception because of lambda and log the error in the caller method.
+                        throw new RuntimeException(e);
+                    }
+                }).collect(Collectors.toList());
     }
 }
