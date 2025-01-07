@@ -251,8 +251,8 @@ public class DefaultClusterTemplateCache {
                             .findFirst();
                     if (blueprint.isPresent()) {
                         clusterTemplate.setClouderaRuntimeVersion(blueprint.get().getStackVersion());
+                        defaultTemplates.add(clusterTemplate);
                     }
-                    defaultTemplates.add(clusterTemplate);
                 }
             }
         });
