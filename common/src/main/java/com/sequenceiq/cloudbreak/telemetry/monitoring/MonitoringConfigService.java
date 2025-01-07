@@ -145,7 +145,7 @@ public class MonitoringConfigService implements TelemetryPillarConfigGenerator<M
 
     private Optional<String> extractStorageAccount(Logging logging) {
         Optional<String> storageAccountOptional = Optional.empty();
-        if (logging.getAdlsGen2() != null) {
+        if (logging != null && logging.getAdlsGen2() != null) {
             String storageLocation = logging.getStorageLocation();
             AdlsGen2CloudStorageV1Parameters parameters = logging.getAdlsGen2();
             AdlsGen2Config adlsGen2Config = adlsGen2ConfigGenerator.generateStorageConfig(storageLocation);
