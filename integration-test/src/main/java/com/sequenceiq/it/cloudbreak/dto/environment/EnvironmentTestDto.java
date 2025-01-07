@@ -372,6 +372,14 @@ public class EnvironmentTestDto
         return this;
     }
 
+    public EnvironmentTestDto withResourceEncryptionKey() {
+        return getCloudProvider().withResourceEncryptionKey(this);
+    }
+
+    public EnvironmentTestDto withResourceEncryptionUserManagedIdentity() {
+        return getCloudProvider().withResourceEncryptionUserManagedIdentity(this);
+    }
+
     public EnvironmentTestDto withAws(AwsEnvironmentParameters awsEnvironmentParameters) {
         getRequest().setAws(awsEnvironmentParameters);
         return this;

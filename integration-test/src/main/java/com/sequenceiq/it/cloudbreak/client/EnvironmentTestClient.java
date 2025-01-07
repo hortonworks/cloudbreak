@@ -5,6 +5,7 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.it.cloudbreak.action.Action;
+import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentAddUserManagedIdentityAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentCascadingDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentCcmUpgrade;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentChangeAuthenticationAction;
@@ -124,4 +125,9 @@ public class EnvironmentTestClient {
     public Action<EnvironmentTestDto, EnvironmentClient> reInitializeDefaultExternalizedComputeCluster(boolean privateCluster) {
         return new EnvironmentReInitializeDefaultExternalizedComputeClusterAction(privateCluster);
     }
+
+    public Action<EnvironmentTestDto, EnvironmentClient> addUserManagedIdentity() {
+        return new EnvironmentAddUserManagedIdentityAction();
+    }
+
 }

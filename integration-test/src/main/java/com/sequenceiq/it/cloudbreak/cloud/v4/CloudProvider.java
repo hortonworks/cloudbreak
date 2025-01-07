@@ -113,6 +113,10 @@ public interface CloudProvider {
 
     EnvironmentTestDto withResourceEncryption(EnvironmentTestDto environmentTestDto);
 
+    EnvironmentTestDto withResourceEncryptionKey(EnvironmentTestDto environmentTestDto);
+
+    EnvironmentTestDto withResourceEncryptionUserManagedIdentity(EnvironmentTestDto environmentTestDto);
+
     DistroXTestDtoBase withResourceEncryption(DistroXTestDtoBase distroXTestDtoBase);
 
     StackTestDtoBase stack(StackTestDtoBase stack);

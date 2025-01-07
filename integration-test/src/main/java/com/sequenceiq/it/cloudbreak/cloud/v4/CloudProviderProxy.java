@@ -287,6 +287,16 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
+    public EnvironmentTestDto withResourceEncryptionKey(EnvironmentTestDto environmentTestDto) {
+        return delegate.withResourceEncryptionKey(environmentTestDto);
+    }
+
+    @Override
+    public EnvironmentTestDto withResourceEncryptionUserManagedIdentity(EnvironmentTestDto environmentTestDto) {
+        return delegate.withResourceEncryptionUserManagedIdentity(environmentTestDto);
+    }
+
+    @Override
     public DistroXTestDtoBase withResourceEncryption(DistroXTestDtoBase distroXTestDtoBase) {
         return delegate.withResourceEncryption(distroXTestDtoBase);
     }

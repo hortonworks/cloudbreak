@@ -516,6 +516,34 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public EnvironmentTestDto withResourceEncryptionKey(EnvironmentTestDto environmentTestDto) {
+        if (environmentTestDto.getAzure() == null) {
+            environmentTestDto.setAzure(AzureEnvironmentParameters.builder().build());
+        }
+        AzureEnvironmentParameters azureEnvironmentParameters = environmentTestDto.getAzure();
+        AzureResourceEncryptionParameters params = AzureResourceEncryptionParameters.builder()
+                .withEncryptionKeyResourceGroupName(getEncryptionResourceGroupName())
+                .withEncryptionKeyUrl(getEncryptionKeyUrl()).build();
+        azureEnvironmentParameters.setResourceEncryptionParameters(params);
+        environmentTestDto.setAzure(azureEnvironmentParameters);
+        return environmentTestDto;
+    }
+
+    @Override
+    public EnvironmentTestDto withResourceEncryptionUserManagedIdentity(EnvironmentTestDto environmentTestDto) {
+        if (environmentTestDto.getAzure() == null) {
+            environmentTestDto.setAzure(AzureEnvironmentParameters.builder().build());
+        }
+        AzureEnvironmentParameters azureEnvironmentParameters = environmentTestDto.getAzure();
+        if (azureEnvironmentParameters.getResourceEncryptionParameters() == null) {
+            azureEnvironmentParameters.setResourceEncryptionParameters(AzureResourceEncryptionParameters.builder().build());
+        }
+        AzureResourceEncryptionParameters encryptionParameters = azureEnvironmentParameters.getResourceEncryptionParameters();
+        encryptionParameters.setUserManagedIdentity(getEncryptionManagedIdentity());
+        return environmentTestDto;
+    }
+
+    @Override
     public DistroXTestDtoBase withResourceEncryption(DistroXTestDtoBase distroXTestDtoBase) {
         return distroXTestDtoBase;
     }
