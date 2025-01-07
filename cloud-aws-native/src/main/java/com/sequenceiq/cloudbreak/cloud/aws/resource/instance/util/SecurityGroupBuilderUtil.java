@@ -44,6 +44,7 @@ import software.amazon.awssdk.services.ec2.model.Filter;
 import software.amazon.awssdk.services.ec2.model.IpPermission;
 import software.amazon.awssdk.services.ec2.model.IpRange;
 import software.amazon.awssdk.services.ec2.model.PrefixListId;
+import software.amazon.awssdk.services.ec2.model.RevokeSecurityGroupEgressRequest;
 import software.amazon.awssdk.services.ec2.model.SecurityGroup;
 
 @Component
@@ -160,12 +161,17 @@ public class SecurityGroupBuilderUtil {
                     .ipRanges(IpRange.builder().cidrIp(cidr).build())
                     .build());
         }
-        AuthorizeSecurityGroupIngressRequest reguest = AuthorizeSecurityGroupIngressRequest.builder()
-                .groupId(securityGroupId)
-                .ipPermissions(permissions)
-                .build();
-        amazonEc2Client.addIngress(reguest);
-        LOGGER.info("Ingress added to {}", securityGroupId);
+        if (!permissions.isEmpty()) {
+            LOGGER.debug("Adding ingress rules to security group ({}): {}", securityGroupId, permissions);
+            AuthorizeSecurityGroupIngressRequest reguest = AuthorizeSecurityGroupIngressRequest.builder()
+                    .groupId(securityGroupId)
+                    .ipPermissions(permissions)
+                    .build();
+            amazonEc2Client.addIngress(reguest);
+            LOGGER.info("Ingress added to {}", securityGroupId);
+        } else {
+            LOGGER.info("No ingress rule has been generated, skipping the addition of ingress rules");
+        }
     }
 
     public void egress(AmazonEc2Client amazonEc2Client, AuthenticatedContext ac, AwsNetworkView awsNetworkView, String securityGroupId,
@@ -194,12 +200,14 @@ public class SecurityGroupBuilderUtil {
                 }
             }
             if (!permissions.isEmpty()) {
+                LOGGER.debug("Adding egress rules to security group ({}): {}", securityGroupId, permissions);
                 AuthorizeSecurityGroupEgressRequest request = AuthorizeSecurityGroupEgressRequest.builder()
                         .groupId(securityGroupId)
                         .ipPermissions(permissions)
                         .build();
                 amazonEc2Client.addEgress(request);
                 LOGGER.info("Egress added to {}", securityGroupId);
+                revokeDefaultOutboundEgressRule(amazonEc2Client, securityGroupId);
             } else {
                 LOGGER.debug("No permission for egress request, skip it");
             }
@@ -207,6 +215,20 @@ public class SecurityGroupBuilderUtil {
             LOGGER.debug("Egress creation skipped: {}, prefix list size: {}, vpc cidrs size: {}",
                     outboundInternetTraffic, prefixListIds.size(), vpcCidrs.size());
         }
+    }
+
+    private void revokeDefaultOutboundEgressRule(AmazonEc2Client amazonEc2Client, String securityGroupId) {
+        RevokeSecurityGroupEgressRequest revokeRequest = RevokeSecurityGroupEgressRequest.builder()
+                .groupId(securityGroupId)
+                .ipPermissions(IpPermission.builder()
+                        .ipProtocol("-1")
+                        .fromPort(0)
+                        .toPort(0)
+                        .ipRanges(IpRange.builder().cidrIp("0.0.0.0/0").build())
+                        .build())
+                .build();
+        amazonEc2Client.revokeEgress(revokeRequest);
+        LOGGER.info("Default allow all outbound traffic egress rule has been revoked for security group ({}).", securityGroupId);
     }
 
     public List<String> getSecurityGroupIds(AwsContext context, Group group) {

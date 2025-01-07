@@ -103,12 +103,36 @@ class SecurityGroupBuilderUtilTest {
         String groupId = "groupId";
         when(amazonEc2Client.createSecurityGroup(any())).thenReturn(CreateSecurityGroupResponse.builder().groupId(groupId).build());
         stubRegionName();
+        Security security = mock(Security.class);
+        SecurityRule securityRule = new SecurityRule("0.0.0.0/10", new PortDefinition[] { new PortDefinition("22", "22") }, "tcp");
+        when(security.getRules()).thenReturn(List.of(securityRule));
+        when(group.getSecurity()).thenReturn(security);
+
         String actual = underTest.createSecurityGroup(network, group, amazonEc2Client, context, ac);
 
         Assertions.assertEquals(groupId, actual);
         verify(amazonEc2Client, times(1)).createSecurityGroup(any());
         verify(amazonEc2Client, times(0)).addEgress(any());
         verify(amazonEc2Client, times(1)).addIngress(any());
+    }
+
+    @Test
+    void testCreateOrGetSecurityGroupWhenCreateSecurityGroupCallFails() {
+        String groupName = "groupName";
+        CreateSecurityGroupRequest request = CreateSecurityGroupRequest.builder()
+                .groupName(groupName)
+                .build();
+        Ec2Exception amazonEC2Exception = (Ec2Exception) Ec2Exception.builder()
+                .message("Internal server error")
+                .awsErrorDetails(AwsErrorDetails.builder()
+                        .errorCode("Internal.Error")
+                        .build())
+                .build();
+        when(amazonEc2Client.createSecurityGroup(request)).thenThrow(amazonEC2Exception);
+
+        Assertions.assertThrows(RuntimeException.class,
+                () -> underTest.createOrGetSecurityGroup(amazonEc2Client, request, group, awsNetworkView, ac));
+        verify(amazonEc2Client, times(0)).addIngress(any());
     }
 
     @Test
@@ -136,7 +160,7 @@ class SecurityGroupBuilderUtilTest {
 
         String actual = underTest.createOrGetSecurityGroup(amazonEc2Client, request, group, awsNetworkView, ac);
         Assertions.assertEquals(groupId, actual);
-        verify(amazonEc2Client, times(1)).addIngress(any());
+        verify(amazonEc2Client, times(0)).addIngress(any());
     }
 
     @Test
@@ -297,6 +321,7 @@ class SecurityGroupBuilderUtilTest {
 
         underTest.egress(amazonEc2Client, ac, awsNetworkView, "id", emptyList());
         verify(amazonEc2Client, times(0)).addEgress(any());
+        verify(amazonEc2Client, times(0)).revokeEgress(any());
     }
 
     @Test
@@ -308,6 +333,7 @@ class SecurityGroupBuilderUtilTest {
 
         underTest.egress(amazonEc2Client, ac, awsNetworkView, "id", emptyList());
         verify(amazonEc2Client, times(0)).addEgress(any());
+        verify(amazonEc2Client, times(0)).revokeEgress(any());
     }
 
     @Test
@@ -319,6 +345,7 @@ class SecurityGroupBuilderUtilTest {
 
         underTest.egress(amazonEc2Client, ac, awsNetworkView, "id", emptyList());
         verify(amazonEc2Client, times(0)).addEgress(any());
+        verify(amazonEc2Client, times(0)).revokeEgress(any());
     }
 
     @Test
@@ -330,6 +357,7 @@ class SecurityGroupBuilderUtilTest {
 
         underTest.egress(amazonEc2Client, ac, awsNetworkView, "id", emptyList());
         verify(amazonEc2Client, times(0)).addEgress(any());
+        verify(amazonEc2Client, times(0)).revokeEgress(any());
     }
 
     @Test
@@ -343,6 +371,7 @@ class SecurityGroupBuilderUtilTest {
         ArgumentCaptor<AuthorizeSecurityGroupEgressRequest> egressCaptor = ArgumentCaptor.forClass(AuthorizeSecurityGroupEgressRequest.class);
         verify(amazonEc2Client).addEgress(egressCaptor.capture());
         verify(amazonEc2Client, times(1)).addEgress(any());
+        verify(amazonEc2Client, times(1)).revokeEgress(any());
 
         Assertions.assertEquals("id", egressCaptor.getValue().groupId());
         Assertions.assertEquals("-1", egressCaptor.getValue().ipPermissions().get(0).ipProtocol());
@@ -363,6 +392,7 @@ class SecurityGroupBuilderUtilTest {
         ArgumentCaptor<AuthorizeSecurityGroupEgressRequest> egressCaptor = ArgumentCaptor.forClass(AuthorizeSecurityGroupEgressRequest.class);
         verify(amazonEc2Client).addEgress(egressCaptor.capture());
         verify(amazonEc2Client, times(1)).addEgress(any());
+        verify(amazonEc2Client, times(1)).revokeEgress(any());
 
         Assertions.assertEquals("id", egressCaptor.getValue().groupId());
         Assertions.assertEquals("-1", egressCaptor.getValue().ipPermissions().get(0).ipProtocol());
@@ -386,6 +416,7 @@ class SecurityGroupBuilderUtilTest {
         ArgumentCaptor<AuthorizeSecurityGroupEgressRequest> egressCaptor = ArgumentCaptor.forClass(AuthorizeSecurityGroupEgressRequest.class);
         verify(amazonEc2Client).addEgress(egressCaptor.capture());
         verify(amazonEc2Client, times(1)).addEgress(any());
+        verify(amazonEc2Client, times(1)).revokeEgress(any());
 
         Assertions.assertEquals("id", egressCaptor.getValue().groupId());
         Assertions.assertEquals("-1", egressCaptor.getValue().ipPermissions().get(0).ipProtocol());
@@ -406,6 +437,7 @@ class SecurityGroupBuilderUtilTest {
         ArgumentCaptor<AuthorizeSecurityGroupEgressRequest> egressCaptor = ArgumentCaptor.forClass(AuthorizeSecurityGroupEgressRequest.class);
         verify(amazonEc2Client).addEgress(egressCaptor.capture());
         verify(amazonEc2Client, times(1)).addEgress(any());
+        verify(amazonEc2Client, times(1)).revokeEgress(any());
 
         Assertions.assertEquals("id", egressCaptor.getValue().groupId());
         Assertions.assertEquals("-1", egressCaptor.getValue().ipPermissions().get(0).ipProtocol());

@@ -84,6 +84,8 @@ import software.amazon.awssdk.services.ec2.model.ModifyVolumeRequest;
 import software.amazon.awssdk.services.ec2.model.ModifyVolumeResponse;
 import software.amazon.awssdk.services.ec2.model.ReleaseAddressRequest;
 import software.amazon.awssdk.services.ec2.model.ReleaseAddressResponse;
+import software.amazon.awssdk.services.ec2.model.RevokeSecurityGroupEgressRequest;
+import software.amazon.awssdk.services.ec2.model.RevokeSecurityGroupEgressResponse;
 import software.amazon.awssdk.services.ec2.model.RunInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.RunInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.StartInstancesRequest;
@@ -258,6 +260,10 @@ public class AmazonEc2Client extends AmazonClient {
 
     public AuthorizeSecurityGroupEgressResponse addEgress(AuthorizeSecurityGroupEgressRequest request) {
         return client.authorizeSecurityGroupEgress(request);
+    }
+
+    public RevokeSecurityGroupEgressResponse revokeEgress(RevokeSecurityGroupEgressRequest request) {
+        return client.revokeSecurityGroupEgress(request);
     }
 
     public AllocateAddressResponse allocateAddress(AllocateAddressRequest request) {
