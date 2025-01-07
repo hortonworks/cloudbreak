@@ -248,6 +248,11 @@ Set Gradle JVM
 IntelliJ IDEA -> Settings -> Build, Execution, Deployment -> Gradle -> Gradle JVM -> 21
 ```
 
+Set IDEA compiler JVM heap memory
+```
+File -> Settings -> Build, Execution, Deployment -> Compiler -> Shared heap size -> 1500
+```
+
 Set additional command line parameters
 ```
 IntelliJ IDEA -> Settings -> Build, Execution, Deployment -> Compiler -> Java Compiler -> Additional command line parameters -> -parameters
