@@ -134,6 +134,7 @@ public class ApiDescription {
         public static final String OPERATION_ID = "operation ID of the particular scaling activity";
         public static final String FLOW_ID = "flow id of the scaling activity";
         public static final String START_TIME = "start time of the scaling activity";
+        public static final String YARN_RECOMMENDATION_TIME = "time when we asked yarn for recommendation";
         public static final String END_TIME = "end time of the activity";
         public static final String ACTIVITY_STATUS = "Status of the scaling activity";
         public static final String ACTIVITY_REASON = "Reason for the scaling activity";

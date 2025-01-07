@@ -18,11 +18,17 @@ public class DistroXAutoscaleScalingActivityResponse implements Json {
     @Schema(description = ApiDescription.ClusterJsonsProperties.END_TIME)
     private Date endTime;
 
+    @Schema(description = ApiDescription.ClusterJsonsProperties.YARN_RECOMMENDATION_TIME)
+    private Date yarnRecommendationTime;
+
     @Schema(description = ApiDescription.ClusterJsonsProperties.ACTIVITY_STATUS)
     private ApiActivityStatus apiActivityStatus;
 
     @Schema(description = ApiDescription.ClusterJsonsProperties.ACTIVITY_REASON)
     private String scalingActivityReason;
+
+    @Schema(description = ApiDescription.ClusterJsonsProperties.YARN_RECOMMENDATION)
+    private String yarnRecommendation;
 
     public DistroXAutoscaleScalingActivityResponse() {
     }
@@ -41,6 +47,14 @@ public class DistroXAutoscaleScalingActivityResponse implements Json {
 
     public Date getStartTime() {
         return startTime;
+    }
+
+    public void setYarnRecommendationTime(Date yarnRecommendationTime) {
+        this.yarnRecommendationTime = yarnRecommendationTime;
+    }
+
+    public Date getYarnRecommendationTime() {
+        return yarnRecommendationTime;
     }
 
     public void setEndTime(Date endTime) {
@@ -65,6 +79,14 @@ public class DistroXAutoscaleScalingActivityResponse implements Json {
 
     public void setScalingActivityReason(String scalingActivityReason) {
         this.scalingActivityReason = scalingActivityReason;
+    }
+
+    public String getYarnRecommendation() {
+        return yarnRecommendation;
+    }
+
+    public void setYarnRecommendation(String yarnRecommendation) {
+        this.yarnRecommendation = yarnRecommendation;
     }
 
 }

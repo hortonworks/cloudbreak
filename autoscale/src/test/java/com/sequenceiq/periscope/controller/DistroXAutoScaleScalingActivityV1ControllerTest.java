@@ -85,6 +85,7 @@ public class DistroXAutoScaleScalingActivityV1ControllerTest {
     private DistroXAutoscaleScalingActivityResponse convert(ScalingActivity scalingActivity) {
         DistroXAutoscaleScalingActivityResponse json = new DistroXAutoscaleScalingActivityResponse();
         json.setStartTime(scalingActivity.getStartTime());
+        json.setYarnRecommendationTime(scalingActivity.getYarnRecommendationTime());
         json.setEndTime(scalingActivity.getEndTime());
         json.setOperationId(scalingActivity.getOperationId());
         json.setActivityStatus(convert(scalingActivity.getActivityStatus()));
@@ -284,6 +285,7 @@ public class DistroXAutoScaleScalingActivityV1ControllerTest {
         scalingActivity.setScalingActivityReason(TEST_REASON);
         scalingActivity.setActivityStatus(status);
         scalingActivity.setStartTime(new Date(creationTimestamp));
+        scalingActivity.setYarnRecommendationTime(new Date(creationTimestamp));
         scalingActivity.setCluster(cluster);
         return scalingActivity;
     }

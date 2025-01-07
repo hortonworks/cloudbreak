@@ -38,9 +38,11 @@ public class DistroXAutoscaleScalingActivityResponseConverter extends AbstractCo
         DistroXAutoscaleScalingActivityResponse json = new DistroXAutoscaleScalingActivityResponse();
         json.setStartTime(scalingActivity.getStartTime());
         json.setEndTime(scalingActivity.getEndTime());
+        json.setYarnRecommendationTime(scalingActivity.getYarnRecommendationTime());
         json.setOperationId(scalingActivity.getOperationId());
         json.setActivityStatus(convert(scalingActivity.getActivityStatus()));
         json.setScalingActivityReason(scalingActivity.getScalingActivityReason());
+        json.setYarnRecommendation(scalingActivity.getYarnRecommendation());
         return json;
     }
 

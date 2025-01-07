@@ -27,6 +27,8 @@ class DistroXAutoscaleScalingActivityResponseConverterTest {
 
     private static final String TEST_REASON = "test trigger reason";
 
+    private static final String TEST_YARN_RECOMMENDATION = "test yarn recommendation";
+
     private static final String CLOUDBREAK_STACK_CRN_1 = "crn:cdp:datahub:us-west-1:tenant:cluster:878605d9-f9e9-44c6-9da6-e4bce9570ef5";
 
     private static final String TEST_TENANT = "testTenant";
@@ -46,6 +48,7 @@ class DistroXAutoscaleScalingActivityResponseConverterTest {
         ScalingActivity testScalingActivity = createScalingActivity(testCluster, ActivityStatus.UPSCALE_TRIGGER_SUCCESS, Instant.now().toEpochMilli(),
                 Instant.now().minus(30, MINUTES).toEpochMilli());
         DistroXAutoscaleScalingActivityResponse result = underTest.convert(testScalingActivity);
+        assertThat(result.getYarnRecommendation()).isNotNull().isEqualTo(TEST_YARN_RECOMMENDATION);
         assertThat(result.getOperationId()).isNotNull().isEqualTo(TEST_OPERATION_ID);
     }
 
@@ -53,9 +56,11 @@ class DistroXAutoscaleScalingActivityResponseConverterTest {
         ScalingActivity scalingActivity = new ScalingActivity();
         scalingActivity.setOperationId(TEST_OPERATION_ID);
         scalingActivity.setScalingActivityReason(TEST_REASON);
+        scalingActivity.setYarnRecommendation(TEST_YARN_RECOMMENDATION);
         scalingActivity.setActivityStatus(status);
         scalingActivity.setFlowId(TEST_OPERATION_ID);
         scalingActivity.setStartTime(new Date(creationTimestamp));
+        scalingActivity.setYarnRecommendationTime(new Date(creationTimestamp));
         scalingActivity.setEndTime(new Date(endTimeStamp));
         scalingActivity.setCluster(cluster);
 
