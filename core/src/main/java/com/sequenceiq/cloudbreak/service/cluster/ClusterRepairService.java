@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ACCEPTANCE_POLICY_PARAMETER;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANUALRECOVERY_COULD_NOT_START;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANUALRECOVERY_NO_NODES_TO_RECOVER;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANUALRECOVERY_REQUESTED;
@@ -31,12 +32,25 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.converter.spi.CloudContextProvider;
+import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
@@ -54,6 +68,7 @@ import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
 import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
+import com.sequenceiq.cloudbreak.service.environment.marketplace.AzureMarketplaceTermsClientService;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
@@ -65,6 +80,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -131,6 +147,21 @@ public class ClusterRepairService {
 
     @Inject
     private SaltVersionValidatorService saltVersionValidatorService;
+
+    @Inject
+    private CloudPlatformConnectors cloudPlatformConnectors;
+
+    @Inject
+    private StackUtil stackUtil;
+
+    @Inject
+    private AzureMarketplaceTermsClientService azureMarketplaceTermsClientService;
+
+    @Inject
+    private StackToCloudStackConverter stackToCloudStackConverter;
+
+    @Inject
+    private CloudContextProvider cloudContextProvider;
 
     public FlowIdentifier repairAll(StackView stackView, boolean upgrade, boolean keepVariant) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
@@ -232,7 +263,12 @@ public class ClusterRepairService {
         } else if (!isAllGatewaySelectedWhenSaltVersionIsOutdated(repairMode, selectedParts, stack)) {
             return Optional.of(RepairValidation.of("Gateway node(s) has outdated Salt version. Please include gateway node(s) in the repair selection!"));
         } else {
-            return Optional.empty();
+            String resultMessage = validateImage(stack);
+            if (StringUtils.isNotEmpty(resultMessage)) {
+                return Optional.of(RepairValidation.of(resultMessage));
+            } else {
+                return Optional.empty();
+            }
         }
     }
 
@@ -246,6 +282,42 @@ public class ClusterRepairService {
             }
         }
         return true;
+    }
+
+    private String validateImage(StackDto stack) {
+        String platform = stack.getCloudPlatform();
+        if (!CloudPlatform.AZURE.name().equals(platform)) {
+            LOGGER.debug("Platform is not Azure. Nothing to validate.");
+            return null;
+        }
+        CloudPlatformVariant cloudPlatform = new CloudPlatformVariant(
+                Platform.platform(platform.toUpperCase()),
+                Variant.variant(platform.toUpperCase()));
+            LOGGER.debug("Checking if Azure Marketplace image is usable before attempting repair");
+            CloudConnector connector = cloudPlatformConnectors.get(cloudPlatform);
+            AuthenticatedContext ac = getAuthenticatedContext(stack, stack.getEnvironmentCrn(), connector);
+
+            Image image = getImageFromDatabase(stack.getStack());
+            Boolean accepted = azureMarketplaceTermsClientService.getAccepted(stack.getEnvironmentCrn());
+            LOGGER.debug("Azure Marketplace automatic terms acceptance policy: {}", accepted);
+            Map<String, String> parameters = Map.of(ACCEPTANCE_POLICY_PARAMETER, accepted.toString());
+            CloudStack cloudStack = stackToCloudStackConverter.convert(stack);
+            try {
+                connector.setup().validateImage(ac, cloudStack, image);
+            } catch (CloudConnectorException e) {
+                if (e.getMessage().contains("Image validation error")) {
+                    LOGGER.debug("Repair image validation failed: {}", e.getMessage());
+                    return e.getMessage();
+                }
+            }
+        return null;
+    }
+
+    private AuthenticatedContext getAuthenticatedContext(StackDto stack, String environmentCrn, CloudConnector connector) {
+        CloudContext cloudContext = cloudContextProvider.getCloudContext(stack);
+
+        CloudCredential cloudCredential = stackUtil.getCloudCredential(environmentCrn);
+        return connector.authentication().authenticate(cloudContext, cloudCredential);
     }
 
     private boolean isCMRepairAndAllStoppedNodesNotSelected(List<InstanceMetadataView> nonTerminatedInstanceMetadata, Set<String> selectedInstances) {

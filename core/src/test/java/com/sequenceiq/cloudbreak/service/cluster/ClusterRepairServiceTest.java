@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -25,6 +26,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -44,6 +46,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.Authenticator;
+import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.Setup;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
@@ -51,6 +60,8 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.converter.spi.CloudContextProvider;
+import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
@@ -75,6 +86,7 @@ import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
 import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
+import com.sequenceiq.cloudbreak.service.environment.marketplace.AzureMarketplaceTermsClientService;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
@@ -87,6 +99,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -177,6 +190,30 @@ class ClusterRepairServiceTest {
 
     @Mock
     private SaltVersionValidatorService saltVersionValidatorService;
+
+    @Mock
+    private CloudPlatformConnectors cloudPlatformConnectors;
+
+    @Mock
+    private CloudContextProvider cloudContextProvider;
+
+    @Mock
+    private StackUtil stackUtil;
+
+    @Mock
+    private CloudConnector connector;
+
+    @Mock
+    private AuthenticatedContext authenticatedContext;
+
+    @Mock
+    private Image image;
+
+    @Mock
+    private AzureMarketplaceTermsClientService azureMarketplaceTermsClientService;
+
+    @Mock
+    private StackToCloudStackConverter stackToCloudStackConverter;
 
     private Stack stack;
 
@@ -858,4 +895,77 @@ class ClusterRepairServiceTest {
         return instanceMetaData;
     }
 
+    @Test
+    void testValidateImageNonAzurePlatform() {
+        when(freeipaService.checkFreeipaRunning(any())).thenReturn(true);
+        when(environmentService.environmentStatusInDesiredState(any(), any())).thenReturn(true);
+        cluster.setDatabaseServerCrn(null);
+        when(entitlementService.haRepairEnabled(any())).thenReturn(true);
+        when(stackDto.getNotTerminatedGatewayInstanceMetadata()).thenReturn(List.of());
+
+        when(stackDto.getCloudPlatform()).thenReturn("AWS");
+        Optional<RepairValidation> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.validateRepairConditions(ManualClusterRepairMode.ALL, stackDto, Set.of()));
+
+        assertTrue(result.isEmpty());
+        verify(stackDto, times(2)).getCloudPlatform();
+        verifyNoInteractions(cloudPlatformConnectors, azureMarketplaceTermsClientService, stackToCloudStackConverter);
+    }
+
+    @Test
+    void testValidateImageAzureValidationFails() {
+        when(freeipaService.checkFreeipaRunning(any())).thenReturn(true);
+        when(environmentService.environmentStatusInDesiredState(any(), any())).thenReturn(true);
+        cluster.setDatabaseServerCrn(null);
+        when(entitlementService.haRepairEnabled(any())).thenReturn(true);
+        when(stackDto.getNotTerminatedGatewayInstanceMetadata()).thenReturn(List.of());
+
+        when(stackDto.getCloudPlatform()).thenReturn("AZURE");
+        when(stackDto.getEnvironmentCrn()).thenReturn("env-crn");
+        when(cloudPlatformConnectors.get(any())).thenReturn(connector);
+        when(azureMarketplaceTermsClientService.getAccepted("env-crn")).thenReturn(true);
+        when(stackToCloudStackConverter.convert(stackDto)).thenReturn(mock(CloudStack.class));
+
+        Setup setup = mock(Setup.class);
+        when(connector.setup()).thenReturn(setup);
+        doThrow(new CloudConnectorException("Image validation error: Invalid image"))
+                .when(setup).validateImage(any(), any(), any());
+
+        Authenticator authenticator = mock(Authenticator.class);
+        when(connector.authentication()).thenReturn(authenticator);
+        when(authenticator.authenticate(any(), any())).thenReturn(authenticatedContext);
+
+        Optional<RepairValidation> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.validateRepairConditions(ManualClusterRepairMode.ALL, stackDto, Set.of()));
+
+        assertNotNull(result);
+        assertTrue(result.get().getValidationErrors().contains("Image validation error: Invalid image"));
+    }
+
+    @Test
+    void testValidateImageSuccessfulValidation() {
+        when(freeipaService.checkFreeipaRunning(any())).thenReturn(true);
+        when(environmentService.environmentStatusInDesiredState(any(), any())).thenReturn(true);
+        cluster.setDatabaseServerCrn(null);
+        when(entitlementService.haRepairEnabled(any())).thenReturn(true);
+        when(stackDto.getNotTerminatedGatewayInstanceMetadata()).thenReturn(List.of());
+
+        when(stackDto.getCloudPlatform()).thenReturn("AZURE");
+        when(stackDto.getEnvironmentCrn()).thenReturn("env-crn");
+        when(cloudPlatformConnectors.get(any())).thenReturn(connector);
+        when(azureMarketplaceTermsClientService.getAccepted("env-crn")).thenReturn(true);
+        when(stackToCloudStackConverter.convert(stackDto)).thenReturn(mock(CloudStack.class));
+
+        Setup setup = mock(Setup.class);
+        when(connector.setup()).thenReturn(setup);
+
+        Authenticator authenticator = mock(Authenticator.class);
+        when(connector.authentication()).thenReturn(authenticator);
+        when(authenticator.authenticate(any(), any())).thenReturn(authenticatedContext);
+
+        Optional<RepairValidation> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.validateRepairConditions(ManualClusterRepairMode.ALL, stackDto, Set.of()));
+
+        assertTrue(result.isEmpty());
+    }
 }

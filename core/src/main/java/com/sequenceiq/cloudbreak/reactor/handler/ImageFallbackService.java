@@ -70,7 +70,17 @@ public class ImageFallbackService {
                         currentImage.getImageName());
                 throw new CloudbreakServiceException(message);
             }
-            String fallbackImageName = getFallbackImageName(stackView, currentImage);
+            String fallbackImageName = null;
+            try {
+                fallbackImageName = getFallbackImageName(stackView, currentImage);
+            } catch (CloudbreakImageNotFoundException e) {
+                String errorMessage = String.format("Your image %s seems to be an Azure Marketplace image, "
+                        + "however its Terms and Conditions are not accepted! "
+                        + "Please either enable automatic consent or accept the terms manually and initiate the provisioning or upgrade again. " +
+                        "On how to accept the Terms and Conditions of the image please refer to azure documentation " +
+                        "at https://docs.microsoft.com/en-us/cli/azure/vm/image/terms?view=azure-cli-latest.", currentImage.getImageName());
+                throw new CloudbreakServiceException(errorMessage);
+            }
             LOGGER.debug("Replacing current image {} with fallback image {}", currentImage.getImageName(), fallbackImageName);
             userDataService.makeSureUserDataIsMigrated(stackView.getId());
             component.setAttributes(new Json(new Image(fallbackImageName,

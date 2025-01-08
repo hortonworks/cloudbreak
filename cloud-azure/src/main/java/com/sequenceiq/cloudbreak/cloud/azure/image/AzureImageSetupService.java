@@ -120,6 +120,10 @@ public class AzureImageSetupService {
         return CopyStatusType.ABORTED.equals(copyState) || CopyStatusType.FAILED.equals(copyState);
     }
 
+    public void validateImage(AuthenticatedContext ac, CloudStack stack, Image image, AzureClient client) {
+        azureMarketplaceValidatorService.validateMarketplaceImageTerms(image, client, stack, ac);
+    }
+
     public void copyVhdImageIfNecessary(AuthenticatedContext ac, CloudStack stack, Image image, String region, AzureClient client,
             PrepareImageType prepareType, String imageFallbackTarget) {
         CloudContext cloudContext = ac.getCloudContext();
