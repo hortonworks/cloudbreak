@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.auth;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -40,7 +39,7 @@ public class PaywallCredentialPopulatorTest {
 
         underTest.populateWebTarget(baseUrl, webTarget);
 
-        assertFalse(webTarget.getConfiguration().getInstances().isEmpty());
+        assertEquals(2, webTarget.getConfiguration().getInstances().size());
         verify(clouderaManagerLicenseProvider).getLicense(any());
         verify(license).getPaywallUsername();
         verify(license).getPaywallPassword();
@@ -53,7 +52,7 @@ public class PaywallCredentialPopulatorTest {
 
         underTest.populateWebTarget(baseUrl, webTarget);
 
-        assertTrue(webTarget.getConfiguration().getInstances().isEmpty());
+        assertEquals(1, webTarget.getConfiguration().getInstances().size());
         verifyNoInteractions(clouderaManagerLicenseProvider);
     }
 

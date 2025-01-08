@@ -17,12 +17,17 @@ import org.apache.http.ssl.SSLContexts;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.filter.EncodingFilter;
+import org.glassfish.jersey.jackson.internal.jackson.jaxrs.json.JacksonJsonProvider;
 import org.glassfish.jersey.logging.LoggingFeature;
 import org.glassfish.jersey.logging.LoggingFeature.Verbosity;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.message.GZipEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 public class RestClientUtil {
 
@@ -99,6 +104,7 @@ public class RestClientUtil {
             builder = enableRestDebug(builder);
         }
         Client client = builder.build();
+        client.register(createIgnoreUnknownFieldsProvider());
         LOGGER.debug("Jax rs client has been constructed: {}, sslContext: {}", client, sslContext);
         return client;
     }
@@ -125,10 +131,18 @@ public class RestClientUtil {
 
         Client client = builder.build();
         client.property(ClientProperties.SUPPRESS_HTTP_COMPLIANCE_VALIDATION, configKey.isIgnorePreValidation());
+        client.register(createIgnoreUnknownFieldsProvider());
 
         SSLContext sslContext = client.getSslContext();
         LOGGER.debug("RestClient has been constructed: {}, client: {}, sslContext: {}", configKey, client, sslContext);
         return client;
+    }
+
+    private static JacksonJsonProvider createIgnoreUnknownFieldsProvider() {
+        ObjectMapper mapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        return new JacksonJsonProvider(mapper);
     }
 
     private static ClientBuilder enableRestDebug(ClientBuilder builder) {
