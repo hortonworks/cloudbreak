@@ -29,16 +29,20 @@ public class StackToDependentHostGroupV4ResponseConverter {
 
     public DependentHostGroupsV4Response convert(StackDto stack, Set<String> hostGroups) {
         Map<String, Set<String>> dependentHostGroupsForHostGroup = Maps.newHashMap();
+        Map<String, Set<String>> dependentComponentsForHostGroup = Maps.newHashMap();
         if (stack.getBlueprint() != null && StringUtils.isNotEmpty(stack.getBlueprint().getBlueprintJsonText())) {
             LOGGER.debug("Adding dependent hostgroups with roles health to response");
             CmTemplateProcessor processor = cmTemplateProcessorFactory.get(stack.getBlueprint().getBlueprintJsonText());
             hostGroups.forEach(hg -> dependentHostGroupsForHostGroup.put(hg,
                     dependentRolesHealthCheckService.getDependentHostGroupsForHostGroup(processor, hg)));
+            hostGroups.forEach(hg -> dependentComponentsForHostGroup.put(hg,
+                    dependentRolesHealthCheckService.getDependentComponentsForHostGroup(processor, hg)));
         } else {
             LOGGER.info("No blueprint for stack: '{}', returning with empty response", stack.getName());
         }
         DependentHostGroupsV4Response dependentHostGroupsResponse = new DependentHostGroupsV4Response();
         dependentHostGroupsResponse.setDependentHostGroups(dependentHostGroupsForHostGroup);
+        dependentHostGroupsResponse.setDependentComponents(dependentComponentsForHostGroup);
         return dependentHostGroupsResponse;
     }
 }

@@ -4,6 +4,8 @@ import static com.sequenceiq.periscope.api.model.ClusterState.RUNNING;
 import static com.sequenceiq.periscope.api.model.ClusterState.SUSPENDED;
 import static java.util.stream.Collectors.toSet;
 
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -37,6 +39,8 @@ public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStat
 
     // TODO: Better way to define such constants?
     private static final String UNDEFINED_DEPENDENCY = "UNDEFINED_DEPENDENCY";
+
+    private static final String GOOD_HEALTH = "GOOD";
 
     @Inject
     private ClusterService clusterService;
@@ -111,17 +115,45 @@ public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStat
                 return Optional.ofNullable(stackResponse.getStatus()).map(Status::isAvailable).orElse(false);
             }
 
-            boolean dependentHostsUnhealthy = policyHostGroups.stream().anyMatch(hg -> dependentHostsUnhealthy(dependentHostGroupsResponse, stackResponse, hg));
+            boolean dependentHostsUnhealthy = policyHostGroups.stream().anyMatch(hg ->
+                    dependentHostsUnhealthy(dependentHostGroupsResponse, stackResponse, hg, cluster));
 
             return !(stackDeletionInProgress(stackResponse) || stackStatusInProgress(stackResponse) || stackStopped(stackResponse)
                     || dependentHostsUnhealthy);
         }
     }
 
-    private boolean dependentHostsUnhealthy(DependentHostGroupsV4Response dependentHostGroupsResponse, StackV4Response stackResponse, String policyHostGroup) {
+    private boolean dependentHostsUnhealthy(DependentHostGroupsV4Response dependentHostGroupsResponse, StackV4Response stackResponse,
+            String policyHostGroup, Cluster cluster) {
+        Set<String> dependentComponents = dependentHostGroupsResponse.getDependentComponents().getOrDefault(policyHostGroup, Set.of());
         Set<String> unhealthyDependentHosts = stackResponseUtils.getUnhealthyDependentHosts(stackResponse, dependentHostGroupsResponse, policyHostGroup);
         logUnhealthyHostNamesIfPresent(unhealthyDependentHosts, policyHostGroup);
-        return !unhealthyDependentHosts.isEmpty();
+        if (!unhealthyDependentHosts.isEmpty()) {
+            Map<String, String> hostServicesHealth = cmCommunicator.readServicesHealth(cluster);
+            Set<String> unhealthyComponents = new HashSet<>();
+            for (String component : dependentComponents) {
+                String healthCheck = String.valueOf(hostServicesHealth
+                        .entrySet()
+                        .stream()
+                        .filter(i -> i.getKey().contains(component))
+                        .map(Map.Entry::getValue)
+                        .findFirst().get());
+                if (!Objects.equals(healthCheck, GOOD_HEALTH)) {
+                    unhealthyComponents.add(component);
+                }
+            }
+            logUnhealthyDependentComponents(unhealthyComponents, policyHostGroup);
+            return !unhealthyComponents.isEmpty();
+        }
+        return false;
+    }
+
+    private void logUnhealthyDependentComponents(Set<String> unhealthyDependentComponents, String hostGroup) {
+        if (unhealthyDependentComponents.isEmpty()) {
+            LOGGER.info("No unhealthy dependent components for hostGroup: {}", hostGroup);
+        } else {
+            LOGGER.info("Detected unhealthy dependent components: {} for hostGroup: {}", unhealthyDependentComponents, hostGroup);
+        }
     }
 
     private void logUnhealthyHostNamesIfPresent(Set<String> unhealthyDependentHosts, String hostGroup) {

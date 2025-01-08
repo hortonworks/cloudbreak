@@ -218,6 +218,10 @@ class ClusterStatusSyncHandlerTest {
     void testOnApplicationEventWhenStopStartScalingEnabledAndDependentHostUnhealthyAndCmHealthy() {
         Cluster cluster = getACluster(ClusterState.RUNNING);
         cluster.setStopStartScalingEnabled(Boolean.TRUE);
+        Map<String, String> dependentComponentsHealthCheck = Map.ofEntries(
+                Map.entry("YARN_RESOURCEMANAGERS_HEALTH", "BAD"));
+
+        when(cmCommunicator.readServicesHealth(any(Cluster.class))).thenReturn(dependentComponentsHealthCheck);
         when(clusterService.findById(anyLong())).thenReturn(cluster);
         when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getMockStackResponseWithDependentHostGroup(Status.AVAILABLE,
                 Set.of("gateway1"), InstanceStatus.SERVICES_UNHEALTHY));
@@ -236,6 +240,10 @@ class ClusterStatusSyncHandlerTest {
     void testOnApplicationEventWhenStopStartScalingEnabledAndMultipleDependentHostsUnhealthyAndCmHealthy() {
         Cluster cluster = getACluster(ClusterState.RUNNING);
         cluster.setStopStartScalingEnabled(Boolean.TRUE);
+        Map<String, String> dependentComponentsHealthCheck = Map.ofEntries(
+                Map.entry("YARN_RESOURCEMANAGERS_HEALTH", "BAD"));
+        when(cmCommunicator.readServicesHealth(any(Cluster.class))).thenReturn(dependentComponentsHealthCheck);
+
         when(clusterService.findById(anyLong())).thenReturn(cluster);
         when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getMockStackResponseWithDependentHostGroup(Status.AVAILABLE,
                 Set.of("master", "gateway1"), InstanceStatus.SERVICES_UNHEALTHY));
@@ -367,14 +375,18 @@ class ClusterStatusSyncHandlerTest {
 
     private DependentHostGroupsV4Response getDependentHostGroupsResponse(String policyHostGroup, String... dependentHostGroups) {
         DependentHostGroupsV4Response response = new DependentHostGroupsV4Response();
+        Set<String> dependentComponents = Set.of("RESOURCEMANAGER");
         Map<String, Set<String>> dependentHostGroupsMap = Map.of(policyHostGroup, Set.of(dependentHostGroups));
+        Map<String, Set<String>> dependentComponentsMap = Map.of(policyHostGroup, dependentComponents);
         response.setDependentHostGroups(dependentHostGroupsMap);
+        response.setDependentComponents(dependentComponentsMap);
         return response;
     }
 
     private DependentHostGroupsV4Response getUndefinedDependentHostGroupResponse(String policyHostGroup) {
         DependentHostGroupsV4Response response = new DependentHostGroupsV4Response();
         response.setDependentHostGroups(Map.of(policyHostGroup, Set.of("UNDEFINED_DEPENDENCY")));
+        response.setDependentComponents(Map.of(policyHostGroup, Set.of("UNDEFINED_DEPENDENCY")));
         return response;
     }
 

@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.monitor.handler;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -11,9 +13,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.RoleConfigGroupsResourceApi;
+import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiConfig;
+import com.cloudera.api.swagger.model.ApiHealthCheck;
+import com.cloudera.api.swagger.model.ApiService;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cm.DataView;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
@@ -73,6 +78,24 @@ public class ClouderaManagerCommunicator {
             LOGGER.error("Error when trying to determine CM status for cluster: {}", cluster.getStackCrn(), e);
             return false;
         }
+    }
+
+    public Map<String, String> readServicesHealth(Cluster cluster) {
+        ApiClient client = createApiClient(cluster);
+        ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(client);
+        List<ApiService> apiServiceList = null;
+        try {
+            apiServiceList = servicesResourceApi.readServices(cluster.getStackName(), DataView.FULL.name()).getItems();
+        } catch (ApiException e) {
+            throw new RuntimeException(e);
+        }
+        Map<String, String> componentWithHealthCheck = new HashMap<>();
+        for (ApiService apiService : apiServiceList) {
+            for (ApiHealthCheck apiHealthCheck : apiService.getHealthChecks()) {
+                componentWithHealthCheck.put(apiHealthCheck.getName(), apiHealthCheck.getSummary().toString());
+            }
+        }
+        return componentWithHealthCheck;
     }
 
     public Map<String, ApiConfig> getRoleConfigPropertiesFromCM(Cluster cluster, String serviceName,

@@ -137,8 +137,8 @@ public class StackResponseUtilsTest {
     public void testGetUnhealthyDependentHostsMasterUnhealthy() {
         String policyHostGroup = "compute";
         StackV4Response mockStackResponse = getMockStackResponseWithDependentHostGroup(AVAILABLE, Set.of("master"), SERVICES_RUNNING);
-        DependentHostGroupsV4Response mockDependentHostGroupsResponse = getDependentHostGroupsResponse(policyHostGroup,
-                "master", "gateway");
+        DependentHostGroupsV4Response mockDependentHostGroupsResponse = getDependentHostGroupsResponse(policyHostGroup, Set.of("master", "gateway"),
+                "yarn1", "yarn2");
 
         Set<String> result = underTest.getUnhealthyDependentHosts(mockStackResponse, mockDependentHostGroupsResponse, policyHostGroup);
         assertThat(result).hasSameElementsAs(Set.of("fqdn-master"));
@@ -148,7 +148,7 @@ public class StackResponseUtilsTest {
     public void testGetUnhealthyDependentHostsNoneUnhealthy() {
         String policyHostGroup = "compute";
         StackV4Response mockStackResponse = getMockStackResponseWithDependentHostGroup(AVAILABLE, Set.of("master", "gateway"), SERVICES_HEALTHY);
-        DependentHostGroupsV4Response mockDependentHostGroupsResponse = getDependentHostGroupsResponse(policyHostGroup,
+        DependentHostGroupsV4Response mockDependentHostGroupsResponse = getDependentHostGroupsResponse(policyHostGroup, Set.of("yarn1", "yarn2"),
                 "master", "gateway");
 
         Set<String> result = underTest.getUnhealthyDependentHosts(mockStackResponse, mockDependentHostGroupsResponse, policyHostGroup);
@@ -185,9 +185,12 @@ public class StackResponseUtilsTest {
                 .getMockStackV4ResponseWithStoppedAndRunningNodes("test-crn", hostGroup, "test-fqdn", runningHostGroupCount, stoppedHostGroupCount);
     }
 
-    private DependentHostGroupsV4Response getDependentHostGroupsResponse(String policyHostGroup, String... dependentHostGroups) {
+    private DependentHostGroupsV4Response getDependentHostGroupsResponse(String policyHostGroup,
+            Set<String> dependentHostGroups, String... dependentComponents) {
         DependentHostGroupsV4Response response = new DependentHostGroupsV4Response();
-        Map<String, Set<String>> dependentHostGroupsMap = Map.of(policyHostGroup, Set.of(dependentHostGroups));
+        Map<String, Set<String>> dependentHostGroupsMap = Map.of(policyHostGroup, dependentHostGroups);
+        Map<String, Set<String>> dependentComponentsMap = Map.of(policyHostGroup, Set.of(dependentComponents));
+        response.setDependentComponents(dependentComponentsMap);
         response.setDependentHostGroups(dependentHostGroupsMap);
         return response;
     }
