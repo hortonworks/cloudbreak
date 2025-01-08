@@ -325,6 +325,7 @@ public enum ResourceEvent {
     CLUSTER_DNS_ENTRY_UPDATE_FINISHED("cluster.dns.update.finished"),
     CLUSTER_STARTED("cluster.started"),
     CLUSTER_START_FAILED("cluster.start.failed"),
+    CLUSTER_START_INSTANCES_FAILED("cluster.start.instances.failed"),
     CLUSTER_CHANGE_CREDENTIAL_FAILED("cluster.change.credential.failed"),
     CLUSTER_SINGLE_MASTER_REPAIR_STARTED("cluster.single.master.repair.started"),
     CLUSTER_SINGLE_MASTER_REPAIR_FINISHED("cluster.single.master.repair.finished"),

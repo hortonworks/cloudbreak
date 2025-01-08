@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
@@ -20,6 +21,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.JobState;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunningJobsResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SaltJobFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltEmptyResponseException;
+import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltExecutionWentWrongException;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStateService;
 
 public class SaltJobIdTracker implements OrchestratorBootstrap {
@@ -145,6 +147,14 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
         } catch (SaltEmptyResponseException e) {
             LOGGER.debug("Jid info is empty (jid: {}), this usually occurs due to salt not working properly", jobId, e);
             saltJobRunner.setJobState(JobState.IN_PROGRESS);
+        } catch (SaltExecutionWentWrongException e) {
+            LOGGER.debug("Fail while checking the result (jid: {}), this usually occurs due to missing minions", jobId, e);
+            saltJobRunner.setJobState(JobState.AMBIGUOUS);
+            Multimap<String, String> errorMap = ArrayListMultimap.create();
+            e.getUnresponsiveNodes().forEach(m -> errorMap.put(m, "Salt minion is not responding."));
+            errorMap.putAll(saltConnector.getSaltErrorResolver().resolveErrorMessages(e.getNodesWithErrors()));
+            saltJobRunner.setNodesWithError(errorMap);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), saltJobRunner.getNodesWithError());
         } catch (RuntimeException e) {
             LOGGER.debug("Fail while checking the result (jid: {}), this usually occurs due to concurrency", jobId, e);
             saltJobRunner.setJobState(JobState.AMBIGUOUS);

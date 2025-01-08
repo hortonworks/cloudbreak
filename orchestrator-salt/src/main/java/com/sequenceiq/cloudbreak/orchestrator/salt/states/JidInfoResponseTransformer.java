@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Spliterators;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -16,6 +17,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.JidInfoResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunnerInfo;
 
@@ -53,26 +56,34 @@ public class JidInfoResponseTransformer {
             JsonNode hostResults, boolean highstate) {
         Map<String, List<RunnerInfo>> result = new HashMap<>();
         if (hostResults != null) {
-            handleUnresponsiveSaltMinions(hostResults, highstate);
+            List<String> unresponsiveMinions = getUnresponsiveMinions(hostResults);
             iteratorToFiniteStream(hostResults.fieldNames()).forEach(
                     host -> convertAndAddRunnerInfoByHost(hostResults, highstate, result, host));
+            if (CollectionUtils.isNotEmpty(unresponsiveMinions) && highstate) {
+                Multimap<String, Map<String, String>> nodesWithErrors = ArrayListMultimap.create();
+                result.forEach((hostname, runnerInfos) -> {
+                    if (runnerInfos != null) {
+                        runnerInfos.stream()
+                                .filter(Predicate.not(RunnerInfo::getResult))
+                                .forEach(runnerInfo -> {
+                                    nodesWithErrors.put(hostname, runnerInfo.getErrorResultSummary());
+                                });
+                    }
+                });
+                String unresponsiveMinionsListStr = StringUtils.join(unresponsiveMinions, ",");
+                LOGGER.debug("Found unresponsive minions: {}", unresponsiveMinionsListStr);
+                throw new SaltExecutionWentWrongException(String.format("The following salt minions have been unresponsive during salt highstate: %s",
+                        unresponsiveMinionsListStr), unresponsiveMinions, nodesWithErrors);
+            }
         }
         return result;
     }
 
-    private static void handleUnresponsiveSaltMinions(JsonNode hostResults, boolean highstate) {
-        List<String> unresponsiveMinions = iteratorToFiniteStream(hostResults.fields())
+    private static List<String> getUnresponsiveMinions(JsonNode hostResults) {
+        return iteratorToFiniteStream(hostResults.fields())
                 .filter(nodeEntry -> nodeEntry != null && nodeEntry.getValue().isTextual() && nodeEntry.getValue().asText().equals(UNRESPONSIVE_MINION_MSG))
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
-        if (CollectionUtils.isNotEmpty(unresponsiveMinions)) {
-            String unresponsiveMinionsListStr = StringUtils.join(unresponsiveMinions, ",");
-            LOGGER.debug("Found unresponsive minions: {}", unresponsiveMinionsListStr);
-            if (highstate) {
-                throw new SaltExecutionWentWrongException(String.format("The following salt minions have been unresponsive during salt highstate: %s",
-                        unresponsiveMinionsListStr));
-            }
-        }
     }
 
     private static void convertAndAddRunnerInfoByHost(JsonNode hostResults, boolean highstate,
@@ -108,9 +119,9 @@ public class JidInfoResponseTransformer {
     private static void validateHighstateResponse(JidInfoResponse jidInfoResponse) {
         jidInfoResponse.getReturn()
                 .forEach(node -> {
-                    validateOnHighstateResults(jidInfoResponse, node);
-                }
-        );
+                            validateOnHighstateResults(jidInfoResponse, node);
+                        }
+                );
     }
 
     private static void validateOnHighstateResults(JidInfoResponse jidInfoResponse, JsonNode node) {
@@ -139,7 +150,7 @@ public class JidInfoResponseTransformer {
     private static void errorOnNonEmptyListResponse(JsonNode node, String fieldName, JsonNode returnFieldNode) {
         if (returnFieldNode.size() != 0) {
             String errorMessage = StreamSupport.stream(
-                    node.withArray(fieldName).spliterator(), false)
+                            node.withArray(fieldName).spliterator(), false)
                     .map(JsonNode::asText)
                     .reduce((s, s2) -> s + "; " + s2).get();
             throw new SaltExecutionWentWrongException("Salt execution went wrong: " + errorMessage);

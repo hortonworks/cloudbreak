@@ -384,8 +384,8 @@ public class InstanceMetaDataService {
         return repository.findNotTerminatedAndNotZombieForStack(stackId);
     }
 
-    public Set<Long> findNotTerminatedAndNotZombieIdForStack(Long stackId) {
-        return repository.findNotTerminatedAndNotZombieIdForStack(stackId);
+    public Set<Long> findNotTerminatedAndNotUnhealthyAndNotZombieIdForStack(Long stackId) {
+        return repository.findNotTerminatedAndNotUnhealthyAndNotZombieIdForStack(stackId);
     }
 
     public List<InstanceMetaData> findNotTerminatedAsOrderedListForStack(Long stackId) {

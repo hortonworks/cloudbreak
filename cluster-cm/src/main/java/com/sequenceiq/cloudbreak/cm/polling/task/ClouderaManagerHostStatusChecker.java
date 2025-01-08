@@ -14,6 +14,7 @@ import com.cloudera.api.swagger.HostsResourceApi;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
@@ -80,6 +81,7 @@ public class ClouderaManagerHostStatusChecker extends AbstractClouderaManagerApi
         return pollerObject.getStack().getNotTerminatedInstanceMetaData().stream()
                 .filter(metaData -> metaData.getDiscoveryFQDN() != null)
                 .filter(InstanceMetadataView::isReachable)
+                .filter(instance -> !InstanceStatus.SERVICES_UNHEALTHY.equals(instance.getInstanceStatus()))
                 .filter(md -> CollectionUtils.isEmpty(targets) || targets.contains(md.getPrivateIp()))
                 .filter(metaData -> !hostIpsFromManager.contains(metaData.getPrivateIp()))
                 .collect(Collectors.toList());

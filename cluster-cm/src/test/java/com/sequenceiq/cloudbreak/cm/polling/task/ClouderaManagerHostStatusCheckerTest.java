@@ -8,8 +8,7 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
-import java.util.List;
+import java.util.Arrays;
 import java.util.Set;
 
 import org.junit.Before;
@@ -57,7 +56,7 @@ public class ClouderaManagerHostStatusCheckerTest {
     @Test
     public void shouldBeFalseWhenNoHostsReturned() throws ApiException {
         InstanceMetaData instanceMetaData = validInstanceMetadata();
-        when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(new ApiHostList().items(Collections.emptyList()));
+        when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(newApiHostList());
 
         boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData));
 
@@ -68,7 +67,7 @@ public class ClouderaManagerHostStatusCheckerTest {
     public void shouldBeFalseWhenHostsReturnedHasNoHeartbeat() throws ApiException {
         InstanceMetaData instanceMetaData = validInstanceMetadata();
         ApiHost apiHost = new ApiHost().ipAddress(instanceMetaData.getPrivateIp());
-        when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(new ApiHostList().items(List.of(apiHost)));
+        when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(newApiHostList(apiHost));
 
         boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData));
 
@@ -81,7 +80,7 @@ public class ClouderaManagerHostStatusCheckerTest {
         ApiHost apiHost = new ApiHost()
                 .ipAddress(instanceMetaData.getPrivateIp())
                 .lastHeartbeat(Instant.now().minus(5, ChronoUnit.MINUTES).toString());
-        when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(new ApiHostList().items(List.of(apiHost)));
+        when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(newApiHostList(apiHost));
 
         boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData));
 
@@ -92,7 +91,7 @@ public class ClouderaManagerHostStatusCheckerTest {
     public void shouldBeTrueWhenHostsReturnedHasRecentHeartbeat() throws ApiException {
         InstanceMetaData instanceMetaData = validInstanceMetadata();
         ApiHost apiHost = getValidApiHost(instanceMetaData);
-        when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(new ApiHostList().items(List.of(apiHost)));
+        when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(newApiHostList(apiHost));
 
         boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData));
 
@@ -105,7 +104,7 @@ public class ClouderaManagerHostStatusCheckerTest {
         ApiHost apiHost = new ApiHost()
                 .ipAddress("2.2.2.2")
                 .lastHeartbeat(Instant.now().plus(5, ChronoUnit.MINUTES).toString());
-        when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(new ApiHostList().items(List.of(apiHost)));
+        when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(newApiHostList(apiHost));
 
         boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData));
 
@@ -118,7 +117,7 @@ public class ClouderaManagerHostStatusCheckerTest {
         InstanceMetaData instanceMetaData2 = validInstanceMetadata();
         instanceMetaData2.setPrivateIp("2.2.2.2");
         ApiHost apiHost = getValidApiHost(instanceMetaData);
-        when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(new ApiHostList().items(List.of(apiHost)));
+        when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(newApiHostList(apiHost));
 
         boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData, instanceMetaData2));
 
@@ -132,7 +131,7 @@ public class ClouderaManagerHostStatusCheckerTest {
         instanceMetaData2.setPrivateIp("2.2.2.2");
         ApiHost apiHost = getValidApiHost(instanceMetaData);
         ApiHost apiHost2 = getValidApiHost(instanceMetaData2);
-        when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(new ApiHostList().items(List.of(apiHost, apiHost2)));
+        when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(newApiHostList(apiHost, apiHost2));
 
         boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData, instanceMetaData2));
 
@@ -146,7 +145,7 @@ public class ClouderaManagerHostStatusCheckerTest {
         instanceMetaData2.setPrivateIp("2.2.2.2");
         ApiHost apiHost = getValidApiHost(instanceMetaData);
         ApiHost apiHost2 = getValidApiHost(instanceMetaData2).ipAddress("3.3.3.3");
-        when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(new ApiHostList().items(List.of(apiHost, apiHost2)));
+        when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(newApiHostList(apiHost, apiHost2));
 
         boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData, instanceMetaData2));
 
@@ -160,7 +159,7 @@ public class ClouderaManagerHostStatusCheckerTest {
         instanceMetaData2.setPrivateIp("2.2.2.2");
         instanceMetaData2.setDiscoveryFQDN(null);
         ApiHost apiHost = getValidApiHost(instanceMetaData);
-        when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(new ApiHostList().items(List.of(apiHost)));
+        when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(newApiHostList(apiHost));
 
         boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData, instanceMetaData2));
 
@@ -174,7 +173,22 @@ public class ClouderaManagerHostStatusCheckerTest {
         instanceMetaData2.setPrivateIp("2.2.2.2");
         instanceMetaData2.setInstanceStatus(InstanceStatus.TERMINATED);
         ApiHost apiHost = getValidApiHost(instanceMetaData);
-        when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(new ApiHostList().items(List.of(apiHost)));
+        when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(newApiHostList(apiHost));
+
+        boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData, instanceMetaData2));
+
+        assertTrue(result);
+    }
+
+    @Test
+    public void shouldBeTrueWhenServicesOnOneInstanceAreUnhealthy() throws ApiException {
+        InstanceMetaData instanceMetaData = validInstanceMetadata();
+        InstanceMetaData instanceMetaData2 = validInstanceMetadata();
+        instanceMetaData2.setPrivateIp("2.2.2.2");
+        instanceMetaData2.setInstanceStatus(InstanceStatus.SERVICES_UNHEALTHY);
+        ApiHost apiHost = getValidApiHost(instanceMetaData);
+        ApiHost apiHost2 = getValidApiHost(instanceMetaData2);
+        when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(newApiHostList(apiHost, apiHost2));
 
         boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData, instanceMetaData2));
 
@@ -188,7 +202,7 @@ public class ClouderaManagerHostStatusCheckerTest {
         instanceMetaData2.setPrivateIp("2.2.2.2");
         instanceMetaData2.setInstanceStatus(InstanceStatus.DELETED_ON_PROVIDER_SIDE);
         ApiHost apiHost = getValidApiHost(instanceMetaData);
-        when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(new ApiHostList().items(List.of(apiHost)));
+        when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(newApiHostList(apiHost));
 
         boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData, instanceMetaData2));
 
@@ -202,7 +216,7 @@ public class ClouderaManagerHostStatusCheckerTest {
         instanceMetaData2.setPrivateIp("2.2.2.2");
         instanceMetaData2.setInstanceStatus(InstanceStatus.STOPPED);
         ApiHost apiHost = getValidApiHost(instanceMetaData);
-        when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(new ApiHostList().items(List.of(apiHost)));
+        when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(newApiHostList(apiHost));
 
         boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData, instanceMetaData2));
 
@@ -216,7 +230,7 @@ public class ClouderaManagerHostStatusCheckerTest {
         instanceMetaData2.setPrivateIp("2.2.2.2");
         instanceMetaData2.setInstanceStatus(InstanceStatus.FAILED);
         ApiHost apiHost = getValidApiHost(instanceMetaData);
-        when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(new ApiHostList().items(List.of(apiHost)));
+        when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(newApiHostList(apiHost));
 
         boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData, instanceMetaData2));
 
@@ -230,7 +244,7 @@ public class ClouderaManagerHostStatusCheckerTest {
         instanceMetaData2.setPrivateIp("2.2.2.2");
         instanceMetaData2.setInstanceStatus(InstanceStatus.ORCHESTRATION_FAILED);
         ApiHost apiHost = getValidApiHost(instanceMetaData);
-        when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(new ApiHostList().items(List.of(apiHost)));
+        when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(newApiHostList(apiHost));
 
         boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData, instanceMetaData2));
 
@@ -257,6 +271,10 @@ public class ClouderaManagerHostStatusCheckerTest {
         instanceGroup.setInstanceMetaData(Set.of(instanceMetaDatas));
         stack.setInstanceGroups(Set.of(instanceGroup));
         return new ClouderaManagerCommandPollerObject(stack, new ApiClient(), BigDecimal.ONE);
+    }
+
+    private ApiHostList newApiHostList(ApiHost... apiHosts) {
+        return new ApiHostList().items(Arrays.stream(apiHosts).toList());
     }
 
 }

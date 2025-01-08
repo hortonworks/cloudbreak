@@ -75,8 +75,8 @@ public interface InstanceMetaDataRepository extends JpaRepository<InstanceMetaDa
 
     @Query("SELECT i.id FROM InstanceMetaData i " +
             "WHERE i.instanceGroup.stack.id= :stackId " +
-            "AND i.instanceStatus not in ('TERMINATED', 'DELETED_ON_PROVIDER_SIDE', 'DELETED_BY_PROVIDER', 'ZOMBIE')")
-    Set<Long> findNotTerminatedAndNotZombieIdForStack(@Param("stackId") Long stackId);
+            "AND i.instanceStatus not in ('TERMINATED', 'DELETED_ON_PROVIDER_SIDE', 'DELETED_BY_PROVIDER', 'ZOMBIE', 'SERVICES_UNHEALTHY')")
+    Set<Long> findNotTerminatedAndNotUnhealthyAndNotZombieIdForStack(@Param("stackId") Long stackId);
 
     @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraphType.LOAD)
     @Query("SELECT i FROM InstanceMetaData i " +

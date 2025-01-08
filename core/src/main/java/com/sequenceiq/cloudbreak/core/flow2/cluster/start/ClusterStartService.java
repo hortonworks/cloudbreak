@@ -82,7 +82,7 @@ public class ClusterStartService {
     }
 
     private void updateInstancesToHealthy(StackView stack) {
-        Set<Long> instances = instanceMetaDataService.findNotTerminatedAndNotZombieIdForStack(stack.getId());
+        Set<Long> instances = instanceMetaDataService.findNotTerminatedAndNotUnhealthyAndNotZombieIdForStack(stack.getId());
         instanceMetaDataService.updateAllInstancesToStatus(instances, com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_HEALTHY,
                 "Cluster start finished successfully");
     }
