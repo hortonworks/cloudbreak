@@ -120,12 +120,6 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
             @Param("dbSslRootCertBundle") String dbSslRootCertBundle,
             @Param("dbSslEnabled") Boolean dbSslEnabled);
 
-    @Query("SELECT c.id as localId, s.resourceCrn as remoteResourceId, s.name as name, s.cloudPlatform as provider " +
-            "FROM Cluster c " +
-            "JOIN c.stack s " +
-            "WHERE c.cloudbreakClusterManagerUser IS NULL AND c.creationFinished IS NOT NULL AND s.terminated IS NULL")
-    Set<JobResource> getClustersWithEmptyClusterManagerUser();
-
     @Override
     @Query("SELECT c.id as localId, s.resourceCrn as remoteResourceId, s.name as name, s.cloudPlatform as provider " +
             "FROM Cluster c " +

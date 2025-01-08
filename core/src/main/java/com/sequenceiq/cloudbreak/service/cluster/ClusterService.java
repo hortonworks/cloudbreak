@@ -71,7 +71,6 @@ import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.dto.DatabaseSslDetails;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
-import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
@@ -211,10 +210,6 @@ public class ClusterService {
 
     public Optional<Cluster> retrieveClusterByStackIdWithoutAuth(Long stackId) {
         return repository.findOneByStackId(stackId);
-    }
-
-    public Set<JobResource> getClustersWithEmptyClusterManagerUser() {
-        return repository.getClustersWithEmptyClusterManagerUser();
     }
 
     public Cluster updateClusterManagerClientConfig(Long clusterId, HttpClientConfig clusterManagerClientConfig) {

@@ -32,14 +32,10 @@ public interface ClusterDtoRepository extends Repository<Cluster, Long> {
             "c.customContainerDefinition as customContainerDefinition, " +
             "c.dpClusterManagerUser as dpClusterManagerUserSecret," +
             "c.dpClusterManagerPassword as dpClusterManagerPasswordSecret," +
-            "c.dpAmbariUser as dpAmbariUserSecret," +
-            "c.dpAmbariPassword as dpAmbariPasswordSecret," +
             "c.password as passwordSecret, " +
             "c.userName as userNameSecret, " +
             "c.executorType as executorType, " +
             "c.variant as variant, " +
-            "c.cloudbreakAmbariUser as cloudbreakAmbariUserSecret, " +
-            "c.cloudbreakAmbariPassword as cloudbreakAmbariPasswordSecret, " +
             "c.cloudbreakClusterManagerUser as cloudbreakClusterManagerUserSecretObject, " +
             "c.cloudbreakClusterManagerPassword as cloudbreakClusterManagerPasswordSecretObject, " +
             "c.cdpNodeStatusMonitorPassword as cdpNodeStatusMonitorPasswordSecret, " +

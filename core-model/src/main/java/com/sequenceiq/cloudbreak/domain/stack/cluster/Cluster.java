@@ -105,11 +105,6 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
     @SecretValue
     private Secret password = Secret.EMPTY;
 
-    @Deprecated
-    @Convert(converter = SecretToString.class)
-    @SecretValue
-    private Secret cloudbreakAmbariUser = Secret.EMPTY;
-
     @Convert(converter = SecretToString.class)
     @SecretValue
     private Secret cloudbreakClusterManagerUser = Secret.EMPTY;
@@ -117,11 +112,6 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
     @Convert(converter = SecretToString.class)
     @SecretValue
     private Secret cloudbreakClusterManagerMonitoringUser = Secret.EMPTY;
-
-    @Deprecated
-    @Convert(converter = SecretToString.class)
-    @SecretValue
-    private Secret cloudbreakAmbariPassword = Secret.EMPTY;
 
     @Convert(converter = SecretToString.class)
     @SecretValue
@@ -135,19 +125,9 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
     @SecretValue
     private Secret cdpNodeStatusMonitorPassword = Secret.EMPTY;
 
-    @Deprecated
-    @Convert(converter = SecretToString.class)
-    @SecretValue
-    private Secret dpAmbariUser = Secret.EMPTY;
-
     @Convert(converter = SecretToString.class)
     @SecretValue
     private Secret dpClusterManagerUser = Secret.EMPTY;
-
-    @Deprecated
-    @Convert(converter = SecretToString.class)
-    @SecretValue
-    private Secret dpAmbariPassword = Secret.EMPTY;
 
     @Convert(converter = SecretToString.class)
     @SecretValue
@@ -491,11 +471,6 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
         return cloudbreakClusterManagerPassword;
     }
 
-    public void setCloudbreakUser(String cloudbreakAmbariUser) {
-        this.cloudbreakAmbariUser = new Secret(cloudbreakAmbariUser);
-        this.cloudbreakClusterManagerUser = new Secret(cloudbreakAmbariUser);
-    }
-
     public void setCloudbreakClusterManagerUser(String cloudbreakClusterManagerUser) {
         this.cloudbreakClusterManagerUser = new Secret(cloudbreakClusterManagerUser);
     }
@@ -570,21 +545,8 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
         return getIfNotNull(cdpNodeStatusMonitorPassword, Secret::getRaw);
     }
 
-    public void setCloudbreakPassword(String cloudbreakAmbariPassword) {
-        this.cloudbreakAmbariPassword = new Secret(cloudbreakAmbariPassword);
-        this.cloudbreakClusterManagerPassword = new Secret(cloudbreakAmbariPassword);
-    }
-
-    public void setCloudbreakClusterManagerUserFromOld() {
-        this.cloudbreakClusterManagerUser = new Secret(getIfNotNull(cloudbreakAmbariUser, Secret::getRaw));
-    }
-
     public void setCloudbreakClusterManagerPassword(String password) {
         cloudbreakClusterManagerPassword = new Secret(password);
-    }
-
-    public void setCloudbreakClusterManagerPasswordFromOld() {
-        this.cloudbreakClusterManagerPassword = new Secret(getIfNotNull(cloudbreakAmbariPassword, Secret::getRaw));
     }
 
     public void setCloudbreakClusterManagerMonitoringPassword(String cloudbreakClusterManagerMonitoringPassword) {
@@ -600,17 +562,8 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
         return dpClusterManagerUser;
     }
 
-    public void setDpUser(String dpAmbariUser) {
-        this.dpAmbariUser = new Secret(dpAmbariUser);
-        dpClusterManagerUser = new Secret(dpAmbariUser);
-    }
-
     public void setDpClusterManagerUser(String user) {
         dpClusterManagerUser = new Secret(user);
-    }
-
-    public void setDpClusterManagerUserFromOld() {
-        this.dpClusterManagerUser = new Secret(getIfNotNull(dpAmbariUser, Secret::getRaw));
     }
 
     @Override
@@ -618,17 +571,8 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
         return dpClusterManagerPassword;
     }
 
-    public void setDpPassword(String dpAmbariPassword) {
-        this.dpAmbariPassword = new Secret(dpAmbariPassword);
-        this.dpClusterManagerPassword = new Secret(dpAmbariPassword);
-    }
-
     public void setDpClusterManagerPassword(String password) {
         dpClusterManagerPassword = new Secret(password);
-    }
-
-    public void setDpClusterManagerPasswordFromOld() {
-        this.dpClusterManagerPassword = new Secret(getIfNotNull(dpAmbariPassword, Secret::getRaw));
     }
 
     public String getKeyStorePwd() {

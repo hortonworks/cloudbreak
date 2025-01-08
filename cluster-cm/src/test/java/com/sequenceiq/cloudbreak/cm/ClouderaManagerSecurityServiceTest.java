@@ -613,10 +613,10 @@ public class ClouderaManagerSecurityServiceTest {
 
     private Cluster createCluster(String userName) {
         Cluster cluster = new Cluster();
-        cluster.setCloudbreakUser("cloudbereak");
-        cluster.setCloudbreakPassword("cloudbereak123");
-        cluster.setDpUser("dp");
-        cluster.setDpPassword("dp123");
+        cluster.setCloudbreakClusterManagerUser("cloudbereak");
+        cluster.setCloudbreakClusterManagerPassword("cloudbereak123");
+        cluster.setDpClusterManagerUser("dp");
+        cluster.setDpClusterManagerPassword("dp123");
         cluster.setUserName(userName);
         cluster.setPassword("admin123");
         return cluster;

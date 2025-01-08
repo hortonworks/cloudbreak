@@ -473,18 +473,10 @@ class ClusterProxyServiceTest {
                 new Secret("cloudbreak", vaultSecretString("cbpassword")));
         ReflectionTestUtils.setField(cluster, "cloudbreakClusterManagerUser",
                 new Secret("cloudbreak", vaultSecretString("cbuser")));
-        ReflectionTestUtils.setField(cluster, "cloudbreakAmbariPassword",
-                new Secret("cloudbreak", vaultSecretString("cbpassword")));
-        ReflectionTestUtils.setField(cluster, "cloudbreakAmbariUser",
-                new Secret("cloudbreak", vaultSecretString("cbuser")));
         ReflectionTestUtils.setField(cluster, "dpClusterManagerUser",
                 new Secret("cmmgmt", vaultSecretString("dpuser")));
         ReflectionTestUtils.setField(cluster, "dpClusterManagerPassword",
                 new Secret("cmmgmt", vaultSecretString("dppassword")));
-        ReflectionTestUtils.setField(cluster, "cloudbreakAmbariPassword",
-                new Secret("cmmgmt", vaultSecretString("cbpassword")));
-        ReflectionTestUtils.setField(cluster, "cloudbreakAmbariUser",
-                new Secret("cmmgmt", vaultSecretString("cbuser")));
         stack.setCluster(cluster);
         stack.getCluster().setId(1L);
         return stack;
@@ -508,8 +500,6 @@ class ClusterProxyServiceTest {
 
     private Stack testStackWithInvalidSecret() throws JsonProcessingException {
         Stack stack = testStack();
-        ReflectionTestUtils.setField(stack.getCluster(), "cloudbreakAmbariPassword", new Secret("cbpassword", "invalid-vault-string"));
-        ReflectionTestUtils.setField(stack.getCluster(), "cloudbreakClusterManagerPassword", new Secret("cbpassword", "invalid-vault-string"));
         ReflectionTestUtils.setField(stack.getCluster(), "dpClusterManagerPassword", new Secret("cbpassword", "invalid-vault-string"));
         ReflectionTestUtils.setField(stack.getCluster(), "cloudbreakClusterManagerPassword", new Secret("cbpassword", "invalid-vault-string"));
         return stack;
@@ -526,10 +516,10 @@ class ClusterProxyServiceTest {
     private Cluster testCluster() {
         Cluster cluster = new Cluster();
         cluster.setId(CLUSTER_ID);
-        cluster.setCloudbreakUser("cloudbreak");
-        ReflectionTestUtils.setField(cluster, "cloudbreakAmbariPassword", new Secret("cbpassword", vaultSecretString("cbpassword")));
-        cluster.setDpUser("cmmgmt");
-        ReflectionTestUtils.setField(cluster, "dpAmbariPassword", new Secret("dppassword", vaultSecretString("dppassword")));
+        cluster.setCloudbreakClusterManagerUser("cloudbreak");
+        ReflectionTestUtils.setField(cluster, "cloudbreakClusterManagerPassword", new Secret("cbpassword", vaultSecretString("cbpassword")));
+        cluster.setDpClusterManagerUser("cmmgmt");
+        ReflectionTestUtils.setField(cluster, "dpClusterManagerPassword", new Secret("dppassword", vaultSecretString("dppassword")));
         return cluster;
     }
 

@@ -101,7 +101,7 @@ public class StackV4RequestToStackConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackV4RequestToStackConverter.class);
 
     @Value("${cb.ambari.username:cloudbreak}")
-    private String ambariUserName;
+    private String cmAdminUserName;
 
     @Value("${cb.cm.mgmt.username:cmmgmt}")
     private String cmMgmtUsername;
@@ -418,15 +418,15 @@ public class StackV4RequestToStackConverter {
         if (source.getType() != StackType.TEMPLATE) {
             cluster.setUserName(source.getCluster().getUserName());
             cluster.setPassword(source.getCluster().getPassword());
-            cluster.setCloudbreakUser(ambariUserName);
-            cluster.setCloudbreakPassword(PasswordUtil.generatePassword());
+            cluster.setCloudbreakClusterManagerUser(cmAdminUserName);
+            cluster.setCloudbreakClusterManagerPassword(PasswordUtil.generatePassword());
             if (monitoringConfiguration.getClouderaManagerExporter() != null) {
                 cluster.setCloudbreakClusterManagerMonitoringUser(monitoringConfiguration.getClouderaManagerExporter().getUser());
                 cluster.setCloudbreakClusterManagerMonitoringPassword(PasswordUtil.generatePassword());
             }
             cluster.setCdpNodeStatusMonitorPassword(PasswordUtil.generatePassword());
-            cluster.setDpUser(cmMgmtUsername);
-            cluster.setDpPassword(PasswordUtil.generatePassword());
+            cluster.setDpClusterManagerUser(cmMgmtUsername);
+            cluster.setDpClusterManagerPassword(PasswordUtil.generatePassword());
             cluster.setKeyStorePwd(PasswordUtil.generatePassword());
             cluster.setTrustStorePwd(PasswordUtil.generatePassword());
         }

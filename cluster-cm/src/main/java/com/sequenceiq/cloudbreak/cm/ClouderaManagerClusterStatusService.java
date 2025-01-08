@@ -218,13 +218,13 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
     @PostConstruct
     public void initApiClient() throws ClusterClientInitException {
         ClusterView cluster = stack.getCluster();
-        String cloudbreakAmbariUser = cluster.getCloudbreakClusterManagerUser();
-        String cloudbreakAmbariPassword = cluster.getCloudbreakClusterManagerPassword();
+        String cloudbreakClusterManagerUser = cluster.getCloudbreakClusterManagerUser();
+        String cloudbreakClusterManagerPassword = cluster.getCloudbreakClusterManagerPassword();
         try {
             client = clouderaManagerApiClientProvider
-                    .getV31Client(stack.getGatewayPort(), cloudbreakAmbariUser, cloudbreakAmbariPassword, clientConfig);
+                    .getV31Client(stack.getGatewayPort(), cloudbreakClusterManagerUser, cloudbreakClusterManagerPassword, clientConfig);
             fastClient = clouderaManagerApiClientProvider
-                    .getV31Client(stack.getGatewayPort(), cloudbreakAmbariUser, cloudbreakAmbariPassword, clientConfig);
+                    .getV31Client(stack.getGatewayPort(), cloudbreakClusterManagerUser, cloudbreakClusterManagerPassword, clientConfig);
             fastClient.getHttpClient().setConnectTimeout(connectQuickTimeoutSeconds, TimeUnit.SECONDS);
         } catch (ClouderaManagerClientInitException e) {
             throw new ClusterClientInitException(e);
