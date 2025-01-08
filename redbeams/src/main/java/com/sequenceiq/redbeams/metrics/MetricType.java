@@ -14,7 +14,11 @@ public enum MetricType implements Metric {
     DB_ROTATE_CERT_FINISHED("db.rotatecert.finished"),
     DB_ROTATE_CERT_FAILED("db.rotatecert.failed"),
     DB_UPGRADE_FINISHED("db.upgrade.finished"),
-    DB_UPGRADE_FAILED("db.upgrade.failed");
+    DB_UPGRADE_FAILED("db.upgrade.failed"),
+    DB_VALIDATE_UPGRADE_FINISHED("db.validate.upgrade.finished"),
+    DB_VALIDATE_UPGRADE_FAILED("db.validate.upgrade.failed"),
+    DB_VALIDATE_UPGRADE_CLEANUP_FINISHED("db.validate.upgrade.cleanup.finished"),
+    DB_VALIDATE_UPGRADE_CLEANUP_FAILED("db.validate.upgrade.cleanup.failed");
 
     private final String metricName;
 

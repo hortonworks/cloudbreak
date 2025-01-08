@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = ModelDescriptions.DATABASE_PROPERTIES_RESPONSE)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DatabasePropertiesV4Response {
+
     @Schema(description = DatabaseServer.CONNECTION_NAME_FORMAT, required = true)
     private ConnectionNameFormat connectionNameFormat = ConnectionNameFormat.USERNAME_ONLY;
 

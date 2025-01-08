@@ -21,6 +21,7 @@ public enum ResourceType {
     AWS_CLOUD_WATCH,
     RDS_INSTANCE,
     RDS_HOSTNAME,
+    RDS_HOSTNAME_CANARY(CommonResourceType.CANARY),
     RDS_PORT,
     RDS_DB_SUBNET_GROUP,
     RDS_DB_PARAMETER_GROUP,
@@ -65,9 +66,12 @@ public enum ResourceType {
     AZURE_NETWORK_INTERFACE,
     AZURE_SECURITY_GROUP,
     AZURE_AVAILABILITY_SET,
-    AZURE_PRIVATE_ENDPOINT,
     AZURE_PRIVATE_DNS_ZONE,
+    AZURE_PRIVATE_ENDPOINT,
     AZURE_DNS_ZONE_GROUP,
+    AZURE_DATABASE_CANARY(CommonResourceType.CANARY),
+    AZURE_PRIVATE_ENDPOINT_CANARY(CommonResourceType.CANARY),
+    AZURE_DNS_ZONE_GROUP_CANARY(CommonResourceType.CANARY),
     AZURE_VIRTUAL_NETWORK_LINK,
     AZURE_LOAD_BALANCER,
 
@@ -102,5 +106,9 @@ public enum ResourceType {
 
     public static boolean isInstanceResource(ResourceType resourceType) {
         return INSTANCE_TYPES.contains(resourceType);
+    }
+
+    public static boolean isCanaryResource(ResourceType resourceType) {
+        return resourceType.getCommonResourceType() == CommonResourceType.CANARY;
     }
 }

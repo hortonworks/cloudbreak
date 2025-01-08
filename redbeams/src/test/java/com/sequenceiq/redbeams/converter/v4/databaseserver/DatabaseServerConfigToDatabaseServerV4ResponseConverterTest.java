@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
+import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.redbeams.TestData;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
@@ -46,6 +47,7 @@ import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.configuration.DatabaseServerSslCertificateConfig;
 import com.sequenceiq.redbeams.configuration.SslCertificateEntry;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
+import com.sequenceiq.redbeams.domain.stack.DBResource;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DBStackStatus;
 import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
@@ -97,6 +99,8 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
 
     private static final String DB_INSTANCE_TYPE = "m5.4xlarge";
 
+    private static final String RESOURCE_NAME = "RESOURCE";
+
     @Mock
     private X509Certificate x509Certificate;
 
@@ -132,6 +136,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         initDBStackStatus(dbStack);
         setDatabaseServer(dbStack, azureDatabaseType);
         dbStack.setCloudPlatform(cloudPlatform.name());
+        dbStack.setDatabaseResources(Set.of(createResource(true), createResource(false)));
         server.setDbStack(dbStack);
         when(stringToSecretResponseConverter.convert(anyString())).thenReturn(new SecretResponse());
         dbStack.setSslConfig(1L);
@@ -185,6 +190,13 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         dbStackStatus.setStatus(Status.CREATE_IN_PROGRESS);
         dbStackStatus.setStatusReason(STATUS_REASON);
         dbStack.setDBStackStatus(dbStackStatus);
+    }
+
+    private DBResource createResource(boolean canary) {
+        DBResource resource = new DBResource();
+        resource.setResourceName(RESOURCE_NAME);
+        resource.setResourceType(canary ? ResourceType.AZURE_DATABASE_CANARY : ResourceType.AZURE_DATABASE);
+        return resource;
     }
 
     private static Stream<Arguments> conversionParams() {
@@ -260,6 +272,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
 
         DBStack dbStack = new DBStack();
         initDBStackStatus(dbStack);
+        dbStack.setDatabaseResources(Set.of(createResource(true), createResource(false)));
         dbStack.setCloudPlatform(CLOUD_PLATFORM);
         setDatabaseServer(dbStack, null);
         server.setDbStack(dbStack);
@@ -283,6 +296,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         when(sslConfigService.fetchById(1L)).thenReturn(Optional.of(new SslConfig()));
         initDBStackStatus(dbStack);
         dbStack.setCloudPlatform(CLOUD_PLATFORM);
+        dbStack.setDatabaseResources(Set.of(createResource(true), createResource(false)));
         setDatabaseServer(dbStack, null);
         server.setDbStack(dbStack);
 
@@ -308,6 +322,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         sslConfig.setSslCertificateType(SslCertificateType.BRING_YOUR_OWN);
         dbStack.setSslConfig(1L);
         dbStack.setRegion("eu-west-1");
+        dbStack.setDatabaseResources(Set.of(createResource(true), createResource(false)));
         when(sslConfigService.fetchById(1L)).thenReturn(Optional.of(sslConfig));
         dbStack.setCloudPlatform(CLOUD_PLATFORM);
         setDatabaseServer(dbStack, null);
@@ -355,6 +370,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         setDatabaseServer(dbStack, null);
         dbStack.setCloudPlatform(CLOUD_PLATFORM);
         dbStack.setRegion(REGION);
+        dbStack.setDatabaseResources(Set.of(createResource(true), createResource(false)));
         SslConfig sslConfig = new SslConfig();
         sslConfig.setSslCertificateType(SslCertificateType.CLOUD_PROVIDER_OWNED);
         sslConfig.setSslCertificates(CERTS);

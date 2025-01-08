@@ -14,7 +14,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
+import com.sequenceiq.cloudbreak.common.converter.ResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.SecurityGroupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.SecurityRuleRequest;
@@ -26,7 +26,7 @@ import com.sequenceiq.freeipa.entity.SecurityRule;
 public class SecurityGroupRequestToSecurityGroupConverter implements Converter<SecurityGroupRequest, SecurityGroup> {
 
     @Inject
-    private MissingResourceNameGenerator missingResourceNameGenerator;
+    private ResourceNameGenerator resourceNameGenerator;
 
     @Inject
     private SecurityRuleRequestToSecurityRuleConverter securityRuleConverter;
@@ -34,7 +34,7 @@ public class SecurityGroupRequestToSecurityGroupConverter implements Converter<S
     @Override
     public SecurityGroup convert(@Nonnull SecurityGroupRequest source) {
         SecurityGroup entity = new SecurityGroup();
-        entity.setName(missingResourceNameGenerator.generateName(APIResourceType.SECURITY_GROUP));
+        entity.setName(resourceNameGenerator.generateName(APIResourceType.SECURITY_GROUP));
         entity.setSecurityGroupIds(convertSecurityGroupIdsToList(source));
         entity.setSecurityRules(convertSecurityRules(source.getSecurityRules(), entity));
         return entity;

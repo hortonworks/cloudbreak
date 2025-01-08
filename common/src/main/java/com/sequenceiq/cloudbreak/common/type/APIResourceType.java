@@ -18,7 +18,8 @@ public enum APIResourceType {
     LDAP_CONFIG("ldap"),
     IMAGE_CATALOG("ic"),
     MANAGEMENT_PACK("mpack"),
-    WORKSPACE("org");
+    WORKSPACE("org"),
+    DATABASE_SERVER("dbsvr-");
 
     private final String namePrefix;
 

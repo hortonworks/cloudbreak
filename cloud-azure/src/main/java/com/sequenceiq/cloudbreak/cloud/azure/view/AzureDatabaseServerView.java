@@ -42,8 +42,6 @@ public class AzureDatabaseServerView {
 
     private static final int NUM_MB_IN_GB = 1024;
 
-    private static final String ZONE_1 = "1";
-
     private final DatabaseServer databaseServer;
 
     public AzureDatabaseServerView(DatabaseServer databaseServer) {
@@ -86,12 +84,9 @@ public class AzureDatabaseServerView {
         if (databaseServer.getEngine() == null) {
             return null;
         }
-        switch (databaseServer.getEngine()) {
-            case POSTGRESQL:
-                return "postgres";
-            default:
-                throw new IllegalStateException("Unsupported Azure Database Server engine " + databaseServer.getEngine());
-        }
+        return switch (databaseServer.getEngine()) {
+            case POSTGRESQL -> "postgres";
+        };
     }
 
     public String getDbVersion() {

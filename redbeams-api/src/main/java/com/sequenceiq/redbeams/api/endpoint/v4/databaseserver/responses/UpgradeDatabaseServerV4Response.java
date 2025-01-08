@@ -17,9 +17,11 @@ public class UpgradeDatabaseServerV4Response {
     @Schema(description = ModelDescriptions.UpgradeModelDescriptions.CURRENT_VERSION)
     private MajorVersion currentVersion;
 
+    @Deprecated
     @Schema(description = ModelDescriptions.UpgradeModelDescriptions.UPGRADE_REASON)
     private String reason;
 
+    @Deprecated
     @Schema(description = ModelDescriptions.UpgradeModelDescriptions.UPGRADE_REASON_WARNING)
     private boolean warning;
 

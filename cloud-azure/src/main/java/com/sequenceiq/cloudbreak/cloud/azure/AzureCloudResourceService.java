@@ -2,6 +2,29 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_NAME_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.model.CloudResource.PRIVATE_ID;
+import static com.sequenceiq.cloudbreak.cloud.model.DeploymentType.CANARY_TEST_DEPLOYMENT;
+import static com.sequenceiq.cloudbreak.cloud.model.DeploymentType.PROVISION;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_AVAILABILITY_SET;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_DATABASE;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_DATABASE_CANARY;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_DATABASE_SECURITY_ALERT_POLICY;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_DISK;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_DNS_ZONE_GROUP;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_DNS_ZONE_GROUP_CANARY;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_INSTANCE;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_LOAD_BALANCER;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_MANAGED_IMAGE;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_NETWORK;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_NETWORK_INTERFACE;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_PRIVATE_DNS_ZONE;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_PRIVATE_ENDPOINT;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_PRIVATE_ENDPOINT_CANARY;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_PUBLIC_IP;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_RESOURCE_GROUP;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_SECURITY_GROUP;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_STORAGE;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_SUBNET;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_VIRTUAL_NETWORK_LINK;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,10 +57,13 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
+import com.sequenceiq.cloudbreak.cloud.model.DeploymentType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.util.NullUtil;
+import com.sequenceiq.common.api.type.CommonResourceType;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -45,6 +71,8 @@ import com.sequenceiq.common.api.type.ResourceType;
 public class AzureCloudResourceService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureCloudResourceService.class);
+
+    private static final String DEPLOYMENT_TYPE = "deploymentType";
 
     @Inject
     private AzureUtils azureUtils;
@@ -55,19 +83,27 @@ public class AzureCloudResourceService {
     public List<CloudResource> getNetworkResources(List<CloudResource> resources) {
         return resources.stream()
                 .filter(cloudResource -> List.of(
-                                ResourceType.AZURE_SUBNET,
-                                ResourceType.AZURE_NETWORK,
-                                ResourceType.AZURE_RESOURCE_GROUP)
+                                AZURE_SUBNET,
+                                AZURE_NETWORK,
+                                AZURE_RESOURCE_GROUP)
                         .contains(cloudResource.getType()))
                 .collect(Collectors.toList());
     }
 
-    public List<ResourceType> getPrivateEndpointRdsResourceTypes() {
-        return List.of(ResourceType.AZURE_DNS_ZONE_GROUP,
-                ResourceType.AZURE_PRIVATE_ENDPOINT);
+    public List<ResourceType> getPrivateEndpointRdsResourceTypes(boolean canary) {
+        return canary ?
+                List.of(AZURE_DNS_ZONE_GROUP_CANARY,
+                        AZURE_PRIVATE_ENDPOINT_CANARY) :
+                List.of(AZURE_DNS_ZONE_GROUP,
+                AZURE_PRIVATE_ENDPOINT);
     }
 
     public List<CloudResource> getDeploymentCloudResources(Deployment templateDeployment) {
+        if (templateDeployment == null) {
+            return List.of();
+        }
+        DeploymentType deploymentType = getDeploymentType(templateDeployment);
+
         List<CloudResource> resourceList = azureListResultFactory.list(templateDeployment.deploymentOperations())
                 .getStream()
                 .filter(Predicate.not(Predicate.isEqual(null)))
@@ -75,11 +111,18 @@ public class AzureCloudResourceService {
                         && StringUtils.isNotBlank(deploymentOperation.provisioningState()))
                 .map(deploymentOperation ->
                         convert(deploymentOperation.targetResource(),
-                                convertProvisioningState(deploymentOperation.provisioningState())))
+                                convertProvisioningState(deploymentOperation.provisioningState()), deploymentType))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
+
         LOGGER.debug("Template deployment related cloud resource list: {}", resourceList);
         return resourceList;
+    }
+
+    private DeploymentType getDeploymentType(Deployment templateDeployment) {
+        return Objects.nonNull(templateDeployment.parameters()) ?
+                NullUtil.getIfNotNullOtherwise(((Map) ((Map) templateDeployment.parameters()).get(DEPLOYMENT_TYPE)),
+                map -> DeploymentType.safeValueOf((String) map.get("value")), PROVISION) : PROVISION;
     }
 
     @SuppressWarnings("checkstyle:CyclomaticComplexity")
@@ -92,59 +135,64 @@ public class AzureCloudResourceService {
     }
 
     @SuppressWarnings("checkstyle:CyclomaticComplexity")
-    private CloudResource convert(TargetResource targetResource, CommonStatus commonStatus) {
-
+    private CloudResource convert(TargetResource targetResource, CommonStatus commonStatus, DeploymentType deploymentType) {
         CloudResource.Builder cloudResourceBuilder = CloudResource.builder();
         switch (targetResource.resourceType()) {
             case "Microsoft.Compute/availabilitySets":
-                cloudResourceBuilder.withType(ResourceType.AZURE_AVAILABILITY_SET);
+                cloudResourceBuilder.withType(AZURE_AVAILABILITY_SET);
                 break;
             case "Microsoft.Compute/virtualMachines":
-                cloudResourceBuilder.withType(ResourceType.AZURE_INSTANCE);
+                cloudResourceBuilder.withType(AZURE_INSTANCE);
                 cloudResourceBuilder.withInstanceId(targetResource.resourceName());
                 break;
             case "Microsoft.Network/networkSecurityGroups":
-                cloudResourceBuilder.withType(ResourceType.AZURE_SECURITY_GROUP);
+                cloudResourceBuilder.withType(AZURE_SECURITY_GROUP);
                 break;
             case "Microsoft.Network/publicIPAddresses":
-                cloudResourceBuilder.withType(ResourceType.AZURE_PUBLIC_IP);
+                cloudResourceBuilder.withType(AZURE_PUBLIC_IP);
                 break;
             case "Microsoft.Network/networkInterfaces":
-                cloudResourceBuilder.withType(ResourceType.AZURE_NETWORK_INTERFACE);
+                cloudResourceBuilder.withType(AZURE_NETWORK_INTERFACE);
                 break;
             case "Microsoft.Network/virtualNetworks":
-                cloudResourceBuilder.withType(ResourceType.AZURE_NETWORK);
+                cloudResourceBuilder.withType(AZURE_NETWORK);
                 break;
             case "Microsoft.Network/privateEndpoints":
-                cloudResourceBuilder.withType(ResourceType.AZURE_PRIVATE_ENDPOINT);
+                cloudResourceBuilder.withType(deploymentType == PROVISION ?
+                        AZURE_PRIVATE_ENDPOINT :
+                        AZURE_PRIVATE_ENDPOINT_CANARY);
                 break;
             case "Microsoft.DBforPostgreSQL/servers":
             case "Microsoft.DBforPostgreSQL/flexibleServers":
-                cloudResourceBuilder.withType(ResourceType.AZURE_DATABASE);
+                cloudResourceBuilder.withType(deploymentType == PROVISION ?
+                        AZURE_DATABASE :
+                        AZURE_DATABASE_CANARY);
                 break;
             case "Microsoft.DBforPostgreSQL/servers/securityAlertPolicies":
-                cloudResourceBuilder.withType(ResourceType.AZURE_DATABASE_SECURITY_ALERT_POLICY);
+                cloudResourceBuilder.withType(AZURE_DATABASE_SECURITY_ALERT_POLICY);
                 break;
             case "Microsoft.Compute/images":
-                cloudResourceBuilder.withType(ResourceType.AZURE_MANAGED_IMAGE);
+                cloudResourceBuilder.withType(AZURE_MANAGED_IMAGE);
                 break;
             case "Microsoft.Compute/disks":
-                cloudResourceBuilder.withType(ResourceType.AZURE_DISK);
+                cloudResourceBuilder.withType(AZURE_DISK);
                 break;
             case "Microsoft.Storage/storageAccounts":
-                cloudResourceBuilder.withType(ResourceType.AZURE_STORAGE);
+                cloudResourceBuilder.withType(AZURE_STORAGE);
                 break;
             case "Microsoft.Network/privateDnsZones":
-                cloudResourceBuilder.withType(ResourceType.AZURE_PRIVATE_DNS_ZONE);
+                cloudResourceBuilder.withType(AZURE_PRIVATE_DNS_ZONE);
                 break;
             case "Microsoft.Network/privateEndpoints/privateDnsZoneGroups":
-                cloudResourceBuilder.withType(ResourceType.AZURE_DNS_ZONE_GROUP);
+                cloudResourceBuilder.withType(deploymentType == PROVISION ?
+                        AZURE_DNS_ZONE_GROUP :
+                        AZURE_DNS_ZONE_GROUP_CANARY);
                 break;
             case "Microsoft.Network/privateDnsZones/virtualNetworkLinks":
-                cloudResourceBuilder.withType(ResourceType.AZURE_VIRTUAL_NETWORK_LINK);
+                cloudResourceBuilder.withType(AZURE_VIRTUAL_NETWORK_LINK);
                 break;
             case "Microsoft.Network/loadBalancers":
-                cloudResourceBuilder.withType(ResourceType.AZURE_LOAD_BALANCER);
+                cloudResourceBuilder.withType(AZURE_LOAD_BALANCER);
                 break;
             default:
                 LOGGER.info("Unknown resource type {}", targetResource.resourceType());
@@ -161,7 +209,13 @@ public class AzureCloudResourceService {
                 cloudResource,
                 targetResource.resourceName(),
                 targetResource.resourceType());
-        return cloudResource;
+        return shouldBeCollected(deploymentType, cloudResource) ? cloudResource : null;
+    }
+
+    private boolean shouldBeCollected(DeploymentType deploymentType, CloudResource cloudResource) {
+        return deploymentType == PROVISION ||
+                (deploymentType == CANARY_TEST_DEPLOYMENT &&
+                        cloudResource.getType().getCommonResourceType() == CommonResourceType.CANARY);
     }
 
     public List<CloudResource> getInstanceCloudResources(String stackName, List<CloudResource> cloudResourceList, List<Group> groups,
@@ -170,7 +224,7 @@ public class AzureCloudResourceService {
         List<CloudResource> vmResourceList = new ArrayList<>();
         cloudResourceList
                 .stream()
-                .filter(cloudResource -> cloudResource.getType().equals(ResourceType.AZURE_INSTANCE))
+                .filter(cloudResource -> cloudResource.getType().equals(AZURE_INSTANCE))
                 .forEach(instance -> groups
                         .stream()
                         .map(Group::getInstances)
@@ -228,7 +282,7 @@ public class AzureCloudResourceService {
                 .withStatus(CommonStatus.CREATED)
                 .withPersistent(true)
                 .withReference(osDisk.managedDisk().id())
-                .withType(ResourceType.AZURE_DISK)
+                .withType(AZURE_DISK)
                 .withGroup(instanceGroup)
                 .withParameters(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
                                 .withAvailabilityZone(availabilityZone)
@@ -292,21 +346,21 @@ public class AzureCloudResourceService {
         }
         CloudResource resourceGroupResource = CloudResource.builder().
                 withName(resourceGroupName).
-                withType(ResourceType.AZURE_RESOURCE_GROUP).
+                withType(AZURE_RESOURCE_GROUP).
                 build();
         resources.add(resourceGroupResource);
         notifier.notifyAllocation(resourceGroupResource, cloudContext);
 
         CloudResource networkResource = CloudResource.builder().
                 withName(networkName).
-                withType(ResourceType.AZURE_NETWORK).
+                withType(AZURE_NETWORK).
                 build();
         resources.add(networkResource);
         notifier.notifyAllocation(networkResource, cloudContext);
         for (String subnetName : subnetNameList) {
             CloudResource subnetResource = CloudResource.builder().
                     withName(subnetName).
-                    withType(ResourceType.AZURE_SUBNET).
+                    withType(AZURE_SUBNET).
                     build();
             resources.add(subnetResource);
             notifier.notifyAllocation(subnetResource, cloudContext);

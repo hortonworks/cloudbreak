@@ -15,7 +15,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
-import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
+import com.sequenceiq.cloudbreak.common.converter.ResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.converter.v4.database.DatabaseV4RequestToRDSConfigConverter;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -26,14 +26,14 @@ public class DatabaseV4RequestToRDSConfigConverterTest {
     private static final String NAME = "test";
 
     @Mock
-    private MissingResourceNameGenerator missingResourceNameGenerator;
+    private ResourceNameGenerator resourceNameGenerator;
 
     @InjectMocks
     private DatabaseV4RequestToRDSConfigConverter underTest;
 
     @Before
     public void before() {
-        when(missingResourceNameGenerator.generateName(APIResourceType.RDS_CONFIG)).thenReturn(NAME);
+        when(resourceNameGenerator.generateName(APIResourceType.RDS_CONFIG)).thenReturn(NAME);
     }
 
     @Test
@@ -111,7 +111,7 @@ public class DatabaseV4RequestToRDSConfigConverterTest {
         Assert.assertEquals(NAME, rdsConfig.getName());
         Assert.assertEquals(DatabaseVendor.POSTGRES.connectionDriver(), rdsConfig.getConnectionDriver());
         Assert.assertEquals(DatabaseVendor.POSTGRES, rdsConfig.getDatabaseEngine());
-        verify(missingResourceNameGenerator, times(1)).generateName(any(APIResourceType.class));
+        verify(resourceNameGenerator, times(1)).generateName(any(APIResourceType.class));
     }
 
     private DatabaseV4Request rdsConfigRequest() {
@@ -132,6 +132,6 @@ public class DatabaseV4RequestToRDSConfigConverterTest {
         Assert.assertEquals(rdsConfigRequest.getName(), rdsConfig.getName());
         Assert.assertEquals(databaseVendor.connectionDriver(), rdsConfig.getConnectionDriver());
         Assert.assertEquals(databaseVendor, rdsConfig.getDatabaseEngine());
-        verify(missingResourceNameGenerator, times(0)).generateName(any(APIResourceType.class));
+        verify(resourceNameGenerator, times(0)).generateName(any(APIResourceType.class));
     }
 }

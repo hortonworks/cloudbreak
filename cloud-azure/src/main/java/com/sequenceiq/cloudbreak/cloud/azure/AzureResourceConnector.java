@@ -255,6 +255,19 @@ public class AzureResourceConnector extends AbstractResourceConnector {
     }
 
     @Override
+    public List<CloudResourceStatus> launchValidateUpgradeDatabaseServerResources(AuthenticatedContext authenticatedContext, DatabaseStack stack,
+            TargetMajorVersion targetMajorVersion, DatabaseStack migratedDbStack, PersistenceNotifier persistenceNotifier) {
+        return azureDatabaseResourceService.launchCanaryDatabaseForUpgrade(
+                authenticatedContext, stack, migratedDbStack, persistenceNotifier);
+    }
+
+    @Override
+    public void cleanupValidateUpgradeDatabaseServerResources(AuthenticatedContext authenticatedContext, DatabaseStack stack, List<CloudResource> resources,
+            PersistenceNotifier persistenceNotifier) {
+        azureDatabaseResourceService.deleteCanaryDatabaseForUpgrade(authenticatedContext, persistenceNotifier, resources);
+    }
+
+    @Override
     public List<CloudResourceStatus> launchDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
             PersistenceNotifier persistenceNotifier) {
         return azureDatabaseResourceService.buildDatabaseResourcesForLaunch(authenticatedContext, stack, persistenceNotifier);

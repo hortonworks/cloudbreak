@@ -22,6 +22,7 @@ import freemarker.template.TemplateException;
 
 @Service
 public class AzureDatabaseTemplateBuilder {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureDatabaseTemplateBuilder.class);
 
     @Inject

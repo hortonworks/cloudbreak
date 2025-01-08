@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -20,7 +21,10 @@ import com.sequenceiq.cloudbreak.common.domain.SslCertStatus;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
+import com.sequenceiq.cloudbreak.util.NullUtil;
+import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.AzureDatabaseType;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.CanaryDatabasePropertiesV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.ConnectionNameFormat;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabasePropertiesV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
@@ -29,6 +33,7 @@ import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.configuration.DatabaseServerSslCertificateConfig;
 import com.sequenceiq.redbeams.configuration.SslCertificateEntry;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
+import com.sequenceiq.redbeams.domain.stack.DBResource;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.SslConfig;
 import com.sequenceiq.redbeams.service.sslcertificate.SslConfigService;
@@ -78,6 +83,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverter {
             response.setStatus(dbStack.getStatus());
             response.setStatusReason(dbStack.getStatusReason());
             response.setMajorVersion(dbStack.getMajorVersion());
+            response.setCanaryDatabasePropertiesV4Response(createCanaryDatabaseProperties(dbStack.getCanaryDatabaseResources()));
             if (dbStack.getDatabaseServer() != null) {
                 response.setInstanceType(dbStack.getDatabaseServer().getInstanceType());
                 response.setStorageSize(dbStack.getDatabaseServer().getStorageSize());
@@ -173,6 +179,16 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverter {
                 }
             }
         });
+        return response;
+    }
+
+    private CanaryDatabasePropertiesV4Response createCanaryDatabaseProperties(Set<DBResource> canaryDatabaseResources) {
+        CanaryDatabasePropertiesV4Response response = new CanaryDatabasePropertiesV4Response();
+        NullUtil.doIfNotNull(
+                canaryDatabaseResources.stream()
+                        .filter(dbResource -> dbResource.getResourceType() == ResourceType.RDS_HOSTNAME_CANARY)
+                        .map(DBResource::getResourceName)
+                        .findFirst().orElse(null), response::setHost);
         return response;
     }
 }

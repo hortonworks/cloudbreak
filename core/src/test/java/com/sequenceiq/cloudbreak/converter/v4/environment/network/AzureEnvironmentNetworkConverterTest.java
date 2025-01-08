@@ -23,7 +23,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
-import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
+import com.sequenceiq.cloudbreak.common.converter.ResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
@@ -52,7 +52,7 @@ class AzureEnvironmentNetworkConverterTest {
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
     @Mock
-    private MissingResourceNameGenerator missingResourceNameGenerator;
+    private ResourceNameGenerator resourceNameGenerator;
 
     @Mock
     private SubnetSelector subnetSelector;

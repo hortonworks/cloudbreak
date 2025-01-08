@@ -240,7 +240,7 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
         DBStack savedDBStack;
         LOGGER.debug("Database server creation called with parameters: {}", request);
         if (enableMultipleDatabaseServers) {
-            savedDBStack = redbeamsCreationService.launchNonUniqueDatabaseServer(dbStack, request.getClusterCrn(), request.getNetwork());
+            savedDBStack = redbeamsCreationService.launchMultiDatabaseServer(dbStack, request.getClusterCrn(), request.getNetwork());
         } else {
             savedDBStack = redbeamsCreationService.launchDatabaseServer(dbStack, request.getClusterCrn(), request.getNetwork());
         }
@@ -360,6 +360,13 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
             @Valid @NotNull UpgradeDatabaseServerV4Request request) {
         UpgradeDatabaseRequest upgradeDatabaseRequest = upgradeDatabaseServerV4RequestConverter.convert(request);
         return upgradeDatabaseServerV4ResponseConverter.convert(redbeamsUpgradeService.validateUpgradeDatabaseServer(crn, upgradeDatabaseRequest));
+    }
+
+    @Override
+    @InternalOnly
+    public UpgradeDatabaseServerV4Response validateUpgradeCleanup(@TenantAwareParam @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER)
+    String crn) {
+        return upgradeDatabaseServerV4ResponseConverter.convert(redbeamsUpgradeService.validateUpgradeDatabaseServerCleanup(crn));
     }
 
     @Override

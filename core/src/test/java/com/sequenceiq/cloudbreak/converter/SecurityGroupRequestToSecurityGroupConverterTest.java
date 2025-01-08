@@ -14,7 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
-import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
+import com.sequenceiq.cloudbreak.common.converter.ResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.securitygroup.SecurityGroupV4RequestToSecurityGroupConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.securitygroup.securityrule.SecurityRuleV4RequestToSecurityRuleConverter;
@@ -28,14 +28,14 @@ public class SecurityGroupRequestToSecurityGroupConverterTest extends AbstractJs
     private SecurityGroupV4RequestToSecurityGroupConverter underTest;
 
     @Mock
-    private MissingResourceNameGenerator missingResourceNameGenerator;
+    private ResourceNameGenerator resourceNameGenerator;
 
     @Mock
     private SecurityRuleV4RequestToSecurityRuleConverter securityRuleV4RequestToSecurityRuleConverter;
 
     @Before
     public void setUp() {
-        when(missingResourceNameGenerator.generateName(APIResourceType.SECURITY_GROUP)).thenReturn("name");
+        when(resourceNameGenerator.generateName(APIResourceType.SECURITY_GROUP)).thenReturn("name");
     }
 
     @Test

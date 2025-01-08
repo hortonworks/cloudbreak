@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.te
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
-import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
+import com.sequenceiq.cloudbreak.common.converter.ResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.Mappable;
@@ -49,7 +49,7 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
     private static final String USER_CRN = "crn:altus:iam:us-west-1:" + ACCOUNT_ID + ":user:" + UUID.randomUUID().toString();
 
     @Mock
-    private MissingResourceNameGenerator missingResourceNameGenerator;
+    private ResourceNameGenerator resourceNameGenerator;
 
     @Mock
     private ProviderParameterCalculator providerParameterCalculator;
@@ -65,7 +65,7 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
 
     @BeforeEach
     public void setup() {
-        when(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE)).thenReturn("name");
+        when(resourceNameGenerator.generateName(APIResourceType.TEMPLATE)).thenReturn("name");
     }
 
     @Test
@@ -77,7 +77,7 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("cpus", 1);
 
-        when(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE)).thenReturn("name");
+        when(resourceNameGenerator.generateName(APIResourceType.TEMPLATE)).thenReturn("name");
         when(providerParameterCalculator.get(source)).thenReturn(mappable);
         when(mappable.asMap()).thenReturn(parameters);
 
@@ -105,7 +105,7 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
                 PlatformParametersConsts.CUSTOM_INSTANCETYPE_MEMORY, 1,
                 PlatformParametersConsts.CUSTOM_INSTANCETYPE_CPUS, 1);
 
-        when(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE)).thenReturn("name");
+        when(resourceNameGenerator.generateName(APIResourceType.TEMPLATE)).thenReturn("name");
         when(providerParameterCalculator.get(source)).thenReturn(mappable);
         when(mappable.asMap()).thenReturn(attributeMap);
 
@@ -135,7 +135,7 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
 
         int rootVolumeSize = 60;
         when(defaultRootVolumeSizeProvider.getForPlatform(CloudPlatform.GCP.name())).thenReturn(rootVolumeSize);
-        when(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE)).thenReturn("name");
+        when(resourceNameGenerator.generateName(APIResourceType.TEMPLATE)).thenReturn("name");
         when(providerParameterCalculator.get(source)).thenReturn(mappable);
         when(mappable.asMap()).thenReturn(attributeMap);
 
@@ -221,7 +221,7 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
         ProviderParameterCalculator providerParameterCalculator = new ProviderParameterCalculator();
         ReflectionTestUtils.setField(underTest, "providerParameterCalculator", providerParameterCalculator);
 
-        when(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE)).thenReturn("name");
+        when(resourceNameGenerator.generateName(APIResourceType.TEMPLATE)).thenReturn("name");
         return source;
     }
 
@@ -274,7 +274,7 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
         ProviderParameterCalculator providerParameterCalculator = new ProviderParameterCalculator();
         ReflectionTestUtils.setField(underTest, "providerParameterCalculator", providerParameterCalculator);
 
-        when(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE)).thenReturn("name");
+        when(resourceNameGenerator.generateName(APIResourceType.TEMPLATE)).thenReturn("name");
         return source;
     }
 

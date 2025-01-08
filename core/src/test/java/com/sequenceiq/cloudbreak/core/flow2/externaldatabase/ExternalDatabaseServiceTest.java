@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.externaldatabase;
 
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROTATE;
+import static com.sequenceiq.common.model.AzureDatabaseType.FLEXIBLE_SERVER;
+import static com.sequenceiq.common.model.AzureDatabaseType.SINGLE_SERVER;
 import static com.sequenceiq.redbeams.rotation.RedbeamsSecretType.REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -67,6 +69,7 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.externaldatabase.DatabaseOperation;
 import com.sequenceiq.cloudbreak.service.externaldatabase.DatabaseServerParameterDecorator;
 import com.sequenceiq.cloudbreak.service.externaldatabase.PollingConfig;
@@ -134,8 +137,6 @@ class ExternalDatabaseServiceTest {
 
     private static final String ROTATE_ERROR_REASON = "rotate error happened";
 
-    private static final String DATABASE_NOT_FOUND = "Database not found";
-
     @Mock
     private RedbeamsClientService redbeamsClient;
 
@@ -172,15 +173,18 @@ class ExternalDatabaseServiceTest {
     @Mock
     private EnvironmentPlatformResourceEndpoint environmentPlatformResourceEndpoint;
 
+    @Mock
+    private CmTemplateProcessor cmTemplateProcessor;
+
+    @Mock
+    private EnvironmentClientService environmentClientService;
+
     @InjectMocks
     private ExternalDatabaseService underTest;
 
     private DetailedEnvironmentResponse environmentResponse;
 
     private DatabaseServerV4StackRequest databaseServerV4StackRequest;
-
-    @Mock
-    private CmTemplateProcessor cmTemplateProcessor;
 
     @BeforeEach
     void setUp() {
@@ -556,21 +560,21 @@ class ExternalDatabaseServiceTest {
     }
 
     @Test
-    void testWaitForDatabaseToBeUpgraded() {
+    void testWaitForDatabaseFlowToBeFinished() {
         Cluster cluster = new Cluster();
         cluster.setDatabaseServerCrn(RDBMS_CRN);
         when(redbeamsClient.hasFlowRunningByFlowId(RDBMS_FLOW_ID)).thenReturn(
                 createFlowCheckResponse(Boolean.TRUE, Boolean.FALSE),
                 createFlowCheckResponse(Boolean.FALSE, Boolean.FALSE));
 
-        underTest.waitForDatabaseToBeUpgraded(cluster, new FlowIdentifier(FlowType.FLOW, RDBMS_FLOW_ID));
+        underTest.waitForDatabaseFlowToBeFinished(cluster, new FlowIdentifier(FlowType.FLOW, RDBMS_FLOW_ID));
 
         verify(redbeamsClient, times(2)).hasFlowRunningByFlowId(RDBMS_FLOW_ID);
-        verify(redbeamsClient, never()).getByCrn(any());
+        verify(redbeamsClient).getByCrn(any());
     }
 
     @Test
-    void testWaitForDatabaseToBeUpgradedWhenFlowFailed() {
+    void testWaitForDatabaseFlowToBeFinishedWhenFlowFailed() {
         Cluster cluster = new Cluster();
         cluster.setDatabaseServerCrn(RDBMS_CRN);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, RDBMS_FLOW_ID);
@@ -582,7 +586,7 @@ class ExternalDatabaseServiceTest {
         when(redbeamsClient.hasFlowRunningByFlowId(RDBMS_FLOW_ID)).thenReturn(createFlowCheckResponse(Boolean.FALSE, Boolean.TRUE));
 
         CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
-                () -> underTest.waitForDatabaseToBeUpgraded(cluster, flowIdentifier));
+                () -> underTest.waitForDatabaseFlowToBeFinished(cluster, flowIdentifier));
 
         String expected = String.format("Database flow failed in Redbeams with error: 'upgrade error happened'. "
                         + "Database crn: %s, flow: FlowIdentifier{type=FLOW, pollableId='%s'}",
@@ -593,7 +597,7 @@ class ExternalDatabaseServiceTest {
     }
 
     @Test
-    void testWaitForDatabaseToBeUpgradedWhenFlowFailedAndNoDbFound() {
+    void testWaitForDatabaseFlowToBeFinishedWhenFlowFailedAndNoDbFound() {
         Cluster cluster = new Cluster();
         cluster.setDatabaseServerCrn(RDBMS_CRN);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, RDBMS_FLOW_ID);
@@ -604,7 +608,7 @@ class ExternalDatabaseServiceTest {
                 createFlowCheckResponse(Boolean.FALSE, Boolean.TRUE));
 
         CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
-                () -> underTest.waitForDatabaseToBeUpgraded(cluster, flowIdentifier));
+                () -> underTest.waitForDatabaseFlowToBeFinished(cluster, flowIdentifier));
 
         String expected = String.format("Database flow failed in Redbeams with error: 'notfound'. "
                         + "Database crn: %s, flow: FlowIdentifier{type=FLOW, pollableId='%s'}",
@@ -615,11 +619,11 @@ class ExternalDatabaseServiceTest {
     }
 
     @Test
-    void testWaitForDatabaseToBeUpgradedWhenNoFlowId() {
+    void testWaitForDatabaseFlowToBeFinishedWhenNoFlowId() {
         Cluster cluster = spy(new Cluster());
         cluster.setDatabaseServerCrn(RDBMS_CRN);
 
-        underTest.waitForDatabaseToBeUpgraded(cluster, null);
+        underTest.waitForDatabaseFlowToBeFinished(cluster, null);
 
         verify(redbeamsClient, never()).hasFlowRunningByFlowId(any());
         verify(redbeamsClient, never()).getByCrn(any());
@@ -662,6 +666,8 @@ class ExternalDatabaseServiceTest {
         doReturn(Optional.ofNullable(databaseType)).when(dbServerParameterDecorator).getDatabaseType(any());
         lenient().when(dbConfigs.get(new DatabaseStackConfigKey(CloudPlatform.valueOf(platform), databaseType)))
                 .thenReturn(new DatabaseStackConfig(INSTANCE_TYPE, VENDOR, VOLUME_SIZE));
+        when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
+        when(environmentClientService.getByCrn(ENV_CRN)).thenReturn(environmentResponse);
         if (migrationRequired) {
             lenient().when(stack.getExternalDatabaseCreationType()).thenReturn(DatabaseAvailabilityType.HA);
             Stack realStack = new Stack();
@@ -677,12 +683,12 @@ class ExternalDatabaseServiceTest {
                     .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instanceType")));
         }
 
-        DatabaseServerV4StackRequest result = underTest.migrateDatabaseSettingsIfNeeded(stack, majorVersion, environmentResponse);
+        DatabaseServerV4StackRequest result = underTest.migrateDatabaseSettingsIfNeeded(stack, majorVersion);
 
         if (migrationRequired) {
             DatabaseServerParameter serverParameter = DatabaseServerParameter.builder()
                     .withEngineVersion(target)
-                    .withAttributes(Map.of(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.FLEXIBLE_SERVER.name()))
+                    .withAttributes(Map.of(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, FLEXIBLE_SERVER.name()))
                     .withAvailabilityType(DatabaseAvailabilityType.HA)
                     .build();
             assertNotNull(result);
@@ -696,17 +702,17 @@ class ExternalDatabaseServiceTest {
     private static Object[][] dbUpgradeMigrationScenarios() {
         return new Object[][]{
                 // ExternalDB, Platform, currentVersion, targetVersion, originalDBType, migrationRequired, datalake
-                {true, "AZURE", "10", "11", AzureDatabaseType.SINGLE_SERVER, false, true},
-                {true, "AZURE", "10", "14", AzureDatabaseType.SINGLE_SERVER, true, true},
-                {true, "AZURE", "10", "14", AzureDatabaseType.SINGLE_SERVER, true, false},
-                {true, "AZURE", "14", "14", AzureDatabaseType.FLEXIBLE_SERVER, false, false},
+                {true, "AZURE", "10", "11", SINGLE_SERVER, false, true},
+                {true, "AZURE", "10", "14", SINGLE_SERVER, true, true},
+                {true, "AZURE", "10", "14", SINGLE_SERVER, true, false},
+                {true, "AZURE", "14", "14", FLEXIBLE_SERVER, false, false},
                 {true, "AZURE", "14", "11", null, false, false},
                 {true, "AWS", "10", "11", null, false, false},
                 {true, "AWS", "10", "14", null, false, false},
                 {true, "AWS", "14", "14", null, false, false},
                 {true, "AWS", "14", "11", null, false, false},
-                {false, "AZURE", "10", "14", AzureDatabaseType.SINGLE_SERVER, false, true},
-                {true, "AZURE", "11", "14", AzureDatabaseType.FLEXIBLE_SERVER, false, true},
+                {false, "AZURE", "10", "14", SINGLE_SERVER, false, true},
+                {true, "AZURE", "11", "14", FLEXIBLE_SERVER, false, true},
         };
     }
 

@@ -5,14 +5,20 @@ import static com.azure.resourcemanager.postgresql.models.ServerState.DROPPING;
 import static com.azure.resourcemanager.postgresql.models.ServerState.INACCESSIBLE;
 import static com.azure.resourcemanager.postgresql.models.ServerState.READY;
 import static com.sequenceiq.cloudbreak.cloud.azure.view.AzureDatabaseServerView.DB_VERSION;
+import static com.sequenceiq.common.api.type.CommonResourceType.CANARY;
 import static com.sequenceiq.common.api.type.ResourceType.ARM_TEMPLATE;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_DATABASE;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_DATABASE_CANARY;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_PRIVATE_ENDPOINT;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_RESOURCE_GROUP;
 import static com.sequenceiq.common.api.type.ResourceType.RDS_HOSTNAME;
+import static com.sequenceiq.common.api.type.ResourceType.RDS_HOSTNAME_CANARY;
+import static com.sequenceiq.common.api.type.ResourceType.RDS_PORT;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -24,6 +30,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.azure.core.management.exception.ManagementException;
+import com.azure.resourcemanager.postgresql.models.StorageProfile;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.Server;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerState;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.Storage;
@@ -69,6 +76,7 @@ import com.sequenceiq.common.model.AzureDatabaseType;
 
 @Service
 public class AzureDatabaseResourceService {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureDatabaseResourceService.class);
 
     // PostgreSQL server port is fixed for now
@@ -148,17 +156,18 @@ public class AzureDatabaseResourceService {
         createResourceGroupIfNotExists(ac, stack, client, resourceGroupName, resourceGroupUsage, persistenceNotifier);
 
         createTemplateResource(persistenceNotifier, cloudContext, stackName);
-        Deployment deployment = createOrFetchDeployment(persistenceNotifier, stackName, resourceGroupName, template, client, ac);
+        List<CloudResource> cloudResources = createOrFetchDeployment(persistenceNotifier, stackName, resourceGroupName, template, client, ac);
 
-        String fqdn = (String) ((Map) ((Map) deployment.outputs()).get(DATABASE_SERVER_FQDN)).get("value");
-        List<CloudResource> databaseResources = createCloudResources(fqdn);
-        databaseResources.forEach(dbr -> persistenceNotifier.notifyAllocation(dbr, cloudContext));
-        return databaseResources.stream()
+        return convertWithStatus(cloudResources);
+    }
+
+    private List<CloudResourceStatus> convertWithStatus(List<CloudResource> cloudResources) {
+        return cloudResources.stream()
                 .map(resource -> new CloudResourceStatus(resource, ResourceStatus.CREATED))
                 .collect(Collectors.toList());
     }
 
-    private Deployment createOrFetchDeployment(PersistenceNotifier persistenceNotifier, String stackName, String resourceGroupName, String template,
+    private List<CloudResource> createOrFetchDeployment(PersistenceNotifier persistenceNotifier, String stackName, String resourceGroupName, String template,
             AzureClient client, AuthenticatedContext ac) {
         Optional<RuntimeException> exception = Optional.empty();
         try {
@@ -170,19 +179,53 @@ public class AzureDatabaseResourceService {
         } catch (Exception e) {
             exception = Optional.of(new CloudConnectorException(String.format("Error in provisioning database stack %s: %s", stackName, e.getMessage()), e));
         }
+        List<CloudResource> resources = fetchAndSaveDeploymentResources(persistenceNotifier, stackName, resourceGroupName, client, ac, exception);
+        LOGGER.debug("Deployment resources: {}", resources);
+        return resources;
+    }
+
+    private List<CloudResource> fetchAndSaveDeploymentResources(PersistenceNotifier persistenceNotifier, String stackName, String resourceGroupName,
+            AzureClient client, AuthenticatedContext ac, Optional<RuntimeException> exception) {
         try {
             Deployment deployment = fetchDeploymentWithRetry(stackName, resourceGroupName, client);
-            List<CloudResource> cloudResources = azureCloudResourceService.getDeploymentCloudResources(deployment);
-            cloudResources.forEach(cloudResource -> persistenceNotifier.notifyAllocation(cloudResource, ac.getCloudContext()));
+            List<CloudResource> cloudResources = new ArrayList<>();
+            boolean canaryDeployment = false;
+            if (Objects.nonNull(deployment)) {
+                cloudResources = azureCloudResourceService.getDeploymentCloudResources(deployment);
+                canaryDeployment = isCanaryDeployment(cloudResources);
+
+                String fqdn = (String) ((Map) ((Map) deployment.outputs()).get(DATABASE_SERVER_FQDN)).get("value");
+                List<CloudResource> databaseResources = createCloudResources(fqdn, canaryDeployment);
+
+                cloudResources.addAll(databaseResources);
+                cloudResources.forEach(dbr -> persistenceNotifier.notifyAllocation(dbr, ac.getCloudContext()));
+            } else {
+                LOGGER.info("Deployment with name {} in RG {} was not found, this should not happen", stackName, resourceGroupName);
+            }
             if (exception.isPresent()) {
+                if (canaryDeployment) {
+                    LOGGER.warn("Canary deployment failed, cleaning up resources {}", cloudResources);
+                    deleteCanaryDatabaseForUpgrade(ac, persistenceNotifier, cloudResources);
+                }
                 throw exception.get();
             } else {
-                return deployment;
+                return cloudResources;
             }
         } catch (Retry.ActionFailedException e) {
             LOGGER.warn("Error during fetching database deployment", e);
+            Deployment deployment = fetchDeployment(stackName, resourceGroupName, client);
+            List<CloudResource> cloudResources = azureCloudResourceService.getDeploymentCloudResources(deployment);
+            boolean canaryDeployment = isCanaryDeployment(cloudResources);
+            if (canaryDeployment) {
+                LOGGER.warn("Canary deployment failed and template retry exhausted, cleaning up resources {}", cloudResources);
+                deleteCanaryDatabaseForUpgrade(ac, persistenceNotifier, cloudResources);
+            }
             throw exception.orElse(e);
         }
+    }
+
+    private boolean isCanaryDeployment(List<CloudResource> cloudResources) {
+        return cloudResources.stream().allMatch(resource -> resource.getCommonResourceType() == CANARY);
     }
 
     private Deployment fetchDeploymentWithRetry(String stackName, String resourceGroupName, AzureClient client) {
@@ -195,6 +238,12 @@ public class AzureDatabaseResourceService {
                 return templateDeployment;
             }
         });
+    }
+
+    private Deployment fetchDeployment(String stackName, String resourceGroupName, AzureClient client) {
+        Deployment templateDeployment = client.getTemplateDeployment(resourceGroupName, stackName);
+        LOGGER.warn("Template deployment: {}", templateDeployment);
+        return templateDeployment;
     }
 
     private void createResourceGroupIfNotExists(AuthenticatedContext ac, DatabaseStack stack, AzureClient client, String resourceGroupName,
@@ -222,8 +271,10 @@ public class AzureDatabaseResourceService {
         persistenceNotifier.notifyAllocation(resourceGroup, cloudContext);
     }
 
-    private List<CloudResource> createCloudResources(String fqdn) {
-        return List.of(createCloudResource(RDS_HOSTNAME, fqdn), createCloudResource(ResourceType.RDS_PORT, Integer.toString(POSTGRESQL_SERVER_PORT)));
+    private List<CloudResource> createCloudResources(String fqdn, boolean canaryDeployment) {
+        return List.of(
+                createCloudResource(canaryDeployment ? RDS_HOSTNAME_CANARY : RDS_HOSTNAME, fqdn),
+                createCloudResource(ResourceType.RDS_PORT, Integer.toString(POSTGRESQL_SERVER_PORT)));
     }
 
     private CloudResource createCloudResource(ResourceType type, String name) {
@@ -307,8 +358,8 @@ public class AzureDatabaseResourceService {
         LOGGER.debug("Deleting Azure private endpoints {}", azureGenericResources);
         azureUtils.deleteGenericResources(client, azureGenericResources.stream().map(CloudResource::getReference).collect(Collectors.toList()));
         azureGenericResources.forEach(cr -> persistenceNotifier.notifyDeletion(cr, cloudContext));
-
-        return findResources(resources, List.of(AZURE_DATABASE)).stream()
+        return findResources(resources, List.of(AZURE_DATABASE))
+                .stream()
                 .map(r -> deleteDatabaseServerAndNotify(r, cloudContext, client, persistenceNotifier, force, databaseServer))
                 .collect(Collectors.toList());
     }
@@ -379,30 +430,30 @@ public class AzureDatabaseResourceService {
         AzureClient client = ac.getParameter(AzureClient.class);
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
         try {
-            return getExternalDatabaseStatus(stack, client, resourceGroupName);
+            return getExternalDatabaseStatus(stack.getDatabaseServer(), client, resourceGroupName);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             throw new CloudConnectorException(e);
         }
     }
 
-    private ExternalDatabaseStatus getExternalDatabaseStatus(DatabaseStack stack, AzureClient client, String resourceGroupName) {
-        return getExternalDatabaseParameters(stack, client, resourceGroupName).externalDatabaseStatus();
+    private ExternalDatabaseStatus getExternalDatabaseStatus(DatabaseServer databaseServer, AzureClient client, String resourceGroupName) {
+        return getExternalDatabaseParameters(databaseServer, client, resourceGroupName).externalDatabaseStatus();
     }
 
     public ExternalDatabaseParameters getExternalDatabaseParameters(AuthenticatedContext ac, DatabaseStack stack) {
         CloudContext cloudContext = ac.getCloudContext();
         AzureClient client = ac.getParameter(AzureClient.class);
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
-        return getExternalDatabaseParameters(stack, client, resourceGroupName);
+        return getExternalDatabaseParameters(stack.getDatabaseServer(), client, resourceGroupName);
     }
 
-    private ExternalDatabaseParameters getExternalDatabaseParameters(DatabaseStack stack, AzureClient client, String resourceGroupName) {
-        AzureDatabaseServerView databaseServerView = new AzureDatabaseServerView(stack.getDatabaseServer());
+    private ExternalDatabaseParameters getExternalDatabaseParameters(DatabaseServer databaseServer, AzureClient client, String resourceGroupName) {
+        AzureDatabaseServerView databaseServerView = new AzureDatabaseServerView(databaseServer);
         ExternalDatabaseParameters externalDatabaseParameters;
         if (databaseServerView.getAzureDatabaseType() == AzureDatabaseType.FLEXIBLE_SERVER) {
             LOGGER.debug("Getting flexible server parameters from Azure for {} database", databaseServerView.getDbServerName());
-            Server server = client.getFlexibleServerClient().getFlexibleServer(resourceGroupName, stack.getDatabaseServer().getServerId());
+            Server server = client.getFlexibleServerClient().getFlexibleServer(resourceGroupName, databaseServer.getServerId());
             externalDatabaseParameters = new ExternalDatabaseParameters(
                     convertFlexibleStatus(server),
                     AzureDatabaseType.FLEXIBLE_SERVER,
@@ -410,7 +461,7 @@ public class AzureDatabaseResourceService {
         } else {
             LOGGER.debug("Getting single server parameters from Azure for {} database", databaseServerView.getDbServerName());
             com.azure.resourcemanager.postgresql.models.Server server =
-                    client.getSingleServerClient().getSingleServer(resourceGroupName, stack.getDatabaseServer().getServerId());
+                    client.getSingleServerClient().getSingleServer(resourceGroupName, databaseServer.getServerId());
             externalDatabaseParameters = new ExternalDatabaseParameters(
                     convertSingleStatus(server),
                     AzureDatabaseType.SINGLE_SERVER,
@@ -437,7 +488,7 @@ public class AzureDatabaseResourceService {
     private Long getSingleServerStorageSizeInMB(com.azure.resourcemanager.postgresql.models.Server server) {
         return Optional.ofNullable(server)
                 .map(com.azure.resourcemanager.postgresql.models.Server::storageProfile)
-                .map(com.azure.resourcemanager.postgresql.models.StorageProfile::storageMB)
+                .map(StorageProfile::storageMB)
                 .map(Integer::longValue)
                 .orElse(null);
     }
@@ -480,8 +531,7 @@ public class AzureDatabaseResourceService {
         String stackName = azureUtils.getStackName(cloudContext);
         AzureClient client = authenticatedContext.getParameter(AzureClient.class);
         try {
-            deleteAllPrivateEndpointResources(persistenceNotifier, cloudContext, resources, client);
-            deleteDatabaseServer(persistenceNotifier, cloudContext, resources, client);
+            deleteDatabaseResourcesOnProvider(persistenceNotifier, resources, cloudContext, client, false);
 
             stack.getDatabaseServer().putParameter(DB_VERSION, targetMajorVersion.getMajorVersion());
             String template = azureDatabaseTemplateBuilder.build(cloudContext, stack);
@@ -495,6 +545,12 @@ public class AzureDatabaseResourceService {
         } finally {
             recreateCloudResourcesInDeployment(persistenceNotifier, cloudContext, stackName, resourceGroupName, client);
         }
+    }
+
+    public void deleteDatabaseResourcesOnProvider(PersistenceNotifier persistenceNotifier, List<CloudResource> resources, CloudContext cloudContext,
+            AzureClient client, boolean canary) {
+        deleteAllPrivateEndpointResources(persistenceNotifier, cloudContext, resources, client, canary);
+        deleteDatabaseServerResources(persistenceNotifier, cloudContext, resources, client, canary);
     }
 
     private void upgradeFlexibleServer(AuthenticatedContext authenticatedContext, TargetMajorVersion targetMajorVersion, List<CloudResource> resources,
@@ -546,19 +602,27 @@ public class AzureDatabaseResourceService {
         return AzureDatabaseType.safeValueOf(databaseStack.getDatabaseServer().getStringParameter(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY));
     }
 
-    private void deleteDatabaseServer(PersistenceNotifier persistenceNotifier, CloudContext cloudContext, List<CloudResource> resources, AzureClient client) {
-        Optional<CloudResource> databaseServer = getResources(resources, AZURE_DATABASE, false).stream().findFirst();
+    private void deleteDatabaseServerResources(PersistenceNotifier persistenceNotifier, CloudContext cloudContext, List<CloudResource> resources,
+            AzureClient client, boolean canary) {
+        ResourceType azureDatabase = canary ? AZURE_DATABASE_CANARY : AZURE_DATABASE;
+        Optional<CloudResource> databaseServer = getResources(resources, azureDatabase, false)
+                .stream()
+                .findFirst();
         databaseServer.ifPresentOrElse(
-                databaseServerResource -> deleteDatabaseServer(client, databaseServerResource, persistenceNotifier, cloudContext),
+                databaseServerResource -> deleteDatabaseServerResources(client, databaseServerResource, persistenceNotifier, cloudContext),
                 () -> {
                     String message = "Azure database server cloud resource does not exist for stack, ignoring it now";
                     LOGGER.warn(message);
                 });
+        List<CloudResource> rdsDescriptorResources = canary ?
+                findResources(resources, List.of(RDS_HOSTNAME_CANARY, RDS_PORT)) :
+                findResources(resources, List.of(RDS_HOSTNAME, RDS_PORT));
+        deleteResources(rdsDescriptorResources, cloudContext, persistenceNotifier);
     }
 
     private void deleteAllPrivateEndpointResources(PersistenceNotifier persistenceNotifier, CloudContext cloudContext, List<CloudResource> resources,
-            AzureClient client) {
-        azureCloudResourceService.getPrivateEndpointRdsResourceTypes()
+            AzureClient client, boolean canary) {
+        azureCloudResourceService.getPrivateEndpointRdsResourceTypes(canary)
                 .stream()
                 .map(resourceType -> getResources(resources, resourceType, false))
                 .forEach(filteredResources -> filteredResources.forEach(
@@ -636,7 +700,7 @@ public class AzureDatabaseResourceService {
         });
     }
 
-    private void deleteDatabaseServer(AzureClient client, CloudResource resource, PersistenceNotifier persistenceNotifier, CloudContext cloudContext) {
+    private void deleteDatabaseServerResources(AzureClient client, CloudResource resource, PersistenceNotifier persistenceNotifier, CloudContext cloudContext) {
         String databaseReference = resource.getReference();
         LOGGER.debug("Azure database server has been found with the reference '{}', deleting and marking it 'DETACHED' in our database: {}",
                 databaseReference, resource);
@@ -649,5 +713,36 @@ public class AzureDatabaseResourceService {
         LOGGER.debug("Deleting {} from our database: {}", resourceType, resource);
         azureUtils.deleteGenericResourceById(client, resource.getReference(), AzureResourceType.getByResourceType(resourceType));
         persistenceNotifier.notifyDeletion(resource, cloudContext);
+    }
+
+    public List<CloudResourceStatus> launchCanaryDatabaseForUpgrade(AuthenticatedContext authenticatedContext, DatabaseStack stack,
+            DatabaseStack migratedDbStack, PersistenceNotifier persistenceNotifier) {
+        List<CloudResource> resources = new ArrayList<>();
+        AzureDatabaseServerView azureDatabaseServer = new AzureDatabaseServerView(stack.getDatabaseServer());
+        boolean originalDbSingleServer = azureDatabaseServer.getAzureDatabaseType().isSingleServer();
+        if (originalDbSingleServer) {
+            CloudContext cloudContext = authenticatedContext.getCloudContext();
+            String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, migratedDbStack);
+            AzureClient client = authenticatedContext.getParameter(AzureClient.class);
+            ExternalDatabaseStatus externalDatabaseStatus = getExternalDatabaseStatus(migratedDbStack.getDatabaseServer(), client, resourceGroupName);
+            String deploymentName = migratedDbStack.getDatabaseServer().getServerId();
+            if (externalDatabaseStatus.isRelaunchable()) {
+                String template = azureDatabaseTemplateBuilder.build(cloudContext, migratedDbStack);
+                resources = createOrFetchDeployment(persistenceNotifier, deploymentName, resourceGroupName, template, client, authenticatedContext);
+            } else {
+                LOGGER.debug("Database server deployment is already present with status {} and name {}, so skipping canary launch",
+                        externalDatabaseStatus, deploymentName);
+            }
+        } else {
+            LOGGER.debug("Database is not Single Server ({}), no need to run canary deployment!", azureDatabaseServer.getAzureDatabaseType());
+        }
+        return convertWithStatus(resources);
+    }
+
+    public void deleteCanaryDatabaseForUpgrade(AuthenticatedContext authenticatedContext, PersistenceNotifier persistenceNotifier,
+            List<CloudResource> resources) {
+        CloudContext cloudContext = authenticatedContext.getCloudContext();
+        AzureClient client = authenticatedContext.getParameter(AzureClient.class);
+        deleteDatabaseResourcesOnProvider(persistenceNotifier, resources, cloudContext, client, true);
     }
 }

@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -151,7 +152,7 @@ public class UpgradeDatabaseServerHandlerTest {
 
         Selectable nextFlowStepSelector = underTest.doAccept(event);
 
-        verify(dbStackService).getById(event.getData().getResourceId());
+        verify(dbStackService, times(2)).getById(event.getData().getResourceId());
         verify(dbStackService).save(dbStackArgumentCaptor.capture());
         verify(dbUpgradeMigrationService).mergeDatabaseStacks(any(DBStack.class), eq(migrationParams), eq(cloudConnector), eq(cloudCredential),
                 eq(cloudPlatformVariant), isNull());

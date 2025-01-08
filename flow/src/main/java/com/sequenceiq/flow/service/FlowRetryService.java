@@ -79,7 +79,7 @@ public class FlowRetryService {
         Optional<FlowLog> failedFlowLog = getMostRecentFailedLog(flowLogs);
         Optional<FlowLog> lastSuccessfulStateFlowLog = failedFlowLog.map(log -> getLastSuccessfulStateLog(log.getCurrentState(), flowLogs));
         if (lastSuccessfulStateFlowLog.isPresent()) {
-            String name = retryableFlows.get(0).getName();
+            String name = retryableFlows.getFirst().getName();
             return RetryableStateResponse.retryable(name, lastSuccessfulStateFlowLog.get());
         } else {
             return RetryableStateResponse.noSuccessfulState();

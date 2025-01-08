@@ -27,11 +27,9 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
-import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.salt.SaltStateParamsService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.template.VolumeUtils;
-import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
@@ -90,16 +88,10 @@ public class RdsUpgradeOrchestratorService {
     private BackupRestoreDBStateParamsProvider backupRestoreDBStateParamsProvider;
 
     @Inject
-    private GatewayConfigService gatewayConfigService;
-
-    @Inject
-    private StackUtil stackUtil;
-
-    @Inject
     private HostOrchestrator hostOrchestrator;
 
     @Inject
-    private UpgradeRdsBackupRestoreStateParamsProvider upgradeRdsBackupRestoreStateParamsProvider;
+    private UpgradeExternalRdsStateParamsProvider upgradeExternalRdsStateParamsProvider;
 
     @Inject
     private PostgresConfigService postgresConfigService;
@@ -199,6 +191,16 @@ public class RdsUpgradeOrchestratorService {
         updateRdsUpgradePillar(stackDto, volumeWithLargestFreeSpace);
     }
 
+    public void validateDbConnection(Long stackId, String serverUrl, String userName) throws CloudbreakOrchestratorException {
+        StackDto stack = stackDtoService.getById(stackId);
+        OrchestratorStateParams stateParams = createStateParams(stack, CHECK_CONNECTION_STATE, true);
+        if (StringUtils.isNotEmpty(serverUrl) && StringUtils.isNotEmpty(userName)) {
+            stateParams.setStateParams(upgradeExternalRdsStateParamsProvider.createParamsForRdsCanaryCheck(serverUrl, userName));
+        }
+        LOGGER.debug("Calling checkRdsConnection with state params '{}'", stateParams);
+        hostOrchestrator.runOrchestratorState(stateParams);
+    }
+
     public void updateDatabaseEngineVersion(Long stackId) {
         StackDto stackDto = stackDtoService.getById(stackId);
         updateDatabaseEngineVersion(stackDto);
@@ -220,7 +222,7 @@ public class RdsUpgradeOrchestratorService {
 
     private void updateRdsUpgradePillar(StackDto stackDto, String rdsBackupLocation) throws CloudbreakOrchestratorException {
         OrchestratorStateParams stateParams = createStateParams(stackDto, GET_EXTERNAL_DB_SIZE, true);
-        SaltConfig saltConfig = new SaltConfig(upgradeRdsBackupRestoreStateParamsProvider.createParamsForRdsBackupRestore(stackDto, rdsBackupLocation));
+        SaltConfig saltConfig = new SaltConfig(upgradeExternalRdsStateParamsProvider.createParamsForRdsBackupRestore(stackDto, rdsBackupLocation));
         hostOrchestrator.saveCustomPillars(saltConfig, new ClusterDeletionBasedExitCriteriaModel(stackDto.getId(), stackDto.getCluster().getId()), stateParams);
     }
 
@@ -244,7 +246,7 @@ public class RdsUpgradeOrchestratorService {
             logErrorAndThrow("Orchestrator engine checking database size did not return any results");
         }
 
-        JsonNode primaryGwResult = result.get(0).get(stateParams.getPrimaryGatewayConfig().getHostname());
+        JsonNode primaryGwResult = result.getFirst().get(stateParams.getPrimaryGatewayConfig().getHostname());
         if (primaryGwResult == null) {
             logErrorAndThrow("Orchestrator engine checking database size did not return any results on the primary gateway");
         }

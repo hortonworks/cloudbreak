@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceGroupParameters;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
-import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
+import com.sequenceiq.cloudbreak.common.converter.ResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
@@ -44,7 +44,7 @@ class DefaultInstanceGroupProviderTest {
     private static final String AVAILABILITY_SET = "availabilitySet";
 
     @Mock
-    private MissingResourceNameGenerator missingResourceNameGenerator;
+    private ResourceNameGenerator resourceNameGenerator;
 
     @Mock
     private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;

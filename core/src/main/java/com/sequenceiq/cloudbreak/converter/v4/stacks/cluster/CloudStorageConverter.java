@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -15,14 +14,12 @@ import jakarta.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.efs.CloudEfsConfiguration;
-import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
+import com.sequenceiq.cloudbreak.common.converter.ResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.AccountMapping;
@@ -56,7 +53,7 @@ import com.sequenceiq.common.model.FileSystemType;
 public class CloudStorageConverter {
 
     @Inject
-    private MissingResourceNameGenerator nameGenerator;
+    private ResourceNameGenerator nameGenerator;
 
     @Inject
     private FileSystemResolver fileSystemResolver;
@@ -115,58 +112,6 @@ public class CloudStorageConverter {
 
         return fileSystem;
 
-    }
-
-    public FileSystem requestToAdditionalFileSystem(CloudStorageBase cloudStorageRequest) {
-        FileSystem fileSystem = new FileSystem();
-        AwsEfsParameters efsParameters = cloudStorageRequest.getAws() == null ? null : cloudStorageRequest.getAws().getEfsParameters();
-
-        if (efsParameters == null || StringUtils.isEmpty(efsParameters.getName())) {
-            return null;
-        }
-
-        fileSystem.setName(efsParameters.getName());
-        FileSystemType fileSystemType = FileSystemType.EFS;
-        fileSystem.setType(fileSystemType);
-
-        Map<String, Object> configurations = new HashMap<>();
-        configurations.put(CloudEfsConfiguration.KEY_BACKUP_POLICY_STATUS, efsParameters.getBackupPolicyStatus());
-        configurations.put(CloudEfsConfiguration.KEY_ENCRYPTED, efsParameters.getEncrypted());
-        configurations.put(CloudEfsConfiguration.KEY_FILESYSTEM_POLICY, efsParameters.getFileSystemPolicy());
-        configurations.put(CloudEfsConfiguration.KEY_FILESYSTEM_TAGS, efsParameters.getFileSystemTags());
-        configurations.put(CloudEfsConfiguration.KEY_KMSKEYID, efsParameters.getKmsKeyId());
-        configurations.put(CloudEfsConfiguration.KEY_LIFECYCLE_POLICIES, efsParameters.getLifeCyclePolicies());
-        configurations.put(CloudEfsConfiguration.KEY_PERFORMANCE_MODE, efsParameters.getPerformanceMode());
-        configurations.put(CloudEfsConfiguration.KEY_PROVISIONED_THROUGHPUT_INMIBPS, efsParameters.getProvisionedThroughputInMibps());
-        configurations.put(CloudEfsConfiguration.KEY_THROUGHPUT_MODE, efsParameters.getThroughputMode());
-
-        String configString;
-        try {
-            configString = JsonUtil.writeValueAsString(configurations);
-        } catch (JsonProcessingException ignored) {
-            configString = configurations.toString();
-        }
-
-        fileSystem.setConfigurations(new Json(configString));
-
-        CloudStorage cloudStorage = new CloudStorage();
-
-        if (cloudStorageRequest.getIdentities() != null) {
-
-            Optional<CloudIdentity> cloudIdentity = cloudStorageRequest.getIdentities().stream()
-                    .map(this::identityRequestToCloudIdentity)
-                    .filter(currCloudIdentity -> currCloudIdentity.getEfsIdentity() != null)
-                    .findFirst();
-
-            if (cloudIdentity != null && cloudIdentity.get() != null) {
-                cloudStorage.setCloudIdentities(List.of(cloudIdentity.get()));
-            }
-        }
-
-        cloudStorage.setAccountMapping(accountMappingRequestToAccountMapping(cloudStorageRequest.getAccountMapping()));
-        fileSystem.setCloudStorage(cloudStorage);
-
-        return fileSystem;
     }
 
     public AwsEfsParameters fileSystemToEfsParameters(FileSystem fileSystem) {
@@ -368,20 +313,6 @@ public class CloudStorageConverter {
         GcsCloudStorageV1Parameters gcsCloudStorageV1Parameters = new GcsCloudStorageV1Parameters();
         gcsCloudStorageV1Parameters.setServiceAccountEmail(gcsIdentity.getServiceAccountEmail());
         return gcsCloudStorageV1Parameters;
-    }
-
-    private S3Identity s3ParametersToIdentity(S3CloudStorageV1Parameters s3CloudStorageV1Parameters) {
-        S3Identity s3Identity = new S3Identity();
-        s3Identity.setInstanceProfile(s3CloudStorageV1Parameters.getInstanceProfile());
-        return s3Identity;
-    }
-
-    private WasbIdentity wasbParametersToIdentity(WasbCloudStorageV1Parameters wasbCloudStorageV1Parameters) {
-        WasbIdentity wasbIdentity = new WasbIdentity();
-        wasbIdentity.setAccountKey(wasbCloudStorageV1Parameters.getAccountKey());
-        wasbIdentity.setAccountName(wasbCloudStorageV1Parameters.getAccountName());
-        wasbIdentity.setSecure(wasbCloudStorageV1Parameters.isSecure());
-        return wasbIdentity;
     }
 
     private StorageLocation storageLocationRequestToStorageLocation(StorageLocationBase storageLocationRequest) {

@@ -87,9 +87,9 @@ public class UpgradeDatabaseServerHandler extends ExceptionCatcherEventHandler<U
         UpgradeDatabaseMigrationParams migrationParams = request.getUpgradeDatabaseMigrationParams();
         boolean databaseMigrationRequired = (migrationParams != null);
         Selectable response;
-        DBStack dbStack = dbStackService.getById(request.getResourceId());
         try {
             if (databaseMigrationRequired) {
+                DBStack dbStack = dbStackService.getById(request.getResourceId());
                 LOGGER.debug("Migration is required, new database server attributes: {}", migrationParams.getAttributes());
                 AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
                 ExternalDatabaseParameters databaseParameters = connector.resources().getDatabaseServerParameters(ac, databaseStack);
@@ -100,15 +100,16 @@ public class UpgradeDatabaseServerHandler extends ExceptionCatcherEventHandler<U
             }
             performDbUpgrade(request, databaseStack, targetMajorVersion, cloudCredential, cloudContext, connector);
 
+            DBStack dbStackToUpdate = dbStackService.getById(request.getResourceId());
             if (databaseMigrationRequired) {
-                updateDbStack(dbStack, targetMajorVersion, databaseStack);
-                DatabaseServerConfig dbServerConfig = databaseServerConfigService.getByCrn(Crn.safeFromString(dbStack.getResourceCrn()))
-                        .orElseThrow(() -> new IllegalStateException("Cannot find database server " + dbStack.getResourceCrn()));
+                updateDbStack(dbStackToUpdate, targetMajorVersion, databaseStack);
+                DatabaseServerConfig dbServerConfig = databaseServerConfigService.getByCrn(Crn.safeFromString(dbStackToUpdate.getResourceCrn()))
+                        .orElseThrow(() -> new IllegalStateException("Cannot find database server " + dbStackToUpdate.getResourceCrn()));
                 LOGGER.debug("Updating database server connection user name after database upgrade.");
                 dbServerConfig.setConnectionUserName(dbServerConfig.getConnectionUserName().split("@")[0]);
                 databaseServerConfigService.update(dbServerConfig);
             } else {
-                updateDbVersionOnly(dbStack, targetMajorVersion);
+                updateDbVersionOnly(dbStackToUpdate, targetMajorVersion);
             }
             response = new UpgradeDatabaseServerSuccess(request.getResourceId());
             LOGGER.debug("Successfully upgraded the database server {}", databaseStack);

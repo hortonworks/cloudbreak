@@ -1,5 +1,7 @@
 package com.sequenceiq.redbeams.domain.stack;
 
+import java.util.Objects;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -180,5 +182,33 @@ public class DatabaseServer implements AccountIdAwareResource {
 
     public void setAttributes(Json attributes) {
         this.attributes = attributes;
+    }
+
+    @SuppressWarnings("checkstyle:CyclomaticComplexity")
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        DatabaseServer that = (DatabaseServer) o;
+        return Objects.equals(id, that.id) &&
+                Objects.equals(accountId, that.accountId) &&
+                Objects.equals(name, that.name) &&
+                Objects.equals(description, that.description) &&
+                Objects.equals(instanceType, that.instanceType) &&
+                databaseVendor == that.databaseVendor &&
+                Objects.equals(connectionDriver, that.connectionDriver) &&
+                Objects.equals(storageSize, that.storageSize) &&
+                Objects.equals(rootUserName, that.rootUserName) &&
+                Objects.equals(rootPassword, that.rootPassword) &&
+                Objects.equals(securityGroup, that.securityGroup) &&
+                Objects.equals(port, that.port) &&
+                Objects.equals(attributes, that.attributes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, accountId, name, description, instanceType, databaseVendor, connectionDriver, storageSize, rootUserName, rootPassword,
+                securityGroup, port, attributes);
     }
 }

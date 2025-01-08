@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.view.AzureNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
+import com.sequenceiq.cloudbreak.cloud.model.DeploymentType;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
@@ -308,6 +309,7 @@ public class AzureTemplateBuilderDbTest {
         network.putParameter("subnets", "subnet");
         model.put("privateEndpointName", "pe-b1ca0b4d-to-dbsvr-d5844028-b646-4ecd-a48d-e0b520bfd15f");
         model.put("subnetIdForPrivateEndpoint", "subnetId");
+        model.put("deploymentType", DeploymentType.PROVISION);
         if (privateSetup == AzurePostgresAccessType.PRIVATE_DELEGATED_SUBNET) {
             network.putParameter("existingDatabasePrivateDnsZoneId", "zoneId");
             network.putParameter("flexibleServerDelegatedSubnetId", "subnetId");

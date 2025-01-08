@@ -31,10 +31,14 @@ public enum DatabaseServerStatus {
     UPGRADE_REQUESTED,
     UPGRADE_IN_PROGRESS,
     UPGRADE_FAILED,
+    VALIDATE_UPGRADE_REQUESTED,
+    VALIDATE_UPGRADE_IN_PROGRESS,
+    VALIDATE_UPGRADE_FAILED,
     UNKNOWN;
 
     public boolean isAvailableForUpgrade() {
         return AVAILABLE.equals(this)
-                || UPGRADE_FAILED.equals(this);
+                || UPGRADE_FAILED.equals(this)
+                || VALIDATE_UPGRADE_FAILED.equals(this);
     }
 }

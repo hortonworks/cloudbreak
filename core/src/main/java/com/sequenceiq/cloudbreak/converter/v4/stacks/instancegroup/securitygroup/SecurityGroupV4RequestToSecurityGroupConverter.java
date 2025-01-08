@@ -14,7 +14,7 @@ import org.springframework.util.CollectionUtils;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
-import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
+import com.sequenceiq.cloudbreak.common.converter.ResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.securitygroup.securityrule.SecurityRuleV4RequestToSecurityRuleConverter;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
@@ -24,14 +24,14 @@ import com.sequenceiq.cloudbreak.domain.SecurityRule;
 public class SecurityGroupV4RequestToSecurityGroupConverter {
 
     @Inject
-    private MissingResourceNameGenerator missingResourceNameGenerator;
+    private ResourceNameGenerator resourceNameGenerator;
 
     @Inject
     private SecurityRuleV4RequestToSecurityRuleConverter securityRuleV4RequestToSecurityRuleConverter;
 
     public SecurityGroup convert(@Nonnull SecurityGroupV4Request source) {
         SecurityGroup entity = new SecurityGroup();
-        entity.setName(missingResourceNameGenerator.generateName(APIResourceType.SECURITY_GROUP));
+        entity.setName(resourceNameGenerator.generateName(APIResourceType.SECURITY_GROUP));
         entity.setStatus(ResourceStatus.USER_MANAGED);
         entity.setSecurityGroupIds(convertSecurityGroupIdsToList(source));
         entity.setSecurityRules(convertSecurityRules(source.getSecurityRules(), entity));

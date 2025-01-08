@@ -16,7 +16,8 @@ import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
 import com.sequenceiq.cloudbreak.template.VolumeUtils;
 
 @Component
-public class UpgradeRdsBackupRestoreStateParamsProvider {
+public class UpgradeExternalRdsStateParamsProvider {
+
     private static final String POSTGRESQL_UPGRADE = "postgresql-upgrade";
 
     @Inject
@@ -37,6 +38,16 @@ public class UpgradeRdsBackupRestoreStateParamsProvider {
                         "backup", backupProperties,
                         "restore", restoreProperties,
                         "checkconnection", checkConnectionProperties))));
+    }
+
+    public Map<String, Object> createParamsForRdsCanaryCheck(String serverUrl, String userName) {
+        Map<String, String> checkConnectionProperties = Map.of(
+                "logfile", "/var/log/postgres_upgrade_canary_checkconnection.log",
+                "canary_hostname", serverUrl,
+                "canary_username", userName);
+        return singletonMap(POSTGRESQL_UPGRADE,
+                singletonMap("upgrade", Map.of(
+                        "checkconnection", checkConnectionProperties)));
     }
 
     private String determineRdsBackupLocation(StackDto stackDto, String rdsBackupLocation) {

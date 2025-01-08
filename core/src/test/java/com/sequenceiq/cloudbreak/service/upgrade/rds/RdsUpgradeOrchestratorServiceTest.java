@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -73,6 +74,8 @@ class RdsUpgradeOrchestratorServiceTest {
 
     private static final String DATABASE_ENGINE_VERSION = "11";
 
+    private static final String CHECK_CONNECTION_STATE = "postgresql/upgrade/check-db-connection";
+
     @Mock
     private StackDtoService stackDtoService;
 
@@ -101,7 +104,7 @@ class RdsUpgradeOrchestratorServiceTest {
     private Cluster cluster;
 
     @Mock
-    private UpgradeRdsBackupRestoreStateParamsProvider upgradeRdsBackupRestoreStateParamsProvider;
+    private UpgradeExternalRdsStateParamsProvider upgradeExternalRdsStateParamsProvider;
 
     @Mock
     private PostgresConfigService postgresConfigService;
@@ -253,7 +256,7 @@ class RdsUpgradeOrchestratorServiceTest {
         JsonNode jsonNode = mapper.readTree("{\"cmd_|-get_external_db_size_test\":{\"changes\":{\"stdout\":\"104857600\",\"stderr\":\"\"}}}");
         when(hostOrchestrator.applyOrchestratorState(any())).thenReturn(List.of(Map.of("fqdn1", jsonNode)));
         Map<String, SaltPillarProperties> pillarParams = Map.of("fqdn1", new SaltPillarProperties("path", Map.of()));
-        when(upgradeRdsBackupRestoreStateParamsProvider.createParamsForRdsBackupRestore(stack, "/hadoopfs/fs1")).thenReturn(pillarParams);
+        when(upgradeExternalRdsStateParamsProvider.createParamsForRdsBackupRestore(stack, "/hadoopfs/fs1")).thenReturn(pillarParams);
         underTest.determineDbBackupLocation(STACK_ID);
 
         verify(hostOrchestrator).runCommandOnHosts(eq(List.of(gatewayConfig)), eq(Set.of("fqdn1")), eq("df -k /hadoopfs/fs1 | awk '{print $4}' | tail -n 1"));
@@ -457,7 +460,7 @@ class RdsUpgradeOrchestratorServiceTest {
 
     @ParameterizedTest
     @EnumSource(MajorVersion.class)
-    void testupdatePostgresAlternatives(MajorVersion targetVersion) throws CloudbreakOrchestratorException {
+    void testUpdatePostgresAlternatives(MajorVersion targetVersion) throws CloudbreakOrchestratorException {
         OrchestratorStateParams stateParams = new OrchestratorStateParams();
         when(saltStateParamsService.createStateParams(stack,
                 MajorVersion.VERSION_14 == targetVersion ? "postgresql/pg14-alternatives" : "postgresql/pg11-alternatives", false, 2000, 3))
@@ -466,5 +469,50 @@ class RdsUpgradeOrchestratorServiceTest {
         underTest.updatePostgresAlternatives(STACK_ID, targetVersion);
 
         verify(hostOrchestrator).runOrchestratorState(stateParams);
+    }
+
+    @Test
+    public void testValidateDbConnectionWithValidParams() throws CloudbreakOrchestratorException {
+        // Given
+        Long stackId = 1L;
+        String serverUrl = "localhost:5432/db";
+        String userName = "postgres";
+
+        StackDto stackDto = new StackDto();
+        OrchestratorStateParams stateParams = new OrchestratorStateParams();
+        stateParams.setState(CHECK_CONNECTION_STATE);
+        stateParams.setConcurrent(true);
+
+        when(stackDtoService.getById(stackId)).thenReturn(stackDto);
+        when(saltStateParamsService.createStateParams(stackDto, CHECK_CONNECTION_STATE, true, 2000, 3)).thenReturn(stateParams);
+
+        // When
+        underTest.validateDbConnection(stackId, serverUrl, userName);
+
+        // Then
+        verify(hostOrchestrator).runOrchestratorState(stateParams);
+        verify(upgradeExternalRdsStateParamsProvider).createParamsForRdsCanaryCheck(serverUrl, userName);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testValidateDbConnectionWithEmptyServerUrlAndUserName(boolean serverUrlNull) throws CloudbreakOrchestratorException {
+        // Given
+        Long stackId = 1L;
+        String serverUrl = serverUrlNull ? "" : "localhost:5432/db";
+        String userName =  serverUrlNull ? "postgres" : "";
+
+        StackDto stackDto = new StackDto();
+        OrchestratorStateParams stateParams = new OrchestratorStateParams();
+
+        when(stackDtoService.getById(stackId)).thenReturn(stackDto);
+        when(saltStateParamsService.createStateParams(stackDto, CHECK_CONNECTION_STATE, true, 2000, 3)).thenReturn(stateParams);
+
+        // When
+        underTest.validateDbConnection(stackId, serverUrl, userName);
+
+        // Then
+        verify(hostOrchestrator).runOrchestratorState(stateParams);
+        verify(upgradeExternalRdsStateParamsProvider, never()).createParamsForRdsCanaryCheck(any(), any());
     }
 }

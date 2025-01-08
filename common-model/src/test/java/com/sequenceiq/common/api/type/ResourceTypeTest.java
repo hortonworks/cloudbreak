@@ -17,8 +17,14 @@ class ResourceTypeTest {
 
     private static final Set<ResourceType> INSTANCE_TYPES = EnumSet.of(ResourceType.GCP_INSTANCE, ResourceType.MOCK_INSTANCE);
 
+    private static final Set<ResourceType> CANARY_TYPES = EnumSet.of(ResourceType.RDS_HOSTNAME_CANARY, ResourceType.AZURE_DATABASE_CANARY,
+            ResourceType.AZURE_PRIVATE_ENDPOINT_CANARY, ResourceType.AZURE_DNS_ZONE_GROUP_CANARY);
+
     static Iterable<?> resourceTypesDataProvider() {
-        return Arrays.stream(ResourceType.values()).filter(type -> !TEMPLATE_TYPES.contains(type)).collect(Collectors.toList());
+        return Arrays.stream(ResourceType.values())
+                .filter(type -> !TEMPLATE_TYPES.contains(type))
+                .filter(type -> !CANARY_TYPES.contains(type))
+                .collect(Collectors.toList());
     }
 
     @ParameterizedTest(name = "{0}")
@@ -57,4 +63,13 @@ class ResourceTypeTest {
         assertThat(ResourceType.isInstanceResource(resourceType)).isTrue();
     }
 
+    static Iterable<?> canaryTypesDataProvider() {
+        return CANARY_TYPES;
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("canaryTypesDataProvider")
+    void getCommonResourceTypeTestWhenCANARY(ResourceType resourceType) {
+        assertThat(resourceType.getCommonResourceType()).isEqualTo(CommonResourceType.CANARY);
+    }
 }

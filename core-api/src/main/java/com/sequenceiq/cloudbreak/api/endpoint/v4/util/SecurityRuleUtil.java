@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.util;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.SerializationUtils;
 
@@ -19,8 +18,8 @@ public class SecurityRuleUtil {
         if (originalSecurityRules != null) {
             List<SecurityRuleV4Request> securityRules = originalSecurityRules
                     .stream()
-                    .map(a -> SerializationUtils.clone(a))
-                    .collect(Collectors.toList());
+                    .map(SerializationUtils::clone)
+                    .toList();
             securityRules.forEach(sr -> sr.setSubnet(cidr));
             generatedSecurityRules.addAll(securityRules);
         }

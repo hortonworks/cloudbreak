@@ -70,6 +70,7 @@ public class AzureFlexibleServerDatabaseTemplateModelBuilder implements AzureDat
         model.put("useStandbyAvailabilityZone", azureDatabaseServerView.useStandbyAvailabilityZone());
         model.put("privateEndpointName", String.format("pe-%s-to-%s",
                 azureUtils.encodeString(azureUtils.getResourceName(azureNetworkView.getSubnetList().getFirst())), azureDatabaseServerView.getDbServerName()));
+        model.put("deploymentType", databaseStack.getDeploymentType());
         addEncryptionParameters(model, azureDatabaseServerView);
         return model;
     }

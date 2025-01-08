@@ -13,9 +13,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
-import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
-import com.sequenceiq.cloudbreak.cloud.transform.ResourceLists;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.PayloadConverter;
@@ -86,13 +85,13 @@ public class RedbeamsProvisionActions {
             @Override
             protected void doExecute(RedbeamsContext context, AllocateDatabaseServerSuccess payload, Map<Object, Object> variables) {
                 dbStackStatusUpdater.updateStatus(payload.getResourceId(), DetailedDBStackStatus.PROVISIONED);
-                List<CloudResourceStatus> dbResourcesList = dbResourceService.getAllAsCloudResourceStatus(payload.getResourceId());
+                List<CloudResource> dbResourcesList = dbResourceService.getAllAsCloudResource(payload.getResourceId());
                 sendEvent(context,
                         new UpdateDatabaseServerRegistrationRequest(
                                 context.getCloudContext(),
                                 context.getCloudCredential(),
                                 context.getDatabaseStack(),
-                                ResourceLists.transform(dbResourcesList)
+                                dbResourcesList
                         )
                 );
             }
@@ -110,7 +109,7 @@ public class RedbeamsProvisionActions {
 
                 dbStack.ifPresentOrElse(
                         db -> dbStackJobService.schedule(db.getId()),
-                        () -> LOGGER.info("DBStack was not present, could not start autosynch service")
+                        () -> LOGGER.info("DBStack was not present, could not start autosync service")
                 );
             }
 

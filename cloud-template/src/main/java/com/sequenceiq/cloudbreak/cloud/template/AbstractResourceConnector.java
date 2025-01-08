@@ -141,6 +141,12 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
     }
 
     @Override
+    public List<CloudResourceStatus> launchValidateUpgradeDatabaseServerResources(AuthenticatedContext authenticatedContext, DatabaseStack stack,
+            TargetMajorVersion targetMajorVersion, DatabaseStack migratedDbStack, PersistenceNotifier persistenceNotifier) {
+        return List.of();
+    }
+
+    @Override
     public void upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack originalStack, DatabaseStack stack,
             PersistenceNotifier persistenceNotifier, TargetMajorVersion targetMajorVersion, List<CloudResource> resources) throws Exception {
         databaseServerUpgradeService.upgrade(authenticatedContext, stack, persistenceNotifier, targetMajorVersion);
@@ -404,5 +410,11 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
 
     protected boolean isCloudResourceAndCloudInstanceEquals(CloudInstance instance, CloudResource resource) {
         return instance.getInstanceId().equalsIgnoreCase(resource.getName());
+    }
+
+    @Override
+    public void cleanupValidateUpgradeDatabaseServerResources(AuthenticatedContext authenticatedContext, DatabaseStack stack, List<CloudResource> resources,
+            PersistenceNotifier persistenceNotifier) throws Exception {
+
     }
 }
