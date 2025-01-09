@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.util.TestConstants.DO_NOT_KEEP_VARIANT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -139,6 +140,8 @@ class StackUpgradeOperationsTest {
         Stack stack = createStack(StackType.WORKLOAD);
         UpgradeV4Request request = createUpgradeRequest(true, null);
         UpgradeV4Response upgradeResponse = createUpgradeResponse();
+        when(upgradePreconditionService.notUsingEphemeralVolume(stack)).thenReturn(true);
+        when(clusterDBValidationService.isGatewayRepairEnabled(any())).thenReturn(true);
         when(instanceGroupService.getByStackAndFetchTemplates(STACK_ID)).thenReturn(Collections.emptySet());
         when(clusterUpgradeAvailabilityService
                 .checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings(), false, null))
@@ -152,8 +155,8 @@ class StackUpgradeOperationsTest {
         verify(clusterUpgradeAvailabilityService)
                 .checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings(), false, null);
         verify(clusterUpgradeCandidateFilterService).filterUpgradeOptions(upgradeResponse, request, false);
-        verifyNoInteractions(upgradePreconditionService);
-        verifyNoInteractions(clusterDBValidationService);
+        verify(instanceGroupService).getByStackAndFetchTemplates(STACK_ID);
+        verify(upgradePreconditionService).notUsingEphemeralVolume(stack);
     }
 
     @Test

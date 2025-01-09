@@ -39,7 +39,7 @@ public class ClusterSizeUpgradeValidator implements ServiceUpgradeValidator {
     }
 
     private void validateClusterSizeForRollingUpgrade(long numberOfInstances) {
-        if (numberOfInstances > maxNumberOfInstancesForRollingUpgrade) {
+        if (isClusterSizeLargerThanAllowedForRollingUpgrade(numberOfInstances)) {
             String errorMessage = String.format("Rolling upgrade is not permitted because this cluster has %s nodes but the maximum number of "
                     + "allowed nodes is %s.", numberOfInstances, maxNumberOfInstancesForRollingUpgrade);
             throw new UpgradeValidationFailedException(errorMessage);
@@ -47,6 +47,10 @@ public class ClusterSizeUpgradeValidator implements ServiceUpgradeValidator {
             LOGGER.debug("Rolling upgrade is permitted for this cluster because this cluster has {} nodes and the maximum number of nodes for rolling "
                     + "upgrade is {}", numberOfInstances, maxNumberOfInstancesForRollingUpgrade);
         }
+    }
+
+    public boolean isClusterSizeLargerThanAllowedForRollingUpgrade(long numberOfInstances) {
+        return numberOfInstances > maxNumberOfInstancesForRollingUpgrade;
     }
 
     private boolean rollingUpgradeValidationEnabled() {

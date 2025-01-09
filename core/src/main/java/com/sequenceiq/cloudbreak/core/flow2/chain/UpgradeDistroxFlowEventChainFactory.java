@@ -8,6 +8,8 @@ import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.CLUST
 import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.STACK_IMAGE_UPDATE_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_UPGRADE_INIT_EVENT;
+import static com.sequenceiq.cloudbreak.domain.stack.ManualClusterRepairMode.ALL;
+import static com.sequenceiq.cloudbreak.domain.stack.ManualClusterRepairMode.NODE_ID;
 import static com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType.ALL_AT_ONCE;
 import static com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType.BATCH;
 import static com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType.ONE_BY_ONE;
@@ -22,6 +24,7 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -32,6 +35,8 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -48,8 +53,8 @@ import com.sequenceiq.cloudbreak.core.flow2.event.DistroXUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StopStartUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.service.EmbeddedDbUpgradeFlowTriggersFactory;
-import com.sequenceiq.cloudbreak.domain.stack.ManualClusterRepairMode;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
@@ -59,8 +64,11 @@ import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.salt.SaltVersionUpgradeService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeAvailabilityService;
+import com.sequenceiq.cloudbreak.service.upgrade.validation.service.ClusterSizeUpgradeValidator;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterUseCaseAware;
+import com.sequenceiq.cloudbreak.tag.ClusterTemplateApplicationTag;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
@@ -69,6 +77,8 @@ import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactory<DistroXUpgradeTriggerEvent>, ClusterUseCaseAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeDistroxFlowEventChainFactory.class);
+
+    private static final String OPERATIONAL_DB = "OPERATIONAL_DB";
 
     @Value("${cb.upgrade.batch.repair.enabled:true}")
     private boolean batchRepairEnabled;
@@ -90,6 +100,15 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
 
     @Inject
     private SaltVersionUpgradeService saltVersionUpgradeService;
+
+    @Inject
+    private StackDtoService stackDtoService;
+
+    @Inject
+    private ClusterSizeUpgradeValidator clusterSizeUpgradeValidator;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     @Override
     public String initEvent() {
@@ -201,6 +220,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
     }
 
     private Optional<ClusterRepairTriggerEvent> getClusterRepairTriggerEvent(DistroXUpgradeTriggerEvent event) {
+        LOGGER.info("ReplaceVms: {}, lockComponents: {}", event.isReplaceVms(), event.isLockComponents());
         if (event.isReplaceVms()) {
             Map<String, List<String>> nodeMap = getReplaceableInstancesByHostGroup(event);
             ClusterRepairTriggerEvent.RepairType repairType = decideRepairType(event, nodeMap);
@@ -228,9 +248,34 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
     }
 
     private Map<String, List<String>> getReplaceableInstancesByHostGroup(DistroXUpgradeTriggerEvent event) {
-        Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> validationResult = clusterRepairService.validateRepair(ManualClusterRepairMode.ALL,
+        StackDto stack = stackDtoService.getByIdWithoutResources(event.getResourceId());
+        if (entitlementService.isDatahubForceOsUpgradeEnabled(stack.getAccountId())) {
+            LOGGER.info("Force OS upgrade entitlement enabled");
+            if ((clusterSizeUpgradeValidator.isClusterSizeLargerThanAllowedForRollingUpgrade(stack.getFullNodeCount())) && event.isRollingUpgradeEnabled()
+                    || isCodCluster(stack)) {
+                LOGGER.info("Cluster size is larger than allowed for rolling upgrade or its a COD cluster. Replace only the Salt master nodes.");
+                Set<String> gatewayInstanceIds = stack.getAllAvailableGatewayInstances().stream()
+                        .map(InstanceMetadataView::getInstanceId)
+                        .collect(Collectors.toSet());
+                Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> validationResult = clusterRepairService.validateRepair(NODE_ID,
+                        event.getResourceId(), gatewayInstanceIds, false);
+                return toStringMap(validationResult.getSuccess());
+            }
+        }
+        Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> validationResult = clusterRepairService.validateRepair(ALL,
                 event.getResourceId(), Set.of(), false);
         return toStringMap(validationResult.getSuccess());
+    }
+
+    private boolean isCodCluster(StackDto stack) {
+        StackTags stackTags = stack.getStackTags();
+        if (stackTags != null) {
+            String serviceType = stackTags.getApplicationTags().get(ClusterTemplateApplicationTag.SERVICE_TYPE.key());
+            if (OPERATIONAL_DB.equals(serviceType)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private Map<String, List<String>> toStringMap(Map<HostGroupName, Set<InstanceMetaData>> repairableNodes) {

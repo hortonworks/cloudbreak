@@ -135,10 +135,19 @@ public class StackUpgradeOperations {
     }
 
     private boolean determineReplaceVmsParameter(Stack stack, Boolean replaceVms) {
-        if (stack.isDatalake() || replaceVms != null) {
-            return Optional.ofNullable(replaceVms).orElse(Boolean.TRUE);
+        if (stack.isDatalake()) {
+            LOGGER.debug("ReplaceVms is always true for datalakes.");
+            return true;
+        } else if (!upgradePreconditionService.notUsingEphemeralVolume(stack)) {
+            LOGGER.debug("Cluster uses ephemeral volume, replaceVms should be false.");
+            return false;
+        } else if (!clusterDBValidationService.isGatewayRepairEnabled(stack.getCluster())) {
+            LOGGER.debug("Gateway repair is not enabled, replaceVms should be false.");
+            return false;
         } else {
-            return upgradePreconditionService.notUsingEphemeralVolume(stack) && clusterDBValidationService.isGatewayRepairEnabled(stack.getCluster());
+            boolean determinedReplaceVms = Optional.ofNullable(replaceVms).orElse(Boolean.TRUE);
+            LOGGER.debug("Determined replaceVms: {}, original param from the request: {}", determinedReplaceVms, replaceVms);
+            return determinedReplaceVms;
         }
     }
 

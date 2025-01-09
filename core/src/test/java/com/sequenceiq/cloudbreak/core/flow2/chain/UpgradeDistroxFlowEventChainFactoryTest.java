@@ -14,6 +14,9 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -33,6 +36,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -43,9 +47,11 @@ import com.sequenceiq.cloudbreak.core.flow2.event.DistroXUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StopStartUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.service.EmbeddedDbUpgradeFlowTriggersFactory;
+import com.sequenceiq.cloudbreak.domain.stack.ManualClusterRepairMode;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
@@ -58,7 +64,10 @@ import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.salt.SaltVersionUpgradeService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeAvailabilityService;
+import com.sequenceiq.cloudbreak.service.upgrade.validation.service.ClusterSizeUpgradeValidator;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
@@ -66,6 +75,8 @@ import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 class UpgradeDistroxFlowEventChainFactoryTest {
 
     private static final long STACK_ID = 1L;
+
+    private static final String ACCOUNT_ID = "ACCOUNT_ID";
 
     private static final String IMAGE_ID = "imageId";
 
@@ -93,6 +104,18 @@ class UpgradeDistroxFlowEventChainFactoryTest {
 
     @Mock
     private SaltVersionUpgradeService saltVersionUpgradeService;
+
+    @Mock
+    private StackDtoService stackDtoService;
+
+    @Mock
+    private StackDto stackDto;
+
+    @Mock
+    private EntitlementService entitlementService;
+
+    @Mock
+    private ClusterSizeUpgradeValidator clusterSizeUpgradeValidator;
 
     @Test
     void testInitEvent() {
@@ -151,6 +174,8 @@ class UpgradeDistroxFlowEventChainFactoryTest {
 
     @Test
     void testChainQueueForRollingUpgradeWithReplaceVms() {
+        when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
+        when(stackDto.getAccountId()).thenReturn(ACCOUNT_ID);
         when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
@@ -170,6 +195,8 @@ class UpgradeDistroxFlowEventChainFactoryTest {
 
     @Test
     void testChainQueueForReplaceVmsWithHundredNodes() {
+        when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
+        when(stackDto.getAccountId()).thenReturn(ACCOUNT_ID);
         when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
@@ -194,6 +221,45 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         assertSaltUpdateEvent(flowChainQueue);
         assertImageUpdateEvent(flowChainQueue);
         assertRepairEvent(flowChainQueue, RepairType.BATCH);
+        verify(clusterRepairService, times(1)).validateRepair(eq(ManualClusterRepairMode.ALL), eq(STACK_ID), eq(Set.of()), eq(false));
+    }
+
+    @Test
+    void testChainQueueForReplaceVmsWithHundredNodesWhenForceOsUpgradeAndRollingUpgradeEnabled() {
+        when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
+        when(stackDto.getAccountId()).thenReturn(ACCOUNT_ID);
+        InstanceMetadataView master1 = mock(InstanceMetadataView.class);
+        when(master1.getInstanceId()).thenReturn("master-1");
+        InstanceMetadataView master2 = mock(InstanceMetadataView.class);
+        when(master2.getInstanceId()).thenReturn("master-2");
+        when(stackDto.getAllAvailableGatewayInstances()).thenReturn(List.of(master1, master2));
+        when(entitlementService.isDatahubForceOsUpgradeEnabled(eq(ACCOUNT_ID))).thenReturn(true);
+        when(clusterSizeUpgradeValidator.isClusterSizeLargerThanAllowedForRollingUpgrade(anyLong())).thenReturn(true);
+        when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
+        when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
+        when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
+        ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
+        when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
+        ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
+        Set<InstanceMetaData> instances = new HashSet<>();
+        for (int i = 0; i < 2; i++) {
+            InstanceMetaData instanceMetaData = new InstanceMetaData();
+            instanceMetaData.setDiscoveryFQDN("master-" + i);
+            instances.add(instanceMetaData);
+        }
+        Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStartResult =
+                Result.success(Map.of(HostGroupName.hostGroupName("master"), instances));
+        when(clusterRepairService.validateRepair(any(), anyLong(), any(), eq(false))).thenReturn(repairStartResult);
+
+        DistroXUpgradeTriggerEvent event = new DistroXUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
+                new Promise<>(), imageChangeDto, true, true, "variant", true, "runtime");
+        FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
+        assertEquals(4, flowChainQueue.getQueue().size());
+        assertUpdateValidationEvent(flowChainQueue, IMAGE_ID, event.isReplaceVms(), event.isLockComponents(), event.isRollingUpgradeEnabled());
+        assertSaltUpdateEvent(flowChainQueue);
+        assertImageUpdateEvent(flowChainQueue);
+        assertRepairEvent(flowChainQueue, RepairType.ONE_BY_ONE);
+        verify(clusterRepairService, times(1)).validateRepair(eq(ManualClusterRepairMode.NODE_ID), eq(STACK_ID), eq(Set.of("master-1", "master-2")), eq(false));
     }
 
     @Test

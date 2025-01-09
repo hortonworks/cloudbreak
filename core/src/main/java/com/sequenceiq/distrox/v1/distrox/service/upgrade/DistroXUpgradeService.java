@@ -132,7 +132,8 @@ public class DistroXUpgradeService {
     }
 
     private UpgradeV4Response initUpgrade(DistroXUpgradeDto upgradeDto, String userCrn, boolean rollingUpgradeEnabled, boolean keepVariant) {
-        boolean replaceVms = determineReplaceVmsParam(upgradeDto.getUpgradeV4Response(), upgradeDto.isLockComponents(), upgradeDto.getStackDto().getStack());
+        boolean replaceVms = overrideReplaceVmsParamIfRequired(upgradeDto.getUpgradeV4Response(), upgradeDto.isLockComponents(),
+                upgradeDto.getStackDto().getStack());
         ImageChangeDto imageChangeDto = upgradeDto.getImageChangeDto();
         LOGGER.debug("Initializing cluster upgrade. Target image: {}, lockComponents: {}, replaceVms: {}, rollingUpgradeEnabled: {}",
                 imageChangeDto.getImageId(), upgradeDto.isLockComponents(), replaceVms, rollingUpgradeEnabled);
@@ -219,9 +220,12 @@ public class DistroXUpgradeService {
         return lockedComponentService.isComponentsLocked(stack, targetImage.getImageId());
     }
 
-    private boolean determineReplaceVmsParam(UpgradeV4Response upgradeV4Response, boolean lockComponents, StackView stack) {
+    private boolean overrideReplaceVmsParamIfRequired(UpgradeV4Response upgradeV4Response, boolean lockComponents, StackView stack) {
         boolean originalReplaceVms = upgradeV4Response.isReplaceVms();
-        if (originalReplaceVms) {
+        if (entitlementService.isDatahubForceOsUpgradeEnabled(Crn.safeFromString(stack.getResourceCrn()).getAccountId())) {
+            LOGGER.info("Force OS upgrade enabled, replaceVms parameter override is not required.");
+            return originalReplaceVms;
+        } else if (originalReplaceVms) {
             try {
                 if (!lockComponents) {
                     LOGGER.info("ReplaceVms parameter has been overridden to false for stack {} in case of distrox runtime upgrade.", stack.getName());

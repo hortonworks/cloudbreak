@@ -173,8 +173,22 @@ class EntitlementServiceTest {
                 {"CDP_SECURITY_ENFORCING_SELINUX", (EntitlementCheckFunction) EntitlementService::isCdpSecurityEnforcingSELinux, true},
 
                 {"CDP_CB_GCP_SECURE_BOOT", (EntitlementCheckFunction) EntitlementService::isGcpSecureBootEnabled, false},
-                {"CDP_CB_GCP_SECURE_BOOT", (EntitlementCheckFunction) EntitlementService::isGcpSecureBootEnabled, true}
+                {"CDP_CB_GCP_SECURE_BOOT", (EntitlementCheckFunction) EntitlementService::isGcpSecureBootEnabled, true},
+
+                {"CDP_DATAHUB_FORCE_OS_UPGRADE", (EntitlementCheckFunction) EntitlementService::isDatahubForceOsUpgradeEnabled, false},
+                {"CDP_DATAHUB_FORCE_OS_UPGRADE", (EntitlementCheckFunction) EntitlementService::isDatahubForceOsUpgradeEnabled, true},
         };
+    }
+
+    private static Account createAccountForEntitlements(String... entitlementNames) {
+        // Protobuf wrappers are all finals, so cannot be mocked
+        Account.Builder builder = Account.newBuilder();
+        Arrays.stream(entitlementNames).forEach(entitlementName -> builder.addEntitlements(createEntitlement(entitlementName)));
+        return builder.build();
+    }
+
+    private static Entitlement createEntitlement(String entitlementName) {
+        return Entitlement.newBuilder().setEntitlementName(entitlementName).build();
     }
 
     @ParameterizedTest(name = "{0} == {2}")
@@ -212,17 +226,6 @@ class EntitlementServiceTest {
                     .forEach(builder::addEntitlements);
         }
         when(umsClient.getAccountDetails(eq(ACCOUNT_ID))).thenReturn(builder.build());
-    }
-
-    private static Account createAccountForEntitlements(String... entitlementNames) {
-        // Protobuf wrappers are all finals, so cannot be mocked
-        Account.Builder builder = Account.newBuilder();
-        Arrays.stream(entitlementNames).forEach(entitlementName -> builder.addEntitlements(createEntitlement(entitlementName)));
-        return builder.build();
-    }
-
-    private static Entitlement createEntitlement(String entitlementName) {
-        return Entitlement.newBuilder().setEntitlementName(entitlementName).build();
     }
 
     @FunctionalInterface

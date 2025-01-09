@@ -39,6 +39,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_BULK
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CONCLUSION_CHECKER_SEND_USER_EVENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CONTAINER_READY_ENV;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_EXPERIMENTAL_SCALE_LIMITS;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_FORCE_OS_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_LONG_TIMEOUT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_RESIZE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_DB_BACKUP_ENABLE_COMPRESSION;
@@ -296,6 +297,12 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private static final String CRN_COMPONENT_SEPARATOR_REGEX = ":";
 
+    private final Map<String, Set<String>> accountUsers = new ConcurrentHashMap<>();
+
+    private final Set<String> grantedEntitlements = new ConcurrentSkipListSet<>();
+
+    private final Set<String> revokedEntitlements = new ConcurrentSkipListSet<>();
+
     @Inject
     private JsonUtil jsonUtil;
 
@@ -452,8 +459,6 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private AltusCredential fluentCredential;
 
-    private final Map<String, Set<String>> accountUsers = new ConcurrentHashMap<>();
-
     @Value("${auth.mock.event-generation.expiration-minutes:10}")
     private long eventGenerationExpirationMinutes;
 
@@ -555,9 +560,8 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.gcp.secureboot.enabled}")
     private boolean gcpSecureBootEnabled;
 
-    private final Set<String> grantedEntitlements = new ConcurrentSkipListSet<>();
-
-    private final Set<String> revokedEntitlements = new ConcurrentSkipListSet<>();
+    @Value("${auth.mock.datahub.force.os.upgrade}")
+    private boolean datahubForceOsUpgradeEnabled;
 
     @Inject
     private MockEnvironmentUserResourceRole mockEnvironmentUserResourceRole;
@@ -1038,6 +1042,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (gcpSecureBootEnabled) {
             builder.addEntitlements(createEntitlement(CDP_CB_GCP_SECURE_BOOT));
+        }
+        if (datahubForceOsUpgradeEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_DATAHUB_FORCE_OS_UPGRADE));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

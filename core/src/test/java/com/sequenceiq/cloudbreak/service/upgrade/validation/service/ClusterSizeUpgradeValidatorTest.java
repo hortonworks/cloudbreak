@@ -3,7 +3,9 @@ package com.sequenceiq.cloudbreak.service.upgrade.validation.service;
 import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.doAs;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -105,6 +107,16 @@ class ClusterSizeUpgradeValidatorTest {
     @Test
     void testValidateShouldNotThrowExceptionWhenVmReplacementIsNotEnabledAndRollingUpgradeIsNotEnabled() {
         doAs(ACTOR, () -> underTest.validate(createRequest(false, false)));
+    }
+
+    @Test
+    void testIsClusterSizeLargerThanAllowedForRollingUpgradeShouldReturnTrueWhenLarger() {
+        assertTrue(underTest.isClusterSizeLargerThanAllowedForRollingUpgrade(21));
+    }
+
+    @Test
+    void testIsClusterSizeLargerThanAllowedForRollingUpgradeShouldReturnFalseWhenNotLarger() {
+        assertFalse(underTest.isClusterSizeLargerThanAllowedForRollingUpgrade(20));
     }
 
     private void mockAvailableInstances(long numberOfInstances) {

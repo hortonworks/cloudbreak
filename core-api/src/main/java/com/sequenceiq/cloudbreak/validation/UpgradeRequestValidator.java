@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.validation;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
 import java.util.Objects;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-
-import org.apache.commons.lang3.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.common.api.util.ValidatorUtil;
@@ -43,12 +44,12 @@ public class UpgradeRequestValidator implements ConstraintValidator<ValidUpgrade
     }
 
     private boolean isOsUpgrade(UpgradeV4Request request) {
-        return Boolean.TRUE.equals(request.getLockComponents()) && StringUtils.isEmpty(request.getRuntime());
+        return Boolean.TRUE.equals(request.getLockComponents()) && isEmpty(request.getRuntime());
     }
 
     private boolean isRuntimeUpgrade(UpgradeV4Request request) {
-        return !Boolean.TRUE.equals(request.getLockComponents())
-                && (!StringUtils.isEmpty(request.getRuntime()) && StringUtils.isEmpty(request.getImageId())
-                || !StringUtils.isEmpty(request.getImageId()) && StringUtils.isEmpty(request.getRuntime()));
+        boolean hasRuntimeWithoutImageId = isNotEmpty(request.getRuntime()) && isEmpty(request.getImageId());
+        boolean hasImageIdWithoutRuntime = isNotEmpty(request.getImageId()) && isEmpty(request.getRuntime());
+        return !Boolean.TRUE.equals(request.getLockComponents()) && (hasRuntimeWithoutImageId || hasImageIdWithoutRuntime);
     }
 }

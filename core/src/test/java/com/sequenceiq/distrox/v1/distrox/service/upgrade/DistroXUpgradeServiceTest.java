@@ -69,6 +69,8 @@ class DistroXUpgradeServiceTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:" + ACCOUNT_ID + ":user:f3b8ed82-e712-4f89-bda7-be07183720d3";
 
+    private static final String RESOURCE_CRN = "crn:cdp:datahub:us-west-1:" + ACCOUNT_ID + ":cluster:f3b8ed82-e712-4f89-bda7-be07183720d3";
+
     private static final NameOrCrn CLUSTER = NameOrCrn.ofName("cluster");
 
     private static final Long WS_ID = 1L;
@@ -144,6 +146,7 @@ class DistroXUpgradeServiceTest {
         lenient().when(stack.getStack()).thenReturn(stackView);
         lenient().when(stack.getCluster()).thenReturn(clusterView);
         lenient().when(clusterView.getId()).thenReturn(STACK_ID);
+        lenient().when(stackView.getResourceCrn()).thenReturn(RESOURCE_CRN);
     }
 
     @Test
@@ -263,6 +266,35 @@ class DistroXUpgradeServiceTest {
         // THEN
         verify(reactorFlowManager).triggerDistroXUpgrade(STACK_ID, imageChangeDto, false, LOCK_COMPONENTS, "variant", ROLLING_UPGRADE_ENABLED, "aRuntime");
         assertFalse(result.isReplaceVms());
+    }
+
+    @Test
+    public void testTriggerFlowWhenOsUpgradeFalseAndForceOsUpgradeEntitlementEnabledShouldNotTurnOffVmsParam() {
+        // GIVEN
+        UpgradeV4Request request = createRequest(false, ROLLING_UPGRADE_ENABLED);
+        UpgradeV4Response response = new UpgradeV4Response();
+        response.setReplaceVms(true);
+        response.setUpgradeCandidates(List.of(mock(ImageInfoV4Response.class)));
+        when(entitlementService.isDatahubForceOsUpgradeEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
+        when(upgradeAvailabilityService.checkForUpgrade(CLUSTER, WS_ID, request, USER_CRN)).thenReturn(response);
+        when(entitlementService.isInternalRepositoryForUpgradeAllowed(ACCOUNT_ID)).thenReturn(Boolean.FALSE);
+        when(clouderaManagerLicenseProvider.getLicense(any())).thenReturn(new JsonCMLicense());
+        ImageInfoV4Response imageInfoV4Response = getImage();
+        when(imageSelector.determineImageId(request, response)).thenReturn(imageInfoV4Response);
+        ArgumentCaptor<StackImageChangeV4Request> imageChangeRequestArgumentCaptor = ArgumentCaptor.forClass(StackImageChangeV4Request.class);
+        ImageChangeDto imageChangeDto = new ImageChangeDto(STACK_ID, imageInfoV4Response.getImageId());
+        when(stackCommonService.createImageChangeDto(eq(CLUSTER), eq(WS_ID), imageChangeRequestArgumentCaptor.capture())).thenReturn(imageChangeDto);
+        when(stackDtoService.getByNameOrCrn(CLUSTER, ACCOUNT_ID)).thenReturn(stack);
+        when(lockedComponentService.isComponentsLocked(stack, imageInfoV4Response.getImageId())).thenReturn(LOCK_COMPONENTS);
+        when(stackUpgradeService.calculateUpgradeVariant(stackView, USER_CRN, DO_NOT_KEEP_VARIANT)).thenReturn("variant");
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "asdf");
+        when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS), anyString(),
+                eq(ROLLING_UPGRADE_ENABLED), eq("aRuntime"))).thenReturn(flowIdentifier);
+        // WHEN
+        UpgradeV4Response result = doAs(USER_CRN, () -> underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request, false));
+        // THEN
+        verify(reactorFlowManager).triggerDistroXUpgrade(STACK_ID, imageChangeDto, true, LOCK_COMPONENTS, "variant", ROLLING_UPGRADE_ENABLED, "aRuntime");
+        assertTrue(result.isReplaceVms());
     }
 
     @Test
