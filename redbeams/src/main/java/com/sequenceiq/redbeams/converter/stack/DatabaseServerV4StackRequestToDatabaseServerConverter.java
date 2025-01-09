@@ -13,10 +13,12 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.common.converter.ResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
+import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.SecurityGroupV4StackRequest;
@@ -25,7 +27,6 @@ import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
 import com.sequenceiq.redbeams.domain.stack.SecurityGroup;
 import com.sequenceiq.redbeams.service.PasswordGeneratorService;
 import com.sequenceiq.redbeams.service.UserGeneratorService;
-import com.sequenceiq.redbeams.service.UuidGeneratorService;
 
 @Component
 public class DatabaseServerV4StackRequestToDatabaseServerConverter {
@@ -40,10 +41,10 @@ public class DatabaseServerV4StackRequestToDatabaseServerConverter {
     private PasswordGeneratorService passwordGeneratorService;
 
     @Inject
-    private UuidGeneratorService uuidGeneratorService;
+    private ProviderParameterCalculator providerParameterCalculator;
 
     @Inject
-    private ProviderParameterCalculator providerParameterCalculator;
+    private ResourceNameGenerator nameGenerator;
 
     public DatabaseServer buildDatabaseServer(DatabaseServerV4StackRequest source, CloudPlatform cloudPlatform) {
         return buildDatabaseServer(source, cloudPlatform, null, null);
@@ -53,7 +54,7 @@ public class DatabaseServerV4StackRequestToDatabaseServerConverter {
             SecurityAccessResponse securityAccessResponse) {
         DatabaseServer server = new DatabaseServer();
         server.setAccountId(Optional.ofNullable(ownerCrn).map(Crn::getAccountId).orElse(null));
-        server.setName(generateDatabaseServerName());
+        server.setName(nameGenerator.generateName(APIResourceType.DATABASE_SERVER));
         server.setInstanceType(source.getInstanceType());
         DatabaseVendor databaseVendor = DatabaseVendor.fromValue(source.getDatabaseVendor());
         server.setDatabaseVendor(databaseVendor);
@@ -106,12 +107,6 @@ public class DatabaseServerV4StackRequestToDatabaseServerConverter {
         }
 
         return securityGroup;
-    }
-
-    // Sorry, MissingResourceNameGenerator seems like overkill. Unlike other
-    // converters, this converter generates names internally in the same format.
-    private String generateDatabaseServerName() {
-        return String.format("dbsvr-%s", uuidGeneratorService.randomUuid());
     }
 
     private void setDbVersion(Map<String, Object> parameters, CloudPlatform cloudPlatform) {

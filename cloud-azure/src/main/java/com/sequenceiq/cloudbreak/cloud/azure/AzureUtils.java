@@ -94,10 +94,6 @@ public class AzureUtils {
 
     private static final int INSTANCE_NAME_HASH_LENGTH = 8;
 
-    private static final String AUTHORIZATION_FAILED_CODE = "AuthorizationFailed";
-
-    private static final String MICROSOFT_MARKETPLACE_ROLE = "Microsoft.Marketplace";
-
     @Value("${cb.max.azure.resource.name.length:}")
     private int maxResourceNameLength;
 
@@ -171,17 +167,17 @@ public class AzureUtils {
     }
 
     public String getStackName(CloudContext cloudContext) {
-        return generateResourceGroupNameByNameAndId(cloudContext.getName(), cloudContext.getId().toString());
+        return generateResourceNameByNameAndId(cloudContext.getName(), cloudContext.getId().toString());
     }
 
-    public String generateResourceGroupNameByNameAndId(String name, String id) {
+    public String generateResourceNameByNameAndId(String name, String id) {
         return Splitter.fixedLength(maxResourceNameLength - id.length())
-                .splitToList(name).get(0) + id;
+                .splitToList(name).getFirst() + id;
     }
 
     public String generateDesNameByNameAndId(String name, String id) {
         return Splitter.fixedLength(MAX_DISK_ENCRYPTION_SET_NAME_LENGTH - id.length())
-                .splitToList(name).get(0) + id;
+                .splitToList(name).getFirst() + id;
     }
 
     public CloudResourceStatus getTemplateStatus(CloudResource resource, Deployment templateDeployment, AzureClient access, String stackName) {
@@ -635,8 +631,8 @@ public class AzureUtils {
             }
             ReactiveUtils.waitAll(deleteCompletables);
         } catch (Exception e) {
-            logAndWrapCompositeException(e, "Error(s) occured while waiting for generic resource deletion: {}",
-                    "Error(s) occured while waiting for generic resource deletion: ");
+            logAndWrapCompositeException(e, "Error(s) occurred while waiting for generic resource deletion: {}",
+                    "Error(s) occurred while waiting for generic resource deletion: ");
         }
     }
 

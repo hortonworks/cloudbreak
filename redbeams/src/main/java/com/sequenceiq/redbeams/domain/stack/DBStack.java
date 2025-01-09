@@ -3,6 +3,7 @@ package com.sequenceiq.redbeams.domain.stack;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -27,6 +28,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.util.NullUtil;
+import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsDatabaseServerV4Parameters;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.azure.AzureDatabaseServerV4Parameters;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.gcp.GcpDatabaseServerV4Parameters;
@@ -63,7 +65,7 @@ public class DBStack {
     @SecretValue
     private DatabaseServer databaseServer;
 
-    @OneToMany(mappedBy = "dbStack", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "dbStack", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<DBResource> databaseResources;
 
     @Convert(converter = JsonToString.class)
@@ -160,6 +162,20 @@ public class DBStack {
 
     public void setDatabaseServer(DatabaseServer databaseServer) {
         this.databaseServer = databaseServer;
+    }
+
+    public Set<DBResource> getDatabaseResources() {
+        return databaseResources;
+    }
+
+    public Set<DBResource> getCanaryDatabaseResources() {
+        return databaseResources.stream()
+                .filter(r -> ResourceType.isCanaryResource(r.getResourceType()))
+                .collect(Collectors.toSet());
+    }
+
+    public void setDatabaseResources(Set<DBResource> databaseResources) {
+        this.databaseResources = databaseResources;
     }
 
     public Json getTags() {
@@ -319,6 +335,30 @@ public class DBStack {
 
     public void setSslConfig(Long sslConfig) {
         this.sslConfig = sslConfig;
+    }
+
+    public DBStack copy() {
+        DBStack clone = new DBStack();
+        clone.id = id;
+        clone.resourceCrn = resourceCrn;
+        clone.name = name;
+        clone.displayName = displayName;
+        clone.description = description;
+        clone.region = region;
+        clone.availabilityZone = availabilityZone;
+        clone.networkId = networkId;
+        clone.databaseServer = databaseServer;
+        clone.tags = tags;
+        clone.parameters = parameters;
+        clone.cloudPlatform = cloudPlatform;
+        clone.platformVariant = platformVariant;
+        clone.environmentId = environmentId;
+        clone.template = template;
+        clone.ownerCrn = ownerCrn;
+        clone.userName = userName;
+        clone.dbStackStatus = dbStackStatus;
+        clone.sslConfig = sslConfig;
+        return clone;
     }
 
     // careful with toString - it may cause database accesses for nested entities

@@ -175,7 +175,7 @@ public class AzureNetworkConnector implements NetworkConnector {
             resourceGroup = azureClient.getResourceGroup(resourceGroupName);
         } else {
             LOGGER.debug("Creating resource group {}", resourceGroupName);
-            String resourceGroupNameForCreation = azureUtils.generateResourceGroupNameByNameAndId(
+            String resourceGroupNameForCreation = azureUtils.generateResourceNameByNameAndId(
                     String.format("%s-", networkRequest.getEnvName()),
                     UUID.randomUUID().toString());
             resourceGroup = azureClient.createResourceGroup(resourceGroupNameForCreation, region, tags);

@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.cloud.task.ResourcesStatePollerResult;
 
 @Component
 public class CloudResourceValidationService {
+
     public void validateResourcesState(CloudContext cloudContext, ResourcesStatePollerResult statePollerResult) {
         if (statePollerResult == null || statePollerResult.getResults() == null) {
             throw new IllegalStateException(String.format("%s is null, cannot check deploy status of database stack for %s",

@@ -246,7 +246,7 @@ public class DatabaseServerV4ControllerTest {
     public void testCreateNonUnique() {
         when(dbStackConverter.convert(allocateRequest, USER_CRN)).thenReturn(dbStack);
         DBStack savedDBStack = new DBStack();
-        when(creationService.launchNonUniqueDatabaseServer(dbStack, CLUSTER_CRN, null)).thenReturn(savedDBStack);
+        when(creationService.launchMultiDatabaseServer(dbStack, CLUSTER_CRN, null)).thenReturn(savedDBStack);
         when(dbStackToDatabaseServerStatusV4ResponseConverter.convert(savedDBStack))
                 .thenReturn(allocateResponse);
         when(redBeamsTagValidator.validateTags(any(), any())).thenReturn(validationResult);
@@ -254,7 +254,7 @@ public class DatabaseServerV4ControllerTest {
         DatabaseServerStatusV4Response response = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->  underTest.createNonUniqueInternal(allocateRequest, USER_CRN));
 
         assertEquals(allocateResponse, response);
-        verify(creationService).launchNonUniqueDatabaseServer(dbStack, CLUSTER_CRN, null);
+        verify(creationService).launchMultiDatabaseServer(dbStack, CLUSTER_CRN, null);
     }
 
     @Test

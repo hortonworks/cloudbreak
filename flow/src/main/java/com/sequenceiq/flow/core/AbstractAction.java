@@ -84,7 +84,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
                 flowContext = createFlowContext(flowParameters, context, payload);
                 executeAction(context, payload, flowContext, variables, flowStateName);
             } catch (Exception ex) {
-                LOGGER.error("Error during execution of " + getClass().getName(), ex);
+                LOGGER.error("Error during execution of {}", getClass().getName(), ex);
                 if (failureEvent != null) {
                     try {
                         sendEvent(flowParameters, failureEvent.event(), getFailurePayload(payload, Optional.ofNullable(flowContext), ex), Map.of());
@@ -94,7 +94,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
                         throw new CloudbreakServiceException("Failed event propagation failed", sendEventException);
                     }
                 } else {
-                    LOGGER.error("Missing error handling for " + getClass().getName());
+                    LOGGER.error("Missing error handling for {}", getClass().getName());
                     closeFlowOnError(ex, flowId);
                     throw new CloudbreakServiceException("Missing error handling for " + getClass().getName());
                 }

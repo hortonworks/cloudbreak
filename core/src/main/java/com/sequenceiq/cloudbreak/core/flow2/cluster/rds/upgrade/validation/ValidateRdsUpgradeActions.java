@@ -17,17 +17,28 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradeBackupValidationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradeBackupValidationResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradeCleanupRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradeCleanupResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradeConnectionRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradeConnectionResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradeFailedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradeOnCloudProviderRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradeOnCloudProviderResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradePushSaltStatesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradeTriggerRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.WaitForValidateRdsUpgradeCleanupRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.WaitForValidateRdsUpgradeCleanupResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.WaitForValidateRdsUpgradeOnCloudProviderRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.WaitForValidateRdsUpgradeOnCloudProviderResult;
+import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.cloudbreak.view.StackView;
 
 @Configuration
 public class ValidateRdsUpgradeActions {
 
-    private static final String TARGET_MAJOR_VERSION_KEY = "TARGET_MAJOR_VERSION";
+    private static final String VALIDATE_ON_PROVIDER_WARNING_MESSAGE = "VALIDATE_ON_PROVIDER_WARNING_MESSAGE";
+
+    private static final String VALIDATE_CONNECTION_ERROR_MESSAGE = "VALIDATE_CONNECTION_ERROR_MESSAGE";
 
     @Inject
     private ValidateRdsUpgradeService validateRdsUpgradeService;
@@ -35,10 +46,16 @@ public class ValidateRdsUpgradeActions {
     @Bean(name = "VALIDATE_RDS_UPGRADE_PUSH_SALT_STATES_STATE")
     public Action<?, ?> pushSaltStates() {
         return new AbstractValidateRdsUpgradeAction<>(ValidateRdsUpgradeTriggerRequest.class) {
+
+            @Override
+            protected void prepareExecution(ValidateRdsUpgradeTriggerRequest payload, Map<Object, Object> variables) {
+                super.prepareExecution(payload, variables);
+                variables.put(TARGET_MAJOR_VERSION_KEY, payload.getVersion());
+            }
+
             @Override
             protected void doExecute(ValidateRdsUpgradeContext context, ValidateRdsUpgradeTriggerRequest payload, Map<Object, Object> variables) {
                 Long stackId = payload.getResourceId();
-                variables.put(TARGET_MAJOR_VERSION_KEY, payload.getVersion());
                 validateRdsUpgradeService.rdsUpgradeStarted(stackId, payload.getVersion());
                 sendEvent(context);
             }
@@ -76,8 +93,84 @@ public class ValidateRdsUpgradeActions {
             @Override
             protected void doExecute(ValidateRdsUpgradeContext context, ValidateRdsUpgradeBackupValidationResult payload, Map<Object, Object> variables) {
                 validateRdsUpgradeService.validateOnCloudProvider(payload.getResourceId());
-                ValidateRdsUpgradeOnCloudProviderRequest validateEvent = new ValidateRdsUpgradeOnCloudProviderRequest(context.getStackId(),
+                ValidateRdsUpgradeOnCloudProviderRequest validateRequest = new ValidateRdsUpgradeOnCloudProviderRequest(context.getStackId(),
                         (TargetMajorVersion) variables.get(TARGET_MAJOR_VERSION_KEY));
+                sendEvent(context, validateRequest.selector(), validateRequest);
+            }
+        };
+    }
+
+    @Bean(name = "WAIT_FOR_VALIDATE_RDS_UPGRADE_ON_CLOUDPROVIDER_STATE")
+    public Action<?, ?> waitForValidateUpgradeOnCloudProvider() {
+        return new AbstractValidateRdsUpgradeAction<>(ValidateRdsUpgradeOnCloudProviderResult.class) {
+            @Override
+            protected void doExecute(ValidateRdsUpgradeContext context, ValidateRdsUpgradeOnCloudProviderResult payload, Map<Object, Object> variables) {
+                WaitForValidateRdsUpgradeOnCloudProviderRequest validateEvent = new WaitForValidateRdsUpgradeOnCloudProviderRequest(context.getStackId(),
+                        payload.getFlowIdentifier(), payload.getCanaryProperties());
+                sendEvent(context, validateEvent.selector(), validateEvent);
+            }
+        };
+    }
+
+    @Bean(name = "VALIDATE_RDS_UPGRADE_CONNECTION_STATE")
+    public Action<?, ?> validateConnection() {
+        return new AbstractValidateRdsUpgradeAction<>(WaitForValidateRdsUpgradeOnCloudProviderResult.class) {
+
+            @Override
+            protected void prepareExecution(WaitForValidateRdsUpgradeOnCloudProviderResult payload, Map<Object, Object> variables) {
+                super.prepareExecution(payload, variables);
+                variables.put(CANARY_RDS_PROPERTIES_KEY, payload.getCanaryProperties());
+                NullUtil.doIfNotNull(payload.getReason(), reason -> variables.put(VALIDATE_ON_PROVIDER_WARNING_MESSAGE, reason));
+            }
+
+            @Override
+            protected void doExecute(ValidateRdsUpgradeContext context, WaitForValidateRdsUpgradeOnCloudProviderResult payload, Map<Object, Object> variables) {
+                if (validateRdsUpgradeService.shouldRunDataBackupRestore(context.getStack(), context.getCluster(), context.getDatabase())) {
+                    validateRdsUpgradeService.validateConnection(payload.getResourceId());
+                }
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(ValidateRdsUpgradeContext context) {
+                return validateRdsUpgradeService.shouldRunDataBackupRestore(context.getStack(), context.getCluster(), context.getDatabase()) ?
+                        new ValidateRdsUpgradeConnectionRequest(context.getStackId(), context.getCanaryProperties()) :
+                        new ValidateRdsUpgradeConnectionResult(context.getStackId(), null);
+            }
+        };
+    }
+
+    @Bean(name = "VALIDATE_RDS_UPGRADE_CLEANUP_STATE")
+    public Action<?, ?> cleanupValidateResources() {
+        return new AbstractValidateRdsUpgradeAction<>(ValidateRdsUpgradeConnectionResult.class) {
+
+            @Override
+            protected void doExecute(ValidateRdsUpgradeContext context, ValidateRdsUpgradeConnectionResult payload, Map<Object, Object> variables) {
+                NullUtil.doIfNotNull(payload.getReason(), reason -> variables.put(VALIDATE_CONNECTION_ERROR_MESSAGE, reason));
+                if (validateRdsUpgradeService.shouldRunDataBackupRestore(context.getStack(), context.getCluster(), context.getDatabase())) {
+                    validateRdsUpgradeService.validateCleanup(payload.getResourceId());
+                }
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(ValidateRdsUpgradeContext context) {
+                return validateRdsUpgradeService.shouldRunDataBackupRestore(context.getStack(), context.getCluster(), context.getDatabase()) ?
+                        new ValidateRdsUpgradeCleanupRequest(context.getStackId()) :
+                        new ValidateRdsUpgradeCleanupResult(context.getStackId(), null);
+            }
+        };
+    }
+
+    @Bean(name = "WAIT_FOR_VALIDATE_RDS_UPGRADE_CLEANUP_STATE")
+    public Action<?, ?> waitForCleanupValidateResources() {
+        return new AbstractValidateRdsUpgradeAction<>(ValidateRdsUpgradeCleanupResult.class) {
+
+            @Override
+            protected void doExecute(ValidateRdsUpgradeContext context, ValidateRdsUpgradeCleanupResult payload, Map<Object, Object> variables) {
+                String connectionErrorMessage = (String) variables.getOrDefault(VALIDATE_CONNECTION_ERROR_MESSAGE, "");
+                WaitForValidateRdsUpgradeCleanupRequest validateEvent = new WaitForValidateRdsUpgradeCleanupRequest(context.getStackId(),
+                        connectionErrorMessage, payload.getFlowIdentifier());
                 sendEvent(context, validateEvent.selector(), validateEvent);
             }
         };
@@ -85,10 +178,12 @@ public class ValidateRdsUpgradeActions {
 
     @Bean(name = "VALIDATE_RDS_UPGRADE_FINISHED_STATE")
     public Action<?, ?> validateRdsUpgradeFinished() {
-        return new AbstractValidateRdsUpgradeAction<>(ValidateRdsUpgradeOnCloudProviderResult.class) {
+        return new AbstractValidateRdsUpgradeAction<>(WaitForValidateRdsUpgradeCleanupResult.class) {
+
             @Override
-            protected void doExecute(ValidateRdsUpgradeContext context, ValidateRdsUpgradeOnCloudProviderResult payload, Map<Object, Object> variables) {
-                validateRdsUpgradeService.validateRdsUpgradeFinished(payload.getResourceId(), context.getClusterId(), payload.getReason());
+            protected void doExecute(ValidateRdsUpgradeContext context, WaitForValidateRdsUpgradeCleanupResult payload, Map<Object, Object> variables) {
+                String validationMessage = (String) variables.getOrDefault(VALIDATE_ON_PROVIDER_WARNING_MESSAGE, "");
+                validateRdsUpgradeService.validateRdsUpgradeFinished(payload.getResourceId(), context.getClusterId(), validationMessage);
                 sendEvent(context);
             }
 
@@ -102,6 +197,7 @@ public class ValidateRdsUpgradeActions {
     @Bean(name = "VALIDATE_RDS_UPGRADE_FAILED_STATE")
     public Action<?, ?> validateRdsUpgradeFailed() {
         return new AbstractStackFailureAction<ValidateRdsUpgradeState, ValidateRdsUpgradeEvent>() {
+
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 ValidateRdsUpgradeFailedEvent concretePayload = (ValidateRdsUpgradeFailedEvent) payload;

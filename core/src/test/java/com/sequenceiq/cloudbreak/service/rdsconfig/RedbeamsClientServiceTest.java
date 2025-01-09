@@ -2,8 +2,10 @@ package com.sequenceiq.cloudbreak.service.rdsconfig;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -16,6 +18,7 @@ import java.util.stream.Stream;
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.ProcessingException;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,8 +37,11 @@ import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.ClusterDatabaseServerCertificateStatusV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.RotateDatabaseServerSecretV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeDatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeTargetMajorVersion;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.ClusterDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslCertificateEntryResponse;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.UpgradeDatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.support.SupportV4Endpoint;
 
 @ExtendWith(MockitoExtension.class)
@@ -181,5 +187,92 @@ class RedbeamsClientServiceTest {
         assertNotNull(result);
         assertEquals(mockResponse, result);
         verify(redbeamsServerEndpoint, times(1)).listDatabaseServersCertificateStatusByStackCrns(request, "usercrn");
+    }
+
+    @Test
+    public void testValidateUpgradeReturnsCorrectResponse() {
+        // Given
+        String crn = "crn:altus:iam:us-west-1:123:user:456";
+        UpgradeDatabaseServerV4Request request = new UpgradeDatabaseServerV4Request();
+        UpgradeDatabaseServerV4Response expectedResponse = new UpgradeDatabaseServerV4Response();
+        FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW, "flow-123");
+        expectedResponse.setFlowIdentifier(flowId);
+
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("internal-crn");
+        when(redbeamsServerEndpoint.validateUpgrade(crn, request)).thenReturn(expectedResponse);
+
+        // When
+        UpgradeDatabaseServerV4Response actualResponse = underTest.validateUpgrade(crn, request);
+
+        // Then
+        assertNotNull(actualResponse);
+        assertEquals(flowId, actualResponse.getFlowIdentifier());
+    }
+
+    @Test
+    public void testValidateUpgradeHandlesProcessingException() {
+        // Given
+        String crn = "crn:altus:iam:us-west-1:123:user:456";
+        UpgradeDatabaseServerV4Request request = new UpgradeDatabaseServerV4Request();
+        request.setUpgradeTargetMajorVersion(UpgradeTargetMajorVersion.VERSION_14);
+        ProcessingException processingException = new ProcessingException("Processing error");
+
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("internal-crn");
+        when(redbeamsServerEndpoint.validateUpgrade(crn, request)).thenThrow(processingException);
+
+        // When
+        CloudbreakServiceException thrownException = assertThrows(
+                CloudbreakServiceException.class,
+                () -> underTest.validateUpgrade(crn, request)
+        );
+
+        // Then
+        assertTrue(thrownException.getMessage().contains("Failed to validate upgrade DatabaseServer with CRN"));
+        assertInstanceOf(ProcessingException.class, thrownException.getCause());
+        verify(redbeamsServerEndpoint).validateUpgrade(crn, request);
+    }
+
+    @Test
+    public void testValidateUpgradeCleanupReturnsCorrectResponse() {
+        // Given
+        String crn = "crn:altus:iam:us-west-1:123:user:456";
+        UpgradeDatabaseServerV4Response expectedResponse = new UpgradeDatabaseServerV4Response();
+        FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW, "flow-123");
+        expectedResponse.setFlowIdentifier(flowId);
+
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("internal-crn");
+        when(redbeamsServerEndpoint.validateUpgradeCleanup(crn)).thenReturn(expectedResponse);
+
+        // When
+        UpgradeDatabaseServerV4Response actualResponse = underTest.validateUpgradeCleanup(crn);
+
+        // Then
+        assertNotNull(actualResponse);
+        assertEquals(flowId, actualResponse.getFlowIdentifier());
+    }
+
+    @Test
+    public void testValidateUpgradeCleanupHandlesProcessingException() {
+        // Given
+        String crn = "crn:altus:iam:us-west-1:123:user:456";
+        ProcessingException processingException = new ProcessingException("Processing error");
+
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("internal-crn");
+        when(redbeamsServerEndpoint.validateUpgradeCleanup(crn)).thenThrow(processingException);
+
+        // When
+        CloudbreakServiceException thrownException = assertThrows(
+                CloudbreakServiceException.class,
+                () -> underTest.validateUpgradeCleanup(crn)
+        );
+
+        // Then
+        assertTrue(thrownException.getMessage().contains("Failed to clean up validate upgrade DatabaseServer with CRN"));
+        assertInstanceOf(ProcessingException.class, thrownException.getCause());
+        verify(redbeamsServerEndpoint).validateUpgradeCleanup(crn);
     }
 }

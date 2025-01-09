@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
 public enum ExternalDatabaseStatus {
+
     START_IN_PROGRESS(StatusGroup.TRANSIENT),
     STARTED(StatusGroup.PERMANENT),
     STOP_IN_PROGRESS(StatusGroup.TRANSIENT),
@@ -22,6 +23,10 @@ public enum ExternalDatabaseStatus {
 
     public boolean isTransient() {
         return StatusGroup.TRANSIENT == statusGroup;
+    }
+
+    public boolean isRelaunchable() {
+        return this == UNKNOWN || this == DELETED;
     }
 
     public StatusGroup getStatusGroup() {

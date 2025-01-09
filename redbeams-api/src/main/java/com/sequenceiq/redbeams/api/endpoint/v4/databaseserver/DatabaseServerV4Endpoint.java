@@ -334,6 +334,16 @@ public interface DatabaseServerV4Endpoint {
             UpgradeDatabaseServerV4Request request);
 
     @PUT
+    @Path("{crn}/validate_upgrade_cleanup")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(summary = DatabaseServerOpDescription.VALIDATE_UPGRADE_CLEANUP, description = DatabaseServerNotes.VALIDATE_UPGRADE_CLEANUP,
+            operationId = "validateUpgradeDatabaseServerCleanup",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    UpgradeDatabaseServerV4Response validateUpgradeCleanup(
+            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotEmpty @Parameter(description = DatabaseServerParamDescriptions.CRN)
+            @PathParam("crn") String crn);
+
+    @PUT
     @Path("internal/rotate_secret")
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = DatabaseServerOpDescription.ROTATE, description = DatabaseServerNotes.ROTATE,

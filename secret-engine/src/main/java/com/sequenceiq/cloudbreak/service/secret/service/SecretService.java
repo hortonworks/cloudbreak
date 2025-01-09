@@ -50,9 +50,7 @@ public class SecretService {
             return null;
         }
         VaultSecret vaultSecret = vaultSecretConverter.convert(vaultSecretJson);
-        Map<String, String> response = vaultRetryService.tryReadingVault(() -> {
-            return persistentEngine.getWithCache(vaultSecret.getPath());
-        });
+        Map<String, String> response = vaultRetryService.tryReadingVault(() -> persistentEngine.getWithCache(vaultSecret.getPath()));
         return response != null ? response.get(field) : null;
     }
 

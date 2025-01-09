@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
-import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
+import com.sequenceiq.cloudbreak.common.converter.ResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.Network;
@@ -29,7 +29,7 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentBaseNetworkConverter.class);
 
     @Inject
-    private MissingResourceNameGenerator missingResourceNameGenerator;
+    private ResourceNameGenerator resourceNameGenerator;
 
     @Inject
     private SubnetSelector subnetSelector;
@@ -40,7 +40,7 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
     @Override
     public Network convertToLegacyNetwork(EnvironmentNetworkResponse source, String availabilityZone) {
         Network result = new Network();
-        result.setName(missingResourceNameGenerator.generateName(APIResourceType.NETWORK));
+        result.setName(resourceNameGenerator.generateName(APIResourceType.NETWORK));
         result.setSubnetCIDR(null);
         result.setOutboundInternetTraffic(source.getOutboundInternetTraffic());
         result.setNetworkCidrs(source.getNetworkCidrs());

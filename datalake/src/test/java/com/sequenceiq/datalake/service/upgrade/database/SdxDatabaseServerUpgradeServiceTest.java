@@ -398,7 +398,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = DatabaseServerStatus.class, names = {"AVAILABLE", "UPGRADE_FAILED"}, mode = EnumSource.Mode.EXCLUDE)
+    @EnumSource(value = DatabaseServerStatus.class, names = {"AVAILABLE", "UPGRADE_FAILED", "VALIDATE_UPGRADE_FAILED"}, mode = EnumSource.Mode.EXCLUDE)
     void testUpgradeWhenDatabaseNotAvailableThenUpgradeNotTriggered(DatabaseServerStatus dbStatus) {
         TargetMajorVersion targetMajorVersion = VERSION_11;
         SdxCluster sdxCluster = getSdxCluster();

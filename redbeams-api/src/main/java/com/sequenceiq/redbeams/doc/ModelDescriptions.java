@@ -33,6 +33,7 @@ public final class ModelDescriptions {
     public static final String SUPPORT_CERTIFICATE_REQUEST = "Request for testing database certificate ";
     public static final String SUPPORT_CERTIFICATE_RESPONSE = "Response for testing database certificate";
     public static final String DATABASE_PROPERTIES_RESPONSE = "Response for the database properties of a database server";
+    public static final String CANARY_DATABASE_PROPERTIES_RESPONSE = "Response for the canary database properties";
 
 
     public static final String FLOW_IDENTIFIER = "The id of the flow or flow chain that was triggered as part of the process.";
@@ -116,6 +117,7 @@ public final class ModelDescriptions {
         public static final String MAJOR_VERSION = "Major version of the database server engine";
         public static final String CONNECTION_NAME_FORMAT = "The format of the username for the database connection";
         public static final String DATABASE_PROPERTIES = "Database server properties";
+        public static final String CANARY_DATABASE_PROPERTIES = "Canary database server properties";
         public static final String INSTANCE_TYPE = "Instance type of the database server";
         public static final String STORAGE_SIZE = "Storage size of the database server, in GB";
     }

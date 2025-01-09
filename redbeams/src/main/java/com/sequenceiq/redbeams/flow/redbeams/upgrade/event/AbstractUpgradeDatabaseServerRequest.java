@@ -7,6 +7,7 @@ import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 
 public abstract class AbstractUpgradeDatabaseServerRequest extends RedbeamsEvent {
+
     private final CloudContext cloudContext;
 
     private final CloudCredential cloudCredential;

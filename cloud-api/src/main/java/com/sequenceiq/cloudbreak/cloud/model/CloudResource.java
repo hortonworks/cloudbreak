@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
+import com.sequenceiq.common.api.type.CommonResourceType;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -117,6 +118,10 @@ public class CloudResource extends DynamicModel {
         } else {
             return getType() + " - " + getName();
         }
+    }
+
+    public CommonResourceType getCommonResourceType() {
+        return type.getCommonResourceType();
     }
 
     @Override

@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.externaldatabase.DatabaseOperation;
 import com.sequenceiq.cloudbreak.service.externaldatabase.DatabaseServerParameterDecorator;
 import com.sequenceiq.cloudbreak.service.externaldatabase.PollingConfig;
@@ -119,6 +120,9 @@ public class ExternalDatabaseService {
 
     @Inject
     private SdxClientService sdxClientService;
+
+    @Inject
+    private EnvironmentClientService environmentClientService;
 
     public void provisionDatabase(Stack stack, DetailedEnvironmentResponse environment) {
         String databaseCrn;
@@ -261,10 +265,11 @@ public class ExternalDatabaseService {
         }
     }
 
-    public void waitForDatabaseToBeUpgraded(ClusterView cluster, FlowIdentifier flowIdentifier) {
+    public DatabaseServerV4Response waitForDatabaseFlowToBeFinished(ClusterView cluster, FlowIdentifier flowIdentifier) {
         if (flowIdentifier != null) {
-            pollUntilFlowFinished(cluster.getDatabaseServerCrn(), flowIdentifier);
+            return pollUntilFlowFinished(cluster.getDatabaseServerCrn(), flowIdentifier);
         }
+        return null;
     }
 
     public void rotateDatabaseSecret(String databaseServerCrn, SecretType secretType, RotationFlowExecutionType executionType,
@@ -295,7 +300,7 @@ public class ExternalDatabaseService {
         }
     }
 
-    private void pollUntilFlowFinished(String databaseCrn, FlowIdentifier flowIdentifier) {
+    private DatabaseServerV4Response pollUntilFlowFinished(String databaseCrn, FlowIdentifier flowIdentifier) {
         try {
             PollingConfig pollingConfig = dbPollingConfig.getConfig();
             Boolean success = Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
@@ -313,13 +318,21 @@ public class ExternalDatabaseService {
                     LOGGER.info("Error {} returned for database crn: {}", errorDescription, databaseCrn);
                 }
                 handleUnsuccessfulFlow(databaseCrn, flowIdentifier, new UserBreakException(errorDescription));
+            } else {
+                try {
+                    return redbeamsClient.getByCrn(databaseCrn);
+                } catch (CloudbreakServiceException | NotFoundException e) {
+                    LOGGER.info("Error {} returned for database crn: {}", e.getMessage(), databaseCrn);
+                    return null;
+                }
             }
         } catch (UserBreakException e) {
             handleUnsuccessfulFlow(databaseCrn, flowIdentifier, e);
         }
+        return null;
     }
 
-    private static void handleUnsuccessfulFlow(String databaseCrn, FlowIdentifier flowIdentifier, UserBreakException e) {
+    private void handleUnsuccessfulFlow(String databaseCrn, FlowIdentifier flowIdentifier, UserBreakException e) {
         String message = String.format("Database flow failed in Redbeams with error: '%s'. Database crn: %s, flow: %s",
                 e != null ? e.getMessage() : "unknown", databaseCrn, flowIdentifier);
         LOGGER.warn(message);
@@ -518,8 +531,8 @@ public class ExternalDatabaseService {
         return migrationNeeded;
     }
 
-    public DatabaseServerV4StackRequest migrateDatabaseSettingsIfNeeded(StackDto stack, TargetMajorVersion majorVersion,
-            DetailedEnvironmentResponse environment) {
+    public DatabaseServerV4StackRequest migrateDatabaseSettingsIfNeeded(StackDto stack, TargetMajorVersion majorVersion) {
+        DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(stack.getCloudPlatform());
         Versioned currentVersion = stack::getExternalDatabaseEngineVersion;
         Versioned targetVersion = majorVersion::getMajorVersion;

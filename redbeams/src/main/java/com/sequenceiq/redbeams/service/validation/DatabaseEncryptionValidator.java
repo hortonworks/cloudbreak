@@ -23,15 +23,15 @@ public class DatabaseEncryptionValidator {
     public void validateEncryption(String cloudPlatform, String environmentCrn, DatabaseServer databaseServer, TargetMajorVersion targetVersion) {
         if (CloudPlatform.AZURE.equalsIgnoreCase(cloudPlatform)) {
             AzureDatabaseServerView azureDatabaseServer = new AzureDatabaseServerView(databaseServer);
-            if (azureDatabaseServer.getAzureDatabaseType().isSingleServer() &&
-                    TargetMajorVersion.VERSION14.getMajorVersion().equals(targetVersion.getMajorVersion()) &&
+            boolean targetVersion14 = TargetMajorVersion.VERSION14.getMajorVersion().equals(targetVersion.getMajorVersion());
+            boolean singleServer = azureDatabaseServer.getAzureDatabaseType().isSingleServer();
+            if (singleServer && targetVersion14 &&
                     StringUtils.isNotEmpty(azureDatabaseServer.getKeyVaultUrl())) {
                 throw new BadRequestException(
                         "Database server upgrade validation failed because upgrading to Azure Flexible server with CMK is disabled. " +
                                 "Please wait until it will be supported in a future release.");
             }
-            if (azureDatabaseServer.getAzureDatabaseType().isSingleServer() &&
-                    TargetMajorVersion.VERSION14.getMajorVersion().equals(targetVersion.getMajorVersion()) &&
+            if (singleServer && targetVersion14 &&
                     StringUtils.isNotEmpty(azureDatabaseServer.getKeyVaultUrl()) && !environmentContainsEncryptionParameters(environmentCrn)) {
                 throw new BadRequestException(
                         "Database server upgrade validation failed because Azure Flexible server requires dedicated maneged identity for data encryption. "

@@ -37,23 +37,19 @@ public class UpgradeDatabaseRequest {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
+
         UpgradeDatabaseRequest that = (UpgradeDatabaseRequest) o;
-        if (targetMajorVersion != that.targetMajorVersion) {
-            return false;
-        }
-        return Objects.equals(migratedDatabaseServer, that.migratedDatabaseServer);
+        return targetMajorVersion == that.targetMajorVersion &&
+                Objects.equals(migratedDatabaseServer, that.migratedDatabaseServer);
     }
 
     @Override
     public int hashCode() {
-        int result = targetMajorVersion.hashCode();
-        result = 31 * result + (migratedDatabaseServer != null ? migratedDatabaseServer.hashCode() : 0);
+        int result = Objects.hashCode(targetMajorVersion);
+        result = 31 * result + Objects.hashCode(migratedDatabaseServer);
         return result;
     }
 }

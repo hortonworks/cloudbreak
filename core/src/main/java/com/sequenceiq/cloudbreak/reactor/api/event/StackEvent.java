@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 
 public class StackEvent implements IdempotentEvent<StackEvent> {
+
     private final String selector;
 
     private final Long stackId;

@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.service;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsEvent.UPGRADE_RDS_UPGRADE_DATABASE_SERVER_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.validation.ValidateRdsUpgradeEvent.VALIDATE_RDS_UPGRADE_CLEANUP_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.validation.ValidateRdsUpgradeEvent.VALIDATE_RDS_UPGRADE_ON_CLOUDPROVIDER_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_RETRY_FLOW_START;
 
 import java.util.List;
@@ -31,9 +33,14 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4En
 
 @Service
 public class CloudbreakFlowRetryService {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakFlowRetryService.class);
 
-    private static final List<FlowEvent> STACK_RETRY_EVENTS = List.of(UPGRADE_RDS_UPGRADE_DATABASE_SERVER_FINISHED_EVENT);
+    private static final List<FlowEvent> STACK_RETRY_EVENTS = List.of(
+            UPGRADE_RDS_UPGRADE_DATABASE_SERVER_FINISHED_EVENT,
+            VALIDATE_RDS_UPGRADE_ON_CLOUDPROVIDER_FINISHED_EVENT,
+            VALIDATE_RDS_UPGRADE_CLEANUP_FINISHED_EVENT
+            );
 
     @Inject
     private StackService stackService;
@@ -62,7 +69,7 @@ public class CloudbreakFlowRetryService {
 
     private void retryRedbeamsIfNecessary(Long stackId, FlowLog lastSuccessfulStateLog) {
         if (isRedbeamsRetryNecessary(lastSuccessfulStateLog.getNextEvent())) {
-            LOGGER.info("Last successful state was " + lastSuccessfulStateLog.getNextEvent() + ", so try a retry on stack");
+            LOGGER.info("Last successful state was {}, so try a retry on stack", lastSuccessfulStateLog.getNextEvent());
             ClusterView clusterView = stackDtoService.getClusterViewByStackId(stackId);
             if (StringUtils.isNotEmpty(clusterView.getDatabaseServerCrn())) {
                 try {

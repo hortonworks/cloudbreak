@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.RootVolumeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
-import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
+import com.sequenceiq.cloudbreak.common.converter.ResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
@@ -33,7 +33,7 @@ public class InstanceTemplateV4RequestToTemplateConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceTemplateV4RequestToTemplateConverter.class);
 
     @Inject
-    private MissingResourceNameGenerator missingResourceNameGenerator;
+    private ResourceNameGenerator resourceNameGenerator;
 
     @Inject
     private ProviderParameterCalculator providerParameterCalculator;
@@ -43,7 +43,7 @@ public class InstanceTemplateV4RequestToTemplateConverter {
 
     public Template convert(InstanceTemplateV4Request source, boolean gatewayType) {
         Template template = new Template();
-        template.setName(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE));
+        template.setName(resourceNameGenerator.generateName(APIResourceType.TEMPLATE));
         template.setStatus(ResourceStatus.USER_MANAGED);
         template.setCloudPlatform(source.getCloudPlatform().name());
         template.setVolumeTemplates(Sets.newHashSet());

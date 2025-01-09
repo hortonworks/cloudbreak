@@ -99,7 +99,7 @@ public class AzureEncryptionResources implements EncryptionResources {
                             "environment creation. At least one of --resource-group-name or --encryption-key-resource-group-name should be specified.");
                 }
                 singleResourceGroup = Boolean.FALSE;
-                desResourceGroupName = azureUtils.generateResourceGroupNameByNameAndId(
+                desResourceGroupName = azureUtils.generateResourceNameByNameAndId(
                         String.format("%s-CDP_DES-", request.getCloudContext().getName()),
                         request.getId());
             }

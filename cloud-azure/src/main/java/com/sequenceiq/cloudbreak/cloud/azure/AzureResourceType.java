@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -9,29 +9,35 @@ import com.sequenceiq.common.api.type.ResourceType;
 
 public enum AzureResourceType {
 
-    DATABASE_SERVER("DatabaseServer", ResourceType.AZURE_DATABASE),
-    PRIVATE_ENDPOINT("PrivateEndpoint", ResourceType.AZURE_PRIVATE_ENDPOINT),
-    PRIVATE_DNS_ZONE_GROUP("PrivateDnsZoneGroup", ResourceType.AZURE_DNS_ZONE_GROUP),
+    DATABASE_SERVER("DatabaseServer", List.of(ResourceType.AZURE_DATABASE, ResourceType.AZURE_DATABASE_CANARY)),
+    PRIVATE_ENDPOINT("PrivateEndpoint",  List.of(ResourceType.AZURE_PRIVATE_ENDPOINT, ResourceType.AZURE_PRIVATE_ENDPOINT_CANARY)),
+    PRIVATE_DNS_ZONE_GROUP("PrivateDnsZoneGroup",  List.of(ResourceType.AZURE_DNS_ZONE_GROUP, ResourceType.AZURE_DNS_ZONE_GROUP_CANARY)),
     RESOURCE_GROUP("ResourceGroup", ResourceType.AZURE_RESOURCE_GROUP);
 
     private static final Map<ResourceType, AzureResourceType> BY_RESOURCE_TYPE = Stream.of(AzureResourceType.values())
-            .collect(Collectors.toUnmodifiableMap(AzureResourceType::getResourceType, Function.identity()));
+            .flatMap(e -> e.resourceTypes.stream().map(s -> Map.entry(s, e)))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
     private final String azureType;
 
-    private final ResourceType resourceType;
+    private final List<ResourceType> resourceTypes;
 
     AzureResourceType(String azureType, ResourceType resourceType) {
         this.azureType = azureType;
-        this.resourceType = resourceType;
+        this.resourceTypes = List.of(resourceType);
+    }
+
+    AzureResourceType(String azureType, List<ResourceType> resourceTypes) {
+        this.azureType = azureType;
+        this.resourceTypes = resourceTypes;
     }
 
     public String getAzureType() {
         return azureType;
     }
 
-    public ResourceType getResourceType() {
-        return resourceType;
+    public List<ResourceType> getResourceTypes() {
+        return resourceTypes;
     }
 
     public static AzureResourceType getByResourceType(ResourceType resourceType) {

@@ -5,10 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -25,12 +22,7 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
-import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
-import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -48,11 +40,12 @@ import com.sequenceiq.redbeams.domain.stack.DBStackStatus;
 import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
 import com.sequenceiq.redbeams.domain.upgrade.UpgradeDatabaseRequest;
 import com.sequenceiq.redbeams.domain.upgrade.UpgradeDatabaseResponse;
-import com.sequenceiq.redbeams.dto.Credential;
 import com.sequenceiq.redbeams.dto.UpgradeDatabaseMigrationParams;
 import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.RedbeamsUpgradeEvent;
+import com.sequenceiq.redbeams.flow.redbeams.upgrade.RedbeamsValidateUpgradeEvent;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.RedbeamsStartUpgradeRequest;
+import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.RedbeamsStartValidateUpgradeRequest;
 import com.sequenceiq.redbeams.service.CredentialService;
 import com.sequenceiq.redbeams.service.network.NetworkBuilderService;
 import com.sequenceiq.redbeams.service.operation.OperationService;
@@ -223,49 +216,22 @@ public class RedbeamsUpgradeServiceTest {
         // GIVEN
         DBStack dbStack = getDbStack(Status.AVAILABLE);
         UpgradeDatabaseRequest upgradeDatabaseRequest = getUpgradeDatabaseRequest();
-        Credential credential = mock(Credential.class);
-        CloudCredential cloudCredential = mock(CloudCredential.class);
-        AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
-        DatabaseStack databaseStack = mock(DatabaseStack.class);
         when(dbStackService.getByCrn(SERVER_CRN_STRING)).thenReturn(dbStack);
-        when(cloudPlatformConnectors.get(any(CloudPlatformVariant.class))).thenReturn(cloudConnector);
-        when(cloudConnector.authentication()).thenReturn(authenticator);
-        when(cloudConnector.resources()).thenReturn(resourceConnector);
-        when(credentialService.getCredentialByEnvCrn("envcrn")).thenReturn(credential);
-        when(credentialConverter.convert(credential)).thenReturn(cloudCredential);
-        when(authenticator.authenticate(any(CloudContext.class), eq(cloudCredential))).thenReturn(authenticatedContext);
-        when(databaseStackConverter.convert(dbStack)).thenReturn(databaseStack);
-        // WHEN
-        UpgradeDatabaseResponse actualResponse = underTest.validateUpgradeDatabaseServer(SERVER_CRN_STRING, upgradeDatabaseRequest);
-        // THEN
-        verify(resourceConnector, times(1)).validateUpgradeDatabaseServer(authenticatedContext, databaseStack, TARGET_MAJOR_VERSION);
-        assertNull(actualResponse.getReason());
-    }
+        RedbeamsStartValidateUpgradeRequest validateUpgradeRequest = new RedbeamsStartValidateUpgradeRequest(dbStack.getId(),
+                upgradeDatabaseRequest.getTargetMajorVersion(), UpgradeDatabaseMigrationParams
+                .fromDatabaseServer(upgradeDatabaseRequest.getMigratedDatabaseServer()));
+        when(flowManager.notify(RedbeamsValidateUpgradeEvent.REDBEAMS_START_VALIDATE_UPGRADE_EVENT.selector(), validateUpgradeRequest)).
+                thenReturn(new FlowIdentifier(FlowType.FLOW, "1"));
 
-    @Test
-    void testValidateUpgradeDatabaseServerWhenCloudConnectorExceptionIsThrown() throws Exception {
-        // GIVEN
-        DBStack dbStack = getDbStack(Status.AVAILABLE);
-        UpgradeDatabaseRequest upgradeDatabaseRequest = getUpgradeDatabaseRequest();
-        Credential credential = mock(Credential.class);
-        CloudCredential cloudCredential = mock(CloudCredential.class);
-        AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
-        DatabaseStack databaseStack = mock(DatabaseStack.class);
-        Exception exception = new Exception("cloudconnectorexception");
-        when(dbStackService.getByCrn(SERVER_CRN_STRING)).thenReturn(dbStack);
-        when(cloudPlatformConnectors.get(any(CloudPlatformVariant.class))).thenReturn(cloudConnector);
-        when(cloudConnector.authentication()).thenReturn(authenticator);
-        when(cloudConnector.resources()).thenReturn(resourceConnector);
-        when(credentialService.getCredentialByEnvCrn("envcrn")).thenReturn(credential);
-        when(credentialConverter.convert(credential)).thenReturn(cloudCredential);
-        when(authenticator.authenticate(any(CloudContext.class), eq(cloudCredential))).thenReturn(authenticatedContext);
-        when(databaseStackConverter.convert(dbStack)).thenReturn(databaseStack);
-        doThrow(exception).when(resourceConnector)
-                .validateUpgradeDatabaseServer(authenticatedContext, databaseStack, TARGET_MAJOR_VERSION);
         // WHEN
         UpgradeDatabaseResponse actualResponse = underTest.validateUpgradeDatabaseServer(SERVER_CRN_STRING, upgradeDatabaseRequest);
         // THEN
-        assertEquals("cloudconnectorexception", actualResponse.getReason());
+        ArgumentCaptor<RedbeamsStartValidateUpgradeRequest> upgradeRequestArgumentCaptor = ArgumentCaptor.forClass(RedbeamsStartValidateUpgradeRequest.class);
+        verify(flowManager).notify(eq(RedbeamsValidateUpgradeEvent.REDBEAMS_START_VALIDATE_UPGRADE_EVENT.selector()), upgradeRequestArgumentCaptor.capture());
+        RedbeamsStartValidateUpgradeRequest actualRequest = upgradeRequestArgumentCaptor.getValue();
+        assertEquals(TARGET_MAJOR_VERSION, actualRequest.getTargetMajorVersion());
+        assertEquals("1", actualResponse.getFlowIdentifier().getPollableId());
+        assertNull(actualResponse.getReason());
     }
 
     private DBStackStatus getDbStackStatus(Status status) {

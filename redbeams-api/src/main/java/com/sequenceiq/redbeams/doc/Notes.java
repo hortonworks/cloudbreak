@@ -65,6 +65,8 @@ public final class Notes {
                 "Rotates database server secrets";
         public static final String VALIDATE_UPGRADE =
                 "Validates if upgrade is possible on the database server to a higher major version.";
+        public static final String VALIDATE_UPGRADE_CLEANUP =
+                "Cleans up the validation related cloud resources of the database server.";
 
         public static final String UPDATE_CLUSTER_CRN =
                 "Updates the cluster crn associated with the database";

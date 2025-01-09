@@ -74,7 +74,7 @@ public class AzurePrivateEndpointValidator {
     public void checkExistingManagedPrivateDnsZone(ValidationResultBuilder resultBuilder, EnvironmentDto environmentDto,
             NetworkDto networkDto) {
         if (azureExistingPrivateDnsZonesService.hasNoExistingManagedZones(networkDto)) {
-            LOGGER.debug("No existing private DNS zones are used, nothing to do.");
+            LOGGER.debug("Existing private DNS zones are not being used, nothing to do.");
             return;
         }
         boolean hasFlexibleServerSubnets = CollectionUtils.isNotEmpty(networkDto.getAzure().getFlexibleServerSubnetIds());

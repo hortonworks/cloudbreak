@@ -5,7 +5,7 @@ import jakarta.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
+import com.sequenceiq.cloudbreak.common.converter.ResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
 import com.sequenceiq.freeipa.api.v1.ldap.model.DirectoryType;
@@ -17,7 +17,7 @@ import com.sequenceiq.freeipa.api.v1.ldap.model.test.MinimalLdapConfigRequest;
 public class LdapConfigConverter {
 
     @Inject
-    private MissingResourceNameGenerator missingResourceNameGenerator;
+    private ResourceNameGenerator resourceNameGenerator;
 
     @Inject
     private StringToSecretResponseConverter stringToSecretResponseConverter;
@@ -25,7 +25,7 @@ public class LdapConfigConverter {
     public LdapConfig convertCreateLdapConfigRequest(CreateLdapConfigRequest createLdapConfigRequest) {
         LdapConfig config = new LdapConfig();
         if (Strings.isNullOrEmpty(createLdapConfigRequest.getName())) {
-            config.setName(missingResourceNameGenerator.generateName(APIResourceType.LDAP_CONFIG));
+            config.setName(resourceNameGenerator.generateName(APIResourceType.LDAP_CONFIG));
         } else {
             config.setName(createLdapConfigRequest.getName());
         }

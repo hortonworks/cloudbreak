@@ -1,11 +1,13 @@
 package com.sequenceiq.cloudbreak.service.upgrade.rds;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,13 +20,13 @@ import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 
 @ExtendWith(MockitoExtension.class)
-class UpgradeRdsBackupRestoreStateParamsProviderTest {
+class UpgradeExternalRdsStateParamsProviderTest {
 
     @Mock
     private EmbeddedDatabaseService embeddedDatabaseService;
 
     @InjectMocks
-    private UpgradeRdsBackupRestoreStateParamsProvider underTest;
+    private UpgradeExternalRdsStateParamsProvider underTest;
 
     @Test
     void testCreateParamsWhenRemoteDBAndBackupLocationGiven() {
@@ -37,10 +39,10 @@ class UpgradeRdsBackupRestoreStateParamsProviderTest {
         Map<String, Object> backupParams = (Map<String, Object>) pillarParams.get("backup");
         Map<String, Object> restoreParams = (Map<String, Object>) pillarParams.get("restore");
         Map<String, Object> checkConnectionParams = (Map<String, Object>) pillarParams.get("checkconnection");
-        Assertions.assertEquals(backupParams.get("directory"), "backuplocation/tmp/postgres_upgrade_backup");
-        Assertions.assertEquals(backupParams.get("logfile"), "/var/log/postgres_upgrade_backup.log");
-        Assertions.assertEquals(restoreParams.get("logfile"), "/var/log/postgres_upgrade_restore.log");
-        Assertions.assertEquals(checkConnectionParams.get("logfile"), "/var/log/postgres_upgrade_checkconnection.log");
+        assertEquals("backuplocation/tmp/postgres_upgrade_backup", backupParams.get("directory"));
+        assertEquals("/var/log/postgres_upgrade_backup.log", backupParams.get("logfile"));
+        assertEquals("/var/log/postgres_upgrade_restore.log", restoreParams.get("logfile"));
+        assertEquals("/var/log/postgres_upgrade_checkconnection.log", checkConnectionParams.get("logfile"));
     }
 
     @Test
@@ -52,7 +54,7 @@ class UpgradeRdsBackupRestoreStateParamsProviderTest {
         Map<String, SaltPillarProperties> actualResult = underTest.createParamsForRdsBackupRestore(stackDto, null);
         Map<String, Object> pillarParams = (Map<String, Object>) actualResult.get("postgresql-upgrade").getProperties().get("upgrade");
         Map<String, Object> backupParams = (Map<String, Object>) pillarParams.get("backup");
-        Assertions.assertEquals(backupParams.get("directory"), "/var/tmp/postgres_upgrade_backup");
+        assertEquals("/var/tmp/postgres_upgrade_backup", backupParams.get("directory"));
     }
 
     @Test
@@ -64,6 +66,45 @@ class UpgradeRdsBackupRestoreStateParamsProviderTest {
         Map<String, SaltPillarProperties> actualResult = underTest.createParamsForRdsBackupRestore(stackDto, null);
         Map<String, Object> pillarParams = (Map<String, Object>) actualResult.get("postgresql-upgrade").getProperties().get("upgrade");
         Map<String, Object> backupParams = (Map<String, Object>) pillarParams.get("backup");
-        Assertions.assertEquals(backupParams.get("directory"), "/dbfs/tmp/postgres_upgrade_backup");
+        assertEquals("/dbfs/tmp/postgres_upgrade_backup", backupParams.get("directory"));
+    }
+
+    // Method returns nested Map with correct structure and keys
+    @Test
+    public void testVerifyNestedMapStructure() {
+        // Given
+        UpgradeExternalRdsStateParamsProvider provider = new UpgradeExternalRdsStateParamsProvider();
+        String serverUrl = "test-server";
+        String userName = "test-user";
+
+        // When
+        Map<String, Object> result = provider.createParamsForRdsCanaryCheck(serverUrl, userName);
+
+        // Then
+        assertNotNull(result);
+        assertTrue(result.containsKey("postgresql-upgrade"));
+        Map<String, Object> upgradeMap = (Map<String, Object>) result.get("postgresql-upgrade");
+        assertTrue(upgradeMap.containsKey("upgrade"));
+        Map<String, Object> innerMap = (Map<String, Object>) upgradeMap.get("upgrade");
+        assertTrue(innerMap.containsKey("checkconnection"));
+    }
+
+    // ServerUrl parameter is correctly mapped to canary_hostname in properties
+    @Test
+    public void testServerUrlMapping() {
+        // Given
+        UpgradeExternalRdsStateParamsProvider provider = new UpgradeExternalRdsStateParamsProvider();
+        String serverUrl = "test-server.domain.com";
+        String userName = "test-user";
+
+        // When
+        Map<String, Object> result = provider.createParamsForRdsCanaryCheck(serverUrl, userName);
+
+        // Then
+        Map<String, Object> upgradeMap = (Map<String, Object>) result.get("postgresql-upgrade");
+        Map<String, Object> innerMap = (Map<String, Object>) upgradeMap.get("upgrade");
+        Map<String, String> connectionProps = (Map<String, String>) innerMap.get("checkconnection");
+        assertEquals(serverUrl, connectionProps.get("canary_hostname"));
+        assertEquals(userName, connectionProps.get("canary_username"));
     }
 }

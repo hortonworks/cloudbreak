@@ -140,6 +140,17 @@ public class MockResourceConnector implements ResourceConnector {
     }
 
     @Override
+    public List<CloudResourceStatus> launchValidateUpgradeDatabaseServerResources(AuthenticatedContext authenticatedContext, DatabaseStack stack,
+            TargetMajorVersion targetMajorVersion, DatabaseStack migratedDbStack, PersistenceNotifier persistenceNotifier) {
+        return List.of();
+    }
+
+    @Override
+    public void cleanupValidateUpgradeDatabaseServerResources(AuthenticatedContext authenticatedContext, DatabaseStack stack, List<CloudResource> resources,
+            PersistenceNotifier persistenceNotifier) {
+    }
+
+    @Override
     public void upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack originalStack, DatabaseStack stack,
             PersistenceNotifier persistenceNotifier, TargetMajorVersion targetMajorVersion, List<CloudResource> resources) {
         mockUrlFactory.get(authenticatedContext, "/db/upgrade").put(Entity.entity(targetMajorVersion.getMajorVersion(), MediaType.APPLICATION_JSON_TYPE));
@@ -205,7 +216,6 @@ public class MockResourceConnector implements ResourceConnector {
 
     @Override
     public void checkUpdate(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) throws Exception {
-        return;
     }
 
     @Override

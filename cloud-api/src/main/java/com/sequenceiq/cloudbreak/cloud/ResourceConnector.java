@@ -58,7 +58,7 @@ public interface ResourceConnector {
      *
      * @param authenticatedContext      the authenticated context which holds the client object
      * @param stack                     contains the full description of infrastructure
-     * @param persistenceNotifier       Cloud platform notifies the Cloudbreak over this interface if a resource is allocated on the Cloud platfrom
+     * @param persistenceNotifier       Cloud platform notifies the Cloudbreak over this interface if a resource is allocated on the Cloud platform
      * @param adjustmentTypeWithThreshold   defines the failure policy (i.e. what shall the cloudplatform do if not all of the VMs can be started)
 
      * @return the status of resources allocated on Cloud platform
@@ -74,7 +74,7 @@ public interface ResourceConnector {
      *
      * @param authenticatedContext the authenticated context which holds the client object
      * @param stack                contains the full description of infrastructure
-     * @param persistenceNotifier  Cloud platform notifies the Cloudbreak over this interface if a resource is allocated on the Cloud platfrom
+     * @param persistenceNotifier  Cloud platform notifies the Cloudbreak over this interface if a resource is allocated on the Cloud platform
      * @return the status of load balancers allocated on Cloud platform
      * @throws Exception in case of any error
      */
@@ -94,7 +94,7 @@ public interface ResourceConnector {
      *
      * @param authenticatedContext the authenticated context which holds the client object
      * @param stack                contains the full description of infrastructure
-     * @param persistenceNotifier  notifier for when a resource is allocated on the cloud platfrom
+     * @param persistenceNotifier  notifier for when a resource is allocated on the cloud platform
      * @return the status of resources allocated on the cloud platform
      * @throws Exception in case of any error
      */
@@ -116,6 +116,35 @@ public interface ResourceConnector {
     void validateUpgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack, TargetMajorVersion targetMajorVersion) throws Exception;
 
     /**
+     * This method launches the necessary RDS instance and related cloud resources on the cloud platform to validate the database stack
+     * upgrade if necessary and throws Exception in case of any validation error.
+     *
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param stack                contains the full description of infrastructure
+     * @param targetMajorVersion   target major version of the database
+     * @param migratedDbStack      contains the parameters of the migrated database, only relevant in case of change in form factors
+     * @param persistenceNotifier  notifier for when a resource is allocated on the cloud platform
+     * @return the status of resources created for validation on the cloud platform
+     * @throws Exception in case of any error
+     */
+    List<CloudResourceStatus> launchValidateUpgradeDatabaseServerResources(AuthenticatedContext authenticatedContext, DatabaseStack stack,
+            TargetMajorVersion targetMajorVersion, DatabaseStack migratedDbStack, PersistenceNotifier persistenceNotifier) throws Exception;
+
+
+    /**
+     * This method cleans up the canary RDS instance and related cloud resources on the cloud platform that are used to validate the database stack
+     * upgrade if necessary and throws Exception in case of any validation error.
+     *
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param stack                contains the full description of infrastructure
+     * @param resources            the resources that need to be cleaned up
+     * @param persistenceNotifier  notifier for when a resource is allocated on the cloud platform
+     * @throws Exception in case of any error
+     */
+    void cleanupValidateUpgradeDatabaseServerResources(AuthenticatedContext authenticatedContext, DatabaseStack stack, List<CloudResource> resources,
+            PersistenceNotifier persistenceNotifier) throws Exception;
+
+    /**
      * Upgrades a database stack on a cloud platform. The stack consists of the following resources:
      * - a single database server instance
      * - depending on the platform, other associated, required resources (e.g., a DB subnet group for RDS)
@@ -128,7 +157,7 @@ public interface ResourceConnector {
      *
      * @param authenticatedContext the authenticated context which holds the client object
      * @param stack                contains the full description of infrastructure
-     * @param persistenceNotifier  notifier for when a resource is allocated on the cloud platfrom
+     * @param persistenceNotifier  notifier for when a resource is allocated on the cloud platform
      * @throws Exception in case of any error
      */
     void upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack originalStack, DatabaseStack stack,
@@ -236,7 +265,7 @@ public interface ResourceConnector {
      *
      * @param authenticatedContext the authenticated context which holds the client object
      * @param stack                contains the full description of the new infrastructure (e.g new security groups)
-     * @param resources            resources that needs to be updated
+     * @param resources            resources that need to be updated
      * @throws Exception in case if update is not possible
      */
     void checkUpdate(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) throws Exception;
@@ -251,7 +280,7 @@ public interface ResourceConnector {
      *
      * @param authenticatedContext the authenticated context which holds the client object
      * @param stack                contains the full description of the new infrastructure (e.g new security groups)
-     * @param resources            resources that needs to be updated
+     * @param resources            resources that need to be updated
      * @return the status of updated resources
      * @throws Exception in case of any error
      */
@@ -279,7 +308,7 @@ public interface ResourceConnector {
      * @param stack                     contains the full description of the new infrastructure including new instances
      *                                  ({@link com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate}) where the CREATE_REQUESTED status
      *                                  {@link com.sequenceiq.cloudbreak.cloud.model.InstanceStatus} denotes that it is a new instance and needs to be created.
-     * @param resources                 resources that needs to be updated (e.g HEAT_TEMPLATE)
+     * @param resources                 resources that need to be updated (e.g HEAT_TEMPLATE)
      * @param adjustmentTypeWithThreshold   defines the failure policy (i.e. what shall the cloudplatform do if not all of the VMs can be started)
      * @return the status of updated resources
      */
@@ -295,7 +324,7 @@ public interface ResourceConnector {
      * @param stack                contains the full description of the new infrastructure including the instances tha needs to be deleted
      *                             ({@link com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate}) where the DELETE_REQUESTED status
      *                             {@link com.sequenceiq.cloudbreak.cloud.model.InstanceStatus} denotes that it is an instance that needs to be terminated.
-     * @param resources            resources that needs to be updated (e.g HEAT_TEMPLATE)
+     * @param resources            resources that need to be updated (e.g HEAT_TEMPLATE)
      * @param vms                  the {@link CloudInstance}s are listed that needs to be deleted
      * @param resourcesToRemove    previously collected resources to remove
      * @return the status of updated resources
@@ -310,7 +339,7 @@ public interface ResourceConnector {
      * @param stack                contains the full description of the new infrastructure including the instances tha needs to be deleted
      *                             ({@link com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate}) where the DELETE_REQUESTED status
      *                             {@link com.sequenceiq.cloudbreak.cloud.model.InstanceStatus} denotes that it is an instance that needs to be terminated.
-     * @param resources            resources that needs to be updated (e.g HEAT_TEMPLATE)
+     * @param resources            resources that need to be updated (e.g HEAT_TEMPLATE)
      * @param vms                  the {@link CloudInstance}s are listed that needs to be deleted
      * @return the list of resources to be removed
      */

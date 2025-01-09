@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
-import static java.util.Collections.singletonList;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,18 +45,6 @@ import software.amazon.awssdk.services.rds.model.DescribeDbInstancesResponse;
 public class AwsResourceConnector implements ResourceConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsResourceConnector.class);
-
-    private static final List<String> CAPABILITY_IAM = singletonList("CAPABILITY_IAM");
-
-    private static final List<String> UPSCALE_PROCESSES = singletonList("Launch");
-
-    private static final String CFS_OUTPUT_EIPALLOCATION_ID = "EIPAllocationID";
-
-    private static final String S3_ACCESS_ROLE = "S3AccessRole";
-
-    private static final String CREATED_VPC = "CreatedVpc";
-
-    private static final String CREATED_SUBNET = "CreatedSubnet";
 
     @Inject
     private Configuration freemarkerConfiguration;
@@ -133,13 +119,24 @@ public class AwsResourceConnector implements ResourceConnector {
 
     @Override
     public List<CloudResourceStatus> launchDatabaseServer(AuthenticatedContext ac, DatabaseStack stack,
-            PersistenceNotifier persistenceNotifier) throws Exception {
+            PersistenceNotifier persistenceNotifier) {
         return awsRdsLaunchService.launch(ac, stack, persistenceNotifier);
     }
 
     @Override
     public void validateUpgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack, TargetMajorVersion targetMajorVersion) {
         awsRdsUpgradeValidatorService.validateCustomPropertiesAdded(authenticatedContext, stack);
+    }
+
+    @Override
+    public List<CloudResourceStatus> launchValidateUpgradeDatabaseServerResources(AuthenticatedContext authenticatedContext, DatabaseStack stack,
+            TargetMajorVersion targetMajorVersion, DatabaseStack migratedDbStack, PersistenceNotifier persistenceNotifier) {
+        return List.of();
+    }
+
+    @Override
+    public void cleanupValidateUpgradeDatabaseServerResources(AuthenticatedContext authenticatedContext, DatabaseStack stack, List<CloudResource> resources,
+            PersistenceNotifier persistenceNotifier) {
     }
 
     @Override

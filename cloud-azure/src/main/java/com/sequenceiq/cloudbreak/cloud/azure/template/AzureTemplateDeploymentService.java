@@ -81,7 +81,7 @@ public class AzureTemplateDeploymentService {
 
     public Optional<ManagementError> runWhatIfAnalysis(AzureClient client, CloudStack stack, AuthenticatedContext ac) {
         CloudContext cloudContext = ac.getCloudContext();
-        String stackName = azureUtils.generateResourceGroupNameByNameAndId("whatif", cloudContext.getId().toString());
+        String stackName = azureUtils.generateResourceNameByNameAndId("whatif", cloudContext.getId().toString());
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
         AzureStackView azureStackView = azureStackViewProvider
                 .getAzureStack(new AzureCredentialView(ac.getCloudCredential()), stack, client, ac);

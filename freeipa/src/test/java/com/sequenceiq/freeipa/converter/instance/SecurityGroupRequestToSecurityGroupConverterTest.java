@@ -14,7 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
+import com.sequenceiq.cloudbreak.common.converter.ResourceNameGenerator;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.SecurityGroupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.SecurityRuleRequest;
 import com.sequenceiq.freeipa.converter.instance.securityrule.SecurityRuleRequestToSecurityRuleConverter;
@@ -28,7 +28,7 @@ public class SecurityGroupRequestToSecurityGroupConverterTest {
     private SecurityGroupRequestToSecurityGroupConverter underTest;
 
     @Mock
-    private MissingResourceNameGenerator missingResourceNameGenerator;
+    private ResourceNameGenerator resourceNameGenerator;
 
     @Mock
     private SecurityRuleRequestToSecurityRuleConverter securityRuleConverter;

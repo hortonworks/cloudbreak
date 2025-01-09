@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 
 public class ValidateRdsUpgradeOnCloudProviderRequest extends AbstractValidateRdsUpgradeEvent {
+
     private final TargetMajorVersion version;
 
     @JsonCreator

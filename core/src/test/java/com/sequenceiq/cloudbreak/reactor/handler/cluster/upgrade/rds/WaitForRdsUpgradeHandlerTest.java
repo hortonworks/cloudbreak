@@ -62,7 +62,7 @@ class WaitForRdsUpgradeHandlerTest {
                 new HandlerEvent<>(new Event<>(waitForDatabaseServerUpgradeRequest)));
 
         Assertions.assertEquals(flowIdentifier, actualResult.getFlowIdentifier());
-        verify(databaseService, times(1)).waitForDatabaseToBeUpgraded(cluster, flowIdentifier);
+        verify(databaseService, times(1)).waitForDatabaseFlowToBeFinished(cluster, flowIdentifier);
     }
 
     @Test
@@ -78,7 +78,7 @@ class WaitForRdsUpgradeHandlerTest {
                 new HandlerEvent<>(new Event<>(waitForDatabaseServerUpgradeRequest)));
 
         Assertions.assertNull(actualResult.getFlowIdentifier());
-        verify(databaseService, never()).waitForDatabaseToBeUpgraded(any(), any());
+        verify(databaseService, never()).waitForDatabaseFlowToBeFinished(any(), any());
     }
 
     @ParameterizedTest
@@ -92,7 +92,7 @@ class WaitForRdsUpgradeHandlerTest {
         ClusterView cluster = mock(ClusterView.class);
         when(stack.getCluster()).thenReturn(cluster);
         when(stackDtoService.getById(1L)).thenReturn(stack);
-        doThrow(exception).when(databaseService).waitForDatabaseToBeUpgraded(cluster, flowIdentifier);
+        doThrow(exception).when(databaseService).waitForDatabaseFlowToBeFinished(cluster, flowIdentifier);
 
         UpgradeRdsFailedEvent actualResult = (UpgradeRdsFailedEvent) underTest.doAccept(
                 new HandlerEvent<>(new Event<>(waitForDatabaseServerUpgradeRequest)));
