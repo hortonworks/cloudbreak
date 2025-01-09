@@ -13,6 +13,7 @@ import com.sequenceiq.datalake.flow.upgrade.database.event.SdxUpgradeDatabaseSer
 import com.sequenceiq.datalake.flow.upgrade.database.event.SdxUpgradeDatabaseServerSuccessEvent;
 import com.sequenceiq.datalake.flow.upgrade.database.event.UpgradeDatabaseServerRequest;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.sdx.database.DatabaseService;
 import com.sequenceiq.datalake.service.upgrade.database.SdxDatabaseServerUpgradeService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -28,6 +29,9 @@ public class SdxUpgradeDatabaseServerHandler extends ExceptionCatcherEventHandle
 
     @Inject
     private SdxService sdxService;
+
+    @Inject
+    private DatabaseService databaseService;
 
     @Override
     public String selector() {
@@ -45,6 +49,8 @@ public class SdxUpgradeDatabaseServerHandler extends ExceptionCatcherEventHandle
         LOGGER.debug("Entering upgrade of database server in SDX, event: {}", event);
         UpgradeDatabaseServerRequest request = event.getData();
         SdxCluster sdxCluster = sdxService.getById(request.getResourceId());
+        sdxCluster.setSdxDatabase(databaseService.updateDatabaseTypeFromRedbeams(sdxCluster.getSdxDatabase()));
+
         Long sdxId = request.getResourceId();
         String userId = request.getUserId();
         try {

@@ -3,6 +3,8 @@ package com.sequenceiq.datalake.service.sdx.database;
 import static com.sequenceiq.datalake.service.sdx.SdxService.DATABASE_SSL_ENABLED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -37,6 +39,7 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.datalake.configuration.PlatformConfig;
 import com.sequenceiq.datalake.converter.DatabaseServerConverter;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -44,6 +47,7 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
+import com.sequenceiq.datalake.repository.SdxDatabaseRepository;
 import com.sequenceiq.datalake.service.sdx.SdxNotificationService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
@@ -55,6 +59,7 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4En
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslConfigV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabasePropertiesV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsDatabaseServerV4Parameters;
@@ -121,6 +126,12 @@ public class DatabaseServiceTest {
 
     @Mock
     private EnvironmentPlatformResourceEndpoint environmentPlatformResourceEndpoint;
+
+    @Mock
+    private SdxDatabaseRepository sdxDatabaseRepository;
+
+    @Mock
+    private AzureDatabaseAttributesService azureDatabaseAttributesService;
 
     @InjectMocks
     private DatabaseService underTest;
@@ -598,5 +609,100 @@ public class DatabaseServiceTest {
         sdxDatabase.setDatabaseCrn(DATABASE_CRN);
         cluster.setSdxDatabase(sdxDatabase);
         return cluster;
+    }
+
+    @Test
+    void testUpdateDatabaseTypeWhenTypeChangeRequired() {
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxDatabase.setDatabaseCrn("test-crn");
+
+        DatabasePropertiesV4Response databasePropertiesV4Response = new DatabasePropertiesV4Response();
+        DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
+        databaseServerV4Response.setDatabasePropertiesV4Response(databasePropertiesV4Response);
+        databasePropertiesV4Response.setDatabaseType(AzureDatabaseType.FLEXIBLE_SERVER.name());
+        when(azureDatabaseAttributesService.getAzureDatabaseType(sdxDatabase)).thenReturn(AzureDatabaseType.SINGLE_SERVER);
+        when(sdxDatabaseRepository.save(any(SdxDatabase.class))).thenReturn(sdxDatabase);
+        when(databaseServerV4Endpoint.getByCrn(anyString())).thenReturn(databaseServerV4Response);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+
+        SdxDatabase result = underTest.updateDatabaseTypeFromRedbeams(sdxDatabase);
+
+        verify(azureDatabaseAttributesService).updateDatabaseType(sdxDatabase, AzureDatabaseType.FLEXIBLE_SERVER);
+        verify(sdxDatabaseRepository).save(sdxDatabase);
+        assertNotNull(result);
+    }
+
+    @Test
+    void testUpdateDatabaseTypeWhenNoUpdateRequiredSameTypes() {
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxDatabase.setDatabaseCrn("test-crn");
+
+        DatabasePropertiesV4Response databasePropertiesV4Response = new DatabasePropertiesV4Response();
+        DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
+        databaseServerV4Response.setDatabasePropertiesV4Response(databasePropertiesV4Response);
+        databasePropertiesV4Response.setDatabaseType(AzureDatabaseType.FLEXIBLE_SERVER.name());
+        when(azureDatabaseAttributesService.getAzureDatabaseType(sdxDatabase)).thenReturn(AzureDatabaseType.FLEXIBLE_SERVER);
+        when(databaseServerV4Endpoint.getByCrn(anyString())).thenReturn(databaseServerV4Response);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+
+        SdxDatabase result = underTest.updateDatabaseTypeFromRedbeams(sdxDatabase);
+
+        verify(azureDatabaseAttributesService, never()).updateDatabaseType(any(), any());
+        verify(sdxDatabaseRepository, never()).save(any());
+        assertEquals(sdxDatabase, result);
+    }
+
+    @Test
+    void testUpdateDatabaseTypeWhenNoDatabaseCrn() {
+        // Given
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxDatabase.setDatabaseCrn(null);
+
+        // When
+        SdxDatabase result = underTest.updateDatabaseTypeFromRedbeams(sdxDatabase);
+
+        // Then
+        verify(azureDatabaseAttributesService, never()).updateDatabaseType(any(), any());
+        verify(sdxDatabaseRepository, never()).save(any());
+        assertEquals(sdxDatabase, result);
+    }
+
+    @Test
+    void testUpdateDatabaseTypeWhenNoDatabaseType() {
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxDatabase.setDatabaseCrn("test-crn");
+
+        DatabasePropertiesV4Response databasePropertiesV4Response = new DatabasePropertiesV4Response();
+        DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
+        databaseServerV4Response.setDatabasePropertiesV4Response(databasePropertiesV4Response);
+        databasePropertiesV4Response.setDatabaseType(null);
+        when(databaseServerV4Endpoint.getByCrn(anyString())).thenReturn(databaseServerV4Response);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+
+        SdxDatabase result = underTest.updateDatabaseTypeFromRedbeams(sdxDatabase);
+
+        verify(azureDatabaseAttributesService, never()).updateDatabaseType(any(), any());
+        verify(sdxDatabaseRepository, never()).save(any());
+        assertEquals(sdxDatabase, result);
+    }
+
+    @Test
+    void testUpdateDatabaseTypeWhenNoPropertiesResponse() {
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxDatabase.setDatabaseCrn("test-crn");
+        DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
+        databaseServerV4Response.setDatabasePropertiesV4Response(null);
+        when(databaseServerV4Endpoint.getByCrn(anyString())).thenReturn(databaseServerV4Response);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+
+        SdxDatabase result = underTest.updateDatabaseTypeFromRedbeams(sdxDatabase);
+
+        verify(azureDatabaseAttributesService, never()).updateDatabaseType(any(), any());
+        verify(sdxDatabaseRepository, never()).save(any());
+        assertEquals(sdxDatabase, result);
     }
 }
