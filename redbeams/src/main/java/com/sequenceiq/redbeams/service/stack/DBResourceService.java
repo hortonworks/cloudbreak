@@ -1,16 +1,16 @@
 package com.sequenceiq.redbeams.service.stack;
 
+import static java.util.stream.Collectors.toCollection;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.redbeams.converter.spi.DBResourceToCloudResourceConverter;
@@ -24,17 +24,12 @@ public class DBResourceService {
     private DBResourceRepository dbResourceRepository;
 
     @Inject
-    private DBResourceToCloudResourceConverter dbResourceTocloudResourceConverter;
-
-    public List<CloudResourceStatus> getAllAsCloudResourceStatus(Long dbStackId) {
-        return getAllAsCloudResource(dbStackId).stream()
-                .map(r -> new CloudResourceStatus(r, ResourceStatus.CREATED))
-                .collect(Collectors.toList());
-    }
+    private DBResourceToCloudResourceConverter dbResourceToCloudResourceConverter;
 
     public List<CloudResource> getAllAsCloudResource(Long dbStackId) {
         return dbResourceRepository.findAllByStackId(dbStackId).stream()
-            .map(r -> dbResourceTocloudResourceConverter.convert(r)).collect(Collectors.toList());
+                .map(dbResourceToCloudResourceConverter::convert)
+                .collect(toCollection(ArrayList::new));
     }
 
     public DBResource save(DBResource resource) {

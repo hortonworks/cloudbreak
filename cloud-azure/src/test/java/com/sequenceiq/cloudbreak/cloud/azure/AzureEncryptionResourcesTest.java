@@ -770,7 +770,7 @@ public class AzureEncryptionResourcesTest {
         when(azureClient.getVaultNameFromEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion"))
                 .thenReturn("dummyVaultName");
         when(azureClient.getDiskEncryptionSetByName(any(String.class), any(String.class))).thenReturn(null);
-        when(azureUtils.generateResourceGroupNameByNameAndId(any(String.class), any(String.class))).thenReturn("envName-CDP_DES-uniqueId");
+        when(azureUtils.generateResourceNameByNameAndId(any(String.class), any(String.class))).thenReturn("envName-CDP_DES-uniqueId");
         when(azureClient.resourceGroupExists(eq("envName-CDP_DES-uniqueId"))).thenReturn(Boolean.FALSE);
         when(azureClient.createResourceGroup(eq("envName-CDP_DES-uniqueId"), eq("dummyRegion"), any(HashMap.class))).thenReturn(resourceGroup);
         when(azureClient.createDiskEncryptionSet(

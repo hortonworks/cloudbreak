@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.rds;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -22,6 +23,7 @@ import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.ExternalDatabaseSer
 import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsFailedEvent;
@@ -33,8 +35,6 @@ import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.rds.RdsUpgradeOrchestratorService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
-import com.sequenceiq.cloudbreak.view.StackView;
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -51,8 +51,6 @@ class UpgradeRdsHandlerTest {
     private static final UpgradeTargetMajorVersion UPGRADE_TARGET_MAJOR_VERSION = UpgradeTargetMajorVersion.VERSION_11;
 
     private static final String DB_CRN = "dbCrn";
-
-    private static final String ENV_CRN = "envCrn";
 
     @Mock
     private ExternalDatabaseService databaseService;
@@ -90,6 +88,15 @@ class UpgradeRdsHandlerTest {
     }
 
     @Test
+    void testDefaultFailureEvent() {
+        UpgradeRdsUpgradeDatabaseServerRequest request = new UpgradeRdsUpgradeDatabaseServerRequest(STACK_ID, TARGET_MAJOR_VERSION);
+
+        Selectable defaultFailureEvent = underTest.defaultFailureEvent(1L, new RuntimeException(), Event.wrap(request));
+
+        assertEquals("UPGRADERDSFAILEDEVENT", defaultFailureEvent.selector());
+    }
+
+    @Test
     void doAcceptForExternal() throws CloudbreakOrchestratorException {
         UpgradeRdsUpgradeDatabaseServerRequest request = new UpgradeRdsUpgradeDatabaseServerRequest(STACK_ID, TARGET_MAJOR_VERSION);
         StackDto stackDto = spy(StackDto.class);
@@ -97,17 +104,12 @@ class UpgradeRdsHandlerTest {
         when(stackDto.getCluster()).thenReturn(cluster);
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         when(stackDto.getCluster()).thenReturn(cluster);
-        StackView stackView = mock(StackView.class);
-        when(stackDto.getStack()).thenReturn(stackView);
-        when(stackView.getEnvironmentCrn()).thenReturn(ENV_CRN);
         when(cluster.getDatabaseServerCrn()).thenReturn(DB_CRN);
         when(event.getData()).thenReturn(request);
         when(targetMajorVersionToUpgradeTargetVersionConverter.convert(TARGET_MAJOR_VERSION)).thenReturn(UPGRADE_TARGET_MAJOR_VERSION);
 
-        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder().build();
-        when(environmentClientService.getByCrn(ENV_CRN)).thenReturn(environment);
         DatabaseServerV4StackRequest newSettings = new DatabaseServerV4StackRequest();
-        when(databaseService.migrateDatabaseSettingsIfNeeded(stackDto, TARGET_MAJOR_VERSION, environment)).thenReturn(newSettings);
+        when(databaseService.migrateDatabaseSettingsIfNeeded(stackDto, TARGET_MAJOR_VERSION)).thenReturn(newSettings);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "flowid");
         when(databaseService.upgradeDatabase(cluster, UpgradeTargetMajorVersion.VERSION_11, newSettings)).thenReturn(flowIdentifier);
         Selectable result = underTest.doAccept(event);
@@ -138,8 +140,7 @@ class UpgradeRdsHandlerTest {
 
         verify(targetMajorVersionToUpgradeTargetVersionConverter, never()).convert(TARGET_MAJOR_VERSION);
         verify(databaseService, never()).upgradeDatabase(any(ClusterView.class), any(UpgradeTargetMajorVersion.class), any(DatabaseServerV4StackRequest.class));
-        verify(databaseService, never()).migrateDatabaseSettingsIfNeeded(any(StackDto.class), any(TargetMajorVersion.class),
-                any(DetailedEnvironmentResponse.class));
+        verify(databaseService, never()).migrateDatabaseSettingsIfNeeded(any(StackDto.class), any(TargetMajorVersion.class));
         verify(environmentClientService, never()).getByCrn(any());
         verify(rdsUpgradeOrchestratorService).upgradeEmbeddedDatabase(stackDto);
         verify(stackUpdater).updateExternalDatabaseEngineVersion(STACK_ID, TARGET_MAJOR_VERSION.getMajorVersion());
@@ -163,8 +164,7 @@ class UpgradeRdsHandlerTest {
 
         verify(targetMajorVersionToUpgradeTargetVersionConverter, never()).convert(TARGET_MAJOR_VERSION);
         verify(databaseService, never()).upgradeDatabase(any(ClusterView.class), any(UpgradeTargetMajorVersion.class), any(DatabaseServerV4StackRequest.class));
-        verify(databaseService, never()).migrateDatabaseSettingsIfNeeded(any(StackDto.class), any(TargetMajorVersion.class),
-                any(DetailedEnvironmentResponse.class));
+        verify(databaseService, never()).migrateDatabaseSettingsIfNeeded(any(StackDto.class), any(TargetMajorVersion.class));
         verify(environmentClientService, never()).getByCrn(any());
         verify(rdsUpgradeOrchestratorService, never()).upgradeEmbeddedDatabase(stackDto);
         assertThat(result.selector()).isEqualTo("UPGRADERDSFAILEDEVENT");

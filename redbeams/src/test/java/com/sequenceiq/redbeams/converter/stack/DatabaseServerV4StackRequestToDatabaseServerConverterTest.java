@@ -24,17 +24,18 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.common.converter.ResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.MappableBase;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParametersBase;
+import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.SecurityGroupV4StackRequest;
 import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
 import com.sequenceiq.redbeams.service.PasswordGeneratorService;
 import com.sequenceiq.redbeams.service.UserGeneratorService;
-import com.sequenceiq.redbeams.service.UuidGeneratorService;
 
 @ExtendWith(MockitoExtension.class)
 class DatabaseServerV4StackRequestToDatabaseServerConverterTest {
@@ -52,7 +53,7 @@ class DatabaseServerV4StackRequestToDatabaseServerConverterTest {
     private PasswordGeneratorService passwordGeneratorService;
 
     @Mock
-    private UuidGeneratorService uuidGeneratorService;
+    private ResourceNameGenerator nameGenerator;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private ProviderParameterCalculator providerParameterCalculator;
@@ -79,7 +80,7 @@ class DatabaseServerV4StackRequestToDatabaseServerConverterTest {
         source.setPort(5432);
         setupProviderCalculatorResponse(source, new HashMap<>(Map.of("dbkey", "dbvalue")));
 
-        when(uuidGeneratorService.randomUuid()).thenReturn("random-uuid");
+        when(nameGenerator.generateName(APIResourceType.DATABASE_SERVER)).thenReturn("random-uuid");
         when(userGeneratorService.generateUserName()).thenReturn("root");
         when(passwordGeneratorService.generatePassword(any(Optional.class))).thenReturn("random-password");
 
@@ -105,7 +106,7 @@ class DatabaseServerV4StackRequestToDatabaseServerConverterTest {
         source.setPort(5432);
         setupProviderCalculatorResponse(source, new HashMap<>(Map.of("dbkey", "dbvalue")));
 
-        when(uuidGeneratorService.randomUuid()).thenReturn("random-uuid");
+        when(nameGenerator.generateName(APIResourceType.DATABASE_SERVER)).thenReturn("random-uuid");
 
         // When
         DatabaseServer result = underTest.buildDatabaseServer(source, cloudPlatform);
@@ -132,7 +133,7 @@ class DatabaseServerV4StackRequestToDatabaseServerConverterTest {
         securityGroupRequest.setSecurityGroupIds(Set.of("sg-12345678"));
         source.setSecurityGroup(securityGroupRequest);
 
-        when(uuidGeneratorService.randomUuid()).thenReturn("random-uuid");
+        when(nameGenerator.generateName(APIResourceType.DATABASE_SERVER)).thenReturn("random-uuid");
         when(userGeneratorService.generateUserName()).thenReturn("root");
         when(passwordGeneratorService.generatePassword(any(Optional.class))).thenReturn("random-password");
 
@@ -158,7 +159,7 @@ class DatabaseServerV4StackRequestToDatabaseServerConverterTest {
 
         SecurityAccessResponse securityAccessResponse = SecurityAccessResponse.builder().withDefaultSecurityGroupId("defaultSecurityGroupId").build();
 
-        when(uuidGeneratorService.randomUuid()).thenReturn("random-uuid");
+        when(nameGenerator.generateName(APIResourceType.DATABASE_SERVER)).thenReturn("random-uuid");
         when(userGeneratorService.generateUserName()).thenReturn("root");
         when(passwordGeneratorService.generatePassword(any(Optional.class))).thenReturn("random-password");
 

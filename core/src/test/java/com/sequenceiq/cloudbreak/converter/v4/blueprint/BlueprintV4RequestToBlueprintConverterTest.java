@@ -15,7 +15,7 @@ import org.mockito.Spy;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateGeneratorService;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
-import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
+import com.sequenceiq.cloudbreak.common.converter.ResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.AbstractJsonConverterTest;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -36,7 +36,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
     private final BlueprintUtils blueprintUtils = new BlueprintUtils();
 
     @Mock
-    private MissingResourceNameGenerator missingResourceNameGenerator;
+    private ResourceNameGenerator resourceNameGenerator;
 
     @Mock
     private CmTemplateGeneratorService clusterTemplateGeneratorService;

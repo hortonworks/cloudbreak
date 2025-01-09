@@ -15,7 +15,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
-import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
+import com.sequenceiq.cloudbreak.common.converter.ResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.DatabaseV4Request;
@@ -41,7 +41,7 @@ public class DatabaseV4RequestToDatabaseConfigConverterTest {
     private static final String CONNECTION_DRIVER = "connectionDriver";
 
     @Mock
-    private MissingResourceNameGenerator missingResourceNameGenerator;
+    private ResourceNameGenerator resourceNameGenerator;
 
     @Mock
     private Clock clock;
@@ -83,6 +83,6 @@ public class DatabaseV4RequestToDatabaseConfigConverterTest {
         assertEquals(DatabaseVendor.POSTGRES, databaseConfig.getDatabaseVendor());
         assertEquals(ResourceStatus.USER_MANAGED, databaseConfig.getStatus());
         verify(databaseVendorUtil).getVendorByJdbcUrl(CONNECTION_URL);
-        verify(missingResourceNameGenerator, never()).generateName(any());
+        verify(resourceNameGenerator, never()).generateName(any());
     }
 }

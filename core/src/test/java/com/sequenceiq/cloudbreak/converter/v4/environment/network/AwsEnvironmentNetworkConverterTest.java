@@ -11,7 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 
-import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
+import com.sequenceiq.cloudbreak.common.converter.ResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
@@ -20,7 +20,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentN
 class AwsEnvironmentNetworkConverterTest {
 
     @Mock
-    private MissingResourceNameGenerator missingResourceNameGenerator;
+    private ResourceNameGenerator resourceNameGenerator;
 
     @Mock
     private SubnetSelector subnetSelector;

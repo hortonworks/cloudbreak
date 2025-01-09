@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.validation;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_VALIDATION_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
@@ -111,16 +112,29 @@ class ValidateRdsUpgradeServiceTest {
     }
 
     @Test
+    public void testValidateConnectionStarted() {
+        underTest.validateConnection(STACK_ID);
+        verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()), eq(ResourceEvent.CLUSTER_RDS_UPGRADE_VALIDATION_CONNECTION));
+    }
+
+    @Test
+    public void testValidateCleanupStarted() {
+        underTest.validateCleanup(STACK_ID);
+        verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()), eq(ResourceEvent.CLUSTER_RDS_UPGRADE_VALIDATION_CLEANUP));
+    }
+
+    @Test
     public void testRdsUpgradeStarted() {
         underTest.rdsUpgradeStarted(STACK_ID, TargetMajorVersion.VERSION_11);
-        verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()), eq(ResourceEvent.CLUSTER_RDS_UPGRADE_STARTED), eq("11"));    }
+        verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()), eq(ResourceEvent.CLUSTER_RDS_UPGRADE_STARTED), eq("11"));
+    }
 
     @Test
     public void testPushSaltStatesState() {
         when(messagesService.getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_VALIDATION_PUSH_SALT_STATES.getMessage())).thenReturn(PUSH_SALT_STATE);
         underTest.pushSaltStates(STACK_ID);
 
-        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_VALIDATION_IN_PROGRESS),
+        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(EXTERNAL_DATABASE_UPGRADE_VALIDATION_IN_PROGRESS),
                 eq(PUSH_SALT_STATE));
         verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()),
                 eq(ResourceEvent.CLUSTER_RDS_UPGRADE_VALIDATION_PUSH_SALT_STATES));
@@ -131,7 +145,7 @@ class ValidateRdsUpgradeServiceTest {
         when(messagesService.getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_VALIDATION_BACKUP_VALIDATION.getMessage())).thenReturn(VALIDATE_BACKUP_STATE);
         underTest.validateBackup(STACK_ID);
 
-        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_VALIDATION_IN_PROGRESS),
+        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(EXTERNAL_DATABASE_UPGRADE_VALIDATION_IN_PROGRESS),
                 eq(VALIDATE_BACKUP_STATE));
         verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()),
                 eq(ResourceEvent.CLUSTER_RDS_UPGRADE_VALIDATION_BACKUP_VALIDATION));
@@ -142,7 +156,7 @@ class ValidateRdsUpgradeServiceTest {
         when(messagesService.getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_VALIDATION_ON_CLOUDPROVIDER.getMessage())).thenReturn("message");
         underTest.validateOnCloudProvider(STACK_ID);
 
-        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_VALIDATION_IN_PROGRESS),
+        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(EXTERNAL_DATABASE_UPGRADE_VALIDATION_IN_PROGRESS),
                 eq("message"));
         verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()),
                 eq(ResourceEvent.CLUSTER_RDS_UPGRADE_VALIDATION_ON_CLOUDPROVIDER));

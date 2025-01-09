@@ -17,17 +17,25 @@ public class DatabaseStack {
 
     private final Map<String, String> tags;
 
+    private DeploymentType deploymentType;
+
+    public DatabaseStack(Network network, DatabaseServer databaseServer, Map<String, String> tags, String template) {
+        this(network, databaseServer, tags, template, DeploymentType.PROVISION);
+    }
+
     @JsonCreator
     public DatabaseStack(
             @JsonProperty("network") Network network,
             @JsonProperty("databaseServer") DatabaseServer databaseServer,
             @JsonProperty("tags") Map<String, String> tags,
-            @JsonProperty("template") String template) {
+            @JsonProperty("template") String template,
+            @JsonProperty("deploymentType") DeploymentType deploymentType) {
 
         this.network = network;
         this.databaseServer = databaseServer;
         this.tags = ImmutableMap.copyOf(tags);
         this.template = template;
+        this.deploymentType = deploymentType;
     }
 
     public Network getNetwork() {
@@ -46,22 +54,30 @@ public class DatabaseStack {
         return tags;
     }
 
+    public DeploymentType getDeploymentType() {
+        return deploymentType;
+    }
+
+    public void setDeploymentType(DeploymentType deploymentType) {
+        this.deploymentType = deploymentType;
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        } else if (o == null || getClass() != o.getClass()) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
-        } else {
-            DatabaseStack that = (DatabaseStack) o;
-            return Objects.equals(network, that.network) && Objects.equals(databaseServer, that.databaseServer) && Objects.equals(template, that.template)
-                    && Objects.equals(tags, that.tags);
         }
+        DatabaseStack that = (DatabaseStack) o;
+        return Objects.equals(network, that.network) &&
+                Objects.equals(databaseServer, that.databaseServer) &&
+                Objects.equals(template, that.template) &&
+                tags.equals(that.tags) &&
+                deploymentType == that.deploymentType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(network, databaseServer, template, tags);
+        return Objects.hash(network, databaseServer, template, tags, deploymentType);
     }
 
     @Override
@@ -71,6 +87,7 @@ public class DatabaseStack {
                 ", databaseServer=" + databaseServer +
                 ", template='" + template + '\'' +
                 ", tags=" + tags +
+                ", deploymentType=" + deploymentType +
                 '}';
     }
 }

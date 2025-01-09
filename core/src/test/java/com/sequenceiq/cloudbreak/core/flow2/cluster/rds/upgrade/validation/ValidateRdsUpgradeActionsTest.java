@@ -10,6 +10,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -17,12 +18,15 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseConnectionProperties;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
@@ -30,11 +34,21 @@ import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.AbstractValidateRdsUpgradeEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradeBackupValidationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradeBackupValidationResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradeCleanupRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradeCleanupResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradeConnectionRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradeConnectionResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradeOnCloudProviderRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradeOnCloudProviderResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradePushSaltStatesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradeTriggerRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.WaitForValidateRdsUpgradeCleanupRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.WaitForValidateRdsUpgradeOnCloudProviderRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.WaitForValidateRdsUpgradeOnCloudProviderResult;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.AbstractActionTestSupport;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -107,6 +121,68 @@ class ValidateRdsUpgradeActionsTest {
         verifyBackupRestoreAction(ValidateRdsUpgradeOnCloudProviderRequest.class);
     }
 
+    @Test
+    public void testShouldWaitForValidateOnCloudProvider() throws Exception {
+        AbstractAction action = (AbstractAction) underTest.waitForValidateUpgradeOnCloudProvider();
+        ValidateRdsUpgradeOnCloudProviderResult triggerEvent = new ValidateRdsUpgradeOnCloudProviderResult(STACK_ID,
+                TARGET_MAJOR_VERSION,
+                "",
+                new FlowIdentifier(FlowType.FLOW, FLOW_ID),
+                new DatabaseConnectionProperties());
+        mockAndTriggerRdsUpgradeAction(action, triggerEvent, true);
+
+        verifyNoInteractions(validateRdsUpgradeService);
+        verifyBackupRestoreAction(WaitForValidateRdsUpgradeOnCloudProviderRequest.class);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testValidateConnection(boolean shouldRunDataBackupRestore) throws Exception {
+        AbstractAction action = (AbstractAction) underTest.validateConnection();
+        WaitForValidateRdsUpgradeOnCloudProviderResult triggerEvent = new WaitForValidateRdsUpgradeOnCloudProviderResult(STACK_ID,
+                "",
+                new DatabaseConnectionProperties());
+        mockAndTriggerRdsUpgradeAction(action, triggerEvent, shouldRunDataBackupRestore);
+
+        verify(validateRdsUpgradeService, times(2)).shouldRunDataBackupRestore(any(), any(), any());
+        if (shouldRunDataBackupRestore) {
+            verify(validateRdsUpgradeService).validateConnection(STACK_ID);
+            verifyBackupRestoreAction(ValidateRdsUpgradeConnectionRequest.class);
+        } else {
+            verify(validateRdsUpgradeService, never()).validateConnection(STACK_ID);
+            verifyBackupRestoreAction(ValidateRdsUpgradeConnectionResult.class);
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testValidateCleanup(boolean shouldRunDataBackupRestore) throws Exception {
+        AbstractAction action = (AbstractAction) underTest.cleanupValidateResources();
+        ValidateRdsUpgradeConnectionResult triggerEvent = new ValidateRdsUpgradeConnectionResult(STACK_ID,
+                "");
+        mockAndTriggerRdsUpgradeAction(action, triggerEvent, shouldRunDataBackupRestore);
+
+        verify(validateRdsUpgradeService, times(2)).shouldRunDataBackupRestore(any(), any(), any());
+        if (shouldRunDataBackupRestore) {
+            verify(validateRdsUpgradeService).validateCleanup(STACK_ID);
+            verifyBackupRestoreAction(ValidateRdsUpgradeCleanupRequest.class);
+        } else {
+            verify(validateRdsUpgradeService, never()).validateConnection(STACK_ID);
+            verifyBackupRestoreAction(ValidateRdsUpgradeCleanupResult.class);
+        }
+    }
+
+    @Test
+    public void testShouldWaitForValidateCleanup() throws Exception {
+        AbstractAction action = (AbstractAction) underTest.waitForCleanupValidateResources();
+        ValidateRdsUpgradeCleanupResult triggerEvent = new ValidateRdsUpgradeCleanupResult(STACK_ID,
+                new FlowIdentifier(FlowType.FLOW, FLOW_ID));
+        mockAndTriggerRdsUpgradeAction(action, triggerEvent, true);
+
+        verifyNoInteractions(validateRdsUpgradeService);
+        verifyBackupRestoreAction(WaitForValidateRdsUpgradeCleanupRequest.class);
+    }
+
     private void mockAndTriggerRdsUpgradeAction(AbstractAction action, AbstractValidateRdsUpgradeEvent triggerEvent,
             boolean shouldRunDataBackupRestore) throws Exception {
         ReflectionTestUtils.setField(action, null, runningFlows, FlowRegister.class);
@@ -120,7 +196,8 @@ class ValidateRdsUpgradeActionsTest {
         Database database = new Database();
 
         lenient().when(validateRdsUpgradeService.shouldRunDataBackupRestore(stack, cluster, database)).thenReturn(shouldRunDataBackupRestore);
-        ValidateRdsUpgradeContext context = new ValidateRdsUpgradeContext(new FlowParameters(FLOW_ID, FLOW_ID), stack, cluster, database);
+        ValidateRdsUpgradeContext context = new ValidateRdsUpgradeContext(new FlowParameters(FLOW_ID, FLOW_ID), stack, cluster, database,
+                TARGET_MAJOR_VERSION, null);
 
         AbstractActionTestSupport testSupport = new AbstractActionTestSupport(action);
         Map<Object, Object> variables = new HashMap<>();

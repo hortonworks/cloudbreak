@@ -7,7 +7,7 @@ import jakarta.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
-import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
+import com.sequenceiq.cloudbreak.common.converter.ResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
@@ -19,14 +19,14 @@ import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 public class NetworkV4RequestToNetworkConverter {
 
     @Inject
-    private MissingResourceNameGenerator missingResourceNameGenerator;
+    private ResourceNameGenerator resourceNameGenerator;
 
     @Inject
     private ProviderParameterCalculator providerParameterCalculator;
 
     public Network convert(NetworkV4Request source) {
         Network network = new Network();
-        network.setName(missingResourceNameGenerator.generateName(APIResourceType.NETWORK));
+        network.setName(resourceNameGenerator.generateName(APIResourceType.NETWORK));
         network.setSubnetCIDR(source.getSubnetCIDR());
         network.setOutboundInternetTraffic(OutboundInternetTraffic.ENABLED);
 

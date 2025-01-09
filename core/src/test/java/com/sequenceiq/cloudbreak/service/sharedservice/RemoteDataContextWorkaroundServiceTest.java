@@ -24,7 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
+import com.sequenceiq.cloudbreak.common.converter.ResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -51,7 +51,7 @@ public class RemoteDataContextWorkaroundServiceTest {
     private StackService stackService;
 
     @Mock
-    private MissingResourceNameGenerator nameGenerator;
+    private ResourceNameGenerator nameGenerator;
 
     @InjectMocks
     private RemoteDataContextWorkaroundService underTest;

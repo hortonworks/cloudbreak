@@ -108,7 +108,8 @@ class AzureFlexibleServerPermissionValidatorTest {
         assertEquals("The following required action(s) are missing from your role definition: [Microsoft.DBforPostgreSQL/flexibleServers/write, " +
                 "Microsoft.DBforPostgreSQL/flexibleServers/firewallRules/write, Microsoft.DBforPostgreSQL/flexibleServers/configurations/write, " +
                 "Microsoft.DBforPostgreSQL/flexibleServers/delete, Microsoft.DBforPostgreSQL/flexibleServers/start/action, " +
-                "Microsoft.DBforPostgreSQL/flexibleServers/read, Microsoft.DBforPostgreSQL/flexibleServers/stop/action]", exception.getMessage());
+                "Microsoft.DBforPostgreSQL/flexibleServers/read, Microsoft.DBforPostgreSQL/flexibleServers/privateEndpointConnectionsApproval/action, " +
+                "Microsoft.DBforPostgreSQL/flexibleServers/stop/action]", exception.getMessage());
     }
 
     @Test
@@ -125,7 +126,8 @@ class AzureFlexibleServerPermissionValidatorTest {
         assertEquals("The following required action(s) are missing from your role definition: [Microsoft.DBforPostgreSQL/flexibleServers/write, " +
                 "Microsoft.DBforPostgreSQL/flexibleServers/firewallRules/write, Microsoft.DBforPostgreSQL/flexibleServers/configurations/write, " +
                 "Microsoft.DBforPostgreSQL/flexibleServers/delete, Microsoft.DBforPostgreSQL/flexibleServers/start/action, " +
-                "Microsoft.DBforPostgreSQL/flexibleServers/read, Microsoft.DBforPostgreSQL/flexibleServers/stop/action]", exception.getMessage());
+                "Microsoft.DBforPostgreSQL/flexibleServers/read, Microsoft.DBforPostgreSQL/flexibleServers/privateEndpointConnectionsApproval/action, " +
+                "Microsoft.DBforPostgreSQL/flexibleServers/stop/action]", exception.getMessage());
     }
 
     @Test
@@ -142,7 +144,8 @@ class AzureFlexibleServerPermissionValidatorTest {
         assertEquals("The following required action(s) are missing from your role definition: [Microsoft.DBforPostgreSQL/flexibleServers/write, " +
                 "Microsoft.DBforPostgreSQL/flexibleServers/firewallRules/write, Microsoft.DBforPostgreSQL/flexibleServers/configurations/write, " +
                 "Microsoft.DBforPostgreSQL/flexibleServers/delete, Microsoft.DBforPostgreSQL/flexibleServers/start/action, " +
-                "Microsoft.DBforPostgreSQL/flexibleServers/read, Microsoft.DBforPostgreSQL/flexibleServers/stop/action]", exception.getMessage());
+                "Microsoft.DBforPostgreSQL/flexibleServers/read, Microsoft.DBforPostgreSQL/flexibleServers/privateEndpointConnectionsApproval/action, " +
+                "Microsoft.DBforPostgreSQL/flexibleServers/stop/action]", exception.getMessage());
     }
 
     @Test

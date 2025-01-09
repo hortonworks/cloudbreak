@@ -43,7 +43,7 @@ import com.sequenceiq.cloudbreak.service.cluster.DatabaseSslService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.AbstractRdsConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigProviderFactory;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
-import com.sequenceiq.cloudbreak.service.upgrade.rds.UpgradeRdsBackupRestoreStateParamsProvider;
+import com.sequenceiq.cloudbreak.service.upgrade.rds.UpgradeExternalRdsStateParamsProvider;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 
 @Service
@@ -82,7 +82,7 @@ public class PostgresConfigService {
     private DatabaseSslService databaseSslService;
 
     @Inject
-    private UpgradeRdsBackupRestoreStateParamsProvider upgradeRdsBackupRestoreStateParamsProvider;
+    private UpgradeExternalRdsStateParamsProvider upgradeExternalRdsStateParamsProvider;
 
     @Inject
     private ClusterComponentConfigProvider clusterComponentProvider;
@@ -110,7 +110,7 @@ public class PostgresConfigService {
             servicePillar.put(POSTGRESQL_SERVER, new SaltPillarProperties(POSTGRESQL_POSTGRE_SLS, singletonMap(POSTGRES, postgresConfig)));
             servicePillar.put(POSTGRES_ROTATION, getPillarPropertiesForRotation(stackDto));
         }
-        servicePillar.putAll(upgradeRdsBackupRestoreStateParamsProvider.createParamsForRdsBackupRestore(stackDto, ""));
+        servicePillar.putAll(upgradeExternalRdsStateParamsProvider.createParamsForRdsBackupRestore(stackDto, ""));
     }
 
     public void uploadServicePillarsForPostgres(StackDto stackDto, ExitCriteriaModel exitModel, OrchestratorStateParams stateParams)

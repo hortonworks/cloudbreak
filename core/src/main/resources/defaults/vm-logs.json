@@ -80,6 +80,10 @@
     "label": "rds_upgrade_checkconnection"
   },
   {
+    "path": "/var/log/postgres_upgrade_canary_checkconnection.log",
+    "label": "rds_upgrade_canary_checkconnection"
+  },
+  {
     "path": "${serverLogFolderPrefix}/cloudera-scm-server/cloudera-scm-server.log*",
     "label": "cloudera_server_log"
   },

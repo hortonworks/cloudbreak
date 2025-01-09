@@ -76,7 +76,7 @@ public class RedbeamsCreationService {
         }
     }
 
-    public DBStack launchNonUniqueDatabaseServer(DBStack dbStack, String clusterCrn, ProviderParametersBase networkParameters) {
+    public DBStack launchMultiDatabaseServer(DBStack dbStack, String clusterCrn, ProviderParametersBase networkParameters) {
         MDCBuilder.buildMdcContext(dbStack);
         validateDbDoesNotExist(dbStack);
         List<DatabaseServerConfig> configs = databaseServerConfigService.findByEnvironmentCrnAndClusterCrn(dbStack.getEnvironmentId(), clusterCrn);

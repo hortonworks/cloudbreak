@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateGeneratorService;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.template.domain.GeneratedCmTemplate;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
-import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
+import com.sequenceiq.cloudbreak.common.converter.ResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -43,7 +43,7 @@ public class BlueprintV4RequestToBlueprintConverter {
     private BlueprintUtils blueprintUtils;
 
     @Inject
-    private MissingResourceNameGenerator missingResourceNameGenerator;
+    private ResourceNameGenerator resourceNameGenerator;
 
     @Inject
     private CmTemplateGeneratorService clusterTemplateGeneratorService;
@@ -94,7 +94,7 @@ public class BlueprintV4RequestToBlueprintConverter {
     }
 
     private String getNameByItsAvailability(@Nullable String name) {
-        return Strings.isNullOrEmpty(name) ? missingResourceNameGenerator.generateName(APIResourceType.BLUEPRINT) : name;
+        return Strings.isNullOrEmpty(name) ? resourceNameGenerator.generateName(APIResourceType.BLUEPRINT) : name;
     }
 
     private Json createJsonFromTagsMap(Map<String, Object> tags) {

@@ -1,9 +1,6 @@
 package com.sequenceiq.redbeams.service.stack;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -72,16 +69,6 @@ public class DBStackStatusUpdaterTest {
         assertEquals("because", dbStackStatus.getStatusReason());
         assertEquals(DetailedDBStackStatus.PROVISIONED, dbStackStatus.getDetailedDBStackStatus());
         assertEquals(now, dbStackStatus.getCreated().longValue());
-    }
-
-    @Test
-    public void testUpdateStatusSkippedWhenDeleteCompleted() {
-        dbStack.setDBStackStatus(new DBStackStatus(dbStack, DetailedDBStackStatus.DELETE_COMPLETED, now));
-
-        underTest.updateStatus(1L, DetailedDBStackStatus.PROVISIONED, "because").get();
-
-        verify(dbStackService, never()).save(dbStack);
-        verify(redbeamsInMemoryStateStoreUpdaterService, never()).update(anyLong(), any());
     }
 
 }

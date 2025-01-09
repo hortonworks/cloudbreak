@@ -177,6 +177,35 @@ public class RedbeamsClientService {
         }
     }
 
+    public UpgradeDatabaseServerV4Response validateUpgrade(String crn, UpgradeDatabaseServerV4Request request) {
+        try {
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> redbeamsServerEndpoint.validateUpgrade(crn, request));
+        } catch (WebApplicationException | ProcessingException e) {
+            String message = String.format("Failed to validate upgrade DatabaseServer with CRN %s to version %s due to error: %s",
+                    crn,
+                    request.getUpgradeTargetMajorVersion(),
+                    e.getMessage());
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        }
+    }
+
+    public UpgradeDatabaseServerV4Response validateUpgradeCleanup(String crn) {
+        try {
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> redbeamsServerEndpoint.validateUpgradeCleanup(crn));
+        } catch (WebApplicationException | ProcessingException e) {
+            String message = String.format("Failed to clean up validate upgrade DatabaseServer with CRN %s due to error: %s",
+                    crn,
+                    e.getMessage());
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        }
+    }
+
     public DatabaseServerV4Response getByClusterCrn(String environmentCrn, String clusterCrn) {
         validateForGetByClusterCrn(environmentCrn, clusterCrn);
         try {

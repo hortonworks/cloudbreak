@@ -138,7 +138,6 @@ public class AllocateDatabaseServerHandler extends ExceptionCatcherEventHandler<
     }
 
     private Network setupNetworkIfMissing(AllocateDatabaseServerRequest request, DBStack dbStack, Network originalNetwork) {
-        DatabaseStack databaseStack = request.getDatabaseStack();
         if (dbStack.getNetwork() == null) {
             LOGGER.debug("Network is missing for DBStack, setting up");
             DetailedEnvironmentResponse environment = environmentService.getByCrn(dbStack.getEnvironmentId());

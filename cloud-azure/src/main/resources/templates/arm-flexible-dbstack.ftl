@@ -150,6 +150,10 @@
       "type": "string",
       "defaultValue": "${existingDatabasePrivateDnsZoneId!""}"
     },
+    "deploymentType": {
+      "type": "string",
+      "defaultValue": "${deploymentType}"
+    },
     "flexibleServerDelegatedSubnetId": {
       "type": "string",
       "defaultValue": "${flexibleServerDelegatedSubnetId!""}"
@@ -312,6 +316,10 @@
     "databaseServerFQDN": {
       "type": "string",
       "value": "[reference(parameters('dbServerName')).fullyQualifiedDomainName]"
+    },
+    "deploymentType": {
+      "type": "string",
+      "value": "[parameters('deploymentType')]"
     }
   }
 }

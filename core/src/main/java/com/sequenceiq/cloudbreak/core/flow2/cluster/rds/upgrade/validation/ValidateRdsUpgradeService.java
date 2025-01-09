@@ -65,6 +65,16 @@ public class ValidateRdsUpgradeService {
                 getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_VALIDATION_ON_CLOUDPROVIDER), ResourceEvent.CLUSTER_RDS_UPGRADE_VALIDATION_ON_CLOUDPROVIDER);
     }
 
+    void validateConnection(Long stackId) {
+        setStatusAndNotify(stackId, UPDATE_IN_PROGRESS, DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_VALIDATION_IN_PROGRESS,
+                getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_VALIDATION_CONNECTION), ResourceEvent.CLUSTER_RDS_UPGRADE_VALIDATION_CONNECTION);
+    }
+
+    void validateCleanup(Long stackId) {
+        setStatusAndNotify(stackId, UPDATE_IN_PROGRESS, DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_VALIDATION_IN_PROGRESS,
+                getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_VALIDATION_CLEANUP), ResourceEvent.CLUSTER_RDS_UPGRADE_VALIDATION_CLEANUP);
+    }
+
     void rdsUpgradeStarted(Long stackId, TargetMajorVersion version) {
         setStatusAndNotify(stackId, UPDATE_IN_PROGRESS, DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_VALIDATION_IN_PROGRESS,
                 getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_STARTED, version.getMajorVersion()), ResourceEvent.CLUSTER_RDS_UPGRADE_STARTED,

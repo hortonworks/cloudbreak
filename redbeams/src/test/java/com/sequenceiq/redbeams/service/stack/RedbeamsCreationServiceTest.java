@@ -165,7 +165,7 @@ class RedbeamsCreationServiceTest {
         when(dbStackService.save(dbStack)).thenReturn(dbStack);
         when(databaseServerConfigService.findByEnvironmentCrnAndClusterCrn(ENVIRONMENT_CRN, CLUSTER_CRN)).thenReturn(List.of(databaseServerConfig));
 
-        DBStack launchedStack = underTest.launchNonUniqueDatabaseServer(dbStack, CLUSTER_CRN, null);
+        DBStack launchedStack = underTest.launchMultiDatabaseServer(dbStack, CLUSTER_CRN, null);
         assertThat(launchedStack).isEqualTo(dbStack);
         verify(dbStackService).save(dbStack);
 

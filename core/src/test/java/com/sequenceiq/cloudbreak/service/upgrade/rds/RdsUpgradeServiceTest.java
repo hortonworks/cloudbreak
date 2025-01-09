@@ -386,7 +386,7 @@ class RdsUpgradeServiceTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = DatabaseServerStatus.class, names = {"AVAILABLE", "UPGRADE_FAILED"})
+    @EnumSource(value = DatabaseServerStatus.class, names = {"AVAILABLE", "UPGRADE_FAILED", "VALIDATE_UPGRADE_FAILED"})
     void testUpgradeRdsWithValidDatabaseStatusThenSuccess(DatabaseServerStatus status) {
         Stack stack = createStack(Status.AVAILABLE);
         StackDto stackDto = createStackDto(stack, DatabaseAvailabilityType.HA);
@@ -421,7 +421,7 @@ class RdsUpgradeServiceTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = DatabaseServerStatus.class, names = {"AVAILABLE", "UPGRADE_FAILED"}, mode = EnumSource.Mode.EXCLUDE)
+    @EnumSource(value = DatabaseServerStatus.class, names = {"AVAILABLE", "UPGRADE_FAILED", "VALIDATE_UPGRADE_FAILED"}, mode = EnumSource.Mode.EXCLUDE)
     void testUpgradeRdsWithDatabaseNotAvailableThenError(DatabaseServerStatus status) {
         Stack stack = createStack(Status.AVAILABLE);
         StackDto stackDto = createStackDto(stack, DatabaseAvailabilityType.HA);

@@ -54,7 +54,7 @@ public class WaitForRdsUpgradeHandler extends ExceptionCatcherEventHandler<WaitF
         ClusterView cluster = stack.getCluster();
         try {
             if (request.getFlowIdentifier() != null) {
-                databaseService.waitForDatabaseToBeUpgraded(cluster, request.getFlowIdentifier());
+                databaseService.waitForDatabaseFlowToBeFinished(cluster, request.getFlowIdentifier());
             } else {
                 LOGGER.info("No need to wait for RDS upgrade, as the flow identifier is null");
             }
@@ -63,13 +63,13 @@ public class WaitForRdsUpgradeHandler extends ExceptionCatcherEventHandler<WaitF
             LOGGER.error("Database 'upgrade' polling exited before timeout. Cause: ", e);
             return upgradeFailedEvent(stackId, e);
         } catch (PollerStoppedException e) {
-            LOGGER.error(String.format("Database 'upgrade' poller stopped for stack: %s", stack.getName()), e);
+            LOGGER.error("Database 'upgrade' poller stopped for stack: {}", stack.getName(), e);
             return upgradeFailedEvent(stackId, e);
         } catch (PollerException e) {
-            LOGGER.error(String.format("Database 'upgrade' polling failed for stack: %s", stack.getName()), e);
+            LOGGER.error("Database 'upgrade' polling failed for stack: {}", stack.getName(), e);
             return upgradeFailedEvent(stackId, e);
         } catch (Exception e) {
-            LOGGER.error(String.format("Exception during DB upgrade for stack: %s", stack.getName()), e);
+            LOGGER.error("Exception during DB upgrade for stack: {}", stack.getName(), e);
             return upgradeFailedEvent(stackId, e);
         }
     }

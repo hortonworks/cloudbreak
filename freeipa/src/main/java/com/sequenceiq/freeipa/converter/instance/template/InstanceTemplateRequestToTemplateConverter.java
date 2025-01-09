@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.GcpInstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
-import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
+import com.sequenceiq.cloudbreak.common.converter.ResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
@@ -37,7 +37,7 @@ import com.sequenceiq.freeipa.service.stack.instance.DefaultInstanceTypeProvider
 public class InstanceTemplateRequestToTemplateConverter {
 
     @Inject
-    private MissingResourceNameGenerator missingResourceNameGenerator;
+    private ResourceNameGenerator resourceNameGenerator;
 
     @Inject
     private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
@@ -58,7 +58,7 @@ public class InstanceTemplateRequestToTemplateConverter {
         String diskEncryptionSetId, String gcpKmsEncryptionKey, String awsKmsEncryptionKey) {
         Template template = new Template();
         template.setAccountId(accountId);
-        template.setName(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE));
+        template.setName(resourceNameGenerator.generateName(APIResourceType.TEMPLATE));
         template.setStatus(ResourceStatus.USER_MANAGED);
         setVolumesProperty(source.getAttachedVolumes(), template, cloudPlatform);
         template.setInstanceType(Objects.requireNonNullElse(source.getInstanceType(), defaultInstanceTypeProvider.getForPlatform(cloudPlatform.name())));

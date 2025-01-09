@@ -22,4 +22,13 @@ public class UuidUtil {
     public static Supplier<String> uuidSupplier() {
         return () -> UUID.randomUUID().toString();
     }
+
+    public static String randomUuid() {
+        return UUID.randomUUID().toString();
+    }
+
+    public static String nameBasedUuid(String name) {
+        return NullUtil.getIfNotNullOtherwise(name,
+                n -> UUID.nameUUIDFromBytes(n.getBytes()).toString(), UUID.randomUUID().toString());
+    }
 }

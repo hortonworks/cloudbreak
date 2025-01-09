@@ -143,7 +143,7 @@ class AzureTemplateDeploymentServiceTest {
         String deploymentName = "whatif-1";
 
         when(azureStorage.getCustomImage(any(), any(), any())).thenReturn(new AzureImage("1", "image1", true));
-        when(azureUtils.generateResourceGroupNameByNameAndId("whatif", "1")).thenReturn(deploymentName);
+        when(azureUtils.generateResourceNameByNameAndId("whatif", "1")).thenReturn(deploymentName);
         when(azureTemplateBuilder.build(eq(deploymentName), any(), any(), any(), any(), any(), any(), any())).thenReturn("template");
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack)).thenReturn(resourceGroupName);
         when(azureStackViewProvider.getAzureStack(any(), any(), any(), any())).thenReturn(stackView);
@@ -154,8 +154,3 @@ class AzureTemplateDeploymentServiceTest {
     }
 
 }
-
-
-
-
-

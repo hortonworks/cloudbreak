@@ -84,7 +84,7 @@ public class DBStackToDatabaseStackConverter {
         }
     }
 
-    private DatabaseServer buildDatabaseServer(DBStack dbStack) {
+    public DatabaseServer buildDatabaseServer(DBStack dbStack) {
         com.sequenceiq.redbeams.domain.stack.DatabaseServer dbStackDatabaseServer = dbStack.getDatabaseServer();
         if (dbStackDatabaseServer == null) {
             return null;

@@ -213,7 +213,7 @@ public class FlowService {
     private void validateResourceId(List<FlowLogWithoutPayload> flowLogs, List<Long> resourceIdList) {
         if (flowLogs.stream().anyMatch(flowLog -> !resourceIdList.contains(flowLog.getResourceId()))) {
             throw new BadRequestException(String.format("The requested chain id %s does not belong to that " +
-                    "resources %s", flowLogs.get(0).getFlowChainId(), resourceIdList));
+                    "resources %s", flowLogs.getFirst().getFlowChainId(), resourceIdList));
         }
     }
 

@@ -44,7 +44,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.service.cluster.DatabaseSslService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigProviderFactory;
-import com.sequenceiq.cloudbreak.service.upgrade.rds.UpgradeRdsBackupRestoreStateParamsProvider;
+import com.sequenceiq.cloudbreak.service.upgrade.rds.UpgradeExternalRdsStateParamsProvider;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
 
@@ -78,7 +78,7 @@ class PostgresConfigServiceTest {
     private DatabaseSslService databaseSslService;
 
     @Mock
-    private UpgradeRdsBackupRestoreStateParamsProvider upgradeRdsBackupRestoreStateParamsProvider;
+    private UpgradeExternalRdsStateParamsProvider upgradeExternalRdsStateParamsProvider;
 
     @Mock
     private ClusterComponentConfigProvider clusterComponentProvider;
@@ -111,7 +111,7 @@ class PostgresConfigServiceTest {
         underTest.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack);
 
         assertThat(servicePillar).isEmpty();
-        verify(upgradeRdsBackupRestoreStateParamsProvider, times(1)).createParamsForRdsBackupRestore(stack, "");
+        verify(upgradeExternalRdsStateParamsProvider, times(1)).createParamsForRdsBackupRestore(stack, "");
         verify(databaseSslService, never()).isDbSslEnabledByClusterView(any(StackView.class), any(ClusterView.class));
     }
 
@@ -138,7 +138,7 @@ class PostgresConfigServiceTest {
         underTest.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack);
 
         assertThat(servicePillar).isEmpty();
-        verify(upgradeRdsBackupRestoreStateParamsProvider, times(1)).createParamsForRdsBackupRestore(stack, "");
+        verify(upgradeExternalRdsStateParamsProvider, times(1)).createParamsForRdsBackupRestore(stack, "");
         verify(databaseSslService, never()).getDbSslDetailsForCreationAndUpdateInCluster(any(StackDto.class));
     }
 

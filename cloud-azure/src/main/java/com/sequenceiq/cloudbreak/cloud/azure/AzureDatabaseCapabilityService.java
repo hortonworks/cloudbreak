@@ -145,7 +145,7 @@ public class AzureDatabaseCapabilityService {
             }
             putRegion(instanceTypeMap, entry.getKey(), instanceType);
         }
-        LOGGER.debug("Default flexible server instancetypes by regions [{}]", instanceTypeMap);
+        LOGGER.debug("Default flexible server instance types by regions [{}]", instanceTypeMap);
         return instanceTypeMap;
     }
 

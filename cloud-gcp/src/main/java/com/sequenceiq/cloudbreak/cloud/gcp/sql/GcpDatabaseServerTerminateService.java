@@ -47,21 +47,21 @@ public class GcpDatabaseServerTerminateService extends GcpDatabaseServerBaseServ
         List<CloudResource> buildableResource = List.of(getDatabaseCloudResource(deploymentName, ac));
         try {
             Optional<DatabaseInstance> databaseInstance = getDatabaseInstance(deploymentName, sqlAdmin, projectId);
-            if (!databaseInstance.isEmpty()) {
+            if (databaseInstance.isPresent()) {
                 SQLAdmin.Instances.Delete delete = sqlAdmin.instances().delete(projectId, deploymentName);
                 delete.setPrettyPrint(true);
                 try {
                     Operation operation = delete.execute();
                     verifyOperation(operation, buildableResource);
-                    CloudResource operationAwareCloudResource = createOperationAwareCloudResource(buildableResource.get(0), operation);
+                    CloudResource operationAwareCloudResource = createOperationAwareCloudResource(buildableResource.getFirst(), operation);
                     databasePollerService.terminateDatabasePoller(ac, buildableResource);
                     return Collections.singletonList(operationAwareCloudResource);
                 } catch (GoogleJsonResponseException e) {
-                    throw new GcpResourceException(checkException(e), resourceType(), buildableResource.get(0).getName());
+                    throw new GcpResourceException(checkException(e), resourceType(), buildableResource.getFirst().getName());
                 }
             }
         } catch (GoogleJsonResponseException e) {
-            throw new GcpResourceException(checkException(e), resourceType(), buildableResource.get(0).getName());
+            throw new GcpResourceException(checkException(e), resourceType(), buildableResource.getFirst().getName());
         }
         return List.of();
     }

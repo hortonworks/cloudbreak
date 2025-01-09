@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
-import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
+import com.sequenceiq.cloudbreak.common.converter.ResourceNameGenerator;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudStorage;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.StorageLocation;
@@ -25,7 +25,7 @@ import com.sequenceiq.common.model.FileSystemType;
 public class RemoteDataContextWorkaroundService {
 
     @Inject
-    private MissingResourceNameGenerator nameGenerator;
+    private ResourceNameGenerator nameGenerator;
 
     public FileSystem prepareFilesystem(Cluster requestedCluster, SdxFileSystemView sdxFileSystemView, String datalakeCRN) {
         prepareFilesystemIfNotPresentedButSdxHasIt(requestedCluster, sdxFileSystemView);

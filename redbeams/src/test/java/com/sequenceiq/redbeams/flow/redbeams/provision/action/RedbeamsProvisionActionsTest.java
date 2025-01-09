@@ -151,10 +151,7 @@ class RedbeamsProvisionActionsTest {
     @Test
     void updateDatabaseServerRegistrationTestDoExecute() throws Exception {
         when(cloudContext.getId()).thenReturn(RESOURCE_ID);
-
-        when(cloudResourceStatus.getCloudResource()).thenReturn(cloudResource);
-        when(dbResourceService.getAllAsCloudResourceStatus(RESOURCE_ID)).thenReturn(List.of(cloudResourceStatus));
-
+        when(dbResourceService.getAllAsCloudResource(RESOURCE_ID)).thenReturn(List.of(cloudResource));
         when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
 
         AllocateDatabaseServerSuccess payload = new AllocateDatabaseServerSuccess(RESOURCE_ID);

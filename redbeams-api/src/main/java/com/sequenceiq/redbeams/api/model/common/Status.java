@@ -39,6 +39,9 @@ public enum Status {
     UPGRADE_REQUESTED,
     UPGRADE_IN_PROGRESS,
     UPGRADE_FAILED,
+    VALIDATE_UPGRADE_REQUESTED,
+    VALIDATE_UPGRADE_IN_PROGRESS,
+    VALIDATE_UPGRADE_FAILED,
     UNKNOWN;
 
     private static final Map<Status, Status> IN_PROGRESS_TO_FINAL_STATUS_MAPPING = ImmutableMap.<Status, Status>builder()
@@ -55,19 +58,15 @@ public enum Status {
             .put(START_IN_PROGRESS, START_FAILED)
             .put(UPGRADE_REQUESTED, UPGRADE_FAILED)
             .put(UPGRADE_IN_PROGRESS, UPGRADE_FAILED)
+            .put(VALIDATE_UPGRADE_REQUESTED, VALIDATE_UPGRADE_FAILED)
+            .put(VALIDATE_UPGRADE_IN_PROGRESS, VALIDATE_UPGRADE_FAILED)
             .put(WAIT_FOR_SYNC, AVAILABLE)
             .put(SSL_ROTATE_REQUESTED, SSL_ROTATE_FAILED)
             .put(SSL_ROTATE_IN_PROGRESS, SSL_ROTATE_FAILED)
             .build();
 
-    private static final List<Status> IS_REMOVABLE_STATUS_LIST = Arrays.asList(AVAILABLE, UPDATE_FAILED, CREATE_FAILED,
-            ENABLE_SECURITY_FAILED, DELETE_FAILED, DELETE_COMPLETED, STOPPED, START_FAILED, STOP_FAILED, SSL_ROTATE_FAILED);
-
-    private static final List<Status> IS_AVAILABLE_LIST = Arrays.asList(AVAILABLE, MAINTENANCE_MODE_ENABLED, SSL_ROTATED);
-
-    public boolean isRemovableStatus() {
-        return IS_REMOVABLE_STATUS_LIST.contains(valueOf(name()));
-    }
+    private static final List<Status> IS_AVAILABLE_LIST = Arrays.asList(
+            AVAILABLE, MAINTENANCE_MODE_ENABLED, SSL_ROTATED, VALIDATE_UPGRADE_FAILED);
 
     public boolean isAvailable() {
         return IS_AVAILABLE_LIST.contains(valueOf(name()));
@@ -117,7 +116,9 @@ public enum Status {
 
     public boolean isUpgradeInProgress() {
         return UPGRADE_REQUESTED.equals(this)
-                || UPGRADE_IN_PROGRESS.equals(this);
+                || UPGRADE_IN_PROGRESS.equals(this)
+                || VALIDATE_UPGRADE_IN_PROGRESS.equals(this)
+                || VALIDATE_UPGRADE_REQUESTED.equals(this);
     }
 
     public static Set<Status> getAutoSyncStatuses() {
@@ -134,27 +135,27 @@ public enum Status {
 
     //CHECKSTYLE:OFF: CyclomaticComplexity
     public boolean isInProgress() {
-        switch (this) {
-            case REQUESTED:
-            case UPDATE_REQUESTED:
-            case DELETE_REQUESTED:
-            case STOP_REQUESTED:
-            case START_REQUESTED:
-            case CREATE_IN_PROGRESS:
-            case UPDATE_IN_PROGRESS:
-            case PRE_DELETE_IN_PROGRESS:
-            case DELETE_IN_PROGRESS:
-            case STOP_IN_PROGRESS:
-            case START_IN_PROGRESS:
-            case UPGRADE_REQUESTED:
-            case UPGRADE_IN_PROGRESS:
-            case WAIT_FOR_SYNC:
-            case SSL_ROTATE_IN_PROGRESS:
-            case SSL_ROTATE_REQUESTED:
-                return true;
-            default:
-                return false;
-        }
+        return switch (this) {
+            case REQUESTED,
+                 UPDATE_REQUESTED,
+                 DELETE_REQUESTED,
+                 STOP_REQUESTED,
+                 START_REQUESTED,
+                 CREATE_IN_PROGRESS,
+                 UPDATE_IN_PROGRESS,
+                 PRE_DELETE_IN_PROGRESS,
+                 DELETE_IN_PROGRESS,
+                 STOP_IN_PROGRESS,
+                 START_IN_PROGRESS,
+                 UPGRADE_REQUESTED,
+                 UPGRADE_IN_PROGRESS,
+                 VALIDATE_UPGRADE_REQUESTED,
+                 VALIDATE_UPGRADE_IN_PROGRESS,
+                 WAIT_FOR_SYNC,
+                 SSL_ROTATE_IN_PROGRESS,
+                 SSL_ROTATE_REQUESTED -> true;
+            default -> false;
+        };
     }
     //CHECKSTYLE:ON: CyclomaticComplexity
 

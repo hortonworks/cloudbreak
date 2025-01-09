@@ -29,20 +29,12 @@ public class ResourcePersistenceHandler implements Consumer<Event<ResourceNotifi
 
         RetryUtil.withDefaultRetries()
                 .retry(() -> {
-                    ResourceNotification notificationPersisted;
-                    switch (notification.getType()) {
-                        case CREATE:
-                            notificationPersisted = cloudResourcePersisterService.persist(notification);
-                            break;
-                        case UPDATE:
-                            notificationPersisted = cloudResourcePersisterService.update(notification);
-                            break;
-                        case DELETE:
-                            notificationPersisted = cloudResourcePersisterService.delete(notification);
-                            break;
-                        default:
-                            throw new IllegalArgumentException("Unsupported notification type: " + notification.getType());
-                    }
+                    ResourceNotification notificationPersisted = switch (notification.getType()) {
+                        case CREATE -> cloudResourcePersisterService.persist(notification);
+                        case UPDATE -> cloudResourcePersisterService.update(notification);
+                        case DELETE -> cloudResourcePersisterService.delete(notification);
+                        default -> throw new IllegalArgumentException("Unsupported notification type: " + notification.getType());
+                    };
                     notificationPersisted.getPromise().onNext(new ResourcePersisted());
                 })
                 .checkIfRecoverable(e -> e instanceof TransientDataAccessException)

@@ -3,6 +3,7 @@ package com.sequenceiq.redbeams.domain.stack;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -25,7 +26,7 @@ public class DBResource {
     @SequenceGenerator(name = "resource_generator", sequenceName = "resource_id_seq", allocationSize = 1)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "resource_dbstack")
     private DBStack dbStack;
 
