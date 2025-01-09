@@ -5,14 +5,20 @@ import java.util.Optional;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
+import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradeBackupValidationRequest;
@@ -30,8 +36,13 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validatio
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.WaitForValidateRdsUpgradeCleanupResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.WaitForValidateRdsUpgradeOnCloudProviderRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.WaitForValidateRdsUpgradeOnCloudProviderResult;
+import com.sequenceiq.cloudbreak.service.database.DatabaseService;
+import com.sequenceiq.cloudbreak.service.externaldatabase.AzureDatabaseServerParameterDecorator;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.cloudbreak.view.StackView;
+import com.sequenceiq.common.model.AzureDatabaseType;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 
 @Configuration
 public class ValidateRdsUpgradeActions {
@@ -40,12 +51,23 @@ public class ValidateRdsUpgradeActions {
 
     private static final String VALIDATE_CONNECTION_ERROR_MESSAGE = "VALIDATE_CONNECTION_ERROR_MESSAGE";
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ValidateRdsUpgradeActions.class);
+
     @Inject
     private ValidateRdsUpgradeService validateRdsUpgradeService;
 
     @Bean(name = "VALIDATE_RDS_UPGRADE_PUSH_SALT_STATES_STATE")
     public Action<?, ?> pushSaltStates() {
         return new AbstractValidateRdsUpgradeAction<>(ValidateRdsUpgradeTriggerRequest.class) {
+
+            @Inject
+            private RedbeamsClientService redbeamsClientService;
+
+            @Inject
+            private DatabaseService databaseService;
+
+            @Inject
+            private AzureDatabaseServerParameterDecorator azureDatabaseServerParameterDecorator;
 
             @Override
             protected void prepareExecution(ValidateRdsUpgradeTriggerRequest payload, Map<Object, Object> variables) {
@@ -57,7 +79,34 @@ public class ValidateRdsUpgradeActions {
             protected void doExecute(ValidateRdsUpgradeContext context, ValidateRdsUpgradeTriggerRequest payload, Map<Object, Object> variables) {
                 Long stackId = payload.getResourceId();
                 validateRdsUpgradeService.rdsUpgradeStarted(stackId, payload.getVersion());
+                updateDatabaseTypeIfDifferentFromRedbeams(context);
                 sendEvent(context);
+            }
+
+            private void updateDatabaseTypeIfDifferentFromRedbeams(ValidateRdsUpgradeContext context) {
+                String databaseServerCrn = context.getCluster().getDatabaseServerCrn();
+                if (CloudPlatform.AZURE.name().equalsIgnoreCase(context.getStack().getCloudPlatform())
+                        && StringUtils.isNotBlank(databaseServerCrn)) {
+                    DatabaseServerV4Response databaseServerV4Response = redbeamsClientService.getByCrn(databaseServerCrn);
+                    LOGGER.debug("Response from redbeams is {}", databaseServerV4Response);
+                    if (databaseServerV4Response != null && databaseServerV4Response.getDatabasePropertiesV4Response() != null
+                            && StringUtils.isNotBlank(databaseServerV4Response.getDatabasePropertiesV4Response().getDatabaseType())) {
+                        AzureDatabaseType azureDatabaseTypeFromRedbeams = AzureDatabaseType.safeValueOf(
+                                databaseServerV4Response.getDatabasePropertiesV4Response().getDatabaseType());
+                        Optional<AzureDatabaseType> databaseTypeInCb =
+                                azureDatabaseServerParameterDecorator.getDatabaseType(context.getDatabase().getAttributesMap());
+                        LOGGER.debug("Database type in CB is [{}] in Redbeams is [{}]", databaseTypeInCb, azureDatabaseTypeFromRedbeams);
+                        if (databaseTypeInCb.isPresent() && AzureDatabaseType.FLEXIBLE_SERVER.equals(azureDatabaseTypeFromRedbeams)
+                                && AzureDatabaseType.SINGLE_SERVER.equals(databaseTypeInCb.get())) {
+                            Database database = context.getDatabase();
+                            Map<String, Object> attributes = azureDatabaseServerParameterDecorator
+                                    .setAzureDatabaseType(database.getAttributesMap(), azureDatabaseTypeFromRedbeams.name());
+                            database.setAttributes(new Json(attributes));
+                            databaseService.save(database);
+                            LOGGER.info("Updated database type to [{}]", azureDatabaseTypeFromRedbeams);
+                        }
+                    }
+                }
             }
 
             @Override

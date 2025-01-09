@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.repository.DatabaseRepository;
 import com.sequenceiq.cloudbreak.service.externaldatabase.DatabaseServerParameterDecorator;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
-import com.sequenceiq.distrox.v1.distrox.StackOperations;
 import com.sequenceiq.distrox.v1.distrox.converter.DatabaseServerConverter;
 import com.sequenceiq.flow.api.model.operation.OperationView;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
@@ -33,9 +32,6 @@ import com.sequenceiq.redbeams.api.endpoint.v4.operation.OperationV4Endpoint;
 public class DatabaseService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseService.class);
-
-    @Inject
-    private StackOperations stackOperations;
 
     @Inject
     private DatabaseServerV4Endpoint databaseServerV4Endpoint;

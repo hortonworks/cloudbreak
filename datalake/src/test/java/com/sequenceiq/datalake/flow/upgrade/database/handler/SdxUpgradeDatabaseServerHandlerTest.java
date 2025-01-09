@@ -17,10 +17,12 @@ import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.flow.upgrade.database.event.SdxUpgradeDatabaseServerFailedEvent;
 import com.sequenceiq.datalake.flow.upgrade.database.event.SdxUpgradeDatabaseServerSuccessEvent;
 import com.sequenceiq.datalake.flow.upgrade.database.event.UpgradeDatabaseServerRequest;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.sdx.database.DatabaseService;
 import com.sequenceiq.datalake.service.upgrade.database.SdxDatabaseServerUpgradeService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -37,6 +39,9 @@ public class SdxUpgradeDatabaseServerHandlerTest {
 
     @Mock
     private SdxService sdxService;
+
+    @Mock
+    private DatabaseService databaseService;
 
     @InjectMocks
     private SdxUpgradeDatabaseServerHandler underTest;
@@ -64,12 +69,15 @@ public class SdxUpgradeDatabaseServerHandlerTest {
         TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
         HandlerEvent<UpgradeDatabaseServerRequest> event = setupHandlerEvent(targetMajorVersion, forced);
         SdxCluster sdxCluster = new SdxCluster();
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxCluster.setSdxDatabase(sdxDatabase);
         when(sdxService.getById(SDX_ID)).thenReturn(sdxCluster);
 
         Selectable nextEvent = underTest.doAccept(event);
 
         assertEquals(nextEvent.getSelector(), EventSelectorUtil.selector(SdxUpgradeDatabaseServerSuccessEvent.class));
         verify(sdxDatabaseServerUpgradeService).initUpgradeInCb(sdxCluster, targetMajorVersion, forced);
+        verify(databaseService).updateDatabaseTypeFromRedbeams(sdxDatabase);
     }
 
     @ParameterizedTest

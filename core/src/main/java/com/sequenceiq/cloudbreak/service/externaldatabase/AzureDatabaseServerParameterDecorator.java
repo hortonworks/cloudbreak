@@ -220,4 +220,9 @@ public class AzureDatabaseServerParameterDecorator implements DatabaseServerPara
         return AzureDatabaseType.safeValueOf(dbTypeStr);
     }
 
+    public Map<String, Object> setAzureDatabaseType(Map<String, Object> attributes, String dbType) {
+        attributes.put(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, dbType);
+        return attributes;
+    }
+
 }

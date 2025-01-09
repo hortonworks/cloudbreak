@@ -1,6 +1,7 @@
 package com.sequenceiq.datalake.service.sdx.database;
 
 import static com.sequenceiq.common.model.AzureDatabaseType.FLEXIBLE_SERVER;
+import static com.sequenceiq.common.model.AzureDatabaseType.SINGLE_SERVER;
 import static com.sequenceiq.datalake.service.TagUtil.getTags;
 import static com.sequenceiq.datalake.service.sdx.SdxService.DATABASE_SSL_ENABLED;
 
@@ -26,7 +27,6 @@ import com.dyngr.core.AttemptResults;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
+import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.common.model.DatabaseCapabilityType;
 import com.sequenceiq.common.model.DatabaseType;
 import com.sequenceiq.datalake.configuration.PlatformConfig;
@@ -117,13 +118,13 @@ public class DatabaseService {
     private OperationV4Endpoint operationV4Endpoint;
 
     @Inject
-    private EntitlementService entitlementService;
-
-    @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Inject
     private EnvironmentPlatformResourceEndpoint environmentPlatformResourceEndpoint;
+
+    @Inject
+    private AzureDatabaseAttributesService azureDatabaseAttributesService;
 
     public DatabaseServerStatusV4Response create(SdxCluster sdxCluster, DetailedEnvironmentResponse env) {
         LOGGER.info("Create databaseServer in environment {} for SDX {}", env.getName(), sdxCluster.getClusterName());
@@ -406,5 +407,29 @@ public class DatabaseService {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> databaseServerV4Endpoint.getByCrn(databaseServerCrn));
+    }
+
+    public SdxDatabase updateDatabaseTypeFromRedbeams(SdxDatabase sdxDatabase) {
+        DatabaseServerV4Response databaseServerV4Response = StringUtils.isNotBlank(sdxDatabase.getDatabaseCrn()) ?
+                getDatabaseServerV4Response(sdxDatabase.getDatabaseCrn()) : null;
+        LOGGER.debug("Describe response from redbeams: {}", databaseServerV4Response);
+        if (databaseServerV4Response != null && databaseServerV4Response.getDatabasePropertiesV4Response() != null
+                && StringUtils.isNotBlank(databaseServerV4Response.getDatabasePropertiesV4Response().getDatabaseType())) {
+            AzureDatabaseType azureDbTypeInRedbeams = AzureDatabaseType.safeValueOf(
+                    databaseServerV4Response.getDatabasePropertiesV4Response().getDatabaseType());
+            AzureDatabaseType azureDatabaseTypeInSdx = azureDatabaseAttributesService.getAzureDatabaseType(sdxDatabase);
+            LOGGER.debug("DB type in redbeams is [{}] and in SDX [{}]", azureDbTypeInRedbeams, azureDatabaseTypeInSdx);
+            if (FLEXIBLE_SERVER.equals(azureDbTypeInRedbeams) && SINGLE_SERVER.equals(azureDatabaseTypeInSdx)) {
+                azureDatabaseAttributesService.updateDatabaseType(sdxDatabase, azureDbTypeInRedbeams);
+                LOGGER.info("Updating database type from redbeams [{}] to sdx database [{}]", azureDbTypeInRedbeams, azureDatabaseTypeInSdx);
+                return sdxDatabaseRepository.save(sdxDatabase);
+            } else {
+                LOGGER.debug("No update was required");
+                return sdxDatabase;
+            }
+        } else {
+            LOGGER.debug("No update was required");
+            return sdxDatabase;
+        }
     }
 }
