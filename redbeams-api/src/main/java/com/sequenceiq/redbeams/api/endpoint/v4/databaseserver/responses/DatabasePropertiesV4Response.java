@@ -13,11 +13,29 @@ public class DatabasePropertiesV4Response {
     @Schema(description = DatabaseServer.CONNECTION_NAME_FORMAT, required = true)
     private ConnectionNameFormat connectionNameFormat = ConnectionNameFormat.USERNAME_ONLY;
 
+    private String databaseType;
+
     public ConnectionNameFormat getConnectionNameFormat() {
         return connectionNameFormat == null ? ConnectionNameFormat.USERNAME_ONLY : connectionNameFormat;
     }
 
     public void setConnectionNameFormat(ConnectionNameFormat connectionNameFormat) {
         this.connectionNameFormat = connectionNameFormat;
+    }
+
+    public String getDatabaseType() {
+        return databaseType;
+    }
+
+    public void setDatabaseType(String databaseType) {
+        this.databaseType = databaseType;
+    }
+
+    @Override
+    public String toString() {
+        return "DatabasePropertiesV4Response{" +
+                "connectionNameFormat=" + connectionNameFormat +
+                ", databaseType='" + databaseType + '\'' +
+                '}';
     }
 }

@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAzureRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.service.database.EnvironmentDatabaseService;
@@ -29,9 +28,6 @@ import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 public class AzureDatabaseAttributesService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureDatabaseAttributesService.class);
-
-    @Inject
-    private EntitlementService entitlementService;
 
     @Inject
     private EnvironmentDatabaseService environmentDatabaseService;
@@ -99,6 +95,13 @@ public class AzureDatabaseAttributesService {
             LOGGER.debug("No Azure databasetype update is needed. Azure dbtype: {}, db version: {}", dbType, dbVersion);
             return Optional.empty();
         }
+    }
+
+    public SdxDatabase updateDatabaseType(SdxDatabase sdxDatabase, AzureDatabaseType azureDatabaseType) {
+        Map<String, Object> attributes = sdxDatabase.getAttributes() != null ? sdxDatabase.getAttributes().getMap() : new HashMap<>();
+        attributes.put(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, azureDatabaseType);
+        sdxDatabase.setAttributes(new Json(attributes));
+        return sdxDatabase;
     }
 
     private AzureDatabaseType getAzureDatabaseType(String dbTypeStr) {

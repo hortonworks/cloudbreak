@@ -174,6 +174,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverter {
                 String dbTypeStr = (String) params.get(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY);
                 AzureDatabaseType azureDatabaseType =
                         StringUtils.isNotBlank(dbTypeStr) ? AzureDatabaseType.valueOf(dbTypeStr) : AzureDatabaseType.SINGLE_SERVER;
+                response.setDatabaseType(azureDatabaseType.name());
                 if (azureDatabaseType == AzureDatabaseType.SINGLE_SERVER) {
                     response.setConnectionNameFormat(ConnectionNameFormat.USERNAME_WITH_HOSTNAME);
                 }
