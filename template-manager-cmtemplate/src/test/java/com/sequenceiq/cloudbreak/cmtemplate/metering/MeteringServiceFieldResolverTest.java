@@ -89,6 +89,16 @@ public class MeteringServiceFieldResolverTest {
     }
 
     @Test
+    public void testResolveServiceFeatureForDLM() {
+        // GIVEN
+        given(cmTemplateProcessor.getAllComponents()).willReturn(createServiceComponents("DLM"));
+        // WHEN
+        String result = underTest.resolveServiceFeature(cmTemplateProcessor);
+        // THEN
+        assertEquals("CLO", result);
+    }
+
+    @Test
     public void testResolveServiceFeatureWithoutMatchingService() {
         // GIVEN
         given(cmTemplateProcessor.getAllComponents()).willReturn(createServiceComponents("HBASE"));

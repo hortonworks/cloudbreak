@@ -31,6 +31,10 @@
       "relatedServices":[
         "IMPALA"
       ]
+    },
+    {
+      "name": "CLO",
+      "relatedServices": ["DLM"]
     }
   ]
 }
