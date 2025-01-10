@@ -130,10 +130,6 @@
               "value": "<property><name>yarn.scheduler.configuration.store.class</name><value>file</value></property>"
             },
             {
-              "name": "yarn_scheduler_capacity_resource_calculator",
-              "value": "org.apache.hadoop.yarn.util.resource.DominantResourceCalculator"
-            },
-            {
               "name": "yarn_resourcemanager_scheduler_class",
               "value": "org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler"
             },

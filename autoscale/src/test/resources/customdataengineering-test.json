@@ -435,10 +435,6 @@
               "value": "<property><name>yarn.resourcemanager.am.placement-preference-with-node-attributes</name><value>ORDER NODES IN NodeInstanceType WITH worker &gt; compute</value></property><property><name>yarn.resourcemanager.non-am.placement-preference-with-node-attributes</name><value>ORDER NODES IN NodeInstanceType WITH compute &gt; worker</value></property>\n<property><name>yarn.scheduler.configuration.store.class</name><value>zk</value></property>"
             },
             {
-              "name": "yarn_scheduler_capacity_resource_calculator",
-              "value": "org.apache.hadoop.yarn.util.resource.DefaultResourceCalculator"
-            },
-            {
               "name": "yarn_resourcemanager_scheduler_class",
               "value": "org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler"
             },
