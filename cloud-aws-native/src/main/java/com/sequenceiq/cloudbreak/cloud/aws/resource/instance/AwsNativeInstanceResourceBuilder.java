@@ -128,7 +128,7 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
         InstanceTemplate instanceTemplate = group.getReferenceInstanceTemplate();
         AwsCloudStackView awsCloudStackView = new AwsCloudStackView(cloudStack);
         CloudResource cloudResource = buildableResource.get(0);
-        Optional<Instance> existedOpt = resourceByName(amazonEc2Client, cloudResource.getName());
+        Optional<Instance> existedOpt = resourceByName(amazonEc2Client, awsStackNameCommonUtil.getInstanceName(ac, group.getName(), privateId));
         Instance instance;
         if (existedOpt.isPresent() && existedOpt.get().state().code() != AWS_INSTANCE_TERMINATED_CODE) {
             instance = existedOpt.get();
