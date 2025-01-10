@@ -16,18 +16,17 @@ import com.sequenceiq.cloudbreak.rotation.secret.poller.PollerRotationContext;
 import com.sequenceiq.sdx.rotation.DatalakeSecretType;
 
 @Component
-public class DatalakeNginxClusterSslCertPrivateKeyRotationContextProvider implements RotationContextProvider {
+public class DatalakeEmbeddedDbSslCertRotationContextProvider implements RotationContextProvider {
 
     @Override
     public Map<SecretRotationStep, ? extends RotationContext> getContexts(String resourceCrn) {
         Map<SecretRotationStep, RotationContext> context = new HashMap<>();
-        context.put(CLOUDBREAK_ROTATE_POLLING, new PollerRotationContext(resourceCrn, CloudbreakSecretType.NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY));
+        context.put(CLOUDBREAK_ROTATE_POLLING, new PollerRotationContext(resourceCrn, CloudbreakSecretType.EMBEDDED_DB_SSL_CERT));
         return context;
     }
 
     @Override
     public SecretType getSecret() {
-        return DatalakeSecretType.NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY;
+        return DatalakeSecretType.EMBEDDED_DB_SSL_CERT;
     }
 }
-

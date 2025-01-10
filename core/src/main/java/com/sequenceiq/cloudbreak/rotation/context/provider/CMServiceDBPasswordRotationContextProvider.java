@@ -42,11 +42,11 @@ public class CMServiceDBPasswordRotationContextProvider extends AbstractCMRelate
         VaultRotationContext vaultRotationContext = getVaultRotationContext(userPassPairs, stack);
         SaltPillarRotationContext pillarUpdateRotationContext = new SaltPillarRotationContext(stack.getResourceCrn(), this::getPillarProperties);
         SaltStateApplyRotationContext stateApplyRotationContext = getSaltStateApplyRotationContextBuilder(stack)
-                .withStates(List.of("postgresql.rotate.init"))
-                .withRollbackStates(List.of("postgresql.rotate.rollback"))
-                .withCleanupStates(List.of("postgresql.rotate.finalize"))
-                .withPreValidateStates(List.of("postgresql.rotate.prevalidate"))
-                .withPostValidateStates(List.of("postgresql.rotate.postvalidate"))
+                .withStates(List.of("postgresql.db-user-rotate.init"))
+                .withRollbackStates(List.of("postgresql.db-user-rotate.rollback"))
+                .withCleanupStates(List.of("postgresql.db-user-rotate.finalize"))
+                .withPreValidateStates(List.of("postgresql.db-user-rotate.prevalidate"))
+                .withPostValidateStates(List.of("postgresql.db-user-rotate.postvalidate"))
                 .build();
         CMServiceConfigRotationContext cmServiceConfigRotationContext = getCMServiceConfigRotationContext(userPassPairs, stack);
 

@@ -8,13 +8,13 @@
     - user: root
     - group: postgres
     - mode: 750
-    - source: salt://postgresql/rotate/scripts/rotate_db_secrets_remote.sh
+    - source: salt://postgresql/db-user-rotate/scripts/rotate_db_secrets_remote.sh
     - template: jinja
     - replace: True
 
-rotate-db-secrets-remote:
+finalize-db-secrets-remote:
   cmd.run:
-    - name: runuser -l postgres -s /bin/bash -c '/opt/salt/scripts/rotate_db_secrets_remote.sh rotation' 2>&1 | tee -a /var/log/postgresql_rotate.log && exit ${PIPESTATUS[0]}
+    - name: runuser -l postgres -s /bin/bash -c '/opt/salt/scripts/rotate_db_secrets_remote.sh finalize' 2>&1 | tee -a /var/log/postgresql_rotate_finalize.log && exit ${PIPESTATUS[0]}
     - require:
       - file: /opt/salt/scripts/rotate_db_secrets_remote.sh
 
@@ -26,20 +26,20 @@ rotate-db-secrets-remote:
     - mode: 750
     - user: root
     - group: postgres
-    - source: salt://postgresql/rotate/scripts/rotate_db_secrets.sh
+    - source: salt://postgresql/db-user-rotate/scripts/rotate_db_secrets.sh
     - template: jinja
     - replace: True
 
-rotate-db-secrets:
+finalize-db-secrets:
   cmd.run:
-    - name: runuser -l postgres -s /bin/bash -c '/opt/salt/scripts/rotate_db_secrets.sh rotation' 2>&1 | tee -a /var/log/postgresql_rotate.log && exit ${PIPESTATUS[0]}
+    - name: runuser -l postgres -s /bin/bash -c '/opt/salt/scripts/rotate_db_secrets.sh finalize' 2>&1 | tee -a /var/log/postgresql_rotate_finalize.log && exit ${PIPESTATUS[0]}
     - require:
       - file: /opt/salt/scripts/rotate_db_secrets.sh
 
-restart-pgsql-if-secret-rotated:
+restart-pgsql-if-rotation-finalized:
   service.running:
     - name: postgresql
     - watch:
-      - cmd: rotate-db-secrets
+      - cmd: finalize-db-secrets
 
 {% endif %}

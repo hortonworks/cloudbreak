@@ -54,13 +54,13 @@ public class CMDBPasswordRotationContextProvider extends AbstractCMRelatedDataba
 
         SaltPillarRotationContext pillarUpdateRotationContext = new SaltPillarRotationContext(stack.getResourceCrn(), this::getPillarProperties);
         SaltStateApplyRotationContext stateApplyRotationContext = getSaltStateApplyRotationContextBuilder(stack)
-                .withStates(List.of("cloudera.manager.server-stop", "postgresql.rotate.init",
+                .withStates(List.of("cloudera.manager.server-stop", "postgresql.db-user-rotate.init",
                         "cloudera.manager.rotate.rotate-secrets", "cloudera.manager.server-start"))
-                .withRollbackStates(List.of("cloudera.manager.server-stop", "postgresql.rotate.rollback",
+                .withRollbackStates(List.of("cloudera.manager.server-stop", "postgresql.db-user-rotate.rollback",
                         "cloudera.manager.rotate.rollback-secrets", "cloudera.manager.server-start"))
-                .withCleanupStates(List.of("postgresql.rotate.finalize"))
-                .withPreValidateStates(List.of("postgresql.rotate.prevalidate"))
-                .withPostValidateStates(List.of("postgresql.rotate.postvalidate"))
+                .withCleanupStates(List.of("postgresql.db-user-rotate.finalize"))
+                .withPreValidateStates(List.of("postgresql.db-user-rotate.prevalidate"))
+                .withPostValidateStates(List.of("postgresql.db-user-rotate.postvalidate"))
                 .build();
         CustomJobRotationContext customJobRotationContext = CustomJobRotationContext.builder()
                 .withResourceCrn(stack.getResourceCrn())

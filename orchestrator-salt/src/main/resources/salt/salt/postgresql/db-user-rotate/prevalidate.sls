@@ -8,7 +8,7 @@
     - user: root
     - group: postgres
     - mode: 750
-    - source: salt://postgresql/rotate/scripts/rotate_db_secrets_remote.sh
+    - source: salt://postgresql/db-user-rotate/scripts/rotate_db_secrets_remote.sh
     - template: jinja
     - replace: True
 
@@ -26,7 +26,7 @@ prevalidate-db-secrets-remote:
     - mode: 750
     - user: root
     - group: postgres
-    - source: salt://postgresql/rotate/scripts/rotate_db_secrets.sh
+    - source: salt://postgresql/db-user-rotate/scripts/rotate_db_secrets.sh
     - template: jinja
     - replace: True
 
