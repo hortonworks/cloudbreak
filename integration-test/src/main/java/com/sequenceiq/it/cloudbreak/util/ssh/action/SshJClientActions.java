@@ -700,7 +700,7 @@ public class SshJClientActions {
         if (!instanceGroups.isEmpty() && instanceGroups.getFirst() instanceof InstanceGroupResponse) {
             instanceIps = getInstanceGroupIps((List<InstanceGroupResponse>) instanceGroups, hostGroupNames);
         } else if (!instanceGroups.isEmpty() && instanceGroups.getFirst() instanceof InstanceGroupV4Response) {
-            instanceIps = getInstanceGroupIps((List<InstanceGroupV4Response>) instanceGroups, hostGroupNames, true);
+            instanceIps = getInstanceGroupIps((List<InstanceGroupV4Response>) instanceGroups, hostGroupNames, false);
         }
         return instanceIps.stream()
                 .map(ip -> executeSshCommand(ip, "cloudbreak", null, privateKeyFilePath, command).getValue().toLowerCase(Locale.ROOT))
