@@ -30,6 +30,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
@@ -73,11 +74,14 @@ public class SshJClientActions {
                 .map(InstanceGroupV4Response::getMetadata)
                 .filter(Objects::nonNull)
                 .flatMap(Collection::stream)
-                .map(x -> publicIp && StringUtils.isNotEmpty(x.getPublicIp()) ? x.getPublicIp() : x.getPrivateIp())
+                .map(x -> {
+                    LOGGER.info("For instance [{}] Private IP [{}] and Public IP [{}] are available. {} ip will be used!",
+                            x.getInstanceId(), x.getPrivateIp(), x.getPublicIp(), publicIp && isPublicIpAvailable(x) ? "Public" : "Private");
+                    return publicIp && isPublicIpAvailable(x) ? x.getPublicIp() : x.getPrivateIp();
+                })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
         assert !instanceGroupIpList.isEmpty();
-        LOGGER.info("The available {} IPs [{}].", publicIp ? "Public" : "Private", instanceGroupIpList);
         return instanceGroupIpList;
     }
 
@@ -93,8 +97,8 @@ public class SshJClientActions {
                 .map(instanceMetaData -> {
                     LOGGER.info("The selected Instance Type [{}] and the available Private IP [{}] and Public IP [{}]. {} ip will be used!",
                             instanceMetaData.getInstanceType(), instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIp(),
-                            publicIp ? "Public" : "Private");
-                    return publicIp ? instanceMetaData.getPublicIp() : instanceMetaData.getPrivateIp();
+                            publicIp && isPublicIpAvailable(instanceMetaData) ? "Public" : "Private");
+                    return publicIp && isPublicIpAvailable(instanceMetaData) ? instanceMetaData.getPublicIp() : instanceMetaData.getPrivateIp();
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
@@ -107,7 +111,7 @@ public class SshJClientActions {
                 .filter(Objects::nonNull)
                 .flatMap(Collection::stream)
                 .filter(imd -> GATEWAY_PRIMARY == imd.getInstanceType())
-                .map(imd -> publicIp && StringUtils.isNotEmpty(imd.getPublicIp()) ? imd.getPublicIp() : imd.getPrivateIp())
+                .map(imd -> publicIp && isPublicIpAvailable(imd) ? imd.getPublicIp() : imd.getPrivateIp())
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
@@ -121,12 +125,14 @@ public class SshJClientActions {
                     .map(InstanceGroupV4Response::getMetadata)
                     .filter(Objects::nonNull)
                     .flatMap(Collection::stream)
-                    .map(x -> publicIp && StringUtils.isNotEmpty(x.getPublicIp()) ? x.getPublicIp() : x.getPrivateIp())
+                    .map(x -> {
+                        LOGGER.info("For instance [{}] in host group [{}], Private IP [{}] and Public IP [{}] are available. {} ip will be used!",
+                                x.getInstanceId(), hostGroupName, x.getPublicIp(), x.getPrivateIp(), publicIp && isPublicIpAvailable(x) ? "Public" : "Private");
+                        return publicIp && isPublicIpAvailable(x) ? x.getPublicIp() : x.getPrivateIp();
+                    })
                     .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
+                    .toList();
             assert !instanceGroupIpList.isEmpty();
-            LOGGER.info("The selected Instance Group [{}] and the available {} IPs [{}].",
-                    hostGroupName, publicIp ? "Public" : "Private", instanceGroupIpList);
             instanceIPs.addAll(instanceGroupIpList);
         });
 
@@ -338,7 +344,7 @@ public class SshJClientActions {
         try {
             Pair<Integer, String> cmdOut = executeSshCommand(instanceIP, user, password, fileListCommand);
 
-            List<String> cmdOutputValues = Stream.of(cmdOut.getValue().split("[\\r\\n\\t]")).filter(Objects::nonNull).collect(Collectors.toList());
+            List<String> cmdOutputValues = Stream.of(cmdOut.getValue().split("[\\r\\n\\t]")).filter(Objects::nonNull).toList();
             boolean fileFound = cmdOutputValues.stream()
                     .anyMatch(outputValue -> outputValue.strip().startsWith("/"));
             String foundFilePath = cmdOutputValues.stream()
@@ -358,7 +364,7 @@ public class SshJClientActions {
         for (Entry<String, Pair<Integer, String>> statusReport : statusReportByIp.entrySet()) {
             List<Integer> eventCounts = new Json(statusReport.getValue().getValue()).getMap().entrySet().stream()
                     .filter(status -> String.valueOf(status.getKey()).contains(eventName))
-                    .map(Entry::getValue).collect(Collectors.toList())
+                    .map(Entry::getValue).toList()
                     .stream()
                     .map(countObject -> (Integer) countObject)
                     .collect(Collectors.toList());
@@ -517,7 +523,7 @@ public class SshJClientActions {
                         .flatMap(selectedCategory -> selectedCategory.getValue().entrySet().stream()
                                 .filter(servicesInCategory -> "success_count".equalsIgnoreCase(servicesInCategory.getKey())))
                         .map(Entry::getValue)
-                        .collect(Collectors.toList());
+                        .toList();
                 if (!successCount.isEmpty()) {
                     Log.log(LOGGER, format(" Monitoring Request Signer success count is '%s' at '%s' instance. ", successCount,
                             monitoringStatusReport.getKey()));
@@ -723,6 +729,10 @@ public class SshJClientActions {
     }
 
     private boolean isPublicIpAvailable(InstanceMetaDataResponse instanceMetaData) {
+        return StringUtils.isNotEmpty(instanceMetaData.getPublicIp()) && !NOT_AVAILABLE.equals(instanceMetaData.getPublicIp());
+    }
+
+    private boolean isPublicIpAvailable(InstanceMetaDataV4Response instanceMetaData) {
         return StringUtils.isNotEmpty(instanceMetaData.getPublicIp()) && !NOT_AVAILABLE.equals(instanceMetaData.getPublicIp());
     }
 
