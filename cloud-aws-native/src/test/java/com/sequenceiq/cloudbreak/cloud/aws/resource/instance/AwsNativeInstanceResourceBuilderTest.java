@@ -36,6 +36,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.UpdateType;
@@ -72,6 +73,7 @@ import com.sequenceiq.common.api.type.ResourceType;
 import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
 import software.amazon.awssdk.services.ec2.model.ArchitectureValues;
 import software.amazon.awssdk.services.ec2.model.BlockDeviceMapping;
+import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.Ec2Exception;
 import software.amazon.awssdk.services.ec2.model.HttpTokensState;
@@ -250,21 +252,25 @@ class AwsNativeInstanceResourceBuilderTest {
         Instance instance = Instance.builder().instanceId(INSTANCE_ID).architecture(ArchitectureValues.X86_64).build();
         RunInstancesResponse runInstancesResponse = RunInstancesResponse.builder().instances(instance).build();
         InstanceAuthentication authentication = mock(InstanceAuthentication.class);
+        String groupName = "groupName";
         CloudResource cloudResource = CloudResource.builder()
                 .withName("name")
                 .withType(ResourceType.AWS_INSTANCE)
                 .withStatus(CommonStatus.CREATED)
-                .withGroup("groupName")
+                .withGroup(groupName)
                 .withParameters(emptyMap())
                 .build();
 
         Image image = mock(Image.class);
 
         long privateId = 0;
-        when(awsMethodExecutor.execute(any(), eq(Optional.empty()))).thenReturn(Optional.empty());
+        String instanceName = "instanceName1";
+        when(awsStackNameCommonUtil.getInstanceName(ac, groupName, privateId)).thenReturn(instanceName);
+        when(awsMethodExecutor.execute(any(), eq(Optional.empty()))).then(InvocationOnMock::callRealMethod);
+        when(amazonEc2Client.describeInstances(any())).thenReturn(DescribeInstancesResponse.builder().build());
         when(amazonEc2Client.createInstance(any())).thenReturn(runInstancesResponse);
         when(group.getReferenceInstanceTemplate()).thenReturn(instanceTemplate);
-        when(group.getName()).thenReturn("groupName");
+        when(group.getName()).thenReturn(groupName);
         when(cloudStack.getImage()).thenReturn(image);
         when(cloudStack.getTags()).thenReturn(Map.of("Name", "doNotOverride"));
         when(image.getImageName()).thenReturn("img-name");
@@ -281,6 +287,10 @@ class AwsNativeInstanceResourceBuilderTest {
                 eq(software.amazon.awssdk.services.ec2.model.ResourceType.INSTANCE));
         verify(awsTaggingService, times(1)).prepareEc2TagSpecification(anyMap(),
                 eq(software.amazon.awssdk.services.ec2.model.ResourceType.VOLUME));
+        ArgumentCaptor<DescribeInstancesRequest> describeInstanceRequest = ArgumentCaptor.forClass(DescribeInstancesRequest.class);
+        verify(amazonEc2Client, times(1)).describeInstances(describeInstanceRequest.capture());
+        DescribeInstancesRequest describeInstancesRequestFor = describeInstanceRequest.getValue();
+        assertEquals(instanceName, describeInstancesRequestFor.filters().get(0).values().get(0));
     }
 
     @Test
