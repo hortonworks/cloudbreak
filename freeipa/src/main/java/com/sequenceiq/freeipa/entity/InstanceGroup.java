@@ -185,6 +185,22 @@ public class InstanceGroup implements Comparable<InstanceGroup> {
     }
 
     @Override
+    public String toString() {
+        return "InstanceGroup{" +
+                "id=" + id +
+                ", template=" + template +
+                ", securityGroup=" + securityGroup +
+                ", availabilityZones=" + availabilityZones +
+                ", instanceGroupNetwork=" + instanceGroupNetwork +
+                ", groupName='" + groupName + '\'' +
+                ", instanceGroupType=" + instanceGroupType +
+                ", instanceMetaData=" + instanceMetaData +
+                ", attributes=" + attributes +
+                ", nodeCount=" + nodeCount +
+                '}';
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
