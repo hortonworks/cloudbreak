@@ -93,7 +93,7 @@ public class SecurityRule {
     public String toString() {
         return "SecurityRule{"
                 + "id=" + id
-                + ", securityGroup=" + securityGroup
+                + ", securityGroup=" + (securityGroup == null ? null : securityGroup.getId())
                 + ", cidr='" + cidr + '\''
                 + ", ports='" + ports + '\''
                 + ", protocol='" + protocol + '\''

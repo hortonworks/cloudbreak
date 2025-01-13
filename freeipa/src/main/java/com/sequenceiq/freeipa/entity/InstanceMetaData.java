@@ -296,7 +296,7 @@ public class InstanceMetaData implements OrchestrationNode {
                 ", subnetId='" + subnetId + '\'' +
                 ", availabilityZone='" + availabilityZone + '\'' +
                 ", instanceName='" + instanceName + '\'' +
-                ", instanceGroup=" + instanceGroup +
+                ", instanceGroup=" + (instanceGroup == null ? null : instanceGroup.getId()) +
                 ", lifeCycle=" + lifeCycle +
                 ", variant='" + variant + '\'' +
                 ", userdataSecretResource=" + userdataSecretResourceId +
