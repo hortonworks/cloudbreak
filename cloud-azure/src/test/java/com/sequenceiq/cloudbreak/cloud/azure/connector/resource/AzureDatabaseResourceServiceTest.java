@@ -77,7 +77,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureFlexibleServerClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureSingleServerClient;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
-import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureFlexibleServerPermissionValidator;
+import com.sequenceiq.cloudbreak.cloud.azure.validator.AzurePermissionValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureDatabaseServerView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -160,7 +160,7 @@ class AzureDatabaseResourceServiceTest {
     private PersistenceNotifier persistenceNotifier;
 
     @Mock
-    private AzureFlexibleServerPermissionValidator azureFlexibleServerPermissionValidator;
+    private AzurePermissionValidator azurePermissionValidator;
 
     @Mock
     private PollTaskFactory statusCheckFactory;

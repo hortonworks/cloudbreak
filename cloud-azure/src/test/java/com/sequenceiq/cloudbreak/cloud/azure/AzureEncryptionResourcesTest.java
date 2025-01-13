@@ -302,7 +302,7 @@ public class AzureEncryptionResourcesTest {
         when(azureClient.keyVaultExists("dummyResourceGroup", "dummyVaultName")).thenReturn(Boolean.TRUE);
         when(azureClient.getVaultNameFromEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion"))
                 .thenReturn("dummyVaultName");
-        when(azureClient.checkKeyVaultAccessPolicyForServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID))
+        when(azureClient.isValidKeyVaultAccessPolicyListForServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID))
                 .thenReturn(true);
         initRetry();
         // Return the same DES instance to simulate that the poller checker task instantly completed
@@ -323,7 +323,7 @@ public class AzureEncryptionResourcesTest {
                 any(String.class),
                 any(Map.class));
         verify(azureClient).grantKeyVaultAccessPolicyToServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
-        verify(azureClient).checkKeyVaultAccessPolicyForServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
+        verify(azureClient).isValidKeyVaultAccessPolicyListForServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
 
         verifyPersistedCloudResource();
     }
@@ -457,7 +457,7 @@ public class AzureEncryptionResourcesTest {
         when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
         when(azureClient.getCurrentSubscription()).thenReturn(subscription);
         when(azureClient.getDiskEncryptionSetByName(any(String.class), any(String.class))).thenReturn(desInitial);
-        when(azureClient.checkKeyVaultAccessPolicyForServicePrincipal(any(String.class), any(String.class), any(String.class))).thenReturn(true);
+        when(azureClient.isValidKeyVaultAccessPolicyListForServicePrincipal(any(String.class), any(String.class), any(String.class))).thenReturn(true);
         initRetry();
         // Return a different DES instance to simulate that the poller checker task initially indicated incomplete, hence the final DES was obtained by the
         // scheduled execution of the poller
@@ -481,7 +481,7 @@ public class AzureEncryptionResourcesTest {
                 any(String.class),
                 any(Map.class));
         verify(azureClient).grantKeyVaultAccessPolicyToServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
-        verify(azureClient).checkKeyVaultAccessPolicyForServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
+        verify(azureClient).isValidKeyVaultAccessPolicyListForServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
 
         verifyPersistedCloudResource();
     }
@@ -528,7 +528,7 @@ public class AzureEncryptionResourcesTest {
         when(azureClient.keyVaultExists("dummyResourceGroup", "dummyVaultName")).thenReturn(Boolean.TRUE);
         when(azureClient.getVaultNameFromEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion"))
                 .thenReturn("dummyVaultName");
-        when(azureClient.checkKeyVaultAccessPolicyForServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID))
+        when(azureClient.isValidKeyVaultAccessPolicyListForServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID))
                 .thenReturn(true);
         initRetry();
         // Return the same DES instance to simulate that the poller checker task instantly completed
@@ -540,7 +540,7 @@ public class AzureEncryptionResourcesTest {
         assertEquals(createdDes.getDiskEncryptionSetLocation(), "dummyRegion");
         assertEquals(createdDes.getDiskEncryptionSetResourceGroupName(), "dummyResourceGroup");
         verify(azureClient).grantKeyVaultAccessPolicyToServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
-        verify(azureClient).checkKeyVaultAccessPolicyForServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
+        verify(azureClient).isValidKeyVaultAccessPolicyListForServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
 
         verifyPersistedCloudResource();
     }
@@ -643,7 +643,7 @@ public class AzureEncryptionResourcesTest {
         when(azureClient.keyVaultExists("dummyResourceGroup", "dummyVaultName")).thenReturn(Boolean.TRUE);
         when(azureClient.getVaultNameFromEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion"))
                 .thenReturn("dummyVaultName");
-        when(azureClient.checkKeyVaultAccessPolicyForServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID))
+        when(azureClient.isValidKeyVaultAccessPolicyListForServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID))
                 .thenReturn(false);
         initRetry();
         // Return the same DES instance to simulate that the poller checker task instantly completed
@@ -697,7 +697,7 @@ public class AzureEncryptionResourcesTest {
                 any(String.class),
                 any(String.class),
                 any(Map.class))).thenReturn(des);
-        when(azureClient.checkKeyVaultAccessPolicyForServicePrincipal("dummyVaultResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID))
+        when(azureClient.isValidKeyVaultAccessPolicyListForServicePrincipal("dummyVaultResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID))
                 .thenReturn(true);
         initRetry();
         // Return the same DES instance to simulate that the poller checker task instantly completed
@@ -711,7 +711,7 @@ public class AzureEncryptionResourcesTest {
         assertEquals(createdDes.getDiskEncryptionSetLocation(), "dummyRegion");
         assertEquals(createdDes.getDiskEncryptionSetResourceGroupName(), "dummyResourceGroup");
         verify(azureClient).grantKeyVaultAccessPolicyToServicePrincipal("dummyVaultResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
-        verify(azureClient).checkKeyVaultAccessPolicyForServicePrincipal("dummyVaultResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
+        verify(azureClient).isValidKeyVaultAccessPolicyListForServicePrincipal("dummyVaultResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
 
         verifyPersistedCloudResource();
     }
@@ -782,7 +782,7 @@ public class AzureEncryptionResourcesTest {
                 any(String.class),
                 any(Map.class))).thenReturn(des);
         when(azureClient.keyVaultExists("dummyResourceGroup", "dummyVaultName")).thenReturn(Boolean.TRUE);
-        when(azureClient.checkKeyVaultAccessPolicyForServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID))
+        when(azureClient.isValidKeyVaultAccessPolicyListForServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID))
                 .thenReturn(true);
         initRetry();
         // Return the same DES instance to simulate that the poller checker task instantly completed
@@ -794,7 +794,7 @@ public class AzureEncryptionResourcesTest {
         assertEquals(createdDes.getDiskEncryptionSetLocation(), "dummyRegion");
         assertEquals(createdDes.getDiskEncryptionSetResourceGroupName(), "envName-CDP_DES-uniqueId");
         verify(azureClient).grantKeyVaultAccessPolicyToServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
-        verify(azureClient).checkKeyVaultAccessPolicyForServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
+        verify(azureClient).isValidKeyVaultAccessPolicyListForServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
         verify(azureClient).createResourceGroup(eq("envName-CDP_DES-uniqueId"), eq("dummyRegion"), any(HashMap.class));
         verifyPersistedResourceGroupAndDiskEncryptionSetCloudResource(resourceGroup.id());
     }

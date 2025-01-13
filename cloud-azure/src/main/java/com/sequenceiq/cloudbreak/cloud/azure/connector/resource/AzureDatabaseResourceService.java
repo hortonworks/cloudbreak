@@ -48,7 +48,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.client.AzureFlexibleServerClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureSingleServerClient;
 import com.sequenceiq.cloudbreak.cloud.azure.template.AzureTransientDeploymentService;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
-import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureFlexibleServerPermissionValidator;
+import com.sequenceiq.cloudbreak.cloud.azure.validator.AzurePermissionValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureRDSAutoMigrationValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureDatabaseServerView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -125,7 +125,7 @@ public class AzureDatabaseResourceService {
     private AzureTransientDeploymentService azureTransientDeploymentService;
 
     @Inject
-    private AzureFlexibleServerPermissionValidator azureFlexibleServerPermissionValidator;
+    private AzurePermissionValidator azurePermissionValidator;
 
     @Inject
     private AzureRDSAutoMigrationValidator azureRDSAutoMigrationValidator;
@@ -147,7 +147,7 @@ public class AzureDatabaseResourceService {
         CloudContext cloudContext = ac.getCloudContext();
         AzureClient client = ac.getParameter(AzureClient.class);
 
-        azureFlexibleServerPermissionValidator.validate(client, stack.getDatabaseServer());
+        azurePermissionValidator.validateFlexibleServerPermission(client, stack.getDatabaseServer());
         String stackName = azureUtils.getStackName(cloudContext);
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
         ResourceGroupUsage resourceGroupUsage = azureResourceGroupMetadataProvider.getResourceGroupUsage(stack);
@@ -507,7 +507,7 @@ public class AzureDatabaseResourceService {
 
     public void validateUpgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack dbStack) {
         AzureClient client = authenticatedContext.getParameter(AzureClient.class);
-        azureFlexibleServerPermissionValidator.validatePermission(client);
+        azurePermissionValidator.validateFlexibleServerPermission(client);
         azureRDSAutoMigrationValidator.validate(authenticatedContext, dbStack);
     }
 

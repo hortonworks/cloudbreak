@@ -92,6 +92,7 @@ public class ResourceEncryptionInitializationHandler extends EventSenderAwareHan
         String environmentName = environment.getName();
         LOGGER.info("Initializing encryption resources for environment \"{}\".", environmentName);
         try {
+            environmentEncryptionService.validateEncryptionParameters(environmentDto);
             CreatedDiskEncryptionSet createdDiskEncryptionSet = environmentEncryptionService.createEncryptionResources(environmentDto);
             LOGGER.info("Created Disk Encryption Set resource for environment \"{}\": {}", environmentName, createdDiskEncryptionSet);
             AzureParameters azureParameters = (AzureParameters) environment.getParameters();
@@ -116,4 +117,3 @@ public class ResourceEncryptionInitializationHandler extends EventSenderAwareHan
     }
 
 }
-
