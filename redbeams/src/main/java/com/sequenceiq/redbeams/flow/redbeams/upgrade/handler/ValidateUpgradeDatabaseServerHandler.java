@@ -96,7 +96,7 @@ public class ValidateUpgradeDatabaseServerHandler extends ExceptionCatcherEventH
 
         try {
             // Validating encryption
-            databaseEncryptionValidator.validateEncryption(dbStack.getCloudPlatform(), dbStack.getEnvironmentId(),
+            databaseEncryptionValidator.validateEncryptionDuringUpgrade(dbStack.getCloudPlatform(), dbStack.getEnvironmentId(),
                     databaseStack.getDatabaseServer(), targetMajorVersion);
 
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);

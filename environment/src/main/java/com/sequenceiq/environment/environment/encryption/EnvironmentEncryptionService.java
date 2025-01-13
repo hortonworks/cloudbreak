@@ -4,10 +4,14 @@ import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -23,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.CreatedDiskEncryptionSet;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.DiskEncryptionSetCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.DiskEncryptionSetDeletionRequest;
+import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionParametersValidationRequest;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -35,6 +40,7 @@ import com.sequenceiq.environment.resourcepersister.CloudResourceRetrieverServic
 
 @Component
 public class EnvironmentEncryptionService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentEncryptionService.class);
 
     private final CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
@@ -51,6 +57,12 @@ public class EnvironmentEncryptionService {
         this.cloudPlatformConnectors = cloudPlatformConnectors;
         this.environmentTagProvider = environmentTagProvider;
         this.resourceRetriever = resourceRetriever;
+    }
+
+    public void validateEncryptionParameters(EnvironmentDto environmentDto) {
+        EncryptionResources encryptionResources = getEncryptionResources(environmentDto.getCloudPlatform());
+        EncryptionParametersValidationRequest validationRequest = createEncryptionParametersValidationRequest(environmentDto);
+        encryptionResources.validateEncryptionParameters(validationRequest);
     }
 
     public CreatedDiskEncryptionSet createEncryptionResources(EnvironmentDto environmentDto) {
@@ -73,14 +85,8 @@ public class EnvironmentEncryptionService {
 
     @VisibleForTesting
     DiskEncryptionSetCreationRequest createEncryptionResourcesCreationRequest(EnvironmentDto environment) {
-        String encryptionKeyResourceGroupName = Optional.ofNullable(environment.getParameters())
-                .map(ParametersDto::getAzureParametersDto)
-                .map(AzureParametersDto::getAzureResourceEncryptionParametersDto)
-                .map(AzureResourceEncryptionParametersDto::getEncryptionKeyResourceGroupName).orElse(null);
-        String diskEncryptionSetResourceGroupName = Optional.ofNullable(environment.getParameters())
-                .map(ParametersDto::getAzureParametersDto)
-                .map(AzureParametersDto::getAzureResourceGroupDto)
-                .map(AzureResourceGroupDto::getName).orElse(null);
+        String encryptionKeyResourceGroupName = getVaultResourceGroup(environment);
+        String diskEncryptionSetResourceGroupName = getEnvironmentResourceGroupName(environment);
         DiskEncryptionSetCreationRequest.Builder builder = new DiskEncryptionSetCreationRequest.Builder()
                 .withId(Crn.safeFromString(environment.getResourceCrn()).getResource())
                 .withCloudCredential(credentialToCloudCredentialConverter.convert(environment.getCredential()))
@@ -104,6 +110,41 @@ public class EnvironmentEncryptionService {
                 .withCloudContext(getCloudContext(environment))
                 .withCloudResources(getResourcesForDeletion(environment))
                 .build();
+    }
+
+    private EncryptionParametersValidationRequest createEncryptionParametersValidationRequest(EnvironmentDto environmentDto) {
+        String resourceGroupName = getEnvironmentResourceGroupName(environmentDto);
+        Map<ResourceType, CloudResource> cloudResourceMap = Optional.ofNullable(environmentDto.getParameters())
+                .map(ParametersDto::getAzureParametersDto)
+                .map(AzureParametersDto::getAzureResourceEncryptionParametersDto)
+                .map(encryptionParameters -> createAzureEncryptionCloudResources(encryptionParameters, resourceGroupName))
+                .orElse(Map.of());
+        return new EncryptionParametersValidationRequest(getCloudContext(environmentDto),
+                credentialToCloudCredentialConverter.convert(environmentDto.getCredential()), cloudResourceMap);
+    }
+
+    private Map<ResourceType, CloudResource> createAzureEncryptionCloudResources(AzureResourceEncryptionParametersDto encryptionParameters,
+            String resourceGroupName) {
+        Map<ResourceType, CloudResource> cloudResourceMap = new EnumMap<>(ResourceType.class);
+        cloudResourceMap.put(ResourceType.AZURE_RESOURCE_GROUP, CloudResource.builder()
+                .withType(ResourceType.AZURE_RESOURCE_GROUP)
+                .withName(StringUtils.isNotEmpty(encryptionParameters.getEncryptionKeyResourceGroupName()) ?
+                        encryptionParameters.getEncryptionKeyResourceGroupName() : resourceGroupName)
+                .build());
+        cloudResourceMap.put(ResourceType.AZURE_KEYVAULT_KEY, CloudResource.builder()
+                .withType(ResourceType.AZURE_KEYVAULT_KEY)
+                .withName(encryptionParameters.getEncryptionKeyUrl())
+                .withReference(encryptionParameters.getEncryptionKeyUrl())
+                .build());
+        if (StringUtils.isNotEmpty(encryptionParameters.getUserManagedIdentity())) {
+            cloudResourceMap.put(ResourceType.AZURE_MANAGED_IDENTITY, CloudResource.builder()
+                    .withType(ResourceType.AZURE_MANAGED_IDENTITY)
+                    .withName(encryptionParameters.getUserManagedIdentity())
+                    .withReference(encryptionParameters.getUserManagedIdentity())
+                    .build());
+        }
+        LOGGER.debug("Cloud resources for Azure encryption: {}", cloudResourceMap);
+        return cloudResourceMap;
     }
 
     private CloudContext getCloudContext(EnvironmentDto environment) {
@@ -131,5 +172,19 @@ public class EnvironmentEncryptionService {
                 ResourceType.AZURE_RESOURCE_GROUP);
         rgCloudResourceOptional.ifPresent(resources::add);
         return resources;
+    }
+
+    private String getEnvironmentResourceGroupName(EnvironmentDto environmentDto) {
+        return Optional.ofNullable(environmentDto.getParameters())
+                .map(ParametersDto::getAzureParametersDto)
+                .map(AzureParametersDto::getAzureResourceGroupDto)
+                .map(AzureResourceGroupDto::getName).orElse(null);
+    }
+
+    private String getVaultResourceGroup(EnvironmentDto environmentDto) {
+        return Optional.ofNullable(environmentDto.getParameters())
+                .map(ParametersDto::getAzureParametersDto)
+                .map(AzureParametersDto::getAzureResourceEncryptionParametersDto)
+                .map(AzureResourceEncryptionParametersDto::getEncryptionKeyResourceGroupName).orElse(null);
     }
 }

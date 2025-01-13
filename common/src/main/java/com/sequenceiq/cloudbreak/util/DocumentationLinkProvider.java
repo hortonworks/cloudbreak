@@ -45,4 +45,9 @@ public class DocumentationLinkProvider {
     public static String awsS3guardDisableDocumentationLink() {
         return "https://docs.cloudera.com/cdp-public-cloud-preview-features/cloud/disable-s3-guard/disable-s3-guard.pdf";
     }
+
+    public static String azureFlexibleServerCMKManagedIdentityLink() {
+        return "https://docs.cloudera.com/cdp-public-cloud/cloud/requirements-azure/topics/" +
+                "mc-customer_managed_encryption_keys.html#managed_identity_for_configuring_a_cmk_for_encrypting_azure_database_for_postgresql_flexible_server";
+    }
 }

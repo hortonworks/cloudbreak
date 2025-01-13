@@ -59,6 +59,7 @@ import com.sequenceiq.redbeams.service.EnvironmentService;
 import com.sequenceiq.redbeams.service.network.NetworkBuilderService;
 import com.sequenceiq.redbeams.service.sslcertificate.DatabaseServerSslCertificatePrescriptionService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
+import com.sequenceiq.redbeams.service.validation.DatabaseEncryptionValidator;
 
 @ExtendWith(MockitoExtension.class)
 class AllocateDatabaseServerHandlerTest {
@@ -94,6 +95,9 @@ class AllocateDatabaseServerHandlerTest {
 
     @Mock
     private DBStackService dbStackService;
+
+    @Mock
+    private DatabaseEncryptionValidator databaseEncryptionValidator;
 
     @InjectMocks
     private AllocateDatabaseServerHandler underTest;

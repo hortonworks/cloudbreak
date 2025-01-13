@@ -258,11 +258,10 @@ public class RdsUpgradeOrchestratorService {
                 .orElse("");
 
         JsonNode dbSizeCommandOutput = primaryGwResult.get(fieldName);
-        JsonNode changes = dbSizeCommandOutput.get("changes");
-        if (dbSizeCommandOutput == null || changes == null) {
+        if (dbSizeCommandOutput == null ||  dbSizeCommandOutput.get("changes") == null) {
             logErrorAndThrow("Orchestrator engine could not run database size checking");
         }
-
+        JsonNode changes = dbSizeCommandOutput.get("changes");
         JsonNode stdErr = changes.get("stderr");
         if (stdErr != null && !stdErr.textValue().isEmpty()) {
             logErrorAndThrow(String.format("Could not determine database size, because of the following error: %s", stdErr.textValue()));

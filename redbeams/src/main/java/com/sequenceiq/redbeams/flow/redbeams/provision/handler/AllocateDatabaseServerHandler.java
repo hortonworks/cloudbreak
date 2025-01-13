@@ -46,6 +46,7 @@ import com.sequenceiq.redbeams.service.EnvironmentService;
 import com.sequenceiq.redbeams.service.network.NetworkBuilderService;
 import com.sequenceiq.redbeams.service.sslcertificate.DatabaseServerSslCertificatePrescriptionService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
+import com.sequenceiq.redbeams.service.validation.DatabaseEncryptionValidator;
 
 @Component
 public class AllocateDatabaseServerHandler extends ExceptionCatcherEventHandler<AllocateDatabaseServerRequest> {
@@ -85,6 +86,9 @@ public class AllocateDatabaseServerHandler extends ExceptionCatcherEventHandler<
     @Inject
     private CloudResourceValidationService cloudResourceValidationService;
 
+    @Inject
+    private DatabaseEncryptionValidator databaseEncryptionValidator;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(AllocateDatabaseServerRequest.class);
@@ -109,6 +113,7 @@ public class AllocateDatabaseServerHandler extends ExceptionCatcherEventHandler<
                             dbStack,
                             databaseStack,
                             Optional.empty());
+            databaseEncryptionValidator.validateEncryption(dbStack.getCloudPlatform(), databaseStack.getDatabaseServer());
             List<CloudResourceStatus> resourceStatuses = connector.resources().launchDatabaseServer(ac, databaseStack, persistenceNotifier);
             List<CloudResource> resources = ResourceLists.transform(resourceStatuses);
 
@@ -139,8 +144,8 @@ public class AllocateDatabaseServerHandler extends ExceptionCatcherEventHandler<
 
     private Network setupNetworkIfMissing(AllocateDatabaseServerRequest request, DBStack dbStack, Network originalNetwork) {
         if (dbStack.getNetwork() == null) {
-            LOGGER.debug("Network is missing for DBStack, setting up");
             DetailedEnvironmentResponse environment = environmentService.getByCrn(dbStack.getEnvironmentId());
+            LOGGER.debug("Network is missing for DBStack, setting up");
             dbStack.setNetwork(networkBuilderService.buildNetwork(request.getNetworkParameters(), environment, dbStack).getId());
             return dbStackToDatabaseStackConverter.buildNetwork(dbStack);
         } else {

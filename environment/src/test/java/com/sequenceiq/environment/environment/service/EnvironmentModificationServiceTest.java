@@ -742,6 +742,7 @@ class EnvironmentModificationServiceTest {
                 .withAzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto.builder()
                         .withEncryptionKeyUrl("dummyKeyUrl")
                         .withEncryptionKeyResourceGroupName("dummyResourceGroupName")
+                        .withUserManagedIdentity("managedidentity")
                         .build())
                 .build();
         CreatedDiskEncryptionSet createdDiskEncryptionSet = new CreatedDiskEncryptionSet.Builder()
@@ -763,7 +764,6 @@ class EnvironmentModificationServiceTest {
         verify(azureParametersRepository).save(azureParametersArgumentCaptor.capture());
         assertEquals("dummyKeyUrl", azureParametersArgumentCaptor.getValue().getEncryptionKeyUrl());
         assertEquals("dummyResourceGroupName", azureParametersArgumentCaptor.getValue().getEncryptionKeyResourceGroupName());
-
     }
 
     @Test

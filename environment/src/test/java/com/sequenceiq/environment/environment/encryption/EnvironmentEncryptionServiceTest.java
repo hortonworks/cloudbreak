@@ -3,6 +3,7 @@ package com.sequenceiq.environment.environment.encryption;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -35,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.CreatedDiskEncryptionSet;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.DiskEncryptionSetCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.DiskEncryptionSetDeletionRequest;
+import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionParametersValidationRequest;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.environment.credential.domain.Credential;
@@ -414,4 +416,75 @@ class EnvironmentEncryptionServiceTest {
         assertEquals(rgCloudResource.getType(), ResourceType.AZURE_RESOURCE_GROUP);
     }
 
+    @Test
+    void testValidateEncryptionParameters() {
+        EnvironmentDto environmentDto = EnvironmentDto.builder()
+                .withResourceCrn(ENVIRONMENT_CRN)
+                .withId(ENVIRONMENT_ID)
+                .withName(ENVIRONMENT_NAME)
+                .withCloudPlatform(CLOUD_PLATFORM)
+                .withCredential(credential)
+                .withLocationDto(LocationDto.builder().withName(REGION).build())
+                .withParameters(ParametersDto.builder()
+                        .withAzureParametersDto(AzureParametersDto.builder()
+                                .withAzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto.builder()
+                                        .withEncryptionKeyUrl(KEY_URL)
+                                        .withEncryptionKeyResourceGroupName(KEY_URL_RESOURCE_GROUP_NAME)
+                                        .build())
+                                .withAzureResourceGroupDto(AzureResourceGroupDto.builder()
+                                        .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE)
+                                        .withName("envrg").build())
+                                .build())
+                        .build())
+                .withCreator(USER_NAME)
+                .withAccountId(ACCOUNT_ID)
+                .build();
+        when(cloudPlatformConnectors.get(any(CloudPlatformVariant.class))).thenReturn(cloudConnector);
+        when(cloudConnector.encryptionResources()).thenReturn(encryptionResources);
+
+        underTest.validateEncryptionParameters(environmentDto);
+
+        ArgumentCaptor<EncryptionParametersValidationRequest> validationRequestCaptor = ArgumentCaptor.forClass(EncryptionParametersValidationRequest.class);
+        verify(encryptionResources).validateEncryptionParameters(validationRequestCaptor.capture());
+        EncryptionParametersValidationRequest validationRequest = validationRequestCaptor.getValue();
+        assertEquals(KEY_URL_RESOURCE_GROUP_NAME, validationRequest.cloudResources().get(ResourceType.AZURE_RESOURCE_GROUP).getName());
+        assertEquals(KEY_URL, validationRequest.cloudResources().get(ResourceType.AZURE_KEYVAULT_KEY).getName());
+        assertFalse(validationRequest.cloudResources().containsKey(ResourceType.AZURE_MANAGED_IDENTITY));
+    }
+
+    @Test
+    void testValidateEncryptionParametersWithManagedIdentityWithoutRG() {
+        EnvironmentDto environmentDto = EnvironmentDto.builder()
+                .withResourceCrn(ENVIRONMENT_CRN)
+                .withId(ENVIRONMENT_ID)
+                .withName(ENVIRONMENT_NAME)
+                .withCloudPlatform(CLOUD_PLATFORM)
+                .withCredential(credential)
+                .withLocationDto(LocationDto.builder().withName(REGION).build())
+                .withParameters(ParametersDto.builder()
+                        .withAzureParametersDto(AzureParametersDto.builder()
+                                .withAzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto.builder()
+                                        .withEncryptionKeyUrl(KEY_URL)
+                                        .withUserManagedIdentity("managedIdentity")
+                                        .build())
+                                .withAzureResourceGroupDto(AzureResourceGroupDto.builder()
+                                        .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE)
+                                        .withName("envrg").build())
+                                .build())
+                        .build())
+                .withCreator(USER_NAME)
+                .withAccountId(ACCOUNT_ID)
+                .build();
+        when(cloudPlatformConnectors.get(any(CloudPlatformVariant.class))).thenReturn(cloudConnector);
+        when(cloudConnector.encryptionResources()).thenReturn(encryptionResources);
+
+        underTest.validateEncryptionParameters(environmentDto);
+
+        ArgumentCaptor<EncryptionParametersValidationRequest> validationRequestCaptor = ArgumentCaptor.forClass(EncryptionParametersValidationRequest.class);
+        verify(encryptionResources).validateEncryptionParameters(validationRequestCaptor.capture());
+        EncryptionParametersValidationRequest validationRequest = validationRequestCaptor.getValue();
+        assertEquals("envrg", validationRequest.cloudResources().get(ResourceType.AZURE_RESOURCE_GROUP).getName());
+        assertEquals(KEY_URL, validationRequest.cloudResources().get(ResourceType.AZURE_KEYVAULT_KEY).getName());
+        assertEquals("managedIdentity", validationRequest.cloudResources().get(ResourceType.AZURE_MANAGED_IDENTITY).getName());
+    }
 }

@@ -381,11 +381,11 @@ class AzureClientTest {
                 .withObjectId("400")
                 .withPermissions(new Permissions().withKeys(List.of(KeyPermissions.WRAP_KEY, KeyPermissions.UNWRAP_KEY))));
 
-        assertTrue(underTest.checkKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "100"));
-        Assertions.assertFalse(underTest.checkKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "200"));
-        Assertions.assertFalse(underTest.checkKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "300"));
-        Assertions.assertFalse(underTest.checkKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "400"));
-        Assertions.assertFalse(underTest.checkKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "dummy"));
+        assertTrue(underTest.isValidKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "100"));
+        Assertions.assertFalse(underTest.isValidKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "200"));
+        Assertions.assertFalse(underTest.isValidKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "300"));
+        Assertions.assertFalse(underTest.isValidKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "400"));
+        Assertions.assertFalse(underTest.isValidKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "dummy"));
     }
 
     @Test

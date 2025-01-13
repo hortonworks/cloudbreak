@@ -17,13 +17,17 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.azure.resourcemanager.compute.fluent.models.DiskEncryptionSetInner;
+import com.azure.resourcemanager.keyvault.models.Vault;
+import com.azure.resourcemanager.msi.models.Identity;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
 import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
 import com.sequenceiq.cloudbreak.cloud.EncryptionResources;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
 import com.sequenceiq.cloudbreak.cloud.azure.task.diskencryptionset.DiskEncryptionSetCreationCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.azure.task.diskencryptionset.DiskEncryptionSetCreationPoller;
+import com.sequenceiq.cloudbreak.cloud.azure.validator.AzurePermissionValidator;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -33,10 +37,13 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.CreatedDiskEncryptionSet;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.DiskEncryptionSetCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.DiskEncryptionSetDeletionRequest;
+import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionParametersValidationRequest;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.common.api.type.CommonStatus;
+import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
 public class AzureEncryptionResources implements EncryptionResources {
@@ -67,6 +74,9 @@ public class AzureEncryptionResources implements EncryptionResources {
     @Inject
     private CloudResourceHelper cloudResourceHelper;
 
+    @Inject
+    private AzurePermissionValidator azurePermissionValidator;
+
     @Override
     public Platform platform() {
         return AzureConstants.PLATFORM;
@@ -75,6 +85,57 @@ public class AzureEncryptionResources implements EncryptionResources {
     @Override
     public Variant variant() {
         return AzureConstants.VARIANT;
+    }
+
+    @Override
+    public void validateEncryptionParameters(EncryptionParametersValidationRequest validationRequest) {
+        AuthenticatedContext authenticatedContext = azureClientService.createAuthenticatedContext(validationRequest.cloudContext(),
+                validationRequest.cloudCredential());
+        AzureClient azureClient = authenticatedContext.getParameter(AzureClient.class);
+
+        Map<ResourceType, CloudResource> cloudResourceMap = validationRequest.cloudResources();
+        CloudResource vaultKeyResource = cloudResourceMap.get(ResourceType.AZURE_KEYVAULT_KEY);
+        CloudResource vaultResourceGroup = cloudResourceMap.get(ResourceType.AZURE_RESOURCE_GROUP);
+        CloudResource managedIdentity = cloudResourceMap.get(ResourceType.AZURE_MANAGED_IDENTITY);
+        if (vaultResourceGroup == null || vaultKeyResource == null) {
+            throw new BadRequestException("Vault key and vault resource group is mandatory parameters");
+        }
+        String vaultResourceGroupName = vaultResourceGroup.getName();
+        String vaultName = azureClient.getVaultNameFromEncryptionKeyUrl(vaultKeyResource.getReference());
+        if (managedIdentity != null) {
+            try {
+                Identity identity = azureClient.getIdentityById(managedIdentity.getReference());
+                if (identity == null) {
+                    String identityNotFound = String.format("Managed identity does not exist: %s. Please fix the reference or " +
+                            "create Managed identity as it is mandatory for CMK and retry the operation", managedIdentity.getReference());
+
+                    LOGGER.error(identityNotFound);
+                    throw new BadRequestException(identityNotFound);
+                }
+                Vault vault = azureClient.getKeyVault(vaultResourceGroupName, vaultName);
+                if (vault == null) {
+                    String vaultNotFound = String.format("Vault with name \"%s\" in \"%s\" resource group either does not exist or user does not have " +
+                            "permission to access it. Kindly check if the vault & encryption key exists and the correct encryption key URL is specified.",
+                            vaultName, vaultResourceGroupName);
+                    LOGGER.error(vaultNotFound);
+                    throw new BadRequestException(vaultNotFound);
+                } else if (vault.roleBasedAccessControlEnabled()) {
+                    azurePermissionValidator.validateCMKManagedIdentityPermissions(azureClient, identity, vault);
+                } else if (!azureClient.isValidKeyVaultAccessPolicyListForServicePrincipal(vault.accessPolicies(), identity.principalId())) {
+                    String missingAccessPolicies = String.format(
+                            "Missing Key Vault AccessPolicies (get key, wrap key, unwrap key) in %s key vault for %s managed identity",
+                            vaultName, managedIdentity.getName());
+                    LOGGER.error(missingAccessPolicies);
+                    throw new BadRequestException(missingAccessPolicies);
+                }
+            } catch (ProviderAuthenticationFailedException authenticationException) {
+                LOGGER.error("CMK permission checking is not authorized on your credential: {}", authenticationException.getMessage());
+                throw new BadRequestException(String.format("User does not have read permissions to Vault with name \"%s\" in \"%s\" resourgroup. " +
+                        " Kindly check if the user has read permission for the Vault.", vaultName, vaultResourceGroupName));
+            }
+        } else {
+            LOGGER.info("No managed identity is given, CMK validation will be skipped");
+        }
     }
 
     @Override
@@ -218,7 +279,7 @@ public class AzureEncryptionResources implements EncryptionResources {
     }
 
     private CreatedDiskEncryptionSet getOrCreateDiskEncryptionSetOnCloud(AuthenticatedContext authenticatedContext, AzureClient azureClient,
-        String desResourceGroupName, String sourceVaultId, DiskEncryptionSetCreationRequest request, boolean singleResourceGroup) {
+            String desResourceGroupName, String sourceVaultId, DiskEncryptionSetCreationRequest request, boolean singleResourceGroup) {
         CloudContext cloudContext = request.getCloudContext();
         String region = cloudContext.getLocation().getRegion().getRegionName();
         Map<String, String> tags = request.getTags();
@@ -279,7 +340,7 @@ public class AzureEncryptionResources implements EncryptionResources {
     }
 
     private void grantKeyVaultAccessPolicyToDiskEncryptionSetServicePrincipal(AzureClient azureClient, String vaultResourceGroupName, String vaultName,
-        String desResourceGroupName, String desName, String desPrincipalObjectId) {
+            String desResourceGroupName, String desName, String desPrincipalObjectId) {
         String description = String.format("access to Key Vault \"%s\" in Resource Group \"%s\" for Service Principal having object ID \"%s\" " +
                         "associated with Disk Encryption Set \"%s\" in Resource Group \"%s\"", vaultName, vaultResourceGroupName, desPrincipalObjectId,
                 desName, desResourceGroupName);
@@ -287,7 +348,7 @@ public class AzureEncryptionResources implements EncryptionResources {
             try {
                 LOGGER.info("Granting {}.", description);
                 azureClient.grantKeyVaultAccessPolicyToServicePrincipal(vaultResourceGroupName, vaultName, desPrincipalObjectId);
-                if (!azureClient.checkKeyVaultAccessPolicyForServicePrincipal(vaultResourceGroupName, vaultName, desPrincipalObjectId)) {
+                if (!azureClient.isValidKeyVaultAccessPolicyListForServicePrincipal(vaultResourceGroupName, vaultName, desPrincipalObjectId)) {
                     throw new CloudConnectorException(
                             String.format("Access policy has not been granted to object Id: %s, Retrying ...", desPrincipalObjectId));
                 }
@@ -323,7 +384,7 @@ public class AzureEncryptionResources implements EncryptionResources {
     }
 
     private void removeKeyVaultAccessPolicyFromDiskEncryptionSetServicePrincipal(AzureClient azureClient, String desResourceGroupName, String desName,
-        String encryptionKeyUrl, String desPrincipalObjectId, String sourceVaultId) {
+            String encryptionKeyUrl, String desPrincipalObjectId, String sourceVaultId) {
         String vaultResourceGroupName;
         String vaultName = azureClient.getVaultNameFromEncryptionKeyUrl(encryptionKeyUrl);
         if (vaultName == null) {

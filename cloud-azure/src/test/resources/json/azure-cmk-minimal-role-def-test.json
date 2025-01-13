@@ -1,0 +1,14 @@
+{
+  "Name": "Cloudera Management Console Azure Operator for using custom-managed keys",
+  "IsCustom": true,
+  "Description": "This role definition contains all the required actions for using customer-managed keys from an Azure Key Vault",
+  "Actions": [],
+  "NotActions": [],
+  "DataActions": [
+    "Microsoft.KeyVault/vaults/keys/read",
+    "Microsoft.KeyVault/vaults/keys/wrap/action",
+    "Microsoft.KeyVault/vaults/keys/unwrap/action"
+  ],
+  "NotDataActions": [],
+  "AssignableScopes": []
+}
