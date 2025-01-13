@@ -1,5 +1,8 @@
 package com.sequenceiq.it.cloudbreak.assertion.proxy;
 
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS_NATIVE;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS_NATIVE_GOV;
+
 import java.util.Map;
 
 import org.apache.commons.lang3.NotImplementedException;
@@ -33,22 +36,37 @@ class ProxyConfigUserDataAssertions {
 
     public Assertion<FreeIpaTestDto, FreeIpaClient> validateFreeIpaUserDataProxySettings(ProxyTestDto proxy) {
         return (testContext, testDto, client) -> {
-            String stackNamePrefix = getFreeipaStackNamePrefix(testContext);
-            validateUserDataProxySettings(testContext, testDto.getCloudPlatform(), stackNamePrefix, proxy);
+            String variant = testDto.getVariant();
+            if (!isAwsNative(variant)) {
+                String stackNamePrefix = getFreeipaStackNamePrefix(testContext);
+                validateUserDataProxySettings(testContext, testDto.getCloudPlatform(), stackNamePrefix, proxy);
+            } else {
+                LOGGER.info("Skipping FreeIPA userdata proxy settings validation because platform variant is {}.", variant);
+            }
             return testDto;
         };
     }
 
     public Assertion<SdxInternalTestDto, SdxClient> validateDatalakeUserDataProxySettings(ProxyTestDto proxy) {
         return (testContext, testDto, client) -> {
-            validateUserDataProxySettings(testContext, testDto.getCloudPlatform(), testDto.getName(), proxy);
+            String variant = testDto.getVariant();
+            if (!isAwsNative(variant)) {
+                validateUserDataProxySettings(testContext, testDto.getCloudPlatform(), testDto.getName(), proxy);
+            } else {
+                LOGGER.info("Skipping Data Lake userdata proxy settings validation because platform variant is {}.", variant);
+            }
             return testDto;
         };
     }
 
     public Assertion<DistroXTestDto, CloudbreakClient> validateDatahubUserDataProxySettings(ProxyTestDto proxy) {
         return (testContext, testDto, client) -> {
-            validateUserDataProxySettings(testContext, testDto.getCloudPlatform(), testDto.getName(), proxy);
+            String variant = testDto.getVariant();
+            if (!isAwsNative(variant)) {
+                validateUserDataProxySettings(testContext, testDto.getCloudPlatform(), testDto.getName(), proxy);
+            } else {
+                LOGGER.info("Skipping Data Hub userdata proxy settings validation because platform variant is {}.", variant);
+            }
             return testDto;
         };
     }
@@ -76,22 +94,37 @@ class ProxyConfigUserDataAssertions {
 
     public Assertion<FreeIpaTestDto, FreeIpaClient> validateFreeIpaUserDataNoProxySettings() {
         return (testContext, testDto, client) -> {
-            String stackNamePrefix = getFreeipaStackNamePrefix(testContext);
-            validateUserDataNoProxySettings(testContext, testDto.getCloudPlatform(), stackNamePrefix);
+            String variant = testDto.getVariant();
+            if (!isAwsNative(variant)) {
+                String stackNamePrefix = getFreeipaStackNamePrefix(testContext);
+                validateUserDataNoProxySettings(testContext, testDto.getCloudPlatform(), stackNamePrefix);
+            } else {
+                LOGGER.info("Skipping FreeIPA userdata no proxy settings validation because platform variant is {}.", variant);
+            }
             return testDto;
         };
     }
 
     public Assertion<SdxInternalTestDto, SdxClient> validateDatalakeUserDataNoProxySettings() {
         return (testContext, testDto, client) -> {
-            validateUserDataNoProxySettings(testContext, testDto.getCloudPlatform(), testDto.getName());
+            String variant = testDto.getVariant();
+            if (!isAwsNative(variant)) {
+                validateUserDataNoProxySettings(testContext, testDto.getCloudPlatform(), testDto.getName());
+            } else {
+                LOGGER.info("Skipping Data Lake userdata no proxy settings validation because platform variant is {}.", variant);
+            }
             return testDto;
         };
     }
 
     public Assertion<DistroXTestDto, CloudbreakClient> validateDatahubUserDataNoProxySettings() {
         return (testContext, testDto, client) -> {
-            validateUserDataNoProxySettings(testContext, testDto.getCloudPlatform(), testDto.getName());
+            String variant = testDto.getVariant();
+            if (!isAwsNative(variant)) {
+                validateUserDataNoProxySettings(testContext, testDto.getCloudPlatform(), testDto.getName());
+            } else {
+                LOGGER.info("Skipping Data Hub userdata no proxy settings validation because platform variant is {}.", variant);
+            }
             return testDto;
         };
     }
@@ -152,5 +185,9 @@ class ProxyConfigUserDataAssertions {
             LOGGER.warn("Launch template could not be retrieved for {} on {}", stackNamePrefix, cloudPlatform);
             return null;
         }
+    }
+
+    private static boolean isAwsNative(String variant) {
+        return AWS_NATIVE.equals(variant) || AWS_NATIVE_GOV.equals(variant);
     }
 }

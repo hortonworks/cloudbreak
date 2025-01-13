@@ -223,4 +223,8 @@ public class DistroXTestDtoBase<T extends DistroXTestDtoBase> extends AbstractCl
         tags.forEach((key, value) -> getRequest().addTag(key, value));
         return this;
     }
+
+    public String getVariant() {
+        return getResponse().getVariant();
+    }
 }

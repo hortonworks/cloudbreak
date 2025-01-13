@@ -631,6 +631,10 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         return (cloudPlatformFromStack != null) ? cloudPlatformFromStack : super.getCloudPlatform();
     }
 
+    public String getVariant() {
+        return getResponse().getVariant();
+    }
+
     public FreeIpaTestDto withSeLinuxSecurity(String seLinux) {
         SecurityRequest securityRequest = new SecurityRequest();
         securityRequest.setSeLinux(seLinux);
