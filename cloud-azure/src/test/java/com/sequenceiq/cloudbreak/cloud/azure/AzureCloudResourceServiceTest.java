@@ -1,6 +1,23 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_AVAILABILITY_SET;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_DATABASE;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_DATABASE_SECURITY_ALERT_POLICY;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_DISK;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_DNS_ZONE_GROUP;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_INSTANCE;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_LOAD_BALANCER;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_MANAGED_IMAGE;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_NETWORK;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_NETWORK_INTERFACE;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_PRIVATE_DNS_ZONE;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_PRIVATE_ENDPOINT;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_PUBLIC_IP;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_SECURITY_GROUP;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_STORAGE;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_VIRTUAL_NETWORK_LINK;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -94,26 +111,68 @@ public class AzureCloudResourceServiceTest {
     }
 
     @Test
-    public void getListWithKnownSucceededCloudResource() {
-        TargetResource t = new TargetResource();
-        t.withResourceType(MICROSOFT_COMPUTE_VIRTUAL_MACHINES);
-        t.withResourceName(VM_NAME);
+    public void getListWithKnownSucceededCloudResources() {
+        ArrayList<DeploymentOperation> deploymentOperations = getDeploymentOperations();
         PagedIterable<DeploymentOperation> operationList = mock(PagedIterable.class);
+        when(operationList.stream()).thenReturn(deploymentOperations.stream());
         DeploymentOperations operations = mock(DeploymentOperations.class);
-        DeploymentOperation operation = mock(DeploymentOperation.class);
-        when(operationList.stream()).thenReturn(Stream.of(operation));
-
         when(deployment.deploymentOperations()).thenReturn(operations);
         when(deployment.deploymentOperations().list()).thenReturn(operationList);
-        when(operation.targetResource()).thenReturn(t);
-        when(operation.provisioningState()).thenReturn("succeeded");
 
         List<CloudResource> cloudResourceList = underTest.getDeploymentCloudResources(deployment);
 
-        assertEquals(1, cloudResourceList.size());
-        CloudResource cloudResource = cloudResourceList.get(0);
-        assertEquals(VM_NAME, cloudResource.getName());
-        assertEquals(CommonStatus.CREATED, cloudResource.getStatus());
+        assertEquals(15, cloudResourceList.size());
+        assertEquals(AZURE_AVAILABILITY_SET, cloudResourceList.get(0).getType());
+        assertEquals(AZURE_INSTANCE, cloudResourceList.get(1).getType());
+        assertEquals(AZURE_SECURITY_GROUP, cloudResourceList.get(2).getType());
+        assertEquals(AZURE_PUBLIC_IP, cloudResourceList.get(3).getType());
+        assertEquals(AZURE_NETWORK_INTERFACE, cloudResourceList.get(4).getType());
+        assertEquals(AZURE_NETWORK, cloudResourceList.get(5).getType());
+        assertEquals(AZURE_PRIVATE_ENDPOINT, cloudResourceList.get(6).getType());
+        assertEquals(AZURE_DATABASE, cloudResourceList.get(7).getType());
+        assertEquals(AZURE_DATABASE_SECURITY_ALERT_POLICY, cloudResourceList.get(8).getType());
+        assertEquals(AZURE_MANAGED_IMAGE, cloudResourceList.get(9).getType());
+        assertEquals(AZURE_DISK, cloudResourceList.get(10).getType());
+        assertEquals(AZURE_STORAGE, cloudResourceList.get(11).getType());
+        assertEquals(AZURE_PRIVATE_DNS_ZONE, cloudResourceList.get(12).getType());
+        assertEquals(AZURE_VIRTUAL_NETWORK_LINK, cloudResourceList.get(13).getType());
+        assertEquals(AZURE_LOAD_BALANCER, cloudResourceList.get(14).getType());
+        assertTrue(cloudResourceList.stream().noneMatch(cloudResource -> cloudResource.getType() == AZURE_DNS_ZONE_GROUP));
+        assertTrue(cloudResourceList.stream().allMatch(cloudResource -> CommonStatus.CREATED.equals(cloudResource.getStatus())));
+        assertTrue(cloudResourceList.stream().allMatch(cloudResource -> cloudResource.getName().equals(VM_NAME)));
+    }
+
+    private ArrayList<DeploymentOperation> getDeploymentOperations() {
+        List<String> resources = List.of(
+                "Microsoft.Compute/availabilitySets",
+                "Microsoft.Compute/virtualMachines",
+                "Microsoft.Network/networkSecurityGroups",
+                "Microsoft.Network/publicIPAddresses",
+                "Microsoft.Network/networkInterfaces",
+                "Microsoft.Network/virtualNetworks",
+                "Microsoft.Network/privateEndpoints",
+                "Microsoft.DBforPostgreSQL/servers",
+                "Microsoft.DBforPostgreSQL/servers/securityAlertPolicies",
+                "Microsoft.Compute/images",
+                "Microsoft.Compute/disks",
+                "Microsoft.Storage/storageAccounts",
+                "Microsoft.Network/privateDnsZones",
+                "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+                "Microsoft.Network/loadBalancers",
+                "Microsoft.Network/privateEndpoints/privateDnsZoneGroups");
+
+        ArrayList<DeploymentOperation> deploymentOperations = new ArrayList<>();
+
+        resources.forEach(resource -> {
+            TargetResource t = new TargetResource();
+            t.withResourceType(resource);
+            t.withResourceName(VM_NAME);
+            DeploymentOperation operation = mock(DeploymentOperation.class);
+            when(operation.targetResource()).thenReturn(t);
+            when(operation.provisioningState()).thenReturn("succeeded");
+            deploymentOperations.add(operation);
+        });
+        return deploymentOperations;
     }
 
     @Test

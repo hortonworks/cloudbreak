@@ -264,7 +264,7 @@ class AzureDatabaseResourceServiceTest {
         when(singleServerClientMock.getSingleServer(RESOURCE_GROUP_NAME, MIGRATED_SERVER_NAME)).thenReturn(server);
         when(server.userVisibleState()).thenReturn(DISABLED);
 
-        lenient().when(azureCloudResourceService.getPrivateEndpointRdsResourceTypes(false)).thenReturn(List.of(AZURE_PRIVATE_ENDPOINT, AZURE_DNS_ZONE_GROUP));
+        lenient().when(azureCloudResourceService.getPrivateEndpointRdsResourceTypes(false)).thenReturn(List.of(AZURE_PRIVATE_ENDPOINT));
         when(deployment.outputs()).thenReturn(Map.of("databaseServerFQDN", Map.of("value", "fqdn")));
         doAnswer(invocation -> {
             invocation.getArgument(0, Runnable.class).run();
@@ -326,7 +326,7 @@ class AzureDatabaseResourceServiceTest {
         when(singleServerClientMock.getSingleServer(RESOURCE_GROUP_NAME, MIGRATED_SERVER_NAME)).thenReturn(server);
         when(server.userVisibleState()).thenReturn(DISABLED);
 
-        lenient().when(azureCloudResourceService.getPrivateEndpointRdsResourceTypes(false)).thenReturn(List.of(AZURE_PRIVATE_ENDPOINT, AZURE_DNS_ZONE_GROUP));
+        lenient().when(azureCloudResourceService.getPrivateEndpointRdsResourceTypes(false)).thenReturn(List.of(AZURE_PRIVATE_ENDPOINT));
         doAnswer(invocation -> {
             invocation.getArgument(0, Runnable.class).run();
             return null;
@@ -481,7 +481,7 @@ class AzureDatabaseResourceServiceTest {
         when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
         when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
         when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(cloudResourceList);
-        when(azureCloudResourceService.getPrivateEndpointRdsResourceTypes(false)).thenReturn(List.of(AZURE_PRIVATE_ENDPOINT, AZURE_DNS_ZONE_GROUP));
+        when(azureCloudResourceService.getPrivateEndpointRdsResourceTypes(false)).thenReturn(List.of(AZURE_PRIVATE_ENDPOINT));
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(DELETED);
         when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
         when(originalDatabaseStack.getDatabaseServer()).thenReturn(originalDatabaseServer);
@@ -499,12 +499,12 @@ class AzureDatabaseResourceServiceTest {
 
         InOrder inOrder = inOrder(azureUtils);
         inOrder.verify(azureUtils).deleteGenericResourceById(client, RESOURCE_REFERENCE, PRIVATE_ENDPOINT);
-        inOrder.verify(azureUtils).deleteGenericResourceById(client, RESOURCE_REFERENCE, PRIVATE_DNS_ZONE_GROUP);
+        verify(azureUtils, never()).deleteGenericResourceById(client, RESOURCE_REFERENCE, PRIVATE_DNS_ZONE_GROUP);
         inOrder.verify(azureUtils).deleteDatabaseServer(client, RESOURCE_REFERENCE, false);
 
         inOrder = inOrder(persistenceNotifier);
         inOrder.verify(persistenceNotifier).notifyDeletion(peResource, cloudContext);
-        inOrder.verify(persistenceNotifier).notifyDeletion(dzgResource, cloudContext);
+        verify(persistenceNotifier, never()).notifyDeletion(dzgResource, cloudContext);
         inOrder.verify(persistenceNotifier).notifyDeletion(dbResource, cloudContext);
 
         verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
@@ -526,7 +526,7 @@ class AzureDatabaseResourceServiceTest {
         when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
         when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
         when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(cloudResourceList);
-        when(azureCloudResourceService.getPrivateEndpointRdsResourceTypes(false)).thenReturn(List.of(AZURE_PRIVATE_ENDPOINT, AZURE_DNS_ZONE_GROUP));
+        when(azureCloudResourceService.getPrivateEndpointRdsResourceTypes(false)).thenReturn(List.of(AZURE_PRIVATE_ENDPOINT));
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(DELETED);
         when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
         doAnswer(invocation -> {
@@ -547,12 +547,12 @@ class AzureDatabaseResourceServiceTest {
 
         InOrder inOrder = inOrder(azureUtils);
         inOrder.verify(azureUtils).deleteGenericResourceById(client, RESOURCE_REFERENCE, PRIVATE_ENDPOINT);
-        inOrder.verify(azureUtils).deleteGenericResourceById(client, RESOURCE_REFERENCE, PRIVATE_DNS_ZONE_GROUP);
+        verify(azureUtils, never()).deleteGenericResourceById(client, RESOURCE_REFERENCE, PRIVATE_DNS_ZONE_GROUP);
         inOrder.verify(azureUtils).deleteDatabaseServer(client, RESOURCE_REFERENCE, false);
 
         inOrder = inOrder(persistenceNotifier);
         inOrder.verify(persistenceNotifier).notifyDeletion(peResource, cloudContext);
-        inOrder.verify(persistenceNotifier).notifyDeletion(dzgResource, cloudContext);
+        verify(persistenceNotifier, never()).notifyDeletion(dzgResource, cloudContext);
         inOrder.verify(persistenceNotifier).notifyDeletion(dbResource, cloudContext);
 
         verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
@@ -573,7 +573,7 @@ class AzureDatabaseResourceServiceTest {
         when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
         when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
         when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(cloudResourceList);
-        when(azureCloudResourceService.getPrivateEndpointRdsResourceTypes(false)).thenReturn(List.of(AZURE_PRIVATE_ENDPOINT, AZURE_DNS_ZONE_GROUP));
+        when(azureCloudResourceService.getPrivateEndpointRdsResourceTypes(false)).thenReturn(List.of(AZURE_PRIVATE_ENDPOINT));
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(DELETED);
         when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
         doAnswer(invocation -> {
@@ -594,12 +594,12 @@ class AzureDatabaseResourceServiceTest {
 
         InOrder inOrder = inOrder(azureUtils);
         inOrder.verify(azureUtils).deleteGenericResourceById(client, RESOURCE_REFERENCE, PRIVATE_ENDPOINT);
-        inOrder.verify(azureUtils).deleteGenericResourceById(client, RESOURCE_REFERENCE, PRIVATE_DNS_ZONE_GROUP);
+        verify(azureUtils, never()).deleteGenericResourceById(client, RESOURCE_REFERENCE, PRIVATE_DNS_ZONE_GROUP);
         inOrder.verify(azureUtils).deleteDatabaseServer(client, RESOURCE_REFERENCE, false);
 
         inOrder = inOrder(persistenceNotifier);
         inOrder.verify(persistenceNotifier).notifyDeletion(peResource, cloudContext);
-        inOrder.verify(persistenceNotifier).notifyDeletion(dzgResource, cloudContext);
+        verify(persistenceNotifier, never()).notifyDeletion(dzgResource, cloudContext);
         inOrder.verify(persistenceNotifier).notifyDeletion(dbResource, cloudContext);
 
         verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
@@ -624,7 +624,7 @@ class AzureDatabaseResourceServiceTest {
         when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
         when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
         when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(expectedCloudResourceList);
-        when(azureCloudResourceService.getPrivateEndpointRdsResourceTypes(false)).thenReturn(List.of(AZURE_PRIVATE_ENDPOINT, AZURE_DNS_ZONE_GROUP));
+        when(azureCloudResourceService.getPrivateEndpointRdsResourceTypes(false)).thenReturn(List.of(AZURE_PRIVATE_ENDPOINT));
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(DELETED);
         when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
 
@@ -634,14 +634,14 @@ class AzureDatabaseResourceServiceTest {
 
         InOrder inOrder = inOrder(azureUtils);
         inOrder.verify(azureUtils, times(3)).deleteGenericResourceById(client, RESOURCE_REFERENCE, PRIVATE_ENDPOINT);
-        inOrder.verify(azureUtils).deleteGenericResourceById(client, RESOURCE_REFERENCE, PRIVATE_DNS_ZONE_GROUP);
+        verify(azureUtils, never()).deleteGenericResourceById(client, RESOURCE_REFERENCE, PRIVATE_DNS_ZONE_GROUP);
         inOrder.verify(azureUtils).deleteDatabaseServer(client, RESOURCE_REFERENCE, false);
 
         inOrder = inOrder(persistenceNotifier);
         inOrder.verify(persistenceNotifier).notifyDeletion(pe1Resource, cloudContext);
         inOrder.verify(persistenceNotifier).notifyDeletion(pe2Resource, cloudContext);
         inOrder.verify(persistenceNotifier).notifyDeletion(pe3Resource, cloudContext);
-        inOrder.verify(persistenceNotifier).notifyDeletion(dzgResource, cloudContext);
+        verify(persistenceNotifier, never()).notifyDeletion(dzgResource, cloudContext);
         inOrder.verify(persistenceNotifier).notifyDeletion(dbResource, cloudContext);
 
         verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
