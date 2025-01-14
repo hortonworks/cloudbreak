@@ -9,6 +9,7 @@ import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.SKIP_SALT_UPDATE
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep.CCMV2_JUMPGATE;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep.FREEIPA_ADMIN_USER_PASSWORD;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep.FREEIPA_DIRECTORY_MANAGER_PASSWORD;
+import static com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep.FREEIPA_UMS_DATABUS_CREDENTIAL;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep.FREEIPA_USER_PASSWORD;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep.LAUNCH_TEMPLATE;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep.SALT_PILLAR_UPDATE;
@@ -40,6 +41,7 @@ public enum FreeIpaSecretType implements SecretType {
     // cluster related internal freeipa secrets
     FREEIPA_LDAP_BIND_PASSWORD(List.of(VAULT, FREEIPA_USER_PASSWORD), Set.of(SKIP_SALT_UPDATE, INTERNAL)),
     DEMO_SECRET(List.of(CUSTOM_JOB), Set.of(SKIP_SALT_UPDATE, INTERNAL)),
+    DBUS_UMS_ACCESS_KEY(List.of(FREEIPA_UMS_DATABUS_CREDENTIAL, CUSTOM_JOB)),
     FREEIPA_KERBEROS_BIND_USER(List.of(VAULT, FREEIPA_USER_PASSWORD), Set.of(SKIP_SALT_UPDATE, INTERNAL));
 
     private final List<SecretRotationStep> steps;

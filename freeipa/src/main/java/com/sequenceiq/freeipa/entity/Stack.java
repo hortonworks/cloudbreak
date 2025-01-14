@@ -350,6 +350,10 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
         return databusCredential.getRaw();
     }
 
+    public Secret getDatabusCredentialSecret() {
+        return databusCredential;
+    }
+
     public void setDatabusCredential(String databusCredential) {
         this.databusCredential = new Secret(databusCredential);
     }

@@ -182,6 +182,15 @@ public class AltusMachineUserService {
         return result;
     }
 
+    public DataBusCredential getDataBusCredential(AltusCredential altusCredential, Stack stack, CdpAccessKeyType cdpAccessKeyType) {
+        DataBusCredential dataBusCredential = new DataBusCredential();
+        dataBusCredential.setMachineUserName(getFluentMachineUser(stack));
+        dataBusCredential.setAccessKey(altusCredential.getAccessKey());
+        dataBusCredential.setPrivateKey(altusCredential.getPrivateKey() != null ? new String(altusCredential.getPrivateKey()) : null);
+        dataBusCredential.setAccessKeyType(cdpAccessKeyType.getValue());
+        return dataBusCredential;
+    }
+
     /**
      * Store databus access / secret keypair and machine user name in the cluster if altus credential exists
      *
@@ -192,12 +201,7 @@ public class AltusMachineUserService {
      */
     public DataBusCredential storeDataBusCredential(Optional<AltusCredential> altusCredential, Stack stack, CdpAccessKeyType cdpAccessKeyType) {
         if (altusCredential.isPresent()) {
-            DataBusCredential dataBusCredential = new DataBusCredential();
-            dataBusCredential.setMachineUserName(getFluentMachineUser(stack));
-            dataBusCredential.setAccessKey(altusCredential.get().getAccessKey());
-            dataBusCredential.setPrivateKey(altusCredential.get().getPrivateKey() != null ? new String(altusCredential.get().getPrivateKey()) : null);
-            dataBusCredential.setAccessKeyType(cdpAccessKeyType.getValue());
-            return storeCdpCredential(dataBusCredential, stack.getId(), Stack::setDatabusCredential);
+            return storeCdpCredential(getDataBusCredential(altusCredential.get(), stack, cdpAccessKeyType), stack.getId(), Stack::setDatabusCredential);
         }
         return null;
     }

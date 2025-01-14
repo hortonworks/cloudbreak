@@ -11,6 +11,7 @@ public enum FreeIpaSecretRotationStep implements SecretRotationStep {
     LAUNCH_TEMPLATE,
     SALT_STATE_APPLY,
     SALT_STATE_RUN,
+    FREEIPA_UMS_DATABUS_CREDENTIAL,
     FREEIPA_USER_PASSWORD;
 
     @Override
