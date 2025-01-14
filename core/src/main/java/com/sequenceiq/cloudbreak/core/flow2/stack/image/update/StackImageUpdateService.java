@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
@@ -106,7 +107,7 @@ public class StackImageUpdateService {
 
         } catch (CloudbreakImageNotFoundException e) {
             LOGGER.info("Cloudbreak Image not found", e);
-            throw new CloudbreakApiException(e.getMessage(), e);
+            throw new BadRequestException(e.getMessage(), e);
         } catch (CloudbreakImageCatalogException e) {
             LOGGER.info("Cloudbreak Image Catalog error", e);
             throw new CloudbreakApiException(e.getMessage(), e);

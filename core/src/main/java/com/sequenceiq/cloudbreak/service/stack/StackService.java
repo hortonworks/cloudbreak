@@ -682,7 +682,7 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
             return savedStackWithAllDetails;
         } catch (CloudbreakImageNotFoundException e) {
             LOGGER.info("Cloudbreak Image not found", e);
-            throw new CloudbreakApiException(e.getMessage(), e);
+            throw new BadRequestException(e.getMessage(), e);
         } catch (CloudbreakImageCatalogException e) {
             LOGGER.info("Cloudbreak Image Catalog error", e);
             throw new CloudbreakApiException(e.getMessage(), e);
