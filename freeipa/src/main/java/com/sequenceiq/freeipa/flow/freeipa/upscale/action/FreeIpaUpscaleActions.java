@@ -742,18 +742,18 @@ public class FreeIpaUpscaleActions {
 
             @Override
             protected void doExecute(StackContext context, UpscaleFailureEvent payload, Map<Object, Object> variables) {
-                LOGGER.error("Upscale failed with payload: " + payload);
+                LOGGER.error("Upscale failed with payload: {}", payload);
                 Stack stack = context.getStack();
                 String environmentCrn = stack.getEnvironmentCrn();
                 SuccessDetails successDetails = new SuccessDetails(environmentCrn);
                 successDetails.getAdditionalDetails()
                         .put(payload.getFailedPhase(), payload.getSuccess() == null ? List.of() : new ArrayList<>(payload.getSuccess()));
-                String message = "Upscale failed during " + payload.getFailedPhase();
+                String errorReason = getErrorReason(payload.getException());
+                String message = "Upscale failed during [" + payload.getFailedPhase() + "]. Reason: " + errorReason;
                 FailureDetails failureDetails = new FailureDetails(environmentCrn, message);
                 if (payload.getFailureDetails() != null) {
                     failureDetails.getAdditionalDetails().putAll(payload.getFailureDetails());
                 }
-                String errorReason = getErrorReason(payload.getException());
                 stackUpdater.updateStackStatus(context.getStack(), getFailedStatus(variables), errorReason);
                 operationService.failOperation(stack.getAccountId(), getOperationId(variables), message, List.of(successDetails), List.of(failureDetails));
                 instanceMetaDataService.updateInstanceStatusOnUpscaleFailure(stack.getNotDeletedInstanceMetaDataSet());

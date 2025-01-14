@@ -324,7 +324,8 @@ class FreeIpaUpscaleFlowIntegrationTest {
         verify(stackUpdater).updateStackStatus(stack, DetailedStackStatus.UPSCALE_FAILED, "Image fallback started second time!");
         verify(imageFallbackService).performImageFallback(any(), eq(stack));
         verifyNoInteractions(tlsSetupService, metadataSetupService);
-        verify(operationService).failOperation(eq(stack.getAccountId()), eq(OPERATION_ID), eq("Upscale failed during Image fallback"), any(), any());
+        verify(operationService).failOperation(eq(stack.getAccountId()), eq(OPERATION_ID),
+                eq("Upscale failed during [Image fallback]. Reason: Image fallback started second time!"), any(), any());
     }
 
     @Test
@@ -359,7 +360,8 @@ class FreeIpaUpscaleFlowIntegrationTest {
 
         verify(imageFallbackService, never()).performImageFallback(any(), eq(stack));
         ArgumentCaptor<Collection<FailureDetails>> failureCaptor = ArgumentCaptor.forClass(Collection.class);
-        verify(operationService).failOperation(eq(stack.getAccountId()), eq(OPERATION_ID), eq("Upscale failed during Adding instances"), any(),
+        verify(operationService).failOperation(eq(stack.getAccountId()), eq(OPERATION_ID),
+                eq("Upscale failed during [Adding instances]. Reason: MP image failure"), any(),
                 failureCaptor.capture());
         assertEquals("MP image failure", failureCaptor.getValue().stream().toList().getFirst().getAdditionalDetails().get("statusReason"));
     }
