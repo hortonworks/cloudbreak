@@ -81,6 +81,9 @@ public class ComputeResourceService {
     @Inject
     private ResourceActionFactory resourceActionFactory;
 
+    @Inject
+    private CloudInstanceBatchSplitter cloudInstanceBatchSplitter;
+
     public List<CloudResourceStatus> buildResourcesForLaunch(ResourceBuilderContext ctx, AuthenticatedContext auth, CloudStack cloudStack,
             AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
         LOGGER.info("Build compute resources for launch with adjustment type and threshold: {}", adjustmentTypeWithThreshold);
@@ -117,7 +120,7 @@ public class ComputeResourceService {
     }
 
     private List<CloudResourceStatus> getDeletedResourcesOrFail(Collection<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures,
-            boolean hardFail) {
+                                                                boolean hardFail) {
         Map<FutureResult, List<List<CloudResourceStatus>>> futureResults = waitForRequests(futures);
         List<List<CloudResourceStatus>> failedResources = futureResults.get(FutureResult.FAILED);
         if (hardFail) {
@@ -132,7 +135,7 @@ public class ComputeResourceService {
     }
 
     public List<CloudResourceStatus> update(ResourceBuilderContext ctx, AuthenticatedContext auth, CloudStack stack,
-            List<CloudResource> cloudResource, Optional<String> group, UpdateType updateType) {
+                                            List<CloudResource> cloudResource, Optional<String> group, UpdateType updateType) {
         LOGGER.info("Update compute resources.");
         return new ResourceBuilder(ctx, auth).updateResources(ctx, auth, cloudResource, stack, group, updateType);
     }
@@ -303,27 +306,39 @@ public class ComputeResourceService {
         }
 
         public List<CloudResourceStatus> buildResources(CloudStack cloudStack, Iterable<Group> groups,
-                Boolean upscale, AdjustmentTypeWithThreshold adjustmentTypeAndThreshold) {
-            List<CloudResourceStatus> results = new ArrayList<>();
-            Collection<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
-            for (Group group : getOrderedCopy(groups)) {
-                List<CloudInstance> instances = group.getInstances().stream()
-                        .filter(cloudInstance -> CREATE_REQUESTED.equals(cloudInstance.getTemplate().getStatus()))
-                        .collect(Collectors.toList());
-                Integer createBatchSize = resourceBuilders.getCreateBatchSize(auth.getCloudContext().getVariant());
+                                                        Boolean upscale, AdjustmentTypeWithThreshold adjustmentTypeAndThreshold) {
 
-                LOGGER.debug("Split the instances to {} chunks to execute the operation in parallel", createBatchSize);
-                AtomicInteger counter = new AtomicInteger();
-                Collection<List<CloudInstance>> instancesChunks = instances.stream()
-                        .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / createBatchSize)).values();
+            Integer createBatchSize = resourceBuilders.getCreateBatchSize(auth.getCloudContext().getVariant());
+            List<CloudInstancesGroupProcessingBatch> cloudInstanceProcessingBatches = cloudInstanceBatchSplitter.split(groups, createBatchSize);
 
-                for (List<CloudInstance> instancesChunk : instancesChunks) {
+            List<FutureResourceGroupResults> futureResourceGroupResults = new ArrayList<>();
+
+            for (CloudInstancesGroupProcessingBatch batch : cloudInstanceProcessingBatches) {
+                Collection<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
+                for (List<CloudInstance> instancesChunk : batch.getCloudInstances()) {
                     LOGGER.debug("Submit the create operation thread with {} instances", instancesChunk.size());
-                    ResourceCreationCallablePayload creationCallablePayload = new ResourceCreationCallablePayload(instancesChunk, group, ctx, auth, cloudStack);
+                    ResourceCreationCallablePayload creationCallablePayload = new ResourceCreationCallablePayload(instancesChunk, batch.getGroup(),
+                            ctx, auth, cloudStack);
                     ResourceCreationCallable creationCallable = resourceActionFactory.buildCreationCallable(creationCallablePayload);
                     Future<ResourceRequestResult<List<CloudResourceStatus>>> future = resourceBuilderExecutor.submit(creationCallable);
                     futures.add(future);
                 }
+                futureResourceGroupResults.add(new FutureResourceGroupResults(batch, futures));
+            }
+
+            List<CloudResourceStatus> results = waitForResourceCreations(groups, upscale, adjustmentTypeAndThreshold, futureResourceGroupResults);
+            LOGGER.debug("Resource creation has been finished, the results are: {}", results);
+            return results;
+        }
+
+        private List<CloudResourceStatus> waitForResourceCreations(Iterable<Group> groups, Boolean upscale,
+                AdjustmentTypeWithThreshold adjustmentTypeAndThreshold, List<FutureResourceGroupResults> futureResourceGroupResults) {
+
+            List<CloudResourceStatus> results = new ArrayList<>();
+            List<RuntimeException> exceptions = new ArrayList<>();
+
+            for (FutureResourceGroupResults futureResourceGroupResult : futureResourceGroupResults) {
+                Collection<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = futureResourceGroupResult.getFutures();
 
                 if (!futures.isEmpty()) {
                     LOGGER.debug("Wait for all {} creation threads to finish", futures.size());
@@ -331,20 +346,48 @@ public class ComputeResourceService {
                     List<CloudResourceStatus> resourceStatuses = waitForResourceCreations(cloudResourceStatusChunks);
                     List<CloudResourceStatus> failedResources = filterResourceStatuses(resourceStatuses, ResourceStatus.FAILED);
                     if (adjustmentTypeAndThreshold == null) {
-                        adjustmentTypeAndThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, (long) instances.size());
+                        adjustmentTypeAndThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT,
+                                futureResourceGroupResult.getBatch().getTotalInstanceCount());
                     }
                     try {
                         ctx.setBuild(false);
                         CloudFailureContext cloudFailureContext = new CloudFailureContext(auth,
                                 new ScaleContext(upscale, adjustmentTypeAndThreshold.getAdjustmentType(), adjustmentTypeAndThreshold.getThreshold()), ctx);
-                        cloudFailureHandler.rollbackIfNecessary(cloudFailureContext, failedResources, resourceStatuses, group, getNewNodeCount(groups));
+                        cloudFailureHandler.rollbackIfNecessary(cloudFailureContext, failedResources, resourceStatuses,
+                                futureResourceGroupResult.getBatch().getGroup(), getNewNodeCount(groups));
                         results.addAll(resourceStatuses);
+                    } catch (RuntimeException e) {
+                        LOGGER.error("Failed to handle provisioning rollback", e);
+                        exceptions.add(e);
                     } finally {
                         ctx.setBuild(true);
                     }
                 }
             }
+
+            combineRollbackFailures(exceptions);
+
             return results;
+        }
+
+        private void combineRollbackFailures(List<RuntimeException> exceptions) {
+            if (!exceptions.isEmpty()) {
+                if (exceptions.size() == 1) {
+                    throw exceptions.getFirst();
+                }
+                StringBuilder message = new StringBuilder("Multiple exceptions occurred during resource creation: ");
+                int i = 1;
+                for (RuntimeException exception : exceptions) {
+                    message.append(i).append(". ").append(exception.getMessage()).append(" ");
+                    i++;
+                }
+                RuntimeException combinedException = new RuntimeException(message.toString());
+                for (RuntimeException exception : exceptions) {
+                    combinedException.addSuppressed(exception);
+                }
+                LOGGER.error("Combined exeption during resource cration!", combinedException);
+                throw combinedException;
+            }
         }
 
         public List<CloudResourceStatus> updateResources(ResourceBuilderContext ctx, AuthenticatedContext auth,

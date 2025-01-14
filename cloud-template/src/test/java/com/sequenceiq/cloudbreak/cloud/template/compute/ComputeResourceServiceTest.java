@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -31,6 +32,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
@@ -102,6 +104,9 @@ class ComputeResourceServiceTest {
 
     @Mock
     private CloudFailureHandler cloudFailureHandler;
+
+    @Spy
+    private CloudInstanceBatchSplitter cloudInstanceBatchSplitter;
 
     @Captor
     private ArgumentCaptor<ResourceDeletionCallablePayload> deletionCallableCaptor;
@@ -274,6 +279,38 @@ class ComputeResourceServiceTest {
         verify(cloudFailureHandler, times(1)).rollbackIfNecessary(any(), anyList(), anyList(), eq(group1), any());
         verify(cloudFailureHandler, times(1)).rollbackIfNecessary(any(), anyList(), anyList(), eq(group2), any());
         assertThat(rollbackContextBuildValue).containsExactly(Boolean.FALSE, Boolean.FALSE);
+    }
+
+    @Test
+    void waitForResourceCreationsWithExceptionDuringRollback() throws Exception {
+        ResourceBuilderContext resourceBuilderContext = new ResourceBuilderContext("name", Location.location(Region.region("region")), 8, true);
+        when(cloudResource.getType()).thenReturn(ResourceType.AWS_INSTANCE);
+        CloudStack cloudStack = mock(CloudStack.class);
+        Group group1 = mock(Group.class);
+        Group group2 = mock(Group.class);
+        when(cloudStack.getGroups()).thenReturn(List.of(group1, group2));
+        InstanceTemplate template = new InstanceTemplate("flavor", "group1", 1L, List.of(), InstanceStatus.CREATE_REQUESTED, null, 1L, "imageId", null, 1L);
+        CloudInstance cloudInstance1 = new CloudInstance("instance1", template, null, null, null);
+        CloudInstance cloudInstance2 = new CloudInstance("instance2", template, null, null, null);
+        when(group1.getInstances()).thenReturn(List.of(cloudInstance1));
+        when(group2.getInstances()).thenReturn(List.of(cloudInstance2));
+        when(resourceBuilders.getCreateBatchSize(any())).thenReturn(Integer.valueOf(8));
+        ResourceCreationCallable resourceCreationCallable = mock(ResourceCreationCallable.class);
+        when(resourceActionFactory.buildCreationCallable(any())).thenReturn(resourceCreationCallable);
+        Future resourceRequestFuture = mock(Future.class);
+        ResourceRequestResult<List<CloudResourceStatus>> resourceRequestResult = new ResourceRequestResult<>(FutureResult.SUCCESS,
+                List.of(new CloudResourceStatus(cloudResource, ResourceStatus.CREATED)));
+        when(resourceRequestFuture.get()).thenReturn(resourceRequestResult);
+        when(resourceBuilderExecutor.submit(eq(resourceCreationCallable))).thenReturn(resourceRequestFuture);
+
+        List<CloudResourceStatus> cloudResourceStatuses = List.of(mock(CloudResourceStatus.class));
+        Future<ResourceRequestResult<List<CloudResourceStatus>>> future = mock(Future.class);
+        List<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = List.of(future);
+        doThrow(new RuntimeException("Rollback failed")).when(cloudFailureHandler).rollbackIfNecessary(any(), anyList(), anyList(), any(), anyInt());
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            underTest.buildResourcesForLaunch(resourceBuilderContext, authenticatedContext, cloudStack, null);
+        });
+        assertEquals("Multiple exceptions occurred during resource creation: 1. Rollback failed 2. Rollback failed ", exception.getMessage());
     }
 
     private Future<ResourceRequestResult<List<CloudResourceStatus>>> givenDeletionResult(FutureResult futureResult, CloudResourceStatus cloudResourceStatus)
