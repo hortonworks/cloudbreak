@@ -46,7 +46,7 @@ public class DuplicatedSecretMigrationJob extends StatusCheckerJob {
         try {
             measure(() -> {
                 StackDto stackDto = stackDtoService.getByCrn(getRemoteResourceCrn());
-                if (!stackDto.getStatus().isInProgress()) {
+                if (stackDto.getStatus() == null || !stackDto.getStatus().isInProgress()) {
                     Cluster cluster = clusterService.getByIdWithLists(getLocalIdAsLong());
                     if (StringUtils.isEmpty(cluster.getCloudbreakClusterManagerUser()) || StringUtils.isEmpty(cluster.getDpClusterManagerUser())) {
                         cluster.setCloudbreakClusterManagerUserFromOld();
