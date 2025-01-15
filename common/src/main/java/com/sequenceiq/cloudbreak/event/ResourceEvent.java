@@ -421,6 +421,8 @@ public enum ResourceEvent {
     CLUSTER_UPGRADE_VALIDATION_FINISHED("cluster.upgrade.validation.finished"),
     CLUSTER_UPGRADE_VALIDATION_SKIPPED("cluster.upgrade.validation.skipped"),
     CLUSTER_UPGRADE_VALIDATION_FAILED("cluster.upgrade.validation.failed"),
+    CLUSTER_FORCE_OS_UPGRADE_ENABLED("cluster.force.os.upgrade.enabled"),
+    CLUSTER_FORCE_OS_UPGRADE_REQUESTED("cluster.force.os.upgrade.requested"),
     CLUSTER_PROVISION_CLOUD_STORAGE_VALIDATION_ON_IDBROKER_FAILED("cluster.provision.idbrokerhost.cloudstorage.vmvalidation.failed"),
     CLUSTER_SCALING_STOPSTART_UPSCALE_INIT("cluster.scaling.stopstart.upscale.init"),
     CLUSTER_SCALING_STOPSTART_UPSCALE_STARTING("cluster.scaling.stopstart.upscale.starting"),

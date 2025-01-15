@@ -76,8 +76,6 @@ class UpgradeDistroxFlowEventChainFactoryTest {
 
     private static final long STACK_ID = 1L;
 
-    private static final String ACCOUNT_ID = "ACCOUNT_ID";
-
     private static final String IMAGE_ID = "imageId";
 
     private static final String RH_IMAGE = "rh-image";
@@ -175,7 +173,6 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     @Test
     void testChainQueueForRollingUpgradeWithReplaceVms() {
         when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
-        when(stackDto.getAccountId()).thenReturn(ACCOUNT_ID);
         when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
@@ -196,7 +193,6 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     @Test
     void testChainQueueForReplaceVmsWithHundredNodes() {
         when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
-        when(stackDto.getAccountId()).thenReturn(ACCOUNT_ID);
         when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
@@ -227,13 +223,11 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     @Test
     void testChainQueueForReplaceVmsWithHundredNodesWhenForceOsUpgradeAndRollingUpgradeEnabled() {
         when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
-        when(stackDto.getAccountId()).thenReturn(ACCOUNT_ID);
         InstanceMetadataView master1 = mock(InstanceMetadataView.class);
         when(master1.getInstanceId()).thenReturn("master-1");
         InstanceMetadataView master2 = mock(InstanceMetadataView.class);
         when(master2.getInstanceId()).thenReturn("master-2");
         when(stackDto.getAllAvailableGatewayInstances()).thenReturn(List.of(master1, master2));
-        when(entitlementService.isDatahubForceOsUpgradeEnabled(eq(ACCOUNT_ID))).thenReturn(true);
         when(clusterSizeUpgradeValidator.isClusterSizeLargerThanAllowedForRollingUpgrade(anyLong())).thenReturn(true);
         when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
@@ -252,11 +246,13 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         when(clusterRepairService.validateRepair(any(), anyLong(), any(), eq(false))).thenReturn(repairStartResult);
 
         DistroXUpgradeTriggerEvent event = new DistroXUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
-                new Promise<>(), imageChangeDto, true, true, "variant", true, "runtime");
+                new Promise<>(), imageChangeDto, true, false, "variant", true, "runtime");
         FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
-        assertEquals(4, flowChainQueue.getQueue().size());
+        assertEquals(6, flowChainQueue.getQueue().size());
         assertUpdateValidationEvent(flowChainQueue, IMAGE_ID, event.isReplaceVms(), event.isLockComponents(), event.isRollingUpgradeEnabled());
+        assertUpdatePreparationEvent(flowChainQueue, IMAGE_ID);
         assertSaltUpdateEvent(flowChainQueue);
+        assertUpgradeEvent(flowChainQueue, IMAGE_ID);
         assertImageUpdateEvent(flowChainQueue);
         assertRepairEvent(flowChainQueue, RepairType.ONE_BY_ONE);
         verify(clusterRepairService, times(1)).validateRepair(eq(ManualClusterRepairMode.NODE_ID), eq(STACK_ID), eq(Set.of("master-1", "master-2")), eq(false));

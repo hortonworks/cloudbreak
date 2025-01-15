@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.service.upgrade;
 import static com.sequenceiq.common.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -13,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -32,6 +35,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterDBValidationService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
@@ -73,6 +77,8 @@ public class ClusterUpgradeAvailabilityServiceTest {
 
     private static final InternalUpgradeSettings INTERNAL_UPGRADE_SETTINGS = new InternalUpgradeSettings(false, true, true);
 
+    private final Map<String, String> activatedParcels = new HashMap<>();
+
     @InjectMocks
     private ClusterUpgradeAvailabilityService underTest;
 
@@ -94,9 +100,19 @@ public class ClusterUpgradeAvailabilityServiceTest {
     @Mock
     private InstanceMetaDataService instanceMetaDataService;
 
+    @Mock
+    private UpgradePreconditionService upgradePreconditionService;
+
+    @Mock
+    private ClusterDBValidationService clusterDBValidationService;
+
     private boolean lockComponents;
 
-    private final Map<String, String> activatedParcels = new HashMap<>();
+    @BeforeEach
+    void setUp() {
+        lenient().when(upgradePreconditionService.notUsingEphemeralVolume(any())).thenReturn(true);
+        lenient().when(clusterDBValidationService.isGatewayRepairEnabled(any())).thenReturn(true);
+    }
 
     @Test
     public void testCheckForUpgradesByNameAndSomeInstancesAreStopped() throws CloudbreakImageNotFoundException {

@@ -176,6 +176,10 @@ public class DistroXUpgradeRetrievalComponentTest {
 
     private final ImageCatalogMock imageCatalogMock = new ImageCatalogMock();
 
+    private final Stack stack = createStack();
+
+    private final StackDto mockStackDto = createMockStackDto();
+
     @Inject
     private DistroXUpgradeV1Controller distroXUpgradeV1Controller;
 
@@ -257,10 +261,6 @@ public class DistroXUpgradeRetrievalComponentTest {
 
     @MockBean
     private StackCcmUpgradeService stackCcmUpgradeService;
-
-    private final Stack stack = createStack();
-
-    private final StackDto mockStackDto = createMockStackDto();
 
     @BeforeEach
     public void before() throws CloudbreakImageCatalogException {

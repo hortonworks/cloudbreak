@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import jakarta.inject.Inject;
@@ -17,6 +18,7 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterDBValidationService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
@@ -49,11 +51,18 @@ public class ClusterUpgradeAvailabilityService {
     @Inject
     private CurrentImageRetrieverService currentImageRetrieverService;
 
-    public UpgradeV4Response checkForUpgradesByName(Stack stack, boolean lockComponents, boolean replaceVms, InternalUpgradeSettings internalUpgradeSettings,
+    @Inject
+    private UpgradePreconditionService upgradePreconditionService;
+
+    @Inject
+    private ClusterDBValidationService clusterDBValidationService;
+
+    public UpgradeV4Response checkForUpgradesByName(Stack stack, boolean lockComponents, Boolean replaceVms, InternalUpgradeSettings internalUpgradeSettings,
             boolean getAllImages, String targetImageId) {
+        boolean replaceVmsForCheck = determineReplaceVmsParameterForCheck(stack, replaceVms);
         UpgradeV4Response upgradeOptions = checkForUpgrades(stack, lockComponents, internalUpgradeSettings, getAllImages, targetImageId);
-        upgradeOptions.setReplaceVms(replaceVms);
-        addReasonIfNecessary(stack, lockComponents, replaceVms, upgradeOptions);
+        upgradeOptions.setReplaceVms(replaceVmsForCheck);
+        addReasonIfNecessary(stack, lockComponents, replaceVmsForCheck, upgradeOptions);
         return upgradeOptions;
     }
 
@@ -75,7 +84,24 @@ public class ClusterUpgradeAvailabilityService {
         return upgradeOptions;
     }
 
-    private void addReasonIfNecessary(Stack stack, boolean lockComponents, boolean replaceVms, UpgradeV4Response upgradeOptions) {
+    private boolean determineReplaceVmsParameterForCheck(Stack stack, Boolean replaceVms) {
+        if (stack.isDatalake()) {
+            LOGGER.debug("ReplaceVms is always true for datalakes.");
+            return true;
+        } else if (!upgradePreconditionService.notUsingEphemeralVolume(stack)) {
+            LOGGER.debug("Cluster uses ephemeral volume, replaceVms should be false.");
+            return false;
+        } else if (!clusterDBValidationService.isGatewayRepairEnabled(stack.getCluster())) {
+            LOGGER.debug("Gateway repair is not enabled, replaceVms should be false.");
+            return false;
+        } else {
+            boolean determinedReplaceVms = Optional.ofNullable(replaceVms).orElse(Boolean.TRUE);
+            LOGGER.debug("Determined replaceVms: {}, original param from the request: {}", determinedReplaceVms, replaceVms);
+            return determinedReplaceVms;
+        }
+    }
+
+    private void addReasonIfNecessary(Stack stack, boolean lockComponents, Boolean replaceVms, UpgradeV4Response upgradeOptions) {
         if (StringUtils.isEmpty(upgradeOptions.getReason())) {
             if (!stack.getStatus().isAvailable()) {
                 upgradeOptions.setReason(String.format("Cannot upgrade cluster because it is in %s state.", stack.getStatus()));
@@ -95,7 +121,7 @@ public class ClusterUpgradeAvailabilityService {
     }
 
     private boolean shouldValidateForRepair(boolean lockComponents, Boolean replaceVms) {
-        return lockComponents || replaceVms == null || replaceVms;
+        return lockComponents || replaceVms == null || Boolean.TRUE.equals(replaceVms);
     }
 
     private ImageFilterResult getAvailableImagesForUpgrade(Stack stack, String imageCatalogName, ImageFilterParams imageFilterParams) {

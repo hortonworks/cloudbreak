@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterDBValidationService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
@@ -55,9 +54,6 @@ public class StackUpgradeOperations {
 
     @Inject
     private UpgradePreconditionService upgradePreconditionService;
-
-    @Inject
-    private ClusterDBValidationService clusterDBValidationService;
 
     @Inject
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
@@ -94,9 +90,8 @@ public class StackUpgradeOperations {
         MDCBuilder.buildMdcContext(stack);
         stack.setInstanceGroups(instanceGroupService.getByStackAndFetchTemplates(stack.getId()));
         boolean osUpgrade = Boolean.TRUE.equals(request.getLockComponents()) && StringUtils.isEmpty(request.getRuntime());
-        boolean replaceVms = determineReplaceVmsParameter(stack, request.getReplaceVms());
         boolean getAllImages = request.getImageId() != null;
-        UpgradeV4Response upgradeResponse = clusterUpgradeAvailabilityService.checkForUpgradesByName(stack, osUpgrade, replaceVms,
+        UpgradeV4Response upgradeResponse = clusterUpgradeAvailabilityService.checkForUpgradesByName(stack, osUpgrade, request.getReplaceVms(),
                 request.getInternalUpgradeSettings(), getAllImages, request.getImageId());
         if (CollectionUtils.isNotEmpty(upgradeResponse.getUpgradeCandidates())) {
             clusterUpgradeCandidateFilterService.filterUpgradeOptions(upgradeResponse, request, stack.isDatalake());
@@ -128,23 +123,6 @@ public class StackUpgradeOperations {
 
     private boolean isRollingUpgradeEnabled(UpgradeV4Request request) {
         return Optional.ofNullable(request.getInternalUpgradeSettings()).map(InternalUpgradeSettings::isRollingUpgradeEnabled).orElse(false);
-    }
-
-    private boolean determineReplaceVmsParameter(Stack stack, Boolean replaceVms) {
-        if (stack.isDatalake()) {
-            LOGGER.debug("ReplaceVms is always true for datalakes.");
-            return true;
-        } else if (!upgradePreconditionService.notUsingEphemeralVolume(stack)) {
-            LOGGER.debug("Cluster uses ephemeral volume, replaceVms should be false.");
-            return false;
-        } else if (!clusterDBValidationService.isGatewayRepairEnabled(stack.getCluster())) {
-            LOGGER.debug("Gateway repair is not enabled, replaceVms should be false.");
-            return false;
-        } else {
-            boolean determinedReplaceVms = Optional.ofNullable(replaceVms).orElse(Boolean.TRUE);
-            LOGGER.debug("Determined replaceVms: {}, original param from the request: {}", determinedReplaceVms, replaceVms);
-            return determinedReplaceVms;
-        }
     }
 
     private List<String> getPreparedImagesList(long clusterId) {

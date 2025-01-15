@@ -28,7 +28,7 @@ public class UpgradeV4Request {
     @Schema(description = UpgradeModelDescription.DRY_RUN)
     private Boolean dryRun;
 
-    private Boolean replaceVms = Boolean.TRUE;
+    private Boolean replaceVms;
 
     @Schema(description = UpgradeModelDescription.SKIP_DATAHUB_VALIDATION)
     private Boolean skipDataHubValidation;
@@ -110,12 +110,12 @@ public class UpgradeV4Request {
         this.skipDataHubValidation = skipDataHubValidation;
     }
 
-    public void setKeepVariant(Boolean keepVariant) {
-        this.keepVariant = Boolean.TRUE.equals(keepVariant);
-    }
-
     public boolean isKeepVariant() {
         return keepVariant;
+    }
+
+    public void setKeepVariant(Boolean keepVariant) {
+        this.keepVariant = Boolean.TRUE.equals(keepVariant);
     }
 
     public boolean isEmpty() {

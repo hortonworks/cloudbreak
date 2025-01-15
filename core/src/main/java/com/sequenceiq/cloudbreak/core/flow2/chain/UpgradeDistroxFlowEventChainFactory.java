@@ -35,7 +35,6 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
@@ -106,9 +105,6 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
 
     @Inject
     private ClusterSizeUpgradeValidator clusterSizeUpgradeValidator;
-
-    @Inject
-    private EntitlementService entitlementService;
 
     @Override
     public String initEvent() {
@@ -249,8 +245,8 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
 
     private Map<String, List<String>> getReplaceableInstancesByHostGroup(DistroXUpgradeTriggerEvent event) {
         StackDto stack = stackDtoService.getByIdWithoutResources(event.getResourceId());
-        if (entitlementService.isDatahubForceOsUpgradeEnabled(stack.getAccountId())) {
-            LOGGER.info("Force OS upgrade entitlement enabled");
+        if (event.isReplaceVms() && !event.isLockComponents()) {
+            LOGGER.info("Force OS upgrade is enabled by entitlement or requested by explicitly specifying replaceVms as true and lockComponents as false.");
             if ((clusterSizeUpgradeValidator.isClusterSizeLargerThanAllowedForRollingUpgrade(stack.getFullNodeCount())) && event.isRollingUpgradeEnabled()
                     || isCodCluster(stack)) {
                 LOGGER.info("Cluster size is larger than allowed for rolling upgrade or its a COD cluster. Replace only the Salt master nodes.");
