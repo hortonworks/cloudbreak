@@ -166,7 +166,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService, Cl
 
     private void fireEventWithPayload(Long stackId, String eventType, ResourceEvent resourceEvent, Collection<String> eventMessageArgs,
             String eventMessage, String instanceGroupName) {
-        StackDto stack = stackDtoService.getById(stackId);
+        StackDto stack = stackDtoService.getByIdWithoutResources(stackId);
         fireEventWithPayload(stack, eventType, resourceEvent, eventMessageArgs, eventMessage, instanceGroupName);
     }
 
