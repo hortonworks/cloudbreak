@@ -26,8 +26,6 @@ dependencies {
   implementation     project(':service-common')
 
   implementation     group: 'org.springframework.boot',          name: 'spring-boot-starter-jersey',     version: springBootVersion
-  implementation     group: 'org.bouncycastle',                  name: 'bcprov-jdk18on',                 version: bouncycastleVersion
-  implementation     group: 'org.bouncycastle',                  name: 'bcpkix-jdk18on',                 version: bouncycastleVersion
 
   implementation     group: 'net.i2p.crypto',                    name: 'eddsa',                          version: '0.3.0'
 

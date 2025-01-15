@@ -71,6 +71,8 @@ bootJar {
       def grgit = Grgit.open(currentDir: project.projectDir)
       attributes "Implementation-Version": grgit.describe()
     }
+    //TODO  This could be removed if commercial side will be also on chainguard images
+    requiresUnpack '**/bc*.jar'
 }
 
 publishing {
@@ -121,11 +123,6 @@ dependencyManagement {
       entry 'spring-boot-starter-freemarker'
     }
 
-    dependencySet(group: 'org.bouncycastle',  version: bouncycastleVersion) {
-      entry 'bcprov-jdk18on'
-      entry 'bcpkix-jdk18on'
-    }
-
     dependencySet(group: 'com.jayway.restassured',  version: '2.9.0') {
       entry 'rest-assured'
       entry 'json-path'
@@ -173,8 +170,8 @@ dependencies {
   implementation group: 'org.apache.commons',                 name: 'commons-lang3'
   implementation group: 'org.freemarker',                     name: 'freemarker'
   implementation group: 'org.postgresql',                     name: 'postgresql'
-  implementation group: 'org.bouncycastle',                   name: 'bcprov-jdk18on'
-  implementation group: 'org.bouncycastle',                   name: 'bcpkix-jdk18on'
+  implementation group: 'org.bouncycastle',                   name: 'bc-fips',                     version: bouncycastleFipsVersion
+  implementation group: 'org.bouncycastle',                   name: 'bcpkix-fips',                 version: bouncycastlePkixFipsVersion
   implementation group: 'org.glassfish.jersey.media',         name: 'jersey-media-multipart'
   implementation group: 'org.glassfish.jersey.ext',           name: 'jersey-micrometer',           version: jerseyMicrometerVersion
   implementation group: 'org.mybatis',                        name: 'mybatis-migrations'

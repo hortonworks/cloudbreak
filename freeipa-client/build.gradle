@@ -40,11 +40,12 @@ dependencies {
   implementation     group: 'com.fasterxml.jackson.core',       name: 'jackson-databind',            version: jacksonVersion
   implementation     group: 'org.slf4j',                        name: 'slf4j-api',                   version: slf4jApiVersion
   implementation     group: 'org.apache.commons',               name: 'commons-lang3',               version: apacheCommonsLangVersion
-  implementation     group: 'org.bouncycastle',                 name: 'bcprov-jdk18on',              version: bouncycastleVersion
-  implementation     group: 'org.bouncycastle',                 name: 'bcpkix-jdk18on',              version: bouncycastleVersion
   implementation     group: 'org.springframework',              name: 'spring-web',                  version: springFrameworkVersion
   implementation     group: 'org.glassfish.jersey.core',        name: 'jersey-common',               version: jerseyCoreVersion
   implementation     group: 'org.springframework.boot',         name: 'spring-boot-starter-web',     version: springBootVersion
+  implementation     group: 'org.bouncycastle',                 name: 'bc-fips',                     version: bouncycastleFipsVersion
+  implementation     group: 'org.bouncycastle',                 name: 'bcpkix-fips',                 version: bouncycastlePkixFipsVersion
+  implementation     group: 'org.bouncycastle',                 name: 'bcutil-fips',                 version: bouncycastleUtilFipsVersion
 
   testImplementation group: 'org.mockito',                      name: 'mockito-core',                version: mockitoVersion
   testImplementation group: 'org.hamcrest',                     name: 'hamcrest',                    version: hamcrestVersion

@@ -66,7 +66,7 @@ dependencies {
   implementation    (group: 'org.springframework.data',  name: 'spring-data-envers',                   version: springDataJpaFrameworkVersion) {
     exclude group: 'org.hibernate', module: 'hibernate-envers'
   }
-  implementation     group: 'org.bouncycastle',          name: 'bcprov-jdk18on',                       version: bouncycastleVersion
+  implementation group: 'org.bouncycastle',                 name: 'bc-fips',                        version: bouncycastleFipsVersion
   implementation     group: 'com.google.guava',          name: 'guava',                                version: guavaVersion
   implementation     (group: 'org.apache.directory.server', name: 'apacheds-kerberos-codec',           version: '2.0.0.AM26') {
     exclude group: 'org.apache.mina', module: 'mina-core'
@@ -201,6 +201,8 @@ bootJar {
     def grgit = Grgit.open(currentDir: project.projectDir)
     attributes "Implementation-Version": grgit.describe()
   }
+  //TODO  This could be removed if commercial side will be also on chainguard images
+  requiresUnpack '**/bc*.jar'
 }
 
 publishing {

@@ -9,7 +9,7 @@ import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConf
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
-import com.sequenceiq.cloudbreak.util.OpenSSLLoaderUtil;
+import com.sequenceiq.cloudbreak.util.BouncyCastleFipsProviderLoader;
 
 @Configuration
 @EnableAspectJAutoProxy(proxyTargetClass = true)
@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.util.OpenSSLLoaderUtil;
 public class PeriscopeApplication {
 
     public static void main(String[] args) {
-        OpenSSLLoaderUtil.registerOpenSSLJniProvider();
+        BouncyCastleFipsProviderLoader.load();
         if (!versionedApplication().showVersionInfo(args)) {
             if (args.length == 0) {
                 SpringApplication.run(PeriscopeApplication.class);

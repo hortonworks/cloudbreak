@@ -10,22 +10,46 @@ set -e
 
 echo "Importing certificates to the default Java certificate  trust store."
 
+import_cert_with_alias_to_trust_store() {
+  cert_dir=$1
+  cert=$2
+
+  echo "Adding certificate from file $cert_dir/$cert to trust store"
+  if keytool -import -alias "$cert" -noprompt -file "$cert_dir/$cert" -keystore "$JAVA_HOME/lib/security/cacerts" -storepass changeit; then
+      echo "Certificate added to default Java trust store with alias $cert."
+  else
+      echo "WARNING: Failed to add $cert to trust store."
+  fi
+}
+
 import_certs_from_dir_to_keystore() {
   cert_dir_param=$1
 
   if [ -d "$cert_dir_param" ]; then
-      echo -e "Starting to process certificates in $cert_dir_param directory."
+      echo "Starting to process certificates in $cert_dir_param directory."
       for cert in $(ls -A "$cert_dir_param"); do
+          echo "checking file $cert_dir_param/$cert"
           if [ -f "$cert_dir_param/$cert" ]; then
-              if keytool -import -alias "$cert" -noprompt -file "$cert_dir_param/$cert" -keystore /etc/pki/java/cacerts -storepass changeit; then
-                  echo -e "Certificate added to default Java trust store with alias $cert."
+              echo "It is a file checking for number of certificate entries $cert_dir_param/$cert"
+              number_of_certs=$(grep -c 'END CERTIFICATE' "$cert_dir_param/$cert" || true)
+              if [ "$number_of_certs" -gt 1 ]; then
+                  echo "Splitting $cert_dir_param/$cert into multiple certificate files as it contains $number_of_certs certificates"
+                  cert_bundle_dir="/${cert%.pem}/"
+                  mkdir -p "$cert_bundle_dir"
+                  awk 'split_after==1{n++;split_after=0} /-----END CERTIFICATE-----/ {split_after=1} {print > "'"${cert_bundle_dir}"'cert" n ".pem"}' "$cert_dir_param/$cert"
+                  for certbundle_part in $(ls -A "$cert_bundle_dir"); do
+                      import_cert_with_alias_to_trust_store "$cert_bundle_dir" "$certbundle_part"
+                  done;
               else
-                  echo -e "WARNING: Failed to add $cert to trust store.\n"
+                  echo "import single cert from single file $cert_dir_param/$cert"
+                  import_cert_with_alias_to_trust_store "$cert_dir_param" "$cert"
               fi
+          else
+            echo "it is not file: $cert_dir_param/$cert"
           fi
       done
   else
-      echo -e "NOT an existing directory $cert_dir_param"
+      echo "NOT an existing directory $cert_dir_param"
   fi
 }
 
@@ -43,6 +67,25 @@ if [ "$CRYPTOSENSE_ENABLED" == "true" ]; then
   REMOTE_ENVIRONMENT_JAVA_OPTS="$REMOTE_ENVIRONMENT_JAVA_OPTS -Dcryptosense.agent.out=/cryptosense/logs -javaagent:/cryptosense/cs-java-tracer.jar"
 fi
 
-REMOTE_ENVIRONMENT_JAVA_OPTS="$REMOTE_ENVIRONMENT_JAVA_OPTS -Djavax.net.ssl.keyStore=NONE -Djavax.net.ssl.keyStoreType=PKCS11 -Djavax.net.ssl.trustStore=NONE -Djavax.net.ssl.trustStoreType=PKCS11"
+# If presence of bouncycastle-fips in an image is detected, do not set any other security options (neither FIPS or non-fips).
+BC_FIPS_LOCATION="/usr/share/java/bouncycastle-fips"
+if [ -e "${BC_FIPS_LOCATION}" ]; then
+  SECURITY_OPTS="--module-path=${BC_FIPS_LOCATION}"
+  if [ "${FIPS_MODE_ENABLED:-false}" = false ]; then
+    SECURITY_OPTS="${SECURITY_OPTS} -Djava.security.properties=$JAVA_HOME/conf/security/java-nonfips.security"
+  fi
+  echo "env variable 'JDK_JAVA_FIPS_OPTIONS='${JDK_JAVA_FIPS_OPTIONS} and 'JAVA_TRUSTSTORE_OPTIONS='${JAVA_TRUSTSTORE_OPTIONS} "
+  SECURITY_OPTS="${SECURITY_OPTS} ${JDK_JAVA_FIPS_OPTIONS}"
+
+  SECURITY_OPTS="${SECURITY_OPTS} --add-exports java.base/sun.security.ssl=ALL-UNNAMED"
+  SECURITY_OPTS="${SECURITY_OPTS} --add-exports java.base/com.sun.crypto.provider=ALL-UNNAMED"
+  SECURITY_OPTS="${SECURITY_OPTS} --add-exports org.bouncycastle.fips.core/org.bouncycastle.asn1.cryptlib=ALL-UNNAMED"
+  SECURITY_OPTS="${SECURITY_OPTS} --add-exports org.bouncycastle.fips.core/org.bouncycastle.asn1.isara=ALL-UNNAMED"
+  SECURITY_OPTS="${SECURITY_OPTS} --add-exports org.bouncycastle.fips.core/org.bouncycastle.math.ec.custom.gm=ALL-UNNAMED"
+  SECURITY_OPTS="${SECURITY_OPTS} --add-exports org.bouncycastle.fips.core/org.bouncycastle.math.ec.custom.djb=ALL-UNNAMED"
+else
+  SECURITY_OPTS="${SECURITY_OPTS} -Djavax.net.ssl.keyStore=NONE -Djavax.net.ssl.keyStoreType=PKCS11 -Djavax.net.ssl.trustStore=NONE -Djavax.net.ssl.trustStoreType=PKCS11"
+fi
+REMOTE_ENVIRONMENT_JAVA_OPTS="${REMOTE_ENVIRONMENT_JAVA_OPTS} ${SECURITY_OPTS}"
 
 eval "(java $REMOTE_ENVIRONMENT_JAVA_OPTS -jar /remote-environment.jar) & JAVAPID=\$!; trap \"kill \$JAVAPID; wait \$JAVAPID\" SIGINT SIGTERM; wait \$JAVAPID"

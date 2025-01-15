@@ -31,8 +31,6 @@ dependencies {
   implementation group: 'com.github.ben-manes.caffeine',    name: 'caffeine',                       version: caffeineVersion
   implementation group: 'org.glassfish.jersey.core',        name: 'jersey-client',                  version: jerseyCoreVersion
   implementation group: 'org.glassfish.jersey.media',       name: 'jersey-media-multipart',         version: jerseyCoreVersion
-  implementation group: 'org.bouncycastle',                 name: 'bcprov-jdk18on',                 version: bouncycastleVersion
-  implementation group: 'org.bouncycastle',                 name: 'bcpkix-jdk18on',                 version: bouncycastleVersion
 
   implementation group: 'org.springframework',              name: 'spring-beans',                   version: springFrameworkVersion
   implementation group: 'org.springframework',              name: 'spring-context',                 version: springFrameworkVersion

@@ -9,6 +9,7 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.StringReader;
 import java.math.BigInteger;
+import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -16,14 +17,15 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.Signature;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
+import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.RSAPrivateKeySpec;
-import java.security.spec.X509EncodedKeySpec;
+import java.security.spec.PSSParameterSpec;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -37,7 +39,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.asn1.pkcs.Attribute;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.Extensions;
 import org.bouncycastle.asn1.x509.ExtensionsGenerator;
@@ -46,23 +47,12 @@ import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
-import org.bouncycastle.crypto.CryptoException;
-import org.bouncycastle.crypto.Signer;
-import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.bouncycastle.crypto.engines.RSAEngine;
-import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
-import org.bouncycastle.crypto.params.RSAKeyParameters;
-import org.bouncycastle.crypto.signers.PSSSigner;
-import org.bouncycastle.crypto.util.PrivateKeyFactory;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.bouncycastle.openssl.jcajce.JcaPKCS8Generator;
 import org.bouncycastle.operator.ContentSigner;
-import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
-import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
-import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
@@ -74,6 +64,9 @@ import org.springframework.util.CollectionUtils;
 import com.google.common.io.BaseEncoding;
 
 public class PkiUtil {
+    static final String SHA_256_WITH_RSA = "SHA256withRSA";
+
+    static final Integer SALT_LENGTH = 20;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PkiUtil.class);
 
@@ -81,16 +74,14 @@ public class PkiUtil {
 
     private static final int CERT_VALIDITY_YEAR = 10;
 
-    private static final Integer SALT_LENGTH = 20;
-
     private static final Integer MAX_CACHE_SIZE = 200;
 
     private static final int CSR_PRINT_INDEX = 64;
 
-    private static final Map<String, RSAKeyParameters> CACHE =
+    private static final Map<String, PrivateKey> CACHE =
             Collections.synchronizedMap(new LinkedHashMap<>(MAX_CACHE_SIZE * 4 / 3, 0.75f, true) {
                 @Override
-                protected boolean removeEldestEntry(Map.Entry<String, RSAKeyParameters> eldest) {
+                protected boolean removeEldestEntry(Map.Entry<String, PrivateKey> eldest) {
                     return size() > MAX_CACHE_SIZE;
                 }
             });
@@ -117,34 +108,32 @@ public class PkiUtil {
     }
 
     public static String generateSignature(String privateKeyPem, byte[] data) {
-        RSAKeyParameters rsaKeyParameters = CACHE.get(privateKeyPem);
+        PrivateKey privateKey = CACHE.get(privateKeyPem);
 
-        if (rsaKeyParameters == null) {
+        if (privateKey == null) {
             try (PEMParser pemParser = new PEMParser(new StringReader(clarifyPemKey(privateKeyPem)))) {
                 PEMKeyPair pemKeyPair = (PEMKeyPair) pemParser.readObject();
 
                 KeyFactory factory = KeyFactory.getInstance("RSA");
-                KeySpec publicKeySpec = new X509EncodedKeySpec(pemKeyPair.getPublicKeyInfo().getEncoded());
-                PublicKey publicKey = factory.generatePublic(publicKeySpec);
                 KeySpec privateKeySpec = new PKCS8EncodedKeySpec(pemKeyPair.getPrivateKeyInfo().getEncoded());
-                PrivateKey privateKey = factory.generatePrivate(privateKeySpec);
-                KeyPair kp = new KeyPair(publicKey, privateKey);
-                RSAPrivateKeySpec privKeySpec = factory.getKeySpec(kp.getPrivate(), RSAPrivateKeySpec.class);
-                rsaKeyParameters = new RSAKeyParameters(true, privKeySpec.getModulus(), privKeySpec.getPrivateExponent());
+                privateKey = factory.generatePrivate(privateKeySpec);
 
-                CACHE.put(privateKeyPem, rsaKeyParameters);
+                CACHE.put(privateKeyPem, privateKey);
             } catch (NoSuchAlgorithmException | IOException | InvalidKeySpecException e) {
                 throw new SecurityException(e);
             }
         }
 
-        Signer signer = new PSSSigner(new RSAEngine(), new SHA256Digest(), SALT_LENGTH);
-        signer.init(true, rsaKeyParameters);
-        signer.update(data, 0, data.length);
         try {
-            byte[] signature = signer.generateSignature();
-            return BaseEncoding.base64().encode(signature);
-        } catch (CryptoException e) {
+            Signature signature = Signature.getInstance("SHA256withRSAandMGF1");
+            signature.initSign(privateKey);
+            signature.setParameter(new PSSParameterSpec("SHA-256", "MGF1",
+                    new MGF1ParameterSpec("SHA-256"), SALT_LENGTH, PSSParameterSpec.DEFAULT.getTrailerField()));
+            signature.update(data);
+            byte[] signedData = signature.sign();
+            return BaseEncoding.base64().encode(signedData);
+        } catch (GeneralSecurityException e) {
+            LOGGER.warn("Failed to create signature", e);
             throw new SecurityException(e);
         }
     }
@@ -292,14 +281,6 @@ public class PkiUtil {
 
     private static X509Certificate selfsign(PKCS10CertificationRequest inputCSR, String publicAddress, KeyPair signKey, int validity)
             throws Exception {
-        AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder()
-                .find("SHA256withRSA");
-        AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder()
-                .find(sigAlgId);
-
-        AsymmetricKeyParameter akp = PrivateKeyFactory.createKey(signKey.getPrivate()
-                .getEncoded());
-
         Calendar cal = Calendar.getInstance();
         Date currentTime = cal.getTime();
         cal.add(Calendar.YEAR, validity);
@@ -318,13 +299,9 @@ public class PkiUtil {
             }
         }
 
-        ContentSigner sigGen = new BcRSAContentSignerBuilder(sigAlgId, digAlgId)
-                .build(akp);
-
+        ContentSigner sigGen = new JcaContentSignerBuilder(SHA_256_WITH_RSA).build(signKey.getPrivate());
         X509CertificateHolder holder = myCertificateGenerator.build(sigGen);
-
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
-
         return (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(holder.toASN1Structure().getEncoded()));
     }
 
@@ -341,7 +318,7 @@ public class PkiUtil {
             p10Builder = addSubjectAlternativeNames(p10Builder, sanList);
         }
 
-        JcaContentSignerBuilder csBuilder = new JcaContentSignerBuilder("SHA256withRSA");
+        JcaContentSignerBuilder csBuilder = new JcaContentSignerBuilder(SHA_256_WITH_RSA);
         ContentSigner signer = csBuilder.build(identity.getPrivate());
         return p10Builder.build(signer);
     }

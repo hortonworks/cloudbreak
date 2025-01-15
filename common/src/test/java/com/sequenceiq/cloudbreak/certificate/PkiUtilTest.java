@@ -1,17 +1,31 @@
 package com.sequenceiq.cloudbreak.certificate;
 
+import static com.sequenceiq.cloudbreak.certificate.PkiUtil.SALT_LENGTH;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
 import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.Security;
+import java.security.Signature;
+import java.security.SignatureException;
 import java.security.cert.X509Certificate;
+import java.security.spec.MGF1ParameterSpec;
+import java.security.spec.PSSParameterSpec;
 
 import javax.security.auth.x500.X500Principal;
 
+import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
 import org.bouncycastle.util.encoders.DecoderException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+import org.testcontainers.shaded.org.bouncycastle.jce.provider.BouncyCastleProvider;
+
+import com.google.common.io.BaseEncoding;
 
 class PkiUtilTest {
 
@@ -132,4 +146,39 @@ class PkiUtilTest {
         assertThat(issuerX500Principal.getName()).isEqualTo(CERT_ISSUER);
     }
 
+    @Test
+    void testGenerateSignatureBCFIPSProvider() throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, InvalidAlgorithmParameterException {
+        Security.addProvider(new BouncyCastleFipsProvider());
+
+        KeyPair keyPair = PkiUtil.generateKeypair();
+        String privateKeyAsString = PkiUtil.convert(keyPair.getPrivate());
+        String data = "somedata";
+
+        String signedData = PkiUtil.generateSignature(privateKeyAsString, data.getBytes());
+
+        Signature instance = Signature.getInstance("SHA256withRSAandMGF1");
+        instance.initVerify(keyPair.getPublic());
+        instance.setParameter(new PSSParameterSpec("SHA-256", "MGF1",
+                new MGF1ParameterSpec("SHA-256"), SALT_LENGTH, PSSParameterSpec.DEFAULT.getTrailerField()));
+        instance.update(data.getBytes());
+        assertTrue(instance.verify(BaseEncoding.base64().decode(signedData)));
+    }
+
+    @Test
+    void testGenerateSignatureBCProvider() throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, InvalidAlgorithmParameterException {
+        Security.addProvider(new BouncyCastleProvider());
+
+        KeyPair keyPair = PkiUtil.generateKeypair();
+        String privateKeyAsString = PkiUtil.convert(keyPair.getPrivate());
+        String data = "somedata";
+
+        String signedData = PkiUtil.generateSignature(privateKeyAsString, data.getBytes());
+
+        Signature instance = Signature.getInstance("SHA256withRSAandMGF1");
+        instance.initVerify(keyPair.getPublic());
+        instance.setParameter(new PSSParameterSpec("SHA-256", "MGF1",
+                new MGF1ParameterSpec("SHA-256"), SALT_LENGTH, PSSParameterSpec.DEFAULT.getTrailerField()));
+        instance.update(data.getBytes());
+        assertTrue(instance.verify(BaseEncoding.base64().decode(signedData)));
+    }
 }

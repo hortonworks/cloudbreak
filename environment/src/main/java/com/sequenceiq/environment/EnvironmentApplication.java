@@ -8,7 +8,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import com.sequenceiq.cloudbreak.util.OpenSSLLoaderUtil;
+import com.sequenceiq.cloudbreak.util.BouncyCastleFipsProviderLoader;
 
 @EnableScheduling
 @EnableJpaRepositories(basePackages = "com.sequenceiq")
@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.util.OpenSSLLoaderUtil;
 public class EnvironmentApplication {
 
     public static void main(String[] args) {
-        OpenSSLLoaderUtil.registerOpenSSLJniProvider();
+        BouncyCastleFipsProviderLoader.load();
         SpringApplication.run(EnvironmentApplication.class, args);
     }
 

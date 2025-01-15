@@ -6,6 +6,8 @@ import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.util.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -16,6 +18,7 @@ import com.google.api.client.util.SecurityUtils;
 
 @Configuration
 public class GcpHttpClientConfig {
+    private static final Logger LOGGER = LoggerFactory.getLogger(GcpHttpClientConfig.class);
 
     @Bean
     public HttpTransport httpTransport() throws GeneralSecurityException, IOException {
@@ -26,8 +29,15 @@ public class GcpHttpClientConfig {
 
     private KeyStore getCertificateTrustStore() throws IOException, GeneralSecurityException {
         KeyStore certTrustStore = SecurityUtils.getDefaultKeyStore();
-        try (InputStream keyStoreStream = GoogleUtils.class.getResourceAsStream("google.jks")) {
-            SecurityUtils.loadKeyStore(certTrustStore, Objects.requireNonNull(keyStoreStream), "notasecret");
+        LOGGER.debug("Trying to load Google's certificates to default key store with type: {}", certTrustStore.getType());
+        if ("bcfks".equals(certTrustStore.getType())) {
+            LOGGER.warn("BCFKS key/trust stores not supported yet");
+            certTrustStore.load(null);
+        } else {
+            LOGGER.debug("Loading Google's certificates into default key store with type: {}", certTrustStore.getType());
+            try (InputStream keyStoreStream = GoogleUtils.class.getResourceAsStream("google.p12")) {
+                SecurityUtils.loadKeyStore(certTrustStore, Objects.requireNonNull(keyStoreStream), "notasecret");
+            }
         }
         return certTrustStore;
     }

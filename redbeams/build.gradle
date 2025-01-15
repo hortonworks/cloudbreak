@@ -158,6 +158,8 @@ bootJar {
     def grgit = Grgit.open(currentDir: project.projectDir)
     attributes "Implementation-Version": grgit.describe()
   }
+  //TODO  This could be removed if commercial side will be also on chainguard images
+  requiresUnpack '**/bc*.jar'
 }
 
 publishing {

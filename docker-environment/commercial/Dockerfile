@@ -7,7 +7,7 @@ ARG REPO_URL=https://nexus-private.hortonworks.com/nexus/content/groups/public
 ARG VERSION=''
 ARG TARGETARCH=''
 
-ENV VERSION ${VERSION}
+ENV VERSION=${VERSION}
 
 WORKDIR /
 
@@ -28,7 +28,7 @@ COPY bootstrap/wait_for_environment_api.sh /
 # Copy NSS DB config for non-FIPS
 COPY bootstrap/nss.cfg $JAVA_HOME/conf/security/nss.cfg
 
-ENV JAVA_SECURITY_POLICY_FILE $JAVA_HOME/conf/security/java.security
+ENV JAVA_SECURITY_POLICY_FILE=$JAVA_HOME/conf/security/java.security
 
 # Add OpenSSL provider to Java security policy file (FIPS enabled mode only).
 # - insert a line: fips.provider.1=OpenSSL

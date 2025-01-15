@@ -98,10 +98,12 @@ ext {
 
   // Crypto
   bouncycastleVersion = '1.78'
+  bouncycastleFipsVersion = '2.0.0'
+  bouncycastlePkixFipsVersion = '2.0.7'
+  bouncycastleUtilFipsVersion = '2.0.3'
 
   // Cloudera
   cmClientVersion = '7.12.0.0'
-  clouderaCryptoOpenSslProviderVersion = '1.0.2-b7'
 
   // Testing
   assertjVersion = '3.21.0'

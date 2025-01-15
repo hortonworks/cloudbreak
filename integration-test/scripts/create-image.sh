@@ -7,6 +7,7 @@ rm -rf ./integcb/docker-containers
 mkdir -p ./integcb/docker-containers
 
 folder="commercial"
+special_build_args="--build-arg FIPS_MODE_ENABLED=false"
 if [[ "$USE_FEDRAMP_CONTAINERS" == true ]]; then
   folder="fedramp"
 fi
@@ -109,14 +110,14 @@ docker run -v "$(pwd)"/integcb/docker-containers/docker-mock-thunderhead:/integc
  busybox:1.31.1 /bin/sh -c "sed -i '/mock-thunderhead-\$VERSION/c\ADD mock-thunderhead.jar /' /integcb/docker-containers/docker-mock-thunderhead/Dockerfile"
 
 echo -e "\n\033[1;96m--- Build docker images\033[0m\n"
-docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak:dev ./integcb/docker-containers/docker-cloudbreak -f ./integcb/docker-containers/docker-cloudbreak/$folder/Dockerfile & \
-  docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak-datalake:dev ./integcb/docker-containers/docker-datalake -f ./integcb/docker-containers/docker-datalake/$folder/Dockerfile & \
-  docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak-autoscale:dev ./integcb/docker-containers/docker-autoscale -f ./integcb/docker-containers/docker-autoscale/$folder/Dockerfile & \
-  docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak-freeipa:dev ./integcb/docker-containers/docker-freeipa -f ./integcb/docker-containers/docker-freeipa/$folder/Dockerfile & \
-  docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak-environment:dev ./integcb/docker-containers/docker-environment -f ./integcb/docker-containers/docker-environment/$folder/Dockerfile & \
-  docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak-redbeams:dev ./integcb/docker-containers/docker-redbeams -f ./integcb/docker-containers/docker-redbeams/$folder/Dockerfile & \
-  docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak-externalizedcompute:dev ./integcb/docker-containers/docker-externalized-compute -f ./integcb/docker-containers/docker-externalized-compute/$folder/Dockerfile & \
+  docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak:dev ./integcb/docker-containers/docker-cloudbreak -f ./integcb/docker-containers/docker-cloudbreak/$folder/Dockerfile $special_build_args & \
+  docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak-datalake:dev ./integcb/docker-containers/docker-datalake -f ./integcb/docker-containers/docker-datalake/$folder/Dockerfile $special_build_args & \
+  docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak-autoscale:dev ./integcb/docker-containers/docker-autoscale -f ./integcb/docker-containers/docker-autoscale/$folder/Dockerfile $special_build_args & \
+  docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak-freeipa:dev ./integcb/docker-containers/docker-freeipa -f ./integcb/docker-containers/docker-freeipa/$folder/Dockerfile $special_build_args & \
+  docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak-environment:dev ./integcb/docker-containers/docker-environment -f ./integcb/docker-containers/docker-environment/$folder/Dockerfile $special_build_args & \
+  docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak-redbeams:dev ./integcb/docker-containers/docker-redbeams -f ./integcb/docker-containers/docker-redbeams/$folder/Dockerfile $special_build_args & \
+  docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak-externalizedcompute:dev ./integcb/docker-containers/docker-externalized-compute -f ./integcb/docker-containers/docker-externalized-compute/$folder/Dockerfile $special_build_args & \
   docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak-mock-infrastructure:dev ./integcb/docker-containers/docker-mock-infrastructure & \
   docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak-mock-thunderhead:dev ./integcb/docker-containers/docker-mock-thunderhead & \
-  docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak-remote-environment:dev ./integcb/docker-containers/docker-environment-remote -f ./integcb/docker-containers/docker-environment-remote/$folder/Dockerfile & \
+  docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak-remote-environment:dev ./integcb/docker-containers/docker-environment-remote -f ./integcb/docker-containers/docker-environment-remote/$folder/Dockerfile $special_build_args & \
   wait

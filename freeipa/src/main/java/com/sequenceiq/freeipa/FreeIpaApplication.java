@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConf
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-import com.sequenceiq.cloudbreak.util.OpenSSLLoaderUtil;
+import com.sequenceiq.cloudbreak.util.BouncyCastleFipsProviderLoader;
 
 @EnableJpaRepositories(basePackages = { "com.sequenceiq" })
 @SpringBootApplication(scanBasePackages = "com.sequenceiq", exclude = { ErrorMvcAutoConfiguration.class, WebMvcObservationAutoConfiguration.class })
@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.util.OpenSSLLoaderUtil;
 public class FreeIpaApplication {
 
     public static void main(String[] args) {
-        OpenSSLLoaderUtil.registerOpenSSLJniProvider();
+        BouncyCastleFipsProviderLoader.load();
         SpringApplication.run(FreeIpaApplication.class, args);
     }
 

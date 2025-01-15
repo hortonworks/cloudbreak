@@ -15,7 +15,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 import com.sequenceiq.cloudbreak.structuredevent.service.CDPFlowStructuredEventHandler;
-import com.sequenceiq.cloudbreak.util.OpenSSLLoaderUtil;
+import com.sequenceiq.cloudbreak.util.BouncyCastleFipsProviderLoader;
 
 @EnableAsync
 @ComponentScan(basePackages = "com.sequenceiq",
@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.util.OpenSSLLoaderUtil;
 @EnableAutoConfiguration(exclude = { ErrorMvcAutoConfiguration.class, WebMvcObservationAutoConfiguration.class })
 public class CloudbreakApplication {
     public static void main(String[] args) {
-        OpenSSLLoaderUtil.registerOpenSSLJniProvider();
+        BouncyCastleFipsProviderLoader.load();
         if (!versionedApplication().showVersionInfo(args)) {
             if (args.length == 0) {
                 SpringApplication.run(CloudbreakApplication.class);
