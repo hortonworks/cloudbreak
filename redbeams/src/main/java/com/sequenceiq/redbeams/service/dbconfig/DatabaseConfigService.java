@@ -125,8 +125,7 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
     }
 
     public DatabaseConfig getByName(String name, String environmentCrn) {
-        Optional<DatabaseConfig> resourceOpt =
-                repository.findByEnvironmentIdAndName(environmentCrn, name);
+        Optional<DatabaseConfig> resourceOpt = repository.findByEnvironmentIdAndName(environmentCrn, name);
         if (resourceOpt.isEmpty()) {
             throw new NotFoundException(String.format("No database found with name '%s' in environment '%s'",
                     name, environmentCrn));

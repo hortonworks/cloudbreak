@@ -6,27 +6,20 @@ import static com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.S
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.domain.SslCertStatus;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.common.api.type.ResourceType;
-import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.CanaryDatabasePropertiesV4Response;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.ConnectionNameFormat;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabasePropertiesV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslConfigV4Response;
 import com.sequenceiq.redbeams.api.model.common.Status;
@@ -56,6 +49,9 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverter {
     @Inject
     private SslConfigService sslConfigService;
 
+    @Inject
+    private DatabaseServerConfigToDatabasePropertiesV4ResponseConverter databaseServerConfigToDatabasePropertiesV4ResponseConverter;
+
     public DatabaseServerV4Response convert(DatabaseServerConfig source) {
         DatabaseServerV4Response response = new DatabaseServerV4Response();
         response.setId(source.getId());
@@ -75,7 +71,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverter {
         response.setClusterCrn(source.getClusterCrn());
 
         response.setResourceStatus(source.getResourceStatus());
-        response.setDatabasePropertiesV4Response(createDatabaseProperties(source));
+        response.setDatabasePropertiesV4Response(databaseServerConfigToDatabasePropertiesV4ResponseConverter.convert(source));
         response.setStatus(Status.UNKNOWN);
         response.setSslConfig(new SslConfigV4Response());
         if (source.getDbStack().isPresent()) {
@@ -163,24 +159,6 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverter {
         sslConfig.setSslCertificateExpirationDate(expirationedDate);
         sslConfigService.save(sslConfig);
         return expirationedDate;
-    }
-
-    private DatabasePropertiesV4Response createDatabaseProperties(DatabaseServerConfig source) {
-        DatabasePropertiesV4Response response = new DatabasePropertiesV4Response();
-        source.getDbStack().ifPresent(dbStack -> {
-            Json attributes = dbStack.getDatabaseServer().getAttributes();
-            Map<String, Object> params = attributes == null ? Collections.emptyMap() : attributes.getMap();
-            if (dbStack.getCloudPlatform().equals(CloudPlatform.AZURE.name())) {
-                String dbTypeStr = (String) params.get(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY);
-                AzureDatabaseType azureDatabaseType =
-                        StringUtils.isNotBlank(dbTypeStr) ? AzureDatabaseType.valueOf(dbTypeStr) : AzureDatabaseType.SINGLE_SERVER;
-                response.setDatabaseType(azureDatabaseType.name());
-                if (azureDatabaseType == AzureDatabaseType.SINGLE_SERVER) {
-                    response.setConnectionNameFormat(ConnectionNameFormat.USERNAME_WITH_HOSTNAME);
-                }
-            }
-        });
-        return response;
     }
 
     private CanaryDatabasePropertiesV4Response createCanaryDatabaseProperties(Set<DBResource> canaryDatabaseResources) {

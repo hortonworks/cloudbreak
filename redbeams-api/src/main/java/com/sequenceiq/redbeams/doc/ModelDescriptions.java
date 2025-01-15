@@ -33,6 +33,7 @@ public final class ModelDescriptions {
     public static final String SUPPORT_CERTIFICATE_REQUEST = "Request for testing database certificate ";
     public static final String SUPPORT_CERTIFICATE_RESPONSE = "Response for testing database certificate";
     public static final String DATABASE_PROPERTIES_RESPONSE = "Response for the database properties of a database server";
+    public static final String AZURE_DATABASE_PROPERTIES_RESPONSE = "Response for Azure database server properties";
     public static final String CANARY_DATABASE_PROPERTIES_RESPONSE = "Response for the canary database properties";
 
 
@@ -88,6 +89,8 @@ public final class ModelDescriptions {
         public static final String DATABASE_VENDOR_DISPLAY_NAME = "Display name of the database vendor (MySQL, PostgreSQL, ...)";
         public static final String USERNAME = "Username of the administrative user of the database server";
         public static final String PASSWORD = "Password of the administrative user of the database server";
+        public static final String RESOURCE_GROUP_NAME = "The Azure resource group name of the database server";
+        public static final String RESOURCE_ID = "The Azure resource ID of the database server";
         public static final String ENVIRONMENT_CRN = "CRN of the environment of the database server";
         public static final String CLUSTER_CRN = "CRN of the cluster of the database server";
         public static final String CREATION_DATE = "Creation date / time of the database server, in epoch milliseconds";

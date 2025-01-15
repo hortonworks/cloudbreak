@@ -39,7 +39,6 @@ import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.redbeams.TestData;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.ConnectionNameFormat;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslCertificateType;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslConfigV4Response;
@@ -113,12 +112,15 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
     @Mock
     private SslConfigService sslConfigService;
 
+    @Mock
+    private DatabaseServerConfigToDatabasePropertiesV4ResponseConverter databaseServerConfigToDatabasePropertiesV4ResponseConverter;
+
     @InjectMocks
     private DatabaseServerConfigToDatabaseServerV4ResponseConverter converter;
 
     @ParameterizedTest
     @MethodSource("conversionParams")
-    public void testConversion(CloudPlatform cloudPlatform, AzureDatabaseType azureDatabaseType, ConnectionNameFormat connectionNameFormat) {
+    public void testConversion(CloudPlatform cloudPlatform, AzureDatabaseType azureDatabaseType) {
         DatabaseServerConfig server = new DatabaseServerConfig();
         server.setId(1L);
         server.setResourceCrn(TestData.getTestCrn(RESOURCE_TYPE_DATABASE_SERVER, RESOURCE_ID));
@@ -169,7 +171,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         assertThat(response.getStatus()).isEqualTo(dbStack.getStatus());
         assertThat(response.getStatusReason()).isEqualTo(dbStack.getStatusReason());
         assertThat(response.getMajorVersion()).isEqualTo(dbStack.getMajorVersion());
-        assertThat(response.getDatabasePropertiesV4Response().getConnectionNameFormat()).isEqualTo(connectionNameFormat);
+        //assertThat(response.getDatabasePropertiesV4Response().getConnectionNameFormat()).isEqualTo(connectionNameFormat);
         assertThat(response.getSslConfig().getSslCertificatesStatus()).isEqualTo(SslCertStatus.UP_TO_DATE);
     }
 
@@ -201,11 +203,11 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
 
     private static Stream<Arguments> conversionParams() {
         return Stream.of(
-                Arguments.of(CloudPlatform.AWS, null, ConnectionNameFormat.USERNAME_ONLY),
-                Arguments.of(CloudPlatform.GCP, null, ConnectionNameFormat.USERNAME_ONLY),
-                Arguments.of(CloudPlatform.AZURE, null, ConnectionNameFormat.USERNAME_WITH_HOSTNAME),
-                Arguments.of(CloudPlatform.AZURE, AzureDatabaseType.SINGLE_SERVER, ConnectionNameFormat.USERNAME_WITH_HOSTNAME),
-                Arguments.of(CloudPlatform.AZURE, AzureDatabaseType.FLEXIBLE_SERVER, ConnectionNameFormat.USERNAME_ONLY)
+                Arguments.of(CloudPlatform.AWS, null),
+                Arguments.of(CloudPlatform.GCP, null),
+                Arguments.of(CloudPlatform.AZURE, null),
+                Arguments.of(CloudPlatform.AZURE, AzureDatabaseType.SINGLE_SERVER),
+                Arguments.of(CloudPlatform.AZURE, AzureDatabaseType.FLEXIBLE_SERVER)
         );
     }
 

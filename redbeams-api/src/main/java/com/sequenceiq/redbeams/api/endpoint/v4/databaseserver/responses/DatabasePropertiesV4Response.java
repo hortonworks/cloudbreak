@@ -15,6 +15,8 @@ public class DatabasePropertiesV4Response {
 
     private String databaseType;
 
+    private AzureDatabasePropertiesV4Response azure;
+
     public ConnectionNameFormat getConnectionNameFormat() {
         return connectionNameFormat == null ? ConnectionNameFormat.USERNAME_ONLY : connectionNameFormat;
     }
@@ -31,11 +33,20 @@ public class DatabasePropertiesV4Response {
         this.databaseType = databaseType;
     }
 
+    public AzureDatabasePropertiesV4Response getAzure() {
+        return azure;
+    }
+
+    public void setAzure(AzureDatabasePropertiesV4Response azure) {
+        this.azure = azure;
+    }
+
     @Override
     public String toString() {
         return "DatabasePropertiesV4Response{" +
                 "connectionNameFormat=" + connectionNameFormat +
                 ", databaseType='" + databaseType + '\'' +
+                ", azure='" + azure + '\'' +
                 '}';
     }
 }
