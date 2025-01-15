@@ -78,7 +78,6 @@
     "Microsoft.Network/privateEndpoints/delete",
     "Microsoft.Network/privateEndpoints/privateDnsZoneGroups/read",
     "Microsoft.Network/privateEndpoints/privateDnsZoneGroups/write",
-    "Microsoft.Network/privateEndpoints/privateDnsZoneGroups/delete",
     "Microsoft.DBforPostgreSQL/servers/privateEndpointConnectionsApproval/action",
     "Microsoft.Network/privateDnsZones/A/read",
     "Microsoft.Network/privateDnsZones/A/write",
