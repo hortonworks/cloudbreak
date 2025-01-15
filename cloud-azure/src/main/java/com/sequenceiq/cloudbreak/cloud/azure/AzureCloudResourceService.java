@@ -9,8 +9,6 @@ import static com.sequenceiq.common.api.type.ResourceType.AZURE_DATABASE;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_DATABASE_CANARY;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_DATABASE_SECURITY_ALERT_POLICY;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_DISK;
-import static com.sequenceiq.common.api.type.ResourceType.AZURE_DNS_ZONE_GROUP;
-import static com.sequenceiq.common.api.type.ResourceType.AZURE_DNS_ZONE_GROUP_CANARY;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_INSTANCE;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_LOAD_BALANCER;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_MANAGED_IMAGE;
@@ -92,10 +90,8 @@ public class AzureCloudResourceService {
 
     public List<ResourceType> getPrivateEndpointRdsResourceTypes(boolean canary) {
         return canary ?
-                List.of(AZURE_DNS_ZONE_GROUP_CANARY,
-                        AZURE_PRIVATE_ENDPOINT_CANARY) :
-                List.of(AZURE_DNS_ZONE_GROUP,
-                AZURE_PRIVATE_ENDPOINT);
+                List.of(AZURE_PRIVATE_ENDPOINT_CANARY) :
+                List.of(AZURE_PRIVATE_ENDPOINT);
     }
 
     public List<CloudResource> getDeploymentCloudResources(Deployment templateDeployment) {
@@ -182,11 +178,6 @@ public class AzureCloudResourceService {
                 break;
             case "Microsoft.Network/privateDnsZones":
                 cloudResourceBuilder.withType(AZURE_PRIVATE_DNS_ZONE);
-                break;
-            case "Microsoft.Network/privateEndpoints/privateDnsZoneGroups":
-                cloudResourceBuilder.withType(deploymentType == PROVISION ?
-                        AZURE_DNS_ZONE_GROUP :
-                        AZURE_DNS_ZONE_GROUP_CANARY);
                 break;
             case "Microsoft.Network/privateDnsZones/virtualNetworkLinks":
                 cloudResourceBuilder.withType(AZURE_VIRTUAL_NETWORK_LINK);
