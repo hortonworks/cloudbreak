@@ -41,16 +41,12 @@ public class ClouderaManagerCipherService {
                     "DHE-RSA-AES128-SHA," +
                     "DHE-RSA-AES256-SHA256," +
                     "DHE-RSA-AES256-SHA," +
-                    "ECDHE-ECDSA-DES-CBC3-SHA," +
-                    "ECDHE-RSA-DES-CBC3-SHA," +
-                    "DHE-RSA-DES-CBC3-SHA," +
                     "AES128-GCM-SHA256," +
                     "AES256-GCM-SHA384," +
                     "AES128-SHA256," +
                     "AES256-SHA256," +
                     "AES128-SHA," +
-                    "AES256-SHA," +
-                    "DES-CBC3-SHA";
+                    "AES256-SHA";
 
     public static final String JAVA_INTERMEDIATE2018 =
             "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256," +
@@ -71,16 +67,12 @@ public class ClouderaManagerCipherService {
                     "TLS_DHE_RSA_WITH_AES_128_CBC_SHA," +
                     "TLS_DHE_RSA_WITH_AES_256_CBC_SHA256," +
                     "TLS_DHE_RSA_WITH_AES_256_CBC_SHA," +
-                    "TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA," +
-                    "TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA," +
-                    "TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA," +
                     "TLS_RSA_WITH_AES_128_GCM_SHA256," +
                     "TLS_RSA_WITH_AES_256_GCM_SHA384," +
                     "TLS_RSA_WITH_AES_128_CBC_SHA256," +
                     "TLS_RSA_WITH_AES_256_CBC_SHA256," +
                     "TLS_RSA_WITH_AES_128_CBC_SHA," +
-                    "TLS_RSA_WITH_AES_256_CBC_SHA," +
-                    "TLS_RSA_WITH_3DES_EDE_CBC_SHA";
+                    "TLS_RSA_WITH_AES_256_CBC_SHA";
 
     public static final String JAVA_EXCLUDE_INTERMEDIATE2018 =
             "^.*MD5.*$," +
