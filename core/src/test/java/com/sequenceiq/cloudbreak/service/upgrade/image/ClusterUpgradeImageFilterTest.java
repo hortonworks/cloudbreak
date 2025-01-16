@@ -40,6 +40,8 @@ public class ClusterUpgradeImageFilterTest {
 
     private static final String REGION = "us-west-1";
 
+    private static final String INTERNAL_ERROR = "Failed to retrieve eligible images due to an internal error.";
+
     @InjectMocks
     private ClusterUpgradeImageFilter underTest;
 
@@ -116,6 +118,21 @@ public class ClusterUpgradeImageFilterTest {
         ImageFilterResult actual = underTest.getAvailableImagesForUpgrade(WORKSPACE_ID, IMAGE_CATALOG_NAME, imageFilterParams);
 
         assertEquals(actual, otherImageFilterResult);
+    }
+
+    @Test
+    public void testGetAvailableImagesForUpgradeShouldReturnErrorOnException() throws CloudbreakImageCatalogException {
+        ImageFilterParams imageFilterParams = createImageFilterParams();
+
+        when(blueprintUpgradeOptionValidator.isValidBlueprint(imageFilterParams)).thenReturn(new BlueprintValidationResult(true));
+        when(imageCatalogService.getImageFilterResult(WORKSPACE_ID, IMAGE_CATALOG_NAME, imageFilterParams.getImageCatalogPlatform(),
+                imageFilterParams.isGetAllImages(), imageFilterParams.getCurrentImage().getImageId())).thenThrow(new RuntimeException("Internal Error"));
+
+        ImageFilterResult availableImagesForUpgrade = underTest.getAvailableImagesForUpgrade(WORKSPACE_ID, IMAGE_CATALOG_NAME, imageFilterParams);
+
+        assertTrue(availableImagesForUpgrade.getImages().isEmpty());
+        assertEquals(INTERNAL_ERROR, availableImagesForUpgrade.getReason());
+
     }
 
     private ImageFilterParams createImageFilterParams() {

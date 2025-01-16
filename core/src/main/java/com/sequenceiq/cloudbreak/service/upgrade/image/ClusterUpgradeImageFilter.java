@@ -38,7 +38,7 @@ public class ClusterUpgradeImageFilter {
             return availableImages.getImages().isEmpty() ? availableImages : filterImages(availableImages, imageFilterParams);
         } catch (Exception ex) {
             LOGGER.error("Error during image filtering.", ex);
-            return createEmptyResult("Failed to retrieve eligible images due tue an internal error.");
+            return createEmptyResult("Failed to retrieve eligible images due to an internal error.");
         }
     }
 
