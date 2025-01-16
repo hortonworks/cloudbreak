@@ -52,9 +52,9 @@ import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 @Component
-public class DatahubDbusUmsAccessKeyRotationContextProvider implements RotationContextProvider {
+public class DbusUmsAccessKeyRotationContextProvider implements RotationContextProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DatahubDbusUmsAccessKeyRotationContextProvider.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DbusUmsAccessKeyRotationContextProvider.class);
 
     private static final String DATABUS_KEY = "databus";
 
@@ -87,6 +87,9 @@ public class DatahubDbusUmsAccessKeyRotationContextProvider implements RotationC
     @Override
     public Map<SecretRotationStep, ? extends RotationContext> getContexts(String resourceCrn) {
         StackDto stackDto = stackService.getByCrn(resourceCrn);
+        if (stackDto.getCluster().getDatabusCredential() == null) {
+            throw new SecretRotationException("No databus credential present for cluster, rotation is not needed!");
+        }
         CMServiceConfigRotationContext cmServiceConfigRotationContext = getCMServiceConfigRotationContext(stackDto);
         RotationContext customJobRotationContext = CustomJobRotationContext.builder()
                 .withResourceCrn(resourceCrn)

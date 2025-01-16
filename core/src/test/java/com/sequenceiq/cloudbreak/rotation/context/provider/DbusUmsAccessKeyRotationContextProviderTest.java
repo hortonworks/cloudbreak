@@ -1,5 +1,10 @@
 package com.sequenceiq.cloudbreak.rotation.context.provider;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.meteringv2.MeteringV2ServiceRoles.METERINGV2_DATABUS_ACCESS_KEY_ID;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.meteringv2.MeteringV2ServiceRoles.METERINGV2_DATABUS_ACCESS_SECRET_KEY;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.meteringv2.MeteringV2ServiceRoles.METERINGV2_DATABUS_ACCESS_SECRET_KEY_ALGO;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.meteringv2.MeteringV2ServiceRoles.METERINGV2_SERVICE;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.CM_SERVICE;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM_JOB;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -16,6 +21,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -25,6 +31,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.google.common.collect.Table;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
@@ -35,7 +42,10 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationSaltService;
+import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
+import com.sequenceiq.cloudbreak.rotation.context.CMServiceConfigRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
@@ -46,9 +56,11 @@ import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 @ExtendWith(MockitoExtension.class)
-public class DatahubDbusUmsAccessKeyRotationContextProviderTest {
+public class DbusUmsAccessKeyRotationContextProviderTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:accountId:user:name";
+
+    private static final String DBUS_CRED_JSON = "{\"privateKey\":\"privateKey\", \"accessKey\":\"accessKey\", \"accessKeyType\":\"accessKeyType\"}";
 
     @Mock
     private StackDtoService stackService;
@@ -75,7 +87,7 @@ public class DatahubDbusUmsAccessKeyRotationContextProviderTest {
     private ClusterBuilderService clusterBuilderService;
 
     @InjectMocks
-    private DatahubDbusUmsAccessKeyRotationContextProvider underTest;
+    private DbusUmsAccessKeyRotationContextProvider underTest;
 
     @BeforeEach
     void setup() {
@@ -85,13 +97,30 @@ public class DatahubDbusUmsAccessKeyRotationContextProviderTest {
     }
 
     @Test
+    void testGetContextsWhenNoDbusCredPresent() {
+        StackDto stackDto = mock(StackDto.class);
+        when(stackService.getByCrn(any())).thenReturn(stackDto);
+        ClusterView clusterView = mock(ClusterView.class);
+        when(stackDto.getCluster()).thenReturn(clusterView);
+        when(clusterView.getDatabusCredential()).thenReturn(null);
+        assertThrows(SecretRotationException.class, () -> underTest.getContexts(""));
+    }
+
+    @Test
     void testGetContexts() {
         StackDto stackDto = mock(StackDto.class);
         when(stackService.getByCrn(any())).thenReturn(stackDto);
         ClusterView clusterView = mock(ClusterView.class);
         when(stackDto.getCluster()).thenReturn(clusterView);
-        when(clusterView.getDatabusCredential()).thenReturn("{\"privateKey\":\"anything\", \"accessKey\":\"anything\"}");
-        assertEquals(3, underTest.getContexts("").size());
+        when(clusterView.getDatabusCredential()).thenReturn(DBUS_CRED_JSON);
+        Map<SecretRotationStep, ? extends RotationContext> contexts = underTest.getContexts("");
+        assertEquals(3, contexts.size());
+        assertTrue(contexts.containsKey(CM_SERVICE));
+        CMServiceConfigRotationContext cmServiceConfigRotationContext = (CMServiceConfigRotationContext) contexts.get(CM_SERVICE);
+        Table<String, String, String> configTable = cmServiceConfigRotationContext.getCmServiceConfigTable();
+        assertEquals("privateKey", configTable.get(METERINGV2_SERVICE, METERINGV2_DATABUS_ACCESS_SECRET_KEY));
+        assertEquals("accessKey", configTable.get(METERINGV2_SERVICE, METERINGV2_DATABUS_ACCESS_KEY_ID));
+        assertEquals("accessKeyType", configTable.get(METERINGV2_SERVICE, METERINGV2_DATABUS_ACCESS_SECRET_KEY_ALGO));
     }
 
     @Test
@@ -115,7 +144,7 @@ public class DatahubDbusUmsAccessKeyRotationContextProviderTest {
         StackDto stackDto = mock(StackDto.class);
         ClusterView clusterView = mock(ClusterView.class);
         when(stackDto.getCluster()).thenReturn(clusterView);
-        when(clusterView.getDatabusCredential()).thenReturn("{\"privateKey\":\"anything\", \"accessKey\":\"anything\"}");
+        when(clusterView.getDatabusCredential()).thenReturn(DBUS_CRED_JSON);
         when(stackService.getByCrn(any())).thenReturn(stackDto);
         doThrow(new CloudbreakOrchestratorFailedException("failed")).when(saltService).updateSaltPillar(any(), any());
         CustomJobRotationContext customJobRotationContext = (CustomJobRotationContext) underTest.getContexts("").get(CUSTOM_JOB);
@@ -134,7 +163,7 @@ public class DatahubDbusUmsAccessKeyRotationContextProviderTest {
         StackDto stackDto = mock(StackDto.class);
         ClusterView clusterView = mock(ClusterView.class);
         when(stackDto.getCluster()).thenReturn(clusterView);
-        when(clusterView.getDatabusCredential()).thenReturn("{\"privateKey\":\"anything\", \"accessKey\":\"anything\"}");
+        when(clusterView.getDatabusCredential()).thenReturn(DBUS_CRED_JSON);
         when(stackService.getByCrn(any())).thenReturn(stackDto);
         doNothing().when(saltService).updateSaltPillar(any(), any());
         when(stackUtil.collectReachableNodes(any())).thenReturn(Set.of());
@@ -155,7 +184,7 @@ public class DatahubDbusUmsAccessKeyRotationContextProviderTest {
         StackDto stackDto = mock(StackDto.class);
         ClusterView clusterView = mock(ClusterView.class);
         when(stackDto.getCluster()).thenReturn(clusterView);
-        when(clusterView.getDatabusCredential()).thenReturn("{\"privateKey\":\"anything\", \"accessKey\":\"anything\"}");
+        when(clusterView.getDatabusCredential()).thenReturn(DBUS_CRED_JSON);
         when(stackService.getByCrn(any())).thenReturn(stackDto);
         doNothing().when(saltService).updateSaltPillar(any(), any());
         when(stackUtil.collectReachableNodes(any())).thenReturn(Set.of());
@@ -181,7 +210,7 @@ public class DatahubDbusUmsAccessKeyRotationContextProviderTest {
         StackDto stackDto = mock(StackDto.class);
         ClusterView clusterView = mock(ClusterView.class);
         when(stackDto.getCluster()).thenReturn(clusterView);
-        when(clusterView.getDatabusCredential()).thenReturn("{\"privateKey\":\"anything\", \"accessKey\":\"anything\"}");
+        when(clusterView.getDatabusCredential()).thenReturn(DBUS_CRED_JSON);
         when(stackService.getByCrn(any())).thenReturn(stackDto);
         doNothing().when(saltService).updateSaltPillar(any(), any());
         when(stackUtil.collectReachableNodes(any())).thenReturn(Set.of());
