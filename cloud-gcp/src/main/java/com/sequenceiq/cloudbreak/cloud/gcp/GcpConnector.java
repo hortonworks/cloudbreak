@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceVolumeConnector;
+import com.sequenceiq.cloudbreak.cloud.ScriptResources;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.Validator;
 import com.sequenceiq.cloudbreak.cloud.ValidatorType;
@@ -73,6 +74,9 @@ public class GcpConnector implements CloudConnector {
 
     @Inject
     private GcpAvailabilityZoneConnector gcpAvailabilityZoneConnector;
+
+    @Inject
+    private GcpScriptResources gcpScriptResources;
 
     @Override
     public Authenticator authentication() {
@@ -160,6 +164,11 @@ public class GcpConnector implements CloudConnector {
     @Override
     public EncryptionResources encryptionResources() {
         return null;
+    }
+
+    @Override
+    public ScriptResources scriptResources() {
+        return gcpScriptResources;
     }
 
     @Override

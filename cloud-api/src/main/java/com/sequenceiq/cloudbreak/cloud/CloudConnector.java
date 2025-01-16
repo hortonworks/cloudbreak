@@ -186,4 +186,9 @@ public interface CloudConnector extends CloudPlatformAware {
     default SecretConnector secretConnector() {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
+
+    default ScriptResources scriptResources() {
+        return () -> null;
+    }
+
 }

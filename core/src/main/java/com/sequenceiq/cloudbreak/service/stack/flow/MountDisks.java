@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.flow.diskvalidator.DiskValidator;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -57,6 +58,9 @@ public class MountDisks {
 
     @Inject
     private HostOrchestrator hostOrchestrator;
+
+    @Inject
+    private DiskValidator diskValidator;
 
     public void mountAllDisks(Long stackId) throws CloudbreakException {
         LOGGER.debug("Mount all disks for stack.");
@@ -94,6 +98,8 @@ public class MountDisks {
             LOGGER.debug("Execute format and mount states.");
             Map<String, Map<String, String>> mountInfo =
                     hostOrchestrator.formatAndMountDisksOnNodes(stack, gatewayConfigs, nodesWithDiskData, allNodes, exitCriteriaModel);
+
+            diskValidator.validateDisks(stack, nodesWithDiskData);
 
             mountInfo.forEach((hostname, value) -> {
                 Optional<String> instanceIdOptional = stack.getInstanceMetaDataAsList().stream()

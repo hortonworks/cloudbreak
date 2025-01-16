@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -29,6 +30,7 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.flow.diskvalidator.DiskValidator;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -55,6 +57,9 @@ public class MountDisksTest {
 
     @Mock
     private HostOrchestrator hostOrchestrator;
+
+    @Mock
+    private DiskValidator diskValidator;
 
     @InjectMocks
     private MountDisks underTest;
@@ -87,6 +92,7 @@ public class MountDisksTest {
         underTest.mountDisksOnNewNodes(1L, newNodeAddresses, reachableNodes);
         verify(stackUtil).collectNewNodesWithDiskData(stack, newNodeAddresses);
         verify(hostOrchestrator).formatAndMountDisksOnNodes(any(), any(), targetsCaptor.capture(), allNodesCaptor.capture(), any());
+        verify(diskValidator, times(1)).validateDisks(stack, newNodesWithDiskData);
         Set<Node> capturedTargets = targetsCaptor.getValue();
         Set<Node> capturedAllNode = allNodesCaptor.getValue();
         assertTrue(capturedTargets.contains(node1));

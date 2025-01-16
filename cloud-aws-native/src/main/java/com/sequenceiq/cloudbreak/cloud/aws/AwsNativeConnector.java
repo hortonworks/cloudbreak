@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.PublicKeyConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceVolumeConnector;
+import com.sequenceiq.cloudbreak.cloud.ScriptResources;
 import com.sequenceiq.cloudbreak.cloud.SecretConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.Validator;
@@ -37,6 +38,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsObjectStorageConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformResources;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPublicKeyConnector;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsScriptResources;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsSecretsManagerConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTagValidator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.validator.AwsStorageValidator;
@@ -104,6 +106,9 @@ public class AwsNativeConnector implements CloudConnector {
 
     @Inject
     private AwsEncryptionResources awsEncryptionResources;
+
+    @Inject
+    private AwsScriptResources awsScriptResources;
 
     @Override
     public Authenticator authentication() {
@@ -199,6 +204,11 @@ public class AwsNativeConnector implements CloudConnector {
     }
 
     @Override
+    public ScriptResources scriptResources() {
+        return awsScriptResources;
+    }
+
+    @Override
     public Platform platform() {
         return awsConstants.platform();
     }
@@ -207,4 +217,5 @@ public class AwsNativeConnector implements CloudConnector {
     public Variant variant() {
         return AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant();
     }
+
 }
