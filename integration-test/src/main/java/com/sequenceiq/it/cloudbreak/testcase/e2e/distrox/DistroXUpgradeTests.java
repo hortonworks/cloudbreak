@@ -1,12 +1,21 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.distrox;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.timeoutChecker;
+
+import java.util.Map;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StackResponseEntries;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.polling.AttemptBasedTimeoutChecker;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeReplaceVms;
 import com.sequenceiq.it.cloudbreak.assertion.distrox.AwsAvailabilityZoneAssertion;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
@@ -15,8 +24,10 @@ import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXUpgradeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
@@ -28,6 +39,8 @@ import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public class DistroXUpgradeTests extends AbstractE2ETest {
+
+    private static final int RUNTIME_AND_OS_UPGRADE_MAX_ATTEMPTS = 5000;
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -58,12 +71,10 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "there is a running Cloudbreak, and an environment with SDX and two DistroX clusters in " +
-                    "available state, one cluster created with deafult catalog and one cluster created with production catalog" +
-                    "disk are encrypted",
-            when = "upgrade called on both DistroX clusters",
-            then = "Both DistroX upgrade should be successful," + " the clusters should be up and running" +
-                    "disks are encrypted too")
+            given = "there is a running Cloudbreak, and an environment with SDX and two DistroX clusters in available state, " +
+                    "one cluster created with default catalog and one cluster created with production catalog disk are encrypted",
+            when = "upgrade called on all DistroX clusters",
+            then = "All DistroX upgrade should be successful, the clusters should be up and running, disks are encrypted too")
     public void testDistroXUpgradesWithEncryptedDisks(TestContext testContext) {
         boolean govCloud = testContext.getCloudProvider().getGovCloud();
         String currentUpgradeRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeCurrentVersion(govCloud);
@@ -83,6 +94,55 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
         encryptedTestUtil.assertDatahubWithName(testContext, null, firstDhName);
         encryptedTestUtil.assertDatahubWithName(testContext, null, secondDhName);
         upgradeAndAssertUpgrade(testContext, firstDhName, secondDhName, thirdDhName, patchUpgradePair.getRight());
+    }
+
+    @Test(dataProvider = TEST_CONTEXT)
+    @UseSpotInstances
+    @Description(
+            given = "there is a running Cloudbreak, and an environment with SDX and a DistroX (COD) cluster in available state",
+            when = "force OS upgrade (runtime + OS) rolling upgrade called on the DistroX (COD) cluster",
+            then = "the runtime upgrade should be successful, and partial OS oupgrade should upgrade the gateway nodes to the new image version")
+    public void testForcedOsUpgradeWhenCODCluster(TestContext testContext) {
+        testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
+        createDefaultDatalake(testContext);
+        boolean govCloud = testContext.getCloudProvider().getGovCloud();
+        String currentUpgradeRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeCurrentVersion(govCloud);
+        String targetRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeTargetVersion();
+
+        testContext
+                .given(DistroXTestDto.class)
+                .withLoadBalancer()
+                .withCluster(testContext.given(DistroXClusterTestDto.class)
+                        .withBlueprintName(commonClusterManagerProperties.getStreamsHADistroXBlueprintName(currentUpgradeRuntimeVersion)))
+                .withInstanceGroupsEntity(DistroXInstanceGroupTestDto.streamsHAHostGroups(testContext, testContext.getCloudPlatform()))
+                .addApplicationTags(Map.of("Cloudera-Service-Type", "OPERATIONAL_DB"))
+                .when(distroXTestClient.create())
+                .await(STACK_AVAILABLE)
+                .awaitForHealthyInstances()
+
+                .given(DistroXUpgradeTestDto.class)
+                .withRuntime(targetRuntimeVersion)
+                .withLockComponents(false)
+                .withReplaceVms(DistroXUpgradeReplaceVms.ENABLED)
+                .withRollingUpgradeEnabled(true)
+                .given(DistroXTestDto.class)
+                .when(distroXTestClient.upgrade())
+                .await(STACK_AVAILABLE, timeoutChecker(new AttemptBasedTimeoutChecker(RUNTIME_AND_OS_UPGRADE_MAX_ATTEMPTS)))
+                .awaitForHealthyInstances()
+
+                .withEntries(Set.of(StackResponseEntries.HARDWARE_INFO.getEntryName()))
+                .when(distroXTestClient.get())
+                .then((tc, testDto, client) -> checkInstanceImageIds(testDto))
+
+                .when(distroXTestClient.stop())
+                .awaitForFlow()
+                .await(STACK_STOPPED)
+
+                .when(distroXTestClient.start())
+                .awaitForFlow()
+                .await(STACK_AVAILABLE)
+                .awaitForHealthyInstances()
+                .validate();
     }
 
     private void upgradeAndAssertUpgrade(TestContext testContext, String firstDhName, String secondDhName, String thirdDhName, String targetImage) {
@@ -197,4 +257,28 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
         return testDto;
     }
 
+    private DistroXTestDto checkInstanceImageIds(DistroXTestDto testDto) {
+        StackV4Response stackV4Response = testDto.getResponse();
+        String actualImageId = stackV4Response.getImage().getId();
+
+        stackV4Response.getHardwareInfoGroups().stream()
+                .flatMap(group -> group.getHardwareInfos().stream())
+                .forEach(instance -> {
+                    if (InstanceMetadataType.GATEWAY.equals(instance.getInstanceMetadataType())
+                            || InstanceMetadataType.GATEWAY_PRIMARY.equals(instance.getInstanceMetadataType())) {
+                        if (!instance.getImageId().equals(actualImageId)) {
+                            throw new TestFailException(
+                                    String.format("The clusters's image id (%s) and the gateway's image id (%s) must be identical on the instance: %s",
+                                    actualImageId, instance.getImageId(), instance.getInstanceId()));
+                        }
+                    } else {
+                        if (instance.getImageId().equals(actualImageId)) {
+                            throw new TestFailException(
+                                    String.format("The clusters's image id (%s) and the instance's image id (%s) must NOT be identical on the instance: %s",
+                                    actualImageId, instance.getImageId(), instance.getInstanceId()));
+                        }
+                    }
+                });
+        return testDto;
+    }
 }

@@ -50,4 +50,9 @@ public class DistroXUpgradeTestDto extends AbstractSdxTestDto<DistroXUpgradeV1Re
         getRequest().setLockComponents(lockComponents);
         return this;
     }
+
+    public DistroXUpgradeTestDto withRollingUpgradeEnabled(Boolean rollingUpgradeEnabled) {
+        getRequest().setRollingUpgradeEnabled(rollingUpgradeEnabled);
+        return this;
+    }
 }

@@ -227,4 +227,9 @@ public class DistroXTestDtoBase<T extends DistroXTestDtoBase> extends AbstractCl
     public String getVariant() {
         return getResponse().getVariant();
     }
+
+    public DistroXTestDtoBase<T> addApplicationTags(Map<String, String> tags) {
+        tags.forEach((key, value) -> getRequest().initAndGetTags().getApplication().put(key, value));
+        return this;
+    }
 }

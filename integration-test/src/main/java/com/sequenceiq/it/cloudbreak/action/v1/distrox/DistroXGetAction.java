@@ -1,7 +1,5 @@
 package com.sequenceiq.it.cloudbreak.action.v1.distrox;
 
-import java.util.HashSet;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +18,7 @@ public class DistroXGetAction implements Action<DistroXTestDto, CloudbreakClient
         testDto.setResponse(
                 client.getDefaultClient()
                         .distroXV1Endpoint()
-                        .getByName(testDto.getName(), new HashSet<>()));
+                        .getByName(testDto.getName(), testDto.getEntries()));
         Log.whenJson(LOGGER, " Stack get was successful:\n", testDto.getResponse());
         Log.when(LOGGER, " crn: " + testDto.getResponse().getCrn());
 

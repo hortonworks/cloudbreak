@@ -1,10 +1,18 @@
 package com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup;
 
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.BROKER;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.COMPUTE;
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.CONNECT;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.COORDINATOR;
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.CORE_BROKER;
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.CORE_ZOOKEEPER;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.EXECUTOR;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.GATEWAY;
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.KRAFT;
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MANAGER;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER_STREAMS;
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.SRM;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.WORKER;
 
 import java.util.HashSet;
@@ -37,27 +45,16 @@ public class DistroXInstanceGroupTestDto extends AbstractCloudbreakTestDto<Insta
         super(new InstanceGroupV1Request(), testContext);
     }
 
-    public DistroXInstanceGroupTestDto valid() {
-        return withHostGroup(MASTER);
-    }
-
-    public DistroXInstanceGroupTestDto withHostGroup(HostGroupType hostGroupType) {
-        DistroXInstanceTemplateTestDto template = getTestContext()
-                .given("DistroxInstanceGroupTestDto" + hostGroupType.getName(), DistroXInstanceTemplateTestDto.class, getCloudPlatform());
-        return withRecoveryMode(RecoveryMode.MANUAL)
-                .withNodeCount(hostGroupType.determineInstanceCount())
-                .withGroup(hostGroupType.getName())
-                .withType(hostGroupType.getInstanceGroupType())
-                .withName(hostGroupType.getName())
-                .withTemplate(template);
-    }
-
     public static List<DistroXInstanceGroupTestDto> dataEngHostGroups(TestContext testContext, CloudPlatform cloudPlatform) {
         return withHostGroup(testContext, cloudPlatform, MASTER, COMPUTE, WORKER, GATEWAY);
     }
 
     public static List<DistroXInstanceGroupTestDto> dataMartHostGroups(TestContext testContext, CloudPlatform cloudPlatform) {
         return withHostGroup(testContext, cloudPlatform, MASTER, COORDINATOR, EXECUTOR);
+    }
+
+    public static List<DistroXInstanceGroupTestDto> streamsHAHostGroups(TestContext testContext, CloudPlatform cloudPlatform) {
+        return withHostGroup(testContext, cloudPlatform, MANAGER, MASTER_STREAMS, CORE_ZOOKEEPER, CORE_BROKER, BROKER, SRM, CONNECT, KRAFT);
     }
 
     public static List<DistroXInstanceGroupTestDto> dataEngHostGroups(TestContext testContext) {
@@ -88,6 +85,21 @@ public class DistroXInstanceGroupTestDto extends AbstractCloudbreakTestDto<Insta
                 .withNetwork(SubnetId.all())
                 .withRecipes(entity.getRequest().getRecipeNames())
                 .withTemplate(testContext.given(DistroXInstanceTemplateTestDto.class, cloudPlatform));
+    }
+
+    public DistroXInstanceGroupTestDto valid() {
+        return withHostGroup(MASTER);
+    }
+
+    public DistroXInstanceGroupTestDto withHostGroup(HostGroupType hostGroupType) {
+        DistroXInstanceTemplateTestDto template = getTestContext()
+                .given("DistroxInstanceGroupTestDto" + hostGroupType.getName(), DistroXInstanceTemplateTestDto.class, getCloudPlatform());
+        return withRecoveryMode(RecoveryMode.MANUAL)
+                .withNodeCount(hostGroupType.determineInstanceCount())
+                .withGroup(hostGroupType.getName())
+                .withType(hostGroupType.getInstanceGroupType())
+                .withName(hostGroupType.getName())
+                .withTemplate(template);
     }
 
     public DistroXInstanceGroupTestDto withNodeCount(int nodeCount) {

@@ -76,6 +76,8 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistroXTestDto.class);
 
+    private final Map<HostGroupType, String> privateIps = new EnumMap<>(HostGroupType.class);
+
     private GeneratedBlueprintV4Response generatedBlueprint;
 
     private StackViewV4Response internalStackResponse;
@@ -96,7 +98,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     private CloudPlatform cloudPlatformFromStack;
 
-    private final Map<HostGroupType, String> privateIps = new EnumMap<>(HostGroupType.class);
+    private Set<String> entries = new HashSet<>();
 
     public DistroXTestDto(TestContext testContext) {
         super(new DistroXV1Request(), testContext);
@@ -351,6 +353,15 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
         return this;
     }
 
+    public DistroXTestDto withEntries(Set<String> entries) {
+        this.entries = entries;
+        return this;
+    }
+
+    public Set<String> getEntries() {
+        return entries;
+    }
+
     public String getInitiatorUserCrn() {
         return initiatorUserCrn;
     }
@@ -438,12 +449,12 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
         return ListUtils.emptyIfNull(actionableInstanceIds);
     }
 
-    public void setRepairableInstanceIds(List<String> repairableInstanceIds) {
-        this.repairableInstanceIds = Optional.of(repairableInstanceIds);
-    }
-
     public Optional<List<String>> getRepairableInstanceIds() {
         return repairableInstanceIds;
+    }
+
+    public void setRepairableInstanceIds(List<String> repairableInstanceIds) {
+        this.repairableInstanceIds = Optional.of(repairableInstanceIds);
     }
 
     public List<OrderedOSUpgradeSet> getOsUpgradeByUpgradeSets() {
@@ -471,6 +482,11 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     }
 
     @Override
+    public Map<HostGroupType, String> getPrivateIpsForLogCollection() {
+        return privateIps;
+    }
+
+    @Override
     public void setPrivateIpsForLogCollection(TestContext testContext) {
         refreshResponse(testContext, testContext.getCloudbreakClient());
         String hostGroupName = MASTER.getName();
@@ -484,11 +500,6 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
         } else {
             LOGGER.info("No private IP for {} host group, current instance status is: {}", hostGroupName, instanceMetaData.getInstanceStatus());
         }
-    }
-
-    @Override
-    public Map<HostGroupType, String> getPrivateIpsForLogCollection() {
-        return privateIps;
     }
 
     private void refreshResponse(TestContext testContext, CloudbreakClient client) {

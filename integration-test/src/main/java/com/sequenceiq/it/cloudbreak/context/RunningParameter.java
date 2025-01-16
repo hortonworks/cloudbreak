@@ -39,10 +39,76 @@ public class RunningParameter {
 
     private TimeoutChecker timeoutChecker;
 
-    public enum FlowWaitConfig {
-        WAIT_SUCCESS,
-        WAIT_FAILURE,
-        NOT_WAIT;
+    public static RunningParameter emptyRunningParameter() {
+        return new RunningParameter();
+    }
+
+    public static RunningParameter force() {
+        return new RunningParameter()
+                .withSkipOnFail(false);
+    }
+
+    public static RunningParameter who(CloudbreakUser cloudbreakUser) {
+        return new RunningParameter()
+                .withWho(cloudbreakUser);
+    }
+
+    public static RunningParameter key(String key) {
+        return new RunningParameter()
+                .withKey(key);
+    }
+
+    public static RunningParameter withoutLogError() {
+        return new RunningParameter()
+                .withLogError(false);
+    }
+
+    public static RunningParameter expectedMessage(String message) {
+        return new RunningParameter()
+                .withExpectedMessage(message);
+    }
+
+    public static RunningParameter expectedPayload(String payload) {
+        return new RunningParameter()
+                .withExpectedPayload(payload);
+    }
+
+    public static RunningParameter httpMockUrl(Class url, Method method) {
+        return new RunningParameter()
+                .withHttpMockUrl(url, method);
+    }
+
+    public static RunningParameter httpMockUrl(Class url, String method) {
+        return new RunningParameter()
+                .withHttpMockUrl(url, method);
+    }
+
+    public static RunningParameter waitForFlow() {
+        return new RunningParameter().withWaitForFlow(true);
+    }
+
+    public static RunningParameter doNotWaitForFlow() {
+        return new RunningParameter().withWaitForFlow(false);
+    }
+
+    public static RunningParameter waitForFlowSuccess() {
+        return new RunningParameter().withWaitForFlowSuccess();
+    }
+
+    public static RunningParameter waitForFlowFail() {
+        return new RunningParameter().withWaitForFlowFail();
+    }
+
+    public static RunningParameter  pollingInterval(Duration pollingInterval) {
+        return new RunningParameter().withPollingInterval(pollingInterval);
+    }
+
+    public static RunningParameter ignoredStatues(Set<Enum<?>> ignoredStatuses) {
+        return new RunningParameter().withIgnoredStatues(ignoredStatuses);
+    }
+
+    public static RunningParameter timeoutChecker(TimeoutChecker timeoutChecker) {
+        return new RunningParameter().withTimeoutChecker(timeoutChecker);
     }
 
     public CloudbreakUser getWho() {
@@ -180,80 +246,14 @@ public class RunningParameter {
         return this;
     }
 
-    public static RunningParameter emptyRunningParameter() {
-        return new RunningParameter();
-    }
-
-    public static RunningParameter force() {
-        return new RunningParameter()
-                .withSkipOnFail(false);
-    }
-
-    public static RunningParameter who(CloudbreakUser cloudbreakUser) {
-        return new RunningParameter()
-                .withWho(cloudbreakUser);
-    }
-
-    public static RunningParameter key(String key) {
-        return new RunningParameter()
-                .withKey(key);
-    }
-
-    public static RunningParameter withoutLogError() {
-        return new RunningParameter()
-                .withLogError(false);
-    }
-
-    public static RunningParameter expectedMessage(String message) {
-        return new RunningParameter()
-                .withExpectedMessage(message);
-    }
-
-    public static RunningParameter expectedPayload(String payload) {
-        return new RunningParameter()
-                .withExpectedPayload(payload);
-    }
-
-    public static RunningParameter httpMockUrl(Class url, Method method) {
-        return new RunningParameter()
-                .withHttpMockUrl(url, method);
-    }
-
-    public static RunningParameter httpMockUrl(Class url, String method) {
-        return new RunningParameter()
-                .withHttpMockUrl(url, method);
-    }
-
-    public static RunningParameter waitForFlow() {
-        return new RunningParameter().withWaitForFlow(true);
-    }
-
-    public static RunningParameter doNotWaitForFlow() {
-        return new RunningParameter().withWaitForFlow(false);
-    }
-
-    public static RunningParameter waitForFlowSuccess() {
-        return new RunningParameter().withWaitForFlowSuccess();
-    }
-
-    public static RunningParameter waitForFlowFail() {
-        return new RunningParameter().withWaitForFlowFail();
-    }
-
-    public static RunningParameter pollingInterval(Duration pollingInterval) {
-        return new RunningParameter().withPollingInterval(pollingInterval);
-    }
-
-    public static RunningParameter ignoredStatues(Set<Enum<?>> ignoredStatuses) {
-        return new RunningParameter().withIgnoredStatues(ignoredStatuses);
-    }
-
     public RunningParameter withTimeoutChecker(TimeoutChecker timeoutChecker) {
         this.timeoutChecker = timeoutChecker;
         return this;
     }
 
-    public static RunningParameter timeoutChecker(TimeoutChecker timeoutChecker) {
-        return new RunningParameter().withTimeoutChecker(timeoutChecker);
+    public enum FlowWaitConfig {
+        WAIT_SUCCESS,
+        WAIT_FAILURE,
+        NOT_WAIT;
     }
 }

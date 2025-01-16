@@ -64,6 +64,8 @@ public class CloudProviderProxy implements CloudProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudProviderProxy.class);
 
+    private final Map<CloudPlatform, CloudProvider> cloudProviderMap = new HashMap<>();
+
     private CloudProvider delegate;
 
     @Inject
@@ -74,8 +76,6 @@ public class CloudProviderProxy implements CloudProvider {
 
     @Inject
     private List<CloudProvider> cloudProviders;
-
-    private final Map<CloudPlatform, CloudProvider> cloudProviderMap = new HashMap<>();
 
     @PostConstruct
     private void init() {
@@ -88,6 +88,11 @@ public class CloudProviderProxy implements CloudProvider {
     @Override
     public String getDataMartDistroXBlueprintName() {
         return delegate.getDataMartDistroXBlueprintName();
+    }
+
+    @Override
+    public String getStreamsHADistroXBlueprintName() {
+        return delegate.getStreamsHADistroXBlueprintName();
     }
 
     @Override
@@ -392,13 +397,13 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
-    public void setImageCatalogName(String name) {
-        delegate.setImageCatalogName(name);
+    public String getImageCatalogName() {
+        return delegate.getImageCatalogName();
     }
 
     @Override
-    public String getImageCatalogName() {
-        return delegate.getImageCatalogName();
+    public void setImageCatalogName(String name) {
+        delegate.setImageCatalogName(name);
     }
 
     @Override

@@ -94,7 +94,8 @@ integrationtest:
   internalClusterShape: CUSTOM
   internalSdxBlueprintName: "%s - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas"
   dataEngDistroXBlueprintName: "%s - Data Engineering: Apache Spark%s, Apache Hive, Apache Oozie"
-  dataMartDistroXBlueprintName:  "%s - Data Mart: Apache Impala, Hue"
+  dataMartDistroXBlueprintName: "%s - Data Mart: Apache Impala, Hue"
+  streamsHADistroXBlueprintName: "%s - Streams Messaging High Availability: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control"
   clouderamanager:
     defaultUser: admin
     defaultPassword: cb1STPneh2b6KyJn

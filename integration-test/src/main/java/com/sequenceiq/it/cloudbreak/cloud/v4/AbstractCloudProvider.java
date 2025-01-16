@@ -89,6 +89,11 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     }
 
     @Override
+    public String getStreamsHADistroXBlueprintName() {
+        return commonClusterManagerProperties().getStreamsHADistroXBluepringNameForCurrentRuntime();
+    }
+
+    @Override
     public String getDataEngDistroXBlueprintName() {
         return commonClusterManagerProperties().getDataEngDistroXBlueprintNameForCurrentRuntime();
     }
@@ -242,11 +247,6 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     }
 
     @Override
-    public void setImageCatalogName(String name) {
-        commonCloudProperties().setImageCatalogName(name);
-    }
-
-    @Override
     public void setImageCatalogUrl(String url) {
         commonCloudProperties().setImageCatalogUrl(url);
     }
@@ -254,6 +254,11 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     @Override
     public String getImageCatalogName() {
         return commonCloudProperties().getImageCatalogName();
+    }
+
+    @Override
+    public void setImageCatalogName(String name) {
+        commonCloudProperties().setImageCatalogName(name);
     }
 
     @Override

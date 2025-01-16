@@ -32,6 +32,8 @@ public class CommonClusterManagerProperties {
 
     private String dataMartDistroXBlueprintName;
 
+    private String streamsHADistroXBlueprintName;
+
     private UpgradeProperties upgrade = new UpgradeProperties();
 
     private UpgradeDatabaseServerProperties upgradeDatabaseServer = new UpgradeDatabaseServerProperties();
@@ -64,12 +66,12 @@ public class CommonClusterManagerProperties {
         return String.format(internalSdxBlueprintName, runtimeVersion);
     }
 
-    public String getInternalSdxBlueprintNameWithRuntimeVersion(String runtimeVersion) {
-        return String.format(internalSdxBlueprintName, runtimeVersion);
-    }
-
     public void setInternalSdxBlueprintName(String internalSdxBlueprintName) {
         this.internalSdxBlueprintName = internalSdxBlueprintName;
+    }
+
+    public String getInternalSdxBlueprintNameWithRuntimeVersion(String runtimeVersion) {
+        return String.format(internalSdxBlueprintName, runtimeVersion);
     }
 
     public ClouderaManager getClouderaManager() {
@@ -98,6 +100,18 @@ public class CommonClusterManagerProperties {
 
     public void setDataMartDistroXBlueprintName(String dataMartDistroXBlueprintName) {
         this.dataMartDistroXBlueprintName = dataMartDistroXBlueprintName;
+    }
+
+    public String getStreamsHADistroXBluepringNameForCurrentRuntime() {
+        return getStreamsHADistroXBlueprintName(runtimeVersion);
+    }
+
+    public String getStreamsHADistroXBlueprintName(String distroXUpgradeCurrentVersion) {
+        return String.format(streamsHADistroXBlueprintName, distroXUpgradeCurrentVersion);
+    }
+
+    public void setStreamsHADistroXBlueprintName(String streamsHADistroXBlueprintName) {
+        this.streamsHADistroXBlueprintName = streamsHADistroXBlueprintName;
     }
 
     public UpgradeProperties getUpgrade() {

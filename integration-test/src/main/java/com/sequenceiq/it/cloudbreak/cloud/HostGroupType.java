@@ -3,49 +3,56 @@ package com.sequenceiq.it.cloudbreak.cloud;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
 public enum HostGroupType {
-    MASTER("master", InstanceGroupType.GATEWAY, InstanceCountParameter.MASTER_INSTANCE_COUNT.getName()),
-    MASTER_ENT("master", InstanceGroupType.CORE, InstanceCountParameter.MASTER_INSTANCE_COUNT.getName(), 2),
-    WORKER("worker", InstanceGroupType.CORE, InstanceCountParameter.WORKER_INSTANCE_COUNT.getName(), 3),
-    IDBROKER("idbroker", InstanceGroupType.CORE, InstanceCountParameter.IDBROKER_INSTANCE_COUNT.getName()),
-    IDBROKER_ENT("idbroker", InstanceGroupType.CORE, InstanceCountParameter.IDBROKER_INSTANCE_COUNT.getName(), 2),
-    GATEWAY("gateway", InstanceGroupType.CORE, InstanceCountParameter.GATEWAY_INSTANCE_COUNT.getName(), 0),
-    GATEWAY_ENT("gateway", InstanceGroupType.GATEWAY, InstanceCountParameter.GATEWAY_INSTANCE_COUNT.getName(), 2),
-    COMPUTE("compute", InstanceGroupType.CORE, InstanceCountParameter.COMPUTE_INSTANCE_COUNT.getName()),
-    COORDINATOR("coordinator", InstanceGroupType.CORE, InstanceCountParameter.COMPUTE_INSTANCE_COUNT.getName()),
-    EXECUTOR("executor", InstanceGroupType.CORE, InstanceCountParameter.WORKER_INSTANCE_COUNT.getName()),
-    SERVICES("Services", InstanceGroupType.GATEWAY, InstanceCountParameter.SERVICE_INSTANCE_COUNT.getName()),
-    MESSAGING("Messaging", InstanceGroupType.CORE, InstanceCountParameter.NIFI_INSTANCE_COUNT.getName()),
-    NIFI("NiFi", InstanceGroupType.CORE, InstanceCountParameter.NIFI_INSTANCE_COUNT.getName()),
-    ZOOKEEPER("ZooKeeper", InstanceGroupType.CORE, InstanceCountParameter.ZOOKEEPER_INSTANCE_COUNT.getName()),
-    AUXILIARY("auxiliary", InstanceGroupType.CORE, InstanceCountParameter.AUXILIARY_INSTANCE_COUNT.getName(), 1),
-    CORE("core", InstanceGroupType.CORE, InstanceCountParameter.CORE_INSTANCE_COUNT.getName(), 3),
-    SOLR_SCALE_OUT("solr_scale_out", InstanceGroupType.CORE, InstanceCountParameter.SOLR_SCALE_OUT_INSTANCE_COUNT.getName(), 0),
-    STORAGE_SCALE_OUT("storage_scale_out", InstanceGroupType.CORE, InstanceCountParameter.STORAGE_SCALE_OUT_INSTANCE_COUNT.getName(), 0),
-    KAFKA_SCALE_OUT("kafka_scale_out", InstanceGroupType.CORE, InstanceCountParameter.KAFKA_SCALE_OUT_INSTANCE_COUNT.getName(), 0),
-    RAZ_SCALE_OUT("raz_scale_out", InstanceGroupType.CORE, InstanceCountParameter.RAZ_SCALE_OUT_INSTANCE_COUNT.getName(), 0),
-    ATLAS_SCALE_OUT("atlas_scale_out", InstanceGroupType.CORE, InstanceCountParameter.ATLAS_SCALE_OUT_INSTANCE_COUNT.getName(), 0),
-    HMS_SCALE_OUT("hms_scale_out", InstanceGroupType.CORE, InstanceCountParameter.HMS_SCALE_OUT_INSTANCE_COUNT.getName(), 0);
+    MASTER("master", InstanceGroupType.GATEWAY, 1),
+    MASTER_ENT("master", InstanceGroupType.CORE, 2),
+    MASTER_STREAMS("master", InstanceGroupType.CORE, 1),
+    WORKER("worker", InstanceGroupType.CORE, 3),
+    IDBROKER("idbroker", InstanceGroupType.CORE, 1),
+    IDBROKER_ENT("idbroker", InstanceGroupType.CORE, 2),
+    GATEWAY("gateway", InstanceGroupType.CORE, 0),
+    GATEWAY_ENT("gateway", InstanceGroupType.GATEWAY, 2),
+    COMPUTE("compute", InstanceGroupType.CORE, 1),
+    COORDINATOR("coordinator", InstanceGroupType.CORE, 1),
+    EXECUTOR("executor", InstanceGroupType.CORE, 1),
+    SERVICES("Services", InstanceGroupType.GATEWAY, 1),
+    MESSAGING("Messaging", InstanceGroupType.CORE, 1),
+    NIFI("NiFi", InstanceGroupType.CORE, 1),
+    ZOOKEEPER("ZooKeeper", InstanceGroupType.CORE, 1),
+    AUXILIARY("auxiliary", InstanceGroupType.CORE, 1),
+    CORE("core", InstanceGroupType.CORE, 3),
+    SOLR_SCALE_OUT("solr_scale_out", InstanceGroupType.CORE, 0),
+    STORAGE_SCALE_OUT("storage_scale_out", InstanceGroupType.CORE, 0),
+    KAFKA_SCALE_OUT("kafka_scale_out", InstanceGroupType.CORE, 0),
+    RAZ_SCALE_OUT("raz_scale_out", InstanceGroupType.CORE, 0),
+    ATLAS_SCALE_OUT("atlas_scale_out", InstanceGroupType.CORE, 0),
+    HMS_SCALE_OUT("hms_scale_out", InstanceGroupType.CORE, 0),
+    MANAGER("manager", InstanceGroupType.GATEWAY, 2),
+    CORE_ZOOKEEPER("core_zookeeper", InstanceGroupType.CORE, 3),
+    CORE_BROKER("core_broker", InstanceGroupType.CORE, 3),
+    BROKER("broker", InstanceGroupType.CORE, 0),
+    SRM("srm", InstanceGroupType.CORE, 0),
+    CONNECT("connect", InstanceGroupType.CORE, 0),
+    KRAFT("kraft", InstanceGroupType.CORE, 0);
 
     private final String name;
 
-    private final String countParameterName;
-
     private final InstanceGroupType instanceGroupType;
 
-    private final int defaultInstanceCount;
+    private final int instanceCount;
 
-    HostGroupType(String name, InstanceGroupType instanceGroupType, String countParameterName) {
+    HostGroupType(String name, InstanceGroupType instanceGroupType, int instanceCount) {
         this.name = name;
         this.instanceGroupType = instanceGroupType;
-        this.countParameterName = countParameterName;
-        defaultInstanceCount = 1;
+        this.instanceCount = instanceCount;
     }
 
-    HostGroupType(String name, InstanceGroupType instanceGroupType, String countParameterName, int defaultInstanceCount) {
-        this.name = name;
-        this.instanceGroupType = instanceGroupType;
-        this.countParameterName = countParameterName;
-        this.defaultInstanceCount = defaultInstanceCount;
+    public static HostGroupType getByName(String name) {
+        for (HostGroupType value : HostGroupType.values()) {
+            if (value.name.equals(name)) {
+                return value;
+            }
+        }
+        return null;
     }
 
     public String getName() {
@@ -57,15 +64,6 @@ public enum HostGroupType {
     }
 
     public int determineInstanceCount() {
-        return this.defaultInstanceCount;
-    }
-
-    public static HostGroupType getByName(String name) {
-        for (HostGroupType value : HostGroupType.values()) {
-            if (value.name.equals(name)) {
-                return value;
-            }
-        }
-        return null;
+        return this.instanceCount;
     }
 }

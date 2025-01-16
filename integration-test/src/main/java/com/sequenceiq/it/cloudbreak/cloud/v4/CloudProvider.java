@@ -177,15 +177,17 @@ public interface CloudProvider {
 
     String getDataMartDistroXBlueprintName();
 
+    String getStreamsHADistroXBlueprintName();
+
     String getBlueprintCdhVersion();
 
     StackV4ParameterBase stackParameters();
 
     CloudFunctionality getCloudFunctionality();
 
-    void setImageCatalogName(String name);
-
     String getImageCatalogName();
+
+    void setImageCatalogName(String name);
 
     void setImageCatalogUrl(String url);
 
