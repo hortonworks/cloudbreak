@@ -89,6 +89,7 @@ import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
+import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.EncryptionType;
@@ -98,7 +99,7 @@ import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.common.model.FileSystemType;
 
 @ExtendWith(MockitoExtension.class)
-public class GcpInstanceResourceBuilderTest {
+class GcpInstanceResourceBuilderTest {
 
     private static final Long WORKSPACE_ID = 1L;
 
@@ -160,11 +161,14 @@ public class GcpInstanceResourceBuilderTest {
     @Mock
     private CustomGcpDiskEncryptionCreatorService customGcpDiskEncryptionCreatorService;
 
+    @Mock
+    private PersistenceNotifier persistenceNotifier;
+
     @Captor
     private ArgumentCaptor<Instance> instanceArg;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         privateId = 0L;
         String privateCrn = "crn";
         name = "master";
@@ -210,7 +214,7 @@ public class GcpInstanceResourceBuilderTest {
     }
 
     @Test
-    public void isSchedulingPreemptibleTest() throws Exception {
+    void isSchedulingPreemptibleTest() throws Exception {
         // GIVEN
         Group group = newGroupWithParams(ImmutableMap.of("preemptible", true));
         List<CloudResource> buildableResources = builder.create(context, group.getInstances().get(0), privateId, authenticatedContext, group, image);
@@ -232,7 +236,7 @@ public class GcpInstanceResourceBuilderTest {
     }
 
     @Test
-    public void isSchedulingNotPreemptibleTest() throws Exception {
+    void isSchedulingNotPreemptibleTest() throws Exception {
         // GIVEN
         Group group = newGroupWithParams(ImmutableMap.of("preemptible", false));
         List<CloudResource> buildableResources = builder.create(context, group.getInstances().get(0), privateId, authenticatedContext, group, image);
@@ -254,7 +258,7 @@ public class GcpInstanceResourceBuilderTest {
     }
 
     @Test
-    public void preemptibleParameterNotSetTest() throws Exception {
+    void preemptibleParameterNotSetTest() throws Exception {
         // GIVEN
         Group group = newGroupWithParams(ImmutableMap.of());
         List<CloudResource> buildableResources = builder.create(context, group.getInstances().get(0), privateId, authenticatedContext, group, image);
@@ -276,7 +280,7 @@ public class GcpInstanceResourceBuilderTest {
     }
 
     @Test
-    public void extraxtServiceAccountWhenServiceEmailEmpty() throws Exception {
+    void extraxtServiceAccountWhenServiceEmailEmpty() throws Exception {
         // GIVEN
         Group group = newGroupWithParams(ImmutableMap.of(DISCOVERY_NAME, "idbroker"));
         List<CloudResource> buildableResources = builder.create(context, group.getInstances().get(0), privateId, authenticatedContext, group, image);
@@ -298,7 +302,7 @@ public class GcpInstanceResourceBuilderTest {
     }
 
     @Test
-    public void freeipaHostnameSet() throws Exception {
+    void freeipaHostnameSet() throws Exception {
         // GIVEN
         String ipaserver = "ipaserver";
         Group group = newGroupWithParams(ImmutableMap.of(DISCOVERY_NAME, ipaserver));
@@ -327,7 +331,7 @@ public class GcpInstanceResourceBuilderTest {
     }
 
     @Test
-    public void labelsAndTagsSetCorrectly() throws Exception {
+    void labelsAndTagsSetCorrectly() throws Exception {
         // GIVEN
         Group group = newGroupWithParams(ImmutableMap.of(DISCOVERY_NAME, "idbroker"));
         List<CloudResource> buildableResources = builder.create(context, group.getInstances().get(0), privateId, authenticatedContext, group, image);
@@ -355,7 +359,7 @@ public class GcpInstanceResourceBuilderTest {
     }
 
     @Test
-    public void extraxtServiceAccountWhenServiceEmailNotEmpty() throws Exception {
+    void extraxtServiceAccountWhenServiceEmailNotEmpty() throws Exception {
         // GIVEN
         String email = "service@email.com";
         CloudGcsView cloudGcsView = new CloudGcsView(CloudIdentityType.LOG);
@@ -386,7 +390,7 @@ public class GcpInstanceResourceBuilderTest {
     }
 
     @Test
-    public void addToInstanceGroupFailsAuth() throws Exception {
+    void addToInstanceGroupFailsAuth() throws Exception {
         // GIVEN
         Group group = newGroupWithParams(ImmutableMap.of());
         List<CloudResource> buildableResources = builder.create(context, group.getInstances().get(0), privateId, authenticatedContext, group, image);
@@ -434,7 +438,7 @@ public class GcpInstanceResourceBuilderTest {
     }
 
     @Test
-    public void addInstanceGroupFromUpscale() throws Exception {
+    void addInstanceGroupFromUpscale() throws Exception {
         // GIVEN
         Group group = newGroupWithParams(ImmutableMap.of());
         List<CloudResource> buildableResources = builder.create(context, group.getInstances().get(0), privateId, authenticatedContext, group, image);
@@ -498,7 +502,7 @@ public class GcpInstanceResourceBuilderTest {
     }
 
     @Test
-    public void noInstanceGroupsExist() throws Exception {
+    void noInstanceGroupsExist() throws Exception {
         // GIVEN
         Group group = newGroupWithParams(ImmutableMap.of());
         List<CloudResource> buildableResources = builder.create(context, group.getInstances().get(0), privateId, authenticatedContext, group, image);
@@ -520,7 +524,7 @@ public class GcpInstanceResourceBuilderTest {
     }
 
     @Test
-    public void noSubnetInformationOnInstance() throws Exception {
+    void noSubnetInformationOnInstance() throws Exception {
 
         // GIVEN
         Group group = newGroupWithParams(ImmutableMap.of());
@@ -550,11 +554,11 @@ public class GcpInstanceResourceBuilderTest {
         assertEquals(subnetCaptor.getValue(), "default");
     }
 
-    public Group newGroupWithParams(Map<String, Object> params) {
+    private Group newGroupWithParams(Map<String, Object> params) {
         return newGroupWithParams(params, null);
     }
 
-    public Group newGroupWithParams(Map<String, Object> params, CloudFileSystemView cloudFileSystemView) {
+    private Group newGroupWithParams(Map<String, Object> params, CloudFileSystemView cloudFileSystemView) {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         CloudInstance cloudInstance = newCloudInstance(params, instanceAuthentication);
         return Group.builder()
@@ -569,25 +573,25 @@ public class GcpInstanceResourceBuilderTest {
                 .build();
     }
 
-    public CloudInstance newCloudInstance(Map<String, Object> params, InstanceAuthentication instanceAuthentication) {
+    private CloudInstance newCloudInstance(Map<String, Object> params, InstanceAuthentication instanceAuthentication) {
         InstanceTemplate instanceTemplate = new InstanceTemplate(flavor, name, privateId, volumes, InstanceStatus.CREATE_REQUESTED, params,
                 0L, "cb-centos66-amb200-2015-05-25", TemporaryStorage.ATTACHED_VOLUMES, 0L);
         return new CloudInstance(instanceId, instanceTemplate, instanceAuthentication, "subnet-1", AVAILABILITY_ZONE, params);
     }
 
     @Test
-    public void testInstanceEncryptionWithDefault() throws Exception {
+    void testInstanceEncryptionWithDefault() throws Exception {
         ImmutableMap<String, Object> params = ImmutableMap.of(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name());
         doTestDefaultDiskEncryption(params);
     }
 
     @Test
-    public void testInstanceEncryptionWithEmptyType() throws Exception {
+    void testInstanceEncryptionWithEmptyType() throws Exception {
         ImmutableMap<String, Object> params = ImmutableMap.of(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, "");
         doTestDefaultDiskEncryption(params);
     }
 
-    public void doTestDefaultDiskEncryption(ImmutableMap<String, Object> params) throws Exception {
+    private void doTestDefaultDiskEncryption(ImmutableMap<String, Object> params) throws Exception {
         Group group = newGroupWithParams(params);
         List<CloudResource> buildableResources = builder.create(context, group.getInstances().get(0), privateId, authenticatedContext, group, image);
         context.addComputeResources(0L, buildableResources);
@@ -605,34 +609,34 @@ public class GcpInstanceResourceBuilderTest {
     }
 
     @Test
-    public void testInstanceEncryptionWithRawMethodEmptyKey() throws Exception {
+    void testInstanceEncryptionWithRawMethodEmptyKey() throws Exception {
         ImmutableMap<String, Object> params = ImmutableMap.of(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name(),
                 "keyEncryptionMethod", "RAW");
         doTestDiskEncryption(params);
     }
 
     @Test
-    public void testInstanceEncryptionWithRawMethod() throws Exception {
+    void testInstanceEncryptionWithRawMethod() throws Exception {
         ImmutableMap<String, Object> params = ImmutableMap.of(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name(),
                 "keyEncryptionMethod", "RAW", InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, ENCRYPTION_KEY);
         doTestDiskEncryption(params);
     }
 
     @Test
-    public void testInstanceEncryptionWithEmptyMethod() throws Exception {
+    void testInstanceEncryptionWithEmptyMethod() throws Exception {
         ImmutableMap<String, Object> params = ImmutableMap.of(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name());
         doTestDiskEncryption(params);
     }
 
     @Test
-    public void testInstanceEncryptionWithRsaMethodEmptyKey() throws Exception {
+    void testInstanceEncryptionWithRsaMethodEmptyKey() throws Exception {
         ImmutableMap<String, Object> params = ImmutableMap.of(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name(),
                 "keyEncryptionMethod", "RSA");
         doTestDiskEncryption(params);
     }
 
     @Test
-    public void testInstanceEncryptionWithRsaMethod() throws Exception {
+    void testInstanceEncryptionWithRsaMethod() throws Exception {
         ImmutableMap<String, Object> params = ImmutableMap.of(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name(),
                 "keyEncryptionMethod", "RSA", InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, ENCRYPTION_KEY);
         doTestDiskEncryption(params);
@@ -665,6 +669,7 @@ public class GcpInstanceResourceBuilderTest {
         builder.build(context, group.getInstances().get(0), privateId, authenticatedContext, group, buildableResources, cloudStack);
 
         verify(customGcpDiskEncryptionService, times(1)).addEncryptionKeyToDisk(any(InstanceTemplate.class), any(AttachedDisk.class));
+        verify(persistenceNotifier, times(1)).notifyUpdate(requestedDisk, authenticatedContext.getCloudContext());
 
         instanceArgumentCaptor.getValue().getDisks().forEach(attachedDisk -> {
             assertNotNull(attachedDisk.getDiskEncryptionKey());
@@ -673,7 +678,7 @@ public class GcpInstanceResourceBuilderTest {
     }
 
     @Test
-    public void testStartWithDefaultEncryption() throws Exception {
+    void testStartWithDefaultEncryption() throws Exception {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         CloudInstance cloudInstance = newCloudInstance(Map.of(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name()),
                 instanceAuthentication);
@@ -681,7 +686,7 @@ public class GcpInstanceResourceBuilderTest {
         doTestDefaultEncryption(cloudInstance);
     }
 
-    public void doTestDefaultEncryption(CloudInstance cloudInstance) throws IOException {
+    private void doTestDefaultEncryption(CloudInstance cloudInstance) throws IOException {
         when(compute.instances()).thenReturn(instances);
 
         Get get = mock(Get.class);
@@ -710,7 +715,7 @@ public class GcpInstanceResourceBuilderTest {
     }
 
     @Test
-    public void testStartWithDefaultEncryptionNoTemplateParams() throws Exception {
+    void testStartWithDefaultEncryptionNoTemplateParams() throws Exception {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         CloudInstance cloudInstance = newCloudInstance(Map.of(), instanceAuthentication);
 
@@ -718,7 +723,7 @@ public class GcpInstanceResourceBuilderTest {
     }
 
     @Test
-    public void testStartWithRawEncryptedKey() throws Exception {
+    void testStartWithRawEncryptedKey() throws Exception {
         CustomerEncryptionKey customerEncryptionKey = new CustomerEncryptionKey();
         customerEncryptionKey.setRawKey("HelloWorld==");
 
@@ -727,7 +732,7 @@ public class GcpInstanceResourceBuilderTest {
         doTestCustomEncryption(params, customerEncryptionKey);
     }
 
-    public void doTestCustomEncryption(Map<String, Object> params, CustomerEncryptionKey encryptionKey) throws IOException {
+    private void doTestCustomEncryption(Map<String, Object> params, CustomerEncryptionKey encryptionKey) throws IOException {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         CloudInstance cloudInstance = newCloudInstance(params, instanceAuthentication);
         when(compute.instances()).thenReturn(instances);
@@ -770,7 +775,7 @@ public class GcpInstanceResourceBuilderTest {
     }
 
     @Test
-    public void testStartWithRsaEncryptedKey() throws Exception {
+    void testStartWithRsaEncryptedKey() throws Exception {
         CustomerEncryptionKey customerEncryptionKey = new CustomerEncryptionKey();
         customerEncryptionKey.setRawKey("HelloWorld==");
 
@@ -780,7 +785,7 @@ public class GcpInstanceResourceBuilderTest {
     }
 
     @Test
-    public void testStartWithEmptyMethodRsaEncryptedKey() throws Exception {
+    void testStartWithEmptyMethodRsaEncryptedKey() throws Exception {
         CustomerEncryptionKey customerEncryptionKey = new CustomerEncryptionKey();
         customerEncryptionKey.setRawKey("HelloWorld==");
 
@@ -790,7 +795,7 @@ public class GcpInstanceResourceBuilderTest {
     }
 
     @Test
-    public void testPublicKeyWhenHasEmailAtTheEndShouldCutTheEmail() {
+    void testPublicKeyWhenHasEmailAtTheEndShouldCutTheEmail() {
         String loginName = "cloudbreak";
         String sshKey = "ssh-rsa key cloudbreak@cloudbreak.com";
         String publicKey = builder.getPublicKey(sshKey, loginName);
@@ -798,7 +803,7 @@ public class GcpInstanceResourceBuilderTest {
     }
 
     @Test
-    public void testPublicKeyWhenHasNoEmailAtTheEndShouldCutTheEmail() {
+    void testPublicKeyWhenHasNoEmailAtTheEndShouldCutTheEmail() {
         String loginName = "cloudbreak";
         String sshKey = "ssh-rsa key";
         String publicKey = builder.getPublicKey(sshKey, loginName);
@@ -806,7 +811,7 @@ public class GcpInstanceResourceBuilderTest {
     }
 
     @Test
-    public void testPublicKeyWhenHasLotOfSegmentAtTheEndShouldCutTheEmail() {
+    void testPublicKeyWhenHasLotOfSegmentAtTheEndShouldCutTheEmail() {
         String loginName = "cloudbreak";
         String sshKey = "ssh-rsa key cloudbreak cloudbreak cloudbreak cloudbreak cloudbreak cloudbreak";
         String publicKey = builder.getPublicKey(sshKey, loginName);
