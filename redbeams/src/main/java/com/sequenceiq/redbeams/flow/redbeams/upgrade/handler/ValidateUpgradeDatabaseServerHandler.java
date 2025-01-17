@@ -147,7 +147,7 @@ public class ValidateUpgradeDatabaseServerHandler extends ExceptionCatcherEventH
             TargetMajorVersion targetMajorVersion, DBStack migratedDbStack) {
         DatabaseServer migratedDatabaseServer = migratedDbStack.getDatabaseServer();
         migratedDatabaseServer.setName(nameGenerator.generateHashBasedName(APIResourceType.DATABASE_SERVER,
-                Optional.of(dbStack.getEnvironmentId() + targetMajorVersion.getMajorVersion())));
+                Optional.of(dbStack.getResourceCrn() + targetMajorVersion.getMajorVersion())));
         migratedDatabaseServer.setAttributes(migrationParams.getAttributes());
         migratedDatabaseServer.setInstanceType(migrationParams.getInstanceType());
         migratedDatabaseServer.setRootUserName(migrationParams.getRootUserName());

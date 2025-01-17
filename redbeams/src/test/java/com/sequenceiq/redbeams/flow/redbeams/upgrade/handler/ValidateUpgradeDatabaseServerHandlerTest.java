@@ -160,6 +160,7 @@ class ValidateUpgradeDatabaseServerHandlerTest {
                 .thenReturn(List.of(mock(CloudResourceStatus.class)));
         when(targetMajorVersion.getMajorVersion()).thenReturn("11");
         when(dbStack.getEnvironmentId()).thenReturn("env_id");
+        when(dbStack.getResourceCrn()).thenReturn("resource_id");
 
         Selectable actual = underTest.doAccept(createEvent(true));
 
@@ -167,7 +168,7 @@ class ValidateUpgradeDatabaseServerHandlerTest {
         verify(resourceConnector).validateUpgradeDatabaseServer(authenticatedContext, databaseStack, targetMajorVersion);
         verify(resourceConnector).launchValidateUpgradeDatabaseServerResources(eq(authenticatedContext), eq(databaseStack), eq(targetMajorVersion), any(),
                 eq(persistenceNotifier));
-        verify(nameGenerator).generateHashBasedName(APIResourceType.DATABASE_SERVER, Optional.of("env_id11"));
+        verify(nameGenerator).generateHashBasedName(APIResourceType.DATABASE_SERVER, Optional.of("resource_id11"));
     }
 
     @Test
