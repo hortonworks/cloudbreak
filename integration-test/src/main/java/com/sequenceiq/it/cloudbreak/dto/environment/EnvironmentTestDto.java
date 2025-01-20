@@ -372,8 +372,8 @@ public class EnvironmentTestDto
         return this;
     }
 
-    public EnvironmentTestDto withResourceEncryptionKey() {
-        return getCloudProvider().withResourceEncryptionKey(this);
+    public EnvironmentTestDto withDatabaseEncryptionKey() {
+        return getCloudProvider().withDatabaseEncryptionKey(this);
     }
 
     public EnvironmentTestDto withResourceEncryptionUserManagedIdentity() {

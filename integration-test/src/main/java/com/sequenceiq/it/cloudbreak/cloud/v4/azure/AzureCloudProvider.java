@@ -506,7 +506,7 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
         AzureResourceEncryptionParameters.Builder builder = AzureResourceEncryptionParameters.builder()
                 .withEncryptionKeyResourceGroupName(getEncryptionResourceGroupName())
-                .withEncryptionKeyUrl(getEncryptionKeyUrl());
+                .withEncryptionKeyUrl(getDiskEncryptionKeyUrl());
         if (!Strings.isNullOrEmpty(getEncryptionManagedIdentity())) {
             builder.withUserManagedIdentity(getEncryptionManagedIdentity());
         }
@@ -516,14 +516,14 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public EnvironmentTestDto withResourceEncryptionKey(EnvironmentTestDto environmentTestDto) {
+    public EnvironmentTestDto withDatabaseEncryptionKey(EnvironmentTestDto environmentTestDto) {
         if (environmentTestDto.getAzure() == null) {
             environmentTestDto.setAzure(AzureEnvironmentParameters.builder().build());
         }
         AzureEnvironmentParameters azureEnvironmentParameters = environmentTestDto.getAzure();
         AzureResourceEncryptionParameters params = AzureResourceEncryptionParameters.builder()
                 .withEncryptionKeyResourceGroupName(getEncryptionResourceGroupName())
-                .withEncryptionKeyUrl(getEncryptionKeyUrl()).build();
+                .withEncryptionKeyUrl(getDatabaseEncryptionKeyUrl()).build();
         azureEnvironmentParameters.setResourceEncryptionParameters(params);
         environmentTestDto.setAzure(azureEnvironmentParameters);
         return environmentTestDto;
@@ -552,7 +552,11 @@ public class AzureCloudProvider extends AbstractCloudProvider {
         return azureProperties.getDiskEncryption().getResourceGroupName();
     }
 
-    public String getEncryptionKeyUrl() {
+    public String getDatabaseEncryptionKeyUrl() {
+        return azureProperties.getDatabaseEncryption().getEncryptionKeyUrl();
+    }
+
+    public String getDiskEncryptionKeyUrl() {
         return azureProperties.getDiskEncryption().getEncryptionKeyUrl();
     }
 
@@ -574,7 +578,7 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
     @Override
     public void verifyVolumeEncryptionKey(List<String> volumesDesIds, String environmentName) {
-        String desKeyUrl = getEncryptionKeyUrl();
+        String desKeyUrl = getDiskEncryptionKeyUrl();
         if (volumesDesIds.stream().noneMatch(desId -> StringUtils.containsIgnoreCase(desId, "diskEncryptionSets/" + environmentName))) {
             LOGGER.error(format("Volume has NOT been encrypted with '%s' DES key!", desKeyUrl));
             throw new TestFailException(format("Volume has NOT been encrypted with '%s' DES key!", desKeyUrl));

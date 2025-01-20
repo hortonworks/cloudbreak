@@ -487,7 +487,7 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public EnvironmentTestDto withResourceEncryptionKey(EnvironmentTestDto environmentTestDto) {
+    public EnvironmentTestDto withDatabaseEncryptionKey(EnvironmentTestDto environmentTestDto) {
         return withResourceEncryption(environmentTestDto);
     }
 

@@ -31,6 +31,8 @@ public class AzureProperties {
 
     private final DiskEncryption diskEncryption = new DiskEncryption();
 
+    private final DatabaseEncryption databaseEncryption = new DatabaseEncryption();
+
     private final Resourcegroup resourcegroup = new Resourcegroup();
 
     private FreeIpaProperties freeipa = new FreeIpaProperties();
@@ -101,6 +103,10 @@ public class AzureProperties {
 
     public Network getNetwork() {
         return network;
+    }
+
+    public DatabaseEncryption getDatabaseEncryption() {
+        return databaseEncryption;
     }
 
     public DiskEncryption getDiskEncryption() {
@@ -380,6 +386,18 @@ public class AzureProperties {
 
         public void setFlexibleServerSubnetIds(Set<String> flexibleServerSubnetIds) {
             this.flexibleServerSubnetIds = flexibleServerSubnetIds;
+        }
+    }
+
+    public static class DatabaseEncryption {
+        private String encryptionKeyUrl;
+
+        public String getEncryptionKeyUrl() {
+            return encryptionKeyUrl;
+        }
+
+        public void setEncryptionKeyUrl(String encryptionKeyUrl) {
+            this.encryptionKeyUrl = encryptionKeyUrl;
         }
     }
 

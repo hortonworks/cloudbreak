@@ -86,7 +86,7 @@ public class SdxUpgradeDatabaseServerTests extends AbstractE2ETest {
             then = "SDX upgrade database server should be successful, the cluster should be up and running"
     )
     public void testSDXDatabaseUpgradeWithEncryption(TestContext testContext) {
-        testContext.given(EnvironmentTestDto.class).withResourceEncryptionKey();
+        testContext.given(EnvironmentTestDto.class).withDatabaseEncryptionKey();
         createEnvironmentWithFreeIpa(testContext);
         String sdx = resourcePropertyProvider().getName();
 

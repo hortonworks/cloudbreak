@@ -113,7 +113,7 @@ public interface CloudProvider {
 
     EnvironmentTestDto withResourceEncryption(EnvironmentTestDto environmentTestDto);
 
-    EnvironmentTestDto withResourceEncryptionKey(EnvironmentTestDto environmentTestDto);
+    EnvironmentTestDto withDatabaseEncryptionKey(EnvironmentTestDto environmentTestDto);
 
     EnvironmentTestDto withResourceEncryptionUserManagedIdentity(EnvironmentTestDto environmentTestDto);
 

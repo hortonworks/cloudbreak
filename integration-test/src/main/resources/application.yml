@@ -286,6 +286,8 @@ integrationtest:
       rebuild:
         fullbackup: abfs://rebuild@cloudbreaktestpersistent.dfs.core.windows.net/full/
         databackup: abfs://rebuild@cloudbreaktestpersistent.dfs.core.windows.net/hourly/
+    databaseEncryption:
+      encryptionKeyUrl:
     diskEncryption:
       encryptionKeyUrl:
       resourceGroupName:

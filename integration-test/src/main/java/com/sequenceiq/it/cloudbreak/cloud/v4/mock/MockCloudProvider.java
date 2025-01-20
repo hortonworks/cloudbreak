@@ -432,7 +432,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public EnvironmentTestDto withResourceEncryptionKey(EnvironmentTestDto environmentTestDto) {
+    public EnvironmentTestDto withDatabaseEncryptionKey(EnvironmentTestDto environmentTestDto) {
         return environmentTestDto;
     }
 
