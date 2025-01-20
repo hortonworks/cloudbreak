@@ -93,6 +93,7 @@ import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
+import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.EncryptionType;
@@ -168,6 +169,9 @@ class GcpInstanceResourceBuilderTest {
 
     @Mock
     private EntitlementService entitlementService;
+
+    @Mock
+    private PersistenceNotifier persistenceNotifier;
 
     @Captor
     private ArgumentCaptor<Instance> instanceArg;
@@ -633,7 +637,7 @@ class GcpInstanceResourceBuilderTest {
     }
 
     //CHECKSTYLE:OFF
-    void doTestDefaultDiskEncryption(ImmutableMap<String, Object> params) throws Throwable {
+    private void doTestDefaultDiskEncryption(ImmutableMap<String, Object> params) throws Throwable {
         //CHECKSTYLE:ON
         Group group = newGroupWithParams(params);
         List<CloudResource> buildableResources = builder.create(context, group.getInstances().getFirst(), privateId, authenticatedContext, group, image);
@@ -726,6 +730,7 @@ class GcpInstanceResourceBuilderTest {
                 builder.build(context, group.getInstances().getFirst(), privateId, authenticatedContext, group, buildableResources, cloudStack));
 
         verify(customGcpDiskEncryptionService, times(1)).addEncryptionKeyToDisk(any(InstanceTemplate.class), any(AttachedDisk.class));
+        verify(persistenceNotifier, times(1)).notifyUpdate(requestedDisk, authenticatedContext.getCloudContext());
 
         instanceArgumentCaptor.getValue().getDisks().forEach(attachedDisk -> {
             assertNotNull(attachedDisk.getDiskEncryptionKey());

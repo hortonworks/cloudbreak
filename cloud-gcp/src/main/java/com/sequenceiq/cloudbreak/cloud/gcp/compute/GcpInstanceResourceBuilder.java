@@ -250,8 +250,8 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         Compute compute = context.getCompute();
         String projectId = context.getProjectId();
 
-        List<CloudResource> instanceGroupResources = filterGroupFromNameAndAz(filterResourcesByType(context.getGroupResources(group.getName()),
-                ResourceType.GCP_INSTANCE_GROUP), group.getName(), zone);
+        List<CloudResource> instanceGroupResources = filterGroupFromNameAndAz(filterResourcesByTypes(context.getGroupResources(group.getName()),
+                List.of(ResourceType.GCP_INSTANCE_GROUP)), group.getName(), zone);
 
         if (!instanceGroupResources.isEmpty() && doesGcpInstanceGroupExist(compute, projectId, zone, instanceGroupResources.get(0))) {
             LOGGER.info("adding instance {} to group {} in project {}", instance.getName(), group.getName(), projectId);
@@ -333,7 +333,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     }
 
     private void updateDiskSetWithInstanceName(AuthenticatedContext auth, List<CloudResource> computeResources, Instance instance) {
-        for (CloudResource resource : filterResourcesByType(computeResources, ResourceType.GCP_ATTACHED_DISKSET)) {
+        for (CloudResource resource : filterResourcesByTypes(computeResources, List.of(ResourceType.GCP_ATTACHED_DISKSET, ResourceType.GCP_DISK))) {
             resource.setInstanceId(instance.getName());
             resource.setStatus(CommonStatus.CREATED);
             persistenceNotifier.notifyUpdate(resource, auth.getCloudContext());
@@ -433,7 +433,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
     private Collection<AttachedDisk> getBootDiskList(List<CloudResource> resources, String projectId, String zone) {
         Collection<AttachedDisk> listOfDisks = new ArrayList<>();
-        for (CloudResource resource : filterResourcesByType(resources, ResourceType.GCP_DISK)) {
+        for (CloudResource resource : filterResourcesByTypes(resources, List.of(ResourceType.GCP_DISK))) {
             listOfDisks.add(createDisk(
                     projectId,
                     true,
@@ -448,7 +448,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
     private Collection<AttachedDisk> getAttachedDisks(List<CloudResource> resources, String projectId) {
         Collection<AttachedDisk> listOfDisks = new ArrayList<>();
-        for (CloudResource resource : filterResourcesByType(resources, ResourceType.GCP_ATTACHED_DISKSET)) {
+        for (CloudResource resource : filterResourcesByTypes(resources, List.of(ResourceType.GCP_ATTACHED_DISKSET))) {
             VolumeSetAttributes volumeSetAttributes = resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
             for (Volume volume : volumeSetAttributes.getVolumes()) {
                 if (!GcpDiskType.LOCAL_SSD.value().equals(volume.getType())) {
@@ -468,7 +468,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
     private Collection<AttachedDisk> getLocalSsds(List<CloudResource> resources, String projectId) {
         Collection<AttachedDisk> listOfDisks = new ArrayList<>();
-        for (CloudResource resource : filterResourcesByType(resources, ResourceType.GCP_ATTACHED_DISKSET)) {
+        for (CloudResource resource : filterResourcesByTypes(resources, List.of(ResourceType.GCP_ATTACHED_DISKSET))) {
             VolumeSetAttributes volumeSetAttributes = resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
             for (Volume volume : volumeSetAttributes.getVolumes()) {
                 if (GcpDiskType.LOCAL_SSD.value().equals(volume.getType())) {
@@ -516,15 +516,15 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         Compute compute = context.getCompute();
 
         NetworkInterface networkInterface = new NetworkInterface();
-        String networkName = Strings.isNullOrEmpty(instance.getSubnetId()) ? filterResourcesByType(context.getNetworkResources(),
-                ResourceType.GCP_NETWORK).get(0).getName() : instance.getSubnetId();
+        String networkName = Strings.isNullOrEmpty(instance.getSubnetId()) ? filterResourcesByTypes(context.getNetworkResources(),
+                List.of(ResourceType.GCP_NETWORK)).get(0).getName() : instance.getSubnetId();
         networkInterface.setName(networkName);
 
         if (!noPublicIp) {
             AccessConfig accessConfig = new AccessConfig();
             accessConfig.setName(networkName);
             accessConfig.setType("ONE_TO_ONE_NAT");
-            List<CloudResource> reservedIp = filterResourcesByType(computeResources, ResourceType.GCP_RESERVED_IP);
+            List<CloudResource> reservedIp = filterResourcesByTypes(computeResources, List.of(ResourceType.GCP_RESERVED_IP));
             if (InstanceGroupType.GATEWAY == group.getType() && !reservedIp.isEmpty()) {
                 Addresses.Get getReservedIp = compute.addresses().get(projectId, location.getRegion().value(), reservedIp.get(0).getName());
                 accessConfig.setNatIP(getReservedIp.execute().getAddress());
@@ -546,9 +546,9 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         }
     }
 
-    private List<CloudResource> filterResourcesByType(List<CloudResource> resources, ResourceType resourceType) {
+    private List<CloudResource> filterResourcesByTypes(List<CloudResource> resources, List<ResourceType> resourceTypes) {
         return Optional.ofNullable(resources).orElseGet(List::of).stream()
-                .filter(resource -> resourceType.equals(resource.getType()))
+                .filter(resource -> resourceTypes.contains(resource.getType()))
                 .collect(Collectors.toList());
     }
 
