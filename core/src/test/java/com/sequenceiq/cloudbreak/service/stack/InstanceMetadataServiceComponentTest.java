@@ -60,9 +60,6 @@ public class InstanceMetadataServiceComponentTest {
     @Inject
     private InstanceMetaDataRepository repository;
 
-    @Inject
-    private StackService stackService;
-
     @Mock
     private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 

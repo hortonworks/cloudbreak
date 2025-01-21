@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.executor.AbstractRotationExecutor;
@@ -24,13 +23,8 @@ import com.sequenceiq.cloudbreak.rotation.secret.userdata.UserDataSecretModifier
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.cloudbreak.util.UserDataReplacer;
-import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
-import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
-import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.image.userdata.UserDataService;
-import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Component
@@ -46,24 +40,6 @@ public class UserDataRotationExecutor extends AbstractRotationExecutor<UserDataR
 
     @Inject
     private UserDataService userDataService;
-
-    @Inject
-    private ResourceService resourceService;
-
-    @Inject
-    private ResourceToCloudResourceConverter resourceToCloudResourceConverter;
-
-    @Inject
-    private CloudPlatformConnectors cloudPlatformConnectors;
-
-    @Inject
-    private CredentialToCloudCredentialConverter credentialConverter;
-
-    @Inject
-    private CredentialService credentialService;
-
-    @Inject
-    private StackToCloudStackConverter cloudStackConverter;
 
     @Override
     protected void rotate(UserDataRotationContext rotationContext) {

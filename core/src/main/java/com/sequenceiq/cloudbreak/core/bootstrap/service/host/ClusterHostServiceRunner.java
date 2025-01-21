@@ -51,7 +51,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.api.service.ExposedService;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.auth.CMLicenseParser;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
@@ -262,9 +261,6 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private CsdParcelDecorator csdParcelDecorator;
-
-    @Inject
-    private EntitlementService entitlementService;
 
     @Inject
     private TargetedUpscaleSupportService targetedUpscaleSupportService;

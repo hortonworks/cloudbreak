@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.DatabaseBase;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
@@ -48,9 +47,6 @@ public class SdxExternalDatabaseConfigurer {
 
     @Inject
     private AzureDatabaseAttributesService azureDatabaseAttributesService;
-
-    @Inject
-    private EntitlementService entitlementService;
 
     private final Comparator<Versioned> versionComparator;
 

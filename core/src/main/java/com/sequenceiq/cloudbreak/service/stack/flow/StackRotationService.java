@@ -14,7 +14,6 @@ import jakarta.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
@@ -33,9 +32,6 @@ public class StackRotationService {
 
     @Inject
     private ReactorFlowManager flowManager;
-
-    @Inject
-    private EntitlementService entitlementService;
 
     @Inject
     private StackDtoService stackDtoService;

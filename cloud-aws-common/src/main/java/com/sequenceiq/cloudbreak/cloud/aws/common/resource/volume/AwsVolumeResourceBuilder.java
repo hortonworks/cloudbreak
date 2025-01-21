@@ -98,12 +98,6 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     private ResourceRetriever resourceRetriever;
 
     @Inject
-    private AwsVolumeIopsCalculator awsVolumeIopsCalculator;
-
-    @Inject
-    private AwsVolumeThroughputCalculator awsVolumeThroughputCalculator;
-
-    @Inject
     private AwsInstanceFinder awsInstanceFinder;
 
     @Inject

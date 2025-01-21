@@ -28,7 +28,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
-import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
@@ -63,9 +62,6 @@ public abstract class AbstractRdsConfigProvider {
 
     @Inject
     private DbUsernameConverterService dbUsernameConverterService;
-
-    @Inject
-    private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     /**
      * Creates a map of database information for this provider's database, suitable for inclusion

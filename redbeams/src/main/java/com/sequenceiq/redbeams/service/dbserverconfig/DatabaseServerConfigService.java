@@ -49,7 +49,6 @@ import com.sequenceiq.redbeams.service.crn.CrnService;
 import com.sequenceiq.redbeams.service.dbconfig.DatabaseConfigService;
 import com.sequenceiq.redbeams.service.drivers.DriverFunctions;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
-import com.sequenceiq.redbeams.service.validation.DatabaseServerConnectionValidator;
 
 @Service
 public class DatabaseServerConfigService extends AbstractArchivistService<DatabaseServerConfig> implements CompositeAuthResourcePropertyProvider {
@@ -72,9 +71,6 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
 
     @Inject
     private DatabaseCommon databaseCommon;
-
-    @Inject
-    private DatabaseServerConnectionValidator connectionValidator;
 
     @Inject
     private Clock clock;

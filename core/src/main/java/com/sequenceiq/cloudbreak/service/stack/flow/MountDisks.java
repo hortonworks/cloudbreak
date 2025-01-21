@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
-import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -58,9 +57,6 @@ public class MountDisks {
 
     @Inject
     private HostOrchestrator hostOrchestrator;
-
-    @Inject
-    private ComponentConfigProviderService componentConfigProviderService;
 
     public void mountAllDisks(Long stackId) throws CloudbreakException {
         LOGGER.debug("Mount all disks for stack.");

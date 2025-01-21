@@ -34,8 +34,6 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
-import com.sequenceiq.cloudbreak.rotation.ExitCriteriaProvider;
-import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.DatabaseSslService;
@@ -88,12 +86,6 @@ public class MigrateRdsCertificateService {
 
     @Inject
     private SaltStateParamsService saltStateParamsService;
-
-    @Inject
-    private ExitCriteriaProvider exitCriteriaProvider;
-
-    @Inject
-    private GatewayConfigService gatewayConfigService;
 
     @Inject
     private PostgresConfigService postgresConfigService;

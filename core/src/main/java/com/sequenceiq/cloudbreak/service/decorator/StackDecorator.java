@@ -58,7 +58,6 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetw
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.CdpResourceTypeProvider;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.network.instancegroup.InstanceGroupNetworkService;
@@ -107,9 +106,6 @@ public class StackDecorator {
 
     @Inject
     private SharedServiceValidator sharedServiceValidator;
-
-    @Inject
-    private EnvironmentClientService environmentClientService;
 
     @Inject
     private LegacyRestRequestThreadLocalService legacyRestRequestThreadLocalService;

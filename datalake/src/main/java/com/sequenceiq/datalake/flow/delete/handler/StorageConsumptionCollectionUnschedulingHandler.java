@@ -1,7 +1,5 @@
 package com.sequenceiq.datalake.flow.delete.handler;
 
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -11,7 +9,6 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.datalake.flow.delete.event.SdxDeletionFailedEvent;
 import com.sequenceiq.datalake.flow.delete.event.StorageConsumptionCollectionUnschedulingRequest;
 import com.sequenceiq.datalake.flow.delete.event.StorageConsumptionCollectionUnschedulingSuccessEvent;
-import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -20,9 +17,6 @@ import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 public class StorageConsumptionCollectionUnschedulingHandler extends ExceptionCatcherEventHandler<StorageConsumptionCollectionUnschedulingRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StorageConsumptionCollectionUnschedulingHandler.class);
-
-    @Inject
-    private SdxClusterRepository sdxClusterRepository;
 
     @Override
     public String selector() {

@@ -79,7 +79,6 @@ import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
-import com.sequenceiq.cloudbreak.service.image.ImageUtil;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.java.JavaDefaultVersionCalculator;
 import com.sequenceiq.cloudbreak.service.java.JavaVersionValidator;
@@ -195,9 +194,6 @@ public class StackCreatorService {
 
     @Inject
     private SecurityConfigService securityConfigService;
-
-    @Inject
-    private ImageUtil imageUtil;
 
     public StackV4Response createStack(User user, Workspace workspace, StackV4Request stackRequest, boolean distroxRequest) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();

@@ -14,7 +14,6 @@ import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.eventbus.Event;
-import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.CCMV1RemapKeyRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyReRegistrationResult;
@@ -26,9 +25,6 @@ import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 @Component
 public class CCMV1RemapKeyHandler extends ExceptionCatcherEventHandler<CCMV1RemapKeyRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(CCMV1RemapKeyHandler.class);
-
-    @Inject
-    private EventBus eventBus;
 
     @Inject
     private ClusterProxyEnablementService clusterProxyEnablementService;

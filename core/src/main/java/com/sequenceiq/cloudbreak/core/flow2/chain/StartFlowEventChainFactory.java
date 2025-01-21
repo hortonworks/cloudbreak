@@ -11,8 +11,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartEvent.S
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -24,7 +22,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartState;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.SecretRotationTriggerEvent;
-import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterUseCaseAware;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
@@ -34,9 +31,6 @@ import com.sequenceiq.flow.event.EventSelectorUtil;
 public class StartFlowEventChainFactory implements FlowEventChainFactory<StackEvent>, ClusterUseCaseAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StartFlowEventChainFactory.class);
-
-    @Inject
-    private StackDtoService stackDtoService;
 
     @Override
     public String initEvent() {

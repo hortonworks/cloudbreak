@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskResizeFinishedEvent;
@@ -32,9 +31,6 @@ public class DistroXDiskUpdateResizeHandler extends ExceptionCatcherEventHandler
 
     @Inject
     private DiskUpdateService diskUpdateService;
-
-    @Inject
-    private ResourceAttributeUtil resourceAttributeUtil;
 
     @Override
     public String selector() {

@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.cloudbreak.service.multiaz.ProviderBasedMultiAzSetupValidator;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 
@@ -37,9 +36,6 @@ public class MultiAzValidator {
 
     @Value("${cb.multiaz.supported.instancemetadata.platforms:AWS,YARN}")
     private Set<String> supportedInstanceMetadataPlatforms;
-
-    @Inject
-    private StackService stackService;
 
     @Inject
     private ProviderBasedMultiAzSetupValidator providerBasedMultiAzSetupValidator;

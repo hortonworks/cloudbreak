@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolum
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
@@ -32,7 +31,6 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
-import com.sequenceiq.cloudbreak.service.multiaz.MultiAzCalculatorService;
 import com.sequenceiq.cloudbreak.service.multiaz.ProviderBasedMultiAzSetupValidator;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.verticalscale.VerticalScaleInstanceProvider;
@@ -57,12 +55,6 @@ public class VerticalScalingValidatorService {
 
     @Inject
     private CloudParameterCache cloudParameterCache;
-
-    @Inject
-    private CloudPlatformConnectors cloudPlatformConnectors;
-
-    @Inject
-    private MultiAzCalculatorService multiAzCalculatorService;
 
     @Inject
     private InstanceGroupService instanceGroupService;

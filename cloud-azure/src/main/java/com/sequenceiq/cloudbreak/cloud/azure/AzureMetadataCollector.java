@@ -65,9 +65,6 @@ public class AzureMetadataCollector implements MetadataCollector {
     private AzurePlatformResources azurePlatformResources;
 
     @Inject
-    private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
-
-    @Inject
     private ResourceRetriever resourceRetriever;
 
     @Override

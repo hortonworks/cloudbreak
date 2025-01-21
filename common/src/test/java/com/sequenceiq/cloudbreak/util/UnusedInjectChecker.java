@@ -17,6 +17,8 @@ import org.reflections.scanners.Scanners;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Strings;
+
 public class UnusedInjectChecker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UnusedInjectChecker.class);
@@ -27,6 +29,7 @@ public class UnusedInjectChecker {
                 Scanners.TypesAnnotated,
                 Scanners.SubTypes,
                 new MemberUsageScanner());
+        reflections.getStore().forEach((scanner, values) -> LOGGER.info("Found {} entries for scanner type {}", values.size(), scanner));
 
         Map<String, Set<String>> unusedFields = new HashMap<>();
         reflections.getFieldsAnnotatedWith(Inject.class).forEach(field -> {
@@ -40,21 +43,22 @@ public class UnusedInjectChecker {
                     String className = field.getDeclaringClass().getName();
                     unusedFields.computeIfAbsent(className, key -> new HashSet<>()).add(field.toString());
                 }
-            } catch (RuntimeException e) {
+            } catch (RuntimeException ignored) {
                 // ignore if cannot check fields
             }
         });
 
-        Set<String> fields = new HashSet<>();
+        Set<String> classesWithUnusedInjectedFields = new HashSet<>();
 
         unusedFields.forEach((key, value) -> {
-            fields.add(key + ": " + String.join(", ", value));
+            classesWithUnusedInjectedFields.add("=> " + key + ':' + lineSeparator() + "\t-> " + String.join(lineSeparator() + "\t-> ", value));
         });
         if (!unusedFields.isEmpty()) {
-            String format = String.format("Classes with unused injected fields: %s%s", lineSeparator(), String.join(lineSeparator(), fields));
+            String format = String.format("Classes with unused injected fields:%s%s",
+                    lineSeparator(), String.join(Strings.repeat(lineSeparator(), 2), classesWithUnusedInjectedFields));
             LOGGER.error(format);
-            // TODO disabling this because it is causing flaky runs
-            // fail(format);
+            //TODO Disabled, because this is still flaky. The `MemberUsageScanner` doesn't seem to always find all the usages.
+//            fail(format);
         }
     }
 

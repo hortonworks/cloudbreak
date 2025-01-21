@@ -26,7 +26,6 @@ import org.springframework.statemachine.action.Action;
 import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -181,9 +180,6 @@ public class ClusterUpgradeValidationActions {
     @Bean(name = "CLUSTER_UPGRADE_IMAGE_VALIDATION_STATE")
     public Action<?, ?> clusterUpgradeImageValidation() {
         return new AbstractClusterUpgradeValidationAction<>(ClusterUpgradeS3guardValidationFinishedEvent.class) {
-
-            @Inject
-            private EntitlementService entitlementService;
 
             @Override
             protected void doExecute(StackContext context, ClusterUpgradeS3guardValidationFinishedEvent payload, Map<Object, Object> variables) {

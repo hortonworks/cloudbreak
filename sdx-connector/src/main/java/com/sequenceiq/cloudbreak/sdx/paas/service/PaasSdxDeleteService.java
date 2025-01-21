@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.sdx.paas.service;
 
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DELETE_FAILED;
 
-import java.util.Optional;
-
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -14,8 +12,6 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.sdx.common.polling.PollingResult;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDeleteService;
-import com.sequenceiq.cloudbreak.sdx.paas.LocalPaasRemoteDataContextSupplier;
-import com.sequenceiq.cloudbreak.sdx.paas.LocalPaasSdxService;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
@@ -26,12 +22,6 @@ public class PaasSdxDeleteService extends PaasSdxStatusService implements Platfo
 
     @Inject
     private SdxEndpoint sdxEndpoint;
-
-    @Inject
-    private Optional<LocalPaasRemoteDataContextSupplier> localRdcSupplier;
-
-    @Inject
-    private Optional<LocalPaasSdxService> localPaasSdxService;
 
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;

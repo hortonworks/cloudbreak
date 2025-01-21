@@ -5,7 +5,6 @@ import jakarta.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.CloudStorageValidationService;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupSuccess;
@@ -18,9 +17,6 @@ public class CloudStorageVmValidationHandler implements EventHandler<ValidateClo
 
     @Inject
     private EventBus eventBus;
-
-    @Inject
-    private CloudStorageValidationService cloudStorageValidationService;
 
     @Override
     public String selector() {

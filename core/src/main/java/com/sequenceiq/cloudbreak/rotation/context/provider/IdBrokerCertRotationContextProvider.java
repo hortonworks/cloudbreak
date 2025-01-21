@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext.CustomJobRotationContextBuilder;
 import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
@@ -53,9 +52,6 @@ public class IdBrokerCertRotationContextProvider extends AbstractKnoxCertRotatio
 
     @Inject
     private ExitCriteriaProvider exitCriteriaProvider;
-
-    @Inject
-    private ClusterApiConnectors clusterApiConnectors;
 
     @Override
     public Map<SecretRotationStep, RotationContext> getContexts(String resourceId) {

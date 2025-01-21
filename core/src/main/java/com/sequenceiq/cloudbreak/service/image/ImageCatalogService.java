@@ -58,7 +58,6 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.gov.CommonGovService;
 import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
 import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.CustomImage;
@@ -128,9 +127,6 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
     @Inject
     private OwnerAssignmentService ownerAssignmentService;
-
-    @Inject
-    private TransactionService transactionService;
 
     @Inject
     private ImageCatalogServiceProxy imageCatalogServiceProxy;

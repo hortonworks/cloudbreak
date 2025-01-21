@@ -49,7 +49,6 @@ import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerConfigConverter;
-import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
@@ -82,9 +81,6 @@ public class MetadataSetupService {
 
     @Inject
     private TargetGroupPersistenceService targetGroupPersistenceService;
-
-    @Inject
-    private LoadBalancerConfigService loadBalancerConfigService;
 
     @Inject
     private StackService stackService;

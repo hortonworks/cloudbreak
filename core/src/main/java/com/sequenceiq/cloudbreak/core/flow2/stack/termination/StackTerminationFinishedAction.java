@@ -13,7 +13,6 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
-import com.sequenceiq.cloudbreak.reactor.handler.cluster.deregister.DeregisterPrePositionFactory;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.recovery.RecoveryTeardownService;
@@ -31,9 +30,6 @@ public class StackTerminationFinishedAction extends AbstractStackTerminationActi
 
     @Inject
     private PlatformAwareSdxConnector platformAwareSdxConnector;
-
-    @Inject
-    private DeregisterPrePositionFactory deregisterPrePositionFactory;
 
     public StackTerminationFinishedAction() {
         super(TerminateStackResult.class);

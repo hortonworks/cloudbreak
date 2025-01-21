@@ -10,13 +10,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
-import com.sequenceiq.cloudbreak.cloud.aws.common.resource.volume.AwsInstanceFinder;
 import com.sequenceiq.cloudbreak.cloud.aws.common.resource.volume.AwsVolumeResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -35,9 +32,6 @@ import software.amazon.awssdk.services.ec2.model.SummaryStatus;
 public class AwsNativeVolumeResourceBuilder extends AwsVolumeResourceBuilder {
 
     private static final Logger LOGGER = getLogger(AwsNativeVolumeResourceBuilder.class);
-
-    @Inject
-    private AwsInstanceFinder awsInstanceFinder;
 
     @Override
     public Variant variant() {

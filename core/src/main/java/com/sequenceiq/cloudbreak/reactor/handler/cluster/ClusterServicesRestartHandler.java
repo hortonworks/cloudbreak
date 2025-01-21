@@ -14,7 +14,6 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.eventbus.Event;
-import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.restart.ClusterServicesRestartRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.restart.ClusterServicesRestartResult;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
@@ -36,9 +35,6 @@ public class ClusterServicesRestartHandler extends ExceptionCatcherEventHandler<
 
     @Inject
     private StackService stackService;
-
-    @Inject
-    private EventBus eventBus;
 
     @Inject
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;

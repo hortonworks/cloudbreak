@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsEvent;
@@ -33,9 +32,6 @@ public class EmbeddedDbUpgradeFlowTriggersFactory {
 
     @Value("${cb.db.env.upgrade.embedded.targetversion}")
     private TargetMajorVersion targetMajorVersion;
-
-    @Inject
-    private EntitlementService entitlementService;
 
     @Inject
     private EmbeddedDatabaseService embeddedDatabaseService;

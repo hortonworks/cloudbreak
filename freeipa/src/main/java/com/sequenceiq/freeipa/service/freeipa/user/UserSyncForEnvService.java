@@ -25,7 +25,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Multimap;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
@@ -70,9 +69,6 @@ public class UserSyncForEnvService {
 
     @Inject
     private UmsVirtualGroupCreateService umsVirtualGroupCreateService;
-
-    @Inject
-    private EntitlementService entitlementService;
 
     public void synchronizeUsers(String operationId, String accountId, List<StackUserSyncView> stacks, UserSyncRequestFilter userSyncFilter,
             UserSyncOptions options, long startTime) {

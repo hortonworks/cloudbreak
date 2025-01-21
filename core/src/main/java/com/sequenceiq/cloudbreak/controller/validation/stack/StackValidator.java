@@ -10,7 +10,6 @@ import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.GcpInstanceTemplateV4Parameters;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKey;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -36,9 +35,6 @@ public class StackValidator {
 
     @Inject
     private PlatformResourceClientService platformResourceClientService;
-
-    @Inject
-    private EntitlementService entitlementService;
 
     public void validate(Stack subject, ValidationResult.ValidationResultBuilder validationBuilder) {
         if (CollectionUtils.isEmpty(subject.getInstanceGroups())) {

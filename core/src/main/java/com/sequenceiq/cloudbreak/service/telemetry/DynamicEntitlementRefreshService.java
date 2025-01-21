@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.job.dynamicentitlement.DynamicEntitlementRefreshConfig;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
@@ -31,7 +30,6 @@ import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.flow.service.FlowService;
 
 @Service
 public class DynamicEntitlementRefreshService {
@@ -51,16 +49,10 @@ public class DynamicEntitlementRefreshService {
     private StackOperations stackOperations;
 
     @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Inject
     private ClusterService clusterService;
 
     @Inject
     private MonitoringConfiguration monitoringConfiguration;
-
-    @Inject
-    private FlowService flowService;
 
     public Map<String, Boolean> getChangedWatchedEntitlementsAndStoreNewFromUms(StackDto stack) {
         handleLegacyConfigurations(stack);

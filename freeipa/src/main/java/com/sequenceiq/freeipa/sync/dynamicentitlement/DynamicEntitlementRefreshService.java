@@ -26,7 +26,6 @@ import com.sequenceiq.common.api.telemetry.model.Monitoring;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
-import com.sequenceiq.freeipa.converter.operation.OperationToOperationStatusConverter;
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.chain.FlowChainTriggers;
@@ -56,9 +55,6 @@ public class DynamicEntitlementRefreshService {
 
     @Inject
     private OperationService operationService;
-
-    @Inject
-    private OperationToOperationStatusConverter operationConverter;
 
     @Inject
     private MonitoringUrlResolver monitoringUrlResolver;

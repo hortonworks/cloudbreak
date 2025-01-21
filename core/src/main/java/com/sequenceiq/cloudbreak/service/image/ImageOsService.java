@@ -3,19 +3,12 @@ package com.sequenceiq.cloudbreak.service.image;
 import static com.sequenceiq.common.model.OsType.CENTOS7;
 import static com.sequenceiq.common.model.OsType.RHEL8;
 
-import jakarta.inject.Inject;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-
 @Component
 public class ImageOsService {
-
-    @Inject
-    private EntitlementService entitlementService;
 
     @Value("${cb.image.catalog.default.os}")
     private String defaultOs;

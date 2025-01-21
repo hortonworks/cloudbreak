@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.event.CorePro
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
-import com.sequenceiq.cloudbreak.service.stack.flow.RootDiskValidationService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -34,9 +33,6 @@ import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 public class CoreProviderTemplateUpdateHandler extends ExceptionCatcherEventHandler<ProviderTemplateUpdateHandlerRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CoreProviderTemplateUpdateHandler.class);
-
-    @Inject
-    private RootDiskValidationService rootDiskValidationService;
 
     @Inject
     private StackDtoService stackDtoService;

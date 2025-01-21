@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
-import com.sequenceiq.cloudbreak.service.parcel.UpgradeCandidateProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -55,9 +54,6 @@ public class ClusterUpgradeHandler extends ExceptionCatcherEventHandler<ClusterU
 
     @Inject
     private ClusterBuilderService clusterBuilderService;
-
-    @Inject
-    private UpgradeCandidateProvider upgradeCandidateProvider;
 
     @Inject
     private ClusterService clusterService;

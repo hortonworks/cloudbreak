@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.reactor.handler.consumption;
 
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -11,7 +9,6 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.consumption.AttachedVolumeConsumptionCollectionSchedulingFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.consumption.AttachedVolumeConsumptionCollectionSchedulingRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.consumption.AttachedVolumeConsumptionCollectionSchedulingSuccess;
-import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -20,9 +17,6 @@ import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 public class AttachedVolumeConsumptionCollectionSchedulingHandler extends ExceptionCatcherEventHandler<AttachedVolumeConsumptionCollectionSchedulingRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AttachedVolumeConsumptionCollectionSchedulingHandler.class);
-
-    @Inject
-    private StackDtoService stackDtoService;
 
     @Override
     public String selector() {

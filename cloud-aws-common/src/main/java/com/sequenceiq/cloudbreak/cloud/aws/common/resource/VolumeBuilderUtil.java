@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.resource.volume.AwsVolumeIopsCalculator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.resource.volume.AwsVolumeThroughputCalculator;
@@ -42,9 +41,6 @@ public class VolumeBuilderUtil {
 
     @Inject
     private AwsVolumeThroughputCalculator awsVolumeThroughputCalculator;
-
-    @Inject
-    private EntitlementService entitlementService;
 
     public List<BlockDeviceMapping> getEphemeral(AwsInstanceView awsInstanceView) {
         Long ephemeralCount = getEphemeralCount(awsInstanceView);

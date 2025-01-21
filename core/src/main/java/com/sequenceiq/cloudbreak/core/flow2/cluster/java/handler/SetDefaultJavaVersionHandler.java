@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.JavaPillarDecorator;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.java.SetDefaultJavaVersionFailedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.java.SetDefaultJavaVersionFlowEvent;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -20,8 +19,6 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.orchestrator.salt.SaltService;
-import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStateService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -48,15 +45,6 @@ public class SetDefaultJavaVersionHandler extends ExceptionCatcherEventHandler<S
 
     @Inject
     private StackUtil stackUtil;
-
-    @Inject
-    private JavaPillarDecorator javaPillarDecorator;
-
-    @Inject
-    private SaltService saltService;
-
-    @Inject
-    private SaltStateService saltStateService;
 
     @Inject
     private StackUpdater stackUpdater;

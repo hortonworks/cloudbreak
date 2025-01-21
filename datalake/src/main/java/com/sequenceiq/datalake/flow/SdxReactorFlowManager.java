@@ -40,7 +40,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.imdupdate.InstanceMetadataUpdateType;
@@ -122,9 +121,6 @@ public class SdxReactorFlowManager {
 
     @Inject
     private ErrorHandlerAwareReactorEventFactory eventFactory;
-
-    @Inject
-    private EntitlementService entitlementService;
 
     @Inject
     private EnvironmentClientService environmentClientService;

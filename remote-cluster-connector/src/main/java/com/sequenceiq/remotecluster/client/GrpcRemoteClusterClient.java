@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest;
 import com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.PvcControlPlaneConfiguration;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 
 import io.grpc.ManagedChannel;
@@ -23,9 +22,6 @@ public class GrpcRemoteClusterClient {
 
     @Inject
     private RemoteClusterServiceConfig remoteClusterConfig;
-
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Inject
     private StubProvider stubProvider;

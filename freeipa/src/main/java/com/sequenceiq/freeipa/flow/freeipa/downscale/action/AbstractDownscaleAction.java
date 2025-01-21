@@ -26,7 +26,6 @@ import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.converter.cloud.InstanceMetaDataToCloudInstanceConverter;
-import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -55,9 +54,6 @@ public abstract class AbstractDownscaleAction<P extends Payload> extends Abstrac
 
     @Inject
     private ResourceService resourceService;
-
-    @Inject
-    private ResourceToCloudResourceConverter resourceConverter;
 
     @Inject
     private InstanceMetaDataToCloudInstanceConverter instanceConverter;

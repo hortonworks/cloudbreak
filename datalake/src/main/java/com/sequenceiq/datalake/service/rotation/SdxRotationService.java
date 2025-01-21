@@ -21,7 +21,6 @@ import com.dyngr.exception.PollerStoppedException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.requests.StackV4SecretRotationRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
@@ -85,9 +84,6 @@ public class SdxRotationService {
 
     @Inject
     private FreeipaPoller freeipaPoller;
-
-    @Inject
-    private EntitlementService entitlementService;
 
     @Inject
     private RedbeamsFlowService redbeamsFlowService;

@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.BlackListedDel
 import com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesValidationRequest;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
-import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DeleteVolumesFailedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -46,9 +45,6 @@ public class DeleteVolumesValidationHandler extends ExceptionCatcherEventHandler
 
     @Inject
     private ResourceToCloudResourceConverter cloudResourceConverter;
-
-    @Inject
-    private EventBus eventBus;
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<DeleteVolumesValidationRequest> event) {

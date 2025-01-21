@@ -31,7 +31,6 @@ import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerConfigurationService;
 import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerService;
-import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Configuration
 public class FreeIpaLoadBalancerProvisionActions {
@@ -125,9 +124,6 @@ public class FreeIpaLoadBalancerProvisionActions {
     @Bean(name = "PROVISION_FAILED_STATE")
     public Action<?, ?> handleLoadBalancerProvisionFailure() {
         return new AbstractLoadBalancerCreationAction<>(LoadBalancerCreationFailureEvent.class) {
-
-            @Inject
-            private StackService stackService;
 
             @Override
             protected void doExecute(StackContext context, LoadBalancerCreationFailureEvent payload, Map<Object, Object> variables) {

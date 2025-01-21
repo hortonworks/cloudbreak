@@ -13,7 +13,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.DelayedStartInstancesRequest;
@@ -64,9 +63,6 @@ public class StackStartActions {
 
             @Value("${freeipa.delayed.stop-start-sec}")
             private long delayInSec;
-
-            @Inject
-            private EntitlementService entitlementService;
 
             @Override
             protected void doExecute(StackStartContext context, StackEvent payload, Map<Object, Object> variables) {

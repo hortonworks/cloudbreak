@@ -59,9 +59,6 @@ public class NetworkParameterAdder {
     @Inject
     private SubnetListerService subnetListerService;
 
-    @Inject
-    private SubnetChooserService subnetChooserService;
-
     public Map<String, Object> addSubnetIds(List<String> subnetIds, List<String> azs, CloudPlatform cloudPlatform) {
         switch (cloudPlatform) {
             case AWS, GCP, MOCK -> {

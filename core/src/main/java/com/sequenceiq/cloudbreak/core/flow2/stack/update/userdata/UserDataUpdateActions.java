@@ -28,7 +28,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UserDataUpdate
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UserDataUpdateOnProviderResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UserDataUpdateRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UserDataUpdateSuccess;
-import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.common.api.type.CommonStatus;
@@ -41,9 +40,6 @@ public class UserDataUpdateActions {
 
     @Inject
     private ResourceService resourceService;
-
-    @Inject
-    private ImageService imageService;
 
     @Inject
     private ResourceToCloudResourceConverter resourceToCloudResourceConverter;

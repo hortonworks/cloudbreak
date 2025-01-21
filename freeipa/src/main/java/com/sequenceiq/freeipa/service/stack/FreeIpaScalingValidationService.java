@@ -24,7 +24,6 @@ import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.configuration.AllowedScalingPaths;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.multiaz.MultiAzCalculatorService;
 
 @Service
 public class FreeIpaScalingValidationService {
@@ -36,9 +35,6 @@ public class FreeIpaScalingValidationService {
 
     @Inject
     private VerticalScalingValidatorService verticalScalingValidatorService;
-
-    @Inject
-    private MultiAzCalculatorService multiAzCalculatorService;
 
     public void validateStackForUpscale(Set<InstanceMetaData> allInstances, Stack stack, ScalingPath scalingPath) {
         validateScalingIsUpscale(scalingPath);

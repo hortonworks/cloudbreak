@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.dal.ResourceBasicView;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -63,9 +62,6 @@ public class FreeIpaRecipeService implements AuthorizationResourceCrnListProvide
 
     @Inject
     private RecipeUsageService recipeUsageService;
-
-    @Inject
-    private EntitlementService entitlementService;
 
     @Inject
     private RecipeAttachmentChecker recipeAttachmentChecker;

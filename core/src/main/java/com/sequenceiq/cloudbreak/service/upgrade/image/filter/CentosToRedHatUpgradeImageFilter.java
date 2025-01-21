@@ -13,7 +13,6 @@ import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.service.image.CurrentImageUsageCondition;
 import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeAvailabilityService;
@@ -26,9 +25,6 @@ import com.sequenceiq.common.model.OsType;
 public class CentosToRedHatUpgradeImageFilter implements UpgradeImageFilter {
 
     private static final int ORDER_NUMBER = 11;
-
-    @Inject
-    private EntitlementService entitlementService;
 
     @Inject
     private CentosToRedHatUpgradeAvailabilityService centOSToRedHatUpgradeAvailabilityService;

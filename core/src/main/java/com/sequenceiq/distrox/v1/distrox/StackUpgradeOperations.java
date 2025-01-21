@@ -34,16 +34,12 @@ import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityServi
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeCandidateFilterService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePreconditionService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeService;
-import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Service
 public class StackUpgradeOperations {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackUpgradeOperations.class);
-
-    @Inject
-    private UserService userService;
 
     @Inject
     private StackService stackService;

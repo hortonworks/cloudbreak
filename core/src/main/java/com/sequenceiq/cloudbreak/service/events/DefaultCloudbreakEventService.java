@@ -28,7 +28,6 @@ import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.decorator.StackResponseDecorator;
 import com.sequenceiq.cloudbreak.service.stack.CmCommandLinkProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.BaseLegacyStructuredFlowEventFactory;
@@ -70,9 +69,6 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService, Cl
 
     @Inject
     private CloudbreakMessagesService messagesService;
-
-    @Inject
-    private StackService stackService;
 
     @Inject
     private StackDtoService stackDtoService;

@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
-import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
@@ -107,9 +106,6 @@ public class DeleteVolumesService {
 
     @Inject
     private StackService stackService;
-
-    @Inject
-    private ResourceAttributeUtil resourceAttributeUtil;
 
     @Inject
     private InstanceMetaDataToCloudInstanceConverter instanceMetaDataToCloudInstanceConverter;

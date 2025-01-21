@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
-import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.service.phase.SecretRotationFinalizeService;
 import com.sequenceiq.cloudbreak.rotation.service.phase.SecretRotationPreValidateService;
 import com.sequenceiq.cloudbreak.rotation.service.phase.SecretRotationRollbackService;
@@ -30,9 +29,6 @@ import com.sequenceiq.cloudbreak.rotation.service.usage.SecretRotationUsageServi
 public class SecretRotationOrchestrationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecretRotationOrchestrationService.class);
-
-    @Inject
-    private Map<SecretType, RotationContextProvider> rotationContextProviderMap;
 
     @Inject
     private SecretRotationStepProgressService secretRotationProgressService;

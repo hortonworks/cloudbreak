@@ -15,7 +15,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.image.CurrentImagePackageProvider;
-import com.sequenceiq.cloudbreak.service.image.CurrentImageUsageCondition;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentService;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
 
@@ -33,9 +32,6 @@ public class PythonVersionBasedRuntimeVersionValidator {
 
     @Inject
     private CurrentImagePackageProvider currentImagePackageProvider;
-
-    @Inject
-    private CurrentImageUsageCondition currentImageUsageCondition;
 
     public boolean isUpgradePermittedForRuntime(StackDto stack, List<Image> cdhImagesFromCatalog, com.sequenceiq.cloudbreak.cloud.model.Image currentImage,
             Image targetImage) {

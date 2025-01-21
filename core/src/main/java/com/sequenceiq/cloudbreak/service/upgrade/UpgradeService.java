@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSet;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
@@ -25,17 +24,12 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.OSUpgradeByUpgradeSetsService;
-import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
-import com.sequenceiq.cloudbreak.service.image.ImageService;
-import com.sequenceiq.cloudbreak.service.image.ImageUtil;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentService;
 import com.sequenceiq.cloudbreak.view.StackView;
-import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Component
@@ -45,12 +39,6 @@ public class UpgradeService {
 
     @Inject
     private StackDtoService stackDtoService;
-
-    @Inject
-    private ImageService imageService;
-
-    @Inject
-    private ImageCatalogService imageCatalogService;
 
     @Inject
     private ComponentConfigProviderService componentConfigProviderService;
@@ -65,28 +53,13 @@ public class UpgradeService {
     private OSUpgradeByUpgradeSetsService osUpgradeByUpgradeSetsService;
 
     @Inject
-    private DistroXV1Endpoint distroXV1Endpoint;
-
-    @Inject
     private ReactorFlowManager flowManager;
-
-    @Inject
-    private ComponentVersionProvider componentVersionProvider;
 
     @Inject
     private ClusterBootstrapper clusterBootstrapper;
 
     @Inject
     private LockedComponentService lockedComponentService;
-
-    @Inject
-    private BlueprintService blueprintService;
-
-    @Inject
-    private EntitlementService entitlementService;
-
-    @Inject
-    private ImageUtil imageUtil;
 
     public FlowIdentifier upgradeOsByUpgradeSets(StackView stack, String imageId, List<OrderedOSUpgradeSet> upgradeSets) {
         Image image = findImage(stack);

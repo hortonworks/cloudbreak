@@ -30,7 +30,6 @@ import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.exception.CredentialVerificationException;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
-import com.sequenceiq.environment.credential.v1.converter.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.environment.credential.verification.CredentialVerification;
 import com.sequenceiq.environment.environment.verification.CDPServicePolicyVerification;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
@@ -56,9 +55,6 @@ public class ServiceProviderCredentialAdapter {
 
     @Inject
     private CredentialToCloudCredentialConverter credentialConverter;
-
-    @Inject
-    private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
 
     @Inject
     private CredentialPrerequisiteService credentialPrerequisiteService;

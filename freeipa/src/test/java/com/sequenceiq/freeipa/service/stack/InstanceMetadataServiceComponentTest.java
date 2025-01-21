@@ -72,9 +72,6 @@ public class InstanceMetadataServiceComponentTest {
     @Captor
     private ArgumentCaptor<InstanceMetaData> instanceMetaDataArgumentCaptor;
 
-    @Inject
-    private Clock clock;
-
     @Test
     public void saveInstanceAndGetUpdatedStack() {
 

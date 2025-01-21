@@ -76,7 +76,6 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.domain.RetryableFlow;
-import com.sequenceiq.flow.service.FlowRetryService;
 
 @Service
 public class StackCommonService {
@@ -95,9 +94,6 @@ public class StackCommonService {
 
     @Inject
     private ScalingHardLimitsService scalingHardLimitsService;
-
-    @Inject
-    private FlowRetryService flowRetryService;
 
     @Inject
     private ClusterCommonService clusterCommonService;

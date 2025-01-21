@@ -11,10 +11,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.Map;
-
-import org.apache.commons.lang3.reflect.FieldUtils;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -72,11 +68,6 @@ public class SecretRotationOrchestrationServiceTest {
 
     @InjectMocks
     private SecretRotationOrchestrationService underTest;
-
-    @BeforeEach
-    public void setup() throws IllegalAccessException {
-        FieldUtils.writeField(underTest, "rotationContextProviderMap", Map.of(TEST, contextProvider), true);
-    }
 
     @Test
     public void testRotateWhenNotNeeded() {

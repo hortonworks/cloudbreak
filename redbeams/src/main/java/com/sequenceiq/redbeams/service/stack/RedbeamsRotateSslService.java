@@ -23,9 +23,6 @@ public class RedbeamsRotateSslService {
     private DBStackService dbStackService;
 
     @Inject
-    private DBStackStatusUpdater dbStackStatusUpdater;
-
-    @Inject
     private RedbeamsFlowManager flowManager;
 
     public FlowIdentifier rotateDatabaseServerSslCert(String crn) {

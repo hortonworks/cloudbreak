@@ -9,8 +9,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.deregister.DeregisterPrePositionFactory;
 import com.sequenceiq.cloudbreak.sdx.paas.LocalPaasDhTearDownService;
-import com.sequenceiq.cloudbreak.service.TlsSecurityService;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
@@ -18,12 +16,6 @@ public class DataHubTearDownService implements LocalPaasDhTearDownService {
 
     @Inject
     private StackService stackService;
-
-    @Inject
-    private ClusterApiConnectors clusterApiConnectors;
-
-    @Inject
-    private TlsSecurityService tlsSecurityService;
 
     @Inject
     private DeregisterPrePositionFactory deregisterPrePositionFactory;

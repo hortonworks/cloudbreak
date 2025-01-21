@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.configuration.UsersyncConfig;
@@ -36,9 +35,6 @@ public class PostUserSyncService extends AbstractUserSyncTaskRunner {
 
     @Inject
     private OperationService operationService;
-
-    @Inject
-    private EntitlementService entitlementService;
 
     @Inject
     private SudoRuleService sudoRuleService;

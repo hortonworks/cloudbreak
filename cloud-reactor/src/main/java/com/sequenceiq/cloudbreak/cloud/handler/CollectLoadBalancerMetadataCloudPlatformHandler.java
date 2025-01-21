@@ -13,15 +13,11 @@ import com.sequenceiq.cloudbreak.cloud.event.loadbalancer.CollectLoadBalancerMet
 import com.sequenceiq.cloudbreak.cloud.handler.service.LoadBalancerMetadataService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
 import com.sequenceiq.cloudbreak.eventbus.Event;
-import com.sequenceiq.cloudbreak.eventbus.EventBus;
 
 @Component
 public class CollectLoadBalancerMetadataCloudPlatformHandler implements CloudPlatformEventHandler<CollectLoadBalancerMetadataCloudPlatformRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CollectLoadBalancerMetadataCloudPlatformHandler.class);
-
-    @Inject
-    private EventBus eventBus;
 
     @Inject
     private LoadBalancerMetadataService loadBalancerMetadataService;

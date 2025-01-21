@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.util.AvailabilityChecker;
 
@@ -63,9 +62,6 @@ public class DynamicEntitlementRefreshJob extends StatusCheckerJob {
 
     @Inject
     private AvailabilityChecker availabilityChecker;
-
-    @Inject
-    private OperationService operationService;
 
     @Override
     protected Optional<Object> getMdcContextObject() {

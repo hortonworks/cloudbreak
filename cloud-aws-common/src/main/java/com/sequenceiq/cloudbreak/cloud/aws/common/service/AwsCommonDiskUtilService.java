@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.api.client.util.Lists;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
-import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.resource.volume.AwsVolumeIopsCalculator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.resource.volume.AwsVolumeThroughputCalculator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsInstanceView;
@@ -26,9 +25,6 @@ public class AwsCommonDiskUtilService {
 
     @Inject
     private AwsTaggingService awsTaggingService;
-
-    @Inject
-    private CommonAwsClient awsClient;
 
     @Inject
     private AwsVolumeIopsCalculator awsVolumeIopsCalculator;

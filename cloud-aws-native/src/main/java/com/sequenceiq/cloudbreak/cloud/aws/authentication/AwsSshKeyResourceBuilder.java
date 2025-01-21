@@ -10,8 +10,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPublicKeyConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
-import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsMethodExecutor;
-import com.sequenceiq.cloudbreak.cloud.aws.resource.instance.util.SecurityGroupBuilderUtil;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -25,12 +23,6 @@ import com.sequenceiq.common.api.type.ResourceType;
 public class AwsSshKeyResourceBuilder extends AbstractAwsAuthenticationBuilder {
 
     private static final Logger LOGGER = getLogger(AwsSshKeyResourceBuilder.class);
-
-    @Inject
-    private SecurityGroupBuilderUtil securityGroupBuilderUtil;
-
-    @Inject
-    private AwsMethodExecutor awsMethodExecutor;
 
     @Inject
     private SshKeyNameGenerator sshKeyNameGenerator;
