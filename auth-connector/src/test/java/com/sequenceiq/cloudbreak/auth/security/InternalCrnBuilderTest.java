@@ -13,14 +13,16 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil;
 
 public class InternalCrnBuilderTest {
 
-    private String userCrn = "crn:cdp:iam:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:user:f3b8ed82-e712-4f89-bda7-be07183720d3";
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:user:f3b8ed82-e712-4f89-bda7-be07183720d3";
 
-    private String internalCrn = "crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__";
+    private static final String INTERNAL_CRN = "crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__";
+
+    private static final String ACCOUNT_ID = "accountId";
 
     @Test
-    public void generateInternalCrnWhenAutoscaleIsSpecified() {
+    void generateInternalCrnWhenAutoscaleIsSpecified() {
         RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator =
-                regionalAwareInternalCrnGenerator(Crn.Service.AUTOSCALE, "cdp", "us-west-1");
+                regionalAwareInternalCrnGenerator(Crn.Service.AUTOSCALE, "cdp", "us-west-1", null);
         Crn generated = Crn.safeFromString(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString());
         assertEquals("altus", generated.getAccountId());
         assertEquals(Crn.Service.AUTOSCALE, generated.getService());
@@ -29,20 +31,30 @@ public class InternalCrnBuilderTest {
     }
 
     @Test
-    public void generateCrnAsStringWhenFreeIpaIs() {
+    void generateCrnAsStringWhenFreeIpaIs() {
         RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator =
-                regionalAwareInternalCrnGenerator(Crn.Service.FREEIPA, "cdp", "us-west-1");
+                regionalAwareInternalCrnGenerator(Crn.Service.FREEIPA, "cdp", "us-west-1", null);
         assertEquals("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__",
                 regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString());
     }
 
     @Test
-    public void whenInternalCrnProvidedThenReturnTrue() {
-        assertTrue(RegionAwareInternalCrnGeneratorUtil.isInternalCrn(internalCrn));
+    void generateCrnWithAccountIdSpecified() {
+        RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator = regionalAwareInternalCrnGenerator(Crn.Service.IAM, "cdp", "us-west-1", ACCOUNT_ID);
+        Crn generated = Crn.safeFromString(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString());
+        assertEquals("accountId", generated.getAccountId());
+        assertEquals(Crn.Service.IAM, generated.getService());
+        assertEquals(Crn.ResourceType.USER, generated.getResourceType());
+        assertEquals("__internal__actor__", generated.getResource());
     }
 
     @Test
-    public void whenUserCrnProvidedThenReturnFalse() {
-        assertFalse(RegionAwareInternalCrnGeneratorUtil.isInternalCrn(userCrn));
+    void whenInternalCrnProvidedThenReturnTrue() {
+        assertTrue(RegionAwareInternalCrnGeneratorUtil.isInternalCrn(INTERNAL_CRN));
+    }
+
+    @Test
+    void whenUserCrnProvidedThenReturnFalse() {
+        assertFalse(RegionAwareInternalCrnGeneratorUtil.isInternalCrn(USER_CRN));
     }
 }

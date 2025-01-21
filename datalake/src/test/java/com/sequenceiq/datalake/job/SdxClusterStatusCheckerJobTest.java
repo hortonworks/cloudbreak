@@ -31,6 +31,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceCrnEndpoints;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
@@ -49,7 +52,7 @@ class SdxClusterStatusCheckerJobTest {
 
     private static final Long SDX_ID = 456L;
 
-    private static final Long STACK_ID = 123L;
+    private static final String RESOURCE_CRN = "crn:cdp:datahub:us-west-1:accountId:cluster:resourceId";
 
     @Inject
     private SdxClusterStatusCheckerJob underTest;
@@ -68,6 +71,9 @@ class SdxClusterStatusCheckerJobTest {
 
     @MockBean
     private FlowLogService flowLogService;
+
+    @MockBean
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Mock
     private CloudbreakServiceCrnEndpoints cloudbreakServiceCrnEndpoints;
@@ -89,7 +95,7 @@ class SdxClusterStatusCheckerJobTest {
     @BeforeEach
     void setUp() {
         underTest.setLocalId(SDX_ID.toString());
-        underTest.setRemoteResourceCrn(STACK_ID.toString());
+        underTest.setRemoteResourceCrn(RESOURCE_CRN.toString());
 
         sdxCluster = new SdxCluster();
         sdxCluster.setClusterName("data-lake-cluster");
@@ -99,7 +105,9 @@ class SdxClusterStatusCheckerJobTest {
         stack = new StackStatusV4Response();
         when(cloudbreakInternalCrnClient.withInternalCrn()).thenReturn(cloudbreakServiceCrnEndpoints);
         when(cloudbreakServiceCrnEndpoints.autoscaleEndpoint()).thenReturn(autoscaleV4Endpoint);
-        when(autoscaleV4Endpoint.getStatusByCrn(STACK_ID.toString())).thenReturn(stack);
+        when(autoscaleV4Endpoint.getStatusByCrn(RESOURCE_CRN.toString())).thenReturn(stack);
+        when(regionAwareInternalCrnGeneratorFactory.iam(anyString()))
+                .thenReturn(RegionAwareInternalCrnGenerator.regionalAwareInternalCrnGenerator(Crn.Service.IAM, "cdp", "us-west-1", "accountId"));
 
         status = new SdxStatusEntity();
         status.setDatalake(sdxCluster);

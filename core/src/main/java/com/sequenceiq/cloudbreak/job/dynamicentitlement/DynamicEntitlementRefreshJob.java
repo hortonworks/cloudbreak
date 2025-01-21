@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.auth.security.internal.InternalCrnModifier;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -61,9 +60,6 @@ public class DynamicEntitlementRefreshJob extends StatusCheckerJob {
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Inject
-    private InternalCrnModifier internalCrnModifier;
-
-    @Inject
     private ImageService imageService;
 
     @Inject
@@ -88,9 +84,8 @@ public class DynamicEntitlementRefreshJob extends StatusCheckerJob {
         } else {
             LOGGER.info("DynamicEntitlementRefreshJob will apply watched entitlement changes for stack: {}.", stack.getResourceCrn());
             try {
-                FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAs(
-                        internalCrnModifier.changeAccountIdInCrnString(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                                stack.getAccountId()).toString(),
+                FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
+                        regionAwareInternalCrnGeneratorFactory.iam(stack.getAccountId()).getInternalCrnForServiceAsString(),
                         () -> dynamicEntitlementRefreshService.changeClusterConfigurationIfEntitlementsChanged(stack));
                 if (FlowType.NOT_TRIGGERED != flowIdentifier.getType()) {
                     rescheduleIfPreviousFlowChainFailed(stack, context.getJobDetail(), flowIdentifier.getPollableId());
@@ -102,9 +97,8 @@ public class DynamicEntitlementRefreshJob extends StatusCheckerJob {
     }
 
     private void getChangedWatchedEntitlementsAndStoreNewFromUms(StackDto stack) {
-        ThreadBasedUserCrnProvider.doAs(
-                internalCrnModifier.changeAccountIdInCrnString(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                        stack.getAccountId()).toString(),
+        ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam(stack.getAccountId()).getInternalCrnForServiceAsString(),
                 () -> dynamicEntitlementRefreshService.getChangedWatchedEntitlementsAndStoreNewFromUms(stack));
     }
 

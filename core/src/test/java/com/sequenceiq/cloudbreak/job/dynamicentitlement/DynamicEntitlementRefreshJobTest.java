@@ -28,10 +28,8 @@ import org.quartz.JobKey;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.auth.security.internal.InternalCrnModifier;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -54,8 +52,6 @@ class DynamicEntitlementRefreshJobTest {
     private static final String ACCOUNT_ID = "account-id";
 
     private static final String INTERNAL_CRN = "crn:cdp:iam:us-west-1:altus:user:__internal__actor__";
-
-    private static final String MODIFIED_INTERNAL_CRN = "crn:cdp:iam:us-west-1:account-id:user:__internal__actor__";
 
     private static final String FLOW_CHAIN_ID = "flowChainId";
 
@@ -84,9 +80,6 @@ class DynamicEntitlementRefreshJobTest {
     private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
     @Mock
-    private InternalCrnModifier internalCrnModifier;
-
-    @Mock
     private ImageService imageService;
 
     @Mock
@@ -102,11 +95,9 @@ class DynamicEntitlementRefreshJobTest {
     public void setUp() throws CloudbreakImageNotFoundException {
         underTest.setLocalId(String.valueOf(LOCAL_ID));
         lenient().when(dynamicEntitlementRefreshConfig.isDynamicEntitlementEnabled()).thenReturn(Boolean.TRUE);
-        lenient().when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        lenient().when(regionAwareInternalCrnGeneratorFactory.iam(ACCOUNT_ID)).thenReturn(regionAwareInternalCrnGenerator);
         lenient().when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
                 .thenReturn(INTERNAL_CRN);
-        lenient().when(internalCrnModifier.changeAccountIdInCrnString(eq(INTERNAL_CRN), eq(ACCOUNT_ID)))
-                .thenReturn(Crn.fromString(MODIFIED_INTERNAL_CRN));
         Image image = mock(Image.class);
         lenient().when(image.getPackageVersions()).thenReturn(Map.of(ImagePackageVersion.CDP_PROMETHEUS.getKey(), "2.36.2"));
         lenient().when(imageService.getImage(eq(LOCAL_ID))).thenReturn(image);

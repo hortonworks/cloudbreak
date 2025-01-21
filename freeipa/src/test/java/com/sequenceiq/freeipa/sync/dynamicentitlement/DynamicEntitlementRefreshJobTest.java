@@ -23,10 +23,8 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.JobKey;
 
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.auth.security.internal.InternalCrnModifier;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
@@ -45,8 +43,6 @@ class DynamicEntitlementRefreshJobTest {
     private static final String ACCOUNT_ID = "account-id";
 
     private static final String INTERNAL_CRN = "crn:cdp:iam:us-west-1:altus:user:__internal__actor__";
-
-    private static final String MODIFIED_INTERNAL_CRN = "crn:cdp:iam:us-west-1:account-id:user:__internal__actor__";
 
     private static final String FLOW_CHAIN_ID = "flowChainId";
 
@@ -80,9 +76,6 @@ class DynamicEntitlementRefreshJobTest {
     private JobDetail jobDetail;
 
     @Mock
-    private InternalCrnModifier internalCrnModifier;
-
-    @Mock
     private AvailabilityChecker availabilityChecker;
 
     @Mock
@@ -98,8 +91,7 @@ class DynamicEntitlementRefreshJobTest {
     public void setUp() {
         underTest.setLocalId(String.valueOf(LOCAL_ID));
         lenient().when(dynamicEntitlementRefreshConfig.isDynamicEntitlementEnabled()).thenReturn(Boolean.TRUE);
-        lenient().when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        lenient().when(internalCrnModifier.changeAccountIdInCrnString(eq(INTERNAL_CRN), eq(ACCOUNT_ID))).thenReturn(Crn.fromString(MODIFIED_INTERNAL_CRN));
+        lenient().when(regionAwareInternalCrnGeneratorFactory.iam(ACCOUNT_ID)).thenReturn(regionAwareInternalCrnGenerator);
         lenient().when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_CRN);
         lenient().when(operationService.getOperationForAccountIdAndOperationId(ACCOUNT_ID, OPERATION_ID)).thenReturn(operation);
         lenient().when(operation.getStatus()).thenReturn(OperationState.RUNNING);
@@ -211,8 +203,7 @@ class DynamicEntitlementRefreshJobTest {
     void testExecuteWhenClusterNotAvailable() {
         Stack stack = stack(Status.STOPPED);
         when(dynamicEntitlementRefreshConfig.isDynamicEntitlementEnabled()).thenReturn(Boolean.TRUE);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        when(internalCrnModifier.changeAccountIdInCrnString(eq(INTERNAL_CRN), eq(ACCOUNT_ID))).thenReturn(Crn.fromString(MODIFIED_INTERNAL_CRN));
+        when(regionAwareInternalCrnGeneratorFactory.iam(ACCOUNT_ID)).thenReturn(regionAwareInternalCrnGenerator);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_CRN);
         JobKey jobKey = new JobKey(LOCAL_ID.toString(), "dynamic-entitlement-jobs");
         when(stackService.getByIdWithListsInTransaction(eq(LOCAL_ID))).thenReturn(stack);
@@ -231,8 +222,7 @@ class DynamicEntitlementRefreshJobTest {
         Stack stack = stack(Status.AVAILABLE);
         when(stackService.getByIdWithListsInTransaction(eq(LOCAL_ID))).thenReturn(stack);
         when(dynamicEntitlementRefreshConfig.isDynamicEntitlementEnabled()).thenReturn(Boolean.TRUE);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        when(internalCrnModifier.changeAccountIdInCrnString(eq(INTERNAL_CRN), eq(ACCOUNT_ID))).thenReturn(Crn.fromString(MODIFIED_INTERNAL_CRN));
+        when(regionAwareInternalCrnGeneratorFactory.iam(ACCOUNT_ID)).thenReturn(regionAwareInternalCrnGenerator);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_CRN);
         when(dynamicEntitlementRefreshService.changeClusterConfigurationIfEntitlementsChanged(stack)).thenReturn(OPERATION_ID);
         lenient().when(availabilityChecker.isRequiredPackagesInstalled(eq(stack), eq(Set.of(ImagePackageVersion.CDP_PROMETHEUS.getKey())))).thenReturn(true);
