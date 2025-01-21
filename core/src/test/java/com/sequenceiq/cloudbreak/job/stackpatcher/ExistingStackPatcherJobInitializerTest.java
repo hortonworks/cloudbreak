@@ -1,10 +1,5 @@
 package com.sequenceiq.cloudbreak.job.stackpatcher;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_FAILED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAILED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.domain.stack.StackPatchType.LOGGING_AGENT_AUTO_RESTART;
 import static com.sequenceiq.cloudbreak.domain.stack.StackPatchType.METERING_AZURE_METADATA;
 import static com.sequenceiq.cloudbreak.domain.stack.StackPatchType.UNBOUND_RESTART;
@@ -32,6 +27,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackPatch;
 import com.sequenceiq.cloudbreak.domain.stack.StackPatchStatus;
@@ -77,7 +73,7 @@ class ExistingStackPatcherJobInitializerTest {
     void setUp() {
         lenient().when(stack1.getLocalId()).thenReturn(ID_1);
         lenient().when(stack2.getLocalId()).thenReturn(ID_2);
-        lenient().when(stackService.getAllAliveForAutoSync(Set.of(DELETE_COMPLETED, DELETE_IN_PROGRESS, DELETE_FAILED, CREATE_FAILED, CREATE_IN_PROGRESS)))
+        lenient().when(stackService.getAllAliveForAutoSync(Status.getUnschedulableStatuses()))
                 .thenReturn(List.of(stack1, stack2));
 
         lenient().when(stackPatchService.findAllByTypeForStackIds(any(), any())).thenReturn(List.of());

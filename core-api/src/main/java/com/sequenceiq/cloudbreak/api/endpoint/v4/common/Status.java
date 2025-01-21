@@ -72,7 +72,8 @@ public enum Status {
     UPGRADE_CCM_IN_PROGRESS(StatusKind.PROGRESS),
     UPGRADE_CCM_FAILED(StatusKind.FINAL),
     UPGRADE_CCM_FINISHED(StatusKind.FINAL),
-    DETERMINE_DATALAKE_DATA_SIZES_IN_PROGRESS(StatusKind.PROGRESS);
+    DETERMINE_DATALAKE_DATA_SIZES_IN_PROGRESS(StatusKind.PROGRESS),
+    STALE(StatusKind.FINAL);
 
     private static final Map<Status, Status> IN_PROGRESS_TO_FINAL_STATUS_MAPPING = ImmutableMap.<Status, Status>builder()
             .put(REQUESTED, CREATE_FAILED)
@@ -111,13 +112,45 @@ public enum Status {
         this.statusKind = statusKind;
     }
 
+    public static Set<Status> getAvailableStatuses() {
+        return Sets.immutableEnumSet(AVAILABLE, MAINTENANCE_MODE_ENABLED);
+    }
+
+    public static Set<Status> getStoppedStatuses() {
+        return Sets.immutableEnumSet(STOPPED);
+    }
+
+    public static Set<Status> getAllowedDataHubStatesForSdxUpgrade() {
+        return Sets.immutableEnumSet(STOPPED, DELETE_COMPLETED,
+                CREATE_FAILED, DELETE_FAILED, DELETED_ON_PROVIDER_SIDE);
+    }
+
+    public static EnumSet<Status> getUnschedulableStatuses() {
+        return EnumSet.of(
+                CREATE_FAILED,
+                PRE_DELETE_IN_PROGRESS,
+                DELETE_IN_PROGRESS,
+                DELETE_FAILED,
+                DELETE_COMPLETED,
+                EXTERNAL_DATABASE_CREATION_FAILED,
+                EXTERNAL_DATABASE_DELETION_IN_PROGRESS,
+                EXTERNAL_DATABASE_DELETION_FINISHED,
+                EXTERNAL_DATABASE_DELETION_FAILED,
+                STALE
+        );
+    }
+
+    public static boolean isClusterAvailable(Status stackStatus, Status clusterStatus) {
+        return getAvailableStatuses().contains(stackStatus) && getAvailableStatuses().contains(clusterStatus);
+    }
+
     public StatusKind getStatusKind() {
         return statusKind;
     }
 
     public boolean isRemovableStatus() {
         return EnumSet.of(AVAILABLE, UPDATE_FAILED, RECOVERY_FAILED, CREATE_FAILED, ENABLE_SECURITY_FAILED, DELETE_FAILED,
-                DELETE_COMPLETED, DELETED_ON_PROVIDER_SIDE, STOPPED, START_FAILED, STOP_FAILED, UPGRADE_CCM_FAILED).contains(this);
+                DELETE_COMPLETED, DELETED_ON_PROVIDER_SIDE, STOPPED, START_FAILED, STOP_FAILED, UPGRADE_CCM_FAILED, STALE).contains(this);
     }
 
     public boolean isAvailable() {
@@ -157,38 +190,5 @@ public enum Status {
         } else {
             return this;
         }
-    }
-
-    public static Set<Status> getAvailableStatuses() {
-        return Sets.immutableEnumSet(AVAILABLE, MAINTENANCE_MODE_ENABLED);
-    }
-
-    public static Set<Status> getStoppedStatuses() {
-        return Sets.immutableEnumSet(STOPPED);
-    }
-
-    public static Set<Status> getAllowedDataHubStatesForSdxUpgrade() {
-        return Sets.immutableEnumSet(STOPPED, DELETE_COMPLETED,
-                CREATE_FAILED, DELETE_FAILED, DELETED_ON_PROVIDER_SIDE);
-    }
-
-    public static EnumSet<Status> getUnschedulableStatuses() {
-        return EnumSet.of(
-                CREATE_FAILED,
-                PRE_DELETE_IN_PROGRESS,
-                DELETE_IN_PROGRESS,
-                DELETE_FAILED,
-                DELETE_COMPLETED,
-                EXTERNAL_DATABASE_CREATION_FAILED,
-                EXTERNAL_DATABASE_DELETION_IN_PROGRESS,
-                EXTERNAL_DATABASE_DELETION_FINISHED,
-                EXTERNAL_DATABASE_DELETION_FAILED,
-                LOAD_BALANCER_UPDATE_FINISHED,
-                LOAD_BALANCER_UPDATE_FAILED
-        );
-    }
-
-    public static boolean isClusterAvailable(Status stackStatus, Status clusterStatus) {
-        return getAvailableStatuses().contains(stackStatus) && getAvailableStatuses().contains(clusterStatus);
     }
 }

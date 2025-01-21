@@ -42,7 +42,7 @@ class MeteringSyncJobInitializerTest {
         JobResource jobResource2 = mock(JobResource.class);
         when(stackService.getAllAliveDatahubs(anySet())).thenReturn(List.of(jobResource1, jobResource2));
         underTest.initJobs();
-        verify(meteringJobService, times(2)).schedule(any());
+        verify(meteringJobService, times(2)).schedule(any(MeteringSyncJobAdapter.class));
     }
 
     @Test
@@ -50,6 +50,6 @@ class MeteringSyncJobInitializerTest {
         when(meteringConfig.isEnabled()).thenReturn(Boolean.TRUE);
         when(stackService.getAllAliveDatahubs(anySet())).thenReturn(List.of());
         underTest.initJobs();
-        verify(meteringJobService, never()).schedule(any());
+        verify(meteringJobService, never()).schedule(any(MeteringSyncJobAdapter.class));
     }
 }

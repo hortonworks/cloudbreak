@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STALE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_START_IGNORED;
@@ -58,6 +59,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.quartz.model.StaleAwareJobRescheduler;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -158,6 +160,9 @@ public class StackOperationService {
 
     @Inject
     private ClusterRepairService clusterRepairService;
+
+    @Inject
+    private List<StaleAwareJobRescheduler> staleAwareJobReschedulers;
 
     public FlowIdentifier removeInstance(StackDto stack, String instanceId, boolean forced) {
         InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack.getStack());
@@ -429,6 +434,12 @@ public class StackOperationService {
         if (stack.isAvailable()) {
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), STACK_START_IGNORED);
         } else if (stack.isReadyForStart() || stack.isStartFailed()) {
+            if (stack.getStatus() == STALE) {
+                LOGGER.debug("Reschedule quartz jobs for stale cluster.");
+                if (staleAwareJobReschedulers != null) {
+                    staleAwareJobReschedulers.forEach(staleAwareJobRescheduler -> staleAwareJobRescheduler.rescheduleForStaleCluster(stack.getId()));
+                }
+            }
             flowIdentifier = flowManager.triggerStackStart(stack.getId());
         } else {
             throw new BadRequestException(String.format("Can't start the cluster because it is in %s state.", Optional.ofNullable(stack.getStatus())

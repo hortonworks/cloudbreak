@@ -11,6 +11,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_FAILED_NODES
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_SYNC_INSTANCE_DELETED_BY_PROVIDER_CBMETADATA;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_SYNC_INSTANCE_DELETED_CBMETADATA;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_SYNC_INSTANCE_STATUS_RETRIEVAL_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STALE_STATUS_NOTIFICATION;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -18,12 +19,14 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
@@ -36,6 +39,7 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
+import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.metering.MeteringService;
@@ -54,6 +58,12 @@ public class StackSyncService {
     private static final String CM_SERVER_NOT_RESPONDING = "Cloudera Manager server not responding.";
 
     private static final String PROVIDER_NOT_RESPONDING = "Cloud provider didn't respond. Please check the privileges of the credential.";
+
+    private static final String INVALID_CREDENTIAL_REASON = "The cluster is unreachable and the credential has been invalid for at least %s days." +
+            "As a result, the CDP Control Plane cannot retrieve information from the cloud provider about the current status of the cluster.";
+
+    @Value("${cb.statuschecker.stale.after.days:30}")
+    private int staleAfterDays;
 
     @Inject
     private StackUpdater stackUpdater;
@@ -220,15 +230,28 @@ public class StackSyncService {
     void handleSyncResult(StackView stack, Map<InstanceSyncState, Integer> instanceStateCounts, SyncConfig syncConfig,
             List<InstanceMetadataView> instances) {
         Status status = stack.getStatus();
+        DetailedStackStatus detailedStatus = stack.getDetailedStatus();
         if (instanceStateCounts.get(InstanceSyncState.RUNNING) > 0) {
             handleSyncResultIfSomeNodesRunning(stack, syncConfig, status);
         } else if (isAllStopped(instanceStateCounts, instances.size()) && status != STOPPED) {
             updateStackStatus(stack.getId(), DetailedStackStatus.STOPPED, SYNC_STATUS_REASON);
         } else if (isAllDeletedOnProvider(instanceStateCounts, instances.size()) && status != DELETE_FAILED) {
             updateStackStatus(stack.getId(), DetailedStackStatus.DELETED_ON_PROVIDER_SIDE, SYNC_STATUS_REASON);
-        } else if (status != UNREACHABLE && syncConfig.isProviderResponseError()) {
+        } else if ((status != UNREACHABLE || detailedStatus == DetailedStackStatus.CLUSTER_MANAGER_NOT_RESPONDING) && syncConfig.isProviderResponseError()) {
             handleUnreachable(stack, syncConfig);
+        } else if (isStale(stack)) {
+            updateStackStatus(stack.getId(), DetailedStackStatus.INVALID_CREDENTIAL, String.format(INVALID_CREDENTIAL_REASON, staleAfterDays));
+            eventService.fireCloudbreakEvent(stack.getId(), Status.STALE.name(), STALE_STATUS_NOTIFICATION);
         }
+    }
+
+    private boolean isStale(StackView stack) {
+        StackStatus stackStatus = stack.getStackStatus();
+        if (DetailedStackStatus.PROVIDER_NOT_RESPONDING == stackStatus.getDetailedStackStatus() && stackStatus.getCreated() != null) {
+            long daysInMillis = TimeUnit.DAYS.toMillis(staleAfterDays);
+            return (System.currentTimeMillis() - stackStatus.getCreated()) > daysInMillis;
+        }
+        return false;
     }
 
     private void handleSyncResultIfSomeNodesRunning(StackView stack, SyncConfig syncConfig, Status status) {

@@ -43,7 +43,7 @@ class MeteringInstanceCheckerJobInitializerTest {
         JobResource jobResource2 = mock(JobResource.class);
         when(stackService.getAllAliveDatahubs(anySet())).thenReturn(List.of(jobResource1, jobResource2));
         underTest.initJobs();
-        verify(meteringInstanceCheckerJobService, times(2)).schedule(any());
+        verify(meteringInstanceCheckerJobService, times(2)).schedule(any(MeteringInstanceCheckerJobAdapter.class));
     }
 
     @Test
@@ -52,14 +52,14 @@ class MeteringInstanceCheckerJobInitializerTest {
         when(meteringConfig.isInstanceCheckerEnabled()).thenReturn(Boolean.TRUE);
         when(stackService.getAllAliveDatahubs(anySet())).thenReturn(List.of());
         underTest.initJobs();
-        verify(meteringInstanceCheckerJobService, never()).schedule(any());
+        verify(meteringInstanceCheckerJobService, never()).schedule(any(MeteringInstanceCheckerJobAdapter.class));
     }
 
     @Test
     void testInitJobsWithAliveDatahubsWhenMeteringDisabled() {
         when(meteringConfig.isEnabled()).thenReturn(Boolean.FALSE);
         underTest.initJobs();
-        verify(meteringInstanceCheckerJobService, never()).schedule(any());
+        verify(meteringInstanceCheckerJobService, never()).schedule(any(MeteringInstanceCheckerJobAdapter.class));
     }
 
     @Test
@@ -67,6 +67,6 @@ class MeteringInstanceCheckerJobInitializerTest {
         when(meteringConfig.isEnabled()).thenReturn(Boolean.TRUE);
         when(meteringConfig.isInstanceCheckerEnabled()).thenReturn(Boolean.FALSE);
         underTest.initJobs();
-        verify(meteringInstanceCheckerJobService, never()).schedule(any());
+        verify(meteringInstanceCheckerJobService, never()).schedule(any(MeteringInstanceCheckerJobAdapter.class));
     }
 }

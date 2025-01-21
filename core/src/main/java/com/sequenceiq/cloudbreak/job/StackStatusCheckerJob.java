@@ -107,7 +107,9 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
             Status.UPGRADE_CCM_IN_PROGRESS,
             Status.DATAHUB_DISK_UPDATE_VALIDATION_FAILED,
             Status.DATAHUB_DISK_UPDATE_FAILED,
-            Status.DATAHUB_DISK_UPDATE_RESIZE_FAILED
+            Status.DATAHUB_DISK_UPDATE_RESIZE_FAILED,
+            Status.LOAD_BALANCER_UPDATE_FINISHED,
+            Status.LOAD_BALANCER_UPDATE_FAILED
     );
 
     public static final EnumSet<Status> IGNORED_STATES = EnumSet.of(

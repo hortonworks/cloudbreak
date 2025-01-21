@@ -13,6 +13,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.EXTERNAL_D
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.EXTERNAL_DATABASE_STOP_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.MAINTENANCE_MODE_ENABLED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.NODE_FAILURE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STALE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_REQUESTED;
@@ -210,8 +211,12 @@ public interface StackView extends MdcContextInfoProvider {
     }
 
     default boolean isReadyForStart() {
-        return STOPPED.equals(getStatus()) || START_REQUESTED.equals(getStatus()) || START_IN_PROGRESS.equals(getStatus())
-                || EXTERNAL_DATABASE_STOP_FINISHED.equals(getStatus()) || EXTERNAL_DATABASE_START_FINISHED.equals(getStatus());
+        return STOPPED.equals(getStatus())
+                || START_REQUESTED.equals(getStatus())
+                || START_IN_PROGRESS.equals(getStatus())
+                || EXTERNAL_DATABASE_STOP_FINISHED.equals(getStatus())
+                || EXTERNAL_DATABASE_START_FINISHED.equals(getStatus())
+                || STALE.equals(getStatus());
     }
 
     default boolean isStartFailed() {

@@ -748,7 +748,9 @@ public enum ResourceEvent {
     ADDING_VOLUMES_FAILED("cluster.add.volumes.failed"),
     DATALAKE_ADD_VOLUMES_FAILED("datalake.add.volumes.failed"),
     DATALAKE_ADD_VOLUMES_IN_PROGRESS("datalake.add.volumes.in.progress"),
-    DATALAKE_ADD_VOLUMES_COMPLETE("datalake.add.volumes.complete");
+    DATALAKE_ADD_VOLUMES_COMPLETE("datalake.add.volumes.complete"),
+    DATALAKE_STALE_STATUS("datalake.stale.status"),
+    STALE_STATUS_NOTIFICATION("stale.status.notification"),;
 
     private final String message;
 

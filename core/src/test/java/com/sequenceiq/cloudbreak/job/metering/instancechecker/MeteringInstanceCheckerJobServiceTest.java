@@ -86,7 +86,7 @@ class MeteringInstanceCheckerJobServiceTest {
         lenient().when(meteringConfig.isInstanceCheckerEnabled()).thenReturn(Boolean.TRUE);
         StackRepository jobResourceRepository = mock(StackRepository.class);
         when(scheduler.getJobDetail(any())).thenReturn(new JobDetailImpl());
-        underTest.scheduleIfNotScheduled(Long.valueOf(LOCAL_ID), MeteringInstanceCheckerJobAdapter.class);
+        underTest.scheduleIfNotScheduled(Long.valueOf(LOCAL_ID));
         verify(scheduler, never()).scheduleJob(any(), any());
     }
 
@@ -102,7 +102,7 @@ class MeteringInstanceCheckerJobServiceTest {
         when(scheduler.getJobDetail(any())).thenReturn(null);
         when(meteringConfig.getInstanceCheckerIntervalInHours()).thenReturn(10);
         when(meteringConfig.getInstanceCheckerDelayInSeconds()).thenReturn(10);
-        underTest.scheduleIfNotScheduled(Long.valueOf(LOCAL_ID), MeteringInstanceCheckerJobAdapter.class);
+        underTest.scheduleIfNotScheduled(Long.valueOf(LOCAL_ID));
         verify(scheduler, times(1)).scheduleJob(any(), any());
     }
 

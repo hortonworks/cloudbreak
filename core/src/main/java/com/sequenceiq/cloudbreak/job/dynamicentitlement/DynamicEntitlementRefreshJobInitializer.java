@@ -7,9 +7,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.job.AbstractStackJobInitializer;
+import com.sequenceiq.cloudbreak.quartz.model.StaleAwareJobRescheduler;
 
 @Component
-public class DynamicEntitlementRefreshJobInitializer extends AbstractStackJobInitializer {
+public class DynamicEntitlementRefreshJobInitializer extends AbstractStackJobInitializer implements StaleAwareJobRescheduler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DynamicEntitlementRefreshJobInitializer.class);
 
@@ -28,6 +29,10 @@ public class DynamicEntitlementRefreshJobInitializer extends AbstractStackJobIni
         } else {
             LOGGER.info("Skipping scheduling dynamic entitlement setter jobs, as they are disabled.");
         }
+    }
 
+    @Override
+    public void rescheduleForStaleCluster(Long id) {
+        jobService.schedule(id);
     }
 }

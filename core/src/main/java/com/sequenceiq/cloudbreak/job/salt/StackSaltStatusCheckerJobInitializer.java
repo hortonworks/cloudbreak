@@ -5,10 +5,11 @@ import jakarta.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.job.AbstractStackJobInitializer;
+import com.sequenceiq.cloudbreak.quartz.model.StaleAwareJobRescheduler;
 import com.sequenceiq.cloudbreak.quartz.saltstatuschecker.SaltStatusCheckerConfig;
 
 @Component
-public class StackSaltStatusCheckerJobInitializer extends AbstractStackJobInitializer {
+public class StackSaltStatusCheckerJobInitializer extends AbstractStackJobInitializer implements StaleAwareJobRescheduler {
 
     @Inject
     private SaltStatusCheckerConfig saltStatusCheckerConfig;
@@ -22,5 +23,10 @@ public class StackSaltStatusCheckerJobInitializer extends AbstractStackJobInitia
             getAliveJobResources()
                     .forEach(s -> jobService.schedule(new StackSaltStatusCheckerJobAdapter(s)));
         }
+    }
+
+    @Override
+    public void rescheduleForStaleCluster(Long id) {
+        jobService.schedule(id);
     }
 }

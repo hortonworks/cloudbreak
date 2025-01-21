@@ -112,6 +112,8 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
             return updateToDeleteFailed(sdx, sdxStatus, stack.getStatusReason());
         } else if (isDeletedOnProviderSide(stack)) {
             return updateToDeletedOnProviderSide(sdx, sdxStatus);
+        } else if (isStale(stack)) {
+            return updateToStale(sdx, sdxStatus, stack.getStatusReason());
         } else {
             LOGGER.debug("Sdx StatusChecker Job will ignore stack status {}. Current data lake state is {}.", stack, sdxStatus);
             return sdxStatus.getStatus();
@@ -186,6 +188,14 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
         return resultStatus;
     }
 
+    private DatalakeStatusEnum updateToStale(SdxCluster sdx, SdxStatusEntity status, String statusReason) {
+        DatalakeStatusEnum resultStatus = DatalakeStatusEnum.STALE;
+        if (!resultStatus.equals(status.getStatus())) {
+            sdxStatusService.setStatusForDatalakeAndNotify(resultStatus, ResourceEvent.DATALAKE_STALE_STATUS, statusReason, sdx);
+        }
+        return resultStatus;
+    }
+
     private boolean isAvailable(StackStatusV4Response stack) {
         return stack.getStatus().isAvailable() && stack.getClusterStatus() != null && stack.getClusterStatus().isAvailable();
     }
@@ -216,6 +226,10 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
 
     private boolean isDeletedOnProviderSide(StackStatusV4Response stack) {
         return Status.DELETED_ON_PROVIDER_SIDE.equals(stack.getStatus());
+    }
+
+    private boolean isStale(StackStatusV4Response stack) {
+        return Status.STALE.equals(stack.getStatus());
     }
 
     private void logStateChange(DatalakeStatusEnum from, DatalakeStatusEnum to) {

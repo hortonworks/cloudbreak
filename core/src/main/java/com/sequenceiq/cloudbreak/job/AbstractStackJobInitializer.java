@@ -1,11 +1,5 @@
 package com.sequenceiq.cloudbreak.job;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_FAILED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAILED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
-
 import java.util.List;
 import java.util.Set;
 
@@ -22,7 +16,7 @@ public abstract class AbstractStackJobInitializer implements JobInitializer {
     private StackService stackService;
 
     protected List<JobResource> getAliveJobResources() {
-        return getJobResourcesNotIn(Set.of(DELETE_COMPLETED, DELETE_IN_PROGRESS, DELETE_FAILED, CREATE_FAILED, CREATE_IN_PROGRESS));
+        return getJobResourcesNotIn(Status.getUnschedulableStatuses());
     }
 
     protected List<JobResource> getJobResourcesNotIn(Set<Status> statusesNotIn) {

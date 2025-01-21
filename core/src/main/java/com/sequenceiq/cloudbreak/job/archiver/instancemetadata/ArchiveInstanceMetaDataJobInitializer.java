@@ -7,9 +7,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.job.AbstractStackJobInitializer;
+import com.sequenceiq.cloudbreak.quartz.model.StaleAwareJobRescheduler;
 
 @Component
-public class ArchiveInstanceMetaDataJobInitializer extends AbstractStackJobInitializer {
+public class ArchiveInstanceMetaDataJobInitializer extends AbstractStackJobInitializer implements StaleAwareJobRescheduler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveInstanceMetaDataJobInitializer.class);
 
@@ -28,5 +29,10 @@ public class ArchiveInstanceMetaDataJobInitializer extends AbstractStackJobIniti
         } else {
             LOGGER.info("Skipping scheduling archive InstanceMetaData jobs, as they are disabled");
         }
+    }
+
+    @Override
+    public void rescheduleForStaleCluster(Long id) {
+        jobService.schedule(id);
     }
 }

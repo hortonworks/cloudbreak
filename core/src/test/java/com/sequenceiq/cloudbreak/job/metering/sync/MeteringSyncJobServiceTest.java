@@ -82,7 +82,7 @@ class MeteringSyncJobServiceTest {
         lenient().when(meteringConfig.isEnabled()).thenReturn(Boolean.TRUE);
         StackRepository jobResourceRepository = mock(StackRepository.class);
         when(scheduler.getJobDetail(any())).thenReturn(new JobDetailImpl());
-        underTest.scheduleIfNotScheduled(Long.valueOf(LOCAL_ID), MeteringSyncJobAdapter.class);
+        underTest.scheduleIfNotScheduled(Long.valueOf(LOCAL_ID));
         verify(scheduler, never()).scheduleJob(any(), any());
     }
 
@@ -96,7 +96,7 @@ class MeteringSyncJobServiceTest {
         when(jobResourceRepository.getJobResource(eq(Long.valueOf(LOCAL_ID)))).thenReturn(Optional.of(jobResource));
         when(scheduler.getJobDetail(any())).thenReturn(null);
         when(meteringConfig.getSyncIntervalInSeconds()).thenReturn(10);
-        underTest.scheduleIfNotScheduled(Long.valueOf(LOCAL_ID), MeteringSyncJobAdapter.class);
+        underTest.scheduleIfNotScheduled(Long.valueOf(LOCAL_ID));
         verify(scheduler, times(1)).scheduleJob(any(), any());
     }
 }

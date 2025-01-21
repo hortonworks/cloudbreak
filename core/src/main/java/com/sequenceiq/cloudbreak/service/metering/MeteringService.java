@@ -15,9 +15,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.converter.StackDtoToMeteringEventConverter;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
-import com.sequenceiq.cloudbreak.job.metering.instancechecker.MeteringInstanceCheckerJobAdapter;
 import com.sequenceiq.cloudbreak.job.metering.instancechecker.MeteringInstanceCheckerJobService;
-import com.sequenceiq.cloudbreak.job.metering.sync.MeteringSyncJobAdapter;
 import com.sequenceiq.cloudbreak.job.metering.sync.MeteringSyncJobService;
 import com.sequenceiq.cloudbreak.metering.GrpcMeteringClient;
 import com.sequenceiq.cloudbreak.service.metrics.MeteringMetricTag;
@@ -74,16 +72,16 @@ public class MeteringService {
     public void scheduleSync(long stackId) {
         StackView stack = stackDtoService.getStackViewById(stackId);
         if (shouldSendMeteringEventForStack(stack)) {
-            meteringSyncJobService.schedule(stackId, MeteringSyncJobAdapter.class);
-            meteringInstanceCheckerJobService.schedule(stackId, MeteringInstanceCheckerJobAdapter.class);
+            meteringSyncJobService.schedule(stackId);
+            meteringInstanceCheckerJobService.schedule(stackId);
         }
     }
 
     public void scheduleSyncIfNotScheduled(long stackId) {
         StackView stack = stackDtoService.getStackViewById(stackId);
         if (shouldSendMeteringEventForStack(stack)) {
-            meteringSyncJobService.scheduleIfNotScheduled(stackId, MeteringSyncJobAdapter.class);
-            meteringInstanceCheckerJobService.scheduleIfNotScheduled(stackId, MeteringInstanceCheckerJobAdapter.class);
+            meteringSyncJobService.scheduleIfNotScheduled(stackId);
+            meteringInstanceCheckerJobService.scheduleIfNotScheduled(stackId);
         }
     }
 

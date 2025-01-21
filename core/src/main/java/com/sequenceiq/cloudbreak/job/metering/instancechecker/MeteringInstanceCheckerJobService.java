@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.job.metering.instancechecker;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.Date;
@@ -45,11 +43,11 @@ public class MeteringInstanceCheckerJobService implements JobSchedulerService {
     @Inject
     private ApplicationContext applicationContext;
 
-    public void scheduleIfNotScheduled(Long id, Class<? extends JobResourceAdapter<?>> resourceAdapterClass) {
+    public void scheduleIfNotScheduled(Long id) {
         JobKey jobKey = JobKey.jobKey(String.valueOf(id), JOB_GROUP);
         try {
             if (scheduler.getJobDetail(jobKey) == null) {
-                schedule(id, resourceAdapterClass);
+                schedule(id);
             } else {
                 LOGGER.info("Metering instance checker job already scheduled with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
             }
@@ -59,17 +57,12 @@ public class MeteringInstanceCheckerJobService implements JobSchedulerService {
         }
     }
 
-    public void schedule(Long id, Class<? extends JobResourceAdapter<?>> resourceAdapterClass) {
-        try {
-            Constructor<? extends JobResourceAdapter> c = resourceAdapterClass.getConstructor(Long.class, ApplicationContext.class);
-            JobResourceAdapter resourceAdapter = c.newInstance(id, applicationContext);
-            schedule(resourceAdapter);
-        } catch (NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e) {
-            LOGGER.error("Error during scheduling metering instance checker job: {}", id, e);
-        }
+    public void schedule(Long id) {
+        MeteringInstanceCheckerJobAdapter resourceAdapter = new MeteringInstanceCheckerJobAdapter(id, applicationContext);
+        schedule(resourceAdapter);
     }
 
-    public <T> void schedule(JobResourceAdapter<T> resource) {
+    public <T> void schedule(MeteringInstanceCheckerJobAdapter resource) {
         JobDetail jobDetail = buildJobDetail(resource);
         Trigger trigger = buildJobTrigger(jobDetail);
         schedule(resource.getJobResource().getLocalId(), jobDetail, trigger);
