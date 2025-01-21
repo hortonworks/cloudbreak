@@ -3,26 +3,20 @@ package com.sequenceiq.distrox.v1.distrox.controller;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.ROTATE_DH_SECRETS;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
 import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.DATAHUB;
-import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.ENVIRONMENT;
-import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.VM_DATALAKE;
 
 import java.util.List;
 import java.util.function.Predicate;
 
 import jakarta.annotation.Resource;
 import jakarta.inject.Inject;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
-import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
-import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretListField;
@@ -30,7 +24,6 @@ import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNot
 import com.sequenceiq.cloudbreak.service.stack.flow.StackRotationService;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1RotationEndpoint;
-import com.sequenceiq.distrox.api.v1.distrox.model.DistroXChildResourceMarkingRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXSecretRotationRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXSecretTypeResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -51,22 +44,6 @@ public class DistroXV1RotationController implements DistroXV1RotationEndpoint {
     @CheckPermissionByRequestProperty(type = CRN, path = "crn", action = ROTATE_DH_SECRETS)
     public FlowIdentifier rotateSecrets(@TenantAwareParam @RequestObject DistroXSecretRotationRequest request) {
         return stackRotationService.rotateSecrets(request.getCrn(), request.getSecrets(), request.getExecutionType(), request.getAdditionalProperties());
-    }
-
-    @Deprecated
-    @Override
-    @InternalOnly
-    public boolean checkOngoingChildrenMultiSecretRotationsByParent(@ValidCrn(resource = { ENVIRONMENT, VM_DATALAKE}) String parentCrn,
-            String multiSecret, @InitiatorUserCrn String initiatorUserCrn) {
-        throw new NotImplementedException("This is a deprecated API.");
-    }
-
-    @Deprecated
-    @Override
-    @InternalOnly
-    public void markMultiClusterChildrenResourcesByParent(@Valid DistroXChildResourceMarkingRequest request,
-            @InitiatorUserCrn String initiatorUserCrn) {
-        throw new NotImplementedException("This is a deprecated API.");
     }
 
     @Override
