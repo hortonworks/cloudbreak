@@ -61,8 +61,6 @@ public class TelemetryConverter {
 
     private final String databusEndpoint;
 
-    private final boolean meteringEnabled;
-
     private final boolean useSharedAltusCredential;
 
     private final MonitoringUrlResolver monitoringUrlResolver;
@@ -78,7 +76,6 @@ public class TelemetryConverter {
         this.telemetryPublisherDefaultValue = telemetryPublisherDefaultValue;
         this.databusEndpoint = configuration.getAltusDatabusConfiguration().getAltusDatabusEndpoint();
         this.useSharedAltusCredential = configuration.getAltusDatabusConfiguration().isUseSharedAltusCredential();
-        this.meteringEnabled = configuration.getMeteringConfiguration().isEnabled();
         this.monitoringUrlResolver = monitoringUrlResolver;
     }
 
@@ -120,7 +117,7 @@ public class TelemetryConverter {
             LOGGER.debug("Cluster level monitoring feature is enabled");
             features.addMonitoring(true);
         }
-        setMeteringFeature(type, features);
+        features.addMetering(false);
 
         if (StringUtils.isNotEmpty(databusEndpoint)) {
             LOGGER.debug("Setting databus endpoint: {}", databusEndpoint);
@@ -283,15 +280,6 @@ public class TelemetryConverter {
             monitoringRequest.setRemoteWriteUrl(monitoring.getRemoteWriteUrl());
         }
         return monitoringRequest;
-    }
-
-    private void setMeteringFeature(StackType type, Features features) {
-        if (meteringEnabled && StackType.WORKLOAD.equals(type)) {
-            LOGGER.debug("Setting metering for workload cluster (as metering is enabled)");
-            features.addMetering(true);
-        } else {
-            LOGGER.debug("Metering feature is disabled - global setting; {}, stack type: {}", meteringEnabled, type);
-        }
     }
 
     private void setWorkloadAnalyticsFeature(Telemetry telemetry, Features features) {

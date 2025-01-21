@@ -37,7 +37,6 @@ import com.sequenceiq.cloudbreak.telemetry.TelemetryFeatureService;
 import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 import com.sequenceiq.cloudbreak.telemetry.context.DatabusContext;
 import com.sequenceiq.cloudbreak.telemetry.context.LogShipperContext;
-import com.sequenceiq.cloudbreak.telemetry.context.MeteringContext;
 import com.sequenceiq.cloudbreak.telemetry.context.MonitoringContext;
 import com.sequenceiq.cloudbreak.telemetry.context.NodeStatusContext;
 import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
@@ -130,7 +129,6 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
             telemetryContext.setLogShipperContext(createLogShipperContext(stack, telemetry));
             telemetryContext.setMonitoringContext(createMonitoringContext(stack, telemetry, nodeStatusContext, cdpAccessKeyType));
             telemetryContext.setPaywallConfigs(getPaywallConfigs(stack));
-            telemetryContext.setMeteringContext(MeteringContext.builder().build());
         }
         telemetryContext.setOsType(stack.getImage().getOsType());
         return telemetryContext;

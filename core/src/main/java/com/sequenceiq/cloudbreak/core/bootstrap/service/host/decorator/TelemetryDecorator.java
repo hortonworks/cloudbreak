@@ -36,7 +36,6 @@ import com.sequenceiq.cloudbreak.telemetry.TelemetryContextProvider;
 import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 import com.sequenceiq.cloudbreak.telemetry.context.DatabusContext;
 import com.sequenceiq.cloudbreak.telemetry.context.LogShipperContext;
-import com.sequenceiq.cloudbreak.telemetry.context.MeteringContext;
 import com.sequenceiq.cloudbreak.telemetry.context.MonitoringContext;
 import com.sequenceiq.cloudbreak.telemetry.context.NodeStatusContext;
 import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
@@ -125,7 +124,6 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
             DatabusContext databusContext = createDatabusContext(stack, telemetry, dataBusCredential, accountId, cdpAccessKeyType);
             telemetryContext.setDatabusContext(databusContext);
             telemetryContext.setClusterDetails(createTelemetryClusterDetails(stack, telemetry, databusContext));
-            telemetryContext.setMeteringContext(createMeteringContext(stack, telemetry));
             NodeStatusContext nodeStatusContext = createNodeStatusContext(cluster, accountId);
             telemetryContext.setNodeStatusContext(nodeStatusContext);
             telemetryContext.setLogShipperContext(createLogShipperContext(stack, telemetry));
@@ -214,21 +212,6 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
                 return compare < 0;
             }
         }
-    }
-
-    private MeteringContext createMeteringContext(StackView stack, Telemetry telemetry) {
-        MeteringContext.Builder builder = MeteringContext.builder();
-        boolean datahub = !StackType.DATALAKE.equals(stack.getType());
-        boolean meteringFeatureEnabled = telemetry.isMeteringFeatureEnabled();
-        boolean meteringEnabled = meteringFeatureEnabled && datahub;
-        if (meteringEnabled) {
-            builder.enabled();
-        }
-        String defaultServiceType = StackType.WORKLOAD.equals(stack.getType()) ? FluentClusterType.DATAHUB.value() : "";
-        return builder
-                .withServiceType(getServiceTypeForMetering(stack, defaultServiceType))
-                .withVersion(getVersionForMetering(stack, version))
-                .build();
     }
 
     private LogShipperContext createLogShipperContext(StackView stack, Telemetry telemetry) {
