@@ -126,6 +126,7 @@
         "ec2:AuthorizeSecurityGroupEgress",
         "ec2:DescribeAccountAttributes",
         "ec2:DisassociateAddress",
+        "ec2:DescribeNetworkInterfaces",
         "sts:DecodeAuthorizationMessage",
         "cloudformation:DescribeStacks",
         "dynamodb:DeleteTable",

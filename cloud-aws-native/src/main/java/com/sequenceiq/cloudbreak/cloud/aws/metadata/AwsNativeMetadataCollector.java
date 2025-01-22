@@ -82,6 +82,9 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
     @Inject
     private AwsInstanceCommonService awsInstanceCommonService;
 
+    @Inject
+    private AwsNativeLoadBalancerIpCollector awsNativeLoadBalancerIpCollector;
+
     @Value("${cb.aws.native.instance.fetch.max.item:100}")
     private int instanceFetchMaxBatchSize;
 
@@ -114,10 +117,11 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
                 .map(CloudResource::getReference)
                 .collect(Collectors.toSet());
         AmazonElasticLoadBalancingClient loadBalancingClient = awsClient.createElasticLoadBalancingClient(awsCredential, region);
+        AmazonEc2Client ec2Client = awsClient.createEc2Client(awsCredential, region);
         LOGGER.info("Collect AWS load balancer metadata, in region '{}' with ARNs: '{}'", region, String.join(", ", loadBalancerArns));
 
         for (CloudResource loadBalancer : loadBalancers) {
-            Optional<CloudLoadBalancerMetadata> collectedLoadBalancer = collectLoadBalancerMetadata(loadBalancingClient, loadBalancer, resources);
+            Optional<CloudLoadBalancerMetadata> collectedLoadBalancer = collectLoadBalancerMetadata(loadBalancingClient, ec2Client, loadBalancer, resources);
             collectedLoadBalancer.ifPresent(response::add);
         }
         return response;
@@ -237,11 +241,11 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
         return response;
     }
 
-    private Optional<CloudLoadBalancerMetadata> collectLoadBalancerMetadata(AmazonElasticLoadBalancingClient loadBalancingClient,
+    private Optional<CloudLoadBalancerMetadata> collectLoadBalancerMetadata(AmazonElasticLoadBalancingClient loadBalancingClient,  AmazonEc2Client ec2Client,
             CloudResource loadBalancer, List<CloudResource> resources) {
         Optional<CloudLoadBalancerMetadata> response = Optional.empty();
         try {
-            response = describeLoadBalancer(loadBalancer, loadBalancingClient, resources);
+            response = describeLoadBalancer(loadBalancer, loadBalancingClient, ec2Client, resources);
         } catch (AwsServiceException awsException) {
             if (StringUtils.isNotEmpty(awsException.awsErrorDetails().errorCode()) &&
                     LOAD_BALANCER_NOT_FOUND_ERROR_CODE.equals(awsException.awsErrorDetails().errorCode())) {
@@ -258,7 +262,7 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
     }
 
     private Optional<CloudLoadBalancerMetadata> describeLoadBalancer(CloudResource loadBalancer, AmazonElasticLoadBalancingClient loadBalancingClient,
-            List<CloudResource> resources) {
+            AmazonEc2Client ec2Client, List<CloudResource> resources) {
         DescribeLoadBalancersRequest describeLoadBalancersRequest = DescribeLoadBalancersRequest.builder().loadBalancerArns(loadBalancer.getReference()).build();
         DescribeLoadBalancersResponse describeLoadBalancersResponse = loadBalancingClient.describeLoadBalancers(describeLoadBalancersRequest);
 
@@ -278,6 +282,7 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
                             .withHostedZoneId(awsLb.canonicalHostedZoneId())
                             .withName(awsLb.loadBalancerName())
                             .withParameters(parameters)
+                            .withIp(awsNativeLoadBalancerIpCollector.getLoadBalancerIp(ec2Client, loadBalancer.getName()))
                             .build();
                     LOGGER.info("Saved metadata for load balancer {}: DNS {}, zone ID {}", awsLb.loadBalancerName(), awsLb.dnsName(),
                             awsLb.canonicalHostedZoneId());

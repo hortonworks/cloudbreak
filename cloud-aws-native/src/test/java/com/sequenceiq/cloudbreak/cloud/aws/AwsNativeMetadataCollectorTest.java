@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsInstance
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.LoadBalancerTypeConverter;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsLifeCycleMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.metadata.AwsNativeLbMetadataCollector;
+import com.sequenceiq.cloudbreak.cloud.aws.metadata.AwsNativeLoadBalancerIpCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.metadata.AwsNativeMetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -75,6 +76,8 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer
 @ExtendWith(MockitoExtension.class)
 class AwsNativeMetadataCollectorTest {
 
+    private static final String LB_PRIVATE_IP = "1.1.1.1";
+
     @Mock
     private AwsLifeCycleMapper awsLifeCycleMapper;
 
@@ -98,6 +101,9 @@ class AwsNativeMetadataCollectorTest {
 
     @Mock
     private AwsInstanceCommonService awsInstanceCommonService;
+
+    @Mock
+    private AwsNativeLoadBalancerIpCollector awsNativeLoadBalancerIpCollector;
 
     @InjectMocks
     private AwsNativeMetadataCollector underTest;
@@ -401,6 +407,7 @@ class AwsNativeMetadataCollectorTest {
         CloudResource secondCloudResource = getCloudResource("secondCrn", "lbnamesecond", null, ELASTIC_LOAD_BALANCER);
         List<CloudResource> cloudResources = List.of(cloudResource, secondCloudResource);
         when(awsClient.createElasticLoadBalancingClient(any(), any())).thenReturn(loadBalancingClient);
+        when(awsClient.createEc2Client(any(), any())).thenReturn(ec2Client);
         LoadBalancerNotFoundException loadBalancerNotFoundException = LoadBalancerNotFoundException.builder()
                 .message("One or more elastic lb not found")
                 .awsErrorDetails(AwsErrorDetails.builder().errorCode(LOAD_BALANCER_NOT_FOUND_ERROR_CODE).build())
@@ -409,11 +416,13 @@ class AwsNativeMetadataCollectorTest {
         when(loadBalancingClient.describeLoadBalancers(any()))
                 .thenReturn(DescribeLoadBalancersResponse.builder().loadBalancers(loadBalancer).build())
                 .thenThrow(loadBalancerNotFoundException);
+        when(awsNativeLoadBalancerIpCollector.getLoadBalancerIp(eq(ec2Client), any())).thenReturn(LB_PRIVATE_IP);
 
         List<CloudLoadBalancerMetadata> cloudLoadBalancerMetadata = underTest.collectLoadBalancer(authenticatedContext, loadBalancerTypes, cloudResources);
 
         verify(loadBalancingClient, times(2)).describeLoadBalancers(any());
         assertFalse(cloudLoadBalancerMetadata.isEmpty());
+        assertTrue(cloudLoadBalancerMetadata.stream().allMatch(metadata -> LB_PRIVATE_IP.equals(metadata.getIp())));
     }
 
     @Test
@@ -425,10 +434,12 @@ class AwsNativeMetadataCollectorTest {
         secondCloudResource.putParameter(CloudResource.ATTRIBUTES, LoadBalancerTypeAttribute.GATEWAY_PRIVATE);
         List<CloudResource> cloudResources = List.of(cloudResource, secondCloudResource);
         when(awsClient.createElasticLoadBalancingClient(any(), any())).thenReturn(loadBalancingClient);
+        when(awsClient.createEc2Client(any(), any())).thenReturn(ec2Client);
         LoadBalancer loadBalancer = LoadBalancer.builder().scheme(LoadBalancerSchemeEnum.INTERNAL).build();
         when(loadBalancingClient.describeLoadBalancers(any()))
                 .thenReturn(DescribeLoadBalancersResponse.builder().loadBalancers(loadBalancer).build());
         when(loadBalancerTypeConverter.convert(LoadBalancerSchemeEnum.INTERNAL)).thenReturn(LoadBalancerType.PRIVATE);
+        when(awsNativeLoadBalancerIpCollector.getLoadBalancerIp(eq(ec2Client), any())).thenReturn(LB_PRIVATE_IP);
 
         List<CloudLoadBalancerMetadata> cloudLoadBalancerMetadata = underTest.collectLoadBalancer(authenticatedContext, loadBalancerTypes, cloudResources);
 
@@ -437,6 +448,7 @@ class AwsNativeMetadataCollectorTest {
         assertEquals(cloudResources.size(), cloudLoadBalancerMetadata.size());
         assertThat(cloudLoadBalancerMetadata.stream().map(CloudLoadBalancerMetadata::getType).collect(Collectors.toSet()))
                 .containsExactlyInAnyOrder(LoadBalancerType.PRIVATE, LoadBalancerType.GATEWAY_PRIVATE);
+        assertTrue(cloudLoadBalancerMetadata.stream().allMatch(metadata -> LB_PRIVATE_IP.equals(metadata.getIp())));
     }
 
     @Test

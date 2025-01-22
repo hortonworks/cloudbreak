@@ -49,6 +49,8 @@ import software.amazon.awssdk.services.ec2.model.DescribeKeyPairsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeKeyPairsResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeLaunchTemplateVersionsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeLaunchTemplateVersionsResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeNetworkInterfacesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeNetworkInterfacesResponse;
 import software.amazon.awssdk.services.ec2.model.DescribePrefixListsResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeRegionsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeRegionsResponse;
@@ -113,6 +115,10 @@ public class AmazonEc2Client extends AmazonClient {
 
     public DescribeSubnetsResponse describeSubnets(DescribeSubnetsRequest request) {
         return retry.testWith2SecDelayMax15Times(() -> client.describeSubnets(request));
+    }
+
+    public DescribeNetworkInterfacesResponse describeNetworkInterfaces(DescribeNetworkInterfacesRequest request) {
+        return retry.testWith2SecDelayMax15Times(() -> client.describeNetworkInterfaces(request));
     }
 
     public ModifyInstanceAttributeResponse modifyInstanceAttribute(ModifyInstanceAttributeRequest request) {
