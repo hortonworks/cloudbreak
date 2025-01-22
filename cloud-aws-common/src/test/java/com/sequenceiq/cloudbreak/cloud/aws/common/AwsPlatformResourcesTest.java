@@ -85,9 +85,11 @@ import software.amazon.awssdk.services.ec2.model.DescribeVpcsResponse;
 import software.amazon.awssdk.services.ec2.model.DiskInfo;
 import software.amazon.awssdk.services.ec2.model.EbsEncryptionSupport;
 import software.amazon.awssdk.services.ec2.model.EbsInfo;
+import software.amazon.awssdk.services.ec2.model.Filter;
 import software.amazon.awssdk.services.ec2.model.InstanceStorageInfo;
 import software.amazon.awssdk.services.ec2.model.InstanceTypeInfo;
 import software.amazon.awssdk.services.ec2.model.InstanceTypeOffering;
+import software.amazon.awssdk.services.ec2.model.LocationType;
 import software.amazon.awssdk.services.ec2.model.MemoryInfo;
 import software.amazon.awssdk.services.ec2.model.ProcessorInfo;
 import software.amazon.awssdk.services.ec2.model.Region;
@@ -489,6 +491,17 @@ public class AwsPlatformResourcesTest {
         when(amazonEC2Client.describeInstanceTypes(any(DescribeInstanceTypesRequest.class)))
                 .thenReturn(describeInstanceTypesResponse);
 
+        DescribeInstanceTypeOfferingsRequest describeInstanceTypesByAzRequest = DescribeInstanceTypeOfferingsRequest.builder()
+                .locationType(LocationType.AVAILABILITY_ZONE)
+                .filters(Filter.builder().name("location").values(AZ_NAME).build())
+                .build();
+        DescribeInstanceTypeOfferingsResponse describeInstanceTypesByAzResponse = DescribeInstanceTypeOfferingsResponse.builder()
+                .instanceTypeOfferings(List.of(InstanceTypeOffering.builder().instanceType("vm1").build(),
+                        InstanceTypeOffering.builder().instanceType("vm2").build()))
+                .build();
+        when(amazonEC2Client.describeInstanceTypeOfferings(eq(describeInstanceTypesByAzRequest)))
+                .thenReturn(describeInstanceTypesByAzResponse);
+
         ReflectionTestUtils.setField(underTest, "defaultVmTypes", Map.of(
                 region, vmType("vm1"),
                 region(NOT_ENABLED_REGION_NAME), vmType("vm2")));
@@ -498,6 +511,7 @@ public class AwsPlatformResourcesTest {
         assertThat(cloudVmTypes.getCloudVmResponses())
                 .containsKey(AZ_NAME)
                 .doesNotContainKey(NOT_ENABLED_AZ_NAME);
+        assertEquals(2, cloudVmTypes.getCloudVmResponses().get(AZ_NAME).size());
         assertThat(cloudVmTypes.getDefaultCloudVmResponses())
                 .containsKey(AZ_NAME)
                 .doesNotContainKey(NOT_ENABLED_AZ_NAME);

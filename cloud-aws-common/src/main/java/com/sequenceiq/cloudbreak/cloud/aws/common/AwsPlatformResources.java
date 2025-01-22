@@ -16,6 +16,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
 import static com.sequenceiq.cloudbreak.constant.AwsPlatformResourcesFilterConstants.ARCHITECTURE;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
+import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
@@ -38,6 +39,7 @@ import java.util.stream.Collectors;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,6 +48,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.CloudParameterConst;
@@ -107,6 +110,7 @@ import com.sequenceiq.cloudbreak.cloud.model.view.PlatformResourceSshKeyFilterVi
 import com.sequenceiq.cloudbreak.cloud.model.view.PlatformResourceVpcFilterView;
 import com.sequenceiq.cloudbreak.common.domain.CdpSupportedServices;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.filter.MinimalHardwareFilter;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
@@ -773,10 +777,29 @@ public class AwsPlatformResources implements PlatformResources {
                                 .suitableAsMinimumHardware(e.getMetaData().getCPU(), e.getMetaData().getMemoryInGb()))
                         .collect(Collectors.toSet());
             }
-            fillUpAvailabilityZones(region, enabledInstanceTypeFilter, regions, cloudVmResponses, defaultCloudVmResponses, awsInstances);
+            Map<String, List<String>> instanceTypesByAvailabilityZones = getAvailableInstanceTypesByAvailabilityZones(regions, region, ec2Client);
+            setAvailabilityZonesForVmTypes(awsInstances, instanceTypesByAvailabilityZones);
+            fillUpAvailabilityZones(region, enabledInstanceTypeFilter, regions, cloudVmResponses, defaultCloudVmResponses, awsInstances, filters);
             filterInstancesByFilters(enabledInstanceTypeFilter, cloudVmResponses);
         }
         return new CloudVmTypes(cloudVmResponses, defaultCloudVmResponses);
+    }
+
+    private Map<String, List<String>> getAvailableInstanceTypesByAvailabilityZones(CloudRegions regions, Region region, AmazonEc2Client ec2Client) {
+        Map<String, List<String>> instanceTypesByAvailabilityZones = new HashMap<>();
+        regions.getCloudRegions().get(region).forEach(az -> {
+            List<String> instanceTypeOfferingsByAz = ec2Client.describeInstanceTypeOfferings(DescribeInstanceTypeOfferingsRequest.builder()
+                            .locationType(LocationType.AVAILABILITY_ZONE)
+                            .filters(Filter.builder().name("location").values(az.getValue()).build())
+                            .build())
+                    .instanceTypeOfferings()
+                    .stream()
+                    .map(InstanceTypeOffering::instanceTypeAsString)
+                    .toList();
+            instanceTypesByAvailabilityZones.put(az.getValue(), instanceTypeOfferingsByAz);
+        });
+
+        return instanceTypesByAvailabilityZones;
     }
 
     private void fillUpAvailabilityZones(Region region,
@@ -784,12 +807,14 @@ public class AwsPlatformResources implements PlatformResources {
             CloudRegions regions,
             Map<String, Set<VmType>> cloudVmResponses,
             Map<String, VmType> defaultCloudVmResponses,
-            Set<VmType> awsInstances) {
+            Set<VmType> awsInstances,
+            Map<String, String> filters) {
         List<AvailabilityZone> availabilityZones = regions.getCloudRegions().get(region);
         if (availabilityZones != null && !availabilityZones.isEmpty()) {
             for (AvailabilityZone availabilityZone : availabilityZones) {
                 Set<VmType> types = awsInstances.stream()
                         .filter(enabledInstanceTypeFilter)
+                        .filter(instance -> matchAvailabilityZones(filters, instance.getMetaData().getAvailabilityZones()))
                         .collect(Collectors.toSet());
                 cloudVmResponses.put(availabilityZone.value(), types);
                 VmType defaultVmType = defaultVmTypes.get(region);
@@ -798,6 +823,25 @@ public class AwsPlatformResources implements PlatformResources {
             }
         } else {
             LOGGER.info("Availability zones is null or empty in {}", region.getRegionName());
+        }
+    }
+
+    private boolean matchAvailabilityZones(Map<String, String> filters, List<String> availabilityZones) {
+        return filters == null || isEmpty(filters.get(NetworkConstants.AVAILABILITY_ZONES)) ||
+                CollectionUtils.containsAll(emptyIfNull(availabilityZones),
+                        Splitter.on(",").splitToList(filters.get(NetworkConstants.AVAILABILITY_ZONES))
+                );
+    }
+
+    private void setAvailabilityZonesForVmTypes(Set<VmType> awsInstances, Map<String, List<String>> instanceTypesByAz) {
+        for (VmType vmType : awsInstances) {
+            List<String> availabilityZones = new ArrayList<>();
+            instanceTypesByAz.forEach((az, vmTypes) -> {
+                if (vmTypes.contains(vmType.getValue())) {
+                    availabilityZones.add(az);
+                }
+            });
+            vmType.getMetaData().setAvailabilityZones(availabilityZones);
         }
     }
 
