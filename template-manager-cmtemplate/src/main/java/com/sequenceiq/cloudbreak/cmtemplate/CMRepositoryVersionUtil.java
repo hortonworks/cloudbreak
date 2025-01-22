@@ -166,6 +166,20 @@ public class CMRepositoryVersionUtil {
         return isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_4_1);
     }
 
+    public static boolean isKnoxServletAsyncSupported(Optional<ClouderaManagerProduct> cdhProduct) {
+        LOGGER.info("ClouderaManagerRepo is compared for knox servlet async support");
+        boolean supported = false;
+        if (cdhProduct.isPresent()) {
+            String cdhVersion = cdhProduct.get().getVersion().split("-")[0];
+            LOGGER.info("The cdhVersion is {}", cdhVersion);
+            if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_3_1)) {
+                supported = true;
+            }
+        }
+        LOGGER.info("The current cdh and cm version is supported={}", supported);
+        return supported;
+    }
+
     public static boolean isKnoxDatabaseSupported(ClouderaManagerRepo clouderaManagerRepoDetails,
         Optional<ClouderaManagerProduct> cdhProduct,
         Optional<Integer> cdhPatchVersion) {

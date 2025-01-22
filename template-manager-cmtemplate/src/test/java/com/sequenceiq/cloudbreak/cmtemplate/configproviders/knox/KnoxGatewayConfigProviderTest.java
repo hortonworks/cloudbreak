@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.IdBroker;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
@@ -67,6 +68,9 @@ public class KnoxGatewayConfigProviderTest {
 
     @Mock
     private EntitlementService entitlementService;
+
+    @Mock
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     @InjectMocks
     private final KnoxGatewayConfigProvider underTest = new KnoxGatewayConfigProvider();
@@ -192,7 +196,9 @@ public class KnoxGatewayConfigProviderTest {
                 .build();
         when(virtualGroupService.createOrGetVirtualGroup(source.getVirtualGroupRequest(), UmsVirtualGroupRight.KNOX_ADMIN)).thenReturn("");
         when(entitlementService.isOjdbcTokenDhOneHour(anyString())).thenReturn(true);
-
+        CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
+        when(cmTemplateProcessor.getServiceByType(anyString())).thenReturn(Optional.of(new ApiClusterTemplateService()));
+        when(cmTemplateProcessorFactory.get(anyString())).thenReturn(cmTemplateProcessor);
         assertEquals(
                 List.of(
                         config("idbroker_master_secret", "supersecret"),
@@ -218,6 +224,78 @@ public class KnoxGatewayConfigProviderTest {
                         config("gateway_dispatch_whitelist", "^*.*$"),
                         config("gateway_service_tokenstate_impl", "org.apache.knox.gateway.services.token.impl.JDBCTokenStateService"),
                         config("gateway_security_dir", GATEWAY_SECURITY_DIR)
+                ),
+                ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, source))
+        );
+        assertEquals(List.of(), underTest.getRoleConfigs("NAMENODE", source));
+    }
+
+    @Test
+    public void roleConfigsWithGatewayOn731() {
+        ReflectionTestUtils.setField(underTest, "knoxGatewaySecurityDir", GATEWAY_SECURITY_DIR);
+        ReflectionTestUtils.setField(underTest, "knoxIdBrokerSecurityDir", IDBROKER_SECURITY_DIR);
+
+        GatewayTopology topology = new GatewayTopology();
+        topology.setTopologyName("my-topology");
+        topology.setExposedServices(Json.silent(new ExposedServices()));
+
+        Gateway gateway = new Gateway();
+        gateway.setKnoxMasterSecret("admin");
+        gateway.setPath("/a/b/c");
+        gateway.setTopologies(Set.of(topology));
+
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setAccountId(Optional.of("1234"));
+
+        IdBroker idBroker = new IdBroker();
+        idBroker.setMasterSecret("supersecret");
+        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
+        when(blueprintTextProcessor.getVersion()).thenReturn(Optional.of("7.3.1"));
+        BlueprintView blueprintView = new BlueprintView("text", "7.3.1", "CDH", blueprintTextProcessor);
+        TemplatePreparationObject source = Builder.builder()
+                .withGateway(gateway, "key", new HashSet<>())
+                .withGeneralClusterConfigs(generalClusterConfigs)
+                .withBlueprintView(blueprintView)
+                .withVirtualGroupView(new VirtualGroupRequest(TestConstants.CRN, ""))
+                .withProductDetails(new ClouderaManagerRepo().withVersion("7.4.2"), List.of(new ClouderaManagerProduct()
+                        .withVersion("7.3.1")
+                        .withName("CDH")))
+                .withIdBroker(idBroker)
+                .withEnableSecretEncryption(true)
+                .build();
+        when(virtualGroupService.createOrGetVirtualGroup(source.getVirtualGroupRequest(), UmsVirtualGroupRight.KNOX_ADMIN)).thenReturn("");
+        when(entitlementService.isOjdbcTokenDhOneHour(anyString())).thenReturn(true);
+        CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
+        when(cmTemplateProcessor.getServiceByType(anyString())).thenReturn(Optional.of(new ApiClusterTemplateService()));
+        when(cmTemplateProcessorFactory.get(anyString())).thenReturn(cmTemplateProcessor);
+
+        assertEquals(
+                List.of(
+                        config("idbroker_master_secret", "supersecret"),
+                        config("idbroker_gateway_knox_admin_groups", ""),
+                        config("idbroker_gateway_signing_keystore_name", "signing.jks"),
+                        config("idbroker_gateway_signing_keystore_type", "JKS"),
+                        config("idbroker_gateway_signing_key_alias", "signing-identity"),
+                        config("idbroker_security_dir", IDBROKER_SECURITY_DIR)
+                ),
+                underTest.getRoleConfigs(KnoxRoles.IDBROKER, source)
+        );
+        assertEquals(
+                List.of(
+                        config("gateway_master_secret", gateway.getKnoxMaster()),
+                        config("gateway_default_topology_name",
+                                gateway.getTopologies().iterator().next().getTopologyName()),
+                        config("gateway_knox_admin_groups", ""),
+                        config("gateway_auto_discovery_enabled", "false"),
+                        config("gateway_path", gateway.getPath()),
+                        config("gateway_signing_keystore_name", "signing.jks"),
+                        config("gateway_signing_keystore_type", "JKS"),
+                        config("gateway_signing_key_alias", "signing-identity"),
+                        config("gateway_dispatch_whitelist", "^*.*$"),
+                        config("gateway_service_tokenstate_impl", "org.apache.knox.gateway.services.token.impl.JDBCTokenStateService"),
+                        config("gateway_security_dir", GATEWAY_SECURITY_DIR),
+                        config("conf/gateway-site.xml_role_safety_valve",
+                                "<property><name>gateway.servlet.async.supported</name><value>true</value></property>")
                 ),
                 ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, source))
         );
@@ -257,7 +335,9 @@ public class KnoxGatewayConfigProviderTest {
                 .build();
         when(virtualGroupService.createOrGetVirtualGroup(source.getVirtualGroupRequest(), UmsVirtualGroupRight.KNOX_ADMIN)).thenReturn("");
         when(entitlementService.isOjdbcTokenDhOneHour(anyString())).thenReturn(false);
-
+        CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
+        when(cmTemplateProcessor.getServiceByType(anyString())).thenReturn(Optional.of(new ApiClusterTemplateService()));
+        when(cmTemplateProcessorFactory.get(anyString())).thenReturn(cmTemplateProcessor);
         assertEquals(
                 List.of(
                         config("idbroker_master_secret", "supersecret"),
@@ -296,6 +376,9 @@ public class KnoxGatewayConfigProviderTest {
         gcc.setAccountId(Optional.of("1234"));
         IdBroker idBroker = new IdBroker();
         idBroker.setMasterSecret("supersecret");
+        CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
+        when(cmTemplateProcessor.getServiceByType(anyString())).thenReturn(Optional.of(new ApiClusterTemplateService()));
+        when(cmTemplateProcessorFactory.get(anyString())).thenReturn(cmTemplateProcessor);
         BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
         BlueprintView blueprintView = new BlueprintView("text", "7.2.11", "CDH", blueprintTextProcessor);
         TemplatePreparationObject source = Builder.builder()
@@ -359,7 +442,9 @@ public class KnoxGatewayConfigProviderTest {
                 .build();
         when(virtualGroupService.createOrGetVirtualGroup(source.getVirtualGroupRequest(), UmsVirtualGroupRight.KNOX_ADMIN)).thenReturn("knox_admins");
         when(entitlementService.isOjdbcTokenDhOneHour(anyString())).thenReturn(true);
-
+        CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
+        when(cmTemplateProcessor.getServiceByType(anyString())).thenReturn(Optional.of(new ApiClusterTemplateService()));
+        when(cmTemplateProcessorFactory.get(anyString())).thenReturn(cmTemplateProcessor);
         assertEquals(
             List.of(
                 config("idbroker_master_secret", "supersecret"),
@@ -416,7 +501,9 @@ public class KnoxGatewayConfigProviderTest {
                 .build();
         when(virtualGroupService.createOrGetVirtualGroup(source.getVirtualGroupRequest(), UmsVirtualGroupRight.KNOX_ADMIN)).thenReturn("knox_admins");
         when(entitlementService.isOjdbcTokenDhOneHour(anyString())).thenReturn(false);
-
+        CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
+        when(cmTemplateProcessor.getServiceByType(anyString())).thenReturn(Optional.of(new ApiClusterTemplateService()));
+        when(cmTemplateProcessorFactory.get(anyString())).thenReturn(cmTemplateProcessor);
         assertEquals(
                 List.of(
                         config("idbroker_master_secret", "supersecret"),
@@ -476,7 +563,9 @@ public class KnoxGatewayConfigProviderTest {
                 .build();
         when(virtualGroupService.createOrGetVirtualGroup(source.getVirtualGroupRequest(), UmsVirtualGroupRight.KNOX_ADMIN)).thenReturn("knox_admins");
         when(entitlementService.isOjdbcTokenDhOneHour(anyString())).thenReturn(false);
-
+        CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
+        when(cmTemplateProcessor.getServiceByType(anyString())).thenReturn(Optional.of(new ApiClusterTemplateService()));
+        when(cmTemplateProcessorFactory.get(anyString())).thenReturn(cmTemplateProcessor);
         assertEquals(
                 List.of(
                         config("idbroker_master_secret", "supersecret"),

@@ -4,8 +4,11 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUD
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_16;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_9;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isKnoxDatabaseSupported;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isKnoxServletAsyncSupported;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox.KnoxRoles.GATEWAY_SERVLET_ASYNC_SUPPORTED;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox.KnoxRoles.GATEWAY_SITE_SAFETY_VALVE;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -21,6 +24,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
+import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
@@ -28,7 +32,10 @@ import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ssb.SqlStreamBuilderRoles;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
@@ -105,6 +112,9 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider implem
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
+
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         VirtualGroupRequest virtualGroupRequest = source.getVirtualGroupRequest();
@@ -136,14 +146,37 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider implem
             config.add(getGatewayWhitelistConfig(source));
             config.addAll(getDefaultsIfRequired(source));
         }
+        addTokenStateConfig(source, config);
+        addSecurityConfig(source, config);
+        addKnoxServletAsyncIfRequired(source, config);
+        return config;
+    }
+
+    private void addSecurityConfig(TemplatePreparationObject source, List<ApiClusterTemplateConfig> config) {
+        if (isSecretEncryptionSupported(source)) {
+            config.add(config(GATEWAY_SECURITY_DIR, knoxGatewaySecurityDir));
+        }
+    }
+
+    private void addTokenStateConfig(TemplatePreparationObject source, List<ApiClusterTemplateConfig> config) {
         if (source.getProductDetailsView() != null
                 && isKnoxDatabaseSupported(source.getProductDetailsView().getCm(), getCdhProduct(source), getCdhPatchVersion(source))) {
             config.add(config(GATEWAY_SERVICE_TOKENSTATE_IMPL, "org.apache.knox.gateway.services.token.impl.JDBCTokenStateService"));
         }
-        if (isSecretEncryptionSupported(source)) {
-            config.add(config(GATEWAY_SECURITY_DIR, knoxGatewaySecurityDir));
+    }
+
+    private void addKnoxServletAsyncIfRequired(TemplatePreparationObject source, List<ApiClusterTemplateConfig> config) {
+        Optional<ApiClusterTemplateService> serviceByType = cmTemplateProcessorFactory.get(
+                source.getBlueprintView().getBlueprintText()).getServiceByType(SqlStreamBuilderRoles.SQL_STREAM_BUILDER);
+        if (source.getProductDetailsView() != null
+                && isKnoxServletAsyncSupported(getCdhProduct(source))
+                && serviceByType.isPresent()) {
+            StringBuilder gatewayServletSiteSafetyValveValue = new StringBuilder();
+
+            gatewayServletSiteSafetyValveValue.append(ConfigUtils.getSafetyValveProperty(GATEWAY_SERVLET_ASYNC_SUPPORTED, "true"));
+            config.addAll(gatewayServletSiteSafetyValveValue.toString().isEmpty() ? List.of()
+                    : List.of(config(GATEWAY_SITE_SAFETY_VALVE, gatewayServletSiteSafetyValveValue.toString())));
         }
-        return config;
     }
 
     private List<ApiClusterTemplateConfig> getIDBrokerConfigs(TemplatePreparationObject source, String adminGroup) {
