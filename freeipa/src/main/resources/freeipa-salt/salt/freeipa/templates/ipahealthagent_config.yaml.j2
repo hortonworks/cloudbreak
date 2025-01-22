@@ -1,0 +1,3 @@
+realm: {{ salt['pillar.get']('freeipa:domain') }}
+hostname: {{ grains['fqdn'] }}
+timeout: 1000

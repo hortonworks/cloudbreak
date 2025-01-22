@@ -52,6 +52,15 @@ setup-healthagent-certs:
     - require:
       - file: /cdp/ipahealthagent/freeipa_healthagent_getcerts.sh
 
+/opt/ipahealthagent/config.yaml:
+  file.managed:
+    - makedirs: True
+    - user: root
+    - group: root
+    - mode: 600
+    - source: salt://freeipa/templates/ipahealthagent_config.yaml.j2
+    - template: jinja
+
 start-freeipa-healthagent:
   service.running:
     - name: cdp-freeipa-healthagent
