@@ -9,12 +9,12 @@ import java.util.Optional;
 
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import jakarta.ws.rs.ForbiddenException;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -144,7 +144,7 @@ public class BaseLegacyStructuredFlowEventFactory implements LegacyStructuredFlo
                     notificationDetails.setBlueprintName(blueprint.getStackName());
                 }
             }
-        } catch (AccessDeniedException e) {
+        } catch (ForbiddenException e) {
             LOGGER.info("Access denied in structured notification event creation, user: {}, stack: {}", userName, stackId, e);
         }
 

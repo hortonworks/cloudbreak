@@ -4,10 +4,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
+import jakarta.ws.rs.ForbiddenException;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -36,7 +37,7 @@ public class CrnAccountValidator {
     private void validateSameAccount(Crn userCrn, Crn resourceCrn) {
         if (!Objects.equals(userCrn.getAccountId(), resourceCrn.getAccountId())) {
             LOGGER.warn("User {} tried to access {} from different account.", userCrn, resourceCrn);
-            throw new AccessDeniedException(String.format("Can't access resource from different account.", resourceCrn, userCrn.getAccountId()));
+            throw new ForbiddenException(String.format("Can't access resource from different account.", resourceCrn, userCrn.getAccountId()));
         }
     }
 }

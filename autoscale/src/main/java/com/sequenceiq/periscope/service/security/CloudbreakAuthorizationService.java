@@ -1,10 +1,10 @@
 package com.sequenceiq.periscope.service.security;
 
 import jakarta.inject.Inject;
+import jakarta.ws.rs.ForbiddenException;
 
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
@@ -19,7 +19,7 @@ public class CloudbreakAuthorizationService {
     @Cacheable(cacheNames = "stackAccessByUserIdAndTenantCache")
     public void hasAccess(String stackCrn, String userId, String tenant, String permission) {
         if (!cloudbreakClient.withInternalCrn().autoscaleEndpoint().authorizeForAutoscale(stackCrn, userId, tenant, permission).isSuccess()) {
-            throw new AccessDeniedException(String.format("Accessing to stack '%s' is not allowed for '%s' in '%s'", stackCrn, userId, tenant));
+            throw new ForbiddenException(String.format("Accessing to stack '%s' is not allowed for '%s' in '%s'", stackCrn, userId, tenant));
         }
     }
 }

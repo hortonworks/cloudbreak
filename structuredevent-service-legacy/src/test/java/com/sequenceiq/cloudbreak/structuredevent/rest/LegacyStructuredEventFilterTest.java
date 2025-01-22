@@ -62,7 +62,6 @@ class LegacyStructuredEventFilterTest {
         underTest.aroundWriteTo(context);
 
         verify(cloudbreakRestRequestThreadLocalService, times(1)).getCloudbreakUser();
-        verify(authenticatedUserService, times(1)).getServiceAccountId();
         verify(cloudbreakRestRequestThreadLocalService, times(1)).getRequestedWorkspaceId();
     }
 

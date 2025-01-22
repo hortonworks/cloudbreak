@@ -128,7 +128,7 @@ class ExternalizedComputeClusterServiceTest {
 
         CrnUser crnUser = mock(CrnUser.class);
         when(crnUser.getUsername()).thenReturn("perdos@cloudera.com");
-        when(crnUserDetailsService.loadUserByUsername(USER_CRN)).thenReturn(crnUser);
+        when(crnUserDetailsService.getUmsUser(USER_CRN)).thenReturn(crnUser);
 
         ExternalizedComputeCluster savedCluster = new ExternalizedComputeCluster();
         when(externalizedComputeClusterRepository.save(any())).thenReturn(savedCluster);

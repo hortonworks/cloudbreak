@@ -26,6 +26,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 
+import jakarta.ws.rs.ForbiddenException;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,7 +36,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
-import org.springframework.security.access.AccessDeniedException;
 
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
@@ -209,10 +210,10 @@ public class DatabaseServerConfigServiceTest {
     @Test
     public void testCreateFailure() {
         server.setConnectionDriver("org.postgresql.MyCustomDriver");
-        AccessDeniedException e = new AccessDeniedException("no way");
+        ForbiddenException e = new ForbiddenException("no way");
         when(repository.save(server)).thenThrow(e);
 
-        assertThrows(AccessDeniedException.class, () -> underTest.create(server, 0L));
+        assertThrows(ForbiddenException.class, () -> underTest.create(server, 0L));
     }
 
     @Test

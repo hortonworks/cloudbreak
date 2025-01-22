@@ -1,12 +1,11 @@
 package com.sequenceiq.periscope.controller.mapper;
 
+import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.ext.Provider;
 
-import org.springframework.security.access.AccessDeniedException;
-
 @Provider
-public class SpringAccessDeniedExceptionMapper extends BaseExceptionMapper<AccessDeniedException> {
+public class SpringAccessDeniedExceptionMapper extends BaseExceptionMapper<ForbiddenException> {
 
     @Override
     Status getResponseStatus() {

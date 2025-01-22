@@ -39,8 +39,6 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.filter.GenericFilterBean;
 
 import com.sequenceiq.cloudbreak.client.ConfigKey;
@@ -171,11 +169,6 @@ public class AppConfig implements ResourceLoaderAware {
     @Bean
     public ExitCriteria clusterDeletionBasedExitCriteria() {
         return new ClusterDeletionBasedExitCriteria();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 
     @Bean

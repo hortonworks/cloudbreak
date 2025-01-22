@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import jakarta.inject.Inject;
+import jakarta.ws.rs.ForbiddenException;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -16,7 +17,6 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Joiner;
@@ -59,7 +59,7 @@ public class ResourceNameListAuthorizationFactory extends TypedAuthorizationFact
         if (authorizationResourceCrnListProvider == null) {
             LOGGER.error("There is no resource based crn provider implemented for action {} against resources {}, " +
                     "thus authorization is failing automatically.", action, Joiner.on(",").join(resourceNames));
-            throw new AccessDeniedException(String.format("Action %s is not supported over resources %s, thus access is denied",
+            throw new ForbiddenException(String.format("Action %s is not supported over resources %s, thus access is denied",
                     action.getRight(), Joiner.on(",").join(resourceNames)));
         }
         List<String> resourceCrns = authorizationResourceCrnListProvider

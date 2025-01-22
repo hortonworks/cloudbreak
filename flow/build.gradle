@@ -39,8 +39,6 @@ dependencies {
   implementation group: 'net.jcip',                              name: 'jcip-annotations',               version: '1.0'
 
   testImplementation group: 'org.mockito',                       name: 'mockito-core',                   version: mockitoVersion
-  testImplementation group: 'org.springframework.security',      name: 'spring-security-core',           version: springSecurityVersion
-  testImplementation group: 'org.springframework.security',      name: 'spring-security-web',            version: springSecurityVersion
   testImplementation group: 'org.springframework.boot',          name: 'spring-boot-starter-test',       version: springBootVersion
   testImplementation group: 'org.awaitility',                    name: 'awaitility',                     version: awaitilityVersion
   testImplementation group: 'com.h2database',                    name: 'h2',                             version: h2databaseVersion

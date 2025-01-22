@@ -5,10 +5,10 @@ import java.util.Optional;
 import java.util.Set;
 
 import jakarta.inject.Inject;
+import jakarta.ws.rs.ForbiddenException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -116,7 +116,7 @@ public class UserProfileService {
             LOGGER.warn(String.format("Exception has thrown during saving the userProfile for %s user to the DB." +
                     " It might be saved earlier, trying to get it from the DB.", userName), ex);
             return userProfileRepository.findOneByUser(userProfile.getUser().getId()).orElseThrow(
-                    () -> new AccessDeniedException(String.format("UserProfile cannot be created for %s user", userName), ex));
+                    () -> new ForbiddenException(String.format("UserProfile cannot be created for %s user", userName), ex));
         }
     }
 

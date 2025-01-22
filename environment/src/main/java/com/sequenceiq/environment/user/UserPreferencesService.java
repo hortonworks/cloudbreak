@@ -3,11 +3,12 @@ package com.sequenceiq.environment.user;
 import java.util.Optional;
 import java.util.UUID;
 
+import jakarta.ws.rs.ForbiddenException;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -73,7 +74,7 @@ public class UserPreferencesService {
         userPreferences = new UserPreferences(generateExternalId(), generateExternalId(), userCrn);
         try {
             userPreferences = userPreferencesRepository.save(userPreferences);
-        } catch (AccessDeniedException | DataIntegrityViolationException e) {
+        } catch (ForbiddenException | DataIntegrityViolationException e) {
             LOGGER.debug("User exists with crn: '{}'", userCrn, e);
             userPreferencesOptional = userPreferencesRepository.findByUserCrn(userCrn);
             userPreferences = userPreferencesOptional.orElseThrow(() -> new NotFoundException("User does not exists with crn. If you see this error, " +

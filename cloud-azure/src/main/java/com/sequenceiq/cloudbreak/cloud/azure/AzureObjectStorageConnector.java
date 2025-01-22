@@ -3,10 +3,10 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 import java.util.Optional;
 
 import jakarta.inject.Inject;
+import jakarta.ws.rs.ForbiddenException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.azure.core.management.exception.ManagementException;
@@ -111,7 +111,7 @@ public class AzureObjectStorageConnector implements ObjectStorageConnector {
         } catch (ManagementException e) {
             if (azureExceptionHandler.isForbidden(e)) {
                 LOGGER.error("Object storage validation failed on Azure due to authorization failure: {}", e.getMessage());
-                throw new AccessDeniedException("Object storage validation failed on Azure due to authorization failure: ", e);
+                throw new ForbiddenException("Object storage validation failed on Azure due to authorization failure: ", e);
             }
             throw azureUtils.convertToCloudConnectorException(e, "Object storage validation");
         }

@@ -1,19 +1,14 @@
 package com.sequenceiq.cloudbreak.auth.security;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
@@ -34,33 +29,10 @@ public class CrnUserDetailsServiceTest {
     }
 
     @Test
-    public void loadUserByInternalCrn() {
-        UserDetails userDetails = underTest.loadUserByUsername("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
-        assertTrue(userDetails.getAuthorities().iterator().next().getAuthority().equals("ROLE_INTERNAL"));
-    }
-
-    @Test
-    public void loadUserByInternalCrnWithAutoscale() {
-        UserDetails userDetails = underTest.loadUserByUsername("crn:cdp:autoscale:us-west-1:altus:user:__internal__actor__");
-        assertTrue(userDetails.getAuthorities().iterator().next().getAuthority().equals("ROLE_AUTOSCALE"));
-    }
-
-    @Test
-    public void loadUserByCrn() {
-        User user = User.newBuilder().setCrn("userCrn").setEmail("dummyuser@cloudera.com").setUserId("1").build();
-        when(mockedUmsClient.getUserDetails(eq(userCrn))).thenReturn(user);
-        UserDetails userDetails = underTest.loadUserByUsername(userCrn);
-        assertTrue(userDetails.getAuthorities().iterator().next().getAuthority().equals("CRN_USER"));
-    }
-
-    @Test
     public void loadUserByCrnWhenLoadingUMSUserFailed() {
         User user = User.newBuilder().setCrn("userCrn").setEmail("dummyuser@cloudera.com").setUserId("1").build();
         when(mockedUmsClient.getUserDetails(eq(userCrn))).thenThrow(new RuntimeException("error"));
-        UsernameNotFoundException usernameNotFoundException = Assertions.assertThrows(UsernameNotFoundException.class,
-                () -> underTest.loadUserByUsername(userCrn));
-        assertEquals("Loading UMS user failed", usernameNotFoundException.getMessage());
-        assertThat(usernameNotFoundException.getCause()).isInstanceOf(RuntimeException.class);
+        assertThrows(RuntimeException.class, () -> underTest.getUmsUser(userCrn));
     }
 
 }

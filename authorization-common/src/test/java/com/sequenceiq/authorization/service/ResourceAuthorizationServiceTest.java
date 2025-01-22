@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.ws.rs.ForbiddenException;
+
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +28,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.access.AccessDeniedException;
 
 import com.cloudera.thunderhead.service.authorization.AuthorizationProto.RightCheck;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
@@ -90,7 +91,7 @@ public class ResourceAuthorizationServiceTest {
                 .thenReturn(Optional.of(new HasRight(AuthorizationResourceAction.EDIT_ENVIRONMENT, "crn")));
         when(grpcUmsClient.hasRights(anyString(), anyList())).thenReturn(List.of(false));
 
-        AccessDeniedException accessDeniedException = assertThrows(AccessDeniedException.class, () -> {
+        ForbiddenException accessDeniedException = assertThrows(ForbiddenException.class, () -> {
             ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.authorize(USER_CRN, proceedingJoinPoint, methodSignature));
         });
 
@@ -118,7 +119,7 @@ public class ResourceAuthorizationServiceTest {
                 .thenReturn(Optional.of(new HasRight(AuthorizationResourceAction.DESCRIBE_CREDENTIAL, "crn2")));
         when(grpcUmsClient.hasRights(anyString(), anyList())).thenReturn(List.of(false, false));
 
-        AccessDeniedException accessDeniedException = assertThrows(AccessDeniedException.class, () -> {
+        ForbiddenException accessDeniedException = assertThrows(ForbiddenException.class, () -> {
             ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.authorize(USER_CRN, proceedingJoinPoint, methodSignature));
         });
 

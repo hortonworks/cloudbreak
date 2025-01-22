@@ -9,6 +9,8 @@ import static org.mockito.Mockito.lenient;
 
 import java.util.Map;
 
+import jakarta.ws.rs.ForbiddenException;
+
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +20,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.access.AccessDeniedException;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
@@ -68,9 +69,9 @@ public class CommonPermissionCheckingUtilsBulkTest {
     @ParameterizedTest(name = "AuthorizationResources: [{0}]")
     @EnumSource(AuthorizationResourceAction.class)
     public void testCheckPermissionWhenHasNoPermissionThenAccessDeniedExceptionComes(AuthorizationResourceAction action) {
-        doThrow(AccessDeniedException.class).when(umsAccountAuthorizationService).checkRightOfUser(any(), any());
+        doThrow(ForbiddenException.class).when(umsAccountAuthorizationService).checkRightOfUser(any(), any());
 
-        assertThrows(AccessDeniedException.class, () -> {
+        assertThrows(ForbiddenException.class, () -> {
             underTest.checkPermissionForUser(action, USER_CRN);
         });
 
@@ -87,9 +88,9 @@ public class CommonPermissionCheckingUtilsBulkTest {
     @ParameterizedTest(name = "AuthorizationResources: [{0}]")
     @EnumSource(AuthorizationResourceAction.class)
     public void testCheckPermissionOnResourceWhenHasNoPermissionThenAccessDeniedExceptionComes(AuthorizationResourceAction action) {
-        doThrow(AccessDeniedException.class).when(umsResourceAuthorizationService).checkRightOfUserOnResource(any(), any(), anyString());
+        doThrow(ForbiddenException.class).when(umsResourceAuthorizationService).checkRightOfUserOnResource(any(), any(), anyString());
 
-        assertThrows(AccessDeniedException.class, () -> {
+        assertThrows(ForbiddenException.class, () -> {
             underTest.checkPermissionForUserOnResource(action, USER_CRN, RESOURCE_CRN);
         });
 
@@ -107,9 +108,9 @@ public class CommonPermissionCheckingUtilsBulkTest {
     @ParameterizedTest(name = "AuthorizationResources: [{0}]")
     @EnumSource(AuthorizationResourceAction.class)
     public void testCheckPermissionOnResourcesWhenHasNoPermissionThenAccessDeniedExceptionComes(AuthorizationResourceAction action) {
-        doThrow(AccessDeniedException.class).when(umsResourceAuthorizationService).checkRightOfUserOnResources(any(), any(), any());
+        doThrow(ForbiddenException.class).when(umsResourceAuthorizationService).checkRightOfUserOnResources(any(), any(), any());
 
-        assertThrows(AccessDeniedException.class, () -> {
+        assertThrows(ForbiddenException.class, () -> {
             underTest.checkPermissionForUserOnResources(action, USER_CRN, Lists.newArrayList(RESOURCE_CRN, RESOURCE_CRN, OTHER_RESOURCE_CRN));
         });
     }

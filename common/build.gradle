@@ -73,8 +73,6 @@ dependencies {
   api group: 'org.springframework.boot',                    name: 'spring-boot-starter-actuator',   version: springBootVersion
   api group: 'com.zaxxer',                                  name: 'HikariCP',                       version: hikariCPVersion
   implementation group: 'com.fasterxml.jackson.core',       name: 'jackson-databind',               version: { strictly jacksonVersion }
-  api group: 'org.springframework.security',                name: 'spring-security-core',           version: springSecurityVersion
-  api group: 'org.springframework.security',                name: 'spring-security-config',         version: springSecurityVersion
   api group: 'com.cloudera.crypto',                         name: 'openssl-provider',               version: clouderaCryptoOpenSslProviderVersion
   implementation     group: 'org.aspectj',                  name: 'aspectjtools',                   version: aspectjVersion
   implementation     group: 'org.aspectj',                  name: 'aspectjweaver',                  version: aspectjVersion

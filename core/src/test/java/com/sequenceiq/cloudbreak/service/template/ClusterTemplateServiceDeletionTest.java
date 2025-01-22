@@ -5,13 +5,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
+import jakarta.ws.rs.ForbiddenException;
+
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.access.AccessDeniedException;
 
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.FeatureState;
@@ -157,7 +158,7 @@ public class ClusterTemplateServiceDeletionTest {
         resource.setStatus(resourceStatus);
         resource.setName(TEMPLATE_NAME);
 
-        AccessDeniedException accessDeniedException = assertThrows(AccessDeniedException.class, () -> underTest.prepareDeletion(resource));
+        ForbiddenException accessDeniedException = assertThrows(ForbiddenException.class, () -> underTest.prepareDeletion(resource));
 
         assertThat(accessDeniedException.getMessage()).isEqualTo(format("Default cluster definition deletion is forbidden: '%s'", TEMPLATE_NAME));
     }

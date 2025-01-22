@@ -222,7 +222,7 @@ public class StackImageFilterServiceTest {
 
     private CloudbreakUser setupLoggedInUser() {
         CloudbreakUser user = new CloudbreakUser("", "", "", "", "");
-        when(authenticatedUserService.getCbUser()).thenReturn(user);
+        when(authenticatedUserService.getCbUser(any())).thenReturn(user);
         return user;
     }
 }

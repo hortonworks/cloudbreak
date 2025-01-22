@@ -7,8 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.util.Collection;
 import java.util.List;
 
+import jakarta.ws.rs.ForbiddenException;
+
 import org.junit.jupiter.api.Test;
-import org.springframework.security.access.AccessDeniedException;
 
 import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 
@@ -30,7 +31,7 @@ public class CrnAccountValidatorTest {
 
     @Test
     public void throwsAccessDeniedIfAccountsNotMatch() {
-        assertThrowsException(userCrn(ACCOUNT_1), List.of(environmentCrn(ACCOUNT_1), environmentCrn(ACCOUNT_2)), AccessDeniedException.class,
+        assertThrowsException(userCrn(ACCOUNT_1), List.of(environmentCrn(ACCOUNT_1), environmentCrn(ACCOUNT_2)), ForbiddenException.class,
                 "Can't access resource from different account.");
     }
 

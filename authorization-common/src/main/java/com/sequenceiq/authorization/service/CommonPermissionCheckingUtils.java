@@ -12,13 +12,13 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
+import jakarta.ws.rs.ForbiddenException;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
@@ -111,7 +111,7 @@ public class CommonPermissionCheckingUtils {
         } catch (Error | RuntimeException unchecked) {
             throw unchecked;
         } catch (Throwable t) {
-            throw new AccessDeniedException(t.getMessage(), t);
+            throw new ForbiddenException(t.getMessage(), t);
         }
     }
 
@@ -143,7 +143,7 @@ public class CommonPermissionCheckingUtils {
             String right = umsRightProvider.getRight(action);
             String unauthorizedMessage = authorizationMessageUtilsService.formatTemplate(right, resourceCrns);
             LOGGER.error(unauthorizedMessage);
-            throw new AccessDeniedException(unauthorizedMessage);
+            throw new ForbiddenException(unauthorizedMessage);
         }
     }
 

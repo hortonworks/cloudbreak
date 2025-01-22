@@ -9,6 +9,7 @@ import java.lang.reflect.Method;
 import java.sql.SQLException;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.ForbiddenException;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
@@ -17,7 +18,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.access.AccessDeniedException;
 
 @ExtendWith(MockitoExtension.class)
 public class ReflectionUtilTest {
@@ -71,7 +71,7 @@ public class ReflectionUtilTest {
     public void testProceedNotRuntimeExceptionOccured() {
         try {
             when(proceedingJoinPoint.proceed()).thenThrow(new SQLException("wrong"));
-            assertThrows(AccessDeniedException.class, () -> underTest.proceed(proceedingJoinPoint));
+            assertThrows(ForbiddenException.class, () -> underTest.proceed(proceedingJoinPoint));
         } catch (Throwable throwable) {
 
         }

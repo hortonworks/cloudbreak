@@ -14,12 +14,12 @@ import java.util.Set;
 import java.util.function.Function;
 
 import jakarta.inject.Inject;
+import jakarta.ws.rs.ForbiddenException;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.authorization.AuthorizationProto.RightCheck;
@@ -55,7 +55,7 @@ public class ResourceAuthorizationService {
             authorization.evaluateAndGetFailed(iterator).ifPresentOrElse(failedAuthorization -> {
                 LOGGER.debug("Resource authorization failed: {}", failedAuthorization.toString(rightMapper));
                 Map<String, Optional<String>> crnNameMap = resourceNameFactoryService.getNames(collectResourceCrns(failedAuthorization));
-                throw new AccessDeniedException(failedAuthorization.getAsFailureMessage(rightMapper, getNameOrDefault(crnNameMap)));
+                throw new ForbiddenException(failedAuthorization.getAsFailureMessage(rightMapper, getNameOrDefault(crnNameMap)));
             }, () -> LOGGER.trace("Resource authorization was successful."));
         });
     }

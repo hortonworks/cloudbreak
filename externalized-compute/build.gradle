@@ -38,7 +38,6 @@ dependencies {
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: springBootVersion
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-jersey', version: springBootVersion
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: springBootVersion
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: springBootVersion
     implementation group: 'org.glassfish.jersey.media', name: 'jersey-media-multipart', version: jerseyCoreVersion
     implementation group: 'org.glassfish.jersey.ext', name: 'jersey-micrometer', version: jerseyMicrometerVersion
     implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttpVersion

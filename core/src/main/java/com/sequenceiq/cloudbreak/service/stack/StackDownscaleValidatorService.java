@@ -4,8 +4,9 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMeta
 
 import java.util.Objects;
 
+import jakarta.ws.rs.ForbiddenException;
+
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -30,7 +31,7 @@ public class StackDownscaleValidatorService {
 
     public void checkUserHasRightToTerminateInstance(String owner, String userId, Long stackId) {
         if (!Objects.equals(owner, userId)) {
-            throw new AccessDeniedException(String.format("Private stack (%s) is only modifiable by the owner.", stackId));
+            throw new ForbiddenException(String.format("Private stack (%s) is only modifiable by the owner.", stackId));
         }
     }
 

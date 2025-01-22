@@ -6,12 +6,12 @@ import java.lang.annotation.Annotation;
 import java.util.Optional;
 
 import jakarta.inject.Inject;
+import jakarta.ws.rs.ForbiddenException;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
@@ -83,7 +83,7 @@ public class PermissionCheckService {
                     .equals(Crn.safeFromString(userCrn).getAccountId()) && accountIdNeeded(methodSignature)) {
                 LOGGER.error("Method {} is not prepared to call internally, please check readme in authorization module.",
                         methodSignature.getMethod().getDeclaringClass().getSimpleName() + '#' + methodSignature.getMethod().getName());
-                throw new AccessDeniedException("This API is not prepared to use it in service-to-service communication.");
+                throw new ForbiddenException("This API is not prepared to use it in service-to-service communication.");
             }
             return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
         }
@@ -97,7 +97,7 @@ public class PermissionCheckService {
         Optional<Object> initiatorUserCrn = reflectionUtil.getParameter(proceedingJoinPoint, methodSignature, InitiatorUserCrn.class);
         if (initiatorUserCrn.isPresent() && initiatorUserCrn.get() instanceof String && Crn.isCrn((String) initiatorUserCrn.get())) {
             String newUserCrn = (String) initiatorUserCrn.get();
-            internalUserModifier.persistModifiedInternalUser(crnUserDetailsService.loadUserByUsername(newUserCrn));
+            internalUserModifier.persistModifiedInternalUser(crnUserDetailsService.getUmsUser(newUserCrn));
             return Optional.of(newUserCrn);
         }
         return Optional.empty();
@@ -105,14 +105,14 @@ public class PermissionCheckService {
 
     private void validateNotInternalOnly(ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature) {
         if (hasAnnotationOnClass(proceedingJoinPoint, InternalOnly.class) || hasAnnotationOnMethod(methodSignature, InternalOnly.class)) {
-            throw getAccessDeniedAndLogInternalActorRestriction(methodSignature);
+            throw getForbiddenAndLogInternalActorRestriction(methodSignature);
         }
     }
 
-    private AccessDeniedException getAccessDeniedAndLogInternalActorRestriction(MethodSignature methodSignature) {
+    private ForbiddenException getForbiddenAndLogInternalActorRestriction(MethodSignature methodSignature) {
         LOGGER.error("Method {} should be called by internal actor only.",
                 methodSignature.getMethod().getDeclaringClass().getSimpleName() + '#' + methodSignature.getMethod().getName());
-        return new AccessDeniedException("This API is not publicly available and therefore not usable by end users. " +
+        return new ForbiddenException("This API is not publicly available and therefore not usable by end users. " +
                 "Please refer to our documentation about public APIs used by our UI and CLI.");
     }
 

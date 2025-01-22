@@ -4,13 +4,13 @@ import java.util.Map;
 import java.util.Optional;
 
 import jakarta.inject.Inject;
+import jakarta.ws.rs.ForbiddenException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
@@ -48,7 +48,7 @@ public class ResourceNameAuthorizationFactory extends TypedAuthorizationFactory<
         if (resourceCrnProvider == null) {
             LOGGER.error("There is no resource based crn provider implemented for action {} against resource {}, " +
                     "thus authorization is failing automatically.", action, resourceName);
-            throw new AccessDeniedException(String.format("Action %s is not supported over resource %s, thus access is denied",
+            throw new ForbiddenException(String.format("Action %s is not supported over resource %s, thus access is denied",
                     action.getRight(), resourceName));
         }
         String resourceCrn = resourceCrnProvider.getResourceCrnByResourceName(resourceName);

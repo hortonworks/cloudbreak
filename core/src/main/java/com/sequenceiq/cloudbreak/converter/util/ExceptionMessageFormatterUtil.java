@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.util;
 
-import org.springframework.security.access.AccessDeniedException;
+import jakarta.ws.rs.ForbiddenException;
 
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -13,8 +13,8 @@ public class ExceptionMessageFormatterUtil {
     public static void formatAccessDeniedMessage(Runnable r, String resourceName, Long id) {
         try {
             r.run();
-        } catch (AccessDeniedException e) {
-            throw new AccessDeniedException(
+        } catch (ForbiddenException e) {
+            throw new ForbiddenException(
                     String.format("Access to %s '%s' is denied or %s doesn't exist.", resourceName, id, resourceName), e);
         }
     }
@@ -22,8 +22,8 @@ public class ExceptionMessageFormatterUtil {
     public static void formatAccessDeniedMessage(Runnable r, String resourceType, String resourceName) {
         try {
             r.run();
-        } catch (AccessDeniedException e) {
-            throw new AccessDeniedException(
+        } catch (ForbiddenException e) {
+            throw new ForbiddenException(
                     String.format("Access to %s '%s' is denied or %s doesn't exist.", resourceType, resourceName, resourceType), e);
         }
     }

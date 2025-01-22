@@ -92,6 +92,6 @@ public class EnvironmentTagProvider {
     }
 
     private String getUserNameFromCrn(String crn) {
-        return crnUserDetailsService.loadUserByUsername(crn).getUsername();
+        return crnUserDetailsService.getUmsUser(crn).getUsername();
     }
 }

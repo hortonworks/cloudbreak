@@ -4,9 +4,10 @@ import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.Optional;
 
+import jakarta.ws.rs.ForbiddenException;
+
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
@@ -31,7 +32,7 @@ public class ReflectionUtil {
         } catch (Error | RuntimeException unchecked) {
             throw unchecked;
         } catch (Throwable t) {
-            throw new AccessDeniedException(t.getMessage(), t);
+            throw new ForbiddenException(t.getMessage(), t);
         }
     }
 }

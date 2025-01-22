@@ -21,11 +21,11 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import jakarta.inject.Inject;
+import jakarta.ws.rs.ForbiddenException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.OptimisticLockingFailureException;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -156,7 +156,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     @Override
     protected void prepareDeletion(ClusterTemplate resource) {
         if (resource.getStatus() == ResourceStatus.DEFAULT || resource.getStatus() == ResourceStatus.DEFAULT_DELETED) {
-            throw new AccessDeniedException(format("Default cluster definition deletion is forbidden: '%s'", resource.getName()));
+            throw new ForbiddenException(format("Default cluster definition deletion is forbidden: '%s'", resource.getName()));
         }
         String accountId = resource.getWorkspace().getTenant().getName();
         if (internalClusterTemplateValidator.isInternalTemplateInNotInternalTenant(entitlementService.internalTenant(accountId), resource.getFeatureState())) {
@@ -170,7 +170,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
 
     public ClusterTemplate createForLoggedInUser(ClusterTemplate resource, Long workspaceId, String accountId, String creator) {
         if (internalClusterTemplateValidator.isInternalTemplateInNotInternalTenant(entitlementService.internalTenant(accountId), resource.getFeatureState())) {
-            throw new AccessDeniedException("You can not create Internal Template for an outsider organization");
+            throw new ForbiddenException("You can not create Internal Template for an outsider organization");
         }
         resource.setResourceCrn(createCRN(accountId));
         ownerAssignmentService.assignResourceOwnerRoleIfEntitled(creator, resource.getResourceCrn());

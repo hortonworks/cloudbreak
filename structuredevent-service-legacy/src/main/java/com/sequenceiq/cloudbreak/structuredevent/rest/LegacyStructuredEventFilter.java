@@ -194,10 +194,6 @@ public class LegacyStructuredEventFilter implements WriterInterceptor, Container
         restCall.setRestResponse(restResponse);
         restCall.setDuration(System.currentTimeMillis() - requestTime);
         CloudbreakUser cloudbreakUser = cloudbreakRestRequestThreadLocalService.getCloudbreakUser();
-        if (cloudbreakUser == null) {
-            String serviceId = authenticatedUserService.getServiceAccountId();
-            cloudbreakUser = new CloudbreakUser(serviceId, serviceId, serviceId, serviceId, serviceId);
-        }
         Long workspaceId = cloudbreakRestRequestThreadLocalService.getRequestedWorkspaceId();
         legacyStructuredEventClient.sendStructuredEvent(new StructuredRestCallEvent(createOperationDetails(restParams, requestTime, workspaceId, cloudbreakUser),
                 restCall));

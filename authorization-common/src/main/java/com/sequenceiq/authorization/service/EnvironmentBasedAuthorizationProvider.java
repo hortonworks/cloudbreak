@@ -11,11 +11,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
+import jakarta.ws.rs.ForbiddenException;
 
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Joiner;
@@ -47,7 +47,7 @@ public class EnvironmentBasedAuthorizationProvider {
             if (environmentCrnProvider == null) {
                 LOGGER.error("There is no resource based crn provider implemented for action {} against resource type {}, " +
                         "thus authorization is failing automatically.", action, Crn.safeFromString(resourceCrn).getResourceType().name());
-                throw new AccessDeniedException(String.format("Action %s is not supported over resource %s, thus access is denied",
+                throw new ForbiddenException(String.format("Action %s is not supported over resource %s, thus access is denied",
                         action.getRight(), resourceCrn));
             }
             Optional<String> environmentCrnByResourceCrn = environmentCrnProvider.getEnvironmentCrnByResourceCrn(resourceCrn);
@@ -68,7 +68,7 @@ public class EnvironmentBasedAuthorizationProvider {
                 LOGGER.error("There is no resource based crn provider implemented for action {} against resource types {}, " +
                         "thus authorization is failing automatically.", action, Joiner.on(",").join(
                         resourceCrns.stream().map(crn -> Crn.safeFromString(crn).getResourceType().name()).collect(Collectors.toSet())));
-                throw new AccessDeniedException(String.format("Action %s is not supported over resources %s, thus access is denied",
+                throw new ForbiddenException(String.format("Action %s is not supported over resources %s, thus access is denied",
                         action.getRight(), Joiner.on(",").join(resourceCrns)));
             }
             Map<String, String> withEnvironmentCrn = environmentCrnListProvider.getEnvironmentCrnsByResourceCrns(resourceCrns)

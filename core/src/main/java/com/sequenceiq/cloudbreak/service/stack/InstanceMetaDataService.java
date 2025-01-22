@@ -15,13 +15,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
+import jakarta.ws.rs.ForbiddenException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
@@ -345,7 +345,7 @@ public class InstanceMetaDataService {
         try {
             Optional<InstanceMetadataViewDelegate> primaryGatewayInstanceMetadata = repository.getPrimaryGatewayInstanceMetadata(stackId);
             return Optional.ofNullable(primaryGatewayInstanceMetadata.orElse(null));
-        } catch (AccessDeniedException ignore) {
+        } catch (ForbiddenException ignore) {
             LOGGER.debug("No primary gateway for stack [{}]", stackId);
             return Optional.empty();
         }
@@ -360,7 +360,7 @@ public class InstanceMetaDataService {
         try {
             List<InstanceMetaData> result = repository.getTerminatedInstanceMetadataWithInstanceIdByFQDNOrdered(stackId, hostName, PageRequest.of(0, 1));
             return result.isEmpty() ? Optional.empty() : Optional.of(result.get(0));
-        } catch (AccessDeniedException ignore) {
+        } catch (ForbiddenException ignore) {
             LOGGER.debug("Cannot fetch last terminated instance metadata for stack [{}] and hostname [{}]", stackId, hostName);
             return Optional.empty();
         }
@@ -370,7 +370,7 @@ public class InstanceMetaDataService {
         try {
             List<InstanceMetaData> result = repository.geTerminatedPrimaryGatewayInstanceMetadataOrdered(stackId, PageRequest.of(0, 1));
             return result.isEmpty() ? Optional.empty() : Optional.of(result.get(0));
-        } catch (AccessDeniedException ignore) {
+        } catch (ForbiddenException ignore) {
             LOGGER.debug("Cannot fetch the terminated primary gateways for stack [{}]", stackId);
             return Optional.empty();
         }

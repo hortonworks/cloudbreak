@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.auth.security.authentication;
 
-import org.springframework.security.core.Authentication;
-
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 
 public class DisabledAuthenticationService implements AuthenticationService {
@@ -13,12 +11,7 @@ public class DisabledAuthenticationService implements AuthenticationService {
     }
 
     @Override
-    public CloudbreakUser getCloudbreakUser(Authentication auth) {
-        return disabledAuthCbUserProvider.getCloudbreakUser();
-    }
-
-    @Override
-    public CloudbreakUser getCloudbreakUser(String userCrn, String principal) {
+    public CloudbreakUser getCloudbreakUser(String userCrn) {
         return disabledAuthCbUserProvider.getCloudbreakUser();
     }
 }

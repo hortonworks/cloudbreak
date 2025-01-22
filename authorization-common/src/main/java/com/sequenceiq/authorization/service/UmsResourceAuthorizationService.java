@@ -5,10 +5,10 @@ import java.util.List;
 import java.util.Map;
 
 import jakarta.inject.Inject;
+import jakarta.ws.rs.ForbiddenException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
@@ -47,14 +47,14 @@ public class UmsResourceAuthorizationService {
     private void checkRightOfUserOnResource(String userCrn, String right, String resourceCrn, String unauthorizedMessage) {
         if (!umsClient.checkResourceRight(userCrn, right, resourceCrn)) {
             LOGGER.error(unauthorizedMessage);
-            throw new AccessDeniedException(unauthorizedMessage);
+            throw new ForbiddenException(unauthorizedMessage);
         }
     }
 
     private void checkRightOfUserOnResources(String userCrn, String right, Collection<String> resourceCrns, String unauthorizedMessage) {
         if (!umsClient.hasRights(userCrn, Lists.newArrayList(resourceCrns), right).values().stream().allMatch(Boolean::booleanValue)) {
             LOGGER.error(unauthorizedMessage);
-            throw new AccessDeniedException(unauthorizedMessage);
+            throw new ForbiddenException(unauthorizedMessage);
         }
     }
 }

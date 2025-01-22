@@ -114,7 +114,6 @@ dependencyManagement {
       entry 'spring-boot-starter-websocket'
       entry 'spring-boot-starter-aop'
       entry 'spring-boot-starter-freemarker'
-      entry 'spring-boot-starter-security'
       entry ('spring-boot-starter-jersey') {
           exclude group: 'com.fasterxml.jackson.core', name: 'jackson-databind'
       }
@@ -163,7 +162,6 @@ dependencies {
   implementation group: 'org.springframework.boot',           name: 'spring-boot-starter-websocket'
   implementation group: 'org.springframework.boot',           name: 'spring-boot-starter-aop'
   implementation group: 'org.springframework.boot',           name: 'spring-boot-starter-freemarker'
-  implementation group: 'org.springframework.boot',           name: 'spring-boot-starter-security'
   implementation group: 'org.springframework.boot',           name: 'spring-boot-starter-jersey'
   implementation group: 'org.springframework.boot',           name: 'spring-boot-starter-quartz'
 

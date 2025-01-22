@@ -1,10 +1,10 @@
 package com.sequenceiq.authorization.service;
 
 import jakarta.inject.Inject;
+import jakarta.ws.rs.ForbiddenException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
@@ -31,7 +31,7 @@ public class UmsAccountAuthorizationService {
     private void checkRightOfUser(String userCrn, String right, String unauthorizedMessage) {
         if (!umsClient.checkAccountRight(userCrn, right)) {
             LOGGER.error(unauthorizedMessage);
-            throw new AccessDeniedException(unauthorizedMessage);
+            throw new ForbiddenException(unauthorizedMessage);
         }
     }
 
@@ -45,7 +45,7 @@ public class UmsAccountAuthorizationService {
         if (!actorCrn.getAccountId().equals(targetUserCrn.getAccountId())) {
             String unauthorizedMessage = "Unauthorized to run this operation in a different account";
             LOGGER.error(unauthorizedMessage);
-            throw new AccessDeniedException(unauthorizedMessage);
+            throw new ForbiddenException(unauthorizedMessage);
         }
         checkRightOfUser(actorCrnStr, action);
     }

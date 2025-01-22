@@ -20,6 +20,8 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import jakarta.ws.rs.ForbiddenException;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,7 +29,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.access.AccessDeniedException;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
@@ -88,11 +89,11 @@ public class DefaultResourceAuthorizationProviderTest {
     @Test
     public void testDefaultNotAllowed() {
         when(defaultResourceChecker.isDefault(eq(RESOURCE_CRN_1))).thenReturn(true);
-        doThrow(new AccessDeniedException("Bad")).when(commonPermissionCheckingUtils)
+        doThrow(new ForbiddenException("Bad")).when(commonPermissionCheckingUtils)
                 .throwAccessDeniedIfActionNotAllowed(any(), anyCollection(), eq(defaultResourceChecker));
 
-        AccessDeniedException accessDeniedException =
-                assertThrows(AccessDeniedException.class, () -> underTest.authorizeDefaultOrElseCompute(RESOURCE_CRN_1, ACTION, externalSupplier));
+        ForbiddenException accessDeniedException =
+                assertThrows(ForbiddenException.class, () -> underTest.authorizeDefaultOrElseCompute(RESOURCE_CRN_1, ACTION, externalSupplier));
 
         verifyNoInteractions(externalSupplier);
         assertEquals("Bad", accessDeniedException.getMessage());
@@ -149,11 +150,11 @@ public class DefaultResourceAuthorizationProviderTest {
                         .defaultResourceCrns(List.of(RESOURCE_CRN_1))
                         .notDefaultResourceCrns(List.of(RESOURCE_CRN_2))
                         .build());
-        doThrow(new AccessDeniedException("Bad")).when(commonPermissionCheckingUtils)
+        doThrow(new ForbiddenException("Bad")).when(commonPermissionCheckingUtils)
                 .throwAccessDeniedIfActionNotAllowed(any(), anyCollection(), eq(defaultResourceChecker));
 
-        AccessDeniedException accessDeniedException =
-                assertThrows(AccessDeniedException.class, () -> underTest.authorizeDefaultOrElseCompute(resourceCrns, ACTION, externalFunction));
+        ForbiddenException accessDeniedException =
+                assertThrows(ForbiddenException.class, () -> underTest.authorizeDefaultOrElseCompute(resourceCrns, ACTION, externalFunction));
 
         verifyNoInteractions(externalFunction);
         assertEquals("Bad", accessDeniedException.getMessage());

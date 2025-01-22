@@ -13,12 +13,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import jakarta.ws.rs.ForbiddenException;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.access.AccessDeniedException;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -226,7 +227,7 @@ public class UserV1ControllerTest {
         SynchronizeAllUsersRequest request = new SynchronizeAllUsersRequest();
         request.setAccountId(ACCOUNT_ID);
         String actorInDifferentAccount = "crn:cdp:iam:us-west-1:" + UUID.randomUUID() + ":user:" + UUID.randomUUID();
-        assertThrows(AccessDeniedException.class, () -> ThreadBasedUserCrnProvider.doAs(actorInDifferentAccount, () -> underTest.synchronizeAllUsers(request)));
+        assertThrows(ForbiddenException.class, () -> ThreadBasedUserCrnProvider.doAs(actorInDifferentAccount, () -> underTest.synchronizeAllUsers(request)));
     }
 
     @Test

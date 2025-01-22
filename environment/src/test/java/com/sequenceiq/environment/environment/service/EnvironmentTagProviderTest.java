@@ -108,7 +108,7 @@ class EnvironmentTagProviderTest {
         when(accountTagToAccountTagResponsesConverter.convert(any())).thenReturn(ACCOUNT_TAGS.get(0));
 
         CrnUser crnUser = new CrnUser("userId", USER_CRN, USERNAME, "email", "tenant", "role");
-        when(crnUserDetailsService.loadUserByUsername(USER_CRN)).thenReturn(crnUser);
+        when(crnUserDetailsService.getUmsUser(USER_CRN)).thenReturn(crnUser);
     }
 
     @Test

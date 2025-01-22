@@ -79,7 +79,6 @@ allprojects {
   ext['jackson.version'] = jacksonVersion
   ext['snakeyaml.version'] = snakeYamlVersion
   ext['spring-framework.version'] = springFrameworkVersion
-  ext['spring-security.version'] = springSecurityVersion
   ext['jersey.version'] = jerseyCoreVersion
   ext['logback.version'] = logbackVersion
   ext['mockito.version'] = mockitoVersion
@@ -114,7 +113,6 @@ allprojects {
         force "org.codehaus.jackson:jackson-xc:1.9.13-atlassian-2"
         force "org.testng:testng:$testNgVersion"
         force "org.springframework:spring-messaging:$springFrameworkVersion"
-        force "org.springframework.security:spring-security-web:$springSecurityVersion"
         force "org.ow2.asm:asm:9.7.1"
         force "com.google.protobuf:protobuf-java:$protobufVersion"
         force "com.google.guava:guava:$guavaVersion"

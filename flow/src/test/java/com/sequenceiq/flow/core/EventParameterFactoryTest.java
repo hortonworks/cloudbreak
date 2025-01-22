@@ -12,7 +12,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
@@ -60,7 +59,7 @@ class EventParameterFactoryTest {
     @Test
     void emptyWhenNoThreadBasedUserAndGetUserCrnByResourceIdDoesNotExistInUms() {
         userCrnByResourceId = "user2";
-        when(crnUserDetailsService.loadUserByUsername(userCrnByResourceId)).thenThrow(UsernameNotFoundException.class);
+        when(crnUserDetailsService.getUmsUser(userCrnByResourceId)).thenThrow(RuntimeException.class);
 
         Map<String, Object> result = underTest.createEventParameters(RESOURCE_ID);
 

@@ -64,13 +64,11 @@ dependencies {
       exclude group: 'org.mockito'
   }
   implementation group:  'org.springframework.boot',     name: 'spring-boot-starter',            version: springBootVersion
-  implementation group:  'org.springframework.boot',     name: 'spring-boot-starter-security',   version: springBootVersion
   implementation group:  'org.springframework.boot',     name: 'spring-boot-starter-jersey',     version: springBootVersion
   implementation group:  'org.springframework.boot',     name: 'spring-boot-starter-web',        version: springBootVersion
   implementation group:  'org.springframework.boot',     name: 'spring-boot-starter-actuator',   version: springBootVersion
   implementation group: 'org.springframework',           name: 'spring-aspects',                 version: springFrameworkVersion
   implementation group:  'org.springframework',          name: 'spring-context-support',         version: springFrameworkVersion
-  implementation group: 'org.springframework.security',  name: 'spring-security-web',            version: springSecurityVersion
   implementation group:  'com.fasterxml.jackson.core',   name: 'jackson-core',                   version: jacksonVersion
   implementation group:  'javax.annotation',             name: 'javax.annotation-api',           version: javaxAnnotationApiVersion
   implementation group:  'com.google.protobuf',          name: 'protobuf-java-util',             version: protobufVersion

@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import jakarta.ws.rs.ForbiddenException;
+
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
@@ -32,7 +34,6 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.access.AccessDeniedException;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
@@ -112,7 +113,7 @@ public class CommonPermissionCheckingUtilsTest {
 
     @Test
     //CHECKSTYLE:OFF
-    public void testProceedWhenProceedingJoinPointProceedThrowsUncheckedExceptionThenAccessDeniedExceptionComes() throws Throwable {
+    public void testProceedWhenProceedingJoinPointProceedThrowsUncheckedExceptionThenForbiddenExceptionComes() throws Throwable {
         //CHECKSTYLE:ON
         String exceptionMessage = "somethingHappened!!!";
         doThrow(new RuntimeException(exceptionMessage)).when(proceedingJoinPoint).proceed();
@@ -124,7 +125,7 @@ public class CommonPermissionCheckingUtilsTest {
 
     @Test
     //CHECKSTYLE:OFF
-    public void testProceedWhenProceedingJoinPointProceedThrowsCheckedExceptionThenAccessDeniedExceptionComes() throws Throwable {
+    public void testProceedWhenProceedingJoinPointProceedThrowsCheckedExceptionThenForbiddenExceptionComes() throws Throwable {
         //CHECKSTYLE:ON
         String exceptionMessage = "somethingHappened!!!";
         doThrow(new FileNotFoundException(exceptionMessage)).when(proceedingJoinPoint).proceed();
@@ -237,7 +238,7 @@ public class CommonPermissionCheckingUtilsTest {
 
     @Test
     public void testCheckPermissionFailForUserOnDefaultResource() {
-        AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> {
+        ForbiddenException exception = assertThrows(ForbiddenException.class, () -> {
             underTest.checkPermissionForUserOnResource(AuthorizationResourceAction.DELETE_IMAGE_CATALOG, USER_CRN, DEFAULT_RESOURCE_CRN);
         });
 
@@ -276,7 +277,7 @@ public class CommonPermissionCheckingUtilsTest {
     public void testCheckPermissionFailForUserOnMixedResources() {
         List<String> resourceCrns = List.of(DEFAULT_RESOURCE_CRN, RESOURCE_CRN);
 
-        AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> {
+        ForbiddenException exception = assertThrows(ForbiddenException.class, () -> {
             underTest.checkPermissionForUserOnResources(AuthorizationResourceAction.DELETE_IMAGE_CATALOG, USER_CRN, resourceCrns);
         });
 

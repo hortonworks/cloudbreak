@@ -19,13 +19,14 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.ws.rs.ForbiddenException;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.access.AccessDeniedException;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.RequestObject;
@@ -169,7 +170,7 @@ public class RequestPropertyAuthorizationFactoryTest {
     public void testOnNonStringRequestField() {
         when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any())).thenReturn(new SampleRequestObject(Integer.valueOf(0)));
 
-        AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> {
+        ForbiddenException exception = assertThrows(ForbiddenException.class, () -> {
             underTest.getAuthorization(getAnnotation(CRN, EDIT_CREDENTIAL, false, "field"), USER_CRN, null, null);
         });
 

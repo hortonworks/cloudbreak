@@ -16,13 +16,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.util.FieldUtils;
 
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -81,7 +81,7 @@ class PlatformAwareSdxConnectorTest {
     private PlatformAwareSdxConnector underTest;
 
     @BeforeEach
-    public void setup() {
+    public void setup() throws IllegalAccessException {
         Map<TargetPlatform, PlatformAwareSdxStatusService<?>> status = Maps.newHashMap();
         status.put(TargetPlatform.CDL, cdlSdxStatusService);
         status.put(TargetPlatform.PAAS, paasSdxStatusService);
@@ -94,10 +94,10 @@ class PlatformAwareSdxConnectorTest {
         Map<TargetPlatform, PlatformAwareSdxStartStopService> startStop = Maps.newHashMap();
         startStop.put(TargetPlatform.CDL, cdlSdxStartStopService);
         startStop.put(TargetPlatform.PAAS, paasSdxStartStopService);
-        FieldUtils.setProtectedFieldValue("platformDependentSdxStatusServicesMap", underTest, status);
-        FieldUtils.setProtectedFieldValue("platformDependentSdxDescribeServices", underTest, describe);
-        FieldUtils.setProtectedFieldValue("platformDependentSdxDeleteServices", underTest, delete);
-        FieldUtils.setProtectedFieldValue("platformDependentSdxStartStopServices", underTest, startStop);
+        FieldUtils.writeField(underTest, "platformDependentSdxStatusServicesMap", status, true);
+        FieldUtils.writeField(underTest, "platformDependentSdxDescribeServices", describe, true);
+        FieldUtils.writeField(underTest, "platformDependentSdxDeleteServices", delete, true);
+        FieldUtils.writeField(underTest, "platformDependentSdxStartStopServices", startStop, true);
     }
 
     @Test

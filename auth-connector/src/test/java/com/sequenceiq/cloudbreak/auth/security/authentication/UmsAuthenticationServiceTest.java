@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.auth.security.authentication;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -31,11 +32,7 @@ public class UmsAuthenticationServiceTest {
 
     @Test
     public void testInvalidCrnNull() {
-        UmsAuthenticationException exception = assertThrows(UmsAuthenticationException.class, () -> {
-            underTest.getCloudbreakUser(null, "principal");
-        });
-
-        assertEquals("Invalid CRN has been provided: null", exception.getMessage());
+        assertNull(underTest.getCloudbreakUser(null));
     }
 
     @Test
@@ -43,7 +40,7 @@ public class UmsAuthenticationServiceTest {
         String crn = "crsdfadsfdsf sadasf3-df81ae585e10";
 
         UmsAuthenticationException exception = assertThrows(UmsAuthenticationException.class, () -> {
-            underTest.getCloudbreakUser(crn, "principal");
+            underTest.getCloudbreakUser(crn);
         });
 
         assertEquals("Invalid CRN has been provided: " + crn, exception.getMessage());
@@ -54,7 +51,7 @@ public class UmsAuthenticationServiceTest {
         String crn = "crn:cdp:cookie:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:user:qaas/b8a64902-7765-4ddd-a4f3-df81ae585e10";
 
         UmsAuthenticationException exception = assertThrows(UmsAuthenticationException.class, () -> {
-            underTest.getCloudbreakUser(crn, "principal");
+            underTest.getCloudbreakUser(crn);
         });
 
         assertEquals("Invalid CRN has been provided: " + crn, exception.getMessage());
@@ -65,7 +62,7 @@ public class UmsAuthenticationServiceTest {
         String crn = "crn:cdp:iam:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:cluster:qaas/b8a64902-7765-4ddd-a4f3-df81ae585e10";
 
         UmsAuthenticationException exception = assertThrows(UmsAuthenticationException.class, () -> {
-            underTest.getCloudbreakUser(crn, "principal");
+            underTest.getCloudbreakUser(crn);
         });
 
         assertEquals("Authentication is supported only with User and MachineUser CRN: " + crn, exception.getMessage());
@@ -81,7 +78,7 @@ public class UmsAuthenticationServiceTest {
                 .build();
 
         when(grpcUmsClient.getUserDetails(anyString())).thenReturn(user);
-        CloudbreakUser cloudbreakUser = underTest.getCloudbreakUser(crn, null);
+        CloudbreakUser cloudbreakUser = underTest.getCloudbreakUser(crn);
 
         assertEquals("userId", cloudbreakUser.getUserId());
         assertEquals("e@mail.com", cloudbreakUser.getUsername());
@@ -93,14 +90,15 @@ public class UmsAuthenticationServiceTest {
         String crn = "crn:cdp:iam:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:machineUser:qaas/b8a64902-7765-4ddd-a4f3-df81ae585e10";
         UserManagementProto.MachineUser machineUser = UserManagementProto.MachineUser.newBuilder()
                 .setMachineUserId("machineUserId")
+                .setMachineUserName("username")
                 .setCrn(crn)
                 .build();
 
         when(grpcUmsClient.getMachineUserDetails(anyString(), anyString())).thenReturn(machineUser);
-        CloudbreakUser cloudbreakUser = underTest.getCloudbreakUser(crn, "principal");
+        CloudbreakUser cloudbreakUser = underTest.getCloudbreakUser(crn);
 
         assertEquals("machineUserId", cloudbreakUser.getUserId());
-        assertEquals("principal", cloudbreakUser.getUsername());
+        assertEquals("username", cloudbreakUser.getUsername());
         assertEquals(crn, cloudbreakUser.getUserCrn());
     }
 }

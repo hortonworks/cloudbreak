@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import jakarta.ws.rs.ForbiddenException;
+
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,7 +23,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.access.AccessDeniedException;
 
 import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
@@ -194,7 +195,7 @@ public class PermissionCheckServiceTest {
     public void testInternalOnlyMethodIfNotInternalActor() throws NoSuchMethodException {
         when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("internalOnlyMethod"));
 
-        assertThrows(AccessDeniedException.class, () ->
+        assertThrows(ForbiddenException.class, () ->
                 ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint)),
                 "This API is not publicly available and therefore not usable by end users. " +
                         "Please refer to our documentation about public APIs used by our UI and CLI.");
@@ -220,7 +221,7 @@ public class PermissionCheckServiceTest {
     public void testInternalOnlyMethodIfOriginalInternalActor() throws NoSuchMethodException {
         when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("internalOnlyMethod"));
 
-        assertThrows(AccessDeniedException.class, () ->
+        assertThrows(ForbiddenException.class, () ->
                 ThreadBasedUserCrnProvider.doAs("crn:altus:iam:us-west-1:altus:user:__not_internal__actor__",
                         () -> underTest.hasPermission(proceedingJoinPoint)),
                 "This API is not prepared to use it in service-to-service communication.");
@@ -266,7 +267,7 @@ public class PermissionCheckServiceTest {
         when(methodSignature.getMethod()).thenReturn(InternalOnlyClassExample.class.getMethod("get"));
         when(proceedingJoinPoint.getTarget()).thenReturn(new InternalOnlyClassExample());
 
-        assertThrows(AccessDeniedException.class, () ->
+        assertThrows(ForbiddenException.class, () ->
                 ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint)),
                 "This API is not publicly available and therefore not usable by end users. " +
                         "Please refer to our documentation about public APIs used by our UI and CLI.");

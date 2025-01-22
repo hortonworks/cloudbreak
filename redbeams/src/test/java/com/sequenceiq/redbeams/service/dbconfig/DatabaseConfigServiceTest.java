@@ -25,6 +25,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 
+import jakarta.ws.rs.ForbiddenException;
+
 import org.hamcrest.core.Every;
 import org.hibernate.exception.ConstraintViolationException;
 import org.junit.Before;
@@ -36,7 +38,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.MapBindingResult;
 import org.springframework.validation.ObjectError;
 
@@ -386,12 +387,12 @@ public class DatabaseConfigServiceTest {
 
     @Test
     public void testRegisterHasNoAccess() {
-        thrown.expect(AccessDeniedException.class);
+        thrown.expect(ForbiddenException.class);
         DatabaseConfig configToRegister = new DatabaseConfig();
         configToRegister.setConnectionDriver("org.postgresql.MyCustomDriver");
         when(clock.getCurrentTimeMillis()).thenReturn(CURRENT_TIME_MILLIS);
         when(crnService.createCrn(configToRegister)).thenReturn(TestData.getTestCrn("database", "name"));
-        when(repository.save(configToRegister)).thenThrow(new AccessDeniedException("User has no right to access resource"));
+        when(repository.save(configToRegister)).thenThrow(new ForbiddenException("User has no right to access resource"));
 
         underTest.register(configToRegister, false);
     }

@@ -7,8 +7,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import jakarta.ws.rs.ForbiddenException;
+
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -64,7 +65,7 @@ public class AccountTagService {
             }
             return result;
         } catch (DataIntegrityViolationException e) {
-            throw new AccessDeniedException("Access denied", e);
+            throw new ForbiddenException("Access denied", e);
         }
     }
 
@@ -87,7 +88,7 @@ public class AccountTagService {
                     .build();
             return costTagging.generateAccountTags(request);
         } catch (DataIntegrityViolationException e) {
-            throw new AccessDeniedException("Access denied", e);
+            throw new ForbiddenException("Access denied", e);
         }
     }
 

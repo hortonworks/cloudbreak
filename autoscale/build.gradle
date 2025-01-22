@@ -115,7 +115,6 @@ dependencyManagement {
             entry 'spring-boot-starter-data-jpa'
             entry 'spring-boot-starter-aop'
             entry 'spring-boot-starter-freemarker'
-            entry 'spring-boot-starter-security'
             entry ('spring-boot-starter-jersey') {
                 exclude group: 'com.fasterxml.jackson.core', name: 'jackson-databind'
             }
@@ -150,7 +149,6 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.core',         name: 'jackson-databind'
     implementation group: 'org.springframework.boot',           name: 'spring-boot-starter'
     implementation group: 'org.springframework.boot',           name: 'spring-boot-starter-web'
-    implementation group: 'org.springframework.boot',           name: 'spring-boot-starter-security'
     implementation group: 'org.springframework.boot',           name: 'spring-boot-starter-data-jpa'
     implementation group: 'org.springframework.boot',           name: 'spring-boot-starter-actuator'
     implementation group: 'org.springframework.boot',           name: 'spring-boot-starter-freemarker'

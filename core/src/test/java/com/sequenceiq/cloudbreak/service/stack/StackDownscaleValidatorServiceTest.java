@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.service.stack;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType.CORE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType.GATEWAY_PRIMARY;
 
+import jakarta.ws.rs.ForbiddenException;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -10,7 +12,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.security.access.AccessDeniedException;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -66,7 +67,7 @@ public class StackDownscaleValidatorServiceTest {
 
     @Test
     public void testCheckUserHasRightToTerminateInstanceMethodWhenUserIdAndOwnerAreNotTheSameThenExceptionWouldInvoke() {
-        expectedException.expect(AccessDeniedException.class);
+        expectedException.expect(ForbiddenException.class);
         expectedException.expectMessage(ACCESS_DENIED_EXCEPTION_MESSAGE);
 
         underTest.checkUserHasRightToTerminateInstance("something here", "something else here", STACK_ID);

@@ -7,16 +7,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 
 import jakarta.inject.Inject;
+import jakarta.ws.rs.ForbiddenException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.RetryException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.CrnUser;
@@ -70,7 +67,7 @@ public class UserService extends InternalUserModifier {
                 throw new RetryException(e.getMessage(), e);
             }
         } else {
-            throw new AccessDeniedException("cloudbreakUser is empty");
+            throw new ForbiddenException("cloudbreakUser is empty");
         }
     }
 
@@ -110,17 +107,7 @@ public class UserService extends InternalUserModifier {
     public void persistModifiedInternalUser(CrnUser newUser) {
         getOrCreate(newUser);
         restRequestThreadLocalService.setCloudbreakUser(newUser);
-        updateSecurityContext(newUser);
         updateWorkspaceIdInThreadLocal(newUser);
-    }
-
-    private void updateSecurityContext(CrnUser newUser) {
-        Authentication original = SecurityContextHolder.getContext().getAuthentication();
-        if (original != null && original instanceof PreAuthenticatedAuthenticationToken) {
-            PreAuthenticatedAuthenticationToken originalToken = (PreAuthenticatedAuthenticationToken) original;
-            SecurityContextHolder.getContext().setAuthentication(
-                    new PreAuthenticatedAuthenticationToken(newUser, originalToken.getCredentials(), originalToken.getAuthorities()));
-        }
     }
 
     private void updateWorkspaceIdInThreadLocal(CrnUser newUser) {

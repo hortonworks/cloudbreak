@@ -5,10 +5,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import jakarta.ws.rs.ForbiddenException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
@@ -56,7 +57,7 @@ public class AccountTelemetryService {
             accountTelemetryRepository.save(telemetry);
             return telemetry;
         } catch (DataIntegrityViolationException e) {
-            throw new AccessDeniedException("Access denied", e);
+            throw new ForbiddenException("Access denied", e);
         }
     }
 
@@ -78,7 +79,7 @@ public class AccountTelemetryService {
                 return createDefaultAccountTelemetry();
             }
         } catch (DataIntegrityViolationException e) {
-            throw new AccessDeniedException("Access denied", e);
+            throw new ForbiddenException("Access denied", e);
         }
     }
 
@@ -113,7 +114,7 @@ public class AccountTelemetryService {
             telemetry.setFeatures(finalFeatures);
             return create(telemetry, accountId).getFeatures();
         } catch (DataIntegrityViolationException e) {
-            throw new AccessDeniedException("Access denied", e);
+            throw new ForbiddenException("Access denied", e);
         }
     }
 

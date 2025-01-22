@@ -102,7 +102,7 @@ public class FlowIntegrationTestConfig {
 
     @BeforeEach
     void init() {
-        when(crnUserDetailsService.loadUserByUsername(anyString())).thenReturn(mock(CrnUser.class));
+        when(crnUserDetailsService.getUmsUser(anyString())).thenReturn(mock(CrnUser.class));
     }
 
     @Bean

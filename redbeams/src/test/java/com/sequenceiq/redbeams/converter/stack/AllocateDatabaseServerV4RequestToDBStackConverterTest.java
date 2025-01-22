@@ -176,7 +176,7 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         securityGroupRequest = new SecurityGroupV4StackRequest();
         databaseServerRequest.setSecurityGroup(securityGroupRequest);
 
-        when(crnUserDetailsService.loadUserByUsername(OWNER_CRN)).thenReturn(getCrnUser());
+        when(crnUserDetailsService.getUmsUser(OWNER_CRN)).thenReturn(getCrnUser());
         when(uuidGeneratorService.randomUuid()).thenReturn("uuid");
         when(accountTagService.list()).thenReturn(new HashMap<>());
         when(uuidGeneratorService.uuidVariableParts(anyInt())).thenReturn("parts");

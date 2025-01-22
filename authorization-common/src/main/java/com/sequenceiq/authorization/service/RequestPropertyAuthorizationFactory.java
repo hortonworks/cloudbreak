@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 import jakarta.inject.Inject;
+import jakarta.ws.rs.ForbiddenException;
 
 import org.apache.commons.beanutils.NestedNullException;
 import org.apache.commons.beanutils.PropertyUtils;
@@ -11,7 +12,6 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
@@ -77,7 +77,7 @@ public class RequestPropertyAuthorizationFactory extends TypedAuthorizationFacto
             throw unchecked;
         } catch (Throwable t) {
             LOGGER.error("Error happened during authorization of the request object: ", t);
-            throw new AccessDeniedException("Error happened during authorization of the request object, thus access is denied!", t);
+            throw new ForbiddenException("Error happened during authorization of the request object, thus access is denied!", t);
         }
         return Optional.empty();
     }
@@ -94,14 +94,14 @@ public class RequestPropertyAuthorizationFactory extends TypedAuthorizationFacto
             case CRN_LIST:
                 return getAuthorizationFromResourceCrnList(requestObject, action, userCrn);
             default:
-                throw new AccessDeniedException("We cannot determine the type of field from authorization point of view, " +
+                throw new ForbiddenException("We cannot determine the type of field from authorization point of view, " +
                         "thus access is denied!");
         }
     }
 
     private Optional<AuthorizationRule> getAuthorizationFromResourceName(Object resultObject, AuthorizationResourceAction action) {
         if (!(resultObject instanceof String)) {
-            throw new AccessDeniedException("Referred property within request object is not string, thus access is denied!");
+            throw new ForbiddenException("Referred property within request object is not string, thus access is denied!");
         }
         String resourceName = (String) resultObject;
         return resourceNameAuthorizationProvider.calcAuthorization(resourceName, action);
@@ -109,7 +109,7 @@ public class RequestPropertyAuthorizationFactory extends TypedAuthorizationFacto
 
     private Optional<AuthorizationRule> getAuthorizationFromResourceCrn(Object resultObject, AuthorizationResourceAction action, String userCrn) {
         if (!(resultObject instanceof String)) {
-            throw new AccessDeniedException("Referred property within request object is not string, thus access is denied!");
+            throw new ForbiddenException("Referred property within request object is not string, thus access is denied!");
         }
         String resourceCrn = (String) resultObject;
         crnAccountValidator.validateSameAccount(userCrn, resourceCrn);
@@ -118,7 +118,7 @@ public class RequestPropertyAuthorizationFactory extends TypedAuthorizationFacto
 
     private Optional<AuthorizationRule> getAuthorizationFromResourceCrnList(Object resultObject, AuthorizationResourceAction action, String userCrn) {
         if (!(resultObject instanceof Collection)) {
-            throw new AccessDeniedException("Referred property within request object is not collection, thus access is denied!");
+            throw new ForbiddenException("Referred property within request object is not collection, thus access is denied!");
         }
         Collection<String> resourceCrns = (Collection<String>) resultObject;
         crnAccountValidator.validateSameAccount(userCrn, resourceCrns);
@@ -127,7 +127,7 @@ public class RequestPropertyAuthorizationFactory extends TypedAuthorizationFacto
 
     private Optional<AuthorizationRule> getAuthorizationFromResouurceNameList(Object resultObject, AuthorizationResourceAction action) {
         if (!(resultObject instanceof Collection)) {
-            throw new AccessDeniedException("Referred property within request object is not collection, thus access is denied!");
+            throw new ForbiddenException("Referred property within request object is not collection, thus access is denied!");
         }
         Collection<String> resourceNames = (Collection<String>) resultObject;
         return resourceNameListAuthorizationFactory.calcAuthorization(resourceNames, action);

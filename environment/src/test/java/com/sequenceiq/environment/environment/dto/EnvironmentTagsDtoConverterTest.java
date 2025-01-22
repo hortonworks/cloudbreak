@@ -82,14 +82,14 @@ class EnvironmentTagsDtoConverterTest {
 
         when(entitlementService.internalTenant(any())).thenReturn(true);
         when(accountTagService.get(any())).thenReturn(new HashSet<>());
-        when(crnUserDetailsService.loadUserByUsername(any())).thenReturn(createMockUserDetails());
+        when(crnUserDetailsService.getUmsUser(any())).thenReturn(createMockUserDetails());
         when(costTagging.prepareDefaultTags(any())).thenReturn(new HashMap<>());
 
         Json tags = underTest.getTags(creationDto);
 
         verify(entitlementService).internalTenant(anyString());
         verify(accountTagService).get(anyString());
-        verify(crnUserDetailsService).loadUserByUsername(anyString());
+        verify(crnUserDetailsService).getUmsUser(anyString());
         verify(costTagging).prepareDefaultTags(any());
 
         Map<String, String> expectedUserDefinedTags = createMockUserDefinedTags();
@@ -119,7 +119,7 @@ class EnvironmentTagsDtoConverterTest {
                 .withCrn(RESOURCE_CRN)
                 .build();
 
-        when(crnUserDetailsService.loadUserByUsername(CREATOR)).thenReturn(new CrnUser(null, CREATOR, USER_NAME, null, ACCOUNT_ID, null));
+        when(crnUserDetailsService.getUmsUser(CREATOR)).thenReturn(new CrnUser(null, CREATOR, USER_NAME, null, ACCOUNT_ID, null));
         UnsupportedOperationException unsupportedOperationException = new UnsupportedOperationException("This operation is not supported");
         when(costTagging.prepareDefaultTags(any(CDPTagGenerationRequest.class))).thenThrow(unsupportedOperationException);
 
@@ -150,7 +150,7 @@ class EnvironmentTagsDtoConverterTest {
                 .withCrn(RESOURCE_CRN)
                 .build();
 
-        when(crnUserDetailsService.loadUserByUsername(CREATOR)).thenReturn(new CrnUser(null, CREATOR, USER_NAME, null, ACCOUNT_ID, null));
+        when(crnUserDetailsService.getUmsUser(CREATOR)).thenReturn(new CrnUser(null, CREATOR, USER_NAME, null, ACCOUNT_ID, null));
         when(costTagging.prepareDefaultTags(any(CDPTagGenerationRequest.class))).thenThrow(new AccountTagValidationFailed("Error validating tags"));
 
         BadRequestException badRequestException = Assertions.assertThrows(BadRequestException.class,

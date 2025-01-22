@@ -9,6 +9,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 
+import jakarta.ws.rs.ForbiddenException;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -17,7 +19,6 @@ import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.security.access.AccessDeniedException;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Response;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -110,9 +111,9 @@ public class AuditEventServiceTest {
     @Test
     public void testGetAuditEventWhenUserHasNoRightToReadEntryThenAccessDeniedEceptionShouldCome() {
         when(legacyStructuredEventDBService.findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID))
-                .thenThrow(new AccessDeniedException(REPO_ACCESS_DENIED_MESSAGE));
+                .thenThrow(new ForbiddenException(REPO_ACCESS_DENIED_MESSAGE));
 
-        thrown.expect(AccessDeniedException.class);
+        thrown.expect(ForbiddenException.class);
         thrown.expectMessage(REPO_ACCESS_DENIED_MESSAGE);
 
         underTest.getAuditEvent(TEST_AUDIT_ID);
@@ -151,9 +152,9 @@ public class AuditEventServiceTest {
     @Test
     public void testGetAuditEventByWorkspaceIdWhenUserHasNoRightToReadEntryThenAccessDeniedEceptionShouldCome() {
         when(legacyStructuredEventDBService.findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID))
-                .thenThrow(new AccessDeniedException(REPO_ACCESS_DENIED_MESSAGE));
+                .thenThrow(new ForbiddenException(REPO_ACCESS_DENIED_MESSAGE));
 
-        thrown.expect(AccessDeniedException.class);
+        thrown.expect(ForbiddenException.class);
         thrown.expectMessage(REPO_ACCESS_DENIED_MESSAGE);
 
         underTest.getAuditEvent(TEST_AUDIT_ID);

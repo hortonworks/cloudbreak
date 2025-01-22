@@ -15,6 +15,8 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.Map;
 
+import jakarta.ws.rs.ForbiddenException;
+
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,7 +24,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.access.AccessDeniedException;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -72,7 +73,7 @@ public class UmsResourceAuthorizationServiceTest {
     public void testCheckRightOnResource() {
         when(umsClient.checkResourceRight(anyString(), anyString(), anyString())).thenReturn(false);
 
-        AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.
+        ForbiddenException exception = assertThrows(ForbiddenException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.
                 checkRightOfUserOnResource(USER_CRN, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT, RESOURCE_CRN)));
         assertTrue(exception.getMessage().contains(INSUFFICIENT_RIGHTS));
         assertTrue(exception.getMessage().contains(formatTemplate("environments/describeEnvironment", RESOURCE_CRN)));
@@ -82,7 +83,7 @@ public class UmsResourceAuthorizationServiceTest {
     public void testCheckRightOnResourcesFailure() {
         when(umsClient.hasRights(anyString(), anyList(), anyString())).thenReturn(hasRightsResultMap());
 
-        AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN,
+        ForbiddenException exception = assertThrows(ForbiddenException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN,
                 () -> underTest.checkRightOfUserOnResources(USER_CRN,
                         AuthorizationResourceAction.DESCRIBE_ENVIRONMENT,
                         Lists.newArrayList(RESOURCE_CRN, RESOURCE_CRN2))));

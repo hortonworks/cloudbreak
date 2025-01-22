@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.converter.util;
 
 
+import jakarta.ws.rs.ForbiddenException;
+
 import org.junit.Assert;
 import org.junit.Test;
-import org.springframework.security.access.AccessDeniedException;
 
 public class ExceptionMessageFormatterUtilTest {
 
@@ -15,12 +16,12 @@ public class ExceptionMessageFormatterUtilTest {
 
         try {
             ExceptionMessageFormatterUtil.formatAccessDeniedMessage(this::throwAccessDenied, resourceName, id);
-        } catch (AccessDeniedException e) {
+        } catch (ForbiddenException e) {
             Assert.assertEquals(expected, e.getMessage());
         }
     }
 
     private void throwAccessDenied() {
-        throw new AccessDeniedException("");
+        throw new ForbiddenException("");
     }
 }

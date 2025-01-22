@@ -20,13 +20,13 @@ import com.sequenceiq.periscope.controller.DistroXAutoScaleClusterV1Controller;
 import com.sequenceiq.periscope.controller.DistroXAutoScaleScalingActivityV1Controller;
 import com.sequenceiq.periscope.controller.DistroXAutoScaleYarnRecommendationV1Controller;
 import com.sequenceiq.periscope.controller.HistoryController;
-import com.sequenceiq.periscope.controller.mapper.AccessDeniedExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.BadRequestExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.ConstraintViolationExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.ConversionExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.ConversionFailedExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.DataIntegrityViolationExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.DefaultExceptionMapper;
+import com.sequenceiq.periscope.controller.mapper.ForbiddenExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.HttpMediaTypeNotSupportedExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.HttpMessageNotReadableExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.HttpRequestMethodNotSupportedExceptionMapper;
@@ -81,7 +81,7 @@ public class EndpointConfig extends ResourceConfig {
     }
 
     private void registerExceptionMappers() {
-        register(AccessDeniedExceptionMapper.class);
+        register(ForbiddenExceptionMapper.class);
         register(BadRequestExceptionMapper.class);
         register(ConversionExceptionMapper.class);
         register(ConversionFailedExceptionMapper.class);

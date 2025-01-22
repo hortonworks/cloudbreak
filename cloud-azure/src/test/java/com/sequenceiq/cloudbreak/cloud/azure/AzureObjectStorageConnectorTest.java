@@ -11,13 +11,14 @@ import static org.mockito.Mockito.when;
 
 import java.util.function.Supplier;
 
+import jakarta.ws.rs.ForbiddenException;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.access.AccessDeniedException;
 
 import com.azure.core.http.HttpResponse;
 import com.azure.core.management.exception.ManagementException;
@@ -79,7 +80,7 @@ public class AzureObjectStorageConnectorTest {
         ApiError apiError = AzureTestUtils.apiError("AuthorizationFailed", null);
         mockIDBrokerStorageValidationError(403, apiError);
         when(azureExceptionHandler.isForbidden(any(ManagementException.class))).thenReturn(true);
-        assertThrows(AccessDeniedException.class, () -> underTest.validateObjectStorage(getRequest()));
+        assertThrows(ForbiddenException.class, () -> underTest.validateObjectStorage(getRequest()));
         verify(azureUtils, times(0)).convertToCloudConnectorException(any(), anyString());
     }
 

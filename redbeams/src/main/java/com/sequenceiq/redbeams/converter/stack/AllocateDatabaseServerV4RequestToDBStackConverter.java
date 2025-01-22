@@ -96,7 +96,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
 
     public DBStack convert(AllocateDatabaseServerV4Request source, String ownerCrnString) {
         Crn ownerCrn = Crn.safeFromString(ownerCrnString);
-        CrnUser user = crnUserDetailsService.loadUserByUsername(ownerCrnString);
+        CrnUser user = crnUserDetailsService.getUmsUser(ownerCrnString);
 
         DetailedEnvironmentResponse environment = environmentService.getByCrn(source.getEnvironmentCrn());
         validateGeoRedundantAzureCMK(source, environment);

@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.client;
 
-import org.springframework.security.access.AccessDeniedException;
+import jakarta.ws.rs.ForbiddenException;
 
-public class ProviderAuthenticationFailedException extends AccessDeniedException {
+public class ProviderAuthenticationFailedException extends ForbiddenException {
 
     public ProviderAuthenticationFailedException(Throwable t) {
         super("Authentication to provider failed, check if your credential is valid or has enough permissions", t);

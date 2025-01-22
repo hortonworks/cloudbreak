@@ -276,7 +276,7 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
         try {
             String userCrnString = userCrn.toString();
             String accountId = userCrn.getAccountId();
-            CrnUser crnUser = crnUserDetailsService.loadUserByUsername(userCrnString);
+            CrnUser crnUser = crnUserDetailsService.getUmsUser(userCrnString);
             boolean internalTenant = entitlementService.internalTenant(accountId);
             Map<String, String> tags = new HashMap<>();
             if (environment.getTags().getUserDefined() != null) {

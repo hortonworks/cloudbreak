@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import jakarta.ws.rs.ForbiddenException;
+
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +20,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.access.AccessDeniedException;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.service.model.AllMatch;
@@ -86,7 +87,7 @@ public class EnvironmentBasedAuthorizationProviderTest {
     @Test
     public void testWithoutCrnProvider() throws IllegalAccessException {
         FieldUtils.writeField(underTest, "environmentCrnProviderMap", Map.of(), true);
-        assertThrows(AccessDeniedException.class, () -> underTest.getAuthorizations(RESOURCE_CRN_1, ACTION),
+        assertThrows(ForbiddenException.class, () -> underTest.getAuthorizations(RESOURCE_CRN_1, ACTION),
                 String.format("Action %s is not supported over resource %s, thus access is denied!", ACTION.getRight(), RESOURCE_CRN_1));
     }
 

@@ -21,5 +21,4 @@ dependencies {
 
   testImplementation  group: 'org.mockito',               name: 'mockito-core',               version: mockitoVersion
   testImplementation  group: 'org.assertj',               name: 'assertj-core',               version: assertjVersion
-  testImplementation  group: 'org.springframework.security', name: 'spring-security-core',    version: springSecurityVersion
 }

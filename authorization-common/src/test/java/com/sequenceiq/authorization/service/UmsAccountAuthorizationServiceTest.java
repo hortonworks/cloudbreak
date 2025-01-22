@@ -8,12 +8,13 @@ import static org.mockito.Mockito.when;
 
 import java.util.UUID;
 
+import jakarta.ws.rs.ForbiddenException;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.access.AccessDeniedException;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -39,7 +40,7 @@ public class UmsAccountAuthorizationServiceTest {
     public void testCheckRight() {
         when(umsRightProvider.getRight(any())).thenReturn(AuthorizationResourceAction.DESCRIBE_DATALAKE.getRight());
 
-        AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> {
+        ForbiddenException exception = assertThrows(ForbiddenException.class, () -> {
             ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.
                     checkRightOfUser(USER_CRN, AuthorizationResourceAction.DESCRIBE_DATALAKE));
         });
@@ -51,7 +52,7 @@ public class UmsAccountAuthorizationServiceTest {
     public void testHasRightOfUserWithValidResourceTypeAndAction() {
         when(umsClient.checkAccountRight(anyString(), any())).thenReturn(false);
 
-        assertThrows(AccessDeniedException.class,
+        assertThrows(ForbiddenException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.checkRightOfUser(USER_CRN, AuthorizationResourceAction.DESCRIBE_DATALAKE)));
     }
 
@@ -64,7 +65,7 @@ public class UmsAccountAuthorizationServiceTest {
     public void testCheckCallerIsSelfOrHasRightDifferent() {
         String userInDifferentAccount = "crn:cdp:iam:us-west-1:" + UUID.randomUUID() + ":user:" + UUID.randomUUID();
 
-        AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.
+        ForbiddenException exception = assertThrows(ForbiddenException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.
                 checkCallerIsSelfOrHasRight(USER_CRN, userInDifferentAccount, AuthorizationResourceAction.DESCRIBE_DATALAKE)));
         assertEquals("Unauthorized to run this operation in a different account", exception.getMessage());
     }
@@ -73,7 +74,7 @@ public class UmsAccountAuthorizationServiceTest {
     public void testActorAndTargetDifferentAndMissingRight() {
         String user2 = "crn:cdp:iam:us-west-1:1234:user:someOtherUserId";
         when(umsRightProvider.getRight(any())).thenReturn(AuthorizationResourceAction.DESCRIBE_DATALAKE.getRight());
-        AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.
+        ForbiddenException exception = assertThrows(ForbiddenException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.
                 checkCallerIsSelfOrHasRight(USER_CRN, user2, AuthorizationResourceAction.DESCRIBE_DATALAKE)));
         assertEquals("You have no right to perform datalake/describeDatalake in account 1234", exception.getMessage());
     }

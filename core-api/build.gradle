@@ -43,7 +43,6 @@ dependencies {
   implementation group: 'org.apache.httpcomponents.client5', name: 'httpclient5',                version: httpClientVersion
   implementation group: 'org.glassfish.jersey.connectors',  name: 'jersey-apache-connector',     version: jerseyCoreVersion
   implementation group: 'net.jcip',                      name: 'jcip-annotations',               version: '1.0'
-  implementation group: 'org.springframework.boot',      name: 'spring-boot-starter-security',   version: springBootVersion
   implementation group: 'com.google.guava',              name: 'guava',                          version: guavaVersion
   implementation group: 'org.springframework',           name: 'spring-aspects',                 version: springFrameworkVersion
   implementation group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion

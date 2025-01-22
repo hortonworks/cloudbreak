@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
@@ -50,9 +49,9 @@ public abstract class EventParameterFactory {
 
     private boolean isUserExistsInUms(String userCrn) {
         try {
-            crnUserDetailsService.loadUserByUsername(userCrn);
+            crnUserDetailsService.getUmsUser(userCrn);
             return true;
-        } catch (UsernameNotFoundException e) {
+        } catch (Exception e) {
             LOGGER.warn("User crn {} does not exist in UMS", userCrn, e);
             return false;
         }

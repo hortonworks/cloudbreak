@@ -6,10 +6,10 @@ import java.util.Set;
 import jakarta.inject.Inject;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.ForbiddenException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Controller;
 
 import com.google.common.collect.Iterables;
@@ -194,7 +194,7 @@ public class UserV1Controller implements UserV1Endpoint {
         }
         String callingActorAccountId = Crn.safeFromString(callingActor).getAccountId();
         if (!callingActorAccountId.equals(requestedAccountId) && !RegionAwareInternalCrnGeneratorUtil.isInternalCrn(callingActor)) {
-            throw new AccessDeniedException(String.format("Actor %s does not belong to the request account %s", callingActor, requestedAccountId));
+            throw new ForbiddenException(String.format("Actor %s does not belong to the request account %s", callingActor, requestedAccountId));
         }
         return requestedAccountId;
     }
