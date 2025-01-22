@@ -27,4 +27,13 @@ else
     echo "Adding ssl_key_file config to the postgresql.conf"
     echo "ssl_key_file = '{{ postgres_directory }}/certs/postgres.key'" >> $CONFIG_FILE
 fi
+
+CIPHERS="ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-ECDSA-AES256-SHA384:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA256"
+if grep -qR "^ssl_ciphers =" $CONFIG_FILE; then
+    echo "Updating ssl_ciphers config in the postgresql.conf"
+    sed -i.orig "/^ssl_ciphers =/c\ssl_ciphers = '$CIPHERS'" $CONFIG_FILE
+else
+    echo "Adding ssl_ciphers config to the postgresql.conf"
+    echo "ssl_ciphers = '$CIPHERS'" >> $CONFIG_FILE
+fi
 set +e
