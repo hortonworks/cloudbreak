@@ -1,4 +1,4 @@
-{% if salt['file.file_exists']('/cdp/ipahealthagent/cdp-freeipa-healthagent') %}
+{% if salt['file.directory_exists']('/cdp/ipahealthagent') %}
 
 /opt/salt/scripts/freeipa_healthagent_setup.sh:
   file.managed:

@@ -1,4 +1,4 @@
-{%- if salt['file.file_exists']('/cdp/ipaldapagent/cdp-freeipa-ldapagent') %}
+{%- if salt['file.directory_exists']('/cdp/ipaldapagent') %}
 
 /cdp/ipaldapagent/config.yaml:
   file.managed:
