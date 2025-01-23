@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.resource;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
@@ -13,19 +16,31 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.resource.volume.AwsVolumeIopsCalculator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.resource.volume.AwsVolumeThroughputCalculator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.common.api.type.CommonStatus;
+import com.sequenceiq.common.api.type.ResourceType;
 
 import software.amazon.awssdk.services.ec2.model.BlockDeviceMapping;
 import software.amazon.awssdk.services.ec2.model.DescribeImagesResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeVolumesResponse;
 import software.amazon.awssdk.services.ec2.model.EbsBlockDevice;
+import software.amazon.awssdk.services.ec2.model.EbsInstanceBlockDevice;
+import software.amazon.awssdk.services.ec2.model.Instance;
+import software.amazon.awssdk.services.ec2.model.InstanceBlockDeviceMapping;
+import software.amazon.awssdk.services.ec2.model.Reservation;
+import software.amazon.awssdk.services.ec2.model.VolumeAttachment;
 
 @ExtendWith(MockitoExtension.class)
 public class VolumeBuilderUtilTest {
@@ -60,6 +75,9 @@ public class VolumeBuilderUtilTest {
     @Mock
     private EntitlementService entitlementService;
 
+    @Mock
+    private CommonAwsClient commonAwsClient;
+
     @Test
     public void testGetRootVolume() {
         when(ac.getParameter(AmazonEc2Client.class)).thenReturn(amazonEc2Client);
@@ -89,8 +107,8 @@ public class VolumeBuilderUtilTest {
         Assertions.assertNotNull(actual);
         Assertions.assertFalse(actual.isEmpty());
         BlockDeviceMapping theSingleBlockDeviceMapping = actual.get(0);
-        Assertions.assertEquals("/dev/xvdb", theSingleBlockDeviceMapping.deviceName());
-        Assertions.assertEquals("ephemeral0", theSingleBlockDeviceMapping.virtualName());
+        assertEquals("/dev/xvdb", theSingleBlockDeviceMapping.deviceName());
+        assertEquals("ephemeral0", theSingleBlockDeviceMapping.virtualName());
     }
 
     @Test
@@ -102,7 +120,7 @@ public class VolumeBuilderUtilTest {
 
         Assertions.assertNotNull(actual);
         Assertions.assertFalse(actual.isEmpty());
-        Assertions.assertEquals(storageCount, actual.size());
+        assertEquals(storageCount, actual.size());
         Assertions.assertTrue(actual.stream()
                 .anyMatch(deviceMapping -> "/dev/xvdb".equals(deviceMapping.deviceName())
                         && "ephemeral0".equals(deviceMapping.virtualName())));
@@ -117,7 +135,7 @@ public class VolumeBuilderUtilTest {
         when(ac.getParameter(AmazonEc2Client.class)).thenReturn(amazonEc2Client);
         when(amazonEc2Client.describeImages(any())).thenReturn(DescribeImagesResponse.builder().build());
         CloudConnectorException actual = Assertions.assertThrows(CloudConnectorException.class, () -> underTest.getRootDeviceName(ac, cloudStack));
-        Assertions.assertEquals("AMI is not available: 'null'.", actual.getMessage());
+        assertEquals("AMI is not available: 'null'.", actual.getMessage());
     }
 
     @Test
@@ -127,7 +145,7 @@ public class VolumeBuilderUtilTest {
         when(amazonEc2Client.describeImages(any()))
                 .thenReturn(DescribeImagesResponse.builder().images((software.amazon.awssdk.services.ec2.model.Image) null).build());
         CloudConnectorException actual = Assertions.assertThrows(CloudConnectorException.class, () -> underTest.getRootDeviceName(ac, cloudStack));
-        Assertions.assertEquals("Couldn't describe AMI 'null'.", actual.getMessage());
+        assertEquals("Couldn't describe AMI 'null'.", actual.getMessage());
     }
 
     @Test
@@ -140,9 +158,9 @@ public class VolumeBuilderUtilTest {
         EbsBlockDevice actual = underTest.getRootEbs(awsInstanceView, group);
         Assertions.assertTrue(actual.deleteOnTermination());
         Assertions.assertTrue(actual.encrypted());
-        Assertions.assertEquals("gp3", actual.volumeType().toString());
-        Assertions.assertEquals(1, actual.volumeSize());
-        Assertions.assertEquals("kmsKey", actual.kmsKeyId());
+        assertEquals("gp3", actual.volumeType().toString());
+        assertEquals(1, actual.volumeSize());
+        assertEquals("kmsKey", actual.kmsKeyId());
     }
 
     @Test
@@ -156,9 +174,9 @@ public class VolumeBuilderUtilTest {
         EbsBlockDevice actual = underTest.getRootEbs(awsInstanceView, group);
         Assertions.assertTrue(actual.deleteOnTermination());
         Assertions.assertTrue(actual.encrypted());
-        Assertions.assertEquals("gp2", actual.volumeType().toString());
-        Assertions.assertEquals(1, actual.volumeSize());
-        Assertions.assertEquals("kmsKey", actual.kmsKeyId());
+        assertEquals("gp2", actual.volumeType().toString());
+        assertEquals(1, actual.volumeSize());
+        assertEquals("kmsKey", actual.kmsKeyId());
     }
 
     @Test
@@ -170,8 +188,8 @@ public class VolumeBuilderUtilTest {
         EbsBlockDevice actual = underTest.getRootEbs(awsInstanceView, group);
         Assertions.assertTrue(actual.deleteOnTermination());
         Assertions.assertNull(actual.encrypted());
-        Assertions.assertEquals("gp3", actual.volumeType().toString());
-        Assertions.assertEquals(1, actual.volumeSize());
+        assertEquals("gp3", actual.volumeType().toString());
+        assertEquals(1, actual.volumeSize());
         Assertions.assertNull(actual.kmsKeyId());
     }
 
@@ -184,8 +202,8 @@ public class VolumeBuilderUtilTest {
         EbsBlockDevice actual = underTest.getRootEbs(awsInstanceView, group);
         Assertions.assertTrue(actual.deleteOnTermination());
         Assertions.assertNull(actual.encrypted());
-        Assertions.assertEquals("gp3", actual.volumeType().toString());
-        Assertions.assertEquals(1, actual.volumeSize());
+        assertEquals("gp3", actual.volumeType().toString());
+        assertEquals(1, actual.volumeSize());
         Assertions.assertNull(actual.kmsKeyId());
     }
 
@@ -198,8 +216,91 @@ public class VolumeBuilderUtilTest {
         EbsBlockDevice actual = underTest.getRootEbs(awsInstanceView, group);
         Assertions.assertTrue(actual.deleteOnTermination());
         Assertions.assertNull(actual.encrypted());
-        Assertions.assertEquals("gp3", actual.volumeType().toString());
-        Assertions.assertEquals(1, actual.volumeSize());
+        assertEquals("gp3", actual.volumeType().toString());
+        assertEquals(1, actual.volumeSize());
         Assertions.assertNull(actual.kmsKeyId());
+    }
+
+    @Test
+    void testCreateRootVolumeResource() {
+        CloudResource result = underTest.createRootVolumeResource("testRoot", "testGroup", ResourceType.AWS_ROOT_DISK, "1");
+        assertEquals("testRoot", result.getName());
+        assertEquals("testGroup", result.getGroup());
+        assertEquals(ResourceType.AWS_ROOT_DISK, result.getType());
+        assertEquals("1", result.getAvailabilityZone());
+        assertEquals(CommonStatus.REQUESTED, result.getStatus());
+    }
+
+    @Test
+    void testDescribeInstancesByInstanceIds() {
+        DescribeInstancesResponse describeInstancesResponse = mock(DescribeInstancesResponse.class);
+        Reservation reservation = mock(Reservation.class);
+        Instance expectedInstance = mock(Instance.class);
+        when(describeInstancesResponse.reservations()).thenReturn(List.of(reservation));
+        when(reservation.instances()).thenReturn(List.of(expectedInstance));
+        when(commonAwsClient.createEc2Client(ac)).thenReturn(amazonEc2Client);
+        when(amazonEc2Client.describeInstances(any())).thenReturn(describeInstancesResponse);
+
+        List<Instance> result = underTest.describeInstancesByInstanceIds(List.of("test-instance"), ac);
+
+        assertEquals(expectedInstance, result.getFirst());
+    }
+
+    @Test
+    void testGetRootVolumeIdsFromInstances() {
+        Instance instance = mock(Instance.class);
+        when(instance.rootDeviceName()).thenReturn("test-device-name");
+        InstanceBlockDeviceMapping instanceBlockDeviceMapping = mock(InstanceBlockDeviceMapping.class);
+        when(instanceBlockDeviceMapping.deviceName()).thenReturn("test-device-name");
+        EbsInstanceBlockDevice ebsInstanceBlockDevice = mock(EbsInstanceBlockDevice.class);
+        when(ebsInstanceBlockDevice.volumeId()).thenReturn("1");
+        when(instanceBlockDeviceMapping.ebs()).thenReturn(ebsInstanceBlockDevice);
+        when(instance.blockDeviceMappings()).thenReturn(List.of(instanceBlockDeviceMapping));
+
+        List<String> result = underTest.getRootVolumeIdsFromInstances(List.of(instance));
+
+        assertEquals("1", result.getFirst());
+    }
+
+    @Test
+    void testUpdateRootVolumeResource() {
+        CloudResource cloudResource = CloudResource.builder().withName("test").withType(ResourceType.AWS_ROOT_DISK)
+                .withParameters(new HashMap<>()).withStatus(CommonStatus.REQUESTED).build();
+        when(commonAwsClient.createEc2Client(ac)).thenReturn(amazonEc2Client);
+        DescribeVolumesResponse describeVolumesResponse = mock(DescribeVolumesResponse.class);
+        when(amazonEc2Client.describeVolumes(any())).thenReturn(describeVolumesResponse);
+        when(describeVolumesResponse.hasVolumes()).thenReturn(true);
+        software.amazon.awssdk.services.ec2.model.Volume volume = mock(software.amazon.awssdk.services.ec2.model.Volume.class);
+        when(describeVolumesResponse.volumes()).thenReturn(List.of(volume));
+        VolumeAttachment volumeAttachment = mock(VolumeAttachment.class);
+        when(volume.attachments()).thenReturn(List.of(volumeAttachment));
+        when(volumeAttachment.instanceId()).thenReturn("test-instance");
+        when(volumeAttachment.device()).thenReturn("test-device");
+        when(volume.volumeId()).thenReturn("test-volume-id");
+        when(volume.availabilityZone()).thenReturn("test-availability-zone");
+        when(volume.size()).thenReturn(100);
+        when(volume.volumeTypeAsString()).thenReturn("test-volume-type");
+
+        List<CloudResource> result = underTest.updateRootVolumeResource(List.of(cloudResource), List.of("1"), ac);
+        CloudResource responseResource = result.getFirst();
+        VolumeSetAttributes responseAttributes = responseResource.getParameter("attributes", VolumeSetAttributes.class);
+        assertEquals("test-instance", responseResource.getInstanceId());
+        assertEquals(CommonStatus.CREATED, responseResource.getStatus());
+        assertEquals("test-availability-zone", responseAttributes.getAvailabilityZone());
+        assertEquals("test-device", responseAttributes.getVolumes().getFirst().getDevice());
+        assertEquals("test-volume-id", responseAttributes.getVolumes().getFirst().getId());
+        assertEquals(100, responseAttributes.getVolumes().getFirst().getSize());
+        assertEquals("test-volume-type", responseAttributes.getVolumes().getFirst().getType());
+    }
+
+    @Test
+    void testUpdateRootVolumeResourceThrowsException() {
+        CloudResource cloudResource = CloudResource.builder().withName("test").withType(ResourceType.AWS_ROOT_DISK)
+                .withParameters(new HashMap<>()).withStatus(CommonStatus.REQUESTED).build();
+        when(commonAwsClient.createEc2Client(ac)).thenReturn(amazonEc2Client);
+        when(amazonEc2Client.describeVolumes(any())).thenThrow(new RuntimeException("TEST"));
+
+        List<CloudResource> result = underTest.updateRootVolumeResource(List.of(cloudResource), List.of("1"), ac);
+        assertEquals(0, result.size());
     }
 }

@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.resource;
 
+import static java.lang.String.format;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -13,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.resource.volume.AwsVolumeIopsCalculator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.resource.volume.AwsVolumeThroughputCalculator;
@@ -20,16 +24,27 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.common.api.type.CommonStatus;
+import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.AwsDiskType;
 
 import software.amazon.awssdk.services.ec2.model.BlockDeviceMapping;
 import software.amazon.awssdk.services.ec2.model.DescribeImagesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeImagesResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeVolumesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeVolumesResponse;
 import software.amazon.awssdk.services.ec2.model.EbsBlockDevice;
 import software.amazon.awssdk.services.ec2.model.Image;
+import software.amazon.awssdk.services.ec2.model.Instance;
+import software.amazon.awssdk.services.ec2.model.InstanceBlockDeviceMapping;
 
 @Component
 public class VolumeBuilderUtil {
@@ -41,6 +56,9 @@ public class VolumeBuilderUtil {
 
     @Inject
     private AwsVolumeThroughputCalculator awsVolumeThroughputCalculator;
+
+    @Inject
+    private CommonAwsClient awsClient;
 
     public List<BlockDeviceMapping> getEphemeral(AwsInstanceView awsInstanceView) {
         Long ephemeralCount = getEphemeralCount(awsInstanceView);
@@ -116,5 +134,67 @@ public class VolumeBuilderUtil {
             throw new CloudConnectorException(String.format("Couldn't describe AMI '%s'.", imageName));
         }
         return image.rootDeviceName();
+    }
+
+    public CloudResource createRootVolumeResource(String resourceName, String groupName, ResourceType resourceType, String availabilityZone) {
+        CloudResource rootDiskResource = CloudResource.builder()
+                .withGroup(groupName)
+                .withName(resourceName)
+                .withType(resourceType)
+                .withStatus(CommonStatus.REQUESTED)
+                .withAvailabilityZone(availabilityZone)
+                .withPersistent(true)
+                .withParameters(new HashMap<>())
+                .build();
+        return rootDiskResource;
+    }
+
+    public List<Instance> describeInstancesByInstanceIds(List<String> instanceIds, AuthenticatedContext auth) {
+        AmazonEc2Client ec2Client = awsClient.createEc2Client(auth);
+        DescribeInstancesResponse describeInstancesResponse = ec2Client.describeInstances(DescribeInstancesRequest.builder().instanceIds(instanceIds).build());
+        return describeInstancesResponse.reservations().stream().flatMap(res -> res.instances().stream()).collect(Collectors.toList());
+    }
+
+    public List<String> getRootVolumeIdsFromInstances(List<Instance> instances) {
+        return instances.stream()
+                .map(this::getRootVolumeId)
+                .filter(Optional::isPresent)
+                .map(blockDeviceMapping -> blockDeviceMapping.get().ebs().volumeId())
+                .collect(Collectors.toList());
+    }
+
+    private Optional<InstanceBlockDeviceMapping> getRootVolumeId(software.amazon.awssdk.services.ec2.model.Instance instance) {
+        return instance.blockDeviceMappings().stream().filter(mapping -> mapping.deviceName().equals(instance.rootDeviceName())).findFirst();
+    }
+
+    public List<CloudResource> updateRootVolumeResource(List<CloudResource> resources, List<String> rootVolumeIds, AuthenticatedContext auth) {
+        AmazonEc2Client ec2Client = awsClient.createEc2Client(auth);
+        DescribeVolumesRequest describeVolumesRequest = DescribeVolumesRequest.builder().volumeIds(rootVolumeIds).build();
+        try {
+            DescribeVolumesResponse volumesResponse = ec2Client.describeVolumes(describeVolumesRequest);
+            if (volumesResponse.hasVolumes()) {
+                return volumesResponse.volumes().stream().map(
+                        (vol) -> {
+                            CloudResource rootDiskResource = resources.getFirst();
+                            String instanceId = vol.attachments().getFirst().instanceId();
+                            String deviceName = vol.attachments().getFirst().device();
+                            rootDiskResource.setStatus(CommonStatus.CREATED);
+                            rootDiskResource.setInstanceId(instanceId);
+                            VolumeSetAttributes attributes = new VolumeSetAttributes.Builder()
+                                    .withAvailabilityZone(vol.availabilityZone())
+                                    .withVolumes(List.of(new VolumeSetAttributes.Volume(vol.volumeId(), deviceName, vol.size(),
+                                            vol.volumeTypeAsString(), CloudVolumeUsageType.GENERAL)))
+                                    .withDeleteOnTermination(Boolean.TRUE)
+                                    .build();
+                            rootDiskResource.putParameter(CloudResource.ATTRIBUTES, attributes);
+                            return rootDiskResource;
+                        }).toList();
+            }
+        } catch (Exception ex) {
+            String exceptionMessage = format("Exception while querying describe root volumes for volume - %s. " +
+                    "returning empty list. Exception - %s", rootVolumeIds, ex.getMessage());
+            LOGGER.warn(exceptionMessage + "This should not prevent instance creation.");
+        }
+        return new ArrayList<>();
     }
 }

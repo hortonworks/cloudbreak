@@ -6,7 +6,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
 @Service
-public class AwsGovRootDiskTaggingResourceBuilder extends RootDiskTaggingResourceBuilder {
+public class AwsGovRootDiskTaggingResourceBuilder extends AwsNativeRootVolumeResourceBuilder {
 
     @Override
     public Variant variant() {

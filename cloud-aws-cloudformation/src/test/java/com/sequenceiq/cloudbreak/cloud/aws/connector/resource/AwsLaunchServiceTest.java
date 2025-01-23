@@ -101,7 +101,6 @@ class AwsLaunchServiceTest {
         Map<String, String> tags = Map.of("test-tag", "tag");
         AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
         List<CloudResource> cloudInstances = List.of(mock(CloudResource.class));
-        List<CloudResource> rootVolumeResources = List.of(mock(CloudResource.class));
         when(cloudStack.getNetwork()).thenReturn(new Network(new Subnet("cidr")));
         ResourceNotifier resourceNotifier = mock(ResourceNotifier.class);
         when(awsClient.existingKeyPairNameSpecified(any())).thenReturn(Boolean.TRUE);
@@ -120,10 +119,8 @@ class AwsLaunchServiceTest {
         when(awsClient.createEc2Client(any(), anyString())).thenReturn(ec2Client);
         when(cfStackUtil.getInstanceCloudResources(any(), any(), any(), anyList())).thenReturn(cloudInstances);
         when(cloudStack.getTags()).thenReturn(tags);
-        when(awsTaggingService.tagRootVolumes(authenticatedContext, ec2Client, cloudInstances, tags)).thenReturn(rootVolumeResources);
         when(cfStackUtil.getOutputs(any(), any())).thenReturn(Map.of("CreatedVpc", "vpc", "CreatedSubnet", "subnet"));
         underTest.launch(authenticatedContext, cloudStack, resourceNotifier, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 1L));
         verify(awsResourceConnector, times(1)).check(eq(authenticatedContext), anyList());
-        verify(resourceNotifier).notifyAllocations(rootVolumeResources, context);
     }
 }

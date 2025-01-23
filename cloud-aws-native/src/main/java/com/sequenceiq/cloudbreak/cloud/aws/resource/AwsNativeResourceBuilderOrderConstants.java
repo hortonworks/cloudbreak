@@ -24,6 +24,8 @@ public class AwsNativeResourceBuilderOrderConstants {
 
     public static final int NATIVE_EIP_RESOURCE_BUILDER_ORDER = 10;
 
+    public static final int NATIVE_ROOT_VOLUME_RESOURCE_BUILDER_ORDER = 11;
+
     private AwsNativeResourceBuilderOrderConstants() {
     }
 

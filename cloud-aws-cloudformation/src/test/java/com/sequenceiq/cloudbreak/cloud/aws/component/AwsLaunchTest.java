@@ -234,7 +234,7 @@ public class AwsLaunchTest {
 
         // assert
         verify(persistenceNotifier).notifyAllocation(argThat(cloudResource -> ResourceType.AWS_VPC.equals(cloudResource.getType())), any());
-        verify(persistenceNotifier, times(3)).notifyAllocations(
+        verify(persistenceNotifier, times(2)).notifyAllocations(
                 argThat(cloudResources -> cloudResources.stream().allMatch(cloudResource -> ResourceType.AWS_VOLUMESET.equals(cloudResource.getType()))),
                 any());
         verify(persistenceNotifier).notifyAllocation(argThat(cloudResource -> ResourceType.AWS_SUBNET.equals(cloudResource.getType())), any());
@@ -280,7 +280,7 @@ public class AwsLaunchTest {
 
         // assert
         verify(persistenceNotifier).notifyAllocation(argThat(cloudResource -> ResourceType.AWS_VPC.equals(cloudResource.getType())), any());
-        verify(persistenceNotifier, times(3)).notifyAllocations(
+        verify(persistenceNotifier, times(2)).notifyAllocations(
                 argThat(cloudResources -> cloudResources.stream().allMatch(cloudResource -> ResourceType.AWS_VOLUMESET.equals(cloudResource.getType()))),
                 any());
         verify(persistenceNotifier).notifyAllocation(argThat(cloudResource -> ResourceType.AWS_SUBNET.equals(cloudResource.getType())), any());
