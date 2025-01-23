@@ -31,6 +31,8 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEve
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPSCALE_IMAGE_FALLBACK_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPSCALE_IMAGE_FALLBACK_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPSCALE_INVALID_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPSCALE_SALT_INVALID_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPSCALE_SALT_VALID_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPSCALE_UPDATE_USERDATA_SECRETS_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPSCALE_UPDATE_USERDATA_SECRETS_FAILURE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPSCALE_UPDATE_USERDATA_SECRETS_FINISHED_EVENT;
@@ -53,6 +55,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleSta
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.UPSCALE_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.UPSCALE_IMAGE_FALLBACK_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.UPSCALE_PREVALIDATION_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.UPSCALE_SALT_PREVALIDATION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.UPSCALE_UPDATE_USERDATA_SECRETS_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.UPSCALE_UPDATE_USERDATA_SECRETS_STATE;
 
@@ -70,8 +73,10 @@ public class StackUpscaleConfig extends StackStatusFinalizerAbstractFlowConfig<S
     private static final List<Transition<StackUpscaleState, StackUpscaleEvent>> TRANSITIONS =
             new Builder<StackUpscaleState, StackUpscaleEvent>()
                     .from(INIT_STATE).to(UPDATE_DOMAIN_DNS_RESOLVER_STATE).event(ADD_INSTANCES_EVENT).noFailureEvent()
-                    .from(UPDATE_DOMAIN_DNS_RESOLVER_STATE).to(UPSCALE_PREVALIDATION_STATE).event(UPDATE_DOMAIN_DNS_RESOLVER_FINISHED_EVENT)
+                    .from(UPDATE_DOMAIN_DNS_RESOLVER_STATE).to(UPSCALE_SALT_PREVALIDATION_STATE).event(UPDATE_DOMAIN_DNS_RESOLVER_FINISHED_EVENT)
                     .failureEvent(UPDATE_DOMAIN_DNS_RESOLVER_FAILED_EVENT)
+                    .from(UPSCALE_SALT_PREVALIDATION_STATE).to(UPSCALE_PREVALIDATION_STATE).event(UPSCALE_SALT_VALID_EVENT)
+                    .failureEvent(UPSCALE_SALT_INVALID_EVENT)
                     .from(UPSCALE_PREVALIDATION_STATE).to(UPSCALE_CREATE_USERDATA_SECRETS_STATE).event(UPSCALE_VALID_EVENT).failureEvent(UPSCALE_INVALID_EVENT)
                     .from(UPSCALE_PREVALIDATION_STATE).to(EXTEND_METADATA_STATE).event(EXTEND_METADATA_EVENT).failureEvent(UPSCALE_INVALID_EVENT)
 

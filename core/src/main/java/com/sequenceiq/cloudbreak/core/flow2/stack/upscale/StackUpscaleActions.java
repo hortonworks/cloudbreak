@@ -69,6 +69,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpdateDomainDnsResolver
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackImageFallbackResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackSaltValidationRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackSaltValidationResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpscaleCreateUserdataSecretsRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpscaleCreateUserdataSecretsSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpscaleUpdateUserdataSecretsRequest;
@@ -174,12 +176,34 @@ public class StackUpscaleActions {
         };
     }
 
-    @Bean(name = "UPSCALE_PREVALIDATION_STATE")
-    public Action<?, ?> prevalidate() {
+    @Bean(name = "UPSCALE_SALT_PREVALIDATION_STATE")
+    public Action<?, ?> prevalidateSaltAction() {
         return new AbstractStackUpscaleAction<>(UpdateDomainDnsResolverResult.class) {
 
             @Override
             protected void doExecute(StackScalingFlowContext context, UpdateDomainDnsResolverResult payload, Map<Object, Object> variables) {
+                stackUpdater.updateStackStatus(context.getStackId(), DetailedStackStatus.UPSCALE_IN_PROGRESS);
+                if (context.isRepair()) {
+                    LOGGER.debug("Do not check salt yum lock during repair.");
+                    sendEvent(context, new UpscaleStackSaltValidationResult(context.getStackId()));
+                } else {
+                    sendEvent(context, new UpscaleStackSaltValidationRequest(context.getStackId()));
+                }
+            }
+
+            @Override
+            protected Object getFailurePayload(UpdateDomainDnsResolverResult payload, Optional<StackScalingFlowContext> flowContext, Exception ex) {
+                return new StackFailureEvent(EventSelectorUtil.failureSelector(UpscaleStackSaltValidationResult.class), payload.getResourceId(), ex);
+            }
+        };
+    }
+
+    @Bean(name = "UPSCALE_PREVALIDATION_STATE")
+    public Action<?, ?> prevalidate() {
+        return new AbstractStackUpscaleAction<>(UpscaleStackSaltValidationResult.class) {
+
+            @Override
+            protected void doExecute(StackScalingFlowContext context, UpscaleStackSaltValidationResult payload, Map<Object, Object> variables) {
                 StackDto stack = stackDtoService.getById(context.getStackId());
                 Map<String, Integer> hostGroupsWithAdjustment = (Map<String, Integer>) variables.get(HOST_GROUP_WITH_ADJUSTMENT);
                 int instanceCountToCreate = 0;

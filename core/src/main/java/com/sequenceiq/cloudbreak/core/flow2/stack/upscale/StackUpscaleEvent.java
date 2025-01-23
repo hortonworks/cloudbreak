@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.ImageFallbackSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpdateDomainDnsResolverResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackImageFallbackResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackSaltValidationResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpscaleCreateUserdataSecretsFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpscaleCreateUserdataSecretsSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpscaleUpdateUserdataSecretsFailed;
@@ -23,6 +24,8 @@ public enum StackUpscaleEvent implements FlowEvent {
     ADD_INSTANCES_EVENT("STACK_UPSCALE_TRIGGER_EVENT"),
     UPSCALE_VALID_EVENT(CloudPlatformResult.selector(UpscaleStackValidationResult.class)),
     UPSCALE_INVALID_EVENT(CloudPlatformResult.failureSelector(UpscaleStackValidationResult.class)),
+    UPSCALE_SALT_VALID_EVENT(CloudPlatformResult.selector(UpscaleStackSaltValidationResult.class)),
+    UPSCALE_SALT_INVALID_EVENT(CloudPlatformResult.failureSelector(UpscaleStackSaltValidationResult.class)),
     UPSCALE_CREATE_USERDATA_SECRETS_FINISHED_EVENT(EventSelectorUtil.selector(UpscaleCreateUserdataSecretsSuccess.class)),
     UPSCALE_CREATE_USERDATA_SECRETS_FAILED_EVENT(EventSelectorUtil.selector(UpscaleCreateUserdataSecretsFailed.class)),
     UPDATE_DOMAIN_DNS_RESOLVER_FINISHED_EVENT(EventSelectorUtil.selector(UpdateDomainDnsResolverResult.class)),

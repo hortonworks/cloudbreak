@@ -70,8 +70,8 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
-import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpdateDomainDnsResolverResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackSaltValidationResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpscaleCreateUserdataSecretsRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpscaleCreateUserdataSecretsSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpscaleUpdateUserdataSecretsRequest;
@@ -195,8 +195,9 @@ class StackUpscaleActionsTest {
                 Map.of(), Map.of(), false, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, ADJUSTMENT.longValue()));
     }
 
-    private AbstractStackUpscaleAction<UpdateDomainDnsResolverResult> getPrevalidateAction() {
-        AbstractStackUpscaleAction<UpdateDomainDnsResolverResult> action = (AbstractStackUpscaleAction<UpdateDomainDnsResolverResult>) underTest.prevalidate();
+    private AbstractStackUpscaleAction<UpscaleStackSaltValidationResult> getPrevalidateAction() {
+        AbstractStackUpscaleAction<UpscaleStackSaltValidationResult> action =
+                (AbstractStackUpscaleAction<UpscaleStackSaltValidationResult>) underTest.prevalidate();
         initActionPrivateFields(action);
         return action;
     }
@@ -238,7 +239,7 @@ class StackUpscaleActionsTest {
     void prevalidateTestDoExecuteWhenScalingNeededAndAllowed() throws Exception {
         when(cloudContext.getId()).thenReturn(STACK_ID);
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, ADJUSTMENT.longValue());
-        UpdateDomainDnsResolverResult payload = new UpdateDomainDnsResolverResult(STACK_ID);
+        UpscaleStackSaltValidationResult payload = new UpscaleStackSaltValidationResult(STACK_ID);
 
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         when(stackUpscaleService.getInstanceCountToCreate(stackDto, INSTANCE_GROUP_NAME, ADJUSTMENT, false)).thenReturn(ADJUSTMENT);
@@ -274,7 +275,7 @@ class StackUpscaleActionsTest {
     @Test
     void prevalidateTestDoExecuteWhenScalingNeededAndNotAllowed() throws Exception {
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, ADJUSTMENT.longValue());
-        UpdateDomainDnsResolverResult payload = new UpdateDomainDnsResolverResult(STACK_ID);
+        UpscaleStackSaltValidationResult payload = new UpscaleStackSaltValidationResult(STACK_ID);
 
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         when(stackUpscaleService.getInstanceCountToCreate(stackDto, INSTANCE_GROUP_NAME, ADJUSTMENT, false)).thenReturn(ADJUSTMENT_ZERO);
@@ -306,7 +307,7 @@ class StackUpscaleActionsTest {
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, ADJUSTMENT_ZERO.longValue());
         context = new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential, Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO),
                 Map.of(), Map.of(), false, adjustmentTypeWithThreshold);
-        UpdateDomainDnsResolverResult payload = new UpdateDomainDnsResolverResult(STACK_ID);
+        UpscaleStackSaltValidationResult payload = new UpscaleStackSaltValidationResult(STACK_ID);
 
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         when(stackUpscaleService.getInstanceCountToCreate(stackDto, INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO, false)).thenReturn(ADJUSTMENT_ZERO);
@@ -325,7 +326,7 @@ class StackUpscaleActionsTest {
     @Test
     void prevalidateTestCreateContextWhenTriggeredVariantSet() {
         NetworkScaleDetails networkScaleDetails = new NetworkScaleDetails();
-        UpdateDomainDnsResolverResult payload = new UpdateDomainDnsResolverResult(STACK_ID);
+        UpscaleStackSaltValidationResult payload = new UpscaleStackSaltValidationResult(STACK_ID);
         Map<Object, Object> variables = createVariables(Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO),
                 Map.of(INSTANCE_GROUP_NAME, Set.of("hostname")), networkScaleDetails, null, VARIANT);
         new AbstractActionTestSupport<>(getPrevalidateAction()).prepareExecution(payload, variables);
@@ -339,7 +340,7 @@ class StackUpscaleActionsTest {
     @Test
     void prevalidateTestCreateContextWhenTriggeredVariantNotSet() {
         NetworkScaleDetails networkScaleDetails = new NetworkScaleDetails();
-        UpdateDomainDnsResolverResult payload = new UpdateDomainDnsResolverResult(STACK_ID);
+        UpscaleStackSaltValidationResult payload = new UpscaleStackSaltValidationResult(STACK_ID);
         Map<Object, Object> variables = createVariables(Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO),
                 Map.of(INSTANCE_GROUP_NAME, Set.of("hostname")),
                 networkScaleDetails, null, null);
