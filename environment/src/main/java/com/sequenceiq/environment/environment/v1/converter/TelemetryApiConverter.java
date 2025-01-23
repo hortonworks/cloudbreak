@@ -1,6 +1,9 @@
 package com.sequenceiq.environment.environment.v1.converter;
 
 import java.util.HashMap;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -61,6 +64,23 @@ public class TelemetryApiConverter {
             telemetry.setFluentAttributes(new HashMap<>(request.getFluentAttributes()));
         }
         return telemetry;
+    }
+
+    public EnvironmentTelemetry convertForEdit(EnvironmentTelemetry telemetry, TelemetryRequest request, Features accountFeatures, String accountId) {
+        if (request != null) {
+            executeTelemetryEditForFieldIfNeeded(request.getLogging(), this::createLoggingFromRequest, telemetry::setLogging);
+            executeTelemetryEditForFieldIfNeeded(request.getMonitoring(),
+                    monitoring -> createMonitoringFromRequest(request.getMonitoring(), accountId), telemetry::setMonitoring);
+            executeTelemetryEditForFieldIfNeeded(request.getWorkloadAnalytics(), this::createWorkloadAnalyticsFromRequest, telemetry::setWorkloadAnalytics);
+            executeTelemetryEditForFieldIfNeeded(request.getFeatures(),
+                    features -> createEnvironmentFeaturesFromRequest(features, accountFeatures, accountId), telemetry::setFeatures);
+            executeTelemetryEditForFieldIfNeeded(request.getFluentAttributes(), attr -> attr, telemetry::setFluentAttributes);
+        }
+        return telemetry;
+    }
+
+    private <R, F> void executeTelemetryEditForFieldIfNeeded(R requestObject, Function<R, F> mapper, Consumer<F> setter) {
+        Optional.ofNullable(requestObject).map(mapper).ifPresent(setter);
     }
 
     public TelemetryResponse convert(EnvironmentTelemetry telemetry, String accountId) {

@@ -228,7 +228,7 @@ class EnvironmentApiConverterTest {
         when(environment.getCreator()).thenReturn("creator");
         when(environment.getResourceCrn()).thenReturn("crn");
         when(accountTelemetryService.getOrDefault(any())).thenReturn(accountTelemetry);
-        when(telemetryApiConverter.convert(eq(request.getTelemetry()), any(), anyString())).thenReturn(environmentTelemetry);
+        when(telemetryApiConverter.convertForEdit(any(), eq(request.getTelemetry()), any(), anyString())).thenReturn(environmentTelemetry);
         when(networkRequestToDtoConverter.convert(request.getNetwork())).thenReturn(networkDto);
         when(proxyRequestToProxyConfigConverter.convert(request.getProxy())).thenReturn(proxyConfig);
         when(dataServicesConverter.convertToDto(request.getDataServices())).thenReturn(dataServices);
@@ -246,7 +246,7 @@ class EnvironmentApiConverterTest {
 
         verify(accountTelemetry).getFeatures();
         verify(accountTelemetryService).getOrDefault(any());
-        verify(telemetryApiConverter).convert(eq(request.getTelemetry()), any(), anyString());
+        verify(telemetryApiConverter).convertForEdit(any(), eq(request.getTelemetry()), any(), anyString());
         verify(networkRequestToDtoConverter).convert(request.getNetwork());
         verify(networkRequestToDtoConverter, times(0)).setDefaultAvailabilityZonesIfNeeded(any());
     }

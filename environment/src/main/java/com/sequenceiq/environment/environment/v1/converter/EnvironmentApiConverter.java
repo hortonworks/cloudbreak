@@ -415,23 +415,23 @@ public class EnvironmentApiConverter {
                 .build();
     }
 
-    public EnvironmentEditDto initEditDto(Environment currentEnvironmentFromDatabase, EnvironmentEditRequest request) {
+    public EnvironmentEditDto initEditDto(Environment currentEnvironmentFromDb, EnvironmentEditRequest request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentEditDto.Builder builder = EnvironmentEditDto.builder()
                 .withDescription(request.getDescription())
                 .withAccountId(accountId)
                 .withUserDefinedTags(request.getTags())
-                .withCreator(currentEnvironmentFromDatabase.getCreator())
-                .withCloudPlatform(currentEnvironmentFromDatabase.getCloudPlatform())
-                .withCrn(currentEnvironmentFromDatabase.getResourceCrn())
+                .withCreator(currentEnvironmentFromDb.getCreator())
+                .withCloudPlatform(currentEnvironmentFromDb.getCloudPlatform())
+                .withCrn(currentEnvironmentFromDb.getResourceCrn())
                 .withIdBrokerMappingSource(request.getIdBrokerMappingSource())
                 .withCloudStorageValidation(request.getCloudStorageValidation())
                 .withAdminGroupName(request.getAdminGroupName())
                 .withFreeipaNodeCount(request.getFreeIpaNodeCount());
         NullUtil.doIfNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
         NullUtil.doIfNotNull(request.getAuthentication(), authentication -> builder.withAuthentication(authenticationRequestToDto(authentication)));
-        NullUtil.doIfNotNull(request.getTelemetry(), telemetryRequest -> builder.withTelemetry(telemetryApiConverter.convert(request.getTelemetry(),
-                accountTelemetryService.getOrDefault(accountId).getFeatures(), accountId)));
+        NullUtil.doIfNotNull(request.getTelemetry(), telemetryRequest -> builder.withTelemetry(telemetryApiConverter.convertForEdit(
+                currentEnvironmentFromDb.getTelemetry(), request.getTelemetry(), accountTelemetryService.getOrDefault(accountId).getFeatures(), accountId)));
         NullUtil.doIfNotNull(request.getBackup(), backupRequest -> builder.withBackup(backupConverter.convert(request.getBackup())));
         NullUtil.doIfNotNull(request.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessRequestToDto(securityAccess)));
         NullUtil.doIfNotNull(request.getAws(), awsParams -> builder.withParameters(awsParamsToParametersDto(awsParams, null)));

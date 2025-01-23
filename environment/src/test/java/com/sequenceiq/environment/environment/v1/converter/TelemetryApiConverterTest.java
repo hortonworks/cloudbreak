@@ -10,6 +10,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
+import java.util.Map;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -258,6 +260,26 @@ public class TelemetryApiConverterTest {
         assertNotNull(result.getFeatures());
         assertTrue(result.getFeatures().getMonitoring().getEnabled());
         assertEquals(INSTANCE_PROFILE_VALUE, result.getLogging().getS3().getInstanceProfile());
+    }
+
+    @Test
+    void testConvertForEdit() {
+        EnvironmentLogging logging = new EnvironmentLogging();
+        S3CloudStorageParameters s3Params = new S3CloudStorageParameters();
+        s3Params.setInstanceProfile(INSTANCE_PROFILE_VALUE);
+        logging.setS3(s3Params);
+        EnvironmentTelemetry telemetry = new EnvironmentTelemetry();
+        telemetry.setLogging(logging);
+
+        TelemetryRequest request = new TelemetryRequest();
+        WorkloadAnalyticsRequest workloadAnalytics = new WorkloadAnalyticsRequest();
+        workloadAnalytics.setAttributes(Map.of());
+        request.setWorkloadAnalytics(workloadAnalytics);
+
+        underTest.convertForEdit(telemetry, request, null, null);
+
+        assertNotNull(telemetry.getLogging());
+        assertNotNull(telemetry.getWorkloadAnalytics());
     }
 
 }
