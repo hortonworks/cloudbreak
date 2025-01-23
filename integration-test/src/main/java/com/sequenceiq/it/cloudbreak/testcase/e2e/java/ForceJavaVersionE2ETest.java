@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.Test;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -25,6 +26,7 @@ import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJavaVersionActions;
 import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETest;
+import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETestUtil;
 
 public class ForceJavaVersionE2ETest extends AbstractE2ETest implements ImageValidatorE2ETest {
 
@@ -37,13 +39,17 @@ public class ForceJavaVersionE2ETest extends AbstractE2ETest implements ImageVal
     @Inject
     private DistroXTestClient distroXTestClient;
 
+    @Inject
+    private ImageValidatorE2ETestUtil imageValidatorE2ETestUtil;
+
     @Override
     protected void setupTest(TestContext testContext) {
+
         // The SafeLogic CryptoComply for Java should be installed on Cloudbreak images. This is validated by default in this test project.
         // So the SafeLogic validation should be disabled for this test suite.
         testContext.skipSafeLogicValidation();
 
-        createDefaultUser(testContext);
+        imageValidatorE2ETestUtil.setupTest(testContext);
         createDefaultCredential(testContext);
         initializeDefaultBlueprints(testContext);
         createEnvironmentWithFreeIpa(testContext);
@@ -55,6 +61,13 @@ public class ForceJavaVersionE2ETest extends AbstractE2ETest implements ImageVal
             when = "create a SDX and DataHub clusters with forcing all supported java versions ",
             then = "clusters are available and default java version is the forced one on all instances ")
     public void testClusterProvisionWithForcedJavaVersion(TestContext testContext) {
+
+        // do not test java versions that are not supported by the image - these will fail anyway
+        if (supportedJavaVersions.size() > 1) {
+            ImageV4Response imageUnderValidation = imageValidatorE2ETestUtil.getImageUnderValidation(testContext).orElseThrow();
+            supportedJavaVersions.removeIf(jdkVersion -> jdkNotSupportedByImage(imageUnderValidation, jdkVersion));
+        }
+
         Integer sdxJavaVersion = supportedJavaVersions.getFirst();
         testContext.given(SdxInternalTestDto.class).withJavaVersion(sdxJavaVersion);
         createDatalakeWithoutDatabase(testContext);
@@ -65,9 +78,26 @@ public class ForceJavaVersionE2ETest extends AbstractE2ETest implements ImageVal
         if (supportedJavaVersions.size() > 1) {
             supportedJavaVersions.remove(sdxJavaVersion);
         }
+
         Map<Integer, DistroXTestDto> distroXTestDtos = getDistroxTestDtos(testContext, supportedJavaVersions);
         distroXTestDtos.forEach(this::createDistroxWithJavaVersion);
         distroXTestDtos.forEach(this::awaitAndValidateDistroxWithJavaVersion);
+    }
+
+    private boolean jdkNotSupportedByImage(ImageV4Response imageUnderValidation, Integer jdkMajorVersion) {
+
+        logger.info(String.format("Checking if JDK %d is supported by image with ID %s!", jdkMajorVersion, imageUnderValidation.getUuid()));
+        imageUnderValidation.getPackageVersions().forEach(this::listPackageInfo);
+        boolean jdkIsSupported = imageUnderValidation.getPackageVersions().containsKey("java".concat(jdkMajorVersion.toString()));
+        if (!jdkIsSupported) {
+            logger.warn(String.format("Skipping test with enforced JDK %d as it is not supported by image with ID %s!",
+                    jdkMajorVersion, imageUnderValidation.getUuid()));
+        }
+        return !jdkIsSupported;
+    }
+
+    private void listPackageInfo(String name, String version) {
+        logger.info(String.format("%s has version %s", name, version));
     }
 
     private Set<String> getSdxPrivateIpAddresses(TestContext context) {
