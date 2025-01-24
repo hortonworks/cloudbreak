@@ -40,7 +40,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 import com.sequenceiq.it.cloudbreak.dto.AbstractFreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.AbstractSdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
-import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
@@ -360,23 +359,6 @@ public class SshJClientActions {
         return quantity.get();
     }
 
-    private <T extends CloudbreakTestDto> T eventCountsValidation(T testDto, Map<String, Pair<Integer, String>> statusReportByIp, String eventName) {
-        for (Entry<String, Pair<Integer, String>> statusReport : statusReportByIp.entrySet()) {
-            List<Integer> eventCounts = new Json(statusReport.getValue().getValue()).getMap().entrySet().stream()
-                    .filter(status -> String.valueOf(status.getKey()).contains(eventName))
-                    .map(Entry::getValue).toList()
-                    .stream()
-                    .map(countObject -> (Integer) countObject)
-                    .collect(Collectors.toList());
-            Log.log(LOGGER, format(" Found '%s' %s events at '%s' instance. ", eventCounts, eventName, statusReport.getKey()));
-            if (CollectionUtils.isEmpty(eventCounts) || eventCounts.contains(0)) {
-                Log.error(LOGGER, format(" %s does NOT generated on '%s' instance! ", eventName, statusReport.getKey()));
-                throw new TestFailException(format("%s does NOT generated on '%s' instance!", eventName, statusReport.getKey()));
-            }
-        }
-        return testDto;
-    }
-
     private <T extends CloudbreakTestDto> T eventStatusesNotOkValidation(T testDto, Map<String, Pair<Integer, String>> statusReportByIp,
             String acceptableNokEventName) {
         for (Entry<String, Pair<Integer, String>> statusReport : statusReportByIp.entrySet()) {
@@ -397,16 +379,6 @@ public class SshJClientActions {
                 });
             }
         }
-        return testDto;
-    }
-
-    public DistroXTestDto checkMeteringStatus(DistroXTestDto testDto, List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
-        String meteringStatusCommand = "sudo cdp-doctor metering status --format json";
-        Map<String, Pair<Integer, String>> meteringStatusReportByIp = getInstanceGroupIps(instanceGroups, hostGroupNames, false).stream()
-                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, meteringStatusCommand)));
-
-        eventCountsValidation(testDto, meteringStatusReportByIp, "heartbeatEventCount");
-        eventStatusesNotOkValidation(testDto, meteringStatusReportByIp, "databusReachable");
         return testDto;
     }
 

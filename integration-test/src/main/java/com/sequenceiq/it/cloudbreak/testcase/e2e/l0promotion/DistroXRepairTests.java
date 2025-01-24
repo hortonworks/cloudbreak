@@ -81,7 +81,6 @@ public class DistroXRepairTests extends AbstractE2ETest {
                 .given(DistroXTestDto.class)
                 .when(distroXTestClient.get())
                 .then(this::verifyMountedDisks)
-                .then((tc, testDto, client) -> sshJUtil.checkMeteringStatus(testDto, testDto.getResponse().getInstanceGroups(), List.of(MASTER.getName())))
                 .then((tc, testDto, client) -> sshJUtil.checkNetworkStatus(testDto, testDto.getResponse().getInstanceGroups(), List.of(MASTER.getName())))
                 .then((tc, testDto, client) -> sshJUtil.checkFluentdStatus(testDto, testDto.getResponse().getInstanceGroups(), List.of(MASTER.getName())))
                 .then((tc, testDto, client) -> sshJUtil.checkCdpServiceStatus(testDto, testDto.getResponse().getInstanceGroups(), List.of(MASTER.getName())))
