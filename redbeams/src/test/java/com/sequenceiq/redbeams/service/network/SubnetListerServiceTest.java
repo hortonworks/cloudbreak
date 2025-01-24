@@ -72,9 +72,15 @@ public class SubnetListerServiceTest {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private EnvironmentNetworkResponse environmentNetworkResponse;
 
-    private final CloudSubnet subnet1 = new CloudSubnet(SUBNET_ID_1, "name1");
+    private final CloudSubnet subnet1 = new CloudSubnet.Builder()
+            .id(SUBNET_ID_1)
+            .availabilityZone("name1")
+            .build();
 
-    private final CloudSubnet subnet2 = new CloudSubnet(SUBNET_ID_2, "name2");
+    private final CloudSubnet subnet2 = new CloudSubnet.Builder()
+            .id(SUBNET_ID_2)
+            .availabilityZone("name2")
+            .build();
 
     private final Map<String, CloudSubnet> subnets = Map.of(SUBNET_ID_1, subnet1, SUBNET_ID_2, subnet2);
 
@@ -132,7 +138,10 @@ public class SubnetListerServiceTest {
     @Test
     public void testExpandAzureResourceIdWithResourceId() {
         String subnetResourceId = formatAzureResourceId(SUBSCRIPTION_ID, RESOURCE_GROUP, NETWORK_ID, SUBNET_ID_1);
-        CloudSubnet cloudSubnet = new CloudSubnet(subnetResourceId, "name1");
+        CloudSubnet cloudSubnet = new CloudSubnet.Builder()
+                .id(subnetResourceId)
+                .availabilityZone("name1")
+                .build();
 
         CloudSubnet expandedSubnet = underTest.expandAzureResourceId(cloudSubnet, detailedEnvironmentResponse, SUBSCRIPTION_ID);
 

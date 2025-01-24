@@ -47,8 +47,21 @@ class EnvironmentValidatorTest {
 
     @Test
     void checkValidEnvironmentAwsHANotEnoughAZs() {
-        Map<String, CloudSubnet> subnetMetas = Map.of("subnet1", new CloudSubnet("id1", "name1", "az1", "cidr"),
-                "subnet2", new CloudSubnet("id2", "name2", "az1", "cidr"));
+        Map<String, CloudSubnet> subnetMetas = Map.of("subnet1",
+                new CloudSubnet.Builder()
+                        .id("id1")
+                        .name("name1")
+                        .availabilityZone("az1")
+                        .cidr("cidr")
+                        .build(),
+                "subnet2",
+                new CloudSubnet.Builder()
+                        .id("id2")
+                        .name("name2")
+                        .availabilityZone("az1")
+                        .cidr("cidr")
+                        .build()
+        );
 
         DetailedEnvironmentResponse environment = createEnvironment(CloudPlatform.AWS.name(), subnetMetas);
         assertThatThrownBy(() -> underTest.checkValidEnvironment(STACKNAME, DatabaseAvailabilityType.HA, environment))
@@ -58,8 +71,20 @@ class EnvironmentValidatorTest {
 
     @Test
     void checkValidEnvironmentAwsHA() {
-        Map<String, CloudSubnet> subnetMetas = Map.of("subnet1", new CloudSubnet("id1", "name1", "az1", "cidr"),
-                "subnet2", new CloudSubnet("id2", "name2", "az2", "cidr"));
+        Map<String, CloudSubnet> subnetMetas = Map.of("subnet1",
+                new CloudSubnet.Builder()
+                        .id("id1")
+                        .name("name1")
+                        .availabilityZone("az1")
+                        .cidr("cidr")
+                        .build(),
+                "subnet2",
+                new CloudSubnet.Builder()
+                        .id("id2")
+                        .name("name2")
+                        .availabilityZone("az2")
+                        .cidr("cidr")
+                        .build());
 
         DetailedEnvironmentResponse environment = createEnvironment(CloudPlatform.AWS.name(), subnetMetas);
         underTest.checkValidEnvironment(STACKNAME, DatabaseAvailabilityType.HA, environment);

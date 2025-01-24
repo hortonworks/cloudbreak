@@ -169,7 +169,12 @@ class EnvironmentBaseNetworkConverterTest extends SubnetTest {
     }
 
     private CloudSubnet getCloudSubnet(String availabilityZone) {
-        return new CloudSubnet("eu-west-1", "name", availabilityZone, "cidr");
+        return new CloudSubnet.Builder()
+                .id("eu-west-1")
+                .name("name")
+                .availabilityZone(availabilityZone)
+                .cidr("cidr")
+                .build();
     }
 
     private EnvironmentNetworkResponse setupResponse() {

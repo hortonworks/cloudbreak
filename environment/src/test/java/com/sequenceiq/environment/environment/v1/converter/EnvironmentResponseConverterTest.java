@@ -455,7 +455,12 @@ class EnvironmentResponseConverterTest {
                 .withParentEnvironmentCrn("environment crn")
                 .withParentEnvironmentName("parent-env")
                 .withParentEnvironmentCloudPlatform("AWS")
-                .withNetwork(NetworkDto.builder().withSubnetMetas(Map.of("subnet1", new CloudSubnet("subnet1-id", "subnet1"))).build())
+                .withNetwork(NetworkDto.builder().withSubnetMetas(Map.of("subnet1",
+                        new CloudSubnet.Builder()
+                                .id("subnet1-id")
+                                .name("subnet1")
+                                .build()))
+                        .build())
                 .withSecurityAccess(createSecurityAccess())
                 .withEnvironmentDeletionType(EnvironmentDeletionType.FORCE)
                 .withEnableSecretEncryption(true)

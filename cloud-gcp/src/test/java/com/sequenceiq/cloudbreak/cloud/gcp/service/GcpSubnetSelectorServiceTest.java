@@ -36,7 +36,12 @@ public class GcpSubnetSelectorServiceTest {
     public Collection<CloudSubnet> generateSubnetMetas(int count) {
         List<CloudSubnet> subnetMetas = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            subnetMetas.add(new CloudSubnet("" + i, "name-" + i));
+            subnetMetas.add(
+                    new CloudSubnet.Builder()
+                    .id("" + i)
+                    .name("name-" + i)
+                    .build()
+            );
         }
         return subnetMetas;
     }

@@ -60,11 +60,29 @@ public class NetworkTest {
     }
 
     protected CloudSubnet createPrivateSubnet(String id, String aZ) {
-        return new CloudSubnet(id, "name", aZ, "cidr", true, false, false, SubnetType.PRIVATE);
+        return new CloudSubnet.Builder()
+                .id(id)
+                .name("name")
+                .availabilityZone(aZ)
+                .cidr("cidr")
+                .privateSubnet(true)
+                .mapPublicIpOnLaunch(false)
+                .igwAvailable(false)
+                .type(SubnetType.PRIVATE)
+                .build();
     }
 
     protected CloudSubnet createPublicSubnet(String id, String aZ) {
-        return new CloudSubnet(id, "name", aZ, "cidr", false, true, true, SubnetType.PUBLIC);
+        return new CloudSubnet.Builder()
+                .id(id)
+                .name("name")
+                .availabilityZone(aZ)
+                .cidr("cidr")
+                .privateSubnet(false)
+                .mapPublicIpOnLaunch(true)
+                .igwAvailable(true)
+                .type(SubnetType.PUBLIC)
+                .build();
     }
 
     protected Map<String, CloudSubnet> createDefaultPrivateSubnets() {

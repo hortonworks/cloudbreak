@@ -97,7 +97,12 @@ public class NetworkTestUtils {
     }
 
     public static CloudSubnet getCloudSubnet(String availabilityZone) {
-        return new CloudSubnet("eu-west-1", "name", availabilityZone, "cidr");
+        return new CloudSubnet.Builder()
+                .id("eu-west-1")
+                .name("name")
+                .availabilityZone(availabilityZone)
+                .cidr("cidr")
+                .build();
     }
 
     public static AzureParams getAzureParams(boolean noPublicIp, boolean withNetworkId, boolean withResourceGroupName) {

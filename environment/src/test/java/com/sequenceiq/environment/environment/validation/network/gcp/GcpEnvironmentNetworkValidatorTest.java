@@ -370,8 +370,16 @@ class GcpEnvironmentNetworkValidatorTest {
     void testValidateDuringFlowWhenEndpointGatewaySubnetIdNotInVPC() {
         Region region = Region.region("region");
 
-        Map<String, CloudSubnet> eagMetas = Map.of("eagsubnet1", new CloudSubnet("eid1",  "eagsubnet1"));
-        Map<String, CloudSubnet> metas = Map.of("subnet1", new CloudSubnet("id1",  "subnet1"));
+        Map<String, CloudSubnet> eagMetas = Map.of("eagsubnet1",
+                new CloudSubnet.Builder()
+                        .id("eid1")
+                        .name("eagsubnet1")
+                        .build());
+        Map<String, CloudSubnet> metas = Map.of("subnet1",
+                new CloudSubnet.Builder()
+                        .id("id1")
+                        .name("subnet1")
+                        .build());
 
         NetworkDto networkDto = NetworkDto.builder()
                 .withGcp(GcpParams.builder().withNetworkId("gcpNetworkId").build())
@@ -390,8 +398,16 @@ class GcpEnvironmentNetworkValidatorTest {
 
         when(cloudNetworkService.retrieveSubnetMetadata(any(EnvironmentDto.class), any(NetworkDto.class))).thenReturn(metas);
 
-        Map<String, CloudSubnet> providerSubnets = Map.of("providerSubnet1", new CloudSubnet("pnid1",  "providerSubnet1"),
-                "providerSubnet2", new CloudSubnet("pnid2",  "providerSubnet2"));
+        Map<String, CloudSubnet> providerSubnets = Map.of("providerSubnet1",
+                new CloudSubnet.Builder()
+                        .id("pnid1")
+                        .name("providerSubnet1")
+                        .build(),
+                "providerSubnet2",
+                new CloudSubnet.Builder()
+                        .id("pnid2")
+                        .name("providerSubnet2")
+                        .build());
         when(cloudNetworkService.retrieveEndpointGatewaySubnetMetadata(any(EnvironmentDto.class), any(NetworkDto.class))).thenReturn(providerSubnets);
 
         underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
@@ -403,8 +419,16 @@ class GcpEnvironmentNetworkValidatorTest {
     void testValidateDuringFlowWhenEndpointGatewaySubnetIdIsInVPC() {
         Region region = Region.region("region");
 
-        Map<String, CloudSubnet> eagMetas = Map.of("eagsubnet1", new CloudSubnet("eid1",  "eagsubnet1"));
-        Map<String, CloudSubnet> metas = Map.of("subnet1", new CloudSubnet("id1",  "subnet1"));
+        Map<String, CloudSubnet> eagMetas = Map.of("eagsubnet1",
+            new CloudSubnet.Builder()
+                .id("eid1")
+                .name("eagsubnet1")
+                .build());
+        Map<String, CloudSubnet> metas = Map.of("subnet1",
+            new CloudSubnet.Builder()
+                .id("id1")
+                .name("subnet1")
+                .build());
 
         NetworkDto networkDto = NetworkDto.builder()
                 .withGcp(GcpParams.builder().withNetworkId("gcpNetworkId").build())

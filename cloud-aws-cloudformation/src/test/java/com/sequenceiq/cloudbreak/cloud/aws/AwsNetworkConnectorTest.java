@@ -478,7 +478,16 @@ public class AwsNetworkConnectorTest {
 
     private CloudSubnet getSubnet(String az, int index) {
         String nextSubnetId = "subnet-" + index;
-        return new CloudSubnet(nextSubnetId, "", az, "", true, false, false, PUBLIC);
+        return new CloudSubnet.Builder()
+                .id(nextSubnetId)
+                .name("")
+                .availabilityZone(az)
+                .cidr("")
+                .privateSubnet(true)
+                .mapPublicIpOnLaunch(false)
+                .igwAvailable(false)
+                .type(PUBLIC)
+                .build();
     }
 
     private DescribeVpcsResponse describeVpcsResult(String... cidrBlocks) {

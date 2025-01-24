@@ -91,8 +91,14 @@ public class NetworkBuilderServiceTest {
         DBStack dbStack = new DBStack();
         dbStack.setCloudPlatform(AWS_CLOUD_PLATFORM.name());
         List<CloudSubnet> cloudSubnets = List.of(
-                new CloudSubnet("subnet-1", "", "az-a", ""),
-                new CloudSubnet("subnet-2", "", "az-b", "")
+                new CloudSubnet.Builder()
+                        .id("subnet-1")
+                        .availabilityZone("az-a")
+                        .build(),
+                new CloudSubnet.Builder()
+                        .id("subnet-2")
+                        .availabilityZone("az-b")
+                        .build()
         );
         DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
                 .withCloudPlatform(AWS_CLOUD_PLATFORM.name())
@@ -154,8 +160,14 @@ public class NetworkBuilderServiceTest {
     public void testUpdateNetworkSubnetsWhenSubnetsUpdateEnabled() {
         DBStack dbStack = getDbStack(Status.AVAILABLE);
         List<CloudSubnet> cloudSubnets = List.of(
-                new CloudSubnet("subnet-1", "", "az-a", ""),
-                new CloudSubnet("subnet-2", "", "az-b", "")
+                new CloudSubnet.Builder()
+                        .id("subnet-1")
+                        .availabilityZone("az-a")
+                        .build(),
+                new CloudSubnet.Builder()
+                        .id("subnet-2")
+                        .availabilityZone("az-b")
+                        .build()
         );
         when(cloudParameterCache.isDbSubnetsUpdateEnabled(dbStack.getCloudPlatform())).thenReturn(true);
         DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
@@ -185,8 +197,14 @@ public class NetworkBuilderServiceTest {
     public void testUpdateNetworkSubnetsWithFlexibleParameters() {
         DBStack dbStack = getDbStack(Status.AVAILABLE);
         List<CloudSubnet> cloudSubnets = List.of(
-                new CloudSubnet("subnet-1", "", "az-a", ""),
-                new CloudSubnet("subnet-2", "", "az-b", "")
+                new CloudSubnet.Builder()
+                        .id("subnet-1")
+                        .availabilityZone("az-a")
+                        .build(),
+                new CloudSubnet.Builder()
+                        .id("subnet-2")
+                        .availabilityZone("az-b")
+                        .build()
         );
         when(cloudParameterCache.isDbSubnetsUpdateEnabled(dbStack.getCloudPlatform())).thenReturn(true);
         DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();

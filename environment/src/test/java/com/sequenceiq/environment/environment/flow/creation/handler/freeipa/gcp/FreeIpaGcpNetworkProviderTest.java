@@ -28,7 +28,14 @@ class FreeIpaGcpNetworkProviderTest {
         String availabilityZone = "gcp-region1-zone1";
         EnvironmentDto environmentDto = EnvironmentDto.builder()
                 .withNetwork(NetworkDto.builder()
-                        .withSubnetMetas(Map.of(subnetId, new CloudSubnet("id", "name", availabilityZone, "cidr")))
+                        .withSubnetMetas(Map.of(subnetId,
+                                new CloudSubnet.Builder()
+                                        .id("id")
+                                        .name("name")
+                                        .availabilityZone(availabilityZone)
+                                        .cidr("cidr")
+                                        .build()
+                        ))
                         .build())
                 .build();
         GcpNetworkParameters gcpNetworkParameters = new GcpNetworkParameters();
@@ -47,7 +54,14 @@ class FreeIpaGcpNetworkProviderTest {
         String availabilityZone = "gcp-region1-zone1";
         EnvironmentDto environmentDto = EnvironmentDto.builder()
                 .withNetwork(NetworkDto.builder()
-                        .withSubnetMetas(Map.of(subnetId, new CloudSubnet("id", "name", availabilityZone, "cidr")))
+                        .withSubnetMetas(Map.of(subnetId,
+                                new CloudSubnet.Builder()
+                                        .id("id")
+                                        .name("name")
+                                        .availabilityZone(availabilityZone)
+                                        .cidr("cidr")
+                                        .build()
+                        ))
                         .withGcp(GcpParams.builder().build())
                         .build())
                 .build();
@@ -67,7 +81,14 @@ class FreeIpaGcpNetworkProviderTest {
         String envAvailabilityZone = "gcp-region1-zone1";
         String customAvailabilityZone = "custom-gcp-region1-zone1";
         NetworkDto networkDto = NetworkDto.builder()
-                .withSubnetMetas(Map.of(subnetId, new CloudSubnet("id", "name", envAvailabilityZone, "cidr")))
+                .withSubnetMetas(Map.of(subnetId,
+                        new CloudSubnet.Builder()
+                                .id("id")
+                                .name("name")
+                                .availabilityZone(envAvailabilityZone)
+                                .cidr("cidr")
+                                .build()
+                ))
                 .withGcp(GcpParams.builder()
                         .withAvailabilityZones(Set.of(customAvailabilityZone))
                         .build())
@@ -91,7 +112,13 @@ class FreeIpaGcpNetworkProviderTest {
         Set<String> envAvailabilityZones = Set.of("gcp-region1-zone3", "gcp-region1-zone4");
         String subnetAvailabilityZone = "gcp-region1-zone4";
         NetworkDto networkDto = NetworkDto.builder()
-                .withSubnetMetas(Map.of(subnetId, new CloudSubnet("id", "name", subnetAvailabilityZone, "cidr")))
+                .withSubnetMetas(Map.of(subnetId, new CloudSubnet.Builder()
+                        .id("id")
+                        .name("name")
+                        .availabilityZone(subnetAvailabilityZone)
+                        .cidr("cidr")
+                        .build()
+                ))
                 .withGcp(GcpParams.builder()
                         .withAvailabilityZones(envAvailabilityZones)
                         .build())

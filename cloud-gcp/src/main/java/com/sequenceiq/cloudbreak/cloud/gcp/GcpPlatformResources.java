@@ -233,15 +233,18 @@ public class GcpPlatformResources implements PlatformResources {
                         if (network.getSubnetworks().contains(subnetwork.getSelfLink())) {
                             boolean igwAvailable = !Strings.isNullOrEmpty(subnetwork.getGatewayAddress());
                             subnets.add(
-                                    new CloudSubnet(
-                                            subnetwork.getId().toString(),
-                                            subnetwork.getName(),
-                                            zone,
-                                            subnetwork.getIpCidrRange(),
-                                            subnetwork.getPrivateIpGoogleAccess(),
-                                            !subnetwork.getPrivateIpGoogleAccess(),
-                                            igwAvailable,
-                                            igwAvailable ? PUBLIC : PRIVATE));
+                                    new CloudSubnet.Builder()
+                                            .id(subnetwork.getId().toString())
+                                            .name(subnetwork.getName())
+                                            .availabilityZone(zone)
+                                            .cidr(subnetwork.getIpCidrRange())
+                                            .secondaryCidrs(getSecondaryRanges(subnetwork))
+                                            .privateSubnet(subnetwork.getPrivateIpGoogleAccess())
+                                            .mapPublicIpOnLaunch(!subnetwork.getPrivateIpGoogleAccess())
+                                            .igwAvailable(igwAvailable)
+                                            .type(igwAvailable ? PUBLIC : PRIVATE)
+                                            .build()
+                            );
                         }
                     }
                 }
@@ -253,6 +256,13 @@ public class GcpPlatformResources implements PlatformResources {
         result.put(region.value(), cloudNetworks);
 
         return new CloudNetworks(result);
+    }
+
+    private static List<String> getSecondaryRanges(Subnetwork subnetwork) {
+        if (subnetwork.getSecondaryIpRanges() != null) {
+            return subnetwork.getSecondaryIpRanges().stream().map(s -> s.getIpCidrRange()).collect(Collectors.toList());
+        }
+        return List.of();
     }
 
     private static boolean isNetworkListNotNull(NetworkList networkList) {

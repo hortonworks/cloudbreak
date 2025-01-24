@@ -93,11 +93,19 @@ public class NetworkRequestToDtoConverter {
         }
         if (network.getSubnetIds() != null) {
             builder.withSubnetMetas(network.getSubnetIds().stream()
-                    .collect(Collectors.toMap(id -> id, id -> new CloudSubnet(id, id))));
+                    .collect(Collectors.toMap(id -> id, id -> new CloudSubnet.Builder()
+                            .id(id)
+                            .name(id)
+                            .build()
+                    )));
         }
         if (network.getEndpointGatewaySubnetIds() != null) {
             builder.withEndpointGatewaySubnetMetas(network.getEndpointGatewaySubnetIds().stream()
-                .collect(Collectors.toMap(id -> id, id -> new CloudSubnet(id, id))));
+                .collect(Collectors.toMap(id -> id, id -> new CloudSubnet.Builder()
+                        .id(id)
+                        .name(id)
+                        .build()
+                )));
         }
         return builder
                 .withNetworkCidr(network.getNetworkCidr())

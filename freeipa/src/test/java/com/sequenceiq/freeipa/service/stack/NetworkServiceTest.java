@@ -71,12 +71,36 @@ class NetworkServiceTest {
         stack.setPlatformvariant(PLATFORM);
         Credential credential = new Credential(PLATFORM, "", "", "", "acc");
         ExtendedCloudCredential extendedCred = new ExtendedCloudCredential(new CloudCredential(), PLATFORM, "", "", new ArrayList<>());
-        CloudSubnet subnet1 = new CloudSubnet(SUBNET_1, SUBNET_1, "", "10.1.0.0/24");
-        CloudSubnet subnet2 = new CloudSubnet(SUBNET_2, SUBNET_2, "", "10.1.1.0/24");
-        CloudSubnet subnet3 = new CloudSubnet("indifferent", "indifferent", "", "10.1.2.0/24");
+        CloudSubnet subnet1 = new CloudSubnet.Builder()
+                .id(SUBNET_1)
+                .name(SUBNET_1)
+                .availabilityZone("")
+                .cidr("10.1.0.0/24")
+                .build();
+        CloudSubnet subnet2 = new CloudSubnet.Builder()
+                .id(SUBNET_2)
+                .name(SUBNET_2)
+                .availabilityZone("")
+                .cidr("10.1.1.0/24")
+                .build();
+        CloudSubnet subnet3 = new CloudSubnet.Builder()
+                .id("indifferent")
+                .name("indifferent")
+                .availabilityZone("")
+                .cidr("10.1.2.0/24")
+                .build();
         CloudNetwork cloudNetwork1 = new CloudNetwork(NETWORK_ID, NETWORK_ID, Set.of(subnet1, subnet2, subnet3), Map.of());
         CloudNetwork cloudNetwork2 = new CloudNetwork("other", "other",
-                Set.of(new CloudSubnet(SUBNET_1, SUBNET_1), new CloudSubnet("test", "test")), Map.of());
+                Set.of(new CloudSubnet.Builder()
+                            .id(SUBNET_1)
+                            .name(SUBNET_1)
+                            .build(),
+                        new CloudSubnet.Builder()
+                            .id("test")
+                            .name("test")
+                            .build()
+                ),
+                Map.of());
         Map<String, Set<CloudNetwork>> cloudNets = Map.of(REGION, Set.of(cloudNetwork1, cloudNetwork2));
         CloudNetworks cloudNetworks = new CloudNetworks(cloudNets);
 
@@ -102,13 +126,37 @@ class NetworkServiceTest {
         stack.setPlatformvariant(PLATFORM);
         Credential credential = new Credential(PLATFORM, "", "", "", "acc");
         ExtendedCloudCredential extendedCred = new ExtendedCloudCredential(new CloudCredential(), PLATFORM, "", "", new ArrayList<>());
-        CloudSubnet subnet1 = new CloudSubnet(SUBNET_1, SUBNET_1, "", "10.1.0.0/24");
-        CloudSubnet subnet2 = new CloudSubnet(SUBNET_2, SUBNET_2, "", "10.1.1.0/24");
-        CloudSubnet subnet3 = new CloudSubnet("indifferent", "indifferent", "", "10.1.2.0/24");
+        CloudSubnet subnet1 = new CloudSubnet.Builder()
+                .id(SUBNET_1)
+                .name(SUBNET_1)
+                .availabilityZone("")
+                .cidr("10.1.0.0/24")
+                .build();
+        CloudSubnet subnet2 = new CloudSubnet.Builder()
+                .id(SUBNET_2)
+                .name(SUBNET_2)
+                .availabilityZone("")
+                .cidr("10.1.1.0/24")
+                .build();
+        CloudSubnet subnet3 = new CloudSubnet.Builder()
+                .id("indifferent")
+                .name("indifferent")
+                .availabilityZone("")
+                .cidr("10.1.2.0/24")
+                .build();
         CloudNetwork cloudNetwork1 = new CloudNetwork("/rg1/" + NETWORK_ID, "/rg1/" + NETWORK_ID, Set.of(subnet1, subnet2, subnet3), Map.of());
         CloudNetwork cloudNetwork2 = new CloudNetwork("/rg2/" + NETWORK_ID, "/rg2/" + NETWORK_ID,
-                Set.of(new CloudSubnet(SUBNET_1, SUBNET_1, "", "10.2.0.0/24"),
-                        new CloudSubnet("test", "test")), Map.of());
+                Set.of(
+                        new CloudSubnet.Builder()
+                                .id(SUBNET_1)
+                                .name(SUBNET_1)
+                                .availabilityZone("")
+                                .cidr("10.2.0.0/24")
+                                .build(),
+                        new CloudSubnet.Builder()
+                                .id("test")
+                                .name("test")
+                                .build()), Map.of());
         Map<String, Set<CloudNetwork>> cloudNets = Map.of(REGION, Set.of(cloudNetwork1, cloudNetwork2));
         CloudNetworks cloudNetworks = new CloudNetworks(cloudNets);
 
@@ -136,34 +184,62 @@ class NetworkServiceTest {
         Credential credential = new Credential("AZURE", "", "", "", "acc");
         ExtendedCloudCredential extendedCred = new ExtendedCloudCredential(new CloudCredential(), "AZURE", "", "", new ArrayList<>());
         Set<CloudSubnet> subnets = Set.of(
-                new CloudSubnet(
-                        "CDPPROD-DataLake-GW", "CDPPROD-DataLake-GW", null, "10.278.245.32/28",
-                        false, false, false, null, Set.of()
-                ),
-                new CloudSubnet(
-                        "CDPPROD-DataFlow", "CDPPROD-DataFlow", null, "10.278.245.64/28",
-                        false, false, false, null, Set.of()
-                ),
-                new CloudSubnet(
-                        "CDPPROD-DataLake", "CDPPROD-DataLake", null, "10.278.245.0/27",
-                        false, false, false, null, Set.of()
-                ),
-                new CloudSubnet(
-                        "CDPPROD-AirFlow", "CDPPROD-AirFlow", null, "10.278.245.48/28",
-                        false, false, false, null, Set.of()
-                ),
-                new CloudSubnet(
-                        "CDPPROD-DataLake-NAT", "CDPPROD-DataLake-NAT", null, "10.278.245.248/29",
-                        false, false, false, null, Set.of()
-                ),
-                new CloudSubnet(
-                        "CDPPROD-DataEngineering", "CDPPROD-DataEngineering", null, "10.278.245.128/27",
-                        false, false, false, null, Set.of()
-                ),
-                new CloudSubnet(
-                        "CDPPROD-Postgre", "CDPPROD-Postgre", null, "10.278.245.160/27",
-                        true, false, false, null, Set.of()
-                )
+                new CloudSubnet.Builder()
+                        .id("CDPPROD-DataLake-GW")
+                        .name("CDPPROD-DataLake-GW")
+                        .cidr("10.278.245.32/28")
+                        .privateSubnet(false)
+                        .mapPublicIpOnLaunch(false)
+                        .igwAvailable(false)
+                        .build(),
+                new CloudSubnet.Builder()
+                        .id("CDPPROD-DataFlow")
+                        .name("CDPPROD-DataFlow")
+                        .cidr("10.278.245.64/28")
+                        .privateSubnet(false)
+                        .mapPublicIpOnLaunch(false)
+                        .igwAvailable(false)
+                        .build(),
+                new CloudSubnet.Builder()
+                        .id("CDPPROD-DataLake")
+                        .name("CDPPROD-DataLake")
+                        .cidr("10.278.245.0/27")
+                        .privateSubnet(false)
+                        .mapPublicIpOnLaunch(false)
+                        .igwAvailable(false)
+                        .build(),
+                new CloudSubnet.Builder()
+                        .id("CDPPROD-AirFlow")
+                        .name("CDPPROD-AirFlow")
+                        .cidr("10.278.245.48/28")
+                        .privateSubnet(false)
+                        .mapPublicIpOnLaunch(false)
+                        .igwAvailable(false)
+                        .build(),
+                new CloudSubnet.Builder()
+                        .id("CDPPROD-DataLake-NAT")
+                        .name("CDPPROD-DataLake-NAT")
+                        .cidr("10.278.245.248/29")
+                        .privateSubnet(false)
+                        .mapPublicIpOnLaunch(false)
+                        .igwAvailable(false)
+                        .build(),
+                new CloudSubnet.Builder()
+                        .id("CDPPROD-DataEngineering")
+                        .name("CDPPROD-DataEngineering")
+                        .cidr("10.278.245.128/27")
+                        .privateSubnet(false)
+                        .mapPublicIpOnLaunch(false)
+                        .igwAvailable(false)
+                        .build(),
+                new CloudSubnet.Builder()
+                        .id("CDPPROD-Postgre")
+                        .name("CDPPROD-Postgre")
+                        .cidr("10.278.245.160/27")
+                        .privateSubnet(false)
+                        .mapPublicIpOnLaunch(false)
+                        .igwAvailable(false)
+                        .build()
         );
         Map<String, Object> properties = new HashMap<>();
         properties.put("addressSpaces", List.of("10.278.245.0/24"));

@@ -215,7 +215,11 @@ class AzureEnvironmentNetworkValidatorTest {
                         return subnet;
                     }
                 }).collect(Collectors.toSet());
-        Map<String, CloudSubnet> subnetToCloudSubnet = subnetNames.stream().collect(Collectors.toMap(Function.identity(), sn -> new CloudSubnet(sn, null)));
+        Map<String, CloudSubnet> subnetToCloudSubnet = subnetNames.stream().collect(Collectors.toMap(Function.identity(), sn ->
+                new CloudSubnet.Builder()
+                    .id(sn)
+                    .build()
+        ));
         when(cloudNetworkService.retrieveSubnetMetadata(environmentValidationDto.getEnvironmentDto(), networkDto))
                 .thenReturn(subnetToCloudSubnet);
         when(cloudNetworkService.getSubnetMetadata(environmentValidationDto.getEnvironmentDto(), networkDto, subnetNames))
@@ -354,7 +358,11 @@ class AzureEnvironmentNetworkValidatorTest {
                 .thenReturn(Map.ofEntries(Map.entry("flexibleSubnet", new CloudSubnet())));
         when(cloudNetworkService.retrieveCloudNetworks(environmentValidationDto.getEnvironmentDto()))
                 .thenReturn(Set.of(azureParams.getNetworkId()));
-        Map<String, CloudSubnet> subnetToCloudSubnet = flexibleSubnets.stream().collect(Collectors.toMap(Function.identity(), sn -> new CloudSubnet(sn, null)));
+        Map<String, CloudSubnet> subnetToCloudSubnet = flexibleSubnets.stream().collect(Collectors.toMap(Function.identity(), sn ->
+                new CloudSubnet.Builder()
+                    .id(sn)
+                    .build()
+        ));
         when(cloudNetworkService.getSubnetMetadata(environmentValidationDto.getEnvironmentDto(), networkDto, flexibleSubnets))
                 .thenReturn(subnetToCloudSubnet);
 
@@ -664,8 +672,16 @@ class AzureEnvironmentNetworkValidatorTest {
         AzureParams azureParams = getAzureParams("vnet", "resourceGroup");
         azureParams.setFlexibleServerSubnetIds(new HashSet<>());
 
-        Map<String, CloudSubnet> eagMetas = Map.of("eagsubnet1", new CloudSubnet("eid1", "eagsubnet1"));
-        Map<String, CloudSubnet> metas = Map.of("subnet1", new CloudSubnet("id1", "subnet1"));
+        Map<String, CloudSubnet> eagMetas = Map.of("eagsubnet1", new CloudSubnet.Builder()
+                .id("eid1")
+                .name("eagsubnet1")
+                .build()
+        );
+        Map<String, CloudSubnet> metas = Map.of("subnet1", new CloudSubnet.Builder()
+                .id("id1")
+                .name("subnet1")
+                .build()
+        );
         NetworkDto networkDto = NetworkDto.builder()
                 .withId(1L)
                 .withName("networkName")
@@ -681,8 +697,16 @@ class AzureEnvironmentNetworkValidatorTest {
 
         when(cloudNetworkService.retrieveSubnetMetadata(any(EnvironmentDto.class), any(NetworkDto.class))).thenReturn(metas);
 
-        Map<String, CloudSubnet> providerSubnets = Map.of("providerSubnet1", new CloudSubnet("pnid1", "providerSubnet1"),
-                "providerSubnet2", new CloudSubnet("pnid2", "providerSubnet2"));
+        Map<String, CloudSubnet> providerSubnets = Map.of("providerSubnet1",
+                new CloudSubnet.Builder()
+                .id("pnid1")
+                .name("providerSubnet1")
+                .build(),
+                "providerSubnet2",
+                new CloudSubnet.Builder()
+                .id("pnid2")
+                .name("providerSubnet2")
+                .build());
         when(cloudNetworkService.retrieveEndpointGatewaySubnetMetadata(any(EnvironmentDto.class), any(NetworkDto.class))).thenReturn(providerSubnets);
 
         underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
@@ -701,8 +725,17 @@ class AzureEnvironmentNetworkValidatorTest {
         AzureParams azureParams = getAzureParams("vnet", "resourceGroup");
         azureParams.setFlexibleServerSubnetIds(new HashSet<>());
 
-        Map<String, CloudSubnet> eagMetas = Map.of("eagsubnet1", new CloudSubnet("eid1", "eagsubnet1"));
-        Map<String, CloudSubnet> metas = Map.of("subnet1", new CloudSubnet("id1", "subnet1"));
+        Map<String, CloudSubnet> eagMetas = Map.of("eagsubnet1",
+                new CloudSubnet.Builder()
+                        .id("eid1")
+                        .name("eagsubnet1")
+                        .build());
+        Map<String, CloudSubnet> metas = Map.of("subnet1",
+                new CloudSubnet.Builder()
+                        .id("id1")
+                        .name("subnet1")
+                        .build()
+        );
         NetworkDto networkDto = NetworkDto.builder()
                 .withId(1L)
                 .withName("networkName")

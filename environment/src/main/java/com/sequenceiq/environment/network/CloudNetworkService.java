@@ -135,7 +135,11 @@ public class CloudNetworkService {
             return fetchCloudNetwork(environmentDto.getRegions(), environmentDto.getCredential(), environmentDto.getCloudPlatform(),
                     network, filter, subnetIds);
         } else {
-            return subnetIds.stream().collect(toMap(Function.identity(), id -> new CloudSubnet(id, null)));
+            return subnetIds.stream().collect(toMap(Function.identity(), id ->
+                    new CloudSubnet.Builder()
+                            .id(id)
+                            .build()
+            ));
         }
     }
 
@@ -170,7 +174,11 @@ public class CloudNetworkService {
             return fetchCloudNetwork(environment.getRegionSet(), environment.getCredential(), environment.getCloudPlatform(),
                     network, filter, subnetIds);
         } else {
-            return subnetIds.stream().collect(toMap(Function.identity(), id -> new CloudSubnet(id, null)));
+            return subnetIds.stream().collect(toMap(Function.identity(), id ->
+                    new CloudSubnet.Builder()
+                            .id(id)
+                            .build()
+            ));
         }
     }
 

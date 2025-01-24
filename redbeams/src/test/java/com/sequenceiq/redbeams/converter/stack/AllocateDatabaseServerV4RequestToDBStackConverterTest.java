@@ -281,8 +281,14 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         setupAllocateRequest(false);
 
         List<CloudSubnet> cloudSubnets = List.of(
-                new CloudSubnet("subnet-1", "", "az-a", ""),
-                new CloudSubnet("subnet-2", "", "az-b", "")
+                new CloudSubnet.Builder()
+                        .id("subnet-1")
+                        .availabilityZone("az-a")
+                        .build(),
+                new CloudSubnet.Builder()
+                        .id("subnet-2")
+                        .availabilityZone("az-b")
+                        .build()
         );
         DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
                 .withCloudPlatform(AWS_CLOUD_PLATFORM.name())

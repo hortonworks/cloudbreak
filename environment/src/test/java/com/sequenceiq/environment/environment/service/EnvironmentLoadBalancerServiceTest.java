@@ -59,8 +59,16 @@ class EnvironmentLoadBalancerServiceTest {
         EnvironmentLoadBalancerDto environmentLbDto = EnvironmentLoadBalancerDto.builder().build();
         NetworkDto network = NetworkDto.builder()
                 .withEndpointGatewaySubnetMetas(Map.of(
-                        "subnet1", new CloudSubnet("11", "subnet1"),
-                        "subnet2", new CloudSubnet("22", "subnet2")
+                        "subnet1",
+                        new CloudSubnet.Builder()
+                                .id("11")
+                                .name("subnet1")
+                                .build(),
+                        "subnet2",
+                        new CloudSubnet.Builder()
+                                .id("22")
+                                .name("subnet2")
+                                .build()
                 ))
                 .build();
         EnvironmentDto environmentDto = EnvironmentDto.builder()
@@ -88,8 +96,16 @@ class EnvironmentLoadBalancerServiceTest {
         EnvironmentLoadBalancerDto environmentLbDto = EnvironmentLoadBalancerDto.builder().build();
         NetworkDto network = NetworkDto.builder()
                 .withEndpointGatewaySubnetMetas(Map.of(
-                        "subnet1", new CloudSubnet("11", "subnet1"),
-                        "subnet2", new CloudSubnet("22", "subnet2")
+                        "subnet1",
+                        new CloudSubnet.Builder()
+                                .id("11")
+                                .name("subnet1")
+                                .build(),
+                        "subnet2",
+                        new CloudSubnet.Builder()
+                                .id("22")
+                                .name("subnet2")
+                                .build()
                 ))
                 .build();
         EnvironmentDto environmentDto = EnvironmentDto.builder()

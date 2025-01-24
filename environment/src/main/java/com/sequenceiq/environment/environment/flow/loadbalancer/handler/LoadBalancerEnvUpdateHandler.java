@@ -83,7 +83,11 @@ public class LoadBalancerEnvUpdateHandler extends EventSenderAwareHandler<Enviro
                 LOGGER.debug("Enabling endpoint gateway on environment network with public IP {}.", environmentLoadBalancerDto.getEndpointAccessGateway());
                 networkDto.setPublicEndpointAccessGateway(environmentLoadBalancerDto.getEndpointAccessGateway());
                 Map<String, CloudSubnet> tempSubnetMetas = endpointGatewaySubnetIds.stream()
-                    .collect(toMap(id -> id, id -> new CloudSubnet(id, null)));
+                    .collect(toMap(id -> id, id ->
+                            new CloudSubnet.Builder()
+                                    .id(id)
+                                    .build()
+                    ));
                 networkDto.setEndpointGatewaySubnetMetas(tempSubnetMetas);
 
                 LOGGER.debug("Fetching metadata for endpoint gateway subnets.");

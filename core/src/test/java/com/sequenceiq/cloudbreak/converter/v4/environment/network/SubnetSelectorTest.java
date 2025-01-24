@@ -200,7 +200,12 @@ class SubnetSelectorTest extends SubnetTest {
     }
 
     private CloudSubnet getCloudSubnet(String availabilityZone) {
-        return new CloudSubnet(PRIVATE_ID_1, "name", availabilityZone, "cidr");
+        return new CloudSubnet.Builder()
+                .id(PRIVATE_ID_1)
+                .name("name")
+                .availabilityZone(availabilityZone)
+                .cidr("cidr")
+                .build();
     }
 
     private EnvironmentNetworkResponse setupResponse() {

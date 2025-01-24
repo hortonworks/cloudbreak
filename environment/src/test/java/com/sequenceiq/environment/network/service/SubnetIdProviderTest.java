@@ -51,7 +51,11 @@ class SubnetIdProviderTest {
                 .withCbSubnets(Map.of("AZ-a", new CloudSubnet()))
                 .withSubnetMetas(Map.of("AZ-a", new CloudSubnet()))
                 .build();
-        NetworkConnector networkConnector = setupConnectorWithSelectionResult(List.of(new CloudSubnet("id", "name")));
+        NetworkConnector networkConnector = setupConnectorWithSelectionResult(List.of(
+                new CloudSubnet.Builder()
+                        .id("id")
+                        .name("name")
+                        .build()));
         Tunnel tunnel = Tunnel.DIRECT;
 
         ProvidedSubnetIds providedSubnetIds = underTest.subnets(networkDto, tunnel, CloudPlatform.AWS, false);
@@ -88,11 +92,27 @@ class SubnetIdProviderTest {
         setupConnectorWithSelectionError("error message");
         NetworkDto networkDto = NetworkDto.builder()
                 .withCbSubnets(Map.of(
-                        "AZ-a", new CloudSubnet("id-1", "name-1"),
-                        "AZ-b", new CloudSubnet("id-2", "name-2")))
+                        "AZ-a",
+                        new CloudSubnet.Builder()
+                                .id("id-1")
+                                .name("name-1")
+                                .build(),
+                        "AZ-b",
+                        new CloudSubnet.Builder()
+                                .id("id-2")
+                                .name("name-2")
+                                .build()))
                 .withSubnetMetas(Map.of(
-                        "AZ-a", new CloudSubnet("id-1", "name-1"),
-                        "AZ-b", new CloudSubnet("id-2", "name-2")
+                        "AZ-a",
+                        new CloudSubnet.Builder()
+                                .id("id-1")
+                                .name("name-1")
+                                .build(),
+                        "AZ-b",
+                        new CloudSubnet.Builder()
+                                .id("id-2")
+                                .name("name-2")
+                                .build()
                 ))
                 .build();
 
@@ -106,11 +126,27 @@ class SubnetIdProviderTest {
         setupConnectorWithSelectionResult(List.of());
         NetworkDto networkDto = NetworkDto.builder()
                 .withCbSubnets(Map.of(
-                        "AZ-a", new CloudSubnet("id-1", "name-1"),
-                        "AZ-b", new CloudSubnet("id-2", "name-2")))
+                        "AZ-a",
+                        new CloudSubnet.Builder()
+                                .id("id-1")
+                                .name("name-1")
+                                .build(),
+                        "AZ-b",
+                        new CloudSubnet.Builder()
+                                .id("id-2")
+                                .name("name-2")
+                                .build()))
                 .withSubnetMetas(Map.of(
-                        "AZ-a", new CloudSubnet("id-1", "name-1"),
-                        "AZ-b", new CloudSubnet("id-2", "name-2")
+                        "AZ-a",
+                        new CloudSubnet.Builder()
+                                .id("id-1")
+                                .name("name-1")
+                                .build(),
+                        "AZ-b",
+                        new CloudSubnet.Builder()
+                                .id("id-2")
+                                .name("name-2")
+                                .build()
                 ))
                 .build();
 
@@ -122,19 +158,41 @@ class SubnetIdProviderTest {
     @Test
     void testProvideShouldReturnAnySubnetWhenResultIsNotEmptyAndNoErrorButAtLeastTwoSubnetComesBackAsResult() {
         List<CloudSubnet> subnets = List.of(
-                new CloudSubnet("id-1", "name-1"),
-                new CloudSubnet("id-2", "name-2")
+                new CloudSubnet.Builder()
+                        .id("id-1")
+                        .name("name-1")
+                        .build(),
+                new CloudSubnet.Builder()
+                        .id("id-2")
+                        .name("name-2")
+                        .build()
         );
 
         setupConnectorWithSelectionResult(subnets);
         NetworkDto networkDto = NetworkDto.builder()
                 .withSubnetMetas(Map.of(
-                        "AZ-a", new CloudSubnet("id-1", "name-1"),
-                        "AZ-b", new CloudSubnet("id-2", "name-2")
+                        "AZ-a",
+                        new CloudSubnet.Builder()
+                                .id("id-1")
+                                .name("name-1")
+                                .build(),
+                        "AZ-b",
+                        new CloudSubnet.Builder()
+                                .id("id-2")
+                                .name("name-2")
+                                .build()
                 ))
                 .withCbSubnets(Map.of(
-                        "AZ-a", new CloudSubnet("id-1", "name-1"),
-                        "AZ-b", new CloudSubnet("id-2", "name-2")
+                        "AZ-a",
+                        new CloudSubnet.Builder()
+                                .id("id-1")
+                                .name("name-1")
+                                .build(),
+                        "AZ-b",
+                        new CloudSubnet.Builder()
+                                .id("id-2")
+                                .name("name-2")
+                                .build()
                 ))
                 .build();
 
@@ -148,12 +206,28 @@ class SubnetIdProviderTest {
         setupNotSupportedConnector();
         NetworkDto networkDto = NetworkDto.builder()
                 .withSubnetMetas(Map.of(
-                        "AZ-a", new CloudSubnet("id-1", "name-1"),
-                        "AZ-b", new CloudSubnet("id-2", "name-2")
+                        "AZ-a",
+                        new CloudSubnet.Builder()
+                                .id("id-1")
+                                .name("name-1")
+                                .build(),
+                        "AZ-b",
+                        new CloudSubnet.Builder()
+                                .id("id-2")
+                                .name("name-2")
+                                .build()
                 ))
                 .withCbSubnets(Map.of(
-                        "AZ-a", new CloudSubnet("id-1", "name-1"),
-                        "AZ-b", new CloudSubnet("id-2", "name-2")
+                        "AZ-a",
+                        new CloudSubnet.Builder()
+                                .id("id-1")
+                                .name("name-1")
+                                .build(),
+                        "AZ-b",
+                        new CloudSubnet.Builder()
+                                .id("id-2")
+                                .name("name-2")
+                                .build()
                 ))
                 .build();
 

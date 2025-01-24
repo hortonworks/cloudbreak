@@ -127,12 +127,18 @@ class CloudNetworkServiceTest {
     void testRetrieveSubnetMetadataByEnvironmentDtoWhenPlatformIsAwsThenWeShouldFetchTheCloudNetworksFromProvider() {
         AwsParams awsParams = NetworkTestUtils.getAwsParams(DEFAULT_TEST_VPC_ID);
 
-        CloudSubnet cloudSubnet = new CloudSubnet(TEST_SUBNET_ID, "someSubnet");
+        CloudSubnet cloudSubnet = new CloudSubnet.Builder()
+                .id(TEST_SUBNET_ID)
+                .name("someSubnet")
+                .build();
         CloudNetwork cloudNetwork = new CloudNetwork("someCloudNetwork", "someCloudNetwork", Set.of(cloudSubnet),
                 Collections.emptyMap());
         Map<String, Set<CloudNetwork>> cloudNetworksFromProvider = new LinkedHashMap<>();
         cloudNetworksFromProvider.put(DEFAULT_TEST_REGION_NAME, Set.of(cloudNetwork));
-        CloudSubnet cloudSubnet2 = new CloudSubnet(TEST_SUBNET_ID, "someSubnet");
+        CloudSubnet cloudSubnet2 = new CloudSubnet.Builder()
+                .id(TEST_SUBNET_ID)
+                .name("someSubnet")
+                .build();
         CloudNetwork cloudNetwork2 = new CloudNetwork("someCloudNetwork", "someCloudNetwork", Set.of(cloudSubnet2),
                 Collections.emptyMap());
         Map<String, Set<CloudNetwork>> cloudNetworksFromProvider2 = new LinkedHashMap<>();
@@ -171,7 +177,10 @@ class CloudNetworkServiceTest {
     void testRetrieveSubnetMetadataByEnvironmentDtoWhenPlatformIsAwsAndNoEndpointSubnetsAreProvided() {
         AwsParams awsParams = NetworkTestUtils.getAwsParams(DEFAULT_TEST_VPC_ID);
 
-        CloudSubnet cloudSubnet = new CloudSubnet(TEST_SUBNET_ID, "someSubnet");
+        CloudSubnet cloudSubnet = new CloudSubnet.Builder()
+                .id(TEST_SUBNET_ID)
+                .name("someSubnet")
+                .build();
         CloudNetwork cloudNetwork = new CloudNetwork("someCloudNetwork", TEST_SUBNET_ID, Set.of(cloudSubnet),
                 Collections.emptyMap());
         Map<String, Set<CloudNetwork>> cloudNetworksFromProvider = new LinkedHashMap<>();
@@ -207,13 +216,19 @@ class CloudNetworkServiceTest {
     void testRetrieveSubnetMetadataByEnvironmentDtoWhenPlatformIsAwsAndDifferentEndpointSubnetsAreProvided() {
         AwsParams awsParams = NetworkTestUtils.getAwsParams(DEFAULT_TEST_VPC_ID);
 
-        CloudSubnet cloudSubnet = new CloudSubnet(TEST_SUBNET_ID, "someSubnet");
+        CloudSubnet cloudSubnet = new CloudSubnet.Builder()
+                .id(TEST_SUBNET_ID)
+                .name("someSubnet")
+                .build();
         CloudNetwork cloudNetwork = new CloudNetwork("someCloudNetwork", TEST_SUBNET_ID, Set.of(cloudSubnet),
                 Collections.emptyMap());
         Map<String, Set<CloudNetwork>> cloudNetworksFromProvider = new LinkedHashMap<>();
         cloudNetworksFromProvider.put(DEFAULT_TEST_REGION_NAME, Set.of(cloudNetwork));
 
-        CloudSubnet publicCloudSubnet = new CloudSubnet(TEST_PUBLIC_SUBNET_ID, "someSubnet");
+        CloudSubnet publicCloudSubnet = new CloudSubnet.Builder()
+                .id(TEST_PUBLIC_SUBNET_ID)
+                .name("someSubnet")
+                .build();
         CloudNetwork publicCloudNetwork = new CloudNetwork("someCloudNetwork", TEST_PUBLIC_SUBNET_ID, Set.of(publicCloudSubnet),
                 Collections.emptyMap());
         Map<String, Set<CloudNetwork>> publicCloudNetworksFromProvider = new LinkedHashMap<>();
@@ -255,12 +270,18 @@ class CloudNetworkServiceTest {
     void testRetrieveSubnetMetadataByEnvironmentDtoWhenPlatformIsAzureThenWeShouldFetchTheCloudNetworksFromProvider() {
         AzureParams azureParams = NetworkTestUtils.getAzureParams();
 
-        CloudSubnet cloudSubnet = new CloudSubnet(TEST_SUBNET_ID, "someSubnet");
+        CloudSubnet cloudSubnet = new CloudSubnet.Builder()
+                .id(TEST_SUBNET_ID)
+                .name("someSubnet")
+                .build();
         CloudNetwork cloudNetwork = new CloudNetwork("someCloudNetwork", TEST_SUBNET_ID, Set.of(cloudSubnet),
                 Collections.emptyMap());
         Map<String, Set<CloudNetwork>> cloudNetworksFromProvider = new LinkedHashMap<>();
         cloudNetworksFromProvider.put(DEFAULT_TEST_REGION_NAME, Set.of(cloudNetwork));
-        CloudSubnet cloudSubnet2 = new CloudSubnet(TEST_SUBNET_ID, "someSubnet");
+        CloudSubnet cloudSubnet2 = new CloudSubnet.Builder()
+                .id(TEST_SUBNET_ID)
+                .name("someSubnet")
+                .build();
         CloudNetwork cloudNetwork2 = new CloudNetwork("someCloudNetwork", "someCloudNetwork", Set.of(cloudSubnet2),
                 Collections.emptyMap());
         Map<String, Set<CloudNetwork>> cloudNetworksFromProvider2 = new LinkedHashMap<>();
@@ -301,7 +322,10 @@ class CloudNetworkServiceTest {
     void testRetrieveSubnetMetadataByEnvironmentDtoWhenPlatformIsAzureAndNoEndpointSubnetsAreProvided() {
         AzureParams azureParams = NetworkTestUtils.getAzureParams();
 
-        CloudSubnet cloudSubnet = new CloudSubnet(TEST_SUBNET_ID, "someSubnet");
+        CloudSubnet cloudSubnet = new CloudSubnet.Builder()
+                .id(TEST_SUBNET_ID)
+                .name("someSubnet")
+                .build();
         CloudNetwork cloudNetwork = new CloudNetwork("someCloudNetwork", TEST_SUBNET_ID, Set.of(cloudSubnet),
                 Collections.emptyMap());
         Map<String, Set<CloudNetwork>> cloudNetworksFromProvider = new LinkedHashMap<>();
@@ -338,13 +362,19 @@ class CloudNetworkServiceTest {
     void testRetrieveSubnetMetadataByEnvironmentDtoWhenPlatformIsAzureAndDifferentEndpointSubnetsAreProvided() {
         AzureParams azureParams = NetworkTestUtils.getAzureParams();
 
-        CloudSubnet cloudSubnet = new CloudSubnet(TEST_SUBNET_ID, "someSubnet");
+        CloudSubnet cloudSubnet = new CloudSubnet.Builder()
+                .id(TEST_SUBNET_ID)
+                .name("someSubnet")
+                .build();
         CloudNetwork cloudNetwork = new CloudNetwork("someCloudNetwork", TEST_SUBNET_ID, Set.of(cloudSubnet),
                 Collections.emptyMap());
         Map<String, Set<CloudNetwork>> cloudNetworksFromProvider = new LinkedHashMap<>();
         cloudNetworksFromProvider.put(DEFAULT_TEST_REGION_NAME, Set.of(cloudNetwork));
 
-        CloudSubnet publicCloudSubnet = new CloudSubnet(TEST_PUBLIC_SUBNET_ID, "someSubnet");
+        CloudSubnet publicCloudSubnet = new CloudSubnet.Builder()
+                .id(TEST_PUBLIC_SUBNET_ID)
+                .name("someSubnet")
+                .build();
         CloudNetwork publicCloudNetwork = new CloudNetwork("someCloudNetwork", TEST_PUBLIC_SUBNET_ID, Set.of(publicCloudSubnet),
                 Collections.emptyMap());
         Map<String, Set<CloudNetwork>> publicCloudNetworksFromProvider = new LinkedHashMap<>();
@@ -435,12 +465,18 @@ class CloudNetworkServiceTest {
     void testRetrieveSubnetMetadataByEnvironmentWhenPlatformIsAwsThenWeShouldFetchTheCloudNetworksFromProvider() {
         AwsParams awsParams = NetworkTestUtils.getAwsParams(DEFAULT_TEST_VPC_ID);
 
-        CloudSubnet cloudSubnet = new CloudSubnet(TEST_SUBNET_ID, "someSubnet");
+        CloudSubnet cloudSubnet = new CloudSubnet.Builder()
+                .id(TEST_SUBNET_ID)
+                .name("someSubnet")
+                .build();
         CloudNetwork cloudNetwork = new CloudNetwork("someCloudNetwork", TEST_SUBNET_ID, Set.of(cloudSubnet),
                 Collections.emptyMap());
         Map<String, Set<CloudNetwork>> cloudNetworksFromProvider = new LinkedHashMap<>();
         cloudNetworksFromProvider.put(DEFAULT_TEST_REGION_NAME, Set.of(cloudNetwork));
-        CloudSubnet cloudSubnet2 = new CloudSubnet(TEST_SUBNET_ID, "someSubnet");
+        CloudSubnet cloudSubnet2 = new CloudSubnet.Builder()
+                .id(TEST_SUBNET_ID)
+                .name("someSubnet")
+                .build();
         CloudNetwork cloudNetwork2 = new CloudNetwork("someCloudNetwork", "someCloudNetwork", Set.of(cloudSubnet2),
                 Collections.emptyMap());
         Map<String, Set<CloudNetwork>> cloudNetworksFromProvider2 = new LinkedHashMap<>();
@@ -480,12 +516,18 @@ class CloudNetworkServiceTest {
     void testRetrieveSubnetMetadataByEnvironmentWhenPlatformIsAzureThenWeShouldFetchTheCloudNetworksFromProvider() {
         AzureParams azureParams = NetworkTestUtils.getAzureParams();
 
-        CloudSubnet cloudSubnet = new CloudSubnet(TEST_SUBNET_ID, "someSubnet");
+        CloudSubnet cloudSubnet = new CloudSubnet.Builder()
+                .id(TEST_SUBNET_ID)
+                .name("someSubnet")
+                .build();
         CloudNetwork cloudNetwork = new CloudNetwork("someCloudNetwork", TEST_SUBNET_ID, Set.of(cloudSubnet),
                 Collections.emptyMap());
         Map<String, Set<CloudNetwork>> cloudNetworksFromProvider = new LinkedHashMap<>();
         cloudNetworksFromProvider.put(DEFAULT_TEST_REGION_NAME, Set.of(cloudNetwork));
-        CloudSubnet cloudSubnet2 = new CloudSubnet(TEST_SUBNET_ID, "someSubnet");
+        CloudSubnet cloudSubnet2 = new CloudSubnet.Builder()
+                .id(TEST_SUBNET_ID)
+                .name("someSubnet")
+                .build();
         CloudNetwork cloudNetwork2 = new CloudNetwork("someCloudNetwork", "someCloudNetwork", Set.of(cloudSubnet2),
                 Collections.emptyMap());
         Map<String, Set<CloudNetwork>> cloudNetworksFromProvider2 = new LinkedHashMap<>();
@@ -559,12 +601,18 @@ class CloudNetworkServiceTest {
                 .build();
 
         String testSubnetName = "someSubnet";
-        CloudSubnet cloudSubnet = new CloudSubnet(TEST_SUBNET_ID, testSubnetName);
+        CloudSubnet cloudSubnet = new CloudSubnet.Builder()
+                .id(TEST_SUBNET_ID)
+                .name(testSubnetName)
+                .build();
         CloudNetwork cloudNetwork = new CloudNetwork("someCloudNetwork", TEST_SUBNET_ID, Set.of(cloudSubnet),
                 Collections.emptyMap());
         Map<String, Set<CloudNetwork>> cloudNetworksFromProvider = new LinkedHashMap<>();
         cloudNetworksFromProvider.put(DEFAULT_TEST_REGION_NAME, Set.of(cloudNetwork));
-        CloudSubnet cloudSubnet2 = new CloudSubnet(TEST_SUBNET_ID, testSubnetName);
+        CloudSubnet cloudSubnet2 = new CloudSubnet.Builder()
+                .id(TEST_SUBNET_ID)
+                .name(testSubnetName)
+                .build();
         CloudNetwork cloudNetwork2 = new CloudNetwork("someCloudNetwork", "someCloudNetwork", Set.of(cloudSubnet2),
                 Collections.emptyMap());
         Map<String, Set<CloudNetwork>> cloudNetworksFromProvider2 = new LinkedHashMap<>();

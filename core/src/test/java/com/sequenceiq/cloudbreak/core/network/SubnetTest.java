@@ -16,10 +16,28 @@ public class SubnetTest {
     protected static final String PUBLIC_ID_1 = "public-id-1";
 
     protected CloudSubnet getPublicCloudSubnet(String id, String availabilityZone) {
-        return new CloudSubnet(id, "name", availabilityZone, "cidr", false, true, true, SubnetType.PUBLIC);
+        return new CloudSubnet.Builder()
+                .id(id)
+                .name("name")
+                .availabilityZone(availabilityZone)
+                .cidr("cidr")
+                .privateSubnet(false)
+                .mapPublicIpOnLaunch(false)
+                .igwAvailable(true)
+                .type(SubnetType.PUBLIC)
+                .build();
     }
 
     protected CloudSubnet getPrivateCloudSubnet(String id, String availabilityZone) {
-        return new CloudSubnet(id, "name", availabilityZone, "cidr", true, false, false, SubnetType.PRIVATE);
+        return new CloudSubnet.Builder()
+                .id(id)
+                .name("name")
+                .availabilityZone(availabilityZone)
+                .cidr("cidr")
+                .privateSubnet(true)
+                .mapPublicIpOnLaunch(false)
+                .igwAvailable(false)
+                .type(SubnetType.PRIVATE)
+                .build();
     }
 }

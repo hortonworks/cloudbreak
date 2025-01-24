@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -22,6 +23,8 @@ public class CloudSubnet extends DynamicModel implements Serializable {
 
     private String cidr;
 
+    private List<String> secondaryCidrs = List.of();
+
     private SubnetType type;
 
     private boolean privateSubnet;
@@ -35,30 +38,17 @@ public class CloudSubnet extends DynamicModel implements Serializable {
     public CloudSubnet() {
     }
 
-    public CloudSubnet(String id, String name) {
-        this(id, name, null, null);
-    }
-
-    public CloudSubnet(String id, String name, String availabilityZone, String cidr) {
-        this(id, name, availabilityZone, cidr, false, false, false, null);
-    }
-
-    public CloudSubnet(String id, String name, String availabilityZone, String cidr, boolean privateSubnet, boolean mapPublicIpOnLaunch, boolean igwAvailable,
-            SubnetType type) {
-        this.id = id;
-        this.name = name;
-        this.availabilityZone = availabilityZone;
-        this.cidr = cidr;
-        this.privateSubnet = privateSubnet;
-        this.mapPublicIpOnLaunch = mapPublicIpOnLaunch;
-        this.igwAvailable = igwAvailable;
-        this.type = type;
-    }
-
-    public CloudSubnet(String id, String name, String availabilityZone, String cidr, boolean privateSubnet, boolean mapPublicIpOnLaunch, boolean igwAvailable,
-            SubnetType type, Set<DeploymentRestriction> deploymentRestrictions) {
-        this(id, name, availabilityZone, cidr, privateSubnet, mapPublicIpOnLaunch, igwAvailable, type);
-        this.deploymentRestrictions = deploymentRestrictions;
+    public CloudSubnet(CloudSubnet.Builder builder) {
+        this.id = builder.id;
+        this.name = builder.name;
+        this.availabilityZone = builder.availabilityZone;
+        this.cidr = builder.cidr;
+        this.secondaryCidrs = builder.secondaryCidrs;
+        this.type = builder.type;
+        this.privateSubnet = builder.privateSubnet;
+        this.mapPublicIpOnLaunch = builder.mapPublicIpOnLaunch;
+        this.igwAvailable = builder.igwAvailable;
+        this.deploymentRestrictions = builder.deploymentRestrictions;
     }
 
     public String getId() {
@@ -133,8 +123,27 @@ public class CloudSubnet extends DynamicModel implements Serializable {
         this.deploymentRestrictions = deploymentRestrictions;
     }
 
+    public List<String> getSecondaryCidrs() {
+        return secondaryCidrs;
+    }
+
+    public void setSecondaryCidrs(List<String> secondaryCidrs) {
+        this.secondaryCidrs = secondaryCidrs;
+    }
+
     public CloudSubnet withId(String newId) {
-        return new CloudSubnet(newId, name, availabilityZone, cidr, privateSubnet, mapPublicIpOnLaunch, igwAvailable, type);
+        return new CloudSubnet.Builder()
+                .id(newId)
+                .name(name)
+                .availabilityZone(availabilityZone)
+                .cidr(cidr)
+                .secondaryCidrs(secondaryCidrs)
+                .privateSubnet(privateSubnet)
+                .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
+                .igwAvailable(igwAvailable)
+                .deploymentRestrictions(deploymentRestrictions)
+                .type(type)
+                .build();
     }
 
     @SuppressWarnings("checkstyle:CyclomaticComplexity")
@@ -154,13 +163,14 @@ public class CloudSubnet extends DynamicModel implements Serializable {
                 Objects.equals(name, that.name) &&
                 Objects.equals(availabilityZone, that.availabilityZone) &&
                 Objects.equals(cidr, that.cidr) &&
+                Objects.equals(secondaryCidrs, that.secondaryCidrs) &&
                 Objects.equals(type, that.type) &&
                 Objects.equals(deploymentRestrictions, that.deploymentRestrictions);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, availabilityZone, cidr, privateSubnet, mapPublicIpOnLaunch, igwAvailable, type, deploymentRestrictions);
+        return Objects.hash(id, name, availabilityZone, cidr, secondaryCidrs, privateSubnet, mapPublicIpOnLaunch, igwAvailable, type, deploymentRestrictions);
     }
 
     @Override
@@ -170,6 +180,7 @@ public class CloudSubnet extends DynamicModel implements Serializable {
                 + ", name='" + name + '\''
                 + ", availabilityZone='" + availabilityZone + '\''
                 + ", cidr='" + cidr + '\''
+                + ", secondaryCidrs='" + secondaryCidrs + '\''
                 + ", privateSubnet=" + privateSubnet
                 + ", mapPublicIpOnLaunch=" + mapPublicIpOnLaunch
                 + ", igwAvailable=" + igwAvailable
@@ -178,4 +189,84 @@ public class CloudSubnet extends DynamicModel implements Serializable {
                 + ", parameters=" + getParameters()
                 + '}';
     }
+
+    public static class Builder {
+        private String id;
+
+        private String name;
+
+        private String availabilityZone;
+
+        private String cidr;
+
+        private List<String> secondaryCidrs = List.of();
+
+        private SubnetType type;
+
+        private boolean privateSubnet;
+
+        private boolean mapPublicIpOnLaunch;
+
+        private boolean igwAvailable;
+
+        private Set<DeploymentRestriction> deploymentRestrictions = Set.of();
+
+        public Builder() {
+        }
+
+        public Builder id(String id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder availabilityZone(String availabilityZone) {
+            this.availabilityZone = availabilityZone;
+            return this;
+        }
+
+        public Builder cidr(String cidr) {
+            this.cidr = cidr;
+            return this;
+        }
+
+        public Builder secondaryCidrs(List<String> secondaryCidrs) {
+            this.secondaryCidrs = secondaryCidrs;
+            return this;
+        }
+
+        public Builder type(SubnetType type) {
+            this.type = type;
+            return this;
+        }
+
+        public Builder privateSubnet(boolean privateSubnet) {
+            this.privateSubnet = privateSubnet;
+            return this;
+        }
+
+        public Builder mapPublicIpOnLaunch(boolean mapPublicIpOnLaunch) {
+            this.mapPublicIpOnLaunch = mapPublicIpOnLaunch;
+            return this;
+        }
+
+        public Builder igwAvailable(boolean igwAvailable) {
+            this.igwAvailable = igwAvailable;
+            return this;
+        }
+
+        public Builder deploymentRestrictions(Set<DeploymentRestriction> deploymentRestrictions) {
+            this.deploymentRestrictions = deploymentRestrictions != null ? deploymentRestrictions : Set.of();
+            return this;
+        }
+
+        public CloudSubnet build() {
+            return new CloudSubnet(this);
+        }
+    }
+
 }

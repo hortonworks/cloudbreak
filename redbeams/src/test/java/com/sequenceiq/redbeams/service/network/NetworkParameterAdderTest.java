@@ -116,10 +116,17 @@ public class NetworkParameterAdderTest {
         DBStack dbStack = new DBStack();
         dbStack.setCloudPlatform("AZURE");
         DetailedEnvironmentResponse environment = getAzureDetailedEnvironmentResponse();
-        environment.getNetwork().setSubnetMetas(Map.of("mySubnet", new CloudSubnet("mySubnet", "")));
+        environment.getNetwork().setSubnetMetas(Map.of("mySubnet",
+                new CloudSubnet.Builder()
+                .id("mySubnet")
+                .name("")
+                .build()));
         when(subnetListerService.getAzureSubscriptionId(any())).thenReturn("mySubscription");
         when(serviceEndpointCreationToEndpointTypeConverter.convert(any(), any())).thenReturn(PrivateEndpointType.USE_PRIVATE_ENDPOINT);
-        CloudSubnet cloudSubnet = new CloudSubnet(SUBNET_RESOURCE_ID, SUBNET_ID);
+        CloudSubnet cloudSubnet = new CloudSubnet.Builder()
+                .id(SUBNET_RESOURCE_ID)
+                .availabilityZone(SUBNET_ID)
+                .build();
         when(subnetListerService.expandAzureResourceId(any(CloudSubnet.class), any(), anyString())).thenReturn(cloudSubnet);
 
         Map<String, Object> parameters = underTest.addParameters(environment, dbStack);
@@ -138,7 +145,10 @@ public class NetworkParameterAdderTest {
         DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
                 .withCloudPlatform(CloudPlatform.AZURE.name())
                 .withNetwork(EnvironmentNetworkResponse.builder()
-                        .withSubnetMetas(Map.of("mySubnet", new CloudSubnet("mySubnet", "")))
+                        .withSubnetMetas(Map.of("mySubnet", new CloudSubnet.Builder()
+                                .id("mySubnet")
+                                .name("")
+                                .build()))
                         .withAzure(
                                 EnvironmentNetworkAzureParams.EnvironmentNetworkAzureParamsBuilder.anEnvironmentNetworkAzureParams()
                                         .withResourceGroupName("myResourceGroup")
@@ -149,18 +159,42 @@ public class NetworkParameterAdderTest {
                         )
                         .build())
                 .build();
-        CloudSubnet subnetForPrivateEndpoint = new CloudSubnet("mySubnet", "");
+        CloudSubnet subnetForPrivateEndpoint = new CloudSubnet.Builder()
+                .id("mySubnet")
+                .name("")
+                .build();
         when(subnetListerService.getAzureSubscriptionId(any())).thenReturn("mySubscription");
         when(serviceEndpointCreationToEndpointTypeConverter.convert(any(), any())).thenReturn(PrivateEndpointType.USE_PRIVATE_ENDPOINT);
-        CloudSubnet cloudSubnet = new CloudSubnet(SUBNET_RESOURCE_ID, SUBNET_ID);
+        CloudSubnet cloudSubnet = new CloudSubnet.Builder()
+                .id(SUBNET_RESOURCE_ID)
+                .name(SUBNET_ID)
+                .build();
         when(subnetListerService.expandAzureResourceId(subnetForPrivateEndpoint, environment, "mySubscription")).thenReturn(cloudSubnet);
-        CloudSubnet cloudSubnetLarge = new CloudSubnet("flexSubnetLarge", "flexSubnetLarge", "az", "10.3.0.0/16");
+        CloudSubnet cloudSubnetLarge = new CloudSubnet.Builder()
+                .id("flexSubnetLarge")
+                .name("flexSubnetLarge")
+                .availabilityZone("az")
+                .cidr("10.3.0.0/16")
+                .build();
         when(subnetListerService.expandAzureResourceId(cloudSubnetLarge, environment, "mySubscription"))
-                .thenReturn(new CloudSubnet("flexSubnetLargeExpanded", "flexSubnetLargeExpanded"));
+                .thenReturn(new CloudSubnet.Builder()
+                        .id("flexSubnetLargeExpanded")
+                        .name("flexSubnetLargeExpanded")
+                        .build()
+                );
         when(subnetListerService.fetchNetworksFiltered(dbStack, delegatedSubnetIds))
-                .thenReturn(Set.of(new CloudSubnet("flexSubnetSmall", "flexSubnetSmall", "az", "192.168.1.0/24"),
+                .thenReturn(Set.of(
+                        new CloudSubnet.Builder()
+                                .id("flexSubnetSmall")
+                                .name("flexSubnetSmall")
+                                .availabilityZone("az")
+                                .cidr("192.168.1.0/24")
+                                .build(),
                         cloudSubnetLarge,
-                        new CloudSubnet("flexWithoutCidr", "flexWithoutCidr")));
+                        new CloudSubnet.Builder()
+                                .id("flexWithoutCidr")
+                                .name("flexWithoutCidr")
+                                .build()));
 
         Map<String, Object> parameters = underTest.addParameters(environment, dbStack);
 

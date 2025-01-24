@@ -453,15 +453,16 @@ public class AwsPlatformResources implements PlatformResources {
 
             Optional<String> subnetName = getName(subnet.tags());
             subnets.add(
-                    new CloudSubnet(
-                            subnet.subnetId(),
-                            subnetName.orElse(subnet.subnetId()),
-                            subnet.availabilityZone(),
-                            subnet.cidrBlock(),
-                            !hasInternetGateway,
-                            subnet.mapPublicIpOnLaunch(),
-                            hasInternetGateway,
-                            hasInternetGateway ? PUBLIC : PRIVATE)
+                    new CloudSubnet.Builder()
+                            .id(subnet.subnetId())
+                            .name(subnetName.orElse(subnet.subnetId()))
+                            .availabilityZone(subnet.availabilityZone())
+                            .cidr(subnet.cidrBlock())
+                            .privateSubnet(!hasInternetGateway)
+                            .mapPublicIpOnLaunch(hasInternetGateway)
+                            .igwAvailable(hasInternetGateway)
+                            .type(hasInternetGateway ? PUBLIC : PRIVATE)
+                            .build()
             );
         }
         return subnets;

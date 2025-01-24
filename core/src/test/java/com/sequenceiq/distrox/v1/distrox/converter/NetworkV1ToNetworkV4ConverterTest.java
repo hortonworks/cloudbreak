@@ -318,7 +318,16 @@ class NetworkV1ToNetworkV4ConverterTest {
         DetailedEnvironmentResponse environmentNetworkResponse = awsEnvironmentNetwork();
         EnvironmentNetworkResponse network = environmentNetworkResponse.getNetwork();
         network.setPublicEndpointAccessGateway(PublicEndpointAccessGateway.ENABLED);
-        CloudSubnet publicSubnet = new CloudSubnet(PUBLIC_SUBNET_ID, "name", "az-1", "cidr", false, true, true, SubnetType.PUBLIC);
+        CloudSubnet publicSubnet = new CloudSubnet.Builder()
+                .id(PUBLIC_SUBNET_ID)
+                .name("name")
+                .availabilityZone("az-1")
+                .cidr("cidr")
+                .privateSubnet(false)
+                .mapPublicIpOnLaunch(true)
+                .igwAvailable(true)
+                .type(SubnetType.PUBLIC)
+                .build();
 
         when(subnetSelector.chooseSubnetForEndpointGateway(any(), any())).thenReturn(Optional.of(publicSubnet));
         when(endpointGatewayNetworkValidator.validate(any())).thenReturn(ValidationResult.empty());
@@ -342,7 +351,16 @@ class NetworkV1ToNetworkV4ConverterTest {
         network.setPublicEndpointAccessGateway(PublicEndpointAccessGateway.DISABLED);
         network.setEndpointGatewaySubnetIds(Set.of(SUBNET2_ID));
         when(entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(any())).thenReturn(true);
-        CloudSubnet privateSubnet = new CloudSubnet(SUBNET2_ID, "name", "az-1", "cidr", true, false, false, SubnetType.PRIVATE);
+        CloudSubnet privateSubnet = new CloudSubnet.Builder()
+                .id(SUBNET2_ID)
+                .name("name")
+                .availabilityZone("az-1")
+                .cidr("cidr")
+                .privateSubnet(true)
+                .mapPublicIpOnLaunch(false)
+                .igwAvailable(false)
+                .type(SubnetType.PRIVATE)
+                .build();
 
         when(subnetSelector.chooseSubnetForEndpointGateway(any(), any())).thenReturn(Optional.of(privateSubnet));
         when(endpointGatewayNetworkValidator.validate(any())).thenReturn(ValidationResult.empty());

@@ -227,12 +227,14 @@ public class MockPlatformResources implements PlatformResources {
         for (int i = 0; i < azs.length; i++) {
             String londonAvailabilityZone = azs[i];
             String subnetId = name + "-subnet" + i;
-            subnets.add(new CloudSubnet(
-                    subnetId,
-                    subnetId,
-                    londonAvailabilityZone,
-                    "192.168.0.0/16"
-            ));
+            subnets.add(
+                new CloudSubnet.Builder()
+                    .id(subnetId)
+                    .name(subnetId)
+                    .availabilityZone(londonAvailabilityZone)
+                    .cidr("192.168.0.0/16")
+                    .build()
+            );
         }
         return Set.of(new CloudNetwork(name, name, subnets, new HashMap<>()));
     }

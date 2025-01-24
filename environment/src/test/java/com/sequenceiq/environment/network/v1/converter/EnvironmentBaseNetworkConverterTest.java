@@ -46,10 +46,30 @@ class EnvironmentBaseNetworkConverterTest {
     private static final String VPC_ID = "vpcId";
 
     private static final Map<String, CloudSubnet> SUBNET_1 =
-            Map.of("subnet1", new CloudSubnet("123", "subnet1", "az", "cidr1", true, false, false, SubnetType.PRIVATE));
+            Map.of("subnet1",
+                    new CloudSubnet.Builder()
+                            .id("123")
+                            .name("subnet1")
+                            .availabilityZone("az")
+                            .cidr("cidr1")
+                            .privateSubnet(true)
+                            .mapPublicIpOnLaunch(false)
+                            .igwAvailable(false)
+                            .type(SubnetType.PRIVATE)
+                            .build());
 
     private static final Map<String, CloudSubnet> SUBNET_2 =
-            Map.of("subnet2", new CloudSubnet("234", "subnet2", "az", "cidr2", true, false, false, SubnetType.PRIVATE));
+            Map.of("subnet2",
+                    new CloudSubnet.Builder()
+                            .id("234")
+                            .name("subnet2")
+                            .availabilityZone("az")
+                            .cidr("cidr2")
+                            .privateSubnet(true)
+                            .mapPublicIpOnLaunch(false)
+                            .igwAvailable(false)
+                            .type(SubnetType.PRIVATE)
+                            .build());
 
     @Mock
     private EnvironmentViewConverter environmentViewConverter;
@@ -77,7 +97,16 @@ class EnvironmentBaseNetworkConverterTest {
     // @formatter:on
 
     private static  Map<String, CloudSubnet> subnetResult(String id, String name, String cidr, Set<DeploymentRestriction> restrictions) {
-        CloudSubnet subnet = new CloudSubnet(id, name, "az", cidr, true, false, false, SubnetType.PRIVATE);
+        CloudSubnet subnet = new CloudSubnet.Builder()
+                        .id(id)
+                        .name(name)
+                        .availabilityZone("az")
+                        .cidr(cidr)
+                        .privateSubnet(true)
+                        .mapPublicIpOnLaunch(false)
+                        .igwAvailable(false)
+                        .type(SubnetType.PRIVATE)
+                        .build();
         subnet.setDeploymentRestrictions(restrictions);
         return Map.of(name, subnet);
     }

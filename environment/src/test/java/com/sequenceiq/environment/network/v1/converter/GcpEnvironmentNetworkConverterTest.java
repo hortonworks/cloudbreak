@@ -64,10 +64,26 @@ class GcpEnvironmentNetworkConverterTest {
         EnvironmentView env = new EnvironmentView();
         env.setLocation(LOCATION);
         gcpNetwork.setEnvironment(env);
-        gcpNetwork.setSubnetMetas(Map.of("subnet1", new CloudSubnet("id1", "subnet1"),
-                "subnet2", new CloudSubnet("id2", "subnet2")));
-        gcpNetwork.setEndpointGatewaySubnetMetas(Map.of("subnet3", new CloudSubnet("id3", "subnet3"),
-                "subnet4", new CloudSubnet("id4", "subnet4")));
+        gcpNetwork.setSubnetMetas(Map.of("subnet1",
+                new CloudSubnet.Builder()
+                        .id("id1")
+                        .name("subnet1")
+                        .build(),
+                "subnet2",
+                new CloudSubnet.Builder()
+                        .id("id2")
+                        .name("subnet2")
+                        .build()));
+        gcpNetwork.setEndpointGatewaySubnetMetas(Map.of("subnet3",
+                new CloudSubnet.Builder()
+                        .id("id3")
+                        .name("subnet3")
+                        .build(),
+                "subnet4",
+                new CloudSubnet.Builder()
+                        .id("id4")
+                        .name("subnet4")
+                        .build()));
         Set<String> availabilityZones = Set.of("gcp-region1-zone1");
         gcpNetwork.setAvailabilityZones(availabilityZones);
 

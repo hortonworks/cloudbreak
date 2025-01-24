@@ -167,7 +167,16 @@ class LoadBalancerEnvUpdateHandlerTest {
         when(environmentLoadBalancerDto.getEndpointAccessGateway()).thenReturn(peag);
         when(environmentLoadBalancerDto.getEndpointGatewaySubnetIds()).thenReturn(subnets);
         lenient().when(entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(any())).thenReturn(targetingEnabled);
-        Map<String, CloudSubnet> cloudSubnets = Map.of("subnet1", new CloudSubnet("sn1", "name1"), "subnet2", new CloudSubnet("sn2", "name2"));
+        Map<String, CloudSubnet> cloudSubnets = Map.of("subnet1",
+                new CloudSubnet.Builder()
+                    .id("sn1")
+                    .name("name1")
+                    .build(),
+                "subnet2",
+                new CloudSubnet.Builder()
+                    .id("sn2")
+                    .name("name2")
+                    .build());
         when(networkValidationService.getEndpointGatewaySubnetMetadata(environment, environmentDto)).thenReturn(cloudSubnets);
         underTest.accept(environmentLbDtoEvent);
 

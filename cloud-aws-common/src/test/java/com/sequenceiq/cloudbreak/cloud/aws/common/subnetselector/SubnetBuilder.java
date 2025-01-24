@@ -65,6 +65,15 @@ public class SubnetBuilder {
 
     private CloudSubnet getSubnet(String az, boolean privateSubnet, boolean mapPublicOnLaunch) {
         String nextSubnetId = "subnet-" + nextId++;
-        return new CloudSubnet(nextSubnetId, "", az, "", privateSubnet, mapPublicOnLaunch, !privateSubnet, PUBLIC);
+        return new CloudSubnet.Builder()
+                .id(nextSubnetId)
+                .name("")
+                .availabilityZone(az)
+                .cidr("")
+                .privateSubnet(privateSubnet)
+                .mapPublicIpOnLaunch(mapPublicOnLaunch)
+                .igwAvailable(!privateSubnet)
+                .type(PUBLIC)
+                .build();
     }
 }

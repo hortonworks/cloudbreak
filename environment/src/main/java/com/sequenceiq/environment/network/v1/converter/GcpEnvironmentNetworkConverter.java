@@ -96,18 +96,20 @@ public class GcpEnvironmentNetworkConverter extends EnvironmentBaseNetworkConver
 
         gcpNetwork.setSubnetMetas(createdCloudNetwork.getSubnets().stream()
                 .collect(Collectors.toMap(
-                        CreatedSubnet::getSubnetId, subnet -> new CloudSubnet(
-                                subnet.getSubnetId(),
-                                subnet.getSubnetId(),
-                                subnet.getAvailabilityZone(),
-                                subnet.getCidr(),
-                                !subnet.isPublicSubnet(),
-                                subnet.isMapPublicIpOnLaunch(),
-                                subnet.isIgwAvailable(),
-                                subnet.isIgwAvailable() ? PUBLIC : PRIVATE,
-                                subnet.isPublicSubnet()
-                                        ? getDeploymentRestrictionWhenPublicSubnet(createdCloudNetwork)
-                                        : getDeploymentRestrictionForPrivateSubnet(subnet.getType()))
+                        CreatedSubnet::getSubnetId, subnet ->
+                                new CloudSubnet.Builder()
+                                    .id(subnet.getSubnetId())
+                                    .name(subnet.getSubnetId())
+                                    .availabilityZone(subnet.getAvailabilityZone())
+                                    .cidr(subnet.getCidr())
+                                    .privateSubnet(!subnet.isPublicSubnet())
+                                    .mapPublicIpOnLaunch(subnet.isMapPublicIpOnLaunch())
+                                    .igwAvailable(subnet.isIgwAvailable())
+                                    .type(subnet.isIgwAvailable() ? PUBLIC : PRIVATE)
+                                    .deploymentRestrictions(subnet.isPublicSubnet()
+                                            ? getDeploymentRestrictionWhenPublicSubnet(createdCloudNetwork)
+                                            : getDeploymentRestrictionForPrivateSubnet(subnet.getType()))
+                                    .build()
                         )
                 )
         );

@@ -209,7 +209,14 @@ public class StackDecoratorTest {
         crr.setNames(Lists.newArrayList("region"));
         environmentResponse.setRegions(crr);
         EnvironmentNetworkResponse enr = new EnvironmentNetworkResponse();
-        Map<String, CloudSubnet> subnetmetas = Maps.newHashMap("subnet", new CloudSubnet("id", "name", "availabilityzone", "cidr"));
+        Map<String, CloudSubnet> subnetmetas = Maps.newHashMap("subnet",
+                new CloudSubnet.Builder()
+                        .id("id")
+                        .name("name")
+                        .availabilityZone("availabilityzone")
+                        .cidr("cidr")
+                        .build()
+        );
         enr.setSubnetMetas(subnetmetas);
         environmentResponse.setNetwork(enr);
         environmentResponse.setAzure(AzureEnvironmentParameters

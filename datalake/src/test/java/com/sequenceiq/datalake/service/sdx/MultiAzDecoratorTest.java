@@ -135,13 +135,49 @@ class MultiAzDecoratorTest {
         stackV4Request.setInstanceGroups(List.of(getInstanceGroupV4Request(InstanceGroupType.GATEWAY), getInstanceGroupV4Request(InstanceGroupType.CORE)));
         Map<String, CloudSubnet> cloudSubnetMap = Map.of(
                 PREFERRED_SUBNET_ID,
-                new CloudSubnet("id1", PREFERRED_SUBNET_ID, "eu-central-1a", "10.0.0.0/24", false, true, true, SubnetType.PUBLIC),
+                new CloudSubnet.Builder()
+                        .id("id1")
+                        .name(PREFERRED_SUBNET_ID)
+                        .availabilityZone("eu-central-1a")
+                        .cidr("10.0.0.0/24")
+                        .privateSubnet(false)
+                        .mapPublicIpOnLaunch(true)
+                        .igwAvailable(true)
+                        .type(SubnetType.PUBLIC)
+                        .build(),
                 SUBNET_ID2,
-                new CloudSubnet("id2", SUBNET_ID2, "eu-central-1b", "10.0.1.0/24", false, true, true, SubnetType.PUBLIC),
+                new CloudSubnet.Builder()
+                        .id("id2")
+                        .name(SUBNET_ID2)
+                        .availabilityZone("eu-central-1b")
+                        .cidr("10.0.1.0/24")
+                        .privateSubnet(false)
+                        .mapPublicIpOnLaunch(true)
+                        .igwAvailable(true)
+                        .type(SubnetType.PUBLIC)
+                        .build(),
                 SUBNET_ID3,
-                new CloudSubnet("id3", SUBNET_ID3, "eu-central-1c", "10.0.2.0/24", true, false, true, SubnetType.PRIVATE),
+                new CloudSubnet.Builder()
+                        .id("id3")
+                        .name(SUBNET_ID3)
+                        .availabilityZone("eu-central-1c")
+                        .cidr("10.0.2.0/24")
+                        .privateSubnet(true)
+                        .mapPublicIpOnLaunch(false)
+                        .igwAvailable(true)
+                        .type(SubnetType.PRIVATE)
+                        .build(),
                 SUBNET_ID4,
-                new CloudSubnet("id4", SUBNET_ID4, "eu-central-1d", "10.0.3.0/24", true, false, true, SubnetType.PRIVATE)
+                new CloudSubnet.Builder()
+                        .id("id4")
+                        .name(SUBNET_ID4)
+                        .availabilityZone("eu-central-1d")
+                        .cidr("10.0.3.0/24")
+                        .privateSubnet(true)
+                        .mapPublicIpOnLaunch(false)
+                        .igwAvailable(true)
+                        .type(SubnetType.PRIVATE)
+                        .build()
         );
         Set<String> subnetIds = cloudSubnetMap.keySet();
         DetailedEnvironmentResponse environment = getDetailedEnvironmentResponse(subnetIds, cloudSubnetMap, cloudSubnetMap, tunnel);
@@ -162,9 +198,29 @@ class MultiAzDecoratorTest {
         Set<String> subnetIds = Set.of(PREFERRED_SUBNET_ID, SUBNET_ID2);
         DetailedEnvironmentResponse environment = getDetailedEnvironmentResponse(subnetIds, null, Map.of(
                 PREFERRED_SUBNET_ID,
-                new CloudSubnet("id1", PREFERRED_SUBNET_ID, "eu-central-1a", "10.0.0.0/24", false, true, true, SubnetType.PUBLIC, Set.of(DATALAKE)),
+                new CloudSubnet.Builder()
+                        .id("id1")
+                        .name(PREFERRED_SUBNET_ID)
+                        .availabilityZone("eu-central-1d")
+                        .cidr("10.0.0.0/24")
+                        .privateSubnet(false)
+                        .mapPublicIpOnLaunch(true)
+                        .igwAvailable(true)
+                        .type(SubnetType.PUBLIC)
+                        .deploymentRestrictions(Set.of(DATALAKE))
+                        .build(),
                 SUBNET_ID2,
-                new CloudSubnet("id1", SUBNET_ID2, "eu-central-1b", "10.0.1.0/24", false, true, true, SubnetType.PUBLIC, Set.of(DATALAKE))
+                new CloudSubnet.Builder()
+                        .id("id1")
+                        .name(SUBNET_ID2)
+                        .availabilityZone("eu-central-1b")
+                        .cidr("10.0.1.0/24")
+                        .privateSubnet(false)
+                        .mapPublicIpOnLaunch(true)
+                        .igwAvailable(true)
+                        .type(SubnetType.PUBLIC)
+                        .deploymentRestrictions(Set.of(DATALAKE))
+                        .build()
         ), Tunnel.DIRECT);
 
         underTest.decorateStackRequestWithMultiAz(stackV4Request, environment, sdxClusterShape);
@@ -181,8 +237,28 @@ class MultiAzDecoratorTest {
         stackV4Request.setInstanceGroups(List.of(getInstanceGroupV4Request(InstanceGroupType.GATEWAY), getInstanceGroupV4Request(InstanceGroupType.CORE)));
         Set<String> subnetIds = Set.of(PREFERRED_SUBNET_ID, SUBNET_ID2);
         Map<String, CloudSubnet> subnetMetas = Map.of(
-                PREFERRED_SUBNET_ID, new CloudSubnet("id1", PREFERRED_SUBNET_ID, "eu-central-1a", "10.0.0.0/24", false, true, true, SubnetType.PUBLIC),
-                SUBNET_ID2, new CloudSubnet("id1", SUBNET_ID2, "eu-central-1a", "10.0.1.0/24", false, true, true, SubnetType.PUBLIC)
+                PREFERRED_SUBNET_ID,
+                new CloudSubnet.Builder()
+                        .id("id1")
+                        .name(PREFERRED_SUBNET_ID)
+                        .availabilityZone("eu-central-1a")
+                        .cidr("10.0.0.0/24")
+                        .privateSubnet(false)
+                        .mapPublicIpOnLaunch(true)
+                        .igwAvailable(true)
+                        .type(SubnetType.PUBLIC)
+                        .build(),
+                SUBNET_ID2,
+                new CloudSubnet.Builder()
+                        .id("id1")
+                        .name(SUBNET_ID2)
+                        .availabilityZone("eu-central-1a")
+                        .cidr("10.0.1.0/24")
+                        .privateSubnet(false)
+                        .mapPublicIpOnLaunch(true)
+                        .igwAvailable(true)
+                        .type(SubnetType.PUBLIC)
+                        .build()
         );
         DetailedEnvironmentResponse environment = getDetailedEnvironmentResponse(subnetIds, subnetMetas, subnetMetas, Tunnel.DIRECT);
 

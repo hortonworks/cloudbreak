@@ -72,9 +72,18 @@ public class SubnetChooserServiceTest {
     @Test
     public void testChooseSubnetsThenNetworkSelectorCalled() {
         List<CloudSubnet> subnets = List.of(
-                new CloudSubnet(SUBNET_1, "", AVAILABILITY_ZONE_A, ""),
-                new CloudSubnet(SUBNET_2, "", AVAILABILITY_ZONE_B, ""),
-                new CloudSubnet(SUBNET_3, "", AVAILABILITY_ZONE_B, "")
+                new CloudSubnet.Builder()
+                        .id(SUBNET_1)
+                        .availabilityZone(AVAILABILITY_ZONE_A)
+                        .build(),
+                new CloudSubnet.Builder()
+                        .id(SUBNET_2)
+                        .availabilityZone(AVAILABILITY_ZONE_B)
+                        .build(),
+                new CloudSubnet.Builder()
+                        .id(SUBNET_3)
+                        .availabilityZone(AVAILABILITY_ZONE_B)
+                        .build()
         );
         NetworkConnector networkConnector = setupConnector();
 
