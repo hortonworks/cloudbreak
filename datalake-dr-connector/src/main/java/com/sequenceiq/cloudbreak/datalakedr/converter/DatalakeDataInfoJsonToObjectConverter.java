@@ -22,14 +22,14 @@ public class DatalakeDataInfoJsonToObjectConverter {
 
             return DatalakeDataInfoObject.newBuilder()
                     .setOperationId(operationId)
-                    .setDatabaseSizeInBytes(getTotalDatabaseSize(databaseJSON))
-                    .setDatabaseBackupNodeFreeSpaceInBytes(backupSpaceJSON.getAsLong() * BYTES_IN_FILESYSTEM_BLOCK)
-                    .setHbaseAtlasEntityAuditEventsTableSizeInBytes(hbaseJSON.get("atlas_entity_audit_events").getAsLong())
-                    .setHbaseAtlasJanusTableSizeInBytes(hbaseJSON.get("atlas_janus").getAsLong())
-                    .setSolrVertexIndexCollectionSizeInBytes(solrJSON.get("vertex_index").getAsLong())
-                    .setSolrFulltextIndexCollectionSizeInBytes(solrJSON.get("fulltext_index").getAsLong())
-                    .setSolrEdgeIndexCollectionSizeInBytes(solrJSON.get("edge_index").getAsLong())
-                    .setSolrRangerAuditsCollectionSizeInBytes(solrJSON.get("ranger_audits").getAsLong())
+                    .setDatabaseSizeInBytes(databaseJSON != null ? getTotalDatabaseSize(databaseJSON) : 0)
+                    .setDatabaseBackupNodeFreeSpaceInBytes(backupSpaceJSON != null ? backupSpaceJSON.getAsLong() * BYTES_IN_FILESYSTEM_BLOCK : 0)
+                    .setHbaseAtlasEntityAuditEventsTableSizeInBytes(getLongFromJson(hbaseJSON, "atlas_entity_audit_events", 0))
+                    .setHbaseAtlasJanusTableSizeInBytes(getLongFromJson(hbaseJSON, "atlas_janus", 0))
+                    .setSolrVertexIndexCollectionSizeInBytes(getLongFromJson(solrJSON, "vertex_index", 0))
+                    .setSolrFulltextIndexCollectionSizeInBytes(getLongFromJson(solrJSON, "fulltext_index", 0))
+                    .setSolrEdgeIndexCollectionSizeInBytes(getLongFromJson(solrJSON, "edge_index", 0))
+                    .setSolrRangerAuditsCollectionSizeInBytes(getLongFromJson(solrJSON, "ranger_audits", 0))
                     .build();
         } catch (Exception ex) {
             throw new IllegalStateException("Failed to parse the data info object JSON '" + inputJSON + '\'', ex);
@@ -40,5 +40,9 @@ public class DatalakeDataInfoJsonToObjectConverter {
         return databaseJSON.entrySet().stream()
                 .map(entry -> entry.getValue().getAsLong())
                 .reduce(0L, Long::sum);
+    }
+
+    private long getLongFromJson(JsonObject json, String key, long defaultValue) {
+        return json.has(key) ? json.get(key).getAsLong() : defaultValue;
     }
 }

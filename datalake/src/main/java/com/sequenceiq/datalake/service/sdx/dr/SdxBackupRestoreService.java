@@ -247,7 +247,7 @@ public class SdxBackupRestoreService {
             DatalakeDrSkipOptions skipOptions, int fullDrMaxDurationInMin, boolean validationOnly) {
         String selector = DATALAKE_TRIGGER_RESTORE_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        DatalakeTriggerRestoreEvent startEvent = new DatalakeTriggerRestoreEvent(selector, cluster.getId(), null, userId,
+        DatalakeTriggerRestoreEvent startEvent = new DatalakeTriggerRestoreEvent(selector, cluster.getId(), cluster.getClusterName(), userId,
                 backupId, backupLocation, backupLocationOverride, skipOptions, DatalakeRestoreFailureReason.USER_TRIGGERED, fullDrMaxDurationInMin,
                 validationOnly);
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerDatalakeRestoreFlow(startEvent, cluster.getClusterName());
