@@ -26,6 +26,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_SECURE_BOOT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SECRET_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SECRET_ROTATION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_TLS_1_3;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_WIRE_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CENTRAL_COMPUTE_MONITORING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_IDENTITY_MAPPING;
@@ -491,6 +492,10 @@ public class EntitlementService {
 
     public boolean isSecretEncryptionEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CB_SECRET_ENCRYPTION);
+    }
+
+    public boolean isTlsv13Enabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CB_TLS_1_3);
     }
 
     public boolean isExpressOnboardingEnabled(String accountId) {

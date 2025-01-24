@@ -259,6 +259,9 @@ public class MockUserManagementServiceTest {
                 {"secretEncryptionEnabled false", "secretEncryptionEnabled", false, "CDP_CB_SECRET_ENCRYPTION", false},
                 {"secretEncryptionEnabled true", "secretEncryptionEnabled", true, "CDP_CB_SECRET_ENCRYPTION", true},
 
+                {"tlsv13Enabled false", "tlsv13Enabled", false, "CDP_CB_TLS_1_3", false},
+                {"tlsv13Enabled true", "tlsv13Enabled", true, "CDP_CB_TLS_1_3", true},
+
                 {"gcpSecureBootEnabled false", "gcpSecureBootEnabled", false, "CDP_CB_GCP_SECURE_BOOT", false},
                 {"gcpSecureBootEnabled true", "gcpSecureBootEnabled", true, "CDP_CB_GCP_SECURE_BOOT", true},
         };

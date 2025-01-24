@@ -163,6 +163,9 @@ class EntitlementServiceTest {
                 {"CDP_CB_SECRET_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::isSecretEncryptionEnabled, false},
                 {"CDP_CB_SECRET_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::isSecretEncryptionEnabled, true},
 
+                {"CDP_CB_SECRET_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::isSecretEncryptionEnabled, false},
+                {"CDP_CB_SECRET_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::isSecretEncryptionEnabled, true},
+
                 {"CDP_CONTAINER_READY_ENV", (EntitlementCheckFunction) EntitlementService::isContainerReadyEnvEnabled, false},
                 {"CDP_CONTAINER_READY_ENV", (EntitlementCheckFunction) EntitlementService::isContainerReadyEnvEnabled, true},
 

@@ -31,4 +31,15 @@ public class FreeIpaConfigViewTest {
         assertEquals(KERBEROS_SECRET_LOCATION, freeIpaConfigMap.get("kerberosSecretLocation"));
         assertEquals(SeLinux.PERMISSIVE.name(), freeIpaConfigMap.get("selinux_mode"));
     }
+
+    @ParameterizedTest()
+    @ValueSource(booleans = {true, false})
+    void testToMapForTlsv13(boolean tlsv13Enabled) {
+        FreeIpaBackupConfigView backupConfigView = mock(FreeIpaBackupConfigView.class);
+        FreeIpaConfigView freeIpaConfigView = new FreeIpaConfigView.Builder()
+                .withBackupConfig(backupConfigView)
+                .withTlsv13Enabled(tlsv13Enabled).build();
+        Map<String, Object> freeIpaConfigMap = freeIpaConfigView.toMap();
+        assertEquals(tlsv13Enabled, freeIpaConfigMap.get("tlsv13Enabled"));
+    }
 }

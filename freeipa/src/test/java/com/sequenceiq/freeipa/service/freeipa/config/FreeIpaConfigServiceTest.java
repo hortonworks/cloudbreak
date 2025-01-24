@@ -27,6 +27,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -69,6 +70,8 @@ class FreeIpaConfigServiceTest {
 
     private static final String KERBEROS_SECRET_LOCATION = "kerberosSecretLocation";
 
+    private static final String ACCOUNT = "testAccount";
+
     private Multimap<String, String> subnetWithCidr;
 
     @Spy
@@ -101,6 +104,9 @@ class FreeIpaConfigServiceTest {
     @Mock
     private EnvironmentService environmentService;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     @InjectMocks
     private FreeIpaConfigService underTest;
 
@@ -131,6 +137,7 @@ class FreeIpaConfigServiceTest {
         Network network = new Network();
         network.setNetworkCidrs(List.of(CIDR));
         stack.setNetwork(network);
+        stack.setAccountId(ACCOUNT);
 
         when(freeIpaService.findByStack(any())).thenReturn(freeIpa);
         when(freeIpaClientFactory.getAdminUser()).thenReturn(ADMIN);
@@ -142,6 +149,7 @@ class FreeIpaConfigServiceTest {
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         when(proxyConfigDtoService.getByEnvironmentCrn(anyString())).thenReturn(Optional.empty());
         when(environmentService.isSecretEncryptionEnabled(ENV_CRN)).thenReturn(true);
+        when(entitlementService.isTlsv13Enabled(ACCOUNT)).thenReturn(true);
 
         Node node = new Node(PRIVATE_IP, null, null, null, HOSTNAME, DOMAIN, (String) null);
         Map<String, String> expectedHost = Map.of("ip", PRIVATE_IP, "fqdn", HOSTNAME);
@@ -163,6 +171,7 @@ class FreeIpaConfigServiceTest {
         assertEquals(true, freeIpaConfigView.isSecretEncryptionEnabled());
         assertEquals(KERBEROS_SECRET_LOCATION, freeIpaConfigView.getKerberosSecretLocation());
         assertEquals(SeLinux.ENFORCING.name().toLowerCase(Locale.ROOT), freeIpaConfigView.getSeLinux());
+        assertEquals(true, freeIpaConfigView.isTlsv13Enabled());
     }
 
     @ParameterizedTest(name = "{0}")
@@ -174,6 +183,7 @@ class FreeIpaConfigServiceTest {
         network.setNetworkCidrs(List.of(CIDR));
         stack.setNetwork(network);
         stack.setEnvironmentCrn(ENV_CRN);
+        stack.setAccountId(ACCOUNT);
 
         FreeIpa freeIpa = new FreeIpa();
         freeIpa.setDomain(DOMAIN);
@@ -185,6 +195,7 @@ class FreeIpaConfigServiceTest {
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         when(networkService.getFilteredSubnetWithCidr(any())).thenReturn(subnetWithCidr);
         when(environmentService.isSecretEncryptionEnabled(ENV_CRN)).thenReturn(false);
+        when(entitlementService.isTlsv13Enabled(ACCOUNT)).thenReturn(false);
 
         FreeIpaConfigView freeIpaConfigView = underTest.createFreeIpaConfigs(
                 stack, Set.of());
@@ -194,6 +205,7 @@ class FreeIpaConfigServiceTest {
         assertEquals(false, freeIpaConfigView.isSecretEncryptionEnabled());
         assertEquals(KERBEROS_SECRET_LOCATION, freeIpaConfigView.getKerberosSecretLocation());
         assertEquals(SeLinux.PERMISSIVE.name().toLowerCase(Locale.ROOT), freeIpaConfigView.getSeLinux());
+        assertEquals(false, freeIpaConfigView.isTlsv13Enabled());
     }
 
     // @formatter:off

@@ -30,6 +30,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_SECURE_BOOT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SECRET_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SECRET_ROTATION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_TLS_1_3;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CENTRAL_COMPUTE_MONITORING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_IDENTITY_MAPPING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION;
@@ -453,6 +454,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.datalake.backup.compression.enable}")
     private boolean dlBackupCompressionEnable;
+
+    @Value("${auth.mock.tlsv13.enable}")
+    private boolean tlsv13Enabled;
 
     private String cbLicense;
 
@@ -1052,6 +1056,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (datahubForceOsUpgradeEnabled) {
             builder.addEntitlements(createEntitlement(CDP_DATAHUB_FORCE_OS_UPGRADE));
+        }
+        if (tlsv13Enabled) {
+            builder.addEntitlements(createEntitlement(CDP_CB_TLS_1_3));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
