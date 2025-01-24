@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.ServiceUnavailableException;
 
 import org.junit.jupiter.api.Assertions;
@@ -35,24 +36,30 @@ class FreeipaServiceTest {
         freeipa.setStatus(Status.STOPPED);
         freeipa.setAvailabilityStatus(AvailabilityStatus.UNAVAILABLE);
 
-        when(underTest.describe(ENV_CRN)).thenReturn(freeipa);
+        when(freeIpaV1Endpoint.describe(ENV_CRN)).thenReturn(freeipa);
 
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.checkFreeipaRunning(ENV_CRN));
         assertEquals("Freeipa should be in Available state but currently is " + Status.STOPPED, exception.getMessage());
     }
 
     @Test
-    void testCheckFreeipaRunningWhenFreeIpaIsNullThenThrowsException() {
-        when(underTest.describe(ENV_CRN)).thenReturn(null);
+    void testCheckFreeipaRunningWhenFreeIpaIsNullThenIgnore() {
+        when(freeIpaV1Endpoint.describe(ENV_CRN)).thenReturn(null);
 
-        ServiceUnavailableException exception = Assertions.assertThrows(ServiceUnavailableException.class, () -> underTest.checkFreeipaRunning(ENV_CRN));
-        assertEquals("Freeipa availability cannot be determined currently.", exception.getMessage());
+        Assertions.assertDoesNotThrow(() -> underTest.checkFreeipaRunning(ENV_CRN));
+    }
+
+    @Test
+    void testCheckFreeipaRunningWhenFreeIpaNotFoundThenIgnore() {
+        when(freeIpaV1Endpoint.describe(ENV_CRN)).thenThrow(new NotFoundException("Freeipa not found"));
+
+        Assertions.assertDoesNotThrow(() -> underTest.checkFreeipaRunning(ENV_CRN));
     }
 
     @Test
     void testCheckFreeipaRunningWhenFreeIpaStatusIsNullThenThrowsException() {
         DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
-        when(underTest.describe(ENV_CRN)).thenReturn(freeipa);
+        when(freeIpaV1Endpoint.describe(ENV_CRN)).thenReturn(freeipa);
 
         ServiceUnavailableException exception = Assertions.assertThrows(ServiceUnavailableException.class, () -> underTest.checkFreeipaRunning(ENV_CRN));
         assertEquals("Freeipa availability cannot be determined currently.", exception.getMessage());
@@ -64,7 +71,7 @@ class FreeipaServiceTest {
         freeipa.setStatus(Status.AVAILABLE);
         freeipa.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
 
-        when(underTest.describe(ENV_CRN)).thenReturn(freeipa);
+        when(freeIpaV1Endpoint.describe(ENV_CRN)).thenReturn(freeipa);
 
         Assertions.assertDoesNotThrow(() -> underTest.checkFreeipaRunning(ENV_CRN));
     }

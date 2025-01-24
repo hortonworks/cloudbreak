@@ -83,17 +83,6 @@ public class RedbeamsDbServerConfigurer {
         return rdsConfig;
     }
 
-    private DatabaseServerV4Response getDatabaseServerV4Response(String dbServerCrn) {
-        DatabaseServerV4Response resp = getDatabaseServer(dbServerCrn);
-        LOGGER.info("Using redbeams for remote database configuration: {}", resp.toString());
-        if (Objects.nonNull(resp.getStatus()) && !resp.getStatus().isAvailable()) {
-            String message = String.format("Redbeams database server is not available (%s) with message: %s", resp.getStatus(), resp.getStatusReason());
-            LOGGER.warn(message);
-            throw new CloudbreakServiceException(message);
-        }
-        return resp;
-    }
-
     private RdsSslMode getSslMode(DatabaseServerV4Response response) {
         SslMode sslMode = Optional.ofNullable(response.getSslConfig()).map(SslConfigV4Response::getSslMode).orElse(null);
         return SslMode.isEnabled(sslMode) ? RdsSslMode.ENABLED : RdsSslMode.DISABLED;

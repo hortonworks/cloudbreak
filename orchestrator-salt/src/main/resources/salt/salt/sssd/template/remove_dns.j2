@@ -12,12 +12,12 @@ FQDN=$(hostname -f)
 echo "server {{ pillar['sssd-ad']['domain'] }}
 realm {{ pillar['sssd-ad']['domainuppercase'] }}
 update delete $reverse_ip.in-addr.arpa PTR
-send" >> /tmp/reversedns
+send" > /tmp/reversedns
 
 echo "server {{ pillar['sssd-ad']['domain'] }}
 realm {{ pillar['sssd-ad']['domainuppercase'] }}
 update delete $FQDN A
-send" >> /tmp/dns
+send" > /tmp/dns
 
 echo '{{ pillar['sssd-ad']['password'] }}' | kinit {{ pillar['sssd-ad']['username'] }}
 

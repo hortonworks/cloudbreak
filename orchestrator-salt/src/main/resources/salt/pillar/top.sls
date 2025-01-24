@@ -52,7 +52,7 @@ base:
     - match: grain
     - kerberos.init
 
-  'G@roles:kerberized and G@roles:manager_server':
+  'G@roles:kerberized and G@roles:manager_server and G@roles:ipa_member':
     - match: compound
     - kerberos.keytab
 

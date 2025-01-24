@@ -131,6 +131,12 @@ public class ClusterCreationEnvironmentValidator {
                 .orElse(Boolean.FALSE);
     }
 
+    public boolean hasADKerberosConfig(StackView stack) {
+        return kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName())
+                .map(kc -> KerberosType.ACTIVE_DIRECTORY == kc.getType())
+                .orElse(Boolean.FALSE);
+    }
+
     private void validateDatalakeConfig(Stack stack, DetailedEnvironmentResponse environment, ValidationResultBuilder resultBuilder, boolean distroxRequest) {
         if (CloudPlatform.MOCK.name().equalsIgnoreCase(stack.cloudPlatform())) {
             LOGGER.info("No Data Lake validation for MOCK provider");

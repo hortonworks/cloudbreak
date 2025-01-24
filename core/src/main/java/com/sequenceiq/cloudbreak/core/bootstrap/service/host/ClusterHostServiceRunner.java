@@ -632,6 +632,7 @@ public class ClusterHostServiceRunner {
             putIfNotNull(kerberosPillarConf, defaultKerberosCcacheSecretLocation, "cCacheSecretLocation");
             putIfNotNull(kerberosPillarConf, kerberosSecretLocation, "kerberosSecretLocation");
             putIfNotNull(kerberosPillarConf, kerberosConfig.getVerifyKdcTrust().toString(), "verifyKdcTrust");
+            putIfNotNull(kerberosPillarConf, kerberosConfig.getContainerDn(), "container-dn");
             servicePillar.put("kerberos", new SaltPillarProperties("/kerberos/init.sls", singletonMap("kerberos", kerberosPillarConf)));
         }
     }

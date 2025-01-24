@@ -30,12 +30,14 @@ import com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.event.CheckF
 import com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.event.PollBindUserCreationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.event.StartBindUserCreationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.event.ValidateKerberosConfigEvent;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
@@ -119,15 +121,26 @@ public class KerberosConfigValidationActions {
     @Bean(name = "VALIDATE_KERBEROS_CONFIG_STATE")
     public Action<?, ?> kerberosConfigValidationAction() {
         return new AbstractStackCreationAction<>(ValidateKerberosConfigEvent.class) {
+
+            @Inject
+            private ClusterService clusterService;
+
             @Override
             protected void doExecute(StackCreationContext context, ValidateKerberosConfigEvent payload, Map<Object, Object> variables) {
                 StackView stack = context.getStack();
                 decorateStackWithCustomDomainIfAdOrIpaJoinable(stack);
-                ClusterView cluster = stackDtoService.getClusterViewByStackId(payload.getResourceId());
-                if (cluster != null && Boolean.TRUE.equals(cluster.getAutoTlsEnabled()) || payload.isFreeipaExistsForEnv()) {
+                ClusterView clusterView = stackDtoService.getClusterViewByStackId(payload.getResourceId());
+                if (clusterView != null && Boolean.TRUE.equals(clusterView.getAutoTlsEnabled()) || payload.isFreeipaExistsForEnv()) {
                     boolean hasFreeIpaKerberosConfig = clusterCreationEnvironmentValidator.hasFreeIpaKerberosConfig(stack);
                     if (!hasFreeIpaKerberosConfig) {
-                        throw new IllegalStateException("AutoTLS works only with FreeIPA. No FreeIPA Kerberos configuration is found.");
+                        if (clusterCreationEnvironmentValidator.hasADKerberosConfig(stack)) {
+                            Cluster cluster = clusterService.getCluster(clusterView.getId());
+                            cluster.setAutoTlsEnabled(false);
+                            cluster.setDbSslEnabled(false);
+                            clusterService.updateCluster(cluster);
+                        } else {
+                            throw new IllegalStateException("AutoTLS works only with FreeIPA. No FreeIPA Kerberos configuration is found.");
+                        }
                     }
                 }
                 sendEvent(context, KerberosConfigValidationEvent.VALIDATE_KERBEROS_CONFIG_FINISHED_EVENT.selector(), payload);
@@ -140,7 +153,7 @@ public class KerberosConfigValidationActions {
 
             private void decorateStackWithCustomDomainIfAdOrIpaJoinable(StackView stack) {
                 Optional<KerberosConfig> kerberosConfig = measure(() ->
-                                kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()), LOGGER, "kerberosConfigService get {} ms");
+                        kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()), LOGGER, "kerberosConfigService get {} ms");
                 if (kerberosConfig.isPresent() && StringUtils.isNotBlank(kerberosConfig.get().getDomain())) {
                     String domain = kerberosConfig.get().getDomain();
                     LOGGER.info("Setting custom domain [{}] for cluster [{}]", domain, stack.getName());

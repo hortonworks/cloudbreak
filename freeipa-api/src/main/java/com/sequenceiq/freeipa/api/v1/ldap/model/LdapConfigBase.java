@@ -77,6 +77,9 @@ public abstract class LdapConfigBase {
     @Schema(description = LdapConfigModelDescription.ADMIN_GROUP)
     private String adminGroup;
 
+    @Schema(description = LdapConfigModelDescription.USER_GROUP)
+    private String userGroup;
+
     @Schema(description = LdapConfigModelDescription.CERTIFICATE)
     @JsonSerialize(using = Base64Serializer.class)
     @JsonDeserialize(using = Base64Deserializer.class)
@@ -229,5 +232,13 @@ public abstract class LdapConfigBase {
 
     public void setEnvironmentCrn(String environmentCrn) {
         this.environmentCrn = environmentCrn;
+    }
+
+    public String getUserGroup() {
+        return userGroup;
+    }
+
+    public void setUserGroup(String userGroup) {
+        this.userGroup = userGroup;
     }
 }

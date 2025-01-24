@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.service;
 
+import java.util.Optional;
+
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.ServiceUnavailableException;
@@ -21,27 +23,29 @@ public class FreeipaService {
     private FreeIpaV1Endpoint freeIpaV1Endpoint;
 
     public void checkFreeipaRunning(String envCrn) {
-        DescribeFreeIpaResponse freeipa = describe(envCrn);
-        if (freeipa != null && freeipa.getAvailabilityStatus() != null) {
-            if (!freeipa.getAvailabilityStatus().isAvailable()) {
-                String message = "Freeipa should be in Available state but currently is " + freeipa.getStatus().name();
+        Optional<DescribeFreeIpaResponse> freeipa = describe(envCrn);
+        if (freeipa.map(DescribeFreeIpaResponse::getAvailabilityStatus).isPresent()) {
+            if (!freeipa.map(DescribeFreeIpaResponse::getAvailabilityStatus).get().isAvailable()) {
+                String message = "Freeipa should be in Available state but currently is " + freeipa.get().getStatus().name();
                 LOGGER.info(message);
                 throw new BadRequestException(message);
             }
         } else {
             String message = "Freeipa availability cannot be determined currently.";
             LOGGER.warn(message);
-            throw new ServiceUnavailableException(message);
+            if (freeipa.isPresent()) {
+                throw new ServiceUnavailableException(message);
+            }
         }
 
     }
 
-    DescribeFreeIpaResponse describe(String envCrn) {
+    private Optional<DescribeFreeIpaResponse> describe(String envCrn) {
         try {
-            return freeIpaV1Endpoint.describe(envCrn);
+            return Optional.ofNullable(freeIpaV1Endpoint.describe(envCrn));
         } catch (NotFoundException e) {
             LOGGER.error("Could not find freeipa with envCrn: " + envCrn, e);
+            return Optional.empty();
         }
-        return null;
     }
 }

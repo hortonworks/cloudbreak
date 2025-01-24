@@ -6,15 +6,12 @@ function cleanup() {
 
 trap cleanup EXIT
 
-reverse_ip=$(hostname -i | awk -F. '{OFS="."; print $4,$3,$2,$1}')
-FQDN=$(hostname -f)
-
 echo "server {{ pillar['sssd-ad']['domain'] }}
 realm {{ pillar['sssd-ad']['domainuppercase'] }}
-update delete $reverse_ip.in-addr.arpa IN PTR
-update add $reverse_ip.in-addr.arpa 86400 IN PTR $FQDN
-send" > /tmp/ptr
+update delete $(hostname -f) A
+update add $(hostname -f) 3600 A $(hostname -I | awk '{print $1}')
+send" > /tmp/dns
 
 echo '{{ pillar['sssd-ad']['password'] }}' | kinit {{ pillar['sssd-ad']['username'] }}
 
-nsupdate -v -g /tmp/ptr
+nsupdate -v -g /tmp/dns

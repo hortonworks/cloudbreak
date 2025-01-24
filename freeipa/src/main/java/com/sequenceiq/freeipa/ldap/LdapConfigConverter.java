@@ -47,6 +47,7 @@ public class LdapConfigConverter {
         config.setGroupNameAttribute(createLdapConfigRequest.getGroupNameAttribute() != null ? createLdapConfigRequest.getGroupNameAttribute() : "cn");
         config.setGroupMemberAttribute(createLdapConfigRequest.getGroupMemberAttribute() != null ? createLdapConfigRequest.getGroupMemberAttribute() : "member");
         config.setAdminGroup(createLdapConfigRequest.getAdminGroup());
+        config.setUserGroup(createLdapConfigRequest.getUserGroup());
         config.setCertificate(createLdapConfigRequest.getCertificate());
         return config;
     }
@@ -95,6 +96,7 @@ public class LdapConfigConverter {
         createLdapConfigRequest.setBindDn("fake-user");
         createLdapConfigRequest.setBindPassword("fake-password");
         createLdapConfigRequest.setAdminGroup(source.getAdminGroup());
+        createLdapConfigRequest.setUserGroup(source.getUserGroup());
         createLdapConfigRequest.setDescription(source.getDescription());
         createLdapConfigRequest.setDirectoryType(source.getDirectoryType());
         createLdapConfigRequest.setDomain(source.getDomain());
