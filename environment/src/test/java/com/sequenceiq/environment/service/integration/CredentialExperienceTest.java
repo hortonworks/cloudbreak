@@ -29,6 +29,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -158,6 +159,9 @@ public class CredentialExperienceTest {
 
     @MockBean
     private MeterRegistry meterRegistry;
+
+    @MockBean
+    private ObjectMapper objectMapper;
 
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
