@@ -171,6 +171,11 @@ class EntitlementServiceTest {
 
                 {"CDP_SECURITY_ENFORCING_SELINUX", (EntitlementCheckFunction) EntitlementService::isCdpSecurityEnforcingSELinux, false},
                 {"CDP_SECURITY_ENFORCING_SELINUX", (EntitlementCheckFunction) EntitlementService::isCdpSecurityEnforcingSELinux, true},
+
+                {"CDP_AZURE_DATABASE_FLEXIBLE_SERVER_UPGRADE_LONG_POLLING",
+                        (EntitlementCheckFunction) EntitlementService::isFlexibleServerUpgradeLongPollingEnabled, false},
+                {"CDP_AZURE_DATABASE_FLEXIBLE_SERVER_UPGRADE_LONG_POLLING",
+                        (EntitlementCheckFunction) EntitlementService::isFlexibleServerUpgradeLongPollingEnabled, true},
         };
     }
 

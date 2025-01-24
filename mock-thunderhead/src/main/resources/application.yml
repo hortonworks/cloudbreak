@@ -88,6 +88,7 @@ auth:
     co2.calculation.enable: true
     enforce.aws.native.single.az.enabled: false
     azure.database.flexibleserver.upgrade.enabled: true
+    azure.database.flexibleserver.upgrade.longpolling.enabled: false
     secret.rotation.enabled: true
     secret.encryption.enabled: false
     container.ready.env.enabled: true

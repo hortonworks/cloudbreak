@@ -12,6 +12,7 @@ import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -40,6 +41,7 @@ import org.springframework.util.ReflectionUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
@@ -52,6 +54,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorEx
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
+import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateRetryParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
@@ -75,6 +78,8 @@ class RdsUpgradeOrchestratorServiceTest {
     private static final String DATABASE_ENGINE_VERSION = "11";
 
     private static final String CHECK_CONNECTION_STATE = "postgresql/upgrade/check-db-connection";
+
+    private static final String RESOURCE_CRN = "crn:cdp:cloudbreak:us-west-1:default:stack:1";
 
     @Mock
     private StackDtoService stackDtoService;
@@ -123,6 +128,9 @@ class RdsUpgradeOrchestratorServiceTest {
 
     @Mock
     private SaltStateParamsService saltStateParamsService;
+
+    @Mock
+    private EntitlementService entitlementService;
 
     @BeforeEach
     void setUp() {
@@ -492,6 +500,36 @@ class RdsUpgradeOrchestratorServiceTest {
         // Then
         verify(hostOrchestrator).runOrchestratorState(stateParams);
         verify(upgradeExternalRdsStateParamsProvider).createParamsForRdsCanaryCheck(serverUrl, userName);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testValidateDbConnectionWithValidParamsLongPolling(boolean longPolling) throws CloudbreakOrchestratorException {
+        // Given
+        Long stackId = 1L;
+        String serverUrl = "localhost:5432/db";
+        String userName = "postgres";
+
+        StackDto stackDto = mock(StackDto.class);
+        when(stackDto.getResourceCrn()).thenReturn(RESOURCE_CRN);
+        OrchestratorStateParams stateParams = new OrchestratorStateParams();
+        stateParams.setState(CHECK_CONNECTION_STATE);
+        stateParams.setConcurrent(true);
+        OrchestratorStateRetryParams retryParams = new OrchestratorStateRetryParams();
+        retryParams.setMaxRetryOnError(3);
+        stateParams.setStateRetryParams(retryParams);
+
+        when(stackDtoService.getById(stackId)).thenReturn(stackDto);
+        when(saltStateParamsService.createStateParams(stackDto, CHECK_CONNECTION_STATE, true, 2000, 3)).thenReturn(stateParams);
+        when(entitlementService.isFlexibleServerUpgradeLongPollingEnabled(any())).thenReturn(longPolling);
+
+        // When
+        underTest.validateDbConnection(stackId, serverUrl, userName);
+
+        // Then
+        verify(hostOrchestrator).runOrchestratorState(stateParams);
+        verify(upgradeExternalRdsStateParamsProvider).createParamsForRdsCanaryCheck(serverUrl, userName);
+        assertEquals(longPolling ? 180 : 3, stateParams.getStateRetryParams().get().getMaxRetryOnError());
     }
 
     @ParameterizedTest

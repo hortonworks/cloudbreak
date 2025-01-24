@@ -9,6 +9,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_I
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AWS_ARM_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_CERTIFICATE_AUTH;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_DATABASE_FLEXIBLE_SERVER_UPGRADE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_DATABASE_FLEXIBLE_SERVER_UPGRADE_LONG_POLLING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_IMAGE_MARKETPLACE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_IMAGE_MARKETPLACE_ONLY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT;
@@ -551,6 +552,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.aws.arm.datahub}")
     private boolean awsArmDataHubEnabled;
 
+    @Value("${auth.mock.azure.database.flexibleserver.upgrade.longpolling.enabled}")
+    private boolean azureFlexibleUpgradeLongPollingEnabled;
+
     private final Set<String> grantedEntitlements = new ConcurrentSkipListSet<>();
 
     private final Set<String> revokedEntitlements = new ConcurrentSkipListSet<>();
@@ -1031,6 +1035,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (awsArmDataHubEnabled) {
             builder.addEntitlements(createEntitlement(CDP_AWS_ARM_DATAHUB));
+        }
+        if (azureFlexibleUpgradeLongPollingEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_AZURE_DATABASE_FLEXIBLE_SERVER_UPGRADE_LONG_POLLING));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
