@@ -24,8 +24,6 @@
         </sift>
     </appender>
 
-    <logger name="org.glassfish" level="OFF" />
-
     <root level="INFO">
         <appender-ref ref="STDOUT" />
         <appender-ref ref="SUITE_BASED" />
