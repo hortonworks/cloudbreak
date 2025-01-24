@@ -14,4 +14,6 @@ import com.sequenceiq.freeipa.entity.LoadBalancer;
 public interface LoadBalancerRepository extends CrudRepository<LoadBalancer, Long> {
 
     Optional<LoadBalancer> findByStackId(@Param("stackId") Long stackId);
+
+    void deleteByStackId(@Param("stackId") Long stackId);
 }

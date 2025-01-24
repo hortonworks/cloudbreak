@@ -6,6 +6,8 @@ import static org.slf4j.LoggerFactory.getLogger;
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
@@ -23,6 +25,7 @@ import com.sequenceiq.common.api.type.ResourceType;
 
 import software.amazon.awssdk.services.ec2.model.DeleteSecurityGroupRequest;
 import software.amazon.awssdk.services.ec2.model.DeleteSecurityGroupResponse;
+import software.amazon.awssdk.services.ec2.model.Ec2Exception;
 import software.amazon.awssdk.services.ec2.model.SecurityGroup;
 
 @Component
@@ -63,6 +66,7 @@ public class AwsSecurityGroupResourceBuilder extends AbstractAwsNativeGroupBuild
                 .build();
     }
 
+    @Retryable(retryFor = Ec2Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 5000))
     @Override
     public CloudResource delete(AwsContext context, AuthenticatedContext auth, CloudResource resource, Network network) throws Exception {
         AmazonEc2Client amazonEc2Client = context.getAmazonEc2Client();

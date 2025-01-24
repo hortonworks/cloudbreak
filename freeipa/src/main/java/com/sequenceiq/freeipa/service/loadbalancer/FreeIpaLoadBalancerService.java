@@ -33,4 +33,9 @@ public class FreeIpaLoadBalancerService {
         loadBalancerRepository.save(loadBalancer);
     }
 
+    public void delete(Long stackId) {
+        LOGGER.debug("Deleting load balancer from database");
+        loadBalancerRepository.deleteByStackId(stackId);
+    }
+
 }
