@@ -60,6 +60,37 @@ public class DatalakeDataInfoJsonToObjectConverterTest {
             ",\"freeSpace\":" + AVAILABLE_BACKUP_SIZE +
             '}';
 
+    private static final String TEST_DATA_SIZES_RESPONSE_MISSING_DATABASE_AND_FREESPACE = '{' +
+            "\"database\":{" +
+            "}," +
+            "\"hbase\":{" +
+            "\"atlas_entity_audit_events\":" + ATLAS_ENTITY_SIZE + ',' +
+            "\"atlas_janus\":" + ATLAS_JANUS_SIZE +
+            "}," +
+            "\"solr\":{" +
+            "\"edge_index\":" + EDGE_SIZE + ',' +
+            "\"fulltext_index\":" + FULLTEXT_SIZE + ',' +
+            "\"ranger_audits\":" + RANGER_AUDITS_SIZE + ',' +
+            "\"vertex_index\":" + VERTEX_SIZE +
+            '}' +
+            '}';
+
+    private static final String TEST_DATA_SIZES_RESPONSE_MISSING_HBASE_AND_SOME_SOLR = '{' +
+            "\"database\":{" +
+            "\"hive\":" + HIVE_SIZE + ',' +
+            "\"ranger\":" + RANGER_SIZE + ',' +
+            "\"profiler_agent\":" + PROFILER_AGENT_SIZE + ',' +
+            "\"profiler_metric\":" + PROFILER_METRIC_SIZE +
+            "}," +
+            "\"hbase\":{" +
+            "}," +
+            "\"solr\":{" +
+            "\"edge_index\":" + EDGE_SIZE + ',' +
+            "\"fulltext_index\":" + FULLTEXT_SIZE +
+            '}' +
+            ",\"freeSpace\":" + AVAILABLE_BACKUP_SIZE +
+            '}';
+
     @InjectMocks
     private DatalakeDataInfoJsonToObjectConverter datalakeDataInfoJsonToObjectConverter;
 
@@ -78,6 +109,32 @@ public class DatalakeDataInfoJsonToObjectConverterTest {
         assertEquals(out.getSolrFulltextIndexCollectionSizeInBytes(), FULLTEXT_SIZE);
         assertEquals(out.getSolrRangerAuditsCollectionSizeInBytes(), RANGER_AUDITS_SIZE);
         assertEquals(out.getSolrVertexIndexCollectionSizeInBytes(), VERTEX_SIZE);
+        assertEquals(out.getDatabaseBackupNodeFreeSpaceInBytes(), AVAILABLE_BACKUP_SIZE * 1024);
+    }
+
+    @Test
+    public void testParseMissingDatabaseAndFreespace() {
+        DatalakeDataInfoObject out = datalakeDataInfoJsonToObjectConverter.convert(OPERATION_ID, TEST_DATA_SIZES_RESPONSE_MISSING_DATABASE_AND_FREESPACE);
+        assertEquals(out.getDatabaseSizeInBytes(), 0);
+        assertEquals(out.getHbaseAtlasEntityAuditEventsTableSizeInBytes(), ATLAS_ENTITY_SIZE);
+        assertEquals(out.getHbaseAtlasJanusTableSizeInBytes(), ATLAS_JANUS_SIZE);
+        assertEquals(out.getSolrEdgeIndexCollectionSizeInBytes(), EDGE_SIZE);
+        assertEquals(out.getSolrFulltextIndexCollectionSizeInBytes(), FULLTEXT_SIZE);
+        assertEquals(out.getSolrRangerAuditsCollectionSizeInBytes(), RANGER_AUDITS_SIZE);
+        assertEquals(out.getSolrVertexIndexCollectionSizeInBytes(), VERTEX_SIZE);
+        assertEquals(out.getDatabaseBackupNodeFreeSpaceInBytes(), 0);
+    }
+
+    @Test
+    public void testParseMissingHbaseAndSomeSolr() {
+        DatalakeDataInfoObject out = datalakeDataInfoJsonToObjectConverter.convert(OPERATION_ID, TEST_DATA_SIZES_RESPONSE_MISSING_HBASE_AND_SOME_SOLR);
+        assertEquals(out.getDatabaseSizeInBytes(), TOTAL_DB_SIZE);
+        assertEquals(out.getHbaseAtlasEntityAuditEventsTableSizeInBytes(), 0);
+        assertEquals(out.getHbaseAtlasJanusTableSizeInBytes(), 0);
+        assertEquals(out.getSolrEdgeIndexCollectionSizeInBytes(), EDGE_SIZE);
+        assertEquals(out.getSolrFulltextIndexCollectionSizeInBytes(), FULLTEXT_SIZE);
+        assertEquals(out.getSolrRangerAuditsCollectionSizeInBytes(), 0);
+        assertEquals(out.getSolrVertexIndexCollectionSizeInBytes(), 0);
         assertEquals(out.getDatabaseBackupNodeFreeSpaceInBytes(), AVAILABLE_BACKUP_SIZE * 1024);
     }
 
