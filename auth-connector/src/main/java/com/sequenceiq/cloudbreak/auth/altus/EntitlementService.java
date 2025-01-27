@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AWS_ARM
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AWS_RESTRICTED_POLICY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_CERTIFICATE_AUTH;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_DATABASE_FLEXIBLE_SERVER_UPGRADE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_DATABASE_FLEXIBLE_SERVER_UPGRADE_LONG_POLLING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_IMAGE_MARKETPLACE_ONLY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_BASE_IMAGE;
@@ -588,5 +589,9 @@ public class EntitlementService {
 
     public boolean isDatahubForceOsUpgradeEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_DATAHUB_FORCE_OS_UPGRADE);
+    }
+
+    public boolean isFlexibleServerUpgradeLongPollingEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_AZURE_DATABASE_FLEXIBLE_SERVER_UPGRADE_LONG_POLLING);
     }
 }
