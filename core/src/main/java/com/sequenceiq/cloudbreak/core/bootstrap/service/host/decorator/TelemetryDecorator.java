@@ -254,7 +254,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
 
     private DataBusCredential getOrRefreshDataBusCredential(StackView stack, String accountId, Telemetry telemetry, DataBusCredential dataBusCredential,
             CdpAccessKeyType cdpAccessKeyType) {
-        return getAltusCredential(accountId, telemetry, dataBusCredential, "DataBus", altusMachineUserService::isAnyDataBusBasedFeatureSupported,
+        return getAltusCredential(accountId, telemetry, dataBusCredential, "DataBus", t -> StackType.WORKLOAD.equals(stack.getType()),
                 () -> {
                     Optional<AltusCredential> altusCredential = altusMachineUserService.generateDatabusMachineUserForFluent(stack, telemetry, cdpAccessKeyType);
                     return altusMachineUserService.storeDataBusCredential(altusCredential, stack, cdpAccessKeyType);

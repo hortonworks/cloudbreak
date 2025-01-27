@@ -292,7 +292,6 @@ public class TelemetryDecoratorTest {
         given(componentConfigProviderService.getTelemetry(anyLong())).willReturn(telemetry);
         given(componentConfigProviderService.getImage(anyLong())).willReturn(image);
         given(telemetry.getDatabusEndpoint()).willReturn("https://dbus-dev.com");
-        given(altusMachineUserService.isAnyDataBusBasedFeatureSupported(any(Telemetry.class))).willReturn(true);
         given(altusMachineUserService.isAnyMonitoringFeatureSupported(any(Telemetry.class))).willReturn(true);
         given(altusMachineUserService.storeDataBusCredential(any(Optional.class), any(Stack.class), any(CdpAccessKeyType.class)))
                 .willReturn(dataBusCredential);
