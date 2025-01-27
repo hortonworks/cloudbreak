@@ -327,7 +327,7 @@ class RotateRdsCertificateServiceTest {
         StackView stackView = mock(StackView.class);
         ClusterApi clusterApiConnector = mock(ClusterApi.class);
         ClusterModificationService clusterModificationService = mock(ClusterModificationService.class);
-        doNothing().when(clusterModificationService).rollingRestartServices();
+        doNothing().when(clusterModificationService).rollingRestartServices(false);
         when(clusterApiConnector.clusterModificationService()).thenReturn(clusterModificationService);
         when(stackService.getByIdWithLists(stackId)).thenReturn(stack);
         when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApiConnector);
@@ -336,7 +336,7 @@ class RotateRdsCertificateServiceTest {
 
         verify(stackService).getByIdWithLists(stackId);
         verify(clusterApiConnectors).getConnector(stack);
-        verify(clusterModificationService).rollingRestartServices();
+        verify(clusterModificationService).rollingRestartServices(false);
     }
 
     @Test

@@ -191,7 +191,7 @@ class ReactorFlowManagerTest {
         underTest.triggerStopStartStackUpscale(STACK_ID, instanceGroupAdjustment, true);
         underTest.triggerStopStartStackDownscale(STACK_ID, instanceIdsByHostgroup, false);
         underTest.triggerRestartInstances(STACK_ID, instanceIds, false);
-        underTest.triggerClusterServicesRestart(STACK_ID, true, false);
+        underTest.triggerClusterServicesRestart(STACK_ID, true, false, false);
         underTest.triggerClusterProxyConfigReRegistration(STACK_ID, false, "");
         underTest.triggerRdsUpgrade(STACK_ID, TargetMajorVersion.VERSION_11, null, null);
         underTest.triggerModifyProxyConfig(STACK_ID, null);

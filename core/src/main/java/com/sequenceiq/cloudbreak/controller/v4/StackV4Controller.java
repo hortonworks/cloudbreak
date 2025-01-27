@@ -696,8 +696,8 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DATALAKE_HORIZONTAL_SCALING)
-    public FlowIdentifier rollingRestartServices(Long workspaceId, @ResourceCrn String crn) {
-        return stackOperationService.triggerServicesRollingRestart(crn);
+    public FlowIdentifier rollingRestartServices(Long workspaceId, @ResourceCrn String crn, boolean restartStaleServices) {
+        return stackOperationService.triggerServicesRollingRestart(crn, restartStaleServices);
     }
 
     @Override

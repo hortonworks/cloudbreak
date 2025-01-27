@@ -13,10 +13,14 @@ public class ClusterServicesRestartTriggerEvent extends StackEvent {
 
     private final boolean rollingRestart;
 
-    public ClusterServicesRestartTriggerEvent(String selector, Long stackId, boolean refreshNeeded, boolean rollingRestart) {
+    private final boolean restartStaleServices;
+
+    public ClusterServicesRestartTriggerEvent(String selector, Long stackId, boolean refreshNeeded,
+            boolean rollingRestart, boolean restartStaleServices) {
         super(selector, stackId);
         this.refreshNeeded = refreshNeeded;
         this.rollingRestart = rollingRestart;
+        this.restartStaleServices = restartStaleServices;
     }
 
     @JsonCreator
@@ -25,10 +29,12 @@ public class ClusterServicesRestartTriggerEvent extends StackEvent {
             @JsonProperty("resourceId") Long stackId,
             @JsonProperty("refreshNeeded") boolean refreshNeeded,
             @JsonProperty("rollingRestart") boolean rollingRestart,
+            @JsonProperty("restartStaleServices") boolean restartStaleServices,
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
         super(selector, stackId, accepted);
         this.refreshNeeded = refreshNeeded;
         this.rollingRestart = rollingRestart;
+        this.restartStaleServices = restartStaleServices;
     }
 
     public boolean isRefreshNeeded() {
@@ -37,5 +43,9 @@ public class ClusterServicesRestartTriggerEvent extends StackEvent {
 
     public boolean isRollingRestart() {
         return rollingRestart;
+    }
+
+    public boolean isRestartStaleServices() {
+        return restartStaleServices;
     }
 }

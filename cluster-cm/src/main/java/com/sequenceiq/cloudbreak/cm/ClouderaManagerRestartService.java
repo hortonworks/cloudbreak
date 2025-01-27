@@ -60,7 +60,8 @@ public class ClouderaManagerRestartService {
     @Inject
     private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
-    public void doRestartServicesIfNeeded(ApiClient apiClient, StackDtoDelegate stack, boolean rollingRestartEnabled, Optional<List<String>> serviceNames)
+    public void doRestartServicesIfNeeded(ApiClient apiClient, StackDtoDelegate stack, boolean rollingRestartEnabled, boolean restartStaleOnly,
+            Optional<List<String>> serviceNames)
             throws ApiException, CloudbreakException {
         LOGGER.debug("Restarting Cloudera Manager services, rollingRestartEnabled: {}", rollingRestartEnabled);
         ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(apiClient);
@@ -71,7 +72,7 @@ public class ClouderaManagerRestartService {
         } else {
             LOGGER.info("Calling restart command. rollingRestartEnabled {}", rollingRestartEnabled);
             ApiCommand restartCommand = rollingRestartEnabled ?
-                    executeRollingRestartCommand(apiClient, stack, clustersResourceApi) :
+                    executeRollingRestartCommand(apiClient, stack, restartStaleOnly, clustersResourceApi) :
                     executeRestartCommand(stack, clustersResourceApi, serviceNames);
             eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(),
                     rollingRestartEnabled ? CLUSTER_CM_CLUSTER_SERVICES_ROLLING_RESTART : CLUSTER_CM_CLUSTER_SERVICES_RESTARTING);
@@ -130,12 +131,15 @@ public class ClouderaManagerRestartService {
         }
     }
 
-    private ApiCommand executeRollingRestartCommand(ApiClient apiClient, StackDtoDelegate stack, ClustersResourceApi clustersResourceApi) throws ApiException {
+    private ApiCommand executeRollingRestartCommand(ApiClient apiClient, StackDtoDelegate stack, boolean restartStaleOnly,
+            ClustersResourceApi clustersResourceApi) throws ApiException {
         List<String> serviceNamesToRollingRestart = readServices(stack, apiClient).stream().map(ApiService::getName).collect(Collectors.toList());
         ApiRollingRestartClusterArgs rollingRestartClusterArgs = new ApiRollingRestartClusterArgs();
         rollingRestartClusterArgs.setSlaveBatchSize(BigDecimal.ONE);
         rollingRestartClusterArgs.setRolesToInclude(ApiRolesToInclude.ALL_ROLES);
         rollingRestartClusterArgs.setRestartServiceNames(serviceNamesToRollingRestart);
+        rollingRestartClusterArgs.setStaleConfigsOnly(restartStaleOnly);
+
         return clustersResourceApi.rollingRestart(stack.getName(), rollingRestartClusterArgs);
     }
 

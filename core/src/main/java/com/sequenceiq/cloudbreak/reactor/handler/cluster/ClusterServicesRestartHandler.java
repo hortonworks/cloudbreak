@@ -70,7 +70,7 @@ public class ClusterServicesRestartHandler extends ExceptionCatcherEventHandler<
             } else {
                 LOGGER.info("Restarting services");
                 if (request.isRollingRestart()) {
-                    apiConnectors.getConnector(stack).clusterModificationService().rollingRestartServices();
+                    apiConnectors.getConnector(stack).clusterModificationService().rollingRestartServices(request.isRestartStaleServices());
                 } else {
                     apiConnectors.getConnector(stack).clusterModificationService().restartClusterServices();
                 }

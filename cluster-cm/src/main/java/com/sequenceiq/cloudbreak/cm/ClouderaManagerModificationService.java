@@ -321,7 +321,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                 clouderaManagerRestartService.waitForRestartExecutionIfPresent(v31Client, stack, rollingUpgradeEnabled);
                 startServices();
                 callPostClouderaRuntimeUpgradeCommandIfCMIsNewerThan751(rollingUpgradeEnabled);
-                restartServices(rollingUpgradeEnabled);
+                restartServices(rollingUpgradeEnabled, false);
             } else {
                 ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(v31Client);
                 upgradeNonCdhProducts(products, parcelResourceApi, parcelsResourceApi);
@@ -661,12 +661,14 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         LOGGER.debug("Deployed client configs and refreshed services in Cloudera Manager.");
     }
 
-    private void restartServices(boolean rollingRestartEnabled) throws ApiException, CloudbreakException {
-        clouderaManagerRestartService.doRestartServicesIfNeeded(v31Client, stack, rollingRestartEnabled, Optional.empty());
+    private void restartServices(boolean rollingRestartEnabled, boolean restartStaleOnly) throws ApiException, CloudbreakException {
+        clouderaManagerRestartService.doRestartServicesIfNeeded(v31Client, stack, rollingRestartEnabled, restartStaleOnly,
+                Optional.empty());
     }
 
     private void restartGivenServices(List<String> serviceNames) throws ApiException, CloudbreakException {
-        clouderaManagerRestartService.doRestartServicesIfNeeded(v31Client, stack, false, Optional.ofNullable(serviceNames));
+        clouderaManagerRestartService.doRestartServicesIfNeeded(v31Client, stack, false, false,
+                Optional.ofNullable(serviceNames));
     }
 
     private void restartClouderaManagementServices(MgmtServiceResourceApi mgmtServiceResourceApi) throws ApiException, CloudbreakException {
@@ -897,7 +899,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             LOGGER.info("Deploying configuration and restarting services");
             enableKnoxAutoRestart();
             deployConfig();
-            restartServices(false);
+            restartServices(false, false);
         } catch (ApiException e) {
             LOGGER.info("Couldn't start Cloudera Manager services", e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
@@ -1067,7 +1069,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     @Override
     public void restartAll(boolean withMgmtServices) {
         try {
-            restartServices(false);
+            restartServices(false, false);
             if (withMgmtServices) {
                 restartClouderaManagementServices(clouderaManagerApiFactory.getMgmtServiceResourceApi(v31Client));
             }
@@ -1085,7 +1087,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     @Override
     public void restartClusterServices() {
         try {
-            restartServices(false);
+            restartServices(false, false);
         } catch (ApiException | CloudbreakException e) {
             LOGGER.info("Could not restart services", e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
@@ -1167,9 +1169,9 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public void rollingRestartServices() {
+    public void rollingRestartServices(boolean restartStaleOnly) {
         try {
-            restartServices(true);
+            restartServices(true, restartStaleOnly);
         } catch (ClouderaManagerOperationFailedException e) {
             if (e.getMessage().contains("Command Rolling Restart is not currently available for execution")) {
                 //https://jira.cloudera.com/browse/OPSAPS-70856
@@ -1185,7 +1187,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     private void tryWithoutRollingRestartCommand(ClouderaManagerOperationFailedException e) {
         try {
-            restartServices(false);
+            restartServices(false, false);
         } catch (ApiException | CloudbreakException ex) {
             LOGGER.warn("Could not perform rolling restart services", e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);

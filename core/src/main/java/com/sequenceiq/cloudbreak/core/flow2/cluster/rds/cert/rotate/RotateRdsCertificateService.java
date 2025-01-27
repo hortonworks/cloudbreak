@@ -237,7 +237,7 @@ public class RotateRdsCertificateService {
     public void rollingRestartServices(Long stackId) {
         LOGGER.debug("Triggering rolling restart of the services for stack: '{}'", stackId);
         Stack stack = stackService.getByIdWithLists(stackId);
-        clusterApiConnectors.getConnector(stack).clusterModificationService().rollingRestartServices();
+        clusterApiConnectors.getConnector(stack).clusterModificationService().rollingRestartServices(false);
     }
 
     public void rotateOnProvider(Long stackId) {

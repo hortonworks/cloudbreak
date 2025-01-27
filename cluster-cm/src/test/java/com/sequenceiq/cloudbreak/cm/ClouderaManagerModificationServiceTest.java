@@ -831,7 +831,7 @@ class ClouderaManagerModificationServiceTest {
         verify(clouderaManagerParcelManagementService, times(1)).refreshParcelRepos(clouderaManagerResourceApi, stack, v31Client);
         verify(mgmtServiceResourceApi, times(1)).listActiveCommands("SUMMARY");
         verify(mgmtServiceResourceApi, times(1)).restartCommand();
-        verify(clouderaManagerRestartService).doRestartServicesIfNeeded(v31Client, stack, false, Optional.empty());
+        verify(clouderaManagerRestartService).doRestartServicesIfNeeded(v31Client, stack, false, false, Optional.empty());
         verify(clouderaManagerParcelManagementService, times(1)).downloadParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
         verify(clouderaManagerParcelManagementService, times(1)).distributeParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
         verify(clouderaManagerParcelManagementService, times(1)).activateParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
@@ -847,7 +847,7 @@ class ClouderaManagerModificationServiceTest {
         inOrder.verify(clouderaManagerParcelManagementService).downloadParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
         inOrder.verify(clouderaManagerParcelManagementService).distributeParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
         inOrder.verify(clouderaManagerParcelManagementService).activateParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
-        inOrder.verify(clouderaManagerRestartService).doRestartServicesIfNeeded(v31Client, stack, false, Optional.empty());
+        inOrder.verify(clouderaManagerRestartService).doRestartServicesIfNeeded(v31Client, stack, false, false, Optional.empty());
     }
 
     @Test
@@ -943,7 +943,8 @@ class ClouderaManagerModificationServiceTest {
         inOrder.verify(clustersResourceApi).startCommand(STACK_NAME);
         inOrder.verify(clouderaManagerApiClientProvider).getV45Client(any(), any(), any(), any());
         inOrder.verify(clouderaManagerUpgradeService).callPostRuntimeUpgradeCommand(eq(clustersResourceApi), eq(stack), eq(v31Client));
-        inOrder.verify(clouderaManagerRestartService).doRestartServicesIfNeeded(v31Client, stack, false, Optional.empty());
+        inOrder.verify(clouderaManagerRestartService).doRestartServicesIfNeeded(v31Client, stack, false, false,
+                Optional.empty());
     }
 
     @Test
@@ -1442,28 +1443,32 @@ class ClouderaManagerModificationServiceTest {
 
         underTest.updateConfig(HashBasedTable.create(), CMConfigUpdateStrategy.FALLBACK_TO_ROLLCONFIG);
 
-        verify(clouderaManagerRestartService).doRestartServicesIfNeeded(any(), any(), eq(false), eq(Optional.of(List.of("test"))));
+        verify(clouderaManagerRestartService).doRestartServicesIfNeeded(any(), any(), eq(false), eq(false),
+                eq(Optional.of(List.of("test"))));
     }
 
     @Test
     void testClusterRollingRestart() throws Exception {
-        underTest.rollingRestartServices();
-        verify(clouderaManagerRestartService).doRestartServicesIfNeeded(any(), any(), eq(true), any());
+        underTest.rollingRestartServices(false);
+        verify(clouderaManagerRestartService).doRestartServicesIfNeeded(any(), any(), eq(true), eq(false), any());
+
+        underTest.rollingRestartServices(true);
+        verify(clouderaManagerRestartService).doRestartServicesIfNeeded(any(), any(), eq(true), eq(true), any());
     }
 
     @Test
     void testClusterRollingRestartWhenRollingUpgradeNotAvailable() throws Exception {
         doThrow(new ClouderaManagerOperationFailedException("Command Rolling Restart is not currently available for execution"))
                 .when(clouderaManagerRestartService)
-                .doRestartServicesIfNeeded(any(), any(), eq(true), any());
+                .doRestartServicesIfNeeded(any(), any(), eq(true), eq(false), any());
 
         doNothing()
                 .when(clouderaManagerRestartService)
-                .doRestartServicesIfNeeded(any(), any(), eq(false), any());
+                .doRestartServicesIfNeeded(any(), any(), eq(false), eq(false), any());
 
-        underTest.rollingRestartServices();
-        verify(clouderaManagerRestartService).doRestartServicesIfNeeded(any(), any(), eq(true), any());
-        verify(clouderaManagerRestartService).doRestartServicesIfNeeded(any(), any(), eq(false), any());
+        underTest.rollingRestartServices(false);
+        verify(clouderaManagerRestartService).doRestartServicesIfNeeded(any(), any(), eq(true), eq(false), any());
+        verify(clouderaManagerRestartService).doRestartServicesIfNeeded(any(), any(), eq(false), eq(false), any());
     }
 
     private ClusterComponentView createClusterComponent(ClouderaManagerProduct clouderaManagerProduct) {

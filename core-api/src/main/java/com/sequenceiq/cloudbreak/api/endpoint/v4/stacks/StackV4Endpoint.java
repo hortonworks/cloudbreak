@@ -856,7 +856,8 @@ public interface StackV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Services rolling restart", operationId = "rollingRestartServices",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    FlowIdentifier rollingRestartServices(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn);
+    FlowIdentifier rollingRestartServices(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn,
+            @QueryParam("staleServicesOnly") @DefaultValue("false") boolean staleServicesOnly);
 
     @PUT
     @Path("imd_update")

@@ -343,9 +343,10 @@ public class ReactorFlowManager {
         return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
     }
 
-    public FlowIdentifier triggerClusterServicesRestart(Long stackId, boolean refreshNeeded, boolean rollingRestart) {
+    public FlowIdentifier triggerClusterServicesRestart(Long stackId, boolean refreshNeeded, boolean rollingRestart, boolean restartStaleServices) {
         String selector = CLUSTER_SERVICES_RESTART_TRIGGER_EVENT.event();
-        return reactorNotifier.notify(stackId, selector, new ClusterServicesRestartTriggerEvent(selector, stackId, refreshNeeded, rollingRestart));
+        return reactorNotifier.notify(stackId, selector, new ClusterServicesRestartTriggerEvent(selector, stackId, refreshNeeded, rollingRestart,
+                restartStaleServices));
     }
 
     public FlowIdentifier triggerClusterStop(Long stackId) {

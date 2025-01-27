@@ -138,7 +138,7 @@ public interface ClusterApi {
     }
 
     default void rollingRestartServices() {
-        clusterModificationService().rollingRestartServices();
+        clusterModificationService().rollingRestartServices(false);
     }
 
     default Optional<String> getRoleConfigValueByServiceType(String clusterName, String roleConfigGroup, String serviceType, String configName) {

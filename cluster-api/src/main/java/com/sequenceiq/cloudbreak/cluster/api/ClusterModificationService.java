@@ -95,7 +95,7 @@ public interface ClusterModificationService {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
 
-    void rollingRestartServices();
+    void rollingRestartServices(boolean restartStaleOnly);
 
     void updateConfig(Table<String, String, String> configTable, CMConfigUpdateStrategy cmConfigUpdateStrategy) throws Exception;
 
