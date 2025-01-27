@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
@@ -67,6 +69,8 @@ public class RdsUpgradeOrchestratorService {
 
     private static final int MAX_RETRY_ON_ERROR = 3;
 
+    private static final int LONG_RUNNING_MAX_RETRY_ON_ERROR = 180;
+
     private static final int MAX_RETRY = 2000;
 
     private static final int RDS_CONNECT_RETRY = 60;
@@ -98,6 +102,9 @@ public class RdsUpgradeOrchestratorService {
 
     @Inject
     private SaltStateParamsService saltStateParamsService;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     @Value("${cb.db.env.upgrade.rds.backuprestore.validationratio}")
     private double backupValidationRatio;
@@ -196,9 +203,19 @@ public class RdsUpgradeOrchestratorService {
         OrchestratorStateParams stateParams = createStateParams(stack, CHECK_CONNECTION_STATE, true);
         if (StringUtils.isNotEmpty(serverUrl) && StringUtils.isNotEmpty(userName)) {
             stateParams.setStateParams(upgradeExternalRdsStateParamsProvider.createParamsForRdsCanaryCheck(serverUrl, userName));
+            updateCanaryRetryParamsIfLongPollingEnabled(stateParams, stack);
         }
         LOGGER.debug("Calling checkRdsConnection with state params '{}'", stateParams);
         hostOrchestrator.runOrchestratorState(stateParams);
+    }
+
+    private void updateCanaryRetryParamsIfLongPollingEnabled(OrchestratorStateParams stateParams, StackDto stack) {
+        stateParams.getStateRetryParams().ifPresent(retryParams -> {
+            String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
+            if (entitlementService.isFlexibleServerUpgradeLongPollingEnabled(accountId)) {
+                retryParams.setMaxRetryOnError(LONG_RUNNING_MAX_RETRY_ON_ERROR);
+            }
+        });
     }
 
     public void updateDatabaseEngineVersion(Long stackId) {

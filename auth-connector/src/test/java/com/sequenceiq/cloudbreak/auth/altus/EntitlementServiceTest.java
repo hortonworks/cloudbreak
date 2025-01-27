@@ -177,6 +177,11 @@ class EntitlementServiceTest {
 
                 {"CDP_DATAHUB_FORCE_OS_UPGRADE", (EntitlementCheckFunction) EntitlementService::isDatahubForceOsUpgradeEnabled, false},
                 {"CDP_DATAHUB_FORCE_OS_UPGRADE", (EntitlementCheckFunction) EntitlementService::isDatahubForceOsUpgradeEnabled, true},
+
+                {"CDP_AZURE_DATABASE_FLEXIBLE_SERVER_UPGRADE_LONG_POLLING",
+                        (EntitlementCheckFunction) EntitlementService::isFlexibleServerUpgradeLongPollingEnabled, false},
+                {"CDP_AZURE_DATABASE_FLEXIBLE_SERVER_UPGRADE_LONG_POLLING",
+                        (EntitlementCheckFunction) EntitlementService::isFlexibleServerUpgradeLongPollingEnabled, true},
         };
     }
 
