@@ -509,6 +509,7 @@ cb:
           7.3.1 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha;
           7.3.1 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas, Profiler Manager=cdp-sdx-medium-ha-profiler;
           7.3.1 - SDX Enterprise: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-enterprise;
+          7.3.1 - On-premise base: Apache Hive, Apache Ranger, Apache Atlas, Spark3, Livy3=cdp-sdx-on-premise-base;
           7.3.1 - Data Engineering: HA: Apache Spark3, Apache Hive, Apache Oozie=cdp-data-engineering-spark3-ha;
           7.3.1 - Data Engineering: Apache Spark3, Apache Hive, Apache Oozie=cdp-data-engineering-spark3;
           7.3.1 - Data Mart: Apache Impala, Hue=cdp-data-mart;

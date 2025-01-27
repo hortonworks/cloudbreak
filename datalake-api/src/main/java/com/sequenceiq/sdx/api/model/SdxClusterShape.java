@@ -6,7 +6,8 @@ public enum SdxClusterShape {
     MEDIUM_DUTY_HA(Boolean.TRUE, "-md", Boolean.TRUE),
     ENTERPRISE(Boolean.TRUE, "-ent", Boolean.TRUE),
     MICRO_DUTY(Boolean.FALSE, "-mic", Boolean.TRUE),
-    CONTAINERIZED(Boolean.FALSE, "-con", Boolean.FALSE);
+    CONTAINERIZED(Boolean.FALSE, "-con", Boolean.FALSE),
+    ON_PREMISE_BASE(Boolean.FALSE, "-opb", Boolean.TRUE);
 
     private final boolean multiAzEnabledByDefault;
 

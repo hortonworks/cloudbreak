@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cluster.model.ClusterHostAttributes.FQDN
 import static com.sequenceiq.cloudbreak.cluster.model.ClusterHostAttributes.RACK_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,6 +23,8 @@ public class ClouderaHostGroupAssociationBuilderTest {
 
     private static final String HOSTGROUP_NAME_2 = "hostgroup-2";
 
+    private static final String HYBRID_GROUP = "ecs_master";
+
     private static final String FQDN_1 = "fqdn-1";
 
     private static final String FQDN_2 = "fqdn-2";
@@ -29,6 +32,8 @@ public class ClouderaHostGroupAssociationBuilderTest {
     private static final String FQDN_3 = "fqdn-3";
 
     private static final String FQDN_4 = "fqdn-4";
+
+    private static final String FQDN_5 = "fqdn-4";
 
     private static final String RACK_ID_1 = "/dc-1/rack-2";
 
@@ -55,6 +60,24 @@ public class ClouderaHostGroupAssociationBuilderTest {
         assertThat(actual.get(HOSTGROUP_NAME_1).get(1).get(RACK_ID)).isEqualTo(RACK_ID_1);
         assertThat(actual.get(HOSTGROUP_NAME_2).get(0).get(RACK_ID)).isEqualTo(RACK_ID_2);
         assertThat(actual.get(HOSTGROUP_NAME_2).get(1)).doesNotContainKey(RACK_ID);
+    }
+
+    @Test
+    public void testBuildHostGroupAssociationsShouldReturnsHostGroupAssociationsWhenTheParametersArePresentAndNoHybridGroup() {
+        Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup = createInstanceMetaDataByHostGroup();
+        instanceMetaDataByHostGroup.put(createHostGroup(HYBRID_GROUP), List.of(createInstanceMetaData(FQDN_5, RACK_ID_1)));
+
+        Map<String, List<Map<String, String>>> actual = underTest.buildHostGroupAssociations(instanceMetaDataByHostGroup);
+
+        assertEquals(FQDN_1, actual.get(HOSTGROUP_NAME_1).get(0).get(FQDN));
+        assertEquals(FQDN_2, actual.get(HOSTGROUP_NAME_1).get(1).get(FQDN));
+        assertEquals(FQDN_3, actual.get(HOSTGROUP_NAME_2).get(0).get(FQDN));
+        assertEquals(FQDN_4, actual.get(HOSTGROUP_NAME_2).get(1).get(FQDN));
+        assertThat(actual.get(HOSTGROUP_NAME_1).get(0).get(RACK_ID)).isEqualTo(RACK_ID_1);
+        assertThat(actual.get(HOSTGROUP_NAME_1).get(1).get(RACK_ID)).isEqualTo(RACK_ID_1);
+        assertThat(actual.get(HOSTGROUP_NAME_2).get(0).get(RACK_ID)).isEqualTo(RACK_ID_2);
+        assertThat(actual.get(HOSTGROUP_NAME_2).get(1)).doesNotContainKey(RACK_ID);
+        assertNull(actual.get(HYBRID_GROUP));
     }
 
     @Test
