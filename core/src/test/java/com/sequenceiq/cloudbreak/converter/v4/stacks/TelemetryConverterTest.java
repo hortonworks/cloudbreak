@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.altus.AltusDatabusConfiguration;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
+import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
@@ -64,10 +65,11 @@ public class TelemetryConverterTest {
     public void setUp() {
         MockitoAnnotations.openMocks(this);
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, DATABUS_S3_BUCKET, true, "****", "****");
+        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, "app", "stream", false);
         MonitoringConfiguration monitoringConfig = new MonitoringConfiguration();
         when(entitlementService.isComputeMonitoringEnabled(anyString())).thenReturn(true);
         TelemetryConfiguration telemetryConfiguration =
-                new TelemetryConfiguration(altusDatabusConfiguration, monitoringConfig, null);
+                new TelemetryConfiguration(altusDatabusConfiguration, meteringConfiguration, monitoringConfig, null);
         underTest = new TelemetryConverter(telemetryConfiguration, entitlementService, true, true, monitoringUrlResolver);
     }
 
@@ -104,7 +106,7 @@ public class TelemetryConverterTest {
         // THEN
         assertNotNull(result.getFeatures().getWorkloadAnalytics());
         assertFalse(result.getFeatures().getCloudStorageLogging().getEnabled());
-        assertFalse(result.getFeatures().getMetering().getEnabled());
+        assertTrue(result.getFeatures().getMetering().getEnabled());
         assertTrue(result.getFeatures().getMonitoring().getEnabled());
         assertTrue(result.getFeatures().getWorkloadAnalytics().getEnabled());
         assertTrue(result.getFeatures().getUseSharedAltusCredential().getEnabled());
@@ -192,7 +194,7 @@ public class TelemetryConverterTest {
         // WHEN
         Telemetry result = underTest.convert(telemetryRequest, StackType.WORKLOAD, ACCOUNT_ID);
         // THEN
-        assertFalse(result.getFeatures().getMetering().getEnabled());
+        assertTrue(result.getFeatures().getMetering().getEnabled());
         assertTrue(result.getFeatures().getCloudStorageLogging().getEnabled());
     }
 
@@ -205,7 +207,7 @@ public class TelemetryConverterTest {
         // WHEN
         Telemetry result = underTest.convert(telemetryRequest, StackType.WORKLOAD, ACCOUNT_ID);
         // THEN
-        assertFalse(result.getFeatures().getMetering().getEnabled());
+        assertTrue(result.getFeatures().getMetering().getEnabled());
     }
 
     @Test
@@ -215,7 +217,7 @@ public class TelemetryConverterTest {
         // WHEN
         Telemetry result = underTest.convert(telemetryRequest, StackType.DATALAKE, ACCOUNT_ID);
         // THEN
-        assertFalse(result.getFeatures().getMetering().getEnabled());
+        assertNull(result.getFeatures().getMetering());
     }
 
     @Test
@@ -236,10 +238,11 @@ public class TelemetryConverterTest {
         // GIVEN
         SdxClusterResponse sdxClusterResponse = null;
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, DATABUS_S3_BUCKET, false, "", null);
+        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, null, null, false);
         MonitoringConfiguration monitoringConfig = new MonitoringConfiguration();
         when(entitlementService.isComputeMonitoringEnabled(anyString())).thenReturn(true);
         TelemetryConfiguration telemetryConfiguration =
-                new TelemetryConfiguration(altusDatabusConfiguration, monitoringConfig, null);
+                new TelemetryConfiguration(altusDatabusConfiguration, meteringConfiguration, monitoringConfig, null);
         TelemetryConverter converter = new TelemetryConverter(telemetryConfiguration, entitlementService, true, false, monitoringUrlResolver);
         // WHEN
         TelemetryRequest result = converter.convert(null, sdxClusterResponse);
@@ -329,10 +332,11 @@ public class TelemetryConverterTest {
         sdxClusterResponse.setEnvironmentCrn("envCrn");
         sdxClusterResponse.setEnvironmentName("envName");
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, DATABUS_S3_BUCKET, false, "", null);
+        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, null, null, false);
         MonitoringConfiguration monitoringConfig = new MonitoringConfiguration();
         when(entitlementService.isComputeMonitoringEnabled(anyString())).thenReturn(true);
         TelemetryConfiguration telemetryConfiguration =
-                new TelemetryConfiguration(altusDatabusConfiguration, monitoringConfig, null);
+                new TelemetryConfiguration(altusDatabusConfiguration, meteringConfiguration, monitoringConfig, null);
         TelemetryConverter converter = new TelemetryConverter(telemetryConfiguration, entitlementService, false, true, monitoringUrlResolver);
         // WHEN
         TelemetryRequest result = converter.convert(response, sdxClusterResponse);

@@ -10,6 +10,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfigView;
+import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
 import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 
 public class FluentConfigView implements TelemetryConfigView {
@@ -36,7 +37,11 @@ public class FluentConfigView implements TelemetryConfigView {
 
     private final boolean cloudLoggingServiceEnabled;
 
+    private final boolean meteringEnabled;
+
     private final boolean monitoringEnabled;
+
+    private final MeteringConfiguration meteringConfiguration;
 
     private final TelemetryClusterDetails clusterDetails;
 
@@ -86,7 +91,9 @@ public class FluentConfigView implements TelemetryConfigView {
         this.enabled = builder.enabled;
         this.cloudStorageLoggingEnabled = builder.cloudStorageLoggingEnabled;
         this.cloudLoggingServiceEnabled = builder.cloudLoggingServiceEnabled;
+        this.meteringEnabled = builder.meteringEnabled;
         this.monitoringEnabled = builder.monitoringEnabled;
+        this.meteringConfiguration = builder.meteringConfiguration;
         this.clusterDetails = builder.clusterDetails;
         this.user = builder.user;
         this.group = builder.group;
@@ -203,6 +210,10 @@ public class FluentConfigView implements TelemetryConfigView {
         return cloudLoggingServiceEnabled;
     }
 
+    public boolean isMeteringEnabled() {
+        return meteringEnabled;
+    }
+
     public Map<String, Object> getOverrideAttributes() {
         return this.overrideAttributes;
     }
@@ -213,6 +224,7 @@ public class FluentConfigView implements TelemetryConfigView {
         map.put("enabled", this.enabled);
         map.put("cloudStorageLoggingEnabled", this.cloudStorageLoggingEnabled);
         map.put("cloudLoggingServiceEnabled", this.cloudLoggingServiceEnabled);
+        map.put("dbusMeteringEnabled", this.meteringEnabled);
         map.put("dbusIncludeSaltLogs", DBUS_INCLUDE_SALT_LOGS_DEFAULT);
         map.put("user", ObjectUtils.defaultIfNull(this.user, TD_AGENT_USER_DEFAULT));
         map.put("group", ObjectUtils.defaultIfNull(this.group, TD_AGENT_GROUP_DEFAULT));
@@ -239,6 +251,9 @@ public class FluentConfigView implements TelemetryConfigView {
         if (CollectionUtils.isNotEmpty(this.anonymizationRules)) {
             map.put("anonymizationRules", this.anonymizationRules);
         }
+        if (this.meteringConfiguration != null) {
+            map.putAll(meteringConfiguration.getDbusConfigs());
+        }
         if (this.overrideAttributes != null) {
             fillOverrideAttributes(map);
         }
@@ -248,6 +263,7 @@ public class FluentConfigView implements TelemetryConfigView {
     private void fillOverrideAttributes(Map<String, Object> map) {
         for (Map.Entry<String, Object> entry : this.overrideAttributes.entrySet()) {
             if (!"enabled".equalsIgnoreCase(entry.getKey())
+                    && !"dbusMeteringEnabled".equalsIgnoreCase(entry.getKey())
                     && map.containsKey(entry.getKey())) {
                 map.put(entry.getKey(), entry.getValue());
             }
@@ -262,7 +278,11 @@ public class FluentConfigView implements TelemetryConfigView {
 
         private boolean cloudLoggingServiceEnabled;
 
+        private boolean meteringEnabled;
+
         private boolean monitoringEnabled;
+
+        private MeteringConfiguration meteringConfiguration;
 
         private TelemetryClusterDetails clusterDetails;
 
@@ -414,6 +434,16 @@ public class FluentConfigView implements TelemetryConfigView {
 
         public Builder withCloudStorageLoggingEnabled(boolean cloudStorageLoggingEnabled) {
             this.cloudStorageLoggingEnabled = cloudStorageLoggingEnabled;
+            return this;
+        }
+
+        public Builder withMeteringEnabled(boolean meteringEnabled) {
+            this.meteringEnabled = meteringEnabled;
+            return this;
+        }
+
+        public Builder withMeteringConfiguration(MeteringConfiguration meteringConfiguration) {
+            this.meteringConfiguration = meteringConfiguration;
             return this;
         }
 

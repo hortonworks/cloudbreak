@@ -118,6 +118,7 @@ public class TelemetryDecoratorTest {
         assertEquals(FluentClusterType.DATAHUB, result.getClusterType());
         assertTrue(result.getDatabusContext().isEnabled());
         assertTrue(result.getLogShipperContext().isEnabled());
+        assertTrue(result.getMeteringContext().isEnabled());
         assertTrue(result.getMonitoringContext().isEnabled());
         verify(altusMachineUserService, times(1)).storeDataBusCredential(any(Optional.class), any(Stack.class), any(CdpAccessKeyType.class));
         verify(altusMachineUserService, times(1)).storeMonitoringCredential(any(Optional.class), any(Stack.class), any(CdpAccessKeyType.class));
@@ -132,6 +133,7 @@ public class TelemetryDecoratorTest {
         // THEN
         assertEquals(FluentClusterType.DATALAKE, result.getClusterType());
         assertTrue(result.getDatabusContext().isEnabled());
+        assertFalse(result.getMeteringContext().isEnabled());
     }
 
     @Test
@@ -148,6 +150,7 @@ public class TelemetryDecoratorTest {
         // THEN
         assertFalse(result.getDatabusContext().isEnabled());
         assertFalse(result.getLogShipperContext().isEnabled());
+        assertFalse(result.getMeteringContext().isEnabled());
         assertTrue(result.getMonitoringContext().isEnabled());
         verify(altusMachineUserService, times(1)).storeMonitoringCredential(any(Optional.class), any(Stack.class), any(CdpAccessKeyType.class));
     }
@@ -165,6 +168,7 @@ public class TelemetryDecoratorTest {
         // THEN
         assertFalse(result.getDatabusContext().isEnabled());
         assertFalse(result.getLogShipperContext().isEnabled());
+        assertFalse(result.getMeteringContext().isEnabled());
         assertFalse(result.getMonitoringContext().isEnabled());
         assertNull(telemetry.getMonitoring().getRemoteWriteUrl());
         verify(altusMachineUserService, never()).storeMonitoringCredential(any(Optional.class), any(Stack.class), any(CdpAccessKeyType.class));
@@ -184,6 +188,7 @@ public class TelemetryDecoratorTest {
         // THEN
         assertFalse(result.getDatabusContext().isEnabled());
         assertFalse(result.getLogShipperContext().isEnabled());
+        assertFalse(result.getMeteringContext().isEnabled());
         assertTrue(result.getMonitoringContext().isEnabled());
         assertNotNull(telemetry.getMonitoring().getRemoteWriteUrl());
         verify(altusMachineUserService, times(1)).storeMonitoringCredential(any(Optional.class), any(Stack.class), any(CdpAccessKeyType.class));
@@ -203,6 +208,7 @@ public class TelemetryDecoratorTest {
         // THEN
         assertFalse(result.getDatabusContext().isEnabled());
         assertFalse(result.getLogShipperContext().isEnabled());
+        assertFalse(result.getMeteringContext().isEnabled());
         assertTrue(result.getMonitoringContext().isEnabled());
         assertNotNull(telemetry.getMonitoring().getRemoteWriteUrl());
         verify(altusMachineUserService, times(1)).storeMonitoringCredential(any(Optional.class), any(Stack.class), any(CdpAccessKeyType.class));
@@ -221,6 +227,7 @@ public class TelemetryDecoratorTest {
         // THEN
         assertFalse(result.getDatabusContext().isEnabled());
         assertFalse(result.getLogShipperContext().isEnabled());
+        assertFalse(result.getMeteringContext().isEnabled());
         assertFalse(result.getMonitoringContext().isEnabled());
         verify(altusMachineUserService, times(0)).storeMonitoringCredential(any(Optional.class), any(Stack.class), any(CdpAccessKeyType.class));
     }
@@ -238,6 +245,7 @@ public class TelemetryDecoratorTest {
         // THEN
         assertFalse(result.getDatabusContext().isEnabled());
         assertFalse(result.getLogShipperContext().isEnabled());
+        assertFalse(result.getMeteringContext().isEnabled());
         assertFalse(result.getMonitoringContext().isEnabled());
         verify(altusMachineUserService, times(0)).storeMonitoringCredential(any(Optional.class), any(Stack.class), any(CdpAccessKeyType.class));
     }
@@ -255,6 +263,7 @@ public class TelemetryDecoratorTest {
         // THEN
         assertFalse(result.getDatabusContext().isEnabled());
         assertFalse(result.getLogShipperContext().isEnabled());
+        assertFalse(result.getMeteringContext().isEnabled());
         assertFalse(result.getMonitoringContext().isEnabled());
         verify(altusMachineUserService, times(0)).storeMonitoringCredential(any(Optional.class), any(Stack.class), any(CdpAccessKeyType.class));
     }

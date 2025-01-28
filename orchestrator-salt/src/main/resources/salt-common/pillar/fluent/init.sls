@@ -24,6 +24,9 @@ fluent:
   azureInstanceMsi:
   azureIdBrokerInstanceMsi:
   azureStorageAccessKey:
+  dbusMeteringEnabled: false
+  dbusMeteringAppName:
+  dbusMeteringStreamName:
   dbusMonitoringEnabled: false
   dbusIncludeSaltLogs: false
   anonymizationRules:

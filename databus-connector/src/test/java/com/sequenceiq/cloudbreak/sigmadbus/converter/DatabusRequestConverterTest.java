@@ -9,15 +9,14 @@ import org.junit.jupiter.api.Test;
 import com.cloudera.sigma.service.dbus.DbusProto;
 import com.sequenceiq.cloudbreak.sigmadbus.model.DatabusRequest;
 import com.sequenceiq.cloudbreak.sigmadbus.model.DatabusRequestContext;
-import com.sequenceiq.cloudbreak.telemetry.support.SupportBundleConfiguration;
+import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
 
 public class DatabusRequestConverterTest {
-
-    private static final SupportBundleConfiguration SUPPORT_BUNDLE_CONF = new SupportBundleConfiguration(true, "", "", true);
 
     @Test
     public void testConvert() {
         // GIVEN
+        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, "CdpVmMetrics", "CdpVmMetrics", false);
         DatabusRequest input = DatabusRequest.Builder.newBuilder()
                 .withRawBody("{}")
                 .withContext(DatabusRequestContext.Builder.newBuilder()
@@ -26,7 +25,7 @@ public class DatabusRequestConverterTest {
                         .build())
                 .build();
         // WHEN
-        DbusProto.PutRecordRequest result = DatabusRequestConverter.convert(input, SUPPORT_BUNDLE_CONF);
+        DbusProto.PutRecordRequest result = DatabusRequestConverter.convert(input, meteringConfiguration);
         // THEN
         assertEquals("cloudera", result.getRecord().getAccountId());
         assertEquals("{}", result.getRecord().getBody().getPayload().toStringUtf8());
@@ -36,6 +35,7 @@ public class DatabusRequestConverterTest {
     @Test
     public void testConvertWithoutPayload() {
         // GIVEN
+        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, "CdpVmMetrics", "CdpVmMetrics", false);
         DatabusRequest input = DatabusRequest.Builder.newBuilder()
                 .withContext(DatabusRequestContext.Builder.newBuilder()
                         .withAccountId("cloudera")
@@ -43,7 +43,7 @@ public class DatabusRequestConverterTest {
                 .build();
         // WHEN
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> DatabusRequestConverter.convert(input, SUPPORT_BUNDLE_CONF));
+                () -> DatabusRequestConverter.convert(input, meteringConfiguration));
         // THEN
         assertTrue(exception.getMessage().contains("At least raw body message needs to be filled"));
     }
@@ -51,6 +51,7 @@ public class DatabusRequestConverterTest {
     @Test
     public void testConvertWithoutAccountId() {
         // GIVEN
+        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, "CdpVmMetrics", "CdpVmMetrics", false);
         DatabusRequest input = DatabusRequest.Builder.newBuilder()
                 .withRawBody("{}")
                 .withContext(DatabusRequestContext.Builder.newBuilder()
@@ -59,7 +60,7 @@ public class DatabusRequestConverterTest {
                 .build();
         // WHEN
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> DatabusRequestConverter.convert(input, SUPPORT_BUNDLE_CONF));
+                () -> DatabusRequestConverter.convert(input, meteringConfiguration));
         // THEN
         assertTrue(exception.getMessage().contains("At least accountId needs to be filled"));
     }
@@ -67,12 +68,13 @@ public class DatabusRequestConverterTest {
     @Test
     public void testConvertWithoutContext() {
         // GIVEN
+        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, "CdpVmMetrics", "CdpVmMetrics", false);
         DatabusRequest input = DatabusRequest.Builder.newBuilder()
                 .withRawBody("{}")
                 .build();
         // WHEN
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> DatabusRequestConverter.convert(input, SUPPORT_BUNDLE_CONF));
+                () -> DatabusRequestConverter.convert(input, meteringConfiguration));
         // THEN
         assertTrue(exception.getMessage().contains("Databus request context needs to be filled"));
     }
@@ -85,6 +87,7 @@ public class DatabusRequestConverterTest {
                         .setStreamName("example")
                         .build())
                 .build();
+        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, "CdpVmMetrics", "CdpVmMetrics", false);
         DatabusRequest input = DatabusRequest.Builder.newBuilder()
                 .withMessageBody(exampleProtoObj)
                 .withContext(DatabusRequestContext.Builder.newBuilder()
@@ -92,7 +95,7 @@ public class DatabusRequestConverterTest {
                         .build())
                 .build();
         // WHEN
-        DbusProto.PutRecordRequest result = DatabusRequestConverter.convert(input, SUPPORT_BUNDLE_CONF);
+        DbusProto.PutRecordRequest result = DatabusRequestConverter.convert(input, meteringConfiguration);
         // THEN
         assertTrue(result.getRecord().getBody().getPayload().toStringUtf8().contains("example"));
     }

@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryPillarConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.common.AnonymizationRuleResolver;
 import com.sequenceiq.cloudbreak.telemetry.context.LogShipperContext;
+import com.sequenceiq.cloudbreak.telemetry.context.MeteringContext;
 import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2Config;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
@@ -21,6 +22,7 @@ import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.GcsConfig;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.GcsConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3Config;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3ConfigGenerator;
+import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
@@ -51,6 +53,8 @@ public class FluentConfigService implements TelemetryPillarConfigGenerator<Fluen
 
     private final AnonymizationRuleResolver anonymizationRuleResolver;
 
+    private final MeteringConfiguration meteringConfiguration;
+
     public FluentConfigService(S3ConfigGenerator s3ConfigGenerator,
             AdlsGen2ConfigGenerator adlsGen2ConfigGenerator,
             GcsConfigGenerator gcsConfigGenerator,
@@ -60,17 +64,24 @@ public class FluentConfigService implements TelemetryPillarConfigGenerator<Fluen
         this.adlsGen2ConfigGenerator = adlsGen2ConfigGenerator;
         this.gcsConfigGenerator = gcsConfigGenerator;
         this.anonymizationRuleResolver = anonymizationRuleResolver;
+        this.meteringConfiguration = telemetryConfiguration.getMeteringConfiguration();
     }
 
     @Override
     public FluentConfigView createConfigs(TelemetryContext context) {
         final LogShipperContext logShipperContext = context.getLogShipperContext();
+        final MeteringContext meteringContext = context.getMeteringContext();
         final Telemetry telemetry = context.getTelemetry();
         final FluentConfigView.Builder builder = new FluentConfigView.Builder();
         if (telemetry.getFluentAttributes() != null) {
             builder.withOverrideAttributes(
                     telemetry.getFluentAttributes() != null ? new HashMap<>(telemetry.getFluentAttributes()) : new HashMap<>()
             );
+        }
+        if (meteringContext != null && meteringContext.isEnabled()) {
+            builder.withEnabled(true)
+                    .withMeteringEnabled(true)
+                    .withMeteringConfiguration(meteringConfiguration);
         }
         if (logShipperContext.isCloudStorageLogging()) {
             builder.withEnabled(true);
@@ -115,11 +126,15 @@ public class FluentConfigService implements TelemetryPillarConfigGenerator<Fluen
     }
 
     private boolean isLoggingOrMeteringEnabled(TelemetryContext context) {
-        return  isLoggingEnabled(context.getLogShipperContext());
+        return  isLoggingEnabled(context.getLogShipperContext()) || isMeteringEnabled(context.getMeteringContext());
     }
 
     private boolean isLoggingEnabled(LogShipperContext logShipperContext) {
         return logShipperContext != null && logShipperContext.isEnabled();
+    }
+
+    private boolean isMeteringEnabled(MeteringContext meteringContext) {
+        return meteringContext != null && meteringContext.isEnabled();
     }
 
     private void fillS3Configs(FluentConfigView.Builder builder, String storageLocation) {

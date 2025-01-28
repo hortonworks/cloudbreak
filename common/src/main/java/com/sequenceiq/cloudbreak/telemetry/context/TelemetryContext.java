@@ -26,6 +26,8 @@ public class TelemetryContext {
 
     private LogShipperContext logShipperContext;
 
+    private MeteringContext meteringContext;
+
     private NodeStatusContext nodeStatusContext;
 
     private TelemetryClusterDetails clusterDetails;
@@ -82,6 +84,14 @@ public class TelemetryContext {
 
     public void setLogShipperContext(LogShipperContext logShipperContext) {
         this.logShipperContext = logShipperContext;
+    }
+
+    public MeteringContext getMeteringContext() {
+        return meteringContext;
+    }
+
+    public void setMeteringContext(MeteringContext meteringContext) {
+        this.meteringContext = meteringContext;
     }
 
     public NodeStatusContext getNodeStatusContext() {
@@ -149,6 +159,7 @@ public class TelemetryContext {
                 ", databusContext=" + databusContext +
                 ", monitoringContext=" + monitoringContext +
                 ", logShipperContext=" + logShipperContext +
+                ", meteringContext=" + meteringContext +
                 ", nodeStatusContext=" + nodeStatusContext +
                 ", clusterDetails=" + clusterDetails +
                 ", paywallConfigs=******" +

@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_
 
 import java.lang.module.ModuleDescriptor;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -34,6 +35,7 @@ import com.sequenceiq.cloudbreak.node.status.response.CdpDoctorMeteringStatusRes
 import com.sequenceiq.cloudbreak.node.status.response.CdpDoctorNetworkStatusResponse;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
+import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
 import com.sequenceiq.cloudbreak.usage.UsageReporter;
 
@@ -61,6 +63,9 @@ public class DiagnosticsFlowService {
 
     @Inject
     private DataBusEndpointProvider dataBusEndpointProvider;
+
+    @Inject
+    private MeteringConfiguration meteringConfiguration;
 
     @Inject
     private UsageReporter usageReporter;
@@ -144,7 +149,41 @@ public class DiagnosticsFlowService {
     }
 
     public void nodeStatusMeteringReport(Stack stack) {
-        LOGGER.debug("Metering feature is not enabled (or telemetry is empty). Skip metering check.");
+        try {
+            if (!meteringConfiguration.isEnabled()) {
+                LOGGER.debug("Metering feature is not enabled (or telemetry is empty). Skip metering check.");
+                return;
+            }
+            if (stack.isDatalake()) {
+                LOGGER.debug("Skip metering check as billing is not used for datalake");
+                return;
+            }
+            Map<String, CdpDoctorMeteringStatusResponse> resultForMinions = cdpDoctorService.getMeteringStatusForMinions(stack);
+            Set<String> errorSet = new HashSet<>();
+            reportMeteringUsage(resultForMinions, CdpDoctorMeteringStatusResponse::getHeartbeatAgentRunning, "Heartbeat agents running", errorSet);
+            reportMeteringUsage(resultForMinions, CdpDoctorMeteringStatusResponse::getHeartbeatConfig, "Heartbeat agents configured", errorSet);
+            reportMeteringUsage(resultForMinions, CdpDoctorMeteringStatusResponse::getLoggingServiceRunning, "Logging agents running", errorSet);
+            reportMeteringUsage(resultForMinions, CdpDoctorMeteringStatusResponse::getLoggingAgentConfig, "Logging agents configured", errorSet);
+            reportMeteringUsage(resultForMinions, CdpDoctorMeteringStatusResponse::getDatabusReachable, "DataBus reachable", errorSet);
+            reportMeteringUsage(resultForMinions, CdpDoctorMeteringStatusResponse::getDatabusTestResponse, "DataBus test response", errorSet);
+            String resourceCrn = stack.getResourceCrn();
+            String accountId = Crn.safeFromString(resourceCrn).getAccountId();
+            UsageProto.CDPDiagnosticEvent.Builder diagnosticsEventBuilder = UsageProto.CDPDiagnosticEvent.newBuilder();
+            diagnosticsEventBuilder
+                    .setAccountId(accountId)
+                    .setResourceCrn(resourceCrn)
+                    .setEnvironmentCrn(stack.getEnvironmentCrn())
+                    .setServiceType(UsageProto.ServiceType.Value.DATAHUB);
+            if (errorSet.isEmpty()) {
+                LOGGER.info("No metering issue detected, skip sending metering diagnostic event.");
+            } else {
+                diagnosticsEventBuilder.setResult(calculateDiagnosticFailureResult(resultForMinions));
+                diagnosticsEventBuilder.setFailureMessage(String.format("Failure result:%n%s", StringUtils.join(errorSet, "\\n")));
+                usageReporter.cdpDiagnosticsEvent(diagnosticsEventBuilder.build());
+            }
+        } catch (Exception e) {
+            LOGGER.debug("Diagnostics metering node status check failed (skipping): {}", e.getMessage());
+        }
     }
 
     private UsageProto.CDPDiagnosticResult.Value calculateDiagnosticFailureResult(Map<String, CdpDoctorMeteringStatusResponse> resultForMinions) {

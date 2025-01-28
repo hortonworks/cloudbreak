@@ -165,6 +165,7 @@ public class TelemetryConfigServiceTest {
         assertFalse(result.getLogShipperContext().isEnabled());
         assertTrue(result.getDatabusContext().isEnabled());
         assertTrue(result.getMonitoringContext().isEnabled());
+        assertFalse(result.getMeteringContext().isEnabled());
         verify(altusMachineUserService, times(1)).getOrCreateDataBusCredentialIfNeeded(any(Stack.class), any(CdpAccessKeyType.class));
         verify(altusMachineUserService, times(1)).getOrCreateMonitoringCredentialIfNeeded(any(Stack.class), any(CdpAccessKeyType.class));
     }
