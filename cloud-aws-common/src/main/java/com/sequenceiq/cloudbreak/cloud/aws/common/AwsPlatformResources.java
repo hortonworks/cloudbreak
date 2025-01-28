@@ -694,34 +694,38 @@ public class AwsPlatformResources implements PlatformResources {
     @Override
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName() + #filters")
     public CloudVmTypes virtualMachines(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        Architecture architecture = getArchitecture(filters);
         boolean armInstanceEnabled = entitlementService.isArmInstanceEnabled(cloudCredential.getAccountId());
-        return getCloudVmTypes(cloudCredential, armInstanceEnabled, region, filters, getEnabledInstancePredicate(false, architecture), false);
+        return getCloudVmTypes(cloudCredential, armInstanceEnabled, region, filters, enabledInstanceTypeFilter, false);
     }
 
     @Override
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName() + #filters + 'distrox'")
     public CloudVmTypes virtualMachinesForDistroX(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        Architecture architecture = getArchitecture(filters);
+        List<Architecture> architectures = getArchitectures(filters);
         boolean armInstanceEnabled = entitlementService.isArmInstanceEnabled(cloudCredential.getAccountId());
-        Predicate<VmType> instanceTypeFilter = getEnabledInstancePredicate(restrictInstanceTypes, architecture);
+        Predicate<VmType> instanceTypeFilter = getDataHubInstancePredicate(restrictInstanceTypes, architectures);
         return getCloudVmTypes(cloudCredential, armInstanceEnabled, region, filters, instanceTypeFilter, true);
     }
 
-    private Architecture getArchitecture(Map<String, String> filters) {
-        return Architecture.fromStringWithFallback(filters.getOrDefault(
-                ARCHITECTURE,
-                Architecture.X86_64.getName()));
+    private List<Architecture> getArchitectures(Map<String, String> filters) {
+        String architectureString = filters.getOrDefault(ARCHITECTURE, Architecture.X86_64.getName());
+        if (Architecture.ALL_ARCHITECTURE.equals(architectureString)) {
+            return List.of(Architecture.X86_64, Architecture.ARM64);
+        } else {
+            return List.of(Architecture.fromStringWithFallback(architectureString));
+        }
     }
 
-    private Predicate<VmType> getEnabledInstancePredicate(boolean restrictInstanceTypes, Architecture architecture) {
+    private Predicate<VmType> getDataHubInstancePredicate(boolean restrictInstanceTypes, List<Architecture> architectures) {
         if (restrictInstanceTypes) {
-            if (Architecture.X86_64.equals(architecture)) {
-                return enabledDistroxInstanceTypeFilter;
-            } else {
-                return enabledDistroxInstanceTypeArmFilter;
+            Predicate<VmType> predicate = vmType -> false;
+            if (architectures.contains(Architecture.X86_64)) {
+                predicate = predicate.or(enabledDistroxInstanceTypeFilter);
             }
-
+            if (architectures.contains(Architecture.ARM64)) {
+                predicate = predicate.or(enabledDistroxInstanceTypeArmFilter);
+            }
+            return predicate;
         } else {
             return enabledInstanceTypeFilter;
         }
@@ -744,7 +748,7 @@ public class AwsPlatformResources implements PlatformResources {
 
     private CloudVmTypes getCloudVmTypes(ExtendedCloudCredential cloudCredential, boolean dataHubArmEnabled, Region region, Map<String, String> filters,
             Predicate<VmType> enabledInstanceTypeFilter, boolean enableMinimalHardwareFilter) {
-        Architecture architecture = getArchitecture(filters);
+        List<Architecture> architectures = getArchitectures(filters);
         Map<String, Set<VmType>> cloudVmResponses = new HashMap<>();
         Map<String, VmType> defaultCloudVmResponses = new HashMap<>();
         if (region != null && !Strings.isNullOrEmpty(region.value())) {
@@ -760,8 +764,13 @@ public class AwsPlatformResources implements PlatformResources {
 
             Set<VmType> awsInstances = new HashSet<>();
             for (int actualSegment = 0; actualSegment < instanceTypes.size(); actualSegment += SEGMENT) {
-                String[] processorArchitectures = dataHubArmEnabled && Architecture.ARM64.equals(architecture) ?
-                        new String[]{"arm64"} : new String[]{"x86_64"};
+                List<String> processorArchitectures = new ArrayList<>();
+                if (architectures.contains(Architecture.X86_64)) {
+                    processorArchitectures.add("x86_64");
+                }
+                if (dataHubArmEnabled && architectures.contains(Architecture.ARM64)) {
+                    processorArchitectures.add("arm64");
+                }
                 DescribeInstanceTypesRequest request = DescribeInstanceTypesRequest.builder()
                         .filters(Filter.builder()
                                 .name("processor-info.supported-architecture")

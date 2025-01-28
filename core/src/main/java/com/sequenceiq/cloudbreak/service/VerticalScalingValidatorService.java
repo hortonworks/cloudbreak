@@ -8,8 +8,6 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
@@ -35,11 +33,10 @@ import com.sequenceiq.cloudbreak.service.multiaz.ProviderBasedMultiAzSetupValida
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.verticalscale.VerticalScaleInstanceProvider;
 import com.sequenceiq.common.api.type.CdpResourceType;
+import com.sequenceiq.common.model.Architecture;
 
 @Service
 public class VerticalScalingValidatorService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(VerticalScalingValidatorService.class);
 
     @Inject
     private CloudParameterService cloudParameterService;
@@ -122,7 +119,7 @@ public class VerticalScalingValidatorService {
                     stack.getRegion(),
                     stack.getPlatformVariant(),
                     CdpResourceType.DEFAULT,
-                    Map.of(ARCHITECTURE, stack.getArchitectureName()));
+                    Map.of(ARCHITECTURE, Architecture.ALL_ARCHITECTURE));
             verticalScaleInstanceProvider.validateInstanceTypeForVerticalScaling(
                     getInstance(region, availabilityZone, currentInstanceType, allVmTypes),
                     getInstance(region, availabilityZone, requestedInstanceType, allVmTypes),
