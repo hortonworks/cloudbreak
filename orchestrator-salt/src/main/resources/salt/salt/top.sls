@@ -12,6 +12,9 @@ base:
     - telemetry
     - fluent
     - monitoring
+    {% if cpuarch != 'aarch64' %}
+    - metering
+    {% endif %}
     - logrotate
     - ntp
     - postgresql.root-certs

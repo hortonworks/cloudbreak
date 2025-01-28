@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.upgrade.rds.DatabaseUpgradeBackupRestoreChecker;
+import com.sequenceiq.cloudbreak.util.DocumentationLinkProvider;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
 
@@ -101,6 +102,24 @@ class ValidateRdsUpgradeServiceTest {
                 eq(UPDATE_FAILED.name()),
                 eq(ResourceEvent.CLUSTER_RDS_UPGRADE_VALIDATION_FAILED),
                 eq("Could not determine database size."));
+    }
+
+    @Test
+    public void testValidateRdsUpgradeFailedWithExceptionDocLink() {
+        Exception exception = new RuntimeException("blabla psql: could not connect to server: Connection timed out blabla");
+        when(webApplicationExceptionMessageExtractor.getErrorMessage(any(Exception.class))).thenReturn(exception.getMessage());
+
+        underTest.validateRdsUpgradeFailed(STACK_ID, CLUSTER_ID, exception);
+
+        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_VALIDATION_FAILED),
+                eq("Validate RDS upgrade failed with exception: " + exception.getMessage() +
+                        " You can find the troubleshooting guide in CDP documentation: " + DocumentationLinkProvider.azureFlexibleServerTroubleShootingLink()));
+        verify(flowMessageService).fireEventAndLog(
+                eq(STACK_ID),
+                eq(UPDATE_FAILED.name()),
+                eq(ResourceEvent.CLUSTER_RDS_UPGRADE_VALIDATION_FAILED),
+                eq(exception.getMessage() + " You can find the troubleshooting guide in CDP documentation: " +
+                        DocumentationLinkProvider.azureFlexibleServerTroubleShootingLink()));
     }
 
     @Test

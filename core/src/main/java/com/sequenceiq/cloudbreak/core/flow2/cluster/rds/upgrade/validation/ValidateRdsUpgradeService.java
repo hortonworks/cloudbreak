@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 
+import java.util.EnumSet;
 import java.util.Objects;
 
 import jakarta.inject.Inject;
@@ -94,7 +95,7 @@ public class ValidateRdsUpgradeService {
     }
 
     void validateRdsUpgradeFailed(Long stackId, Long clusterId, Exception exception) {
-        String errorMsg = webApplicationExceptionMessageExtractor.getErrorMessage(exception);
+        String errorMsg = extendUpgradeFailedMsgWithDocumentationLink(webApplicationExceptionMessageExtractor.getErrorMessage(exception));
         String statusReason = "Validate RDS upgrade failed with exception: " + errorMsg;
         LOGGER.warn("Validate RDS upgrade failed with exception: {}", errorMsg, exception);
         InMemoryStateStore.deleteStack(stackId);
@@ -103,6 +104,15 @@ public class ValidateRdsUpgradeService {
         }
         updateStatus(stackId, DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_VALIDATION_FAILED, statusReason);
         flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), ResourceEvent.CLUSTER_RDS_UPGRADE_VALIDATION_FAILED, errorMsg);
+    }
+
+    private String extendUpgradeFailedMsgWithDocumentationLink(String errorMessage) {
+        return EnumSet.allOf(RdsUpgradeValidationErrorType.class).stream()
+                .filter(errorType -> errorType.isErrorMsgMatching(errorMessage))
+                .findFirst()
+                .map(errorType -> errorMessage + " You can find the troubleshooting guide in CDP documentation: " +
+                        errorType.getDocumentationLink())
+                .orElse(errorMessage);
     }
 
     boolean shouldRunDataBackupRestore(StackView stack, ClusterView cluster, Database database) {
@@ -120,7 +130,7 @@ public class ValidateRdsUpgradeService {
     }
 
     private void setStatusAndNotify(Long stackId, Status status, DetailedStackStatus detailedStackStatus, String statusReason, ResourceEvent resourceEvent,
-                                    String... args) {
+            String... args) {
         LOGGER.debug(statusReason);
         updateStatus(stackId, detailedStackStatus, statusReason);
         flowMessageService.fireEventAndLog(stackId, status.name(), resourceEvent, args);
