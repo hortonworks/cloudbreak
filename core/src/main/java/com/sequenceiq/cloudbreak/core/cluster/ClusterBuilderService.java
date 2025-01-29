@@ -132,9 +132,14 @@ public class ClusterBuilderService implements LocalPaasRemoteDataContextSupplier
                 stackDto.getCluster().getEnvironmentCrn());
 
         String datalakeCrn = getDatalakeCrn(stackDto);
+        String sdxContext = getSdxContextOptional(datalakeCrn).orElse(null);
+        if (StackType.DATALAKE.equals(stackDto.getStack().getType())) {
+            datalakeCrn = stackDto.getResourceCrn();
+        }
+
         getClusterSetupService(stackDto).configureManagementServices(
                 stackToTemplatePreparationObjectConverter.convert(stackDto),
-                getSdxContextOptional(datalakeCrn).orElse(null),
+                sdxContext,
                 datalakeCrn,
                 componentConfigProviderService.getTelemetry(stackId),
                 proxyConfig.orElse(null));
