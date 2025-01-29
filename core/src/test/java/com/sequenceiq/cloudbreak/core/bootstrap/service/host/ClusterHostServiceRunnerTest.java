@@ -142,7 +142,9 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 @ExtendWith(MockitoExtension.class)
 class ClusterHostServiceRunnerTest {
 
-    private static final String TEST_CLUSTER_CRN = "crn:cdp:datahub:us-west-1:datahub:cluster:f7563fc1-e8ff-486a-9260-4e54ccabbaa0";
+    private static final String ACCOUNT_ID = "default";
+
+    private static final String TEST_CLUSTER_CRN = String.format("crn:cdp:datahub:us-west-1:%s:cluster:f7563fc1-e8ff-486a-9260-4e54ccabbaa0", ACCOUNT_ID);
 
     private static final Map<String, SaltPillarProperties> PAYWALL_PROPERTIES = Map.of("paywall", new SaltPillarProperties("paywall_path", Map.of()));
 
@@ -327,6 +329,7 @@ class ClusterHostServiceRunnerTest {
         lenient().when(environmentConfigProvider.getParentEnvironmentCrn(any())).thenReturn(ENV_CRN);
         lenient().when(cluster.getExtendedBlueprintText()).thenReturn(EXTENDED_BLUEPRINT_TEXT);
         lenient().when(environmentConfigProvider.getEnvironmentByCrn(ENV_CRN)).thenReturn(environmentResponse);
+        lenient().when(stack.getStack().getResourceCrn()).thenReturn(TEST_CLUSTER_CRN);
     }
 
     @Test
@@ -508,6 +511,7 @@ class ClusterHostServiceRunnerTest {
         assertFalse(reachableNodes.stream().anyMatch(node -> StringUtils.equals("fqdn2", node.getHostname())));
         assertTrue(saltConfig.getValue().getServicePillarConfig().keySet().stream().allMatch(Objects::nonNull));
         verifySecretEncryption(false, saltConfig.getValue());
+        verifyTlsv13Enabled(false, saltConfig.getValue());
 
         verifyDefaultKerberosCcacheSecretStorage(DEFAULT_KERBEROS_CCACHE_SECRET_STORAGE, saltConfig.getValue());
         verifyKerberosSecretLocation(KERBEROS_SECRET_LOCATION, saltConfig.getValue());
@@ -572,6 +576,7 @@ class ClusterHostServiceRunnerTest {
         verifyDefaultKerberosCcacheSecretStorage(DEFAULT_KERBEROS_CCACHE_SECRET_STORAGE, saltConfig.getValue());
         verifyKerberosSecretLocation(KERBEROS_SECRET_LOCATION, saltConfig.getValue());
         verifyNoInteractions(backUpDecorator);
+        verifyTlsv13Enabled(false, saltConfig.getValue());
     }
 
     @Test
@@ -610,6 +615,7 @@ class ClusterHostServiceRunnerTest {
         verifyDefaultKerberosCcacheSecretStorage(DEFAULT_KERBEROS_CCACHE_SECRET_STORAGE, saltConfig.getValue());
         verifyKerberosSecretLocation(KERBEROS_SECRET_LOCATION, saltConfig.getValue());
         verifyNoInteractions(backUpDecorator);
+        verifyTlsv13Enabled(false, saltConfig.getValue());
     }
 
     @Test
@@ -946,6 +952,7 @@ class ClusterHostServiceRunnerTest {
         KerberosConfig kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig().withVerifyKdcTrust(true).build();
         when(kerberosConfigService.get(ENV_CRN, STACK_NAME)).thenReturn(Optional.of(kerberosConfig));
         when(kerberosDetailService.areClusterManagerManagedKerberosPackages(kerberosConfig)).thenReturn(true);
+        when(entitlementService.isTlsv13Enabled(ACCOUNT_ID)).thenReturn(true);
 
         underTest.runClusterServices(stack, Collections.emptyMap(), false);
 
@@ -953,6 +960,8 @@ class ClusterHostServiceRunnerTest {
         verify(hostOrchestrator).runService(any(), any(), saltConfig.capture(), any());
 
         verifySecretEncryption(true, saltConfig.getValue());
+        verifyTlsv13Enabled(true, saltConfig.getValue());
+
 
         String knoxGatewaySecurityDir = (String) getGatewayProperties(saltConfig.getValue()).get("knoxGatewaySecurityDir");
         assertEquals(KNOX_GATEWAY_SECURITY_DIR, knoxGatewaySecurityDir);
@@ -980,6 +989,7 @@ class ClusterHostServiceRunnerTest {
         KerberosConfig kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig().withVerifyKdcTrust(true).build();
         when(kerberosConfigService.get(ENV_CRN, STACK_NAME)).thenReturn(Optional.of(kerberosConfig));
         when(kerberosDetailService.areClusterManagerManagedKerberosPackages(kerberosConfig)).thenReturn(true);
+        when(entitlementService.isTlsv13Enabled(ACCOUNT_ID)).thenReturn(true);
 
         underTest.runClusterServices(stack, Collections.emptyMap(), false);
 
@@ -987,6 +997,7 @@ class ClusterHostServiceRunnerTest {
         verify(hostOrchestrator).runService(any(), any(), saltConfig.capture(), any());
 
         verifySecretEncryption(true, saltConfig.getValue());
+        verifyTlsv13Enabled(true, saltConfig.getValue());
 
         verify(backUpDecorator).decoratePillarWithBackup(eq(stack), eq(environmentResponse), any());
     }
@@ -1098,6 +1109,11 @@ class ClusterHostServiceRunnerTest {
     private void verifySecretEncryption(boolean expectedValue, SaltConfig saltConfig) {
         boolean secretEncryptionEnabled = (Boolean) getClusterProperties(saltConfig).get("secretEncryptionEnabled");
         assertEquals(expectedValue, secretEncryptionEnabled);
+    }
+
+    private void verifyTlsv13Enabled(boolean expectedValue, SaltConfig saltConfig) {
+        boolean tlsv13Enabled = (Boolean) getClusterProperties(saltConfig).get("tlsv13Enabled");
+        assertEquals(expectedValue, tlsv13Enabled);
     }
 
     private void verifyDefaultKerberosCcacheSecretStorage(String expectedValue, SaltConfig saltConfig) {

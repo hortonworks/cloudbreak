@@ -51,6 +51,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.api.service.ExposedService;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.auth.CMLicenseParser;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
@@ -298,6 +299,9 @@ public class ClusterHostServiceRunner {
     @Inject
     private BackUpDecorator backUpDecorator;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     public NodeReachabilityResult runClusterServices(@Nonnull StackDto stackDto,
             Map<String, String> candidateAddresses, boolean runPreServiceDeploymentRecipe) {
         LOGGER.debug("Run cluster services on candidates: {}", candidateAddresses);
@@ -524,7 +528,8 @@ public class ClusterHostServiceRunner {
                 "deployedInChildEnvironment", deployedInChildEnvironment,
                 "gov_cloud", stackDto.isOnGovPlatformVariant(),
                 "secretEncryptionEnabled", detailedEnvironmentResponse.isEnableSecretEncryption(),
-                "selinux_mode", seLinux);
+                "selinux_mode", seLinux,
+                "tlsv13Enabled", entitlementService.isTlsv13Enabled(stackDto.getAccountId()));
         servicePillar.put("metadata", new SaltPillarProperties("/metadata/init.sls", singletonMap("cluster", clusterProperties)));
         ClusterPreCreationApi connector = clusterApiConnectors.getConnector(cluster);
         Map<String, List<String>> serviceLocations = getServiceLocations(stackDto);
