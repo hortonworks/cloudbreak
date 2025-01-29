@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -29,12 +30,14 @@ import com.cloudera.api.swagger.model.ApiConfigList;
 import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiRole;
 import com.cloudera.api.swagger.model.ApiRoleList;
-import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.cmtemplate.metering.MeteringServiceFieldResolver;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
@@ -92,6 +95,8 @@ public class ClouderaManagerMgmtTelemetryService {
 
     private static final String DATABUS_HEADER_DATAHUB_NAME = "databus.header.datahub.name";
 
+    private static final String DATABUS_HEADER_DATAHUB_TYPE = "databus.header.datahub.type";
+
     private static final String DATABUS_HEADER_CLOUDPROVIDER_NAME = "databus.header.cloudprovider.name";
 
     private static final String DATABUS_HEADER_CLOUDPROVIDER_REGION = "databus.header.cloudprovider.region";
@@ -140,8 +145,14 @@ public class ClouderaManagerMgmtTelemetryService {
     @Inject
     private MonitoringConfiguration monitoringConfiguration;
 
-    public void setupTelemetryRole(final StackDtoDelegate stack, final ApiClient client, final ApiHostRef cmHostRef,
-            final ApiRoleList mgmtRoles, final Telemetry telemetry, String sdxStackCrn) throws ApiException {
+    @Inject
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
+
+    @Inject
+    private MeteringServiceFieldResolver meteringServiceFieldResolver;
+
+    public void setupTelemetryRole(StackDtoDelegate stack, ApiClient client, ApiHostRef cmHostRef,
+            ApiRoleList mgmtRoles, Telemetry telemetry, String sdxStackCrn) throws ApiException {
         if (isAnalyticsEnabled(stack, telemetry)) {
             WorkloadAnalytics workloadAnalytics = telemetry.getWorkloadAnalytics();
             String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
@@ -160,7 +171,7 @@ public class ClouderaManagerMgmtTelemetryService {
             externalAccountService.createExternalAccount(ALTUS_CREDENTIAL_NAME, ALTUS_CREDENTIAL_NAME,
                     ALTUS_CREDENTIAL_TYPE, accountConfigs, client);
 
-            final ApiRole telemetryPublisher = new ApiRole();
+            ApiRole telemetryPublisher = new ApiRole();
             telemetryPublisher.setName(TELEMETRYPUBLISHER);
             telemetryPublisher.setType(TELEMETRYPUBLISHER);
             telemetryPublisher.setHostRef(cmHostRef);
@@ -171,13 +182,11 @@ public class ClouderaManagerMgmtTelemetryService {
         }
     }
 
-    public void updateTelemetryConfigs(final StackDtoDelegate stack, final ApiClient client,
-            final Telemetry telemetry, final String sdxContextName,
-            final String sdxStackCrn, final ProxyConfig proxyConfig) throws ApiException {
+    public void updateTelemetryConfigs(StackDtoDelegate stack, ApiClient client, Telemetry telemetry,
+            String sdxContextName, String sdxStackCrn, ProxyConfig proxyConfig) throws ApiException {
         if (isAnalyticsEnabled(stack, telemetry)) {
             MgmtRoleConfigGroupsResourceApi mgmtRoleConfigGroupsResourceApi = clouderaManagerApiFactory.getMgmtRoleConfigGroupsResourceApi(client);
-            ApiConfigList configList = buildTelemetryConfigList(stack, telemetry.getWorkloadAnalytics(),
-                    sdxContextName, sdxStackCrn, proxyConfig);
+            ApiConfigList configList = buildTelemetryConfigList(stack, telemetry.getWorkloadAnalytics(), sdxContextName, sdxStackCrn, proxyConfig);
             mgmtRoleConfigGroupsResourceApi.updateConfig(String.format(MGMT_CONFIG_GROUP_NAME_PATTERN, TELEMETRYPUBLISHER),
                     "Set configs for Telemetry publisher by CB", configList);
         }
@@ -218,23 +227,20 @@ public class ClouderaManagerMgmtTelemetryService {
         }
     }
 
-    private List<String> getKeysFromApiConfigList(ApiConfigList serviecMonitorConfigList) {
-        return serviecMonitorConfigList != null && CollectionUtils.isNotEmpty(serviecMonitorConfigList.getItems())
-                ? serviecMonitorConfigList.getItems().stream().map(ApiConfig::getName).collect(Collectors.toList())
+    private List<String> getKeysFromApiConfigList(ApiConfigList serviceMonitorConfigList) {
+        return serviceMonitorConfigList != null && CollectionUtils.isNotEmpty(serviceMonitorConfigList.getItems())
+                ? serviceMonitorConfigList.getItems().stream().map(ApiConfig::getName).collect(Collectors.toList())
                 : new ArrayList<>();
     }
 
-    @VisibleForTesting
-    ApiConfigList buildTelemetryConfigList(StackDtoDelegate stack, WorkloadAnalytics wa, String sdxContextName,
+    private ApiConfigList buildTelemetryConfigList(StackDtoDelegate stack, WorkloadAnalytics wa, String sdxContextName,
             String sdxCrn, ProxyConfig proxyConfig) {
-        final Map<String, String> configsToUpdate = new HashMap<>();
+        Map<String, String> configsToUpdate = new HashMap<>();
         Map<String, String> telemetrySafetyValveMap = new HashMap<>();
         if (stack != null && stack.getType() == StackType.DATALAKE) {
-            telemetrySafetyValveMap.put(TELEMETRY_WA_CLUSTER_TYPE_HEADER,
-                    TELEMETRY_WA_DEFAULT_CLUSTER_TYPE + "_RUNTIME");
+            telemetrySafetyValveMap.put(TELEMETRY_WA_CLUSTER_TYPE_HEADER, TELEMETRY_WA_DEFAULT_CLUSTER_TYPE + "_RUNTIME");
         } else {
-            telemetrySafetyValveMap.put(TELEMETRY_WA_CLUSTER_TYPE_HEADER,
-                    TELEMETRY_WA_DEFAULT_CLUSTER_TYPE);
+            telemetrySafetyValveMap.put(TELEMETRY_WA_CLUSTER_TYPE_HEADER, TELEMETRY_WA_DEFAULT_CLUSTER_TYPE);
             // the HMS metadata extractor is true by default in the Observability, but this make impact on the DHs performance therefore we should disable it.
             // Enabling this temporarily, but will be reverted once DL telemetry issues are fixed.
             telemetrySafetyValveMap.put(TELEMETRY_CONFIG_EXTRACTOR_HMS_METADATA_ENABLED, "true");
@@ -255,9 +261,8 @@ public class ClouderaManagerMgmtTelemetryService {
         return makeApiConfigList(configsToUpdate);
     }
 
-    @VisibleForTesting
-    ApiConfigList buildTelemetryCMConfigList(WorkloadAnalytics workloadAnalytics, String databusUrl) {
-        final Map<String, String> configsToUpdate = new HashMap<>();
+    private ApiConfigList buildTelemetryCMConfigList(WorkloadAnalytics workloadAnalytics, String databusUrl) {
+        Map<String, String> configsToUpdate = new HashMap<>();
         configsToUpdate.put(TELEMETRY_MASTER, "true");
         configsToUpdate.put(TELEMETRY_WA, "true");
         configsToUpdate.put(TELEMETRY_COLLECT_JOB_LOGS, "true");
@@ -268,8 +273,7 @@ public class ClouderaManagerMgmtTelemetryService {
         return makeApiConfigList(configsToUpdate);
     }
 
-    @VisibleForTesting
-    void enrichWithEnvironmentMetadata(
+    private void enrichWithEnvironmentMetadata(
             String sdxContextName,
             String sdxCrn,
             StackDtoDelegate stack,
@@ -313,6 +317,7 @@ public class ClouderaManagerMgmtTelemetryService {
         if (stack.getType() == StackType.WORKLOAD) {
             addIfNotEmpty(telemetrySafetyValveMap, DATABUS_HEADER_DATAHUB_CRN, stack.getResourceCrn());
             addIfNotEmpty(telemetrySafetyValveMap, DATABUS_HEADER_DATAHUB_NAME, stack.getName());
+            addIfNotEmpty(telemetrySafetyValveMap, DATABUS_HEADER_DATAHUB_TYPE, getDatahubType(stack).orElse("UNDEFINED"));
             addIfNotEmpty(telemetrySafetyValveMap, DATABUS_HEADER_DATALAKE_CRN, stack.getDatalakeCrn());
         } else if (stack.getType() == StackType.DATALAKE) {
             addIfNotEmpty(telemetrySafetyValveMap, DATABUS_HEADER_DATALAKE_CRN, stack.getResourceCrn());
@@ -336,7 +341,7 @@ public class ClouderaManagerMgmtTelemetryService {
     private String createStringFromSafetyValveMap(Map<String, String> telemetrySafetyValveMap) {
         return telemetrySafetyValveMap.entrySet()
                 .stream()
-                .map(e -> e.getKey() + "=" + e.getValue())
+                .map(e -> e.getKey() + '=' + e.getValue())
                 .collect(joining("\n"));
     }
 
@@ -359,8 +364,15 @@ public class ClouderaManagerMgmtTelemetryService {
 
     private boolean isGovCloud(StackDtoDelegate stack) {
         return stack.getPlatformVariant() != null
-                && (stack.getPlatformVariant().equalsIgnoreCase("govCloud")
-                || stack.getPlatformVariant().equalsIgnoreCase(AWS_NATIVE_GOV));
+                && ("govCloud".equalsIgnoreCase(stack.getPlatformVariant())
+                || AWS_NATIVE_GOV.equalsIgnoreCase(stack.getPlatformVariant()));
+    }
+
+    private Optional<String> getDatahubType(StackDtoDelegate stack) {
+        String blueprintJsonText = stack.getBlueprint().getBlueprintJsonText();
+        CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(blueprintJsonText);
+
+        return Optional.ofNullable(meteringServiceFieldResolver.resolveServiceFeature(cmTemplateProcessor));
     }
 
 }
