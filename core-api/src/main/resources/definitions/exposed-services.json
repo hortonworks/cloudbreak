@@ -894,6 +894,21 @@
       "visibleForDatalake": false,
       "visibleForDatahub": true,
       "minVersion": "7.2.18"
+    },
+    {
+      "name": "CLO",
+      "displayName": "Cloudera Lakehouse Optimizer",
+      "serviceName": "CLO_SERVER",
+      "knoxService": "CLO",
+      "knoxUrl": "/clo/",
+      "ssoSupported": false,
+      "port": 8085,
+      "tlsPort": 8085,
+      "apiOnly": true,
+      "apiIncluded": true,
+      "visibleForDatalake": false,
+      "visibleForDatahub": true,
+      "minVersion": "7.3.2"
     }
   ]
 }

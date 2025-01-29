@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.meteringv2;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.clo.CLOServiceRoles.CLO_SERVER;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.clo.CLOServiceRoles.CLO_SERVICE;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.dlm.DLMServiceRoles.DLM_SERVER;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.dlm.DLMServiceRoles.DLM_SERVICE;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.meteringv2.MeteringV2ServiceRoles.METERINGV2_SERVICE;
@@ -23,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
@@ -62,6 +65,31 @@ class MeteringV2ConfigProviderTest {
         ApiClusterTemplateService apiClusterTemplateService = mock(ApiClusterTemplateService.class);
         // This will cause isConfigurationNeeded to return true.
         when(mockTemplateProcessor.isRoleTypePresentInService(DLM_SERVICE, List.of(DLM_SERVER))).thenReturn(true);
+
+        when(templatePreparationObject.getHostgroupViews()).thenReturn(Set.of(new HostgroupView("master", 0, InstanceGroupType.GATEWAY, 1)));
+        Map<String, ApiClusterTemplateService> additionalServices = underTest.getAdditionalServices(mockTemplateProcessor, templatePreparationObject);
+
+        assertFalse(additionalServices.isEmpty());
+    }
+
+    @Test
+    void getAdditionalServicesButCLOIsNotPresent() {
+        ApiClusterTemplateService apiClusterTemplateService = mock(ApiClusterTemplateService.class);
+        // This will cause isConfigurationNeeded to return false -> No metering config should get generated.
+        when(mockTemplateProcessor.isRoleTypePresentInService(DLM_SERVICE, Lists.newArrayList(DLM_SERVER))).thenReturn(false);
+        when(mockTemplateProcessor.isRoleTypePresentInService(CLO_SERVICE, List.of(CLO_SERVER))).thenReturn(false);
+
+        Map<String, ApiClusterTemplateService> additionalServices = underTest.getAdditionalServices(mockTemplateProcessor, templatePreparationObject);
+
+        assertTrue(additionalServices.isEmpty());
+    }
+
+    @Test
+    void getAdditionalServicesCLOIsPresentButMeteringIsNot() {
+        ApiClusterTemplateService apiClusterTemplateService = mock(ApiClusterTemplateService.class);
+        // This will cause isConfigurationNeeded to return true.
+        when(mockTemplateProcessor.isRoleTypePresentInService(DLM_SERVICE, Lists.newArrayList(DLM_SERVER))).thenReturn(false);
+        when(mockTemplateProcessor.isRoleTypePresentInService(CLO_SERVICE, List.of(CLO_SERVER))).thenReturn(true);
 
         when(templatePreparationObject.getHostgroupViews()).thenReturn(Set.of(new HostgroupView("master", 0, InstanceGroupType.GATEWAY, 1)));
         Map<String, ApiClusterTemplateService> additionalServices = underTest.getAdditionalServices(mockTemplateProcessor, templatePreparationObject);

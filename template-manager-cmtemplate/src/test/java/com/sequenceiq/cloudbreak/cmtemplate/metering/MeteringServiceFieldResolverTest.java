@@ -99,6 +99,16 @@ public class MeteringServiceFieldResolverTest {
     }
 
     @Test
+    public void testResolveServiceFeatureForCLO() {
+        // GIVEN
+        given(cmTemplateProcessor.getAllComponents()).willReturn(createServiceComponents("CLO"));
+        // WHEN
+        String result = underTest.resolveServiceFeature(cmTemplateProcessor);
+        // THEN
+        assertEquals("CLO", result);
+    }
+
+    @Test
     public void testResolveServiceFeatureWithoutMatchingService() {
         // GIVEN
         given(cmTemplateProcessor.getAllComponents()).willReturn(createServiceComponents("HBASE"));

@@ -146,7 +146,8 @@ class ExposedServiceCollectorTest {
                 "QUERY_PROCESSOR",
                 "RANGER_RAZ_SERVER",
                 "KAFKA_BROKER",
-                "DLM_SERVER");
+                "DLM_SERVER",
+                "CLO_SERVER");
     }
 
     @Test
@@ -213,7 +214,8 @@ class ExposedServiceCollectorTest {
                 "QUERY_PROCESSOR",
                 "RANGERRAZ",
                 "KAFKA_BROKER",
-                "DLM");
+                "DLM",
+                "CLO");
     }
 
     @Test

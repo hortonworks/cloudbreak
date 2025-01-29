@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.meteringv2;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.clo.CLOServiceRoles.CLO_SERVER;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.clo.CLOServiceRoles.CLO_SERVICE;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.dlm.DLMServiceRoles.DLM_SERVER;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.dlm.DLMServiceRoles.DLM_SERVICE;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.meteringv2.MeteringV2ServiceRoles.METERINGV2_SERVER;
@@ -123,9 +125,11 @@ public class MeteringV2ConfigProvider extends AbstractRoleConfigProvider {
 
     @Override
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
-        // If DLM is present, return true.
-        return cmTemplateProcessor.isRoleTypePresentInService(DLM_SERVICE, Lists.newArrayList(DLM_SERVER))
+        // If DLM || CLO is present, return true.
+        return (cmTemplateProcessor.isRoleTypePresentInService(DLM_SERVICE, Lists.newArrayList(DLM_SERVER))
+                || cmTemplateProcessor.isRoleTypePresentInService(CLO_SERVICE, Lists.newArrayList(CLO_SERVER)))
                 && StringUtils.isNotBlank(dbusAppName)
                 && StringUtils.isNotBlank(dbusStreamName);
     }
+
 }

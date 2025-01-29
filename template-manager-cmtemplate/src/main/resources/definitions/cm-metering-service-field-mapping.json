@@ -8,6 +8,10 @@
     {
       "name": "CLO",
       "relatedServices": ["DLM"]
+    },
+    {
+      "name": "CLO",
+      "relatedServices": ["CLO"]
     }
   ]
 }

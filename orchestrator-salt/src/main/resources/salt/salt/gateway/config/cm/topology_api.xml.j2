@@ -757,4 +757,15 @@
         </service>
     {%- endif %}
     {%- endif %}
+
+    {% if 'CLO_SERVER' in salt['pillar.get']('gateway:location') -%}
+    {% if 'CLO' in exposed -%}
+        <service>
+            <role>CLO</role>
+            {% for hostloc in salt['pillar.get']('gateway:location')['CLO_SERVER'] -%}
+            <url>http://{{ hostloc }}:{{ ports['CLO'] }}</url>
+            {%- endfor %}
+        </service>
+    {%- endif %}
+    {%- endif %}
 </topology>
