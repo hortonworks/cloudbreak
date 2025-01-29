@@ -1,6 +1,12 @@
 {% if grains['os_family'] == 'RedHat' %}
 
 {% set cm_repo_file_path = '/etc/yum.repos.d/cloudera-manager-' + salt['pillar.get']('cloudera-manager-upgrade-prepare:repo:version') + '-' + salt['pillar.get']('cloudera-manager-upgrade-prepare:repo:buildNumber') + '.repo' %}
+{% set cpuarch = salt['grains.get']('cpuarch') %}
+{% if cpuarch == 'aarch64' %}
+    {% set package_extension = 'el' + salt['grains.get']('osmajorrelease')|string + '.' + cpuarch %}
+{% else %}
+    {% set package_extension = 'el' + salt['grains.get']('osmajorrelease')|string %}
+{% endif %}
 
 {% if not salt['file.file_exists'](cm_repo_file_path) %}
 remove_old_preparation_repo_files:
@@ -27,9 +33,9 @@ add-cluster-manager-repo:
 download-cluster-manager-packages:
   pkg.downloaded:
     - pkgs:
-        - cloudera-manager-agent: '{{ salt['pillar.get']('cloudera-manager-upgrade-prepare:repo:version') }}-{{ salt['pillar.get']('cloudera-manager-upgrade-prepare:repo:buildNumber') }}.el{{ grains['osmajorrelease'] }}'
-        - cloudera-manager-server: '{{ salt['pillar.get']('cloudera-manager-upgrade-prepare:repo:version') }}-{{ salt['pillar.get']('cloudera-manager-upgrade-prepare:repo:buildNumber') }}.el{{ grains['osmajorrelease'] }}'
-        - cloudera-manager-daemons: '{{ salt['pillar.get']('cloudera-manager-upgrade-prepare:repo:version') }}-{{ salt['pillar.get']('cloudera-manager-upgrade-prepare:repo:buildNumber') }}.el{{ grains['osmajorrelease'] }}'
+        - cloudera-manager-agent: '{{ salt['pillar.get']('cloudera-manager-upgrade-prepare:repo:version') }}-{{ salt['pillar.get']('cloudera-manager-upgrade-prepare:repo:buildNumber') }}.{{ package_extension }}'
+        - cloudera-manager-server: '{{ salt['pillar.get']('cloudera-manager-upgrade-prepare:repo:version') }}-{{ salt['pillar.get']('cloudera-manager-upgrade-prepare:repo:buildNumber') }}.{{ package_extension }}'
+        - cloudera-manager-daemons: '{{ salt['pillar.get']('cloudera-manager-upgrade-prepare:repo:version') }}-{{ salt['pillar.get']('cloudera-manager-upgrade-prepare:repo:buildNumber') }}.{{ package_extension }}'
     - fromrepo: cloudera-manager-{{ salt['pillar.get']('cloudera-manager-upgrade-prepare:repo:version') }}-{{ salt['pillar.get']('cloudera-manager-upgrade-prepare:repo:buildNumber') }}
     - failhard: True
 
