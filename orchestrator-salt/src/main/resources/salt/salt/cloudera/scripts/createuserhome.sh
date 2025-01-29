@@ -124,7 +124,11 @@ echo "Webhdfs url: $WEBHDFS_URL"
 
 WEBHDFS_COOKIE_JAR=/tmp/cloudbreak-webhdfs.cookies
 
-mapfile -t users < <((ipa user-find --pkey-only --sizelimit=0 --timelimit=0) | grep 'User login:' | awk '{ print $3}')
+case "{{ ldap.directoryType }}" in
+ LDAP)              mapfile -t users < <((ipa user-find --pkey-only --sizelimit=0 --timelimit=0) | grep 'User login:' | awk '{ print $3}');;
+ ACTIVE_DIRECTORY)  mapfile -t users < <((ldapsearch -x -D "{{ ldap.bindDn }}" -w "{{ ldap.bindPassword }}" -H {{ ldap.connectionURL }} -b "{{ ldap.userSearchBase }}" "(&(objectClass=user)(|(memberOf=CN={{ ldap.adminGroup }},{{ ldap.groupSearchBase }})(memberOf=CN={{ ldap.userGroup }},{{ ldap.groupSearchBase }})))") | grep sAMAccountName | awk '{ print $2}');;
+esac
+
 declare -a existingusers
 if test -f "$EXISTING_USERS_FILE"; then
   mapfile -t existingusers < <(cat $EXISTING_USERS_FILE)

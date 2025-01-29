@@ -1,8 +1,13 @@
-{% if "ipa_member" in grains.get('roles', []) and "namenode" in grains.get('roles', []) %}
+{% set roles = salt['grains.get']('roles') %}
+{% if ("ipa_member" in roles or "ad_member" in roles) and "namenode" in roles %}
+
 /opt/salt/scripts/createuserhome.sh:
   file.managed:
+    - template: jinja
     - source:
         - salt://cloudera/scripts/createuserhome.sh
+    - context:
+        ldap: {{ salt['pillar.get']('ldap') }}
     - makedirs: True
     - mode: 755
 

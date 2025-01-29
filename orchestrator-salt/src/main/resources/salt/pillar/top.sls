@@ -104,3 +104,7 @@ base:
   'roles:startup_mount':
     - match: grain
     - mount.startup
+
+  'roles:namenode':
+    - match: grain
+{{ include_if_exists('gateway', 'ldap') }}
