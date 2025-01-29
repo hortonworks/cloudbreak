@@ -135,7 +135,6 @@ public class KerberosConfigValidationActions {
                     if (!hasFreeIpaKerberosConfig) {
                         if (clusterCreationEnvironmentValidator.hasADKerberosConfig(stack)) {
                             Cluster cluster = clusterService.getCluster(clusterView.getId());
-                            cluster.setAutoTlsEnabled(false);
                             cluster.setDbSslEnabled(false);
                             clusterService.updateCluster(cluster);
                         } else {

@@ -42,6 +42,14 @@ base:
     - match: compound
     - cloudera.agent.upgrade
 
+  'roles:kerberized':
+    - match: grain
+    - kerberos.common
+
+  'G@roles:kerberized and G@roles:manager_server':
+    - match: compound
+    - kerberos.cm-keytab
+
   'G@roles:manager_server':
     - postgresql
     - cloudera.csd
@@ -54,14 +62,6 @@ base:
   'G@roles:manager_agent':
     - cloudera.repo
     - cloudera.agent
-
-  'roles:kerberized':
-    - match: grain
-    - kerberos.common
-
-  'G@roles:kerberized and G@roles:manager_server':
-    - match: compound
-    - kerberos.cm-keytab
 
   'roles:postgresql_server':
     - match: grain
