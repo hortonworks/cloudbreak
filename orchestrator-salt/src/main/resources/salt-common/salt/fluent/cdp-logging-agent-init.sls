@@ -77,6 +77,16 @@ copy_cdp_logging_agent_conf:
         workerIndex: {{ fluent.cloudStorageWorkerIndex }}
 {% endif %}
 
+{% if cpuarch != 'aarch64' %}
+/etc/cdp-logging-agent/databus_metering.conf:
+   file.managed:
+    - source: salt://fluent/template/databus_metering.conf.j2
+    - template: jinja
+    - user: "{{ fluent.user }}"
+    - group: "{{ fluent.group }}"
+    - mode: 640
+{% endif %}
+
 {% if fluent.cloudLoggingServiceEnabled %}
 /etc/cdp-logging-agent/filter.conf:
   file.managed:
@@ -134,6 +144,7 @@ fluentd_systemd_reload_and_run:
       - file: /etc/systemd/system/cdp-logging-agent.service{% if fluent.cloudStorageLoggingEnabled or fluent.cloudLoggingServiceEnabled %}
       - file: /etc/cdp-logging-agent/input.conf
       - file: /etc/cdp-logging-agent/output.conf{% endif %}
+      {% if cpuarch != 'aarch64' %}- file: /etc/cdp-logging-agent/databus_metering.conf{% endif %}
 
   service.running:
     - enable: True
@@ -142,6 +153,7 @@ fluentd_systemd_reload_and_run:
        - file: /etc/systemd/system/cdp-logging-agent.service{% if fluent.cloudStorageLoggingEnabled or fluent.cloudLoggingServiceEnabled %}
        - file: /etc/cdp-logging-agent/input.conf
        - file: /etc/cdp-logging-agent/output.conf{% endif %}
+       {% if cpuarch != 'aarch64' %}- file: /etc/cdp-logging-agent/databus_metering.conf{% endif %}
 {% else %}
 
 fs.file-max:

@@ -50,4 +50,8 @@ public class DocumentationLinkProvider {
         return "https://docs.cloudera.com/cdp-public-cloud/cloud/requirements-azure/topics/" +
                 "mc-customer_managed_encryption_keys.html#managed_identity_for_configuring_a_cmk_for_encrypting_azure_database_for_postgresql_flexible_server";
     }
+
+    public static String azureFlexibleServerTroubleShootingLink() {
+        return "https://docs.cloudera.com/management-console/cloud/environments-azure/topics/mc-troubleshooting_flexible_server.html#pnavId2";
+    }
 }
