@@ -136,6 +136,7 @@ public class KerberosConfigValidationActions {
                         if (clusterCreationEnvironmentValidator.hasADKerberosConfig(stack)) {
                             Cluster cluster = clusterService.getCluster(clusterView.getId());
                             cluster.setDbSslEnabled(false);
+                            cluster.setAutoTlsEnabled(false);
                             clusterService.updateCluster(cluster);
                         } else {
                             throw new IllegalStateException("AutoTLS works only with FreeIPA. No FreeIPA Kerberos configuration is found.");
