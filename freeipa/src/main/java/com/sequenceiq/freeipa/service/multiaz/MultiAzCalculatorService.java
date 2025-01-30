@@ -48,8 +48,6 @@ public class MultiAzCalculatorService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MultiAzCalculatorService.class);
 
-    private static final Set<CloudPlatform> ZONAL_SUBNET_CLOUD_PLATFORMS = Set.of(CloudPlatform.AWS);
-
     @Inject
     private MultiAzValidator multiAzValidator;
 
@@ -313,11 +311,18 @@ public class MultiAzCalculatorService {
     }
 
     private Set<String> validateAndGetEnvironmentZones(DetailedEnvironmentResponse detailedEnvironmentResponse, Stack stack) {
-        Set<String> environmentZones = detailedEnvironmentResponse.getNetwork().getAvailabilityZones(CloudPlatform.valueOf(stack.getCloudPlatform()));
+        Set<String> environmentZones;
+        if (CloudPlatform.AWS.name().equals(stack.getCloudPlatform())) {
+            environmentZones = detailedEnvironmentResponse.getNetwork().getSubnetMetas().values().stream()
+                    .map(CloudSubnet::getAvailabilityZone)
+                    .collect(Collectors.toSet());
+        } else {
+            environmentZones = detailedEnvironmentResponse.getNetwork().getAvailabilityZones(CloudPlatform.valueOf(stack.getCloudPlatform()));
+        }
         if (CollectionUtils.isEmpty(environmentZones)) {
             LOGGER.error("Environment Zones are not configured");
             throw new BadRequestException(String.format("MultiAz is enabled but Availability Zones are not configured for environment %s." +
-                            "Please modify the environment and configure Availability Zones", detailedEnvironmentResponse.getName()));
+                    "Please modify the environment and configure Availability Zones", detailedEnvironmentResponse.getName()));
         }
         return environmentZones;
     }
@@ -331,6 +336,6 @@ public class MultiAzCalculatorService {
     }
 
     private boolean isSubnetAzNeeded(Stack stack) {
-        return !stack.isMultiAz() || ZONAL_SUBNET_CLOUD_PLATFORMS.contains(CloudPlatform.valueOf(stack.getCloudPlatform()));
+        return !stack.isMultiAz();
     }
 }

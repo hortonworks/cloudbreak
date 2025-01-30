@@ -1,6 +1,11 @@
 package com.sequenceiq.cloudbreak.service.multiaz;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
+
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -10,15 +15,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.common.api.type.InstanceGroupName;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Service
 public class DataLakeAwareInstanceMetadataAvailabilityZoneCalculator extends InstanceMetadataAvailabilityZoneCalculator {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataLakeAwareInstanceMetadataAvailabilityZoneCalculator.class);
+
+    private static final String DEFAULT_RACK = "default-rack";
 
     @Inject
     private BlueprintUtils blueprintUtils;
@@ -34,8 +45,65 @@ public class DataLakeAwareInstanceMetadataAvailabilityZoneCalculator extends Ins
                 populate(stack);
             }
         } else {
-            LOGGER.debug("Stack is NOT multi-AZ enabled or AvailabilityZone connector doesn't exist for platform , no need to populate zones for instances");
+            LOGGER.debug("Stack is NOT multi-AZ enabled or AvailabilityZone connector doesn't exist for platform, populating zones and subnets for instances");
+            String stackSubnetId = getStackSubnetIdIfExists(stack);
+            DetailedEnvironmentResponse environment = getDetailedEnvironmentResponse(stack.getEnvironmentCrn());
+            Map<String, String> subnetAzMap = prepareSubnetAzMap(environment);
+            String stackAz = stackSubnetId == null ? null : subnetAzMap.get(stackSubnetId);
+            stack.getInstanceGroups().forEach(ig -> prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(stackSubnetId, stackAz, ig, stack, subnetAzMap));
+            Set<InstanceMetaData> instancesToBeUpdated = new HashSet<>();
+            for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+                instancesToBeUpdated.addAll(instanceGroup.getInstanceMetaData());
+            }
+            updateInstancesMetaData(instancesToBeUpdated);
         }
+    }
+
+    private Map<String, String> prepareSubnetAzMap(DetailedEnvironmentResponse environment) {
+        Map<String, String> subnetAzPairs = new HashMap<>();
+        if (environment != null && environment.getNetwork() != null && environment.getNetwork().getSubnetMetas() != null) {
+            for (Map.Entry<String, CloudSubnet> entry : environment.getNetwork().getSubnetMetas().entrySet()) {
+                CloudSubnet value = entry.getValue();
+                if (!isNullOrEmpty(value.getName())) {
+                    subnetAzPairs.put(value.getName(), value.getAvailabilityZone());
+                    if (!isNullOrEmpty(value.getName())) {
+                        subnetAzPairs.put(value.getName(), value.getAvailabilityZone());
+                    }
+                    if (!isNullOrEmpty(value.getId())) {
+                        subnetAzPairs.put(value.getId(), value.getAvailabilityZone());
+                    }
+                }
+            }
+        }
+
+        return subnetAzPairs;
+    }
+
+    private String getStackSubnetIdIfExists(Stack stack) {
+        return Optional.ofNullable(stack.getNetwork())
+                .map(Network::getAttributes)
+                .map(Json::getMap)
+                .map(attr -> attr.get(SUBNET_ID))
+                .map(Object::toString)
+                .orElse(null);
+    }
+
+    protected void prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(String stackSubnetId, String stackAz, InstanceGroup instanceGroup, Stack stack,
+            Map<String, String> subnetAzPairs) {
+        for (InstanceMetaData instanceMetaData : instanceGroup.getAllInstanceMetaData()) {
+            if (isNullOrEmpty(instanceMetaData.getSubnetId()) && isNullOrEmpty(instanceMetaData.getAvailabilityZone())) {
+                instanceMetaData.setSubnetId(stackSubnetId);
+                instanceMetaData.setAvailabilityZone(stackAz);
+            }
+            instanceMetaData.setRackId(determineRackId(instanceMetaData));
+        }
+    }
+
+    private String determineRackId(InstanceMetaData instanceMetaData) {
+        return "/" +
+                (isNullOrEmpty(instanceMetaData.getAvailabilityZone()) ?
+                        (isNullOrEmpty(instanceMetaData.getSubnetId()) ? DEFAULT_RACK : instanceMetaData.getSubnetId())
+                        : instanceMetaData.getAvailabilityZone());
     }
 
     private void populateForEnterpriseDataLake(Stack stack) {
@@ -54,7 +122,8 @@ public class DataLakeAwareInstanceMetadataAvailabilityZoneCalculator extends Ins
             auxiliaryInstanceGroup.ifPresent(ig -> mergedInstanceMetaData.addAll(ig.getNotTerminatedInstanceMetaDataSet()));
             LOGGER.info("Auxiliary/Master instance group's meta data: {}", mergedInstanceMetaData);
             Set<String> availabilityZones = masterInstanceGroup.or(() -> auxiliaryInstanceGroup).get().getAvailabilityZones();
-            updatedInstancesMetaData.addAll(populateAvailabilityZoneOfInstances(availabilityZones, mergedInstanceMetaData, "Master/Auxiliary"));
+            updatedInstancesMetaData.addAll(populateAvailabilityZoneOfInstances(availabilityZones, mergedInstanceMetaData, "Master/Auxiliary",
+                    masterInstanceGroup.isPresent() ? masterInstanceGroup.get() : auxiliaryInstanceGroup.get()));
             updateInstancesMetaData(updatedInstancesMetaData);
         } else {
             LOGGER.info("{} and {} instance groups are not present, nothing to do", InstanceGroupName.MASTER.getName(),

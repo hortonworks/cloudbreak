@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,6 +25,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.AvailabilityZoneConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
@@ -33,13 +34,18 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.AvailabilityZone;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.common.api.type.InstanceGroupName;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
 @ExtendWith(MockitoExtension.class)
 class DataLakeAwareInstanceMetadataAvailabilityZoneCalculatorTest {
+
+    private static final String ENVIRONMENT_CRN = "envCrn";
 
     @Mock
     private BlueprintUtils blueprintUtils;
@@ -57,7 +63,22 @@ class DataLakeAwareInstanceMetadataAvailabilityZoneCalculatorTest {
     private AvailabilityZoneConnector availabilityZoneConnector;
 
     @Mock
-    private MultiAzCalculatorService multiAzCalculatorService;
+    private InstanceMetadataAvailabilityZoneCalculator instanceMetadataAvailabilityZoneCalculator;
+
+    @Mock
+    private DetailedEnvironmentResponse environmentResponse;
+
+    @Mock
+    private EnvironmentNetworkResponse environmentNetworkResponse;
+
+    @Mock
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Mock
+    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
+
+    @Mock
+    private EnvironmentClientService environmentClientService;
 
     @Spy
     @InjectMocks
@@ -79,10 +100,13 @@ class DataLakeAwareInstanceMetadataAvailabilityZoneCalculatorTest {
         Stack stack = TestUtil.stack();
         stack.setMultiAz(Boolean.FALSE);
         when(stackService.getByIdWithLists(anyLong())).thenReturn(stack);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environmentResponse);
 
         underTest.populate(1L);
 
-        verify(underTest, times(0)).updateInstancesMetaData(any());
+        verify(underTest, times(1)).updateInstancesMetaData(any());
         verify(underTest, times(1)).populateSupportedOnStack(stack);
         verify(underTest, times(0)).populate(stack);
     }
@@ -93,10 +117,13 @@ class DataLakeAwareInstanceMetadataAvailabilityZoneCalculatorTest {
         stack.setMultiAz(Boolean.FALSE);
         when(stackService.getByIdWithLists(anyLong())).thenReturn(stack);
         when(cloudPlatformConnectors.get(any()).availabilityZoneConnector()).thenReturn(null);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environmentResponse);
 
         underTest.populate(1L);
 
-        verify(underTest, times(0)).updateInstancesMetaData(any());
+        verify(underTest, times(1)).updateInstancesMetaData(any());
         verify(underTest, times(1)).populateSupportedOnStack(stack);
         verify(underTest, times(0)).populate(stack);
     }
@@ -192,9 +219,6 @@ class DataLakeAwareInstanceMetadataAvailabilityZoneCalculatorTest {
         when(stackService.getByIdWithLists(anyLong())).thenReturn(stack);
         when(cloudPlatformConnectors.get(any()).availabilityZoneConnector()).thenReturn(availabilityZoneConnector);
         when(blueprintUtils.isEnterpriseDatalake(stack)).thenReturn(Boolean.TRUE);
-        when(multiAzCalculatorService.determineRackId(any(), eq("1"))).thenReturn("/1");
-        when(multiAzCalculatorService.determineRackId(any(), eq("2"))).thenReturn("/2");
-        when(multiAzCalculatorService.determineRackId(any(), eq("3"))).thenReturn("/3");
 
         underTest.populate(1L);
 

@@ -8,6 +8,7 @@ import jakarta.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
+import com.sequenceiq.cloudbreak.cloud.AvailabilityZoneConnector;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
@@ -111,6 +112,9 @@ public class AwsNativeConnector implements CloudConnector {
     private AwsEncryptionResources awsEncryptionResources;
 
     @Inject
+    private AwsNativeAvailabilityZoneConnector awsNativeAvailabilityZoneConnector;
+
+    @Inject
     private AwsScriptResources awsScriptResources;
 
     @Inject
@@ -177,6 +181,11 @@ public class AwsNativeConnector implements CloudConnector {
     @Override
     public EncryptionResources encryptionResources() {
         return awsEncryptionResources;
+    }
+
+    @Override
+    public AvailabilityZoneConnector availabilityZoneConnector() {
+        return awsNativeAvailabilityZoneConnector;
     }
 
     @Override

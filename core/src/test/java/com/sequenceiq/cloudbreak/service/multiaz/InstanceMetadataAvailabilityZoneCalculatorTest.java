@@ -8,7 +8,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -42,23 +41,34 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.AvailabilityZoneConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.AvailabilityZone;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 
 @ExtendWith(MockitoExtension.class)
 class InstanceMetadataAvailabilityZoneCalculatorTest {
+
+    private static final String ENVIRONMENT_CRN = "envCrn";
 
     @Mock
     private StackService stackService;
@@ -70,10 +80,22 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
     private CloudPlatformConnectors cloudPlatformConnectors;
 
     @Mock
-    private MultiAzCalculatorService multiAzCalculatorService;
+    private AvailabilityZoneConnector availabilityZoneConnector;
 
     @Mock
-    private AvailabilityZoneConnector availabilityZoneConnector;
+    private DetailedEnvironmentResponse environmentResponse;
+
+    @Mock
+    private EnvironmentNetworkResponse environmentNetworkResponse;
+
+    @Mock
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Mock
+    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
+
+    @Mock
+    private EnvironmentClientService environmentClientService;
 
     @Captor
     private ArgumentCaptor<Set<InstanceMetaData>> savedInstanceMetadatas;
@@ -147,7 +169,6 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
 
         when(stackService.getByIdWithLists(anyLong())).thenReturn(stack);
         when(cloudPlatformConnectors.get(any()).availabilityZoneConnector()).thenReturn(availabilityZoneConnector);
-        when(multiAzCalculatorService.determineRackId(any(), eq("3"))).thenReturn("/3");
         underTest.populate(1L);
 
         Set<InstanceMetaData> instancesExpectedToBeUpdated = new HashSet<>(stack.getNotDeletedInstanceMetaDataSet());
@@ -238,6 +259,82 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
         }
     }
 
+    // @formatter:off
+    // CHECKSTYLE:OFF
+    static Object[][] testAvailabilityZoneDistributionForAwsInstanceGroupData() {
+        return new Object[][]{
+                //instanceCountByGroup, groupLevelZones,        expectedInstanceCountByAz,  expectedInstanceCountBySubnet
+                {17,                   Set.of("eu-central-1a"),            Map.of("eu-central-1a", 17, "eu-central-1b", 0, "eu-central-1c", 0), Map.of("subnet1", 17, "subnet2", 0, "subnet3", 0)},
+                {17,                   Set.of("eu-central-1b", "eu-central-1c"),       Map.of("eu-central-1a", 0, "eu-central-1b", 8, "eu-central-1c", 9), Map.of("subnet1", 0, "subnet2", 8, "subnet3", 9)},
+                {19,                   Set.of("eu-central-1a", "eu-central-1b", "eu-central-1c"),  Map.of("eu-central-1a", 7, "eu-central-1b", 6, "eu-central-1c", 6), Map.of("subnet1", 7, "subnet2", 6, "subnet3", 6)},
+                {37,                   Set.of("eu-central-1a", "eu-central-1b", "eu-central-1c"),  Map.of("eu-central-1a", 13, "eu-central-1b", 12, "eu-central-1c", 12), Map.of("subnet1", 13, "subnet2", 12, "subnet3", 12)},
+                {41,                   Set.of("eu-central-1a", "eu-central-1b", "eu-central-1c"),  Map.of("eu-central-1a", 14, "eu-central-1b", 13, "eu-central-1c", 14), Map.of("subnet1", 14, "subnet2", 13, "subnet3", 14)},
+        };
+    }
+    // CHECKSTYLE:ON
+    // @formatter:on
+
+    @ParameterizedTest(name = "testPopulateShouldDistributeAwsNodesAcrossInstancesOfTheGroup settings " +
+            "when {0} environment level zones and {1} instances count and {2} group level zones should result in {3} subnet counts")
+    @MethodSource("testAvailabilityZoneDistributionForAwsInstanceGroupData")
+    void testPopulateShouldDistributeAwsNodesAcrossInstancesOfTheGroup(int instanceCountByGroup, Set<String> groupAvailabilityZones,
+            Map<String, Integer> expectedInstanceCountByAz, Map<String, Integer> expectedInstanceCountBySubnet) {
+        when(cloudPlatformConnectors.get(any()).availabilityZoneConnector()).thenReturn(availabilityZoneConnector);
+        Stack stack = TestUtil.stack(Status.REQUESTED, TestUtil.awsCredential());
+        stack.setMultiAz(Boolean.TRUE);
+        stack.getInstanceGroups()
+                .forEach(ig -> {
+                    ig.setInstanceMetaData(TestUtil.generateInstanceMetaDatas(instanceCountByGroup, ig.getId(), ig));
+                    ig.setStack(stack);
+                });
+        InstanceGroupNetwork instanceGroupNetwork = new InstanceGroupNetwork();
+        instanceGroupNetwork.setCloudPlatform(CloudPlatform.AWS.name());
+        instanceGroupNetwork.setAttributes(new Json("{\"subnetIds\":[\"subnet1\",\"subnet2\",\"subnet3\"]}"));
+        stack.getInstanceGroups().forEach(ig -> ig.setInstanceGroupNetwork(instanceGroupNetwork));
+        when(stackService.getByIdWithLists(anyLong())).thenReturn(stack);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environmentResponse);
+        when(environmentResponse.getNetwork()).thenReturn(environmentNetworkResponse);
+        when(environmentNetworkResponse.getSubnetMetas())
+                .thenReturn(Map.of("subnet1", new CloudSubnet.Builder().id("id1").name("name1").availabilityZone("eu-central-1a").cidr("cidr1").build(),
+                        "subnet2", new CloudSubnet.Builder().id("id2").name("name2").availabilityZone("eu-central-1b").cidr("cidr2").build(),
+                        "subnet3", new CloudSubnet.Builder().id("id3").name("name3").availabilityZone("eu-central-1c").cidr("cidr3").build()));
+        if (CollectionUtils.isNotEmpty(groupAvailabilityZones)) {
+            stack.getInstanceGroups()
+                    .forEach(ig -> {
+                        Set<AvailabilityZone> availabilityZones = groupAvailabilityZones.stream().map(az -> {
+                            AvailabilityZone availabilityZone = new AvailabilityZone();
+                            availabilityZone.setAvailabilityZone(az);
+                            availabilityZone.setInstanceGroup(ig);
+                            return availabilityZone;
+                        }).collect(Collectors.toSet());
+                        ig.setAvailabilityZones(availabilityZones);
+                    });
+        }
+
+        underTest.populate(1L);
+
+        verify(instanceMetaDataService).saveAll(stack.getNotDeletedInstanceMetaDataSet());
+        for (Map.Entry<String, Integer> expectedCountByAzEntry : expectedInstanceCountByAz.entrySet()) {
+            for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+                long actualInstanceCountByAz = instanceGroup.getNotDeletedInstanceMetaDataSet().stream()
+                        .filter(im -> expectedCountByAzEntry.getKey().equals(im.getAvailabilityZone()))
+                        .count();
+                assertEquals(Long.valueOf(expectedCountByAzEntry.getValue()), actualInstanceCountByAz);
+            }
+        }
+
+        for (Map.Entry<String, Integer> expectedCountBySubnetEntry : expectedInstanceCountBySubnet.entrySet()) {
+            for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+                long actualInstanceCountByAz = instanceGroup.getNotDeletedInstanceMetaDataSet().stream()
+                        .filter(im -> expectedCountBySubnetEntry.getKey().equals(im.getSubnetId()))
+                        .count();
+                assertEquals(Long.valueOf(expectedCountBySubnetEntry.getValue()), actualInstanceCountByAz);
+            }
+        }
+    }
+
     @Test
     void testPopulateForScalingWhenStackIsNotMultiAzEnabled() {
         Stack stack = TestUtil.stack();
@@ -288,7 +385,7 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
         boolean actual = underTest.populateForScaling(stack, Set.of(), Boolean.FALSE, NetworkScaleDetails.getEmpty());
 
         assertFalse(actual);
-        verify(instanceMetaDataService, times(1)).getNotDeletedInstanceMetadataByStackId(stack.getId());
+        verify(instanceMetaDataService, times(1)).getNotDeletedInstanceMetadataWithNetworkByStackId(stack.getId());
     }
 
     @Test
@@ -302,13 +399,13 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
         when(cloudPlatformConnectors.get(any()).availabilityZoneConnector()).thenReturn(availabilityZoneConnector);
         Set<String> groupNamesToScale = stack.getInstanceGroups().stream().map(InstanceGroup::getGroupName).collect(Collectors.toSet());
         Set<InstanceMetaData> notDeletedInstanceMetaDataSet = stack.getNotDeletedInstanceMetaDataSet();
-        when(instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(stack.getId())).thenReturn(notDeletedInstanceMetaDataSet);
+        when(instanceMetaDataService.getNotDeletedInstanceMetadataWithNetworkByStackId(stack.getId())).thenReturn(notDeletedInstanceMetaDataSet);
 
         boolean actual = underTest.populateForScaling(stack, groupNamesToScale, Boolean.FALSE, NetworkScaleDetails.getEmpty());
 
         assertTrue(actual);
         verify(instanceMetaDataService).saveAll(savedInstanceMetadatas.capture());
-        verify(instanceMetaDataService, times(1)).getNotDeletedInstanceMetadataByStackId(stack.getId());
+        verify(instanceMetaDataService, times(1)).getNotDeletedInstanceMetadataWithNetworkByStackId(stack.getId());
         verify(instanceMetaDataService, times(0)).getAvailabilityZoneFromDiskIfRepair(any(), anyBoolean(), anyString(), anyString());
         assertTrue(savedInstanceMetadatas.getValue().size() == 3);
         savedInstanceMetadatas.getValue()
@@ -329,12 +426,12 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
         when(cloudPlatformConnectors.get(any()).availabilityZoneConnector()).thenReturn(availabilityZoneConnector);
         Set<String> groupNamesToScale = stack.getInstanceGroups().stream().map(InstanceGroup::getGroupName).collect(Collectors.toSet());
         Set<InstanceMetaData> notDeletedInstanceMetaDataSet = stack.getNotDeletedInstanceMetaDataSet();
-        when(instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(stack.getId())).thenReturn(notDeletedInstanceMetaDataSet);
+        when(instanceMetaDataService.getNotDeletedInstanceMetadataWithNetworkByStackId(stack.getId())).thenReturn(notDeletedInstanceMetaDataSet);
 
         boolean actual = underTest.populateForScaling(stack, groupNamesToScale, Boolean.FALSE, new NetworkScaleDetails(List.of(), targetedAzs));
 
         assertTrue(actual);
-        verify(instanceMetaDataService, times(1)).getNotDeletedInstanceMetadataByStackId(stack.getId());
+        verify(instanceMetaDataService, times(1)).getNotDeletedInstanceMetadataWithNetworkByStackId(stack.getId());
         verify(instanceMetaDataService, times(1)).saveAll(any());
         verify(instanceMetaDataService, times(0)).getAvailabilityZoneFromDiskIfRepair(any(), anyBoolean(), anyString(), anyString());
         verify(instanceMetaDataService).saveAll(savedInstanceMetadatas.capture());
@@ -362,7 +459,7 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
         when(cloudPlatformConnectors.get(any()).availabilityZoneConnector()).thenReturn(availabilityZoneConnector);
         Set<String> groupNamesToScale = stack.getInstanceGroups().stream().map(InstanceGroup::getGroupName).collect(Collectors.toSet());
         Set<InstanceMetaData> notDeletedInstanceMetaDataSet = stack.getNotDeletedInstanceMetaDataSet();
-        when(instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(stack.getId())).thenReturn(notDeletedInstanceMetaDataSet);
+        when(instanceMetaDataService.getNotDeletedInstanceMetadataWithNetworkByStackId(stack.getId())).thenReturn(notDeletedInstanceMetaDataSet);
 
         int index = 0;
         List<String> availabilityZoneList = new ArrayList<>(groupAvailabilityZonesForGroup);
@@ -373,14 +470,13 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
             expectedAvailabilityZoneByFqdn.put(discoveryFQDN, expectedZoneForInstance);
             when(instanceMetaDataService.getAvailabilityZoneFromDiskIfRepair(stack, repair, im.getInstanceGroup().getGroupName(), discoveryFQDN))
                     .thenReturn(expectedZoneForInstance);
-            when(multiAzCalculatorService.determineRackId(im.getSubnetId(), expectedZoneForInstance)).thenReturn("/" + expectedZoneForInstance);
             index++;
         }
 
         boolean actual = underTest.populateForScaling(stack, groupNamesToScale, repair, NetworkScaleDetails.getEmpty());
 
         assertTrue(actual);
-        verify(instanceMetaDataService, times(1)).getNotDeletedInstanceMetadataByStackId(stack.getId());
+        verify(instanceMetaDataService, times(1)).getNotDeletedInstanceMetadataWithNetworkByStackId(stack.getId());
         verify(instanceMetaDataService, times(stack.getNotDeletedInstanceMetaDataSet().size()))
                 .getAvailabilityZoneFromDiskIfRepair(any(), anyBoolean(), anyString(), anyString());
         verify(instanceMetaDataService).saveAll(savedInstanceMetadatas.capture());
@@ -405,7 +501,7 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
         when(cloudPlatformConnectors.get(any()).availabilityZoneConnector()).thenReturn(availabilityZoneConnector);
         Set<String> groupNamesToScale = stack.getInstanceGroups().stream().map(InstanceGroup::getGroupName).collect(Collectors.toSet());
         Set<InstanceMetaData> notDeletedInstanceMetaDataSet = stack.getNotDeletedInstanceMetaDataSet();
-        when(instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(stack.getId())).thenReturn(notDeletedInstanceMetaDataSet);
+        when(instanceMetaDataService.getNotDeletedInstanceMetadataWithNetworkByStackId(stack.getId())).thenReturn(notDeletedInstanceMetaDataSet);
         notDeletedInstanceMetaDataSet.forEach(im -> {
             if (!"test-1-1".equals(im.getInstanceId()) && "is1".equals(im.getInstanceGroup().getGroupName())) {
                 im.setInstanceStatus(InstanceStatus.REQUESTED);

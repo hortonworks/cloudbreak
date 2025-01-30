@@ -598,33 +598,16 @@ class StackCommonServiceTest {
     }
 
     @Test
-    void testValidateNetworkScaleRequestWhenVariantIsNotSupportedForMultiAzButAzHasBeenPreferredInTheRequest() {
-        StackDto stack = mock(StackDto.class);
-        String variant = AwsConstants.AwsVariant.AWS_VARIANT.name();
-        when(stack.getPlatformVariant()).thenReturn(variant);
-        when(multiAzValidator.supportedVariant(variant)).thenReturn(FALSE);
-        NetworkScaleV4Request networkScaleV4Request = new NetworkScaleV4Request();
-        networkScaleV4Request.setPreferredSubnetIds(List.of(SUBNET_ID));
-
-        assertThrows(BadRequestException.class, () -> underTest.validateNetworkScaleRequest(stack, networkScaleV4Request));
-
-        verify(multiAzValidator, times(1)).supportedVariant(variant);
-        verify(multiAzValidator, times(0)).collectSubnetIds(any());
-    }
-
-    @Test
     void testValidateNetworkScaleRequestWhenThereIsPreferredAzAndStackProvisionedToASingleSubnet() {
         StackDto stack = mock(StackDto.class);
         String variant = AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.name();
         when(stack.getPlatformVariant()).thenReturn(variant);
-        when(multiAzValidator.supportedVariant(variant)).thenReturn(Boolean.TRUE);
         when(multiAzValidator.collectSubnetIds(any())).thenReturn(Set.of(SUBNET_ID));
         NetworkScaleV4Request networkScaleV4Request = new NetworkScaleV4Request();
         networkScaleV4Request.setPreferredSubnetIds(List.of(SUBNET_ID));
 
         assertThrows(BadRequestException.class, () -> underTest.validateNetworkScaleRequest(stack, networkScaleV4Request));
 
-        verify(multiAzValidator, times(1)).supportedVariant(variant);
         verify(multiAzValidator, times(1)).collectSubnetIds(any());
     }
 
@@ -637,7 +620,6 @@ class StackCommonServiceTest {
         String variant = AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.name();
         when(stack.getPlatformVariant()).thenReturn(variant);
         when(stackDtoService.getByNameOrCrn(STACK_NAME, ACCOUNT_ID)).thenReturn(stack);
-        when(multiAzValidator.supportedVariant(variant)).thenReturn(Boolean.TRUE);
         when(multiAzValidator.collectSubnetIds(any())).thenReturn(Set.of(SUBNET_ID, SUBNET_ID2));
         NetworkScaleV4Request networkScaleV4Request = new NetworkScaleV4Request();
         networkScaleV4Request.setPreferredSubnetIds(List.of(SUBNET_ID));

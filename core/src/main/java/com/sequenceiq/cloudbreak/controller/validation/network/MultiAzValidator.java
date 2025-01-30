@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.controller.validation.network;
 
-import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT;
-import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants.AwsVariant.AWS_NATIVE_VARIANT;
+import static com.sequenceiq.cloudbreak.service.multiaz.InstanceMetadataAvailabilityZoneCalculator.ZONAL_SUBNET_CLOUD_PLATFORMS;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import jakarta.annotation.PostConstruct;
@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.cloud.AvailabilityZoneConnector;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
@@ -31,10 +32,7 @@ public class MultiAzValidator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MultiAzValidator.class);
 
-    @Value("${cb.multiaz.supported.variants:AWS_NATIVE,AWS_NATIVE_GOV}")
-    private Set<String> supportedMultiAzVariants;
-
-    @Value("${cb.multiaz.supported.instancemetadata.platforms:AWS,YARN}")
+    @Value("${cb.multiaz.supported.instancemetadata.platforms:YARN}")
     private Set<String> supportedInstanceMetadataPlatforms;
 
     @Inject
@@ -42,12 +40,8 @@ public class MultiAzValidator {
 
     @PostConstruct
     public void initSupportedVariants() {
-        if (supportedMultiAzVariants.isEmpty()) {
-            supportedMultiAzVariants = Set.of(AWS_NATIVE_VARIANT.variant().value(), AWS_NATIVE_GOV_VARIANT.variant().value());
-        }
         if (supportedInstanceMetadataPlatforms.isEmpty()) {
             supportedInstanceMetadataPlatforms = Set.of(
-                    CloudPlatform.AWS.name(),
                     CloudPlatform.YARN.name());
         }
     }
@@ -55,17 +49,24 @@ public class MultiAzValidator {
     public void validateMultiAzForStack(Stack stack, ValidationResult.ValidationResultBuilder validationBuilder) {
         Set<String> allSubnetIds = collectSubnetIds(new ArrayList<>(stack.getInstanceGroups()));
         String platformVariant = stack.getPlatformVariant();
-        if (allSubnetIds.size() > 1 && !supportedVariant(platformVariant)) {
-            String variantIsNotSupportedMsg = String.format("Multiple Availability Zone feature is not supported for %s, please use one of %s instead",
-                    platformVariant, supportedMultiAzVariants);
+        if (allSubnetIds.size() > 1 && !supportedVariant(stack)) {
+            String variantIsNotSupportedMsg = String.format("Multiple subnets are not supported for this %s platform and %s variant", stack.getCloudPlatform(),
+                    stack.getPlatformVariant());
             LOGGER.info(variantIsNotSupportedMsg);
             validationBuilder.error(variantIsNotSupportedMsg);
+        } else if (allSubnetIds.size() > 1 && supportedVariant(stack)) {
+            LOGGER.info("Multiple subnets are supported for this {} platform and configured in the request. Setting the multi-AZ flag to true",
+                    stack.getCloudPlatform());
+            stack.setMultiAz(Boolean.TRUE);
         }
         providerBasedMultiAzSetupValidator.validate(validationBuilder, stack);
     }
 
-    public boolean supportedVariant(String variant) {
-        return !Strings.isNullOrEmpty(variant) && supportedMultiAzVariants.contains(variant);
+    public boolean supportedVariant(Stack stack) {
+        Optional<AvailabilityZoneConnector> optAvailabilityZoneConnector = Optional.ofNullable(providerBasedMultiAzSetupValidator
+                .getAvailabilityZoneConnector(stack));
+        return !Strings.isNullOrEmpty(stack.getPlatformVariant()) && optAvailabilityZoneConnector.isPresent()
+                && ZONAL_SUBNET_CLOUD_PLATFORMS.contains(stack.getCloudPlatform());
     }
 
     public boolean supportedForInstanceMetadataGeneration(InstanceGroupView instanceGroup) {
