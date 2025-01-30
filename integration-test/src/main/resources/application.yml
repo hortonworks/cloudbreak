@@ -169,7 +169,7 @@ integrationtest:
       accessKeyId:
       secretKey:
     instance:
-      type: m5.4xlarge
+      type: r5.2xlarge
       rootVolumeSize: 200
       volumeSize: 100
       volumeCount: 1
@@ -218,7 +218,7 @@ integrationtest:
       supported: true
       datalake:
         group: master
-        instanceType: Standard_D32s_v3
+        instanceType: Standard_DS14_v2
       datahub:
         group: master
         instanceType: Standard_D8s_v3
@@ -241,7 +241,7 @@ integrationtest:
       subscriptionId:
       tenantId:
     instance:
-      type: Standard_D32s_v3
+      type: Standard_DS13_v2
       rootVolumeSize: 200
       volumeSize: 100
       volumeCount: 1
@@ -330,7 +330,7 @@ integrationtest:
         serviceAccountPrivateKey:
         projectId:
     instance:
-      type: n1-standard-16
+      type: e2-highmem-8
       rootVolumeSize: 200
       volumeSize: 100
       volumeCount: 1
