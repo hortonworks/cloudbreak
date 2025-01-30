@@ -53,13 +53,6 @@
           "tez-GATEWAY-BASE",
           "yarn-NODEMANAGER-BASE"
         ]
-      },
-      {
-        "cardinality": 1,
-        "refName": "idbroker",
-        "roleConfigGroupsRefNames": [
-          "knox-IDBROKER-BASE"
-        ]
       }
     ],
     "services": [
@@ -528,11 +521,6 @@
             "base": true,
             "refName": "knox-KNOX_GATEWAY-BASE",
             "roleType": "KNOX_GATEWAY"
-          },
-          {
-            "base": true,
-            "refName": "knox-IDBROKER-BASE",
-            "roleType": "IDBROKER"
           }
         ]
       },

@@ -12,6 +12,7 @@ import static com.sequenceiq.cloudbreak.common.request.CreatorClientConstants.US
 import static com.sequenceiq.cloudbreak.common.request.HeaderValueProvider.getHeaderOrItsFallbackValueOrDefault;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+import static com.sequenceiq.sdx.api.model.SdxClusterShape.ON_PREMISE_BASE;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.ArrayList;
@@ -524,7 +525,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         } else if (!CloudPlatform.YARN.equalsIgnoreCase(cloudPlatform.name()) &&
                 !GCP.equalsIgnoreCase(cloudPlatform.name()) &&
                 !MOCK.equalsIgnoreCase(cloudPlatform.name()) &&
-                internalStackV4Request == null) {
+                internalStackV4Request == null &&
+                !sdxClusterRequest.getClusterShape().equals(ON_PREMISE_BASE)) {
             throw new BadRequestException("Cloud storage parameter is required.");
         }
 
