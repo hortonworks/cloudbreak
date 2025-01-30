@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.Sta
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
+import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.FileSystemType;
@@ -439,6 +440,11 @@ public class CloudProviderProxy implements CloudProvider {
     @Override
     public String getVariant() {
         return delegate.getVariant();
+    }
+
+    @Override
+    public String getVariant(CdpResourceType cdpResourceType) {
+        return delegate.getVariant(cdpResourceType);
     }
 
     @Override

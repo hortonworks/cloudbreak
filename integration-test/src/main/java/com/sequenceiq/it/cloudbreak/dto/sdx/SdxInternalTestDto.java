@@ -736,8 +736,4 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         getRequest().setSecurity(securityRequest);
         return this;
     }
-
-    public String getVariant() {
-        return getResponse().getStackV4Response().getVariant();
-    }
 }

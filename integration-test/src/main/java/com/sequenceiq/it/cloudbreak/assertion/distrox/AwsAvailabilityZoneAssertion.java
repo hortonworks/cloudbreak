@@ -8,6 +8,7 @@ import java.util.Set;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
@@ -42,8 +43,8 @@ public class AwsAvailabilityZoneAssertion implements Assertion<DistroXTestDto, C
     }
 
     private void checkAwsNativeVariantIfMultiAzEnabled(TestContext testContext, DistroXTestDto testDto) {
-        if ("AWS_NATIVE".equals(testContext.getCloudProvider().getVariant()) &&
-                !testContext.getCloudProvider().getVariant().equals(testDto.getResponse().getVariant())) {
+        if ("AWS_NATIVE".equals(testContext.getCloudProvider().getVariant(CdpResourceType.DATAHUB)) &&
+                !testContext.getCloudProvider().getVariant(CdpResourceType.DATAHUB).equals(testDto.getResponse().getVariant())) {
             throw new TestFailException("The Multi-AZ enabled but the stack variant is not AWS_NATIVE: " + testDto.getResponse().getVariant());
         }
     }

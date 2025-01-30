@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
+import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -206,7 +207,7 @@ public class DatalakeCcmUpgradeAndRotationTest extends AbstractE2ETest implement
     private Assertion<EnvironmentTestDto, EnvironmentClient> validateCcmUpgradeOnEnvironment() {
         return (testContext1, environmentTestDto, environmentClient) -> {
             FreeIpaTestDto freeIpaTestDto = testContext1.get(FreeIpaTestDto.class);
-            if (!AWS_NATIVE.equals(freeIpaTestDto.getVariant())) {
+            if (!AWS_NATIVE.equals(testContext1.getCloudProvider().getVariant(CdpResourceType.FREEIPA))) {
                 CloudFunctionality cloudFunctionality = testContext1.getCloudProvider().getCloudFunctionality();
                 Map<String, String> launchTemplateUserData = cloudFunctionality.getLaunchTemplateUserData(environmentTestDto.getName());
                 boolean ccmV2Enabled = launchTemplateUserData.entrySet().stream().allMatch(ud -> {

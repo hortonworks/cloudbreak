@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
+import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
@@ -129,8 +130,8 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
     }
 
     private FreeIpaTestDto withVariant() {
-        if (StringUtils.isNotBlank(getCloudProvider().getVariant())) {
-            getRequest().setVariant(getCloudProvider().getVariant());
+        if (StringUtils.isNotBlank(getCloudProvider().getVariant(CdpResourceType.FREEIPA))) {
+            getRequest().setVariant(getCloudProvider().getVariant(CdpResourceType.FREEIPA));
         }
         return this;
     }
@@ -629,10 +630,6 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
     @Override
     public CloudPlatform getCloudPlatform() {
         return (cloudPlatformFromStack != null) ? cloudPlatformFromStack : super.getCloudPlatform();
-    }
-
-    public String getVariant() {
-        return getResponse().getVariant();
     }
 
     public FreeIpaTestDto withSeLinuxSecurity(String seLinux) {
