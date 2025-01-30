@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.AvailabilityZoneConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
@@ -117,8 +118,14 @@ public class ProviderBasedMultiAzSetupValidator {
         DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
         Credential credential = credentialConverter.convert(environment.getCredential());
         ExtendedCloudCredential cloudCredential = extendedCloudCredentialConverter.convert(credential);
-        Set<String> environmentZones = environment.getNetwork()
-                .getAvailabilityZones(CloudPlatform.valueOf(stack.getCloudPlatform()));
+        Set<String> environmentZones;
+        if (CloudPlatform.AWS.name().equals(stack.getCloudPlatform())) {
+            environmentZones = environment.getNetwork().getSubnetMetas().values().stream()
+                    .map(CloudSubnet::getAvailabilityZone)
+                    .collect(Collectors.toSet());
+        } else {
+            environmentZones = environment.getNetwork().getAvailabilityZones(CloudPlatform.valueOf(stack.getCloudPlatform()));
+        }
         if (CollectionUtils.isEmpty(environmentZones) && stack.isMultiAz()) {
             String msg = "No availability zone configured on the environment, multi/targeted availability zone could not be requested.";
             LOGGER.info(msg);

@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -55,9 +54,6 @@ class DataLakeAwareInstanceMetadataAvailabilityZoneCalculatorTest {
 
     @Mock
     private AvailabilityZoneConnector availabilityZoneConnector;
-
-    @Mock
-    private MultiAzCalculatorService multiAzCalculatorService;
 
     @Spy
     @InjectMocks
@@ -192,9 +188,6 @@ class DataLakeAwareInstanceMetadataAvailabilityZoneCalculatorTest {
         when(stackService.getByIdWithLists(anyLong())).thenReturn(stack);
         when(cloudPlatformConnectors.get(any()).availabilityZoneConnector()).thenReturn(availabilityZoneConnector);
         when(blueprintUtils.isEnterpriseDatalake(stack)).thenReturn(Boolean.TRUE);
-        when(multiAzCalculatorService.determineRackId(any(), eq("1"))).thenReturn("/1");
-        when(multiAzCalculatorService.determineRackId(any(), eq("2"))).thenReturn("/2");
-        when(multiAzCalculatorService.determineRackId(any(), eq("3"))).thenReturn("/3");
 
         underTest.populate(1L);
 

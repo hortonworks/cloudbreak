@@ -3,11 +3,6 @@ package com.sequenceiq.cloudbreak.service.stack;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -43,6 +38,7 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
@@ -58,10 +54,10 @@ import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
-import com.sequenceiq.cloudbreak.service.multiaz.MultiAzCalculatorService;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -75,7 +71,7 @@ class InstanceMetaDataServiceTest {
 
     private static final String AVAILABILITY_ZONE = "AVAILABILITY_ZONE";
 
-    private static final String RACK_ID = "/RACK_ID";
+    private static final String RACK_ID = "/default-rack";
 
     private static final String HOSTNAME_1 = "host-1.foo.org";
 
@@ -88,9 +84,6 @@ class InstanceMetaDataServiceTest {
 
     @Mock
     private EnvironmentClientService environmentClientService;
-
-    @Mock
-    private MultiAzCalculatorService multiAzCalculatorService;
 
     @Mock
     private ResourceRetriever resourceRetriever;
@@ -113,18 +106,22 @@ class InstanceMetaDataServiceTest {
     static Object[][] saveInstanceAndGetUpdatedStackTestWhenSubnetAndAvailabilityZoneAndRackIdAndRoundRobinDataProvider() {
         return new Object[][]{
                 // testCaseName save hostnames subnetId availabilityZone rackId
-                {"save=false, hostnames=[], subnetId=SUBNET_ID, availabilityZone=null, rackId=null,", false, List.of(), SUBNET_ID, null, null},
-                {"save=false, hostnames=[], subnetId=SUBNET_ID, availabilityZone=null, rackId=RACK_ID,", false, List.of(), SUBNET_ID, null, RACK_ID},
-                {"save=false, hostnames=[], subnetId=SUBNET_ID, availabilityZone=AVAILABILITY_ZONE, rackId=RACK_ID,", false, List.of(), SUBNET_ID,
-                        AVAILABILITY_ZONE, RACK_ID},
-                {"save=true, hostnames=[], subnetId=SUBNET_ID, availabilityZone=AVAILABILITY_ZONE, rackId=RACK_ID,", true, List.of(), SUBNET_ID,
-                        AVAILABILITY_ZONE, RACK_ID},
-                {"save=false, hostnames=[HOSTNAME_1], subnetId=SUBNET_ID, availabilityZone=AVAILABILITY_ZONE, rackId=RACK_ID,", false, List.of(HOSTNAME_1),
-                        SUBNET_ID, AVAILABILITY_ZONE, RACK_ID},
-                {"save=false, hostnames=[HOSTNAME_1, HOSTNAME_2], subnetId=SUBNET_ID, availabilityZone=AVAILABILITY_ZONE, rackId=RACK_ID,", false,
-                        List.of(HOSTNAME_1, HOSTNAME_2), SUBNET_ID, AVAILABILITY_ZONE, RACK_ID},
-                {"save=false, hostnames=[HOSTNAME_1, HOSTNAME_2, HOSTNAME_3], subnetId=SUBNET_ID, availabilityZone=AVAILABILITY_ZONE, rackId=RACK_ID,", false,
-                        List.of(HOSTNAME_1, HOSTNAME_2, HOSTNAME_3), SUBNET_ID, AVAILABILITY_ZONE, RACK_ID},
+                {"save=false, hostnames=[], subnetId=null, availabilityZone=null, rackId=RACK_ID,", false, List.of(), null, null, RACK_ID},
+                {"save=false, hostnames=[HOSTNAME_1], subnetId=null, availabilityZone=null, rackId=RACK_ID,", false, List.of(HOSTNAME_1),
+                        null, null, RACK_ID},
+                {"save=false, hostnames=[HOSTNAME_1, HOSTNAME_2], subnetId=null, availabilityZone=null, rackId=RACK_ID,", false,
+                        List.of(HOSTNAME_1, HOSTNAME_2), null, null, RACK_ID},
+                {"save=false, hostnames=[HOSTNAME_1, HOSTNAME_2, HOSTNAME_3], subnetId=null, availabilityZone=null, rackId=RACK_ID,", false,
+                        List.of(HOSTNAME_1, HOSTNAME_2, HOSTNAME_3), null, null, RACK_ID},
+        };
+    }
+
+    static Object[][] saveInstanceAndGetUpdatedStackTestWhenStackSubnetIdAndStackAzExist() {
+        return new Object[][]{
+                // testCaseName save stackSubnetId stackAz rackId
+                {"save=true, stackSubnetId=subnet1, stackAz=az1, rackId=/az1,", true, "subnet1", "az1", "/az1"},
+                {"save=true, stackSubnetId=subnet1, stackAz=null, rackId=/subnet1,", true, "subnet1", null, "/subnet1"},
+                {"save=true, stackSubnetId=null, stackAz=null, rackId=RACK_ID,", true, null, null, RACK_ID},
         };
     }
 
@@ -137,16 +134,6 @@ class InstanceMetaDataServiceTest {
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
-        Map<String, String> subnetAzPairs = Map.of();
-        when(multiAzCalculatorService.prepareSubnetAzMap(environment)).thenReturn(subnetAzPairs);
-        doAnswer(invocation -> {
-            InstanceMetaData instanceMetaData = invocation.getArgument(2, InstanceMetaData.class);
-            instanceMetaData.setSubnetId(subnetId);
-            instanceMetaData.setAvailabilityZone(availabilityZone);
-            return null;
-        }).when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), any(InstanceGroupDto.class), any(InstanceMetaData.class), any());
-        when(multiAzCalculatorService.determineRackId(subnetId, availabilityZone)).thenReturn(rackId);
-        when(multiAzCalculatorService.isSubnetAzNeeded(eq(false), any())).thenReturn(true);
 
         StackDtoDelegate result = underTest.saveInstanceAndGetUpdatedStack(stack, Map.of(groupName(0), 1), Map.of(groupName(0),
                 new LinkedHashSet<>(hostnames)), save, false, NetworkScaleDetails.getEmpty());
@@ -168,15 +155,6 @@ class InstanceMetaDataServiceTest {
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
-        Map<String, String> subnetAzPairs = Map.of();
-        when(multiAzCalculatorService.prepareSubnetAzMap(environment)).thenReturn(subnetAzPairs);
-        doAnswer(invocation -> {
-            InstanceMetaData instanceMetaData = invocation.getArgument(2, InstanceMetaData.class);
-            instanceMetaData.setSubnetId(subnetId);
-            return null;
-        }).when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), any(InstanceGroupDto.class), any(InstanceMetaData.class), any());
-        when(multiAzCalculatorService.determineRackId(subnetId, null)).thenReturn(rackId);
-        when(multiAzCalculatorService.isSubnetAzNeeded(eq(false), any())).thenReturn(false);
 
         StackDtoDelegate result = underTest.saveInstanceAndGetUpdatedStack(stack, Map.of(groupName(0), 1), Map.of(groupName(0),
                 new LinkedHashSet<>(hostnames)), save, false, NetworkScaleDetails.getEmpty());
@@ -257,15 +235,6 @@ class InstanceMetaDataServiceTest {
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
-        Map<String, String> subnetAzPairs = Map.of();
-        when(multiAzCalculatorService.prepareSubnetAzMap(environment)).thenReturn(subnetAzPairs);
-        doAnswer(invocation -> {
-            InstanceMetaData instanceMetaData = invocation.getArgument(2, InstanceMetaData.class);
-            instanceMetaData.setSubnetId(subnetId);
-            instanceMetaData.setAvailabilityZone(availabilityZone);
-            return null;
-        }).when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), any(InstanceGroupDto.class), any(InstanceMetaData.class), any());
-        when(multiAzCalculatorService.determineRackId(subnetId, availabilityZone)).thenReturn(rackId);
 
         StackDtoDelegate result = underTest.saveInstanceAndGetUpdatedStack(stack, Map.of(groupName(INSTANCE_GROUP_COUNT - 1), INSTANCE_GROUP_COUNT),
                 Map.of(groupName(INSTANCE_GROUP_COUNT - 1), new LinkedHashSet<>(hostnames)), save, false, NetworkScaleDetails.getEmpty());
@@ -298,8 +267,6 @@ class InstanceMetaDataServiceTest {
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
-        Map<String, String> subnetAzPairs = Map.of();
-        when(multiAzCalculatorService.prepareSubnetAzMap(environment)).thenReturn(subnetAzPairs);
 
         StackDtoDelegate result = underTest.saveInstanceAndGetUpdatedStack(stack, Map.of(groupName(3), 1), Map.of(groupName(3), new LinkedHashSet<>(hostnames)),
                 save, false, NetworkScaleDetails.getEmpty());
@@ -322,17 +289,8 @@ class InstanceMetaDataServiceTest {
         network.setAttributes(Json.silent(subnetId == null ? Map.of() : Map.of("subnetId", subnetId)));
         stack.setNetwork(network);
         when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
-        Map<String, String> subnetAzPairs = subnetId == null || availabilityZone == null ? Map.of() : Map.of(subnetId, availabilityZone);
-        if (!hostnames.isEmpty()) {
-            when(multiAzCalculatorService.prepareSubnetAzMap(environment, null)).thenReturn(subnetAzPairs);
-        }
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        when(multiAzCalculatorService.prepareSubnetAzMap(environment)).thenReturn(subnetAzPairs);
-        doNothing().when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), any(InstanceGroupDto.class), any(InstanceMetaData.class), any());
-        when(multiAzCalculatorService.determineRackId(subnetId, availabilityZone)).thenReturn(rackId);
-
-        when(multiAzCalculatorService.isSubnetAzNeeded(eq(false), any())).thenReturn(true);
 
         StackDtoDelegate result = underTest.saveInstanceAndGetUpdatedStack(stack, Map.of(groupName(INSTANCE_GROUP_COUNT - 1), INSTANCE_GROUP_COUNT),
                 Map.of(groupName(INSTANCE_GROUP_COUNT - 1), new LinkedHashSet<>(hostnames)), save, false, NetworkScaleDetails.getEmpty());
@@ -345,13 +303,44 @@ class InstanceMetaDataServiceTest {
         verifyRepositorySave(resultInstanceGroups, save);
     }
 
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("saveInstanceAndGetUpdatedStackTestWhenStackSubnetIdAndStackAzExist")
+    void saveInstanceAndGetUpdatedStackTestWhenStackSubnetIdAndStackAzExist(String testCaseName, boolean save, String stackSubnetId, String stackAz,
+            String rackId) {
+        Stack stack = stack(INSTANCE_GROUP_COUNT);
+        when(repository.findLastPrivateIdForStack(any(), any())).thenReturn(new PageImpl<>(List.of(0L)));
+        Network network = new Network();
+        if (stackSubnetId != null) {
+            network.setAttributes(Json.silent(Map.of("subnetId", stackSubnetId)));
+        }
+        stack.setNetwork(network);
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        if (stackSubnetId != null) {
+            environmentResponse.setNetwork(EnvironmentNetworkResponse.builder()
+                    .withSubnetMetas(Map.of(stackSubnetId, new CloudSubnet.Builder().availabilityZone(stackAz).build()))
+                    .build());
+        }
+        when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environmentResponse);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+
+        StackDtoDelegate result = underTest.saveInstanceAndGetUpdatedStack(stack, Map.of(groupName(INSTANCE_GROUP_COUNT - 1), INSTANCE_GROUP_COUNT),
+                Map.of(groupName(INSTANCE_GROUP_COUNT - 1), Set.of()), true, false, NetworkScaleDetails.getEmpty());
+
+        assertThat(result).isSameAs(stack);
+        List<InstanceGroupDto> resultInstanceGroups = result.getInstanceGroupDtos();
+        assertThat(resultInstanceGroups).isNotNull();
+        assertThat(resultInstanceGroups).hasSize(INSTANCE_GROUP_COUNT);
+        verifyInstances(resultInstanceGroups, List.of(), stackSubnetId, stackAz, rackId, null, INSTANCE_GROUP_COUNT);
+        verifyRepositorySave(resultInstanceGroups, save);
+    }
+
     @Test
     void saveInstanceAndGetUpdatedStackTestWhenNoCloudInstances() {
         Stack stack = stack(1);
 
         when(repository.findLastPrivateIdForStack(any(), any())).thenReturn(new PageImpl<>(List.of(0L)));
         when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
-        when(multiAzCalculatorService.prepareSubnetAzMap(environment)).thenReturn(Map.of());
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         StackDtoDelegate result = underTest.saveInstanceAndGetUpdatedStack(stack, Map.of(groupName(INSTANCE_GROUP_COUNT - 1), 0), Map.of(groupName(0),
@@ -364,9 +353,6 @@ class InstanceMetaDataServiceTest {
         assertThat(resultInstanceGroups).hasSize(1);
         verifyInstances(resultInstanceGroups, List.of(), null, null, null, null, 0);
         verifyRepositorySave(resultInstanceGroups, false);
-
-        verify(multiAzCalculatorService, never()).calculateByRoundRobin(anyMap(), any(InstanceGroupDto.class), any(InstanceMetaData.class), any());
-        verify(multiAzCalculatorService, never()).determineRackId(anyString(), anyString());
     }
 
     static Stream<Arguments> supportedProvidersWithVolumeResource() {

@@ -101,6 +101,15 @@ public interface InstanceMetaDataRepository extends JpaRepository<InstanceMetaDa
             "AND i.instanceStatus not in :statuses ")
     List<InstanceMetadataViewDelegate> findAllViewsStatusNotInForStack(@Param("stackId") Long stackId, @Param("statuses") Collection<InstanceStatus> statuses);
 
+    @Query("SELECT i, ig, ign, s " +
+            "FROM InstanceMetaData i " +
+            "LEFT JOIN i.instanceGroup ig " +
+            "LEFT JOIN ig.instanceGroupNetwork ign " +
+            "LEFT JOIN ig.stack s " +
+            "WHERE s.id= :stackId " +
+            "AND i.instanceStatus not in :statuses ")
+    List<InstanceMetaData> findAllStatusNotInForStackWithNetwork(@Param("stackId") Long stackId, @Param("statuses") Collection<InstanceStatus> statuses);
+
     @Query("SELECT i " +
             "FROM InstanceMetaData i " +
             "LEFT JOIN i.instanceGroup ig " +

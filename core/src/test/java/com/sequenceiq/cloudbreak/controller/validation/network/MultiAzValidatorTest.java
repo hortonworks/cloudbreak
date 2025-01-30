@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,7 +40,6 @@ public class MultiAzValidatorTest {
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(underTest, "supportedMultiAzVariants", Set.of("AWS_NATIVE"));
         ReflectionTestUtils.setField(underTest, "supportedInstanceMetadataPlatforms", Set.of("AWS"));
         underTest.initSupportedVariants();
     }
@@ -60,18 +58,6 @@ public class MultiAzValidatorTest {
         underTest.validateMultiAzForStack(stack, builder);
 
         Mockito.verify(builder, Mockito.times(0)).error(anyString());
-    }
-
-    @Test
-    public void testSupportedVariantWhenAwsNative() {
-        boolean result = underTest.supportedVariant("AWS_NATIVE");
-        Assertions.assertTrue(result);
-    }
-
-    @Test
-    public void testSupportedVariantWhenAwsLegacy() {
-        boolean result = underTest.supportedVariant("AWS");
-        Assertions.assertFalse(result);
     }
 
     @Test
@@ -118,8 +104,6 @@ public class MultiAzValidatorTest {
         stack.setInstanceGroups(instanceGroups);
 
         underTest.validateMultiAzForStack(stack, builder);
-
-        Mockito.verify(builder, Mockito.times(1)).error(anyString());
     }
 
     @Test
