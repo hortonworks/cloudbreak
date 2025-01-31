@@ -324,6 +324,33 @@ subprojects {
 
   task('buildInfo', type: BuildInfoTask, dependsOn: processResources)
 
+  project.tasks.register("cleanOut") {
+    group = "custom"
+    description = "Cleans the 'out' directory in each submodule"
+    doLast {
+      delete("out")
+    }
+  }
+
+  project.tasks.register("rebuildOutResources") {
+    group = "custom"
+    description = "Cleans and rebuilds 'out/production/resources' directory in each submodule"
+
+    doLast {
+      var outResourcesDir = file("out/production/resources")
+      delete(outResourcesDir)
+
+      var srcResourcesDir = file("src/main/resources")
+      if (srcResourcesDir.exists()) {
+        outResourcesDir.mkdirs()
+        copy {
+          from(srcResourcesDir)
+          into(outResourcesDir)
+        }
+      }
+    }
+  }
+
   afterEvaluate { Project project ->
     if (project.name in [
             'core',
