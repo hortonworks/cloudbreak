@@ -1,11 +1,14 @@
 package com.sequenceiq.cloudbreak.cloud.aws.metadata;
 
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.doAs;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 
@@ -28,38 +32,62 @@ class AwsNativeLoadBalancerIpCollectorTest {
 
     private static final String LB_NAME = "lb-name";
 
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:cloudera:user:__internal__actor__";
+
+    private static final String FREEIPA_CRN = "crn:cdp:freeipa:us-west-1:Test:freeipa:b3a8d7d4-2bb6-4ec0-8889-1bd525c5ab74";
+
+    private static final String DATALAKE_CRN = "crn:cdp:datalake:us-west-1:Test:datalake:40231209-6037-4d4b-95b9-f3c30698ae98";
+
     @InjectMocks
     private AwsNativeLoadBalancerIpCollector underTest;
 
     @Mock
     private AmazonEc2Client ec2Client;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     @Test
     void testGetLoadBalancerIpShouldReturnLoadBalancerIpAddresses() {
+        when(entitlementService.isFreeIpaLoadBalancerEnabled(any())).thenReturn(true);
         when(ec2Client.describeNetworkInterfaces(any())).thenReturn(DescribeNetworkInterfacesResponse.builder()
                 .networkInterfaces(NetworkInterface.builder().privateIpAddress(LB_PRIVATE_IP_1).build(),
                         NetworkInterface.builder().privateIpAddress(LB_PRIVATE_IP_2).build())
                 .build());
 
-        String actual = underTest.getLoadBalancerIp(ec2Client, LB_NAME);
+        Optional<String> actual = doAs(USER_CRN, () -> underTest.getLoadBalancerIp(ec2Client, LB_NAME, FREEIPA_CRN));
 
-        assertEquals(String.join(",", List.of(LB_PRIVATE_IP_1, LB_PRIVATE_IP_2)), actual);
+        assertTrue(actual.isPresent());
+        assertEquals(String.join(",", List.of(LB_PRIVATE_IP_1, LB_PRIVATE_IP_2)), actual.get());
+    }
+
+    @Test
+    void testGetLoadBalancerIpShouldReturnOptionalEmptyWhenTheStackIsDataLake() {
+        assertTrue(doAs(USER_CRN, () -> underTest.getLoadBalancerIp(ec2Client, LB_NAME, DATALAKE_CRN)).isEmpty());
+    }
+
+    @Test
+    void testGetLoadBalancerIpShouldReturnOptionalEmptyWhenTheStackIsFreeipaButTheLoadBalancerEntitlementIsDisabled() {
+        when(entitlementService.isFreeIpaLoadBalancerEnabled(any())).thenReturn(false);
+        assertTrue(doAs(USER_CRN, () -> underTest.getLoadBalancerIp(ec2Client, LB_NAME, FREEIPA_CRN)).isEmpty());
     }
 
     @Test
     void testGetLoadBalancerIpShouldThrowExceptionWhenTheNetworkInterfaceResponseIsNull() {
+        when(entitlementService.isFreeIpaLoadBalancerEnabled(any())).thenReturn(true);
         when(ec2Client.describeNetworkInterfaces(any())).thenReturn(DescribeNetworkInterfacesResponse.builder().build());
 
-        assertThrows(NotFoundException.class, () -> underTest.getLoadBalancerIp(ec2Client, LB_NAME));
+        assertThrows(NotFoundException.class, () -> doAs(USER_CRN, () -> underTest.getLoadBalancerIp(ec2Client, LB_NAME, FREEIPA_CRN)));
     }
 
     @Test
     void testGetLoadBalancerIpShouldThrowExceptionWhenTheNetworkInterfaceResponsePrivateIpIsNull() {
+        when(entitlementService.isFreeIpaLoadBalancerEnabled(any())).thenReturn(true);
         when(ec2Client.describeNetworkInterfaces(any())).thenReturn(DescribeNetworkInterfacesResponse.builder()
                 .networkInterfaces(NetworkInterface.builder().build(), NetworkInterface.builder().build())
                 .build());
 
-        assertThrows(NotFoundException.class, () -> underTest.getLoadBalancerIp(ec2Client, LB_NAME));
+        assertThrows(NotFoundException.class, () -> doAs(USER_CRN, () -> underTest.getLoadBalancerIp(ec2Client, LB_NAME, FREEIPA_CRN)));
     }
 
 }

@@ -121,7 +121,8 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
         LOGGER.info("Collect AWS load balancer metadata, in region '{}' with ARNs: '{}'", region, String.join(", ", loadBalancerArns));
 
         for (CloudResource loadBalancer : loadBalancers) {
-            Optional<CloudLoadBalancerMetadata> collectedLoadBalancer = collectLoadBalancerMetadata(loadBalancingClient, ec2Client, loadBalancer, resources);
+            Optional<CloudLoadBalancerMetadata> collectedLoadBalancer = collectLoadBalancerMetadata(loadBalancingClient, ec2Client, loadBalancer, resources,
+                    ac.getCloudContext().getCrn());
             collectedLoadBalancer.ifPresent(response::add);
         }
         return response;
@@ -242,10 +243,10 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
     }
 
     private Optional<CloudLoadBalancerMetadata> collectLoadBalancerMetadata(AmazonElasticLoadBalancingClient loadBalancingClient,  AmazonEc2Client ec2Client,
-            CloudResource loadBalancer, List<CloudResource> resources) {
+            CloudResource loadBalancer, List<CloudResource> resources, String resourceCrn) {
         Optional<CloudLoadBalancerMetadata> response = Optional.empty();
         try {
-            response = describeLoadBalancer(loadBalancer, loadBalancingClient, ec2Client, resources);
+            response = describeLoadBalancer(loadBalancer, loadBalancingClient, ec2Client, resources, resourceCrn);
         } catch (AwsServiceException awsException) {
             if (StringUtils.isNotEmpty(awsException.awsErrorDetails().errorCode()) &&
                     LOAD_BALANCER_NOT_FOUND_ERROR_CODE.equals(awsException.awsErrorDetails().errorCode())) {
@@ -262,7 +263,7 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
     }
 
     private Optional<CloudLoadBalancerMetadata> describeLoadBalancer(CloudResource loadBalancer, AmazonElasticLoadBalancingClient loadBalancingClient,
-            AmazonEc2Client ec2Client, List<CloudResource> resources) {
+            AmazonEc2Client ec2Client, List<CloudResource> resources, String resourceCrn) {
         DescribeLoadBalancersRequest describeLoadBalancersRequest = DescribeLoadBalancersRequest.builder().loadBalancerArns(loadBalancer.getReference()).build();
         DescribeLoadBalancersResponse describeLoadBalancersResponse = loadBalancingClient.describeLoadBalancers(describeLoadBalancersRequest);
 
@@ -276,17 +277,16 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
                         LOGGER.debug("GATEWAY_PRIVATE LoadBalancer selected");
                         type = LoadBalancerType.GATEWAY_PRIVATE;
                     }
-                    CloudLoadBalancerMetadata loadBalancerMetadata = CloudLoadBalancerMetadata.builder()
+                    CloudLoadBalancerMetadata.Builder loadBalancerMetadata = CloudLoadBalancerMetadata.builder()
                             .withType(type)
                             .withCloudDns(awsLb.dnsName())
                             .withHostedZoneId(awsLb.canonicalHostedZoneId())
                             .withName(awsLb.loadBalancerName())
-                            .withParameters(parameters)
-                            .withIp(awsNativeLoadBalancerIpCollector.getLoadBalancerIp(ec2Client, loadBalancer.getName()))
-                            .build();
+                            .withParameters(parameters);
+                    awsNativeLoadBalancerIpCollector.getLoadBalancerIp(ec2Client, loadBalancer.getName(), resourceCrn).ifPresent(loadBalancerMetadata::withIp);
                     LOGGER.info("Saved metadata for load balancer {}: DNS {}, zone ID {}", awsLb.loadBalancerName(), awsLb.dnsName(),
                             awsLb.canonicalHostedZoneId());
-                    return loadBalancerMetadata;
+                    return loadBalancerMetadata.build();
                 });
     }
 

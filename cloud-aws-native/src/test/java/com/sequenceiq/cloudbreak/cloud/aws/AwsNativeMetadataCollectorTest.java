@@ -78,6 +78,8 @@ class AwsNativeMetadataCollectorTest {
 
     private static final String LB_PRIVATE_IP = "1.1.1.1";
 
+    private static final String CRN = "crn";
+
     @Mock
     private AwsLifeCycleMapper awsLifeCycleMapper;
 
@@ -114,7 +116,7 @@ class AwsNativeMetadataCollectorTest {
         CloudContext context = CloudContext.Builder.builder()
                 .withId(1L)
                 .withName("context")
-                .withCrn("crn")
+                .withCrn(CRN)
                 .withPlatform("AWS")
                 .withVariant("AWS")
                 .withLocation(Location.location(Region.region("eu-central-1")))
@@ -416,7 +418,7 @@ class AwsNativeMetadataCollectorTest {
         when(loadBalancingClient.describeLoadBalancers(any()))
                 .thenReturn(DescribeLoadBalancersResponse.builder().loadBalancers(loadBalancer).build())
                 .thenThrow(loadBalancerNotFoundException);
-        when(awsNativeLoadBalancerIpCollector.getLoadBalancerIp(eq(ec2Client), any())).thenReturn(LB_PRIVATE_IP);
+        when(awsNativeLoadBalancerIpCollector.getLoadBalancerIp(eq(ec2Client), any(), eq(CRN))).thenReturn(Optional.of(LB_PRIVATE_IP));
 
         List<CloudLoadBalancerMetadata> cloudLoadBalancerMetadata = underTest.collectLoadBalancer(authenticatedContext, loadBalancerTypes, cloudResources);
 
@@ -439,7 +441,7 @@ class AwsNativeMetadataCollectorTest {
         when(loadBalancingClient.describeLoadBalancers(any()))
                 .thenReturn(DescribeLoadBalancersResponse.builder().loadBalancers(loadBalancer).build());
         when(loadBalancerTypeConverter.convert(LoadBalancerSchemeEnum.INTERNAL)).thenReturn(LoadBalancerType.PRIVATE);
-        when(awsNativeLoadBalancerIpCollector.getLoadBalancerIp(eq(ec2Client), any())).thenReturn(LB_PRIVATE_IP);
+        when(awsNativeLoadBalancerIpCollector.getLoadBalancerIp(eq(ec2Client), any(), eq(CRN))).thenReturn(Optional.of(LB_PRIVATE_IP));
 
         List<CloudLoadBalancerMetadata> cloudLoadBalancerMetadata = underTest.collectLoadBalancer(authenticatedContext, loadBalancerTypes, cloudResources);
 
