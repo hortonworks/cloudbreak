@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.INSTANCE_NOT_FOUND;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.INSUFFICIENT_INSTANCE_CAPACITY;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -52,10 +55,6 @@ import software.amazon.awssdk.services.ec2.model.StopInstancesRequest;
 
 @Service
 public class AwsInstanceConnector implements InstanceConnector {
-
-    public static final String INSTANCE_NOT_FOUND_ERROR_CODE = "InvalidInstanceID.NotFound";
-
-    public static final String INSUFFICIENT_INSTANCE_CAPACITY_ERROR_CODE = "InsufficientInstanceCapacity";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsInstanceConnector.class);
 
@@ -297,7 +296,7 @@ public class AwsInstanceConnector implements InstanceConnector {
 
     private void handleEC2Exception(List<CloudInstance> vms, Ec2Exception e) {
         LOGGER.debug("Exception received from AWS: ", e);
-        if (e.awsErrorDetails().errorCode().equalsIgnoreCase(INSTANCE_NOT_FOUND_ERROR_CODE)) {
+        if (e.awsErrorDetails().errorCode().equalsIgnoreCase(INSTANCE_NOT_FOUND)) {
             Pattern pattern = Pattern.compile("i-[a-z0-9]*");
             Matcher matcher = pattern.matcher(e.awsErrorDetails().errorMessage());
             if (matcher.find()) {
@@ -305,7 +304,7 @@ public class AwsInstanceConnector implements InstanceConnector {
                 LOGGER.debug("Remove instance from vms: {}", doesNotExistInstanceId);
                 vms.removeIf(vm -> doesNotExistInstanceId.equals(vm.getInstanceId()));
             }
-        } else if (e.awsErrorDetails().errorCode().equalsIgnoreCase(INSUFFICIENT_INSTANCE_CAPACITY_ERROR_CODE)) {
+        } else if (e.awsErrorDetails().errorCode().equalsIgnoreCase(INSUFFICIENT_INSTANCE_CAPACITY)) {
             LOGGER.error("Encountered  EC2 insufficient capacity exception");
             throw new InsufficientCapacityException(e.getMessage(), e.getCause());
         }

@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
-import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsInstanceConnector.INSTANCE_NOT_FOUND_ERROR_CODE;
-import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsInstanceConnector.INSUFFICIENT_INSTANCE_CAPACITY_ERROR_CODE;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.INSTANCE_NOT_FOUND;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.INSUFFICIENT_INSTANCE_CAPACITY;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
@@ -208,7 +208,7 @@ class AwsInstanceConnectorTest {
 
     @Test
     void testCheckExceptionHandle() {
-        mockDescribeInstancesException(INSTANCE_NOT_FOUND_ERROR_CODE, "i-1 is a sheep!");
+        mockDescribeInstancesException(INSTANCE_NOT_FOUND, "i-1 is a sheep!");
         List<CloudInstance> mutableList = new ArrayList<>(getCloudInstances());
         assertThrows(Ec2Exception.class, () -> underTest.check(authenticatedContext, mutableList));
         assertThat(mutableList, hasSize(1));
@@ -364,7 +364,7 @@ class AwsInstanceConnectorTest {
 
     @Test
     void testStartExceptionHandle() {
-        mockDescribeInstancesException(INSTANCE_NOT_FOUND_ERROR_CODE, "i-1 is a sheep!");
+        mockDescribeInstancesException(INSTANCE_NOT_FOUND, "i-1 is a sheep!");
         List<CloudInstance> mutableList = new ArrayList<>(getCloudInstances());
         assertThrows(Ec2Exception.class, () -> underTest.start(authenticatedContext, List.of(), mutableList));
         assertThat(mutableList, hasSize(1));
@@ -372,7 +372,7 @@ class AwsInstanceConnectorTest {
 
     @Test
     void testCheckInsufficientCapacityExceptionHandle() {
-        mockDescribeInstancesException(INSUFFICIENT_INSTANCE_CAPACITY_ERROR_CODE, "Insufficient capacity on i-432");
+        mockDescribeInstancesException(INSUFFICIENT_INSTANCE_CAPACITY, "Insufficient capacity on i-432");
         List<CloudInstance> mutableList = new ArrayList<>(getCloudInstances());
         assertThatThrownBy(() -> underTest.startWithLimitedRetry(authenticatedContext, List.of(), mutableList, null))
                 .isInstanceOf(InsufficientCapacityException.class);
@@ -381,7 +381,7 @@ class AwsInstanceConnectorTest {
 
     @Test
     void testStopExceptionHandle() {
-        mockDescribeInstancesException(INSTANCE_NOT_FOUND_ERROR_CODE, "i-1 is a sheep!");
+        mockDescribeInstancesException(INSTANCE_NOT_FOUND, "i-1 is a sheep!");
         List<CloudInstance> mutableList = new ArrayList<>(getCloudInstances());
         assertThrows(Ec2Exception.class, () -> underTest.stop(authenticatedContext, List.of(), mutableList));
         assertThat(mutableList, hasSize(1));

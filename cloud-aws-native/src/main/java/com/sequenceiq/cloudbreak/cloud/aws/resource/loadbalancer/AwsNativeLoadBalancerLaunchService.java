@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.aws.resource.loadbalancer;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.DUPLICATE_LISTENER;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.DUPLICATE_LOAD_BALANCER_NAME;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.DUPLICATE_TARGET_GROUP_NAME;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
@@ -69,11 +72,6 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetTypeEn
 
 @Service
 public class AwsNativeLoadBalancerLaunchService {
-    static final String DUPLICATE_LOAD_BALANCER_NAME_ERROR_CODE = "DuplicateLoadBalancerName";
-
-    static final String DUPLICATE_TARGET_GROUP_NAME_ERROR_CODE = "DuplicateTargetGroupName";
-
-    static final String DUPLICATE_LISTENER_ERROR_CODE = "DuplicateListener";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsNativeLoadBalancerLaunchService.class);
 
@@ -207,7 +205,7 @@ public class AwsNativeLoadBalancerLaunchService {
             return context.getLoadBalancingClient().registerLoadBalancer(request);
         } catch (AwsServiceException amazonServiceException) {
             String errorCode = amazonServiceException.awsErrorDetails().errorCode();
-            if (StringUtils.isNotEmpty(errorCode) && errorCode.contains(DUPLICATE_LOAD_BALANCER_NAME_ERROR_CODE)) {
+            if (StringUtils.isNotEmpty(errorCode) && errorCode.contains(DUPLICATE_LOAD_BALANCER_NAME)) {
                 DescribeLoadBalancersRequest describeLoadBalancersRequest = DescribeLoadBalancersRequest.builder().names(request.name()).build();
                 DescribeLoadBalancersResponse describeLoadBalancersResponse = context.getLoadBalancingClient()
                         .describeLoadBalancers(describeLoadBalancersRequest);
@@ -286,7 +284,7 @@ public class AwsNativeLoadBalancerLaunchService {
             return context.getLoadBalancingClient().createTargetGroup(targetGroupRequest);
         } catch (AwsServiceException amazonServiceException) {
             String errorCode = amazonServiceException.awsErrorDetails().errorCode();
-            if (StringUtils.isNotEmpty(errorCode) && errorCode.contains(DUPLICATE_TARGET_GROUP_NAME_ERROR_CODE)) {
+            if (StringUtils.isNotEmpty(errorCode) && errorCode.contains(DUPLICATE_TARGET_GROUP_NAME)) {
                 DescribeTargetGroupsRequest describeTargetGroupsRequest = DescribeTargetGroupsRequest.builder().names(targetGroupRequest.name()).build();
                 DescribeTargetGroupsResponse describeTargetGroupsResponse = context.getLoadBalancingClient().describeTargetGroup(describeTargetGroupsRequest);
                 return describeTargetGroupsResponse.targetGroups()
@@ -355,7 +353,7 @@ public class AwsNativeLoadBalancerLaunchService {
             return context.getLoadBalancingClient().registerListener(listenerRequest);
         } catch (AwsServiceException amazonServiceException) {
             String errorCode = amazonServiceException.awsErrorDetails().errorCode();
-            if (StringUtils.isNotEmpty(errorCode) && errorCode.contains(DUPLICATE_LISTENER_ERROR_CODE)) {
+            if (StringUtils.isNotEmpty(errorCode) && errorCode.contains(DUPLICATE_LISTENER)) {
                 String loadBalancerArn = context.getLoadBalancerArn();
                 DescribeListenersRequest describeListenersRequest = DescribeListenersRequest.builder().loadBalancerArn(loadBalancerArn).build();
                 DescribeListenersResponse describeListenersResponse = context.getLoadBalancingClient().describeListeners(describeListenersRequest);

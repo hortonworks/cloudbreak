@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.util;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.ACCESS_DENIED;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,7 +42,7 @@ public class AwsEncodedAuthorizationFailureMessageDecoder {
             try {
                 result = getResultMessage(credentialView, region, matcher.group(1));
             } catch (StsException e) {
-                if ("AccessDenied".equals(e.awsErrorDetails().errorCode())) {
+                if (ACCESS_DENIED.equals(e.awsErrorDetails().errorCode())) {
                     result = replaceAwsMessage(message, matcher.group(0)) + " Please contact your system administrator to update your AWS policy with the " +
                             "sts:DecodeAuthorizationMessage permission to get more details next time.";
                 } else {

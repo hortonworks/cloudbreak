@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.client;
 
-import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsInstanceConnector.INSTANCE_NOT_FOUND_ERROR_CODE;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.INSTANCE_NOT_FOUND;
 
 import com.sequenceiq.cloudbreak.service.Retry;
 
@@ -199,7 +199,7 @@ public class AmazonEc2Client extends AmazonClient {
             try {
                 return client.describeInstances(describeInstancesRequest);
             } catch (Ec2Exception e) {
-                if (e.awsErrorDetails().errorCode().equalsIgnoreCase(INSTANCE_NOT_FOUND_ERROR_CODE)) {
+                if (e.awsErrorDetails().errorCode().equalsIgnoreCase(INSTANCE_NOT_FOUND)) {
                     throw new Retry.ActionFailedException("The requested instances are not found on AWS side: " + describeInstancesRequest.instanceIds(), e);
                 } else {
                     throw e;

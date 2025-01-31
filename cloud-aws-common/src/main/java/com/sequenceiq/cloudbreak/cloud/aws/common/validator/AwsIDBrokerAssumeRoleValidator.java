@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.validator;
 
 import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsAccessConfigType.INSTANCE_PROFILE;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.ACCESS_DENIED;
 import static com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsValidationMessageUtil.getAdviceMessage;
 import static com.sequenceiq.common.model.CloudIdentityType.ID_BROKER;
 
@@ -58,7 +59,7 @@ public class AwsIDBrokerAssumeRoleValidator {
                 // If error messages access denied we add the error to the result
                 LOGGER.error("Unable to check assume role from instance profile {} for roles {} due to {}",
                         instanceProfile.arn(), roleArns, e.getMessage(), e);
-                if ("AccessDenied".equals(e.awsErrorDetails().errorCode())) {
+                if (ACCESS_DENIED.equals(e.awsErrorDetails().errorCode())) {
                     resultBuilder.error(String.format("Unable to check assume role from Instance profile %s from roles %s because access is denied.",
                             instanceProfile.arn(), roleArns));
                     return false;

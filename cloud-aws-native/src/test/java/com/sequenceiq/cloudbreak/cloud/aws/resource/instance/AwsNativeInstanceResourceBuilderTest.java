@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.resource.instance;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.NOT_FOUND;
 import static com.sequenceiq.cloudbreak.cloud.model.CloudInstance.USERDATA_SECRET_ID;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -438,11 +439,11 @@ class AwsNativeInstanceResourceBuilderTest {
         when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
         Ec2Exception amazonEC2Exception = (Ec2Exception) Ec2Exception.builder()
                 .message("message")
-                .awsErrorDetails(AwsErrorDetails.builder().errorCode("NotFound").build())
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode(NOT_FOUND).build())
                 .build();
         when(amazonEc2Client.describeInstances(any())).thenThrow(amazonEC2Exception);
         Ec2Exception actual = Assertions.assertThrows(Ec2Exception.class, () -> underTest.getResourceStatus(awsContext, ac, cloudResource));
-        assertEquals("NotFound", actual.awsErrorDetails().errorCode());
+        assertEquals(NOT_FOUND, actual.awsErrorDetails().errorCode());
     }
 
     @Test

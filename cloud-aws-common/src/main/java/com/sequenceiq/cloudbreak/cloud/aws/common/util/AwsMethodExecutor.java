@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.util;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.NOT_FOUND;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.function.Supplier;
@@ -25,7 +26,7 @@ public class AwsMethodExecutor {
             ret = awsMethod.get();
             LOGGER.debug("Data fetched: {}", ret);
         } catch (Ec2Exception e) {
-            if (e.awsErrorDetails().errorCode().contains("NotFound")) {
+            if (e.awsErrorDetails().errorCode().contains(NOT_FOUND)) {
                 LOGGER.info("Aws resource does not found: {}", e.getMessage());
                 ret = def;
             } else {

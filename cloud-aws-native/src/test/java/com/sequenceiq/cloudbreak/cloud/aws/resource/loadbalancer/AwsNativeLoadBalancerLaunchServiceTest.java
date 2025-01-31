@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.aws.resource.loadbalancer;
 
-import static com.sequenceiq.cloudbreak.cloud.aws.resource.loadbalancer.AwsNativeLoadBalancerLaunchService.DUPLICATE_LISTENER_ERROR_CODE;
-import static com.sequenceiq.cloudbreak.cloud.aws.resource.loadbalancer.AwsNativeLoadBalancerLaunchService.DUPLICATE_LOAD_BALANCER_NAME_ERROR_CODE;
-import static com.sequenceiq.cloudbreak.cloud.aws.resource.loadbalancer.AwsNativeLoadBalancerLaunchService.DUPLICATE_TARGET_GROUP_NAME_ERROR_CODE;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.DUPLICATE_LISTENER;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.DUPLICATE_LOAD_BALANCER_NAME;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.DUPLICATE_TARGET_GROUP_NAME;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -220,8 +220,8 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(resourceNameService.loadBalancer(STACK_NAME, INTERNAL)).thenReturn(LB_NAME_INTERNAL_NEW);
         when(resourceNameService.loadBalancerResourceTypeAndSchemeNamePart(eq(AwsLoadBalancerScheme.INTERNAL.resourceName()))).thenReturn("LBInternal");
         AwsServiceException loadBalancerDuplicatedExc = AwsServiceException.builder()
-                .message(DUPLICATE_LOAD_BALANCER_NAME_ERROR_CODE)
-                .awsErrorDetails(AwsErrorDetails.builder().errorCode(DUPLICATE_LOAD_BALANCER_NAME_ERROR_CODE).build())
+                .message(DUPLICATE_LOAD_BALANCER_NAME)
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode(DUPLICATE_LOAD_BALANCER_NAME).build())
                 .build();
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID)).thenReturn(List.of());
@@ -322,8 +322,8 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_ID)).thenReturn(List.of());
         AwsServiceException amazonServiceException = AwsServiceException.builder()
-                .message(DUPLICATE_TARGET_GROUP_NAME_ERROR_CODE)
-                .awsErrorDetails(AwsErrorDetails.builder().errorCode(DUPLICATE_TARGET_GROUP_NAME_ERROR_CODE).build())
+                .message(DUPLICATE_TARGET_GROUP_NAME)
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode(DUPLICATE_TARGET_GROUP_NAME).build())
                 .build();
         when(loadBalancingClient.createTargetGroup(any())).thenThrow(amazonServiceException);
         TargetGroup targetGroup = TargetGroup.builder().targetGroupArn("aTargetGroupArn").build();
@@ -414,8 +414,8 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_LISTENER, STACK_ID)).thenReturn(List.of());
         AwsServiceException amazonServiceException = AwsServiceException.builder()
-                .message(DUPLICATE_LISTENER_ERROR_CODE)
-                .awsErrorDetails(AwsErrorDetails.builder().errorCode(DUPLICATE_LISTENER_ERROR_CODE).build())
+                .message(DUPLICATE_LISTENER)
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode(DUPLICATE_LISTENER).build())
                 .build();
         when(loadBalancingClient.registerListener(any())).thenThrow(amazonServiceException);
         Listener listener = Listener.builder().listenerArn("aListenerArn").build();

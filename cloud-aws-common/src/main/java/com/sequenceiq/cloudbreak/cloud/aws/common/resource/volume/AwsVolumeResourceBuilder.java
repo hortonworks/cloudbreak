@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.resource.volume;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.VOLUME_NOT_FOUND;
 import static com.sequenceiq.cloudbreak.cloud.model.CloudResource.PRIVATE_ID;
 import static com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.ATTACHED;
 import static com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.CREATED;
@@ -461,7 +462,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                 DescribeVolumesResponse response = client.describeVolumes(describeVolumesRequest);
                 volumeSetStatus.set(getResourceStatus(response));
             } catch (Ec2Exception e) {
-                if (!"InvalidVolume.NotFound".equals(e.awsErrorDetails().errorCode())) {
+                if (!VOLUME_NOT_FOUND.equals(e.awsErrorDetails().errorCode())) {
                     throw e;
                 }
                 LOGGER.info("The volume doesn't need to be deleted as it does not exist on the provider side. Reason: {}", e.getMessage());
@@ -496,7 +497,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                     .reduce(ATTACHED, resourceStatusReducer());
         } catch (Ec2Exception e) {
             LOGGER.debug("Obtaining volume status was not successful due to the following error: " + e.awsErrorDetails().errorCode(), e);
-            return "InvalidVolume.NotFound".equals(e.awsErrorDetails().errorCode()) ? DELETED : FAILED;
+            return VOLUME_NOT_FOUND.equals(e.awsErrorDetails().errorCode()) ? DELETED : FAILED;
         }
     }
 

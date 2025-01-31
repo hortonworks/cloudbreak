@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.ACCESS_DENIED;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -46,8 +48,6 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupN
 public class AwsLoadBalancerCommonService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsLoadBalancerCommonService.class);
-
-    private static final String ACCESS_DENIED_EXCEPTION_ERROR_CODE = "AccessDenied";
 
     @Inject
     private LoadBalancerTypeConverter loadBalancerTypeConverter;
@@ -125,7 +125,7 @@ public class AwsLoadBalancerCommonService {
         } catch (AwsServiceException amazonServiceException) {
             LOGGER.warn("Failed to modify targetgroup flag of load balancer to value '{}'", stickySession, amazonServiceException);
             if (amazonServiceException instanceof ElasticLoadBalancingV2Exception
-                    && ACCESS_DENIED_EXCEPTION_ERROR_CODE.equals(amazonServiceException.awsErrorDetails().errorCode())) {
+                    && ACCESS_DENIED.equals(amazonServiceException.awsErrorDetails().errorCode())) {
                 LOGGER.info("User has no right to edit loadbalancer targetgroup to be stickysession. " +
                         "The role needs elasticloadbalancing:ModifyLoadBalancerAttributes permission");
             } else {
@@ -158,7 +158,7 @@ public class AwsLoadBalancerCommonService {
         } catch (AwsServiceException amazonServiceException) {
             LOGGER.warn("Failed to modify deletion protection flag of load balancer to value '{}'", deletionProtection, amazonServiceException);
             if (amazonServiceException instanceof ElasticLoadBalancingV2Exception
-                    && ACCESS_DENIED_EXCEPTION_ERROR_CODE.equals(amazonServiceException.awsErrorDetails().errorCode())) {
+                    && ACCESS_DENIED.equals(amazonServiceException.awsErrorDetails().errorCode())) {
                 LOGGER.info("User has no right to edit loadbalancer to be deletionprotected. " +
                         "The role needs elasticloadbalancing:ModifyLoadBalancerAttributes permission");
             } else {

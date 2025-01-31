@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.resource.instance;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.NOT_FOUND;
 import static com.sequenceiq.cloudbreak.cloud.aws.resource.AwsNativeResourceBuilderOrderConstants.NATIVE_INSTANCE_RESOURCE_BUILDER_ORDER;
 import static com.sequenceiq.cloudbreak.cloud.model.CloudInstance.USERDATA_SECRET_ID;
 import static com.sequenceiq.cloudbreak.constant.ImdsConstants.AWS_IMDS_VERSION_V2;
@@ -285,7 +286,7 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
                     return getResourceStatusForDeletion(resource, instanceState);
                 }
             } catch (Ec2Exception e) {
-                if (e.awsErrorDetails().errorCode().contains("NotFound") && !creation) {
+                if (e.awsErrorDetails().errorCode().contains(NOT_FOUND) && !creation) {
                     LOGGER.info("Aws resource does not found: {}", e.getMessage());
                     return new CloudResourceStatus(resource, ResourceStatus.DELETED, "AWS resource does not found");
                 } else {

@@ -1,10 +1,12 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.INSUFFICIENT_INSTANCE_CAPACITY;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -39,7 +41,9 @@ import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration;
+import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.core.retry.RetryPolicy;
+import software.amazon.awssdk.core.retry.conditions.RetryCondition;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cloudwatch.CloudWatchClient;
 import software.amazon.awssdk.services.cloudwatch.CloudWatchClientBuilder;
@@ -67,6 +71,8 @@ import software.amazon.awssdk.services.sts.StsClient;
 import software.amazon.awssdk.services.sts.StsClientBuilder;
 
 public abstract class AwsClient {
+
+    public static final int MAX_CLIENT_RETRIES_INSUFFICIENT_INSTANCE_CAPACITY = 3;
 
     // Default retries is 3. This allows more time for backoff during throttling
     public static final int MAX_CLIENT_RETRIES = 30;
@@ -336,14 +342,31 @@ public abstract class AwsClient {
     }
 
     protected ClientOverrideConfiguration getDefaultClientConfiguration() {
+        RetryCondition insufficientInstanceCapacityRetryCondition = ctx -> isInsufficientInstanceCapacityError(ctx.exception());
+        RetryPolicy insufficientInstanceCapacityRetryPolicy = RetryPolicy.builder()
+                .numRetries(MAX_CLIENT_RETRIES_INSUFFICIENT_INSTANCE_CAPACITY)
+                .retryCondition(insufficientInstanceCapacityRetryCondition)
+                .build();
+        RetryPolicy defaultRetryPolicy = RetryPolicy.defaultRetryPolicy();
         ClientOverrideConfiguration.Builder clientOverrideConfigurationBuilder = ClientOverrideConfiguration.builder()
                 .retryPolicy(RetryPolicy.builder()
                         .numRetries(MAX_CLIENT_RETRIES)
+                        .retryCondition((ctx) -> {
+                            if (isInsufficientInstanceCapacityError(ctx.exception())) {
+                                return insufficientInstanceCapacityRetryPolicy.retryCondition().shouldRetry(ctx);
+                            }
+                            return defaultRetryPolicy.retryCondition().shouldRetry(ctx);
+                        })
                         .build());
         if (awsMetricsEnabled) {
             clientOverrideConfigurationBuilder.addMetricPublisher(awsMetricPublisher);
         }
         return clientOverrideConfigurationBuilder.build();
+    }
+
+    private boolean isInsufficientInstanceCapacityError(SdkException ex) {
+        return ex instanceof AwsServiceException &&
+                StringUtils.equals(INSUFFICIENT_INSTANCE_CAPACITY, ((AwsServiceException) ex).awsErrorDetails().errorCode());
     }
 
     private ClientOverrideConfiguration getClientConfigurationWithMinimalRetries() {

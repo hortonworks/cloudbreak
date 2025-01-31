@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.metadata;
 
-import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsInstanceConnector.INSTANCE_NOT_FOUND_ERROR_CODE;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.INSTANCE_NOT_FOUND;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.LOAD_BALANCER_NOT_FOUND;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -56,8 +57,6 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeLoad
 
 @Service
 public class AwsNativeMetadataCollector implements MetadataCollector {
-
-    public static final String LOAD_BALANCER_NOT_FOUND_ERROR_CODE = "LoadBalancerNotFound";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsNativeMetadataCollector.class);
 
@@ -161,7 +160,7 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
                 response.addAll(describeInstances(vms, instanceIdBatch, resourcesByInstanceId, ec2Client));
             } catch (AwsServiceException serviceException) {
                 if (StringUtils.isNotEmpty(serviceException.awsErrorDetails().errorCode()) &&
-                        INSTANCE_NOT_FOUND_ERROR_CODE.equals(serviceException.awsErrorDetails().errorCode())) {
+                        INSTANCE_NOT_FOUND.equals(serviceException.awsErrorDetails().errorCode())) {
                     response.addAll(handleNotFoundInstancesAndDescribeOthers(vms, ec2Client, instanceIdBatch, serviceException, resourcesByInstanceId));
                 } else {
                     LOGGER.warn("Collection of instance metadata failed", serviceException);
@@ -249,7 +248,7 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
             response = describeLoadBalancer(loadBalancer, loadBalancingClient, ec2Client, resources, resourceCrn);
         } catch (AwsServiceException awsException) {
             if (StringUtils.isNotEmpty(awsException.awsErrorDetails().errorCode()) &&
-                    LOAD_BALANCER_NOT_FOUND_ERROR_CODE.equals(awsException.awsErrorDetails().errorCode())) {
+                    LOAD_BALANCER_NOT_FOUND.equals(awsException.awsErrorDetails().errorCode())) {
                 LOGGER.info("Load balancers with ARN '{}' could not be found due to:", loadBalancer.getReference(), awsException);
             } else {
                 LOGGER.warn("Metadata collection failed for load balancer '{}'", loadBalancer.getReference(), awsException);

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource.loadbalancer;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.VALIDATION_ERROR;
 import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.CancellableWaiterConfiguration.cancellableWaiterConfiguration;
 import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.WaiterRunner.handleWaiterError;
 import static com.sequenceiq.common.api.type.ResourceType.ELASTIC_LOAD_BALANCER;
@@ -61,8 +62,6 @@ import software.amazon.awssdk.services.cloudformation.waiters.CloudFormationWait
 public class AwsLoadBalancerLaunchService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsLoadBalancerLaunchService.class);
-
-    private static final String VALIDATION_ERROR = "ValidationError";
 
     @Inject
     private CloudFormationStackUtil cfStackUtil;

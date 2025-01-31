@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.ACCESS_DENIED;
 import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.CancellableWaiterConfiguration.cancellableWaiterConfiguration;
 import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.WaiterRunner.run;
 
@@ -33,8 +34,6 @@ import software.amazon.awssdk.services.rds.waiters.RdsWaiter;
 public class AwsDatabaseSslCertRotationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsDatabaseSslCertRotationService.class);
-
-    private static final String ACCESS_DENIED = "AccessDenied";
 
     @Inject
     private AwsCloudFormationClient awsClient;

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
-import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsInstanceConnector.INSTANCE_NOT_FOUND_ERROR_CODE;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.INSTANCE_NOT_FOUND;
 
 import java.util.List;
 import java.util.Optional;
@@ -64,7 +64,7 @@ public class InstanceInAutoScalingGroupUpdater {
         } catch (Ec2Exception e) {
             String message = String.format("Failed to describe instances with ids('%s') for auto scaling group('%s')", String.join(",", instanceIds),
                     autoScalingGroupName);
-            if (e.awsErrorDetails().errorCode().equalsIgnoreCase(INSTANCE_NOT_FOUND_ERROR_CODE)) {
+            if (e.awsErrorDetails().errorCode().equalsIgnoreCase(INSTANCE_NOT_FOUND)) {
                 message = String.format("Some of the instances in the auto scaling group('%s') does not exist on EC2: ", autoScalingGroupName);
             }
             LOGGER.warn(message, e);

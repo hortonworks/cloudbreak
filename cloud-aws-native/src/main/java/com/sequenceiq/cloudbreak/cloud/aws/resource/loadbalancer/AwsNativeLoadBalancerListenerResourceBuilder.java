@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.resource.loadbalancer;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.LISTENER_NOT_FOUND;
 import static com.sequenceiq.cloudbreak.cloud.aws.resource.AwsNativeResourceBuilderOrderConstants.NATIVE_LOAD_BALANCER_LISTENER_RESOURCE_BUILDER_ORDER;
 
 import java.util.List;
@@ -32,8 +33,6 @@ public class AwsNativeLoadBalancerListenerResourceBuilder extends AbstractAwsNat
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsNativeLoadBalancerListenerResourceBuilder.class);
 
-    private static final String LISTENER_NOT_FOUND_ERROR_CODE = "ListenerNotFound";
-
     @Inject
     private AwsMethodExecutor awsMethodExecutor;
 
@@ -63,7 +62,7 @@ public class AwsNativeLoadBalancerListenerResourceBuilder extends AbstractAwsNat
             deleteResponse = awsMethodExecutor.execute(() -> loadBalancingClient.deleteListener(deleteListenerRequest), null);
         } catch (AwsServiceException awsException) {
             if (StringUtils.isNotEmpty(awsException.awsErrorDetails().errorCode()) &&
-                    LISTENER_NOT_FOUND_ERROR_CODE.equals(awsException.awsErrorDetails().errorCode())) {
+                    LISTENER_NOT_FOUND.equals(awsException.awsErrorDetails().errorCode())) {
                 LOGGER.info("Listener doesn't exist with id: '{}'", resource.getReference());
             } else {
                 LOGGER.warn("Listener could not be fetched from AWS with id: '{}'", resource.getReference(), awsException);

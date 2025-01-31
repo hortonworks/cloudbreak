@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
-import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsInstanceConnector.INSTANCE_NOT_FOUND_ERROR_CODE;
-import static com.sequenceiq.cloudbreak.cloud.aws.metadata.AwsNativeMetadataCollector.LOAD_BALANCER_NOT_FOUND_ERROR_CODE;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.INSTANCE_NOT_FOUND;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.LOAD_BALANCER_NOT_FOUND;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATED;
 import static com.sequenceiq.common.api.type.ResourceType.AWS_INSTANCE;
 import static com.sequenceiq.common.api.type.ResourceType.ELASTIC_LOAD_BALANCER;
@@ -184,7 +184,7 @@ class AwsNativeMetadataCollectorTest {
         String instancesNotFoundMessage = String.format("Instance with id could not be found: '%s, %s'", anInstanceId, secondInstanceId);
         AwsServiceException amazonServiceException = AwsServiceException.builder()
                 .message(instancesNotFoundMessage)
-                .awsErrorDetails(AwsErrorDetails.builder().errorCode(INSTANCE_NOT_FOUND_ERROR_CODE).build())
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode(INSTANCE_NOT_FOUND).build())
                 .build();
         when(ec2Client.describeInstances(any())).thenThrow(amazonServiceException);
 
@@ -221,7 +221,7 @@ class AwsNativeMetadataCollectorTest {
         String instancesNotFoundMessage = String.format("Instance with ID could not be found: '%s'", secondInstanceId);
         AwsServiceException amazonServiceException = AwsServiceException.builder()
                 .message(instancesNotFoundMessage)
-                .awsErrorDetails(AwsErrorDetails.builder().errorCode(INSTANCE_NOT_FOUND_ERROR_CODE).build())
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode(INSTANCE_NOT_FOUND).build())
                 .build();
         when(ec2Client.describeInstances(any())).thenThrow(amazonServiceException).thenReturn(describeInstancesResponse);
 
@@ -298,14 +298,14 @@ class AwsNativeMetadataCollectorTest {
         when(awsClient.createEc2Client(any(), anyString())).thenReturn(ec2Client);
         AwsServiceException amazonServiceException = AwsServiceException.builder()
                 .message("Instance with id could not be found: 'anInstanceId0'")
-                .awsErrorDetails(AwsErrorDetails.builder().errorCode(INSTANCE_NOT_FOUND_ERROR_CODE).build())
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode(INSTANCE_NOT_FOUND).build())
                 .build();
         DescribeInstancesResponse describeInstancesResponse1 = DescribeInstancesResponse.builder()
                 .reservations(List.of(Reservation.builder().instances(ec2Instances.subList(1, 5)).build()))
                 .build();
         AwsServiceException amazonServiceException2 = AwsServiceException.builder()
                 .message("Instance with id could not be found: 'anInstanceId5'")
-                .awsErrorDetails(AwsErrorDetails.builder().errorCode(INSTANCE_NOT_FOUND_ERROR_CODE).build())
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode(INSTANCE_NOT_FOUND).build())
                 .build();
         DescribeInstancesResponse describeInstancesResponse2 = DescribeInstancesResponse.builder()
                 .reservations(List.of(Reservation.builder().instances(ec2Instances.subList(6, 10)).build()))
@@ -392,7 +392,7 @@ class AwsNativeMetadataCollectorTest {
         when(awsClient.createElasticLoadBalancingClient(any(), any())).thenReturn(loadBalancingClient);
         LoadBalancerNotFoundException loadBalancerNotFoundException = LoadBalancerNotFoundException.builder()
                 .message("One or more elastic lb not found")
-                .awsErrorDetails(AwsErrorDetails.builder().errorCode(LOAD_BALANCER_NOT_FOUND_ERROR_CODE).build())
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode(LOAD_BALANCER_NOT_FOUND).build())
                 .build();
         when(loadBalancingClient.describeLoadBalancers(any())).thenThrow(loadBalancerNotFoundException);
 
@@ -412,7 +412,7 @@ class AwsNativeMetadataCollectorTest {
         when(awsClient.createEc2Client(any(), any())).thenReturn(ec2Client);
         LoadBalancerNotFoundException loadBalancerNotFoundException = LoadBalancerNotFoundException.builder()
                 .message("One or more elastic lb not found")
-                .awsErrorDetails(AwsErrorDetails.builder().errorCode(LOAD_BALANCER_NOT_FOUND_ERROR_CODE).build())
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode(LOAD_BALANCER_NOT_FOUND).build())
                 .build();
         LoadBalancer loadBalancer = LoadBalancer.builder().scheme(LoadBalancerSchemeEnum.INTERNAL).build();
         when(loadBalancingClient.describeLoadBalancers(any()))

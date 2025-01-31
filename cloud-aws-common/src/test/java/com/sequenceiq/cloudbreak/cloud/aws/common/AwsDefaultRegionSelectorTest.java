@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
-import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsDefaultRegionSelector.EC2_AUTH_FAILURE_ERROR_CODE;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.AUTH_FAILURE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -97,7 +97,7 @@ class AwsDefaultRegionSelectorTest {
     void testDetermineDefaultRegionWhenGlobalDefaultRegionDescribeFailsWithAuthExceptionAndNoAdditionalRegionsAreConfigured() {
         Ec2Exception amazonEC2Exception = (Ec2Exception) Ec2Exception.builder()
                 .message("SomethingBadHappened")
-                .awsErrorDetails(AwsErrorDetails.builder().errorCode(EC2_AUTH_FAILURE_ERROR_CODE).build())
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode(AUTH_FAILURE).build())
                 .build();
 
         when(ec2Client.describeRegions(any(DescribeRegionsRequest.class))).thenThrow(amazonEC2Exception);
@@ -115,7 +115,7 @@ class AwsDefaultRegionSelectorTest {
     void testDetermineDefaultRegionWhenGlobalDefaultRegionIsNotViableAndOneOfTheAdditionalRegionsIsViable() {
         Ec2Exception amazonEC2Exception = (Ec2Exception) Ec2Exception.builder()
                 .message("SomethingBadHappened")
-                .awsErrorDetails(AwsErrorDetails.builder().errorCode(EC2_AUTH_FAILURE_ERROR_CODE).build())
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode(AUTH_FAILURE).build())
                 .build();
         when(ec2Client.describeRegions(any(DescribeRegionsRequest.class))).thenReturn(DescribeRegionsResponse.builder().build());
         when(awsClient.createAccessWithMinimalRetries(any(AwsCredentialView.class), any()))
@@ -138,7 +138,7 @@ class AwsDefaultRegionSelectorTest {
         when(awsClient.createAccessWithMinimalRetries(any(AwsCredentialView.class), any())).thenReturn(ec2Client);
         Ec2Exception amazonEC2Exception = (Ec2Exception) Ec2Exception.builder()
                 .message("SomethingBadHappened")
-                .awsErrorDetails(AwsErrorDetails.builder().errorCode(EC2_AUTH_FAILURE_ERROR_CODE).build())
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode(AUTH_FAILURE).build())
                         .build();
         when(ec2Client.describeRegions(any(DescribeRegionsRequest.class))).thenThrow(amazonEC2Exception);
 

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
-import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsInstanceConnector.INSTANCE_NOT_FOUND_ERROR_CODE;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.INSTANCE_NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -83,7 +83,7 @@ class InstanceInAutoScalingGroupUpdaterTest {
         when(instance2.instanceId()).thenReturn("instanceId2");
         when(autoScalingGroup.instances()).thenReturn(List.of(instance1, instance2));
         AwsServiceException ec2Exception = Ec2Exception.builder()
-                .awsErrorDetails(AwsErrorDetails.builder().errorCode(INSTANCE_NOT_FOUND_ERROR_CODE).build())
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode(INSTANCE_NOT_FOUND).build())
                 .build();
         when(ec2Client.describeInstances(any())).thenThrow(ec2Exception);
 

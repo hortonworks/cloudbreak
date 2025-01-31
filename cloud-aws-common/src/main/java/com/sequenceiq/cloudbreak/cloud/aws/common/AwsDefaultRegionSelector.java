@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.AUTH_FAILURE;
+
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,7 +24,6 @@ import software.amazon.awssdk.services.ec2.model.Ec2Exception;
 
 @Service
 public class AwsDefaultRegionSelector {
-    static final String EC2_AUTH_FAILURE_ERROR_CODE = "AuthFailure";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsDefaultRegionSelector.class);
 
@@ -80,7 +81,7 @@ public class AwsDefaultRegionSelector {
         } catch (Ec2Exception ec2Exception) {
             String errorMessage = String.format("Unable to describe regions via using EC2 region '%s' APIs, due to: '%s'", region, ec2Exception.getMessage());
             LOGGER.debug(errorMessage, ec2Exception);
-            if (!EC2_AUTH_FAILURE_ERROR_CODE.equals(ec2Exception.awsErrorDetails().errorCode())) {
+            if (!AUTH_FAILURE.equals(ec2Exception.awsErrorDetails().errorCode())) {
                 throw ec2Exception;
             }
         } catch (RuntimeException e) {

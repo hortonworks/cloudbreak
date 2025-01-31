@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
-import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsInstanceConnector.INSTANCE_NOT_FOUND_ERROR_CODE;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.INSTANCE_NOT_FOUND;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.INVALID_INSTANCE_ID_MALFORMED;
 import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.CancellableWaiterConfiguration.cancellableWaiterConfiguration;
 import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.WaiterRunner.handleWaiterError;
 
@@ -62,8 +63,6 @@ public class AwsDownscaleService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsDownscaleService.class);
 
     private static final int MAX_DETACH_INSTANCE_SIZE = 20;
-
-    private static final String INVALID_INSTANCE_ID_MALFORMED_CODE = "InvalidInstanceID.Malformed";
 
     @Inject
     private AwsComputeResourceService awsComputeResourceService;
@@ -247,8 +246,8 @@ public class AwsDownscaleService {
                 return existingInstances;
             } catch (AwsServiceException e) {
                 LOGGER.info("Termination failed, lets check if it is failed because instance was not found", e);
-                if (!INSTANCE_NOT_FOUND_ERROR_CODE.equals(e.awsErrorDetails().errorCode())
-                        && !INVALID_INSTANCE_ID_MALFORMED_CODE.equals(e.awsErrorDetails().errorCode())) {
+                if (!INSTANCE_NOT_FOUND.equals(e.awsErrorDetails().errorCode())
+                        && !INVALID_INSTANCE_ID_MALFORMED.equals(e.awsErrorDetails().errorCode())) {
                     throw e;
                 } else {
                     LOGGER.info("Instance was not found, lets filter out the non existing instances");
@@ -290,7 +289,7 @@ public class AwsDownscaleService {
         } catch (CloudConnectorException e) {
             LOGGER.info("Wait termination failed, lets check if it is because instance was not found", e);
             if (e.getCause() instanceof AwsServiceException) {
-                if (!INSTANCE_NOT_FOUND_ERROR_CODE.equals(((AwsServiceException) e.getCause()).awsErrorDetails().errorCode())) {
+                if (!INSTANCE_NOT_FOUND.equals(((AwsServiceException) e.getCause()).awsErrorDetails().errorCode())) {
                     throw e;
                 } else {
                     LOGGER.info("Instance was not found, lets wait for others");

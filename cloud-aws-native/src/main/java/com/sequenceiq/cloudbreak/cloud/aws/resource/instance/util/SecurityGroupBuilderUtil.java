@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.resource.instance.util;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.GROUP_DUPLICATE;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.ArrayList;
@@ -86,7 +87,7 @@ public class SecurityGroupBuilderUtil {
             egress(amazonEc2Client, ac, awsNetworkView, securityGroup.groupId(), Collections.emptyList());
             securityGroupId = securityGroup.groupId();
         } catch (Ec2Exception e) {
-            if (!"InvalidGroup.Duplicate".equals(e.awsErrorDetails().errorCode())) {
+            if (!GROUP_DUPLICATE.equals(e.awsErrorDetails().errorCode())) {
                 throw e;
             }
             LOGGER.debug("Security group exists with name of {} for {}, try to fetch it", request.groupName(), request.vpcId());

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
-import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsInstanceConnector.INSTANCE_NOT_FOUND_ERROR_CODE;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.INSTANCE_NOT_FOUND;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -360,12 +360,12 @@ class AwsDownscaleServiceTest {
 
         AwsServiceException amazonServiceException = AwsServiceException.builder().awsErrorDetails(AwsErrorDetails.builder()
                 .errorMessage("Cannot execute method: terminateInstances. Invalid id: " + "\"i-worker1\",\"i-worker2\"")
-                .errorCode(INSTANCE_NOT_FOUND_ERROR_CODE).build()).build();
+                .errorCode(INSTANCE_NOT_FOUND).build()).build();
         when(amazonEC2Client.terminateInstances(any())).thenThrow(amazonServiceException).thenReturn(TerminateInstancesResponse.builder().build());
 
         AwsServiceException amazonServiceExceptionForWaiter = AwsServiceException.builder().awsErrorDetails(AwsErrorDetails.builder()
                 .errorMessage("Cannot execute method: terminateInstances. Invalid id: " + "\"i-worker3\"")
-                .errorCode(INSTANCE_NOT_FOUND_ERROR_CODE).build()).build();
+                .errorCode(INSTANCE_NOT_FOUND).build()).build();
         when(amazonEC2Client.waiters()).thenReturn(ec2Waiter);
         doThrow(amazonServiceExceptionForWaiter).doReturn(null)
                 .when(ec2Waiter).waitUntilInstanceTerminated(any(DescribeInstancesRequest.class), any());
@@ -455,7 +455,7 @@ class AwsDownscaleServiceTest {
 
         AwsServiceException amazonServiceException = AwsServiceException.builder().awsErrorDetails(
                 AwsErrorDetails.builder().errorMessage("Cannot execute method: terminateInstances. Invalid id: \"i-worker1\",\"i-worker2\"")
-                        .errorCode(INSTANCE_NOT_FOUND_ERROR_CODE)
+                        .errorCode(INSTANCE_NOT_FOUND)
                         .build()).build();
         when(amazonEC2Client.terminateInstances(any())).thenThrow(amazonServiceException);
 
@@ -531,7 +531,7 @@ class AwsDownscaleServiceTest {
         AwsServiceException amazonServiceException = AwsServiceException.builder().awsErrorDetails(AwsErrorDetails.builder()
                 .errorMessage("Cannot execute method: terminateInstances. Invalid id: " +
                 "\"i-worker1\",\"i-worker2\",\"i-worker3\",\"i-worker4\"")
-                .errorCode(INSTANCE_NOT_FOUND_ERROR_CODE)
+                .errorCode(INSTANCE_NOT_FOUND)
                 .build()).build();
 
         when(amazonEC2Client.terminateInstances(any())).thenThrow(amazonServiceException).thenReturn(TerminateInstancesResponse.builder().build());

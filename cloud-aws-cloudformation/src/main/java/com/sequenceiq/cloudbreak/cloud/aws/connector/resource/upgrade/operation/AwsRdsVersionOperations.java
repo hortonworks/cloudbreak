@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.ACCESS_DENIED;
 import static com.sequenceiq.cloudbreak.cloud.model.DatabaseEngine.POSTGRESQL;
 import static com.sequenceiq.cloudbreak.common.database.MajorVersion.VERSION_17;
 import static com.sequenceiq.cloudbreak.common.database.MajorVersion.VERSION_FAMILY_9;
@@ -34,8 +35,6 @@ public class AwsRdsVersionOperations {
     private static final int GROUP_MAJOR_VERSION = 1;
 
     private static final String POSTGRES = "postgres";
-
-    private static final String ACCESS_DENIED = "AccessDenied";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsRdsVersionOperations.class);
 
