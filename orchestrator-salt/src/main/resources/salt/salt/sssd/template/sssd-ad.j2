@@ -1,7 +1,7 @@
+{%- from 'sssd/ad-settings.sls' import ad with context %}
 {%- set secretEncryptionEnabled = True if salt['pillar.get']('cluster:secretEncryptionEnabled', False) == True else False %}
 {%- set krb5_ccname_template_path = salt['pillar.get']('kerberos:cCacheSecretLocation') if secretEncryptionEnabled == True else '/tmp' %}
 {%- set kerberosConfigPath = salt['pillar.get']('kerberos:kerberosSecretLocation') if secretEncryptionEnabled == True else '/etc' %}
-{%- set server_hostname = salt['grains.get']('host') %}
 
 [nss]
 filter_users = root
@@ -19,7 +19,7 @@ services = nss, pam
 default_domain_suffix = {{ pillar['sssd-ad']['domainuppercase'] }}
 
 [domain/{{ pillar['sssd-ad']['domainuppercase'] }}]
-ldap_sasl_authid = {{ server_hostname }}$
+ldap_sasl_authid = {{ ad.server_hostname }}$
 ad_domain = {{ pillar['sssd-ad']['domain'] }}
 krb5_realm = {{ pillar['sssd-ad']['domainuppercase'] }}
 realmd_tags = manages-system joined-with-samba

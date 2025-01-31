@@ -18,8 +18,9 @@ HOSTNAME={{ manager_server_hostname }}
 FQDN={{ manager_server_fqdn }}
 LOADBALANCER_SAN={{ internal_loadbalancer_san }}
 {% if "ad_member" in grains.get('roles', []) %}
+{% from 'sssd/ad-settings.sls' import ad with context %}
 CM_KEYTAB_FILE=/etc/cloudera-scm-server/cmf.keytab
-CM_PRINCIPAL={{ manager_server_hostname }}$
+CM_PRINCIPAL={{ ad.server_hostname }}$
 {% else %}
 CM_KEYTAB_FILE={{ cm_keytab.path }}
 CM_PRINCIPAL={{ cm_keytab.principal }}

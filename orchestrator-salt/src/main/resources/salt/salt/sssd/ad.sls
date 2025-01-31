@@ -1,6 +1,5 @@
-{%- set server_hostname = salt['grains.get']('host') %}
-{%- set domain_component = 'DC=' ~ salt['pillar.get']('sssd-ad:domain') | replace('.', ',DC=') %}
-    
+{%- from 'sssd/ad-settings.sls' import ad with context %}
+
 add_cldr_repo:
   cmd.run:
     - name: curl https://mirror.infra.cloudera.com/repos/rhel/server/8/8.10/rhel8.10_cldr_mirrors.repo > /etc/yum.repos.d/rhel8.10_cldr_mirrors.repo
@@ -40,7 +39,7 @@ join_domain:
 {% if grains['os_family'] == 'Debian' %}
     - name: echo $BINDPW | realm --verbose join --install=/ --user={{salt['pillar.get']('sssd-ad:username')}} {{salt['pillar.get']('sssd-ad:domain')}}
 {% else %}
-    - name: realm leave; echo $BINDPW | realm --verbose join --computer-name={{ server_hostname }} --user={{salt['pillar.get']('sssd-ad:username')}} {{salt['pillar.get']('sssd-ad:domain')}} 2>&1 | tee -a /var/log/realm.log && exit ${PIPESTATUS[1]}
+    - name: realm leave; echo $BINDPW | realm --verbose join --computer-name={{ ad.server_hostname }} --user={{salt['pillar.get']('sssd-ad:username')}} {{salt['pillar.get']('sssd-ad:domain')}} 2>&1 | tee -a /var/log/realm.log && exit ${PIPESTATUS[1]}
 {% endif %}
     - unless: realm list | grep -qi {{salt['pillar.get']('sssd-ad:domain')}} && test -f /etc/krb5.keytab
     - failhard: True
@@ -115,16 +114,16 @@ ldif_to_add_machine_to_domain_admin:
   file.managed:
     - name: /opt/salt/add-machine-to-admin.ldif
     - contents: |
-        dn: CN=Domain Admins,CN=Users,{{ domain_component }}
+        dn: CN=Domain Admins,CN=Users,{{ ad.domain_component }}
         changetype: modify
         add: member
-        member: CN={{ server_hostname }},CN=Computers,{{ domain_component }}
+        member: CN={{ ad.server_hostname }},CN=Computers,{{ ad.domain_component }}
 
 ldapmodify_make_machine_admin:
   cmd.run:
     - name: ldapmodify -H {{ salt['pillar.get']('ldap:connectionURL') }} -D "{{ salt['pillar.get']('ldap:bindDn') }}" -w {{ salt['pillar.get']('ldap:bindPasswordEscaped') }} -f /opt/salt/add-machine-to-admin.ldif
     - failhard: True
-    - unless: ldapsearch -LLL -H {{ salt['pillar.get']('ldap:connectionURL') }} -D "{{ salt['pillar.get']('ldap:bindDn') }}" -w {{ salt['pillar.get']('ldap:bindPasswordEscaped') }} -b "CN=Domain Admins,CN=Users,{{ domain_component }}" member | grep -q "CN={{ server_hostname }},CN=Computers,{{ domain_component }}"
+    - unless: ldapsearch -LLL -H {{ salt['pillar.get']('ldap:connectionURL') }} -D "{{ salt['pillar.get']('ldap:bindDn') }}" -w {{ salt['pillar.get']('ldap:bindPasswordEscaped') }} -b "CN=Domain Admins,CN=Users,{{ ad.domain_component }}" member | grep -q "CN={{ ad.server_hostname }},CN=Computers,{{ ad.domain_component }}"
 
 {%- endif %}
 

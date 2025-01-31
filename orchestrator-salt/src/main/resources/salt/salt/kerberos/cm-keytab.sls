@@ -39,7 +39,7 @@ replace_max_renew_life:
 
 
 {% if "ad_member" in grains.get('roles', []) %}
-{%- set server_hostname = salt['grains.get']('host') %}
+{% from 'sssd/ad-settings.sls' import ad with context %}
 
 configure_cm_principal_ad:
   file.managed:
@@ -47,7 +47,7 @@ configure_cm_principal_ad:
     - user: cloudera-scm
     - group: cloudera-scm
     - mode: 600
-    - contents: {{ server_hostname }}$
+    - contents: {{ ad.server_hostname }}$
 
 copy_keytab_cm:
   file.copy:
