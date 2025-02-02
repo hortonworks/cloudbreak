@@ -49,11 +49,13 @@ import com.sequenceiq.cloudbreak.core.flow2.event.AwsVariantMigrationTriggerEven
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.CoreVerticalScalingTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.ImageValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StopStartUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.service.EmbeddedDbUpgradeFlowTriggersFactory;
 import com.sequenceiq.cloudbreak.core.flow2.stack.migration.AwsVariantMigrationEvent;
+import com.sequenceiq.cloudbreak.core.flow2.validate.image.config.ImageValidationEvent;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -197,6 +199,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
 
         Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
         flowTriggers.add(new FlowChainInitPayload(getName(), event.getResourceId(), event.accepted()));
+        flowTriggers.add(new ImageValidationTriggerEvent(ImageValidationEvent.IMAGE_VALIDATION_EVENT.event(), event.getResourceId()));
         if (!stoppedInstances.isEmpty() && stackView.getType().equals(StackType.WORKLOAD)) {
             addClusterScaleTriggerEventIfNeeded(stackView, flowTriggers, stoppedInstances, hostGroup);
         }
