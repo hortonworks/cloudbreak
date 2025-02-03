@@ -46,7 +46,7 @@ webhdfs_command()   {
     local query=$3
     exec {out_fd}>&1
     echo "webhdfs_command HTTP response:"
-    local http_code=$(curl --cookie-jar $WEBHDFS_COOKIE_JAR --cookie $WEBHDFS_COOKIE_JAR \
+    local http_code=$(curl -k --cookie-jar $WEBHDFS_COOKIE_JAR --cookie $WEBHDFS_COOKIE_JAR \
       -o >(cat >&${out_fd}) \
       --silent \
       --noproxy '*' \
