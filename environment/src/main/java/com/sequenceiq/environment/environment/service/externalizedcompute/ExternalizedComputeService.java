@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,6 +35,7 @@ import com.sequenceiq.environment.environment.validation.EnvironmentFlowValidato
 import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.environment.exception.EnvironmentServiceException;
 import com.sequenceiq.environment.exception.ExternalizedComputeOperationFailedException;
+import com.sequenceiq.environment.exception.ExternalizedComputeValidationFailedException;
 import com.sequenceiq.environment.util.PollingConfig;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterApiStatus;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterBase;
@@ -221,20 +223,28 @@ public class ExternalizedComputeService {
         environmentService.save(environment);
     }
 
-    public void awaitComputeClusterCreation(Environment environment, String computeClusterName) {
-        ExtendedPollingResult pollWithTimeout = computeClusterPollingService.pollWithTimeout(
-                new ComputeClusterCreationRetrievalTask(this, eventSenderService, environmentService),
-                new ComputeClusterPollerObject(environment.getId(), environment.getResourceCrn(), computeClusterName),
-                ComputeClusterCreationRetrievalTask.COMPUTE_CLUSTER_RETRYING_INTERVAL,
-                ComputeClusterCreationRetrievalTask.COMPUTE_CLUSTER_RETRYING_COUNT,
-                ComputeClusterCreationRetrievalTask.COMPUTE_CLUSTER_FAILURE_COUNT);
-        if (!pollWithTimeout.isSuccess()) {
-            LOGGER.info("Compute cluster creation polling has stopped due to the unsuccessful result: {}", pollWithTimeout.getPollingResult());
-            Optional.ofNullable(pollWithTimeout.getException()).ifPresentOrElse(e -> {
-                throw new ExternalizedComputeOperationFailedException(e.getMessage());
-            }, () -> {
-                throw new ExternalizedComputeOperationFailedException("Polling result was: " + pollWithTimeout.getPollingResult());
-            });
+    public void awaitComputeClusterCreation(Environment environment, String computeClusterName) throws ExternalizedComputeOperationFailedException {
+        try {
+            ExtendedPollingResult pollWithTimeout = computeClusterPollingService.pollWithTimeout(
+                    new ComputeClusterCreationRetrievalTask(this, eventSenderService, environmentService),
+                    new ComputeClusterPollerObject(environment.getId(), environment.getResourceCrn(), computeClusterName),
+                    ComputeClusterCreationRetrievalTask.COMPUTE_CLUSTER_RETRYING_INTERVAL,
+                    ComputeClusterCreationRetrievalTask.COMPUTE_CLUSTER_RETRYING_COUNT,
+                    ComputeClusterCreationRetrievalTask.COMPUTE_CLUSTER_FAILURE_COUNT);
+            if (!pollWithTimeout.isSuccess()) {
+                LOGGER.info("Compute cluster creation polling has stopped due to the unsuccessful result: {}", pollWithTimeout.getPollingResult());
+                Optional.ofNullable(pollWithTimeout.getException()).ifPresentOrElse(e -> {
+                    throw new ExternalizedComputeOperationFailedException(e.getMessage());
+                }, () -> {
+                    throw new ExternalizedComputeOperationFailedException("Polling result was: " + pollWithTimeout.getPollingResult());
+                });
+            }
+        } catch (Exception e) {
+            if (ExceptionUtils.getRootCause(e) instanceof ExternalizedComputeValidationFailedException) {
+                clearDefaultComputeClusterProperties(environment);
+            }
+            LOGGER.error("Compute cluster creation failed", e);
+            throw new ExternalizedComputeOperationFailedException(ExceptionUtils.getRootCause(e).getMessage(), e);
         }
     }
 
@@ -243,5 +253,11 @@ public class ExternalizedComputeService {
                 credentialName, region);
         LOGGER.debug("Validate credential result: {}", validateCredentialResult);
         return validateCredentialResult;
+    }
+
+    private void clearDefaultComputeClusterProperties(Environment environment) {
+        LOGGER.info("Clearing default compute cluster properties for environment: '{}'", environment.getName());
+        environment.setDefaultComputeCluster(new DefaultComputeCluster());
+        environmentService.save(environment);
     }
 }

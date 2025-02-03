@@ -11,7 +11,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ValidationResponse;
 import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ValidationResult;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
 @ExtendWith(MockitoExtension.class)
 class LiftieValidationResponseUtilTest {
@@ -38,7 +37,7 @@ class LiftieValidationResponseUtilTest {
                         .build())
                 .build();
 
-        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
+        LiftieValidationFailedException exception = assertThrows(LiftieValidationFailedException.class,
                 () -> underTest.throwException(validationResponse));
 
         assertEquals("Validation failed: Error: Failed 1 message. Reason: Detailed message 1. Error: Failed 2 message. Reason: Detailed message 2.",

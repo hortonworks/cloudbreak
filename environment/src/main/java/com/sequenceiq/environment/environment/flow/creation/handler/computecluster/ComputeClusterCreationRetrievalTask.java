@@ -18,6 +18,7 @@ import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.externalizedcompute.ExternalizedComputeService;
 import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.environment.exception.ExternalizedComputeOperationFailedException;
+import com.sequenceiq.environment.exception.ExternalizedComputeValidationFailedException;
 import com.sequenceiq.environment.store.EnvironmentInMemoryStateStore;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterApiStatus;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterResponse;
@@ -67,6 +68,10 @@ public class ComputeClusterCreationRetrievalTask extends SimpleStatusCheckerTask
             } else if (status.isDeletionInProgress() || status.isDeleted()) {
                 LOGGER.warn("Compute cluster {} is getting terminated (status:'{}'), polling is cancelled.", name, status);
                 throw new ExternalizedComputeOperationFailedException(String.format("Compute cluster %s deleted under the creation process.", name));
+            } else if (status.isValidationFailed()) {
+                LOGGER.warn("Compute cluster {} creation failed due to validation error (status:'{}'), polling is cancelled.", name, status);
+                throw new ExternalizedComputeValidationFailedException(String.format("Compute cluster %s creation failed due to validation error. Reason: %s",
+                        name, computeCluster.getStatusReason()));
             } else if (status.isFailed()) {
                 LOGGER.warn("Compute cluster {} is in failed state (status:'{}'), polling is cancelled.", name, status);
                 throw new ExternalizedComputeOperationFailedException(String.format("Compute cluster %s failed. Reason: %s",

@@ -14,6 +14,10 @@ import com.sequenceiq.it.cloudbreak.microservice.ExternalizedComputeClusterClien
 @Service
 public class ExternalizedComputeClusterTestClient {
 
+    public Action<ExternalizedComputeClusterTestDto, ExternalizedComputeClusterClient> describeDefaultNotExists() {
+        return new ExternalizedComputeClusterDescribeDefaultAction();
+    }
+
     public Action<ExternalizedComputeClusterTestDto, ExternalizedComputeClusterClient> describeDefault() {
         return new ExternalizedComputeClusterDescribeDefaultAction();
     }

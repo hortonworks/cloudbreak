@@ -34,6 +34,7 @@ import static com.sequenceiq.environment.environment.flow.creation.event.EnvCrea
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -346,10 +347,13 @@ public class EnvCreationActions {
                 environmentService
                         .findEnvironmentById(payload.getResourceId())
                         .ifPresentOrElse(environment -> {
-                            environment.setStatusReason(exception.getMessage());
-                            if (exception.getCause() != null && ExternalizedComputeOperationFailedException.class.equals(exception.getCause().getClass())) {
+                            ExternalizedComputeOperationFailedException externalizedException =
+                                    ExceptionUtils.throwableOfType(exception, ExternalizedComputeOperationFailedException.class);
+                            if (externalizedException != null) {
+                                environment.setStatusReason(externalizedException.getMessage());
                                 environment.setStatus(EnvironmentStatus.AVAILABLE);
                             } else {
+                                environment.setStatusReason(exception.getMessage());
                                 environment.setStatus(EnvironmentStatus.CREATE_FAILED);
                             }
                             environmentService.save(environment);

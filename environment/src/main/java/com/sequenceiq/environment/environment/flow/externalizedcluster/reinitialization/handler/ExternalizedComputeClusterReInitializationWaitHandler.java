@@ -18,6 +18,7 @@ import com.sequenceiq.environment.environment.flow.externalizedcluster.reinitial
 import com.sequenceiq.environment.environment.flow.externalizedcluster.reinitialization.event.ExternalizedComputeClusterReInitializationFailedEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.externalizedcompute.ExternalizedComputeService;
+import com.sequenceiq.environment.exception.ExternalizedComputeOperationFailedException;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
@@ -48,7 +49,12 @@ public class ExternalizedComputeClusterReInitializationWaitHandler extends Excep
         Environment environment = environmentService.findEnvironmentByIdOrThrow(environmentDto.getId());
         LOGGER.debug("Compute cluster reinitialization waiting flow step started.");
         String computeClusterName = externalizedComputeService.getDefaultComputeClusterName(environment.getName());
-        externalizedComputeService.awaitComputeClusterCreation(environment, computeClusterName);
+        try {
+            externalizedComputeService.awaitComputeClusterCreation(environment, computeClusterName);
+        } catch (ExternalizedComputeOperationFailedException e) {
+            LOGGER.error("Compute cluster reinitialization waiting failed.", e);
+            return new ExternalizedComputeClusterReInitializationFailedEvent(event.getData(), e, EnvironmentStatus.AVAILABLE);
+        }
         LOGGER.debug("Compute cluster reinitialization waiting successfully finished.");
         return ExternalizedComputeClusterReInitializationEvent.builder()
                 .withResourceId(environmentDto.getResourceId())

@@ -7,7 +7,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ValidationResponse;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
 @Component
 public class LiftieValidationResponseUtil {
@@ -25,7 +24,7 @@ public class LiftieValidationResponseUtil {
                 }
             });
             if (!failedValidationMessages.isEmpty()) {
-                throw new CloudbreakServiceException("Validation failed: " + String.join(" ", failedValidationMessages));
+                throw new LiftieValidationFailedException("Validation failed: " + String.join(" ", failedValidationMessages));
             }
         }
     }

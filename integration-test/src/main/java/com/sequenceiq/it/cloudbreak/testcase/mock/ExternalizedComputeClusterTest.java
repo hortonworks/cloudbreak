@@ -1,12 +1,16 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpMethod;
 import org.testng.annotations.Test;
 
@@ -75,6 +79,58 @@ public class ExternalizedComputeClusterTest extends AbstractMockTest {
                 .when(externalizedComputeClusterTestClient.describe())
                 .when(externalizedComputeClusterTestClient.delete())
                 .awaitForFlow()
+                .await(ExternalizedComputeClusterApiStatus.DELETED)
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is a running cloudbreak",
+            when = "create an env with externalized compute service",
+            then = "these should be available")
+    public void testCreateExternalizedComputeClusterValidationFail(MockedTestContext testContext) {
+        String envName = StringUtils.substring("validationfailenv" + UUID.randomUUID().getMostSignificantBits(), 0, 27);
+        testContext
+                .given(EnvironmentNetworkTestDto.class)
+                .given(EnvironmentTestDto.class)
+                .withName(envName)
+                .withExternalizedComputeCluster()
+                .withNetwork()
+                .withCreateFreeIpa(true)
+                .withOneFreeIpaNode()
+                .withFreeIpaImage(imageCatalogMockServerSetup.getFreeIpaImageCatalogUrl(), "f6e778fc-7f17-4535-9021-515351df3691")
+                .when(environmentTestClient.create())
+                .await(EnvironmentStatus.AVAILABLE)
+                .when(environmentTestClient.describe())
+                .then((testContext1, envDto, client) -> {
+                    String statusReason = envDto.getResponse().getStatusReason();
+                    if (!statusReason.contains("Validation error!")) {
+                        throw new TestFailException("Status reason should contain 'Validation error!' message");
+                    }
+                    return envDto;
+                })
+                .given(ExternalizedComputeClusterTestDto.class)
+                .when(externalizedComputeClusterTestClient.describeDefaultNotExists())
+                .given(EnvironmentTestDto.class)
+                .when(environmentTestClient.reInitializeDefaultExternalizedComputeCluster(true))
+                .awaitForFlow(emptyRunningParameter().withWaitForFlowFail())
+                .when(environmentTestClient.describe())
+                .then((testContext1, envDto, client) -> {
+                    EnvironmentStatus environmentStatus = envDto.getResponse().getEnvironmentStatus();
+                    if (!EnvironmentStatus.AVAILABLE.equals(environmentStatus)) {
+                        throw new TestFailException("Environment status should be AVAILABLE");
+                    }
+                    String statusReason = envDto.getResponse().getStatusReason();
+                    if (!statusReason.contains("Validation error!")) {
+                        throw new TestFailException("Status reason should contain 'Validation error!' message");
+                    }
+                    return envDto;
+                })
+                .when(environmentTestClient.delete())
+                .awaitForFlow()
+                .await(EnvironmentStatus.ARCHIVED)
+                .given(ExternalizedComputeClusterTestDto.class)
+                .when(externalizedComputeClusterTestClient.describeDeleted())
                 .await(ExternalizedComputeClusterApiStatus.DELETED)
                 .validate();
     }

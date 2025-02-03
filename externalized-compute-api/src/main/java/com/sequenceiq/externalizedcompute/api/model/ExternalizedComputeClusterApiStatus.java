@@ -12,10 +12,11 @@ public enum ExternalizedComputeClusterApiStatus {
     DELETED,
     AVAILABLE,
     CREATE_FAILED,
+    CREATION_VALIDATION_FAILED,
     DELETE_FAILED,
     UNKNOWN;
 
-    private static final Set<ExternalizedComputeClusterApiStatus> FAILED_STATUSES = EnumSet.of(CREATE_FAILED, DELETE_FAILED);
+    private static final Set<ExternalizedComputeClusterApiStatus> FAILED_STATUSES = EnumSet.of(CREATE_FAILED, CREATION_VALIDATION_FAILED, DELETE_FAILED);
 
     public boolean isFailed() {
         return FAILED_STATUSES.contains(this);
@@ -27,6 +28,10 @@ public enum ExternalizedComputeClusterApiStatus {
 
     public boolean isDeletionInProgress() {
         return DELETE_IN_PROGRESS.equals(this);
+    }
+
+    public boolean isValidationFailed() {
+        return CREATION_VALIDATION_FAILED.equals(this);
     }
 
     public boolean isDeleted() {

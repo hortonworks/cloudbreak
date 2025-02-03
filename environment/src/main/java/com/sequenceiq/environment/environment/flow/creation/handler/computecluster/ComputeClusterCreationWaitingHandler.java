@@ -16,6 +16,7 @@ import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEve
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.externalizedcompute.ExternalizedComputeService;
+import com.sequenceiq.environment.exception.ExternalizedComputeOperationFailedException;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -52,7 +53,12 @@ public class ComputeClusterCreationWaitingHandler extends ExceptionCatcherEventH
         Environment environment = environmentService.findEnvironmentByIdOrThrow(environmentDto.getId());
         LOGGER.debug("Compute cluster creation waiting flow step started.");
         String computeClusterName = externalizedComputeService.getDefaultComputeClusterName(environment.getName());
-        externalizedComputeService.awaitComputeClusterCreation(environment, computeClusterName);
+        try {
+            externalizedComputeService.awaitComputeClusterCreation(environment, computeClusterName);
+        } catch (ExternalizedComputeOperationFailedException e) {
+            LOGGER.error("Compute cluster creation waiting failed.", e);
+            return new EnvCreationFailureEvent(environmentDto.getId(), environmentDto.getName(), e, environmentDto.getResourceCrn());
+        }
         LOGGER.debug("Compute cluster creation waiting successfully finished.");
         return EnvCreationEvent.builder()
                 .withResourceId(environmentDto.getResourceId())

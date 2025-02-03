@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -21,6 +22,7 @@ import com.sequenceiq.externalizedcompute.flow.ExternalizedComputeClusterContext
 import com.sequenceiq.externalizedcompute.flow.ExternalizedComputeClusterEvent;
 import com.sequenceiq.externalizedcompute.service.ExternalizedComputeClusterCreateService;
 import com.sequenceiq.externalizedcompute.service.ExternalizedComputeClusterStatusService;
+import com.sequenceiq.externalizedcompute.util.LiftieValidationFailedException;
 
 @Configuration
 public class ExternalizedComputeClusterCreateActions {
@@ -103,8 +105,15 @@ public class ExternalizedComputeClusterCreateActions {
                 if (payload.getException() != null && payload.getException().getMessage() != null) {
                     reason = payload.getException().getMessage();
                 }
-                externalizedComputeClusterStatusService.setStatus(context.getExternalizedComputeId(), ExternalizedComputeClusterStatusEnum.CREATE_FAILED,
-                        "Cluster provision failed due to: " + reason);
+                if (ExceptionUtils.getRootCause(payload.getException()) instanceof LiftieValidationFailedException validationFailedException) {
+                    externalizedComputeClusterStatusService.setStatus(context.getExternalizedComputeId(),
+                            ExternalizedComputeClusterStatusEnum.CREATION_VALIDATION_FAILED,
+                            "Cluster validation failed due to: " + validationFailedException.getMessage());
+                } else {
+                    externalizedComputeClusterStatusService.setStatus(context.getExternalizedComputeId(), ExternalizedComputeClusterStatusEnum.CREATE_FAILED,
+                            "Cluster provision failed due to: " + reason);
+                }
+
                 LOGGER.warn("Cluster provision failed", payload.getException());
                 sendEvent(context, EXTERNALIZED_COMPUTE_CLUSTER_CREATE_FAIL_HANDLED_EVENT.event(), payload);
             }

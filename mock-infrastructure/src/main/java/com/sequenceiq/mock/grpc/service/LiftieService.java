@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicGrpc.LiftiePublicImplBase;
+import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto;
 import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.CommonStatusMessage;
 import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.CreateClusterRequest;
 import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.CreateClusterResponse;
@@ -41,9 +42,16 @@ public class LiftieService extends LiftiePublicImplBase {
     @Override
     public void createCluster(CreateClusterRequest request,
             io.grpc.stub.StreamObserver<CreateClusterResponse> responseObserver) {
-        String liftieId = liftieExperienceStoreService
-                .create(request.getEnvironment(), Crn.fromString(request.getEnvironment()).getAccountId(), request.getName(), request.getIsDefault());
-        responseObserver.onNext(CreateClusterResponse.newBuilder().setClusterId(liftieId).build());
+        String environment = request.getEnvironment();
+        if (request.getName().contains("validationfail")) {
+            responseObserver.onNext(CreateClusterResponse.newBuilder().setValidationResponse(LiftieSharedProto.ValidationResponse.newBuilder().addValidations(
+                            LiftieSharedProto.ValidationResult.newBuilder().setStatus("FAILED").setMessage("Validation error!").build()).build())
+                    .build());
+        } else {
+            String liftieId = liftieExperienceStoreService
+                    .create(environment, Crn.fromString(environment).getAccountId(), request.getName(), request.getIsDefault());
+            responseObserver.onNext(CreateClusterResponse.newBuilder().setClusterId(liftieId).build());
+        }
         responseObserver.onCompleted();
     }
 

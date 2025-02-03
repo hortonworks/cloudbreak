@@ -189,6 +189,7 @@ class EnvCreationActionsTest {
         Action<?, ?> action = configureAction(() -> underTest.failedAction());
         action.execute(stateContext);
         verify(environment).setStatus(EnvironmentStatus.AVAILABLE);
+        verify(environment).setStatusReason("Liftie cluster failed");
     }
 
     private void testFailure(Supplier<Action<?, ?>> creationAction) {

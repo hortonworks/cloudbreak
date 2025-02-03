@@ -9,6 +9,7 @@ public enum ExternalizedComputeClusterStatusEnum {
     DELETED,
     AVAILABLE,
     CREATE_FAILED,
+    CREATION_VALIDATION_FAILED,
     DELETE_FAILED,
     UNKNOWN;
 
@@ -21,7 +22,7 @@ public enum ExternalizedComputeClusterStatusEnum {
     }
 
     public boolean isFailed() {
-        return CREATE_FAILED.equals(this) || DELETE_FAILED.equals(this);
+        return CREATE_FAILED.equals(this) || DELETE_FAILED.equals(this) || CREATION_VALIDATION_FAILED.equals(this);
     }
 
     public boolean isInProgress() {
