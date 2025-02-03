@@ -1184,7 +1184,7 @@ public class AwsPlatformResources implements PlatformResources {
                     accountId,
                     entitlements
             );
-            CloudVmTypes cloudVmTypes = virtualMachines(extendedCloudCredential, location.getRegion(), Map.of());
+            CloudVmTypes cloudVmTypes = virtualMachines(extendedCloudCredential, location.getRegion(), Map.of(ARCHITECTURE, Architecture.ALL_ARCHITECTURE));
             Map<String, Set<VmType>> cloudVmResponses = cloudVmTypes.getCloudVmResponses();
             Map<String, VolumeParameterConfig> instanceTypeToInstanceStorageMap = cloudVmResponses.getOrDefault(location.getAvailabilityZone().value(), Set.of())
                     .stream()

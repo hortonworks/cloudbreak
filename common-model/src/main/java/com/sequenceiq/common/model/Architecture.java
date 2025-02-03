@@ -11,6 +11,8 @@ public enum Architecture {
     X86_64,
     ARM64;
 
+    public static final String ALL_ARCHITECTURE = "ALL";
+
     public static Architecture fromStringWithFallback(String architecture) {
         return fromString(architecture, true);
     }
