@@ -7,8 +7,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.http.HttpStatus;
 
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
@@ -25,13 +28,13 @@ class FingerprintFromSbCollectorTest {
     private SaltConnector sc = mock(SaltConnector.class);
 
     @Test
-    public void testAnyExceptionConverted() {
+    void testAnyExceptionConverted() {
         when(sc.collectFingerPrints(any(FingerprintRequest.class))).thenThrow(new RuntimeException("random"));
         assertThrows(CloudbreakOrchestratorFailedException.class, () -> underTest.collectFingerprintFromMinions(sc, List.of()));
     }
 
     @Test
-    public void testHttpStatusValidation() {
+    void testHttpStatusValidation() {
         FingerprintsResponse response = new FingerprintsResponse();
         response.setStatusCode(HttpStatus.SERVICE_UNAVAILABLE.value());
         when(sc.collectFingerPrints(any(FingerprintRequest.class))).thenReturn(response);
@@ -39,7 +42,7 @@ class FingerprintFromSbCollectorTest {
     }
 
     @Test
-    public void testAllMinionsCollectedValidation() {
+    void testAllMinionsCollectedValidation() {
         FingerprintsResponse response = new FingerprintsResponse();
         response.setStatusCode(HttpStatus.OK.value());
         Fingerprint fp = new Fingerprint();
@@ -59,15 +62,25 @@ class FingerprintFromSbCollectorTest {
         assertThrows(CloudbreakOrchestratorFailedException.class, () -> underTest.collectFingerprintFromMinions(sc, List.of(m1, m2)));
     }
 
-    @Test
-    public void testSuccessfulCollection() throws CloudbreakOrchestratorFailedException {
+    private static Stream<List<String>> testSuccessfulCollectionParams() {
+        return Stream.of(
+                // Same saltboot https setting on all nodes
+                List.of("", ""),
+                // Different saltboot https setting on some nodes
+                List.of(":7070", ":7071")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("testSuccessfulCollectionParams")
+    void testSuccessfulCollection(List<String> ports) throws CloudbreakOrchestratorFailedException {
         FingerprintsResponse response = new FingerprintsResponse();
         response.setStatusCode(HttpStatus.OK.value());
         Fingerprint fp = new Fingerprint();
-        fp.setAddress("1.1.1.1");
+        fp.setAddress("1.1.1.1" + ports.get(0));
         fp.setFingerprint("asdf");
         Fingerprint fp2 = new Fingerprint();
-        fp2.setAddress("1.1.1.2");
+        fp2.setAddress("1.1.1.2" + ports.get(1));
         fp2.setFingerprint("gfsd");
         response.setFingerprints(List.of(fp, fp2));
         when(sc.collectFingerPrints(any(FingerprintRequest.class))).thenReturn(response);

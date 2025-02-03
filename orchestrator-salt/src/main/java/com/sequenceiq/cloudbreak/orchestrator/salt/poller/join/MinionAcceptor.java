@@ -128,7 +128,8 @@ public class MinionAcceptor {
         Map<String, String> minionIdByAddress = minions.stream().collect(Collectors.toMap(Minion::getAddress, Minion::getId));
         List<Fingerprint> fingerprints = fingerprintsResponse.getFingerprints();
         return fingerprints.stream()
-                .collect(Collectors.toMap(fp -> minionIdByAddress.get(fp.getAddress()), Fingerprint::getFingerprint));
+                .filter(fp -> fp.getIpFromAddress() != null)
+                .collect(Collectors.toMap(fp -> minionIdByAddress.get(fp.getIpFromAddress()), Fingerprint::getFingerprint));
     }
 
     private MinionKeysOnMasterResponse fetchMinionsFromMaster(SaltConnector sc, List<Minion> minions) throws CloudbreakOrchestratorFailedException {

@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.poller.join;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +36,10 @@ public class FingerprintFromSbCollector implements FingerprintCollector {
     }
 
     private void validateAllMinionsCollected(List<Minion> minionsToAccept, FingerprintsResponse response) throws CloudbreakOrchestratorFailedException {
-        List<String> collectedMinionAddress = response.getFingerprints().stream().map(Fingerprint::getAddress).collect(Collectors.toList());
+        List<String> collectedMinionAddress = response.getFingerprints().stream()
+                .map(Fingerprint::getIpFromAddress)
+                .filter(Objects::nonNull)
+                .toList();
         boolean allFingerprintCollected = minionsToAccept.stream().allMatch(minion -> collectedMinionAddress.contains(minion.getAddress()));
         if (!allFingerprintCollected) {
             LOGGER.error("Not all minions' fingerprint has been collected. Minions to collect: [{}] Response: [{}]", minionsToAccept, response);

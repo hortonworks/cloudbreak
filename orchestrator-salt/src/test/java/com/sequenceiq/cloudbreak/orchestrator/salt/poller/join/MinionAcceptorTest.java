@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
@@ -161,8 +163,18 @@ class MinionAcceptorTest {
         assertThrows(CloudbreakOrchestratorFailedException.class, underTest::acceptMinions);
     }
 
-    @Test
-    void testAllMinionsAcceptedWithMatchingFingerprint() throws CloudbreakOrchestratorFailedException {
+    private static List<List<String>> testAllMinionsAcceptedWithMatchingFingerprintParams() {
+        return List.of(
+                // Same saltboot https setting on all nodes
+                List.of("", "", ""),
+                // Different saltboot https setting on some nodes
+                List.of(":7070", ":7071", ":7070")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("testAllMinionsAcceptedWithMatchingFingerprintParams")
+    void testAllMinionsAcceptedWithMatchingFingerprint(List<String> ports) throws CloudbreakOrchestratorFailedException {
         MinionKeysOnMasterResponse keysOnMasterResponse = mock(MinionKeysOnMasterResponse.class);
         MinionFingersOnMasterResponse fingersOnMasterResponse = mock(MinionFingersOnMasterResponse.class);
         FingerprintFromSbCollector fingerprintCollector = mock(FingerprintFromSbCollector.class);
@@ -187,13 +199,13 @@ class MinionAcceptorTest {
 
         Fingerprint fp1 = new Fingerprint();
         fp1.setFingerprint("finger1");
-        fp1.setAddress("1.1.1.1");
+        fp1.setAddress("1.1.1.1" + ports.get(0));
         Fingerprint fp2 = new Fingerprint();
         fp2.setFingerprint("finger2");
-        fp2.setAddress("1.1.1.2");
+        fp2.setAddress("1.1.1.2" + ports.get(1));
         Fingerprint fp3 = new Fingerprint();
         fp3.setFingerprint("badFinger");
-        fp3.setAddress("1.1.1.3");
+        fp3.setAddress("1.1.1.3" + ports.get(2));
 
         when(keysOnMasterResponse.getAllMinions()).thenReturn(List.of("m2.d", "m1.d", "m3.d", "m4.d"));
         when(keysOnMasterResponse.getUnacceptedMinions()).thenReturn(List.of("m2.d", "m1.d", "m3.d"));

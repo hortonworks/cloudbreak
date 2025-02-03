@@ -30,6 +30,10 @@ public class Fingerprint {
         return address;
     }
 
+    public String getIpFromAddress() {
+        return address != null ? address.split(":")[0] : null;
+    }
+
     public void setAddress(String address) {
         this.address = address;
     }
