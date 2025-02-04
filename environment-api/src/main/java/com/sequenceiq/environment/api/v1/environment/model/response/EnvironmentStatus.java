@@ -111,6 +111,12 @@ public enum EnvironmentStatus {
     VERTICAL_SCALE_ON_FREEIPA_FAILED("Vertical Scale on FreeIPA failed"),
     VERTICAL_SCALE_FAILED("Vertical Scale failed"),
 
+    ENABLE_SELINUX_VALIDATION_IN_PROGRESS("Validation for Enable SeLinux"),
+    ENABLE_SELINUX_VALIDATION_FAILED("Validation for Enable SeLinux failed"),
+    ENABLE_SELINUX_ON_FREEIPA_IN_PROGRESS("Enable SeLinux on FreeIPA"),
+    ENABLE_SELINUX_ON_FREEIPA_FAILED("Enable SeLinux on FreeIPA failed"),
+    ENABLE_SELINUX_FAILED("Enable SeLinux failed"),
+
     PROXY_CONFIG_MODIFICATION_IN_PROGRESS("Starting proxy configuration modification"),
     PROXY_CONFIG_MODIFICATION_ON_FREEIPA_IN_PROGRESS("Modifying proxy configuration on FreeIPA"),
     PROXY_CONFIG_MODIFICATION_ON_FREEIPA_FAILED("Failed to modify proxy configuration on FreeIPA"),

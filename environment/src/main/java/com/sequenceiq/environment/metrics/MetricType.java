@@ -26,7 +26,10 @@ public enum MetricType implements Metric {
     ENV_UPGRADE_CCM_FAILED("environment.upgrade.ccm.failed"),
 
     ENV_VERTICAL_SCALE_FINISHED("environment.vertical.scale.finished"),
-    ENV_VERTICAL_SCALE_FAILED("environment.vertical.scale.failed");
+    ENV_VERTICAL_SCALE_FAILED("environment.vertical.scale.failed"),
+
+    ENV_ENABLE_SELINUX_FINISHED("environment.enable.selinux.finished"),
+    ENV_ENABLE_SELINUX_FAILED("environment.enable.selinux.failed");
 
     private final String metricName;
 

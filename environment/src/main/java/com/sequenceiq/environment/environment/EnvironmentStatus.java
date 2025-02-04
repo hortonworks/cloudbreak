@@ -176,6 +176,13 @@ public enum EnvironmentStatus {
     VERTICAL_SCALE_ON_FREEIPA_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.VERTICAL_SCALE_ON_FREEIPA_FAILED),
     VERTICAL_SCALE_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.VERTICAL_SCALE_FAILED),
 
+    // Enabel SeLinux FreeIPA
+    ENABLE_SELINUX_VALIDATION_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.ENABLE_SELINUX_VALIDATION_IN_PROGRESS),
+    ENABLE_SELINUX_VALIDATION_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.ENABLE_SELINUX_VALIDATION_FAILED),
+    ENABLE_SELINUX_ON_FREEIPA_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.ENABLE_SELINUX_ON_FREEIPA_IN_PROGRESS),
+    ENABLE_SELINUX_ON_FREEIPA_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.ENABLE_SELINUX_ON_FREEIPA_FAILED),
+    ENABLE_SELINUX_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.ENABLE_SELINUX_FAILED),
+
     PROXY_CONFIG_MODIFICATION_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.PROXY_CONFIG_MODIFICATION_IN_PROGRESS),
     PROXY_CONFIG_MODIFICATION_ON_FREEIPA_IN_PROGRESS(
             com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.PROXY_CONFIG_MODIFICATION_ON_FREEIPA_IN_PROGRESS),
@@ -278,6 +285,10 @@ public enum EnvironmentStatus {
     }
 
     public boolean isVerticalScaleAllowed() {
+        return !NON_VERTICAL_SCALABLE_STATES.contains(this);
+    }
+
+    public boolean isEnableSeLinuxAllowed() {
         return !NON_VERTICAL_SCALABLE_STATES.contains(this);
     }
 

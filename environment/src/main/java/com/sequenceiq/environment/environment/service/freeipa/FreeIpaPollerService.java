@@ -120,6 +120,10 @@ public class FreeIpaPollerService {
         }
     }
 
+    public void waitForEnableSeLinux(Long envId, String envCrn) {
+        // TODO implement once we have the freeipa flow
+    }
+
     private void executeFreeIpaOperationAndStartPolling(String envCrn, Consumer<String> freeIpaOperation, AttemptMaker<Void> attemptMaker,
             Function<Status, Boolean> shouldRun) {
         Optional<DescribeFreeIpaResponse> freeIpaResponse = freeIpaService.describe(envCrn);
