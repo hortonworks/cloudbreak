@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto;
 import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.DeleteClusterResponse;
 import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ListClusterItem;
 import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ValidateCredentialRequest;
@@ -53,6 +54,8 @@ import com.sequenceiq.liftie.client.LiftieGrpcClient;
 
 @Service
 public class ExternalizedComputeClusterService implements ResourceIdProvider, PayloadContextProvider {
+
+    public static final String DELETING_LIFTIE_STATUS = "DELETING";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExternalizedComputeClusterService.class);
 
@@ -189,19 +192,27 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
     public void initiateDelete(Long id, boolean force) {
         ExternalizedComputeCluster externalizedComputeCluster = getExternalizedComputeCluster(id);
         LOGGER.info("Initiate delete for: {}", externalizedComputeCluster.getName());
-        try {
-            if (externalizedComputeCluster.getLiftieName() != null) {
+        if (externalizedComputeCluster.getLiftieName() != null) {
+            String liftieClusterCrn = getLiftieClusterCrn(externalizedComputeCluster);
+            String internalCrn = regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString();
+            try {
                 DeleteClusterResponse deleteClusterResponse =
-                        liftieGrpcClient.deleteCluster(getLiftieClusterCrn(externalizedComputeCluster),
-                                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                        liftieGrpcClient.deleteCluster(liftieClusterCrn,
+                                internalCrn,
                                 externalizedComputeCluster.getEnvironmentCrn(), force);
                 LOGGER.info("Liftie delete response: {}", deleteClusterResponse);
-            }
-        } catch (Exception e) {
-            if (!e.getMessage().contains("already deleted") && !e.getMessage().contains("not found in database")
-                    && !e.getMessage().contains("existing operation 'Delete'")) {
-                LOGGER.error("Externalized compute cluster deletion failed", e);
-                throw new RuntimeException(e);
+            } catch (Exception e) {
+                if (e.getMessage().contains("existing operation 'Delete'")) {
+                    LiftieSharedProto.DescribeClusterResponse describeClusterResponse = liftieGrpcClient.describeCluster(liftieClusterCrn, internalCrn);
+                    if (!DELETING_LIFTIE_STATUS.equals(describeClusterResponse.getStatus())) {
+                        LOGGER.error("Liftie cluster delete failed, there is a delete operation, but not in "
+                                + DELETING_LIFTIE_STATUS + "status: {}", describeClusterResponse);
+                        throw new RuntimeException(e.getMessage());
+                    }
+                } else if (!e.getMessage().contains("already deleted") && !e.getMessage().contains("not found in database")) {
+                    LOGGER.error("Externalized compute cluster deletion failed", e);
+                    throw new RuntimeException(e.getMessage());
+                }
             }
         }
     }

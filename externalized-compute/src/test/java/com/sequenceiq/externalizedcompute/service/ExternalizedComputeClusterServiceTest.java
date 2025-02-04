@@ -32,6 +32,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto;
 import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.DeleteClusterResponse;
 import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ListClusterItem;
 import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ValidateCredentialRequest;
@@ -201,6 +202,65 @@ class ExternalizedComputeClusterServiceTest {
         clusterService.initiateDelete(1L, true);
 
         verify(liftieGrpcClient).deleteCluster("crn:cdp:compute:us-west-1:account:cluster:liftie1", internalCrn, envCrn, true);
+    }
+
+    @Test
+    public void testDeleteLiftieClusterCrnButDeleteOperationExists() {
+        ReflectionTestUtils.setField(regionAwareCrnGenerator, "partition", "cdp");
+        ReflectionTestUtils.setField(regionAwareCrnGenerator, "region", "us-west-1");
+
+        ExternalizedComputeCluster cluster = new ExternalizedComputeCluster();
+        cluster.setName("cluster");
+        String envCrn = "envCrn";
+        cluster.setEnvironmentCrn(envCrn);
+        cluster.setLiftieName("liftie1");
+        cluster.setAccountId("account");
+
+        when(externalizedComputeClusterRepository.findByIdAndDeletedIsNull(1L)).thenReturn(Optional.of(cluster));
+        RegionAwareInternalCrnGenerator internalCrnGenerator = mock(RegionAwareInternalCrnGenerator.class);
+        String internalCrn = "internalCrn";
+        when(internalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(internalCrn);
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(internalCrnGenerator);
+        String liftieCrn = "crn:cdp:compute:us-west-1:account:cluster:liftie1";
+        String existingOperationMessage = "existing operation 'Delete' running";
+        when(liftieGrpcClient.deleteCluster(liftieCrn, internalCrn, envCrn, false))
+                .thenThrow(new RuntimeException(existingOperationMessage));
+        LiftieSharedProto.DescribeClusterResponse describeClusterResponse = mock(LiftieSharedProto.DescribeClusterResponse.class);
+        when(describeClusterResponse.getStatus()).thenReturn("RUNNING");
+        when(liftieGrpcClient.describeCluster(liftieCrn, internalCrn)).thenReturn(describeClusterResponse);
+        RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> clusterService.initiateDelete(1L, false));
+        assertEquals(existingOperationMessage, runtimeException.getMessage());
+
+        verify(liftieGrpcClient).deleteCluster(liftieCrn, internalCrn, envCrn, false);
+    }
+
+    @Test
+    public void testDeleteLiftieClusterCrnButDeleteOperationExistsButDeletionReallyInProgress() {
+        ReflectionTestUtils.setField(regionAwareCrnGenerator, "partition", "cdp");
+        ReflectionTestUtils.setField(regionAwareCrnGenerator, "region", "us-west-1");
+
+        ExternalizedComputeCluster cluster = new ExternalizedComputeCluster();
+        cluster.setName("cluster");
+        String envCrn = "envCrn";
+        cluster.setEnvironmentCrn(envCrn);
+        cluster.setLiftieName("liftie1");
+        cluster.setAccountId("account");
+
+        when(externalizedComputeClusterRepository.findByIdAndDeletedIsNull(1L)).thenReturn(Optional.of(cluster));
+        RegionAwareInternalCrnGenerator internalCrnGenerator = mock(RegionAwareInternalCrnGenerator.class);
+        String internalCrn = "internalCrn";
+        when(internalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(internalCrn);
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(internalCrnGenerator);
+        String liftieCrn = "crn:cdp:compute:us-west-1:account:cluster:liftie1";
+        String existingOperationMessage = "existing operation 'Delete' running";
+        when(liftieGrpcClient.deleteCluster(liftieCrn, internalCrn, envCrn, false))
+                .thenThrow(new RuntimeException(existingOperationMessage));
+        LiftieSharedProto.DescribeClusterResponse describeClusterResponse = mock(LiftieSharedProto.DescribeClusterResponse.class);
+        when(describeClusterResponse.getStatus()).thenReturn("DELETING");
+        when(liftieGrpcClient.describeCluster(liftieCrn, internalCrn)).thenReturn(describeClusterResponse);
+        clusterService.initiateDelete(1L, false);
+
+        verify(liftieGrpcClient).deleteCluster(liftieCrn, internalCrn, envCrn, false);
     }
 
     @Test
