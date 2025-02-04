@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.template.utils.HostGroupUtils;
 import com.sequenceiq.cloudbreak.template.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.template.validation.BlueprintValidatorUtil;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
@@ -49,16 +50,22 @@ public class CmTemplateValidator implements BlueprintValidator {
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private HostGroupUtils hostGroupUtils;
+
+    @Inject
+    private BlueprintValidatorUtil blueprintValidatorUtil;
+
     @Override
     public void validate(Blueprint blueprint, Set<HostGroup> hostGroups, Collection<InstanceGroupView> instanceGroups,
             boolean validateServiceCardinality) {
         CmTemplateProcessor templateProcessor = processorFactory.get(blueprint.getBlueprintJsonText());
         Map<String, InstanceCount> blueprintHostGroupCardinality = templateProcessor.getCardinalityByHostGroup();
 
-        BlueprintValidatorUtil.validateHostGroupsMatch(hostGroups, blueprintHostGroupCardinality.keySet());
-        BlueprintValidatorUtil.validateInstanceGroups(hostGroups, instanceGroups);
+        blueprintValidatorUtil.validateHostGroupsMatch(hostGroups, blueprintHostGroupCardinality.keySet());
+        blueprintValidatorUtil.validateInstanceGroups(hostGroups, instanceGroups);
         if (validateServiceCardinality) {
-            BlueprintValidatorUtil.validateHostGroupCardinality(hostGroups, blueprintHostGroupCardinality);
+            blueprintValidatorUtil.validateHostGroupCardinality(hostGroups, blueprintHostGroupCardinality);
         }
     }
 
@@ -77,7 +84,9 @@ public class CmTemplateValidator implements BlueprintValidator {
             LOGGER.info("Host group scaling uses forced == true. Skipping validation of black listed roles.");
         } else {
             instanceGroupAdjustments.forEach((hostGroupName, adjustment) -> {
-                validateBlackListedScalingRoles(accountId, templateProcessor, hostGroupName, adjustment, cdhProduct);
+                if (hostGroupUtils.isNotEcsHostGroup(hostGroupName)) {
+                    validateBlackListedScalingRoles(accountId, templateProcessor, hostGroupName, adjustment, cdhProduct);
+                }
             });
         }
     }
@@ -107,7 +116,7 @@ public class CmTemplateValidator implements BlueprintValidator {
     }
 
     private void validateRole(String accountId, BlackListedScaleRole role, Optional<ClouderaManagerProduct> cdhProduct,
-        CmTemplateProcessor templateProcessor) {
+            CmTemplateProcessor templateProcessor) {
         Versioned blueprintVersion = () -> cdhProduct.isEmpty() ? "7.0.0" : cdhProduct.get().getVersion();
         boolean versionEnablesScaling = isVersionEnablesScaling(blueprintVersion, role);
         boolean entitledFor = role.getEntitledFor().isEmpty() ? false : entitlementService.isEntitledFor(accountId, role.getEntitledFor().get());
@@ -158,7 +167,7 @@ public class CmTemplateValidator implements BlueprintValidator {
                 if (hasCommonElement(targetGroups, groupsWithRoles)) {
                     List<InstanceGroup> filteredInstanceGroups = instanceGroups.stream()
                             .filter(instanceGroup -> groupsWithRoles.contains(instanceGroup.getGroupName()))
-                            .collect(Collectors.toList());
+                            .toList();
                     String groupNames = filteredInstanceGroups.stream().map(InstanceGroup::getGroupName).collect(Collectors.joining(", "));
                     LOGGER.debug("Host group(s) with {} role: {}", role, groupNames);
                     filteredInstanceGroups.stream()

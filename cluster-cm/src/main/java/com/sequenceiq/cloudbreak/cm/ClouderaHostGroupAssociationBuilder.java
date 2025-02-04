@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import jakarta.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cluster.model.ClusterHostAttributes;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.template.utils.HostGroupUtils;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 
 @Service
@@ -20,12 +23,17 @@ class ClouderaHostGroupAssociationBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaHostGroupAssociationBuilder.class);
 
+    @Inject
+    private HostGroupUtils hostGroupUtils;
+
     Map<String, List<Map<String, String>>> buildHostGroupAssociations(Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup) {
         Map<String, List<Map<String, String>>> hostGroupMappings = new HashMap<>();
         LOGGER.debug("Computing host - hostGroup mappings based on hostGroup - instanceGroup associations");
         for (Entry<HostGroup, List<InstanceMetaData>> hostGroupListEntry : instanceMetaDataByHostGroup.entrySet()) {
-            List<Map<String, String>> hostInfoForHostGroup = buildHostGroupAssociation(hostGroupListEntry.getValue());
-            hostGroupMappings.put(hostGroupListEntry.getKey().getName(), hostInfoForHostGroup);
+            if (hostGroupUtils.isNotEcsHostGroup(hostGroupListEntry.getKey().getName())) {
+                List<Map<String, String>> hostInfoForHostGroup = buildHostGroupAssociation(hostGroupListEntry.getValue());
+                hostGroupMappings.put(hostGroupListEntry.getKey().getName(), hostInfoForHostGroup);
+            }
         }
         LOGGER.debug("Computed host-hostGroup associations: {}", hostGroupMappings);
         return hostGroupMappings;

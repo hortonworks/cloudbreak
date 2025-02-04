@@ -5,6 +5,8 @@ import static java.util.stream.Collectors.toSet;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 
 import java.util.Collection;
@@ -16,6 +18,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -27,6 +30,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
@@ -35,7 +39,9 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.template.utils.HostGroupUtils;
 import com.sequenceiq.cloudbreak.template.validation.BlueprintValidationException;
+import com.sequenceiq.cloudbreak.template.validation.BlueprintValidatorUtil;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 
@@ -48,6 +54,12 @@ public class CmTemplateValidatorTest {
 
     @Mock
     private EntitlementService entitlementService;
+
+    @Mock
+    private HostGroupUtils hostGroupUtils;
+
+    @Spy
+    private BlueprintValidatorUtil blueprintValidatorUtil;
 
     @InjectMocks
     private CmTemplateValidator subject = new CmTemplateValidator();
@@ -65,6 +77,12 @@ public class CmTemplateValidatorTest {
                 Arguments.of("7.2.13", true),
                 Arguments.of("7.2.16", true)
         );
+    }
+
+    @BeforeEach
+    void init() {
+        lenient().when(hostGroupUtils.isNotEcsHostGroup(any())).thenReturn(true);
+        ReflectionTestUtils.setField(blueprintValidatorUtil, "hostGroupUtils", hostGroupUtils);
     }
 
     @Test

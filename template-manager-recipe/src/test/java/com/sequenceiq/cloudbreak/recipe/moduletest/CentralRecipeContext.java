@@ -7,6 +7,7 @@ import java.util.Map;
 import jakarta.inject.Inject;
 
 import org.mockito.Mockito;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +15,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.vault.core.VaultTemplate;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.recipe.CentralRecipeUpdater;
@@ -42,6 +44,9 @@ public class CentralRecipeContext {
 
         @Inject
         private List<FileSystemConfigurator<?>> fileSystemConfigurators;
+
+        @MockBean
+        private EntitlementService entitlementService;
 
         @Bean
         public Map<FileSystemType, FileSystemConfigurator<?>> fileSystemConfigurators() {

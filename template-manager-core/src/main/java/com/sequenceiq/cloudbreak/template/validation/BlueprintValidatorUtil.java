@@ -8,18 +8,27 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.Maps;
+import jakarta.inject.Inject;
+
+import org.springframework.stereotype.Component;
+
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceCount;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.template.utils.HostGroupUtils;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 
+@Component
 public class BlueprintValidatorUtil {
 
-    private BlueprintValidatorUtil() { }
+    @Inject
+    private HostGroupUtils hostGroupUtils;
 
-    public static void validateHostGroupsMatch(Set<HostGroup> hostGroupsInRequest, Set<String> hostGroupsInBlueprint) {
-        Set<String> hostGroupNamesInRequest = hostGroupsInRequest.stream().map(HostGroup::getName).collect(Collectors.toSet());
+    public void validateHostGroupsMatch(Set<HostGroup> hostGroupsInRequest, Set<String> hostGroupsInBlueprint) {
+        Set<String> hostGroupNamesInRequest = hostGroupsInRequest.stream()
+                .map(HostGroup::getName)
+                .filter(hostGroupUtils::isNotEcsHostGroup)
+                .collect(Collectors.toSet());
         Set<String> missingFromRequest = Set.copyOf(Sets.difference(hostGroupsInBlueprint, hostGroupNamesInRequest));
         Set<String> unknownHostGroups = Set.copyOf(Sets.difference(hostGroupNamesInRequest, hostGroupsInBlueprint));
         if (!missingFromRequest.isEmpty()) {
@@ -32,7 +41,7 @@ public class BlueprintValidatorUtil {
         }
     }
 
-    public static void validateInstanceGroups(Collection<HostGroup> hostGroups, Collection<InstanceGroupView> instanceGroups) {
+    public void validateInstanceGroups(Collection<HostGroup> hostGroups, Collection<InstanceGroupView> instanceGroups) {
         if (!instanceGroups.isEmpty()) {
             Collection<String> instanceGroupNames = new HashSet<>();
             for (HostGroup hostGroup : hostGroups) {
@@ -49,20 +58,12 @@ public class BlueprintValidatorUtil {
         }
     }
 
-    public static Map<String, HostGroup> createHostGroupMap(Iterable<HostGroup> hostGroups) {
-        Map<String, HostGroup> groupMap = Maps.newHashMap();
-        for (HostGroup hostGroup : hostGroups) {
-            groupMap.put(hostGroup.getName(), hostGroup);
-        }
-        return groupMap;
-    }
-
-    public static void validateHostGroupCardinality(Set<HostGroup> hostGroups, Map<String, InstanceCount> blueprintHostGroupCardinality) {
+    public void validateHostGroupCardinality(Set<HostGroup> hostGroups, Map<String, InstanceCount> blueprintHostGroupCardinality) {
         List<String> failures = new LinkedList<>();
         for (HostGroup hostGroup : hostGroups) {
             InstanceCount requiredCount = blueprintHostGroupCardinality.get(hostGroup.getName());
             int count = hostGroup.getInstanceGroup().getNodeCount();
-            if (!requiredCount.isAcceptable(count)) {
+            if (requiredCount != null && !requiredCount.isAcceptable(count)) {
                 failures.add(String.format("(group: '%s', required: %s, actual: %d)", hostGroup.getName(), requiredCount, count));
             }
         }
