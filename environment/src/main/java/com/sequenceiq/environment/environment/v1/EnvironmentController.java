@@ -512,16 +512,16 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.UPGRADE_CCM)
-    public void upgradeCcmByName(
+    public FlowIdentifier upgradeCcmByName(
             @ResourceName String name) {
-        upgradeCcmService.upgradeCcmByName(name);
+        return upgradeCcmService.upgradeCcmByName(name);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.UPGRADE_CCM)
-    public void upgradeCcmByCrn(
+    public FlowIdentifier upgradeCcmByCrn(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn String crn) {
-        upgradeCcmService.upgradeCcmByCrn(crn);
+        return upgradeCcmService.upgradeCcmByCrn(crn);
     }
 
     @Override

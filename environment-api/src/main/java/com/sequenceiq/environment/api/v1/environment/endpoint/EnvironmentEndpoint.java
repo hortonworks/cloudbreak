@@ -349,7 +349,7 @@ public interface EnvironmentEndpoint {
     @Operation(summary = EnvironmentOpDescription.UPGRADE_CCM, description = ENVIRONMENT_NOTES,
             operationId = "upgradeCcmByEnvironmentNameV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    void upgradeCcmByName(@PathParam("name") String name);
+    FlowIdentifier upgradeCcmByName(@PathParam("name") String name);
 
     @PUT
     @Path("/crn/{crn}/upgrade_ccm")
@@ -357,7 +357,7 @@ public interface EnvironmentEndpoint {
     @Operation(summary = EnvironmentOpDescription.UPGRADE_CCM, description = ENVIRONMENT_NOTES,
             operationId = "upgradeCcmByEnvironmentCrnV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    void upgradeCcmByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn);
+    FlowIdentifier upgradeCcmByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn);
 
     @PUT
     @Path("/name/{name}/vertical_scaling")

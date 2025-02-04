@@ -303,22 +303,22 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.SYNC_DATAHUB)
-    public void syncByName(@ResourceName String name) {
+    public FlowIdentifier syncByName(@ResourceName String name) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        stackOperations.sync(NameOrCrn.ofName(name), accountId, EnumSet.of(StackType.WORKLOAD));
+        return stackOperations.sync(NameOrCrn.ofName(name), accountId, EnumSet.of(StackType.WORKLOAD));
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SYNC_DATAHUB)
-    public void syncByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @TenantAwareParam @ResourceCrn String crn) {
+    public FlowIdentifier syncByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @TenantAwareParam @ResourceCrn String crn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        stackOperations.sync(NameOrCrn.ofCrn(crn), accountId, EnumSet.of(StackType.WORKLOAD));
+        return stackOperations.sync(NameOrCrn.ofCrn(crn), accountId, EnumSet.of(StackType.WORKLOAD));
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.RETRY_DATAHUB_OPERATION)
-    public void retryByName(@ResourceName String name) {
-        stackOperations.retry(
+    public FlowIdentifier retryByName(@ResourceName String name) {
+        return stackOperations.retry(
                 NameOrCrn.ofName(name),
                 getWorkspaceIdForCurrentUser());
     }
@@ -334,8 +334,8 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.RETRY_DATAHUB_OPERATION)
-    public void retryByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @TenantAwareParam @ResourceCrn String crn) {
-        stackOperations.retry(NameOrCrn.ofCrn(crn), getWorkspaceIdForCurrentUser());
+    public FlowIdentifier retryByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @TenantAwareParam @ResourceCrn String crn) {
+        return stackOperations.retry(NameOrCrn.ofCrn(crn), getWorkspaceIdForCurrentUser());
     }
 
     @Override

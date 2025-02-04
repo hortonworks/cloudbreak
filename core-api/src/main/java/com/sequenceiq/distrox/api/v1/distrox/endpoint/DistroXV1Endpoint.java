@@ -207,21 +207,21 @@ public interface DistroXV1Endpoint {
     @Operation(summary = SYNC_BY_NAME, description = Notes.STACK_NOTES,
             operationId = "syncDistroXV1ByName",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    void syncByName(@PathParam("name") String name);
+    FlowIdentifier syncByName(@PathParam("name") String name);
 
     @POST
     @Path("crn/{crn}/sync")
     @Operation(summary = SYNC_BY_CRN, description = Notes.STACK_NOTES,
             operationId = "syncDistroXV1ByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    void syncByCrn(@ValidCrn(resource = DATAHUB) @PathParam("crn") String crn);
+    FlowIdentifier syncByCrn(@ValidCrn(resource = DATAHUB) @PathParam("crn") String crn);
 
     @POST
     @Path("name/{name}/retry")
     @Operation(summary = RETRY_BY_NAME, description = Notes.RETRY_STACK_NOTES,
             operationId = "retryDistroXV1ByName",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    void retryByName(@PathParam("name") String name);
+    FlowIdentifier retryByName(@PathParam("name") String name);
 
     @GET
     @Path("name/{name}/retry")
@@ -236,7 +236,7 @@ public interface DistroXV1Endpoint {
     @Operation(summary = RETRY_BY_CRN, description = Notes.RETRY_STACK_NOTES,
             operationId = "retryDistroXV1ByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    void retryByCrn(@ValidCrn(resource = DATAHUB) @PathParam("crn") String crn);
+    FlowIdentifier retryByCrn(@ValidCrn(resource = DATAHUB) @PathParam("crn") String crn);
 
     @PUT
     @Path("name/{name}/stop")
