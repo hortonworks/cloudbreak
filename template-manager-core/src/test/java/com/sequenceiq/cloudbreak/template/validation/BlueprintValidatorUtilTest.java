@@ -96,19 +96,4 @@ public class BlueprintValidatorUtilTest {
         validateHostGroupCardinality(request, requirements);
     }
 
-    @Test
-    public void testValidateHostGroupsMatchForNotRequiredHybridGroup() {
-        Set<HostGroup> request = Set.of(
-                hostGroup("master", 1),
-                hostGroup("worker", 3),
-                hostGroup("ecs", 2)
-        );
-        Map<String, InstanceCount> requirements = Map.of(
-                "master", InstanceCount.EXACTLY_ONE,
-                "worker", InstanceCount.atLeast(3)
-        );
-
-        validateHostGroupCardinality(request, requirements);
-    }
-
 }

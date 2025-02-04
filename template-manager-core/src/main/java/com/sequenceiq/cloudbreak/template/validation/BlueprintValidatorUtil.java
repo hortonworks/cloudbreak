@@ -12,19 +12,14 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceCount;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.template.model.HybridHostGroups;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 
 public class BlueprintValidatorUtil {
 
-    private BlueprintValidatorUtil() {
-    }
+    private BlueprintValidatorUtil() { }
 
     public static void validateHostGroupsMatch(Set<HostGroup> hostGroupsInRequest, Set<String> hostGroupsInBlueprint) {
-        Set<String> hostGroupNamesInRequest = hostGroupsInRequest.stream()
-                .map(HostGroup::getName)
-                .filter(HybridHostGroups::isNotHybridHostGroup)
-                .collect(Collectors.toSet());
+        Set<String> hostGroupNamesInRequest = hostGroupsInRequest.stream().map(HostGroup::getName).collect(Collectors.toSet());
         Set<String> missingFromRequest = Set.copyOf(Sets.difference(hostGroupsInBlueprint, hostGroupNamesInRequest));
         Set<String> unknownHostGroups = Set.copyOf(Sets.difference(hostGroupNamesInRequest, hostGroupsInBlueprint));
         if (!missingFromRequest.isEmpty()) {
@@ -67,7 +62,7 @@ public class BlueprintValidatorUtil {
         for (HostGroup hostGroup : hostGroups) {
             InstanceCount requiredCount = blueprintHostGroupCardinality.get(hostGroup.getName());
             int count = hostGroup.getInstanceGroup().getNodeCount();
-            if (requiredCount != null && !requiredCount.isAcceptable(count)) {
+            if (!requiredCount.isAcceptable(count)) {
                 failures.add(String.format("(group: '%s', required: %s, actual: %d)", hostGroup.getName(), requiredCount, count));
             }
         }

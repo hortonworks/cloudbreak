@@ -26,7 +26,6 @@ import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.template.model.HybridHostGroups;
 import com.sequenceiq.cloudbreak.template.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.template.validation.BlueprintValidatorUtil;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
@@ -78,9 +77,7 @@ public class CmTemplateValidator implements BlueprintValidator {
             LOGGER.info("Host group scaling uses forced == true. Skipping validation of black listed roles.");
         } else {
             instanceGroupAdjustments.forEach((hostGroupName, adjustment) -> {
-                if (HybridHostGroups.isNotHybridHostGroup(hostGroupName)) {
-                    validateBlackListedScalingRoles(accountId, templateProcessor, hostGroupName, adjustment, cdhProduct);
-                }
+                validateBlackListedScalingRoles(accountId, templateProcessor, hostGroupName, adjustment, cdhProduct);
             });
         }
     }
@@ -110,7 +107,7 @@ public class CmTemplateValidator implements BlueprintValidator {
     }
 
     private void validateRole(String accountId, BlackListedScaleRole role, Optional<ClouderaManagerProduct> cdhProduct,
-            CmTemplateProcessor templateProcessor) {
+        CmTemplateProcessor templateProcessor) {
         Versioned blueprintVersion = () -> cdhProduct.isEmpty() ? "7.0.0" : cdhProduct.get().getVersion();
         boolean versionEnablesScaling = isVersionEnablesScaling(blueprintVersion, role);
         boolean entitledFor = role.getEntitledFor().isEmpty() ? false : entitlementService.isEntitledFor(accountId, role.getEntitledFor().get());

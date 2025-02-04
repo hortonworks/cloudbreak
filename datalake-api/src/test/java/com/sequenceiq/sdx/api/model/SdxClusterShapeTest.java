@@ -9,8 +9,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 public class SdxClusterShapeTest {
-    private static final Set<String> EXPECTED_SHAPES = Set.of("custom", "light_duty",
-            "medium_duty_ha", "micro_duty", "enterprise", "containerized", "on_premise_base");
+    private static final Set<String> EXPECTED_SHAPES = Set.of("custom", "light_duty", "medium_duty_ha", "micro_duty", "enterprise", "containerized");
 
     private static final Set<SdxClusterShape> MULTI_AZ_SHAPES = Set.of(SdxClusterShape.MEDIUM_DUTY_HA, SdxClusterShape.ENTERPRISE);
 
