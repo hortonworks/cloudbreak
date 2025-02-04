@@ -95,6 +95,8 @@ public class Environment implements AuthResource, AccountAwareResource {
 
     private String freeIpaImageOs;
 
+    private String freeIpaPlatformVariant;
+
     @Column(nullable = false)
     private boolean freeIpaEnableMultiAz;
 
@@ -584,6 +586,14 @@ public class Environment implements AuthResource, AccountAwareResource {
         this.environmentServiceVersion = environmentServiceVersion;
     }
 
+    public String getFreeIpaPlatformVariant() {
+        return freeIpaPlatformVariant;
+    }
+
+    public void setFreeIpaPlatformVariant(String freeIpaPlatformVariant) {
+        this.freeIpaPlatformVariant = freeIpaPlatformVariant;
+    }
+
     public boolean isFreeIpaEnableMultiAz() {
         return freeIpaEnableMultiAz;
     }
@@ -645,6 +655,7 @@ public class Environment implements AuthResource, AccountAwareResource {
         return "Environment{" +
                 "name='" + name + '\'' +
                 ", cloudPlatform='" + cloudPlatform + '\'' +
+                ", freeIpaPlatformVariant='" + freeIpaPlatformVariant + '\'' +
                 ", freeIpaEnableMultiAz=" + freeIpaEnableMultiAz +
                 ", creator='" + creator + '\'' +
                 ", resourceCrn='" + resourceCrn + '\'' +

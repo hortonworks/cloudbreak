@@ -96,6 +96,7 @@ public class FreeIpaConverter {
         if (request != null) {
             builder.withCreate(request.getCreate());
             builder.withEnableMultiAz(request.isEnableMultiAz());
+            builder.withPlatformVariant(request.getPlatformVariant());
             if (request.isEnableMultiAz()) {
                 if (!multiAzValidator.suportedMultiAzForEnvironment(cloudPlatform)) {
                     throw new BadRequestException(String.format("Multi Availability Zone is not supported for %s",

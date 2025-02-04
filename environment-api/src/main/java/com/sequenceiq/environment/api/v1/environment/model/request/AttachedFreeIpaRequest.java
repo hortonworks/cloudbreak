@@ -31,6 +31,9 @@ public class AttachedFreeIpaRequest implements Serializable {
     @Schema(description = EnvironmentModelDescription.MULTIAZ_FREEIPA)
     private boolean enableMultiAz;
 
+    @Schema(description = EnvironmentModelDescription.CLOUD_PROVIDER_VARIANT)
+    private String platformVariant;
+
     @Schema(description = EnvironmentModelDescription.FREEIPA_RECIPE_LIST)
     private Set<String> recipes;
 
@@ -92,6 +95,7 @@ public class AttachedFreeIpaRequest implements Serializable {
                 ", instanceCountByGroup=" + instanceCountByGroup +
                 ", instanceType=" + instanceType +
                 ", enableMultiAz=" + enableMultiAz +
+                ", platformVariant=" + platformVariant +
                 ", aws=" + aws +
                 ", azure=" + azure +
                 ", gcp=" + gcp +
@@ -138,6 +142,14 @@ public class AttachedFreeIpaRequest implements Serializable {
 
     public void setEnableMultiAz(boolean enableMultiAz) {
         this.enableMultiAz = enableMultiAz;
+    }
+
+    public String getPlatformVariant() {
+        return platformVariant;
+    }
+
+    public void setPlatformVariant(String platformVariant) {
+        this.platformVariant = platformVariant;
     }
 
     public Set<String> getRecipes() {

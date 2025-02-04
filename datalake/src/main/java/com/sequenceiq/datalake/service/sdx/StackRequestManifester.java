@@ -182,12 +182,12 @@ public class StackRequestManifester {
             validateCloudStorage(sdxCluster, environment, stackRequest);
             setupInstanceVolumeEncryption(stackRequest, environment);
             setupMultiAz(sdxCluster, environment, stackRequest);
-            setupGovCloud(environment, stackRequest);
             stackRequest.setExternalDatabase(databaseRequestConverter.createExternalDbRequest(sdxCluster));
             if (isAwsNativePlatformVariantEnforced(environment.getCloudPlatform()) ||
                     isAwsNativePlatformVariantDefaultForRuntimeVersion(environment.getCloudPlatform(), sdxCluster.getRuntime())) {
                 stackRequest.setVariant("AWS_NATIVE");
             }
+            setupGovCloud(environment, stackRequest);
             setupDisableDbSslEnforcement(sdxCluster, stackRequest);
             return stackRequest;
         } catch (IOException e) {

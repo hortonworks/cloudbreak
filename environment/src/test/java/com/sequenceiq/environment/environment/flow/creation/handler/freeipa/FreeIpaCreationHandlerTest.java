@@ -470,6 +470,7 @@ public class FreeIpaCreationHandlerTest {
         environmentDto.setCredential(new Credential());
         Environment environment = new Environment();
         environment.setCreateFreeIpa(true);
+        environment.setFreeIpaPlatformVariant("AWS");
         ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder()
                 .success()
                 .build();
@@ -491,6 +492,7 @@ public class FreeIpaCreationHandlerTest {
         verify(freeIpaService).create(freeIpaRequestCaptor.capture());
         verify(eventSender, times(1)).sendEvent(any(EnvCreationEvent.class), any(Event.Headers.class));
         CreateFreeIpaRequest freeIpaRequest = freeIpaRequestCaptor.getValue();
+        assertEquals("AWS", freeIpaRequest.getVariant());
         assertNull(freeIpaRequest.getImage());
     }
 

@@ -51,6 +51,9 @@ public class SdxClusterRequestBase implements TaggableRequest {
     @Schema(description = ModelDescriptions.RANGER_RMS_ENABLED)
     private boolean enableRangerRms;
 
+    @Schema(description = ModelDescriptions.CLOUD_PROVIDER_VARIANT)
+    private String variant;
+
     @Schema(description = ModelDescriptions.MULTI_AZ_ENABLED)
     private boolean enableMultiAz;
 
@@ -153,6 +156,14 @@ public class SdxClusterRequestBase implements TaggableRequest {
         this.enableMultiAz = enableMultiAz;
     }
 
+    public String getVariant() {
+        return variant;
+    }
+
+    public void setVariant(String variant) {
+        this.variant = variant;
+    }
+
     public SdxAzureRequest getAzure() {
         return azure;
     }
@@ -226,6 +237,7 @@ public class SdxClusterRequestBase implements TaggableRequest {
         toInstance.setAws(aws);
         toInstance.setEnableRangerRaz(enableRangerRaz);
         toInstance.setEnableMultiAz(enableMultiAz);
+        toInstance.setVariant(variant);
         toInstance.setCustomInstanceGroups(customInstanceGroups);
         toInstance.setJavaVersion(javaVersion);
         toInstance.setRecipes(recipes);
@@ -244,6 +256,7 @@ public class SdxClusterRequestBase implements TaggableRequest {
                 ", enableRangerRaz=" + enableRangerRaz +
                 ", enabledRangerRms=" + enableRangerRms +
                 ", enableMultiAz=" + enableMultiAz +
+                ", variant=" + variant +
                 ", javaVersion=" + javaVersion +
                 ", recipes=" + recipes +
                 ", image=" + image +

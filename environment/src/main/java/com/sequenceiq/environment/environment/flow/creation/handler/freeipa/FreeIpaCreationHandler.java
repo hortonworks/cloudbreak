@@ -156,7 +156,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
                 if (Objects.nonNull(environment.getParentEnvironment())) {
                     attachParentFreeIpa(environmentDto);
                 } else if (environment.isCreateFreeIpa() && supportedPlatforms.supportedPlatformForFreeIpa(environment.getCloudPlatform())) {
-                    createFreeIpa(environmentDto);
+                    createFreeIpa(environmentDto, environment.getFreeIpaPlatformVariant());
                 } else {
                     boolean supported = supportedPlatforms.supportedPlatformForFreeIpa(environment.getCloudPlatform());
                     LOGGER.info("Freeipa won't create: parent: {}, create freeipa: {}, {} provider is supproted: {}", environment.getParentEnvironment(),
@@ -172,11 +172,11 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         }
     }
 
-    private void createFreeIpa(EnvironmentDto environmentDto) {
+    private void createFreeIpa(EnvironmentDto environmentDto, String platformVariant) {
         Optional<DescribeFreeIpaResponse> freeIpa = freeIpaService.describe(environmentDto.getResourceCrn());
         if (freeIpa.isEmpty()) {
             LOGGER.info("FreeIpa for environmentCrn '{}' was not found, creating a new one.", environmentDto.getResourceCrn());
-            CreateFreeIpaRequest createFreeIpaRequest = createFreeIpaRequest(environmentDto);
+            CreateFreeIpaRequest createFreeIpaRequest = createFreeIpaRequest(environmentDto, platformVariant);
             freeIpaService.create(createFreeIpaRequest);
             awaitFreeIpaCreation(environmentDto);
         } else {
@@ -238,7 +238,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         return addDnsZoneForSubnetIdsRequest;
     }
 
-    private CreateFreeIpaRequest createFreeIpaRequest(EnvironmentDto environment) {
+    private CreateFreeIpaRequest createFreeIpaRequest(EnvironmentDto environment, String platformVariant) {
         boolean multiAzRequired = environment.getFreeIpaCreation().isEnableMultiAz();
 
         CreateFreeIpaRequest createFreeIpaRequest = new CreateFreeIpaRequest();
@@ -263,7 +263,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         }
         createFreeIpaRequest.setInstanceGroups(createInstanceGroupRequests(createFreeIpaRequest, securityGroupRequest, environment, multiAzRequired));
         createFreeIpaRequest.setRecipes(environment.getFreeIpaCreation().getRecipes());
-        setVariant(environment, createFreeIpaRequest, multiAzRequired);
+        setVariant(environment, createFreeIpaRequest, multiAzRequired, platformVariant);
         setUseCcm(environment.getExperimentalFeatures().getTunnel(), createFreeIpaRequest);
         return createFreeIpaRequest;
     }
@@ -275,7 +275,10 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         createFreeIpaRequest.setSecurity(securityRequest);
     }
 
-    private void setVariant(EnvironmentDto environment, CreateFreeIpaRequest createFreeIpaRequest, boolean multiAzRequired) {
+    private void setVariant(EnvironmentDto environment, CreateFreeIpaRequest createFreeIpaRequest, boolean multiAzRequired, String platformVariant) {
+        if (platformVariant != null) {
+            createFreeIpaRequest.setVariant(platformVariant);
+        }
         if (environment.getCredential().getGovCloud() != null && environment.getCredential().getGovCloud()
                 && CloudPlatform.AWS.name().equals(environment.getCloudPlatform())) {
             createFreeIpaRequest.setVariant(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());

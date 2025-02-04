@@ -139,11 +139,13 @@ public class DistroXV1RequestToStackV4RequestConverter {
     private void calculateVariant(DetailedEnvironmentResponse environment, DistroXV1Request source, StackV4Request request, String runtime) {
         Comparator<Versioned> versionComparator = new VersionComparator();
         if (CloudPlatform.AWS.name().equals(environment.getCloudPlatform()) &&
-                entitlementService.enforceAwsNativeForSingleAzDatahubEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+                entitlementService.enforceAwsNativeForSingleAzDatahubEnabled(ThreadBasedUserCrnProvider.getAccountId())
+                && !environment.getCredential().getGovCloud()) {
             request.setVariant(AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value());
         } else if (CloudPlatform.AWS.name().equals(environment.getCloudPlatform()) &&
                 runtime != null &&
-                versionComparator.compare(() -> runtime, () -> MIN_RUNTIME_VERSION_FOR_DEFAULT_AWS_NATIVE) >= 0) {
+                versionComparator.compare(() -> runtime, () -> MIN_RUNTIME_VERSION_FOR_DEFAULT_AWS_NATIVE) >= 0
+                && !environment.getCredential().getGovCloud()) {
             request.setVariant(AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value());
         } else {
             request.setVariant(source.getVariant());

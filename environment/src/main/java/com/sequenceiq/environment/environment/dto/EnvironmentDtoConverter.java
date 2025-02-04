@@ -181,6 +181,7 @@ public class EnvironmentDtoConverter {
         environment.setFreeIpaInstanceCountByGroup(creationDto.getFreeIpaCreation().getInstanceCountByGroup());
         environment.setFreeIpaInstanceType(creationDto.getFreeIpaCreation().getInstanceType());
         environment.setFreeIpaImageCatalog(creationDto.getFreeIpaCreation().getImageCatalog());
+        environment.setFreeIpaPlatformVariant(creationDto.getFreeIpaCreation().getPlatformVariant());
         environment.setFreeIpaEnableMultiAz(creationDto.getFreeIpaCreation().isEnableMultiAz());
         environment.setDeletionType(NONE);
         environment.setFreeIpaImageId(creationDto.getFreeIpaCreation().getImageId());

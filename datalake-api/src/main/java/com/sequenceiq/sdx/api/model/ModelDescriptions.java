@@ -145,6 +145,8 @@ public class ModelDescriptions {
 
     public static final String MULTI_AZ_ENABLED = "Option to enable multi availability zones.";
 
+    public static final String CLOUD_PROVIDER_VARIANT = "cloud provider variant.";
+
     public static final String TAGS = "Tags.";
 
     public static final String DATA_LAKE_CLUSTER_SERVICE_VERSION = "Data Lake cluster service version.";

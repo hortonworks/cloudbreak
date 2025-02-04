@@ -50,6 +50,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.network.NetworkV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.aws.AwsNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.aws.InstanceGroupAwsNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.tags.TagsV1Request;
+import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.CompactRegionResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -85,6 +86,9 @@ class DistroXV1RequestToStackV4RequestConverterTest {
 
     @Mock
     private SdxConverter sdxConverter;
+
+    @Mock
+    private CredentialResponse credentialResponse;
 
     @Mock
     private TelemetryConverter telemetryConverter;
@@ -129,7 +133,9 @@ class DistroXV1RequestToStackV4RequestConverterTest {
 
     @Test
     void testConvertWithDisabledAwsNativeEntitlementAndRuntimeVersionThatMakesAwsNativeVariantDefault() {
-        when(environmentClientService.getByName(anyString())).thenReturn(createAwsEnvironment());
+        DetailedEnvironmentResponse environmentResponse = createAwsEnvironment();
+        when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
+        when(environmentResponse.getCredential().getGovCloud()).thenReturn(false);
         when(networkConverter.convertToNetworkV4Request(any())).thenReturn(createAwsNetworkV4Request());
         when(databaseRequestConverter.convert(any(DistroXDatabaseRequest.class))).thenReturn(createDatabaseRequest());
         when(entitlementService.enforceAwsNativeForSingleAzDatahubEnabled(anyString())).thenReturn(Boolean.FALSE);
@@ -151,6 +157,35 @@ class DistroXV1RequestToStackV4RequestConverterTest {
         when(entitlementService.enforceAwsNativeForSingleAzDatahubEnabled(anyString())).thenReturn(Boolean.FALSE);
         convert = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(source));
         assertThat(convert.getVariant()).isEqualTo("AWS_NATIVE");
+    }
+
+    @Test
+    void testConvertWithDisabledAwsNativeEntitlementAndRuntimeVersionForAwsGov() {
+        DetailedEnvironmentResponse environmentResponse = createAwsEnvironment();
+        when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
+        when(environmentResponse.getCredential().getGovCloud()).thenReturn(true);
+        when(networkConverter.convertToNetworkV4Request(any())).thenReturn(createAwsNetworkV4Request());
+        when(databaseRequestConverter.convert(any(DistroXDatabaseRequest.class))).thenReturn(createDatabaseRequest());
+        when(entitlementService.enforceAwsNativeForSingleAzDatahubEnabled(anyString())).thenReturn(Boolean.FALSE);
+        SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
+        sdxClusterResponse.setRuntime("7.3.1");
+        when(sdxClientService.getByEnvironmentCrn(anyString())).thenReturn(List.of(sdxClusterResponse));
+
+        DistroXV1Request source = new DistroXV1Request();
+        source.setEnvironmentName("envname");
+        source.setVariant("AWS_NATIVE_GOV");
+        DistroXDatabaseRequest databaseRequest = new DistroXDatabaseRequest();
+        databaseRequest.setAvailabilityType(DistroXDatabaseAvailabilityType.HA);
+        databaseRequest.setDatabaseEngineVersion("13");
+        source.setExternalDatabase(databaseRequest);
+        StackV4Request convert = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(source));
+        assertThat(convert.getExternalDatabase()).isNotNull();
+        assertThat(convert.getExternalDatabase().getAvailabilityType()).isEqualTo(DatabaseAvailabilityType.HA);
+        assertThat(convert.getExternalDatabase().getDatabaseEngineVersion()).isEqualTo("13");
+
+        when(entitlementService.enforceAwsNativeForSingleAzDatahubEnabled(anyString())).thenReturn(Boolean.FALSE);
+        convert = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(source));
+        assertThat(convert.getVariant()).isEqualTo("AWS_NATIVE_GOV");
     }
 
     @Test
@@ -556,6 +591,7 @@ class DistroXV1RequestToStackV4RequestConverterTest {
         env.setCrn("environmentCrn");
         env.setNetwork(createAwsNetwork());
         env.setName("SomeAwesomeEnv");
+        env.setCredential(credentialResponse);
         env.setRegions(createCompactRegionResponse());
         return env;
     }

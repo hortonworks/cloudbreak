@@ -912,6 +912,7 @@ class SdxServiceCreateSdxTest {
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(LIGHT_DUTY, "cdp-default", "imageId_1");
         setSpot(sdxClusterRequest);
         withCloudStorage(sdxClusterRequest);
+        sdxClusterRequest.setVariant("AWS");
         when(imageCatalogService.getImageResponseFromImageRequest(eq(sdxClusterRequest.getImage()), any())).thenReturn(imageResponse);
         when(externalDatabaseConfigurer.configure(any(), eq(OS), any(), any(), any())).thenReturn(new SdxDatabase());
         long id = 10L;
@@ -927,6 +928,7 @@ class SdxServiceCreateSdxTest {
         SdxCluster createdSdxCluster = result.getLeft();
         StackV4Request stackV4Request = JsonUtil.readValue(createdSdxCluster.getStackRequest(), StackV4Request.class);
         assertNotNull(stackV4Request.getImage());
+        assertEquals("AWS", stackV4Request.getVariant());
         assertEquals("cdp-default", stackV4Request.getImage().getCatalog());
         assertEquals("imageId_1", stackV4Request.getImage().getId());
         verify(externalDatabaseConfigurer).configure(any(), eq(OS), any(), any(), any());

@@ -20,6 +20,8 @@ public class FreeIpaCreationDto {
 
     private boolean enableMultiAz;
 
+    private String platformVariant;
+
     private String imageCatalog;
 
     private String imageId;
@@ -36,6 +38,7 @@ public class FreeIpaCreationDto {
         aws = builder.aws;
         imageCatalog = builder.imageCatalog;
         enableMultiAz = builder.enableMultiAz;
+        platformVariant = builder.platformVariant;
         imageId = builder.imageId;
         imageOs = builder.imageOs;
         instanceType = builder.instanceType;
@@ -99,6 +102,14 @@ public class FreeIpaCreationDto {
         this.enableMultiAz = enableMultiAz;
     }
 
+    public String getPlatformVariant() {
+        return platformVariant;
+    }
+
+    public void setPlatformVariant(String platformVariant) {
+        this.platformVariant = platformVariant;
+    }
+
     public String getInstanceType() {
         return instanceType;
     }
@@ -132,6 +143,7 @@ public class FreeIpaCreationDto {
                 ", recipes=" + recipes +
                 ", seLinux=" + seLinux +
                 ", enableMultiAz=" + enableMultiAz +
+                ", platformVariant=" + platformVariant +
                 ", imageCatalog='" + imageCatalog + '\'' +
                 ", imageId='" + imageId + '\'' +
                 ", imageOs='" + imageOs + '\'' +
@@ -159,6 +171,8 @@ public class FreeIpaCreationDto {
         private String imageOs;
 
         private boolean enableMultiAz;
+
+        private String platformVariant;
 
         private String instanceType;
 
@@ -205,6 +219,11 @@ public class FreeIpaCreationDto {
 
         public Builder withEnableMultiAz(boolean enableMultiAz) {
             this.enableMultiAz = enableMultiAz;
+            return this;
+        }
+
+        public Builder withPlatformVariant(String platformVariant) {
+            this.platformVariant = platformVariant;
             return this;
         }
 

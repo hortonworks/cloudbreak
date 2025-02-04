@@ -536,6 +536,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         updateStackV4RequestWithEnvironmentCrnIfNotExistsOnIt(internalStackV4Request, environment.getCrn());
         StackV4Request stackRequest = getStackRequest(sdxClusterRequest.getClusterShape(), internalStackV4Request,
                 cloudPlatform, runtimeVersion, imageSettingsV4Request);
+        if (sdxClusterRequest.getVariant() != null) {
+            stackRequest.setVariant(sdxClusterRequest.getVariant());
+        }
         setStackRequestParams(stackRequest, sdxClusterRequest.getJavaVersion(), sdxClusterRequest.isEnableRangerRaz(), sdxClusterRequest.isEnableRangerRms());
 
         overrideDefaultInstanceType(stackRequest, sdxClusterRequest.getCustomInstanceGroups(), Collections.emptyList(), Collections.emptyList(),
