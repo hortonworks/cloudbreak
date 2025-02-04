@@ -35,14 +35,7 @@
     {
       "name": "worker",
       "template": {
-        "instanceType": "m6a.4xlarge",
-        "attachedVolumes": [
-          {
-            "count": 4,
-            "size": 1024,
-            "type": "gp3"
-          }
-        ],
+        "instanceType": "m5.4xlarge",
         "rootVolume": {
           "size": 500
         }
@@ -50,6 +43,22 @@
       "nodeCount": 3,
       "type": "CORE",
       "recoveryMode": "MANUAL"
+    },
+    {
+      "name": "idbroker",
+      "template": {
+        "instanceType": "t3.medium",
+        "attachedVolumes": [
+          {
+            "count": 0,
+            "type": "standard"
+          }
+        ]
+      },
+      "nodeCount": 1,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
     },
     {
       "name": "master",
