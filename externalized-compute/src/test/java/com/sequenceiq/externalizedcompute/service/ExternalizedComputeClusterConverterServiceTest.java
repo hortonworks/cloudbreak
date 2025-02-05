@@ -4,15 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 
-import java.util.HashMap;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterApiStatus;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterResponse;
 import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeCluster;
@@ -41,7 +38,6 @@ public class ExternalizedComputeClusterConverterServiceTest {
         externalizedComputeCluster.setCreated(123L);
         externalizedComputeCluster.setId(1L);
         externalizedComputeCluster.setAccountId("accid");
-        externalizedComputeCluster.setTags(Json.silent(new HashMap<>()));
         ExternalizedComputeClusterStatus status = new ExternalizedComputeClusterStatus();
         status.setExternalizedComputeCluster(externalizedComputeCluster);
         status.setStatus(ExternalizedComputeClusterStatusEnum.AVAILABLE);
@@ -66,7 +62,6 @@ public class ExternalizedComputeClusterConverterServiceTest {
         externalizedComputeCluster.setCreated(123L);
         externalizedComputeCluster.setId(1L);
         externalizedComputeCluster.setAccountId("accid");
-        externalizedComputeCluster.setTags(Json.silent(new HashMap<>()));
         ExternalizedComputeClusterStatus status = new ExternalizedComputeClusterStatus();
         status.setExternalizedComputeCluster(externalizedComputeCluster);
         status.setStatus(ExternalizedComputeClusterStatusEnum.AVAILABLE);

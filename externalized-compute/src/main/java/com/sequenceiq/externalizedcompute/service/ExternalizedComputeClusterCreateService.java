@@ -19,7 +19,6 @@ import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeCluster;
 import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeClusterStatusEnum;
 import com.sequenceiq.externalizedcompute.repository.ExternalizedComputeClusterRepository;
 import com.sequenceiq.externalizedcompute.util.LiftieValidationResponseUtil;
-import com.sequenceiq.externalizedcompute.util.TagUtil;
 import com.sequenceiq.liftie.client.LiftieGrpcClient;
 
 @Service
@@ -86,7 +85,6 @@ public class ExternalizedComputeClusterCreateService {
         createClusterBuilder.setEnvironment(externalizedComputeCluster.getEnvironmentCrn())
                 .setName(externalizedComputeCluster.getName())
                 .setDescription("Common compute cluster")
-                .putAllTags(TagUtil.getTags(externalizedComputeCluster.getTags()))
                 .setIsDefault(externalizedComputeCluster.isDefaultCluster())
                 .getNetworkBuilder().addAllSubnets(subnets);
         return createClusterBuilder.build();

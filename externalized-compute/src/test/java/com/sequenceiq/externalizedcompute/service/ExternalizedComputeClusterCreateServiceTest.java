@@ -78,7 +78,6 @@ class ExternalizedComputeClusterCreateServiceTest {
         assertEquals("envcrn", clusterRequest.getEnvironment());
         assertEquals("cluster-name", clusterRequest.getName());
         assertEquals("Common compute cluster", clusterRequest.getDescription());
-        assertThat(clusterRequest.getTagsMap()).containsEntry("label1", "value1");
         assertTrue(clusterRequest.getIsDefault());
         assertThat(clusterRequest.getNetwork().getSubnetsList().stream().toList()).containsExactlyInAnyOrder("subnetX", "subnetY");
 
@@ -116,7 +115,6 @@ class ExternalizedComputeClusterCreateServiceTest {
         assertEquals("envcrn", clusterRequest.getEnvironment());
         assertEquals("cluster-name", clusterRequest.getName());
         assertEquals("Common compute cluster", clusterRequest.getDescription());
-        assertThat(clusterRequest.getTagsMap()).containsEntry("label1", "value1");
         assertTrue(clusterRequest.getIsDefault());
         assertThat(clusterRequest.getNetwork().getSubnetsList().stream().toList()).containsExactlyInAnyOrder("subnet1", "subnet2");
 

@@ -45,7 +45,10 @@ public class ExternalizedComputeCluster implements AccountAwareResource {
 
     private Long deleted;
 
-    @NotNull
+    /**
+     * @deprecated tags should be stored in environment level not on compute cluster level
+     */
+    @Deprecated
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json tags;

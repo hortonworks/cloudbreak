@@ -1,10 +1,7 @@
 package com.sequenceiq.externalizedcompute.service;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,23 +18,17 @@ import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ListClust
 import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ValidateCredentialRequest;
 import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ValidateCredentialResponse;
 import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ValidationResult;
-import com.sequenceiq.cloudbreak.auth.CrnUser;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.tag.CostTagging;
-import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterCredentialValidationResponse;
@@ -79,18 +70,6 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
 
     @Inject
     private LiftieGrpcClient liftieGrpcClient;
-
-    @Inject
-    private EntitlementService entitlementService;
-
-    @Inject
-    private CrnUserDetailsService crnUserDetailsService;
-
-    @Inject
-    private AccountTagService accountTagService;
-
-    @Inject
-    private CostTagging costTagging;
 
     @Inject
     private TransactionService transactionService;
@@ -150,7 +129,6 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
         String crn = regionAwareCrnGenerator.generateCrnStringWithUuid(CrnResourceDescriptor.EXTERNALIZED_COMPUTE, userCrn.getAccountId());
         externalizedComputeCluster.setResourceCrn(crn);
         externalizedComputeCluster.setDefaultCluster(defaultCluster);
-        setTagsSafe(environment, externalizedComputeClusterRequest.getTags(), externalizedComputeCluster, userCrn);
         // TODO: add check if exists
         try {
             ExternalizedComputeCluster initiatedExternalizedComputeCluster = transactionService.required(() -> {
@@ -281,41 +259,4 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
         boolean successful = "PASSED".equals(validateCredentialResponse.getResult());
         return new ExternalizedComputeClusterCredentialValidationResponse(successful, validateCredentialResponse.getMessage(), validationResults);
     }
-
-    private void setTagsSafe(DetailedEnvironmentResponse environment, Map<String, String> userDefinedTags,
-            ExternalizedComputeCluster externalizedComputeCluster, Crn userCrn) {
-        try {
-            String userCrnString = userCrn.toString();
-            String accountId = userCrn.getAccountId();
-            CrnUser crnUser = crnUserDetailsService.getUmsUser(userCrnString);
-            boolean internalTenant = entitlementService.internalTenant(accountId);
-            Map<String, String> tags = new HashMap<>();
-            if (environment.getTags().getUserDefined() != null) {
-                tags.putAll(environment.getTags().getUserDefined());
-            }
-            if (environment.getTags().getDefaults() != null) {
-                tags.putAll(environment.getTags().getDefaults());
-            }
-            CDPTagGenerationRequest request = CDPTagGenerationRequest.Builder
-                    .builder()
-                    .withCreatorCrn(userCrnString)
-                    .withEnvironmentCrn(environment.getCrn())
-                    .withPlatform(environment.getCloudPlatform())
-                    .withAccountId(accountId)
-                    .withResourceCrn(externalizedComputeCluster.getResourceCrn())
-                    .withIsInternalTenant(internalTenant)
-                    .withUserName(crnUser.getUsername())
-                    .withAccountTags(accountTagService.list())
-                    .withUserDefinedTags(userDefinedTags)
-                    .build();
-
-            Map<String, String> prepareDefaultTags = costTagging.prepareDefaultTags(request);
-            tags.putAll(prepareDefaultTags);
-
-            externalizedComputeCluster.setTags(new Json(Objects.requireNonNullElseGet(tags, HashMap::new)));
-        } catch (IllegalArgumentException e) {
-            throw new BadRequestException("Can not convert tags", e);
-        }
-    }
-
 }

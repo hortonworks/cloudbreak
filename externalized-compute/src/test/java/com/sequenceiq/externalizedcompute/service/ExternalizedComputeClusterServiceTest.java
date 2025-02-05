@@ -38,18 +38,13 @@ import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ListClust
 import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ValidateCredentialRequest;
 import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ValidateCredentialResponse;
 import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ValidationResult;
-import com.sequenceiq.cloudbreak.auth.CrnUser;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.tag.CostTagging;
-import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.TagResponse;
@@ -77,18 +72,6 @@ class ExternalizedComputeClusterServiceTest {
 
     @Mock
     private EnvironmentEndpoint environmentEndpoint;
-
-    @Mock
-    private CrnUserDetailsService crnUserDetailsService;
-
-    @Mock
-    private EntitlementService entitlementService;
-
-    @Mock
-    private CostTagging costTagging;
-
-    @Mock
-    private AccountTagService accountTagService;
 
     @Mock
     private TransactionService transactionService;
@@ -127,19 +110,8 @@ class ExternalizedComputeClusterServiceTest {
 
         Crn userCrn = Crn.fromString(USER_CRN);
 
-        CrnUser crnUser = mock(CrnUser.class);
-        when(crnUser.getUsername()).thenReturn("perdos@cloudera.com");
-        when(crnUserDetailsService.getUmsUser(USER_CRN)).thenReturn(crnUser);
-
         ExternalizedComputeCluster savedCluster = new ExternalizedComputeCluster();
         when(externalizedComputeClusterRepository.save(any())).thenReturn(savedCluster);
-
-        ArgumentCaptor<CDPTagGenerationRequest> cdpTagGenerationRequestArgumentCaptor = ArgumentCaptor.forClass(CDPTagGenerationRequest.class);
-        when(costTagging.prepareDefaultTags(cdpTagGenerationRequestArgumentCaptor.capture())).thenReturn(Map.of());
-
-        when(accountTagService.list()).thenReturn(Map.of("account", "tag"));
-
-        when(entitlementService.internalTenant("1234")).thenReturn(true);
 
         clusterService.prepareComputeClusterCreation(externalizedComputeClusterRequest, true, userCrn);
 
@@ -153,15 +125,6 @@ class ExternalizedComputeClusterServiceTest {
         assertEquals("1234", cluster.getAccountId());
         assertTrue(cluster.isDefaultCluster());
         assertNull(cluster.getDeleted());
-
-        CDPTagGenerationRequest tags = cdpTagGenerationRequestArgumentCaptor.getValue();
-        assertThat(tags.getUserDefinedTags()).containsExactlyInAnyOrderEntriesOf(Map.of("key", "value"));
-        assertEquals(ENV_CRN, tags.getEnvironmentCrn());
-        assertEquals(USER_CRN, tags.getCreatorCrn());
-        assertEquals("AWS", tags.getPlatform());
-        assertEquals("perdos@cloudera.com", tags.getUserName());
-        assertEquals("1234", tags.getAccountId());
-        assertTrue(tags.isInternalTenant());
 
         verify(externalizedComputeClusterStatusService).setStatus(savedCluster, ExternalizedComputeClusterStatusEnum.CREATE_IN_PROGRESS,
                 "Cluster provision initiated");
