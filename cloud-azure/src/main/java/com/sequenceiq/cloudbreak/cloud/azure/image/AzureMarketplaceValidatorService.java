@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.azure.image;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ACCEPTANCE_POLICY_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.azure.AzureDeploymentMarketplaceError.MARKETPLACE_PURCHASE_ELIGIBILITY_FAILED;
 
+import java.io.UncheckedIOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -122,11 +123,13 @@ public class AzureMarketplaceValidatorService {
 
     private ValidationResult performValidation(AzureClient client, CloudStack stack, AuthenticatedContext ac) {
         try {
-
             Optional<ManagementError> error = azureTemplateDeploymentService.runWhatIfAnalysis(client, stack, ac);
             ValidationResult validationResult = error.map(this::getMarketplacePurchaseEligibilityFailedError).orElse(ValidationResult.builder().build());
             LOGGER.debug("Marketplace what-if validation result: {}", validationResult);
             return validationResult;
+        } catch (UncheckedIOException e) {
+            LOGGER.warn("The generated template for What-If analysis is not a valid JSON. Skipping this part of the validation.");
+            return ValidationResult.builder().build();
         } catch (ManagementException e) {
             // we need to skip errors related missing whatIf permission seamlessly
             if (azureExceptionHandler.isForbidden(e)) {
