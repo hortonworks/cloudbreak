@@ -146,9 +146,6 @@ public class RotateSaltPasswordService {
         if (stack.isStopped()) {
             throw new BadRequestException("Rotating SaltStack user password is not supported for stopped clusters");
         }
-        if (!entitlementService.isSaltUserPasswordRotationEnabled(stack.getAccountId())) {
-            throw new BadRequestException("Rotating SaltStack user password is not supported in your account");
-        }
     }
 
     public void sendSuccessUsageReport(String resourceCrn, RotateSaltPasswordReason reason) {

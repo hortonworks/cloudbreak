@@ -62,7 +62,6 @@ class SaltPasswordStatusServiceTest {
     @BeforeEach
     void setUp() {
         lenient().when(stack.getAccountId()).thenReturn(ACCOUNT_ID);
-        lenient().when(entitlementService.isSaltUserPasswordRotationEnabled(ACCOUNT_ID)).thenReturn(true);
     }
 
     @Test

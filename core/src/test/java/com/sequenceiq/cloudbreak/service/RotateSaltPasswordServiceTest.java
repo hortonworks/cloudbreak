@@ -111,7 +111,6 @@ class RotateSaltPasswordServiceTest {
         lenient().when(stack.getAccountId()).thenReturn(ACCOUNT_ID);
         lenient().when(stack.getStatus()).thenReturn(Status.AVAILABLE);
         lenient().when(stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata()).thenReturn(List.of(instanceMetadataView));
-        lenient().when(entitlementService.isSaltUserPasswordRotationEnabled(ACCOUNT_ID)).thenReturn(true);
 
         GatewayConfig gw1 = new GatewayConfig("host1", "1.1.1.1", "1.1.1.1", 22, "i-1839", false);
         GatewayConfig gw2 = new GatewayConfig("host2", "1.1.1.2", "1.1.1.2", 22, "i-1839", false);

@@ -79,7 +79,6 @@ auth:
       routing.enable: false
       enable: false
     saas.sdx.integration.enable: true
-    salt.rotatepassword.enable: true
     postgres.upgrade.exception.enable: false
     postgres.upgrade.skip.attached.datahubs.check.enable: false
     postgres.upgrade.skip.service.stop.enable: false

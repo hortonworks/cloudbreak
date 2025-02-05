@@ -122,7 +122,6 @@ class RotateSaltPasswordServiceTest {
     void setUp() {
         lenient().when(gatewayConfig.getPrivateAddress()).thenReturn("8.8.8.8");
 
-        lenient().when(entitlementService.isSaltUserPasswordRotationEnabled(ACCOUNT_ID)).thenReturn(true);
         lenient().when(saltBootstrapVersionChecker.isChangeSaltuserPasswordSupported(stack)).thenReturn(true);
         lenient().when(gatewayConfigService.getNotDeletedGatewayConfigs(stack)).thenReturn(List.of(gatewayConfig));
 
@@ -147,15 +146,6 @@ class RotateSaltPasswordServiceTest {
         Assertions.assertThatThrownBy(() -> underTest.rotateSaltPassword(stack))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Rotating SaltStack user password is not supported for stopped clusters");
-    }
-
-    @Test
-    void rotateSaltPasswordWithoutEntitlement() {
-        when(entitlementService.isSaltUserPasswordRotationEnabled(ACCOUNT_ID)).thenReturn(false);
-
-        Assertions.assertThatThrownBy(() -> underTest.rotateSaltPassword(stack))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("Rotating SaltStack user password is not supported in your account");
     }
 
     @Test

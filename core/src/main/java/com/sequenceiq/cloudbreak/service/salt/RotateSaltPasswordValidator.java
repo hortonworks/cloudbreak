@@ -23,9 +23,6 @@ public class RotateSaltPasswordValidator {
         if (stack.getStatus().isStopped()) {
             throw new BadRequestException("Rotating SaltStack user password is not supported for stopped clusters");
         }
-        if (!entitlementService.isSaltUserPasswordRotationEnabled(stack.getAccountId())) {
-            throw new BadRequestException("Rotating SaltStack user password is not supported in your account");
-        }
         if (stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().isEmpty()) {
             throw new IllegalStateException("Rotating SaltStack user password is not supported when there are no available gateway instances");
         }

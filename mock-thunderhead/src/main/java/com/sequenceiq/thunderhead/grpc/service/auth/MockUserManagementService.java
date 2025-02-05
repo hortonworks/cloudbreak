@@ -64,7 +64,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRE
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RANGER_LDAP_USERSYNC;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ROTATE_SALTUSER_PASSWORD;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SAAS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SAAS_SDX_INTEGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SDX_HBASE_CLOUD_STORAGE;
@@ -498,9 +497,6 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.compute.monitoring.enable}")
     private boolean enableComputeMonitoring;
-
-    @Value("${auth.mock.salt.rotatepassword.enable}")
-    private boolean enableSalRotatePassword;
 
     @Value("${auth.mock.user.sync.group-size.enforce-limit.enable}")
     private boolean enableUsersyncEnforceGroupMemberLimit;
@@ -965,9 +961,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         if ((enableComputeMonitoring || grantedEntitlements.contains(CDP_CENTRAL_COMPUTE_MONITORING.name()))
                 && !revokedEntitlements.contains(CDP_CENTRAL_COMPUTE_MONITORING.name())) {
             builder.addEntitlements(createEntitlement(CDP_CENTRAL_COMPUTE_MONITORING));
-        }
-        if (enableSalRotatePassword) {
-            builder.addEntitlements(createEntitlement(CDP_ROTATE_SALTUSER_PASSWORD));
         }
         if (enableUsersyncEnforceGroupMemberLimit) {
             builder.addEntitlements(createEntitlement(CDP_USERSYNC_ENFORCE_GROUP_MEMBER_LIMIT));

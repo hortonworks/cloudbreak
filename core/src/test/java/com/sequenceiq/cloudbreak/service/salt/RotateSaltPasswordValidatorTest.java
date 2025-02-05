@@ -16,7 +16,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.SaltBootstrapVersionChecker;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -52,7 +51,6 @@ class RotateSaltPasswordValidatorTest {
         lenient().when(stack.getAccountId()).thenReturn(ACCOUNT_ID);
         lenient().when(stack.getStatus()).thenReturn(Status.AVAILABLE);
         lenient().when(stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata()).thenReturn(List.of(instanceMetadataView));
-        lenient().when(entitlementService.isSaltUserPasswordRotationEnabled(ACCOUNT_ID)).thenReturn(true);
     }
 
     @Test
@@ -64,15 +62,6 @@ class RotateSaltPasswordValidatorTest {
         Assertions.assertThatThrownBy(() -> underTest.validateRotateSaltPassword(stack))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("Rotating SaltStack user password is only supported when all instances are running");
-    }
-
-    @Test
-    public void testRotateSaltPasswordOnStackInAccountWithoutEntitlement() {
-        when(entitlementService.isSaltUserPasswordRotationEnabled(ACCOUNT_ID)).thenReturn(false);
-
-        Assertions.assertThatThrownBy(() -> underTest.validateRotateSaltPassword(stack))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("Rotating SaltStack user password is not supported in your account");
     }
 
     @Test
