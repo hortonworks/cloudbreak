@@ -12,7 +12,6 @@ tests:
         excludedMethods:
           - testSDXMediumDutyRepair
           - testSDXEnterpriseRepair
-        #TODO reenable this once https://jira.cloudera.com/browse/CB-28133 is fixed
-#      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.gov.SecretEncryptionTests
-#        excludedMethods:
-#          - testCreateStopStartUpscaleDownscaleFreeIpaWithSecretEncryption
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.gov.SecretEncryptionTests
+        excludedMethods:
+          - testCreateStopStartUpscaleDownscaleFreeIpaWithSecretEncryption

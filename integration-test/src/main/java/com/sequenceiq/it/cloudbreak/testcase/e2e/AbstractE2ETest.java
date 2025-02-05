@@ -94,8 +94,7 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
                 safeLogicAssertions.validate(testContext);
             }
             LOGGER.info("Validating secret encryption on the created resources...");
-            //TODO reenable this once https://jira.cloudera.com/browse/CB-28133 is fixed
-//            secretEncryptionAssertions.validateAllExisting(testContext);
+            secretEncryptionAssertions.validateAllExisting(testContext);
         }
         spotUtil.setUseSpotInstances(Boolean.FALSE);
     }
