@@ -183,6 +183,7 @@ public class ImageServiceTest {
         when(imageConverter.extractLdapAgentVersion(image)).thenReturn("1.2.3");
         when(imageConverter.extractSourceImage(image)).thenReturn("source-image");
         when(imageConverter.extractImdsVersion(image)).thenReturn("v2");
+        when(imageConverter.extractSaltVersion(image)).thenReturn("3001.8");
         when(platformStringTransformer.getPlatformString(stack)).thenReturn("aws");
 
         ImageEntity imageEntity = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.changeImage(stack, imageRequest));
@@ -196,6 +197,7 @@ public class ImageServiceTest {
         assertEquals("rh8", imageEntity.getOs());
         assertEquals("rhel8", imageEntity.getOsType());
         assertEquals("v2", imageEntity.getImdsVersion());
+        assertEquals("3001.8", imageEntity.getSaltVersion());
     }
 
     @Test

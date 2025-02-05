@@ -2,17 +2,22 @@ package com.sequenceiq.freeipa.service;
 
 import static org.apache.commons.codec.binary.Base64.decodeBase64;
 
+import java.io.IOException;
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 
 import jakarta.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.io.BaseEncoding;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.client.SaltClientConfig;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
@@ -25,6 +30,8 @@ import com.sequenceiq.freeipa.service.stack.ClusterProxyService;
 
 @Component
 public class TlsSecurityService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TlsSecurityService.class);
 
     @Inject
     private SecurityConfigService securityConfigService;
@@ -119,12 +126,25 @@ public class TlsSecurityService {
                         saltMasterPrivateKey, saltMasterPublicKey,
                         new String(decodeBase64(saltSignPrivateKeyB64)), new String(decodeBase64(saltSecurityConfig.getSaltSignPublicKey())),
                         null, null);
+        gatewayConfig.withSaltVersion(getInstanceSaltVersion(gatewayInstance));
+
         if (clusterProxyService.isCreateConfigForClusterProxy(stack)) {
             gatewayConfig
                     .withPath(clusterProxyService.getProxyPathPgwAsFallBack(stack, gatewayInstance.getDiscoveryFQDN()))
                     .withProtocol(clusterProxyConfiguration.getClusterProxyProtocol());
         }
         return gatewayConfig;
+    }
+
+    public String getInstanceSaltVersion(InstanceMetaData instanceMetadata) {
+        try {
+            if (instanceMetadata.getImage() != null) {
+                return instanceMetadata.getImage().get(Image.class).getPackageVersion(ImagePackageVersion.SALT);
+            }
+        } catch (IOException e) {
+            LOGGER.warn("Missing image information for instance: " + instanceMetadata.getInstanceId(), e);
+        }
+        return null;
     }
 
     private String getGatewayIp(SecurityConfig securityConfig, InstanceMetaData gatewayInstance, Stack stack) {

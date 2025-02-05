@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 
@@ -20,7 +21,8 @@ class ImageToImageEntityConverterTest {
         Image source = new Image(1L, "date", "", "arch", "1-2-a-b", Map.of(), "manjaro",
                 Map.of("freeipa-ldap-agent", "1.2.3",
                         "source-image", SOURCE_IMAGE,
-                        "imds", "v2"),
+                        "imds", "v2",
+                        ImagePackageVersion.SALT.getKey(), "3001.8"),
                 false);
 
         ImageEntity result = underTest.convert("accountId", source);
@@ -32,6 +34,7 @@ class ImageToImageEntityConverterTest {
         assertEquals("1.2.3", result.getLdapAgentVersion());
         assertEquals(SOURCE_IMAGE, result.getSourceImage());
         assertEquals("v2", result.getImdsVersion());
+        assertEquals("3001.8", result.getSaltVersion());
     }
 
     @Test

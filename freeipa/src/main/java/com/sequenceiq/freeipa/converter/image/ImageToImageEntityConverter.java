@@ -20,6 +20,7 @@ public class ImageToImageEntityConverter {
         imageEntity.setDate(source.getDate());
         imageEntity.setLdapAgentVersion(extractLdapAgentVersion(source));
         imageEntity.setImdsVersion(extractImdsVersion(source));
+        imageEntity.setSaltVersion(extractSaltVersion(source));
         imageEntity.setSourceImage(extractSourceImage(source));
         return imageEntity;
     }
@@ -58,5 +59,13 @@ public class ImageToImageEntityConverter {
 
     private String extractSourceImage(Map<String, String> packageVersions) {
         return packageVersions == null ? null : packageVersions.get(ImagePackageVersion.SOURCE_IMAGE.getKey());
+    }
+
+    public String extractSaltVersion(Image image) {
+        return extractSaltVersion(image.getPackageVersions());
+    }
+
+    private String extractSaltVersion(Map<String, String> packageVersions) {
+        return packageVersions == null ? null : packageVersions.get(ImagePackageVersion.SALT.getKey());
     }
 }

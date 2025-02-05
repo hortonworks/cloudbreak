@@ -12,7 +12,10 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.client.SaltClientConfig;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.salt.SaltService;
+import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.SaltSecurityConfig;
@@ -29,6 +32,9 @@ public class GatewayConfigService {
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
+    @Inject
+    private SaltService saltService;
+
     public List<GatewayConfig> getNotDeletedGatewayConfigs(Stack stack) {
         Set<InstanceMetaData> instanceMetaDatas = instanceMetaDataRepository.findNotTerminatedForStack(stack.getId());
         return getGatewayConfigs(stack, instanceMetaDatas);
@@ -42,9 +48,31 @@ public class GatewayConfigService {
         return result;
     }
 
+    /**
+     * Use this method to retrieve the primary gateway config for communicating with the Salt on the cluster.
+     * Use {@link #getPrimaryGatewayConfig(Stack) } for other communications, e.g. access FreeIPA, etc.
+     *
+     * @return primary gateway config for Salt communication
+     */
+    public GatewayConfig getPrimaryGatewayConfigForSalt(Stack stack) {
+        Set<InstanceMetaData> instanceMetaDatas = instanceMetaDataRepository.findNotTerminatedForStack(stack.getId());
+        List<GatewayConfig> gatewayConfigs = getGatewayConfigs(stack, instanceMetaDatas);
+        try {
+            return saltService.getPrimaryGatewayConfig(gatewayConfigs);
+        } catch (CloudbreakOrchestratorFailedException e) {
+            throw new CloudbreakRuntimeException(e);
+        }
+    }
+
+    /**
+     * Use this method to retrieve the primary gateway config for communicating with FreeIPA, etc. (except Salt)
+     * Use {@link #getPrimaryGatewayConfigForSalt(Stack) } to communicate with Salt on the cluster
+     *
+     * @return primary gateway config
+     */
     public GatewayConfig getPrimaryGatewayConfig(Stack stack) {
-        InstanceMetaData gatewayInstance = getPrimaryGwInstance(stack);
-        return getGatewayConfig(stack, gatewayInstance);
+        return getGatewayConfig(stack, getPrimaryGwInstance(stack));
+
     }
 
     private InstanceMetaData getPrimaryGwInstance(Stack stack) {

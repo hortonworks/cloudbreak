@@ -32,8 +32,10 @@ public class ImageConverter implements Converter<ImageEntity, Image> {
                 source.getImageId(),
                 StringUtils.isNotBlank(source.getSourceImage()) ?
                         Map.of(ImagePackageVersion.SOURCE_IMAGE.getKey(), source.getSourceImage(),
-                                ImagePackageVersion.IMDS_VERSION.getKey(), Strings.nullToEmpty(source.getImdsVersion())) :
-                        Map.of(ImagePackageVersion.IMDS_VERSION.getKey(), Strings.nullToEmpty(source.getImdsVersion())),
+                                ImagePackageVersion.IMDS_VERSION.getKey(), Strings.nullToEmpty(source.getImdsVersion()),
+                                ImagePackageVersion.SALT.getKey(), Strings.nullToEmpty(source.getSaltVersion())) :
+                        Map.of(ImagePackageVersion.IMDS_VERSION.getKey(), Strings.nullToEmpty(source.getImdsVersion()),
+                                ImagePackageVersion.SALT.getKey(), Strings.nullToEmpty(source.getSaltVersion())),
                 source.getDate(),
                 null);
     }

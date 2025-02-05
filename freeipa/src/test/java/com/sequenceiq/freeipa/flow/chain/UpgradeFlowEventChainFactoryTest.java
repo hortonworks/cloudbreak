@@ -84,6 +84,14 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals(UpscaleFlowEvent.UPSCALE_EVENT.event(), upscaleEvent1.selector());
         assertEquals(4, upscaleEvent1.getInstanceCountByGroup());
 
+        ChangePrimaryGatewayEvent changePrimaryGatewayEvent = (ChangePrimaryGatewayEvent) queue.poll();
+        assertEquals(OPERATION_ID, changePrimaryGatewayEvent.getOperationId());
+        assertEquals(STACK_ID, changePrimaryGatewayEvent.getResourceId());
+        assertFalse(changePrimaryGatewayEvent.getFinalChain());
+        assertEquals(ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_EVENT.event(), changePrimaryGatewayEvent.selector());
+        assertEquals(3, changePrimaryGatewayEvent.getRepairInstanceIds().size());
+        assertTrue(List.of("repl1", "repl2", "pgw").containsAll(changePrimaryGatewayEvent.getRepairInstanceIds()));
+
         DownscaleEvent downscaleEvent1 = (DownscaleEvent) queue.poll();
         assertEquals(OPERATION_ID, downscaleEvent1.getOperationId());
         assertEquals(STACK_ID, downscaleEvent1.getResourceId());
@@ -93,8 +101,7 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals(DownscaleFlowEvent.DOWNSCALE_EVENT.event(), downscaleEvent1.selector());
         assertEquals(3, downscaleEvent1.getInstanceCountByGroup());
         assertEquals(1, downscaleEvent1.getInstanceIds().size());
-        String firstInstanceToDownscale = downscaleEvent1.getInstanceIds().get(0);
-        assertTrue(firstInstanceToDownscale.startsWith("repl"));
+        assertEquals("pgw", downscaleEvent1.getInstanceIds().get(0));
 
         UpscaleEvent upscaleEvent2 = (UpscaleEvent) queue.poll();
         assertEquals(OPERATION_ID, upscaleEvent2.getOperationId());
@@ -117,8 +124,6 @@ class UpgradeFlowEventChainFactoryTest {
         String secondInstanceToDownscale = downscaleEvent2.getInstanceIds().get(0);
         assertTrue(secondInstanceToDownscale.startsWith("repl"));
 
-        assertNotEquals(firstInstanceToDownscale, secondInstanceToDownscale);
-
         UpscaleEvent upscaleEvent3 = (UpscaleEvent) queue.poll();
         assertEquals(OPERATION_ID, upscaleEvent3.getOperationId());
         assertEquals(STACK_ID, upscaleEvent3.getResourceId());
@@ -127,14 +132,6 @@ class UpgradeFlowEventChainFactoryTest {
         assertFalse(upscaleEvent3.getRepair());
         assertEquals(UpscaleFlowEvent.UPSCALE_EVENT.event(), upscaleEvent3.selector());
         assertEquals(4, upscaleEvent3.getInstanceCountByGroup());
-
-        ChangePrimaryGatewayEvent changePrimaryGatewayEvent = (ChangePrimaryGatewayEvent) queue.poll();
-        assertEquals(OPERATION_ID, changePrimaryGatewayEvent.getOperationId());
-        assertEquals(STACK_ID, changePrimaryGatewayEvent.getResourceId());
-        assertFalse(changePrimaryGatewayEvent.getFinalChain());
-        assertEquals(ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_EVENT.event(), changePrimaryGatewayEvent.selector());
-        assertEquals(3, changePrimaryGatewayEvent.getRepairInstanceIds().size());
-        assertTrue(List.of("repl1", "repl2", "pgw").containsAll(changePrimaryGatewayEvent.getRepairInstanceIds()));
 
         DownscaleEvent downscaleEvent3 = (DownscaleEvent) queue.poll();
         assertEquals(OPERATION_ID, downscaleEvent3.getOperationId());
@@ -145,7 +142,10 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals(DownscaleFlowEvent.DOWNSCALE_EVENT.event(), downscaleEvent3.selector());
         assertEquals(3, downscaleEvent3.getInstanceCountByGroup());
         assertEquals(1, downscaleEvent3.getInstanceIds().size());
-        assertEquals("pgw", downscaleEvent3.getInstanceIds().get(0));
+        String firstInstanceToDownscale = downscaleEvent3.getInstanceIds().get(0);
+        assertTrue(firstInstanceToDownscale.startsWith("repl"));
+
+        assertNotEquals(firstInstanceToDownscale, secondInstanceToDownscale);
 
         SaltUpdateTriggerEvent saltUpdateTriggerEvent2 = (SaltUpdateTriggerEvent) queue.poll();
         assertEquals(OPERATION_ID, saltUpdateTriggerEvent2.getOperationId());
@@ -310,6 +310,14 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals(UpscaleFlowEvent.UPSCALE_EVENT.event(), upscaleEvent1.selector());
         assertEquals(4, upscaleEvent1.getInstanceCountByGroup());
 
+        ChangePrimaryGatewayEvent changePrimaryGatewayEvent = (ChangePrimaryGatewayEvent) queue.poll();
+        assertEquals(OPERATION_ID, changePrimaryGatewayEvent.getOperationId());
+        assertEquals(STACK_ID, changePrimaryGatewayEvent.getResourceId());
+        assertFalse(changePrimaryGatewayEvent.getFinalChain());
+        assertEquals(ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_EVENT.event(), changePrimaryGatewayEvent.selector());
+        assertEquals(3, changePrimaryGatewayEvent.getRepairInstanceIds().size());
+        assertTrue(List.of("repl1", "repl2", "pgw").containsAll(changePrimaryGatewayEvent.getRepairInstanceIds()));
+
         DownscaleEvent downscaleEvent1 = (DownscaleEvent) queue.poll();
         assertEquals(OPERATION_ID, downscaleEvent1.getOperationId());
         assertEquals(STACK_ID, downscaleEvent1.getResourceId());
@@ -319,8 +327,7 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals(DownscaleFlowEvent.DOWNSCALE_EVENT.event(), downscaleEvent1.selector());
         assertEquals(3, downscaleEvent1.getInstanceCountByGroup());
         assertEquals(1, downscaleEvent1.getInstanceIds().size());
-        String firstInstanceToDownscale = downscaleEvent1.getInstanceIds().get(0);
-        assertTrue(firstInstanceToDownscale.startsWith("repl2"));
+        assertEquals("pgw", downscaleEvent1.getInstanceIds().get(0));
 
         UpscaleEvent upscaleEvent3 = (UpscaleEvent) queue.poll();
         assertEquals(OPERATION_ID, upscaleEvent3.getOperationId());
@@ -331,14 +338,6 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals(UpscaleFlowEvent.UPSCALE_EVENT.event(), upscaleEvent3.selector());
         assertEquals(4, upscaleEvent3.getInstanceCountByGroup());
 
-        ChangePrimaryGatewayEvent changePrimaryGatewayEvent = (ChangePrimaryGatewayEvent) queue.poll();
-        assertEquals(OPERATION_ID, changePrimaryGatewayEvent.getOperationId());
-        assertEquals(STACK_ID, changePrimaryGatewayEvent.getResourceId());
-        assertFalse(changePrimaryGatewayEvent.getFinalChain());
-        assertEquals(ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_EVENT.event(), changePrimaryGatewayEvent.selector());
-        assertEquals(3, changePrimaryGatewayEvent.getRepairInstanceIds().size());
-        assertTrue(List.of("repl1", "repl2", "pgw").containsAll(changePrimaryGatewayEvent.getRepairInstanceIds()));
-
         DownscaleEvent downscaleEvent3 = (DownscaleEvent) queue.poll();
         assertEquals(OPERATION_ID, downscaleEvent3.getOperationId());
         assertEquals(STACK_ID, downscaleEvent3.getResourceId());
@@ -348,7 +347,8 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals(DownscaleFlowEvent.DOWNSCALE_EVENT.event(), downscaleEvent3.selector());
         assertEquals(3, downscaleEvent3.getInstanceCountByGroup());
         assertEquals(1, downscaleEvent3.getInstanceIds().size());
-        assertEquals("pgw", downscaleEvent3.getInstanceIds().get(0));
+        String firstInstanceToDownscale = downscaleEvent3.getInstanceIds().get(0);
+        assertTrue(firstInstanceToDownscale.startsWith("repl2"));
 
         SaltUpdateTriggerEvent saltUpdateTriggerEvent2 = (SaltUpdateTriggerEvent) queue.poll();
         assertEquals(OPERATION_ID, saltUpdateTriggerEvent2.getOperationId());
@@ -399,6 +399,14 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals(UpscaleFlowEvent.UPSCALE_EVENT.event(), upscaleEvent1.selector());
         assertEquals(4, upscaleEvent1.getInstanceCountByGroup());
 
+        ChangePrimaryGatewayEvent changePrimaryGatewayEvent = (ChangePrimaryGatewayEvent) queue.poll();
+        assertEquals(OPERATION_ID, changePrimaryGatewayEvent.getOperationId());
+        assertEquals(STACK_ID, changePrimaryGatewayEvent.getResourceId());
+        assertFalse(changePrimaryGatewayEvent.getFinalChain());
+        assertEquals(ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_EVENT.event(), changePrimaryGatewayEvent.selector());
+        assertEquals(3, changePrimaryGatewayEvent.getRepairInstanceIds().size());
+        assertTrue(List.of("repl1", "repl2", "pgw").containsAll(changePrimaryGatewayEvent.getRepairInstanceIds()));
+
         DownscaleEvent downscaleEvent1 = (DownscaleEvent) queue.poll();
         assertEquals(OPERATION_ID, downscaleEvent1.getOperationId());
         assertEquals(STACK_ID, downscaleEvent1.getResourceId());
@@ -408,8 +416,7 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals(DownscaleFlowEvent.DOWNSCALE_EVENT.event(), downscaleEvent1.selector());
         assertEquals(3, downscaleEvent1.getInstanceCountByGroup());
         assertEquals(1, downscaleEvent1.getInstanceIds().size());
-        String firstInstanceToDownscale = downscaleEvent1.getInstanceIds().get(0);
-        assertTrue(firstInstanceToDownscale.startsWith("repl"));
+        assertEquals("pgw", downscaleEvent1.getInstanceIds().get(0));
 
         UpscaleEvent upscaleEvent2 = (UpscaleEvent) queue.poll();
         assertEquals(OPERATION_ID, upscaleEvent2.getOperationId());
@@ -432,8 +439,6 @@ class UpgradeFlowEventChainFactoryTest {
         String secondInstanceToDownscale = downscaleEvent2.getInstanceIds().get(0);
         assertTrue(secondInstanceToDownscale.startsWith("repl"));
 
-        assertNotEquals(firstInstanceToDownscale, secondInstanceToDownscale);
-
         UpscaleEvent upscaleEvent3 = (UpscaleEvent) queue.poll();
         assertEquals(OPERATION_ID, upscaleEvent3.getOperationId());
         assertEquals(STACK_ID, upscaleEvent3.getResourceId());
@@ -442,14 +447,6 @@ class UpgradeFlowEventChainFactoryTest {
         assertFalse(upscaleEvent3.getRepair());
         assertEquals(UpscaleFlowEvent.UPSCALE_EVENT.event(), upscaleEvent3.selector());
         assertEquals(4, upscaleEvent3.getInstanceCountByGroup());
-
-        ChangePrimaryGatewayEvent changePrimaryGatewayEvent = (ChangePrimaryGatewayEvent) queue.poll();
-        assertEquals(OPERATION_ID, changePrimaryGatewayEvent.getOperationId());
-        assertEquals(STACK_ID, changePrimaryGatewayEvent.getResourceId());
-        assertFalse(changePrimaryGatewayEvent.getFinalChain());
-        assertEquals(ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_EVENT.event(), changePrimaryGatewayEvent.selector());
-        assertEquals(3, changePrimaryGatewayEvent.getRepairInstanceIds().size());
-        assertTrue(List.of("repl1", "repl2", "pgw").containsAll(changePrimaryGatewayEvent.getRepairInstanceIds()));
 
         DownscaleEvent downscaleEvent3 = (DownscaleEvent) queue.poll();
         assertEquals(OPERATION_ID, downscaleEvent3.getOperationId());
@@ -460,7 +457,10 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals(DownscaleFlowEvent.DOWNSCALE_EVENT.event(), downscaleEvent3.selector());
         assertEquals(3, downscaleEvent3.getInstanceCountByGroup());
         assertEquals(1, downscaleEvent3.getInstanceIds().size());
-        assertEquals("pgw", downscaleEvent3.getInstanceIds().get(0));
+        String firstInstanceToDownscale = downscaleEvent3.getInstanceIds().get(0);
+        assertTrue(firstInstanceToDownscale.startsWith("repl"));
+
+        assertNotEquals(firstInstanceToDownscale, secondInstanceToDownscale);
 
         SaltUpdateTriggerEvent saltUpdateTriggerEvent2 = (SaltUpdateTriggerEvent) queue.poll();
         assertEquals(OPERATION_ID, saltUpdateTriggerEvent2.getOperationId());

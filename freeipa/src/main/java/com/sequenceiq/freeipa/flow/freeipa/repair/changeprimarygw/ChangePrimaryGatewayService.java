@@ -55,7 +55,7 @@ public class ChangePrimaryGatewayService {
         String newPrimaryGatewayInstanceId;
         try {
             GatewayConfig currentPrimaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-            Optional<String> freeIpaMasterInstanceId = findFreeIpaMasterInstanceId(stack, currentPrimaryGatewayConfig);
+            Optional<String> freeIpaMasterInstanceId = findFreeIpaMasterInstanceId(stack, gatewayConfigService.getPrimaryGatewayConfigForSalt(stack));
             if (freeIpaMasterInstanceId.isPresent() && !repairInstanceIds.contains(freeIpaMasterInstanceId.get())) {
                 LOGGER.debug("Using the FreeIPA master as the new primary gateway");
                 newPrimaryGatewayInstanceId = freeIpaMasterInstanceId.get();

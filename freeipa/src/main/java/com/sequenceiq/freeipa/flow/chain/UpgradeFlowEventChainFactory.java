@@ -84,8 +84,8 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
         int instanceCountForUpscale = Math.min(nonPrimaryGwInstanceCount + PRIMARY_GW_INSTANCE_COUNT + 1, MAX_NODE_COUNT_FOR_UPSCALE);
         int instanceCountForDownscale = Math.min(nonPrimaryGwInstanceCount + PRIMARY_GW_INSTANCE_COUNT, MAX_NODE_COUNT_FOR_DOWNSCALE);
         Set<String> groupNames = instanceGroupService.findGroupNamesByStackId(event.getResourceId());
-        flowEventChain.addAll(createScaleEventsForNonPgwInstances(event, instanceCountForUpscale, instanceCountForDownscale, groupNames));
         flowEventChain.addAll(createScaleEventsAndChangePgw(event, instanceCountForUpscale, instanceCountForDownscale, groupNames));
+        flowEventChain.addAll(createScaleEventsForNonPgwInstances(event, instanceCountForUpscale, instanceCountForDownscale, groupNames));
         flowEventChain.add(new SaltUpdateTriggerEvent(event.getResourceId(), event.accepted(), true, true, event.getOperationId()));
         flowEventChain.add(new FlowChainFinalizePayload(getName(), event.getResourceId(), event.accepted()));
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);

@@ -55,7 +55,7 @@ public class FreeIpaInstallService {
     }
 
     private void installFreeIpa(Long stackId, Stack stack, List<GatewayConfig> gatewayConfigs, Set<Node> allNodes) throws CloudbreakOrchestratorException {
-        GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+        GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfigForSalt(stack);
         List<RecipeModel> recipes = freeIpaRecipeService.getRecipes(stackId);
         if (!recipes.isEmpty()) {
             LOGGER.info("Recipes for stack: {}", recipes);

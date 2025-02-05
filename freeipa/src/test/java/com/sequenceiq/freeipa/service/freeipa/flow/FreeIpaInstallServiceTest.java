@@ -65,7 +65,7 @@ class FreeIpaInstallServiceTest {
         GatewayConfig gatewayConfig = mock(GatewayConfig.class);
         List<GatewayConfig> allGatewayConfigs = List.of(gatewayConfig);
         when(gatewayConfigService.getGatewayConfigs(stack, instanceMetaDataSet)).thenReturn(allGatewayConfigs);
-        when(gatewayConfigService.getPrimaryGatewayConfig(stack)).thenReturn(gatewayConfig);
+        when(gatewayConfigService.getPrimaryGatewayConfigForSalt(stack)).thenReturn(gatewayConfig);
         Node node = mock(Node.class);
         Set<Node> nodes = Set.of(node);
         when(freeIpaNodeUtilService.mapInstancesToNodes(instanceMetaDataSet)).thenReturn(nodes);
@@ -89,7 +89,7 @@ class FreeIpaInstallServiceTest {
         GatewayConfig gatewayConfig = mock(GatewayConfig.class);
         List<GatewayConfig> allGatewayConfigs = List.of(gatewayConfig);
         when(gatewayConfigService.getGatewayConfigs(stack, instanceMetaDataSet)).thenReturn(allGatewayConfigs);
-        when(gatewayConfigService.getPrimaryGatewayConfig(stack)).thenReturn(gatewayConfig);
+        when(gatewayConfigService.getPrimaryGatewayConfigForSalt(stack)).thenReturn(gatewayConfig);
         Node node = mock(Node.class);
         Set<Node> nodes = Set.of(node);
         when(freeIpaNodeUtilService.mapInstancesToNodes(instanceMetaDataSet)).thenReturn(nodes);
@@ -113,7 +113,7 @@ class FreeIpaInstallServiceTest {
         GatewayConfig gatewayConfig = mock(GatewayConfig.class);
         List<GatewayConfig> allGatewayConfigs = List.of(gatewayConfig);
         when(gatewayConfigService.getGatewayConfigs(stack, instanceMetaDataSet)).thenReturn(allGatewayConfigs);
-        when(gatewayConfigService.getPrimaryGatewayConfig(stack)).thenReturn(gatewayConfig);
+        when(gatewayConfigService.getPrimaryGatewayConfigForSalt(stack)).thenReturn(gatewayConfig);
         Node node = mock(Node.class);
         Set<Node> nodes = Set.of(node);
         when(freeIpaNodeUtilService.mapInstancesToNodes(instanceMetaDataSet)).thenReturn(nodes);

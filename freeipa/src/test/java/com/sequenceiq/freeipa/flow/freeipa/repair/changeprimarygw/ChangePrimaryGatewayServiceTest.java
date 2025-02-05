@@ -96,6 +96,7 @@ class ChangePrimaryGatewayServiceTest {
         InstanceMetaData im2 = mock(InstanceMetaData.class);
 
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
+        when(gatewayConfigService.getPrimaryGatewayConfigForSalt(any())).thenReturn(gatewayConfig);
         when(hostOrchestrator.getFreeIpaMasterHostname(any(), any())).thenReturn(Optional.of(HOSTNAME_1));
         when(stack.getNotDeletedInstanceMetaDataList()).thenReturn(List.of(im1, im2));
         when(im1.getDiscoveryFQDN()).thenReturn(HOSTNAME_1);
@@ -151,6 +152,7 @@ class ChangePrimaryGatewayServiceTest {
         Set<Node> allNodes = Set.of(node);
 
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
+        when(gatewayConfigService.getPrimaryGatewayConfigForSalt(any())).thenReturn(gatewayConfig);
         when(gatewayConfig.getInstanceId()).thenReturn(INSTANCE_ID_1);
         when(freeIpaNodeUtilService.mapInstancesToNodes(any())).thenReturn(allNodes);
         when(hostOrchestrator.getFreeIpaMasterHostname(any(), any())).thenReturn(Optional.of(HOSTNAME_1));
@@ -177,6 +179,7 @@ class ChangePrimaryGatewayServiceTest {
         Set<Node> allNodes = Set.of(node);
 
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
+        when(gatewayConfigService.getPrimaryGatewayConfigForSalt(any())).thenReturn(gatewayConfig);
         when(gatewayConfig.getInstanceId()).thenReturn(INSTANCE_ID_2);
         when(freeIpaNodeUtilService.mapInstancesToNodes(any())).thenReturn(allNodes);
         when(hostOrchestrator.getFreeIpaMasterHostname(any(), any())).thenReturn(Optional.of(HOSTNAME_1));

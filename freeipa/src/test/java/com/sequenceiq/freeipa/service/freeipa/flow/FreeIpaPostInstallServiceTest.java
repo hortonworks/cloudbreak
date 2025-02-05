@@ -108,7 +108,7 @@ class FreeIpaPostInstallServiceTest {
         Stack stack = mock(Stack.class);
         FreeIpaClient ipaClient = mock(FreeIpaClient.class);
         GatewayConfig gatewayConfig = mock(GatewayConfig.class);
-        when(gatewayConfigService.getPrimaryGatewayConfig(stack)).thenReturn(gatewayConfig);
+        when(gatewayConfigService.getPrimaryGatewayConfigForSalt(stack)).thenReturn(gatewayConfig);
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
         when(freeIpaClientFactory.getFreeIpaClientForStackIgnoreUnreachable(stack)).thenReturn(ipaClient);
         Set<Node> nodes = Set.of(mock(Node.class));

@@ -68,28 +68,54 @@ public class ImageEntity implements AccountIdAwareResource {
 
     private String imdsVersion;
 
+    private String saltVersion;
+
     public String getImageName() {
         return imageName;
+    }
+
+    public void setImageName(String imageName) {
+        this.imageName = imageName;
     }
 
     public String getOsType() {
         return osType;
     }
 
+    public void setOsType(String osType) {
+        this.osType = osType;
+    }
+
     public String getImageCatalogUrl() {
         return imageCatalogUrl;
+    }
+
+    public void setImageCatalogUrl(String imageCatalogUrl) {
+        this.imageCatalogUrl = imageCatalogUrl;
     }
 
     public String getImageId() {
         return imageId;
     }
 
+    public void setImageId(String imageId) {
+        this.imageId = imageId;
+    }
+
     public String getImageCatalogName() {
         return imageCatalogName;
     }
 
+    public void setImageCatalogName(String imageCatalogName) {
+        this.imageCatalogName = imageCatalogName;
+    }
+
     public String getOs() {
         return os;
+    }
+
+    public void setOs(String os) {
+        this.os = os;
     }
 
     public Long getId() {
@@ -108,40 +134,16 @@ public class ImageEntity implements AccountIdAwareResource {
         this.stack = stack;
     }
 
-    public void setImageName(String imageName) {
-        this.imageName = imageName;
-    }
-
     public String getUserdata() {
         return userdata;
-    }
-
-    public String getUserdataWrapper() {
-        return Strings.isNullOrEmpty(getGatewayUserdata()) ? getUserdata() : getGatewayUserdata();
     }
 
     public void setUserdata(String userdata) {
         this.userdata = userdata;
     }
 
-    public void setOs(String os) {
-        this.os = os;
-    }
-
-    public void setOsType(String osType) {
-        this.osType = osType;
-    }
-
-    public void setImageCatalogUrl(String imageCatalogUrl) {
-        this.imageCatalogUrl = imageCatalogUrl;
-    }
-
-    public void setImageId(String imageId) {
-        this.imageId = imageId;
-    }
-
-    public void setImageCatalogName(String imageCatalogName) {
-        this.imageCatalogName = imageCatalogName;
+    public String getUserdataWrapper() {
+        return Strings.isNullOrEmpty(getGatewayUserdata()) ? getUserdata() : getGatewayUserdata();
     }
 
     public String getDate() {
@@ -164,14 +166,14 @@ public class ImageEntity implements AccountIdAwareResource {
         return gatewayUserdata.getRaw();
     }
 
-    public Secret getGatewayUserdataSecret() {
-        return gatewayUserdata;
-    }
-
     public void setGatewayUserdata(String gatewayUserdata) {
         if (gatewayUserdata != null) {
             this.gatewayUserdata = new Secret(gatewayUserdata);
         }
+    }
+
+    public Secret getGatewayUserdataSecret() {
+        return gatewayUserdata;
     }
 
     @Override
@@ -199,6 +201,14 @@ public class ImageEntity implements AccountIdAwareResource {
         this.imdsVersion = imdsVersion;
     }
 
+    public String getSaltVersion() {
+        return saltVersion;
+    }
+
+    public void setSaltVersion(String saltVersion) {
+        this.saltVersion = saltVersion;
+    }
+
     @Override
     public String toString() {
         return "ImageEntity{" +
@@ -215,6 +225,7 @@ public class ImageEntity implements AccountIdAwareResource {
                 ", accountId='" + accountId + '\'' +
                 ", sourceImage='" + sourceImage + '\'' +
                 ", imdsVersion='" + imdsVersion + '\'' +
+                ", saltVersion='" + saltVersion + '\'' +
                 '}';
     }
 

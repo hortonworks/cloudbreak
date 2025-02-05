@@ -32,6 +32,7 @@ class ImageConverterTest {
         imageEntity.setImageCatalogName("catalogName");
         imageEntity.setImageCatalogUrl("catalogUrl");
         imageEntity.setImdsVersion("v2");
+        imageEntity.setSaltVersion("3001.8");
         if (legacyUserData) {
             imageEntity.setUserdata("userData");
         } else {
@@ -46,9 +47,9 @@ class ImageConverterTest {
         assertEquals("osType", converted.getOsType());
         assertEquals(hasSourceImage ? "sourceImage" : null, converted.getPackageVersion(ImagePackageVersion.SOURCE_IMAGE));
         assertEquals("v2", converted.getPackageVersion(ImagePackageVersion.IMDS_VERSION));
+        assertEquals("3001.8", converted.getPackageVersion(ImagePackageVersion.SALT));
         assertEquals(2, converted.getUserdata().keySet().size());
         assertEquals(legacyUserData ? "userData" : "gwUserData", converted.getUserdata().get(InstanceGroupType.GATEWAY));
         assertEquals(legacyUserData ? "userData" : "gwUserData", converted.getUserdata().get(InstanceGroupType.CORE));
-
     }
 }

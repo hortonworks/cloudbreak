@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
+import com.sequenceiq.cloudbreak.orchestrator.salt.utils.GatewayConfigComparator;
 
 @Service
 public class SaltService {
@@ -40,13 +41,29 @@ public class SaltService {
         return gatewayConfigs.stream().map(this::createSaltConnector).collect(Collectors.toList());
     }
 
+    /**
+     * Returns the primary gateway config for use during Salt communication in FMS. If a minion has a newer Salt version, it will be selected
+     * instead of the original PGW. This is required for the Salt version upgrade, where the old minions can connect to a new master, but a new minion
+     * cannot connect to an old master, so we have to ensure to always connect to the gateway with the latest salt version.
+     * @return primary gateway config for salt communication
+     */
     public GatewayConfig getPrimaryGatewayConfig(List<GatewayConfig> allGatewayConfigs) throws CloudbreakOrchestratorFailedException {
-        Optional<GatewayConfig> gatewayConfigOptional = allGatewayConfigs.stream().filter(GatewayConfig::isPrimary).findFirst();
-        if (gatewayConfigOptional.isPresent()) {
-            GatewayConfig gatewayConfig = gatewayConfigOptional.get();
-            LOGGER.debug("Primary gateway: {},", gatewayConfig);
-            return gatewayConfig;
+        Optional<GatewayConfig> originalPrimaryGatewayConfig = allGatewayConfigs.stream().filter(GatewayConfig::isPrimary).findFirst();
+        if (originalPrimaryGatewayConfig.isEmpty()) {
+            throw new CloudbreakOrchestratorFailedException("No primary gateway specified");
         }
-        throw new CloudbreakOrchestratorFailedException("No primary gateway specified");
+        GatewayConfig overriddenPrimaryGatewayConfig = allGatewayConfigs.stream()
+                .sorted(new GatewayConfigComparator())
+                .findFirst()
+                .orElse(originalPrimaryGatewayConfig.get());
+        if (!originalPrimaryGatewayConfig.get().getInstanceId().equals(overriddenPrimaryGatewayConfig.getInstanceId())) {
+            LOGGER.info("Override original primary gateway config {} and use instance with the latest salt version: {}",
+                    originalPrimaryGatewayConfig.get().getInstanceId(), overriddenPrimaryGatewayConfig.getInstanceId());
+        }
+        LOGGER.debug("Primary gateway: {},", overriddenPrimaryGatewayConfig);
+        return overriddenPrimaryGatewayConfig;
     }
+
 }
+
+
