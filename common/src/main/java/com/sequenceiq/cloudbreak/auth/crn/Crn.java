@@ -465,6 +465,7 @@ public class Crn {
         DELETE_BACKUP_REQUEST("deleteBackupRequest"),
         USERSYNC("usersync"),
         PVC_CONTROL_PLANE("pvcControlPlane"),
+        VIRTUAL_CLUSTER("virtualCluster"),
         MLSERVING("mlserving");
 
         private static final ImmutableMap<String, ResourceType> FROM_STRING;
