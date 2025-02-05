@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.AwsVariantMigrationTriggerEven
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.CoreVerticalScalingTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.ImageValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
@@ -158,6 +159,7 @@ class ClusterRepairFlowEventChainFactoryTest {
 
         assertEvents(eventQueues, List.of(
                 "FLOWCHAIN_INIT_TRIGGER_EVENT",
+                "IMAGE_VALIDATION_EVENT",
                 "STACK_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
@@ -177,6 +179,7 @@ class ClusterRepairFlowEventChainFactoryTest {
 
         assertEvents(eventQueues, List.of(
                 "FLOWCHAIN_INIT_TRIGGER_EVENT",
+                "IMAGE_VALIDATION_EVENT",
                 "UPGRADE_EMBEDDEDDB_PREPARATION_TRIGGER_EVENT",
                 "UPGRADE_RDS_TRIGGER_EVENT",
                 "FULL_DOWNSCALE_TRIGGER_EVENT",
@@ -194,6 +197,7 @@ class ClusterRepairFlowEventChainFactoryTest {
 
         assertEvents(eventQueues, List.of(
                 "FLOWCHAIN_INIT_TRIGGER_EVENT",
+                "IMAGE_VALIDATION_EVENT",
                 "STACK_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
@@ -212,6 +216,7 @@ class ClusterRepairFlowEventChainFactoryTest {
 
         assertEvents(eventQueues, List.of(
                 "FLOWCHAIN_INIT_TRIGGER_EVENT",
+                "IMAGE_VALIDATION_EVENT",
                 "STACK_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
@@ -228,6 +233,7 @@ class ClusterRepairFlowEventChainFactoryTest {
 
         assertEvents(eventQueues, List.of(
                 "FLOWCHAIN_INIT_TRIGGER_EVENT",
+                "IMAGE_VALIDATION_EVENT",
                 "STACK_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
@@ -244,6 +250,7 @@ class ClusterRepairFlowEventChainFactoryTest {
 
         assertEvents(eventQueues, List.of(
                 "FLOWCHAIN_INIT_TRIGGER_EVENT",
+                "IMAGE_VALIDATION_EVENT",
                 "STACK_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
@@ -259,6 +266,7 @@ class ClusterRepairFlowEventChainFactoryTest {
 
         assertEvents(eventQueues, List.of(
                 "FLOWCHAIN_INIT_TRIGGER_EVENT",
+                "IMAGE_VALIDATION_EVENT",
                 "FULL_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
@@ -291,6 +299,7 @@ class ClusterRepairFlowEventChainFactoryTest {
 
         assertEvents(eventQueues, List.of(
                 "FLOWCHAIN_INIT_TRIGGER_EVENT",
+                "IMAGE_VALIDATION_EVENT",
                 "STOPSTART_UPSCALE_TRIGGER_EVENT",
                 "FULL_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
@@ -307,6 +316,7 @@ class ClusterRepairFlowEventChainFactoryTest {
 
         assertEvents(eventQueues, List.of(
                 "FLOWCHAIN_INIT_TRIGGER_EVENT",
+                "IMAGE_VALIDATION_EVENT",
                 "FULL_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
@@ -333,14 +343,18 @@ class ClusterRepairFlowEventChainFactoryTest {
 
         assertEvents(eventQueues, List.of(
                 "FLOWCHAIN_INIT_TRIGGER_EVENT",
+                "IMAGE_VALIDATION_EVENT",
                 "STACK_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
                 "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));
 
-        assertThat(eventQueues.getQueue(), hasSize(5));
+        assertThat(eventQueues.getQueue(), hasSize(6));
         FlowChainInitPayload flowChainInitPayload = (FlowChainInitPayload) eventQueues.getQueue().poll();
         assertNotNull(flowChainInitPayload);
+
+        ImageValidationTriggerEvent imageValidationTriggerEvent = (ImageValidationTriggerEvent) eventQueues.getQueue().poll();
+        assertNotNull(imageValidationTriggerEvent);
 
         StackDownscaleTriggerEvent downscale = (StackDownscaleTriggerEvent) eventQueues.getQueue().poll();
         assertGroupWithHosts(downscale, HG_MASTER, Set.of(FAILED_PRIMARY_GATEWAY_FQDN, FAILED_SECONDARY_GATEWAY_FQDN_1));
@@ -380,7 +394,7 @@ class ClusterRepairFlowEventChainFactoryTest {
         FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(triggerEvent);
 
         assertEvents(eventQueues, List.of(
-                "FLOWCHAIN_INIT_TRIGGER_EVENT",
+                "FLOWCHAIN_INIT_TRIGGER_EVENT", "IMAGE_VALIDATION_EVENT",
                 "STACK_DOWNSCALE_TRIGGER_EVENT", "FULL_UPSCALE_TRIGGER_EVENT",
                 "FULL_DOWNSCALE_TRIGGER_EVENT", "FULL_UPSCALE_TRIGGER_EVENT",
                 "FULL_DOWNSCALE_TRIGGER_EVENT", "FULL_UPSCALE_TRIGGER_EVENT",
@@ -390,9 +404,12 @@ class ClusterRepairFlowEventChainFactoryTest {
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
                 "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));
 
-        assertThat(eventQueues.getQueue(), hasSize(15));
+        assertThat(eventQueues.getQueue(), hasSize(16));
         FlowChainInitPayload flowChainInitPayload = (FlowChainInitPayload) eventQueues.getQueue().poll();
         assertNotNull(flowChainInitPayload);
+
+        ImageValidationTriggerEvent imageValidationTriggerEvent = (ImageValidationTriggerEvent) eventQueues.getQueue().poll();
+        assertNotNull(imageValidationTriggerEvent);
 
         StackDownscaleTriggerEvent downscaleMaster1 = (StackDownscaleTriggerEvent) eventQueues.getQueue().poll();
         assertGroupWithHost(downscaleMaster1, HG_MASTER, FAILED_PRIMARY_GATEWAY_FQDN);
@@ -451,7 +468,7 @@ class ClusterRepairFlowEventChainFactoryTest {
         FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(triggerEvent);
 
         assertEvents(eventQueues, List.of(
-                "FLOWCHAIN_INIT_TRIGGER_EVENT",
+                "FLOWCHAIN_INIT_TRIGGER_EVENT", "IMAGE_VALIDATION_EVENT",
                 "STACK_DOWNSCALE_TRIGGER_EVENT", "FULL_UPSCALE_TRIGGER_EVENT",
                 "FULL_DOWNSCALE_TRIGGER_EVENT", "FULL_UPSCALE_TRIGGER_EVENT",
                 "FULL_DOWNSCALE_TRIGGER_EVENT", "FULL_UPSCALE_TRIGGER_EVENT",
@@ -459,6 +476,9 @@ class ClusterRepairFlowEventChainFactoryTest {
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT", "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));
 
         eventQueues.getQueue().remove();
+
+        ImageValidationTriggerEvent imageValidationTriggerEvent = (ImageValidationTriggerEvent) eventQueues.getQueue().poll();
+        assertNotNull(imageValidationTriggerEvent);
 
         StackDownscaleTriggerEvent downscale1 = (StackDownscaleTriggerEvent) eventQueues.getQueue().poll();
         assertGroupWithHosts(downscale1, HG_MASTER, Set.of(FAILED_PRIMARY_GATEWAY_FQDN, FAILED_SECONDARY_GATEWAY_FQDN_1, FAILED_SECONDARY_GATEWAY_FQDN_2));
@@ -575,6 +595,7 @@ class ClusterRepairFlowEventChainFactoryTest {
         FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedCore().build());
 
         assertEvents(eventQueues, List.of("FLOWCHAIN_INIT_TRIGGER_EVENT",
+                "IMAGE_VALIDATION_EVENT",
                 "STACK_VERTICAL_SCALE_TRIGGER_EVENT",
                 "FULL_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
@@ -582,6 +603,8 @@ class ClusterRepairFlowEventChainFactoryTest {
                 "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));
 
         eventQueues.getQueue().remove();
+        ImageValidationTriggerEvent imageValidationTriggerEvent = (ImageValidationTriggerEvent) eventQueues.getQueue().poll();
+        assertNotNull(imageValidationTriggerEvent);
         CoreVerticalScalingTriggerEvent coreVerticalScalingTriggerEvent = (CoreVerticalScalingTriggerEvent) eventQueues.getQueue().poll();
         assertEquals(200, coreVerticalScalingTriggerEvent.getRequest().getTemplate().getRootVolume().getSize().intValue());
     }
@@ -598,6 +621,7 @@ class ClusterRepairFlowEventChainFactoryTest {
 
         assertEvents(eventQueues, List.of(
                 "FLOWCHAIN_INIT_TRIGGER_EVENT",
+                "IMAGE_VALIDATION_EVENT",
                 "FULL_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
@@ -616,6 +640,7 @@ class ClusterRepairFlowEventChainFactoryTest {
 
         assertEvents(eventQueues, List.of(
                 "FLOWCHAIN_INIT_TRIGGER_EVENT",
+                "IMAGE_VALIDATION_EVENT",
                 "STACK_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
@@ -634,6 +659,7 @@ class ClusterRepairFlowEventChainFactoryTest {
 
         assertEvents(eventQueues, List.of(
                 "FLOWCHAIN_INIT_TRIGGER_EVENT",
+                "IMAGE_VALIDATION_EVENT",
                 "STACK_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",

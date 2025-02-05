@@ -162,7 +162,7 @@ public class StackImageService {
         return Optional.ofNullable(targetImageComponent);
     }
 
-    public Optional<StatedImage> getStatedImageInternal(Stack stack, com.sequenceiq.cloudbreak.cloud.model.Image image, ImageCatalog imageCatalog) {
+    public Optional<StatedImage> getStatedImageInternal(StackView stack, com.sequenceiq.cloudbreak.cloud.model.Image image, ImageCatalog imageCatalog) {
         return ThreadBasedUserCrnProvider.doAs(getInternalUserCrn(stack),
                 () -> {
                     try {
@@ -175,18 +175,18 @@ public class StackImageService {
                 });
     }
 
-    public Optional<StatedImage> getStatedImageInternal(Stack stack) throws CloudbreakImageNotFoundException {
+    public Optional<StatedImage> getStatedImageInternal(StackView stack) throws CloudbreakImageNotFoundException {
         com.sequenceiq.cloudbreak.cloud.model.Image image = getCurrentImage(stack.getId());
         ImageCatalog imageCatalog = getImageCatalogFromStackAndImage(stack, image);
         return getStatedImageInternal(stack, image, imageCatalog);
     }
 
-    public ImageCatalog getImageCatalogFromStackAndImage(Stack stack, com.sequenceiq.cloudbreak.cloud.model.Image image) {
+    public ImageCatalog getImageCatalogFromStackAndImage(StackView stack, com.sequenceiq.cloudbreak.cloud.model.Image image) {
         return ThreadBasedUserCrnProvider.doAs(getInternalUserCrn(stack),
                 () -> imageCatalogService.getImageCatalogByName(stack.getWorkspaceId(), image.getImageCatalogName()));
     }
 
-    private String getInternalUserCrn(Stack stack) {
+    private String getInternalUserCrn(StackView stack) {
         return internalCrnModifier.getInternalCrnWithAccountId(Crn.fromString(stack.getResourceCrn()).getAccountId());
     }
 }

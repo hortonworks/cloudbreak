@@ -754,7 +754,8 @@ public enum ResourceEvent {
     DATALAKE_ADD_VOLUMES_IN_PROGRESS("datalake.add.volumes.in.progress"),
     DATALAKE_ADD_VOLUMES_COMPLETE("datalake.add.volumes.complete"),
     DATALAKE_STALE_STATUS("datalake.stale.status"),
-    STALE_STATUS_NOTIFICATION("stale.status.notification"),;
+    STALE_STATUS_NOTIFICATION("stale.status.notification"),
+    IMAGE_VALIDATION_FAILED("stack.image.validation");
 
     private final String message;
 
