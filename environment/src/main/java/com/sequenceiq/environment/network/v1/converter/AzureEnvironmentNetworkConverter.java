@@ -190,6 +190,9 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
         if (Objects.nonNull(networkDto.getAzure())) {
             azureNetwork.setFlexibleServerSubnetIds(networkDto.getAzure().getFlexibleServerSubnetIds());
             azureNetwork.setDatabasePrivateDnsZoneId(networkDto.getAzure().getDatabasePrivateDnsZoneId());
+            if (networkDto.getAzure().getAksPrivateDnsZoneId() != null) {
+                azureNetwork.setAksPrivateDnsZoneId(networkDto.getAzure().getAksPrivateDnsZoneId());
+            }
         }
         azureNetwork.setServiceEndpointCreation(networkDto.getServiceEndpointCreation());
     }
