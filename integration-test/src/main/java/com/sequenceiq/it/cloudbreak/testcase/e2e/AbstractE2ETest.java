@@ -93,8 +93,10 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
                 LOGGER.info("Validating SafeLogic installation of created resources...");
                 safeLogicAssertions.validate(testContext);
             }
-            LOGGER.info("Validating secret encryption on the created resources...");
-            secretEncryptionAssertions.validateAllExisting(testContext);
+            if (testContext.isSecretEncryptionEnabled()) {
+                LOGGER.info("Validating secret encryption on the created resources...");
+                secretEncryptionAssertions.validateAllExisting(testContext);
+            }
         }
         spotUtil.setUseSpotInstances(Boolean.FALSE);
     }

@@ -1152,6 +1152,15 @@ public abstract class TestContext implements ApplicationContextAware {
         return safeLogicValidation;
     }
 
+    public boolean isSecretEncryptionEnabled() {
+        EnvironmentTestDto environment = get(EnvironmentTestDto.class);
+        if (environment == null || environment.getResponse() == null) {
+            LOGGER.warn("Skipping secret encryption validation because the environment or its response is null.");
+            return false;
+        }
+        return environment.getResponse().isEnableSecretEncryption();
+    }
+
     public String getWorkloadPassword() {
         return getActingUser().getWorkloadPassword();
     }
