@@ -396,9 +396,59 @@ public class CmTemplateValidatorTest {
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () ->
                 subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, -3, List.of(compute, worker),
                         false));
-        assertEquals("Scaling adjustment is not allowed. NODEMANAGER role must be present on 1 host(s) but after the scaling operation 0 host(s) " +
-                        "would have this role. Based on the template this role is present on the compute, worker host group(s).",
+        assertEquals("Scaling adjustment is not allowed. NODEMANAGER role has restriction on node count but after the scaling operation 0 host(s) " +
+                        "would not fulfill this restriction: Minimal number of hosts with YARN NODEMANAGER role is 1. " +
+                        "Based on the template this role is present on the compute, worker host group(s).",
                 badRequestException.getMessage());
+    }
+
+    @Test
+    public void testValidationIfNifiZookeeperOnlyScalableToOddNumber() {
+        Blueprint blueprint = readBlueprint("input/cdp-flow-management-small-nifi-2.bp");
+
+        String hostGroup = "nifi";
+        ClouderaManagerProduct clouderaManagerRepo = new ClouderaManagerProduct();
+        clouderaManagerRepo.setVersion("7.3.1");
+
+        InstanceGroup management = new InstanceGroup();
+        management.setGroupName("management");
+        management.setInstanceMetaData(Set.of(new InstanceMetaData()));
+        InstanceGroup nifi = new InstanceGroup();
+        nifi.setGroupName("nifi");
+        nifi.setInstanceMetaData(Set.of(new InstanceMetaData(), new InstanceMetaData(), new InstanceMetaData()));
+        InstanceGroup nifiScaling = new InstanceGroup();
+        nifiScaling.setGroupName("nifi_scaling");
+        nifiScaling.setInstanceMetaData(Set.of());
+
+        assertDoesNotThrow(() -> subject
+                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, 2,
+                        List.of(management, nifi, nifiScaling), false));
+    }
+
+    @Test
+    public void testValidationIfNifiZookeeperNotAllowedToScaleToEvenNumber() {
+        Blueprint blueprint = readBlueprint("input/cdp-flow-management-small-nifi-2.bp");
+
+        String hostGroup = "nifi";
+        ClouderaManagerProduct clouderaManagerRepo = new ClouderaManagerProduct();
+        clouderaManagerRepo.setVersion("7.3.1");
+
+        InstanceGroup management = new InstanceGroup();
+        management.setGroupName("management");
+        management.setInstanceMetaData(Set.of(new InstanceMetaData()));
+        InstanceGroup nifi = new InstanceGroup();
+        nifi.setGroupName("nifi");
+        nifi.setInstanceMetaData(Set.of(new InstanceMetaData(), new InstanceMetaData(), new InstanceMetaData()));
+        InstanceGroup nifiScaling = new InstanceGroup();
+        nifiScaling.setGroupName("nifi_scaling");
+        nifiScaling.setInstanceMetaData(Set.of());
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> subject
+                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, 1,
+                        List.of(management, nifi, nifiScaling), false));
+        assertEquals("Scaling adjustment is not allowed. SERVER role has restriction on node count but after the scaling operation 4 host(s) " +
+                "would not fulfill this restriction: Number of nodes with ZooKeeper server should be odd number. " +
+                "Based on the template this role is present on the nifi host group(s).", badRequestException.getMessage());
     }
 
     private Blueprint readBlueprint(String file) {

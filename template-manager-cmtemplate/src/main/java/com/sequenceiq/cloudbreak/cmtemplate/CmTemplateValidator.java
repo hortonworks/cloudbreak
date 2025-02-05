@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -21,11 +22,13 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceCount;
+import com.sequenceiq.cloudbreak.cmtemplate.validation.ServiceRoleRestriction;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.template.utils.HostGroupUtils;
 import com.sequenceiq.cloudbreak.template.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.template.validation.BlueprintValidatorUtil;
@@ -36,13 +39,22 @@ public class CmTemplateValidator implements BlueprintValidator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CmTemplateValidator.class);
 
-    private static final Map<String, Integer> REQUIRED_ROLE_COUNT = Map.ofEntries(
-            Map.entry("DATANODE", 1),
-            Map.entry("NODEMANAGER", 1),
-            Map.entry("HBASE_REGIONSERVER", 1),
-            Map.entry("PHOENIX_QUERY_SERVER", 1),
-            Map.entry("KUDU_TSERVER", 1),
-            Map.entry("KAFKA_BROKER", 3));
+    private static final List<ServiceRoleRestriction> REQUIRED_SERVICEROLE_RESTRICTION = List.of(
+            new ServiceRoleRestriction("ZOOKEEPER", "SERVER", (nodecount) -> (nodecount % 2) == 1,
+                    "Number of nodes with ZooKeeper server should be odd number."),
+            new ServiceRoleRestriction("HDFS", "DATANODE", nodecountAtLeast(1),
+                    "Minimal number of hosts with HDFS DATANODE role is 1."),
+            new ServiceRoleRestriction("YARN", "NODEMANAGER", nodecountAtLeast(1),
+                    "Minimal number of hosts with YARN NODEMANAGER role is 1."),
+            new ServiceRoleRestriction("HBASE", "REGIONSERVER", nodecountAtLeast(1),
+                    "Minimal number of hosts with HBASE REGIONSERVER role is 1."),
+            new ServiceRoleRestriction("PHOENIX", "PHOENIX_QUERY_SERVER", nodecountAtLeast(1),
+                    "Minimal number of hosts with PHOENIX_QUERY_SERVER role is 1."),
+            new ServiceRoleRestriction("KUDU", "KUDU_TSERVER", nodecountAtLeast(1),
+                    "Minimal number of hosts with KUDU_TSERVER role is 1."),
+            new ServiceRoleRestriction("KAFKA", "KAFKA_BROKER", nodecountAtLeast(3),
+                    "Minimal number of hosts with KAFKA_BROKER role is 3.")
+    );
 
     @Inject
     private CmTemplateProcessorFactory processorFactory;
@@ -162,28 +174,28 @@ public class CmTemplateValidator implements BlueprintValidator {
         if (CollectionUtils.isNotEmpty(instanceGroups)) {
             Set<String> targetGroups = instanceGroupAdjustments.keySet();
             LOGGER.debug("Host group adjustments: {}", instanceGroupAdjustments);
-            REQUIRED_ROLE_COUNT.forEach((role, requiredCount) -> {
-                Set<String> groupsWithRoles = findGroupsWithRoles(role, templateProcessor);
+            REQUIRED_SERVICEROLE_RESTRICTION.forEach(serviceRoleRestriction -> {
+                Set<String> groupsWithRoles = findGroupsWithRoles(serviceRoleRestriction.service(), serviceRoleRestriction.role(), templateProcessor);
                 if (hasCommonElement(targetGroups, groupsWithRoles)) {
                     List<InstanceGroup> filteredInstanceGroups = instanceGroups.stream()
                             .filter(instanceGroup -> groupsWithRoles.contains(instanceGroup.getGroupName()))
                             .toList();
                     String groupNames = filteredInstanceGroups.stream().map(InstanceGroup::getGroupName).collect(Collectors.joining(", "));
-                    LOGGER.debug("Host group(s) with {} role: {}", role, groupNames);
+                    LOGGER.debug("Host group(s) with {} role: {}", serviceRoleRestriction.role(), groupNames);
                     filteredInstanceGroups.stream()
-                            .map(instanceGroup -> getAdjustedNodeCount(instanceGroupAdjustments, role, instanceGroup))
+                            .map(instanceGroup -> getAdjustedNodeCount(instanceGroupAdjustments, serviceRoleRestriction.role(), instanceGroup))
                             .reduce(Integer::sum)
-                            .ifPresent(remainingInstances -> validateRemainingInstanceCount(role, requiredCount, groupNames, remainingInstances));
+                            .ifPresent(remainingInstances -> validateInstanceRestriction(serviceRoleRestriction, groupNames, remainingInstances));
                 }
             });
         }
     }
 
-    private Set<String> findGroupsWithRoles(String role, CmTemplateProcessor templateProcessor) {
-        return templateProcessor.getComponentsByHostGroup()
+    private Set<String> findGroupsWithRoles(String service, String role, CmTemplateProcessor templateProcessor) {
+        return templateProcessor.getServiceComponentsByHostGroup()
                 .entrySet()
                 .stream()
-                .filter(entry -> entry.getValue().contains(role))
+                .filter(entry -> entry.getValue().contains(ServiceComponent.of(service, role)))
                 .map(Entry::getKey)
                 .collect(Collectors.toSet());
     }
@@ -206,14 +218,18 @@ public class CmTemplateValidator implements BlueprintValidator {
         }
     }
 
-    private void validateRemainingInstanceCount(String role, Integer requiredCount, String groupNames, Integer remainingInstances) {
-        LOGGER.debug("{} remaining instances, required: {} in groups of {} for {} role",
-                remainingInstances, requiredCount, groupNames, role);
-        if (remainingInstances < requiredCount) {
+    private void validateInstanceRestriction(ServiceRoleRestriction restriction, String groupNames, Integer remainingInstances) {
+        LOGGER.debug("{} instances, in groups of {} for {} role",
+                remainingInstances, groupNames, restriction.role());
+        if (restriction.restriction().negate().test(remainingInstances)) {
             throw new BadRequestException(String.format(
-                    "Scaling adjustment is not allowed. %s role must be present on %s host(s) but after the scaling operation %s " +
-                            "host(s) would have this role. Based on the template this role is present on the %s " +
-                            "host group(s).", role, requiredCount, remainingInstances, groupNames));
+                    "Scaling adjustment is not allowed. %s role has restriction on node count but after the scaling operation %s " +
+                            "host(s) would not fulfill this restriction: %s Based on the template this role is present on the %s " +
+                            "host group(s).", restriction.role(), remainingInstances, restriction.message(), groupNames));
         }
+    }
+
+    private static Predicate<Integer> nodecountAtLeast(Integer i) {
+        return (nodecount) -> nodecount >= i;
     }
 }
