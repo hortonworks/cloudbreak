@@ -4,9 +4,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
 public interface ResourceBatchConfig {
 
-    Integer stopStartBatchSize();
-
-    Integer createBatchSize();
+    Integer batchSize();
 
     Variant variant();
 }

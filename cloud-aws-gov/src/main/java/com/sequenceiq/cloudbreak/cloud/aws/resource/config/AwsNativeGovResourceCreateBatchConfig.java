@@ -5,22 +5,15 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
-import com.sequenceiq.cloudbreak.cloud.template.ResourceBatchConfig;
+import com.sequenceiq.cloudbreak.cloud.template.ResourceCreateBatchConfig;
 
 @Service
-public class AwsNativeGovResourceBatchConfig implements ResourceBatchConfig {
-
-    @Value("${cb.aws.stopStart.batch.size}")
-    private Integer stopStartBatchSize;
+public class AwsNativeGovResourceCreateBatchConfig implements ResourceCreateBatchConfig {
 
     @Value("${cb.aws.create.batch.size}")
     private Integer createBatchSize;
 
-    public Integer stopStartBatchSize() {
-        return stopStartBatchSize;
-    }
-
-    public Integer createBatchSize() {
+    public Integer batchSize() {
         return createBatchSize;
     }
 

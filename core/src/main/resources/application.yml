@@ -234,7 +234,6 @@ cb:
           imdsVersion: v1
 
   aws:
-    stopStart.batch.size: 10
     create.batch.size: 8
     spotinstances.enabled: true
     disabled.instance.types:

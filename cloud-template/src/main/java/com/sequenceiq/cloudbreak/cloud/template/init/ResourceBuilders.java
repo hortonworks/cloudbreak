@@ -24,7 +24,8 @@ import com.sequenceiq.cloudbreak.cloud.template.GroupResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.LoadBalancerResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.NetworkResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.OrderedBuilder;
-import com.sequenceiq.cloudbreak.cloud.template.ResourceBatchConfig;
+import com.sequenceiq.cloudbreak.cloud.template.ResourceCreateBatchConfig;
+import com.sequenceiq.cloudbreak.cloud.template.ResourceStopStartBatchConfig;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 
 @Component
@@ -37,7 +38,10 @@ public class ResourceBuilders {
     private static final Integer DEFAULT_CREATE_BATCH_SIZE = 5;
 
     @Autowired(required = false)
-    private List<ResourceBatchConfig> batchConfig = new ArrayList<>();
+    private List<ResourceCreateBatchConfig> createBatchConfigs = new ArrayList<>();
+
+    @Autowired(required = false)
+    private List<ResourceStopStartBatchConfig> stopStartBatchConfigs = new ArrayList<>();
 
     @Autowired(required = false)
     private List<NetworkResourceBuilder> network = new ArrayList<>();
@@ -160,14 +164,14 @@ public class ResourceBuilders {
     }
 
     private void initStopStartBatchSize() {
-        for (ResourceBatchConfig resourceBatchConfig : batchConfig) {
-            stopStartBatchSize.put(resourceBatchConfig.variant(), resourceBatchConfig.stopStartBatchSize());
+        for (ResourceStopStartBatchConfig resourceBatchConfig : stopStartBatchConfigs) {
+            stopStartBatchSize.put(resourceBatchConfig.variant(), resourceBatchConfig.batchSize());
         }
     }
 
     private void initCreateBatchSize() {
-        for (ResourceBatchConfig resourceBatchConfig : batchConfig) {
-            createBatchSize.put(resourceBatchConfig.variant(), resourceBatchConfig.createBatchSize());
+        for (ResourceCreateBatchConfig resourceBatchConfig : createBatchConfigs) {
+            createBatchSize.put(resourceBatchConfig.variant(), resourceBatchConfig.batchSize());
         }
     }
 
