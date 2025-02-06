@@ -557,14 +557,14 @@ public class AzureClient {
     }
 
     public Set<AvailabilityZoneId> getAvailabilityZone(String resourceGroup, String vmName) {
-        return handleException(() -> {
+        return handleExceptionWithDefault(() -> {
             VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, vmName);
             if (Objects.isNull(vm) || Objects.isNull(vm.availabilityZones())) {
                 return Collections.emptySet();
             } else {
                 return vm.availabilityZones();
             }
-        });
+        }, Collections.emptySet());
     }
 
     public Integer getFaultDomainNumber(String resourceGroup, String vmName) {
@@ -922,6 +922,10 @@ public class AzureClient {
 
     private <T> T handleException(Supplier<T> function) {
         return azureExceptionHandler.handleException(function);
+    }
+
+    private <T> T handleExceptionWithDefault(Supplier<T> function, T defaultValue) {
+        return azureExceptionHandler.handleException(function, defaultValue);
     }
 
     private void handleException(Runnable function) {

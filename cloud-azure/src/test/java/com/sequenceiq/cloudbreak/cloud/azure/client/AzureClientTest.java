@@ -171,16 +171,18 @@ class AzureClientTest {
         lenient().when(azureClientCredentials.getAzureResourceManager()).thenReturn(azureResourceManager);
         lenient().when(azureClientCredentials.getPostgreSqlManager()).thenReturn(postgreSqlManager);
         lenient().when(azureExceptionHandler.handleException(any(Supplier.class))).thenCallRealMethod();
+        lenient().when(azureExceptionHandler.handleException(any(Supplier.class), eq(Collections.emptySet()))).thenCallRealMethod();
+        lenient().when(azureExceptionHandler.handleException(any(Supplier.class), any(), any())).thenCallRealMethod();
         lenient().doCallRealMethod().when(azureExceptionHandler).handleException(any(Runnable.class));
 
         underTest = new AzureClient(azureClientCredentials, azureExceptionHandler, azureListResultFactory);
     }
 
     static Object[][] setupDiskEncryptionWithDesIfNeededTestWhenDesAbsentDataProvider() {
-        return new Object[][] {
+        return new Object[][]{
                 // testCaseName diskEncryptionSetId
-                { "diskEncryptionSetId=null", null },
-                { "diskEncryptionSetId=\"\"", "" },
+                {"diskEncryptionSetId=null", null},
+                {"diskEncryptionSetId=\"\"", ""},
         };
     }
 
@@ -401,7 +403,7 @@ class AzureClientTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = LoadBalancerType.class, names = { "PRIVATE", "GATEWAY_PRIVATE" })
+    @EnumSource(value = LoadBalancerType.class, names = {"PRIVATE", "GATEWAY_PRIVATE"})
     void getPrivateLoadBalancerWith1Frontend(LoadBalancerType loadBalancerType) {
         when(azureResourceManager.loadBalancers()).thenReturn(loadBalancerResource);
         when(loadBalancerResource.getByResourceGroup(RESOURCE_GROUP_NAME, PRIVATE_LB_NAME)).thenReturn(privateLoadBalancer);
@@ -419,7 +421,7 @@ class AzureClientTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = LoadBalancerType.class, names = { "PRIVATE", "GATEWAY_PRIVATE" })
+    @EnumSource(value = LoadBalancerType.class, names = {"PRIVATE", "GATEWAY_PRIVATE"})
     void getPrivateLoadBalancerWith2Frontends(LoadBalancerType loadBalancerType) {
         when(azureResourceManager.loadBalancers()).thenReturn(loadBalancerResource);
         when(loadBalancerResource.getByResourceGroup(RESOURCE_GROUP_NAME, PRIVATE_LB_NAME)).thenReturn(privateLoadBalancer);
@@ -438,7 +440,7 @@ class AzureClientTest {
                 .anyMatch(fe -> LoadBalancerType.PRIVATE == fe.getLoadBalancerType()
                         && PRIVATE_IP_ADDRESS1.equals(fe.getIp()) && FRONTEND_1_NAME.equals(fe.getName()))
                 .anyMatch(fe -> LoadBalancerType.GATEWAY_PRIVATE == fe.getLoadBalancerType()
-                && GATEWAY_PRIVATE_IP_ADDRESS1.equals(fe.getIp()) && FRONTEND_2_NAME.equals(fe.getName()));
+                        && GATEWAY_PRIVATE_IP_ADDRESS1.equals(fe.getIp()) && FRONTEND_2_NAME.equals(fe.getName()));
     }
 
     static Object[] zoneInfoFromAzure() {
@@ -446,7 +448,7 @@ class AzureClientTest {
         azureZoneInfo.put("instanceType1", List.of("1"));
         azureZoneInfo.put("instanceType2", List.of("1", "2"));
         azureZoneInfo.put("instanceType3", List.of("1", "2", "3"));
-        return new Object[] {
+        return new Object[]{
                 Collections.emptyMap(),
                 Map.of("instanceType1", List.of("1")),
                 azureZoneInfo};
@@ -538,12 +540,12 @@ class AzureClientTest {
 
     private List<ResourceSkuInner> getResourceSkus(Map<String, List<String>> instanceInformation) {
         return instanceInformation.entrySet().stream().map(entry -> {
-                ResourceSkuInner resourceSkuInner = mock(ResourceSkuInner.class);
-                ResourceSkuLocationInfo resourceSkuLocationInfo = mock(ResourceSkuLocationInfo.class);
-                when(resourceSkuInner.name()).thenReturn(entry.getKey());
-                when(resourceSkuInner.locationInfo()).thenReturn(List.of(resourceSkuLocationInfo));
-                when(resourceSkuLocationInfo.zones()).thenReturn(entry.getValue());
-                return resourceSkuInner;
+            ResourceSkuInner resourceSkuInner = mock(ResourceSkuInner.class);
+            ResourceSkuLocationInfo resourceSkuLocationInfo = mock(ResourceSkuLocationInfo.class);
+            when(resourceSkuInner.name()).thenReturn(entry.getKey());
+            when(resourceSkuInner.locationInfo()).thenReturn(List.of(resourceSkuLocationInfo));
+            when(resourceSkuLocationInfo.zones()).thenReturn(entry.getValue());
+            return resourceSkuInner;
         }).collect(Collectors.toList());
     }
 
