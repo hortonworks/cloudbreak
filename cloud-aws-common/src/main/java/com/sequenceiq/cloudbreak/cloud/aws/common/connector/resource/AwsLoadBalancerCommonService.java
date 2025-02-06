@@ -105,10 +105,6 @@ public class AwsLoadBalancerCommonService {
                             TargetGroupAttribute.builder()
                                     .key("stickiness.enabled")
                                     .value("true")
-                                    .build(),
-                            TargetGroupAttribute.builder()
-                                    .key("load_balancing.cross_zone.enabled")
-                                    .value("true")
                                     .build()));
                     ModifyTargetGroupAttributesRequest modifyRequest = ModifyTargetGroupAttributesRequest.builder()
                             .targetGroupArn(targetGroup.targetGroupArn())
@@ -140,6 +136,10 @@ public class AwsLoadBalancerCommonService {
             loadBalancerAttributes.add(LoadBalancerAttribute.builder()
                     .key("deletion_protection.enabled")
                     .value(String.valueOf(deletionProtection))
+                    .build());
+            loadBalancerAttributes.add(LoadBalancerAttribute.builder()
+                    .key("load_balancing.cross_zone.enabled")
+                    .value("true")
                     .build());
 
             ModifyLoadBalancerAttributesRequest modifyLoadBalancerAttributesRequest = ModifyLoadBalancerAttributesRequest.builder()

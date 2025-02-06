@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -435,11 +436,19 @@ class AwsLoadBalancerCommonServiceTest {
 
         assertEquals(arn, capturedRequest.loadBalancerArn());
         List<LoadBalancerAttribute> attributes = capturedRequest.attributes();
-        assertEquals(1, attributes.size());
+        assertEquals(2, attributes.size());
+
+        List<String> attrKeys = attributes.stream().map(LoadBalancerAttribute::key).toList();
+        assertTrue(attrKeys.contains("deletion_protection.enabled"));
+        assertTrue(attrKeys.contains("load_balancing.cross_zone.enabled"));
 
         attributes.forEach(attribute -> {
             if ("deletion_protection.enabled".equals(attribute.key())) {
                 assertEquals("true", attribute.value());
+            } else if ("load_balancing.cross_zone.enabled".equals(attribute.key())) {
+                assertEquals("true", attribute.value());
+            } else {
+                fail();
             }
         });
     }
