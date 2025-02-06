@@ -185,6 +185,9 @@ class EntitlementServiceTest {
                         (EntitlementCheckFunction) EntitlementService::isFlexibleServerUpgradeLongPollingEnabled, false},
                 {"CDP_AZURE_DATABASE_FLEXIBLE_SERVER_UPGRADE_LONG_POLLING",
                         (EntitlementCheckFunction) EntitlementService::isFlexibleServerUpgradeLongPollingEnabled, true},
+
+                {"CDP_AZURE_DATABASE_SINGLE_SERVER_REJECT", (EntitlementCheckFunction) EntitlementService::isSingleServerRejectEnabled, false},
+                {"CDP_AZURE_DATABASE_SINGLE_SERVER_REJECT", (EntitlementCheckFunction) EntitlementService::isSingleServerRejectEnabled, true},
         };
     }
 

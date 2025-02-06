@@ -10,6 +10,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AWS_ARM
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_CERTIFICATE_AUTH;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_DATABASE_FLEXIBLE_SERVER_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_DATABASE_FLEXIBLE_SERVER_UPGRADE_LONG_POLLING;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_DATABASE_SINGLE_SERVER_REJECT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_IMAGE_MARKETPLACE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_IMAGE_MARKETPLACE_ONLY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT;
@@ -561,6 +562,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.azure.database.flexibleserver.upgrade.longpolling.enabled}")
     private boolean azureFlexibleUpgradeLongPollingEnabled;
 
+    @Value("${auth.mock.azure.database.singleserver.reject.enabled}")
+    private boolean azureSingleServerRejectEnabled;
+
     @Value("${auth.mock.gcp.secureboot.enabled}")
     private boolean gcpSecureBootEnabled;
 
@@ -1043,6 +1047,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (azureFlexibleUpgradeLongPollingEnabled) {
             builder.addEntitlements(createEntitlement(CDP_AZURE_DATABASE_FLEXIBLE_SERVER_UPGRADE_LONG_POLLING));
+        }
+        if (azureSingleServerRejectEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_AZURE_DATABASE_SINGLE_SERVER_REJECT));
         }
         if (gcpSecureBootEnabled) {
             builder.addEntitlements(createEntitlement(CDP_CB_GCP_SECURE_BOOT));
