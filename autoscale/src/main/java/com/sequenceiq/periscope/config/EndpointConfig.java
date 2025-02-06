@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.authorization.controller.AuthorizationInfoController;
+import com.sequenceiq.cloudbreak.controller.mapper.ForbiddenExceptionMapper;
 import com.sequenceiq.cloudbreak.service.openapi.OpenApiController;
 import com.sequenceiq.cloudbreak.service.openapi.OpenApiProvider;
 import com.sequenceiq.periscope.api.AutoscaleApi;
@@ -26,7 +27,6 @@ import com.sequenceiq.periscope.controller.mapper.ConversionExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.ConversionFailedExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.DataIntegrityViolationExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.DefaultExceptionMapper;
-import com.sequenceiq.periscope.controller.mapper.ForbiddenExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.HttpMediaTypeNotSupportedExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.HttpMessageNotReadableExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.HttpRequestMethodNotSupportedExceptionMapper;
