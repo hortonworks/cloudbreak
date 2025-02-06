@@ -76,6 +76,10 @@ public enum Status {
         return name().contains("STOP");
     }
 
+    public boolean isStopped() {
+        return name().equals("STOPPED");
+    }
+
     public boolean isSuccessfullyDeleted() {
         return DELETE_COMPLETED.equals(this);
     }

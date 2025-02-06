@@ -11,7 +11,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.metrics.data
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CLUSTER_CREATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateEvent.ROTATE_RDS_CERTIFICATE_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.restart.RestartEvent.RESTART_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent.SALT_UPDATE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.services.restart.ClusterServicesRestartEvent.CLUSTER_SERVICES_RESTART_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.CLUSTER_START_EVENT;
@@ -61,6 +60,7 @@ import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesRequest;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.java.SetDefaultJavaVersionTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.restart.RestartInstancesWithRdsStartEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.services.restart.event.ClusterServicesRestartTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateStateSelectors;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateEvent;
@@ -82,7 +82,6 @@ import com.sequenceiq.cloudbreak.core.flow2.event.MaintenanceModeValidationTrigg
 import com.sequenceiq.cloudbreak.core.flow2.event.MultiHostgroupClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.RdsUpgradeChainTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.RefreshEntitlementParamsFlowChainTriggerEvent;
-import com.sequenceiq.cloudbreak.core.flow2.event.RestartInstancesEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
@@ -243,10 +242,10 @@ public class ReactorFlowManager {
         return reactorNotifier.notify(stackId, selector, event);
     }
 
-    public FlowIdentifier triggerRestartInstances(Long stackId, List<String> instanceIds) {
-        String selector = RESTART_TRIGGER_EVENT.event();
-        RestartInstancesEvent event = new RestartInstancesEvent(selector, stackId, instanceIds);
-        return reactorNotifier.notify(stackId, selector, event);
+    public FlowIdentifier triggerRestartInstances(Long stackId, List<String> instanceIds, boolean rdsRestartRequired) {
+        RestartInstancesWithRdsStartEvent restartInstancesWithRdsStartEvent = new RestartInstancesWithRdsStartEvent(stackId, instanceIds, rdsRestartRequired);
+        String selector = FlowChainTriggers.RESTART_INSTANCES_WITH_RDS_RESTART_CHAIN_TRIGGER_EVENT;
+        return reactorNotifier.notify(stackId, selector, restartInstancesWithRdsStartEvent);
     }
 
     public FlowIdentifier triggerStackRemoveInstances(Long stackId, Map<String, Set<Long>> instanceIdsByHostgroupMap, boolean forced) {
