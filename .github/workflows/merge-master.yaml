@@ -21,7 +21,7 @@ jobs:
   sonar:
     permissions: write-all
     name: Sonar Analyze
-    runs-on: [cb-ubi8-jdk21]
+    runs-on: [cb-ubuntu22]
 
     steps:
       - name: Checkout
