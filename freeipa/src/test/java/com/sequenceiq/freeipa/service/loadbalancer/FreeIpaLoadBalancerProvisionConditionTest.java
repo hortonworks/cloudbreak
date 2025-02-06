@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -15,7 +16,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.util.CrnService;
 
@@ -43,6 +46,12 @@ class FreeIpaLoadBalancerProvisionConditionTest {
     @Mock
     private Stack stack;
 
+    @Mock
+    private ImageService imageService;
+
+    @Mock
+    private Image image;
+
     @BeforeEach
     void before() {
         ReflectionTestUtils.setField(underTest, "supportedVariants", SUPPORTED_VARIANTS);
@@ -54,8 +63,30 @@ class FreeIpaLoadBalancerProvisionConditionTest {
     void testLoadBalancerProvisionEnabledShouldReturnTrue() {
         when(stack.getPlatformvariant()).thenReturn("AZURE");
         when(entitlementService.isFreeIpaLoadBalancerEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(imageService.getImageForStack(stack)).thenReturn(image);
+        when(image.getPackageVersions()).thenReturn(Map.of("freeipa-health-agent", "2.1.0.2-b2228"));
 
         assertTrue(underTest.loadBalancerProvisionEnabled(STACK_ID));
+    }
+
+    @Test
+    void testHealthAgentVersionNewerShouldReturnTrue() {
+        when(stack.getPlatformvariant()).thenReturn("AZURE");
+        when(entitlementService.isFreeIpaLoadBalancerEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(imageService.getImageForStack(stack)).thenReturn(image);
+        when(image.getPackageVersions()).thenReturn(Map.of("freeipa-health-agent", "2.1.0.2-b2228"));
+
+        assertTrue(underTest.loadBalancerProvisionEnabled(STACK_ID));
+    }
+
+    @Test
+    void testHealthAgentVersionOlderShouldReturnFalse() {
+        when(stack.getPlatformvariant()).thenReturn("AZURE");
+        when(entitlementService.isFreeIpaLoadBalancerEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(imageService.getImageForStack(stack)).thenReturn(image);
+        when(image.getPackageVersions()).thenReturn(Map.of("freeipa-health-agent", "0.1-20240222112618git0dd472a"));
+
+        assertFalse(underTest.loadBalancerProvisionEnabled(STACK_ID));
     }
 
     @Test
