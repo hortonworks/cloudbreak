@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
-import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.INSUFFICIENT_INSTANCE_CAPACITY;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
+import java.time.Duration;
+
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -41,9 +41,8 @@ import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration;
-import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.core.retry.RetryPolicy;
-import software.amazon.awssdk.core.retry.conditions.RetryCondition;
+import software.amazon.awssdk.core.retry.backoff.FullJitterBackoffStrategy;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cloudwatch.CloudWatchClient;
 import software.amazon.awssdk.services.cloudwatch.CloudWatchClientBuilder;
@@ -72,10 +71,14 @@ import software.amazon.awssdk.services.sts.StsClientBuilder;
 
 public abstract class AwsClient {
 
-    public static final int MAX_CLIENT_RETRIES_INSUFFICIENT_INSTANCE_CAPACITY = 3;
-
     // Default retries is 3. This allows more time for backoff during throttling
     public static final int MAX_CLIENT_RETRIES = 30;
+
+    public static final int MAX_CLIENT_RETRIES_START_INSTANCES = 5;
+
+    public static final int MAX_CLIENT_BACKOFF_MINS_START_INSTANCES = 5;
+
+    public static final int BASE_CLIENT_BACKOFF_MINS_START_INSTANCES = 1;
 
     public static final int MAX_CONSECUTIVE_RETRIES_BEFORE_THROTTLING = 200;
 
@@ -112,19 +115,34 @@ public abstract class AwsClient {
             AuthenticatedContextView authenticatedContextView = new AuthenticatedContextView(authenticatedContext);
             String region = authenticatedContextView.getRegion();
             AwsCredentialView awsCredentialView = authenticatedContextView.getAwsCredentialView();
-            AmazonEc2Client amazonEC2Client = null;
+            AmazonEc2Client amazonEC2Client;
+            AmazonEc2Client startInstancesAmazonEc2Client;
             if (region != null) {
                 amazonEC2Client = createEc2Client(awsCredentialView, region);
+                startInstancesAmazonEc2Client = createEc2ClientForStartInstancesOperation(awsCredentialView, region);
                 AmazonElasticLoadBalancingClient loadBalancingClient = createElasticLoadBalancingClient(awsCredentialView, region);
                 authenticatedContext.putParameter(AmazonElasticLoadBalancingClient.class, loadBalancingClient);
             } else {
                 amazonEC2Client = createEc2Client(awsCredentialView);
+                startInstancesAmazonEc2Client = createEc2ClientForStartInstancesOperation(awsCredentialView);
             }
             authenticatedContext.putParameter(AmazonEc2Client.class, amazonEC2Client);
+            authenticatedContext.putParameter("StartInstances" + AmazonEc2Client.class.getName(), startInstancesAmazonEc2Client);
         } catch (AwsServiceException e) {
             throw new CredentialVerificationException(e.getMessage(), e);
         }
         return authenticatedContext;
+    }
+
+    public AmazonEc2Client createEc2ClientForStartInstancesOperation(AwsCredentialView awsCredential, String regionName) {
+        Ec2Client ec2Client = createAccessWithClientConfiguration(awsCredential, regionName, getClientConfigurationForStartInstances());
+        return new AmazonEc2Client(ec2Client, retry);
+    }
+
+    public AmazonEc2Client createEc2ClientForStartInstancesOperation(AwsCredentialView awsCredential) {
+        Ec2Client ec2Client = createAccessWithClientConfiguration(awsCredential, awsDefaultZoneProvider.getDefaultZone(awsCredential),
+                getClientConfigurationForStartInstances());
+        return new AmazonEc2Client(ec2Client, retry);
     }
 
     public AmazonEc2Client createAccessWithMinimalRetries(AwsCredentialView awsCredential, String regionName) {
@@ -342,21 +360,9 @@ public abstract class AwsClient {
     }
 
     protected ClientOverrideConfiguration getDefaultClientConfiguration() {
-        RetryCondition insufficientInstanceCapacityRetryCondition = ctx -> isInsufficientInstanceCapacityError(ctx.exception());
-        RetryPolicy insufficientInstanceCapacityRetryPolicy = RetryPolicy.builder()
-                .numRetries(MAX_CLIENT_RETRIES_INSUFFICIENT_INSTANCE_CAPACITY)
-                .retryCondition(insufficientInstanceCapacityRetryCondition)
-                .build();
-        RetryPolicy defaultRetryPolicy = RetryPolicy.defaultRetryPolicy();
         ClientOverrideConfiguration.Builder clientOverrideConfigurationBuilder = ClientOverrideConfiguration.builder()
                 .retryPolicy(RetryPolicy.builder()
                         .numRetries(MAX_CLIENT_RETRIES)
-                        .retryCondition((ctx) -> {
-                            if (isInsufficientInstanceCapacityError(ctx.exception())) {
-                                return insufficientInstanceCapacityRetryPolicy.retryCondition().shouldRetry(ctx);
-                            }
-                            return defaultRetryPolicy.retryCondition().shouldRetry(ctx);
-                        })
                         .build());
         if (awsMetricsEnabled) {
             clientOverrideConfigurationBuilder.addMetricPublisher(awsMetricPublisher);
@@ -364,14 +370,27 @@ public abstract class AwsClient {
         return clientOverrideConfigurationBuilder.build();
     }
 
-    private boolean isInsufficientInstanceCapacityError(SdkException ex) {
-        return ex instanceof AwsServiceException &&
-                StringUtils.equals(INSUFFICIENT_INSTANCE_CAPACITY, ((AwsServiceException) ex).awsErrorDetails().errorCode());
+    private ClientOverrideConfiguration getClientConfigurationWithMinimalRetries() {
+        ClientOverrideConfiguration.Builder clientOverrideConfigurationBuilder = ClientOverrideConfiguration.builder()
+                .retryPolicy(RetryPolicy.defaultRetryPolicy());
+        if (awsMetricsEnabled) {
+            clientOverrideConfigurationBuilder.addMetricPublisher(awsMetricPublisher);
+        }
+        return clientOverrideConfigurationBuilder.build();
     }
 
-    private ClientOverrideConfiguration getClientConfigurationWithMinimalRetries() {
-        return ClientOverrideConfiguration.builder()
-                .retryPolicy(RetryPolicy.defaultRetryPolicy())
-                .build();
+    private ClientOverrideConfiguration getClientConfigurationForStartInstances() {
+        ClientOverrideConfiguration.Builder clientOverrideConfigurationBuilder = ClientOverrideConfiguration.builder()
+                .retryPolicy(RetryPolicy.builder()
+                        .numRetries(MAX_CLIENT_RETRIES_START_INSTANCES)
+                        .backoffStrategy(FullJitterBackoffStrategy.builder()
+                                .maxBackoffTime(Duration.ofMinutes(MAX_CLIENT_BACKOFF_MINS_START_INSTANCES))
+                                .baseDelay(Duration.ofMinutes(BASE_CLIENT_BACKOFF_MINS_START_INSTANCES))
+                                .build())
+                        .build());
+        if (awsMetricsEnabled) {
+            clientOverrideConfigurationBuilder.addMetricPublisher(awsMetricPublisher);
+        }
+        return clientOverrideConfigurationBuilder.build();
     }
 }

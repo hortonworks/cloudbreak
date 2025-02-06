@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.apache.commons.collections4.CollectionUtils;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
@@ -81,7 +83,7 @@ public class InstanceTemplate extends DynamicModel {
         this.templateId = templateId;
         this.groupName = groupName;
         this.privateId = privateId;
-        this.volumes = ImmutableList.copyOf(volumes);
+        this.volumes = ImmutableList.copyOf(CollectionUtils.emptyIfNull(volumes));
         this.status = status;
         this.imageId = imageId;
         this.temporaryStorage = temporaryStorage;

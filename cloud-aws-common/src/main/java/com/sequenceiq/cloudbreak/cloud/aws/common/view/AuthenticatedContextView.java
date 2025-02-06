@@ -15,6 +15,10 @@ public class AuthenticatedContextView {
         return authenticatedContext.getParameter(AmazonEc2Client.class);
     }
 
+    public AmazonEc2Client getStartInstancesAmazonEC2Client() {
+        return authenticatedContext.getParameter("StartInstances" + AmazonEc2Client.class.getName(), AmazonEc2Client.class);
+    }
+
     public String getRegion() {
         if (authenticatedContext == null ||
                 authenticatedContext.getCloudContext() == null ||

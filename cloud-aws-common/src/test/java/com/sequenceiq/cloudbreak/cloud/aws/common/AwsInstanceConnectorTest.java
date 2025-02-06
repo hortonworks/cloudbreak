@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import jakarta.inject.Inject;
 
@@ -57,12 +58,14 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsPageCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.exception.InsufficientCapacityException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.service.RetryService;
@@ -125,10 +128,14 @@ class AwsInstanceConnectorTest {
 
     private List<CloudInstance> inputList;
 
+    private List<CloudInstance> largeInputList;
+
     @BeforeEach
     void awsClientSetup() {
         doReturn(amazonEC2Client).when(commonAwsClient).createEc2Client(any(AwsCredentialView.class));
         doReturn(amazonEC2Client).when(commonAwsClient).createEc2Client(any(AwsCredentialView.class), anyString());
+        doReturn(amazonEC2Client).when(commonAwsClient).createEc2ClientForStartInstancesOperation(any(AwsCredentialView.class));
+        doReturn(amazonEC2Client).when(commonAwsClient).createEc2ClientForStartInstancesOperation(any(AwsCredentialView.class), anyString());
 
         CloudContext context = CloudContext.Builder.builder()
                 .withId(1L)
@@ -148,6 +155,7 @@ class AwsInstanceConnectorTest {
         when(amazonEC2Client.startInstances(any(StartInstancesRequest.class))).thenReturn(startInstanceResult);
 
         inputList = getCloudInstances();
+        largeInputList = getLargeCountCloudInstances();
     }
 
     @TestFactory
@@ -243,6 +251,45 @@ class AwsInstanceConnectorTest {
         verify(amazonEC2Client, times(1)).startInstances(captorStart.capture());
         assertEquals(inputList.size(), captorStart.getValue().instanceIds().size());
         assertThat(result, hasItem(allOf(hasProperty("status", is(stopped1)))));
+    }
+
+    @Test
+    void testSuccessfulChunkedStartDuringResilientStart() {
+        AtomicBoolean toggle = new AtomicBoolean(true);
+        when(amazonEC2Client.describeInstances(any()))
+                .thenAnswer(i -> {
+                    DescribeInstancesRequest request = (DescribeInstancesRequest) i.getArguments()[0];
+                    if (toggle.get()) {
+                        toggle.set(false);
+                        return DescribeInstancesResponse.builder().reservations(
+                                        request.instanceIds().stream()
+                                                .map(instanceId -> getReservation(getAwsInstance(instanceId, "notrunning", 16), instanceId))
+                                                .toList())
+                                .build();
+                    } else {
+                        toggle.set(true);
+                        return DescribeInstancesResponse.builder().reservations(
+                                        request.instanceIds().stream()
+                                                .map(instanceId -> getReservation(getAwsInstance(instanceId, "running", 16), instanceId))
+                                                .toList())
+                                .build();
+                    }
+                });
+
+        List<CloudVmInstanceStatus> result = underTest.start(authenticatedContext, List.of(), largeInputList);
+
+        verify(amazonEC2Client, times(22)).startInstances(any());
+        assertThat(result, hasItem(allOf(hasProperty("status", is(AwsInstanceStatusMapper.getInstanceStatusByAwsStatus("Running"))))));
+    }
+
+    @Test
+    void testSpringRetrySkipDuringResilientStart() {
+        AtomicBoolean toggle = new AtomicBoolean(true);
+        when(amazonEC2Client.describeInstances(any())).thenThrow(SdkClientException.builder().message("whatever").build());
+
+        assertThrows(CloudConnectorException.class, () -> underTest.start(authenticatedContext, List.of(), largeInputList));
+
+        verify(amazonEC2Client, never()).startInstances(any());
     }
 
     @Test
@@ -531,12 +578,29 @@ class AwsInstanceConnectorTest {
         return List.of(instance1, instance2);
     }
 
-    private Reservation getReservation(Instance instances1, String s) {
-        return Reservation.builder().reservationId(s).instances(instances1).build();
+    private List<CloudInstance> getLargeCountCloudInstances() {
+        List<CloudInstance> result = new ArrayList<>();
+        for (int i = 1; i < 101; i++) {
+            InstanceTemplate instanceTemplate = new InstanceTemplate(null, "large", null, null, null, null, null, null, null, null);
+            result.add(new CloudInstance("large" + i, instanceTemplate, null, "subnet-123", "az1"));
+        }
+        for (int i = 1; i < 3; i++) {
+            InstanceTemplate instanceTemplate = new InstanceTemplate(null, "small1", null, null, null, null, null, null, null, null);
+            result.add(new CloudInstance("small1" + i, instanceTemplate, null, "subnet-123", "az1"));
+        }
+        for (int i = 1; i < 3; i++) {
+            InstanceTemplate instanceTemplate = new InstanceTemplate(null, "small2", null, null, null, null, null, null, null, null);
+            result.add(new CloudInstance("small2" + i, instanceTemplate, null, "subnet-123", "az1"));
+        }
+        return result;
     }
 
-    private Instance getAwsInstance(String s, String state, int code) {
-        return Instance.builder().state(InstanceState.builder().name(state).code(code).build()).instanceId(s).build();
+    private Reservation getReservation(Instance instances, String reservationId) {
+        return Reservation.builder().reservationId(reservationId).instances(instances).build();
+    }
+
+    private Instance getAwsInstance(String instanceId, String state, int code) {
+        return Instance.builder().state(InstanceState.builder().name(state).code(code).build()).instanceId(instanceId).build();
     }
 
     @Configuration
