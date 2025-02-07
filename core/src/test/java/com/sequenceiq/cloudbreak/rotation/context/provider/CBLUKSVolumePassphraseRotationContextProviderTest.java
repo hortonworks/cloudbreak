@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.rotation.context.provider;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants.AWS_DEFAULT_VARIANT;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -18,6 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
@@ -54,6 +57,8 @@ class CBLUKSVolumePassphraseRotationContextProviderTest {
     @Test
     void testGetContexts() {
         StackDto stack = mock(StackDto.class);
+        when(stack.getResourceCrn()).thenReturn(RESOURCE_CRN);
+        when(stack.getPlatformVariant()).thenReturn(AWS_NATIVE_GOV_VARIANT.variant().getValue());
         InstanceMetadataView instance1 = mock(InstanceMetadataView.class);
         InstanceMetadataView instance2 = mock(InstanceMetadataView.class);
         GatewayConfig gatewayConfig = mock(GatewayConfig.class);
@@ -87,6 +92,8 @@ class CBLUKSVolumePassphraseRotationContextProviderTest {
     @Test
     void testGetContextsWhenNotAllInstancesAreAvailable() {
         StackDto stack = mock(StackDto.class);
+        when(stack.getResourceCrn()).thenReturn(RESOURCE_CRN);
+        when(stack.getPlatformVariant()).thenReturn(AWS_NATIVE_GOV_VARIANT.variant().getValue());
         InstanceMetadataView instance1 = mock(InstanceMetadataView.class);
         InstanceMetadataView instance2 = mock(InstanceMetadataView.class);
         lenient().when(instance1.isReachable()).thenReturn(true);
@@ -100,6 +107,16 @@ class CBLUKSVolumePassphraseRotationContextProviderTest {
         CustomJobRotationContext customJobRotationContext = (CustomJobRotationContext) result.get(CommonSecretRotationStep.CUSTOM_JOB);
         assertEquals(RESOURCE_CRN, customJobRotationContext.getResourceCrn());
         assertThrows(CloudbreakRuntimeException.class, () -> customJobRotationContext.getPreValidateJob().get().run());
+    }
+
+    @Test
+    void testGetContextsWhenNotGovVariant() {
+        StackDto stack = mock(StackDto.class);
+        when(stack.getPlatformVariant()).thenReturn(AWS_DEFAULT_VARIANT.getValue());
+        when(stackDtoService.getByCrn(RESOURCE_CRN)).thenReturn(stack);
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.getContexts(RESOURCE_CRN));
+        assertEquals("LUKS passphrase rotation is only available on AWS Gov environments.", exception.getMessage());
     }
 
     @Test

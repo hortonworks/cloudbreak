@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.rotation.lukspassphrase.contextprovider;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM_JOB;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep.SALT_STATE_APPLY;
 
@@ -14,6 +15,7 @@ import jakarta.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
@@ -49,9 +51,15 @@ public class FreeipaLUKSVolumePassphraseRotationContextProvider implements Rotat
 
     @Override
     public Map<SecretRotationStep, ? extends RotationContext> getContexts(String resourceCrn) {
+        Crn environmentCrn = Crn.safeFromString(resourceCrn);
+        Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(resourceCrn, environmentCrn.getAccountId());
+        if (!AWS_NATIVE_GOV_VARIANT.variant().getValue().equals(stack.getPlatformvariant())) {
+            throw new BadRequestException("LUKS passphrase rotation is only available on AWS Gov environments.");
+        }
+
         Map<SecretRotationStep, RotationContext> contexts = new HashMap<>();
-        contexts.put(CUSTOM_JOB, getCustomJobRotationContext(resourceCrn));
-        contexts.put(SALT_STATE_APPLY, getSaltStateApplyRotationContext(resourceCrn));
+        contexts.put(CUSTOM_JOB, getCustomJobRotationContext(stack));
+        contexts.put(SALT_STATE_APPLY, getSaltStateApplyRotationContext(stack));
         return contexts;
     }
 
@@ -60,11 +68,9 @@ public class FreeipaLUKSVolumePassphraseRotationContextProvider implements Rotat
         return FreeIpaSecretType.LUKS_VOLUME_PASSPHRASE;
     }
 
-    private CustomJobRotationContext getCustomJobRotationContext(String resourceCrn) {
-        Crn environmentCrn = Crn.safeFromString(resourceCrn);
-        Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(resourceCrn, environmentCrn.getAccountId());
+    private CustomJobRotationContext getCustomJobRotationContext(Stack stack) {
         return CustomJobRotationContext.builder()
-                .withResourceCrn(resourceCrn)
+                .withResourceCrn(stack.getEnvironmentCrn())
                 .withPreValidateJob(() -> {
                     if (stack.getNotDeletedInstanceMetaDataSet().stream().anyMatch(Predicate.not(InstanceMetaData::isAvailable))) {
                         throw new CloudbreakRuntimeException("All instances of the stack need to be in an availabe state " +
@@ -74,12 +80,10 @@ public class FreeipaLUKSVolumePassphraseRotationContextProvider implements Rotat
                 .build();
     }
 
-    private SaltStateApplyRotationContext getSaltStateApplyRotationContext(String resourceCrn) {
-        Crn environmentCrn = Crn.safeFromString(resourceCrn);
-        Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(resourceCrn, environmentCrn.getAccountId());
+    private SaltStateApplyRotationContext getSaltStateApplyRotationContext(Stack stack) {
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         return SaltStateApplyRotationContext.builder()
-                .withResourceCrn(resourceCrn)
+                .withResourceCrn(stack.getEnvironmentCrn())
                 .withGatewayConfig(primaryGatewayConfig)
                 .withTargets(stack.getNotDeletedInstanceMetaDataSet().stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toSet()))
                 .withExitCriteriaModel(exitCriteriaProvider.get(stack))

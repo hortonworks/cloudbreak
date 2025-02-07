@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.rotation.context.provider;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.SALT_STATE_APPLY;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM_JOB;
 
@@ -13,6 +14,7 @@ import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
@@ -48,9 +50,14 @@ public class CBLUKSVolumePassphraseRotationContextProvider implements RotationCo
 
     @Override
     public Map<SecretRotationStep, ? extends RotationContext> getContexts(String resourceCrn) {
+        StackDto stack = stackDtoService.getByCrn(resourceCrn);
+        if (!AWS_NATIVE_GOV_VARIANT.variant().getValue().equals(stack.getPlatformVariant())) {
+            throw new BadRequestException("LUKS passphrase rotation is only available on AWS Gov environments.");
+        }
+
         Map<SecretRotationStep, RotationContext> context = new HashMap<>();
-        context.put(CUSTOM_JOB, getCustomJobRotationContext(resourceCrn));
-        context.put(SALT_STATE_APPLY, getSaltStateApplyRotationContext(resourceCrn));
+        context.put(CUSTOM_JOB, getCustomJobRotationContext(stack));
+        context.put(SALT_STATE_APPLY, getSaltStateApplyRotationContext(stack));
         return context;
     }
 
@@ -59,10 +66,9 @@ public class CBLUKSVolumePassphraseRotationContextProvider implements RotationCo
         return CloudbreakSecretType.LUKS_VOLUME_PASSPHRASE;
     }
 
-    private CustomJobRotationContext getCustomJobRotationContext(String resourceCrn) {
-        StackDto stack = stackDtoService.getByCrn(resourceCrn);
+    private CustomJobRotationContext getCustomJobRotationContext(StackDto stack) {
         return CustomJobRotationContext.builder()
-                .withResourceCrn(resourceCrn)
+                .withResourceCrn(stack.getResourceCrn())
                 .withPreValidateJob(() -> {
                     if (stack.getNotDeletedInstanceMetaData().stream().anyMatch(Predicate.not(InstanceMetadataView::isReachable))) {
                         throw new CloudbreakRuntimeException("All instances of the stack need to be in a reachable state " +
@@ -72,11 +78,10 @@ public class CBLUKSVolumePassphraseRotationContextProvider implements RotationCo
                 .build();
     }
 
-    private SaltStateApplyRotationContext getSaltStateApplyRotationContext(String resourceCrn) {
-        StackDto stack = stackDtoService.getByCrn(resourceCrn);
+    private SaltStateApplyRotationContext getSaltStateApplyRotationContext(StackDto stack) {
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         return SaltStateApplyRotationContext.builder()
-                .withResourceCrn(resourceCrn)
+                .withResourceCrn(stack.getResourceCrn())
                 .withGatewayConfig(primaryGatewayConfig)
                 .withTargets(stack.getNotDeletedInstanceMetaData().stream().map(InstanceMetadataView::getDiscoveryFQDN).collect(Collectors.toSet()))
                 .withExitCriteriaModel(exitCriteriaProvider.get(stack))

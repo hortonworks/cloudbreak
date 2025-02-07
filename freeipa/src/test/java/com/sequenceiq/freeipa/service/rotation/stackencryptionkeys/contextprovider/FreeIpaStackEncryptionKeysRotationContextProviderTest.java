@@ -1,7 +1,10 @@
 package com.sequenceiq.freeipa.service.rotation.stackencryptionkeys.contextprovider;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants.AWS_DEFAULT_VARIANT;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -23,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeyRotationRequest;
 import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
@@ -97,6 +101,7 @@ class FreeIpaStackEncryptionKeysRotationContextProviderTest {
         when(stack.getRegion()).thenReturn(REGION);
         when(stack.getAvailabilityZone()).thenReturn(AVAILABILITY_ZONE);
         when(stack.getEnvironmentCrn()).thenReturn(ENVIRONMENT_CRN);
+        when(stack.getPlatformvariant()).thenReturn(AWS_NATIVE_GOV_VARIANT.variant().getValue());
         when(stackService.getByEnvironmentCrnAndAccountId(ENVIRONMENT_CRN, TEST_ACCOUNT_ID)).thenReturn(stack);
         StackEncryption stackEncryption = mock(StackEncryption.class);
         when(stackEncryption.getEncryptionKeyLuks()).thenReturn(LUKS_KEY_ARN);
@@ -131,6 +136,17 @@ class FreeIpaStackEncryptionKeysRotationContextProviderTest {
         assertThat(encryptionKeyRotationRequest.cloudContext().getLocation().getRegion().value()).isEqualTo(REGION);
         assertThat(encryptionKeyRotationRequest.cloudContext().getLocation().getAvailabilityZone().value()).isEqualTo(AVAILABILITY_ZONE);
         assertThat(encryptionKeyRotationRequest.cloudCredential()).isEqualTo(cloudCredential);
+    }
+
+    @Test
+    void testGetContextsWhenNotGovVariant() {
+        Stack stack = mock(Stack.class);
+        when(stack.getPlatformvariant()).thenReturn(AWS_DEFAULT_VARIANT.getValue());
+        when(stackService.getByEnvironmentCrnAndAccountId(ENVIRONMENT_CRN, TEST_ACCOUNT_ID)).thenReturn(stack);
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.getContexts(ENVIRONMENT_CRN)));
+        assertEquals("Stack encryption key rotation is only available on AWS Gov environments.", exception.getMessage());
     }
 
     @Test

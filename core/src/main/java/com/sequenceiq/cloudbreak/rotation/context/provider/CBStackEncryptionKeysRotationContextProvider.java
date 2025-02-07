@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.rotation.context.provider;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
@@ -19,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeyRotationRequest;
 import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackEncryption;
@@ -63,6 +65,10 @@ public class CBStackEncryptionKeysRotationContextProvider implements RotationCon
     @Override
     public Map<SecretRotationStep, ? extends RotationContext> getContexts(String resourceCrn) {
         Stack stack = stackService.getByCrn(resourceCrn);
+        if (!AWS_NATIVE_GOV_VARIANT.variant().getValue().equals(stack.getPlatformVariant())) {
+            throw new BadRequestException("Stack encryption key rotation is only available on AWS Gov environments.");
+        }
+
         StackEncryption stackEncryption = stackEncryptionService.getStackEncryption(stack.getId());
         EncryptionResources encryptionResources = encryptionKeyService.getEncryptionResources(stack);
         CloudInformationDecorator cloudInformationDecorator = cloudInformationDecoratorProvider.getForStack(stack);
