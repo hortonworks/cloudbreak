@@ -1,0 +1,186 @@
+name: cloudbreak-coverage
+
+env:
+  APP_NAME: cloudbreak
+  namespace: cloudbreak-${{github.event.number}}
+  serviceversion: ${{github.sha}}
+  PROJECT: cloudbreak/cloudbreak
+  BRANCH: ${{github.base_ref}}
+  SOURCE_BRANCH: ${{github.head_ref}}
+
+on:
+  push:
+    branches:
+      - master
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sonar:
+    permissions: write-all
+    name: Sonar Analyze
+    runs-on: [cb-ubuntu22]
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Setup secrets
+        id: build_secrets
+        uses: Kitchen/RE-thirdparty-actions/actions/vault@main
+        with:
+          tlsSkipVerify: true
+          url: https://re-vault.infra.cloudera.com/
+          method: kubernetes
+          path: rke_re_jenkins
+          role: cb
+          secrets: |
+              cb/data/CM_PRIVATE_REPO_PASSWORD CM_PRIVATE_REPO_PASSWORD | CM_PRIVATE_REPO_PASSWORD;
+              cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
+              cb/data/SONAR_TOKEN SONAR_TOKEN | SONAR_TOKEN;
+      - name: Cache Java libs
+        id: cache-java
+        uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
+        env:
+          cache-name: cache-java-libs
+        with:
+          path: |
+            /home/jenkins/.gradle/caches
+            /home/jenkins/.gradle/wrapper
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
+            ${{ runner.os }}-build-${{ hashFiles('**/build.gradle') }}
+            ${{ runner.os }}-${{ hashFiles('**/build.gradle') }}
+      - if: ${{ steps.cache-java.outputs.cache-hit != 'true' }}
+        name: List the state of java libs
+        continue-on-error: true
+        run: ./gradlew dependencies
+      - name: Sonar analyze
+        run: |-
+          #!/bin/bash -x
+          export CM_PRIVATE_REPO_PASSWORD=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}")
+          export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
+          export SONAR_TOKEN=$(echo "${{ steps.build_secrets.outputs.SONAR_TOKEN}}")
+          export SONAR_URL=https://sonarqube.infra.cloudera.com
+          export SONAR_COVERAGE_EXCLUSION=**/proto/**,**/generated/**,**/test/**,**/build/**,**/reports/**,**/resources/**
+          export SONAR_EXCLUSION=**/proto/**,**/generated/**,**/test/**,**/build/**,**/reports/**,**/resources/**
+          export SONAR_JAVA_BINARIES=build/classes
+          export SONAR_SOURCES=src/main/java/
+          export SONAR_COVERAGE_JACOCO_XMLREPORTPATHS=target/site/jacoco-aggregate/jacoco.xml
+          
+          ./gradlew -Penv=jenkins -b build.gradle --quiet \
+            test \
+            jacocoTestReport \
+            -x checkstyleMain \
+            -x checkstyleTest \
+            -x spotbugsMain \
+            -x spotbugsTest 
+          
+          cd core && sonar-scanner \
+          -Dsonar.token=$SONAR_TOKEN \
+          -Dsonar.coverage.jacoco.xmlReportPaths=$SONAR_COVERAGE_JACOCO_XMLREPORTPATHS \
+          -Dsonar.language=java \
+          -Dsonar.java.binaries=$SONAR_JAVA_BINARIES \
+          -Dsonar.java.libraries=$SONAR_JAVA_BINARIES \
+          -Dsonar.verbose=true \
+          -Dsonar.sources=$SONAR_SOURCES \
+          -Dsonar.projectKey=CloudbreakCore_Service_UT_master \
+          -Dsonar.coverage.exclusions=$SONAR_COVERAGE_EXCLUSION \
+          -Dsonar.exclusions=$SONAR_EXCLUSION \
+          -Dsonar.host.url=$SONAR_URL
+          
+          cd .. && cd autoscale && sonar-scanner \
+          -Dsonar.token=$SONAR_TOKEN \
+          -Dsonar.coverage.jacoco.xmlReportPaths=$SONAR_COVERAGE_JACOCO_XMLREPORTPATHS \
+          -Dsonar.language=java \
+          -Dsonar.java.binaries=$SONAR_JAVA_BINARIES \
+          -Dsonar.java.libraries=$SONAR_JAVA_BINARIES \
+          -Dsonar.verbose=true \
+          -Dsonar.sources=$SONAR_SOURCES \
+          -Dsonar.projectKey=Autoscale_Service_UT_master \
+          -Dsonar.coverage.exclusions=$SONAR_COVERAGE_EXCLUSION \
+          -Dsonar.exclusions=$SONAR_EXCLUSION \
+          -Dsonar.host.url=$SONAR_URL
+          
+          cd .. && cd datalake && sonar-scanner \
+          -Dsonar.token=$SONAR_TOKEN \
+          -Dsonar.coverage.jacoco.xmlReportPaths=$SONAR_COVERAGE_JACOCO_XMLREPORTPATHS \
+          -Dsonar.language=java \
+          -Dsonar.java.binaries=$SONAR_JAVA_BINARIES \
+          -Dsonar.java.libraries=$SONAR_JAVA_BINARIES \
+          -Dsonar.verbose=true \
+          -Dsonar.sources=$SONAR_SOURCES \
+          -Dsonar.projectKey=Datalake_Service_UT_master \
+          -Dsonar.coverage.exclusions=$SONAR_COVERAGE_EXCLUSION \
+          -Dsonar.exclusions=$SONAR_EXCLUSION \
+          -Dsonar.host.url=$SONAR_URL
+          
+          cd .. && cd environment && sonar-scanner \
+          -Dsonar.token=$SONAR_TOKEN \
+          -Dsonar.coverage.jacoco.xmlReportPaths=$SONAR_COVERAGE_JACOCO_XMLREPORTPATHS \
+          -Dsonar.language=java \
+          -Dsonar.java.binaries=$SONAR_JAVA_BINARIES \
+          -Dsonar.java.libraries=$SONAR_JAVA_BINARIES \
+          -Dsonar.verbose=true \
+          -Dsonar.sources=$SONAR_SOURCES \
+          -Dsonar.projectKey=Environment_Service_UT_master \
+          -Dsonar.coverage.exclusions=$SONAR_COVERAGE_EXCLUSION \
+          -Dsonar.exclusions=$SONAR_EXCLUSION \
+          -Dsonar.host.url=$SONAR_URL
+          
+          cd .. && cd externalized-compute && sonar-scanner \
+          -Dsonar.token=$SONAR_TOKEN \
+          -Dsonar.coverage.jacoco.xmlReportPaths=$SONAR_COVERAGE_JACOCO_XMLREPORTPATHS \
+          -Dsonar.language=java \
+          -Dsonar.java.binaries=$SONAR_JAVA_BINARIES \
+          -Dsonar.java.libraries=$SONAR_JAVA_BINARIES \
+          -Dsonar.verbose=true \
+          -Dsonar.sources=$SONAR_SOURCES \
+          -Dsonar.projectKey=Externalized_Compute_Service_UT_master \
+          -Dsonar.coverage.exclusions=$SONAR_COVERAGE_EXCLUSION \
+          -Dsonar.exclusions=$SONAR_EXCLUSION \
+          -Dsonar.host.url=$SONAR_URL
+          
+          cd .. && cd freeipa && sonar-scanner \
+          -Dsonar.token=$SONAR_TOKEN \
+          -Dsonar.coverage.jacoco.xmlReportPaths=$SONAR_COVERAGE_JACOCO_XMLREPORTPATHS \
+          -Dsonar.language=java \
+          -Dsonar.java.binaries=$SONAR_JAVA_BINARIES \
+          -Dsonar.java.libraries=$SONAR_JAVA_BINARIES \
+          -Dsonar.verbose=true \
+          -Dsonar.sources=$SONAR_SOURCES \
+          -Dsonar.projectKey=Freeipa_Service_UT_master \
+          -Dsonar.coverage.exclusions=$SONAR_COVERAGE_EXCLUSION \
+          -Dsonar.exclusions=$SONAR_EXCLUSION \
+          -Dsonar.host.url=$SONAR_URL
+          
+          cd .. && cd redbeams && sonar-scanner \
+          -Dsonar.token=$SONAR_TOKEN \
+          -Dsonar.coverage.jacoco.xmlReportPaths=$SONAR_COVERAGE_JACOCO_XMLREPORTPATHS \
+          -Dsonar.language=java \
+          -Dsonar.java.binaries=$SONAR_JAVA_BINARIES \
+          -Dsonar.java.libraries=$SONAR_JAVA_BINARIES \
+          -Dsonar.verbose=true \
+          -Dsonar.sources=$SONAR_SOURCES \
+          -Dsonar.projectKey=Redbeams_Service_UT_master \
+          -Dsonar.coverage.exclusions=$SONAR_COVERAGE_EXCLUSION \
+          -Dsonar.exclusions=$SONAR_EXCLUSION \
+          -Dsonar.host.url=$SONAR_URL
+          
+          cd .. && cd environment-remote && sonar-scanner \
+          -Dsonar.token=$SONAR_TOKEN \
+          -Dsonar.coverage.jacoco.xmlReportPaths=$SONAR_COVERAGE_JACOCO_XMLREPORTPATHS \
+          -Dsonar.language=java \
+          -Dsonar.java.binaries=$SONAR_JAVA_BINARIES \
+          -Dsonar.java.libraries=$SONAR_JAVA_BINARIES \
+          -Dsonar.verbose=true \
+          -Dsonar.sources=$SONAR_SOURCES \
+          -Dsonar.projectKey=Remote_Environment_Service_UT_master \
+          -Dsonar.coverage.exclusions=$SONAR_COVERAGE_EXCLUSION \
+          -Dsonar.exclusions=$SONAR_EXCLUSION \
+          -Dsonar.host.url=$SONAR_URL

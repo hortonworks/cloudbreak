@@ -49,8 +49,6 @@ jobs:
           export PROJECT=$PROJECT
           ./scripts/jira.sh
 
-
-
   unit-test:
     permissions: write-all
     name: Unit Test
