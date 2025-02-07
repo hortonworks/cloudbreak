@@ -9,7 +9,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -85,6 +90,8 @@ import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.java.JavaVersionValidator;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
+import com.sequenceiq.cloudbreak.service.multiaz.DataLakeMultiAzCalculatorService;
+import com.sequenceiq.cloudbreak.service.multiaz.MultiAzCalculatorService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeValidatorService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
@@ -189,6 +196,12 @@ public class StackCreatorServiceTest {
 
     @Mock
     private ValidationResult validationResult;
+
+    @Mock
+    private MultiAzCalculatorService multiAzCalculatorService;
+
+    @Mock
+    private DataLakeMultiAzCalculatorService dataLakeMultiAzCalculatorService;
 
     @Mock
     private Stack stack;
@@ -587,18 +600,23 @@ public class StackCreatorServiceTest {
         InstanceGroup workerGroup = getARequestGroup("worker", 2, InstanceGroupType.CORE);
         InstanceGroup computeGroup = getARequestGroup("compute", 4, InstanceGroupType.CORE);
         stack.setInstanceGroups(Set.of(masterGroup, workerGroup, computeGroup));
+        doReturn(Map.of()).when(multiAzCalculatorService).prepareSubnetAzMap(environmentResponse);
+        doNothing().when(multiAzCalculatorService).calculateByRoundRobin(anyMap(), any(Stack.class));
         underTest.fillInstanceMetadata(environmentResponse, stack);
 
         Map<String, Set<InstanceMetaData>> hostGroupInstances = stack.getInstanceGroups().stream().collect(
                 Collectors.toMap(InstanceGroup::getGroupName, InstanceGroup::getAllInstanceMetaData));
         long privateIdStart = 0L;
         validateInstanceMetadataPrivateId("master", 1, privateIdStart, hostGroupInstances.get("master"));
+        validateInstanceMetadataSubnetAndAvailabilityZoneAndRackId("master", 1, hostGroupInstances.get("master"), null, null, null);
 
         privateIdStart = 1L;
         validateInstanceMetadataPrivateId("compute", 4, privateIdStart, hostGroupInstances.get("compute"));
+        validateInstanceMetadataSubnetAndAvailabilityZoneAndRackId("compute", 4, hostGroupInstances.get("compute"), null, null, null);
 
         privateIdStart = 5L;
         validateInstanceMetadataPrivateId("worker", 2, privateIdStart, hostGroupInstances.get("worker"));
+        validateInstanceMetadataSubnetAndAvailabilityZoneAndRackId("worker", 2, hostGroupInstances.get("worker"), null, null, null);
     }
 
     @Test
@@ -610,6 +628,8 @@ public class StackCreatorServiceTest {
         InstanceGroup workerGroup = getARequestGroup("worker", 3, InstanceGroupType.CORE);
         InstanceGroup masterGroup = getARequestGroup("master", 2, InstanceGroupType.CORE);
         stack.setInstanceGroups(Set.of(masterGroup, workerGroup, computeGroup, managerGroup, gatewayGroup));
+        doReturn(Map.of()).when(multiAzCalculatorService).prepareSubnetAzMap(environmentResponse);
+        doNothing().when(multiAzCalculatorService).calculateByRoundRobin(anyMap(), any(Stack.class));
 
         underTest.fillInstanceMetadata(environmentResponse, stack);
 
@@ -618,18 +638,23 @@ public class StackCreatorServiceTest {
 
         long privateIdStart = 0L;
         validateInstanceMetadataPrivateId("manager", 1, privateIdStart, hostGroupInstances.get("manager"));
+        validateInstanceMetadataSubnetAndAvailabilityZoneAndRackId("manager", 1, hostGroupInstances.get("manager"), null, null, null);
 
         privateIdStart = 1L;
         validateInstanceMetadataPrivateId("compute", 0, privateIdStart, hostGroupInstances.get("compute"));
+        validateInstanceMetadataSubnetAndAvailabilityZoneAndRackId("compute", 0, hostGroupInstances.get("compute"), null, null, null);
 
         privateIdStart = 1L;
         validateInstanceMetadataPrivateId("gateway", 2, privateIdStart, hostGroupInstances.get("gateway"));
+        validateInstanceMetadataSubnetAndAvailabilityZoneAndRackId("gateway", 2, hostGroupInstances.get("gateway"), null, null, null);
 
         privateIdStart = 3L;
         validateInstanceMetadataPrivateId("master", 2, privateIdStart, hostGroupInstances.get("master"));
+        validateInstanceMetadataSubnetAndAvailabilityZoneAndRackId("master", 2, hostGroupInstances.get("master"), null, null, null);
 
         privateIdStart = 5L;
         validateInstanceMetadataPrivateId("worker", 3, privateIdStart, hostGroupInstances.get("worker"));
+        validateInstanceMetadataSubnetAndAvailabilityZoneAndRackId("worker", 3, hostGroupInstances.get("worker"), null, null, null);
     }
 
     @Test
@@ -650,8 +675,12 @@ public class StackCreatorServiceTest {
         InstanceGroup idbrokerGroup = getARequestGroup("idbroker", 2, InstanceGroupType.CORE);
         idbrokerGroup.setInstanceGroupNetwork(network);
         stack.setInstanceGroups(Set.of(masterGroup, coreGroup, auxiliaryGroup, idbrokerGroup, gatewayGroup));
+        doReturn(subnetAzPairs(3)).when(multiAzCalculatorService).prepareSubnetAzMap(environmentResponse);
 
         underTestSpy.fillInstanceMetadata(environmentResponse, stack);
+        verify(multiAzCalculatorService, times(1)).calculateByRoundRobin(
+                multiAzCalculatorService.prepareSubnetAzMap(environmentResponse), stack);
+        verify(dataLakeMultiAzCalculatorService, times(0)).calculateByRoundRobinTreatingAuxiliaryAndMasterAsOne(any(), any(), anyString(), any());
     }
 
     @Test
@@ -670,8 +699,11 @@ public class StackCreatorServiceTest {
         InstanceGroup idbrokerGroup = getARequestGroup("idbroker", 2, InstanceGroupType.CORE);
         idbrokerGroup.setInstanceGroupNetwork(network);
         stack.setInstanceGroups(Set.of(masterGroup, coreGroup, idbrokerGroup, gatewayGroup));
+        doReturn(subnetAzPairs(3)).when(multiAzCalculatorService).prepareSubnetAzMap(environmentResponse);
 
         underTestSpy.fillInstanceMetadata(environmentResponse, stack);
+        verify(multiAzCalculatorService, times(1)).calculateByRoundRobin(anyMap(), any(Stack.class));
+        verify(dataLakeMultiAzCalculatorService, times(0)).calculateByRoundRobinTreatingAuxiliaryAndMasterAsOne(any(), any(), anyString(), any());
     }
 
     @Test
@@ -687,7 +719,10 @@ public class StackCreatorServiceTest {
         InstanceGroup idbrokerGroup = getARequestGroup("idbroker", 2, InstanceGroupType.CORE);
         idbrokerGroup.setInstanceGroupNetwork(network);
         stack.setInstanceGroups(Set.of(masterGroup, idbrokerGroup));
+        doReturn(subnetAzPairs(2)).when(multiAzCalculatorService).prepareSubnetAzMap(environmentResponse);
         underTestSpy.fillInstanceMetadata(environmentResponse, stack);
+        verify(dataLakeMultiAzCalculatorService, times(1)).calculateByRoundRobin(anyMap(), any(Stack.class));
+        verify(dataLakeMultiAzCalculatorService, times(0)).calculateByRoundRobinTreatingAuxiliaryAndMasterAsOne(any(), any(), anyString(), any());
     }
 
     @Test
@@ -703,7 +738,10 @@ public class StackCreatorServiceTest {
         InstanceGroup idbrokerGroup = getARequestGroup("idbroker", 2, InstanceGroupType.CORE);
         idbrokerGroup.setInstanceGroupNetwork(network);
         stack.setInstanceGroups(Set.of(masterGroup, idbrokerGroup));
+        doReturn(subnetAzPairs(2)).when(multiAzCalculatorService).prepareSubnetAzMap(environmentResponse);
         underTestSpy.fillInstanceMetadata(environmentResponse, stack);
+        verify(dataLakeMultiAzCalculatorService, times(1)).calculateByRoundRobin(anyMap(), any(Stack.class));
+        verify(dataLakeMultiAzCalculatorService, times(0)).calculateByRoundRobinTreatingAuxiliaryAndMasterAsOne(any(), any(), anyString(), any());
     }
 
     private Map<String, String> subnetAzPairs(int subnetCount) {
@@ -737,6 +775,17 @@ public class StackCreatorServiceTest {
         InstanceGroup workerGroup = getARequestGroup("worker", 3, InstanceGroupType.CORE);
         stack.setInstanceGroups(Set.of(workerGroup));
         Map<String, String> subnetAzPairs = Map.of();
+        doReturn(subnetAzPairs).when(multiAzCalculatorService).prepareSubnetAzMap(environmentResponse);
+        doAnswer(invocation -> {
+            Stack stack1 = invocation.getArgument(1);
+            Set<InstanceMetaData> instanceMetaDataSet = stack1.getInstanceGroups().iterator().next().getInstanceMetaData();
+            instanceMetaDataSet.forEach(instanceMetaData -> {
+                instanceMetaData.setSubnetId(subnetId);
+                instanceMetaData.setAvailabilityZone(availabilityZone);
+                instanceMetaData.setRackId("/fooRack");
+            });
+            return null;
+        }).when(multiAzCalculatorService).calculateByRoundRobin(subnetAzPairs, stack);
         underTest.fillInstanceMetadata(environmentResponse, stack);
 
         Map<String, Set<InstanceMetaData>> hostGroupInstances = stack.getInstanceGroups().stream().collect(
@@ -744,6 +793,7 @@ public class StackCreatorServiceTest {
 
         long privateIdStart = 0L;
         validateInstanceMetadataPrivateId("worker", 3, privateIdStart, hostGroupInstances.get("worker"));
+        validateInstanceMetadataSubnetAndAvailabilityZoneAndRackId("worker", 3, hostGroupInstances.get("worker"), subnetId, availabilityZone, "/fooRack");
     }
 
     @Test
@@ -754,6 +804,9 @@ public class StackCreatorServiceTest {
         Network network = new Network();
         network.setAttributes(Json.silent(Map.of("subnetId", "subnet-1")));
         stack.setNetwork(network);
+        Map<String, String> subnetAzPairs = Map.of("subnet-1", "az-1");
+        doReturn(subnetAzPairs).when(multiAzCalculatorService).prepareSubnetAzMap(environmentResponse);
+        doNothing().when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), any(Stack.class));
 
         underTest.fillInstanceMetadata(environmentResponse, stack);
 

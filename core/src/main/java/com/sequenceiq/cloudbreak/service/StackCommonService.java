@@ -547,6 +547,12 @@ public class StackCommonService {
                 && stackNetworkScaleV4Request.getPreferredSubnetIds() != null
                 && stackNetworkScaleV4Request.getPreferredSubnetIds().stream().anyMatch(StringUtils::isNotBlank)) {
             String platformVariant = stack.getPlatformVariant();
+            boolean supportedVariant = multiAzValidator.supportedVariant(platformVariant);
+            if (!supportedVariant) {
+                String errorMessage = String.format("Multiple availability zones are not supported on platform variant '%s'", platformVariant);
+                LOGGER.info(errorMessage);
+                throw new BadRequestException(errorMessage);
+            }
             Set<InstanceGroupView> instanceGroupViews = new HashSet<>(stack.getInstanceGroupViews());
             Set<String> subnetIds = multiAzValidator.collectSubnetIds(instanceGroupViews);
             if (subnetIds.size() < 2) {

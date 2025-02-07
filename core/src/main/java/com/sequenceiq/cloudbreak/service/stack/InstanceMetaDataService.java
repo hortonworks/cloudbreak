@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.sequenceiq.cloudbreak.cloud.model.CloudResource.ATTRIBUTES;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
@@ -32,7 +31,6 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
@@ -51,6 +49,7 @@ import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.dto.SubnetIdWithResourceNameAndCrn;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.multiaz.MultiAzCalculatorService;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -58,20 +57,20 @@ import com.sequenceiq.cloudbreak.view.delegate.InstanceMetadataViewDelegate;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
 @Service
 public class InstanceMetaDataService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceMetaDataService.class);
 
-    private static final String DEFAULT_RACK = "default-rack";
-
     @Inject
     private InstanceMetaDataRepository repository;
 
     @Inject
     private EnvironmentClientService environmentClientService;
+
+    @Inject
+    private MultiAzCalculatorService multiAzCalculatorService;
 
     @Inject
     private ResourceRetriever resourceRetriever;
@@ -122,8 +121,9 @@ public class InstanceMetaDataService {
         LOGGER.info("Get updated stack with instance count ({}) and hostnames: {} and save: ({})", hostGroupsWithInstanceCountToCreate, hostGroupWithHostnames,
                 save);
         DetailedEnvironmentResponse environment = getDetailedEnvironmentResponse(stack.getEnvironmentCrn());
+        Map<String, String> subnetAzPairs = multiAzCalculatorService.prepareSubnetAzMap(environment);
         String stackSubnetId = getStackSubnetIdIfExists(stack);
-        String stackAz = getStackAz(stackSubnetId, environment);
+        String stackAz = stackSubnetId == null ? null : subnetAzPairs.get(stackSubnetId);
         long privateId = getFirstValidPrivateId(stack.getId());
         List<InstanceGroupDto> instanceGroupDtos = stack.getInstanceGroupDtos();
         for (Map.Entry<String, Integer> hostGroupWithInstanceCount : hostGroupsWithInstanceCountToCreate.entrySet()) {
@@ -147,10 +147,14 @@ public class InstanceMetaDataService {
                         });
                         LOGGER.info("We have hostname to be allocated: {}, set it to this instanceMetadata: {}", hostName, instanceMetaData);
                         instanceMetaData.setDiscoveryFQDN(hostName);
+                        subnetAzPairs = getSubnetAzPairsFilteredByHostNameIfRepair(environment, stack.getStack(), repair, instanceGroup.getGroupName(),
+                                hostName);
                     }
-
-                    prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(instanceMetaData, stackSubnetId, stackAz, stack.getStack());
-
+                    Map<String, String> filteredSubnetsByLeastUsedAz = networkScaleDetails == null
+                            ? multiAzCalculatorService.filterSubnetByLeastUsedAz(instanceGroupDto, subnetAzPairs)
+                            : subnetAzPairs;
+                    prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(instanceGroupDto, instanceMetaData, filteredSubnetsByLeastUsedAz, stackSubnetId,
+                            stackAz, networkScaleDetails, stack.getStack());
                     if (save) {
                         repository.save(instanceMetaData);
                     }
@@ -159,19 +163,6 @@ public class InstanceMetaDataService {
             }
         }
         return stack;
-    }
-
-    private String getStackAz(String stackSubnetId, DetailedEnvironmentResponse environment) {
-        if (stackSubnetId != null) {
-            return Optional.ofNullable(environment)
-                    .map(DetailedEnvironmentResponse::getNetwork)
-                    .map(EnvironmentNetworkResponse::getSubnetMetas)
-                    .map(subnetMetas -> subnetMetas.get(stackSubnetId))
-                    .map(CloudSubnet::getAvailabilityZone)
-                    .orElse(null);
-        }
-
-        return null;
     }
 
     private Iterator<String> getHostNameIterator(Set<String> hostNames) {
@@ -232,6 +223,12 @@ public class InstanceMetaDataService {
         return null;
     }
 
+    private Map<String, String> getSubnetAzPairsFilteredByHostNameIfRepair(DetailedEnvironmentResponse environment, StackView stack, boolean repair,
+            String instanceGroup, String hostname) {
+        String az = getAvailabilityZoneFromDiskIfRepair(stack, repair, instanceGroup, hostname);
+        return multiAzCalculatorService.prepareSubnetAzMap(environment, az);
+    }
+
     private DetailedEnvironmentResponse getDetailedEnvironmentResponse(String environmentCrn) {
         return measure(() ->
                         ThreadBasedUserCrnProvider.doAsInternalActor(
@@ -250,19 +247,16 @@ public class InstanceMetaDataService {
                 .orElse(null);
     }
 
-    private void prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(InstanceMetaData instanceMetaData, String stackSubnetId, String stackAz,
-            StackView stackView) {
-        if (isNullOrEmpty(instanceMetaData.getSubnetId()) && isNullOrEmpty(instanceMetaData.getAvailabilityZone()) && !isNullOrEmpty(stackSubnetId)) {
+    private void prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(InstanceGroupDto instanceGroup, InstanceMetaData instanceMetaData,
+            Map<String, String> subnetAzPairs, String stackSubnetId, String stackAz, NetworkScaleDetails networkScaleDetails, StackView stackView) {
+        multiAzCalculatorService.calculateByRoundRobin(subnetAzPairs, instanceGroup, instanceMetaData, networkScaleDetails);
+        if (Strings.isNullOrEmpty(instanceMetaData.getSubnetId()) && Strings.isNullOrEmpty(instanceMetaData.getAvailabilityZone())) {
             instanceMetaData.setSubnetId(stackSubnetId);
-            if (!stackView.isMultiAz() && !isNullOrEmpty(stackAz)) {
+            if (multiAzCalculatorService.isSubnetAzNeeded(stackView.isMultiAz(), stackView.getCloudPlatform())) {
                 instanceMetaData.setAvailabilityZone(stackAz);
             }
         }
-
-        instanceMetaData.setRackId("/" +
-                (isNullOrEmpty(instanceMetaData.getAvailabilityZone()) ?
-                        (isNullOrEmpty(instanceMetaData.getSubnetId()) ? DEFAULT_RACK : instanceMetaData.getSubnetId())
-                        : instanceMetaData.getAvailabilityZone()));
+        instanceMetaData.setRackId(multiAzCalculatorService.determineRackId(instanceMetaData.getSubnetId(), instanceMetaData.getAvailabilityZone()));
     }
 
     public void saveInstanceRequests(StackDtoDelegate stack, List<Group> groups) {
@@ -304,14 +298,6 @@ public class InstanceMetaDataService {
 
     public Set<InstanceMetaData> getNotDeletedInstanceMetadataByStackId(Long stackId) {
         return repository.findAllStatusNotInForStack(stackId, List.of(InstanceStatus.TERMINATED, InstanceStatus.DELETED_ON_PROVIDER_SIDE,
-                        InstanceStatus.DELETED_BY_PROVIDER))
-                .stream()
-                .filter(metaData -> !metaData.isTerminated())
-                .collect(Collectors.toSet());
-    }
-
-    public Set<InstanceMetaData> getNotDeletedInstanceMetadataWithNetworkByStackId(Long stackId) {
-        return repository.findAllStatusNotInForStackWithNetwork(stackId, List.of(InstanceStatus.TERMINATED, InstanceStatus.DELETED_ON_PROVIDER_SIDE,
                         InstanceStatus.DELETED_BY_PROVIDER))
                 .stream()
                 .filter(metaData -> !metaData.isTerminated())

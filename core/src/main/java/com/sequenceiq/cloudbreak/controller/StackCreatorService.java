@@ -83,6 +83,8 @@ import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.java.JavaDefaultVersionCalculator;
 import com.sequenceiq.cloudbreak.service.java.JavaVersionValidator;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
+import com.sequenceiq.cloudbreak.service.multiaz.DataLakeMultiAzCalculatorService;
+import com.sequenceiq.cloudbreak.service.multiaz.MultiAzCalculatorService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeValidatorService;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
@@ -147,6 +149,12 @@ public class StackCreatorService {
 
     @Inject
     private OwnerAssignmentService ownerAssignmentService;
+
+    @Inject
+    private MultiAzCalculatorService multiAzCalculatorService;
+
+    @Inject
+    private DataLakeMultiAzCalculatorService dataLakeMultiAzCalculatorService;
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
@@ -427,11 +435,17 @@ public class StackCreatorService {
     @VisibleForTesting
     void fillInstanceMetadata(DetailedEnvironmentResponse environment, Stack stack) {
         long privateIdNumber = 0;
+        Map<String, String> subnetAzPairs = multiAzCalculatorService.prepareSubnetAzMap(environment);
         for (InstanceGroup instanceGroup : sortInstanceGroups(stack)) {
             for (InstanceMetaData instanceMetaData : instanceGroup.getAllInstanceMetaData()) {
                 instanceMetaData.setPrivateId(privateIdNumber++);
                 instanceMetaData.setInstanceStatus(InstanceStatus.REQUESTED);
             }
+        }
+        if (StackType.DATALAKE.equals(stack.getType())) {
+            dataLakeMultiAzCalculatorService.calculateByRoundRobin(subnetAzPairs, stack);
+        } else {
+            multiAzCalculatorService.calculateByRoundRobin(subnetAzPairs, stack);
         }
     }
 
