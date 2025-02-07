@@ -14,6 +14,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentS
 import com.sequenceiq.it.cloudbreak.client.RedbeamsDatabaseServerTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
+import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseServerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
@@ -49,7 +50,7 @@ public class RedbeamsDatabaseServerTest extends AbstractMockTest {
                 .withName(databaseName)
                 .withClusterCrn(clusterCrn)
                 .when(redbeamsDatabaseServerTest.create())
-                .await(Status.AVAILABLE)
+                .await(Status.AVAILABLE, RunningParameter.consecutivePollingAttemptsInDesiredState(3))
                 .when(redbeamsDatabaseServerTest.delete())
                 .await(Status.DELETE_COMPLETED)
                 .validate();
@@ -74,7 +75,7 @@ public class RedbeamsDatabaseServerTest extends AbstractMockTest {
                 .withName(databaseName)
                 .withClusterCrn(clusterCrn)
                 .when(redbeamsDatabaseServerTest.create())
-                .await(Status.AVAILABLE)
+                .await(Status.AVAILABLE, RunningParameter.consecutivePollingAttemptsInDesiredState(3))
                 .when(redbeamsDatabaseServerTest.stop())
                 .await(Status.STOPPED)
                 .when(redbeamsDatabaseServerTest.start())

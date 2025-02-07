@@ -15,6 +15,10 @@ import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 @Component
 public class RunningParameter {
 
+    private static final int MIN_CONSECUTIVE_POLLING_ATTEMPTS = 1;
+
+    private static final int MAX_CONSECUTIVE_POLLING_ATTEMPTS = 10;
+
     private CloudbreakUser who;
 
     private boolean skipOnFail = true;
@@ -38,6 +42,8 @@ public class RunningParameter {
     private Set<Enum<?>> ignoredStatuses;
 
     private TimeoutChecker timeoutChecker;
+
+    private Integer consecutivePollingAttemptsInDesiredState;
 
     public static RunningParameter emptyRunningParameter() {
         return new RunningParameter();
@@ -109,6 +115,10 @@ public class RunningParameter {
 
     public static RunningParameter timeoutChecker(TimeoutChecker timeoutChecker) {
         return new RunningParameter().withTimeoutChecker(timeoutChecker);
+    }
+
+    public static RunningParameter consecutivePollingAttemptsInDesiredState(Integer numberOfAttempts) {
+        return new RunningParameter().withConsecutivePollingAttemptsInDesiredState(numberOfAttempts);
     }
 
     public CloudbreakUser getWho() {
@@ -195,6 +205,10 @@ public class RunningParameter {
         return timeoutChecker;
     }
 
+    public Integer getConsecutivePollingAttemptsInDesiredState() {
+        return consecutivePollingAttemptsInDesiredState;
+    }
+
     public RunningParameter withKey(String key) {
         this.key = key;
         return this;
@@ -248,6 +262,16 @@ public class RunningParameter {
 
     public RunningParameter withTimeoutChecker(TimeoutChecker timeoutChecker) {
         this.timeoutChecker = timeoutChecker;
+        return this;
+    }
+
+    public RunningParameter withConsecutivePollingAttemptsInDesiredState(Integer numberOfAttempts) {
+        if (MIN_CONSECUTIVE_POLLING_ATTEMPTS > numberOfAttempts || MAX_CONSECUTIVE_POLLING_ATTEMPTS < numberOfAttempts) {
+            String message = String.format("The parameter value should be between %s and %s!", MIN_CONSECUTIVE_POLLING_ATTEMPTS,
+                    MAX_CONSECUTIVE_POLLING_ATTEMPTS);
+            throw new IllegalArgumentException(message);
+        }
+        this.consecutivePollingAttemptsInDesiredState = numberOfAttempts;
         return this;
     }
 
