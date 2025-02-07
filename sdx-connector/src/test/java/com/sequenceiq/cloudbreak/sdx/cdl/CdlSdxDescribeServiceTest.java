@@ -7,6 +7,7 @@ import static com.sequenceiq.common.model.CloudStorageCdpService.HIVE_REPLICA_WA
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -158,6 +159,12 @@ public class CdlSdxDescribeServiceTest {
         assertEquals(HIVE_WAREHOUSE_DIR, fileSystemView.sharedFileSystemLocationsByService().get(HIVE_METASTORE_WAREHOUSE.name()));
         assertEquals(HIVE_EXTERNAL_WAREHOUSE_DIR, fileSystemView.sharedFileSystemLocationsByService().get(HIVE_METASTORE_EXTERNAL_WAREHOUSE.name()));
         assertEquals(HIVE_REPLICA_WAREHOUSE_DIR, fileSystemView.sharedFileSystemLocationsByService().get(HIVE_REPLICA_WAREHOUSE.name()));
+    }
+
+    @Test
+    void testGetHmsServiceConfigThrowsError() {
+        RuntimeException e = assertThrows(RuntimeException.class, () -> underTest.getHmsServiceConfig(Optional.of("")));
+        assertEquals("Failed to obtain HMS config via remote data context for the CDL. Can't continue with HMS config setup.", e.getMessage());
     }
 
     private CdlCrudProto.ListDatalakesResponse getDatalakeList() {

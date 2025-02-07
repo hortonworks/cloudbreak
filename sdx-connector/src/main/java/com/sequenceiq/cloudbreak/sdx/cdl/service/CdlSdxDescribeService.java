@@ -141,6 +141,16 @@ public class CdlSdxDescribeService extends AbstractCdlSdxService implements Plat
         return listSdxCrns(environmentCrn);
     }
 
+    @Override
+    public Map<String, String> getHmsServiceConfig(Optional<String> remoteDataContext) {
+        Map<String, String> serviceConfig = PlatformAwareSdxDescribeService.super.getHmsServiceConfig(remoteDataContext);
+        if (serviceConfig.isEmpty()) {
+            throw new RuntimeException("Failed to obtain HMS config via remote data context for the CDL. Can't continue with HMS config setup.");
+        }
+
+        return serviceConfig;
+    }
+
     private SdxFileSystemView describeServicesResponseToFileSystem(CdlCrudProto.DescribeServicesResponse servicesResponse, String cloudStorageLocation) {
         String fileSystemType = null;
         Map<String, String> fileSystemLocations = new HashMap<>();
