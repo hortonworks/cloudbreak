@@ -18,7 +18,10 @@
         "s3:ListBucket",
         "s3:ListBucketMultipartUploads"
       ],
-      "Resource": "arn:${ARN_PARTITION}:s3:::${DATALAKE_BUCKET}"
+      "Resource": [
+        "arn:${ARN_PARTITION}:s3:::${DATALAKE_BUCKET}",
+        "arn:${ARN_PARTITION}:s3:::${DATALAKE_BUCKET}/*"
+      ]
     }
   ]
 }

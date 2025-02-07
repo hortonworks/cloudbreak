@@ -330,7 +330,9 @@ public class AwsIamServiceTest {
                 new Statement(Effect.Allow).withId("LimitedAccessToDataLakeBucket")
                         .withActions(new Action("s3:AbortMultipartUpload"), new Action("s3:ListBucket"),
                                 new Action("s3:ListBucketMultipartUploads"))
-                        .withResources(new Resource("arn:${ARN_PARTITION}:s3:::${DATALAKE_BUCKET}"))
+                        .withResources(
+                                new Resource("arn:${ARN_PARTITION}:s3:::${DATALAKE_BUCKET}"),
+                                new Resource("arn:${ARN_PARTITION}:s3:::${DATALAKE_BUCKET}/*"))
         );
         assertThat(awsIamService.getPolicy("aws-cdp-ranger-audit-s3-policy.json",
                 Collections.emptyMap()).toJson()).isEqualTo(expectedPolicyNoReplacements.toJson());
@@ -342,7 +344,9 @@ public class AwsIamServiceTest {
                 new Statement(Effect.Allow).withId("LimitedAccessToDataLakeBucket")
                         .withActions(new Action("s3:AbortMultipartUpload"), new Action("s3:ListBucket"),
                                 new Action("s3:ListBucketMultipartUploads"))
-                        .withResources(new Resource("arn:aws-us-gov:s3:::mybucket"))
+                        .withResources(
+                                new Resource("arn:aws-us-gov:s3:::mybucket"),
+                                new Resource("arn:aws-us-gov:s3:::mybucket/*"))
         );
 
         Map<String, String> policyReplacements = new HashMap<>();
