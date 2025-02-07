@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETED_ON_PROVIDER_SIDE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.NODE_FAILURE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
@@ -208,13 +209,18 @@ public class StackSyncService {
                 incrementInstanceStateCount(instanceStateCounts, state);
                 LOGGER.debug("Instance '{}' is reported as deleted on the cloud provider, setting its state to {}.",
                         instance.getInstanceId(), state.name());
-                eventService.fireCloudbreakEvent(stack.getId(), "RECOVERY",
-                        CLUSTER_FAILED_NODES_REPORTED_CLUSTER_EVENT,
-                        Collections.singletonList(instance.getDiscoveryFQDN()));
                 if (InstanceSyncState.DELETED_BY_PROVIDER.equals(state)) {
-                    updateMetaDataToDeletedByProvider(stack, instance);
+                    if (!InstanceStatus.DELETED_BY_PROVIDER.equals(instance.getInstanceStatus())) {
+                        eventService.fireCloudbreakEvent(stack.getId(), "RECOVERY", CLUSTER_FAILED_NODES_REPORTED_CLUSTER_EVENT,
+                                Collections.singletonList(instance.getDiscoveryFQDN()));
+                        updateMetaDataToDeletedByProvider(stack, instance);
+                    }
                 } else {
-                    updateMetaDataToDeletedOnProviderSide(stack, instance);
+                    if (!InstanceStatus.DELETED_ON_PROVIDER_SIDE.equals(instance.getInstanceStatus())) {
+                        eventService.fireCloudbreakEvent(stack.getId(), "RECOVERY", CLUSTER_FAILED_NODES_REPORTED_CLUSTER_EVENT,
+                                Collections.singletonList(instance.getDiscoveryFQDN()));
+                        updateMetaDataToDeletedOnProviderSide(stack, instance);
+                    }
                 }
             }
         }
@@ -300,13 +306,13 @@ public class StackSyncService {
 
     private void updateMetaDataToDeletedOnProviderSide(StackView stack, InstanceMetadataView instanceMetaData) {
         instanceMetaDataService.updateInstanceStatus(instanceMetaData, InstanceStatus.DELETED_ON_PROVIDER_SIDE);
-        eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), STACK_SYNC_INSTANCE_DELETED_CBMETADATA,
+        eventService.fireCloudbreakEvent(stack.getId(), DELETED_ON_PROVIDER_SIDE.name(), STACK_SYNC_INSTANCE_DELETED_CBMETADATA,
                 Collections.singletonList(getInstanceName(instanceMetaData)));
     }
 
     private void updateMetaDataToDeletedByProvider(StackView stack, InstanceMetadataView instanceMetaData) {
         instanceMetaDataService.updateInstanceStatus(instanceMetaData, InstanceStatus.DELETED_BY_PROVIDER);
-        eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), STACK_SYNC_INSTANCE_DELETED_BY_PROVIDER_CBMETADATA,
+        eventService.fireCloudbreakEvent(stack.getId(), DELETED_ON_PROVIDER_SIDE.name(), STACK_SYNC_INSTANCE_DELETED_BY_PROVIDER_CBMETADATA,
                 Collections.singletonList(getInstanceName(instanceMetaData)));
     }
 
