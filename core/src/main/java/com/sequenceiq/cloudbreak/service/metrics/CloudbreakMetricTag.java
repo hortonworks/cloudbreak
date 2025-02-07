@@ -4,5 +4,7 @@ public enum CloudbreakMetricTag {
     STACK_TYPE,
     STATUS,
     CLOUD_PLATFORM,
-    TUNNEL
+    TUNNEL,
+    ISSUE_TYPE,
+    PLATFORM_VARIANT
 }

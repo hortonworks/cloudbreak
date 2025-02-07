@@ -1,5 +1,13 @@
 package com.sequenceiq.cloudbreak.service.stack.flow.diskvalidator;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VOLUME_MISSING;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VOLUME_MISSING_BY_SIZE;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VOLUME_MOUNT_MISSING;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VOLUME_SIZE_MISMATCH;
+import static com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricTag.ISSUE_TYPE;
+import static com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricTag.PLATFORM_VARIANT;
+import static com.sequenceiq.cloudbreak.service.metrics.MetricType.VOLUME_MOUNT_MISSING;
+import static com.sequenceiq.cloudbreak.service.metrics.MetricType.VOLUME_MOUNT_SIZE_MISMATCH;
 import static com.sequenceiq.cloudbreak.service.stack.flow.diskvalidator.DiskValidator.VOLUMES_INADEQUATE_EVENT_TYPE;
 import static com.sequenceiq.cloudbreak.service.stack.flow.diskvalidator.LsblkFetcher.LSBLK_COMMAND;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,11 +41,11 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -90,6 +98,9 @@ class DiskValidatorTest {
     @Mock
     private CloudPlatformConnectors cloudPlatformConnectors;
 
+    @Mock
+    private MetricService metricService;
+
     @InjectMocks
     private LsblkFetcher lsblkFetcher = Mockito.spy(new LsblkFetcher());
 
@@ -128,6 +139,7 @@ class DiskValidatorTest {
         mockAwsVolumesCommand(allGatewayConfigs, false, false);
         underTest.validateDisks(stack, Set.of(node1, node2));
         verifyNoInteractions(cloudbreakEventService);
+        verifyNoInteractions(metricService);
     }
 
     @Test
@@ -150,6 +162,7 @@ class DiskValidatorTest {
         mockGcpVolumesCommand(allGatewayConfigs, false, false);
         underTest.validateDisks(stack, Set.of(node1, node2));
         verifyNoInteractions(cloudbreakEventService);
+        verifyNoInteractions(metricService);
     }
 
     @Test
@@ -158,6 +171,7 @@ class DiskValidatorTest {
         Node node2 = new Node("1.1.1.2", null, "i-456", null, "fqdn2", "worker");
 
         Stack stack = new Stack();
+        stack.setId(2L);
         stack.setPlatformVariant(CloudConstants.AWS);
 
         Set<Resource> stackResources = new HashSet<>();
@@ -181,8 +195,12 @@ class DiskValidatorTest {
         mockAwsVolumesCommand(allGatewayConfigs, false, false);
         underTest.validateDisks(stack, Set.of(node1, node2));
         verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(stack.getId(), VOLUMES_INADEQUATE_EVENT_TYPE,
-                ResourceEvent.CLUSTER_VOLUME_MOUNT_MISSING, List.of("vol-234df4235sdf4423d", "fqdn2"));
+                CLUSTER_VOLUME_MOUNT_MISSING, List.of("vol-234df4235sdf4423d", "fqdn2"));
+        verify(metricService, times(1)).incrementMetricCounter(VOLUME_MOUNT_MISSING,
+                ISSUE_TYPE.name(), CLUSTER_VOLUME_MOUNT_MISSING.name(),
+                PLATFORM_VARIANT.name(), stack.getPlatformVariant());
         verifyNoMoreInteractions(cloudbreakEventService);
+        verifyNoMoreInteractions(metricService);
     }
 
     @Test
@@ -191,6 +209,7 @@ class DiskValidatorTest {
         Node node2 = new Node("1.1.1.2", null, "i-456", null, "fqdn2", "worker");
 
         Stack stack = new Stack();
+        stack.setId(2L);
         stack.setPlatformVariant(CloudConstants.GCP);
 
         Set<Resource> stackResources = new HashSet<>();
@@ -214,8 +233,12 @@ class DiskValidatorTest {
         mockGcpVolumesCommand(allGatewayConfigs, false, false);
         underTest.validateDisks(stack, Set.of(node1, node2));
         verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(stack.getId(), VOLUMES_INADEQUATE_EVENT_TYPE,
-                ResourceEvent.CLUSTER_VOLUME_MOUNT_MISSING, List.of("perdosdhgcp-w-2-3-1737381500806", "fqdn2"));
+                CLUSTER_VOLUME_MOUNT_MISSING, List.of("perdosdhgcp-w-2-3-1737381500806", "fqdn2"));
+        verify(metricService, times(1)).incrementMetricCounter(VOLUME_MOUNT_MISSING,
+                ISSUE_TYPE.name(), CLUSTER_VOLUME_MOUNT_MISSING.name(),
+                PLATFORM_VARIANT.name(), stack.getPlatformVariant());
         verifyNoMoreInteractions(cloudbreakEventService);
+        verifyNoMoreInteractions(metricService);
     }
 
     @Test
@@ -224,6 +247,7 @@ class DiskValidatorTest {
         Node node2 = new Node("1.1.1.2", null, "i-456", null, "fqdn2", "worker");
 
         Stack stack = new Stack();
+        stack.setId(2L);
         stack.setPlatformVariant(CloudConstants.AWS);
 
         Set<Resource> stackResources = new HashSet<>();
@@ -239,10 +263,14 @@ class DiskValidatorTest {
         mockAwsVolumesCommand(allGatewayConfigs, true, false);
         underTest.validateDisks(stack, Set.of(node1, node2));
         verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(stack.getId(), VOLUMES_INADEQUATE_EVENT_TYPE,
-                ResourceEvent.CLUSTER_VOLUME_MISSING, List.of("vol-6573543xcfasferq1", "fqdn2"));
+                CLUSTER_VOLUME_MISSING, List.of("vol-6573543xcfasferq1", "fqdn2"));
         verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(stack.getId(), VOLUMES_INADEQUATE_EVENT_TYPE,
-                ResourceEvent.CLUSTER_VOLUME_MISSING, List.of("vol-234df4235sdf4423d", "fqdn2"));
+                CLUSTER_VOLUME_MISSING, List.of("vol-234df4235sdf4423d", "fqdn2"));
+        verify(metricService, times(2)).incrementMetricCounter(VOLUME_MOUNT_MISSING,
+                ISSUE_TYPE.name(), CLUSTER_VOLUME_MISSING.name(),
+                PLATFORM_VARIANT.name(), stack.getPlatformVariant());
         verifyNoMoreInteractions(cloudbreakEventService);
+        verifyNoMoreInteractions(metricService);
     }
 
     @Test
@@ -252,6 +280,7 @@ class DiskValidatorTest {
 
         Stack stack = new Stack();
         stack.setPlatformVariant(CloudConstants.GCP);
+        stack.setId(2L);
 
         Set<Resource> stackResources = new HashSet<>();
         stackResources.addAll(createNode1GcpResources());
@@ -266,10 +295,14 @@ class DiskValidatorTest {
         mockGcpVolumesCommand(allGatewayConfigs, true, false);
         underTest.validateDisks(stack, Set.of(node1, node2));
         verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(stack.getId(), VOLUMES_INADEQUATE_EVENT_TYPE,
-                ResourceEvent.CLUSTER_VOLUME_MISSING, List.of("perdosdhgcp-w-2-3-1737381500806", "fqdn2"));
+                CLUSTER_VOLUME_MISSING, List.of("perdosdhgcp-w-2-3-1737381500806", "fqdn2"));
         verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(stack.getId(), VOLUMES_INADEQUATE_EVENT_TYPE,
-                ResourceEvent.CLUSTER_VOLUME_MISSING, List.of("perdosdhgcp-w-2-2-1737381500806", "fqdn2"));
+                CLUSTER_VOLUME_MISSING, List.of("perdosdhgcp-w-2-2-1737381500806", "fqdn2"));
+        verify(metricService, times(2)).incrementMetricCounter(VOLUME_MOUNT_MISSING,
+                ISSUE_TYPE.name(), CLUSTER_VOLUME_MISSING.name(),
+                PLATFORM_VARIANT.name(), stack.getPlatformVariant());
         verifyNoMoreInteractions(cloudbreakEventService);
+        verifyNoMoreInteractions(metricService);
     }
 
     @Test
@@ -278,6 +311,7 @@ class DiskValidatorTest {
         Node node2 = new Node("1.1.1.2", null, "i-456", null, "fqdn2", "worker");
 
         Stack stack = new Stack();
+        stack.setId(2L);
         stack.setPlatformVariant(CloudConstants.AWS);
 
         Set<Resource> stackResources = new HashSet<>();
@@ -301,10 +335,13 @@ class DiskValidatorTest {
         mockAwsVolumesCommand(allGatewayConfigs, false, false);
         underTest.validateDisks(stack, Set.of(node1, node2));
         verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(stack.getId(), VOLUMES_INADEQUATE_EVENT_TYPE,
-                ResourceEvent.CLUSTER_VOLUME_SIZE_MISMATCH, List.of("vol-7654567asd123asd1", "fqdn2", "1000 GiB", "500 GiB"));
+                CLUSTER_VOLUME_SIZE_MISMATCH, List.of("vol-7654567asd123asd1", "fqdn2", "1000 GiB", "500 GiB"));
         verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(stack.getId(), VOLUMES_INADEQUATE_EVENT_TYPE,
-                ResourceEvent.CLUSTER_VOLUME_SIZE_MISMATCH, List.of("vol-234df4235sdf4423d", "fqdn2", "1000 GiB", "500 GiB"));
+                CLUSTER_VOLUME_SIZE_MISMATCH, List.of("vol-234df4235sdf4423d", "fqdn2", "1000 GiB", "500 GiB"));
+        verify(metricService, times(2)).incrementMetricCounter(VOLUME_MOUNT_SIZE_MISMATCH,
+                PLATFORM_VARIANT.name(), stack.getPlatformVariant());
         verifyNoMoreInteractions(cloudbreakEventService);
+        verifyNoMoreInteractions(metricService);
     }
 
     @Test
@@ -313,6 +350,7 @@ class DiskValidatorTest {
         Node node2 = new Node("1.1.1.2", null, "i-456", null, "fqdn2", "worker");
 
         Stack stack = new Stack();
+        stack.setId(2L);
         stack.setPlatformVariant(CloudConstants.GCP);
 
         Set<Resource> stackResources = new HashSet<>();
@@ -336,10 +374,13 @@ class DiskValidatorTest {
         mockGcpVolumesCommand(allGatewayConfigs, false, false);
         underTest.validateDisks(stack, Set.of(node1, node2));
         verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(stack.getId(), VOLUMES_INADEQUATE_EVENT_TYPE,
-                ResourceEvent.CLUSTER_VOLUME_SIZE_MISMATCH, List.of("perdosdhgcp-w-2-2-1737381500806", "fqdn2", "1000 GiB", "500 GiB"));
+                CLUSTER_VOLUME_SIZE_MISMATCH, List.of("perdosdhgcp-w-2-2-1737381500806", "fqdn2", "1000 GiB", "500 GiB"));
         verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(stack.getId(), VOLUMES_INADEQUATE_EVENT_TYPE,
-                ResourceEvent.CLUSTER_VOLUME_SIZE_MISMATCH, List.of("perdosdhgcp-w-2-3-1737381500806", "fqdn2", "1000 GiB", "500 GiB"));
+                CLUSTER_VOLUME_SIZE_MISMATCH, List.of("perdosdhgcp-w-2-3-1737381500806", "fqdn2", "1000 GiB", "500 GiB"));
+        verify(metricService, times(2)).incrementMetricCounter(VOLUME_MOUNT_SIZE_MISMATCH,
+                PLATFORM_VARIANT.name(), stack.getPlatformVariant());
         verifyNoMoreInteractions(cloudbreakEventService);
+        verifyNoMoreInteractions(metricService);
     }
 
     @Test
@@ -348,6 +389,7 @@ class DiskValidatorTest {
         Node node2 = new Node("1.1.1.2", null, "i-456", null, "fqdn2", "worker");
 
         Stack stack = new Stack();
+        stack.setId(2L);
         stack.setPlatformVariant(CloudConstants.AWS);
 
         Set<Resource> stackResources = new HashSet<>();
@@ -363,14 +405,18 @@ class DiskValidatorTest {
         mockAwsVolumesCommand(allGatewayConfigs, false, true);
         underTest.validateDisks(stack, Set.of(node1, node2));
         verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(stack.getId(), VOLUMES_INADEQUATE_EVENT_TYPE,
-                ResourceEvent.CLUSTER_VOLUME_MISSING, List.of("vol-537634653asdazxcz", "fqdn2"));
+                CLUSTER_VOLUME_MISSING, List.of("vol-537634653asdazxcz", "fqdn2"));
         verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(stack.getId(), VOLUMES_INADEQUATE_EVENT_TYPE,
-                ResourceEvent.CLUSTER_VOLUME_MISSING, List.of("vol-234df4235sdf4423d", "fqdn2"));
+                CLUSTER_VOLUME_MISSING, List.of("vol-234df4235sdf4423d", "fqdn2"));
         verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(stack.getId(), VOLUMES_INADEQUATE_EVENT_TYPE,
-                ResourceEvent.CLUSTER_VOLUME_MISSING, List.of("vol-6573543xcfasferq1", "fqdn2"));
+                CLUSTER_VOLUME_MISSING, List.of("vol-6573543xcfasferq1", "fqdn2"));
         verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(stack.getId(), VOLUMES_INADEQUATE_EVENT_TYPE,
-                ResourceEvent.CLUSTER_VOLUME_MISSING, List.of("vol-7654567asd123asd1", "fqdn2"));
+                CLUSTER_VOLUME_MISSING, List.of("vol-7654567asd123asd1", "fqdn2"));
+        verify(metricService, times(4)).incrementMetricCounter(VOLUME_MOUNT_MISSING,
+                ISSUE_TYPE.name(), CLUSTER_VOLUME_MISSING.name(),
+                PLATFORM_VARIANT.name(), stack.getPlatformVariant());
         verifyNoMoreInteractions(cloudbreakEventService);
+        verifyNoMoreInteractions(metricService);
     }
 
     @Test
@@ -379,6 +425,7 @@ class DiskValidatorTest {
         Node node2 = new Node("1.1.1.2", null, "i-456", null, "fqdn2", "worker");
 
         Stack stack = new Stack();
+        stack.setId(2L);
         stack.setPlatformVariant(CloudConstants.GCP);
 
         Set<Resource> stackResources = new HashSet<>();
@@ -394,14 +441,18 @@ class DiskValidatorTest {
         mockGcpVolumesCommand(allGatewayConfigs, false, true);
         underTest.validateDisks(stack, Set.of(node1, node2));
         verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(stack.getId(), VOLUMES_INADEQUATE_EVENT_TYPE,
-                ResourceEvent.CLUSTER_VOLUME_MISSING, List.of("perdosdhgcp-w-2-0-1737381500806", "fqdn2"));
+                CLUSTER_VOLUME_MISSING, List.of("perdosdhgcp-w-2-0-1737381500806", "fqdn2"));
         verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(stack.getId(), VOLUMES_INADEQUATE_EVENT_TYPE,
-                ResourceEvent.CLUSTER_VOLUME_MISSING, List.of("perdosdhgcp-w-2-1-1737381500806", "fqdn2"));
+                CLUSTER_VOLUME_MISSING, List.of("perdosdhgcp-w-2-1-1737381500806", "fqdn2"));
         verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(stack.getId(), VOLUMES_INADEQUATE_EVENT_TYPE,
-                ResourceEvent.CLUSTER_VOLUME_MISSING, List.of("perdosdhgcp-w-2-2-1737381500806", "fqdn2"));
+                CLUSTER_VOLUME_MISSING, List.of("perdosdhgcp-w-2-2-1737381500806", "fqdn2"));
         verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(stack.getId(), VOLUMES_INADEQUATE_EVENT_TYPE,
-                ResourceEvent.CLUSTER_VOLUME_MISSING, List.of("perdosdhgcp-w-2-3-1737381500806", "fqdn2"));
+                CLUSTER_VOLUME_MISSING, List.of("perdosdhgcp-w-2-3-1737381500806", "fqdn2"));
+        verify(metricService, times(4)).incrementMetricCounter(VOLUME_MOUNT_MISSING,
+                ISSUE_TYPE.name(), CLUSTER_VOLUME_MISSING.name(),
+                PLATFORM_VARIANT.name(), stack.getPlatformVariant());
         verifyNoMoreInteractions(cloudbreakEventService);
+        verifyNoMoreInteractions(metricService);
     }
 
     @Test
@@ -423,6 +474,7 @@ class DiskValidatorTest {
                 .thenReturn(Map.of("fqdn1", azureLsblkOuptut, "fqdn2", azureLsblkOuptut));
         underTest.validateDisks(stack, Set.of(node1, node2));
         verifyNoInteractions(cloudbreakEventService);
+        verifyNoInteractions(metricService);
     }
 
     @Test
@@ -431,6 +483,7 @@ class DiskValidatorTest {
         Node node2 = new Node("1.1.1.2", null, "i-456", null, "fqdn2", "worker");
 
         Stack stack = new Stack();
+        stack.setId(2L);
         stack.setPlatformVariant(CloudConstants.AZURE);
 
         Set<Resource> stackResources = new HashSet<>();
@@ -453,8 +506,12 @@ class DiskValidatorTest {
                 .thenReturn(Map.of("fqdn1", azureLsblkOuptut, "fqdn2", missingLsblkOutput));
         underTest.validateDisks(stack, Set.of(node1, node2));
         verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(stack.getId(), VOLUMES_INADEQUATE_EVENT_TYPE,
-                ResourceEvent.CLUSTER_VOLUME_MISSING_BY_SIZE, List.of("fqdn2", "1000 GiB, 1000 GiB"));
+                CLUSTER_VOLUME_MISSING_BY_SIZE, List.of("fqdn2", "1000 GiB, 1000 GiB"));
+        verify(metricService, times(1)).incrementMetricCounter(VOLUME_MOUNT_MISSING,
+                ISSUE_TYPE.name(), CLUSTER_VOLUME_MISSING_BY_SIZE.name(),
+                PLATFORM_VARIANT.name(), stack.getPlatformVariant());
         verifyNoMoreInteractions(cloudbreakEventService);
+        verifyNoMoreInteractions(metricService);
     }
 
     private Set<Resource> createNode1GcpResources() {

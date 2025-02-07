@@ -49,6 +49,9 @@ public enum MetricType implements Metric {
     ROTATE_RDS_CERTIFICATE_SUCCESSFUL("externaldatabase.certificate.rotation.successful"),
     ROTATE_RDS_CERTIFICATE_FAILED("externaldatabase.certificate.rotation.failed"),
 
+    VOLUME_MOUNT_MISSING("volume.mount.missing"),
+    VOLUME_MOUNT_SIZE_MISMATCH("volume.mount.size.mismatch"),
+
     MODIFY_SELINUX_SUCCESSFUL("stack.modify.selinux.successful"),
     MODIFY_SELINUX_FAILED("stack.modify.selinux.failed");
 

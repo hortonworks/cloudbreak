@@ -1,5 +1,14 @@
 package com.sequenceiq.cloudbreak.service.stack.flow.diskvalidator;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VOLUME_MISSING;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VOLUME_MISSING_BY_SIZE;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VOLUME_MOUNT_MISSING;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VOLUME_SIZE_MISMATCH;
+import static com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricTag.ISSUE_TYPE;
+import static com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricTag.PLATFORM_VARIANT;
+import static com.sequenceiq.cloudbreak.service.metrics.MetricType.VOLUME_MOUNT_MISSING;
+import static com.sequenceiq.cloudbreak.service.metrics.MetricType.VOLUME_MOUNT_SIZE_MISMATCH;
+
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,12 +28,11 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
+import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
-import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
@@ -45,9 +53,6 @@ public class DiskValidator {
     private GatewayConfigService gatewayConfigService;
 
     @Inject
-    private HostOrchestrator hostOrchestrator;
-
-    @Inject
     private LsblkFetcher lsblkFetcher;
 
     @Inject
@@ -55,6 +60,9 @@ public class DiskValidator {
 
     @Inject
     private CloudbreakEventService cloudbreakEventService;
+
+    @Inject
+    private MetricService metricService;
 
     public void validateDisks(Stack stack, Set<Node> nodes) throws CloudbreakOrchestratorFailedException {
         List<Resource> diskResources = stack.getDiskResources();
@@ -94,33 +102,32 @@ public class DiskValidator {
         Collection<LsblkLine> lsblkLine = lsblkResults.get(fqdn);
         Collection<VolumeInfo> requiredVolumes = volumeInfos.get(instanceId);
 
-        String platformVariant = stack.getPlatformVariant();
         if (!volumeMappings.isEmpty()) {
             for (VolumeInfo volumeInfo : requiredVolumes) {
-                validateVolume(stack.getId(), volumeInfo, fqdn, lsblkLine, volumeMappings.get(fqdn));
+                validateVolume(stack, volumeInfo, fqdn, lsblkLine, volumeMappings.get(fqdn));
             }
         } else {
-            validateVolumeCount(stack.getId(), requiredVolumes, fqdn, lsblkLine);
+            validateVolumeCount(stack, requiredVolumes, fqdn, lsblkLine);
         }
     }
 
-    private void validateVolume(Long stackId, VolumeInfo volumeInfo, String fqdn, Collection<LsblkLine> lsblkLines,
+    private void validateVolume(Stack stack, VolumeInfo volumeInfo, String fqdn, Collection<LsblkLine> lsblkLines,
             Collection<VolumeIdWithDevice> volumeMappingsForFQDN) {
         if (volumeMappingsForFQDN != null) {
             volumeMappingsForFQDN.stream().filter(volumeMapping -> volumeInfo.getId().equals(volumeMapping.getVolumeId())).findFirst()
-                    .ifPresentOrElse(volumeMapping -> validateVolumeSize(stackId, volumeMapping, lsblkLines, volumeInfo, fqdn),
-                            () -> logVolumeNotFound(stackId, volumeInfo, fqdn));
+                    .ifPresentOrElse(volumeMapping -> validateVolumeSize(stack, volumeMapping, lsblkLines, volumeInfo, fqdn),
+                            () -> logVolumeNotFound(stack, volumeInfo, fqdn));
         } else {
-            logVolumeNotFound(stackId, volumeInfo, fqdn);
+            logVolumeNotFound(stack, volumeInfo, fqdn);
         }
     }
 
-    private void validateVolumeSize(Long stackId, VolumeIdWithDevice volumeIdWithDevice, Collection<LsblkLine> lsblkLines, VolumeInfo volumeInfo, String fqdn) {
+    private void validateVolumeSize(Stack stack, VolumeIdWithDevice volumeIdWithDevice, Collection<LsblkLine> lsblkLines, VolumeInfo volumeInfo, String fqdn) {
         lsblkLines.stream().filter(line -> volumeIdWithDevice.getDevice().equals(line.getDevice())).findFirst()
-                .ifPresentOrElse(line -> checkVolumeSizeAndMount(stackId, line, volumeInfo, fqdn), () -> logVolumeNotFound(stackId, volumeInfo, fqdn));
+                .ifPresentOrElse(line -> checkVolumeSizeAndMount(stack, line, volumeInfo, fqdn), () -> logVolumeNotFound(stack, volumeInfo, fqdn));
     }
 
-    private void validateVolumeCount(Long stackId, Collection<VolumeInfo> requiredVolumes, String fqdn, Collection<LsblkLine> lsblkLines) {
+    private void validateVolumeCount(Stack stack, Collection<VolumeInfo> requiredVolumes, String fqdn, Collection<LsblkLine> lsblkLines) {
         List<VolumeInfo> notFoundVolumesBySize = new LinkedList<>(requiredVolumes);
         lsblkLines.forEach(lsblkLine -> {
             if (isMounted(lsblkLine)) {
@@ -133,21 +140,29 @@ public class DiskValidator {
         if (!notFoundVolumesBySize.isEmpty()) {
             String volumesMissing = notFoundVolumesBySize.stream().map(volumeInfo -> volumeInfo.getSize() + GIGABYTE).collect(Collectors.joining(", "));
             LOGGER.warn("Missing volume(s) on {}: {}", fqdn, volumesMissing);
-            cloudbreakEventService.fireCloudbreakEvent(stackId, VOLUMES_INADEQUATE_EVENT_TYPE, ResourceEvent.CLUSTER_VOLUME_MISSING_BY_SIZE,
+            metricService.incrementMetricCounter(VOLUME_MOUNT_MISSING,
+                    ISSUE_TYPE.name(), CLUSTER_VOLUME_MISSING_BY_SIZE.name(),
+                    PLATFORM_VARIANT.name(), stack.getPlatformVariant());
+            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), VOLUMES_INADEQUATE_EVENT_TYPE, CLUSTER_VOLUME_MISSING_BY_SIZE,
                     List.of(fqdn, volumesMissing));
         }
     }
 
-    private void checkVolumeSizeAndMount(Long stackId, LsblkLine lsblkLine, VolumeInfo volumeInfo, String fqdn) {
+    private void checkVolumeSizeAndMount(Stack stack, LsblkLine lsblkLine, VolumeInfo volumeInfo, String fqdn) {
         if (!volumeInfo.getSize().equals(lsblkLine.getSize())) {
             LOGGER.warn("Volume {} size mismatch for instance {}. Expected: {}, Actual: {}",
                     volumeInfo.getId(), fqdn, volumeInfo.getSize(), lsblkLine.getSize());
-            cloudbreakEventService.fireCloudbreakEvent(stackId, VOLUMES_INADEQUATE_EVENT_TYPE, ResourceEvent.CLUSTER_VOLUME_SIZE_MISMATCH,
+            metricService.incrementMetricCounter(VOLUME_MOUNT_SIZE_MISMATCH,
+                    PLATFORM_VARIANT.name(), stack.getPlatformVariant());
+            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), VOLUMES_INADEQUATE_EVENT_TYPE, CLUSTER_VOLUME_SIZE_MISMATCH,
                     List.of(volumeInfo.getId(), fqdn, volumeInfo.getSize() + GIGABYTE, lsblkLine.getSize() + GIGABYTE));
         }
         if (!isMounted(lsblkLine)) {
-            LOGGER.warn("Volume {} is not mounted on the instance {}", volumeInfo.getId(), fqdn);
-            cloudbreakEventService.fireCloudbreakEvent(stackId, VOLUMES_INADEQUATE_EVENT_TYPE, ResourceEvent.CLUSTER_VOLUME_MOUNT_MISSING,
+            LOGGER.warn("Volume {} is not mounted, but it should have been on {}", volumeInfo.getId(), fqdn);
+            metricService.incrementMetricCounter(VOLUME_MOUNT_MISSING,
+                    ISSUE_TYPE.name(), CLUSTER_VOLUME_MOUNT_MISSING.name(),
+                    PLATFORM_VARIANT.name(), stack.getPlatformVariant());
+            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), VOLUMES_INADEQUATE_EVENT_TYPE, CLUSTER_VOLUME_MOUNT_MISSING,
                     List.of(volumeInfo.getId(), fqdn));
         }
     }
@@ -156,10 +171,13 @@ public class DiskValidator {
         return !Strings.isNullOrEmpty(lsblkLine.getMountPoint());
     }
 
-    private void logVolumeNotFound(Long stackId, VolumeInfo volumeInfo, String fqdn) {
+    private void logVolumeNotFound(Stack stack, VolumeInfo volumeInfo, String fqdn) {
         LOGGER.warn("Volume {} not found on the instance {}", volumeInfo.getId(), fqdn);
-        cloudbreakEventService.fireCloudbreakEvent(stackId,
-                VOLUMES_INADEQUATE_EVENT_TYPE, ResourceEvent.CLUSTER_VOLUME_MISSING, List.of(volumeInfo.getId(), fqdn));
+        metricService.incrementMetricCounter(VOLUME_MOUNT_MISSING,
+                ISSUE_TYPE.name(), CLUSTER_VOLUME_MISSING.name(),
+                PLATFORM_VARIANT.name(), stack.getPlatformVariant());
+        cloudbreakEventService.fireCloudbreakEvent(stack.getId(),
+                VOLUMES_INADEQUATE_EVENT_TYPE, CLUSTER_VOLUME_MISSING, List.of(volumeInfo.getId(), fqdn));
     }
 
 }
