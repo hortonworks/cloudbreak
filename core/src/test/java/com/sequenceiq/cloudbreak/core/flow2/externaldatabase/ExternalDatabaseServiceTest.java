@@ -712,7 +712,7 @@ class ExternalDatabaseServiceTest {
                 {true, "AWS", "14", "14", null, false, false},
                 {true, "AWS", "14", "11", null, false, false},
                 {false, "AZURE", "10", "14", SINGLE_SERVER, false, true},
-                {true, "AZURE", "11", "14", FLEXIBLE_SERVER, false, true},
+                {true, "AZURE", "11", "14", FLEXIBLE_SERVER, true, true},
         };
     }
 

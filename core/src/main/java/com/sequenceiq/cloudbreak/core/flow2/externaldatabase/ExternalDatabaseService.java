@@ -534,8 +534,8 @@ public class ExternalDatabaseService {
                 CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited(targetVersion, TargetMajorVersion.VERSION_14::getMajorVersion);
         boolean currentVersionImpliesFlexibleServerMigration =
                 CMRepositoryVersionUtil.isVersionOlderThanLimited(currentVersion, TargetMajorVersion.VERSION_14::getMajorVersion);
-        boolean migrationNeeded = externalDb && cloudPlatform == AZURE && databaseType == AzureDatabaseType.SINGLE_SERVER &&
-                upgradeTargetVersionImpliesFlexibleServerMigration && currentVersionImpliesFlexibleServerMigration;
+        boolean migrationNeeded = externalDb && cloudPlatform == AZURE && upgradeTargetVersionImpliesFlexibleServerMigration &&
+                currentVersionImpliesFlexibleServerMigration;
         String migrationNeededMsg = migrationNeeded ? "Database settings migration is needed during upgrade." :
                 "Database settings migration is not needed during upgrade.";
         LOGGER.debug("{} Current version: {}, target version: {}, cloudPlatform: {}, externalDb: {}, databaseType: {}",
