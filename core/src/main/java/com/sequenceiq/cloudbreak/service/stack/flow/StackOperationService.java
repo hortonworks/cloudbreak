@@ -51,6 +51,7 @@ import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessage
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
+import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.ExternalDatabaseService;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.user.ExternalDatabaseUserOperation;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
@@ -89,6 +90,7 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.ClusterDatabaseServerCertificateStatusV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.ClusterDatabaseServerCertificateStatusV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.ClusterDatabaseServerCertificateStatusV4Responses;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 
 @Service
 public class StackOperationService {
@@ -133,6 +135,9 @@ public class StackOperationService {
 
     @Inject
     private StackApiViewService stackApiViewService;
+
+    @Inject
+    private ExternalDatabaseService externalDatabaseService;
 
     @Inject
     private TargetedUpscaleSupportService targetedUpscaleSupportService;
@@ -243,7 +248,11 @@ public class StackOperationService {
     }
 
     public FlowIdentifier restartInstances(StackDto stackDto, List<String> instanceIds) {
-        return flowManager.triggerRestartInstances(stackDto.getId(), instanceIds);
+        if (calculateIfRdsRestartIsRequired(stackDto)) {
+            LOGGER.info("Starting RDS instances required");
+            return flowManager.triggerRestartInstances(stackDto.getId(), instanceIds, true);
+        }
+        return flowManager.triggerRestartInstances(stackDto.getId(), instanceIds, false);
     }
 
     public FlowIdentifier updateImage(ImageChangeDto imageChangeDto) {
@@ -532,7 +541,7 @@ public class StackOperationService {
     }
 
     public StackDatabaseServerCertificateStatusV4Responses
-        listDatabaseServersCertificateStatus(StackDatabaseServerCertificateStatusV4Request request, String userCrn) {
+    listDatabaseServersCertificateStatus(StackDatabaseServerCertificateStatusV4Request request, String userCrn) {
         try {
             StackDatabaseServerCertificateStatusV4Responses responses = new StackDatabaseServerCertificateStatusV4Responses();
             ClusterDatabaseServerCertificateStatusV4Request databaseServerCertificateStatusV4Request = new ClusterDatabaseServerCertificateStatusV4Request();
@@ -585,6 +594,15 @@ public class StackOperationService {
     public void validateDefaultJavaVersionUpdate(NameOrCrn nameOrCrn, String accountId, SetDefaultJavaVersionRequest request) {
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
         defaultJavaVersionUpdateValidator.validate(stack, request);
+    }
+
+    private boolean calculateIfRdsRestartIsRequired(StackDto stack) {
+        Optional<DatabaseServerV4Response> existingDatabase = externalDatabaseService.findExistingDatabase(stack);
+        if (existingDatabase.isEmpty()) {
+            LOGGER.info("No External Database found for cluster, no need to start.");
+            return false;
+        }
+        return existingDatabase.get().getStatus().isStopped();
     }
 
     public FlowIdentifier manageDatabaseUser(String crn, String dbUser, String dbType, String operation) {

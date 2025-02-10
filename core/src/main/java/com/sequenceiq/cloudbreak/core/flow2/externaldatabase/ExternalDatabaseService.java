@@ -371,6 +371,18 @@ public class ExternalDatabaseService {
         }
     }
 
+    public Optional<DatabaseServerV4Response> findExistingDatabase(StackDto stackDto) {
+        String stackCrn = stackDto.getResourceCrn();
+        String environmentCrn = stackDto.getEnvironmentCrn();
+        LOGGER.debug("Trying to find existing database server for environment {} and cluster {}", environmentCrn, stackCrn);
+        try {
+            return Optional.ofNullable(redbeamsClient.getByClusterCrn(environmentCrn, stackCrn));
+        } catch (NotFoundException ignore) {
+            LOGGER.debug("External database in environment {} for resource {} does not exist.", environmentCrn, stackCrn);
+            return Optional.empty();
+        }
+    }
+
     private boolean externalDatabaseReferenceExist(String databaseCrn) {
         return !Strings.isNullOrEmpty(databaseCrn);
     }
