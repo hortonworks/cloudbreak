@@ -395,6 +395,12 @@ class StackCommonServiceTest {
     void testThrowsExceptionWhenStackIsStopped() {
         StackDto stack = mock(StackDto.class);
         StackView stackView = mock(StackView.class);
+        List<InstanceMetadataView> instanceMetadataViews = new ArrayList<>();
+        InstanceMetaData im1 = new InstanceMetaData();
+        im1.setInstanceId("i-1");
+        im1.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
+        instanceMetadataViews.add(im1);
+        when(stack.getAllNotTerminatedInstanceMetaData()).thenReturn(instanceMetadataViews);
         when(stack.getStack()).thenReturn(stackView);
         when(stackView.isStopped()).thenReturn(TRUE);
         when(stackView.getName()).thenReturn(STACK_NAME.getName());
@@ -404,6 +410,62 @@ class StackCommonServiceTest {
                 () -> underTest.restartMultipleInstances(STACK_CRN, ACCOUNT_ID, instanceIds));
         assertEquals("Cannot restart instances because the stackName is in stopped state.", exception.getMessage());
         verifyNoInteractions(stackOperationService);
+    }
+
+    @Test
+    void testDoesThrowExceptionWhenAllNodesAreStoppedAndInstanceIdsDoesNotContainCmServer() {
+        StackDto stack = mock(StackDto.class);
+        List<InstanceMetadataView> instanceMetadataViews = new ArrayList<>();
+        InstanceMetaData im1 = new InstanceMetaData();
+        im1.setInstanceId("i-1");
+        im1.setInstanceStatus(InstanceStatus.STOPPED);
+        instanceMetadataViews.add(im1);
+        InstanceMetaData im2 = new InstanceMetaData();
+        im2.setInstanceId("i-2");
+        im2.setInstanceStatus(InstanceStatus.STOPPED);
+        instanceMetadataViews.add(im2);
+        InstanceMetaData im3 = new InstanceMetaData();
+        im3.setInstanceId("i-3");
+        im3.setInstanceStatus(InstanceStatus.STOPPED);
+        im3.setClusterManagerServer(true);
+        instanceMetadataViews.add(im3);
+        when(stack.getAllNotTerminatedInstanceMetaData()).thenReturn(instanceMetadataViews);
+        when(stackDtoService.getByNameOrCrn(STACK_CRN, ACCOUNT_ID)).thenReturn(stack);
+        List<String> instanceIds = List.of("i-1", "i-2");
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.restartMultipleInstances(STACK_CRN, ACCOUNT_ID, instanceIds));
+        assertEquals("All cluster nodes are stopped. Initial start request need to contain CM server node. CM server node ids: [i-3]", exception.getMessage());
+        verifyNoInteractions(stackOperationService);
+    }
+
+    @Test
+    void testDoesNotThrowExceptionWhenAllNodesAreStoppedAndInstanceIdsContainCmServer() {
+        StackDto stack = mock(StackDto.class);
+        StackView stackView = mock(StackView.class);
+        lenient().when(stack.getStack()).thenReturn(stackView);
+        lenient().when(stackView.isStopped()).thenReturn(FALSE);
+        lenient().when(stackView.getName()).thenReturn(STACK_NAME.getName());
+        when(stack.getCloudPlatform()).thenReturn(CloudConstants.AWS);
+        List<InstanceMetadataView> instanceMetadataViews = new ArrayList<>();
+        InstanceMetaData im1 = new InstanceMetaData();
+        im1.setInstanceId("i-1");
+        im1.setInstanceStatus(InstanceStatus.STOPPED);
+        instanceMetadataViews.add(im1);
+        InstanceMetaData im2 = new InstanceMetaData();
+        im2.setInstanceId("i-2");
+        im2.setInstanceStatus(InstanceStatus.STOPPED);
+        instanceMetadataViews.add(im2);
+        InstanceMetaData im3 = new InstanceMetaData();
+        im3.setInstanceId("i-3");
+        im3.setInstanceStatus(InstanceStatus.STOPPED);
+        im3.setClusterManagerServer(true);
+        instanceMetadataViews.add(im3);
+        when(stack.getAllNotTerminatedInstanceMetaData()).thenReturn(instanceMetadataViews);
+        when(stack.getAllAvailableInstances()).thenReturn(instanceMetadataViews);
+        when(stackDtoService.getByNameOrCrn(STACK_CRN, ACCOUNT_ID)).thenReturn(stack);
+        List<String> instanceIds = List.of("i-1", "i-3");
+        underTest.restartMultipleInstances(STACK_CRN, ACCOUNT_ID, instanceIds);
+        verify(stackOperationService).restartInstances(stack, instanceIds);
     }
 
     @Test

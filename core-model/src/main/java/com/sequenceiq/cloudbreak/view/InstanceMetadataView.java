@@ -108,6 +108,10 @@ public interface InstanceMetadataView {
         return getTerminationDate() != null;
     }
 
+    default boolean isStopped() {
+        return InstanceStatus.STOPPED.equals(getInstanceStatus());
+    }
+
     default boolean isZombie() {
         return InstanceStatus.ZOMBIE.equals(getInstanceStatus());
     }

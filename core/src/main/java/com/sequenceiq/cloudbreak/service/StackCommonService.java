@@ -275,7 +275,8 @@ public class StackCommonService {
 
     public FlowIdentifier restartMultipleInstances(NameOrCrn nameOrCrn, String accountId, List<String> instanceIds) {
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
-        validateStackIsNotStopped(stack);
+        List<InstanceMetadataView> allNotStoppedInstances = getAllNotStoppedInstances(stack);
+        validateStackCanBeStarted(stack, instanceIds, allNotStoppedInstances);
         validateAllInstancesInSameStack(stack, instanceIds);
         validateNumberOfInstancesToRestart(instanceIds);
         validateAllInstancesAreNotTerminatedAndZombie(stack, instanceIds);
@@ -428,10 +429,26 @@ public class StackCommonService {
         }
     }
 
-    private void validateStackIsNotStopped(StackDto stack) {
-        if (stack.getStack().isStopped()) {
-            throw new BadRequestException(String.format("Cannot restart instances because the %s is in stopped state.", stack.getStack().getName()));
+    private void validateStackCanBeStarted(StackDto stack, List<String> instanceIds, List<InstanceMetadataView> allNotStoppedInstances) {
+        if (allNotStoppedInstances.isEmpty()) {
+            LOGGER.info("All nodes are stopped, we only allow starts when CM server is in the instance list");
+            List<String> clusterManagerInstanceIds = stack.getAllNotTerminatedInstanceMetaData().stream()
+                    .filter(i -> Boolean.TRUE.equals(i.getClusterManagerServer()))
+                    .map(InstanceMetadataView::getInstanceId).toList();
+            if (instanceIds.stream().noneMatch(clusterManagerInstanceIds::contains)) {
+                throw new BadRequestException(String.format("All cluster nodes are stopped." +
+                        " Initial start request need to contain CM server node. CM server node ids: %s", clusterManagerInstanceIds));
+            }
+        } else {
+            if (stack.getStack().isStopped()) {
+                throw new BadRequestException(String.format("Cannot restart instances because the %s is in stopped state.", stack.getStack().getName()));
+            }
         }
+    }
+
+    private static List<InstanceMetadataView> getAllNotStoppedInstances(StackDto stack) {
+        return stack.getAllNotTerminatedInstanceMetaData().stream()
+                .filter(instance -> !instance.isStopped()).toList();
     }
 
     private void validateAllInstancesInSameStack(StackDto stackDto, List<String> instanceIds) {
