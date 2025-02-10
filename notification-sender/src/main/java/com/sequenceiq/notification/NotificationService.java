@@ -33,27 +33,27 @@ public class NotificationService {
     }
 
     public void send(ResourceEvent resourceEvent) {
-        send(resourceEvent, Collections.emptySet(), null, null);
+        send(resourceEvent, Collections.emptySet(), null, null, null);
     }
 
     public void send(ResourceEvent resourceEvent, String userId) {
-        send(resourceEvent, Collections.emptySet(), null, userId);
+        send(resourceEvent, Collections.emptySet(), null, userId, null);
     }
 
     public void send(ResourceEvent resourceEvent, Object payload, String userId) {
-        send(resourceEvent, Collections.emptySet(), payload, userId);
+        send(resourceEvent, Collections.emptySet(), payload, userId, null);
     }
 
     public void send(ResourceEvent resourceEvent, Collection<?> messageArgs, Object payload) {
         notificationSender.send(
-                notificationAssemblingService.createNotification(resourceEvent, messageArgs, payload),
+                notificationAssemblingService.createNotification(resourceEvent, messageArgs, payload, null),
                 getNotificationUrls(),
                 RestClientUtil.get());
     }
 
-    public void send(ResourceEvent resourceEvent, Collection<?> messageArgs, Object payload, String userId) {
+    public void send(ResourceEvent resourceEvent, Collection<?> messageArgs, Object payload, String userId, String notificationType) {
         notificationSender.send(
-                notificationAssemblingService.createNotification(resourceEvent, messageArgs, payload, userId),
+                notificationAssemblingService.createNotification(resourceEvent, messageArgs, payload, userId, notificationType),
                 getNotificationUrls(),
                 RestClientUtil.get());
     }

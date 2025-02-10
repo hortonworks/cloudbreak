@@ -41,7 +41,7 @@ public class SdxNotificationService {
     }
 
     public void send(ResourceEvent resourceEvent, Collection<?> messageArgs, SdxCluster sdx, String userCrn) {
-        notificationService.send(resourceEvent, messageArgs, sdxClusterConverter.sdxClusterToResponse(sdx), userCrn);
+        notificationService.send(resourceEvent, messageArgs, sdxClusterConverter.sdxClusterToResponse(sdx), userCrn, null);
         LOGGER.info("SDX Notification has been sent: {}", resourceEvent);
     }
 

@@ -10,6 +10,7 @@ import jakarta.ws.rs.core.MediaType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +31,7 @@ public class HttpNotificationSenderService implements NotificationSender {
     @Inject
     private ObjectMapper objectMapper;
 
+    @Qualifier("CommonMetricService")
     @Inject
     private MetricService metricService;
 

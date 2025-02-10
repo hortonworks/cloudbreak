@@ -29,7 +29,8 @@ public class NotificationAssemblingService {
         return new Notification<>(notification);
     }
 
-    public Notification<CloudbreakNotification> createNotification(ResourceEvent resourceEvent, Collection<?> messageArgs, Object payload) {
+    public Notification<CloudbreakNotification> createNotification(ResourceEvent resourceEvent, Collection<?> messageArgs, Object payload,
+            String notificationType) {
         CloudbreakNotification notification = new CloudbreakNotification();
         notification.setEventTimestamp(new Date().getTime());
         notification.setEventType(resourceEvent.name());
@@ -42,6 +43,7 @@ public class NotificationAssemblingService {
         }
         notification.setTenantName(getAccountId());
         notification.setUserId(ThreadBasedUserCrnProvider.getUserCrn());
+        notification.setNotificationType(notificationType);
         if (payload != null) {
             notification.setPayload(JsonUtil.convertToTree(payload));
             notification.setPayloadType(payload.getClass().getSimpleName());
@@ -49,8 +51,9 @@ public class NotificationAssemblingService {
         return new Notification<>(notification);
     }
 
-    public Notification<CloudbreakNotification> createNotification(ResourceEvent resourceEvent, Collection<?> messageArgs, Object payload, String userId) {
-        Notification<CloudbreakNotification> n = createNotification(resourceEvent, messageArgs, payload);
+    public Notification<CloudbreakNotification> createNotification(ResourceEvent resourceEvent, Collection<?> messageArgs, Object payload, String userId,
+            String notificationType) {
+        Notification<CloudbreakNotification> n = createNotification(resourceEvent, messageArgs, payload, notificationType);
         n.getNotification().setTenantName(getTenantName(userId));
         n.getNotification().setUserId(userId);
         String accountId = getTenantName(userId);

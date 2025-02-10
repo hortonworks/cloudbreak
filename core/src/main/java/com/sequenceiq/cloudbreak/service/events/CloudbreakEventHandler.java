@@ -39,12 +39,20 @@ public class CloudbreakEventHandler implements Consumer<Event<CloudbreakComposit
         StackV4Response stackResponse = cloudbreakCompositeEvent.getStackResponse();
         if (stackResponse != null) {
             try {
+                String notificationType = getNotificationType(cloudbreakCompositeEvent.getStructuredNotificationEvent());
                 Collection<String> resourceEventMessageArgs = cloudbreakCompositeEvent.getResourceEventMessageArgs();
-                notificationService.send(cloudbreakCompositeEvent.getResourceEvent(), resourceEventMessageArgs, stackResponse, owner);
+                notificationService.send(cloudbreakCompositeEvent.getResourceEvent(), resourceEventMessageArgs, stackResponse, owner, notificationType);
             } catch (Exception e) {
                 String msg = String.format("Failed to send notification from structured event, stack('%s')", stackResponse.getId());
                 LOGGER.warn(msg, e);
             }
         }
+    }
+
+    private String getNotificationType(StructuredNotificationEvent structuredNotificationEvent) {
+        if (structuredNotificationEvent != null && structuredNotificationEvent.getNotificationDetails() != null) {
+            return structuredNotificationEvent.getNotificationDetails().getNotificationType();
+        }
+        return null;
     }
 }
