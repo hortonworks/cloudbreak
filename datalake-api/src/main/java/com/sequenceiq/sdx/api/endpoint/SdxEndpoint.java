@@ -571,5 +571,20 @@ public interface SdxEndpoint {
     @Operation(summary = "get SDX cluster detail", description = "getSdxDetailWithResourcesByName",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxClusterDetailResponse getSdxDetailWithResourcesByName(@PathParam("name") String name, @QueryParam("entries") Set<String> entries);
+
+    @PUT
+    @Path("/name/{name}/enable_selinux")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Enables SELinux on on a specific DL", operationId = "enableSelinuxByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier enableSeLinuxByName(@PathParam("name") String name);
+
+    @PUT
+    @Path("/crn/{crn}/enable_selinux")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Enables SELinux on on a specific DL", operationId = "enableSelinuxByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier enableSeLinuxByCrn(@ValidCrn(resource = VM_DATALAKE) @PathParam("crn") String crn);
+
 }
 

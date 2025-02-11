@@ -49,7 +49,10 @@ public enum MetricType implements Metric {
     AWS_VARIANT_MIGRATION_SUCCESSFUL("aws.variant.migration.failed"),
 
     ROTATE_RDS_CERTIFICATE_SUCCESSFUL("externaldatabase.certificate.rotation.successful"),
-    ROTATE_RDS_CERTIFICATE_FAILED("externaldatabase.certificate.rotation.failed");
+    ROTATE_RDS_CERTIFICATE_FAILED("externaldatabase.certificate.rotation.failed"),
+
+    ENABLE_SELINUX_SUCCESSFUL("stack.enable.selinux.successful"),
+    ENABLE_SELINUX_FAILED("stack.enable.selinux.failed");
 
     private final String metricName;
 

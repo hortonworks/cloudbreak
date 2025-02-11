@@ -895,4 +895,20 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
         NameOrCrn nameOrCrn = NameOrCrn.ofCrn(crn);
         return stackOperationService.triggerSetDefaultJavaVersion(nameOrCrn, accountId, request);
     }
+
+    @Override
+    @CheckPermissionByResourceName(action =  AuthorizationResourceAction.REPAIR_DATAHUB)
+    public FlowIdentifier enableSeLinuxByName(@ResourceName String name) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        NameOrCrn nameOrCrn = NameOrCrn.ofName(name);
+        return stackOperationService.triggerEnableSELinux(nameOrCrn, accountId);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action =  AuthorizationResourceAction.REPAIR_DATAHUB)
+    public FlowIdentifier enableSeLinuxByCrn(@TenantAwareParam @ResourceCrn String crn) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        NameOrCrn nameOrCrn = NameOrCrn.ofCrn(crn);
+        return stackOperationService.triggerEnableSELinux(nameOrCrn, accountId);
+    }
 }

@@ -38,7 +38,6 @@ public class EnvironmentEnableSeLinuxHandler extends EventSenderAwareHandler<Env
 
     @Override
     public void accept(Event<EnvironmentEnableSeLinuxEvent> enableSeLinuxEventEvent) {
-        LOGGER.debug("In EnvironmentEnableSeLinuxHandler.accept");
         EnvironmentEnableSeLinuxEvent enableSeLinuxEvent = enableSeLinuxEventEvent.getData();
         try {
             freeIpaService.describe(enableSeLinuxEvent.getResourceCrn()).ifPresentOrElse(freeIpa -> {
@@ -62,8 +61,6 @@ public class EnvironmentEnableSeLinuxHandler extends EventSenderAwareHandler<Env
                         .build();
 
                 eventSender().sendEvent(result, enableSeLinuxEventEvent.getHeaders());
-                LOGGER.debug("ENABLE_SELINUX_FREEIPA_EVENT event sent");
-
             }, () -> {
                 throw new FreeIpaOperationFailedException(String.format("FreeIPA cannot be found for environment %s",
                         enableSeLinuxEvent.getResourceName()));
@@ -73,7 +70,6 @@ public class EnvironmentEnableSeLinuxHandler extends EventSenderAwareHandler<Env
             EnvironmentEnableSeLinuxFailedEvent failedEvent =
                     new EnvironmentEnableSeLinuxFailedEvent(enableSeLinuxEvent, e, EnvironmentStatus.ENABLE_SELINUX_ON_FREEIPA_FAILED);
             eventSender().sendEvent(failedEvent, enableSeLinuxEventEvent.getHeaders());
-            LOGGER.debug("ENABLE_SELINUX_ON_FREEIPA_FAILED event sent");
         }
     }
 

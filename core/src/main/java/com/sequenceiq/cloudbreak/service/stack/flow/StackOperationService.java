@@ -591,6 +591,12 @@ public class StackOperationService {
                 request.isRestartCM(), request.isRollingRestart());
     }
 
+    public FlowIdentifier triggerEnableSELinux(NameOrCrn nameOrCrn, String accountId) {
+        LOGGER.info("Triggering enable selinux update on stack ('{}')", nameOrCrn);
+        StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
+        return flowManager.triggerEnableSelinux(stack.getId(), stack.getName(), stack.getResourceCrn());
+    }
+
     public void validateDefaultJavaVersionUpdate(NameOrCrn nameOrCrn, String accountId, SetDefaultJavaVersionRequest request) {
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
         defaultJavaVersionUpdateValidator.validate(stack, request);

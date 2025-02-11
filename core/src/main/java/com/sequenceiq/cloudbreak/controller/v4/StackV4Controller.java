@@ -760,4 +760,10 @@ public class StackV4Controller extends NotificationController implements StackV4
     public FlowIdentifier manageDatabaseUser(Long workspaceId, ExternalDatabaseManageDatabaseUserV4Request rq, @InitiatorUserCrn String initiatorUserCrn) {
         return stackOperationService.manageDatabaseUser(rq.getCrn(), rq.getDbUser(), rq.getDbType(), rq.getOperation());
     }
+
+    @Override
+    @InternalOnly
+    public FlowIdentifier enableSeLinuxByCrn(Long workspaceId, @TenantAwareParam @ResourceCrn String crn) {
+        return stackOperationService.triggerEnableSELinux(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId());
+    }
 }

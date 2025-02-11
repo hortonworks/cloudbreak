@@ -959,4 +959,14 @@ public interface StackV4Endpoint {
             @NotNull @Valid ExternalDatabaseManageDatabaseUserV4Request request,
             @NotEmpty @ValidCrn(resource = {CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER})
             @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @PUT
+    @Path("internal/crn/{crn}/enable_selinux")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(
+            summary = "Enables SELinux on on a specific Stack", operationId = "enableSelinuxByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier enableSeLinuxByCrn(@PathParam("workspaceId") Long workspaceId,
+        @NotEmpty @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn);
 }

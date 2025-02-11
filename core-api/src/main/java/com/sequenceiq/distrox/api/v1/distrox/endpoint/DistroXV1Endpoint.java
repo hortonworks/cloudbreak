@@ -817,4 +817,23 @@ public interface DistroXV1Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier setDefaultJavaVersionByCrn(@NotEmpty @ValidCrn(resource = DATAHUB) @PathParam("crn") String crn,
             @NotNull @Valid SetDefaultJavaVersionRequest request);
+
+    @PUT
+    @Path("/name/{name}/enable_selinux")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(
+            summary = "Enables SELinux on on a specific DH", operationId = "enableSelinuxByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier enableSeLinuxByName(@PathParam("name") String name);
+
+    @PUT
+    @Path("/crn/{crn}/enable_selinux")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(
+            summary = "Enables SELinux on on a specific DH", operationId = "enableSelinuxByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier enableSeLinuxByCrn(@NotEmpty @ValidCrn(resource = DATAHUB) @PathParam("crn") String crn);
+
 }

@@ -30,7 +30,6 @@ public class EnvironmentValidateEnableSeLinuxHandler extends EventSenderAwareHan
 
     @Override
     public void accept(Event<EnvironmentEnableSeLinuxEvent> enableSeLinuxEventEvent) {
-        LOGGER.debug("In EnvironmentValidateEnableSeLinuxHandler.accept");
         try {
             EnvironmentEnableSeLinuxEvent result = EnvironmentEnableSeLinuxEvent.builder()
                     .withAccepted(new Promise<>())
@@ -41,12 +40,10 @@ public class EnvironmentValidateEnableSeLinuxHandler extends EventSenderAwareHan
                     .build();
 
             eventSender().sendEvent(result, enableSeLinuxEventEvent.getHeaders());
-            LOGGER.debug("ENABLE_SELINUX_FREEIPA_EVENT event sent");
         } catch (Exception e) {
             EnvironmentEnableSeLinuxFailedEvent failedEvent =
                     new EnvironmentEnableSeLinuxFailedEvent(enableSeLinuxEventEvent.getData(), e, EnvironmentStatus.VERTICAL_SCALE_FAILED);
             eventSender().sendEvent(failedEvent, enableSeLinuxEventEvent.getHeaders());
-            LOGGER.debug("ENABLE_SELINUX_ON_FREEIPA_FAILED event sent");
         }
     }
 }

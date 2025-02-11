@@ -59,6 +59,7 @@ import com.sequenceiq.cloudbreak.common.imdupdate.InstanceMetadataUpdateType;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesRequest;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.enableselinux.event.CoreEnableSeLinuxEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.java.SetDefaultJavaVersionTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.restart.RestartInstancesWithRdsStartEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.services.restart.event.ClusterServicesRestartTriggerEvent;
@@ -574,6 +575,12 @@ public class ReactorFlowManager {
         String selector = FlowChainTriggers.SET_DEFAULT_JAVA_VERSION_CHAIN_TRIGGER_EVENT;
         return reactorNotifier.notify(stackId, selector,
                 new SetDefaultJavaVersionTriggerEvent(selector, stackId, javaVersion, restartServices, restartCM, rollingRestart));
+    }
+
+    public FlowIdentifier triggerEnableSelinux(Long stackId, String stackName, String stackCrn) {
+        String selector = FlowChainTriggers.ENABLE_SELINUX_CORE_VALIDATION_EVENT;
+        return reactorNotifier.notify(stackId, selector,
+                new CoreEnableSeLinuxEvent(selector, stackId, stackName, stackCrn));
     }
 
     public FlowIdentifier triggerExternalDatabaseUserOperation(Long stackId, String name, String crn, ExternalDatabaseUserOperation operation,

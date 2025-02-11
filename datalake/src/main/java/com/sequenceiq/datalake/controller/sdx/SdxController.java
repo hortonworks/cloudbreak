@@ -64,6 +64,7 @@ import com.sequenceiq.datalake.metric.MetricType;
 import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.SdxDeleteService;
 import com.sequenceiq.datalake.service.rotation.certificate.SdxDatabaseCertificateRotationService;
+import com.sequenceiq.datalake.service.sdx.SELinuxService;
 import com.sequenceiq.datalake.service.sdx.SdxHorizontalScalingService;
 import com.sequenceiq.datalake.service.sdx.SdxImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.SdxRecommendationService;
@@ -174,6 +175,9 @@ public class SdxController implements SdxEndpoint {
 
     @Inject
     private EntitlementService entitlementService;
+
+    @Inject
+    private SELinuxService seLinuxService;
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
@@ -644,6 +648,22 @@ public class SdxController implements SdxEndpoint {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = getSdxClusterByCrn(crn);
         return verticalScaleService.updateRootVolumeDatalake(sdxCluster, updateRequest, userCrn);
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action =  AuthorizationResourceAction.REPAIR_DATALAKE)
+    public FlowIdentifier enableSeLinuxByName(@ResourceName String name) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        SdxCluster sdxCluster = getSdxClusterByName(name);
+        return seLinuxService.enableSeLinuxOnDatalake(sdxCluster, userCrn);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action =  AuthorizationResourceAction.REPAIR_DATALAKE)
+    public FlowIdentifier enableSeLinuxByCrn(@ResourceCrn @TenantAwareParam String crn) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        SdxCluster sdxCluster = getSdxClusterByCrn(crn);
+        return seLinuxService.enableSeLinuxOnDatalake(sdxCluster, userCrn);
     }
 
     private SdxCluster getSdxClusterByName(String name) {

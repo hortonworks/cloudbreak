@@ -218,7 +218,7 @@ class ReactorFlowManagerTest {
             }
         }
         // -6: 2 notifyWithoutCheck, 1 terminationTriggerService, 1 triggerStackRemoveInstance internal, 1 triggerMigrateRdsToTls, 1 rootVolumeUpdateFlow
-        verify(reactorNotifier, times(count - 6)).notify(anyLong(), anyString(), any(Acceptable.class));
+        verify(reactorNotifier, times(count - 7)).notify(anyLong(), anyString(), any(Acceptable.class));
         verify(reactorNotifier, times(2)).notifyWithoutCheck(anyLong(), anyString(), any(Acceptable.class));
         verify(terminationTriggerService, times(1)).triggerTermination(stack, true);
         verify(terminationTriggerService, times(1)).triggerTermination(stack, false);
