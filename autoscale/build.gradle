@@ -25,8 +25,8 @@ apply plugin: "org.sonarqube"
 
 sonar {
     properties {
-        property("sonar.projectName", "cb-autoscale-service")
-        property("sonar.projectKey", "cb-autoscale-service")
+        property("sonar.projectName", "Autoscale_Service_UT_master")
+        property("sonar.projectKey", "Autoscale_Service_UT_master")
         property("sonar.java.coveragePlugin", "plugin")
         property("sonar.sourceEncoding", "UTF-8")
         property("sonar.sources", "src/main")

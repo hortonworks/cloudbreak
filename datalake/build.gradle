@@ -24,8 +24,8 @@ apply plugin: "org.sonarqube"
 
 sonar {
   properties {
-    property("sonar.projectName", "cb-datalake-service")
-    property("sonar.projectKey", "cb-datalake-service")
+    property("sonar.projectName", "Datalake_Service_UT_master")
+    property("sonar.projectKey", "Datalake_Service_UT_master")
     property("sonar.java.coveragePlugin", "plugin")
     property("sonar.sourceEncoding", "UTF-8")
     property("sonar.sources", "src/main")

@@ -33,8 +33,8 @@ configurations.all {
 
 sonar {
     properties {
-        property("sonar.projectName", "cb-environment-service")
-        property("sonar.projectKey", "cb-environment-service")
+        property("sonar.projectName", "Environment_Service_UT_master")
+        property("sonar.projectKey", "Environment_Service_UT_master")
         property("sonar.java.coveragePlugin", "plugin")
         property("sonar.sourceEncoding", "UTF-8")
         property("sonar.sources", "src/main")

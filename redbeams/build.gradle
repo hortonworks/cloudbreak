@@ -23,8 +23,8 @@ apply plugin: "org.sonarqube"
 
 sonar {
   properties {
-    property("sonar.projectName", "cb-redbeams-service")
-    property("sonar.projectKey", "cb-redbeams-service")
+    property("sonar.projectName", "Redbeams_Service_UT_master")
+    property("sonar.projectKey", "Redbeams_Service_UT_master")
     property("sonar.java.coveragePlugin", "plugin")
     property("sonar.sourceEncoding", "UTF-8")
     property("sonar.sources", "src/main")

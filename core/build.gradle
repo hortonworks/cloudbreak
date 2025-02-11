@@ -27,8 +27,8 @@ apply plugin: "org.sonarqube"
 
 sonar {
   properties {
-    property("sonar.projectName", "cb-core-service")
-    property("sonar.projectKey", "cb-core-service")
+    property("sonar.projectName", "CloudbreakCore_Service_UT_master")
+    property("sonar.projectKey", "CloudbreakCore_Service_UT_master")
     property("sonar.java.coveragePlugin", "plugin")
     property("sonar.sourceEncoding", "UTF-8")
     property("sonar.sources", "src/main")
