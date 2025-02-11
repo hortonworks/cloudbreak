@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalSca
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
@@ -53,6 +54,7 @@ import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.datalake.authorization.DataLakeFiltering;
 import com.sequenceiq.datalake.cm.RangerCloudIdentityService;
 import com.sequenceiq.datalake.configuration.CDPConfigService;
@@ -87,6 +89,8 @@ import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAzureRequest;
+import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 import com.sequenceiq.sdx.api.model.SdxDatabaseServerCertificateStatusV4Request;
 import com.sequenceiq.sdx.api.model.SdxDefaultTemplateResponse;
 import com.sequenceiq.sdx.api.model.SdxGenerateImageCatalogResponse;
@@ -168,12 +172,18 @@ public class SdxController implements SdxEndpoint {
     @Inject
     private SdxDatabaseCertificateRotationService certificateRotationService;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
     public SdxClusterResponse create(@ValidStackNameFormat @ValidStackNameLength String name,
             @Valid SdxClusterRequest createSdxClusterRequest) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         validateSdxClusterShape(createSdxClusterRequest.getClusterShape());
+        if (entitlementService.isSingleServerRejectEnabled(userCrn)) {
+            validateAzureDatabaseType(createSdxClusterRequest.getExternalDatabase());
+        }
         Pair<SdxCluster, FlowIdentifier> result = sdxService.createSdx(userCrn, name, createSdxClusterRequest, null);
         SdxCluster sdxCluster = result.getLeft();
         MetricType metricType = createSdxClusterRequest.getImage() != null
@@ -667,6 +677,19 @@ public class SdxController implements SdxEndpoint {
             throw new BadRequestException("CONTAINERIZED shape is not acceptable for this request. The CONTAINERIZED shape is not supported." +
                 " Please confirm, your cluster shape and retry the operation.");
         }
+    }
+
+    private void validateAzureDatabaseType(@Valid SdxDatabaseRequest sdxDatabaseRequest) {
+        Optional.ofNullable(sdxDatabaseRequest)
+                .map(SdxDatabaseRequest::getSdxDatabaseAzureRequest)
+                .map(SdxDatabaseAzureRequest::getAzureDatabaseType)
+                .ifPresent(azureDatabaseType -> {
+                    if (azureDatabaseType == AzureDatabaseType.SINGLE_SERVER) {
+                        throw new BadRequestException("Azure Database for PostgreSQL - Single Server is retired. New deployments cannot be created anymore. " +
+                                "Check documentation for more information: " +
+                                "https://learn.microsoft.com/en-us/azure/postgresql/migrate/whats-happening-to-postgresql-single-server");
+                    }
+        });
     }
 
     @Override

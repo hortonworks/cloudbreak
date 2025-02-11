@@ -32,6 +32,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.verification.VerificationMode;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
@@ -43,7 +44,10 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAzureRequest;
+import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.image.DistroXImageV1Request;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4RequestConverter;
@@ -88,6 +92,9 @@ class DistroXServiceTest {
 
     @Mock
     private ImageOsService imageOsService;
+
+    @Mock
+    private EntitlementService entitlementService;
 
     @InjectMocks
     private DistroXService underTest;
@@ -402,6 +409,66 @@ class DistroXServiceTest {
                 .hasMessage("Image os 'os' is not supported in your account.");
 
         verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any());
+    }
+
+    @Test
+    void testWithSingleServerWhenSingleServerRejectEnabled() {
+        DistroXV1Request request = createDistroXV1RequestForAzureSingleServerRejectionTest(AzureDatabaseType.SINGLE_SERVER, true);
+
+        assertThatThrownBy(() -> underTest.post(request, NOT_INTERNAL_REQUEST))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("Azure Database for PostgreSQL - Single Server is retired. New deployments cannot be created anymore. " +
+                        "Check documentation for more information: " +
+                        "https://learn.microsoft.com/en-us/azure/postgresql/migrate/whats-happening-to-postgresql-single-server");
+    }
+
+    @Test
+    void testWithSingleServerWhenSingleServerRejectDisabled() {
+        DistroXV1Request request = createDistroXV1RequestForAzureSingleServerRejectionTest(AzureDatabaseType.SINGLE_SERVER, false);
+        underTest.post(request, NOT_INTERNAL_REQUEST);
+        verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any());
+
+    }
+
+    @Test
+    void testWithFlexibleServerWhenSingleServerRejectEnabled() {
+        DistroXV1Request request = createDistroXV1RequestForAzureSingleServerRejectionTest(AzureDatabaseType.FLEXIBLE_SERVER, true);
+        underTest.post(request, NOT_INTERNAL_REQUEST);
+        verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any());
+    }
+
+    @Test
+    void testWithFlexibleServerWhenSingleServerRejectDisabled() {
+        DistroXV1Request request = createDistroXV1RequestForAzureSingleServerRejectionTest(AzureDatabaseType.FLEXIBLE_SERVER, false);
+        underTest.post(request, NOT_INTERNAL_REQUEST);
+        verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any());
+
+    }
+
+    private DistroXV1Request createDistroXV1RequestForAzureSingleServerRejectionTest(
+            AzureDatabaseType azureDatabaseType, boolean singleServerRejectEnabled) {
+        String envName = "someAwesomeEnvironment";
+        DistroXV1Request request = new DistroXV1Request();
+        request.setEnvironmentName(envName);
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        envResponse.setEnvironmentStatus(AVAILABLE);
+        envResponse.setCrn("crn");
+        DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
+        freeipa.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
+        freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
+
+        DistroXDatabaseRequest databaseRequest = new DistroXDatabaseRequest();
+        DistroXDatabaseAzureRequest databaseAzureRequest = new DistroXDatabaseAzureRequest();
+        databaseAzureRequest.setAzureDatabaseType(azureDatabaseType);
+        databaseRequest.setDatabaseAzureRequest(databaseAzureRequest);
+        request.setExternalDatabase(databaseRequest);
+
+        when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
+        when(environmentClientService.getByName(envName)).thenReturn(envResponse);
+        when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any()))
+                .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
+        when(entitlementService.isSingleServerRejectEnabled(any())).thenReturn(singleServerRejectEnabled);
+        return request;
     }
 
     private static VerificationMode calledOnce() {

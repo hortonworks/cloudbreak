@@ -1,6 +1,7 @@
 package com.sequenceiq.datalake.controller.sdx;
 
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_DATALAKE;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -8,6 +9,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -41,6 +43,7 @@ import com.sequenceiq.cloudbreak.cloud.model.BackupOperationType;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.datalake.authorization.DataLakeFiltering;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -66,6 +69,8 @@ import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAzureRequest;
+import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 import com.sequenceiq.sdx.api.model.SdxGenerateImageCatalogResponse;
 
 @ExtendWith(MockitoExtension.class)
@@ -118,10 +123,69 @@ class SdxControllerTest {
 
     @Test
     void createTest() {
-        SdxCluster sdxCluster = getValidSdxCluster();
-        when(sdxService.createSdx(anyString(), anyString(), any(SdxClusterRequest.class), nullable(StackV4Request.class)))
-                .thenReturn(Pair.of(sdxCluster, new FlowIdentifier(FlowType.FLOW, "FLOW_ID")));
+        SdxCluster sdxCluster = createSdxCluster();
+        SdxClusterRequest createSdxClusterRequest = createSdxClusterRequest(sdxCluster);
 
+        SdxClusterResponse sdxClusterResponse = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> sdxController.create(SDX_CLUSTER_NAME, createSdxClusterRequest));
+        verifySdxClusterCreation(createSdxClusterRequest, sdxCluster, sdxClusterResponse);
+    }
+
+    @Test
+    void createTestWithSingleServerWhenSingleServerRejectEnabled() {
+        SdxCluster sdxCluster = createSdxCluster();
+        SdxClusterRequest createSdxClusterRequest = createSdxClusterRequest(sdxCluster);
+        addDatabaseAzureRequest(createSdxClusterRequest, AzureDatabaseType.SINGLE_SERVER, true);
+
+        assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                        () -> sdxController.create(SDX_CLUSTER_NAME, createSdxClusterRequest)))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("Azure Database for PostgreSQL - Single Server is retired. New deployments cannot be created anymore. " +
+                        "Check documentation for more information: " +
+                        "https://learn.microsoft.com/en-us/azure/postgresql/migrate/whats-happening-to-postgresql-single-server");
+    }
+
+    @Test
+    void createTestWithSingleServerWhenSingleServerRejectDisabled() {
+        SdxCluster sdxCluster = createSdxCluster();
+        SdxClusterRequest createSdxClusterRequest = createSdxClusterRequest(sdxCluster);
+        addDatabaseAzureRequest(createSdxClusterRequest, AzureDatabaseType.SINGLE_SERVER, false);
+
+        SdxClusterResponse sdxClusterResponse = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> sdxController.create(SDX_CLUSTER_NAME, createSdxClusterRequest));
+        verifySdxClusterCreation(createSdxClusterRequest, sdxCluster, sdxClusterResponse);
+    }
+
+    @Test
+    void createTestWithFlexibleServerWhenSingleServerRejectEnabled() {
+        SdxCluster sdxCluster = createSdxCluster();
+        SdxClusterRequest createSdxClusterRequest = createSdxClusterRequest(sdxCluster);
+        addDatabaseAzureRequest(createSdxClusterRequest, AzureDatabaseType.FLEXIBLE_SERVER, true);
+
+        SdxClusterResponse sdxClusterResponse = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> sdxController.create(SDX_CLUSTER_NAME, createSdxClusterRequest));
+        verifySdxClusterCreation(createSdxClusterRequest, sdxCluster, sdxClusterResponse);
+    }
+
+    @Test
+    void createTestWithFlexibleServerWhenSingleServerRejectDisabled() {
+        SdxCluster sdxCluster = createSdxCluster();
+        SdxClusterRequest createSdxClusterRequest = createSdxClusterRequest(sdxCluster);
+        addDatabaseAzureRequest(createSdxClusterRequest, AzureDatabaseType.FLEXIBLE_SERVER, false);
+
+        SdxClusterResponse sdxClusterResponse = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> sdxController.create(SDX_CLUSTER_NAME, createSdxClusterRequest));
+        verifySdxClusterCreation(createSdxClusterRequest, sdxCluster, sdxClusterResponse);
+    }
+
+    private SdxCluster createSdxCluster() {
+        SdxCluster sdxCluster = getValidSdxCluster();
+        lenient().when(sdxService.createSdx(anyString(), anyString(), any(SdxClusterRequest.class), nullable(StackV4Request.class)))
+                .thenReturn(Pair.of(sdxCluster, new FlowIdentifier(FlowType.FLOW, "FLOW_ID")));
+        return sdxCluster;
+    }
+
+    private SdxClusterRequest createSdxClusterRequest(SdxCluster sdxCluster) {
         SdxClusterRequest createSdxClusterRequest = new SdxClusterRequest();
         createSdxClusterRequest.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
         createSdxClusterRequest.setEnvironment("test-env");
@@ -132,10 +196,12 @@ class SdxControllerTest {
         sdxStatusEntity.setStatus(DatalakeStatusEnum.REQUESTED);
         sdxStatusEntity.setStatusReason("statusreason");
         sdxStatusEntity.setCreated(1L);
-        when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
+        lenient().when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
         ReflectionTestUtils.setField(sdxClusterConverter, "sdxStatusService", sdxStatusService);
-        SdxClusterResponse sdxClusterResponse = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> sdxController.create(SDX_CLUSTER_NAME, createSdxClusterRequest));
+        return createSdxClusterRequest;
+    }
+
+    private void verifySdxClusterCreation(SdxClusterRequest createSdxClusterRequest, SdxCluster sdxCluster, SdxClusterResponse sdxClusterResponse) {
         verify(sdxService).createSdx(eq(USER_CRN), eq(SDX_CLUSTER_NAME), eq(createSdxClusterRequest), nullable(StackV4Request.class));
         verify(sdxStatusService, times(1)).getActualStatusForSdx(sdxCluster);
         assertEquals(SDX_CLUSTER_NAME, sdxClusterResponse.getName());
@@ -143,6 +209,17 @@ class SdxControllerTest {
         assertEquals("crn:sdxcluster", sdxClusterResponse.getCrn());
         assertEquals(SdxClusterStatusResponse.REQUESTED, sdxClusterResponse.getStatus());
         assertEquals("statusreason", sdxClusterResponse.getStatusReason());
+    }
+
+    private void addDatabaseAzureRequest(SdxClusterRequest createSdxClusterRequest, AzureDatabaseType azureDatabaseType, boolean singleServerRejectEnabled) {
+        SdxDatabaseAzureRequest sdxDatabaseAzureRequest = new SdxDatabaseAzureRequest();
+        sdxDatabaseAzureRequest.setAzureDatabaseType(azureDatabaseType);
+        SdxDatabaseRequest externalDatabase = new SdxDatabaseRequest();
+        externalDatabase.setCreate(true);
+        externalDatabase.setSdxDatabaseAzureRequest(sdxDatabaseAzureRequest);
+        createSdxClusterRequest.setExternalDatabase(externalDatabase);
+
+        when(entitlementService.isSingleServerRejectEnabled(any())).thenReturn(singleServerRejectEnabled);
     }
 
     @Test

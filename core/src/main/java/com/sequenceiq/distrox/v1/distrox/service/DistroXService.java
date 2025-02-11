@@ -13,6 +13,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.status.StatusCheckResult;
@@ -23,7 +25,10 @@ import com.sequenceiq.cloudbreak.service.image.ImageOsService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAzureRequest;
+import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.image.DistroXImageV1Request;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4RequestConverter;
@@ -64,6 +69,9 @@ public class DistroXService {
     @Inject
     private ReservedTagValidatorService reservedTagValidatorService;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     public StackV4Response post(DistroXV1Request request, boolean internalRequest) {
         Workspace workspace = workspaceService.getForCurrentUser();
         validate(request, internalRequest);
@@ -102,6 +110,12 @@ public class DistroXService {
             throw new BadRequestException("Data Lake stacks of environment should be available.");
         }
         validateImageRequest(request.getImage());
+
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        if (entitlementService.isSingleServerRejectEnabled(userCrn)) {
+            validateAzureDatabaseType(request.getExternalDatabase());
+        }
+
     }
 
     private Predicate<StatusCheckResult> isSdxAvailable() {
@@ -120,6 +134,19 @@ public class DistroXService {
                 }
             }
         }
+    }
+
+    private void validateAzureDatabaseType(DistroXDatabaseRequest externalDatabase) {
+        Optional.ofNullable(externalDatabase)
+                .map(DistroXDatabaseRequest::getDatabaseAzureRequest)
+                .map(DistroXDatabaseAzureRequest::getAzureDatabaseType)
+                .ifPresent(azureDatabaseType -> {
+                    if (azureDatabaseType == AzureDatabaseType.SINGLE_SERVER) {
+                        throw new BadRequestException("Azure Database for PostgreSQL - Single Server is retired. New deployments cannot be created anymore. " +
+                                "Check documentation for more information: " +
+                                "https://learn.microsoft.com/en-us/azure/postgresql/migrate/whats-happening-to-postgresql-single-server");
+                    }
+                });
     }
 
 }
