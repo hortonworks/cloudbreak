@@ -1,241 +1,206 @@
 package com.sequenceiq.cloudbreak.cloud.aws.resource.instance.alarm;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static software.amazon.awssdk.services.cloudwatch.model.Statistic.MAXIMUM;
 
-import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonCloudWatchClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
-import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
-import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 
+import software.amazon.awssdk.services.cloudwatch.model.AlarmType;
 import software.amazon.awssdk.services.cloudwatch.model.CloudWatchException;
 import software.amazon.awssdk.services.cloudwatch.model.DeleteAlarmsRequest;
 import software.amazon.awssdk.services.cloudwatch.model.DescribeAlarmsRequest;
 import software.amazon.awssdk.services.cloudwatch.model.DescribeAlarmsResponse;
+import software.amazon.awssdk.services.cloudwatch.model.Dimension;
 import software.amazon.awssdk.services.cloudwatch.model.MetricAlarm;
+import software.amazon.awssdk.services.cloudwatch.model.PutMetricAlarmRequest;
 
+@ExtendWith(MockitoExtension.class)
 class AwsNativeCloudWatchServiceTest {
 
     private static final String REGION = "region";
+
+    private static final String INSTANCE_ID = "instanceId";
+
+    private static final Map<String, String> TAGS = Map.of("key1", "value1", "key2", "value2");
+
+    private CloudResource resource;
+
+    private AwsCredentialView credentialView;
 
     @Mock
     private CommonAwsClient commonAwsClient;
 
     @Mock
+    private AwsTaggingService awsTaggingService;
+
+    @Mock
     private AmazonCloudWatchClient mockAmazonCloudWatchClient;
 
+    @InjectMocks
     private AwsNativeCloudWatchService underTest;
 
+    @Captor
+    private ArgumentCaptor<PutMetricAlarmRequest> putMetricAlarmRequestCaptor;
+
+    @Captor
+    private ArgumentCaptor<DeleteAlarmsRequest> deleteAlarmsRequestCaptor;
+
     @BeforeEach
-    public void setupConfiguration() {
-        MockitoAnnotations.openMocks(this);
-        underTest = new AwsNativeCloudWatchService(commonAwsClient);
+    void setUp() {
+        resource = mock(CloudResource.class);
+        credentialView = mock(AwsCredentialView.class);
         ReflectionTestUtils.setField(underTest, "alarmSuffix", "-Status-Check-Failed-System");
+        ReflectionTestUtils.setField(underTest, "cloudwatchPeriod", 60);
+        ReflectionTestUtils.setField(underTest, "cloudwatchEvaluationPeriods", 2);
+        ReflectionTestUtils.setField(underTest, "cloudwatchThreshold", 1.0);
         ReflectionTestUtils.setField(underTest, "maxBatchsize", 100);
     }
 
-    @Test
-    void testDeleteCloudWatchAlarmsForSystemFailuresWhenOneAlarmHasAlreadyBeenDeleted() {
-        String alarm1Name = "i-1-Status-Check-Failed-System";
-        String alarm2Name = "i-2-Status-Check-Failed-System";
-        String alarm3Name = "i-3-Status-Check-Failed-System";
-        String instanceId1 = "i-1";
-        String instanceId2 = "i-2";
-        String instanceId3 = "i-3";
-        MetricAlarm alarm1 = MetricAlarm.builder().alarmName(alarm1Name).build();
-        MetricAlarm alarm2 = MetricAlarm.builder().alarmName(alarm2Name).build();
-        DescribeAlarmsResponse describeAlarmsResponse = DescribeAlarmsResponse.builder().metricAlarms(alarm1, alarm2).build();
-        AwsCredentialView credentialView = mock(AwsCredentialView.class);
-        CloudStack stack = mock(CloudStack.class);
-        Group group = mock(Group.class);
-        CloudInstance instance1 = mock(CloudInstance.class);
-        CloudInstance instance2 = mock(CloudInstance.class);
-        CloudInstance instance3 = mock(CloudInstance.class);
-        List<Group> groups = List.of(group);
-        when(stack.getGroups()).thenReturn(groups);
-        when(group.getInstances()).thenReturn(List.of(instance1, instance2, instance3));
-        when(instance1.getInstanceId()).thenReturn(instanceId1);
-        when(instance2.getInstanceId()).thenReturn(instanceId2);
-        when(instance3.getInstanceId()).thenReturn(instanceId3);
-        when(commonAwsClient.createCloudWatchClient(eq(credentialView), eq(REGION))).thenReturn(mockAmazonCloudWatchClient);
-        when(mockAmazonCloudWatchClient.describeAlarms(any())).thenReturn(describeAlarmsResponse);
-        // alarm 3 was already deleted
-
-        underTest.deleteAllCloudWatchAlarmsForSystemFailures(stack, REGION, credentialView);
-
-        ArgumentCaptor<DescribeAlarmsRequest> captorDescribe = ArgumentCaptor.forClass(DescribeAlarmsRequest.class);
-        ArgumentCaptor<DeleteAlarmsRequest> captorDelete = ArgumentCaptor.forClass(DeleteAlarmsRequest.class);
-        verify(mockAmazonCloudWatchClient, times(1)).describeAlarms(captorDescribe.capture());
-        verify(mockAmazonCloudWatchClient, times(1)).deleteAlarms(captorDelete.capture());
-        assertEquals(List.of(alarm1Name, alarm2Name, alarm3Name), captorDescribe.getValue().alarmNames());
-
-        // only delete alarms that were not already deleted
-        assertEquals(List.of(alarm1Name, alarm2Name), captorDelete.getValue().alarmNames());
-    }
-
-    @Test
-    void testDeleteCloudWatchAlarmsForSystemFailuresBatchesDeletion() {
-        List<CloudInstance> cloudInstances = new LinkedList<>();
-        List<String> alarmNames1 = new LinkedList<>();
-        List<String> alarmNames2 = new LinkedList<>();
-        List<String> alarmNames3 = new LinkedList<>();
-        List<MetricAlarm> alarms1 = new LinkedList<>();
-        List<MetricAlarm> alarms2 = new LinkedList<>();
-        List<MetricAlarm> alarms3 = new LinkedList<>();
-        for (int i = 1; i <= 100; i++) {
-            String alarmName = "i-" + i + "-Status-Check-Failed-System";
-            alarmNames1.add(alarmName);
-            MetricAlarm alarm = MetricAlarm.builder().alarmName(alarmName).build();
-            alarms1.add(alarm);
-        }
-        for (int i = 101; i <= 200; i++) {
-            String alarmName = "i-" + i + "-Status-Check-Failed-System";
-            alarmNames2.add(alarmName);
-            MetricAlarm alarm = MetricAlarm.builder().alarmName(alarmName).build();
-            alarms2.add(alarm);
-        }
-        for (int i = 201; i <= 210; i++) {
-            String alarmName = "i-" + i + "-Status-Check-Failed-System";
-            alarmNames3.add(alarmName);
-            MetricAlarm alarm = MetricAlarm.builder().alarmName(alarmName).build();
-            alarms3.add(alarm);
-        }
-        for (int i = 1; i <= 210; i++) {
-            String instanceId = "i-" + i;
-            CloudInstance cloudInstance = mock(CloudInstance.class);
-            when(cloudInstance.getInstanceId()).thenReturn(instanceId);
-            cloudInstances.add(cloudInstance);
-        }
-        DescribeAlarmsResponse describeAlarmsResponse1 = DescribeAlarmsResponse.builder().metricAlarms(alarms1).build();
-        DescribeAlarmsResponse describeAlarmsResponse2 = DescribeAlarmsResponse.builder().metricAlarms(alarms2).build();
-        DescribeAlarmsResponse describeAlarmsResponse3 = DescribeAlarmsResponse.builder().metricAlarms(alarms3).build();
-        AwsCredentialView credentialView = mock(AwsCredentialView.class);
-        CloudStack stack = mock(CloudStack.class);
-        Group group = mock(Group.class);
-        List<Group> groups = List.of(group);
-        when(stack.getGroups()).thenReturn(groups);
-        when(group.getInstances()).thenReturn(cloudInstances);
+    @ValueSource(booleans = {true, false})
+    @ParameterizedTest
+    void testAddCloudWatchAlarmsForSystemFailures(boolean govCloud) {
+        when(resource.getInstanceId()).thenReturn(INSTANCE_ID);
+        when(credentialView.isGovernmentCloudEnabled()).thenReturn(govCloud);
+        when(awsTaggingService.prepareCloudWatchTags(TAGS)).thenCallRealMethod();
         when(commonAwsClient.createCloudWatchClient(credentialView, REGION)).thenReturn(mockAmazonCloudWatchClient);
-        when(mockAmazonCloudWatchClient.describeAlarms(any())).thenReturn(describeAlarmsResponse1, describeAlarmsResponse2, describeAlarmsResponse3);
 
-        underTest.deleteAllCloudWatchAlarmsForSystemFailures(stack, REGION, credentialView);
+        underTest.addCloudWatchAlarmsForSystemFailures(resource, REGION, credentialView, TAGS);
 
-        ArgumentCaptor<DescribeAlarmsRequest> captorDescribe = ArgumentCaptor.forClass(DescribeAlarmsRequest.class);
-        ArgumentCaptor<DeleteAlarmsRequest> captorDelete = ArgumentCaptor.forClass(DeleteAlarmsRequest.class);
-        verify(mockAmazonCloudWatchClient, times(3)).describeAlarms(captorDescribe.capture());
-        verify(mockAmazonCloudWatchClient, times(3)).deleteAlarms(captorDelete.capture());
-        assertEquals(List.of(alarmNames1, alarmNames2, alarmNames3),
-                captorDescribe.getAllValues().stream().map(DescribeAlarmsRequest::alarmNames).collect(Collectors.toList()));
-        assertEquals(List.of(alarmNames1, alarmNames2, alarmNames3),
-                captorDelete.getAllValues().stream().map(DeleteAlarmsRequest::alarmNames).collect(Collectors.toList()));
+        verify(mockAmazonCloudWatchClient).putMetricAlarm(putMetricAlarmRequestCaptor.capture());
+        PutMetricAlarmRequest putMetricAlarmRequest = putMetricAlarmRequestCaptor.getValue();
+        assertEquals(60, putMetricAlarmRequest.period());
+        assertEquals("AWS/EC2", putMetricAlarmRequest.namespace());
+        assertEquals("StatusCheckFailed_System", putMetricAlarmRequest.metricName());
+        assertEquals("GreaterThanOrEqualToThreshold", putMetricAlarmRequest.comparisonOperator().toString());
+        Dimension dimension = putMetricAlarmRequest.dimensions().getFirst();
+        assertEquals("InstanceId", dimension.name());
+        assertEquals(INSTANCE_ID, dimension.value());
+        assertEquals(govCloud ? "arn:aws-us-gov:automate:region:ec2:recover" : "arn:aws:automate:region:ec2:recover",
+                putMetricAlarmRequest.alarmActions().getFirst());
+        assertEquals(2, putMetricAlarmRequest.evaluationPeriods());
+        assertEquals(INSTANCE_ID + "-Status-Check-Failed-System", putMetricAlarmRequest.alarmName());
+        assertEquals(1.0, putMetricAlarmRequest.threshold());
+        assertEquals(MAXIMUM, putMetricAlarmRequest.statistic());
+        assertThat(putMetricAlarmRequest.tags()).extracting(tag -> Map.entry(tag.key(), tag.value()))
+                .containsExactlyInAnyOrderElementsOf(TAGS.entrySet());
     }
 
     @Test
-    void testDeleteCloudWatchAlarmsForSystemFailuresDoesNotBatchDeletionWhenDescribeAlarmPermissionIsMissing() {
-        List<CloudInstance> cloudInstances = new LinkedList<>();
-        List<List<String>> deleteAlarmNames = new LinkedList<>();
-        List<String> alarmNames1 = new LinkedList<>();
-        List<String> alarmNames2 = new LinkedList<>();
-        List<String> alarmNames3 = new LinkedList<>();
-        for (int i = 1; i <= 100; i++) {
-            String alarmName = "i-" + i + "-Status-Check-Failed-System";
-            alarmNames1.add(alarmName);
-            deleteAlarmNames.add(List.of(alarmName));
-        }
-        for (int i = 101; i <= 200; i++) {
-            String alarmName = "i-" + i + "-Status-Check-Failed-System";
-            alarmNames2.add(alarmName);
-            deleteAlarmNames.add(List.of(alarmName));
-        }
-        for (int i = 201; i <= 210; i++) {
-            String alarmName = "i-" + i + "-Status-Check-Failed-System";
-            alarmNames3.add(alarmName);
-            deleteAlarmNames.add(List.of(alarmName));
-        }
-        for (int i = 1; i <= 210; i++) {
-            String instanceId = "i-" + i;
-            CloudInstance cloudInstance = mock(CloudInstance.class);
-            when(cloudInstance.getInstanceId()).thenReturn(instanceId);
-            cloudInstances.add(cloudInstance);
-        }
-        AwsCredentialView credentialView = mock(AwsCredentialView.class);
-        CloudStack stack = mock(CloudStack.class);
-        Group group = mock(Group.class);
-        List<Group> groups = List.of(group);
-        when(stack.getGroups()).thenReturn(groups);
-        when(group.getInstances()).thenReturn(cloudInstances);
+    void testAddCloudWatchAlarmsForSystemFailuresDoesNotThrow() {
+        when(resource.getInstanceId()).thenReturn(INSTANCE_ID);
+        when(credentialView.isGovernmentCloudEnabled()).thenReturn(false);
+        when(awsTaggingService.prepareCloudWatchTags(TAGS)).thenCallRealMethod();
         when(commonAwsClient.createCloudWatchClient(credentialView, REGION)).thenReturn(mockAmazonCloudWatchClient);
-        CloudWatchException exception = (CloudWatchException) CloudWatchException.builder().message("No permissions to describe cloudwatch alarms").build();
-        when(mockAmazonCloudWatchClient.describeAlarms(any())).thenThrow(exception);
+        when(mockAmazonCloudWatchClient.putMetricAlarm(any(PutMetricAlarmRequest.class))).thenThrow(CloudWatchException.builder().message("error").build());
 
-        underTest.deleteAllCloudWatchAlarmsForSystemFailures(stack, REGION, credentialView);
-
-        ArgumentCaptor<DescribeAlarmsRequest> captorDescribe = ArgumentCaptor.forClass(DescribeAlarmsRequest.class);
-        ArgumentCaptor<DeleteAlarmsRequest> captorDelete = ArgumentCaptor.forClass(DeleteAlarmsRequest.class);
-        verify(mockAmazonCloudWatchClient, times(3)).describeAlarms(captorDescribe.capture());
-        verify(mockAmazonCloudWatchClient, times(210)).deleteAlarms(captorDelete.capture());
-        assertEquals(List.of(alarmNames1, alarmNames2, alarmNames3),
-                captorDescribe.getAllValues().stream().map(DescribeAlarmsRequest::alarmNames).collect(Collectors.toList()));
-        assertEquals(deleteAlarmNames,
-                captorDelete.getAllValues().stream().map(DeleteAlarmsRequest::alarmNames).collect(Collectors.toList()));
+        assertDoesNotThrow(() -> underTest.addCloudWatchAlarmsForSystemFailures(resource, REGION, credentialView, TAGS));
     }
 
     @Test
-    void testDeleteCloudWatchAlarmsWhenInstanceDeletedOnProvider() {
-        String alarm1Name = "i-1-Status-Check-Failed-System";
-        String alarm2Name = "i-2-Status-Check-Failed-System";
-        String deletedAlarmName = "i-deleted-Status-Check-Failed-System";
-        String instanceId1 = "i-1";
-        String instanceId2 = "i-2";
-        String deletedInstanceId = "i-deleted";
-        MetricAlarm alarm1 = MetricAlarm.builder().alarmName(alarm1Name).build();
-        MetricAlarm alarm2 = MetricAlarm.builder().alarmName(alarm2Name).build();
-        MetricAlarm deletedInstanceAlarm = MetricAlarm.builder().alarmName(deletedAlarmName).build();
-        DescribeAlarmsResponse describeAlarmsResponse = DescribeAlarmsResponse.builder().metricAlarms(alarm1, alarm2, deletedInstanceAlarm).build();
-        AwsCredentialView credentialView = mock(AwsCredentialView.class);
-        CloudStack stack = mock(CloudStack.class);
-        Group group = mock(Group.class);
-        Group deletedGroup = mock(Group.class);
-        CloudInstance instance1 = mock(CloudInstance.class);
-        CloudInstance instance2 = mock(CloudInstance.class);
-        CloudInstance deletedInstance = mock(CloudInstance.class);
-        List<Group> groups = List.of(group, deletedGroup);
+    void testDeleteCloudWatchAlarmsForSystemFailures() {
+        List<String> instanceIds = IntStream.range(0, 150).boxed()
+                .map(i -> "instanceId" + i)
+                .toList();
+        List<MetricAlarm> metricAlarms = instanceIds.stream()
+                .map(instanceId -> MetricAlarm.builder()
+                        .alarmName(instanceId + "-Status-Check-Failed-System")
+                        .build())
+                .toList();
+        List<DescribeAlarmsResponse> describeAlarmsResponses = List.of(
+                DescribeAlarmsResponse.builder()
+                        .metricAlarms(metricAlarms.subList(0, 100))
+                        .build(),
+                DescribeAlarmsResponse.builder()
+                        .metricAlarms(metricAlarms.subList(100, 150))
+                        .build());
+        when(commonAwsClient.createCloudWatchClient(credentialView, REGION)).thenReturn(mockAmazonCloudWatchClient);
+        when(mockAmazonCloudWatchClient.describeAlarms(any(DescribeAlarmsRequest.class)))
+                .thenReturn(describeAlarmsResponses.get(0))
+                .thenReturn(describeAlarmsResponses.get(1));
 
-        when(stack.getGroups()).thenReturn(groups);
-        when(group.getInstances()).thenReturn(List.of(instance1, instance2));
-        when(deletedGroup.getInstances()).thenReturn(List.of(deletedInstance));
-        when(instance1.getInstanceId()).thenReturn(instanceId1);
-        when(instance2.getInstanceId()).thenReturn(instanceId2);
-        when(deletedInstance.getInstanceId()).thenReturn(deletedInstanceId);
-        when(commonAwsClient.createCloudWatchClient(eq(credentialView), eq(REGION))).thenReturn(mockAmazonCloudWatchClient);
-        when(mockAmazonCloudWatchClient.describeAlarms(any())).thenReturn(describeAlarmsResponse);
+        underTest.deleteCloudWatchAlarmsForSystemFailures(REGION, credentialView, instanceIds);
 
-        underTest.deleteAllCloudWatchAlarmsForSystemFailures(stack, REGION, credentialView);
-
-        ArgumentCaptor<DescribeAlarmsRequest> captorDescribe = ArgumentCaptor.forClass(DescribeAlarmsRequest.class);
-        ArgumentCaptor<DeleteAlarmsRequest> captorDelete = ArgumentCaptor.forClass(DeleteAlarmsRequest.class);
-        verify(mockAmazonCloudWatchClient, times(1)).describeAlarms(captorDescribe.capture());
-        verify(mockAmazonCloudWatchClient, times(1)).deleteAlarms(captorDelete.capture());
-        assertEquals(List.of(alarm1Name, alarm2Name, deletedAlarmName), captorDescribe.getValue().alarmNames());
-        assertEquals(List.of(alarm1Name, alarm2Name, deletedAlarmName), captorDelete.getValue().alarmNames());
+        verify(mockAmazonCloudWatchClient, times(2)).deleteAlarms(deleteAlarmsRequestCaptor.capture());
+        List<DeleteAlarmsRequest> deleteAlarmsRequests = deleteAlarmsRequestCaptor.getAllValues();
+        assertEquals(100, deleteAlarmsRequests.get(0).alarmNames().size());
+        assertEquals(50, deleteAlarmsRequests.get(1).alarmNames().size());
     }
 
+    @Test
+    void testDeleteCloudWatchAlarmsForSystemFailuresFallbackToDeleteIndividually() {
+        List<String> instanceIds = IntStream.range(0, 150).boxed()
+                .map(i -> "instanceId" + i)
+                .toList();
+        List<MetricAlarm> metricAlarms = instanceIds.stream()
+                .map(instanceId -> MetricAlarm.builder()
+                        .alarmName(instanceId + "-Status-Check-Failed-System")
+                        .build())
+                .toList();
+        when(commonAwsClient.createCloudWatchClient(credentialView, REGION)).thenReturn(mockAmazonCloudWatchClient);
+        when(mockAmazonCloudWatchClient.describeAlarms(any(DescribeAlarmsRequest.class))).thenThrow(CloudWatchException.builder().message("error").build());
+
+        assertDoesNotThrow(() -> underTest.deleteCloudWatchAlarmsForSystemFailures(REGION, credentialView, instanceIds));
+
+        verify(mockAmazonCloudWatchClient, times(150)).deleteAlarms(any(DeleteAlarmsRequest.class));
+    }
+
+    @Test
+    void testDeleteCloudWatchAlarmsForSystemFailuresThrowsIfDeleteFails() {
+        List<MetricAlarm> metricAlarms = List.of(MetricAlarm.builder().alarmName("instanceId0-Status-Check-Failed-System").build());
+        when(commonAwsClient.createCloudWatchClient(credentialView, REGION)).thenReturn(mockAmazonCloudWatchClient);
+        when(mockAmazonCloudWatchClient.describeAlarms(any(DescribeAlarmsRequest.class)))
+                .thenReturn(DescribeAlarmsResponse.builder().metricAlarms(metricAlarms).build());
+        when(mockAmazonCloudWatchClient.deleteAlarms(any(DeleteAlarmsRequest.class))).thenThrow(CloudWatchException.builder().message("error").build());
+
+        assertThrows(CloudConnectorException.class, () -> underTest.deleteCloudWatchAlarmsForSystemFailures(REGION, credentialView, List.of("instanceId0")));
+    }
+
+    @Test
+    void testGetMetricAlarmsForInstances() {
+        List<String> alarmNames = List.of("instanceId0-Status-Check-Failed-System", "instanceId1-Status-Check-Failed-System");
+        when(commonAwsClient.createCloudWatchClient(credentialView, REGION)).thenReturn(mockAmazonCloudWatchClient);
+        DescribeAlarmsRequest describeAlarmsRequest = DescribeAlarmsRequest.builder()
+                .alarmTypes(AlarmType.METRIC_ALARM)
+                .alarmNames(alarmNames)
+                .build();
+        DescribeAlarmsResponse describeAlarmsResponse = DescribeAlarmsResponse.builder()
+                .metricAlarms(alarmNames.stream()
+                        .map(alarmName -> MetricAlarm.builder().alarmName(alarmName).build())
+                        .toList())
+                .build();
+        when(mockAmazonCloudWatchClient.describeAlarms(describeAlarmsRequest)).thenReturn(describeAlarmsResponse);
+
+        List<MetricAlarm> result = underTest.getMetricAlarmsForInstances(REGION, credentialView, List.of("instanceId0", "instanceId1"));
+
+        assertThat(result).extracting(MetricAlarm::alarmName).containsExactlyInAnyOrderElementsOf(alarmNames);
+    }
 }
