@@ -13,8 +13,6 @@ import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXUpgradeTestDto;
-import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
-import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 
@@ -35,29 +33,24 @@ public class DistroXAwsMigrationTest extends AbstractE2ETest {
         createDefaultUser(testContext);
         initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
-        createDefaultDatalake(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "there is a running cloudbreak and existin environment, distrox, datalake",
+            given = "there is a running cloudbreak and existing environment, distrox, datalake",
             when = "a valid DistroX",
-            then = "DistroX cluster is mutliaz")
+            then = "DistroX cluster is multiAZ")
     public void testAwsNativeMigration(TestContext testContext) {
-        String imgCatalogKey = "os-upgrade-img-cat";
+        String currentVersion = commonClusterManagerProperties.getUpgrade()
+                .getDistroXUpgradeCurrentVersion(testContext.getCloudProvider().getGovCloud());
+        String targetVersion = commonClusterManagerProperties.getUpgrade().getTargetRuntimeVersion();
+
+        createDatalakeWithVersion(testContext, currentVersion);
+
         testContext
-                .given(imgCatalogKey, ImageCatalogTestDto.class)
-                .withName(imgCatalogKey)
-                .withUrl("https://github.infra.cloudera.com/raw/cloudbreak/cloudbreak/master/integration-test/src/main/resources/catalog/" +
-                        "os-upgrade-image-catalog.json")
-                .when(imageCatalogTestClient.createIfNotExistV4())
-                .given(DistroXImageTestDto.class)
-                .withImageCatalog(imgCatalogKey)
                 .given(DistroXTestDto.class)
-                .withTemplate(commonClusterManagerProperties.getDataEngDistroXBlueprintName(commonClusterManagerProperties.getUpgrade()
-                        .getDistroXUpgradeCurrentVersion(testContext.getCloudProvider().getGovCloud())))
-                .withImageSettings()
+                .withTemplate(commonClusterManagerProperties.getDataEngDistroXBlueprintName(currentVersion))
                 .withLoadBalancer()
                 .when(distroXTestClient.create())
                 .await(STACK_AVAILABLE)
@@ -65,8 +58,7 @@ public class DistroXAwsMigrationTest extends AbstractE2ETest {
                 .when(distroXTestClient.checkVariant("AWS"))
                 .given(DistroXUpgradeTestDto.class)
                 .withReplaceVms(DistroXUpgradeReplaceVms.ENABLED)
-                .withRuntime(commonClusterManagerProperties.getUpgrade()
-                        .getDistroXUpgradeCurrentVersion(testContext.getCloudProvider().getGovCloud()))
+                .withRuntime(targetVersion)
                 .given(DistroXTestDto.class)
                 .when(distroXTestClient.upgrade())
                 .await(STACK_AVAILABLE)
