@@ -135,7 +135,7 @@ class RestartActionsTest {
 
         List<String> instanceIds = instancesToRestart.stream().map(InstanceMetadataView::getInstanceId).collect(Collectors.toList());
         RestartContext context = createContext(instanceIds);
-        RestartInstancesEvent request = new RestartInstancesEvent(SELECTOR, STACK_ID, instanceIds);
+        RestartInstancesEvent request = new RestartInstancesEvent(SELECTOR, STACK_ID, instanceIds, null);
         mockStackEtc(instancesToRestart);
         when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
 

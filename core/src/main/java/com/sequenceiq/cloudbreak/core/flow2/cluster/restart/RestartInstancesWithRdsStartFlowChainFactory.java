@@ -29,7 +29,8 @@ public class RestartInstancesWithRdsStartFlowChainFactory implements FlowEventCh
             flowEventChain.add(new StackEvent(ExternalDatabaseStartEvent.EXTERNAL_DATABASE_COMMENCE_START_EVENT.event(),
                     event.getResourceId(), event.accepted()));
         }
-        flowEventChain.add(new RestartInstancesEvent(RestartEvent.RESTART_TRIGGER_EVENT.event(), event.getResourceId(), event.getInstanceIds()));
+        flowEventChain.add(new RestartInstancesEvent(RestartEvent.RESTART_TRIGGER_EVENT.event(),
+                event.getResourceId(), event.getInstanceIds(), event.accepted()));
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 }
