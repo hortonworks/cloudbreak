@@ -101,7 +101,9 @@ import com.sequenceiq.freeipa.flow.freeipa.upscale.failure.HostMetadataSetupFail
 import com.sequenceiq.freeipa.flow.freeipa.upscale.failure.ImageFallbackFailedToUpscaleFailureEventConverter;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.failure.InstallFreeIpaServicesFailedToUpscaleFailureEventConverter;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.failure.PostInstallFreeIpaFailedToUpscaleFailureEventConverter;
+import com.sequenceiq.freeipa.flow.freeipa.upscale.failure.StackFailureEventToUpscaleFailureEventConverter;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.failure.UpscaleStackResultToUpscaleFailureEventConverter;
+import com.sequenceiq.freeipa.flow.freeipa.upscale.failure.ValidateCloudStorageFailedToUpscaleFailureEventConverter;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.action.AbstractStackProvisionAction;
@@ -772,6 +774,10 @@ public class FreeIpaUpscaleActions {
                 payloadConverters.add(new PostInstallFreeIpaFailedToUpscaleFailureEventConverter());
                 payloadConverters.add(new ClusterProxyRegistrationFailedToUpscaleFailureEventConverter());
                 payloadConverters.add(new ImageFallbackFailedToUpscaleFailureEventConverter());
+                payloadConverters.add(new ValidateCloudStorageFailedToUpscaleFailureEventConverter());
+                // this should be the last one
+                payloadConverters.add(new StackFailureEventToUpscaleFailureEventConverter());
+
             }
         };
     }
