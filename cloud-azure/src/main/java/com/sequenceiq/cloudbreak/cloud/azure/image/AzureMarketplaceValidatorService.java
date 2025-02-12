@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ACCEPTANC
 import static com.sequenceiq.cloudbreak.cloud.azure.AzureDeploymentMarketplaceError.MARKETPLACE_PURCHASE_ELIGIBILITY_FAILED;
 
 import java.io.UncheckedIOException;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -43,6 +42,10 @@ public class AzureMarketplaceValidatorService {
     private static final String MISSING_WHAT_IF_PERMISSION_ERROR = "Insufficient permission to perform what if analysis, " +
             "please ensure Microsoft.Resources/deployments/whatIf/action is granted!";
 
+    private static final String IMAGE_TERMS_CDP_DOCS_URL = "Refer to Cloudera documentation at " +
+            "https://docs.cloudera.com/cdp-public-cloud/cloud/requirements-azure/topics/cdp-cdp_images_hosted_in_azure_marketplace.html#pnavId2 " +
+            "for more information. ";
+
     @Inject
     private AzureTemplateDeploymentService azureTemplateDeploymentService;
 
@@ -61,36 +64,56 @@ public class AzureMarketplaceValidatorService {
     @Inject
     private AzureExceptionHandler azureExceptionHandler;
 
-    public void validateMarketplaceImageTerms(Image image, AzureClient client, CloudStack stack, AuthenticatedContext ac) {
+    public void validateMarketplaceImageTermsForOsUpgrade(Image image, AzureClient client, CloudStack stack, AuthenticatedContext ac) {
         if (azureImageFormatValidator.isMarketplaceImageFormat(image)) {
             AzureMarketplaceImage azureMarketplaceImage = azureMarketplaceImageProviderService.get(image);
             AzureClient azureClient = ac.getParameter(AzureClient.class);
-            AzureImageTermStatus imageTermStatus = azureImageTermsSignerService.getImageTermStatus(
-                    azureClient.getCurrentSubscription().subscriptionId(), azureMarketplaceImage, azureClient);
-            if (AzureImageTermStatus.NON_READABLE.equals(imageTermStatus)) {
-                String message = String.format("Image validation error: Cannot read image terms for Azure Marketplace image: '%s'. " +
-                        "If image terms are not accepted, deploying the VM(s) is not possible.", image.getImageName());
-                throw new CloudConnectorException(message);
+
+            AzureImageTermStatus termStatus =
+                    azureImageTermsSignerService.getImageTermStatus(azureClient.getCurrentSubscription().subscriptionId(), azureMarketplaceImage, azureClient);
+            if (AzureImageTermStatus.ACCEPTED.equals(termStatus)) {
+                LOGGER.info("Image terms are accepted on Marketplace image: {}", image.getImageName());
+                return;
+            } else {
+                attemptToAccept(stack, termStatus, azureClient, azureMarketplaceImage);
             }
-            if (AzureImageTermStatus.NOT_ACCEPTED.equals(imageTermStatus) && Boolean.parseBoolean(stack.getParameters().get(ACCEPTANCE_POLICY_PARAMETER))) {
-                AzureImageTermStatus statusAfterSign =
-                        azureImageTermsSignerService.sign(azureClient.getCurrentSubscription().subscriptionId(), azureMarketplaceImage, azureClient);
-                if (AzureImageTermStatus.NOT_ACCEPTED.equals(statusAfterSign)) {
-                    String message = String.format("Image validation error: Cannot accept image terms for Azure Marketplace image: '%s'. " +
-                            "If image terms are not accepted, deploying the VM(s) is not possible.", image.getImageName());
-                    throw new CloudConnectorException(message);
-                }
-            }
+
             CloudStack newStack = CloudStack.replaceImage(stack, image);
             ValidationResult marketplaceEligibilityValidationResult = performValidation(client, newStack, ac);
             if (marketplaceEligibilityValidationResult.hasError()) {
-                List<String> errors = marketplaceEligibilityValidationResult.getErrors();
+                String errors = marketplaceEligibilityValidationResult.getFormattedErrors();
                 LOGGER.debug("Marketplace image is not usable: {}", errors);
-                String message = String.format("Image validation error: %s", errors);
+                String message = "Image validation error. Please accept Azure Marketplace image terms " +
+                        "or enable Terms & Conditions automatic acceptance " +
+                        "and grant Microsoft.MarketplaceOrdering/offertypes/publishers/offers/plans/agreements/write. " +
+                        IMAGE_TERMS_CDP_DOCS_URL +
+                        "What-if analysis failed: " + errors;
                 throw new CloudConnectorException(message);
+            } else if (marketplaceEligibilityValidationResult.hasWarning()) {
+                throwExceptionForMissingWhatIfPermission(marketplaceEligibilityValidationResult);
+            } else {
+                LOGGER.info("Marketplace image is usable: {}", image.getImageName());
             }
         } else {
             LOGGER.debug("Image {} does not have Marketplace format, nothing to do here.", image.getImageName());
+        }
+    }
+
+    private void throwExceptionForMissingWhatIfPermission(ValidationResult marketplaceEligibilityValidationResult) {
+        LOGGER.warn("What-if validation failed: {}", marketplaceEligibilityValidationResult.getFormattedWarnings());
+        throw new CloudConnectorException(marketplaceEligibilityValidationResult.getFormattedWarnings());
+    }
+
+    private void attemptToAccept(CloudStack stack, AzureImageTermStatus termStatus, AzureClient azureClient, AzureMarketplaceImage azureMarketplaceImage) {
+        boolean autoAcceptOn = Boolean.parseBoolean(stack.getParameters().get(ACCEPTANCE_POLICY_PARAMETER));
+        if (AzureImageTermStatus.NOT_ACCEPTED.equals(termStatus) && !autoAcceptOn) {
+            LOGGER.debug("Marketplace image is not accepted, auto acceptance is off. Cannot proceed.");
+            String message = String.format("Terms are not accepted on image: {}. Please accept Azure Marketplace image terms " +
+                    "or enable Terms & Conditions automatic acceptance " +
+                    "and grant Microsoft.MarketplaceOrdering/offertypes/publishers/offers/plans/agreements/write. " + IMAGE_TERMS_CDP_DOCS_URL);
+            throw new CloudConnectorException(message);
+        } else if (autoAcceptOn) {
+            azureImageTermsSignerService.sign(azureClient.getCurrentSubscription().subscriptionId(), azureMarketplaceImage, azureClient);
         }
     }
 
