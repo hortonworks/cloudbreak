@@ -1,6 +1,9 @@
 package com.sequenceiq.datalake.service.sdx;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
@@ -51,7 +54,13 @@ import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.cloudstorage.StorageIdentityBase;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
+import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
+import com.sequenceiq.common.api.telemetry.response.FeaturesResponse;
+import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
+import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
+import com.sequenceiq.common.api.telemetry.response.WorkloadAnalyticsResponse;
 import com.sequenceiq.common.api.type.EncryptionType;
+import com.sequenceiq.common.api.type.FeatureSetting;
 import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.datalake.converter.DatabaseRequestConverter;
@@ -301,6 +310,82 @@ public class StackRequestManifesterTest {
         assertThat(variant).isNotEqualTo("AWS_NATIVE");
         verify(multiAzDecorator, never()).decorateStackRequestWithAwsNative(any());
         verify(multiAzDecorator, never()).decorateStackRequestWithMultiAz(any(), any(), any());
+    }
+
+    @Test
+    public void testWorkloadAnalyticsEnabledWhenEnabledForEnvironment() throws IOException {
+        SdxCluster sdxCluster = getSdxCluster(false);
+        getStackV4Request(sdxCluster, false);
+
+        DetailedEnvironmentResponse detailedEnvironmentResponse = getDetailedEnvironmentResponse(false);
+        TelemetryResponse telemetryResponse = new TelemetryResponse();
+        telemetryResponse.setLogging(new LoggingResponse());
+        FeaturesResponse featuresResponse = new FeaturesResponse();
+        FeatureSetting workloadAnalyticsFeature = new FeatureSetting();
+        workloadAnalyticsFeature.setEnabled(true);
+        featuresResponse.setWorkloadAnalytics(workloadAnalyticsFeature);
+        telemetryResponse.setFeatures(featuresResponse);
+        WorkloadAnalyticsResponse workloadAnalyticsResponse = new WorkloadAnalyticsResponse();
+        workloadAnalyticsResponse.setAttributes(Map.of("test", "result"));
+        telemetryResponse.setWorkloadAnalytics(workloadAnalyticsResponse);
+        detailedEnvironmentResponse.setTelemetry(telemetryResponse);
+
+        doNothing().when(cloudStorageValidator).validate(any(), any(), any());
+        when(databaseRequestConverter.createExternalDbRequest(sdxCluster)).thenReturn(new DatabaseRequest());
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.configureStackForSdxCluster(sdxCluster, detailedEnvironmentResponse));
+
+        TelemetryRequest telemetry = JsonUtil.readValue(sdxCluster.getStackRequestToCloudbreak(), StackV4Request.class).getTelemetry();
+        assertNotNull(telemetry.getWorkloadAnalytics());
+        assertEquals("result", telemetry.getWorkloadAnalytics().getAttributes().get("test"));
+    }
+
+    @Test
+    public void testWorkloadAnalyticsDisabledWhenDisabledForEnvironment() throws IOException {
+        SdxCluster sdxCluster = getSdxCluster(false);
+        getStackV4Request(sdxCluster, false);
+
+        DetailedEnvironmentResponse detailedEnvironmentResponse = getDetailedEnvironmentResponse(false);
+        TelemetryResponse telemetryResponse = new TelemetryResponse();
+        telemetryResponse.setLogging(new LoggingResponse());
+        FeaturesResponse featuresResponse = new FeaturesResponse();
+        FeatureSetting workloadAnalyticsFeature = new FeatureSetting();
+        workloadAnalyticsFeature.setEnabled(false);
+        featuresResponse.setWorkloadAnalytics(workloadAnalyticsFeature);
+        telemetryResponse.setFeatures(featuresResponse);
+        WorkloadAnalyticsResponse workloadAnalyticsResponse = new WorkloadAnalyticsResponse();
+        workloadAnalyticsResponse.setAttributes(Map.of("test", "result"));
+        telemetryResponse.setWorkloadAnalytics(workloadAnalyticsResponse);
+        detailedEnvironmentResponse.setTelemetry(telemetryResponse);
+
+        doNothing().when(cloudStorageValidator).validate(any(), any(), any());
+        when(databaseRequestConverter.createExternalDbRequest(sdxCluster)).thenReturn(new DatabaseRequest());
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.configureStackForSdxCluster(sdxCluster, detailedEnvironmentResponse));
+
+        TelemetryRequest telemetry = JsonUtil.readValue(sdxCluster.getStackRequestToCloudbreak(), StackV4Request.class).getTelemetry();
+        assertNull(telemetry.getWorkloadAnalytics());
+    }
+
+    @Test
+    public void testWorkloadAnalyticsDisabledWhenMissingForEnvironment() throws IOException {
+        SdxCluster sdxCluster = getSdxCluster(false);
+        getStackV4Request(sdxCluster, false);
+
+        DetailedEnvironmentResponse detailedEnvironmentResponse = getDetailedEnvironmentResponse(false);
+        TelemetryResponse telemetryResponse = new TelemetryResponse();
+        telemetryResponse.setLogging(new LoggingResponse());
+        FeaturesResponse featuresResponse = new FeaturesResponse();
+        telemetryResponse.setFeatures(featuresResponse);
+        detailedEnvironmentResponse.setTelemetry(telemetryResponse);
+
+        doNothing().when(cloudStorageValidator).validate(any(), any(), any());
+        when(databaseRequestConverter.createExternalDbRequest(sdxCluster)).thenReturn(new DatabaseRequest());
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.configureStackForSdxCluster(sdxCluster, detailedEnvironmentResponse));
+
+        TelemetryRequest telemetry = JsonUtil.readValue(sdxCluster.getStackRequestToCloudbreak(), StackV4Request.class).getTelemetry();
+        assertNull(telemetry.getWorkloadAnalytics());
     }
 
     @Test

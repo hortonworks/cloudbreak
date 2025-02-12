@@ -22,16 +22,17 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.InstanceGroupName;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
-import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
-import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.VolumeUtils;
@@ -49,13 +50,8 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
 
     private static final String MINIMAL_ENTERPRISE_RUNTIME = "7.2.17";
 
-    private static final String ENTERPRISE_BLUEPRINT_NAME = "%s - SDX Enterprise: Apache Hive Metastore, Apache Ranger, Apache Atlas";
-
     @Inject
     private SdxTestClient sdxTestClient;
-
-    @Inject
-    private RecipeTestClient recipeTestClient;
 
     @Inject
     private StackTestClient stackTestClient;
@@ -70,7 +66,26 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
     private SshJClientActions sshJClientActions;
 
     @Inject
-    private ImageCatalogTestClient imageCatalogTestClient;
+    private EnvironmentTestClient environmentTestClient;
+
+    @Override
+    protected void initiateEnvironmentCreation(TestContext testContext) {
+        testContext
+                .given("telemetry", TelemetryTestDto.class)
+                .withLogging()
+                .withReportClusterLogsWithoutWorkloadAnalytics()
+                .given(EnvironmentTestDto.class)
+                .withNetwork()
+                .withTelemetry("telemetry")
+                .withTunnel(testContext.getTunnel())
+                .withResourceEncryption(testContext.isResourceEncryptionEnabled())
+                .withCreateFreeIpa(Boolean.TRUE)
+                .withFreeIpaNodes(getFreeIpaInstanceCountByProvider(testContext))
+                .withFreeIpaImage(commonCloudProperties().getImageValidation().getFreeIpaImageCatalog(),
+                        commonCloudProperties().getImageValidation().getFreeIpaImageUuid())
+                .when(environmentTestClient.create())
+                .validate();
+    }
 
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances

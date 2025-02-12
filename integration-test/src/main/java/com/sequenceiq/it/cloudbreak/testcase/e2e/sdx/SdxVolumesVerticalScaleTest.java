@@ -15,15 +15,16 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.I
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.InstanceUtil;
-import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
@@ -47,7 +48,26 @@ public class SdxVolumesVerticalScaleTest extends PreconditionSdxE2ETest {
     private SdxTestClient sdxTestClient;
 
     @Inject
-    private SdxUtil sdxUtil;
+    private EnvironmentTestClient environmentTestClient;
+
+    @Override
+    protected void initiateEnvironmentCreation(TestContext testContext) {
+        testContext
+                .given("telemetry", TelemetryTestDto.class)
+                .withLogging()
+                .withReportClusterLogsWithoutWorkloadAnalytics()
+                .given(EnvironmentTestDto.class)
+                .withNetwork()
+                .withTelemetry("telemetry")
+                .withTunnel(testContext.getTunnel())
+                .withResourceEncryption(testContext.isResourceEncryptionEnabled())
+                .withCreateFreeIpa(Boolean.TRUE)
+                .withFreeIpaNodes(getFreeIpaInstanceCountByProvider(testContext))
+                .withFreeIpaImage(commonCloudProperties().getImageValidation().getFreeIpaImageCatalog(),
+                        commonCloudProperties().getImageValidation().getFreeIpaImageUuid())
+                .when(environmentTestClient.create())
+                .validate();
+    }
 
     @Test(dataProvider = TEST_CONTEXT, timeOut = 9000000)
     @Description(
@@ -62,7 +82,7 @@ public class SdxVolumesVerticalScaleTest extends PreconditionSdxE2ETest {
         testContext
             .given("telemetry", TelemetryTestDto.class)
             .withLogging()
-            .withReportClusterLogs()
+            .withReportClusterLogsWithoutWorkloadAnalytics()
             .given(SdxInternalTestDto.class)
             .withTelemetry("telemetry")
             .withInstanceType(instanceType)
