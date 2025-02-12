@@ -67,7 +67,7 @@ jobs:
           export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
           export SONAR_TOKEN=$(echo "${{ steps.build_secrets.outputs.SONAR_TOKEN}}")
           export SONAR_URL=https://sonarqube.infra.cloudera.com
-          export SONAR_COVERAGE_EXCLUSION=**/proto/**,**/generated/**,**/test/**,**/build/**,**/reports/**,**/resources/**
+          export SONAR_COVERAGE_EXCLUSION=**/proto/**,**/generated/**,**/flow/**/*State.java,**/flow/**/event/*Event.java,**/configuration/**/*Properties.java,**/configuration/*Properties.java,**/flow/**/Configs.java,**/configuration/**/*Config.java,**/configuration/*Config.java,**/Resource.java,**/domain/**
           export SONAR_EXCLUSION=**/proto/**,**/generated/**,**/test/**,**/build/**,**/reports/**,**/resources/**
           export SONAR_JAVA_BINARIES=build/classes
           export SONAR_SOURCES=src/main/java/
