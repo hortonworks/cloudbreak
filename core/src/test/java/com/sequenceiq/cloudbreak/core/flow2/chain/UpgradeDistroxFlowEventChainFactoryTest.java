@@ -19,7 +19,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +39,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradePreparationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
@@ -177,7 +177,15 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
-        Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStartResult = Result.success(new HashMap<>());
+
+        Set<InstanceMetaData> instances = new HashSet<>();
+        for (int i = 0; i < 2; i++) {
+            InstanceMetaData instanceMetaData = new InstanceMetaData();
+            instanceMetaData.setDiscoveryFQDN("master-" + i);
+            instances.add(instanceMetaData);
+        }
+        Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStartResult =
+                Result.success(Map.of(HostGroupName.hostGroupName("master"), instances));
         when(clusterRepairService.validateRepair(any(), anyLong(), any(), eq(false))).thenReturn(repairStartResult);
 
         DistroXUpgradeTriggerEvent event = new DistroXUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
@@ -187,7 +195,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         assertUpdateValidationEvent(flowChainQueue, IMAGE_ID, event.isReplaceVms(), event.isLockComponents(), event.isRollingUpgradeEnabled());
         assertSaltUpdateEvent(flowChainQueue);
         assertImageUpdateEvent(flowChainQueue);
-        assertRepairEvent(flowChainQueue, RepairType.ONE_BY_ONE);
+        assertRepairEvent(flowChainQueue, RepairType.ONE_BY_ONE, 2);
     }
 
     @Test
@@ -216,7 +224,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         assertUpdateValidationEvent(flowChainQueue, IMAGE_ID, event.isReplaceVms(), event.isLockComponents(), event.isRollingUpgradeEnabled());
         assertSaltUpdateEvent(flowChainQueue);
         assertImageUpdateEvent(flowChainQueue);
-        assertRepairEvent(flowChainQueue, RepairType.BATCH);
+        assertRepairEvent(flowChainQueue, RepairType.BATCH, 500);
         verify(clusterRepairService, times(1)).validateRepair(eq(ManualClusterRepairMode.ALL), eq(STACK_ID), eq(Set.of()), eq(false));
     }
 
@@ -254,7 +262,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         assertSaltUpdateEvent(flowChainQueue);
         assertUpgradeEvent(flowChainQueue, IMAGE_ID);
         assertImageUpdateEvent(flowChainQueue);
-        assertRepairEvent(flowChainQueue, RepairType.ONE_BY_ONE);
+        assertRepairEvent(flowChainQueue, RepairType.ONE_BY_ONE, 2);
         verify(clusterRepairService, times(1)).validateRepair(eq(ManualClusterRepairMode.NODE_ID), eq(STACK_ID), eq(Set.of("master-1", "master-2")), eq(false));
     }
 
@@ -272,6 +280,68 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         assertUpdatePreparationEvent(flowChainQueue, RH_IMAGE);
         assertSaltUpdateEvent(flowChainQueue);
         assertUpgradeEvent(flowChainQueue, RH_IMAGE);
+        assertImageUpdateEvent(flowChainQueue);
+    }
+
+    @Test
+    void testChainQueueForOsUpgradeShouldFilterOutAlreadyUpgradedInstances() {
+        when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
+        when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
+        when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
+        when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
+        ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
+
+        Set<InstanceMetaData> instances = new HashSet<>();
+        InstanceMetaData instanceMetaData1 = new InstanceMetaData();
+        instanceMetaData1.setDiscoveryFQDN("master-1");
+        instanceMetaData1.setImage(new Json(com.sequenceiq.cloudbreak.cloud.model.Image.builder().withImageId(IMAGE_ID).build()));
+        instances.add(instanceMetaData1);
+        InstanceMetaData instanceMetaData2 = new InstanceMetaData();
+        instanceMetaData2.setDiscoveryFQDN("master-2");
+        instanceMetaData2.setImage(new Json(com.sequenceiq.cloudbreak.cloud.model.Image.builder().withImageId("OLD_IMAGE").build()));
+        instances.add(instanceMetaData2);
+
+        Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStartResult =
+                Result.success(Map.of(HostGroupName.hostGroupName("master"), instances));
+        when(clusterRepairService.validateRepair(any(), anyLong(), any(), eq(false))).thenReturn(repairStartResult);
+
+        DistroXUpgradeTriggerEvent event = new DistroXUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
+                new Promise<>(), imageChangeDto, true, true, "variant", false, "runtime");
+        FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
+        assertEquals(4, flowChainQueue.getQueue().size());
+        assertUpdateValidationEvent(flowChainQueue, IMAGE_ID, event.isReplaceVms(), event.isLockComponents(), event.isRollingUpgradeEnabled());
+        assertSaltUpdateEvent(flowChainQueue);
+        assertImageUpdateEvent(flowChainQueue);
+        assertRepairEvent(flowChainQueue, RepairType.ALL_AT_ONCE, 1);
+    }
+
+    @Test
+    void testChainQueueForOsUpgradeShouldSkipOsUpgradeWhenNoUpgradableInstanceFound() {
+        when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
+        when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
+        when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
+        ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
+
+        Set<InstanceMetaData> instances = new HashSet<>();
+        InstanceMetaData instanceMetaData1 = new InstanceMetaData();
+        instanceMetaData1.setDiscoveryFQDN("master-1");
+        instanceMetaData1.setImage(new Json(com.sequenceiq.cloudbreak.cloud.model.Image.builder().withImageId(IMAGE_ID).build()));
+        instances.add(instanceMetaData1);
+        InstanceMetaData instanceMetaData2 = new InstanceMetaData();
+        instanceMetaData2.setDiscoveryFQDN("master-2");
+        instanceMetaData2.setImage(new Json(com.sequenceiq.cloudbreak.cloud.model.Image.builder().withImageId(IMAGE_ID).build()));
+        instances.add(instanceMetaData2);
+
+        Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStartResult =
+                Result.success(Map.of(HostGroupName.hostGroupName("master"), instances));
+        when(clusterRepairService.validateRepair(any(), anyLong(), any(), eq(false))).thenReturn(repairStartResult);
+
+        DistroXUpgradeTriggerEvent event = new DistroXUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
+                new Promise<>(), imageChangeDto, true, true, "variant", false, "runtime");
+        FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
+        assertEquals(3, flowChainQueue.getQueue().size());
+        assertUpdateValidationEvent(flowChainQueue, IMAGE_ID, event.isReplaceVms(), event.isLockComponents(), event.isRollingUpgradeEnabled());
+        assertSaltUpdateEvent(flowChainQueue);
         assertImageUpdateEvent(flowChainQueue);
     }
 
@@ -336,12 +406,13 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         assertEquals(imageChangeDto.getImageCatalogUrl(), event.getImageCatalogUrl());
     }
 
-    private void assertRepairEvent(FlowTriggerEventQueue flowChainQueue, RepairType repairType) {
+    private void assertRepairEvent(FlowTriggerEventQueue flowChainQueue, RepairType repairType, int nodeCount) {
         Selectable repairEvent = flowChainQueue.getQueue().remove();
         assertEquals(CLUSTER_REPAIR_TRIGGER_EVENT, repairEvent.selector());
         assertEquals(repairType, ((ClusterRepairTriggerEvent) repairEvent).getRepairType());
         assertEquals(STACK_ID, repairEvent.getResourceId());
         assertInstanceOf(ClusterRepairTriggerEvent.class, repairEvent);
+        assertEquals(nodeCount, ((ClusterRepairTriggerEvent) repairEvent).getFailedNodesMap().entrySet().iterator().next().getValue().size());
     }
 
     private InstanceMetaData getHost(String hostName, String groupName, InstanceStatus instanceStatus, InstanceGroupType instanceGroupType) {

@@ -15,7 +15,9 @@ import static com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterR
 import static com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType.ONE_BY_ONE;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +26,6 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -219,6 +220,10 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         LOGGER.info("ReplaceVms: {}, lockComponents: {}", event.isReplaceVms(), event.isLockComponents());
         if (event.isReplaceVms()) {
             Map<String, List<String>> nodeMap = getReplaceableInstancesByHostGroup(event);
+            if (nodeMap.isEmpty()) {
+                LOGGER.info("OS upgrade is not required, as replaceable node list is empty.");
+                return Optional.empty();
+            }
             ClusterRepairTriggerEvent.RepairType repairType = decideRepairType(event, nodeMap);
             LOGGER.info("Repair type: {}", repairType);
             return Optional.of(new ClusterRepairTriggerEvent(CLUSTER_REPAIR_TRIGGER_EVENT, event.getResourceId(),
@@ -252,15 +257,15 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
                 LOGGER.info("Cluster size is larger than allowed for rolling upgrade or its a COD cluster. Replace only the Salt master nodes.");
                 Set<String> gatewayInstanceIds = stack.getAllAvailableGatewayInstances().stream()
                         .map(InstanceMetadataView::getInstanceId)
-                        .collect(Collectors.toSet());
+                        .collect(toSet());
                 Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> validationResult = clusterRepairService.validateRepair(NODE_ID,
                         event.getResourceId(), gatewayInstanceIds, false);
-                return toStringMap(validationResult.getSuccess());
+                return filterBasedOnImageAndConvertToFqdn(validationResult.getSuccess(), event.getImageChangeDto().getImageId());
             }
         }
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> validationResult = clusterRepairService.validateRepair(ALL,
                 event.getResourceId(), Set.of(), false);
-        return toStringMap(validationResult.getSuccess());
+        return filterBasedOnImageAndConvertToFqdn(validationResult.getSuccess(), event.getImageChangeDto().getImageId());
     }
 
     private boolean isCodCluster(StackDto stack) {
@@ -274,15 +279,27 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         return false;
     }
 
-    private Map<String, List<String>> toStringMap(Map<HostGroupName, Set<InstanceMetaData>> repairableNodes) {
-        return repairableNodes
-                .entrySet()
-                .stream()
+    private Map<String, List<String>> filterBasedOnImageAndConvertToFqdn(Map<HostGroupName, Set<InstanceMetaData>> repairableNodes, String stackImageId) {
+        Map<String, List<String>> repairableFqdns = repairableNodes.entrySet().stream()
                 .collect(toMap(entry -> entry.getKey().value(),
-                        entry -> entry.getValue()
-                                .stream()
+                        entry -> entry.getValue().stream()
+                                .filter(instanceMetadata -> stackImageId == null || !stackImageId.equals(getInstanceId(instanceMetadata)))
                                 .map(InstanceMetaData::getDiscoveryFQDN)
                                 .filter(Objects::nonNull)
                                 .collect(toList())));
+        return repairableFqdns.entrySet().stream()
+                .filter(entry -> entry.getValue() != null && !entry.getValue().isEmpty())
+                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    private String getInstanceId(InstanceMetadataView instanceMetadata) {
+        try {
+            if (instanceMetadata != null && instanceMetadata.getImage() != null) {
+                return instanceMetadata.getImage().get(com.sequenceiq.cloudbreak.cloud.model.Image.class).getImageId();
+            }
+        } catch (IOException e) {
+            LOGGER.warn("Missing image information for instance: " + instanceMetadata.getInstanceId(), e);
+        }
+        return null;
     }
 }
