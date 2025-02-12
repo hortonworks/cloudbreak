@@ -61,7 +61,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
-import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.AdjustmentType;
@@ -111,9 +110,6 @@ class AwsUpscaleServiceTest {
 
     @InjectMocks
     private AwsUpscaleService awsUpscaleService;
-
-    @Mock
-    private PersistenceNotifier resourceNotifier;
 
     @Test
     void upscaleTest() throws AmazonAutoscalingFailedException {
@@ -200,8 +196,6 @@ class AwsUpscaleServiceTest {
         verify(cloudResourceHelper, times(1)).updateDeleteOnTerminationFlag(any(), eq(false), any());
         verify(cloudResourceHelper, times(1)).updateDeleteOnTerminationFlag(any(), eq(true), any());
         verify(syncUserDataService).syncUserData(any(), any(), any());
-        verify(resourceNotifier).notifyDeletions(rootVolumeResources, cloudContext);
-        verify(resourceNotifier).notifyAllocations(rootVolumeResources, cloudContext);
     }
 
     @Test
