@@ -181,12 +181,12 @@ public class StackRequestManifester {
             setupCloudStorageAccountMapping(stackRequest, environment.getCrn(), environment.getIdBrokerMappingSource(), environment.getCloudPlatform());
             validateCloudStorage(sdxCluster, environment, stackRequest);
             setupInstanceVolumeEncryption(stackRequest, environment);
-            setupMultiAz(sdxCluster, environment, stackRequest);
             stackRequest.setExternalDatabase(databaseRequestConverter.createExternalDbRequest(sdxCluster));
-            if (isAwsNativePlatformVariantEnforced(environment.getCloudPlatform()) ||
-                    isAwsNativePlatformVariantDefaultForRuntimeVersion(environment.getCloudPlatform(), sdxCluster.getRuntime())) {
+            if (isAwsNativePlatformVariantEnforced(environment.getCloudPlatform(), stackRequest.getVariant()) ||
+                    isAwsNativePlatformVariantDefaultForRuntimeVersion(environment.getCloudPlatform(), sdxCluster.getRuntime(), stackRequest.getVariant())) {
                 stackRequest.setVariant("AWS_NATIVE");
             }
+            setupMultiAz(sdxCluster, environment, stackRequest);
             setupGovCloud(environment, stackRequest);
             setupDisableDbSslEnforcement(sdxCluster, stackRequest);
             return stackRequest;
@@ -196,15 +196,15 @@ public class StackRequestManifester {
         }
     }
 
-    private boolean isAwsNativePlatformVariantEnforced(String cloudPlatform) {
-        return CloudPlatform.AWS.name().equals(cloudPlatform) &&
+    private boolean isAwsNativePlatformVariantEnforced(String cloudPlatform, String variant) {
+        return CloudPlatform.AWS.name().equals(cloudPlatform) && variant == null &&
                 entitlementService.enforceAwsNativeForSingleAzDatalakeEnabled(ThreadBasedUserCrnProvider.getAccountId());
     }
 
-    private boolean isAwsNativePlatformVariantDefaultForRuntimeVersion(String cloudPlatform, String runtimeVersion) {
+    private boolean isAwsNativePlatformVariantDefaultForRuntimeVersion(String cloudPlatform, String runtimeVersion, String variant) {
         if (runtimeVersion != null) {
             Comparator<Versioned> versionComparator = new VersionComparator();
-            return CloudPlatform.AWS.name().equals(cloudPlatform) &&
+            return CloudPlatform.AWS.name().equals(cloudPlatform) && variant == null &&
                     versionComparator.compare(() -> runtimeVersion, () -> MIN_RUNTIME_VERSION_FOR_DEFAULT_AWS_NATIVE) >= 0;
         }
 

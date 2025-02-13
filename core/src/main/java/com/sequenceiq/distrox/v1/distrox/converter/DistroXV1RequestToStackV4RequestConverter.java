@@ -136,18 +136,38 @@ public class DistroXV1RequestToStackV4RequestConverter {
         return request;
     }
 
-    private void calculateVariant(DetailedEnvironmentResponse environment, DistroXV1Request source, StackV4Request request, String runtime) {
+    private boolean enforceAwsNativeForSingleAz(String cloudProvider, boolean govCloud) {
+        return CloudPlatform.AWS.name().equals(cloudProvider)
+                && entitlementService.enforceAwsNativeForSingleAzDatahubEnabled(ThreadBasedUserCrnProvider.getAccountId())
+                && !govCloud;
+    }
+
+    private boolean enforceAwsNativeBasedOnRuntime(String cloudProvider, String runtime, boolean govCloud) {
         Comparator<Versioned> versionComparator = new VersionComparator();
-        if (CloudPlatform.AWS.name().equals(environment.getCloudPlatform()) &&
-                entitlementService.enforceAwsNativeForSingleAzDatahubEnabled(ThreadBasedUserCrnProvider.getAccountId())
-                && !environment.getCredential().getGovCloud()) {
+        return CloudPlatform.AWS.name().equals(cloudProvider)
+                && runtime != null
+                && versionComparator.compare(() -> runtime, () -> MIN_RUNTIME_VERSION_FOR_DEFAULT_AWS_NATIVE) >= 0
+                && !govCloud;
+    }
+
+    private boolean enforceAwsBasedOnValueProvided(String cloudProvider, String variant, boolean govCloud, boolean multiAzEnabled) {
+        return CloudPlatform.AWS.name().equals(cloudProvider)
+                && variant != null
+                && !govCloud
+                && !multiAzEnabled;
+    }
+
+    private void calculateVariant(DetailedEnvironmentResponse environment, DistroXV1Request source, StackV4Request request, String runtime) {
+        if (enforceAwsNativeForSingleAz(environment.getCloudPlatform(), environment.getCredential().getGovCloud())) {
             request.setVariant(AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value());
-        } else if (CloudPlatform.AWS.name().equals(environment.getCloudPlatform()) &&
-                runtime != null &&
-                versionComparator.compare(() -> runtime, () -> MIN_RUNTIME_VERSION_FOR_DEFAULT_AWS_NATIVE) >= 0
-                && !environment.getCredential().getGovCloud()) {
+        } else if (enforceAwsNativeBasedOnRuntime(environment.getCloudPlatform(), runtime, environment.getCredential().getGovCloud())) {
             request.setVariant(AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value());
         } else {
+            request.setVariant(source.getVariant());
+        }
+
+        if (enforceAwsBasedOnValueProvided(environment.getCloudPlatform(), source.getVariant(), environment.getCredential().getGovCloud(),
+                source.isEnableMultiAz())) {
             request.setVariant(source.getVariant());
         }
     }
