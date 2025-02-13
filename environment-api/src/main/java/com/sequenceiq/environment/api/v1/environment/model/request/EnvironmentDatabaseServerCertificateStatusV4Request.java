@@ -3,6 +3,7 @@ package com.sequenceiq.environment.api.v1.environment.model.request;
 import java.util.HashSet;
 import java.util.Set;
 
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -16,6 +17,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class EnvironmentDatabaseServerCertificateStatusV4Request {
 
     @NotNull
+    @NotEmpty
     @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
     private Set<String> environmentCrns = new HashSet<>();
 
