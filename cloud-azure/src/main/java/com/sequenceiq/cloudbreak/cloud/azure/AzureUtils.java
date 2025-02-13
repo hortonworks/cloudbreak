@@ -180,7 +180,7 @@ public class AzureUtils {
                 .splitToList(name).getFirst() + id;
     }
 
-    public CloudResourceStatus getTemplateStatus(CloudResource resource, Deployment templateDeployment, AzureClient access, String stackName) {
+    public CloudResourceStatus getTemplateStatus(CloudResource resource, Deployment templateDeployment, AzureClient client, String stackName) {
         String status = templateDeployment.provisioningState();
         LOGGER.debug("Azure stack status of: {}  is: {}", resource.getName(), status);
         ResourceStatus resourceStatus = AzureStatusMapper.mapResourceStatus(status);
@@ -189,7 +189,7 @@ public class AzureUtils {
         if (ResourceStatus.FAILED.equals(resourceStatus)) {
             LOGGER.debug("Cloud resource status: {}", resourceStatus);
             try {
-                List<DeploymentOperation> templateDeploymentOperations = access.getTemplateDeploymentOperations(stackName, stackName).getAll();
+                List<DeploymentOperation> templateDeploymentOperations = client.getTemplateDeploymentOperations(stackName, stackName).getAll();
                 for (DeploymentOperation deploymentOperation : templateDeploymentOperations) {
 
                     if ("Failed".equals(deploymentOperation.provisioningState())) {
@@ -773,6 +773,18 @@ public class AzureUtils {
 
     public CloudConnectorException convertToCloudConnectorException(ManagementException e, String actionDescription) {
         String errorMessage = getErrorMessage(e, actionDescription);
+        return convertToCloudConnectorException(e, actionDescription, errorMessage);
+    }
+
+    public CloudConnectorException convertToCloudConnectorExceptionWithFailureReason(ManagementException e, String actionDescription,
+            String operationFailureReason) {
+        String errorMessage = operationFailureReason == null
+                ? getErrorMessage(e, actionDescription)
+                : String.format("%s, Deployment operation failure reason: %s", getErrorMessage(e, actionDescription), operationFailureReason);
+        return convertToCloudConnectorException(e, actionDescription, errorMessage);
+    }
+
+    private CloudConnectorException convertToCloudConnectorException(ManagementException e, String actionDescription, String errorMessage) {
         LOGGER.warn("{} failed, cloud exception happened, details: {}", actionDescription, errorMessage, e);
         if (e.getValue() != null && marketplaceRelatedError(e.getValue().getCode(), e.getValue().getMessage())) {
             return new CloudImageException(errorMessage);

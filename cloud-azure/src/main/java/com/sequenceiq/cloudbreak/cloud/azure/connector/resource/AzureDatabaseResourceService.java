@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.client.AzureFlexibleServerClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureSingleServerClient;
 import com.sequenceiq.cloudbreak.cloud.azure.template.AzureTransientDeploymentService;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
+import com.sequenceiq.cloudbreak.cloud.azure.util.AzureTemplateDeploymentFailureReasonProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzurePermissionValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureRDSAutoMigrationValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureDatabaseServerView;
@@ -142,6 +143,9 @@ public class AzureDatabaseResourceService {
 
     @Inject
     private CloudResourceValidationService cloudResourceValidationService;
+
+    @Inject
+    private AzureTemplateDeploymentFailureReasonProvider azureTemplateDeploymentFailureReasonProvider;
 
     public List<CloudResourceStatus> buildDatabaseResourcesForLaunch(AuthenticatedContext ac, DatabaseStack stack, PersistenceNotifier persistenceNotifier) {
         CloudContext cloudContext = ac.getCloudContext();
@@ -537,7 +541,8 @@ public class AzureDatabaseResourceService {
             String template = azureDatabaseTemplateBuilder.build(cloudContext, stack);
             deployDatabaseServer(stackName, resourceGroupName, template, client, authenticatedContext);
         } catch (ManagementException e) {
-            throw azureUtils.convertToCloudConnectorException(e, "Database stack upgrade");
+            Optional<String> deploymentOperationError = azureTemplateDeploymentFailureReasonProvider.getFailureMessage(resourceGroupName, stackName, client);
+            throw azureUtils.convertToCloudConnectorExceptionWithFailureReason(e, "Database stack upgrade", deploymentOperationError.orElse(null));
         } catch (CloudConnectorException e) {
             throw e;
         } catch (Exception e) {

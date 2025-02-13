@@ -77,6 +77,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureFlexibleServerClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureSingleServerClient;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
+import com.sequenceiq.cloudbreak.cloud.azure.util.AzureTemplateDeploymentFailureReasonProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzurePermissionValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureDatabaseServerView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -170,6 +171,9 @@ class AzureDatabaseResourceServiceTest {
 
     @Mock
     private CloudResourceValidationService cloudResourceValidationService;
+
+    @Mock
+    private AzureTemplateDeploymentFailureReasonProvider azureTemplateDeploymentFailureReasonProvider;
 
     @InjectMocks
     private AzureDatabaseResourceService underTest;
@@ -538,7 +542,9 @@ class AzureDatabaseResourceServiceTest {
         ManagementException managementException = new ManagementException("asdf", mock(HttpResponse.class), new ManagementError("conflict", "asdf"));
         doThrow(managementException).when(client).createTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME, TEMPLATE, "{}");
         when(azureExceptionHandler.isExceptionCodeConflict(managementException)).thenReturn(Boolean.TRUE);
-        when(azureUtils.convertToCloudConnectorException(managementException, "Database stack upgrade")).thenReturn(new CloudConnectorException("fda"));
+        when(azureTemplateDeploymentFailureReasonProvider.getFailureMessage(RESOURCE_GROUP_NAME, STACK_NAME, client)).thenReturn(Optional.empty());
+        when(azureUtils.convertToCloudConnectorExceptionWithFailureReason(managementException, "Database stack upgrade", null))
+                .thenReturn(new CloudConnectorException("fda"));
 
         assertThrows(CloudConnectorException.class,
                 () -> underTest.upgradeDatabaseServer(ac, databaseStack, databaseStack, persistenceNotifier, VERSION14, cloudResourceList));
@@ -585,7 +591,9 @@ class AzureDatabaseResourceServiceTest {
         ManagementException managementException = new ManagementException("asdf", mock(HttpResponse.class), new ManagementError("not_conflict", "asdf"));
         doThrow(managementException).when(client).createTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME, TEMPLATE, "{}");
         when(azureExceptionHandler.isExceptionCodeConflict(managementException)).thenReturn(Boolean.FALSE);
-        when(azureUtils.convertToCloudConnectorException(managementException, "Database stack upgrade")).thenReturn(new CloudConnectorException("fda"));
+        when(azureTemplateDeploymentFailureReasonProvider.getFailureMessage(RESOURCE_GROUP_NAME, STACK_NAME, client)).thenReturn(Optional.of("error"));
+        when(azureUtils.convertToCloudConnectorExceptionWithFailureReason(managementException, "Database stack upgrade", "error"))
+                .thenReturn(new CloudConnectorException("fda"));
 
         assertThrows(CloudConnectorException.class,
                 () -> underTest.upgradeDatabaseServer(ac, databaseStack, databaseStack, persistenceNotifier, VERSION14, cloudResourceList));
