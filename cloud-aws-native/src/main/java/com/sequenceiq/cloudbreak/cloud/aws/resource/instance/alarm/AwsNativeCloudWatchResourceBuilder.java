@@ -7,7 +7,6 @@ import static java.util.Collections.singletonList;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -63,9 +62,9 @@ public class AwsNativeCloudWatchResourceBuilder extends AbstractAwsNativeCompute
             List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception {
         String region = context.getLocation().getRegion().getRegionName();
         AwsCredentialView credential = new AwsCredentialView(auth.getCloudCredential());
-        nativeCloudWatchService.addCloudWatchAlarmsForSystemFailures(buildableResource.get(0), region, credential);
+        nativeCloudWatchService.addCloudWatchAlarmsForSystemFailures(buildableResource.getFirst(), region, credential, cloudStack.getTags());
         CloudResource resource = CloudResource.builder()
-                .cloudResource(buildableResource.get(0))
+                .cloudResource(buildableResource.getFirst())
                 .build();
         return List.of(resource);
     }
@@ -75,7 +74,7 @@ public class AwsNativeCloudWatchResourceBuilder extends AbstractAwsNativeCompute
         String region = context.getLocation().getRegion().getRegionName();
         AwsCredentialView credential = new AwsCredentialView(auth.getCloudCredential());
         String instanceId = resource.getInstanceId() == null ? resource.getReference() : resource.getInstanceId();
-        boolean instanceHasAlarm = !nativeCloudWatchService.getMetricAlarmsForInstances(region, credential, Set.of(instanceId)).isEmpty();
+        boolean instanceHasAlarm = !nativeCloudWatchService.getMetricAlarmsForInstances(region, credential, List.of(instanceId)).isEmpty();
         if (instanceHasAlarm) {
             LOGGER.info("About to remove CloudWatch alarm for instance: {}", instanceId);
             nativeCloudWatchService.deleteCloudWatchAlarmsForSystemFailures(region, credential, List.of(instanceId));
