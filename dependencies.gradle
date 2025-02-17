@@ -74,7 +74,7 @@ ext {
   gsonVersion = '2.8.9'
   jacksonVersion = '2.18.2'
   jsonSmartVersion = '2.4.9'
-  snakeYamlVersion = '2.3'
+  snakeYamlVersion = '2.4'
   xerces = '2.12.2'
   jacksonDatabindNullable = "0.2.6"
 
