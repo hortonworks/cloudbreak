@@ -11,7 +11,7 @@ env:
 on:
   push:
     branches:
-      - master
+      - master #change this to your branch if you want to test it. branch name should be like cb-XXXXX
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -67,7 +67,12 @@ jobs:
           export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
           export SONAR_TOKEN=$(echo "${{ steps.build_secrets.outputs.SONAR_TOKEN}}")
           export SONAR_URL=https://sonarqube.infra.cloudera.com
-          export SONAR_COVERAGE_EXCLUSION=**/proto/**,**/generated/**,**/flow/**/*State.java,**/flow/**/event/*Event.java,**/configuration/**/*Properties.java,**/configuration/*Properties.java,**/flow/**/Configs.java,**/configuration/**/*Config.java,**/configuration/*Config.java,**/Resource.java,**/domain/**
+          export SONAR_COVERAGE_EXCLUSION_COMMON="**/proto/**,**/generated/**,**/flow/**/*State.java,**/flow/**/event/*Event.java,**/flow*/**/*Configs.java,**/*Repository.java,**/configuration/*Properties.java,**/configuration/**/*Config.java,**/domain/**"
+          export CORE_SONAR_COVERAGE_EXCLUSION="${SONAR_COVERAGE_EXCLUSION_COMMON},**/reactor/api/event/**,**/flow2/**/*Config.java,**/flow2/**/*State.java,**/flow2/**/*Event.java"
+          export DL_SONAR_COVERAGE_EXCLUSION="${SONAR_COVERAGE_EXCLUSION_COMMON},**datalake/configuration/**"
+          export ENV_SONAR_COVERAGE_EXCLUSION="${SONAR_COVERAGE_EXCLUSION_COMMON}"
+          export FREEIPA_SONAR_COVERAGE_EXCLUSION="${SONAR_COVERAGE_EXCLUSION_COMMON}"
+          export REMOTE_ENV_SONAR_COVERAGE_EXCLUSION="${SONAR_COVERAGE_EXCLUSION_COMMON},**/config/**,**/flow/**"
           export SONAR_EXCLUSION=**/proto/**,**/generated/**,**/test/**,**/build/**,**/reports/**,**/resources/**
           export SONAR_JAVA_BINARIES=build/classes
           export SONAR_SOURCES=src/main/java/
@@ -89,8 +94,9 @@ jobs:
           -Dsonar.java.libraries=$SONAR_JAVA_BINARIES \
           -Dsonar.verbose=true \
           -Dsonar.sources=$SONAR_SOURCES \
+          -Dsonar.branch.name=$SOURCE_BRANCH \
           -Dsonar.projectKey=CloudbreakCore_Service_UT_master \
-          -Dsonar.coverage.exclusions=$SONAR_COVERAGE_EXCLUSION \
+          -Dsonar.coverage.exclusions=$CORE_SONAR_COVERAGE_EXCLUSION \
           -Dsonar.exclusions=$SONAR_EXCLUSION \
           -Dsonar.host.url=$SONAR_URL
           
@@ -102,8 +108,9 @@ jobs:
           -Dsonar.java.libraries=$SONAR_JAVA_BINARIES \
           -Dsonar.verbose=true \
           -Dsonar.sources=$SONAR_SOURCES \
+          -Dsonar.branch.name=$SOURCE_BRANCH \
           -Dsonar.projectKey=Autoscale_Service_UT_master \
-          -Dsonar.coverage.exclusions=$SONAR_COVERAGE_EXCLUSION \
+          -Dsonar.coverage.exclusions=$SONAR_COVERAGE_EXCLUSION_COMMON \
           -Dsonar.exclusions=$SONAR_EXCLUSION \
           -Dsonar.host.url=$SONAR_URL
           
@@ -115,8 +122,9 @@ jobs:
           -Dsonar.java.libraries=$SONAR_JAVA_BINARIES \
           -Dsonar.verbose=true \
           -Dsonar.sources=$SONAR_SOURCES \
+          -Dsonar.branch.name=$SOURCE_BRANCH \
           -Dsonar.projectKey=Datalake_Service_UT_master \
-          -Dsonar.coverage.exclusions=$SONAR_COVERAGE_EXCLUSION \
+          -Dsonar.coverage.exclusions=$DL_SONAR_COVERAGE_EXCLUSION\
           -Dsonar.exclusions=$SONAR_EXCLUSION \
           -Dsonar.host.url=$SONAR_URL
           
@@ -128,8 +136,9 @@ jobs:
           -Dsonar.java.libraries=$SONAR_JAVA_BINARIES \
           -Dsonar.verbose=true \
           -Dsonar.sources=$SONAR_SOURCES \
+          -Dsonar.branch.name=$SOURCE_BRANCH \
           -Dsonar.projectKey=Environment_Service_UT_master \
-          -Dsonar.coverage.exclusions=$SONAR_COVERAGE_EXCLUSION \
+          -Dsonar.coverage.exclusions=$ENV_SONAR_COVERAGE_EXCLUSION \
           -Dsonar.exclusions=$SONAR_EXCLUSION \
           -Dsonar.host.url=$SONAR_URL
           
@@ -141,8 +150,9 @@ jobs:
           -Dsonar.java.libraries=$SONAR_JAVA_BINARIES \
           -Dsonar.verbose=true \
           -Dsonar.sources=$SONAR_SOURCES \
+          -Dsonar.branch.name=$SOURCE_BRANCH \
           -Dsonar.projectKey=Externalized_Compute_Service_UT_master \
-          -Dsonar.coverage.exclusions=$SONAR_COVERAGE_EXCLUSION \
+          -Dsonar.coverage.exclusions=$SONAR_COVERAGE_EXCLUSION_COMMON \
           -Dsonar.exclusions=$SONAR_EXCLUSION \
           -Dsonar.host.url=$SONAR_URL
           
@@ -154,8 +164,9 @@ jobs:
           -Dsonar.java.libraries=$SONAR_JAVA_BINARIES \
           -Dsonar.verbose=true \
           -Dsonar.sources=$SONAR_SOURCES \
+          -Dsonar.branch.name=$SOURCE_BRANCH \
           -Dsonar.projectKey=Freeipa_Service_UT_master \
-          -Dsonar.coverage.exclusions=$SONAR_COVERAGE_EXCLUSION \
+          -Dsonar.coverage.exclusions=$FREEIPA_SONAR_COVERAGE_EXCLUSION \
           -Dsonar.exclusions=$SONAR_EXCLUSION \
           -Dsonar.host.url=$SONAR_URL
           
@@ -167,8 +178,9 @@ jobs:
           -Dsonar.java.libraries=$SONAR_JAVA_BINARIES \
           -Dsonar.verbose=true \
           -Dsonar.sources=$SONAR_SOURCES \
+          -Dsonar.branch.name=$SOURCE_BRANCH \
           -Dsonar.projectKey=Redbeams_Service_UT_master \
-          -Dsonar.coverage.exclusions=$SONAR_COVERAGE_EXCLUSION \
+          -Dsonar.coverage.exclusions=$SONAR_COVERAGE_EXCLUSION_COMMON \
           -Dsonar.exclusions=$SONAR_EXCLUSION \
           -Dsonar.host.url=$SONAR_URL
           
@@ -180,7 +192,8 @@ jobs:
           -Dsonar.java.libraries=$SONAR_JAVA_BINARIES \
           -Dsonar.verbose=true \
           -Dsonar.sources=$SONAR_SOURCES \
+          -Dsonar.branch.name=$SOURCE_BRANCH \
           -Dsonar.projectKey=Remote_Environment_Service_UT_master \
-          -Dsonar.coverage.exclusions=$SONAR_COVERAGE_EXCLUSION \
+          -Dsonar.coverage.exclusions=$REMOTE_ENV_SONAR_COVERAGE_EXCLUSION \
           -Dsonar.exclusions=$SONAR_EXCLUSION \
           -Dsonar.host.url=$SONAR_URL
