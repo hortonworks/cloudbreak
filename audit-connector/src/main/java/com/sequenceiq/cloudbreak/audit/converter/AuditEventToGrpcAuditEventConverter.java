@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.audit.model.ActorCrn;
 import com.sequenceiq.cloudbreak.audit.model.ActorService;
 import com.sequenceiq.cloudbreak.audit.model.AuditEvent;
 import com.sequenceiq.cloudbreak.audit.model.EventData;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 @Component
 public class AuditEventToGrpcAuditEventConverter {
@@ -36,7 +37,7 @@ public class AuditEventToGrpcAuditEventConverter {
 
     public AuditProto.AuditEvent convert(AuditEvent source) {
         String id = Optional.ofNullable(source.getId()).orElseGet(uuidSupplier());
-        String requestId = Optional.ofNullable(source.getRequestId()).orElseGet(uuidSupplier());
+        String requestId = Optional.ofNullable(source.getRequestId()).orElse(MDCBuilder.getOrGenerateRequestId());
         AuditProto.AuditEvent.Builder auditEventBuilder = prepareBuilderForCreateAuditEvent(source, id, requestId);
         updateAuditEventActor(auditEventBuilder, source.getActor());
         updateAuditEventData(auditEventBuilder, source.getEventData());

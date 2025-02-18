@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeRestoreStatusResponse;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
 import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 import io.grpc.ManagedChannel;
 
@@ -92,7 +93,7 @@ public class DatalakeDrClient {
             builder.setBackupName(backupName);
         }
         return statusConverter.convert(
-                newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn)
+                newStub(channelWrapper.getChannel(), actorCrn)
                         .backupDatalake(builder.build())
         );
     }
@@ -111,7 +112,7 @@ public class DatalakeDrClient {
                 .setBackupLocation(backupLocation)
                 .setValidationOnly(true);
         return statusConverter.convert(
-                newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn)
+                newStub(channelWrapper.getChannel(), actorCrn)
                         .backupDatalake(builder.build())
         );
     }
@@ -149,7 +150,7 @@ public class DatalakeDrClient {
             builder.setForce(true);
         }
         return statusConverter.convert(
-                newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn)
+                newStub(channelWrapper.getChannel(), actorCrn)
                         .restoreDatalake(builder.build())
         );
     }
@@ -169,7 +170,7 @@ public class DatalakeDrClient {
                         .setValidationOnly(true);
 
         return statusConverter.convert(
-                newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn)
+                newStub(channelWrapper.getChannel(), actorCrn)
                         .restoreDatalake(builder.build())
         );
     }
@@ -199,7 +200,7 @@ public class DatalakeDrClient {
             builder.setBackupName(backupName);
         }
         return statusConverter.convert(
-                newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn)
+                newStub(channelWrapper.getChannel(), actorCrn)
                         .backupDatalakeStatus(builder.build())
         );
     }
@@ -217,7 +218,7 @@ public class DatalakeDrClient {
         if (!Strings.isNullOrEmpty(backupName)) {
             builder.setBackupName(backupName);
         }
-        return newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn).backupDatalakeStatus(builder.build()).getBackupId();
+        return newStub(channelWrapper.getChannel(), actorCrn).backupDatalakeStatus(builder.build()).getBackupId();
     }
 
     public DatalakeBackupStatusResponse getBackupStatusByBackupId(String datalakeName, String backupId, String actorCrn) {
@@ -241,7 +242,7 @@ public class DatalakeDrClient {
             builder.setBackupName(backupName);
         }
         return statusConverter.convert(
-                newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn)
+                newStub(channelWrapper.getChannel(), actorCrn)
                         .backupDatalakeStatus(builder.build())
         );
     }
@@ -260,7 +261,7 @@ public class DatalakeDrClient {
                 .setRestoreId(restoreId);
 
         return statusConverter.convert(
-                newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn)
+                newStub(channelWrapper.getChannel(), actorCrn)
                         .restoreDatalakeStatus(builder.build())
         );
     }
@@ -287,7 +288,7 @@ public class DatalakeDrClient {
             builder.setRestoreId(restoreId);
         }
         return statusConverter.convert(
-                newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn)
+                newStub(channelWrapper.getChannel(), actorCrn)
                         .restoreDatalakeStatus(builder.build())
         );
     }
@@ -302,7 +303,7 @@ public class DatalakeDrClient {
 
         RestoreDatalakeStatusRequest.Builder builder = RestoreDatalakeStatusRequest.newBuilder()
                 .setDatalakeName(datalakeName);
-        return newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn).restoreDatalakeStatus(builder.build()).getRestoreId();
+        return newStub(channelWrapper.getChannel(), actorCrn).restoreDatalakeStatus(builder.build()).getRestoreId();
     }
 
     public DatalakeBackupInfo getLastSuccessfulBackup(String datalakeName, String actorCrn, Optional<String> runtime) {
@@ -315,7 +316,7 @@ public class DatalakeDrClient {
 
         ListDatalakeBackupRequest.Builder builder = ListDatalakeBackupRequest.newBuilder()
                 .setDatalakeName(datalakeName);
-        ListDatalakeBackupResponse response = newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn)
+        ListDatalakeBackupResponse response = newStub(channelWrapper.getChannel(), actorCrn)
                 .listDatalakeBackups(builder.build());
 
         if (response != null) {
@@ -343,7 +344,7 @@ public class DatalakeDrClient {
 
         ListDatalakeBackupRequest.Builder builder = ListDatalakeBackupRequest.newBuilder()
                 .setDatalakeName(datalakeName);
-        ListDatalakeBackupResponse response = newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn)
+        ListDatalakeBackupResponse response = newStub(channelWrapper.getChannel(), actorCrn)
                 .listDatalakeBackups(builder.build());
 
         if (response != null) {
@@ -364,7 +365,7 @@ public class DatalakeDrClient {
         checkNotNull(actorCrn, "actorCrn should not be null.");
 
         datalakeDRProto.DatalakeDataInfoObject datalakeDataInfoObject = datalakeDataInfoJsonToObjectConverter.convert(operationId, inputJson);
-        return newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn)
+        return newStub(channelWrapper.getChannel(), actorCrn)
                 .submitDatalakeDataInfo(datalakeDataInfoObject);
     }
 
@@ -372,12 +373,11 @@ public class DatalakeDrClient {
      * Creates a new stub with the appropriate metadata injecting interceptors.
      *
      * @param channel   channel
-     * @param requestId the request ID
      * @param actorCrn  actor
      * @return the stub
      */
-    private datalakeDRBlockingStub newStub(ManagedChannel channel, String requestId, String actorCrn) {
-        checkNotNull(requestId, "requestId should not be null.");
+    private datalakeDRBlockingStub newStub(ManagedChannel channel, String actorCrn) {
+        String requestId = MDCBuilder.getOrGenerateRequestId();
         return datalakeDRGrpc.newBlockingStub(channel)
                 .withInterceptors(
                         GrpcUtil.getTimeoutInterceptor(datalakeDrConfig.getGrpcTimeoutSec()),

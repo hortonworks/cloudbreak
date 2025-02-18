@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.audit;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
-import static com.sequenceiq.cloudbreak.util.UuidUtil.uuidSupplier;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +32,7 @@ import com.sequenceiq.cloudbreak.audit.util.ActorUtil;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
 import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 import io.grpc.ManagedChannel;
 
@@ -82,7 +82,7 @@ public class AuditClient {
     }
 
     public void updateAttemptAuditEventWithResult(AttemptAuditEventResult attemptAuditEventResult) {
-        String requestId = Optional.ofNullable(attemptAuditEventResult.getRequestId()).orElseGet(uuidSupplier());
+        String requestId = Optional.ofNullable(attemptAuditEventResult.getRequestId()).orElse(MDCBuilder.getOrGenerateRequestId());
         AuditProto.AttemptAuditEventResult protoAttemptAuditEventResult = resultConverter.convert(attemptAuditEventResult);
         newStub(channelWrapper.getChannel(), requestId, attemptAuditEventResult.getActorCrn())
                 .updateAttemptAuditEventWithResult(UpdateAttemptAuditEventWithResultRequest.newBuilder()
