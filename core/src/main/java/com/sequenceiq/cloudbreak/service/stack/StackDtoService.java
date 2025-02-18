@@ -19,12 +19,10 @@ import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -33,14 +31,11 @@ import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
-import com.sequenceiq.cloudbreak.domain.SecurityGroup;
-import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.DnsResolverType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackParameters;
-import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -165,29 +160,7 @@ public class StackDtoService implements LocalPaasSdxService {
         Map<Long, Map<InstanceGroupView, List<InstanceMetadataView>>> group = new HashMap<>();
         List<InstanceGroupView> instanceGroups = instanceGroupService.getInstanceGroupViewByStackId(stackView.getId());
         instanceGroups.forEach(it -> group.put(it.getId(), new HashMap<>()));
-        List<String> groupString = instanceGroups.stream()
-                .map(ig -> String.format("InstanceGroup '%s': (group_name: '%s', securitygroup_name: '%s', template_name: '%s', network_attributes: '%s')",
-                        ig.getId(),
-                        ig.getGroupName(),
-                        Optional.ofNullable(ig.getSecurityGroup())
-                                .map(SecurityGroup::getName).orElse(""),
-                        Optional.ofNullable(ig.getTemplate())
-                                .map(Template::getName).orElse(""),
-                        Optional.ofNullable(ig.getInstanceGroupNetwork())
-                                .map(InstanceGroupNetwork::getAttributes)
-                                .map(Json::getValue)
-                                .orElse("")))
-                .collect(Collectors.toList());
         List<InstanceMetadataView> imDto = instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(stackView.getId());
-        LOGGER.debug("Fetched groups: {} by stack: {}", Joiner.on(",").join(groupString), stackView.getId());
-        List<String> instanceMetadataString = imDto.stream()
-                .map(im -> String.format("The %s with id: '%s' add to group of '%s' with id: '%s'",
-                        Optional.ofNullable(im.getInstanceName()).orElse("instance"),
-                        im.getId(),
-                        im.getInstanceGroupName(),
-                        im.getInstanceGroupId()))
-                .collect(Collectors.toList());
-        LOGGER.debug("Fetched instance metadata: {} by stack: {}", Joiner.on(",").join(instanceMetadataString), stackView.getId());
         imDto.forEach(im -> {
             Map<InstanceGroupView, List<InstanceMetadataView>> imByIg = group.computeIfAbsent(im.getInstanceGroupId(), key -> new HashMap<>());
             if (imByIg.isEmpty()) {
