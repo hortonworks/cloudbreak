@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.converter.v4.workspaces.WorkspaceToWorkspaceRes
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
@@ -192,7 +193,10 @@ public class StackToStackV4ResponseConverter {
 
     private SecurityV4Response convertSecurity(StackDtoDelegate stack) {
         SecurityV4Response securityV4Response = new SecurityV4Response();
-        securityV4Response.setSeLinux(stack.getSecurityConfig().getSeLinux().name());
+        SecurityConfig securityConfig = stack.getSecurityConfig();
+        if (securityConfig != null && securityConfig.getSeLinux() != null) {
+            securityV4Response.setSeLinux(securityConfig.getSeLinux().name());
+        }
         return securityV4Response;
     }
 
