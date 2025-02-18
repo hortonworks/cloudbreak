@@ -145,7 +145,6 @@ public class TlsSecurityService {
                 new String(decodeBase64(saltSecurityConfig.getSaltSignPrivateKey())), new String(decodeBase64(saltSecurityConfig.getSaltSignPublicKey())),
                 securityConfig.getUserFacingCert(), securityConfig.getUserFacingKey());
         if (clusterProxyService.isCreateConfigForClusterProxy(stack)) {
-            LOGGER.info("Create config for cluster proxy");
             gatewayConfig
                     .withPath(clusterProxyService.getProxyPath(stack.getResourceCrn(), gatewayInstance.getInstanceId()))
                     .withProtocol(clusterProxyConfiguration.getClusterProxyProtocol());
@@ -198,9 +197,7 @@ public class TlsSecurityService {
     }
 
     private HttpClientConfig decorateWithClusterProxyConfig(Long stackId, String cloudPlatform, HttpClientConfig httpClientConfig) {
-        LOGGER.info("Decorate with cluster proxy config");
         if (clusterProxyEnablementService.isClusterProxyApplicable(cloudPlatform)) {
-            LOGGER.info("Cluster proxy is applicable");
             StackView stack = stackDtoService.getStackViewById(stackId);
             if (clusterProxyService.useClusterProxyForCommunication(stack)) {
                 LOGGER.info("Cluster proxy for communication");
