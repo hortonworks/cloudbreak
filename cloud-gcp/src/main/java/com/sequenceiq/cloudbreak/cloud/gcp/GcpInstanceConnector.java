@@ -156,15 +156,17 @@ public class GcpInstanceConnector extends AbstractInstanceConnector {
                     status = InstanceStatus.STARTED;
                 } else if ("TERMINATED".equals(executeInstance.getStatus())) {
                     status = InstanceStatus.STOPPED;
+                } else {
+                    LOGGER.info("Instance {} status is: {}", instance, executeInstance.getStatus());
                 }
             } catch (GoogleJsonResponseException e) {
                 if (e.getStatusCode() == HttpStatus.SC_NOT_FOUND) {
                     status = InstanceStatus.TERMINATED;
                 } else {
-                    LOGGER.info(String.format("Instance %s is not reachable", instance), e);
+                    LOGGER.info("Instance {} is not reachable", instance, e);
                 }
             } catch (IOException e) {
-                LOGGER.info(String.format("Instance %s is not reachable", instance), e);
+                LOGGER.info("Instance {} is not reachable", instance, e);
             }
             statuses.add(new CloudVmInstanceStatus(instance, status));
         }

@@ -51,6 +51,12 @@ import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 @ExtendWith(MockitoExtension.class)
 class VmStatusCheckerConclusionStepTest {
 
+    private static final Long INSTANCE_DB_ID_1 = 1L;
+
+    private static final Long INSTANCE_DB_ID_2 = 2L;
+
+    private static final Long STACK_ID = 1L;
+
     @Mock
     private StackService stackService;
 
@@ -79,7 +85,7 @@ class VmStatusCheckerConclusionStepTest {
     @BeforeEach
     public void setUp() {
         Stack stack = new Stack();
-        stack.setId(1L);
+        stack.setId(STACK_ID);
         Cluster cluster = new Cluster();
         cluster.setId(2L);
         stack.setCluster(cluster);
@@ -92,11 +98,11 @@ class VmStatusCheckerConclusionStepTest {
     public void checkShouldBeSuccessfulIfAllInstancesAreHealthy() {
         when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(Boolean.FALSE);
         when(instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(anyLong()))
-                .thenReturn(List.of(createInstanceMetadata("host1"), createInstanceMetadata("host2")));
+                .thenReturn(List.of(createInstanceMetadata(INSTANCE_DB_ID_1), createInstanceMetadata(INSTANCE_DB_ID_2)));
         when(stackInstanceStatusChecker.queryInstanceStatuses(any(), anyList()))
-                .thenReturn(List.of(createCloudVmInstanceStatus("host1", true), createCloudVmInstanceStatus("host2", true)));
+                .thenReturn(List.of(createCloudVmInstanceStatus(INSTANCE_DB_ID_1, true), createCloudVmInstanceStatus(INSTANCE_DB_ID_2, true)));
 
-        Conclusion conclusion = underTest.check(1L);
+        Conclusion conclusion = underTest.check(STACK_ID);
         assertFalse(conclusion.isFailureFound());
         assertNull(conclusion.getConclusion());
         assertNull(conclusion.getDetails());
@@ -110,11 +116,11 @@ class VmStatusCheckerConclusionStepTest {
                 .thenReturn("provider not running vms details");
         when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(Boolean.FALSE);
         when(instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(anyLong()))
-                .thenReturn(List.of(createInstanceMetadata("host1"), createInstanceMetadata("host2")));
+                .thenReturn(List.of(createInstanceMetadata(INSTANCE_DB_ID_1), createInstanceMetadata(INSTANCE_DB_ID_2)));
         when(stackInstanceStatusChecker.queryInstanceStatuses(any(), anyList()))
-                .thenReturn(List.of(createCloudVmInstanceStatus("host1", false), createCloudVmInstanceStatus("host2", false)));
+                .thenReturn(List.of(createCloudVmInstanceStatus(INSTANCE_DB_ID_1, false), createCloudVmInstanceStatus(INSTANCE_DB_ID_2, false)));
 
-        Conclusion conclusion = underTest.check(1L);
+        Conclusion conclusion = underTest.check(STACK_ID);
         assertTrue(conclusion.isFailureFound());
         assertEquals("provider not running vms", conclusion.getConclusion());
         assertEquals("provider not running vms details", conclusion.getDetails());
@@ -128,13 +134,14 @@ class VmStatusCheckerConclusionStepTest {
                 .thenReturn("provider not running vms details");
         when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(Boolean.FALSE);
         InstanceMetaData instanceMetaData = new InstanceMetaData();
-        instanceMetaData.setInstanceId("1");
+        instanceMetaData.setInstanceId("unknown1");
+        instanceMetaData.setId(INSTANCE_DB_ID_1);
         List<InstanceMetadataView> instanceMetaDataList = List.of(instanceMetaData);
         when(instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(anyLong())).thenReturn(instanceMetaDataList);
         when(stackInstanceStatusChecker.queryInstanceStatuses(any(), anyList()))
-                .thenReturn(List.of(createCloudVmInstanceStatus("1", false)));
+                .thenReturn(List.of(createCloudVmInstanceStatus(INSTANCE_DB_ID_1, false)));
 
-        Conclusion conclusion = underTest.check(1L);
+        Conclusion conclusion = underTest.check(INSTANCE_DB_ID_1);
         assertTrue(conclusion.isFailureFound());
         assertEquals("provider not running vms", conclusion.getConclusion());
         assertEquals("provider not running vms details", conclusion.getDetails());
@@ -151,18 +158,19 @@ class VmStatusCheckerConclusionStepTest {
         return new ExtendedHostStatuses(hostStatuses);
     }
 
-    private InstanceMetadataView createInstanceMetadata(String host) {
+    private InstanceMetadataView createInstanceMetadata(Long id) {
         InstanceMetaData instanceMetaData = new InstanceMetaData();
-        instanceMetaData.setDiscoveryFQDN(host);
-        instanceMetaData.setInstanceId(host);
+        instanceMetaData.setDiscoveryFQDN("host" + id);
+        instanceMetaData.setInstanceId("host" + id);
+        instanceMetaData.setId(id);
         instanceMetaData.setInstanceStatus(InstanceStatus.SERVICES_RUNNING);
         return instanceMetaData;
     }
 
-    private CloudVmInstanceStatus createCloudVmInstanceStatus(String instanceId, boolean healthy) {
+    private CloudVmInstanceStatus createCloudVmInstanceStatus(Long id, boolean healthy) {
         com.sequenceiq.cloudbreak.cloud.model.InstanceStatus instanceStatus
                 = healthy ? com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STARTED : com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.FAILED;
-        return new CloudVmInstanceStatus(new CloudInstance(instanceId, null, null, null, null),
+        return new CloudVmInstanceStatus(new CloudInstance(String.valueOf("host" + id), null, null, null, null, Map.of(CloudInstance.ID, id)),
                 instanceStatus);
     }
 }

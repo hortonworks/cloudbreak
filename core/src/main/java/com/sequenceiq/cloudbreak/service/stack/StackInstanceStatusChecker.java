@@ -10,6 +10,8 @@ import java.util.List;
 
 import jakarta.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -27,6 +29,8 @@ import com.sequenceiq.environment.client.EnvironmentInternalCrnClient;
 
 @Service
 public class StackInstanceStatusChecker {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackInstanceStatusChecker.class);
 
     @Inject
     private InstanceStateQuery instanceStateQuery;
@@ -69,6 +73,7 @@ public class StackInstanceStatusChecker {
         try {
             instanceStatuses = instanceStateQuery.getCloudVmInstanceStatusesWithoutRetry(cloudCredential, cloudContext, cloudInstances);
         } catch (RuntimeException e) {
+            LOGGER.warn("Failed to get cloud vm instance statuses", e);
             instanceStatuses = cloudInstances.stream()
                     .map(instance -> new CloudVmInstanceStatus(instance, InstanceStatus.UNKNOWN))
                     .collect(toList());

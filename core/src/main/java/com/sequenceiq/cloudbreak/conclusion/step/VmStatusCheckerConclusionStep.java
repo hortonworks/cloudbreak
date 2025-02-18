@@ -64,10 +64,11 @@ public class VmStatusCheckerConclusionStep extends ConclusionStep {
         List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(runningInstances, stack);
         List<CloudVmInstanceStatus> instanceStatuses = stackInstanceStatusChecker.queryInstanceStatuses(stack, cloudInstances);
         LOGGER.debug("Instance statuses based on provider: {}", instanceStatuses);
-        Map<String, InstanceSyncState> instanceSyncStates = instanceStatuses.stream()
-                .collect(Collectors.toMap(i -> i.getCloudInstance().getInstanceId(), i -> InstanceSyncState.getInstanceSyncState(i.getStatus())));
+        Map<Long, InstanceSyncState> instanceSyncStates = instanceStatuses.stream().collect(Collectors.toMap(
+                i -> i.getCloudInstance().getParameter(CloudInstance.ID, Long.class),
+                i -> InstanceSyncState.getInstanceSyncState(i.getStatus())));
         Set<String> notRunningInstances = runningInstances.stream()
-                .filter(i -> !InstanceSyncState.RUNNING.equals(instanceSyncStates.getOrDefault(i.getInstanceId(), InstanceSyncState.UNKNOWN)))
+                .filter(i -> !InstanceSyncState.RUNNING.equals(instanceSyncStates.getOrDefault(i.getId(), InstanceSyncState.UNKNOWN)))
                 .map(InstanceMetadataView::getDiscoveryFQDN)
                 .filter(Objects::nonNull)
                 .collect(toSet());
