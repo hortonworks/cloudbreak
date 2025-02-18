@@ -42,7 +42,17 @@ public class ValidateImageHandler implements CloudPlatformEventHandler<ValidateI
             CloudConnector connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
             AuthenticatedContext auth = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             CloudStack stack = request.getStack();
-            connector.setup().validateImage(auth, stack, request.getImage());
+
+            String currentImageId = stack.getImage().getImageId();
+            String requestImageId = request.getImage().getImageId();
+            if (currentImageId.equalsIgnoreCase(requestImageId)) {
+                LOGGER.info("Current image id [{}] is the same as in the request [{}]. Skipping validation as it is not necessary.", currentImageId,
+                        requestImageId);
+            } else {
+                LOGGER.debug("Current image id [{}] is different from the one in the request [{}]. Calling image validation", currentImageId, requestImageId);
+                connector.setup().validateImage(auth, stack, request.getImage());
+            }
+
             ValidateImageResult result = new ValidateImageResult(request.getResourceId(), request.getStatedImage());
             request.getResult().onNext(result);
             eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));

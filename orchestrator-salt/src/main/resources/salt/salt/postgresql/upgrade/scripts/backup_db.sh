@@ -100,7 +100,7 @@ move_backup_to_cloud () {
   [ -z "$BACKUP_LOCATION" ] && doLog "WARN BACKUP_LOCATION variable is not defined, skipping the cloud storage upload!" && return 1
 
   BACKUPS_DIR="$1"
-  LOCAL_BACKUP_FILE_NAME={{salt['pillar.get']('upgrade:backup:compressed_file_name')}}
+  LOCAL_BACKUP_FILE_NAME="rds_backup-$(date +%Y%m%d%H%M%S).tar.gz"
   doLog "INFO attempting backup upload to: ${BACKUP_LOCATION}, compressing to file ${LOCAL_BACKUP_FILE_NAME}"
 
   tar -czvf "$LOCAL_BACKUP_FILE_NAME" "${BACKUPS_DIR}"

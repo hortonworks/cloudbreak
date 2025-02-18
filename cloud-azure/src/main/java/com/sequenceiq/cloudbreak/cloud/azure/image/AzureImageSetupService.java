@@ -121,7 +121,7 @@ public class AzureImageSetupService {
     }
 
     public void validateImage(AuthenticatedContext ac, CloudStack stack, Image image, AzureClient client) {
-        azureMarketplaceValidatorService.validateMarketplaceImageTerms(image, client, stack, ac);
+        azureMarketplaceValidatorService.validateMarketplaceImageTermsForOsUpgrade(image, client, stack, ac);
     }
 
     public void copyVhdImageIfNecessary(AuthenticatedContext ac, CloudStack stack, Image image, String region, AzureClient client,
