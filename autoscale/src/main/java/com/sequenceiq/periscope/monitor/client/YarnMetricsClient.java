@@ -164,9 +164,8 @@ public class YarnMetricsClient {
             String message = String.format("Encountered exception when invoking YarnScalingAPI for cluster: %s", cluster.getStackCrn());
             LOGGER.error(message, ex);
             if (ex instanceof ForbiddenException) {
-                metricService.incrementMetricCounter(YARN_FORBIDDEN_EXCEPTION, MetricTag.TENANT.name(),
-                        Optional.ofNullable(cluster.getClusterPertain().getTenant()).orElse("NA"), MetricTag.CLOUD_PROVIDER.name(),
-                        Optional.ofNullable(cluster.getCloudPlatform()).orElse("NA"));
+                metricService.incrementMetricCounter(YARN_FORBIDDEN_EXCEPTION,
+                        MetricTag.CLOUD_PROVIDER.name(), Optional.ofNullable(cluster.getCloudPlatform()).orElse("NA"));
             }
             throw ex;
         }

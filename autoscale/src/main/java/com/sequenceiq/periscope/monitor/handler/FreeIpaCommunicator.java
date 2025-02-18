@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.common.metrics.type.MetricTag;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.UserV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
@@ -58,11 +57,11 @@ public class FreeIpaCommunicator {
             SyncOperationStatus status = ThreadBasedUserCrnProvider.doAsInternalActor(
                     internalCrnGeneratorFactory.autoscale().getInternalCrnForServiceAsString(),
                     () -> userV1Endpoint.synchronizeAllUsers(request));
-            metricService.incrementMetricCounter(IPA_USER_SYNC_INVOCATION, MetricTag.TENANT.name(), request.getAccountId());
+            metricService.incrementMetricCounter(IPA_USER_SYNC_INVOCATION);
             return status;
         } catch (Exception ex) {
             LOGGER.error("Failed to synchronize users to IPA for environment: {}", envCrn, ex);
-            metricService.incrementMetricCounter(IPA_USER_SYNC_FAILED, MetricTag.TENANT.name(), request.getAccountId());
+            metricService.incrementMetricCounter(IPA_USER_SYNC_FAILED);
             throw ex;
         }
     }

@@ -12,7 +12,6 @@ import com.sequenceiq.cloudbreak.common.metrics.AbstractMetricService;
 import com.sequenceiq.cloudbreak.common.metrics.type.MetricTag;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.view.StackView;
-import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 
 @Primary
 @Service("MetricService")
@@ -61,7 +60,7 @@ public class CloudbreakMetricService extends AbstractMetricService {
     }
 
     public void recordImageCopyTime(StackDtoDelegate stack, long startMillis) {
-        String[] tags = {MetricTag.TENANT.name(), Optional.ofNullable(stack.getTenant()).map(Tenant::getName).orElse("NA"),
+        String[] tags = {
                 MetricTag.CLOUD_PROVIDER.name(), Optional.ofNullable(stack.getCloudPlatform()).orElse("NA"),
                 MetricTag.REGION.name(), Optional.ofNullable(stack.getRegion()).orElse("NA")};
 

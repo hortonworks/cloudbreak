@@ -51,7 +51,7 @@ public class PeriscopeMetricService extends AbstractMetricService {
     }
 
     private String[] createTags(Cluster cluster) {
-        return new String[]{MetricTag.TENANT.name(), extractTenant(cluster),
+        return new String[]{
                 MetricTag.CLOUD_PROVIDER.name(), Optional.ofNullable(cluster.getCloudPlatform()).orElse("NA"),
         };
     }
