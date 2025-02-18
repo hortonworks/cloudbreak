@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion;
 
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS_NATIVE;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.CCMV2_JUMPGATE_AGENT_ACCESS_KEY;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static java.lang.String.format;
@@ -203,24 +204,27 @@ public class DatalakeCcmUpgradeAndRotationTest extends AbstractE2ETest implement
     }
 
     private Assertion<EnvironmentTestDto, EnvironmentClient> validateCcmUpgradeOnEnvironment() {
-        return (testContext1, sdxInternalTestDto, environmentClient) -> {
-            CloudFunctionality cloudFunctionality = testContext1.getCloudProvider().getCloudFunctionality();
-            Map<String, String> launchTemplateUserData = cloudFunctionality.getLaunchTemplateUserData(sdxInternalTestDto.getName());
-            boolean ccmV2Enabled = launchTemplateUserData.entrySet().stream().allMatch(ud -> {
-                Pattern p = Pattern.compile(EXPORT_IS_CCM_V_2_JUMPGATE_ENABLED_TRUE);
-                Matcher m = p.matcher(ud.getValue());
+        return (testContext1, environmentTestDto, environmentClient) -> {
+            FreeIpaTestDto freeIpaTestDto = testContext1.get(FreeIpaTestDto.class);
+            if (!AWS_NATIVE.equals(freeIpaTestDto.getVariant())) {
+                CloudFunctionality cloudFunctionality = testContext1.getCloudProvider().getCloudFunctionality();
+                Map<String, String> launchTemplateUserData = cloudFunctionality.getLaunchTemplateUserData(environmentTestDto.getName());
+                boolean ccmV2Enabled = launchTemplateUserData.entrySet().stream().allMatch(ud -> {
+                    Pattern p = Pattern.compile(EXPORT_IS_CCM_V_2_JUMPGATE_ENABLED_TRUE);
+                    Matcher m = p.matcher(ud.getValue());
 
-                boolean result = m.find();
-                if (!result) {
-                    Log.then(LOGGER,
-                            format("the %s launch template user data does not contain %s ", ud.getKey(), EXPORT_IS_CCM_V_2_JUMPGATE_ENABLED_TRUE));
+                    boolean result = m.find();
+                    if (!result) {
+                        Log.then(LOGGER,
+                                format("the %s launch template user data does not contain %s ", ud.getKey(), EXPORT_IS_CCM_V_2_JUMPGATE_ENABLED_TRUE));
+                    }
+                    return result;
+                });
+                if (!ccmV2Enabled) {
+                    throw new TestFailException(format("user data is not updated by %s", EXPORT_IS_CCM_V_2_JUMPGATE_ENABLED_TRUE));
                 }
-                return result;
-            });
-            if (!ccmV2Enabled) {
-                throw new TestFailException(format("user data is not updated by %s", EXPORT_IS_CCM_V_2_JUMPGATE_ENABLED_TRUE));
             }
-            return sdxInternalTestDto;
+            return environmentTestDto;
         };
     }
 
