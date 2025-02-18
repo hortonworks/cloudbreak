@@ -39,14 +39,14 @@ public interface DefaultNetworkConnector extends NetworkConnector {
         } else {
             subnetSelectionResult = filterSubnets(subnetsFilteredByRequestedAZ, subnetSelectionParameters);
             if (subnetSelectionResult.hasResult()) {
-                LOGGER.debug("There are subnets in the subnet selection: {}.", subnetSelectionResult);
+                LOGGER.trace("There are subnets in the subnet selection: {}.", subnetSelectionResult);
                 if (subnetSelectionParameters.isHa()) {
                     subnetSelectionResult = selectForHAScenario(subnetSelectionResult.getResult());
                 } else {
                     subnetSelectionResult = selectForNonHAScenario(subnetSelectionResult.getResult());
                 }
             }
-            LOGGER.info("The subnet selection is: {}.", subnetSelectionResult.getResult().stream()
+            LOGGER.trace("The subnet selection is: {}.", subnetSelectionResult.getResult().stream()
                     .map(e -> String.format("%s: %s", e.getName(), e.getId()))
                     .collect(Collectors.toSet()));
         }
@@ -78,7 +78,7 @@ public interface DefaultNetworkConnector extends NetworkConnector {
     default SubnetSelectionResult selectForHAScenario(List<CloudSubnet> subnets) {
         List<CloudSubnet> result = new ArrayList<>();
         Map<String, List<CloudSubnet>> groupedSubnetsByAz = groupSubnetsByAz(subnets);
-        LOGGER.debug("The subnets groupped by AZs and the result is: {}.", groupedSubnetsByAz);
+        LOGGER.trace("The subnets groupped by AZs and the result is: {}.", groupedSubnetsByAz);
         // We dont have enough AZ
         if (!groupedSubnetsByAz.isEmpty() && !isDifferentAzCountEnough(groupedSubnetsByAz)) {
             LOGGER.debug("There is not enough different AZ in the subnet setup.");
@@ -88,10 +88,10 @@ public interface DefaultNetworkConnector extends NetworkConnector {
         for (Map.Entry<String, List<CloudSubnet>> entry : groupedSubnetsByAz.entrySet()) {
             int random = new SecureRandom().nextInt(entry.getValue().size());
             CloudSubnet cloudSubnet = entry.getValue().get(random);
-            LOGGER.debug("The selected subnet is: {} by random id {}.", cloudSubnet, random);
+            LOGGER.trace("The selected subnet is: {} by random id {}.", cloudSubnet, random);
             result.add(cloudSubnet);
             if (result.size() == subnetCountInDifferentAzMax()) {
-                LOGGER.debug("The selection logic already selected enough subnet which is {}.", result.size());
+                LOGGER.trace("The selection logic already selected enough subnet which is {}.", result.size());
                 break;
             }
         }
@@ -106,7 +106,7 @@ public interface DefaultNetworkConnector extends NetworkConnector {
         List<CloudSubnet> result = new ArrayList<>();
         int random = new SecureRandom().nextInt(subnets.size());
         CloudSubnet cloudSubnet = subnets.get(random);
-        LOGGER.info("The selected subnet is: {} by random id {}.", cloudSubnet, random);
+        LOGGER.trace("The selected subnet is: {} by random id {}.", cloudSubnet, random);
         result.add(cloudSubnet);
         return new SubnetSelectionResult(result);
     }

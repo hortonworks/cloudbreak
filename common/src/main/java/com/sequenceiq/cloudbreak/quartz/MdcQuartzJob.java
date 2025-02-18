@@ -40,7 +40,7 @@ public abstract class MdcQuartzJob extends QuartzJobBean {
     protected void fillMdcContext(JobExecutionContext context) {
         Optional<MdcContextInfoProvider> mdcContextConfigProvider = getMdcContextConfigProvider();
         if (mdcContextConfigProvider == null) {
-            LOGGER.debug("getMdcContextConfigProvider does not implemented, try the old one");
+            LOGGER.trace("getMdcContextConfigProvider does not implemented, try the old one");
             Optional<Object> mdcContextObject = getMdcContextObject();
             if (mdcContextObject == null) {
                 throw new IllegalArgumentException("Please implement one of them: getMdcContextObject() or getMdcContextConfigProvider()");

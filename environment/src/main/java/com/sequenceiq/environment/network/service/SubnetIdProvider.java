@@ -29,7 +29,7 @@ public class SubnetIdProvider {
     private CloudPlatformConnectors cloudPlatformConnectors;
 
     public ProvidedSubnetIds subnets(NetworkDto network, Tunnel tunnel, CloudPlatform cloudPlatform, boolean multiAz) {
-        LOGGER.debug("Choosing subnets, network: {},  platform: {}, tunnel: {}", network, cloudPlatform, tunnel);
+        LOGGER.trace("Choosing subnets, network: {},  platform: {}, tunnel: {}", network, cloudPlatform, tunnel);
         if (network == null || network.getSubnetIds() == null || network.getSubnetIds().isEmpty() || network.getCbSubnets() == null
                 || network.getCbSubnets().isEmpty()) {
             LOGGER.debug("Check failed, returning null");
@@ -53,7 +53,7 @@ public class SubnetIdProvider {
         CloudSubnet selectedSubnet = subnetSelectionResult.hasResult()
                 ? subnetSelectionResult.getResult().get(0)
                 : fallback(network);
-        LOGGER.info("Selected subnet as preferred: {}", selectedSubnet.getId());
+        LOGGER.trace("Selected subnet as preferred: {}", selectedSubnet.getId());
         Set<CloudSubnet> selectedSubnets = subnetSelectionResult.hasResult()
                 ? new HashSet<>(subnetSelectionResult.getResult())
                 : fallbacks(network);

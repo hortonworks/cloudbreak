@@ -69,7 +69,7 @@ public class CoreImageProvider implements ImageProvider {
         ImagesV4Response imagesV4Response = imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, catalog, null,
                 platform, null,
                 null, false, false, null);
-        LOGGER.debug("Images received: {}", imagesV4Response);
+        LOGGER.trace("Images received: {}", imagesV4Response);
         return Optional.ofNullable(imagesV4Response.getFreeipaImages()).
                 orElseGet(List::of).stream()
                 .map(this::convert)
