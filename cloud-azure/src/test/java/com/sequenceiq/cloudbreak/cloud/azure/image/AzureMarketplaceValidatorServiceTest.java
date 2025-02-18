@@ -54,7 +54,6 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.PrepareImageType;
-import com.sequenceiq.cloudbreak.validation.ValidationResult;
 
 @ExtendWith(MockitoExtension.class)
 class AzureMarketplaceValidatorServiceTest {
@@ -367,17 +366,17 @@ class AzureMarketplaceValidatorServiceTest {
     }
 
     @Test
-    void testValidateMarketplaceImageTermsImageNotMarketplaceFormat() {
+    void testValidateMarketplaceImageTermsImageNotMarketplaceFormatForOsUpgrade() {
         when(azureImageFormatValidator.isMarketplaceImageFormat(image)).thenReturn(false);
 
-        assertDoesNotThrow(() -> azureMarketplaceValidatorService.validateMarketplaceImageTerms(image, client, stack, ac));
+        assertDoesNotThrow(() -> azureMarketplaceValidatorService.validateMarketplaceImageTermsForOsUpgrade(image, client, stack, ac));
 
         verify(azureImageFormatValidator).isMarketplaceImageFormat(image);
         verifyNoMoreInteractions(azureImageFormatValidator, azureMarketplaceImageProviderService, azureImageTermsSignerService);
     }
 
     @Test
-    void testValidateMarketplaceImageTermsTermsNonReadable() {
+    void testValidateMarketplaceImageTermsTermsForOsUpgradeNonReadableNoAutoAcceptWhatIfFails() {
         when(azureImageFormatValidator.isMarketplaceImageFormat(image)).thenReturn(true);
         AzureMarketplaceImage marketplaceImage = mock(AzureMarketplaceImage.class);
         when(azureMarketplaceImageProviderService.get(image)).thenReturn(marketplaceImage);
@@ -389,15 +388,49 @@ class AzureMarketplaceValidatorServiceTest {
         when(azureImageTermsSignerService.getImageTermStatus(
                 azureClient.getCurrentSubscription().subscriptionId(), marketplaceImage, azureClient))
                 .thenReturn(AzureImageTermStatus.NON_READABLE);
+        when(stack.getParameters()).thenReturn(Map.of(ACCEPTANCE_POLICY_PARAMETER, "false"));
+        Optional<ManagementError> managementErrors =
+                Optional.of(new ManagementError(MARKETPLACE_PURCHASE_ELIGIBILITY_FAILED.getCode(), MARKETPLACE_PURCHASE_ELIGIBILITY_FAILED.value()));
+        when(azureTemplateDeploymentService.runWhatIfAnalysis(any(), any(), any())).thenReturn(managementErrors);
 
         CloudConnectorException exception = assertThrows(CloudConnectorException.class, () ->
-                azureMarketplaceValidatorService.validateMarketplaceImageTerms(image, client, stack, ac));
+                azureMarketplaceValidatorService.validateMarketplaceImageTermsForOsUpgrade(image, client, stack, ac));
 
-        assertTrue(exception.getMessage().contains("Cannot read image terms for Azure Marketplace image"));
+        assertEquals("Image validation error. Please accept Azure Marketplace image terms or enable Terms & Conditions automatic acceptance and " +
+                "grant Microsoft.MarketplaceOrdering/offertypes/publishers/offers/plans/agreements/write. " +
+                "Refer to Cloudera documentation at https://docs.cloudera.com/cdp-public-cloud/cloud/requirements-azure/topics/" +
+                "cdp-cdp_images_hosted_in_azure_marketplace.html#pnavId2 for more information. " +
+                "What-if analysis failed: MarketplacePurchaseEligibilityFailed", exception.getMessage());
     }
 
     @Test
-    void testValidateMarketplaceImageTermsTermsNotAcceptedSignFails() {
+    void testValidateMarketplaceImageTermsTermsForOsUpgradeNotAcceptedNoAutoAccept() {
+        when(azureImageFormatValidator.isMarketplaceImageFormat(image)).thenReturn(true);
+        AzureMarketplaceImage marketplaceImage = mock(AzureMarketplaceImage.class);
+        when(azureMarketplaceImageProviderService.get(image)).thenReturn(marketplaceImage);
+        AzureClient azureClient = mock(AzureClient.class);
+        Subscription currentSubscription = mock(Subscription.class);
+        when(azureClient.getCurrentSubscription()).thenReturn(currentSubscription);
+        when(currentSubscription.subscriptionId()).thenReturn("sub");
+        when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
+        when(azureImageTermsSignerService.getImageTermStatus(
+                azureClient.getCurrentSubscription().subscriptionId(), marketplaceImage, azureClient))
+                .thenReturn(AzureImageTermStatus.NOT_ACCEPTED);
+        when(stack.getParameters()).thenReturn(Map.of(ACCEPTANCE_POLICY_PARAMETER, "false"));
+
+        CloudConnectorException exception = assertThrows(CloudConnectorException.class, () ->
+                azureMarketplaceValidatorService.validateMarketplaceImageTermsForOsUpgrade(image, client, stack, ac));
+
+        assertEquals("Terms are not accepted on image: {}. Please accept Azure Marketplace image terms or enable Terms & Conditions " +
+                        "automatic acceptance and grant Microsoft.MarketplaceOrdering/offertypes/publishers/offers/plans/agreements/write. " +
+                        "Refer to Cloudera documentation at https://docs.cloudera.com/cdp-public-cloud/cloud/requirements-azure/topics/" +
+                        "cdp-cdp_images_hosted_in_azure_marketplace.html#pnavId2 for more information. ",
+                exception.getMessage());
+        verify(azureTemplateDeploymentService, never()).runWhatIfAnalysis(any(), any(), any());
+    }
+
+    @Test
+    void testValidateMarketplaceImageTermsTermsForOsUpgradeNotAcceptedSignFailsWhatIfSuccessful() {
         when(azureImageFormatValidator.isMarketplaceImageFormat(image)).thenReturn(true);
         AzureMarketplaceImage marketplaceImage = mock(AzureMarketplaceImage.class);
         when(azureMarketplaceImageProviderService.get(image)).thenReturn(marketplaceImage);
@@ -413,15 +446,64 @@ class AzureMarketplaceValidatorServiceTest {
         when(azureImageTermsSignerService.sign(
                 azureClient.getCurrentSubscription().subscriptionId(), marketplaceImage, azureClient))
                 .thenReturn(AzureImageTermStatus.NOT_ACCEPTED);
+        when(azureTemplateDeploymentService.runWhatIfAnalysis(any(), any(), any())).thenReturn(Optional.empty());
 
-        CloudConnectorException exception = assertThrows(CloudConnectorException.class, () ->
-                azureMarketplaceValidatorService.validateMarketplaceImageTerms(image, client, stack, ac));
-
-        assertTrue(exception.getMessage().contains("Cannot accept image terms for Azure Marketplace image"));
+        assertDoesNotThrow(() ->
+                azureMarketplaceValidatorService.validateMarketplaceImageTermsForOsUpgrade(image, client, stack, ac));
     }
 
     @Test
-    void testValidateMarketplaceImageTermsValidationFails() {
+    void testValidateMarketplaceImageTermsTermsForOsUpgradeNonReadableSignFailsWhatIfSuccessful() {
+        when(azureImageFormatValidator.isMarketplaceImageFormat(image)).thenReturn(true);
+        AzureMarketplaceImage marketplaceImage = mock(AzureMarketplaceImage.class);
+        when(azureMarketplaceImageProviderService.get(image)).thenReturn(marketplaceImage);
+        AzureClient azureClient = mock(AzureClient.class);
+        Subscription currentSubscription = mock(Subscription.class);
+        when(azureClient.getCurrentSubscription()).thenReturn(currentSubscription);
+        when(currentSubscription.subscriptionId()).thenReturn("sub");
+        when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
+        when(azureImageTermsSignerService.getImageTermStatus(
+                azureClient.getCurrentSubscription().subscriptionId(), marketplaceImage, azureClient))
+                .thenReturn(AzureImageTermStatus.NON_READABLE);
+        when(stack.getParameters()).thenReturn(Map.of(ACCEPTANCE_POLICY_PARAMETER, "true"));
+        when(azureImageTermsSignerService.sign(
+                azureClient.getCurrentSubscription().subscriptionId(), marketplaceImage, azureClient))
+                .thenReturn(AzureImageTermStatus.NOT_ACCEPTED);
+        when(azureTemplateDeploymentService.runWhatIfAnalysis(any(), any(), any())).thenReturn(Optional.empty());
+
+        assertDoesNotThrow(() ->
+                azureMarketplaceValidatorService.validateMarketplaceImageTermsForOsUpgrade(image, client, stack, ac));
+    }
+
+    @Test
+    void testValidateMarketplaceImageTermsForOsUpgradeNoWhatIfPermission() {
+        when(azureImageFormatValidator.isMarketplaceImageFormat(image)).thenReturn(true);
+        AzureMarketplaceImage marketplaceImage = mock(AzureMarketplaceImage.class);
+        when(azureMarketplaceImageProviderService.get(image)).thenReturn(marketplaceImage);
+        AzureClient azureClient = mock(AzureClient.class);
+        Subscription currentSubscription = mock(Subscription.class);
+        when(azureClient.getCurrentSubscription()).thenReturn(currentSubscription);
+        when(currentSubscription.subscriptionId()).thenReturn("sub");
+        when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
+        when(azureImageTermsSignerService.getImageTermStatus(
+                azureClient.getCurrentSubscription().subscriptionId(), marketplaceImage, azureClient))
+                .thenReturn(AzureImageTermStatus.NON_READABLE);
+        String errorMessage = "Insufficient permission to perform what if analysis, please ensure Microsoft.Resources/deployments/whatIf/action is granted!";
+        ManagementException managementException = new ManagementException(errorMessage, mock(HttpResponse.class),
+                new ManagementError("unauthorized", errorMessage));
+        doThrow(managementException).when(azureTemplateDeploymentService).runWhatIfAnalysis(any(), any(), any());
+        when(azureExceptionHandler.isForbidden(eq(managementException))).thenReturn(true);
+
+        CloudConnectorException exception = assertThrows(CloudConnectorException.class, () ->
+                azureMarketplaceValidatorService.validateMarketplaceImageTermsForOsUpgrade(image, client, stack, ac));
+
+        assertEquals("Insufficient permission to perform what if analysis, please ensure Microsoft.Resources/deployments/whatIf/action is granted! " +
+                        "Message: Insufficient permission to perform what if analysis, please ensure Microsoft.Resources/deployments/whatIf/action is granted!",
+                exception.getMessage());
+    }
+
+    @Test
+    void testValidateMarketplaceImageTermsForOsUpgradeSuccessfulValidation() {
         when(azureImageFormatValidator.isMarketplaceImageFormat(image)).thenReturn(true);
         AzureMarketplaceImage marketplaceImage = mock(AzureMarketplaceImage.class);
         when(azureMarketplaceImageProviderService.get(image)).thenReturn(marketplaceImage);
@@ -433,32 +515,7 @@ class AzureMarketplaceValidatorServiceTest {
         when(azureImageTermsSignerService.getImageTermStatus(
                 azureClient.getCurrentSubscription().subscriptionId(), marketplaceImage, azureClient))
                 .thenReturn(AzureImageTermStatus.ACCEPTED);
-        Optional<ManagementError> managementErrors =
-                Optional.of(new ManagementError(MARKETPLACE_PURCHASE_ELIGIBILITY_FAILED.getCode(), MARKETPLACE_PURCHASE_ELIGIBILITY_FAILED.value()));
-        when(azureTemplateDeploymentService.runWhatIfAnalysis(any(), any(), any())).thenReturn(managementErrors);
 
-        CloudConnectorException exception = assertThrows(CloudConnectorException.class, () ->
-                azureMarketplaceValidatorService.validateMarketplaceImageTerms(image, client, stack, ac));
-
-        assertTrue(exception.getMessage().contains("Image validation error: [MarketplacePurchaseEligibilityFailed]"));
-    }
-
-    @Test
-    void testValidateMarketplaceImageTermsSuccessfulValidation() {
-        when(azureImageFormatValidator.isMarketplaceImageFormat(image)).thenReturn(true);
-        AzureMarketplaceImage marketplaceImage = mock(AzureMarketplaceImage.class);
-        when(azureMarketplaceImageProviderService.get(image)).thenReturn(marketplaceImage);
-        AzureClient azureClient = mock(AzureClient.class);
-        Subscription currentSubscription = mock(Subscription.class);
-        when(azureClient.getCurrentSubscription()).thenReturn(currentSubscription);
-        when(currentSubscription.subscriptionId()).thenReturn("sub");
-        when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
-        when(azureImageTermsSignerService.getImageTermStatus(
-                azureClient.getCurrentSubscription().subscriptionId(), marketplaceImage, azureClient))
-                .thenReturn(AzureImageTermStatus.ACCEPTED);
-        CloudStack newStack = mock(CloudStack.class);
-        ValidationResult validationResult = mock(ValidationResult.class);
-
-        assertDoesNotThrow(() -> azureMarketplaceValidatorService.validateMarketplaceImageTerms(image, client, stack, ac));
+        assertDoesNotThrow(() -> azureMarketplaceValidatorService.validateMarketplaceImageTermsForOsUpgrade(image, client, stack, ac));
     }
 }

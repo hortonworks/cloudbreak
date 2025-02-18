@@ -5,6 +5,7 @@ import java.util.Optional;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
@@ -39,9 +40,41 @@ public class SecurityConfigService {
     public SecurityConfig getSecurityConfig(Long clusterId) {
         LOGGER.debug("Get SecurityConfig for clusterId: {}", clusterId);
         SecurityConfig securityConfig = securityConfigRepository.findByClusterId(clusterId);
-        if (securityConfig == null) {
+        if (!isSecurityConfigAvailable(securityConfig)) {
             LOGGER.info("SecurityConfig not found by : {}", clusterId);
-            securityConfig = syncSecurityConfigForCluster(clusterId);
+            if (securityConfig == null) {
+                securityConfig = syncSecurityConfigForCluster(clusterId);
+            } else {
+                securityConfig = syncSecurityConfigForCluster(clusterId, securityConfig);
+            }
+        }
+        return securityConfig;
+    }
+
+    private boolean isSecurityConfigAvailable(SecurityConfig securityConfig) {
+        return securityConfig != null
+                && StringUtils.isNotEmpty(securityConfig.getClientCert())
+                && StringUtils.isNotEmpty(securityConfig.getClientKey());
+    }
+
+    public SecurityConfig syncSecurityConfigForCluster(Long clusterId, SecurityConfig securityConfig) {
+        String stackCrn = clusterRepository.findStackCrnById(clusterId);
+        SecurityConfig securityConfigFromCb = cloudbreakCommunicator.getRemoteSecurityConfig(stackCrn);
+        Optional<Cluster> cluster = clusterRepository.findById(clusterId);
+        LOGGER.info("fetched securityConfig from CB for cluster with ID : {}", clusterId);
+        if (cluster.isPresent()) {
+            if (securityConfigFromCb.getClientCert() != null) {
+                securityConfig.setClientCert(securityConfigFromCb.getClientCert());
+            }
+            if (securityConfigFromCb.getClientKey() != null) {
+                securityConfig.setClientKey(securityConfigFromCb.getClientKey());
+            }
+            if (securityConfigFromCb.getServerCert() != null) {
+                securityConfig.setServerCert(securityConfigFromCb.getServerCert());
+            }
+            securityConfig.setCluster(cluster.get());
+            securityConfigRepository.save(securityConfig);
+            LOGGER.info("Updated securityConfig for cluster with ID : {}", clusterId);
         }
         return securityConfig;
     }
