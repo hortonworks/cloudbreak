@@ -23,16 +23,6 @@
       ]
     },
     {
-      "Sid": "DynamoDBFull",
-      "Action": [
-        "dynamodb:*"
-      ],
-      "Effect": "Allow",
-      "Resource": [
-        "*"
-      ]
-    },
-    {
       "Sid": "LogsFull",
       "Action": [
         "logs:CreateLogGroup"
