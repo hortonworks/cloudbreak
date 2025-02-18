@@ -85,10 +85,8 @@ public abstract class AbstractFreeIpaHttpClientFactory<T> {
         Client restClient = createRestClient(clientConfig);
         URL freeIpaUrl = getIpaUrl(clientConfig, port, basePath);
         if (username.isPresent() && password.isPresent()) {
-            LOGGER.debug("Creating client with username and password using URL [{}]", freeIpaUrl);
             return instantiateClient(headers, listener, restClient, freeIpaUrl, username, password);
         } else {
-            LOGGER.debug("Creating client without username and password using URL [{}]", freeIpaUrl);
             return instantiateClient(headers, listener, restClient, freeIpaUrl);
         }
     }
