@@ -98,9 +98,14 @@ public class AmazonRdsClient extends AmazonClient {
     }
 
     public void deleteParameterGroup(String dbParameterGroupName) {
-        DeleteDbParameterGroupRequest deleteDBParameterGroupRequest = DeleteDbParameterGroupRequest.builder().dbParameterGroupName(dbParameterGroupName).build();
         try {
-            client.deleteDBParameterGroup(deleteDBParameterGroupRequest);
+            if (isDbParameterGroupPresent(dbParameterGroupName)) {
+                client.deleteDBParameterGroup(
+                        DeleteDbParameterGroupRequest.builder()
+                        .dbParameterGroupName(dbParameterGroupName)
+                        .build()
+                );
+            }
         } catch (DbParameterGroupNotFoundException e) {
             LOGGER.debug("ParameterGroup with {} name does not exist", dbParameterGroupName, e);
         } catch (InvalidDbParameterGroupStateException e) {

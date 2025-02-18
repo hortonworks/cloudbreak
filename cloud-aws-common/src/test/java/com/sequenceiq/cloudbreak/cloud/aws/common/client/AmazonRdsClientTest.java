@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -27,6 +29,7 @@ import software.amazon.awssdk.services.rds.model.DbParameterGroupNotFoundExcepti
 import software.amazon.awssdk.services.rds.model.DeleteDbParameterGroupRequest;
 import software.amazon.awssdk.services.rds.model.DescribeCertificatesRequest;
 import software.amazon.awssdk.services.rds.model.DescribeCertificatesResponse;
+import software.amazon.awssdk.services.rds.model.DescribeDbParameterGroupsRequest;
 import software.amazon.awssdk.services.rds.model.InvalidDbParameterGroupStateException;
 import software.amazon.awssdk.services.rds.model.ModifyDbParameterGroupRequest;
 import software.amazon.awssdk.services.rds.model.Parameter;
@@ -126,6 +129,13 @@ class AmazonRdsClientTest {
         ArgumentCaptor<DeleteDbParameterGroupRequest> requestCaptor = ArgumentCaptor.forClass(DeleteDbParameterGroupRequest.class);
         verify(client).deleteDBParameterGroup(requestCaptor.capture());
         assertEquals("paramGroup", requestCaptor.getValue().dbParameterGroupName());
+    }
+
+    @Test
+    void testDeleteParameterGroupIfNotExistShouldNotTriggerDelete() {
+        doThrow(DbParameterGroupNotFoundException.builder().build()).when(client).describeDBParameterGroups(any(DescribeDbParameterGroupsRequest.class));
+        underTest.deleteParameterGroup("paramGroup");
+        verify(client, never()).deleteDBParameterGroup(any(DeleteDbParameterGroupRequest.class));
     }
 
     @Test
