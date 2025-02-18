@@ -1,5 +1,6 @@
 package com.sequenceiq.distrox.v1.distrox.service;
 
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.doAs;
 import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.AVAILABLE;
 import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.START_DATAHUB_STARTED;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -65,6 +66,8 @@ class DistroXServiceTest {
     private static final String DATALAKE_CRN = "crn:cdp:datalake:us-west-1:acc1:datalake:cluster1";
 
     private static final boolean NOT_INTERNAL_REQUEST = false;
+
+    private static final String ACTOR = "crn:cdp:iam:us-west-1:cloudera:user:__internal__actor__";
 
     @Mock
     private DistroXV1RequestToStackV4RequestConverter stackRequestConverter;
@@ -144,7 +147,7 @@ class DistroXServiceTest {
         when(environmentClientService.getByName(envName)).thenReturn(envResponse);
         when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any())).thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
 
-        underTest.post(request, NOT_INTERNAL_REQUEST);
+        doAs(ACTOR, () -> underTest.post(request, NOT_INTERNAL_REQUEST));
 
         verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any());
     }
@@ -207,7 +210,7 @@ class DistroXServiceTest {
         lenient().when(platformAwareSdxConnector.listSdxCrns(any())).thenReturn(Set.of(DATALAKE_CRN));
         lenient().when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
 
-        BadRequestException err = assertThrows(BadRequestException.class, () -> underTest.post(r, NOT_INTERNAL_REQUEST));
+        BadRequestException err = assertThrows(BadRequestException.class, () -> doAs(ACTOR, () -> underTest.post(r, NOT_INTERNAL_REQUEST)));
 
         assertEquals(String.format("'someAwesomeEnvironment' Environment can not be delete in progress state."),
                 err.getMessage());
@@ -236,7 +239,7 @@ class DistroXServiceTest {
         when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any())).thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
 
-        underTest.post(r, NOT_INTERNAL_REQUEST);
+        doAs(ACTOR, () -> underTest.post(r, NOT_INTERNAL_REQUEST));
 
         verify(environmentClientService, calledOnce()).getByName(any());
         verify(environmentClientService, calledOnce()).getByName(envName);
@@ -315,7 +318,7 @@ class DistroXServiceTest {
         when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any()))
                 .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
 
-        underTest.post(request, NOT_INTERNAL_REQUEST);
+        doAs(ACTOR, () -> underTest.post(request, NOT_INTERNAL_REQUEST));
 
         verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any());
     }
@@ -342,7 +345,7 @@ class DistroXServiceTest {
         when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any()))
                 .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.ROLLING_UPGRADE_IN_PROGRESS)));
 
-        underTest.post(request, NOT_INTERNAL_REQUEST);
+        doAs(ACTOR, () -> underTest.post(request, NOT_INTERNAL_REQUEST));
 
         verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any());
     }
@@ -415,7 +418,7 @@ class DistroXServiceTest {
     void testWithSingleServerWhenSingleServerRejectEnabled() {
         DistroXV1Request request = createDistroXV1RequestForAzureSingleServerRejectionTest(AzureDatabaseType.SINGLE_SERVER, true);
 
-        assertThatThrownBy(() -> underTest.post(request, NOT_INTERNAL_REQUEST))
+        assertThatThrownBy(() -> doAs(ACTOR, () -> underTest.post(request, NOT_INTERNAL_REQUEST)))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Azure Database for PostgreSQL - Single Server is retired. New deployments cannot be created anymore. " +
                         "Check documentation for more information: " +
@@ -425,7 +428,7 @@ class DistroXServiceTest {
     @Test
     void testWithSingleServerWhenSingleServerRejectDisabled() {
         DistroXV1Request request = createDistroXV1RequestForAzureSingleServerRejectionTest(AzureDatabaseType.SINGLE_SERVER, false);
-        underTest.post(request, NOT_INTERNAL_REQUEST);
+        doAs(ACTOR, () -> underTest.post(request, NOT_INTERNAL_REQUEST));
         verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any());
 
     }
@@ -433,14 +436,14 @@ class DistroXServiceTest {
     @Test
     void testWithFlexibleServerWhenSingleServerRejectEnabled() {
         DistroXV1Request request = createDistroXV1RequestForAzureSingleServerRejectionTest(AzureDatabaseType.FLEXIBLE_SERVER, true);
-        underTest.post(request, NOT_INTERNAL_REQUEST);
+        doAs(ACTOR, () -> underTest.post(request, NOT_INTERNAL_REQUEST));
         verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any());
     }
 
     @Test
     void testWithFlexibleServerWhenSingleServerRejectDisabled() {
         DistroXV1Request request = createDistroXV1RequestForAzureSingleServerRejectionTest(AzureDatabaseType.FLEXIBLE_SERVER, false);
-        underTest.post(request, NOT_INTERNAL_REQUEST);
+        doAs(ACTOR, () -> underTest.post(request, NOT_INTERNAL_REQUEST));
         verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any());
 
     }

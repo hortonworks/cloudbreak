@@ -111,8 +111,8 @@ public class DistroXService {
         }
         validateImageRequest(request.getImage());
 
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        if (entitlementService.isSingleServerRejectEnabled(userCrn)) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        if (entitlementService.isSingleServerRejectEnabled(accountId)) {
             validateAzureDatabaseType(request.getExternalDatabase());
         }
 

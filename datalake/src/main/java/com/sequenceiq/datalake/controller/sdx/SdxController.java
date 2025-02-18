@@ -181,7 +181,8 @@ public class SdxController implements SdxEndpoint {
             @Valid SdxClusterRequest createSdxClusterRequest) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         validateSdxClusterShape(createSdxClusterRequest.getClusterShape());
-        if (entitlementService.isSingleServerRejectEnabled(userCrn)) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        if (entitlementService.isSingleServerRejectEnabled(accountId)) {
             validateAzureDatabaseType(createSdxClusterRequest.getExternalDatabase());
         }
         Pair<SdxCluster, FlowIdentifier> result = sdxService.createSdx(userCrn, name, createSdxClusterRequest, null);
