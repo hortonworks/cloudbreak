@@ -295,7 +295,7 @@ public class StackCreatorServiceTest {
     }
 
     @Test
-    void testArm64ShouldNotBeUsedOnDataLake() {
+    void testArm64ShouldNotBeUsedOnDataLakeWhenEntitlementIsNotEnabled() {
         User user = new User();
         Workspace workspace = getWorkspace();
         StackV4Request stackRequest = getStackV4Request();
@@ -306,9 +306,10 @@ public class StackCreatorServiceTest {
         BadRequestException e = assertThrows(BadRequestException.class, () ->
                 ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createStack(user, workspace, stackRequest, false)));
 
-        assertEquals("Data Lake clusters are not supported on (arm64) architecture.", e.getMessage());
+        assertEquals("The selected architecture (arm64) is not enabled in your account", e.getMessage());
         verify(recipeValidatorService).validateRecipeExistenceOnInstanceGroups(any(), any());
         verify(stackDtoService).getStackViewByNameOrCrnOpt(NameOrCrn.ofName(STACK_NAME), ACCOUNT_ID);
+        verify(entitlementService, times(1)).isDataLakeArmEnabled(any());
         verify(entitlementService, never()).isCODUseGraviton(any());
         verify(entitlementService, never()).isArmInstanceEnabled(any());
         verify(entitlementService, never()).isDataHubArmEnabled(any());

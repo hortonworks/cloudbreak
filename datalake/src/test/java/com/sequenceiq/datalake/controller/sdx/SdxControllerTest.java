@@ -462,14 +462,14 @@ class SdxControllerTest {
 
     @Test
     void getDefaultTemplateWithInvalidClusterShape() {
-        assertThrows(BadRequestException.class, () -> sdxController.getDefaultTemplate(SdxClusterShape.CONTAINERIZED, "7.2.18", "aws"));
+        assertThrows(BadRequestException.class, () -> sdxController.getDefaultTemplate(SdxClusterShape.CONTAINERIZED, "7.2.18", "aws", null));
     }
 
     @Test
     void getRecommendationWithInvalidClusterShape() {
         assertThrows(BadRequestException.class,
             () -> sdxController.getRecommendation("cred-crn", SdxClusterShape.CONTAINERIZED, "7.2.18", "aws", "us-west-1",
-                "az1"));
+                "az1", null));
     }
 
     @Test

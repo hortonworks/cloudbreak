@@ -394,7 +394,8 @@ public interface SdxEndpoint {
     SdxDefaultTemplateResponse getDefaultTemplate(
             @QueryParam("clusterShape") SdxClusterShape clusterShape,
             @QueryParam("runtimeVersion") String runtimeVersion,
-            @QueryParam("cloudPlatform") String cloudPlatform);
+            @QueryParam("cloudPlatform") String cloudPlatform,
+            @QueryParam("architecture") String architecture);
 
     @GET
     @Path("recommendation")
@@ -408,7 +409,8 @@ public interface SdxEndpoint {
             @NotNull(message = "The 'runtimeVersion' query parameter must be specified.") @QueryParam("runtimeVersion") String runtimeVersion,
             @NotNull(message = "The 'cloudPlatform' query parameter must be specified.") @QueryParam("cloudPlatform") String cloudPlatform,
             @NotNull(message = "The 'region' query parameter must be specified.") @QueryParam("region") String region,
-            @QueryParam("availabilityZone") String availabilityZone);
+            @QueryParam("availabilityZone") String availabilityZone,
+            @QueryParam("architecture") String architecture);
 
     @GET
     @Path("crn/{crn}/internal/stoppable")

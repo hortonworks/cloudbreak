@@ -330,7 +330,7 @@ public class StackCreatorService {
     }
 
     void validateImageAndInstanceTypeArchitectureForAws(StackV4Request stackRequest, StatedImage image) {
-        if (CloudPlatform.AWS.equals(stackRequest.getCloudPlatform())) {
+        if (CloudPlatform.AWS.equals(stackRequest.getCloudPlatform()) && !StackType.DATALAKE.equals(stackRequest.getType())) {
             Architecture imageArchitecture = Architecture.fromStringWithFallback(image.getImage().getArchitecture());
             List<Pair<String, Architecture>> instanceTypeArchitectures = stackRequest.getInstanceGroups()
                     .stream()
@@ -363,11 +363,11 @@ public class StackCreatorService {
 
     private void validateArchitecture(StackV4Request stackRequest, boolean distroxRequest, Long workspaceId) {
         if (stackRequest.getArchitectureEnum() == Architecture.ARM64) {
-            if (!distroxRequest) {
-                throw new BadRequestException(String.format("Data Lake clusters are not supported on (%s) architecture.",
+            String accountId = ThreadBasedUserCrnProvider.getAccountId();
+            if (!distroxRequest && !entitlementService.isDataLakeArmEnabled(accountId)) {
+                throw new BadRequestException(String.format("The selected architecture (%s) is not enabled in your account",
                         Architecture.ARM64.getName()));
             }
-            String accountId = ThreadBasedUserCrnProvider.getAccountId();
             if (isCodRequest(stackRequest)) {
                 if (!entitlementService.isCODUseGraviton(accountId)) {
                     throw new BadRequestException(String.format("The selected architecture (%s) is not enabled in your account",

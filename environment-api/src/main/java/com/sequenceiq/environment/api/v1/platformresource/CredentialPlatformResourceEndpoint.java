@@ -52,7 +52,8 @@ public interface CredentialPlatformResourceEndpoint {
             @QueryParam("region") String region,
             @QueryParam("platformVariant") String platformVariant,
             @QueryParam("availabilityZone") String availabilityZone,
-            @QueryParam("resourceType") CdpResourceType resourceType);
+            @QueryParam("resourceType") CdpResourceType resourceType,
+            @QueryParam("architecture") String architecture);
 
     @GET
     @Path("regions")

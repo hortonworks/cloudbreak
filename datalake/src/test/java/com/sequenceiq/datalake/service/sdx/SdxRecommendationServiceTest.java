@@ -90,15 +90,15 @@ class SdxRecommendationServiceTest {
 
     @Test
     public void testGetDefaultTemplateWhenMissingRequiredParameters() {
-        assertThrows(BadRequestException.class, () -> underTest.getDefaultTemplateResponse(null, "7.2.14", "AWS"));
-        assertThrows(BadRequestException.class, () -> underTest.getDefaultTemplateResponse(LIGHT_DUTY, null, "AWS"));
-        assertThrows(BadRequestException.class, () -> underTest.getDefaultTemplateResponse(LIGHT_DUTY, "7.2.14", null));
+        assertThrows(BadRequestException.class, () -> underTest.getDefaultTemplateResponse(null, "7.2.14", "AWS", null));
+        assertThrows(BadRequestException.class, () -> underTest.getDefaultTemplateResponse(LIGHT_DUTY, null, "AWS", null));
+        assertThrows(BadRequestException.class, () -> underTest.getDefaultTemplateResponse(LIGHT_DUTY, "7.2.14", null, null));
     }
 
     @Test
     public void testGetDefaultTemplateWhenMissingTemplateForParameters() {
         when(cdpConfigService.getConfigForKey(any())).thenReturn(null);
-        assertThrows(NotFoundException.class, () -> underTest.getDefaultTemplateResponse(LIGHT_DUTY, "7.2.14", "AWS"));
+        assertThrows(NotFoundException.class, () -> underTest.getDefaultTemplateResponse(LIGHT_DUTY, "7.2.14", "AWS", null));
     }
 
     @Test
@@ -106,17 +106,17 @@ class SdxRecommendationServiceTest {
         StackV4Request defaultTemplate = createStackRequest();
         when(cdpConfigService.getConfigForKey(any())).thenReturn(defaultTemplate);
 
-        SdxDefaultTemplateResponse response = underTest.getDefaultTemplateResponse(LIGHT_DUTY, "7.2.14", "AWS");
+        SdxDefaultTemplateResponse response = underTest.getDefaultTemplateResponse(LIGHT_DUTY, "7.2.14", "AWS", null);
         assertEquals(defaultTemplate, response.getTemplate());
     }
 
     @Test
     public void testGetRecommendation() {
         when(cdpConfigService.getConfigForKey(any())).thenReturn(createStackRequest());
-        when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any()))
+        when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any(), any()))
                 .thenReturn(createPlatformVmtypesResponse());
 
-        SdxRecommendationResponse recommendation = underTest.getRecommendation("cred", LIGHT_DUTY, "7.2.14", "AWS", "ec-central-1", null);
+        SdxRecommendationResponse recommendation = underTest.getRecommendation("cred", LIGHT_DUTY, "7.2.14", "AWS", "ec-central-1", null, null);
 
         StackV4Request defaultTemplate = recommendation.getTemplate();
         assertNotNull(defaultTemplate);
@@ -138,11 +138,11 @@ class SdxRecommendationServiceTest {
     @Test
     public void testGetRecommendationFailedWithBadRequestException() {
         when(cdpConfigService.getConfigForKey(any())).thenReturn(createStackRequest());
-        when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any()))
+        when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any(), any()))
                 .thenThrow(new jakarta.ws.rs.BadRequestException("bad request"));
 
         jakarta.ws.rs.BadRequestException badRequestException = assertThrows(jakarta.ws.rs.BadRequestException.class,
-                () -> underTest.getRecommendation("cred", LIGHT_DUTY, "7.2.14", "AWS", "ec-central-1", null));
+                () -> underTest.getRecommendation("cred", LIGHT_DUTY, "7.2.14", "AWS", "ec-central-1", null, null));
 
         assertEquals("bad request", badRequestException.getMessage());
     }
@@ -150,11 +150,11 @@ class SdxRecommendationServiceTest {
     @Test
     public void testGetRecommendationFailedWithProvidedClientSecretKeysError() {
         when(cdpConfigService.getConfigForKey(any())).thenReturn(createStackRequest());
-        when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any()))
+        when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any(), any()))
                 .thenThrow(new jakarta.ws.rs.BadRequestException("The provided client secret keys for app 1234."));
 
         RuntimeException runtimeException = assertThrows(RuntimeException.class,
-                () -> underTest.getRecommendation("cred", LIGHT_DUTY, "7.2.14", "AWS", "ec-central-1", null));
+                () -> underTest.getRecommendation("cred", LIGHT_DUTY, "7.2.14", "AWS", "ec-central-1", null, null));
 
         assertEquals("The provided client secret keys for app 1234.", runtimeException.getMessage());
     }
@@ -162,7 +162,7 @@ class SdxRecommendationServiceTest {
     @Test
     public void validateVmTypeOverrideWhenInstanceGroupIsMissingFromDefaultTemplate() {
         when(cdpConfigService.getConfigForKey(any())).thenReturn(createStackRequest());
-        when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any()))
+        when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any(), any()))
                 .thenReturn(createPlatformVmtypesResponse());
         StackV4Request stackRequest = createStackRequest();
         stackRequest.getInstanceGroups().get(0).setName("unknown");
@@ -178,7 +178,7 @@ class SdxRecommendationServiceTest {
         StackV4Request defaultTemplate = createStackRequest();
         defaultTemplate.getInstanceGroups().get(0).getTemplate().setInstanceType("unknown");
         when(cdpConfigService.getConfigForKey(any())).thenReturn(defaultTemplate);
-        when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any()))
+        when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any(), any()))
                 .thenReturn(createPlatformVmtypesResponse());
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.validateVmTypeOverride(createEnvironment("AWS"), createSdxCluster(createStackRequest(), LIGHT_DUTY)));
@@ -191,13 +191,13 @@ class SdxRecommendationServiceTest {
         assertDoesNotThrow(() -> underTest.validateVmTypeOverride(createEnvironment("YARN"), createSdxCluster(createStackRequest(), LIGHT_DUTY)));
 
         verify(cdpConfigService, never()).getConfigForKey(any());
-        verify(environmentClientService, never()).getVmTypesByCredential(anyString(), anyString(), anyString(), any(), any());
+        verify(environmentClientService, never()).getVmTypesByCredential(anyString(), anyString(), anyString(), any(), any(), any());
     }
 
     @Test
     public void validateVmTypeOverrideWhenNewVmTypeIsSmaller() {
         when(cdpConfigService.getConfigForKey(any())).thenReturn(createStackRequest());
-        when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any()))
+        when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any(), any()))
                 .thenReturn(createPlatformVmtypesResponse());
         StackV4Request stackRequest = createStackRequest();
         stackRequest.getInstanceGroups().stream().forEach(ig -> ig.getTemplate().setInstanceType("small"));
@@ -211,7 +211,7 @@ class SdxRecommendationServiceTest {
     @Test
     public void validateVmTypeOverrideWhenOverrideIsValid() {
         when(cdpConfigService.getConfigForKey(any())).thenReturn(createStackRequest());
-        when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any()))
+        when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any(), any()))
                 .thenReturn(createPlatformVmtypesResponse());
         assertDoesNotThrow(() -> underTest.validateVmTypeOverride(createEnvironment("AWS"), createSdxCluster(createStackRequest(), LIGHT_DUTY)));
     }
@@ -220,7 +220,7 @@ class SdxRecommendationServiceTest {
     public void validateVmTypeOverrideWhenSdxClusterShapeIsCustom() {
         assertDoesNotThrow(() -> underTest.validateVmTypeOverride(createEnvironment("AWS"), createSdxCluster(createStackRequest(), CUSTOM)));
         verify(cdpConfigService, never()).getConfigForKey(any());
-        verify(environmentClientService, never()).getVmTypesByCredential(anyString(), anyString(), anyString(), any(), anyString());
+        verify(environmentClientService, never()).getVmTypesByCredential(anyString(), anyString(), anyString(), any(), anyString(), any());
     }
 
     private SdxCluster createSdxCluster(StackV4Request stackV4Request, SdxClusterShape clusterShape) {

@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -31,6 +32,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageRecommendationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageRecommendationV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceTemplateV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -41,6 +43,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.RetryService;
 import com.sequenceiq.common.api.type.CdpResourceType;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.datalake.configuration.CDPConfigService;
 import com.sequenceiq.datalake.converter.VmTypeConverter;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -82,16 +85,18 @@ public class SdxRecommendationService {
     @Inject
     private EntitlementService entitlementService;
 
-    public SdxDefaultTemplateResponse getDefaultTemplateResponse(SdxClusterShape clusterShape, String runtimeVersion, String cloudPlatform) {
-        StackV4Request defaultTemplate = getDefaultTemplate(clusterShape, runtimeVersion, cloudPlatform);
+    public SdxDefaultTemplateResponse getDefaultTemplateResponse(SdxClusterShape clusterShape, String runtimeVersion, String cloudPlatform,
+            Architecture architecture) {
+        StackV4Request defaultTemplate = getDefaultTemplate(clusterShape, runtimeVersion, cloudPlatform, architecture);
         return new SdxDefaultTemplateResponse(defaultTemplate);
     }
 
-    public StackV4Request getDefaultTemplate(SdxClusterShape clusterShape, String runtimeVersion, String cloudPlatform) {
+    public StackV4Request getDefaultTemplate(SdxClusterShape clusterShape, String runtimeVersion, String cloudPlatform, Architecture architecture) {
         if (clusterShape == null || StringUtils.isAnyBlank(runtimeVersion, cloudPlatform)) {
             throw new BadRequestException("The following query params needs to be filled for this request: clusterShape, runtimeVersion, cloudPlatform");
         }
-        StackV4Request defaultTemplate = cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.valueOf(cloudPlatform), clusterShape, runtimeVersion));
+        StackV4Request defaultTemplate = cdpConfigService.getConfigForKey(
+                new CDPConfigKey(CloudPlatform.valueOf(cloudPlatform), clusterShape, runtimeVersion, architecture));
         if (defaultTemplate == null) {
             LOGGER.warn("Can't find template for cloudplatform: {}, shape {}, cdp version: {}", cloudPlatform, clusterShape, runtimeVersion);
             throw notFound("Default template", "cloudPlatform: " + cloudPlatform + ", shape: " + clusterShape +
@@ -101,11 +106,12 @@ public class SdxRecommendationService {
     }
 
     public SdxRecommendationResponse getRecommendation(String credentialCrn, SdxClusterShape clusterShape, String runtimeVersion, String cloudPlatform,
-            String region, String availabilityZone) {
+            String region, String availabilityZone, String architecture) {
         try {
             availabilityZone = getAvailabilityZoneBasedOnProvider(cloudPlatform, availabilityZone);
-            StackV4Request defaultTemplate = getDefaultTemplate(clusterShape, runtimeVersion, cloudPlatform);
-            List<VmTypeResponse> availableVmTypes = getAvailableVmTypes(credentialCrn, cloudPlatform, region, availabilityZone);
+            StackV4Request defaultTemplate = getDefaultTemplate(clusterShape, runtimeVersion, cloudPlatform,
+                    Optional.ofNullable(architecture).map(Architecture::fromStringWithValidation).orElse(Architecture.X86_64));
+            List<VmTypeResponse> availableVmTypes = getAvailableVmTypes(credentialCrn, cloudPlatform, region, availabilityZone, architecture);
             Map<String, VmTypeResponse> defaultVmTypesByInstanceGroup = getDefaultVmTypesByInstanceGroup(availableVmTypes, defaultTemplate);
             Map<String, List<VmTypeResponse>> availableVmTypesByInstanceGroup = filterAvailableVmTypesBasedOnDefault(
                     availableVmTypes, defaultVmTypesByInstanceGroup);
@@ -138,9 +144,11 @@ public class SdxRecommendationService {
             String cloudPlatform = environment.getCloudPlatform();
             if (shouldValidateVmTypes(sdxCluster, cloudPlatform)) {
                 StackV4Request stackV4Request = JsonUtil.readValue(sdxCluster.getStackRequest(), StackV4Request.class);
-                StackV4Request defaultTemplate = getDefaultTemplate(sdxCluster.getClusterShape(), sdxCluster.getRuntime(), cloudPlatform);
+                StackV4Request defaultTemplate = getDefaultTemplate(sdxCluster.getClusterShape(), sdxCluster.getRuntime(), cloudPlatform,
+                        sdxCluster.getArchitecture());
                 String region = environment.getRegions().getNames().stream().findFirst().orElse(null);
-                List<VmTypeResponse> availableVmTypes = getAvailableVmTypes(environment.getCredential().getCrn(), cloudPlatform, region, null);
+                List<VmTypeResponse> availableVmTypes = getAvailableVmTypes(environment.getCredential().getCrn(), cloudPlatform, region, null,
+                        Optional.ofNullable(sdxCluster.getArchitecture()).map(Architecture::getName).orElse(Architecture.X86_64.getName()));
                 Map<String, VmTypeResponse> defaultVmTypesByInstanceGroup = getDefaultVmTypesByInstanceGroup(availableVmTypes, defaultTemplate);
                 Map<String, List<String>> availableVmTypeNamesByInstanceGroup = filterAvailableVmTypeNamesBasedOnDefault(availableVmTypes,
                         defaultVmTypesByInstanceGroup);
@@ -150,6 +158,9 @@ public class SdxRecommendationService {
                         String message = "Instance group is missing from default template: " + instanceGroup.getName();
                         LOGGER.warn(message);
                         throw new BadRequestException(message);
+                    }
+                    if (sdxCluster.getArchitecture() != null) {
+                        validateInstanceTypeArchitecture(sdxCluster, instanceGroup, availableVmTypes);
                     }
                     VmTypeResponse defaultTemplateVmType = defaultVmTypesByInstanceGroup.get(instanceGroup.getName());
                     if (isCustomInstanceTypeProvided(instanceGroup, defaultTemplateVmType.getValue())
@@ -172,6 +183,22 @@ public class SdxRecommendationService {
         }
     }
 
+    private void validateInstanceTypeArchitecture(SdxCluster sdxCluster, InstanceGroupV4Request instanceGroup, List<VmTypeResponse> availableVmTypes) {
+        Optional<String> instanceType = Optional.ofNullable(instanceGroup.getTemplate()).map(InstanceTemplateV4Base::getInstanceType);
+        instanceType.ifPresent(s -> availableVmTypes.stream()
+                .filter(vmt -> s.equals(vmt.getValue()))
+                .findFirst()
+                .ifPresent(vmt -> {
+                    String architecture = (String) vmt.getVmTypeMetaJson().getProperties().get("Architecture");
+                    if (architecture != null && !sdxCluster.getArchitecture().getName().equalsIgnoreCase(architecture)) {
+                        String message =
+                                String.format("%s instance type has %s cpu architecture which doesn't match the cluster architecture %s",
+                                        vmt.getValue(), architecture, sdxCluster.getArchitecture());
+                        throw new BadRequestException(message);
+                    }
+                }));
+    }
+
     private boolean shouldValidateVmTypes(SdxCluster sdxCluster, String cloudPlatform) {
         return !StringUtils.isBlank(sdxCluster.getStackRequest())
                 && !SdxClusterShape.CUSTOM.equals(sdxCluster.getClusterShape())
@@ -187,9 +214,9 @@ public class SdxRecommendationService {
         return !defaultTemplateVmType.equals(instanceGroup.getTemplate().getInstanceType());
     }
 
-    private List<VmTypeResponse> getAvailableVmTypes(String credentialCrn, String cloudPlatform, String region, String availabilityZone) {
+    private List<VmTypeResponse> getAvailableVmTypes(String credentialCrn, String cloudPlatform, String region, String availabilityZone, String architecture) {
         PlatformVmtypesResponse platformVmtypesResponse = environmentClientService.getVmTypesByCredential(credentialCrn, region, cloudPlatform,
-                CdpResourceType.DATALAKE, availabilityZone);
+                CdpResourceType.DATALAKE, availabilityZone, architecture);
 
         Set<com.sequenceiq.environment.api.v1.platformresource.model.VmTypeResponse> vmTypes = Collections.emptySet();
         if (platformVmtypesResponse.getVmTypes() != null && StringUtils.isNotBlank(availabilityZone)) {
@@ -318,7 +345,7 @@ public class SdxRecommendationService {
         StackV4Request stackV4Request = JsonUtil.readValue(sdxCluster.getStackRequest(), StackV4Request.class);
         String cloudPlatform = environmentResponse.getCloudPlatform();
         String region = environmentResponse.getRegions().getNames().stream().findFirst().orElse(null);
-        StackV4Request defaultTemplate = getDefaultTemplate(sdxCluster.getClusterShape(), sdxCluster.getRuntime(), cloudPlatform);
+        StackV4Request defaultTemplate = getDefaultTemplate(sdxCluster.getClusterShape(), sdxCluster.getRuntime(), cloudPlatform, sdxCluster.getArchitecture());
         ImageRecommendationV4Request request = new ImageRecommendationV4Request();
         request.setBlueprintName(defaultTemplate.getCluster().getBlueprintName());
         request.setPlatform(cloudPlatform);

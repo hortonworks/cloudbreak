@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.constant.AwsPlatformResourcesFilterConst
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -135,7 +136,8 @@ public class CredentialPlatformResourceController implements CredentialPlatformR
             String region,
             String platformVariant,
             String availabilityZone,
-            CdpResourceType cdpResourceType) {
+            CdpResourceType cdpResourceType,
+            String architecture) {
         customCheckUtil.run(() -> permissionCheckByCredential(credentialName, credentialCrn));
         String accountId = getAccountId();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
@@ -146,7 +148,7 @@ public class CredentialPlatformResourceController implements CredentialPlatformR
                 platformVariant,
                 availabilityZone,
                 null,
-                Map.of(ARCHITECTURE, Architecture.X86_64.getName()),
+                Map.of(ARCHITECTURE, Optional.ofNullable(architecture).orElse(Architecture.X86_64.getName())),
                 null,
                 null,
                 cdpResourceType);

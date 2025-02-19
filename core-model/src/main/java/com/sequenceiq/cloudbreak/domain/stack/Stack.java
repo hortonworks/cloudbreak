@@ -69,6 +69,7 @@ import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.orchestration.OrchestrationNode;
 import com.sequenceiq.cloudbreak.common.orchestration.OrchestratorAware;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
+import com.sequenceiq.cloudbreak.converter.ArchitectureConverter;
 import com.sequenceiq.cloudbreak.converter.TunnelConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
@@ -78,7 +79,6 @@ import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
-import com.sequenceiq.cloudbreak.domain.converter.ArchitectureConverter;
 import com.sequenceiq.cloudbreak.domain.converter.DnsResolverTypeConverter;
 import com.sequenceiq.cloudbreak.domain.converter.StackTypeConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -103,7 +103,7 @@ import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.common.model.Architecture;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = { "workspace_id", "name", "resourceCrn" }))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name", "resourceCrn"}))
 public class Stack implements ProvisionEntity, WorkspaceAwareResource, OrchestratorAware, StackView, StackDtoDelegate, IdAware {
 
     @Id

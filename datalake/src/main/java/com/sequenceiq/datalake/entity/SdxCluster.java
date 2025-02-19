@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.converter.ArchitectureConverter;
 import com.sequenceiq.cloudbreak.converter.CertExpirationStateConverter;
 import com.sequenceiq.cloudbreak.converter.FileSystemTypeConverter;
 import com.sequenceiq.cloudbreak.converter.SeLinuxConverter;
@@ -35,6 +36,7 @@ import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.common.api.type.CertExpirationState;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.datalake.converter.SdxClusterShapeConverter;
@@ -149,6 +151,10 @@ public class SdxCluster implements AccountAwareResource {
     @Convert(converter = SeLinuxConverter.class)
     @Column(name = "selinux")
     private SeLinux seLinux;
+
+    @Convert(converter = ArchitectureConverter.class)
+    @Column(name = "architecture")
+    private Architecture architecture;
 
     public Long getId() {
         return id;
@@ -443,6 +449,14 @@ public class SdxCluster implements AccountAwareResource {
 
     public void setSeLinux(SeLinux seLinux) {
         this.seLinux = seLinux;
+    }
+
+    public Architecture getArchitecture() {
+        return architecture;
+    }
+
+    public void setArchitecture(Architecture architecture) {
+        this.architecture = architecture;
     }
 
     //CHECKSTYLE:OFF

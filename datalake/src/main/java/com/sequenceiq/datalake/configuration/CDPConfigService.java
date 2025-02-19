@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.CDPConfigKey;
 import com.sequenceiq.sdx.api.model.AdvertisedRuntime;
@@ -109,8 +110,14 @@ public class CDPConfigService {
                     String runtimeVersion = matcher.group(RUNTIME_GROUP);
                     if (supportedRuntimes.isEmpty() || supportedRuntimes.contains(runtimeVersion)) {
                         CloudPlatform cloudPlatform = CloudPlatform.valueOf(matcher.group(CLOUDPLATFORM_GROUP).toUpperCase(Locale.ROOT));
-                        SdxClusterShape sdxClusterShape = SdxClusterShape.valueOf(matcher.group(CLUSTERSHAPE_GROUP).toUpperCase(Locale.ROOT));
-                        CDPConfigKey cdpConfigKey = new CDPConfigKey(cloudPlatform, sdxClusterShape, runtimeVersion);
+                        String clusterShapeString = matcher.group(CLUSTERSHAPE_GROUP).toUpperCase(Locale.ROOT);
+                        Architecture architecture = Architecture.X86_64;
+                        if (clusterShapeString.contains("_ARM")) {
+                            clusterShapeString = clusterShapeString.replace("_ARM", "");
+                            architecture = Architecture.ARM64;
+                        }
+                        SdxClusterShape sdxClusterShape = SdxClusterShape.valueOf(clusterShapeString);
+                        CDPConfigKey cdpConfigKey = new CDPConfigKey(cloudPlatform, sdxClusterShape, runtimeVersion, architecture);
                         String entitlementString = matcher.group(ENTITLEMENT_GROUP) != null ? StringUtils.substring(matcher.group(ENTITLEMENT_GROUP), 1) : null;
                         Optional<Entitlement> entitlementOptional = Arrays.stream(Entitlement.values()).filter(entitlement ->
                                 StringUtils.equals(entitlement.name().toLowerCase(Locale.ROOT), entitlementString)).findFirst();

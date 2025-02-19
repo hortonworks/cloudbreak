@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_D
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AWS_ARM_DATAHUB;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AWS_ARM_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AWS_RESTRICTED_POLICY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_CERTIFICATE_AUTH;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_DATABASE_FLEXIBLE_SERVER_UPGRADE;
@@ -514,7 +515,7 @@ public class EntitlementService {
     }
 
     public boolean isArmInstanceEnabled(String accountId) {
-        return isDataHubArmEnabled(accountId) || isCODUseGraviton(accountId);
+        return isDataLakeArmEnabled(accountId) || isDataHubArmEnabled(accountId) || isCODUseGraviton(accountId);
     }
 
     public boolean isDataHubArmEnabled(String accountId) {
@@ -523,6 +524,10 @@ public class EntitlementService {
             return true;
         }
         return isEntitledFor(accountId, CDP_AWS_ARM_DATAHUB);
+    }
+
+    public boolean isDataLakeArmEnabled(String accountId) {
+        return isEntitledFor(accountId, CDP_AWS_ARM_DATALAKE);
     }
 
     public boolean isCODUseGraviton(String accountId) {

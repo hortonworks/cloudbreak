@@ -4,6 +4,7 @@ import java.util.Objects;
 import java.util.StringJoiner;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 public class CDPConfigKey {
@@ -14,10 +15,17 @@ public class CDPConfigKey {
 
     private final String runtimeVersion;
 
+    private final Architecture architecture;
+
     public CDPConfigKey(CloudPlatform cloudPlatform, SdxClusterShape clusterShape, String runtimeVersion) {
+        this(cloudPlatform, clusterShape, runtimeVersion, Architecture.X86_64);
+    }
+
+    public CDPConfigKey(CloudPlatform cloudPlatform, SdxClusterShape clusterShape, String runtimeVersion, Architecture architecture) {
         this.cloudPlatform = cloudPlatform;
         this.clusterShape = clusterShape;
         this.runtimeVersion = runtimeVersion;
+        this.architecture = architecture == null ? Architecture.X86_64 : architecture;
     }
 
     public CloudPlatform getCloudPlatform() {
@@ -32,6 +40,10 @@ public class CDPConfigKey {
         return runtimeVersion;
     }
 
+    public Architecture getArchitecture() {
+        return architecture;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -43,7 +55,8 @@ public class CDPConfigKey {
         CDPConfigKey that = (CDPConfigKey) o;
         return cloudPlatform == that.cloudPlatform &&
                 clusterShape == that.clusterShape &&
-                runtimeVersion.equals(that.runtimeVersion);
+                runtimeVersion.equals(that.runtimeVersion) &&
+                architecture == that.architecture;
     }
 
     @Override
@@ -57,6 +70,7 @@ public class CDPConfigKey {
                 .add("cloudPlatform=" + cloudPlatform)
                 .add("clusterShape=" + clusterShape)
                 .add("runtimeVersion='" + runtimeVersion + "'")
+                .add("architecture='" + architecture + "'")
                 .toString();
     }
 }

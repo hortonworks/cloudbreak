@@ -54,6 +54,7 @@ import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.datalake.authorization.DataLakeFiltering;
 import com.sequenceiq.datalake.cm.RangerCloudIdentityService;
@@ -496,18 +497,19 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
-    public SdxDefaultTemplateResponse getDefaultTemplate(SdxClusterShape clusterShape, String runtimeVersion, String cloudPlatform) {
+    public SdxDefaultTemplateResponse getDefaultTemplate(SdxClusterShape clusterShape, String runtimeVersion, String cloudPlatform, String architecture) {
         validateSdxClusterShape(clusterShape);
-        return sdxRecommendationService.getDefaultTemplateResponse(clusterShape, runtimeVersion, cloudPlatform);
+        return sdxRecommendationService.getDefaultTemplateResponse(clusterShape, runtimeVersion, cloudPlatform, Optional.ofNullable(architecture).map(
+                Architecture::fromStringWithValidation).orElse(Architecture.X86_64));
     }
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
     @CheckPermissionByResourceCrn(action = DESCRIBE_CREDENTIAL)
     public SdxRecommendationResponse getRecommendation(@ResourceCrn String credentialCrn, SdxClusterShape clusterShape, String runtimeVersion,
-            String cloudPlatform, String region, String availabilityZone) {
+            String cloudPlatform, String region, String availabilityZone, String architecture) {
         validateSdxClusterShape(clusterShape);
-        return sdxRecommendationService.getRecommendation(credentialCrn, clusterShape, runtimeVersion, cloudPlatform, region, availabilityZone);
+        return sdxRecommendationService.getRecommendation(credentialCrn, clusterShape, runtimeVersion, cloudPlatform, region, availabilityZone, architecture);
     }
 
     @Override

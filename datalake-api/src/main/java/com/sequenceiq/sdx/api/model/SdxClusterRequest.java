@@ -20,6 +20,9 @@ public class SdxClusterRequest extends SdxClusterRequestBase {
     @Deprecated
     private String os;
 
+    @Schema(description = ModelDescriptions.ARCHITECTURE)
+    private String architecture;
+
     public String getRuntime() {
         return runtime;
     }
@@ -38,11 +41,20 @@ public class SdxClusterRequest extends SdxClusterRequestBase {
         this.os = os;
     }
 
+    public String getArchitecture() {
+        return architecture;
+    }
+
+    public void setArchitecture(String architecture) {
+        this.architecture = architecture;
+    }
+
     @Override
     public String toString() {
         return "SdxClusterRequest{" +
                 "runtime='" + runtime + '\'' +
                 ", os='" + os + '\'' +
+                ", architecture='" + architecture + '\'' +
                 "} " + super.toString();
     }
 }

@@ -78,10 +78,10 @@ public class EnvironmentClientService {
     }
 
     public PlatformVmtypesResponse getVmTypesByCredential(String credentialCrn, String region, String platformVariant,
-            CdpResourceType resourceType, String availabilityZone) {
+            CdpResourceType resourceType, String availabilityZone, String architecture) {
         try {
             return credentialPlatformResourceEndpoint.getVmTypesByCredential(null, credentialCrn, region, platformVariant, availabilityZone,
-                    resourceType);
+                    resourceType, architecture);
         } catch (WebApplicationException e) {
             throw webApplicationExceptionHandler.handleException(e);
         }

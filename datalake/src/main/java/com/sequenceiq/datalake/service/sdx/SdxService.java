@@ -507,14 +507,16 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         validateRuntimeAndImage(sdxClusterRequest, environment, imageSettingsV4Request, imageV4Response);
         String runtimeVersion = getRuntime(sdxClusterRequest, internalStackV4Request, imageV4Response);
         String os = getOs(sdxClusterRequest, internalStackV4Request, imageV4Response);
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
+        Architecture architecture = validateAndGetArchitecture(sdxClusterRequest, imageV4Response, cloudPlatform, accountId);
 
         validateCcmV2Requirement(environment, runtimeVersion);
 
         SdxCluster sdxCluster = validateAndCreateNewSdxCluster(sdxClusterRequest, runtimeVersion, name, userCrn, environment);
+        setArchitecture(internalStackV4Request, sdxCluster, architecture);
         setTagsSafe(sdxClusterRequest, sdxCluster);
         setSecurity(sdxClusterRequest, sdxCluster, userCrn);
 
-        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
         if (isCloudStorageConfigured(sdxClusterRequest)) {
             validateCloudStorageRequest(sdxClusterRequest.getCloudStorage(), environment);
             String trimmedBaseLocation = StringUtils.stripEnd(sdxClusterRequest.getCloudStorage().getBaseLocation(), "/");
@@ -535,7 +537,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         overrideDbSslEnabledAttribute(sdxCluster, sdxClusterRequest);
         updateStackV4RequestWithEnvironmentCrnIfNotExistsOnIt(internalStackV4Request, environment.getCrn());
         StackV4Request stackRequest = getStackRequest(sdxClusterRequest.getClusterShape(), internalStackV4Request,
-                cloudPlatform, runtimeVersion, imageSettingsV4Request);
+                cloudPlatform, runtimeVersion, imageSettingsV4Request, architecture);
         if (sdxClusterRequest.getVariant() != null) {
             stackRequest.setVariant(sdxClusterRequest.getVariant());
         }
@@ -572,6 +574,48 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         return Pair.of(savedSdxCluster, flowIdentifier);
     }
 
+    private void setArchitecture(StackV4Request internalStackV4Request, SdxCluster sdxCluster, Architecture architecture) {
+        sdxCluster.setArchitecture(architecture);
+        if (internalStackV4Request != null) {
+            if (internalStackV4Request.getArchitecture() == null) {
+                internalStackV4Request.setArchitecture(architecture.getName());
+            } else if (!architecture.getName().equals(internalStackV4Request.getArchitecture())) {
+                throw new BadRequestException("The request contains %s cpu architecture but the internal stack request contains %s architecture.");
+            }
+        }
+    }
+
+    private Architecture validateAndGetArchitecture(SdxClusterRequest sdxClusterRequest, ImageV4Response imageV4Response, CloudPlatform cloudPlatform,
+            String accountId) {
+        Architecture requestedArchitecture = Optional.ofNullable(sdxClusterRequest.getArchitecture()).map(Architecture::fromStringWithValidation).orElse(null);
+        Architecture imageArchitecture =
+                Optional.ofNullable(imageV4Response).map(image -> Architecture.fromStringWithFallback(image.getArchitecture())).orElse(null);
+        Architecture resultArchitecture;
+        if (requestedArchitecture == null) {
+            resultArchitecture = Optional.ofNullable(imageArchitecture).orElse(Architecture.X86_64);
+        } else if (imageArchitecture == null) {
+            resultArchitecture = requestedArchitecture;
+        } else if (requestedArchitecture.equals(imageArchitecture)) {
+            resultArchitecture = requestedArchitecture;
+        } else {
+            throw new BadRequestException(String.format("The selected cpu architecture %s doesn't match the cpu architecture %s of the image '%s'.",
+                    requestedArchitecture.getName(), imageArchitecture.getName(), imageV4Response.getUuid()));
+        }
+        return validateArchitectureEntitlementAndCloudPlatform(resultArchitecture, cloudPlatform, accountId);
+    }
+
+    private Architecture validateArchitectureEntitlementAndCloudPlatform(Architecture architecture, CloudPlatform cloudPlatform, String accountId) {
+        if (Architecture.ARM64.equals(architecture)) {
+            if (!AWS.equals(cloudPlatform)) {
+                throw new BadRequestException("Arm64 is only supported on AWS cloud provider.");
+            }
+            if (!entitlementService.isDataLakeArmEnabled(accountId)) {
+                throw new BadRequestException("The current account is not entitled to use arm64 instances.");
+            }
+        }
+        return architecture;
+    }
+
     private void setSecurity(SdxClusterRequest sdxClusterRequest, SdxCluster sdxCluster, String userCrn) {
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
         if (sdxClusterRequest.getSecurity() != null && StringUtils.isNotBlank(sdxClusterRequest.getSecurity().getSeLinux())) {
@@ -598,7 +642,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     private void overrideDefaultInstanceType(StackV4Request defaultTemplate, List<SdxInstanceGroupRequest> customInstanceGroups,
-            List<InstanceGroupV4Request> originalInstanceGroups, List<InstanceGroupV4Response> currentInstanceGroups, SdxClusterShape sdxClusterShape) {
+            List<InstanceGroupV4Request> originalInstanceGroups, List<InstanceGroupV4Response> currentInstanceGroups,
+            SdxClusterShape sdxClusterShape) {
         if (CollectionUtils.isNotEmpty(customInstanceGroups)) {
             LOGGER.debug("Override default template with custom instance groups from request.");
             customInstanceGroups.forEach(customInstanceGroup -> {
@@ -703,6 +748,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                 || sdxClusterResizeRequest.isEnableMultiAz(), clusterName, userCrn, environment);
         newSdxCluster.setTags(sdxCluster.getTags());
         newSdxCluster.setCrn(sdxCluster.getCrn());
+        newSdxCluster.setArchitecture(sdxCluster.getArchitecture());
         if (!StringUtils.isBlank(sdxCluster.getCloudStorageBaseLocation())) {
             newSdxCluster.setCloudStorageBaseLocation(sdxCluster.getCloudStorageBaseLocation());
             newSdxCluster.setCloudStorageFileSystemType(sdxCluster.getCloudStorageFileSystemType());
@@ -714,7 +760,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
         newSdxCluster.setSdxDatabase(DatabaseParameterFallbackUtil.setupDatabaseInitParams(sdxCluster.getDatabaseAvailabilityType(),
                 sdxCluster.getDatabaseEngineVersion(), Optional.ofNullable(sdxCluster.getSdxDatabase()).map(SdxDatabase::getAttributes).orElse(null)));
-        StackV4Request stackRequest = getStackRequest(shape, null, cloudPlatform, sdxCluster.getRuntime(), null);
+        StackV4Request stackRequest = getStackRequest(shape, null, cloudPlatform, sdxCluster.getRuntime(), null,
+                Optional.ofNullable(sdxCluster.getArchitecture()).orElse(Architecture.X86_64));
         setStackRequestParams(stackRequest, stackV4Response.getJavaVersion(), sdxCluster.isRangerRazEnabled(), sdxCluster.isRangerRmsEnabled());
         setSecurityRequest(sdxCluster, stackRequest);
         setRecipesFromStackV4ResponseToStackV4Request(stackV4Response, stackRequest);
@@ -728,7 +775,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         prepareImageForStack(stackRequest, stackV4Response);
 
         stackRequest.setResourceCrn(newSdxCluster.getCrn());
-        List<InstanceGroupV4Request> originalInstanceGroups = getInstanceGroupsByCDPConfig(sdxCluster.getClusterShape(), cloudPlatform, sdxCluster.getRuntime());
+        List<InstanceGroupV4Request> originalInstanceGroups = getInstanceGroupsByCDPConfig(sdxCluster.getClusterShape(), cloudPlatform, sdxCluster.getRuntime(),
+                sdxCluster.getArchitecture());
         overrideDefaultInstanceType(stackRequest, sdxClusterResizeRequest.getCustomInstanceGroups(), originalInstanceGroups,
                 stackV4Response.getInstanceGroups(), sdxCluster.getClusterShape());
         overrideDefaultInstanceStorage(stackRequest, sdxClusterResizeRequest.getCustomInstanceGroupDiskSize(), stackV4Response.getInstanceGroups(),
@@ -974,10 +1022,11 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     private StackV4Request getStackRequest(SdxClusterShape shape, StackV4Request internalStackV4Request,
-            CloudPlatform cloudPlatform, String runtimeVersion, ImageSettingsV4Request imageSettingsV4Request) {
+            CloudPlatform cloudPlatform, String runtimeVersion, ImageSettingsV4Request imageSettingsV4Request,
+            Architecture architecture) {
         StackV4Request stackV4Request = internalStackV4Request;
         if (!SdxClusterShape.CUSTOM.equals(shape)) {
-            CDPConfigKey cdpConfigKey = new CDPConfigKey(cloudPlatform, shape, runtimeVersion);
+            CDPConfigKey cdpConfigKey = new CDPConfigKey(cloudPlatform, shape, runtimeVersion, architecture);
             stackV4Request = cdpConfigService.getConfigForKey(cdpConfigKey);
             if (stackV4Request == null) {
                 String message = "Can't find template for " + cdpConfigKey;
@@ -998,8 +1047,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         return stackV4Request;
     }
 
-    private List<InstanceGroupV4Request> getInstanceGroupsByCDPConfig(SdxClusterShape shape, CloudPlatform cloudPlatform, String runtimeVersion) {
-        CDPConfigKey cdpConfigKey = new CDPConfigKey(cloudPlatform, shape, runtimeVersion);
+    private List<InstanceGroupV4Request> getInstanceGroupsByCDPConfig(SdxClusterShape shape, CloudPlatform cloudPlatform, String runtimeVersion,
+            Architecture architecture) {
+        CDPConfigKey cdpConfigKey = new CDPConfigKey(cloudPlatform, shape, runtimeVersion, architecture);
         StackV4Request stackV4Request = cdpConfigService.getConfigForKey(cdpConfigKey);
         if (stackV4Request == null) {
             return Collections.emptyList();
@@ -1461,9 +1511,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             validationBuilder.error("SDX cluster request must not specify both runtime version and image at the same time because image " +
                     "decides runtime version.");
         }
-        if (Architecture.fromStringWithFallback(imageV4Response.getArchitecture()) != Architecture.X86_64) {
-            validationBuilder.error("SDX cluster request image must have x86_64 architecture.");
-        }
         if (imageSettingsV4Request != null && StringUtils.isNotBlank(imageSettingsV4Request.getId())
                 && StringUtils.isNotBlank(imageSettingsV4Request.getOs()) && !imageSettingsV4Request.getOs().equalsIgnoreCase(imageV4Response.getOs())) {
             validationBuilder.error("Image with requested id has different os than requested.");
@@ -1715,7 +1762,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         }
         Set<String> result = new HashSet<>();
         StackV4Request stackV4Request = cdpConfigService.getConfigForKey(new CDPConfigKey(
-                CloudPlatform.valueOf(cloudPlatform), clusterShape, runtimeVersion
+                CloudPlatform.valueOf(cloudPlatform), clusterShape, runtimeVersion, Architecture.X86_64
         ));
         if (stackV4Request != null && CollectionUtils.isNotEmpty(stackV4Request.getInstanceGroups())) {
             result = stackV4Request.getInstanceGroups().stream().map(InstanceGroupV4Base::getName).collect(Collectors.toSet());
