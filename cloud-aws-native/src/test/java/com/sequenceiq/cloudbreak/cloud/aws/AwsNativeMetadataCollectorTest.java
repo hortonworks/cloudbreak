@@ -486,7 +486,8 @@ class AwsNativeMetadataCollectorTest {
         CloudConnectorException cloudConnectorException = assertThrows(CloudConnectorException.class,
                 () -> underTest.collectLoadBalancer(authenticatedContext, loadBalancerTypes, cloudResources));
 
-        assertThat(cloudConnectorException).hasMessage("Metadata collection of load balancers failed");
+        assertThat(cloudConnectorException)
+                .hasMessage("Metadata collection of load balancers failed. Reason: Something really bad happened...");
         assertThat(cloudConnectorException).hasCauseReference(runtimeException);
 
         verify(loadBalancingClient, times(1)).describeLoadBalancers(any());

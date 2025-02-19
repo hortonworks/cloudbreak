@@ -256,7 +256,7 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
             }
         } catch (RuntimeException e) {
             LOGGER.warn("Unable to fetch metadata for load balancer '{}'", loadBalancer.getReference(), e);
-            throw new CloudConnectorException("Metadata collection of load balancers failed", e);
+            throw new CloudConnectorException(String.format("Metadata collection of load balancers failed. Reason: %s", e.getMessage()), e);
         }
         return response;
     }

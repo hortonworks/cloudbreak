@@ -17,10 +17,12 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 
 import software.amazon.awssdk.services.ec2.model.DescribeNetworkInterfacesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeNetworkInterfacesResponse;
+import software.amazon.awssdk.services.ec2.model.Ec2Exception;
 import software.amazon.awssdk.services.ec2.model.Filter;
 import software.amazon.awssdk.services.ec2.model.NetworkInterface;
 
@@ -36,10 +38,7 @@ public class AwsNativeLoadBalancerIpCollector {
     public Optional<String> getLoadBalancerIp(AmazonEc2Client ec2Client, String loadBalancerName, String resourceCrn) {
         CrnResourceDescriptor resourceDescriptor = CrnResourceDescriptor.getByCrnString(resourceCrn);
         if (isFreeIpaCluster(resourceDescriptor) && isFreeIpaLoadBalancerEnabled()) {
-            DescribeNetworkInterfacesRequest describeNetworkInterfacesRequest = DescribeNetworkInterfacesRequest
-                    .builder().filters(Filter.builder().name("description").values("ELB net/" + loadBalancerName + "/*").build())
-                    .build();
-            DescribeNetworkInterfacesResponse describeNetworkInterfacesResponse = ec2Client.describeNetworkInterfaces(describeNetworkInterfacesRequest);
+            DescribeNetworkInterfacesResponse describeNetworkInterfacesResponse = getDescribeNetworkInterfaces(ec2Client, loadBalancerName);
             List<String> ips = Optional.of(describeNetworkInterfacesResponse.networkInterfaces())
                     .map(networkInterfaces -> networkInterfaces.stream()
                             .map(NetworkInterface::privateIpAddress)
@@ -57,6 +56,18 @@ public class AwsNativeLoadBalancerIpCollector {
             return Optional.empty();
         }
 
+    }
+
+    private DescribeNetworkInterfacesResponse getDescribeNetworkInterfaces(AmazonEc2Client ec2Client, String loadBalancerName) {
+        try {
+            DescribeNetworkInterfacesRequest describeNetworkInterfacesRequest = DescribeNetworkInterfacesRequest
+                    .builder().filters(Filter.builder().name("description").values("ELB net/" + loadBalancerName + "/*").build())
+                    .build();
+            return ec2Client.describeNetworkInterfaces(describeNetworkInterfacesRequest);
+        } catch (Ec2Exception e) {
+            LOGGER.error("Failed to retrieve AWS network interfaces", e);
+            throw new CloudConnectorException(e);
+        }
     }
 
     private boolean isFreeIpaLoadBalancerEnabled() {

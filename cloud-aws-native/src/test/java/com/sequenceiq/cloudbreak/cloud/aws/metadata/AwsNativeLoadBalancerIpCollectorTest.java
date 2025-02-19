@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -18,9 +19,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 
 import software.amazon.awssdk.services.ec2.model.DescribeNetworkInterfacesResponse;
+import software.amazon.awssdk.services.ec2.model.Ec2Exception;
 import software.amazon.awssdk.services.ec2.model.NetworkInterface;
 
 @ExtendWith(MockitoExtension.class)
@@ -88,6 +91,14 @@ class AwsNativeLoadBalancerIpCollectorTest {
                 .build());
 
         assertThrows(NotFoundException.class, () -> doAs(USER_CRN, () -> underTest.getLoadBalancerIp(ec2Client, LB_NAME, FREEIPA_CRN)));
+    }
+
+    @Test
+    void testGetLoadBalancerIpShouldThrowCloudConnectorExceptionWhenThereIsNoPermission() {
+        when(entitlementService.isFreeIpaLoadBalancerEnabled(any())).thenReturn(true);
+        doThrow(Ec2Exception.builder().message("No permission").build()).when(ec2Client).describeNetworkInterfaces(any());
+
+        assertThrows(CloudConnectorException.class, () -> doAs(USER_CRN, () -> underTest.getLoadBalancerIp(ec2Client, LB_NAME, FREEIPA_CRN)));
     }
 
 }
