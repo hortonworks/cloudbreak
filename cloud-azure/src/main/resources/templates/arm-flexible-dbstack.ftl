@@ -226,18 +226,6 @@
           "geoRedundantBackup": "[variables('geoRedundantBackupString')]"
         }
       }
-    },
-    {
-      "type": "Microsoft.DBforPostgreSQL/flexibleServers/configurations",
-      "apiVersion": "2022-12-01",
-      "name": "[concat(parameters('dbServerName'),'/azure.extensions')]",
-      "dependsOn": [
-        "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers', parameters('dbServerName'))]"
-      ],
-      "properties": {
-        "value": "PG_STAT_STATEMENTS,PG_BUFFERCACHE",
-        "source": "user-override"
-      }
     }
     <#if !useSslEnforcement>
     ,{
