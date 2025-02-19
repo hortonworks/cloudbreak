@@ -766,7 +766,8 @@ public enum ResourceEvent {
     DATALAKE_ADD_VOLUMES_COMPLETE("datalake.add.volumes.complete"),
     DATALAKE_STALE_STATUS("datalake.stale.status"),
     STALE_STATUS_NOTIFICATION("stale.status.notification"),
-    IMAGE_VALIDATION_FAILED("stack.image.validation");
+    IMAGE_VALIDATION_FAILED("stack.image.validation"),
+    AWS_LARGE_CLUSTER_START("spi.aws.start.large.cluster");
 
     private final String message;
 

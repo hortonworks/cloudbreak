@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.start;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static com.sequenceiq.redbeams.api.model.common.Status.START_IN_PROGRESS;
 
 import java.util.List;
 import java.util.Map;
@@ -19,11 +20,14 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StartInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StartInstancesResult;
+import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -44,6 +48,7 @@ import com.sequenceiq.cloudbreak.service.cluster.DatabaseSslService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -51,6 +56,9 @@ import com.sequenceiq.flow.core.FlowParameters;
 @Configuration
 public class StackStartActions {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackStartActions.class);
+
+    @Inject
+    private CloudPlatformConnectors cloudPlatformConnectors;
 
     @Inject
     private StackToCloudStackConverter cloudStackConverter;
@@ -69,6 +77,9 @@ public class StackStartActions {
 
     @Inject
     private DatabaseSslService databaseSslService;
+
+    @Inject
+    private CloudbreakEventService eventService;
 
     @Bean(name = "START_STATE")
     public Action<?, ?> stackStartAction() {
@@ -90,7 +101,20 @@ public class StackStartActions {
                         .map(s -> resourceToCloudResourceConverter.convert(s))
                         .collect(Collectors.toList());
                 cloudInstances.forEach(instance -> stackDto.getParameters().forEach(instance::putParameter));
+                sendPreStartNotification(context, resources, cloudInstances);
                 return new StartInstancesRequest(context.getCloudContext(), context.getCloudCredential(), resources, cloudInstances);
+            }
+
+            private void sendPreStartNotification(StackStartStopContext context, List<CloudResource> resources, List<CloudInstance> cloudInstances) {
+                try {
+                    CloudConnector connector = cloudPlatformConnectors.get(context.getCloudContext().getPlatformVariant());
+                    AuthenticatedContext authenticatedContext = connector.authentication().authenticate(context.getCloudContext(), context.getCloudCredential());
+                    connector.notifications().flatMap(nc -> nc.preStartNotificiationEvent(authenticatedContext, resources, cloudInstances))
+                            .ifPresent(notificationEvent ->
+                                    eventService.fireCloudbreakEvent(context.getStack().getId(), START_IN_PROGRESS.name(), notificationEvent));
+                } catch (Exception e) {
+                    LOGGER.error("Failed to send notification before starting instances on provider, skipping. Reason:", e);
+                }
             }
         };
     }

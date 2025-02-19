@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
 import java.util.List;
+import java.util.Optional;
 
 import jakarta.inject.Inject;
 
@@ -16,6 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.NoSqlConnector;
+import com.sequenceiq.cloudbreak.cloud.NotificationConnector;
 import com.sequenceiq.cloudbreak.cloud.ObjectStorageConnector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
@@ -34,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsEncryptionResources;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsIdentityService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsInstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsNoSqlConnector;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsNotificationConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsObjectStorageConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformResources;
@@ -109,6 +112,9 @@ public class AwsNativeConnector implements CloudConnector {
 
     @Inject
     private AwsScriptResources awsScriptResources;
+
+    @Inject
+    private AwsNotificationConnector awsNotificationConnector;
 
     @Override
     public Authenticator authentication() {
@@ -206,6 +212,11 @@ public class AwsNativeConnector implements CloudConnector {
     @Override
     public ScriptResources scriptResources() {
         return awsScriptResources;
+    }
+
+    @Override
+    public Optional<NotificationConnector> notifications() {
+        return Optional.of(awsNotificationConnector);
     }
 
     @Override

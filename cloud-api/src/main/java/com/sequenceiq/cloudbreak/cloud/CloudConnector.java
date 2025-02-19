@@ -191,4 +191,8 @@ public interface CloudConnector extends CloudPlatformAware {
         return () -> null;
     }
 
+    default Optional<NotificationConnector> notifications() {
+        return Optional.empty();
+    }
+
 }

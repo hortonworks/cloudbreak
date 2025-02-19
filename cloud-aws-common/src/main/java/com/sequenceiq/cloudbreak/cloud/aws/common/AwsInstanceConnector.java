@@ -57,7 +57,7 @@ import software.amazon.awssdk.services.ec2.model.StopInstancesRequest;
 @Service
 public class AwsInstanceConnector implements InstanceConnector {
 
-    private static final Integer RESILIENT_START_THRESHOLD = 100;
+    public static final Integer RESILIENT_START_THRESHOLD = 100;
 
     private static final Integer RESILIENT_START_CHUNK_SIZE = 5;
 
