@@ -16,7 +16,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_I
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_UAE_CENTRAL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_BASE_IMAGE;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE_FREEIPA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_VARIANT_MIGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_ADD_DISK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_DELETE_DISK;
@@ -415,9 +414,6 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.diagnostics.vm.enable}")
     private boolean diagnosticsEnabled;
-
-    @Value("${auth.mock.freeipa.multiaz.enable}")
-    private boolean enableMultiAzFreeIpa;
 
     @Value("${auth.mock.unbound.elimination.enable}")
     private boolean enableUnboundElimination;
@@ -928,9 +924,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableFmsFreeipaBatchCall) {
             builder.addEntitlements(createEntitlement(FMS_FREEIPA_BATCH_CALL));
-        }
-        if (enableMultiAzFreeIpa) {
-            builder.addEntitlements(createEntitlement(CDP_CB_AWS_NATIVE_FREEIPA));
         }
         if (enableAwsVariantMigration) {
             builder.addEntitlements(createEntitlement(CDP_CB_AWS_VARIANT_MIGRATION));

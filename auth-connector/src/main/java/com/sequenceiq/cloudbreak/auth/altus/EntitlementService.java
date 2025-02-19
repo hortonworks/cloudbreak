@@ -12,7 +12,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_D
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_IMAGE_MARKETPLACE_ONLY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_BASE_IMAGE;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE_FREEIPA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_VARIANT_MIGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_ADD_DISK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_DELETE_DISK;
@@ -164,10 +163,6 @@ public class EntitlementService {
 
     public boolean awsVariantMigrationEnable(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CB_AWS_VARIANT_MIGRATION);
-    }
-
-    public boolean awsNativeFreeIpaEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, CDP_CB_AWS_NATIVE_FREEIPA);
     }
 
     public boolean baseImageEnabled(String accountId) {

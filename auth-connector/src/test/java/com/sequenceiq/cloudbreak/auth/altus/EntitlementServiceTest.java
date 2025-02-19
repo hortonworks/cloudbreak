@@ -42,9 +42,6 @@ class EntitlementServiceTest {
 
                 // entitlementName, function, enabled
 
-                {"CDP_CB_AWS_NATIVE_FREEIPA", (EntitlementCheckFunction) EntitlementService::awsNativeFreeIpaEnabled, false},
-                {"CDP_CB_AWS_NATIVE_FREEIPA", (EntitlementCheckFunction) EntitlementService::awsNativeFreeIpaEnabled, true},
-
                 {"CDP_BASE_IMAGE", (EntitlementCheckFunction) EntitlementService::baseImageEnabled, false},
                 {"CDP_BASE_IMAGE", (EntitlementCheckFunction) EntitlementService::baseImageEnabled, true},
 

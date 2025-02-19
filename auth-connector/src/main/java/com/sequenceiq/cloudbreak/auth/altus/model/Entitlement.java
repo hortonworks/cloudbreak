@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.auth.altus.model;
 
 public enum Entitlement {
 
-    CDP_CB_AWS_NATIVE_FREEIPA,
     CDP_CB_AWS_VARIANT_MIGRATION,
     CDP_BASE_IMAGE,
     CDP_FREEIPA_REBUILD,

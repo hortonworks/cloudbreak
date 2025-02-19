@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.environment.v1.converter;
 
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE_FREEIPA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_MULTIAZ;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -226,7 +225,7 @@ public class FreeIpaConverterTest {
         request.setEnableMultiAz(true);
         // WHEN
         when(multiAzValidator.suportedMultiAzForEnvironment("AWS")).thenReturn(true);
-        when(multiAzValidator.getMultiAzEntitlements(CloudPlatform.AWS)).thenReturn(Set.of(CDP_CB_AWS_NATIVE_FREEIPA));
+        when(multiAzValidator.getMultiAzEntitlements(CloudPlatform.AWS)).thenReturn(Set.of());
         when(entitlementService.getEntitlements(anyString())).thenReturn(List.of("CDP_CB_AWS_NATIVE_FREEIPA"));
         underTest.convert(request, "id", CloudConstants.AWS);
         // THEN
@@ -259,21 +258,6 @@ public class FreeIpaConverterTest {
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.convert(request, "id", CloudConstants.GCP));
         assertEquals("Multi Availability Zone is not supported for GCP", badRequestException.getMessage());
-    }
-
-    @Test
-    public void testConvertWithMultiAzForAwsEntitlementNotPresent() {
-        // GIVEN
-        AttachedFreeIpaRequest request = new AttachedFreeIpaRequest();
-        request.setCreate(true);
-        request.setEnableMultiAz(true);
-        // WHEN
-        when(multiAzValidator.suportedMultiAzForEnvironment("AWS")).thenReturn(true);
-        when(multiAzValidator.getMultiAzEntitlements(CloudPlatform.AWS)).thenReturn(Set.of(CDP_CB_AWS_NATIVE_FREEIPA));
-        when(entitlementService.getEntitlements(anyString())).thenReturn(List.of("Dummy"));
-        BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.convert(request, "id", CloudConstants.AWS));
-        assertEquals("You need to be entitled for CDP_CB_AWS_NATIVE_FREEIPA to provision FreeIPA in Multi Availability Zone", badRequestException.getMessage());
     }
 
     @Test

@@ -23,7 +23,7 @@ public class MultiAzValidator {
 
     private Map<CloudPlatform, Set<Entitlement>> entitlementForPlatformMap = new HashMap<>() {
         {
-            put(CloudPlatform.AWS, Set.of(Entitlement.CDP_CB_AWS_NATIVE_FREEIPA));
+            put(CloudPlatform.AWS, Set.of());
             put(CloudPlatform.AZURE, Set.of(Entitlement.CDP_CB_AZURE_MULTIAZ));
             put(CloudPlatform.GCP, Set.of(Entitlement.CDP_CB_GCP_MULTIAZ));
         }

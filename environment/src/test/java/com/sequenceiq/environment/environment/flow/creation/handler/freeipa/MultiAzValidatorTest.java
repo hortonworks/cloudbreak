@@ -31,7 +31,7 @@ public class MultiAzValidatorTest {
 
     static Object[][] getMultiAzEntitlements() {
         return new Object[][]{
-                {CloudPlatform.AWS, Set.of(Entitlement.CDP_CB_AWS_NATIVE_FREEIPA)},
+                {CloudPlatform.AWS, Set.of()},
                 {CloudPlatform.AZURE, Set.of(Entitlement.CDP_CB_AZURE_MULTIAZ)},
                 {CloudPlatform.GCP, Set.of(Entitlement.CDP_CB_GCP_MULTIAZ)}
         };
