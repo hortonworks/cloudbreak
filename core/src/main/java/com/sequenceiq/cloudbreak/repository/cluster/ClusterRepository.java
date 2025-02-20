@@ -17,15 +17,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.domain.CustomConfigurations;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.BaseBlueprintClusterView;
-import com.sequenceiq.cloudbreak.quartz.model.JobResource;
-import com.sequenceiq.cloudbreak.quartz.model.JobResourceRepository;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.common.api.type.CertExpirationState;
 
 @Transactional(TxType.REQUIRED)
 @EntityType(entityClass = Cluster.class)
-public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, Long>, JpaRepository<Cluster, Long>, JobResourceRepository<Cluster, Long> {
+public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, Long>, JpaRepository<Cluster, Long> {
 
     @Override
     Cluster save(Cluster entity);
@@ -119,11 +117,4 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
     void updateDbSslCert(@Param("clusterId") Long clusterId,
             @Param("dbSslRootCertBundle") String dbSslRootCertBundle,
             @Param("dbSslEnabled") Boolean dbSslEnabled);
-
-    @Override
-    @Query("SELECT c.id as localId, s.resourceCrn as remoteResourceId, s.name as name, s.cloudPlatform as provider " +
-            "FROM Cluster c " +
-            "JOIN c.stack s " +
-            "WHERE c.id = :resourceId")
-    Optional<JobResource> getJobResource(Long resourceId);
 }
