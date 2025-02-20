@@ -7,9 +7,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -27,13 +27,14 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
-import com.google.common.collect.Sets;
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.poller.PollerUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsInstanceStatusMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudOperationNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.exception.InsufficientCapacityException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -55,6 +56,12 @@ import software.amazon.awssdk.services.ec2.model.StopInstancesRequest;
 
 @Service
 public class AwsInstanceConnector implements InstanceConnector {
+
+    private static final Integer RESILIENT_START_THRESHOLD = 100;
+
+    private static final Integer RESILIENT_START_CHUNK_SIZE = 5;
+
+    private static final Integer RESILIENT_START_SMALL_GROUP_THRESHOLD = 5;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsInstanceConnector.class);
 
@@ -81,7 +88,7 @@ public class AwsInstanceConnector implements InstanceConnector {
     }
 
     @Retryable(
-            value = SdkClientException.class,
+            retryFor = SdkClientException.class,
             maxAttemptsExpression = "#{${cb.vm.retry.attempt:15}}",
             backoff = @Backoff(delayExpression = "#{${cb.vm.retry.backoff.delay:1000}}",
                     multiplierExpression = "#{${cb.vm.retry.backoff.multiplier:2}}",
@@ -89,11 +96,49 @@ public class AwsInstanceConnector implements InstanceConnector {
     )
     @Override
     public List<CloudVmInstanceStatus> start(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
-        LOGGER.debug("Sending start request for VM(s) with the following ID(s): {}", String.join(",",
-                vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList())));
-        return setCloudVmInstanceStatuses(ac, vms, "Running",
-                (ec2Client, instances) -> ec2Client.startInstances(StartInstancesRequest.builder().instanceIds(instances).build()),
-                "Failed to send start request to AWS: ");
+        String exceptionText = "Failed to send start request to AWS: ";
+        String completedStatus = "Running";
+        BiConsumer<AmazonEc2Client, Collection<String>> startConsumer =
+                (ec2Client, instances) -> ec2Client.startInstances(StartInstancesRequest.builder().instanceIds(instances).build());
+        if (vms.size() < RESILIENT_START_THRESHOLD) {
+            LOGGER.debug("Sending start request for VM(s) with the following ID(s): {}",
+                    vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.joining(",")));
+            return setCloudVmInstanceStatuses(ac, vms, completedStatus, startConsumer, exceptionText);
+        } else {
+            try {
+                return resilientStart(ac, resources, vms, exceptionText, completedStatus, startConsumer);
+            } catch (SdkClientException e) {
+                // catch and convert SdkClientException to eliminate spring retry in case of resilient start, since ec2client already has its own retry logic
+                throw new CloudConnectorException(e);
+            }
+        }
+    }
+
+    public List<CloudVmInstanceStatus> resilientStart(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms,
+            String exceptionText, String completedStatus, BiConsumer<AmazonEc2Client, Collection<String>> startConsumer) {
+        List<CloudVmInstanceStatus> instanceStatuses = new ArrayList<>();
+        Map<String, List<CloudInstance>> instancesByGroup = vms.stream().collect(
+                Collectors.groupingBy(instance -> instance.getTemplate().getGroupName()));
+        List<List<CloudInstance>> instanceChunks = new ArrayList<>();
+        instancesByGroup.values().forEach(vmsByGroup -> {
+            if (vmsByGroup.size() <= RESILIENT_START_SMALL_GROUP_THRESHOLD) {
+                instanceChunks.add(vmsByGroup);
+            }
+        });
+        instancesByGroup.values().forEach(vmsByGroup -> {
+            if (vmsByGroup.size() > RESILIENT_START_SMALL_GROUP_THRESHOLD) {
+                instanceChunks.addAll(Lists.partition(vmsByGroup, RESILIENT_START_CHUNK_SIZE));
+            }
+        });
+        instanceChunks.forEach(vmListChunk -> {
+            LOGGER.info("Resiliently starting instances: {}", vmListChunk.stream().map(CloudInstance::getInstanceId).collect(Collectors.joining(",")));
+            AmazonEc2Client amazonEC2Client = new AuthenticatedContextView(ac).getStartInstancesAmazonEC2Client();
+            Set<InstanceStatus> finalStatuses =
+                    Set.of(AwsInstanceStatusMapper.getInstanceStatusByAwsStatus(completedStatus), InstanceStatus.FAILED);
+            executeInstanceOperation(ac, vmListChunk, completedStatus, startConsumer, finalStatuses, exceptionText, amazonEC2Client);
+            instanceStatuses.addAll(pollerUtil.waitFor(ac, vmListChunk, finalStatuses, completedStatus));
+        });
+        return instanceStatuses;
     }
 
     @Retryable(
@@ -106,9 +151,9 @@ public class AwsInstanceConnector implements InstanceConnector {
     @Override
     public List<CloudVmInstanceStatus> startWithLimitedRetry(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms,
             Long timeboundInMs) {
+        LOGGER.debug("Sending start request for VM(s) using limited retry with the following ID(s): {}",
+                vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.joining(",")));
         // The following states will never transition over to "Running"/STARTED - so it is safe to ignore instances in this state.
-        LOGGER.debug("Sending start request for VM(s) with the following ID(s): {}", String.join(",",
-                vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList())));
         Set<InstanceStatus> completedStatuses = EnumSet.of(
                 InstanceStatus.FAILED,
                 InstanceStatus.TERMINATED,
@@ -163,6 +208,16 @@ public class AwsInstanceConnector implements InstanceConnector {
             BiConsumer<AmazonEc2Client, Collection<String>> consumer, Set<InstanceStatus> completedStatuses, String exceptionText,
             Long timeboundInMs) {
         AmazonEc2Client amazonEC2Client = new AuthenticatedContextView(ac).getAmazonEC2Client();
+        executeInstanceOperation(ac, vms, status, consumer, completedStatuses, exceptionText, amazonEC2Client);
+        if (timeboundInMs != null) {
+            return pollerUtil.timeBoundWaitFor(timeboundInMs, ac, vms, completedStatuses, status);
+        } else {
+            return pollerUtil.waitFor(ac, vms, completedStatuses, status);
+        }
+    }
+
+    private void executeInstanceOperation(AuthenticatedContext ac, List<CloudInstance> vms, String status, BiConsumer<AmazonEc2Client,
+            Collection<String>> consumer, Set<InstanceStatus> completedStatuses, String exceptionText, AmazonEc2Client amazonEC2Client) {
         try {
             Collection<String> instances = instanceIdsWhichAreNotInCorrectState(vms, amazonEC2Client, status, completedStatuses);
             if (!instances.isEmpty()) {
@@ -174,17 +229,12 @@ public class AwsInstanceConnector implements InstanceConnector {
             LOGGER.warn(exceptionText, e);
             throw e;
         }
-        if (timeboundInMs != null) {
-            return pollerUtil.timeBoundWaitFor(timeboundInMs, ac, vms, completedStatuses, status);
-        } else {
-            return pollerUtil.waitFor(ac, vms, completedStatuses, status);
-        }
     }
 
     private List<CloudVmInstanceStatus> setCloudVmInstanceStatuses(AuthenticatedContext ac, List<CloudInstance> vms, String status,
             BiConsumer<AmazonEc2Client, Collection<String>> consumer, String exceptionText) {
         return setCloudVmInstanceStatuses(ac, vms, status, consumer,
-                Sets.newHashSet(AwsInstanceStatusMapper.getInstanceStatusByAwsStatus(status), InstanceStatus.FAILED), exceptionText, null);
+                Set.of(AwsInstanceStatusMapper.getInstanceStatusByAwsStatus(status), InstanceStatus.FAILED), exceptionText, null);
     }
 
     @Retryable(
@@ -376,7 +426,7 @@ public class AwsInstanceConnector implements InstanceConnector {
 
     private Collection<String> instanceIdsWhichAreNotInCorrectState(List<CloudInstance> vms, AmazonEc2Client amazonEC2Client, String state,
             Set<InstanceStatus> completedStatuses) {
-        Set<String> instances = vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.toCollection(HashSet::new));
+        Set<String> instances = vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.toSet());
         DescribeInstancesResponse describeInstances = amazonEC2Client.describeInstances(
                 DescribeInstancesRequest.builder().instanceIds(instances).build());
         for (Reservation reservation : describeInstances.reservations()) {
