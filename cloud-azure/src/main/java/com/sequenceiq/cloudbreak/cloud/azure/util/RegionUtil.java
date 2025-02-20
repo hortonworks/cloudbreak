@@ -24,6 +24,10 @@ public class RegionUtil {
         if (labelOrName == null) {
             return null;
         }
-        return REGIONS_BY_NAME.get(labelOrName.toLowerCase(Locale.ROOT).replace(" ", ""));
+        Region region = REGIONS_BY_NAME.get(labelOrName.toLowerCase(Locale.ROOT).replace(" ", ""));
+        if (region == null) {
+            region = Region.fromName(labelOrName);
+        }
+        return region;
     }
 }

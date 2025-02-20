@@ -236,6 +236,18 @@
       "latitude": "31.771959",
       "longitude": "35.217018",
       "cdpSupportedServices": [ "ALL" ]
+    },
+    {
+      "name": "New Zealand North",
+      "latitude": "-36.848461",
+      "longitude": "174.763336",
+      "cdpSupportedServices": [ "ALL" ]
+    },
+    {
+      "name": "Poland Central",
+      "latitude": "52.237049",
+      "longitude": "21.017532",
+      "cdpSupportedServices": [ "ALL" ]
     }
   ]
 }
