@@ -95,7 +95,7 @@ class AwsAuthenticatorTest {
         when(awsEnvironmentVariableChecker.isAwsAccessKeyAvailable(any(AwsCredentialView.class))).thenReturn(false);
         when(awsEnvironmentVariableChecker.isAwsSecretAccessKeyAvailable(any(AwsCredentialView.class))).thenReturn(false);
         testAuthenticate(Map.of(AWS, Map.of(DEFAULT_REGION_KEY, REGION, "roleBased", Map.of("roleArn", "role"))));
-        verify(awsEnvironmentVariableChecker, times(2)).isAwsAccessKeyAvailable(any(AwsCredentialView.class));
+        verify(awsEnvironmentVariableChecker, times(3)).isAwsAccessKeyAvailable(any(AwsCredentialView.class));
         verify(awsEnvironmentVariableChecker, times(1)).isAwsSecretAccessKeyAvailable(any(AwsCredentialView.class));
     }
 
