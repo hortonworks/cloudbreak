@@ -11,7 +11,7 @@
     },
     {
       "name": "CLO",
-      "relatedServices": ["CLO"]
+      "relatedServices": ["LAKEHOUSE_OPTIMIZER"]
     }
   ]
 }
