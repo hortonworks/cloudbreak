@@ -266,11 +266,20 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         boolean encryptedVolume = awsCommonDiskUtilService.isEncryptedVolumeRequested(group);
         String volumeEncryptionKey = awsCommonDiskUtilService.getVolumeEncryptionKey(group, encryptedVolume);
         TagSpecification tagSpecification = awsCommonDiskUtilService.getTagSpecification(cloudStack);
-        List<CloudResource> requestedResources = buildableResource.stream()
-                .filter(cloudResource -> CommonStatus.REQUESTED.equals(cloudResource.getStatus()))
-                .collect(Collectors.toList());
+        Map<CommonStatus, List<CloudResource>> resourcesByStatus = buildableResource.stream().collect(Collectors.groupingBy(CloudResource::getStatus));
+        List<CloudResource> requestedResources = resourcesByStatus.getOrDefault(CommonStatus.REQUESTED, List.of());
+        List<CloudResource> detachedResources = resourcesByStatus.getOrDefault(CommonStatus.DETACHED, List.of());
 
         Long ephemeralCount = getEphemeralCount(group);
+        for (CloudResource resource : detachedResources) {
+            VolumeSetAttributes volumeSetAttributes = resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+            LOGGER.debug("There are {} ephemeral volumes in the group {}. Offsetting the device names in the following detached volume set by that much: {}",
+                    ephemeralCount, group.getName(), volumeSetAttributes);
+            DeviceNameGenerator generator = new DeviceNameGenerator(DEVICE_NAME_TEMPLATE, ephemeralCount.intValue());
+            volumeSetAttributes.getVolumes().forEach(volume -> volume.setDevice(generator.next()));
+            LOGGER.debug("Detached volume set after offsetting device names: {}", volumeSetAttributes);
+            resourceNotifier.notifyUpdate(resource, auth.getCloudContext());
+        }
 
         LOGGER.debug("Start creating data volumes for stack: '{}' group: '{}'", auth.getCloudContext().getName(), group.getName());
         String defaultAvailabilityZone = auth.getCloudContext().getLocation().getAvailabilityZone().value();
@@ -316,10 +325,10 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     }
 
     private Long getEphemeralCount(Group group) {
-        Long ephemeralTemplateCount = group.getReferenceInstanceTemplate().getVolumes().stream()
-                .filter(vol -> isVolumeEphemeral(vol)).count();
+        Optional<InstanceTemplate> instanceTemplate = Optional.ofNullable(group.getReferenceInstanceTemplate());
+        Long ephemeralTemplateCount = instanceTemplate.map(it -> it.getVolumes().stream().filter(this::isVolumeEphemeral).count()).orElse(0L);
         if (ephemeralTemplateCount.equals(0L)) {
-            return Optional.ofNullable(group.getReferenceInstanceTemplate()).map(InstanceTemplate::getTemporaryStorageCount).orElse(0L);
+            return instanceTemplate.map(InstanceTemplate::getTemporaryStorageCount).orElse(0L);
         } else {
             return ephemeralTemplateCount;
         }
