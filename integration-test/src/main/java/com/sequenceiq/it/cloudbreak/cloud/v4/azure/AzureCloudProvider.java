@@ -288,7 +288,8 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     public EnvironmentNetworkTestDto network(EnvironmentNetworkTestDto network) {
         return network.withSubnetIDs(getSubnetIds())
                 .withAzure(environmentNetworkParameters())
-                .withServiceEndpoints(serviceEndpoint());
+                .withServiceEndpoints(serviceEndpoint())
+                .disableAzurePrivateEndpoint();
     }
 
     private EnvironmentNetworkAzureParams environmentNetworkParameters() {
