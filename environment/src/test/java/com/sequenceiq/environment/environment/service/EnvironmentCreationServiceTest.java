@@ -158,7 +158,7 @@ class EnvironmentCreationServiceTest {
     void setUp() {
         doNothing().when(ownerAssignmentService).assignResourceOwnerRoleIfEntitled(any(), any());
         when(validatorService.validatePublicKey(any())).thenReturn(ValidationResult.empty());
-        when(validatorService.validateTags(any())).thenReturn(ValidationResult.empty());
+        when(validatorService.validateTags(any(EnvironmentCreationDto.class))).thenReturn(ValidationResult.empty());
     }
 
     @Test

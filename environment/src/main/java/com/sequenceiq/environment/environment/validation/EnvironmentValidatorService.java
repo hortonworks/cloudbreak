@@ -138,6 +138,10 @@ public class EnvironmentValidatorService {
         return tagValidator.validateTags(environmentCreationDto.getCloudPlatform(), environmentCreationDto.getTags());
     }
 
+    public ValidationResult validateTags(EnvironmentEditDto editDto) {
+        return tagValidator.validateTags(editDto.getCloudPlatform(), editDto.getUserDefinedTags());
+    }
+
     public ValidationResult validateParentChildRelation(Environment environment, String parentEnvironmentName) {
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
 

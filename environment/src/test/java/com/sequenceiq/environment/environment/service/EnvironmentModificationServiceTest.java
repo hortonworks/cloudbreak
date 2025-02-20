@@ -145,7 +145,7 @@ class EnvironmentModificationServiceTest {
     @MockBean
     private EventSenderService eventSenderService;
 
-    @Mock
+    @MockBean
     private EnvironmentValidatorService validatorService;
 
     @Mock

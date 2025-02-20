@@ -100,6 +100,8 @@ public class EnvironmentModificationService {
 
     private final EnvironmentTagsDtoConverter environmentTagsDtoConverter;
 
+    private final EnvironmentValidatorService environmentValidatorService;
+
     private final EventSenderService eventSenderService;
 
     public EnvironmentModificationService(
@@ -118,6 +120,7 @@ public class EnvironmentModificationService {
             ProxyConfigModificationService proxyConfigModificationService,
             EnvironmentReactorFlowManager environmentReactorFlowManager,
             EnvironmentTagsDtoConverter environmentTagsDtoConverter,
+            EnvironmentValidatorService environmentValidatorService,
             EventSenderService eventSenderService) {
         this.environmentDtoConverter = environmentDtoConverter;
         this.environmentService = environmentService;
@@ -134,10 +137,12 @@ public class EnvironmentModificationService {
         this.proxyConfigModificationService = proxyConfigModificationService;
         this.environmentReactorFlowManager = environmentReactorFlowManager;
         this.environmentTagsDtoConverter = environmentTagsDtoConverter;
+        this.environmentValidatorService = environmentValidatorService;
         this.eventSenderService = eventSenderService;
     }
 
     public EnvironmentDto edit(Environment environment, EnvironmentEditDto editDto) {
+        ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
         editDescriptionIfChanged(environment, editDto);
         editTelemetryIfChanged(environment, editDto);
         editNetworkIfChanged(environment, editDto);
@@ -152,8 +157,16 @@ public class EnvironmentModificationService {
         editDataServices(editDto, environment);
         editFreeIpaNodeCount(editDto, environment);
         editTags(editDto, environment);
+        validationBuilder.merge(environmentValidatorService.validateTags(editDto));
+
+        ValidationResult validationResult = validationBuilder.build();
+        if (validationResult.hasError()) {
+            throw new BadRequestException(validationResult.getFormattedErrors());
+        }
+
         Environment saved = environmentService.save(environment);
         triggerEditProxyIfChanged(editDto, saved);
+
         return environmentDtoConverter.environmentToDto(saved);
     }
 
