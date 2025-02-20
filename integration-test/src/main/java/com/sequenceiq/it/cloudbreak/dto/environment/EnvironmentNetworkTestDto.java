@@ -39,6 +39,19 @@ public class EnvironmentNetworkTestDto extends AbstractCloudbreakTestDto<Environ
         return this;
     }
 
+    /**
+     * Temporarily disable private endpoint setup for Azure Flexible Server as stop/start functionality is not working properly
+     * and somtimes after flexible server start the server cannot be reached from the CM server node in case of private setup.
+     */
+    public EnvironmentNetworkTestDto disableAzurePrivateEndpoint() {
+        EnvironmentNetworkAzureParams environmentNetworkAzureParams = getRequest().getAzure();
+        if (environmentNetworkAzureParams != null) {
+            environmentNetworkAzureParams.setDatabasePrivateDnsZoneId(null);
+            withServiceEndpoints(ServiceEndpointCreation.DISABLED);
+        }
+        return this;
+    }
+
     public EnvironmentNetworkTestDto withAws(EnvironmentNetworkAwsParams aws) {
         getRequest().setAws(aws);
         return this;
