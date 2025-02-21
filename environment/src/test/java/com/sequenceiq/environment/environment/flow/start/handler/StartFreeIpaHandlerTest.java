@@ -154,7 +154,7 @@ class StartFreeIpaHandlerTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = DetailedStackStatus.class, names = {"STOPPED", "STOP_FAILED", "START_FAILED", "START_IN_PROGRESS"},
+    @EnumSource(value = DetailedStackStatus.class, names = {"STOPPED", "STOP_FAILED", "START_FAILED", "START_IN_PROGRESS", "STALE"},
             mode = EnumSource.Mode.EXCLUDE)
     public void shouldThrowErrorWhenUnstartable(DetailedStackStatus detailedStackStatus) {
         if (!detailedStackStatus.getAvailabilityStatus().isAvailable()) {

@@ -86,6 +86,7 @@ public enum EnvironmentStatus {
     FREEIPA_UNREACHABLE("FreeIPA is unreachable"),
     FREEIPA_REBUILD_IN_PROGRESS("Rebuilding FreeIPA"),
     FREEIPA_REBUILD_FAILED("Rebuilding FreeIPA failed"),
+    FREEIPA_STALE("FreeIPA is stale"),
 
     LOAD_BALANCER_ENV_UPDATE_STARTED("Starting load balancer update for environment"),
     LOAD_BALANCER_ENV_UPDATE_FAILED("Failed to update environment with load balancer"),
@@ -131,7 +132,8 @@ public enum EnvironmentStatus {
             START_DATALAKE_STARTED,
             START_DATAHUB_STARTED,
             START_SYNCHRONIZE_USERS_STARTED,
-            START_FREEIPA_STARTED
+            START_FREEIPA_STARTED,
+            FREEIPA_STALE
     );
 
     private static final Set<EnvironmentStatus> STOPPABLE_STATUSES = Set.of(

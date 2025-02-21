@@ -17,7 +17,8 @@ public enum InstanceStatus {
     REBOOTING,
     UNREACHABLE,
     UNHEALTHY,
-    DELETE_REQUESTED;
+    DELETE_REQUESTED,
+    UNKNOWN;
 
     public static final Collection<InstanceStatus> AVAILABLE_STATUSES = List.of(CREATED);
 
