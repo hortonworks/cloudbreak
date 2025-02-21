@@ -101,7 +101,7 @@ public class MeteringServiceFieldResolverTest {
     @Test
     public void testResolveServiceFeatureForCLO() {
         // GIVEN
-        given(cmTemplateProcessor.getAllComponents()).willReturn(createServiceComponents("CLO"));
+        given(cmTemplateProcessor.getAllComponents()).willReturn(createServiceComponents("LAKEHOUSE_OPTIMIZER"));
         // WHEN
         String result = underTest.resolveServiceFeature(cmTemplateProcessor);
         // THEN

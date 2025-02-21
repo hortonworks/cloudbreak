@@ -215,7 +215,7 @@ class ExposedServiceCollectorTest {
                 "RANGERRAZ",
                 "KAFKA_BROKER",
                 "DLM",
-                "CLO");
+                "LAKEHOUSE_OPTIMIZER");
     }
 
     @Test

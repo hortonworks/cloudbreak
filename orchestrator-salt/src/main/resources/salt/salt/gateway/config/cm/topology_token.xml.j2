@@ -669,11 +669,11 @@
     {%- endif %}
 
     {% if 'CLO_SERVER' in salt['pillar.get']('gateway:location') -%}
-    {% if 'CLO' in exposed -%}
+    {% if 'LAKEHOUSE_OPTIMIZER' in exposed -%}
     <service>
-        <role>CLO</role>
+        <role>LAKEHOUSE_OPTIMIZER</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['CLO_SERVER'] -%}
-        <url>http://{{ hostloc }}:{{ ports['CLO'] }}</url>
+        <url>http://{{ hostloc }}:{{ ports['LAKEHOUSE_OPTIMIZER'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}

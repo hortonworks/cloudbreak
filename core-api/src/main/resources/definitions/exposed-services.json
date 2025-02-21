@@ -896,10 +896,10 @@
       "minVersion": "7.2.18"
     },
     {
-      "name": "CLO",
+      "name": "LAKEHOUSE_OPTIMIZER",
       "displayName": "Cloudera Lakehouse Optimizer",
       "serviceName": "CLO_SERVER",
-      "knoxService": "CLO",
+      "knoxService": "LAKEHOUSE_OPTIMIZER",
       "knoxUrl": "/clo/",
       "ssoSupported": false,
       "port": 8085,
