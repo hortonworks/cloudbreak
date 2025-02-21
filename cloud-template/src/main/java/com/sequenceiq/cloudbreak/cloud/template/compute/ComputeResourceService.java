@@ -120,7 +120,7 @@ public class ComputeResourceService {
     }
 
     private List<CloudResourceStatus> getDeletedResourcesOrFail(Collection<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures,
-                                                                boolean hardFail) {
+            boolean hardFail) {
         Map<FutureResult, List<List<CloudResourceStatus>>> futureResults = waitForRequests(futures);
         List<List<CloudResourceStatus>> failedResources = futureResults.get(FutureResult.FAILED);
         if (hardFail) {
@@ -135,7 +135,7 @@ public class ComputeResourceService {
     }
 
     public List<CloudResourceStatus> update(ResourceBuilderContext ctx, AuthenticatedContext auth, CloudStack stack,
-                                            List<CloudResource> cloudResource, Optional<String> group, UpdateType updateType) {
+            List<CloudResource> cloudResource, Optional<String> group, UpdateType updateType) {
         LOGGER.info("Update compute resources.");
         return new ResourceBuilder(ctx, auth).updateResources(ctx, auth, cloudResource, stack, group, updateType);
     }
@@ -306,17 +306,18 @@ public class ComputeResourceService {
         }
 
         public List<CloudResourceStatus> buildResources(CloudStack cloudStack, Iterable<Group> groups,
-                                                        Boolean upscale, AdjustmentTypeWithThreshold adjustmentTypeAndThreshold) {
+                Boolean upscale, AdjustmentTypeWithThreshold adjustmentTypeAndThreshold) {
 
             Integer createBatchSize = resourceBuilders.getCreateBatchSize(auth.getCloudContext().getVariant());
             List<CloudInstancesGroupProcessingBatch> cloudInstanceProcessingBatches = cloudInstanceBatchSplitter.split(groups, createBatchSize);
 
             List<FutureResourceGroupResults> futureResourceGroupResults = new ArrayList<>();
-
+            LOGGER.debug("Number of instance group batches: {}", cloudInstanceProcessingBatches.size());
             for (CloudInstancesGroupProcessingBatch batch : cloudInstanceProcessingBatches) {
+                LOGGER.debug("Processing instance group batch: {}", batch.getGroup().getName());
                 Collection<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
                 for (List<CloudInstance> instancesChunk : batch.getCloudInstances()) {
-                    LOGGER.debug("Submit the create operation thread with {} instances", instancesChunk.size());
+                    LOGGER.debug("Submit the create operation thread with {} instances, in group: {}", instancesChunk.size(), batch.getGroup().getName());
                     ResourceCreationCallablePayload creationCallablePayload = new ResourceCreationCallablePayload(instancesChunk, batch.getGroup(),
                             ctx, auth, cloudStack);
                     ResourceCreationCallable creationCallable = resourceActionFactory.buildCreationCallable(creationCallablePayload);
@@ -385,7 +386,7 @@ public class ComputeResourceService {
                 for (RuntimeException exception : exceptions) {
                     combinedException.addSuppressed(exception);
                 }
-                LOGGER.error("Combined exeption during resource cration!", combinedException);
+                LOGGER.error("Combined exeption during resource creation!", combinedException);
                 throw combinedException;
             }
         }

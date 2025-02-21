@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Ordering;
@@ -17,8 +19,10 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 @Component
 public class CloudInstanceBatchSplitter {
 
-    public List<CloudInstancesGroupProcessingBatch> split(Iterable<Group> groups, int batchSize) {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CloudInstanceBatchSplitter.class);
 
+    public List<CloudInstancesGroupProcessingBatch> split(Iterable<Group> groups, int batchSize) {
+        LOGGER.debug("Splitting instance group batches with size of {}", batchSize);
         validate(groups, batchSize);
         List<CloudInstancesGroupProcessingBatch> cloudInstanceProcessingBatches = new ArrayList<>();
 
@@ -35,11 +39,11 @@ public class CloudInstanceBatchSplitter {
                     .stream()
                     .toList();
 
-
             CloudInstancesGroupProcessingBatch currentBatch = new CloudInstancesGroupProcessingBatch(group, instancesChunks, instances.size());
+            LOGGER.debug("Instance group {} is split into {} batches", group.getName(), instancesChunks.size());
             cloudInstanceProcessingBatches.add(currentBatch);
-
         }
+        LOGGER.debug("Instance group batches are split into {} batches", cloudInstanceProcessingBatches.size());
 
         return cloudInstanceProcessingBatches;
     }
