@@ -26,6 +26,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.StackAuthenticationResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.FreeIpaLoadBalancerResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.usersync.UserSyncStatusResponse;
 import com.sequenceiq.freeipa.converter.authentication.StackAuthenticationToStackAuthenticationResponseConverter;
 import com.sequenceiq.freeipa.converter.freeipa.FreeIpaToFreeIpaServerResponseConverter;
@@ -87,6 +88,10 @@ class StackToDescribeFreeIpaResponseConverterTest {
     private static final String LOAD_BALANCER_SERVER_IP = "2.2.2.2";
 
     private static final String VARIANT = "NATIVE";
+
+    private static final String LOAD_BALANCER_RESOURCE_ID = "crn:cdp:freeipa:us-west-1:cloudera:freeipa:9662f595-737c-4019-8a8c-07d9131a11aa";
+
+    private static final String LOAD_BALANCER_FQDN = "lb.freeipa.example.com";
 
     @InjectMocks
     private StackToDescribeFreeIpaResponseConverter underTest;
@@ -168,12 +173,23 @@ class StackToDescribeFreeIpaResponseConverterTest {
 
         validateResult(tunnel, result, freeIpaServerResponse);
         validateFreeIpaResponse(freeIpaServerResponse, true);
+        validateLoadBalancerResponse(result);
+    }
+
+    private void validateLoadBalancerResponse(DescribeFreeIpaResponse result) {
+        assertThat(result.getLoadBalancer())
+                .isNotNull()
+                .returns(Set.of(LOAD_BALANCER_SERVER_IP), FreeIpaLoadBalancerResponse::getPrivateIps)
+                .returns(LOAD_BALANCER_RESOURCE_ID, FreeIpaLoadBalancerResponse::getResourceId)
+                .returns(LOAD_BALANCER_FQDN, FreeIpaLoadBalancerResponse::getFqdn);
     }
 
     private void setupLoadBalancerMock(Long id) {
         LoadBalancer loadBalancer = new LoadBalancer();
         loadBalancer.setStackId(id);
         loadBalancer.setIp(Set.of(LOAD_BALANCER_SERVER_IP));
+        loadBalancer.setResourceId(LOAD_BALANCER_RESOURCE_ID);
+        loadBalancer.setFqdn(LOAD_BALANCER_FQDN);
         when(freeIpaLoadBalancerService.findByStackId(id)).thenReturn(Optional.of(loadBalancer));
     }
 

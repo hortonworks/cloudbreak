@@ -30,6 +30,7 @@ public class FreeIpaModelDescriptions {
     public static final String MULTIAZ = "whether FreeIPA is MultiAZ or not";
 
     public static final String SUPPORTED_IMDS_VERSION = "IMDS version supported by the given stack.";
+    public static final String LOAD_BALANCER = "freeipa loadbalancer details";
 
     private FreeIpaModelDescriptions() {
     }
@@ -118,4 +119,11 @@ public class FreeIpaModelDescriptions {
         public static final String IMAGE_SECURITY = "FreeIpa image security settings.";
         public static final String SELINUX = "SELinux enabled on the image.";
     }
+
+    public static class FreeIpaLoadBalancerModelDescriptions {
+        public static final String PRIVATE_IPS = "private IPs of the LoadBalancer";
+        public static final String FQDN = "fully qualified domain name of the LoadBalancer";
+        public static final String RESOURCE_ID = "resource id of the LoadBalancer";
+    }
+
 }

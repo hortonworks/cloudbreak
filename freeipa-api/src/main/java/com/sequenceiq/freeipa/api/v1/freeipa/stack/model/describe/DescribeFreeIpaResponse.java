@@ -108,6 +108,9 @@ public class DescribeFreeIpaResponse {
     @Schema(description = FreeIpaModelDescriptions.FreeIpaImageSecurityModelDescriptions.IMAGE_SECURITY)
     private SecurityResponse security;
 
+    @Schema(description = FreeIpaModelDescriptions.LOAD_BALANCER)
+    private FreeIpaLoadBalancerResponse loadBalancer;
+
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
@@ -298,6 +301,14 @@ public class DescribeFreeIpaResponse {
 
     public void setSecurity(SecurityResponse security) {
         this.security = security;
+    }
+
+    public FreeIpaLoadBalancerResponse getLoadBalancer() {
+        return loadBalancer;
+    }
+
+    public void setLoadBalancer(FreeIpaLoadBalancerResponse loadBalancer) {
+        this.loadBalancer = loadBalancer;
     }
 
     @Override

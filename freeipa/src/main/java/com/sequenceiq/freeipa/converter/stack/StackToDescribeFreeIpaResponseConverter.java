@@ -21,6 +21,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.region.PlacementResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.FreeIpaLoadBalancerResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.SecurityResponse;
 import com.sequenceiq.freeipa.converter.authentication.StackAuthenticationToStackAuthenticationResponseConverter;
 import com.sequenceiq.freeipa.converter.freeipa.FreeIpaToFreeIpaServerResponseConverter;
@@ -98,6 +99,7 @@ public class StackToDescribeFreeIpaResponseConverter {
         describeFreeIpaResponse.setEnableMultiAz(stack.isMultiAz());
         decorateFreeIpaServerResponseWithIps(stack.getId(), describeFreeIpaResponse.getFreeIpa(), describeFreeIpaResponse.getInstanceGroups());
         decorateFreeIpaServerResponseWithLoadBalancedHost(stack, describeFreeIpaResponse.getFreeIpa(), freeIpa);
+        decorateFreeIpaServerResponseWithLoadBalancerInfo(stack.getId(), describeFreeIpaResponse);
         describeFreeIpaResponse.setAppVersion(stack.getAppVersion());
         describeFreeIpaResponse.setRecipes(freeIpaRecipeService.getRecipeNamesForStack(stack.getId()));
         decorateWithCloudStorageAndTelemetry(stack, describeFreeIpaResponse);
@@ -105,6 +107,20 @@ public class StackToDescribeFreeIpaResponseConverter {
         describeFreeIpaResponse.setSupportedImdsVersion(stack.getSupportedImdsVersion());
         describeFreeIpaResponse.setSecurity(getSecurity(stack));
         return describeFreeIpaResponse;
+    }
+
+    private void decorateFreeIpaServerResponseWithLoadBalancerInfo(Long stackId, DescribeFreeIpaResponse describeFreeIpaResponse) {
+        if (Objects.nonNull(describeFreeIpaResponse)) {
+            Optional<LoadBalancer> loadBalancer = freeIpaLoadBalancerService.findByStackId(stackId);
+            if (loadBalancer.isPresent()) {
+                FreeIpaLoadBalancerResponse freeIpaLoadBalancerResponse = new FreeIpaLoadBalancerResponse();
+                LoadBalancer lb = loadBalancer.get();
+                freeIpaLoadBalancerResponse.setPrivateIps(lb.getIp());
+                freeIpaLoadBalancerResponse.setFqdn(lb.getFqdn());
+                freeIpaLoadBalancerResponse.setResourceId(lb.getResourceId());
+                describeFreeIpaResponse.setLoadBalancer(freeIpaLoadBalancerResponse);
+            }
+        }
     }
 
     private SecurityResponse getSecurity(Stack stack) {
