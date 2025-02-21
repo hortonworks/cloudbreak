@@ -56,6 +56,7 @@ public class AzureMarketplaceImageTest extends AbstractE2ETest {
         EnvironmentNetworkTestDto environmentNetworkTestDto = testContext.given("network", EnvironmentNetworkTestDto.class)
                     .withServiceEndpoints(ServiceEndpointCreation.DISABLED);
         environmentNetworkTestDto.getRequest().getAzure().setFlexibleServerSubnetIds(azureProperties.getNetwork().getFlexibleServerSubnetIds());
+        environmentNetworkTestDto.getRequest().getAzure().setDatabasePrivateDnsZoneId(azureProperties.getNetwork().getDatabasePrivateDnsZoneId());
         testContext
                 .given(CredentialTestDto.class)
                 .when(credentialTestClient.create())
