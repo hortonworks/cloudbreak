@@ -116,6 +116,8 @@ class AwsVolumeResourceBuilderTest {
 
     private static final String TYPE_EPHEMERAL = AwsDiskType.Ephemeral.value();
 
+    private static final String TYPE_STANDARD = AwsDiskType.Standard.value();
+
     private static final String VOLUME_SET_NAME = "volumeName";
 
     private static final String VOLUME_ID = "volumeId";
@@ -339,6 +341,22 @@ class AwsVolumeResourceBuilderTest {
         List<VolumeSetAttributes.Volume> volumes = verifyResultAndGetVolumes(result);
         verifyVolumes(volumes, "/dev/xvdb");
         verifyCreateVolumeRequest(null, true, ENCRYPTION_KEY_ARN);
+    }
+
+    @Test
+    void testBuildOffsetsDeviceNamesOfDetachedVolumeSetByTheNumberOfTemporaryStorageVolumes() throws Exception {
+        Group group = createGroup(List.of(createVolume(TYPE_GP2), createVolume(TYPE_STANDARD)), Map.of(), 2L);
+        CloudResource cloudResource = createVolumeSet(List.of(
+                createVolumeForVolumeSet(TYPE_GP2, "/dev/xvdb"),
+                createVolumeForVolumeSet(TYPE_STANDARD, "/dev/xvdc")));
+        cloudResource.setStatus(CommonStatus.DETACHED);
+
+        List<CloudResource> result = underTest.build(awsContext, cloudInstance, PRIVATE_ID, authenticatedContext, group, List.of(cloudResource), cloudStack);
+
+        assertTrue(result.isEmpty());
+        List<VolumeSetAttributes.Volume> volumes = cloudResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class).getVolumes();
+        assertThat(volumes).extracting(VolumeSetAttributes.Volume::getDevice).containsExactlyInAnyOrder("/dev/xvdd", "/dev/xvde");
+        verify(resourceNotifier).notifyUpdate(cloudResource, authenticatedContext.getCloudContext());
     }
 
     @Test
@@ -587,6 +605,10 @@ class AwsVolumeResourceBuilderTest {
 
     private VolumeSetAttributes.Volume createVolumeForVolumeSet(String type) {
         return new VolumeSetAttributes.Volume(null, null, VOLUME_SIZE, type, CloudVolumeUsageType.GENERAL);
+    }
+
+    private VolumeSetAttributes.Volume createVolumeForVolumeSet(String type, String deviceName) {
+        return new VolumeSetAttributes.Volume(null, deviceName, VOLUME_SIZE, type, CloudVolumeUsageType.GENERAL);
     }
 
     private CloudResource createVolumeSet(List<VolumeSetAttributes.Volume> volumes) {
