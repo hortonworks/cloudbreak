@@ -27,6 +27,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.common.io.Resources;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.exception.AwsConfusedDeputyException;
 import com.sequenceiq.cloudbreak.cloud.aws.common.exception.AwsPermissionMissingException;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
@@ -70,6 +71,9 @@ public class AwsCredentialConnectorTest {
 
     @Mock
     private AwsCredentialView credentialView;
+
+    @Mock
+    private EntitlementService entitlementService;
 
     @Mock
     private AwsDefaultRegionSelector defaultRegionSelector;
@@ -133,6 +137,7 @@ public class AwsCredentialConnectorTest {
         String encodedAwsEnvPolicy = Base64Util.encode(awsEnvPolicy);
         String roleArn = "someRoleArn";
         when(credentialView.getRoleArn()).thenReturn(roleArn);
+        when(entitlementService.internalTenant(any())).thenReturn(false);
 
         CloudCredentialStatus result = underTest.verify(authenticatedContext, new CredentialVerificationContext(Boolean.TRUE));
 

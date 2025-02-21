@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.exception.AwsConfusedDeputyException;
 import com.sequenceiq.cloudbreak.cloud.aws.common.exception.AwsPermissionMissingException;
@@ -68,6 +69,9 @@ public class AwsCredentialConnector implements CredentialConnector {
 
     @Inject
     private AwsDefaultRegionSelector defaultRegionSelector;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     @Override
     public CloudCredentialStatus verify(AuthenticatedContext authenticatedContext, CredentialVerificationContext credentialVerificationContext) {
@@ -238,7 +242,7 @@ public class AwsCredentialConnector implements CredentialConnector {
         CloudCredentialStatus credentialStatus = new CloudCredentialStatus(cloudCredential, CredentialStatus.VERIFIED);
         try {
             credentialClient.retrieveSessionCredentials(awsCredential);
-            checkRoleIsAssumableWithoutExternalId(credentialVerificationContext, awsCredential);
+            checkRoleIsAssumableWithoutExternalId(credentialVerificationContext, awsCredential, cloudCredential.getAccountId());
             credentialStatus = verifyCredentialsPermission(cloudCredential, awsCredential, credentialStatus);
             credentialStatus = determineDefaultRegion(cloudCredential, credentialStatus);
         } catch (SdkException ae) {
@@ -346,8 +350,9 @@ public class AwsCredentialConnector implements CredentialConnector {
         return credentialStatus;
     }
 
-    private void checkRoleIsAssumableWithoutExternalId(CredentialVerificationContext credentialVerificationContext, AwsCredentialView awsCredential) {
-        if (credentialVerificationContext.getCreationVerification()) {
+    private void checkRoleIsAssumableWithoutExternalId(CredentialVerificationContext credentialVerificationContext,
+        AwsCredentialView awsCredential, String accountId) {
+        if (credentialVerificationContext.getCreationVerification() && !entitlementService.internalTenant(accountId)) {
             String roleArn = awsCredential.getRoleArn();
             try {
                 credentialClient.retrieveSessionCredentialsWithoutExternalId(awsCredential);
