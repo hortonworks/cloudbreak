@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.auth.altus;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -30,6 +31,8 @@ class EntitlementServiceTest {
     private static final String ENTITLEMENT_BAR = "BAR";
 
     private static final Account ACCOUNT_ENTITLEMENTS_FOO_BAR = createAccountForEntitlements(ENTITLEMENT_FOO, ENTITLEMENT_BAR);
+
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:tenant:user:5678";
 
     @Mock
     private GrpcUmsClient umsClient;
@@ -224,6 +227,16 @@ class EntitlementServiceTest {
     void getEntitlementsTest() {
         when(umsClient.getAccountDetails(eq(ACCOUNT_ID))).thenReturn(ACCOUNT_ENTITLEMENTS_FOO_BAR);
         assertThat(underTest.getEntitlements(ACCOUNT_ID)).containsExactly(ENTITLEMENT_FOO, ENTITLEMENT_BAR);
+    }
+
+    @Test
+    void testGetEntitlementsWithCrnInsteadOfAccountId() {
+        assertThrows(IllegalArgumentException.class, () -> underTest.getEntitlements(USER_CRN));
+    }
+
+    @Test
+    void testEntitlementCheckWithCrnInsteadOfAccountId() {
+        assertThrows(IllegalArgumentException.class, () -> underTest.isSingleServerRejectEnabled(USER_CRN));
     }
 
     private void setUpUmsClient(boolean entitled, String... entitlements) {

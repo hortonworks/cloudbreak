@@ -122,6 +122,7 @@ import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 
 @Service
 public class EntitlementService {
@@ -535,6 +536,9 @@ public class EntitlementService {
     }
 
     public List<String> getEntitlements(String accountId) {
+        if (Crn.isCrn(accountId)) {
+            throw new IllegalArgumentException("getEntitlements was called with Crn instead of an accountId: " + accountId);
+        }
         Account accountDetails = umsClient.getAccountDetails(accountId);
         return accountDetails.getEntitlementsList()
                 .stream()
@@ -543,6 +547,9 @@ public class EntitlementService {
     }
 
     private boolean isEntitlementRegistered(String accountId, Entitlement entitlement) {
+        if (Crn.isCrn(accountId)) {
+            throw new IllegalArgumentException("Entitlement check was called with Crn instead of an accountId: " + accountId);
+        }
         boolean entitled = getEntitlements(accountId)
                 .stream()
                 .map(String::toUpperCase)

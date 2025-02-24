@@ -49,6 +49,8 @@ public class MockUserManagementServiceTest {
 
     private static final String ACCOUNT_ID = UUID.randomUUID().toString();
 
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:tenant:user:5678";
+
     @Mock
     private MockCrnService mockCrnService;
 
@@ -336,4 +338,16 @@ public class MockUserManagementServiceTest {
         assertThat(observer.getValues().size()).isEqualTo(1);
     }
 
+    @Test
+    void testGetAccountWithCrnId() {
+        doCallRealMethod().when(mockCrnService).ensureProperAccountIdUsage(anyString());
+        GetAccountRequest req = GetAccountRequest.newBuilder()
+                .setAccountId(USER_CRN)
+                .build();
+
+        StatusRuntimeException statusRuntimeException = assertThrows(StatusRuntimeException.class, () -> underTest.getAccount(req, null));
+
+        assertThat(statusRuntimeException).hasMessage("INVALID_ARGUMENT: This operation cannot be used with crn id");
+
+    }
 }

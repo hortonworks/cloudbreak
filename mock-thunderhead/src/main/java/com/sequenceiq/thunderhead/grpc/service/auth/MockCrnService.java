@@ -44,5 +44,8 @@ class MockCrnService {
         if (RegionAwareInternalCrnGeneratorUtil.INTERNAL_ACCOUNT.equals(accountId)) {
             throw Status.INVALID_ARGUMENT.withDescription("This operation cannot be used with internal account id").asRuntimeException();
         }
+        if (Crn.isCrn(accountId)) {
+            throw Status.INVALID_ARGUMENT.withDescription("This operation cannot be used with crn id").asRuntimeException();
+        }
     }
 }
