@@ -180,6 +180,7 @@ public class BlueprintLoaderService {
         blueprintFromDatabase.setStackVersion(newBlueprint.getStackVersion());
         blueprintFromDatabase.setBlueprintUpgradeOption(getBlueprintUpgradeOption(newBlueprint));
         blueprintFromDatabase.setLastUpdated(Instant.now().toEpochMilli());
+        blueprintFromDatabase.setTags(newBlueprint.getTags());
         return blueprintFromDatabase;
     }
 

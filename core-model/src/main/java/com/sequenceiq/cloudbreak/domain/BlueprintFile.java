@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.domain;
 
 import com.google.common.base.Preconditions;
+import com.sequenceiq.cloudbreak.common.json.Json;
 
 public class BlueprintFile {
 
@@ -22,8 +23,10 @@ public class BlueprintFile {
 
     private BlueprintUpgradeOption blueprintUpgradeOption;
 
+    private Json tags;
+
     private BlueprintFile(String name, String blueprintText, String defaultBlueprintText, String stackName, String description, int hostGroupCount,
-            String stackType, String stackVersion, BlueprintUpgradeOption blueprintUpgradeOption) {
+            String stackType, String stackVersion, BlueprintUpgradeOption blueprintUpgradeOption, Json tags) {
         this.name = name;
         this.blueprintText = blueprintText;
         this.defaultBlueprintText = defaultBlueprintText;
@@ -33,6 +36,7 @@ public class BlueprintFile {
         this.stackType = stackType;
         this.stackVersion = stackVersion;
         this.blueprintUpgradeOption = blueprintUpgradeOption;
+        this.tags = tags;
     }
 
     public String getDescription() {
@@ -71,6 +75,10 @@ public class BlueprintFile {
         return blueprintUpgradeOption;
     }
 
+    public Json getTags() {
+        return tags;
+    }
+
     @Override
     public String toString() {
         return "Blueprint{" +
@@ -81,6 +89,7 @@ public class BlueprintFile {
                 ", stackType='" + stackType + '\'' +
                 ", stackVersion='" + stackVersion + '\'' +
                 ", blueprintUpgradeOption=" + blueprintUpgradeOption +
+                ", tags=" + tags +
                 '}';
     }
 
@@ -102,6 +111,8 @@ public class BlueprintFile {
         private String stackVersion;
 
         private BlueprintUpgradeOption blueprintUpgradeOption;
+
+        private Json tags;
 
         public Builder name(String name) {
             this.name = name;
@@ -143,6 +154,11 @@ public class BlueprintFile {
             return this;
         }
 
+        public Builder tags(Json tags) {
+            this.tags = tags;
+            return this;
+        }
+
         public Builder blueprintUpgradeOption(BlueprintUpgradeOption blueprintUpgradeOption) {
             this.blueprintUpgradeOption = blueprintUpgradeOption;
             return this;
@@ -155,7 +171,7 @@ public class BlueprintFile {
             Preconditions.checkNotNull(stackVersion);
             Preconditions.checkNotNull(stackType);
             return new BlueprintFile(name, blueprintText, defaultBlueprintText, stackName, description, hostGroupCount, stackType, stackVersion,
-                    blueprintUpgradeOption);
+                    blueprintUpgradeOption, tags);
         }
     }
 }

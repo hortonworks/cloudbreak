@@ -92,6 +92,7 @@ public class DefaultBlueprintCache {
                                 .blueprintUpgradeOption(bp.getBlueprintUpgradeOption())
                                 .hostGroupCount(bp.getHostGroupCount())
                                 .description(bp.getDescription())
+                                .tags(bp.getTags())
                                 .build();
                         String fileName = split[1];
 
