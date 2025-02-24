@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.service.config;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,6 +38,8 @@ import com.sequenceiq.freeipa.util.BalancedDnsAvailabilityChecker;
 class KerberosConfigRegisterServiceTest {
 
     private static final String ENVIRONMENT_CRN = "crn:cdp:environments:us-west-1:accountId:environment:e438a2db-d650-4132-ae62-242c5ba2f784";
+
+    private static final String LOAD_BALANCER_IP = "2.2.2.2";
 
     @InjectMocks
     private KerberosConfigRegisterService underTest;
@@ -123,7 +126,7 @@ class KerberosConfigRegisterServiceTest {
         when(balancedDnsAvailabilityChecker.isBalancedDnsAvailable(stack)).thenReturn(true);
         when(underTest.getEnvironmentCrnByStackId(1L)).thenReturn(ENVIRONMENT_CRN);
         LoadBalancer loadBalancer = new LoadBalancer();
-        loadBalancer.setIp("2.2.2.2");
+        loadBalancer.setIp(Set.of(LOAD_BALANCER_IP));
         when(loadBalancerService.findByStackId(stack.getId())).thenReturn(Optional.of(loadBalancer));
 
         underTest.register(1L);
@@ -138,7 +141,7 @@ class KerberosConfigRegisterServiceTest {
         assertEquals(stack.getEnvironmentCrn(), kerberosConfig.getEnvironmentCrn());
         assertEquals("kdc.testdomain.local", kerberosConfig.getUrl());
         assertEquals("kerberos.testdomain.local", kerberosConfig.getAdminUrl());
-        assertEquals(loadBalancer.getIp(), kerberosConfig.getNameServers());
+        assertEquals(LOAD_BALANCER_IP, kerberosConfig.getNameServers());
         assertEquals(freeIpa.getAdminPassword(), kerberosConfig.getPassword());
         assertEquals(freeIpa.getDomain(), kerberosConfig.getDomain());
         assertEquals(freeIpa.getDomain().toUpperCase(Locale.ROOT), kerberosConfig.getRealm());

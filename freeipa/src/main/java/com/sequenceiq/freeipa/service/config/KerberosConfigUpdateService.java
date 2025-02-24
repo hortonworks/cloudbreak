@@ -42,7 +42,7 @@ public class KerberosConfigUpdateService {
         Optional<LoadBalancer> loadBalancer = loadBalancerService.findByStackId(stackId);
         List<KerberosConfig> kerberosConfigs = kerberosConfigService.findAllInEnvironment(environmentCrn);
         kerberosConfigs.forEach(kerberosConfig -> {
-            kerberosConfig.setNameServers(loadBalancer.map(LoadBalancer::getIp).orElse(allFreeIpaIpJoined));
+            kerberosConfig.setNameServers(loadBalancer.map(LoadBalancer::getIp).map(ip -> String.join(",", ip)).orElse(allFreeIpaIpJoined));
         });
         kerberosConfigService.saveAll(kerberosConfigs);
     }

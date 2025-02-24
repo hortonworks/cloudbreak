@@ -4,7 +4,6 @@ import java.util.Optional;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.freeipa.client.FreeIpaClient;
@@ -28,7 +27,7 @@ public class FreeIpaLoadBalancerDomainService {
         if (loadBalancer.isPresent()) {
             LoadBalancer lb = loadBalancer.get();
             FreeIpa freeIpa = freeIpaService.findByStackId(stackId);
-            for (String ip : StringUtils.split(lb.getIp(), ',')) {
+            for (String ip : lb.getIp()) {
                 FreeIpaClientExceptionUtil.ignoreEmptyModException(() -> freeIpaClient.addDnsARecord(freeIpa.getDomain(), lb.getEndpoint(), ip, true),
                         "LB A record with endpoint [{}], IP [{}], domain [{}] already exists, nothing to do", lb.getEndpoint(), lb.getIp(), freeIpa.getDomain());
             }

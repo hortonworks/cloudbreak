@@ -66,7 +66,7 @@ public class AwsSecurityGroupResourceBuilder extends AbstractAwsNativeGroupBuild
                 .build();
     }
 
-    @Retryable(retryFor = Ec2Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 5000))
+    @Retryable(retryFor = Ec2Exception.class, maxAttempts = 5, backoff = @Backoff(delay = 5000))
     @Override
     public CloudResource delete(AwsContext context, AuthenticatedContext auth, CloudResource resource, Network network) throws Exception {
         AmazonEc2Client amazonEc2Client = context.getAmazonEc2Client();

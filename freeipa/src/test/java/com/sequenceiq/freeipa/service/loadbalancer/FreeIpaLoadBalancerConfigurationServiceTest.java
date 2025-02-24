@@ -1,10 +1,12 @@
 package com.sequenceiq.freeipa.service.loadbalancer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.LoadBalancer;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
@@ -50,6 +53,24 @@ class FreeIpaLoadBalancerConfigurationServiceTest {
                                         targetGroup.getProtocol().equals(entry.getValue()))));
         assertEquals("freeipaStackName" + "-lb", actual.getEndpoint());
         assertEquals("freeipaStackName" + "-lb.cloudera.site", actual.getFqdn());
+    }
+
+    @Test
+    void testExtendConfigurationWithMetadata() {
+        LoadBalancer loadBalancer = new LoadBalancer();
+        CloudLoadBalancerMetadata loadBalancerMetadata = CloudLoadBalancerMetadata.builder()
+                .withCloudDns("cloud-dns")
+                .withName("name")
+                .withIp("1.1.1.1,2.2.2.2")
+                .withHostedZoneId("hosted-zone-id")
+                .build();
+
+        LoadBalancer actual = underTest.extendConfigurationWithMetadata(loadBalancer, loadBalancerMetadata);
+
+        assertEquals(loadBalancerMetadata.getCloudDns(), actual.getDns());
+        assertEquals(loadBalancerMetadata.getName(), actual.getResourceId());
+        assertEquals(loadBalancerMetadata.getName(), actual.getResourceId());
+        assertIterableEquals(Set.of("1.1.1.1", "2.2.2.2"), actual.getIp());
     }
 
 }

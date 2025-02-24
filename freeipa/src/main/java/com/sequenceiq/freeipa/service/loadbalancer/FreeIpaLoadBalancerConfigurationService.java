@@ -1,10 +1,13 @@
 package com.sequenceiq.freeipa.service.loadbalancer;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
@@ -38,7 +41,7 @@ public class FreeIpaLoadBalancerConfigurationService {
     public LoadBalancer extendConfigurationWithMetadata(LoadBalancer loadBalancer, CloudLoadBalancerMetadata metadata) {
         loadBalancer.setDns(metadata.getCloudDns());
         loadBalancer.setResourceId(metadata.getName());
-        loadBalancer.setIp(metadata.getIp());
+        loadBalancer.setIp(new HashSet<>((Arrays.asList(StringUtils.split(metadata.getIp(), ',')))));
         loadBalancer.setHostedZoneId(metadata.getHostedZoneId());
         return loadBalancer;
     }

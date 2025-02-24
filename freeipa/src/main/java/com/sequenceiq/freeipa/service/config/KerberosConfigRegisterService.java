@@ -65,7 +65,7 @@ public class KerberosConfigRegisterService extends AbstractConfigRegister {
                 .flatMap(instanceGroup -> instanceGroup.getNotDeletedInstanceMetaDataSet().stream()).collect(Collectors.toSet());
         String allFreeIpaIpJoined = allNotDeletedInstances.stream().map(InstanceMetaData::getPrivateIp).collect(Collectors.joining(","));
         Optional<LoadBalancer> loadBalancer = loadBalancerService.findByStackId(stackId);
-        kerberosConfig.setNameServers(loadBalancer.map(LoadBalancer::getIp).orElse(allFreeIpaIpJoined));
+        kerberosConfig.setNameServers(loadBalancer.map(LoadBalancer::getIp).map(ip -> String.join(",", ip)).orElse(allFreeIpaIpJoined));
         addServerAddress(freeIpa, stack, kerberosConfig, allNotDeletedInstances);
         kerberosConfig.setPassword(StringUtils.isBlank(password) ? freeIpa.getAdminPassword() : password);
         kerberosConfig.setClusterName(clusterName);

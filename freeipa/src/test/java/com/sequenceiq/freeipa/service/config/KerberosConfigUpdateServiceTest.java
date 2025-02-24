@@ -108,7 +108,7 @@ class KerberosConfigUpdateServiceTest {
         List<KerberosConfig> kerberosConfigs = List.of(kerberosConfig1, kerberosConfig2);
         when(kerberosConfigService.findAllInEnvironment(any())).thenReturn(kerberosConfigs);
         LoadBalancer loadBalancer = new LoadBalancer();
-        loadBalancer.setIp("3.3.3.3,4.4.4.4");
+        loadBalancer.setIp(Set.of("3.3.3.3", "4.4.4.4"));
         when(loadBalancerService.findByStackId(1L)).thenReturn(Optional.of(loadBalancer));
 
         underTest.updateNameservers(1L);
@@ -118,7 +118,7 @@ class KerberosConfigUpdateServiceTest {
         verify(kerberosConfig2).setNameServers(nameServersCaptor.capture());
 
         List.of(nameServersCaptor.getValue(), nameServersCaptor.getValue()).forEach(actualNameServersValue -> {
-            assertEquals("3.3.3.3,4.4.4.4", actualNameServersValue);
+            assertEquals(String.join(",", loadBalancer.getIp()), actualNameServersValue);
         });
 
         verify(kerberosConfigService).saveAll(eq(kerberosConfigs));

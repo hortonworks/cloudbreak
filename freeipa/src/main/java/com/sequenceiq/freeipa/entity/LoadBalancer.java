@@ -6,6 +6,7 @@ import java.util.StringJoiner;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -13,6 +14,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
+
+import com.sequenceiq.cloudbreak.common.database.StringSetToStringConverter;
 
 @Entity
 public class LoadBalancer {
@@ -31,7 +34,9 @@ public class LoadBalancer {
     @OneToMany(mappedBy = "loadBalancer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<TargetGroup> targetGroups = new HashSet<>();
 
-    private String ip;
+    @Convert(converter = StringSetToStringConverter.class)
+    @Column(name = "ip", columnDefinition = "TEXT")
+    private Set<String> ip = new HashSet<>();
 
     private String fqdn;
 
@@ -89,11 +94,11 @@ public class LoadBalancer {
         this.targetGroups = targetGroups;
     }
 
-    public String getIp() {
+    public Set<String> getIp() {
         return ip;
     }
 
-    public void setIp(String ip) {
+    public void setIp(Set<String> ip) {
         this.ip = ip;
     }
 
