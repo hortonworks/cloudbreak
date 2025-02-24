@@ -102,12 +102,14 @@ public class GrpcCcmV2Client {
         while (page == 0 || nextPageToken.getExclusiveStartKeyStringAttrsCount() > 0 || nextPageToken.getExclusiveStartKeyNumAttrsCount() > 0) {
             ++page;
             LOGGER.debug("Calling listAgents with params accountId: '{}', environment CRN: '{}', page: '{}'", accountId, environmentCrnOpt, page);
-            ListAgentsResponse listAgentsResponse = client.listAgents(listAgentsRequest);
-            result.addAll(listAgentsResponse.getAgentsList());
+            if (client != null) {
+                ListAgentsResponse listAgentsResponse = client.listAgents(listAgentsRequest);
+                result.addAll(listAgentsResponse.getAgentsList());
 
-            nextPageToken = listAgentsResponse.getNextPageToken();
-            listAgentsRequestBuilder.setPageToken(nextPageToken);
-            listAgentsRequest = listAgentsRequestBuilder.build();
+                nextPageToken = listAgentsResponse.getNextPageToken();
+                listAgentsRequestBuilder.setPageToken(nextPageToken);
+                listAgentsRequest = listAgentsRequestBuilder.build();
+            }
         }
         return result;
     }

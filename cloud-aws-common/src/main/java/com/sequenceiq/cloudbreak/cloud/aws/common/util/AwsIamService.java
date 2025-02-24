@@ -340,7 +340,7 @@ public class AwsIamService {
      * @throws IOException if unable to read file
      */
     String getResourceFileAsString(String fileName) throws IOException {
-        if (fileName != null) {
+        if (fileName != null && AwsIamService.class.getClassLoader() != null) {
             try (InputStream is = AwsIamService.class.getClassLoader().getResourceAsStream(fileName)) {
                 return inputStreamtoString(is);
             }
