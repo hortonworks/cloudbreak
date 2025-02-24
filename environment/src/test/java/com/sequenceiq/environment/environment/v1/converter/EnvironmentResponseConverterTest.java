@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -28,6 +29,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.backup.response.BackupResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.CcmV2TlsType;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialViewResponse;
@@ -175,6 +177,7 @@ class EnvironmentResponseConverterTest {
         assertSecurityAccess(environment.getSecurityAccess(), actual.getSecurityAccess());
         assertThat(actual.isEnableSecretEncryption()).isTrue();
         assertThat(actual.isEnableComputeCluster()).isTrue();
+        assertEquals(environment.getEnvironmentType().toString(), actual.getEnvironmentType());
 
         verify(credentialConverter).convert(environment.getCredential());
         verify(freeIpaConverter).convert(environment.getFreeIpaCreation());
@@ -196,6 +199,7 @@ class EnvironmentResponseConverterTest {
                         .withOutboundType("outbound")
                         .build())
                 .build();
+        environment.setEnvironmentType(null);
         CredentialResponse credentialResponse = mock(CredentialResponse.class);
         FreeIpaResponse freeIpaResponse = mock(FreeIpaResponse.class);
         CompactRegionResponse compactRegionResponse = mock(CompactRegionResponse.class);
@@ -255,6 +259,7 @@ class EnvironmentResponseConverterTest {
         assertTrue(actual.getExternalizedComputeCluster().isPrivateCluster());
         assertEquals("outbound", actual.getExternalizedComputeCluster().getOutboundType());
         assertEquals("outbound", actual.getExternalizedComputeCluster().getAzure().getOutboundType());
+        assertNull(actual.getEnvironmentType());
 
         verify(credentialConverter).convert(environment.getCredential());
         verify(freeIpaConverter).convert(environment.getFreeIpaCreation());
@@ -315,6 +320,7 @@ class EnvironmentResponseConverterTest {
         assertEquals(dataServicesResponse, actual.getDataServices());
         assertThat(actual.isEnableSecretEncryption()).isTrue();
         assertThat(actual.isEnableComputeCluster()).isTrue();
+        assertEquals(environmentDto.getEnvironmentType().toString(), actual.getEnvironmentType());
 
         verify(credentialViewConverter).convertResponse(environmentDto.getCredential());
         verify(freeIpaConverter).convert(environmentDto.getFreeIpaCreation());
@@ -375,6 +381,7 @@ class EnvironmentResponseConverterTest {
         assertEquals(dataServicesResponse, actual.getDataServices());
         assertThat(actual.isEnableSecretEncryption()).isTrue();
         assertThat(actual.isEnableComputeCluster()).isTrue();
+        assertEquals(environmentViewDto.getEnvironmentType().toString(), actual.getEnvironmentType());
 
         verify(credentialViewConverter).convert(environmentViewDto.getCredentialView());
         verify(freeIpaConverter).convert(environmentViewDto.getFreeIpaCreation());
@@ -464,7 +471,8 @@ class EnvironmentResponseConverterTest {
                 .withSecurityAccess(createSecurityAccess())
                 .withEnvironmentDeletionType(EnvironmentDeletionType.FORCE)
                 .withEnableSecretEncryption(true)
-                .withEnableComputeCluster(true);
+                .withEnableComputeCluster(true)
+                .withEnvironmentType(EnvironmentType.HYBRID);
     }
 
     private EnvironmentViewDto createEnvironmentViewDto(CloudPlatform cloudPlatform) {
@@ -497,6 +505,7 @@ class EnvironmentResponseConverterTest {
                 .withEnvironmentDeletionType(EnvironmentDeletionType.FORCE)
                 .withEnableSecretEncryption(true)
                 .withEnableComputeCluster(true)
+                .withEnvironmentType(EnvironmentType.HYBRID)
                 .build();
     }
 

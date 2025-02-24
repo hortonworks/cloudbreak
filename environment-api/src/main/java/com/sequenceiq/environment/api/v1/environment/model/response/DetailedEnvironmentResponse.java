@@ -158,6 +158,8 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
         private boolean enableComputeCluster;
 
+        private String environmentType;
+
         private Builder() {
         }
 
@@ -371,6 +373,11 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withEnvironmentType(String environmentType) {
+            this.environmentType = environmentType;
+            return this;
+        }
+
         public DetailedEnvironmentResponse build() {
             DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
             detailedEnvironmentResponse.setCrn(crn);
@@ -414,6 +421,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setEnableSecretEncryption(enableSecretEncryption);
             detailedEnvironmentResponse.setExternalizedComputeCluster(externalizedComputeCluster);
             detailedEnvironmentResponse.setEnableComputeCluster(enableComputeCluster);
+            detailedEnvironmentResponse.setEnvironmentType(environmentType);
             return detailedEnvironmentResponse;
         }
     }

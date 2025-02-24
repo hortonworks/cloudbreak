@@ -24,10 +24,12 @@ import org.springframework.util.StringUtils;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.util.CidrUtil;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.environment.api.v1.environment.model.AzureExternalizedComputeParams;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAuthenticationRequest;
@@ -136,6 +138,14 @@ public class EnvironmentApiConverter {
         LOGGER.debug("Creating EnvironmentCreationDto from EnvironmentRequest: {}", request);
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         String cloudPlatform = credentialService.getCloudPlatformByCredential(request.getCredentialName(), accountId, ENVIRONMENT);
+        EnvironmentType environmentType = null;
+        if (request.getEnvironmentType() != null) {
+            try {
+                environmentType = EnvironmentType.valueOf(request.getEnvironmentType());
+            } catch (IllegalArgumentException ie) {
+                throw new BadRequestException(String.format("%s is not a valid value for Environment Type", request.getEnvironmentType()));
+            }
+        }
         EnvironmentCreationDto.Builder builder = EnvironmentCreationDto.builder()
                 .withAccountId(accountId)
                 .withCreator(ThreadBasedUserCrnProvider.getUserCrn())
@@ -167,7 +177,8 @@ public class EnvironmentApiConverter {
                 .withParentEnvironmentName(request.getParentEnvironmentName())
                 .withProxyConfigName(request.getProxyConfigName())
                 .withDataServices(dataServicesConverter.convertToDto(request.getDataServices()))
-                .withCreatorClient(getHeaderOrItsFallbackValueOrDefault(USER_AGENT_HEADER, CDP_CALLER_ID_HEADER, CALLER_ID_NOT_FOUND));
+                .withCreatorClient(getHeaderOrItsFallbackValueOrDefault(USER_AGENT_HEADER, CDP_CALLER_ID_HEADER, CALLER_ID_NOT_FOUND))
+                .withEnvironmentType(environmentType);
 
         NullUtil.doIfNotNull(request.getNetwork(), network -> {
             NetworkDto networkDto = networkRequestToDto(network);

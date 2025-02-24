@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import com.sequenceiq.common.api.backup.response.BackupResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.CcmV2TlsType;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
@@ -37,6 +38,7 @@ class DetailedEnvironmentResponseTest {
         ProxyResponse proxyConfig = new ProxyResponse();
         GcpEnvironmentParameters gcp = new GcpEnvironmentParameters();
         DataServicesResponse dataServices = new DataServicesResponse();
+        String environmentType = EnvironmentType.HYBRID.toString();
 
         DetailedEnvironmentResponse response = DetailedEnvironmentResponse.builder()
                 .withCrn("crn")
@@ -78,6 +80,7 @@ class DetailedEnvironmentResponseTest {
                 .withDataServices(dataServices)
                 .withEnableSecretEncryption(true)
                 .withEnableComputeCluster(true)
+                .withEnvironmentType(environmentType)
                 .build();
 
         assertThat(response).isNotNull();
@@ -120,6 +123,7 @@ class DetailedEnvironmentResponseTest {
         assertThat(response.getDataServices()).isSameAs(dataServices);
         assertThat(response.isEnableSecretEncryption()).isTrue();
         assertThat(response.isEnableComputeCluster()).isTrue();
+        assertThat(response.getEnvironmentType()).isEqualTo(environmentType);
     }
 
 }

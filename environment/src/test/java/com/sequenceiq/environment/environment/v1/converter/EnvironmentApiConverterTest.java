@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
@@ -29,11 +30,13 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.type.CcmV2TlsType;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.AzureExternalizedComputeParams;
@@ -157,6 +160,7 @@ class EnvironmentApiConverterTest {
     @EnumSource(value = CloudPlatform.class, names = {"AWS", "AZURE", "GCP"})
     void testInitCreationDto(CloudPlatform cloudPlatform) {
         EnvironmentRequest request = createEnvironmentRequest(cloudPlatform);
+        request.setEnvironmentType("HYBRID");
         FreeIpaCreationDto freeIpaCreationDto = mock(FreeIpaCreationDto.class);
         EnvironmentTelemetry environmentTelemetry = mock(EnvironmentTelemetry.class);
         AccountTelemetry accountTelemetry = mock(AccountTelemetry.class);
@@ -199,6 +203,7 @@ class EnvironmentApiConverterTest {
         assertTrue(externalizedComputeCluster.isPrivateCluster());
         assertEquals(OUTBOUND_TYPE, externalizedComputeCluster.getOutboundType());
         assertEquals(Set.of(KUBE_API_AUTHORIZED_IP_RANGES), externalizedComputeCluster.getKubeApiAuthorizedIpRanges());
+        assertEquals(EnvironmentType.HYBRID, actual.getEnvironmentType());
 
         verify(credentialService).getCloudPlatformByCredential(anyString(), anyString(), any());
         verify(freeIpaConverter).convert(request.getFreeIpa(), "test-aws", cloudPlatform.name());
@@ -209,6 +214,18 @@ class EnvironmentApiConverterTest {
         verify(networkRequestToDtoConverter).convert(request.getNetwork());
         verify(networkRequestToDtoConverter).setDefaultAvailabilityZonesIfNeeded(actual.getNetwork());
         verify(externalizedComputeService).externalizedComputeValidation(anyString());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = CloudPlatform.class, names = {"AWS", "AZURE", "GCP"})
+    void testInitCreationDtoInvalidEnvironmentType(CloudPlatform cloudPlatform) {
+        EnvironmentRequest request = createEnvironmentRequest(cloudPlatform);
+        request.setEnvironmentType("HYBRID11");
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> testInitCreationDto(request));
+
+        assertEquals("HYBRID11 is not a valid value for Environment Type", badRequestException.getMessage());
     }
 
     @Test

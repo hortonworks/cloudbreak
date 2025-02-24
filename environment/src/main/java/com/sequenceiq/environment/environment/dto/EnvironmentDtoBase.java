@@ -7,6 +7,7 @@ import com.sequenceiq.cloudbreak.common.dal.model.AccountAwareResource;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.common.api.type.CcmV2TlsType;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.environment.EnvironmentDeletionType;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
@@ -95,6 +96,8 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
     private String creatorClient = "No Info";
 
     private boolean enableComputeCluster;
+
+    private EnvironmentType environmentType;
 
     @Override
     public Long getResourceId() {
@@ -426,6 +429,14 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
         this.enableComputeCluster = enableComputeCluster;
     }
 
+    public EnvironmentType getEnvironmentType() {
+        return environmentType;
+    }
+
+    public void setEnvironmentType(EnvironmentType environmentType) {
+        this.environmentType = environmentType;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentDtoBase{" +
@@ -437,6 +448,7 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
                 ", statusReason='" + statusReason + '\'' +
                 ", domain='" + domain + '\'' +
                 ", enableSecretEncryption=" + enableSecretEncryption +
+                ", environmentType=" + environmentType +
                 '}';
     }
 
@@ -515,6 +527,8 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
         private boolean enableSecretEncryption;
 
         private boolean enableComputeCluster;
+
+        private EnvironmentType environmentType;
 
         protected EnvironmentDtoBaseBuilder() {
         }
@@ -699,6 +713,11 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
             return (B) this;
         }
 
+        public B withEnvironmentType(EnvironmentType environmentType) {
+            this.environmentType = environmentType;
+            return (B) this;
+        }
+
         protected void build(T environmentDto) {
             environmentDto.setId(id);
             environmentDto.setLocation(locationDto);
@@ -735,6 +754,7 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
             environmentDto.setEnableSecretEncryption(enableSecretEncryption);
             environmentDto.setCreatorClient(creatorClient);
             environmentDto.setEnableComputeCluster(enableComputeCluster);
+            environmentDto.setEnvironmentType(environmentType);
         }
 
         public abstract T build();

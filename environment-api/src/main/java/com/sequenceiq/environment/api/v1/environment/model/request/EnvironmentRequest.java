@@ -131,6 +131,9 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     @Schema(description = EnvironmentModelDescription.DATA_SERVICES)
     private DataServicesRequest dataServices;
 
+    @Schema(description = EnvironmentModelDescription.ENVIRONMENT_TYPE)
+    private String environmentType;
+
     public AttachedFreeIpaRequest getFreeIpa() {
         return freeIpa;
     }
@@ -346,6 +349,14 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
         this.dataServices = dataServices;
     }
 
+    public String getEnvironmentType() {
+        return environmentType;
+    }
+
+    public void setEnvironmentType(String environmentType) {
+        this.environmentType = environmentType;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentRequest{" +
@@ -375,6 +386,7 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
                 ", environmentServiceVersion='" + environmentServiceVersion + '\'' +
                 ", ccmV2TlsType=" + ccmV2TlsType +
                 ", dataServices=" + dataServices +
+                ", environmentType=" + environmentType +
                 "} " + super.toString();
     }
 }

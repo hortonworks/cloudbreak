@@ -141,6 +141,9 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
     @Schema(description = EnvironmentModelDescription.ENVIRONMENT_ENABLE_COMPUTE_CLUSTER, requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean enableComputeCluster;
 
+    @Schema(description = EnvironmentModelDescription.ENVIRONMENT_TYPE, subTypes = {DetailedEnvironmentResponse.class, SimpleEnvironmentResponse.class})
+    private String environmentType;
+
     @JsonIgnore
     public boolean isCloudStorageLoggingEnabled() {
         return telemetry != null && telemetry.getFeatures() != null && telemetry.getFeatures().getCloudStorageLogging() != null
@@ -476,6 +479,14 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
         this.enableComputeCluster = enableComputeCluster;
     }
 
+    public String getEnvironmentType() {
+        return environmentType;
+    }
+
+    public void setEnvironmentType(String environmentType) {
+        this.environmentType = environmentType;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentBaseResponse{" +
@@ -516,6 +527,7 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
                 ", dataServices=" + dataServices +
                 ", enableSecretEncryption=" + enableSecretEncryption +
                 ", enableComputeCluster=" + enableComputeCluster +
+                ", environmentType=" + environmentType +
                 '}';
     }
 }

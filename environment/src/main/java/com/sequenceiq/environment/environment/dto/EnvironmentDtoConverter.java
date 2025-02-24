@@ -94,7 +94,8 @@ public class EnvironmentDtoConverter {
                 .withEnvironmentServiceVersion(environmentView.getEnvironmentServiceVersion())
                 .withEnvironmentDomain(environmentView.getDomain())
                 .withEnableSecretEncryption(environmentView.isEnableSecretEncryption())
-                .withEnableComputeCluster(isComputeClusterEnabled(environmentView.getDefaultComputeCluster()));
+                .withEnableComputeCluster(isComputeClusterEnabled(environmentView.getDefaultComputeCluster()))
+                .withEnvironmentType(environmentView.getEnvironmentType());
 
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environmentView.getCloudPlatform());
         doIfNotNull(environmentView.getParameters(), parameters -> builder.withParameters(
@@ -142,7 +143,8 @@ public class EnvironmentDtoConverter {
                 .withDataServices(environment.getDataServices())
                 .withEnableSecretEncryption(environment.isEnableSecretEncryption())
                 .withCreatorClient(environment.getCreatorClient())
-                .withEnableComputeCluster(isComputeClusterEnabled(environment.getDefaultComputeCluster()));
+                .withEnableComputeCluster(isComputeClusterEnabled(environment.getDefaultComputeCluster()))
+                .withEnvironmentType(environment.getEnvironmentType());
 
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
         builder.withCredentialDetails(credentialDetailsConverter.credentialToCredentialDetails(cloudPlatform, environment.getCredential()));
@@ -199,6 +201,7 @@ public class EnvironmentDtoConverter {
         }
         setDefaultComputeCluster(creationDto, environment);
         setRegions(creationDto, environment);
+        environment.setEnvironmentType(creationDto.getEnvironmentType());
         return environment;
     }
 

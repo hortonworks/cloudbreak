@@ -10,6 +10,7 @@ import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.environment.api.v1.environment.model.request.CredentialAwareEnvRequest;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.dto.dataservices.EnvironmentDataServices;
@@ -74,6 +75,8 @@ public class EnvironmentCreationDto {
 
     private final EnvironmentDataServices dataServices;
 
+    private final EnvironmentType environmentType;
+
     private EnvironmentCreationDto(Builder builder) {
         name = builder.name;
         description = builder.description;
@@ -104,6 +107,7 @@ public class EnvironmentCreationDto {
         proxyConfigName = builder.proxyConfigName;
         dataServices = builder.dataServices;
         creatorClient = builder.creatorClient;
+        environmentType = builder.environmentType;
     }
 
     public static Builder builder() {
@@ -215,6 +219,10 @@ public class EnvironmentCreationDto {
         return creatorClient;
     }
 
+    public EnvironmentType getEnvironmentType() {
+        return environmentType;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentCreationDto{" +
@@ -224,6 +232,7 @@ public class EnvironmentCreationDto {
                 ", crn='" + crn + '\'' +
                 ", parentEnvironmentName='" + parentEnvironmentName + '\'' +
                 (isNotEmpty(creatorClient) ? ", creatorClient='" + creatorClient + '\'' : "") +
+                ", environmentType='" + environmentType + '\'' +
                 '}';
     }
 
@@ -282,6 +291,8 @@ public class EnvironmentCreationDto {
         private EnvironmentDataServices dataServices;
 
         private String creatorClient;
+
+        private EnvironmentType environmentType;
 
         private Builder() {
         }
@@ -413,6 +424,11 @@ public class EnvironmentCreationDto {
 
         public Builder withCreatorClient(String creatorClient) {
             this.creatorClient = creatorClient;
+            return this;
+        }
+
+        public Builder withEnvironmentType(EnvironmentType environmentType) {
+            this.environmentType = environmentType;
             return this;
         }
 

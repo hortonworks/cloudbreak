@@ -192,6 +192,8 @@ public class EnvironmentModelDescription {
 
     public static final String ENVIRONMENT_ENABLE_COMPUTE_CLUSTER = "True if externalized compute cluster is enabled for the environment.";
 
+    public static final String ENVIRONMENT_TYPE = "Type of the environment";
+
     private EnvironmentModelDescription() {
     }
 }
