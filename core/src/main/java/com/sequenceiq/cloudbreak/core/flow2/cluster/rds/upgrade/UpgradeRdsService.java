@@ -30,7 +30,6 @@ import com.sequenceiq.cloudbreak.service.upgrade.rds.DatabaseUpgradeBackupRestor
 import com.sequenceiq.cloudbreak.service.upgrade.rds.RdsUpgradeOrchestratorService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Service
 public class UpgradeRdsService {
@@ -125,8 +124,7 @@ public class UpgradeRdsService {
 
     public void restoreRds(Long stackId, String targetVersion) throws CloudbreakOrchestratorException {
         StackDto stack = stackDtoService.getById(stackId);
-        DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
-        rdsUpgradeOrchestratorService.checkRdsConnection(stack, environment);
+        rdsUpgradeOrchestratorService.checkRdsConnection(stack);
         rdsUpgradeOrchestratorService.restoreRdsData(stack, targetVersion);
     }
 

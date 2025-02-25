@@ -62,9 +62,6 @@ import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.salt.SaltStateParamsService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
-import com.sequenceiq.common.api.type.ServiceEndpointCreation;
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
 @ExtendWith(MockitoExtension.class)
 class RdsUpgradeOrchestratorServiceTest {
@@ -149,21 +146,11 @@ class RdsUpgradeOrchestratorServiceTest {
     }
 
     @Test
-    void testCheckRdsConnectionWhenNoEnvironment() throws CloudbreakOrchestratorException {
-        underTest.checkRdsConnection(stack, null);
-        verify(saltStateParamsService, never()).createStateParams(stack, "postgresql/upgrade/check-db-connection", true, 60, 60, 60000);
-    }
-
-    @Test
     void testCheckRdsConnection() throws CloudbreakOrchestratorException {
         OrchestratorStateParams stateParams = new OrchestratorStateParams();
-        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
-        EnvironmentNetworkResponse environmentNetworkResponse = new EnvironmentNetworkResponse();
-        environmentNetworkResponse.setServiceEndpointCreation(ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT);
-        detailedEnvironmentResponse.setNetwork(environmentNetworkResponse);
         when(saltStateParamsService.createStateParams(any(), any(), anyBoolean(), anyInt(), anyInt(), anyInt())).thenReturn(stateParams);
 
-        underTest.checkRdsConnection(stack, detailedEnvironmentResponse);
+        underTest.checkRdsConnection(stack);
 
         verify(saltStateParamsService, times(1)).createStateParams(stack, "postgresql/upgrade/check-db-connection", true, 60, 60, 60000);
     }
