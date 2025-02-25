@@ -133,7 +133,7 @@ class UpgradeRdsServiceTest {
 
         underTest.restoreRds(STACK_ID, TARGET_VERSION);
 
-        verify(rdsUpgradeOrchestratorService).checkRdsConnection(stack, null);
+        verify(rdsUpgradeOrchestratorService).checkRdsConnection(stack);
         verify(rdsUpgradeOrchestratorService).restoreRdsData(eq(stack), eq(TARGET_VERSION));
     }
 
