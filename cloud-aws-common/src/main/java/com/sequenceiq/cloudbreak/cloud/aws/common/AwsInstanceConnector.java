@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -119,26 +120,46 @@ public class AwsInstanceConnector implements InstanceConnector {
         List<CloudVmInstanceStatus> instanceStatuses = new ArrayList<>();
         Map<String, List<CloudInstance>> instancesByGroup = vms.stream().collect(
                 Collectors.groupingBy(instance -> instance.getTemplate().getGroupName()));
-        List<List<CloudInstance>> instanceChunks = new ArrayList<>();
+        Map<List<CloudInstance>, AwsResilientStartFailureType> instanceChunksWithFailureTypeMap = getResilientStartVmChunkMap(instancesByGroup);
+        instanceChunksWithFailureTypeMap.forEach((vmListChunk, failureType) ->
+                executeStartForVmListChunk(ac, exceptionText, completedStatus, startConsumer, vmListChunk, failureType, instanceStatuses));
+        return instanceStatuses;
+    }
+
+    private void executeStartForVmListChunk(AuthenticatedContext ac, String exceptionText, String completedStatus,
+            BiConsumer<AmazonEc2Client, Collection<String>> startConsumer, List<CloudInstance> vmListChunk, AwsResilientStartFailureType failureType,
+            List<CloudVmInstanceStatus> instanceStatuses) {
+        String vmListString = vmListChunk.stream().map(CloudInstance::getInstanceId).collect(Collectors.joining(","));
+        LOGGER.info("Resiliently starting instances: {}", vmListString);
+        AmazonEc2Client amazonEC2Client = new AuthenticatedContextView(ac).getStartInstancesAmazonEC2Client();
+        Set<InstanceStatus> finalStatuses = Set.of(AwsInstanceStatusMapper.getInstanceStatusByAwsStatus(completedStatus), InstanceStatus.FAILED);
+        try {
+            executeInstanceOperation(ac, vmListChunk, completedStatus, startConsumer, finalStatuses, exceptionText, amazonEC2Client);
+            instanceStatuses.addAll(pollerUtil.waitFor(ac, vmListChunk, finalStatuses, completedStatus));
+        } catch (Exception e) {
+            if (AwsResilientStartFailureType.SOFT_FAILURE.equals(failureType)) {
+                LOGGER.error("Error happened during batch start of instances {}, but the failure is not blocking, moving on. Reason: {}",
+                        vmListString, e.getMessage());
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    private Map<List<CloudInstance>, AwsResilientStartFailureType> getResilientStartVmChunkMap(Map<String, List<CloudInstance>> instancesByGroup) {
+        Map<List<CloudInstance>, AwsResilientStartFailureType> instanceChunksWithFailureTypeMap = new HashMap<>();
         instancesByGroup.values().forEach(vmsByGroup -> {
             if (vmsByGroup.size() <= RESILIENT_START_SMALL_GROUP_THRESHOLD) {
-                instanceChunks.add(vmsByGroup);
+                instanceChunksWithFailureTypeMap.put(Collections.unmodifiableList(vmsByGroup), AwsResilientStartFailureType.HARD_FAILURE);
             }
         });
         instancesByGroup.values().forEach(vmsByGroup -> {
             if (vmsByGroup.size() > RESILIENT_START_SMALL_GROUP_THRESHOLD) {
-                instanceChunks.addAll(Lists.partition(vmsByGroup, RESILIENT_START_CHUNK_SIZE));
+                Lists.partition(vmsByGroup, RESILIENT_START_CHUNK_SIZE).forEach(vmsChunk ->
+                        instanceChunksWithFailureTypeMap.put(Collections.unmodifiableList(vmsChunk), AwsResilientStartFailureType.SOFT_FAILURE));
             }
         });
-        instanceChunks.forEach(vmListChunk -> {
-            LOGGER.info("Resiliently starting instances: {}", vmListChunk.stream().map(CloudInstance::getInstanceId).collect(Collectors.joining(",")));
-            AmazonEc2Client amazonEC2Client = new AuthenticatedContextView(ac).getStartInstancesAmazonEC2Client();
-            Set<InstanceStatus> finalStatuses =
-                    Set.of(AwsInstanceStatusMapper.getInstanceStatusByAwsStatus(completedStatus), InstanceStatus.FAILED);
-            executeInstanceOperation(ac, vmListChunk, completedStatus, startConsumer, finalStatuses, exceptionText, amazonEC2Client);
-            instanceStatuses.addAll(pollerUtil.waitFor(ac, vmListChunk, finalStatuses, completedStatus));
-        });
-        return instanceStatuses;
+        return instanceChunksWithFailureTypeMap;
     }
 
     @Retryable(

@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -27,9 +28,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
@@ -46,6 +49,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.dyngr.exception.PollerStoppedException;
+import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AwsApacheClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsRegionEndpointProvider;
@@ -71,6 +75,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.service.RetryService;
 
 import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
@@ -255,31 +260,44 @@ class AwsInstanceConnectorTest {
 
     @Test
     void testSuccessfulChunkedStartDuringResilientStart() {
-        AtomicBoolean toggle = new AtomicBoolean(true);
+        Predicate<List<String>> instanceIdChecker = instanceIdList ->
+                instanceIdList.stream().anyMatch(instanceId -> StringUtils.contains(instanceId, "large"));
+        List<String> batchesAwsDescribeExecutedAgainstOnce = new ArrayList<>();
         when(amazonEC2Client.describeInstances(any()))
                 .thenAnswer(i -> {
                     DescribeInstancesRequest request = (DescribeInstancesRequest) i.getArguments()[0];
-                    if (toggle.get()) {
-                        toggle.set(false);
-                        return DescribeInstancesResponse.builder().reservations(
-                                        request.instanceIds().stream()
-                                                .map(instanceId -> getReservation(getAwsInstance(instanceId, "notrunning", 16), instanceId))
-                                                .toList())
-                                .build();
+                    DescribeInstancesResponse notRunning = DescribeInstancesResponse.builder().reservations(request.instanceIds().stream().map(instanceId ->
+                            getReservation(getAwsInstance(instanceId, "stopped", 16), instanceId)).toList()).build();
+                    if (instanceIdChecker.test(request.instanceIds())) {
+                        return notRunning;
                     } else {
-                        toggle.set(true);
-                        return DescribeInstancesResponse.builder().reservations(
-                                        request.instanceIds().stream()
-                                                .map(instanceId -> getReservation(getAwsInstance(instanceId, "running", 16), instanceId))
-                                                .toList())
-                                .build();
+                        String batch = Joiner.on(',').join(request.instanceIds());
+                        if (!batchesAwsDescribeExecutedAgainstOnce.contains(batch)) {
+                            batchesAwsDescribeExecutedAgainstOnce.add(batch);
+                            return notRunning;
+                        } else {
+                            return DescribeInstancesResponse.builder().reservations(request.instanceIds().stream().map(instanceId ->
+                                    getReservation(getAwsInstance(instanceId, "running", 16), instanceId)).toList()).build();
+                        }
                     }
                 });
+        AwsServiceException awsServiceException = Ec2Exception.builder()
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode("whatever").build())
+                .message("sad")
+                .build();
+        when(amazonEC2Client.startInstances(argThat(request -> instanceIdChecker.test(request.instanceIds())))).thenThrow(awsServiceException);
 
         List<CloudVmInstanceStatus> result = underTest.start(authenticatedContext, List.of(), largeInputList);
 
         verify(amazonEC2Client, times(22)).startInstances(any());
-        assertThat(result, hasItem(allOf(hasProperty("status", is(AwsInstanceStatusMapper.getInstanceStatusByAwsStatus("Running"))))));
+        assertThat(result, hasItem(allOf(
+                hasProperty("status", is(AwsInstanceStatusMapper.getInstanceStatusByAwsStatus("Running"))),
+                hasProperty("cloudInstance",
+                        hasProperty("template", hasProperty("groupName", is("small1")))))));
+        assertThat(result, hasItem(allOf(
+                hasProperty("status", is(AwsInstanceStatusMapper.getInstanceStatusByAwsStatus("Running"))),
+                hasProperty("cloudInstance",
+                        hasProperty("template", hasProperty("groupName", is("small2")))))));
     }
 
     @Test
