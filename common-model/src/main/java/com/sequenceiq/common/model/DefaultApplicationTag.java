@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.tag;
+package com.sequenceiq.common.model;
 
 public enum DefaultApplicationTag {
 

@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.tag.DefaultApplicationTag;
+import com.sequenceiq.common.model.DefaultApplicationTag;
 
 public class CDPTagGenerationRequest {
 

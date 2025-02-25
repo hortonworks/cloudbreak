@@ -149,7 +149,7 @@ public class DBStackStatusSyncService {
 
             Optional<ExternalDatabaseStatus> databaseStatusOptional = ofNullable(connector.resources().getDatabaseServerStatus(ac, databaseStack));
             Boolean externalDatabaseDeleted = databaseStatusOptional.map(ExternalDatabaseStatus.DELETED::equals).orElse(false);
-            if (isAzureSingleServer(dbStack, databaseStack) && externalDatabaseDeleted) {
+            if (AZURE.equalsIgnoreCase(dbStack.getCloudPlatform()) && externalDatabaseDeleted) {
                 return handleSingleServerAutoMigration(dbStack, databaseStatusOptional, databaseStack, connector, ac);
             }
             return databaseStatusOptional;
@@ -161,34 +161,46 @@ public class DBStackStatusSyncService {
 
     private Optional<ExternalDatabaseStatus> handleSingleServerAutoMigration(DBStack dbStack, Optional<ExternalDatabaseStatus> databaseStatusOptional,
             DatabaseStack databaseStack, CloudConnector connector, AuthenticatedContext ac) throws Exception {
-        LOGGER.debug(":::Auto sync::: External DB is Azure Single Server and deleted. "
-                + "Checking by Flexible Server resource Id in case of auto-migration");
+        LOGGER.debug(":::Auto sync::: External DB is an Azure database and deleted. "
+                + "Checking if resource still exists in case of auto-migration and rollback");
         Optional<DBResource> serverResourceOptional =
                 dbResourceService.findByStackAndNameAndType(dbStack.getId(), dbStack.getDatabaseServer().getName(), ResourceType.AZURE_DATABASE);
         if (serverResourceOptional.isEmpty()) {
-            LOGGER.debug(":::Auto sync::: Single server resource not found");
+            LOGGER.debug(":::Auto sync::: Database server resource not found");
             return databaseStatusOptional;
         } else {
             DBResource dbResource = serverResourceOptional.get();
-            String flexibleRef = dbResource.getResourceReference()
-                    .replace(AzureDatabaseType.SINGLE_SERVER.referenceType(), AzureDatabaseType.FLEXIBLE_SERVER.referenceType());
-            LOGGER.debug(":::Auto sync::: Looking for migrated flexible database by reference: {}", flexibleRef);
+            AzureDatabaseType currentDatabaseType = currentDatabaseType(dbResource);
+            AzureDatabaseType flippedDatabaseType =
+                    AzureDatabaseType.FLEXIBLE_SERVER.equals(currentDatabaseType) ? AzureDatabaseType.SINGLE_SERVER : AzureDatabaseType.FLEXIBLE_SERVER;
 
-            DatabaseStack flexibleStack = convertDatabaseStackToFlexible(databaseStack);
-            ExternalDatabaseStatus flexibleStatus = connector.resources().getDatabaseServerStatus(ac, flexibleStack);
-            if (!UNACCEPTABLE_STATES.contains(flexibleStatus)) {
-                LOGGER.debug(":::Auto sync::: Flexible server exists in status: {}, updating resource", flexibleStatus);
-                updateResourceReference(dbResource, flexibleRef);
+            String flippedRef = dbResource.getResourceReference()
+                    .replace(currentDatabaseType.referenceType(), flippedDatabaseType.referenceType());
+            LOGGER.debug(":::Auto sync::: Looking for migrated/rolled back {} by reference: {}", flippedDatabaseType.name(), flippedRef);
+
+            DatabaseStack flippedStack = convertDatabaseStackToFlipped(databaseStack, flippedDatabaseType.name());
+            ExternalDatabaseStatus status = connector.resources().getDatabaseServerStatus(ac, flippedStack);
+            if (!UNACCEPTABLE_STATES.contains(status)) {
+                LOGGER.debug(":::Auto sync::: {} server exists in status: {}, updating resource", flippedDatabaseType.name(), status);
+                updateResourceReference(dbResource, flippedRef);
                 updateDatabaseType(dbStack);
 
-                return ofNullable(flexibleStatus);
+                return ofNullable(status);
             }
             return databaseStatusOptional;
         }
     }
 
-    private void updateResourceReference(DBResource dbResource, String flexibleRef) {
-        dbResource.setResourceReference(flexibleRef);
+    private AzureDatabaseType currentDatabaseType(DBResource dbResource) {
+        if (dbResource.getResourceReference().contains(AzureDatabaseType.SINGLE_SERVER.referenceType())) {
+            return AzureDatabaseType.SINGLE_SERVER;
+        } else {
+            return AzureDatabaseType.FLEXIBLE_SERVER;
+        }
+    }
+
+    private void updateResourceReference(DBResource dbResource, String resourceReference) {
+        dbResource.setResourceReference(resourceReference);
         dbResourceService.save(dbResource);
     }
 
@@ -201,20 +213,14 @@ public class DBStackStatusSyncService {
         dbStackService.save(dbStack);
     }
 
-    private DatabaseStack convertDatabaseStackToFlexible(DatabaseStack databaseStack) {
+    private DatabaseStack convertDatabaseStackToFlipped(DatabaseStack databaseStack, String dbType) {
         Map<String, Object> params = new HashMap<>(databaseStack.getDatabaseServer().getParameters());
-        params.put(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.FLEXIBLE_SERVER.name());
+        params.put(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, dbType);
 
-        DatabaseServer flexibleDbServer = DatabaseServer.builder(databaseStack.getDatabaseServer())
+        DatabaseServer dbServer = DatabaseServer.builder(databaseStack.getDatabaseServer())
                 .withParams(params)
                 .build();
 
-        return new DatabaseStack(databaseStack.getNetwork(), flexibleDbServer, databaseStack.getTags(), databaseStack.getTemplate());
-    }
-
-    private boolean isAzureSingleServer(DBStack dbStack, DatabaseStack databaseStack) {
-        String azureDatabaseType = databaseStack.getDatabaseServer().getStringParameter(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY);
-        return AZURE.equalsIgnoreCase(dbStack.getCloudPlatform())
-                && AzureDatabaseType.safeValueOf(azureDatabaseType) == AzureDatabaseType.SINGLE_SERVER;
+        return new DatabaseStack(databaseStack.getNetwork(), dbServer, databaseStack.getTags(), databaseStack.getTemplate());
     }
 }
