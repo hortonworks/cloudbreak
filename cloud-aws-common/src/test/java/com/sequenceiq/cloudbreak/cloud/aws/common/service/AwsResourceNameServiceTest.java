@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -88,19 +90,32 @@ class AwsResourceNameServiceTest {
     @Test
     void testLoadBalancerTargetGroup() {
         String resourceName = underTest.loadBalancerTargetGroup(STACK_NAME, SCHEME, PORT);
-        assertTrue(resourceName.matches("stac-TG8080scheme-\\d{13}"));
+        assertTrue(resourceName.matches("stac-TG8080scheme-\\d{14}"));
     }
 
     @Test
     void testLoadBalancerTargetGroupBackwardCompatibleWithNewHash() {
         String resourceName = underTest.loadBalancerTargetGroup("sator-dev", "GwayPriv", 443);
-        assertTrue(resourceName.matches("sat-TG443GwayPriv-\\d{13}"));
+        assertTrue(resourceName.matches("sat-TG443GwayPriv-\\d{14}"));
     }
 
     @Test
     void testLoadBalancerTargetGroupShorterThanSevenCharacter() {
         String resourceName = underTest.loadBalancerTargetGroup("sdfsda", SCHEME, PORT);
-        assertTrue(resourceName.matches("sdfs-TG8080scheme-\\d{13}"));
+        assertTrue(resourceName.matches("sdfs-TG8080scheme-\\d{14}"));
+    }
+
+    @Disabled
+    @Test
+    void testLoadBalancerTargetGroupMultipleGenerationTestForCollision() {
+        String resourceName = underTest.loadBalancerTargetGroup("stackname-1", SCHEME, PORT);
+        String otherResourceName = underTest.loadBalancerTargetGroup("stackname-2", SCHEME, PORT);
+        String anOtherResourceName = underTest.loadBalancerTargetGroup("stackname-3", SCHEME, PORT);
+        assertTrue(resourceName.matches("stac-TG8080scheme-\\d{14}"));
+        assertTrue(otherResourceName.matches("stac-TG8080scheme-\\d{14}"));
+        assertNotEquals(resourceName, otherResourceName);
+        assertNotEquals(resourceName, anOtherResourceName);
+        assertNotEquals(otherResourceName, anOtherResourceName);
     }
 
     @Test

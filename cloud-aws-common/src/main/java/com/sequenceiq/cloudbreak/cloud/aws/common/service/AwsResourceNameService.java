@@ -110,7 +110,7 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
         name = normalize(reducedStackName);
         name = adjustPartLength(name);
         name = appendPart(name, resourceNameWithScheme);
-        name = appendDateAsHash(name, new Date());
+        name = appendDateAsHashWithAdditionalNano(name, new Date());
         name = adjustBaseLength(name, maxLoadBalancerResourceNameLength);
         return name;
     }

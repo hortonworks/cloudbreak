@@ -285,14 +285,16 @@ public class AwsNativeLoadBalancerLaunchService {
         } catch (AwsServiceException amazonServiceException) {
             String errorCode = amazonServiceException.awsErrorDetails().errorCode();
             if (StringUtils.isNotEmpty(errorCode) && errorCode.contains(DUPLICATE_TARGET_GROUP_NAME)) {
-                DescribeTargetGroupsRequest describeTargetGroupsRequest = DescribeTargetGroupsRequest.builder().names(targetGroupRequest.name()).build();
+                String targetGroupName = targetGroupRequest.name();
+                LOGGER.info("Load balancer target group already exists with name ('{}'), for load balancer ('{}')", targetGroupName, context.loadBalancerArn);
+                DescribeTargetGroupsRequest describeTargetGroupsRequest = DescribeTargetGroupsRequest.builder().names(targetGroupName).build();
                 DescribeTargetGroupsResponse describeTargetGroupsResponse = context.getLoadBalancingClient().describeTargetGroup(describeTargetGroupsRequest);
                 return describeTargetGroupsResponse.targetGroups()
                         .stream()
                         .findFirst()
                         .map(targetGroup -> CreateTargetGroupResponse.builder().targetGroups(targetGroup).build())
                         .orElseThrow(() -> new CloudConnectorException(
-                                String.format("Load balancer target group could not be created and found with name: '%s'", targetGroupRequest.name())));
+                                String.format("Load balancer target group could not be created and found with name: '%s'", targetGroupName)));
             } else {
                 throw amazonServiceException;
             }
