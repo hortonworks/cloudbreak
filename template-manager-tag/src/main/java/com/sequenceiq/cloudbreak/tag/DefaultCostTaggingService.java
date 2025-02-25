@@ -16,6 +16,7 @@ import org.springframework.util.CollectionUtils;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagMergeRequest;
+import com.sequenceiq.common.model.DefaultApplicationTag;
 
 @Service
 public class DefaultCostTaggingService implements CostTagging {

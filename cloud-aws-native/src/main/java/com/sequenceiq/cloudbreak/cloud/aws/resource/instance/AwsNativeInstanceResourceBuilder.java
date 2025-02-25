@@ -4,12 +4,14 @@ import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.NOT_FO
 import static com.sequenceiq.cloudbreak.cloud.aws.resource.AwsNativeResourceBuilderOrderConstants.NATIVE_INSTANCE_RESOURCE_BUILDER_ORDER;
 import static com.sequenceiq.cloudbreak.cloud.model.CloudInstance.USERDATA_SECRET_ID;
 import static com.sequenceiq.cloudbreak.constant.ImdsConstants.AWS_IMDS_VERSION_V2;
+import static com.sequenceiq.common.model.DefaultApplicationTag.RESOURCE_CRN;
 import static java.util.Collections.singletonList;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -133,7 +135,8 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
         InstanceTemplate instanceTemplate = group.getReferenceInstanceTemplate();
         AwsCloudStackView awsCloudStackView = new AwsCloudStackView(cloudStack);
         CloudResource cloudResource = buildableResource.get(0);
-        Optional<Instance> existedOpt = resourceByName(amazonEc2Client, awsStackNameCommonUtil.getInstanceName(ac, group.getName(), privateId));
+        String instanceName = awsStackNameCommonUtil.getInstanceName(ac, group.getName(), privateId);
+        Optional<Instance> existedOpt = resourceByNameAndStackCrn(amazonEc2Client, instanceName, cloudStack);
         Instance instance;
         if (existedOpt.isPresent() && existedOpt.get().state().code() != AWS_INSTANCE_TERMINATED_CODE) {
             instance = existedOpt.get();
@@ -146,7 +149,7 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
         } else {
             LOGGER.info("Create new instance with name: {}", cloudResource.getName());
             Map<String, String> tags = new HashMap<>(awsCloudStackView.getTags());
-            tags.putIfAbsent("Name", awsStackNameCommonUtil.getInstanceName(ac, group.getName(), privateId));
+            tags.putIfAbsent("Name", instanceName);
             tags.putIfAbsent("instanceGroup", group.getName());
             TagSpecification tagSpecificationOfInstance = awsTaggingService.prepareEc2TagSpecification(tags,
                     software.amazon.awssdk.services.ec2.model.ResourceType.INSTANCE);
@@ -252,13 +255,22 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
         return blocks;
     }
 
-    private Optional<Instance> resourceByName(AmazonEc2Client amazonEc2Client, String name) {
+    private Optional<Instance> resourceByNameAndStackCrn(AmazonEc2Client amazonEc2Client, String name, CloudStack cloudStack) {
         return awsMethodExecutor.execute(() -> {
+            Set<Filter> filters = new HashSet<>();
+            filters.add(tagFilter("Name", name));
+            if (cloudStack.getTags().containsKey(RESOURCE_CRN.key())) {
+                filters.add(tagFilter(RESOURCE_CRN.key(), cloudStack.getTags().get(RESOURCE_CRN.key())));
+            }
             DescribeInstancesResponse describeInstancesResponse = amazonEc2Client.describeInstances(DescribeInstancesRequest.builder()
-                    .filters(Filter.builder().name("tag:Name").values(name).build())
+                    .filters(filters)
                     .build());
             return describeInstancesResponse.reservations().stream().flatMap(s -> s.instances().stream()).findFirst();
         }, Optional.empty());
+    }
+
+    private Filter tagFilter(String key, String value) {
+        return Filter.builder().name("tag:" + key).values(value).build();
     }
 
     private Optional<Instance> resourceById(AmazonEc2Client amazonEc2Client, String id) {
