@@ -157,6 +157,12 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
+    public String getLatestBaseImageID(Architecture architecture, TestContext testContext, ImageCatalogTestDto imageCatalogTestDto,
+            CloudbreakClient cloudbreakClient) {
+        return getDelegate(imageCatalogTestDto).getLatestBaseImageID(architecture, testContext, imageCatalogTestDto, cloudbreakClient);
+    }
+
+    @Override
     public InstanceTemplateV4TestDto template(InstanceTemplateV4TestDto template) {
         return getDelegate(template).template(template);
     }

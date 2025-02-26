@@ -73,6 +73,8 @@ public interface CloudProvider {
 
     String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient);
 
+    String getLatestBaseImageID(Architecture architecture, TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient);
+
     String getBaseImageTestCatalogName();
 
     String getBaseImageTestCatalogUrl();
