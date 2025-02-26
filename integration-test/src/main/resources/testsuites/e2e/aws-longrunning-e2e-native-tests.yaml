@@ -8,3 +8,4 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaUpgradeTests
         includedMethods:
           - testHAFreeIpaInstanceUpgrade
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxResizeTests

@@ -274,7 +274,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
             Set<String>> repairableGroupsWithHostNames, boolean singlePrimaryGW, StackDto stack) {
         if (ALL_AT_ONCE.equals(event.getRepairType())) {
             LOGGER.info("Upgrading all the nodes by groups, upgrading all the nodes within a group at the same time, for stack: '{}'", event.getStackId());
-            addRepairFlows(event, flowTriggers, repairableGroupsWithHostNames, singlePrimaryGW, stack);
+            addRepairFlows(event, flowTriggers, repairableGroupsWithHostNames, singlePrimaryGW, stack.getStack());
         } else {
             LOGGER.info("Special repair: '{}'", event.getRepairType());
             specialRepair(event, flowTriggers, repairableGroupsWithHostNames, stack, event.getRepairType());
@@ -290,18 +290,18 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         LinkedHashMultimap<String, String> hostsByHostGroupAndSortedByPgwAndGw =
                 collectHostsByHostGroupAndSortByPGwGwAndName(primaryGwFQDN, secondaryGwFQDNs, repairableGroupsWithHostNameMultimap);
         switch (repairType) {
-            case ONE_BY_ONE -> addRepairFlowsForEachNode(event, flowTriggers, hostsByHostGroupAndSortedByPgwAndGw, primaryGwFQDN, stack);
-            case BATCH -> addBatchedRepairFlows(event, flowTriggers, hostsByHostGroupAndSortedByPgwAndGw, primaryGwFQDN, stack);
+            case ONE_BY_ONE -> addRepairFlowsForEachNode(event, flowTriggers, hostsByHostGroupAndSortedByPgwAndGw, primaryGwFQDN, stack.getStack());
+            case BATCH -> addBatchedRepairFlows(event, flowTriggers, hostsByHostGroupAndSortedByPgwAndGw, primaryGwFQDN, stack.getStack());
             default -> throw new IllegalStateException("Unknown repair type:" + repairType);
         }
     }
 
     private void addRepairFlowsForEachNode(ClusterRepairTriggerEvent event, Queue<Selectable> flowTriggers,
-            LinkedHashMultimap<String, String> hostsByHostGroupAndSortedByPgw, Optional<String> primaryGwFQDN, StackDto stack) {
+            LinkedHashMultimap<String, String> hostsByHostGroupAndSortedByPgw, Optional<String> primaryGwFQDN, StackView stackView) {
         hostsByHostGroupAndSortedByPgw.asMap().forEach((hostGroupName, instances) -> {
             LinkedHashMultimap<String, String> hostGroup = LinkedHashMultimap.create();
             hostGroup.putAll(hostGroupName, List.copyOf(instances));
-            addRepairFlowsForEachGroupsWithOneNode(event, flowTriggers, hostGroup, primaryGwFQDN, stack);
+            addRepairFlowsForEachGroupsWithOneNode(event, flowTriggers, hostGroup, primaryGwFQDN, stackView);
         });
     }
 
@@ -342,7 +342,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     }
 
     private void addBatchedRepairFlows(ClusterRepairTriggerEvent event, Queue<Selectable> flowTriggers,
-            LinkedHashMultimap<String, String> orderedHostMultimap, Optional<String> primaryGwFQDNOptional, StackDto stack) {
+            LinkedHashMultimap<String, String> orderedHostMultimap, Optional<String> primaryGwFQDNOptional, StackView stackView) {
         int batchSize = scalingHardLimitsService.getMaxUpscaleStepInNodeCount();
         LOGGER.info("Batch repair with batch size: {}", batchSize);
         while (!orderedHostMultimap.values().isEmpty()) {
@@ -353,12 +353,12 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
                 orderedHostMultimap.values().remove(hostToRepair.getValue());
             }
             Collection<String> repairedHosts = repairableGroups.values();
-            addRepairFlows(event, flowTriggers, Multimaps.asMap(repairableGroups), isPrimaryGWInHosts(primaryGwFQDNOptional, repairedHosts), stack);
+            addRepairFlows(event, flowTriggers, Multimaps.asMap(repairableGroups), isPrimaryGWInHosts(primaryGwFQDNOptional, repairedHosts), stackView);
         }
     }
 
     private void addRepairFlowsForEachGroupsWithOneNode(ClusterRepairTriggerEvent event, Queue<Selectable> flowTriggers,
-            LinkedHashMultimap<String, String> orderedHostMultimap, Optional<String> primaryGwFQDNOptional, StackDto stack) {
+            LinkedHashMultimap<String, String> orderedHostMultimap, Optional<String> primaryGwFQDNOptional, StackView stackView) {
         LOGGER.info("Rolling upgrade, repairing one node from each host group at one time, for stack: '{}'", event.getStackId());
         while (!orderedHostMultimap.values().isEmpty()) {
             Map<String, Set<String>> repairableGroupsWithOneHostName = new HashMap<>();
@@ -369,7 +369,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
                 });
             }
             Set<String> repairedHosts = repairableGroupsWithOneHostName.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
-            addRepairFlows(event, flowTriggers, repairableGroupsWithOneHostName, isPrimaryGWInHosts(primaryGwFQDNOptional, repairedHosts), stack);
+            addRepairFlows(event, flowTriggers, repairableGroupsWithOneHostName, isPrimaryGWInHosts(primaryGwFQDNOptional, repairedHosts), stackView);
         }
     }
 
@@ -378,13 +378,15 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     }
 
     private void addRepairFlows(ClusterRepairTriggerEvent event, Queue<Selectable> flowTriggers, Map<String, Set<String>> repairableGroupsWithHostNames,
-            boolean singlePrimaryGW, StackDto stack) {
+            boolean singlePrimaryGW, StackView stackView) {
         if (!repairableGroupsWithHostNames.isEmpty()) {
             flowTriggers.add(downscaleEvent(singlePrimaryGW, event, repairableGroupsWithHostNames));
             LOGGER.info("Downscale event added for: {}", repairableGroupsWithHostNames);
-            addAwsNativeEventMigrationIfNeeded(flowTriggers, event, repairableGroupsWithHostNames, stack);
+            for (Entry<String, Set<String>> groupWithHostNames : repairableGroupsWithHostNames.entrySet()) {
+                addAwsNativeEventMigrationIfNeeded(flowTriggers, event, groupWithHostNames.getKey(), stackView);
+            }
             flowTriggers.add(fullUpscaleEvent(event, repairableGroupsWithHostNames, singlePrimaryGW,
-                    event.isRestartServices(), isKerberosSecured(stack.getStack()), event.isRollingRestartEnabled()));
+                    event.isRestartServices(), isKerberosSecured(stackView), event.isRollingRestartEnabled()));
             LOGGER.info("Upscale event added for: {}", repairableGroupsWithHostNames);
         }
     }
@@ -402,28 +404,19 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         }
     }
 
-    void addAwsNativeEventMigrationIfNeeded(Queue<Selectable> flowTriggers, ClusterRepairTriggerEvent event,
-            Map<String, Set<String>> repairableGroupsWithHostNames, StackDto stack) {
+    void addAwsNativeEventMigrationIfNeeded(Queue<Selectable> flowTriggers, ClusterRepairTriggerEvent event, String groupName, StackView stackView) {
         String triggeredVariant = event.getTriggeredStackVariant();
-        boolean allGroupsSelectedForRepair = allGroupsSelectedForRepair(repairableGroupsWithHostNames, stack);
-        boolean awsVariantMigrationIsFeasible = stackUpgradeService.awsVariantMigrationIsFeasible(stack.getStack(), triggeredVariant);
-        if (event.isUpgrade() && allGroupsSelectedForRepair && awsVariantMigrationIsFeasible) {
-            LOGGER.info("AWS Variant migration is needed from '{}' to: '{}', groupNames: '{}'", stack.getPlatformVariant(), triggeredVariant,
-                    repairableGroupsWithHostNames.keySet());
-            for (Entry<String, Set<String>> groupWithHostNames : repairableGroupsWithHostNames.entrySet()) {
-                flowTriggers.add(awsVariantMigrationTriggerEvent(event.getResourceId(), groupWithHostNames.getKey()));
+        if (event.isUpgrade()) {
+            String originalPlatformVariant = stackView.getPlatformVariant();
+            LOGGER.debug("Upgrade flow, checking that the variant migration is triggerable from original: '{}' to new: '{}', groupName: '{}'",
+                    originalPlatformVariant, triggeredVariant, groupName);
+            if (stackUpgradeService.awsVariantMigrationIsFeasible(stackView, triggeredVariant)) {
+                LOGGER.info("Migration variant is needed from '{}' to: '{}', groupName: '{}'", originalPlatformVariant, triggeredVariant, groupName);
+                flowTriggers.add(awsVariantMigrationTriggerEvent(event.getResourceId(), groupName));
             }
         } else {
-            LOGGER.info("AWS Variant migration is not possible, upgrade: {}, allGroupsSelectedForRepair: {}, awsVariantMigrationIsFeasible: {}, variant: {}",
-                    event.isUpgrade(), allGroupsSelectedForRepair, awsVariantMigrationIsFeasible, triggeredVariant);
+            LOGGER.debug("Don't need to migrate the stack, variant: {}, groupName: {}", triggeredVariant, groupName);
         }
-    }
-
-    private boolean allGroupsSelectedForRepair(Map<String, Set<String>> repairableGroupsWithHostNames, StackDto stack) {
-        Set<String> existingInstanceGroups = stack.getInstanceGroupViews().stream()
-                .map(com.sequenceiq.cloudbreak.view.InstanceGroupView::getGroupName)
-                .collect(Collectors.toSet());
-        return repairableGroupsWithHostNames.keySet().containsAll(existingInstanceGroups);
     }
 
     private AwsVariantMigrationTriggerEvent awsVariantMigrationTriggerEvent(Long resourceId, String groupName) {
