@@ -37,7 +37,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.tag.ClusterTemplateApplicationTag;
-import com.sequenceiq.cloudbreak.tag.DefaultApplicationTag;
+import com.sequenceiq.common.model.DefaultApplicationTag;
 
 class StackDtoToMeteringEventConverterTest {
 

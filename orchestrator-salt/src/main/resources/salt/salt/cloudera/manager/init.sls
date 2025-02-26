@@ -174,3 +174,25 @@ run_generate_agent_tokens:
         - file: /opt/salt/scripts/cm_generate_agent_tokens.sh
         - cmd: run_autotls_setup
 {% endif %}
+
+{% if "ipa_member" in grains.get('roles', []) %}
+
+replace_ipa_env_host_to_server:
+  file.replace:
+    - name: /opt/cloudera/cm/bin/gen_credentials_ipa.sh
+    - pattern: "ipa env host"
+    - repl: "ipa env server"
+
+replace_max_renew_life_ipa:
+  file.replace:
+    - name: /opt/cloudera/cm/bin/gen_credentials_ipa.sh
+    - pattern: "MAX_RENEW_LIFE=.*"
+    - repl: "MAX_RENEW_LIFE=0"
+
+replace_max_renew_life:
+  file.replace:
+    - name: /opt/cloudera/cm/bin/gen_credentials.sh
+    - pattern: "MAX_RENEW_LIFE=.*"
+    - repl: "MAX_RENEW_LIFE=0"
+
+{% endif %}

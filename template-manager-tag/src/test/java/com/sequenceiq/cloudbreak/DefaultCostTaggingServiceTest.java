@@ -18,11 +18,11 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.tag.CentralTagUpdater;
-import com.sequenceiq.cloudbreak.tag.DefaultApplicationTag;
 import com.sequenceiq.cloudbreak.tag.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.tag.TagPreparationObject;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagMergeRequest;
+import com.sequenceiq.common.model.DefaultApplicationTag;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultCostTaggingServiceTest {

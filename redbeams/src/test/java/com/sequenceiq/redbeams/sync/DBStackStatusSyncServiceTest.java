@@ -1,10 +1,18 @@
 package com.sequenceiq.redbeams.sync;
 
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
+import static com.sequenceiq.common.model.AzureDatabaseType.AZURE_DATABASE_TYPE_KEY;
+import static com.sequenceiq.common.model.AzureDatabaseType.FLEXIBLE_SERVER;
+import static com.sequenceiq.common.model.AzureDatabaseType.SINGLE_SERVER;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -31,15 +39,18 @@ import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
+import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.redbeams.converter.spi.DBStackToDatabaseStackConverter;
+import com.sequenceiq.redbeams.domain.stack.DBResource;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
 import com.sequenceiq.redbeams.dto.Credential;
 import com.sequenceiq.redbeams.service.CredentialService;
 import com.sequenceiq.redbeams.service.stack.DBResourceService;
+import com.sequenceiq.redbeams.service.stack.DBStackService;
 import com.sequenceiq.redbeams.service.stack.DBStackStatusUpdater;
 
 @ExtendWith(MockitoExtension.class)
@@ -50,6 +61,14 @@ public class DBStackStatusSyncServiceTest {
     private static final String DB_NAME = "name";
 
     private static final Long DB_STACK_ID = 1234L;
+
+    private static final String SINGLE_SERVER_RES_ID = "/subscriptions/12345678-90ab-cdef-1234-567890abcdef/resourceGroups/myResourceGroup/" +
+            "providers/Microsoft.DBforPostgreSQL/servers/mySqlServer";
+
+    private static final String FLEXIBLE_SERVER_RES_ID = "/subscriptions/12345678-90ab-cdef-1234-567890abcdef/resourceGroups/myResourceGroup/" +
+            "providers/Microsoft.DBforPostgreSQL/flexibleServers/mySqlServer";
+
+    private static final String DBSVR_NAME = "dbsvr-91755aa4-9175-401a-8d45-aa13bccae329";
 
     @Mock
     private DatabaseStack databaseStack;
@@ -105,6 +124,9 @@ public class DBStackStatusSyncServiceTest {
     @Mock
     private com.sequenceiq.cloudbreak.cloud.model.DatabaseServer databaseServer;
 
+    @Mock
+    private DBStackService dbStackService;
+
     private ArgumentCaptor<CloudContext> cloudContextArgumentCaptor;
 
     @InjectMocks
@@ -152,7 +174,6 @@ public class DBStackStatusSyncServiceTest {
         when(dbStack.getId()).thenReturn(DB_STACK_ID);
         when(dbStack.getStatus()).thenReturn(savedStatus);
         when(dbStack.getOwnerCrn()).thenReturn(crn);
-        when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
 
         victim.sync(dbStack);
 
@@ -165,6 +186,88 @@ public class DBStackStatusSyncServiceTest {
     }
 
     @Test
+    public void shouldCheckSingleToFlexibleMigration()
+            throws Exception {
+        ArgumentCaptor<DatabaseStack> databaseStackCaptor = ArgumentCaptor.forClass(DatabaseStack.class);
+        when(resourceConnector.getDatabaseServerStatus(eq(authenticatedContext), databaseStackCaptor.capture()))
+                .thenReturn(ExternalDatabaseStatus.DELETED)
+                .thenReturn(ExternalDatabaseStatus.STARTED);
+        when(dbStack.getCloudPlatform()).thenReturn(AZURE.name());
+        when(dbStack.getId()).thenReturn(DB_STACK_ID);
+        when(dbStack.getStatus()).thenReturn(Status.AVAILABLE);
+        when(dbStack.getOwnerCrn()).thenReturn(crn);
+        when(dbStack.getName()).thenReturn(DB_NAME);
+        when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
+        when(dbStack.getDatabaseServer()).thenReturn(dbServer);
+        when(dbServer.getName()).thenReturn(DBSVR_NAME);
+        DBResource dbResource = new DBResource.Builder().withReference(SINGLE_SERVER_RES_ID).build();
+        when(dbResourceService.findByStackAndNameAndType(eq(DB_STACK_ID), eq(DBSVR_NAME), eq(ResourceType.AZURE_DATABASE))).thenReturn(Optional.of(dbResource));
+        victim.sync(dbStack);
+
+        assertEquals(FLEXIBLE_SERVER.name(), databaseStackCaptor.getAllValues().get(1).getDatabaseServer().getParameters().get(AZURE_DATABASE_TYPE_KEY));
+        verify(dbStackService).save(any(DBStack.class));
+        ArgumentCaptor<DBResource> dbResourceArgumentCaptor = ArgumentCaptor.forClass(DBResource.class);
+        verify(dbResourceService).save(dbResourceArgumentCaptor.capture());
+        assertEquals(FLEXIBLE_SERVER_RES_ID, dbResourceArgumentCaptor.getValue().getResourceReference());
+        verifyNoMoreInteractions(dbStackStatusUpdater);
+        verifyNoInteractions(dbStackJobService);
+    }
+
+    @Test
+    public void shouldCheckFlexibleToSingleRollback()
+            throws Exception {
+        ArgumentCaptor<DatabaseStack> databaseStackCaptor = ArgumentCaptor.forClass(DatabaseStack.class);
+        when(resourceConnector.getDatabaseServerStatus(eq(authenticatedContext), databaseStackCaptor.capture()))
+                .thenReturn(ExternalDatabaseStatus.DELETED)
+                .thenReturn(ExternalDatabaseStatus.STARTED);
+        when(dbStack.getCloudPlatform()).thenReturn(AZURE.name());
+        when(dbStack.getId()).thenReturn(DB_STACK_ID);
+        when(dbStack.getStatus()).thenReturn(Status.AVAILABLE);
+        when(dbStack.getOwnerCrn()).thenReturn(crn);
+        when(dbStack.getName()).thenReturn(DB_NAME);
+        when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
+        when(dbStack.getDatabaseServer()).thenReturn(dbServer);
+        when(dbServer.getName()).thenReturn(DBSVR_NAME);
+        DBResource dbResource = new DBResource.Builder().withReference(FLEXIBLE_SERVER_RES_ID).build();
+        when(dbResourceService.findByStackAndNameAndType(eq(DB_STACK_ID), eq(DBSVR_NAME), eq(ResourceType.AZURE_DATABASE))).thenReturn(Optional.of(dbResource));
+        victim.sync(dbStack);
+
+        assertEquals(SINGLE_SERVER.name(), databaseStackCaptor.getAllValues().get(1).getDatabaseServer().getParameters().get(AZURE_DATABASE_TYPE_KEY));
+        verify(dbStackService).save(any(DBStack.class));
+        ArgumentCaptor<DBResource> dbResourceArgumentCaptor = ArgumentCaptor.forClass(DBResource.class);
+        verify(dbResourceService).save(dbResourceArgumentCaptor.capture());
+        assertEquals(SINGLE_SERVER_RES_ID, dbResourceArgumentCaptor.getValue().getResourceReference());
+        verifyNoMoreInteractions(dbStackStatusUpdater);
+        verifyNoInteractions(dbStackJobService);
+    }
+
+    @Test
+    public void shouldBeDeletedIfNeitherSingleNorFlexible()
+            throws Exception {
+        ArgumentCaptor<DatabaseStack> databaseStackCaptor = ArgumentCaptor.forClass(DatabaseStack.class);
+        when(resourceConnector.getDatabaseServerStatus(eq(authenticatedContext), databaseStackCaptor.capture()))
+                .thenReturn(ExternalDatabaseStatus.DELETED)
+                .thenReturn(ExternalDatabaseStatus.DELETED);
+        when(dbStack.getCloudPlatform()).thenReturn(AZURE.name());
+        when(dbStack.getId()).thenReturn(DB_STACK_ID);
+        when(dbStack.getStatus()).thenReturn(Status.AVAILABLE);
+        when(dbStack.getOwnerCrn()).thenReturn(crn);
+        when(dbStack.getName()).thenReturn(DB_NAME);
+        when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
+        when(dbStack.getDatabaseServer()).thenReturn(dbServer);
+        when(dbServer.getName()).thenReturn(DBSVR_NAME);
+        DBResource dbResource = new DBResource.Builder().withReference(SINGLE_SERVER_RES_ID).build();
+        when(dbResourceService.findByStackAndNameAndType(eq(DB_STACK_ID), eq(DBSVR_NAME), eq(ResourceType.AZURE_DATABASE))).thenReturn(Optional.of(dbResource));
+        victim.sync(dbStack);
+
+        assertEquals(FLEXIBLE_SERVER.name(), databaseStackCaptor.getAllValues().get(1).getDatabaseServer().getParameters().get(AZURE_DATABASE_TYPE_KEY));
+        verifyNoInteractions(dbStackService);
+        verifyNoMoreInteractions(dbResourceService);
+        verify(dbStackStatusUpdater).updateStatus(DB_STACK_ID, DetailedDBStackStatus.DELETE_COMPLETED);
+        verify(dbStackJobService).unschedule(DB_STACK_ID, DB_NAME);
+    }
+
+    @Test
     public void shouldSetStatusAndUnscheduleInCaseOfStopCompleted()
             throws Exception {
         when(resourceConnector.getDatabaseServerStatus(authenticatedContext, databaseStack)).thenReturn(ExternalDatabaseStatus.DELETED);
@@ -172,7 +275,6 @@ public class DBStackStatusSyncServiceTest {
         when(dbStack.getStatus()).thenReturn(Status.DELETE_IN_PROGRESS);
         when(dbStack.getOwnerCrn()).thenReturn(crn);
         when(dbStack.getName()).thenReturn(DB_NAME);
-        when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
 
         victim.sync(dbStack);
 
