@@ -645,9 +645,10 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
             orchestratorService.save(stack.getOrchestrator());
         }
         stack.getStackAuthentication().setLoginUserName(SSH_USER_CB);
-        setDefaultTags(stack);
 
         Stack savedStack = measure(() -> save(stack), LOGGER, "Stackrepository save took {} ms for stack {}", stackName);
+
+        setDefaultTags(savedStack);
 
         savedStack.populateStackIdForComponents();
 
@@ -748,6 +749,7 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
                     .withPlatform(stack.getCloudPlatform())
                     .withAccountId(accountId)
                     .withResourceCrn(stack.getResourceCrn())
+                    .withResourceId(Optional.ofNullable(stack.getId()).map(String::valueOf).orElse(null))
                     .withIsInternalTenant(internalTenant)
                     .withUserName(stack.getCreator().getUserName())
                     .withAccountTags(accountTagClientService.list())
