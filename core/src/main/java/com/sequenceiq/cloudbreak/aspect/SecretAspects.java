@@ -83,7 +83,7 @@ public class SecretAspects {
             try {
                 for (Field field : entity.getClass().getDeclaredFields()) {
                     if (field.isAnnotationPresent(SecretValue.class)) {
-                        LOGGER.debug("Found SecretValue annotation on {}", field);
+                        LOGGER.trace("Found SecretValue annotation on {}", field);
                         ReflectionUtils.makeAccessible(field);
                         Secret value = (Secret) field.get(entity);
                         if (value != null && value.getRaw() != null && value.getSecret() == null) {

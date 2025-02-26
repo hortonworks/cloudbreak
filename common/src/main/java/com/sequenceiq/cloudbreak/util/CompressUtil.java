@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.zip.ZipEntry;
@@ -156,8 +157,8 @@ public class CompressUtil {
         }
         for (Map.Entry<String, List<Resource>> entry : structure.entrySet()) {
             zout.putNextEntry(new ZipEntry(entry.getKey()));
+            LOGGER.debug("Zip entries: {}", entry.getValue().stream().map(Resource::getFilename).filter(Objects::nonNull).toList());
             for (Resource resource : entry.getValue()) {
-                LOGGER.debug("Zip entry: {}", resource.getFilename());
                 zout.putNextEntry(new ZipEntry(entry.getKey() + resource.getFilename()));
                 InputStream inputStream = resource.getInputStream();
                 byte[] bytes = IOUtils.toByteArray(inputStream);
