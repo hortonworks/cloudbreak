@@ -2,10 +2,8 @@ package com.sequenceiq.datalake.configuration;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -15,13 +13,10 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -91,28 +86,6 @@ class CDPConfigServiceTest {
         ReflectionTestUtils.setField(cdpConfigService, "defaultRuntime", RUNTIME_710);
     }
 
-    private static Object[][] testResourceTemplateDataProvider() {
-        return new Object[][]{
-                //testCaseName     templatePath     expectedVersion     expectedProvider    expectedEntitlement     expectedSdxClusterShape
-                {"testResourceTemplate - with Entitlement", "resources/duties/7.2.14/aws/cdp_data_lake_medium_duty_with_profiler/medium_duty_ha.json",
-                        RUNTIME_7214, "aws", "/cdp_data_lake_medium_duty_with_profiler", "medium_duty_ha"},
-                {"testResourceTemplate - without Entitlement", "resources/duties/7.2.14/aws/medium_duty_ha.json",
-                        RUNTIME_7214, "aws", null, "medium_duty_ha"}
-        };
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("testResourceTemplateDataProvider")
-    public void testResourceTemplate(String testName, String templatePath,
-            String expectedVersion, String expectedProvider, String expectedEntitlement, String expectedSdxClusterShape) {
-        Matcher matcher = cdpConfigService.RESOURCE_TEMPLATE_PATTERN.matcher(templatePath);
-        assertTrue(matcher.matches());
-        assertEquals(matcher.group(1), expectedVersion);
-        assertEquals(matcher.group(2), expectedProvider);
-        assertEquals(matcher.group(3), expectedEntitlement);
-        assertEquals(matcher.group(4), expectedSdxClusterShape);
-    }
-
     @Test
     void cdpStackRequests() {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
@@ -126,7 +99,7 @@ class CDPConfigServiceTest {
             assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.YARN, SdxClusterShape.LIGHT_DUTY, RUNTIME_7214)));
             assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.MOCK, SdxClusterShape.LIGHT_DUTY, RUNTIME_7212)));
             assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.MOCK, SdxClusterShape.LIGHT_DUTY, RUNTIME_7214)));
-            assertTrue(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.MEDIUM_DUTY_HA, RUNTIME_7214))
+            assertFalse(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.MEDIUM_DUTY_HA, RUNTIME_7214))
                     .getCluster().getBlueprintName().contains("Profiler"));
             assertFalse(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.MEDIUM_DUTY_HA, RUNTIME_7212))
                     .getCluster().getBlueprintName().contains("Profiler"));

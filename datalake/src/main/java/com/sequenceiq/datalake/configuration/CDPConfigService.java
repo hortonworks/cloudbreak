@@ -6,7 +6,6 @@ import static com.sequenceiq.common.model.OsType.RHEL8;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -21,7 +20,6 @@ import java.util.stream.Collectors;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -33,11 +31,8 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
-import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.gov.CommonGovService;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -58,14 +53,12 @@ public class CDPConfigService {
 
     public static final int CLOUDPLATFORM_GROUP = 2;
 
-    public static final int ENTITLEMENT_GROUP = 3;
-
-    public static final int CLUSTERSHAPE_GROUP = 4;
+    public static final int CLUSTERSHAPE_GROUP = 3;
 
     public static final long DEFAULT_WORKSPACE_ID = 0;
 
     @VisibleForTesting
-    static final Pattern RESOURCE_TEMPLATE_PATTERN = Pattern.compile(".*/duties/(.[^/]*)/(.[^/]*)(/.*)?/(.*?).json");
+    static final Pattern RESOURCE_TEMPLATE_PATTERN = Pattern.compile(".*/duties/(.[\\d.?]+]*)/([a-z]+)/([a-z_]+)+\\.json");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CDPConfigService.class);
 
@@ -85,7 +78,7 @@ public class CDPConfigService {
     @Value("${datalake.runtimes.supported}")
     private Set<String> supportedRuntimes;
 
-    private Map<CDPConfigKey, Map<Optional<Entitlement>, String>> cdpStackRequests = new HashMap<>();
+    private final Map<CDPConfigKey, String> cdpStackRequests = new HashMap<>();
 
     @Inject
     private EntitlementService entitlementService;
@@ -118,14 +111,10 @@ public class CDPConfigService {
                         }
                         SdxClusterShape sdxClusterShape = SdxClusterShape.valueOf(clusterShapeString);
                         CDPConfigKey cdpConfigKey = new CDPConfigKey(cloudPlatform, sdxClusterShape, runtimeVersion, architecture);
-                        String entitlementString = matcher.group(ENTITLEMENT_GROUP) != null ? StringUtils.substring(matcher.group(ENTITLEMENT_GROUP), 1) : null;
-                        Optional<Entitlement> entitlementOptional = Arrays.stream(Entitlement.values()).filter(entitlement ->
-                                StringUtils.equals(entitlement.name().toLowerCase(Locale.ROOT), entitlementString)).findFirst();
-                        String templateString = IOUtils.toString(resource.getInputStream(), StandardCharsets.UTF_8.name());
+                        String templateString = IOUtils.toString(resource.getInputStream(), StandardCharsets.UTF_8);
                         if (!cdpStackRequests.containsKey(cdpConfigKey)) {
-                            cdpStackRequests.put(cdpConfigKey, Maps.newHashMap());
+                            cdpStackRequests.put(cdpConfigKey, templateString);
                         }
-                        updateCdpStackRequests(runtimeVersion, cdpConfigKey, entitlementOptional, templateString);
                     }
                 }
             }
@@ -136,31 +125,9 @@ public class CDPConfigService {
         }
     }
 
-    private void updateCdpStackRequests(String runtimeVersion, CDPConfigKey cdpConfigKey, Optional<Entitlement> entitlementOptional, String templateString) {
-        Set<String> enabledGovPlatforms = preferencesService.enabledGovPlatforms();
-        Set<String> enabledPlatforms = preferencesService.enabledPlatforms();
-        if (commonGovService.govCloudDeployment(enabledGovPlatforms, enabledPlatforms)
-                && commonGovService.govCloudCompatibleVersion(runtimeVersion)) {
-            cdpStackRequests.get(cdpConfigKey).putIfAbsent(entitlementOptional, templateString);
-        } else if (!commonGovService.govCloudDeployment(enabledGovPlatforms, enabledPlatforms)) {
-            cdpStackRequests.get(cdpConfigKey).putIfAbsent(entitlementOptional, templateString);
-        }
-    }
-
     public StackV4Request getConfigForKey(CDPConfigKey cdpConfigKey) {
         try {
-            Map<Optional<Entitlement>, String> cdpStackRequestMap = MapUtils.emptyIfNull(cdpStackRequests.get(cdpConfigKey));
-            Optional<String> enabledEntitlementBasedTemplate = cdpStackRequestMap.entrySet().stream()
-                    .filter(entry -> entry.getKey().isPresent())
-                    .filter(entry -> entitlementService.isEntitledFor(ThreadBasedUserCrnProvider.getAccountId(), entry.getKey().get()))
-                    .map(Map.Entry::getValue)
-                    .findFirst();
-            String cdpStackRequest;
-            if (cdpStackRequestMap.keySet().stream().anyMatch(Optional::isPresent) && enabledEntitlementBasedTemplate.isPresent()) {
-                cdpStackRequest = enabledEntitlementBasedTemplate.get();
-            } else {
-                cdpStackRequest = cdpStackRequestMap.get(Optional.empty());
-            }
+            String cdpStackRequest = cdpStackRequests.get(cdpConfigKey);
             if (cdpStackRequest == null) {
                 return null;
             } else {
@@ -234,12 +201,7 @@ public class CDPConfigService {
     }
 
     private Predicate<CDPConfigKey> filterByCloudPlatformIfPresent(String cloudPlatform) {
-        return cdpStack -> {
-            if (StringUtils.isEmpty(cloudPlatform) || cdpStack.getCloudPlatform().equalsIgnoreCase(cloudPlatform)) {
-                return true;
-            }
-            return false;
-        };
+        return cdpStack -> StringUtils.isEmpty(cloudPlatform) || cdpStack.getCloudPlatform().equalsIgnoreCase(cloudPlatform);
     }
 
     public List<AdvertisedRuntime> getAdvertisedRuntimes(String cloudPlatform, String os) {
@@ -248,16 +210,16 @@ public class CDPConfigService {
         Optional<String> calculatedDefault
                 = Strings.isNullOrEmpty(this.defaultRuntime) ? runtimeVersions.stream().findFirst() : Optional.ofNullable(this.defaultRuntime);
 
-        List<AdvertisedRuntime> advertisedRuntimes = new ArrayList<>();
+        List<AdvertisedRuntime> calculatedAdvertisedRuntimes = new ArrayList<>();
         for (String runtimeVersion : runtimeVersions) {
             AdvertisedRuntime advertisedRuntime = new AdvertisedRuntime();
             advertisedRuntime.setRuntimeVersion(runtimeVersion);
             if (calculatedDefault.map(r -> r.equals(runtimeVersion)).orElse(false)) {
                 advertisedRuntime.setDefaultRuntimeVersion(true);
             }
-            advertisedRuntimes.add(advertisedRuntime);
+            calculatedAdvertisedRuntimes.add(advertisedRuntime);
         }
-        LOGGER.debug("Advertised runtime versions for datalake: {}", advertisedRuntimes);
-        return advertisedRuntimes;
+        LOGGER.debug("Advertised runtime versions for datalake: {}", calculatedAdvertisedRuntimes);
+        return calculatedAdvertisedRuntimes;
     }
 }
