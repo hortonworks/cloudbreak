@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProvider;
@@ -95,7 +96,7 @@ public class SdxImagesTests extends PreconditionSdxE2ETest {
                 .withUrl(cloudProvider.getBaseImageTestCatalogUrl())
                 .when(imageCatalogTestClient.createIfNotExistV4())
                 .when((tc, dto, client) -> {
-                    selectedImageID.set(cloudProvider.getLatestBaseImageID(tc, dto, client));
+                    selectedImageID.set(cloudProvider.getLatestBaseImageID(Architecture.X86_64, tc, dto, client));
                     return dto;
                 })
                 .given(imageSettings, ImageSettingsTestDto.class)

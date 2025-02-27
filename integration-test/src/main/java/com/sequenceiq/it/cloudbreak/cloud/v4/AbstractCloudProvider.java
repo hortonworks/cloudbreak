@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.ne
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.InstanceGroupNetworkV1Request;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAuthenticationRequest;
@@ -146,7 +147,13 @@ public abstract class AbstractCloudProvider implements CloudProvider {
 
     @Override
     public String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
-        return getLatestDefaultBaseImage(imageCatalogTestDto, cloudbreakClient, getCloudPlatform().name(), getGovCloud());
+        return getLatestDefaultBaseImage(imageCatalogTestDto, cloudbreakClient, getCloudPlatform().name(), Architecture.X86_64, getGovCloud());
+    }
+
+    @Override
+    public String getLatestBaseImageID(Architecture architecture, TestContext testContext, ImageCatalogTestDto imageCatalogTestDto,
+            CloudbreakClient cloudbreakClient) {
+        return getLatestDefaultBaseImage(imageCatalogTestDto, cloudbreakClient, getCloudPlatform().name(), architecture, getGovCloud());
     }
 
     @Override
@@ -370,7 +377,8 @@ public abstract class AbstractCloudProvider implements CloudProvider {
         }
     }
 
-    public String getLatestDefaultBaseImage(ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient, String platform, boolean govCloud) {
+    public String getLatestDefaultBaseImage(ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient, String platform,
+            Architecture architecture, boolean govCloud) {
         Runtime.Version defaultRuntimeVersion = Runtime.Version.parse(commonClusterManagerProperties.getRuntimeVersion());
         Runtime.Version baseRuntimeVersion = Runtime.Version.parse("7.2.18");
         String osType = govCloud
@@ -384,7 +392,7 @@ public abstract class AbstractCloudProvider implements CloudProvider {
                     .getDefaultClient()
                     .imageCatalogV4Endpoint()
                     .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
-                            platform, null, null, govCloud, true, null).getBaseImages();
+                            platform, null, null, govCloud, true, architecture.getName()).getBaseImages();
 
             if (images.isEmpty()) {
                 throw new TestFailException("Images are empty, there is not any base image on provider " + platform);
