@@ -43,20 +43,22 @@ public class DefaultCostTaggingServiceTest {
     public void testPrepareDefaultTagsForAWSShouldReturnAllDefaultMap() {
         Map<String, String> result = underTest.prepareDefaultTags(tagRequest("AWS"));
 
-        Assert.assertEquals(3L, result.size());
+        Assert.assertEquals(4L, result.size());
         Assert.assertEquals("environment-crn", result.get(DefaultApplicationTag.ENVIRONMENT_CRN.key()));
         Assert.assertEquals("creator-crn", result.get(DefaultApplicationTag.CREATOR_CRN.key()));
         Assert.assertEquals("resource-crn", result.get(DefaultApplicationTag.RESOURCE_CRN.key()));
+        Assert.assertEquals("resource-id", result.get(DefaultApplicationTag.RESOURCE_ID.key()));
     }
 
     @Test
     public void testPrepareDefaultTagsForAWSAndAdditionalTagsShouldReturnAllDefaultMapPlusTagsWhichAreNotEmpty() {
         Map<String, String> result = underTest.prepareDefaultTags(tagRequest("AWS", new HashMap<>(), new HashMap<>()));
 
-        Assert.assertEquals(3L, result.size());
+        Assert.assertEquals(4L, result.size());
         Assert.assertEquals("environment-crn", result.get(DefaultApplicationTag.ENVIRONMENT_CRN.key()));
         Assert.assertEquals("creator-crn", result.get(DefaultApplicationTag.CREATOR_CRN.key()));
         Assert.assertEquals("resource-crn", result.get(DefaultApplicationTag.RESOURCE_CRN.key()));
+        Assert.assertEquals("resource-id", result.get(DefaultApplicationTag.RESOURCE_ID.key()));
     }
 
     @Test
@@ -66,10 +68,11 @@ public class DefaultCostTaggingServiceTest {
 
         Map<String, String> result = underTest.prepareDefaultTags(tagRequest("AZURE", sourceMap, new HashMap<>()));
 
-        Assert.assertEquals(3L, result.size());
+        Assert.assertEquals(4L, result.size());
         Assert.assertEquals("environment-crn", result.get(DefaultApplicationTag.ENVIRONMENT_CRN.key()));
         Assert.assertEquals("creator-crn", result.get(DefaultApplicationTag.CREATOR_CRN.key()));
         Assert.assertEquals("resource-crn", result.get(DefaultApplicationTag.RESOURCE_CRN.key()));
+        Assert.assertEquals("resource-id", result.get(DefaultApplicationTag.RESOURCE_ID.key()));
     }
 
     @Test
@@ -122,11 +125,12 @@ public class DefaultCostTaggingServiceTest {
 
         Map<String, String> result = underTest.prepareDefaultTags(tagRequest);
 
-        Assert.assertEquals(6L, result.size());
+        Assert.assertEquals(7L, result.size());
         Assert.assertEquals("owner", result.get("owner"));
         Assert.assertEquals("creator-crn", result.get("Cloudera-Creator-Resource-Name"));
         Assert.assertEquals("apple1", result.get("apple1"));
         Assert.assertEquals("resource-crn", result.get("Cloudera-Resource-Name"));
+        Assert.assertEquals("resource-id", result.get("Cloudera-Resource-ID"));
         Assert.assertEquals("environment-crn", result.get("Cloudera-Environment-Resource-Name"));
         Assert.assertEquals("apple2", result.get("apple2"));
     }
@@ -145,6 +149,7 @@ public class DefaultCostTaggingServiceTest {
             .withEnvironmentCrn("environment-crn")
             .withCreatorCrn("creator-crn")
             .withResourceCrn("resource-crn")
+            .withResourceId("resource-id")
             .withUserName("apache1@apache.com")
             .withPlatform(platform)
             .withAccountId("pepsi")
