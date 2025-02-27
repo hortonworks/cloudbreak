@@ -4,7 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.NOT_FO
 import static com.sequenceiq.cloudbreak.cloud.aws.resource.AwsNativeResourceBuilderOrderConstants.NATIVE_INSTANCE_RESOURCE_BUILDER_ORDER;
 import static com.sequenceiq.cloudbreak.cloud.model.CloudInstance.USERDATA_SECRET_ID;
 import static com.sequenceiq.cloudbreak.constant.ImdsConstants.AWS_IMDS_VERSION_V2;
-import static com.sequenceiq.common.model.DefaultApplicationTag.RESOURCE_CRN;
+import static com.sequenceiq.common.model.DefaultApplicationTag.RESOURCE_ID;
 import static java.util.Collections.singletonList;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -136,9 +136,9 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
         AwsCloudStackView awsCloudStackView = new AwsCloudStackView(cloudStack);
         CloudResource cloudResource = buildableResource.get(0);
         String instanceName = awsStackNameCommonUtil.getInstanceName(ac, group.getName(), privateId);
-        Optional<Instance> existedOpt = resourceByNameAndStackCrn(amazonEc2Client, instanceName, cloudStack);
+        Optional<Instance> existedOpt = resourceByNameAndStackId(amazonEc2Client, instanceName, cloudStack);
         Instance instance;
-        if (existedOpt.isPresent() && existedOpt.get().state().code() != AWS_INSTANCE_TERMINATED_CODE) {
+        if (existedOpt.isPresent()) {
             instance = existedOpt.get();
             LOGGER.info("Instance exists with name: {} ({}), check the state: {}", cloudResource.getName(), instance.instanceId(),
                     instance.state().name());
@@ -255,17 +255,20 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
         return blocks;
     }
 
-    private Optional<Instance> resourceByNameAndStackCrn(AmazonEc2Client amazonEc2Client, String name, CloudStack cloudStack) {
+    private Optional<Instance> resourceByNameAndStackId(AmazonEc2Client amazonEc2Client, String name, CloudStack cloudStack) {
         return awsMethodExecutor.execute(() -> {
             Set<Filter> filters = new HashSet<>();
             filters.add(tagFilter("Name", name));
-            if (cloudStack.getTags().containsKey(RESOURCE_CRN.key())) {
-                filters.add(tagFilter(RESOURCE_CRN.key(), cloudStack.getTags().get(RESOURCE_CRN.key())));
+            if (cloudStack.getTags().containsKey(RESOURCE_ID.key())) {
+                filters.add(tagFilter(RESOURCE_ID.key(), cloudStack.getTags().get(RESOURCE_ID.key())));
             }
             DescribeInstancesResponse describeInstancesResponse = amazonEc2Client.describeInstances(DescribeInstancesRequest.builder()
                     .filters(filters)
                     .build());
-            return describeInstancesResponse.reservations().stream().flatMap(s -> s.instances().stream()).findFirst();
+            return describeInstancesResponse.reservations().stream()
+                    .flatMap(s -> s.instances().stream())
+                    .filter(instance -> instance.state().code() != AWS_INSTANCE_TERMINATED_CODE)
+                    .findFirst();
         }, Optional.empty());
     }
 

@@ -32,9 +32,10 @@ public class DefaultCostTaggingService implements CostTagging {
         Map<String, String> result = new HashMap<>();
         String platform = request.getPlatform();
         validateResourceTagsNotContainTheSameTag(request.getUserDefinedTags(), request.getAccountTags());
-        addCDPCrnIfPresent(result, DefaultApplicationTag.ENVIRONMENT_CRN, request.getEnvironmentCrn(), platform);
-        addCDPCrnIfPresent(result, DefaultApplicationTag.CREATOR_CRN, request.getCreatorCrn(), platform);
-        addCDPCrnIfPresent(result, DefaultApplicationTag.RESOURCE_CRN, request.getResourceCrn(), platform);
+        addCDPTagIfPresent(result, DefaultApplicationTag.ENVIRONMENT_CRN, request.getEnvironmentCrn(), platform);
+        addCDPTagIfPresent(result, DefaultApplicationTag.CREATOR_CRN, request.getCreatorCrn(), platform);
+        addCDPTagIfPresent(result, DefaultApplicationTag.RESOURCE_CRN, request.getResourceCrn(), platform);
+        addCDPTagIfPresent(result, DefaultApplicationTag.RESOURCE_ID, request.getResourceId(), platform);
 
         Map<String, String> accountTagResult = generateAccountTags(request);
         for (Map.Entry<String, String> entry : accountTagResult.entrySet()) {
@@ -94,10 +95,10 @@ public class DefaultCostTaggingService implements CostTagging {
         }
     }
 
-    private void addCDPCrnIfPresent(Map<String, String> result, DefaultApplicationTag tag, String crn, String platform) {
-        if (StringUtils.isNotEmpty(crn)) {
-            LOGGER.debug("Adding  crn {} tag to default tags.", crn);
-            addTagToResult(result, tag.key(), crn, platform);
+    private void addCDPTagIfPresent(Map<String, String> result, DefaultApplicationTag tag, String value, String platform) {
+        if (StringUtils.isNotEmpty(value)) {
+            LOGGER.debug("Adding {} {} tag to default tags.", tag.key(), value);
+            addTagToResult(result, tag.key(), value, platform);
         } else {
             LOGGER.debug("Unable to add \"{}\" - cost - tag to the resource's default tags because it's value is empty or null!", tag.key());
         }

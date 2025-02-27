@@ -15,6 +15,8 @@ public class CDPTagGenerationRequest {
 
     private final String resourceCrn;
 
+    private final String resourceId;
+
     private final String creatorCrn;
 
     private final String userName;
@@ -40,6 +42,7 @@ public class CDPTagGenerationRequest {
         this.internalTenant = builder.internalTenant;
         this.accountTags = builder.accountTags;
         this.userDefinedTags = builder.userDefinedTags;
+        this.resourceId = builder.resourceId;
     }
 
     public String getPlatform() {
@@ -52,6 +55,10 @@ public class CDPTagGenerationRequest {
 
     public String getResourceCrn() {
         return resourceCrn;
+    }
+
+    public String getResourceId() {
+        return resourceId;
     }
 
     public String getCreatorCrn() {
@@ -94,6 +101,8 @@ public class CDPTagGenerationRequest {
 
         private String resourceCrn;
 
+        private String resourceId;
+
         private String creatorCrn;
 
         private String userName;
@@ -119,6 +128,11 @@ public class CDPTagGenerationRequest {
 
         public Builder withResourceCrn(String resourceCrn) {
             this.resourceCrn = resourceCrn;
+            return this;
+        }
+
+        public Builder withResourceId(String resourceId) {
+            this.resourceId = resourceId;
             return this;
         }
 
