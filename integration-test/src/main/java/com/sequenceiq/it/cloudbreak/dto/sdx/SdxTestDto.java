@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -34,6 +35,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.i
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
@@ -399,6 +401,12 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
 
     public SdxTestDto withRuntimeVersion(String runtimeVersion) {
         getRequest().setRuntime(runtimeVersion);
+        getRequest().setImage(null);
+        return this;
+    }
+
+    public SdxTestDto withArchitecture(Architecture architecture) {
+        getRequest().setArchitecture(architecture.toString().toUpperCase(Locale.ROOT));
         getRequest().setImage(null);
         return this;
     }

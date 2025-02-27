@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_D
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AWS_ARM_DATAHUB;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AWS_ARM_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_CERTIFICATE_AUTH;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_DATABASE_FLEXIBLE_SERVER_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_DATABASE_FLEXIBLE_SERVER_UPGRADE_LONG_POLLING;
@@ -555,6 +556,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.aws.arm.datahub}")
     private boolean awsArmDataHubEnabled;
 
+    @Value("${auth.mock.aws.arm.datalake}")
+    private boolean awsArmDataLakeEnabled;
+
     @Value("${auth.mock.azure.database.flexibleserver.upgrade.longpolling.enabled}")
     private boolean azureFlexibleUpgradeLongPollingEnabled;
 
@@ -1052,6 +1056,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (tlsv13Enabled) {
             builder.addEntitlements(createEntitlement(CDP_CB_TLS_1_3));
+        }
+        if (awsArmDataLakeEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_AWS_ARM_DATALAKE));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

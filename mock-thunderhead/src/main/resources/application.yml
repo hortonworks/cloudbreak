@@ -64,7 +64,9 @@ auth:
       certificate.auth.enable: true
     aws:
       native.variant.migration.enable: false
-      arm.datahub: true
+      arm:
+        datahub: true
+        datalake: true
     gcp:
         secureboot.enabled: false
     conclusion.checker.send.user.event.enable: true
