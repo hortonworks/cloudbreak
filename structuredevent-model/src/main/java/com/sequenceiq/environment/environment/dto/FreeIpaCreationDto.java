@@ -14,6 +14,8 @@ public class FreeIpaCreationDto {
 
     private int instanceCountByGroup;
 
+    private FreeIpaLoadBalancerType loadBalancerType;
+
     private FreeIpaCreationAwsParametersDto aws;
 
     private Set<String> recipes;
@@ -35,6 +37,7 @@ public class FreeIpaCreationDto {
     private FreeIpaCreationDto(Builder builder) {
         create = builder.create;
         instanceCountByGroup = builder.instanceCountByGroup;
+        loadBalancerType = builder.loadBalancerType;
         aws = builder.aws;
         imageCatalog = builder.imageCatalog;
         enableMultiAz = builder.enableMultiAz;
@@ -60,6 +63,14 @@ public class FreeIpaCreationDto {
 
     public int getInstanceCountByGroup() {
         return instanceCountByGroup;
+    }
+
+    public FreeIpaLoadBalancerType getLoadBalancerType() {
+        return loadBalancerType;
+    }
+
+    public void setLoadBalancerType(FreeIpaLoadBalancerType loadBalancerType) {
+        this.loadBalancerType = loadBalancerType;
     }
 
     public FreeIpaCreationAwsParametersDto getAws() {
@@ -139,6 +150,7 @@ public class FreeIpaCreationDto {
         return "FreeIpaCreationDto{" +
                 "create=" + create +
                 ", instanceCountByGroup=" + instanceCountByGroup +
+                ", loadBalancerType=" + loadBalancerType +
                 ", aws=" + aws +
                 ", recipes=" + recipes +
                 ", seLinux=" + seLinux +
@@ -161,6 +173,8 @@ public class FreeIpaCreationDto {
         private boolean create = true;
 
         private Integer instanceCountByGroup;
+
+        private FreeIpaLoadBalancerType loadBalancerType = FreeIpaLoadBalancerType.getDefault();
 
         private FreeIpaCreationAwsParametersDto aws;
 
@@ -194,6 +208,11 @@ public class FreeIpaCreationDto {
 
         private Builder withInstanceCountByGroup(int instanceCountByGroup) {
             this.instanceCountByGroup = instanceCountByGroup;
+            return this;
+        }
+
+        public Builder withLoadBalancerType(FreeIpaLoadBalancerType loadBalancerType) {
+            this.loadBalancerType = loadBalancerType;
             return this;
         }
 

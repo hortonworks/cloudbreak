@@ -17,6 +17,8 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -33,6 +35,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.FreeIpaRespo
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
+import com.sequenceiq.environment.environment.dto.FreeIpaLoadBalancerType;
 import com.sequenceiq.environment.environment.flow.creation.handler.freeipa.MultiAzValidator;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaInstanceCountByGroupProvider;
 
@@ -292,6 +295,43 @@ public class FreeIpaConverterTest {
         assertNotNull(result);
         assertNotNull(result.getRecipes());
         assertTrue(result.getRecipes().isEmpty());
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+            "'NONE', NONE",
+            "'', INTERNAL_NLB",
+            "null, INTERNAL_NLB",
+            "'INTERNAL_NLB', INTERNAL_NLB"
+    }, nullValues = "null")
+    void testConvertFreeIpaLoadBalancerType(String loadBalancerInRequest, FreeIpaLoadBalancerType expected) {
+        // GIVEN
+        AttachedFreeIpaRequest request = new AttachedFreeIpaRequest();
+        request.setCreate(true);
+        request.setLoadBalancerType(loadBalancerInRequest);
+        // WHEN
+        FreeIpaCreationDto freeIpaCreationDto = underTest.convert(request, "id", CloudConstants.AZURE);
+        // THEN
+        assertEquals(expected, freeIpaCreationDto.getLoadBalancerType());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "'ENABLED'",
+            "'DISABLED'",
+            "'FOO_BAR'"
+    })
+    void testConvertFreeIpaInvalidLoadBalancerType(String loadBalancerInRequest) {
+        // GIVEN
+        AttachedFreeIpaRequest request = new AttachedFreeIpaRequest();
+        request.setCreate(true);
+        request.setLoadBalancerType(loadBalancerInRequest);
+        // WHEN
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.convert(request, "id", CloudConstants.AZURE));
+        // THEN
+        assertEquals("Load balancer type provided is not supported: " + loadBalancerInRequest + ". Possible values are: NONE, INTERNAL_NLB",
+                badRequestException.getMessage());
     }
 
     private FreeIpaImageRequest aFreeIpaImage(String catalog, String id) {

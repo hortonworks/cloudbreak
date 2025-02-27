@@ -1,6 +1,8 @@
 package com.sequenceiq.environment.environment.v1.converter;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -28,6 +30,7 @@ import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsParametersDt
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto.Builder;
+import com.sequenceiq.environment.environment.dto.FreeIpaLoadBalancerType;
 import com.sequenceiq.environment.environment.flow.creation.handler.freeipa.MultiAzValidator;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaInstanceCountByGroupProvider;
 
@@ -97,6 +100,13 @@ public class FreeIpaConverter {
             builder.withCreate(request.getCreate());
             builder.withEnableMultiAz(request.isEnableMultiAz());
             builder.withPlatformVariant(request.getPlatformVariant());
+            if (isValidFreeIpaLoadBalancerType(request.getLoadBalancerType())) {
+                builder.withLoadBalancerType(getFreeIpaLoadBalancerType(request));
+            } else {
+                String[] enumValues = Arrays.stream(FreeIpaLoadBalancerType.values()).map(Enum::name).toArray(String[]::new);
+                throw new BadRequestException(String.format("Load balancer type provided is not supported: %s. Possible values are: %s",
+                        request.getLoadBalancerType(), String.join(", ", enumValues)));
+            }
             if (request.isEnableMultiAz()) {
                 if (!multiAzValidator.suportedMultiAzForEnvironment(cloudPlatform)) {
                     throw new BadRequestException(String.format("Multi Availability Zone is not supported for %s",
@@ -138,5 +148,21 @@ public class FreeIpaConverter {
             }
         }
         return builder.build();
+    }
+
+    private boolean isValidFreeIpaLoadBalancerType(String value) {
+        if (StringUtils.isEmpty(value)) {
+            return true;
+        }
+        return Arrays.stream(FreeIpaLoadBalancerType.values())
+                .map(Enum::name)
+                .anyMatch(enumValue -> enumValue.equalsIgnoreCase(value));
+    }
+
+    private FreeIpaLoadBalancerType getFreeIpaLoadBalancerType(AttachedFreeIpaRequest request) {
+            if (StringUtils.isEmpty(request.getLoadBalancerType())) {
+                return FreeIpaLoadBalancerType.getDefault();
+            }
+            return FreeIpaLoadBalancerType.valueOf(request.getLoadBalancerType().toUpperCase(Locale.US));
     }
 }

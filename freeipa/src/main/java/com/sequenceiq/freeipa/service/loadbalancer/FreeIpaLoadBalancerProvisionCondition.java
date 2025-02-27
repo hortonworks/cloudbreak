@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.loadbalancer;
 
+import static com.sequenceiq.environment.environment.dto.FreeIpaLoadBalancerType.INTERNAL_NLB;
+
 import java.util.Optional;
 import java.util.Set;
 
@@ -14,6 +16,7 @@ import org.springframework.util.StringUtils;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
+import com.sequenceiq.environment.environment.dto.FreeIpaLoadBalancerType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.image.ImageService;
@@ -44,20 +47,20 @@ public class FreeIpaLoadBalancerProvisionCondition {
     @Inject
     private ImageService imageService;
 
-    public boolean loadBalancerProvisionEnabled(Long stackId) {
+    public boolean loadBalancerProvisionEnabled(Long stackId, FreeIpaLoadBalancerType loadBalancer) {
         boolean loadBalancerProvisionEntitled = loadBalancerProvisionEntitled();
         Stack stack = stackService.getStackById(stackId);
         String platformVariant = stack.getPlatformvariant();
         boolean platformVariantSupported = supportedVariants.contains(platformVariant);
         boolean healthAgentVersionSupported = healthAgentVersionSupported(stack);
 
-        if (platformVariantSupported && loadBalancerProvisionEntitled && healthAgentVersionSupported) {
+        if (platformVariantSupported && loadBalancerProvisionEntitled && healthAgentVersionSupported && loadBalancer == INTERNAL_NLB) {
             LOGGER.debug("Load balancer creation is enabled for FreeIPA cluster.");
             return true;
         } else {
             LOGGER.debug("Load balancer creation is not enabled for FreeIPA cluster. Entitlement enabled: {}, Platform variant supported: {}, " +
-                            "Health agent version supported: {}",
-                    loadBalancerProvisionEntitled, platformVariantSupported, healthAgentVersionSupported);
+                            "Health agent version supported: {}, LoadBalancer creation in request: {}",
+                    loadBalancerProvisionEntitled, platformVariantSupported, healthAgentVersionSupported, loadBalancer);
             return false;
         }
     }

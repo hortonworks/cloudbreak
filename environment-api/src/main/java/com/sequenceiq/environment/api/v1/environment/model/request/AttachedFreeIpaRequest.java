@@ -25,6 +25,9 @@ public class AttachedFreeIpaRequest implements Serializable {
     @Schema(description = EnvironmentModelDescription.FREEIPA_INSTANCE_COUNT_BY_GROUP)
     private Integer instanceCountByGroup;
 
+    @Schema(description = EnvironmentModelDescription.FREEIPA_LOADBALANCER)
+    private String loadBalancerType;
+
     @Schema(description = EnvironmentModelDescription.FREEIPA_INSTANCE_TYPE)
     private String instanceType;
 
@@ -72,6 +75,14 @@ public class AttachedFreeIpaRequest implements Serializable {
         this.instanceCountByGroup = instanceCountByGroup;
     }
 
+    public String getLoadBalancerType() {
+        return loadBalancerType;
+    }
+
+    public void setLoadBalancerType(String loadBalancerType) {
+        this.loadBalancerType = loadBalancerType;
+    }
+
     public String getInstanceType() {
         return instanceType;
     }
@@ -93,6 +104,7 @@ public class AttachedFreeIpaRequest implements Serializable {
         return "AttachedFreeIpaRequest{" +
                 "create=" + create +
                 ", instanceCountByGroup=" + instanceCountByGroup +
+                ", loadBalancer=" + loadBalancerType +
                 ", instanceType=" + instanceType +
                 ", enableMultiAz=" + enableMultiAz +
                 ", platformVariant=" + platformVariant +

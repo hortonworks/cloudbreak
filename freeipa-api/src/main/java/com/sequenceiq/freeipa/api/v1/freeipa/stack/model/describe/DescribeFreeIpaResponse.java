@@ -108,7 +108,7 @@ public class DescribeFreeIpaResponse {
     @Schema(description = FreeIpaModelDescriptions.FreeIpaImageSecurityModelDescriptions.IMAGE_SECURITY)
     private SecurityResponse security;
 
-    @Schema(description = FreeIpaModelDescriptions.LOAD_BALANCER)
+    @Schema(description = FreeIpaModelDescriptions.LOADBALANCER_DETAILS)
     private FreeIpaLoadBalancerResponse loadBalancer;
 
     public String getEnvironmentCrn() {

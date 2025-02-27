@@ -181,6 +181,7 @@ public class EnvironmentDtoConverter {
         environment.setStatusReason(null);
         environment.setCreateFreeIpa(creationDto.getFreeIpaCreation().isCreate());
         environment.setFreeIpaInstanceCountByGroup(creationDto.getFreeIpaCreation().getInstanceCountByGroup());
+        environment.setFreeIpaLoadBalancer(creationDto.getFreeIpaCreation().getLoadBalancerType());
         environment.setFreeIpaInstanceType(creationDto.getFreeIpaCreation().getInstanceType());
         environment.setFreeIpaImageCatalog(creationDto.getFreeIpaCreation().getImageCatalog());
         environment.setFreeIpaPlatformVariant(creationDto.getFreeIpaCreation().getPlatformVariant());
@@ -281,6 +282,7 @@ public class EnvironmentDtoConverter {
                 .orElse(ipaInstanceCountByGroupProvider.getDefaultInstanceCount());
         return FreeIpaCreationDto.builder(ipaInstanceCountByGroup)
                 .withCreate(environment.isCreateFreeIpa())
+                .withLoadBalancerType(environment.getFreeIpaLoadBalancer())
                 .withInstanceType(environment.getFreeIpaInstanceType())
                 .withImageCatalog(environment.getFreeIpaImageCatalog())
                 .withImageId(environment.getFreeIpaImageId())

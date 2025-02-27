@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.flow.creation.handler.freeipa;
 
+import static com.sequenceiq.environment.environment.dto.FreeIpaLoadBalancerType.NONE;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,6 +49,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
+import com.sequenceiq.environment.environment.dto.FreeIpaLoadBalancerType;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
@@ -494,6 +496,73 @@ public class FreeIpaCreationHandlerTest {
         CreateFreeIpaRequest freeIpaRequest = freeIpaRequestCaptor.getValue();
         assertEquals("AWS", freeIpaRequest.getVariant());
         assertNull(freeIpaRequest.getImage());
+    }
+
+    @Test
+    public void testFreeIpaLoadBalancerIsDisabledIfPopulated() {
+        EnvironmentDto environmentDto = someEnvironmentWithFreeIpaCreation();
+        environmentDto.getFreeIpaCreation().setLoadBalancerType(NONE);
+        environmentDto.getFreeIpaCreation().setEnableMultiAz(false);
+        environmentDto.setCredential(new Credential());
+        Environment environment = new Environment();
+        environment.setCreateFreeIpa(true);
+
+        ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder()
+                .success()
+                .build();
+        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
+        when(supportedPlatforms.supportedPlatformForFreeIpa(environment.getCloudPlatform())).thenReturn(true);
+        when(freeIpaService.describe(ENVIRONMENT_CRN)).thenReturn(Optional.empty());
+        when(connectors.getDefault(any())).thenReturn(mock(CloudConnector.class));
+        when(freeIpaPollingService.pollWithTimeout(
+                any(FreeIpaCreationRetrievalTask.class),
+                any(FreeIpaPollerObject.class),
+                anyLong(),
+                anyInt(),
+                anyInt()))
+                .thenReturn(extendedPollingResult);
+
+        victim.accept(new Event<>(environmentDto));
+
+        ArgumentCaptor<CreateFreeIpaRequest> freeIpaRequestCaptor = ArgumentCaptor.forClass(CreateFreeIpaRequest.class);
+        verify(freeIpaService).create(freeIpaRequestCaptor.capture());
+        verify(eventSender, times(1)).sendEvent(any(EnvCreationEvent.class), any(Event.Headers.class));
+        CreateFreeIpaRequest freeIpaRequest = freeIpaRequestCaptor.getValue();
+        assertEquals("NONE", freeIpaRequest.getLoadBalancerType());
+        assertEquals(freeIpaRequest.getEnableMultiAz(), false);
+    }
+
+    @Test
+    public void testFreeIpaLoadBalancerIsEnabledWhenEmpty() {
+        EnvironmentDto environmentDto = someEnvironmentWithFreeIpaCreation();
+        environmentDto.getFreeIpaCreation().setEnableMultiAz(false);
+        environmentDto.setCredential(new Credential());
+        Environment environment = new Environment();
+        environment.setCreateFreeIpa(true);
+
+        ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder()
+                .success()
+                .build();
+        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
+        when(supportedPlatforms.supportedPlatformForFreeIpa(environment.getCloudPlatform())).thenReturn(true);
+        when(freeIpaService.describe(ENVIRONMENT_CRN)).thenReturn(Optional.empty());
+        when(connectors.getDefault(any())).thenReturn(mock(CloudConnector.class));
+        when(freeIpaPollingService.pollWithTimeout(
+                any(FreeIpaCreationRetrievalTask.class),
+                any(FreeIpaPollerObject.class),
+                anyLong(),
+                anyInt(),
+                anyInt()))
+                .thenReturn(extendedPollingResult);
+
+        victim.accept(new Event<>(environmentDto));
+
+        ArgumentCaptor<CreateFreeIpaRequest> freeIpaRequestCaptor = ArgumentCaptor.forClass(CreateFreeIpaRequest.class);
+        verify(freeIpaService).create(freeIpaRequestCaptor.capture());
+        verify(eventSender, times(1)).sendEvent(any(EnvCreationEvent.class), any(Event.Headers.class));
+        CreateFreeIpaRequest freeIpaRequest = freeIpaRequestCaptor.getValue();
+        assertEquals(FreeIpaLoadBalancerType.getDefault().toString(), freeIpaRequest.getLoadBalancerType());
+        assertEquals(freeIpaRequest.getEnableMultiAz(), false);
     }
 
     private EnvironmentDto aYarnEnvironmentDtoWithParentEnvironment() {

@@ -194,6 +194,9 @@ public class EnvironmentModelDescription {
 
     public static final String ENVIRONMENT_TYPE = "Type of the environment";
 
+    public static final String FREEIPA_LOADBALANCER = "FreeIpa load balancer type to be created. " +
+            "Possible values: NONE, INTERNAL_NLB. Default is INTERNAL_NLB.";
+
     private EnvironmentModelDescription() {
     }
 }

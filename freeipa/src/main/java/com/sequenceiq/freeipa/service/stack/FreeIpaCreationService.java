@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.constant.ImdsConstants.AWS_IMDS_VERSION_
 import static com.sequenceiq.cloudbreak.constant.ImdsConstants.AWS_IMDS_VERSION_V2;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Future;
@@ -33,6 +34,7 @@ import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.CloudStorageFolderResolverService;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.environment.dto.FreeIpaLoadBalancerType;
 import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
@@ -48,7 +50,7 @@ import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.chain.FlowChainTriggers;
-import com.sequenceiq.freeipa.flow.stack.StackEvent;
+import com.sequenceiq.freeipa.flow.freeipa.provision.event.ProvisionTriggerEvent;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.SecurityConfigService;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
@@ -184,13 +186,23 @@ public class FreeIpaCreationService {
                 return Triple.of(savedStack, image, freeIpa);
             });
             flowManager.notify(FlowChainTriggers.PROVISION_TRIGGER_EVENT,
-                    new StackEvent(FlowChainTriggers.PROVISION_TRIGGER_EVENT, stackImageFreeIpaTuple.getLeft().getId()));
+                    new ProvisionTriggerEvent(FlowChainTriggers.PROVISION_TRIGGER_EVENT,
+                            stackImageFreeIpaTuple.getLeft().getId(),
+                            getFreeIpaLoadBalancerType(request)));
             InMemoryStateStore.putStack(stack.getId(), PollGroup.POLLABLE);
             return stackToDescribeFreeIpaResponseConverter
                     .convert(stackImageFreeIpaTuple.getLeft(), stackImageFreeIpaTuple.getMiddle(), stackImageFreeIpaTuple.getRight(), Optional.empty(), false);
         } catch (TransactionService.TransactionExecutionException e) {
             LOGGER.error("Creation of FreeIPA failed", e);
             throw new BadRequestException("Creation of FreeIPA failed: " + e.getCause().getMessage(), e);
+        }
+    }
+
+    private FreeIpaLoadBalancerType getFreeIpaLoadBalancerType(CreateFreeIpaRequest request) {
+        try {
+            return FreeIpaLoadBalancerType.valueOf(request.getLoadBalancerType().toUpperCase(Locale.US));
+        } catch (IllegalArgumentException | NullPointerException e) {
+            return FreeIpaLoadBalancerType.getDefault();
         }
     }
 

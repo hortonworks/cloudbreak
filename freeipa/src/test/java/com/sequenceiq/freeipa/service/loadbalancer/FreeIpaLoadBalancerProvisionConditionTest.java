@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.loadbalancer;
 
+import static com.sequenceiq.environment.environment.dto.FreeIpaLoadBalancerType.INTERNAL_NLB;
+import static com.sequenceiq.environment.environment.dto.FreeIpaLoadBalancerType.NONE;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
@@ -66,7 +68,7 @@ class FreeIpaLoadBalancerProvisionConditionTest {
         when(imageService.getImageForStack(stack)).thenReturn(image);
         when(image.getPackageVersions()).thenReturn(Map.of("freeipa-health-agent", "2.1.0.2-b2228"));
 
-        assertTrue(underTest.loadBalancerProvisionEnabled(STACK_ID));
+        assertTrue(underTest.loadBalancerProvisionEnabled(STACK_ID, INTERNAL_NLB));
     }
 
     @Test
@@ -76,7 +78,7 @@ class FreeIpaLoadBalancerProvisionConditionTest {
         when(imageService.getImageForStack(stack)).thenReturn(image);
         when(image.getPackageVersions()).thenReturn(Map.of("freeipa-health-agent", "2.1.0.2-b2228"));
 
-        assertTrue(underTest.loadBalancerProvisionEnabled(STACK_ID));
+        assertTrue(underTest.loadBalancerProvisionEnabled(STACK_ID, INTERNAL_NLB));
     }
 
     @Test
@@ -86,7 +88,7 @@ class FreeIpaLoadBalancerProvisionConditionTest {
         when(imageService.getImageForStack(stack)).thenReturn(image);
         when(image.getPackageVersions()).thenReturn(Map.of("freeipa-health-agent", "0.1-20240222112618git0dd472a"));
 
-        assertFalse(underTest.loadBalancerProvisionEnabled(STACK_ID));
+        assertFalse(underTest.loadBalancerProvisionEnabled(STACK_ID, INTERNAL_NLB));
     }
 
     @Test
@@ -94,7 +96,7 @@ class FreeIpaLoadBalancerProvisionConditionTest {
         when(stack.getPlatformvariant()).thenReturn("AWS");
         when(entitlementService.isFreeIpaLoadBalancerEnabled(ACCOUNT_ID)).thenReturn(true);
 
-        assertFalse(underTest.loadBalancerProvisionEnabled(STACK_ID));
+        assertFalse(underTest.loadBalancerProvisionEnabled(STACK_ID, INTERNAL_NLB));
     }
 
     @Test
@@ -102,7 +104,15 @@ class FreeIpaLoadBalancerProvisionConditionTest {
         when(stack.getPlatformvariant()).thenReturn("AZURE");
         when(entitlementService.isFreeIpaLoadBalancerEnabled(ACCOUNT_ID)).thenReturn(false);
 
-        assertFalse(underTest.loadBalancerProvisionEnabled(STACK_ID));
+        assertFalse(underTest.loadBalancerProvisionEnabled(STACK_ID, INTERNAL_NLB));
+    }
+
+    @Test
+    void testLoadBalancerProvisionEnabledShouldReturnFalseWhenLoadBalancerTypeDisabled() {
+        when(stack.getPlatformvariant()).thenReturn("AZURE");
+        when(entitlementService.isFreeIpaLoadBalancerEnabled(ACCOUNT_ID)).thenReturn(true);
+
+        assertFalse(underTest.loadBalancerProvisionEnabled(STACK_ID, NONE));
     }
 
 }

@@ -31,12 +31,14 @@ import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.EnvironmentDeletionType;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentBackup;
+import com.sequenceiq.environment.environment.dto.FreeIpaLoadBalancerType;
 import com.sequenceiq.environment.environment.dto.dataservices.EnvironmentDataServices;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.parameters.dao.converter.EnvironmentDeletionTypeConverter;
 import com.sequenceiq.environment.parameters.dao.converter.EnvironmentStatusConverter;
 import com.sequenceiq.environment.parameters.dao.converter.EnvironmentTypeConverter;
+import com.sequenceiq.environment.parameters.dao.converter.FreeIpaLoadBalancerTypeConverter;
 import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 import com.sequenceiq.environment.store.EnvironmentStatusUpdater;
@@ -88,6 +90,9 @@ public class Environment implements AuthResource, AccountAwareResource {
     private boolean createFreeIpa;
 
     private Integer freeIpaInstanceCountByGroup;
+
+    @Convert(converter = FreeIpaLoadBalancerTypeConverter.class)
+    private FreeIpaLoadBalancerType freeIpaLoadBalancer;
 
     private String freeIpaInstanceType;
 
@@ -447,6 +452,14 @@ public class Environment implements AuthResource, AccountAwareResource {
         this.freeIpaInstanceCountByGroup = freeIpaInstanceCountByGroup;
     }
 
+    public FreeIpaLoadBalancerType getFreeIpaLoadBalancer() {
+        return freeIpaLoadBalancer;
+    }
+
+    public void setFreeIpaLoadBalancer(FreeIpaLoadBalancerType freeIpaLoadBalancer) {
+        this.freeIpaLoadBalancer = freeIpaLoadBalancer;
+    }
+
     public String getFreeIpaInstanceType() {
         return freeIpaInstanceType;
     }
@@ -670,7 +683,8 @@ public class Environment implements AuthResource, AccountAwareResource {
                 "name='" + name + '\'' +
                 ", cloudPlatform='" + cloudPlatform + '\'' +
                 ", freeIpaPlatformVariant='" + freeIpaPlatformVariant + '\'' +
-                ", freeIpaEnableMultiAz=" + freeIpaEnableMultiAz +
+                ", freeIpaEnableMultiAz=" + freeIpaEnableMultiAz + '\'' +
+                ", freeIpaLoadBalancer=" + freeIpaLoadBalancer + '\'' +
                 ", creator='" + creator + '\'' +
                 ", resourceCrn='" + resourceCrn + '\'' +
                 ", status=" + status +

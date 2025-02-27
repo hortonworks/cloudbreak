@@ -23,13 +23,14 @@ import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.FreeIpaLoadBalancerCreationEvent;
 import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionEvent;
 import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionState;
+import com.sequenceiq.freeipa.flow.freeipa.provision.event.ProvisionTriggerEvent;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState;
 import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerProvisionCondition;
 
 @Component
-public class ProvisionFlowEventChainFactory implements FlowEventChainFactory<StackEvent>, FreeIpaUseCaseAware {
+public class ProvisionFlowEventChainFactory implements FlowEventChainFactory<ProvisionTriggerEvent>, FreeIpaUseCaseAware {
 
     @Inject
     private FreeIpaLoadBalancerProvisionCondition loadBalancerProvisionCondition;
@@ -40,7 +41,7 @@ public class ProvisionFlowEventChainFactory implements FlowEventChainFactory<Sta
     }
 
     @Override
-    public FlowTriggerEventQueue createFlowTriggerEventQueue(StackEvent event) {
+    public FlowTriggerEventQueue createFlowTriggerEventQueue(ProvisionTriggerEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         flowEventChain.add(new StackEvent(StackProvisionEvent.START_CREATION_EVENT.event(), event.getResourceId(), event.accepted()));
         createLoadBalancerCreationFlowIfNecessary(event).ifPresent(flowEventChain::add);
@@ -66,8 +67,8 @@ public class ProvisionFlowEventChainFactory implements FlowEventChainFactory<Sta
         }
     }
 
-    private Optional<StackEvent> createLoadBalancerCreationFlowIfNecessary(StackEvent event) {
-        return loadBalancerProvisionCondition.loadBalancerProvisionEnabled(event.getResourceId()) ?
+    private Optional<StackEvent> createLoadBalancerCreationFlowIfNecessary(ProvisionTriggerEvent event) {
+        return loadBalancerProvisionCondition.loadBalancerProvisionEnabled(event.getResourceId(), event.getLoadBalancer()) ?
                 Optional.of(new StackEvent(FreeIpaLoadBalancerCreationEvent.FREEIPA_LOAD_BALANCER_CREATION_EVENT.event(), event.getResourceId())) :
                 Optional.empty();
     }

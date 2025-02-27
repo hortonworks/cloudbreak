@@ -50,6 +50,9 @@ public class CreateFreeIpaRequest implements TaggableRequest {
     @Schema(description = FreeIpaModelDescriptions.INSTANCE_GROUPS, required = true)
     private List<InstanceGroupRequest> instanceGroups;
 
+    @Schema(description = FreeIpaModelDescriptions.LOADBALANCER_TYPE)
+    private String loadBalancerType;
+
     @NotNull
     @Valid
     @Schema(description = FreeIpaModelDescriptions.AUTHENTICATION, required = true)
@@ -254,6 +257,14 @@ public class CreateFreeIpaRequest implements TaggableRequest {
         this.security = security;
     }
 
+    public String getLoadBalancerType() {
+        return loadBalancerType;
+    }
+
+    public void setLoadBalancerType(String loadBalancerType) {
+        this.loadBalancerType = loadBalancerType;
+    }
+
     @Override
     public String toString() {
         return "CreateFreeIpaRequest{" +
@@ -261,6 +272,7 @@ public class CreateFreeIpaRequest implements TaggableRequest {
                 ", name='" + name + '\'' +
                 ", placement=" + placement +
                 ", instanceGroups=" + instanceGroups +
+                ", loadBalancerType=" + loadBalancerType +
                 ", authentication=" + authentication +
                 ", network=" + network +
                 ", image=" + image +
