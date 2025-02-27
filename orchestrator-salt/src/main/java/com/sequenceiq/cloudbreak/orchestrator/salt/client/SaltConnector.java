@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltEndpoint.BO
 import java.io.ByteArrayInputStream;
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -85,12 +86,19 @@ public class SaltConnector implements Closeable {
 
     private final String hostname;
 
-    public SaltConnector(GatewayConfig gatewayConfig, SaltErrorResolver saltErrorResolver, boolean debug,
-            int connectTimeoutMs, OptionalInt readTimeout) {
+    public SaltConnector(GatewayConfig gatewayConfig, SaltErrorResolver saltErrorResolver, boolean restDebug,
+            boolean saltLoggerEnabled, boolean saltLoggerResponseBodyEnabled, int connectTimeoutMs, OptionalInt readTimeout) {
         try {
+            Collection<Object> saltFilters = Collections.emptySet();
+            if (saltLoggerEnabled) {
+                saltFilters = new ArrayList<>(List.of(new SaltRequestFilter(), new SaltResponseFilter()));
+                if (saltLoggerResponseBodyEnabled) {
+                    saltFilters.add(new SaltReaderInterceptor());
+                }
+            }
             restClient = RestClientUtil.createClient(gatewayConfig.getServerCert(), gatewayConfig.getNewServerCert(),
                     gatewayConfig.getClientCert(), gatewayConfig.getClientKey(),
-                    connectTimeoutMs, readTimeout, debug);
+                    connectTimeoutMs, readTimeout, restDebug, saltFilters);
             this.hostname = gatewayConfig.getHostname();
             String saltBootPasswd = Optional.ofNullable(gatewayConfig.getSaltBootPassword()).orElse(SALT_BOOT_PASSWORD);
             saltTarget = restClient.target(gatewayConfig.getGatewayUrl())
@@ -105,8 +113,9 @@ public class SaltConnector implements Closeable {
         }
     }
 
-    public SaltConnector(GatewayConfig gatewayConfig, SaltErrorResolver saltErrorResolver, boolean debug) {
-        this(gatewayConfig, saltErrorResolver, debug, CONNECT_TIMEOUT_MS, OptionalInt.empty());
+    public SaltConnector(GatewayConfig gatewayConfig, SaltErrorResolver saltErrorResolver, boolean debug, boolean saltLogger,
+            boolean saltLoggerResponseBodyEnabled) {
+        this(gatewayConfig, saltErrorResolver, debug, saltLogger, saltLoggerResponseBodyEnabled, CONNECT_TIMEOUT_MS, OptionalInt.empty());
     }
 
     @Measure(SaltConnector.class)

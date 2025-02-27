@@ -29,12 +29,19 @@ public class SaltService {
     @Value("${rest.debug}")
     private boolean restDebug;
 
+    @Value("${salt.logger:true}")
+    private boolean saltLoggerEnabled;
+
+    @Value("${salt.logger.response.body:false}")
+    private boolean saltLoggerResponseBodyEnabled;
+
     public SaltConnector createSaltConnector(GatewayConfig gatewayConfig) {
-        return new SaltConnector(gatewayConfig, saltErrorResolver, restDebug);
+        return new SaltConnector(gatewayConfig, saltErrorResolver, restDebug, saltLoggerEnabled, saltLoggerResponseBodyEnabled);
     }
 
     public SaltConnector createSaltConnector(GatewayConfig gatewayConfig, int connectTimeoutMs, int readTimeout) {
-        return new SaltConnector(gatewayConfig, saltErrorResolver, restDebug, connectTimeoutMs, OptionalInt.of(readTimeout));
+        return new SaltConnector(gatewayConfig, saltErrorResolver, restDebug, saltLoggerEnabled, saltLoggerResponseBodyEnabled,
+                connectTimeoutMs, OptionalInt.of(readTimeout));
     }
 
     public List<SaltConnector> createSaltConnector(Collection<GatewayConfig> gatewayConfigs) {

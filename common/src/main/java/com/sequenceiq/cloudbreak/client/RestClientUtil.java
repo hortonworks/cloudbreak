@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.client;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -71,6 +73,13 @@ public class RestClientUtil {
     public static Client createClient(String serverCert, Optional<String> additionalServerCert, String clientCert, String clientKey, int connectionTimeout,
             OptionalInt readTimeout, boolean debug)
             throws Exception {
+        return createClient(serverCert, additionalServerCert, clientCert, clientKey, connectionTimeout, readTimeout, debug, Collections.emptySet());
+    }
+
+    @SuppressWarnings("checkstyle:ParameterNumberCheck")
+    public static Client createClient(String serverCert, Optional<String> additionalServerCert, String clientCert, String clientKey, int connectionTimeout,
+            OptionalInt readTimeout, boolean debug, Collection<Object> providers)
+            throws Exception {
         SSLContext sslContext;
         if (StringUtils.isNoneBlank(serverCert, clientCert, clientKey)) {
             sslContext = SSLContexts.custom()
@@ -80,14 +89,15 @@ public class RestClientUtil {
         } else {
             sslContext = CertificateTrustManager.sslContext();
         }
-        return createClient(sslContext, connectionTimeout, readTimeout, debug);
+        return createClient(sslContext, connectionTimeout, readTimeout, debug, providers);
     }
 
     public static Client createClient(SSLContext sslContext, boolean debug) {
-        return createClient(sslContext, CONNECT_TIMEOUT_MS, OptionalInt.empty(), debug);
+        return createClient(sslContext, CONNECT_TIMEOUT_MS, OptionalInt.empty(), debug, Collections.emptySet());
     }
 
-    private static Client createClient(SSLContext sslContext, int connectionTimeout, OptionalInt readTimeout, boolean debug) {
+    private static Client createClient(SSLContext sslContext, int connectionTimeout, OptionalInt readTimeout, boolean debug,
+            Collection<Object> providers) {
         ClientConfig config = new ClientConfig();
         config.property(ClientProperties.FOLLOW_REDIRECTS, "false");
         config.property(ClientProperties.CONNECT_TIMEOUT, connectionTimeout);
@@ -96,6 +106,9 @@ public class RestClientUtil {
         config.register(RequestIdProviderFeature.class);
         config.register(EncodingFilter.class);
         config.register(GZipEncoder.class);
+        for (Object provider : providers) {
+            config.register(provider);
+        }
 
         ClientBuilder builder = ClientBuilder.newBuilder().withConfig(config);
         builder.sslContext(sslContext);
