@@ -29,6 +29,8 @@ public class RangerCloudIdentityService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RangerCloudIdentityService.class);
 
+    private static final String ENCOUNTERED_CLOUDERA_MANAGER_API_EXCEPTION = "Encountered cloudera manager api exception";
+
     @Inject
     private ClouderaManagerRangerUtil clouderaManagerRangerUtil;
 
@@ -113,8 +115,8 @@ public class RangerCloudIdentityService {
             }).toList();
             return toRangerCloudIdentitySyncStatus(apiCommands);
         } catch (CloudbreakServiceException e) {
-            LOGGER.error("Encountered cloudera manager api exception", e);
-            return newSyncStatus(RangerCloudIdentitySyncState.FAILED, "Encountered cloudera manager api exception");
+            LOGGER.error(ENCOUNTERED_CLOUDERA_MANAGER_API_EXCEPTION, e);
+            return newSyncStatus(RangerCloudIdentitySyncState.FAILED, ENCOUNTERED_CLOUDERA_MANAGER_API_EXCEPTION);
         }
     }
 

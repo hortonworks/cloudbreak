@@ -65,7 +65,7 @@ public class EventSenderService {
         }
     }
 
-    public void notifyEvent(SdxCluster sdxCluster, SdxContext context, ResourceEvent resourceEvent) {
+    public void notifyEvent(SdxCluster sdxCluster, ResourceEvent resourceEvent) {
         if (sdxCluster != null) {
             sendEventAndNotification(sdxCluster, resourceEvent);
         }

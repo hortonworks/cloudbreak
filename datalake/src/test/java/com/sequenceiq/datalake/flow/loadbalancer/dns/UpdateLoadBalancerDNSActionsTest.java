@@ -97,7 +97,7 @@ class UpdateLoadBalancerDNSActionsTest {
         verify(updateLoadBalancerDNSService, times(1))
                 .performLoadBalancerDNSUpdateOnPEM(sdxCluster);
         verify(eventSenderService, times(1))
-                .notifyEvent(sdxCluster, sdxContext, ResourceEvent.UPDATE_LOAD_BALANCER_DNS_PEM_FINISHED);
+                .notifyEvent(sdxCluster, ResourceEvent.UPDATE_LOAD_BALANCER_DNS_PEM_FINISHED);
 
         action = (AbstractAction) underTest.updateLoadBalancerDNSIPAAction();
         initActionPrivateFields(action);
@@ -107,7 +107,7 @@ class UpdateLoadBalancerDNSActionsTest {
         verify(updateLoadBalancerDNSService, times(1))
                 .performLoadBalancerDNSUpdateOnIPA(sdxCluster);
         verify(eventSenderService, times(1))
-                .notifyEvent(sdxCluster, sdxContext, ResourceEvent.UPDATE_LOAD_BALANCER_DNS_IPA_FINISHED);
+                .notifyEvent(sdxCluster, ResourceEvent.UPDATE_LOAD_BALANCER_DNS_IPA_FINISHED);
         verify(eventSenderService, times(1))
                 .sendEventAndNotification(sdxCluster, ResourceEvent.DATALAKE_RECOVERY_FINISHED);
     }
@@ -132,7 +132,7 @@ class UpdateLoadBalancerDNSActionsTest {
         verify(updateLoadBalancerDNSService, times(1))
                 .performLoadBalancerDNSUpdateOnIPA(sdxCluster);
         verify(eventSenderService, times(1))
-                .notifyEvent(sdxCluster, sdxContext, ResourceEvent.UPDATE_LOAD_BALANCER_DNS_IPA_FINISHED);
+                .notifyEvent(sdxCluster, ResourceEvent.UPDATE_LOAD_BALANCER_DNS_IPA_FINISHED);
         verify(eventSenderService, times(0))
                 .sendEventAndNotification(sdxCluster, ResourceEvent.DATALAKE_RECOVERY_FINISHED);
     }

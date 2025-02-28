@@ -71,7 +71,7 @@ public class UpdateLoadBalancerDNSActions {
                 LOGGER.info("Attempting to update the load balancer DNS on PEM for cluster {}.", sdxCluster.getClusterName());
                 updateLoadBalancerDNSService.performLoadBalancerDNSUpdateOnPEM(sdxCluster);
                 LOGGER.info("Successfully updated the load balancer DNS on PEM for cluster {}.", sdxCluster.getClusterName());
-                eventSenderService.notifyEvent(sdxCluster, context, ResourceEvent.UPDATE_LOAD_BALANCER_DNS_PEM_FINISHED);
+                eventSenderService.notifyEvent(sdxCluster, ResourceEvent.UPDATE_LOAD_BALANCER_DNS_PEM_FINISHED);
                 sendEvent(context, UPDATE_LOAD_BALANCER_DNS_PEM_SUCCESS_EVENT.event(), payload);
             }
 
@@ -110,7 +110,7 @@ public class UpdateLoadBalancerDNSActions {
                 LOGGER.info("Attempting to update the load balancer DNS on Free IPA for cluster {}.", sdxCluster.getClusterName());
                 updateLoadBalancerDNSService.performLoadBalancerDNSUpdateOnIPA(sdxCluster);
                 LOGGER.info("Successfully updated the load balancer DNS on Free IPA for cluster {}.", sdxCluster.getClusterName());
-                eventSenderService.notifyEvent(sdxCluster, context, ResourceEvent.UPDATE_LOAD_BALANCER_DNS_IPA_FINISHED);
+                eventSenderService.notifyEvent(sdxCluster, ResourceEvent.UPDATE_LOAD_BALANCER_DNS_IPA_FINISHED);
                 sendNotificationInCaseOfResizeOrRecovery(context, sdxCluster);
                 sendEvent(context, UPDATE_LOAD_BALANCER_DNS_IPA_SUCCESS_EVENT.event(), payload);
             }

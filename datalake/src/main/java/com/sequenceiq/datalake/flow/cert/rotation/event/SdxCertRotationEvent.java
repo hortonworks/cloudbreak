@@ -17,10 +17,6 @@ public enum SdxCertRotationEvent implements FlowEvent {
         event = name();
     }
 
-    SdxCertRotationEvent(String event) {
-        this.event = event;
-    }
-
     SdxCertRotationEvent(Class<?> clazz) {
         event = EventSelectorUtil.selector(clazz);
     }

@@ -60,7 +60,7 @@ public class SdxEventController implements SdxEventEndpoint {
                 zipOutputStream.closeEntry();
             }
         };
-        String fileName = String.format("datalake-audit.zip");
+        String fileName = "datalake-audit.zip";
         return Response.ok(streamingOutput).header("content-disposition", String.format("attachment; filename = %s", fileName)).build();
     }
 }

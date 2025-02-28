@@ -540,7 +540,7 @@ public class SdxController implements SdxEndpoint {
     @InternalOnly
     public void submitDatalakeDataSizesInternal(@TenantAwareParam String crn, String operationId, String dataSizesJson,
             @InitiatorUserCrn String initiatorUserCrn) {
-        SdxCluster sdxCluster = sdxService.getByCrn(crn);
+        sdxService.getByCrn(crn);
         sdxBackupRestoreService.submitDatalakeDataInfo(operationId, dataSizesJson, ThreadBasedUserCrnProvider.getUserCrn());
     }
 

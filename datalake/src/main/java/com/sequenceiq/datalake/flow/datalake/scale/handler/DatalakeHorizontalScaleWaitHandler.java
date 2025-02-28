@@ -1,6 +1,7 @@
 package com.sequenceiq.datalake.flow.datalake.scale.handler;
 
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleEvent.DATALAKE_HORIZONTAL_SCALE_CM_ROLLING_RESTART_EVENT;
+import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleEvent.DATALAKE_HORIZONTAL_SCALE_FAILED_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleHandlerEvent.DATALAKE_HORIZONTAL_SCALE_IN_PROGRESS_HANDLER;
 
 import java.util.concurrent.TimeUnit;
@@ -58,8 +59,13 @@ public class DatalakeHorizontalScaleWaitHandler extends EventSenderAwareHandler<
                     .withStopPollingIfExceptionOccurred(true);
             cloudbreakPoller.pollFlowStateBySdxClusterUntilComplete("Datalake horizontal scaling",
                     sdxCluster, pollingConfig);
-        } catch (SdxWaitException exception) {
-            throw new RuntimeException(exception);
+        } catch (SdxWaitException e) {
+            LOGGER.info("Flow failed. Waiting for Datalake Horizontal timed out.", e);
+
+            DatalakeHorizontalScaleFlowEventBuilder resultEventBuilder = DatalakeHorizontalScaleFlowEvent
+                    .datalakeHorizontalScaleFlowEventBuilderFactory(data)
+                    .setSelector(DATALAKE_HORIZONTAL_SCALE_FAILED_EVENT.selector());
+            eventSender().sendEvent(resultEventBuilder.build(), event.getHeaders());
         }
         LOGGER.info("Polling finished for flow. Id: {}", data.getFlowId());
         DatalakeHorizontalScaleFlowEventBuilder resultEventBuilder = DatalakeHorizontalScaleFlowEvent

@@ -46,8 +46,7 @@ public class CertRotationActions {
             protected void doExecute(SdxContext context, SdxStartCertRotationEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Start cert rotation with request: {}", payload.getRequest());
                 certRotationService.startCertRotation(context.getSdxId(), payload.getRequest());
-                SdxEvent sdxEvent = new SdxEvent(SdxCertRotationEvent.CERT_ROTATION_STARTED_EVENT.event(), payload.getResourceId(), payload.getUserId());
-                sendEvent(context, sdxEvent);
+                sendEvent(context, new SdxEvent(SdxCertRotationEvent.CERT_ROTATION_STARTED_EVENT.event(), payload.getResourceId(), payload.getUserId()));
             }
 
             @Override
@@ -93,8 +92,7 @@ public class CertRotationActions {
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Cert rotation is finished");
                 certRotationService.finalizeCertRotation(payload.getResourceId());
-                SdxEvent event = new SdxEvent(SdxCertRotationEvent.CERT_ROTATION_FINALIZED_EVENT.event(), context);
-                sendEvent(context, event);
+                sendEvent(context, new SdxEvent(SdxCertRotationEvent.CERT_ROTATION_FINALIZED_EVENT.event(), context));
             }
 
             @Override

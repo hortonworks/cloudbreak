@@ -60,7 +60,6 @@ public class DatalakeHorizontalScaleServicesRollingRestartWaitHandler extends Ex
         DatalakeHorizontalScaleFlowEvent data = event.getData();
         SdxCluster sdxCluster = sdxService.getById(data.getResourceId());
         Long sdxId = data.getResourceId();
-        String userId = data.getUserId();
         Selectable response;
         try {
             LOGGER.debug("Start CM polling for services rolling restart process with id: {}", sdxId);

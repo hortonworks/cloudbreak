@@ -55,8 +55,7 @@ public class CertRenewalActions {
                 } else {
                     certRenewalService.renewCertificate(sdxCluster, payload.getUserId());
                 }
-                SdxEvent sdxEvent = new SdxEvent(SdxCertRenewalEvent.CERT_RENEWAL_STARTED_EVENT.event(), payload.getResourceId(), payload.getUserId());
-                sendEvent(context, sdxEvent);
+                sendEvent(context, new SdxEvent(SdxCertRenewalEvent.CERT_RENEWAL_STARTED_EVENT.event(), payload.getResourceId(), payload.getUserId()));
             }
 
             @Override

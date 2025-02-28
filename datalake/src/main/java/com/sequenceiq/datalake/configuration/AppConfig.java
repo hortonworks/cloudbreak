@@ -7,8 +7,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,8 +29,6 @@ import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics;
 @EnableScheduling
 @EnableRetry
 public class AppConfig implements AsyncConfigurer {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AppConfig.class);
 
     @Inject
     @Named("cloudbreakUrl")

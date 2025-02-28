@@ -6,8 +6,6 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.service.secret.service.SecretAspectService;
@@ -15,8 +13,6 @@ import com.sequenceiq.cloudbreak.service.secret.service.SecretAspectService;
 @Component
 @Aspect
 public class SecretAspects {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(SecretAspects.class);
 
     @Inject
     private SecretAspectService secretAspectService;

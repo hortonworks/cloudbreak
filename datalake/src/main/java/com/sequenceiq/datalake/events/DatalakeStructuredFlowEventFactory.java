@@ -140,7 +140,6 @@ public class DatalakeStructuredFlowEventFactory implements CDPStructuredFlowEven
         // turning the string constants in CloudbreakEventService into a enums would be nice.
         String resourceType = CloudbreakEventService.DATALAKE_RESOURCE_TYPE;
 
-        // todo: make a CDPOperationDetails Builder
         CDPOperationDetails operationDetails = new CDPOperationDetails();
         operationDetails.setTimestamp(clock.getCurrentTimeMillis());
         operationDetails.setEventType(FLOW);

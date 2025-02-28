@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.sequenceiq.cloudbreak.cm.client.tracing.CmRequestIdProviderInterceptor;
 
-// TODO Use ClouderaManagerApiClientProvider in client-cm instad of relying on this class
 @Component
 public class ClouderaManagerProxiedClientFactory {
 

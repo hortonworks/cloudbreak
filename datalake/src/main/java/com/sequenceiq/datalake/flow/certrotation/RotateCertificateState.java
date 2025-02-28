@@ -18,10 +18,6 @@ public enum RotateCertificateState implements FlowState {
     RotateCertificateState() {
     }
 
-    RotateCertificateState(Class<? extends DefaultRestartAction> restartAction) {
-        this.restartAction = restartAction;
-    }
-
     @Override
     public Class<? extends RestartAction> restartAction() {
         return restartAction;

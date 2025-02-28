@@ -37,7 +37,7 @@ public class SdxBackupController implements SdxBackupEndpoint {
     public SdxDatabaseBackupResponse backupDatabaseByName(@ResourceName String name, String backupId, String backupLocation) {
         SdxCluster sdxCluster = getSdxClusterByName(name);
         try {
-            SdxDatabaseBackupStatusResponse response = sdxBackupRestoreService.getDatabaseBackupStatus(sdxCluster, backupId);
+            sdxBackupRestoreService.getDatabaseBackupStatus(sdxCluster, backupId);
             SdxDatabaseBackupResponse sdxDatabaseBackupResponse = new SdxDatabaseBackupResponse();
             sdxDatabaseBackupResponse.setOperationId(backupId);
             return sdxDatabaseBackupResponse;
@@ -57,7 +57,7 @@ public class SdxBackupController implements SdxBackupEndpoint {
         SdxCluster sdxCluster = getSdxClusterByName(name);
         String backupId = backupRequest.getBackupId();
         try {
-            SdxDatabaseBackupStatusResponse response = sdxBackupRestoreService.getDatabaseBackupStatus(sdxCluster, backupId);
+            sdxBackupRestoreService.getDatabaseBackupStatus(sdxCluster, backupId);
             SdxDatabaseBackupResponse sdxDatabaseBackupResponse = new SdxDatabaseBackupResponse();
             sdxDatabaseBackupResponse.setOperationId(backupId);
             return sdxDatabaseBackupResponse;

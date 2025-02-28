@@ -251,7 +251,7 @@ public class SdxDetachActions {
                     Map<Object, Object> variables) {
                 SdxCluster detachedCluster = (SdxCluster) variables.get(DETACHED_SDX);
                 sdxDetachService.markAsDetached(detachedCluster.getId());
-                eventSenderService.notifyEvent(detachedCluster, context, ResourceEvent.SDX_DETACH_FINISHED);
+                eventSenderService.notifyEvent(detachedCluster, ResourceEvent.SDX_DETACH_FINISHED);
                 LOGGER.info("Detaching of SDX with ID {} finished.", detachedCluster.getId());
 
                 if (!((boolean) variables.get(IS_DETACH_DURING_RECOVERY))) {
