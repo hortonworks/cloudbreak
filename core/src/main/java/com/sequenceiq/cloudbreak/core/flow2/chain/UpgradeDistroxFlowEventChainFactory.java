@@ -26,6 +26,7 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -219,19 +220,38 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
     private Optional<ClusterRepairTriggerEvent> getClusterRepairTriggerEvent(DistroXUpgradeTriggerEvent event) {
         LOGGER.info("ReplaceVms: {}, lockComponents: {}", event.isReplaceVms(), event.isLockComponents());
         if (event.isReplaceVms()) {
-            Map<String, List<String>> nodeMap = getReplaceableInstancesByHostGroup(event);
+            StackDto stack = stackDtoService.getByIdWithoutResources(event.getResourceId());
+            Map<String, List<String>> nodeMap = getReplaceableInstancesByHostGroup(event, stack);
             if (nodeMap.isEmpty()) {
                 LOGGER.info("OS upgrade is not required, as replaceable node list is empty.");
                 return Optional.empty();
             }
             ClusterRepairTriggerEvent.RepairType repairType = decideRepairType(event, nodeMap);
+            String triggeredStackVariant = calculateTriggeredStackVariant(event.getTriggeredStackVariant(), nodeMap.keySet(), stack);
             LOGGER.info("Repair type: {}", repairType);
             return Optional.of(new ClusterRepairTriggerEvent(CLUSTER_REPAIR_TRIGGER_EVENT, event.getResourceId(),
-                    repairType, nodeMap, true, event.getTriggeredStackVariant(), event.isRollingUpgradeEnabled()));
+                    repairType, nodeMap, true, triggeredStackVariant, event.isRollingUpgradeEnabled()));
         } else {
             LOGGER.info("The replaceVms flag is false, no need to add repair trigger.");
             return Optional.empty();
         }
+    }
+
+    private String calculateTriggeredStackVariant(String triggeredStackVariant, Set<String> selectedGroups, StackDto stack) {
+        if (allGroupsSelectedForRepair(selectedGroups, stack)) {
+            return triggeredStackVariant;
+        } else {
+            LOGGER.info("Use the original platform variant ({}) for repair to skip variant migration because not all host groups are selected.",
+                    stack.getPlatformVariant());
+            return stack.getPlatformVariant();
+        }
+    }
+
+    private boolean allGroupsSelectedForRepair(Set<String> selectedGroups, StackDto stack) {
+        Set<String> existingInstanceGroups = stack.getInstanceGroupViews().stream()
+                .map(com.sequenceiq.cloudbreak.view.InstanceGroupView::getGroupName)
+                .collect(Collectors.toSet());
+        return selectedGroups.containsAll(existingInstanceGroups);
     }
 
     private ClusterRepairTriggerEvent.RepairType decideRepairType(DistroXUpgradeTriggerEvent event, Map<String, List<String>> nodeMap) {
@@ -248,8 +268,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         }
     }
 
-    private Map<String, List<String>> getReplaceableInstancesByHostGroup(DistroXUpgradeTriggerEvent event) {
-        StackDto stack = stackDtoService.getByIdWithoutResources(event.getResourceId());
+    private Map<String, List<String>> getReplaceableInstancesByHostGroup(DistroXUpgradeTriggerEvent event, StackDto stack) {
         if (event.isReplaceVms() && !event.isLockComponents()) {
             LOGGER.info("Force OS upgrade is enabled by entitlement or requested by explicitly specifying replaceVms as true and lockComponents as false.");
             if ((clusterSizeUpgradeValidator.isClusterSizeLargerThanAllowedForRollingUpgrade(stack.getFullNodeCount())) && event.isRollingUpgradeEnabled()
