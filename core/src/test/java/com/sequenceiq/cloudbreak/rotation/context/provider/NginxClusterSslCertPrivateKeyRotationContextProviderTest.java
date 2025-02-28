@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.autoscale.PeriscopeClientService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
@@ -55,6 +56,9 @@ public class NginxClusterSslCertPrivateKeyRotationContextProviderTest {
     @Mock
     private InstanceMetaDataService instanceMetaDataService;
 
+    @Mock
+    private PeriscopeClientService periscopeClientService;
+
     @InjectMocks
     private NginxClusterSslCertPrivateKeyRotationContextProvider underTest;
 
@@ -70,6 +74,7 @@ public class NginxClusterSslCertPrivateKeyRotationContextProviderTest {
         when(gatewayConfigService.getAllGatewayConfigs(any())).thenReturn(List.of(new GatewayConfig(null, null, null,
                 "host", null, "instanceId", null, null, null, null, null, null, null, true, null, null, null, null, null, null)));
         when(secretRotationSaltService.executeCommand(any(), anySet(), any())).thenReturn(Map.of("host", "cert"));
+        doNothing().when(periscopeClientService).updateServerCertificateInPeriscope(any(), any());
         ArgumentCaptor<String> newCertCaptor = ArgumentCaptor.forClass(String.class);
         doNothing().when(instanceMetaDataService).updateServerCert(newCertCaptor.capture(), any(), any());
 
@@ -81,6 +86,7 @@ public class NginxClusterSslCertPrivateKeyRotationContextProviderTest {
         verify(secretRotationSaltService).executeCommand(any(), anySet(), any());
         verify(secretRotationSaltService).executeSaltState(any(), anySet(), any(), any(), any(), any());
         verify(instanceMetaDataService).updateServerCert(any(), eq("instanceId"), eq("host"));
+        verify(periscopeClientService).updateServerCertificateInPeriscope(any(), any());
         assertEquals(new String(decodeBase64(newCertCaptor.getValue())), "cert");
     }
 }

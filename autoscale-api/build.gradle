@@ -33,6 +33,7 @@ dependencies {
   testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
   testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
 
+  implementation project(':authorization-common-api')
   implementation project(':core-api')
 }
 

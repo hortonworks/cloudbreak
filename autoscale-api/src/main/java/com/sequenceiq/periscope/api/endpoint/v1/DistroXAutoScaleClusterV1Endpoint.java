@@ -9,15 +9,18 @@ import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
+import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.periscope.api.endpoint.validator.ValidDistroXAutoscaleRequest;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterRequest;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterResponse;
+import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterServerCertUpdateRequest;
 import com.sequenceiq.periscope.doc.ApiDescription;
 import com.sequenceiq.periscope.doc.ApiDescription.ClusterOpDescription;
 import com.sequenceiq.periscope.doc.ApiDescription.DistroXClusterNotes;
@@ -98,4 +101,11 @@ public interface DistroXAutoScaleClusterV1Endpoint {
             operationId = "enableAutoscaleForClusterCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DistroXAutoscaleClusterResponse enableAutoscaleForClusterCrn(@PathParam("crn") String clusterCrn, AutoscaleClusterState autoscaleState);
+
+    @PUT
+    @Path("updateServerCertificate")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = ClusterOpDescription.CLUSTER_SERVER_CERT_UPDATE, description = DistroXClusterNotes.NOTES, operationId = "updateServerCertificate",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    void updateServerCertificate(@TenantAwareParam @Valid DistroXAutoscaleClusterServerCertUpdateRequest request);
 }

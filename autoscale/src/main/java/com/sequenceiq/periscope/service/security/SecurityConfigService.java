@@ -89,4 +89,14 @@ public class SecurityConfigService {
         }
         return securityConfig;
     }
+
+    public void updateServerCertInSecurityConfig(Cluster cluster, String newServerCert) {
+        SecurityConfig securityConfig = securityConfigRepository.findByClusterId(cluster.getId());
+        if (securityConfig != null) {
+            securityConfig.setServerCert(newServerCert);
+            securityConfigRepository.save(securityConfig);
+        } else {
+            LOGGER.error("There is no security config for the cluster!");
+        }
+    }
 }

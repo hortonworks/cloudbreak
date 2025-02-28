@@ -105,6 +105,7 @@ public class ApiDescription {
         public static final String CLUSTER_SET_STOP_START_SCALING = "enable or disable cluster's stop start scaling feature";
         public static final String CLUSTER_UPDATE_AUTOSCALE_CONFIG = "update cluster's autoscale config";
         public static final String CLUSTER_DELETE_ALERTS = "delete a cluster's alerts";
+        public static final String CLUSTER_SERVER_CERT_UPDATE = "update server certificate in autoscale for the given cluster";
     }
 
     public static class ClusterNotes {
@@ -141,6 +142,7 @@ public class ApiDescription {
         public static final String LOAD_ALERTS = "Load based alerts of the cluster";
         public static final String YARN_RECOMMENDATION = "recommendation from yarn.";
         public static final String SCALING_CONFIGURATION = "Scaling configuration for the cluster";
+        public static final String NEW_SERVER_CERT = "updated server certificate for cluster";
     }
 
     public static class ScalingConfigurationJsonProperties {

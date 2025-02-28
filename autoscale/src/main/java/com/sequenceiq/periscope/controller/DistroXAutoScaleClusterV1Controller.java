@@ -1,6 +1,7 @@
 package com.sequenceiq.periscope.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import jakarta.inject.Inject;
 
@@ -12,20 +13,24 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.periscope.api.endpoint.v1.DistroXAutoScaleClusterV1Endpoint;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterRequest;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterResponse;
+import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterServerCertUpdateRequest;
 import com.sequenceiq.periscope.controller.validation.AlertValidator;
 import com.sequenceiq.periscope.converter.DistroXAutoscaleClusterResponseConverter;
 import com.sequenceiq.periscope.converter.LoadAlertRequestConverter;
 import com.sequenceiq.periscope.converter.TimeAlertRequestConverter;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.service.ClusterService;
+import com.sequenceiq.periscope.service.security.SecurityConfigService;
 
 @Controller
 public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClusterV1Endpoint {
@@ -52,6 +57,9 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
 
     @Inject
     private LoadAlertRequestConverter loadAlertRequestConverter;
+
+    @Inject
+    private SecurityConfigService securityConfigService;
 
     @Override
     @DisableCheckPermissions
@@ -113,6 +121,13 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
             DistroXAutoscaleClusterRequest autoscaleClusterRequest) {
         Cluster cluster = asClusterCommonService.getClusterByStackName(clusterName);
         return updateClusterAutoScaleConfig(cluster, autoscaleClusterRequest);
+    }
+
+    @InternalOnly
+    @Override
+    public void updateServerCertificate(@TenantAwareParam DistroXAutoscaleClusterServerCertUpdateRequest request) {
+        Optional<Cluster> optionalCluster = clusterService.findOneByStackCrn(request.getCrn());
+        optionalCluster.ifPresent(cluster -> securityConfigService.updateServerCertInSecurityConfig(cluster, request.getNewServerCert()));
     }
 
     private DistroXAutoscaleClusterResponse createClusterJsonResponse(Cluster cluster) {

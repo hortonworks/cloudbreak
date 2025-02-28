@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.context.SaltStateApplyRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.autoscale.PeriscopeClientService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
@@ -68,6 +69,9 @@ public class NginxClusterSslCertPrivateKeyRotationContextProvider implements Rot
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
+    @Inject
+    private PeriscopeClientService periscopeClientService;
+
     @Override
     public Map<SecretRotationStep, ? extends RotationContext> getContexts(String resourceCrn) {
         StackDto stack = stackDtoService.getByCrn(resourceCrn);
@@ -94,6 +98,8 @@ public class NginxClusterSslCertPrivateKeyRotationContextProvider implements Rot
                 String instanceId = gatewayConfigs.stream().filter(gc -> StringUtils.equals(gc.getHostname(), key)).findFirst().orElseThrow().getInstanceId();
                 instanceMetaDataService.updateServerCert(BaseEncoding.base64().encode(value.getBytes()), instanceId, key);
             });
+            periscopeClientService.updateServerCertificateInPeriscope(stackDto.getResourceCrn(),
+                    BaseEncoding.base64().encode(certs.get(primaryGatewayConfig.getHostname()).getBytes()));
         } catch (CloudbreakOrchestratorFailedException e) {
             LOGGER.error("Failed to execute salt call!", e);
             throw new SecretRotationException(e);

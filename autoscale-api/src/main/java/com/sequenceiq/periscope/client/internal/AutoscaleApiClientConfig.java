@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.client.ApiClientRequestFilter;
 import com.sequenceiq.cloudbreak.client.ThreadLocalUserCrnWebTargetBuilder;
 import com.sequenceiq.cloudbreak.client.WebTargetEndpointFactory;
 import com.sequenceiq.periscope.api.AutoscaleApi;
+import com.sequenceiq.periscope.api.endpoint.v1.DistroXAutoScaleClusterV1Endpoint;
 import com.sequenceiq.periscope.api.endpoint.v1.DistroXAutoScaleYarnRecommendationV1Endpoint;
 
 @Configuration
@@ -37,5 +38,11 @@ public class AutoscaleApiClientConfig {
     @ConditionalOnBean(name = "autoscaleApiClientWebTarget")
     DistroXAutoScaleYarnRecommendationV1Endpoint createAutoScaleYarnRecommendationV1Endpoint(WebTarget autoscaleApiClientWebTarget) {
         return new WebTargetEndpointFactory().createEndpoint(autoscaleApiClientWebTarget, DistroXAutoScaleYarnRecommendationV1Endpoint.class);
+    }
+
+    @Bean
+    @ConditionalOnBean(name = "autoscaleApiClientWebTarget")
+    DistroXAutoScaleClusterV1Endpoint createAutoScaleClusterV1Endpoint(WebTarget autoscaleApiClientWebTarget) {
+        return new WebTargetEndpointFactory().createEndpoint(autoscaleApiClientWebTarget, DistroXAutoScaleClusterV1Endpoint.class);
     }
 }
