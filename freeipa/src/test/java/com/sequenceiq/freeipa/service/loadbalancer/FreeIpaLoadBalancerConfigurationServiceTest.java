@@ -1,13 +1,13 @@
 package com.sequenceiq.freeipa.service.loadbalancer;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
-import java.util.Set;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -70,7 +70,7 @@ class FreeIpaLoadBalancerConfigurationServiceTest {
         assertEquals(loadBalancerMetadata.getCloudDns(), actual.getDns());
         assertEquals(loadBalancerMetadata.getName(), actual.getResourceId());
         assertEquals(loadBalancerMetadata.getName(), actual.getResourceId());
-        assertIterableEquals(Set.of("1.1.1.1", "2.2.2.2"), actual.getIp());
+        assertThat(actual.getIp(), Matchers.containsInAnyOrder("1.1.1.1", "2.2.2.2"));
     }
 
 }
