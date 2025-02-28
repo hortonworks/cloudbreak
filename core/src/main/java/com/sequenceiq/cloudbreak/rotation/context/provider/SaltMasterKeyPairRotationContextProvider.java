@@ -3,11 +3,8 @@ package com.sequenceiq.cloudbreak.rotation.context.provider;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM_JOB;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
 
-import java.security.KeyPair;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 import jakarta.inject.Inject;
 
@@ -22,7 +19,9 @@ import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
 import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
+import com.sequenceiq.cloudbreak.rotation.SecretRotationSaltService;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
@@ -32,10 +31,7 @@ import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.saltsecurityconf.SaltSecurityConfigService;
-import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
-import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
-import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Component
 public class SaltMasterKeyPairRotationContextProvider implements RotationContextProvider {
@@ -48,13 +44,13 @@ public class SaltMasterKeyPairRotationContextProvider implements RotationContext
     private StackDtoService stackDtoService;
 
     @Inject
-    private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
-
-    @Inject
     private SaltSecurityConfigService saltSecurityConfigService;
 
     @Inject
     private ClusterBootstrapper clusterBootstrapper;
+
+    @Inject
+    private SecretRotationSaltService secretRotationSaltService;
 
     @Override
     public SecretType getSecret() {
@@ -66,20 +62,18 @@ public class SaltMasterKeyPairRotationContextProvider implements RotationContext
         Map<SecretRotationStep, RotationContext> contexts = new HashMap<>();
         StackDto stack = stackDtoService.getByCrn(resourceCrn);
         SaltSecurityConfig saltSecurityConfig = stack.getSecurityConfig().getSaltSecurityConfig();
-        generateAndStoreSaltMasterKeyPairIfMissing(saltSecurityConfig);
+        generateAndStoreSaltMasterPrivateKeyIfMissing(saltSecurityConfig);
         String saltMasterPrivateKeySecretPath = saltSecurityConfig.getSaltMasterPrivateKeySecret().getSecret();
         return ImmutableMap.<SecretRotationStep, RotationContext>builder()
                 .put(VAULT, getVaultRotationContext(resourceCrn, saltMasterPrivateKeySecretPath))
-                .put(CUSTOM_JOB, getCustomJobRotationContext(resourceCrn, saltMasterPrivateKeySecretPath))
+                .put(CUSTOM_JOB, getCustomJobRotationContext(resourceCrn, stack.getId()))
                 .build();
     }
 
-    private void generateAndStoreSaltMasterKeyPairIfMissing(SaltSecurityConfig saltSecurityConfig) {
+    private void generateAndStoreSaltMasterPrivateKeyIfMissing(SaltSecurityConfig saltSecurityConfig) {
         if (StringUtils.isEmpty(saltSecurityConfig.getSaltMasterPrivateKey())) {
-            LOGGER.info("Salt master key pair is missing from the database, generate and store new key pair");
-            KeyPair keyPair = PkiUtil.generateKeypair();
-            saltSecurityConfig.setSaltMasterPublicKey(BaseEncoding.base64().encode(PkiUtil.convertPemPublicKey(keyPair.getPublic()).getBytes()));
-            saltSecurityConfig.setSaltMasterPrivateKey(BaseEncoding.base64().encode(PkiUtil.convert(keyPair.getPrivate()).getBytes()));
+            LOGGER.info("Salt master private key is missing from the database and Vault, generate and store a new private key.");
+            saltSecurityConfig.setSaltMasterPrivateKey(PkiUtil.generatePemPrivateKeyInBase64());
             saltSecurityConfigService.save(saltSecurityConfig);
         }
     }
@@ -87,51 +81,47 @@ public class SaltMasterKeyPairRotationContextProvider implements RotationContext
     private VaultRotationContext getVaultRotationContext(String resourceCrn, String saltMasterPrivateKeySecretPath) {
         return VaultRotationContext.builder()
                 .withResourceCrn(resourceCrn)
-                .withVaultPathSecretMap(Map.of(saltMasterPrivateKeySecretPath,
-                        BaseEncoding.base64().encode(PkiUtil.convert(PkiUtil.generateKeypair().getPrivate()).getBytes())))
+                .withVaultPathSecretMap(Map.of(saltMasterPrivateKeySecretPath, PkiUtil.generatePemPrivateKeyInBase64()))
                 .build();
     }
 
-    private CustomJobRotationContext getCustomJobRotationContext(String resourceCrn, String saltMasterPrivateKeySecretPath) {
+    private CustomJobRotationContext getCustomJobRotationContext(String resourceCrn, Long stackId) {
         return CustomJobRotationContext.builder()
                 .withResourceCrn(resourceCrn)
                 .withPreValidateJob(() -> validateAllInstancesAreReachable(resourceCrn))
-                .withRotationJob(() -> updateSaltMasterKeyPair(resourceCrn, RotationSecret::getSecret))
-                .withRollbackJob(() -> updateSaltMasterKeyPair(resourceCrn, RotationSecret::getBackupSecret))
+                .withRotationJob(() -> updateSaltMasterKeyPairOnCluster(stackId))
+                .withRollbackJob(() -> updateSaltMasterKeyPairOnCluster(stackId))
+                .withPostValidateJob(() -> validateAllInstancesAreReachable(resourceCrn))
+                .withFinalizeJob(() -> deletePublicKeyFromDatabaseIfExists(resourceCrn))
                 .build();
     }
 
     private void validateAllInstancesAreReachable(String resourceCrn) {
         StackDto stack = stackDtoService.getByCrn(resourceCrn);
-        List<String> unreachableInstances = stack.getAllAvailableInstances().stream()
-                .filter(instance -> !instance.isReachable())
-                .map(InstanceMetadataView::getInstanceId)
-                .toList();
-        if (!unreachableInstances.isEmpty()) {
-            throw new SecretRotationException(String.format("Unreachable instances found: %s, salt master key rotation is not possible!", unreachableInstances));
+        try {
+            secretRotationSaltService.validateSalt(stack);
+        } catch (CloudbreakOrchestratorFailedException e) {
+            throw new SecretRotationException(e.getMessage(), e);
         }
     }
 
-    private void updateSaltMasterKeyPair(String resourceCrn, Function<RotationSecret, String> mapper) {
+    private void deletePublicKeyFromDatabaseIfExists(String resourceCrn) {
         StackDto stack = stackDtoService.getByCrn(resourceCrn);
-        updateSaltMasterPublicKeyBasedOnPrivateKeyInVault(stack, mapper);
-        runSaltBootstrap(stack.getId());
-    }
-
-    private void updateSaltMasterPublicKeyBasedOnPrivateKeyInVault(StackDto stack, Function<RotationSecret, String> mapper) {
         SaltSecurityConfig saltSecurityConfig = stack.getSecurityConfig().getSaltSecurityConfig();
-        RotationSecret saltMasterPrivateKey = uncachedSecretServiceForRotation.getRotation(saltSecurityConfig.getSaltMasterPrivateKeySecret().getSecret());
-        saltSecurityConfig.setSaltMasterPublicKey(PkiUtil.calculatePemPublicKeyInBase64(mapper.apply(saltMasterPrivateKey)));
-        saltSecurityConfigService.save(saltSecurityConfig);
+        if (saltSecurityConfig.getLegacySaltMasterPublicKey() != null) {
+            saltSecurityConfig.setSaltMasterPublicKey(null);
+            saltSecurityConfigService.save(saltSecurityConfig);
+        }
     }
 
-    private void runSaltBootstrap(Long stackId) {
+    private void updateSaltMasterKeyPairOnCluster(Long stackId) {
         try {
+            LOGGER.info("Bootstrap machines to upload new salt master key pair based on the rotation phase");
             clusterBootstrapper.bootstrapMachines(stackId, true);
-            LOGGER.info("Bootstrapping and restarting salt finished.");
+            LOGGER.info("Bootstrapping and restarting salt finished, salt master key pair uploaded.");
         } catch (CloudbreakException e) {
             LOGGER.warn("Bootstrapping and restarting salt failed", e);
-            throw new SecretRotationException(e);
+            throw new SecretRotationException(e.getMessage(), e);
         }
     }
 }

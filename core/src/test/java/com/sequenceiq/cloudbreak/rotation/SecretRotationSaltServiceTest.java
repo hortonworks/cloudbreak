@@ -45,13 +45,23 @@ public class SecretRotationSaltServiceTest {
     private SecretRotationSaltService underTest;
 
     @Test
-    void testValidateSalt() throws CloudbreakOrchestratorFailedException {
+    void testValidateSaltPrimaryGateway() throws CloudbreakOrchestratorFailedException {
         when(saltStateParamsService.createStateParams(any(), any(), anyBoolean(), anyInt(), anyInt())).thenReturn(new OrchestratorStateParams());
-        doNothing().when(hostOrchestrator).ping(any(), any());
+        when(hostOrchestrator.ping(any(), any())).thenReturn(Map.of());
+
+        underTest.validateSaltPrimaryGateway(new StackDto());
+
+        verify(hostOrchestrator).ping(any(), any());
+    }
+
+    @Test
+    void testValidateSalt() throws CloudbreakOrchestratorFailedException {
+        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(new GatewayConfig(null, null, null, null, null, null));
+        when(hostOrchestrator.ping(any())).thenReturn(Map.of());
 
         underTest.validateSalt(new StackDto());
 
-        verify(hostOrchestrator).ping(any(), any());
+        verify(hostOrchestrator).ping(any());
     }
 
     @Test

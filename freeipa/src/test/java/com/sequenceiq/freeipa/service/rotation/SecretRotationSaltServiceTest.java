@@ -24,6 +24,8 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteriaModel;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
+import com.sequenceiq.freeipa.service.orchestrator.FreeIpaSaltPingService;
+import com.sequenceiq.freeipa.service.orchestrator.SaltPingFailedException;
 
 @ExtendWith(MockitoExtension.class)
 public class SecretRotationSaltServiceTest {
@@ -40,17 +42,19 @@ public class SecretRotationSaltServiceTest {
     @Mock
     private GatewayConfigService gatewayConfigService;
 
+    @Mock
+    private FreeIpaSaltPingService freeIpaSaltPingService;
+
     @InjectMocks
     private SecretRotationSaltService underTest;
 
     @Test
-    void testValidateSalt() throws CloudbreakOrchestratorFailedException {
+    void testValidateSalt() throws CloudbreakOrchestratorFailedException, SaltPingFailedException {
         when(saltStateParamsService.createStateParams(any(), any(), anyBoolean(), anyInt(), anyInt())).thenReturn(new OrchestratorStateParams());
-        doNothing().when(hostOrchestrator).ping(any(), any());
 
         underTest.validateSalt(new Stack());
 
-        verify(hostOrchestrator).ping(any(), any());
+        verify(freeIpaSaltPingService).saltPing(any(), any());
     }
 
     @Test

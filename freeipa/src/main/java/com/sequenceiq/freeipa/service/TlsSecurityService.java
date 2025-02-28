@@ -48,7 +48,7 @@ public class TlsSecurityService {
         securityConfig.setSaltSecurityConfig(saltSecurityConfig);
         generateClientKeys(securityConfig);
         generateSaltBootSignKeypair(saltSecurityConfig);
-        generateSaltSignKeypair(securityConfig);
+        generateSaltSignKeypair(saltSecurityConfig);
         generateSaltMasterKeypair(saltSecurityConfig);
         generateSaltPassword(saltSecurityConfig);
         generateSaltBootPassword(saltSecurityConfig);
@@ -70,30 +70,15 @@ public class TlsSecurityService {
     }
 
     private void generateSaltBootSignKeypair(SaltSecurityConfig saltSecurityConfig) {
-        KeyPair keyPair = PkiUtil.generateKeypair();
-        String privateKey = PkiUtil.convert(keyPair.getPrivate());
-        String publicKey = PkiUtil.convertPemPublicKey(keyPair.getPublic());
-        saltSecurityConfig.setSaltBootSignPublicKey(BaseEncoding.base64().encode(publicKey.getBytes()));
-        String saltBootSignPrivateKey = BaseEncoding.base64().encode(privateKey.getBytes());
-        saltSecurityConfig.setSaltBootSignPrivateKeyVault(saltBootSignPrivateKey);
+        saltSecurityConfig.setSaltBootSignPrivateKeyVault(PkiUtil.generatePemPrivateKeyInBase64());
     }
 
-    private void generateSaltSignKeypair(SecurityConfig securityConfig) {
-        KeyPair keyPair = PkiUtil.generateKeypair();
-        String privateKey = PkiUtil.convert(keyPair.getPrivate());
-        String publicKey = PkiUtil.convertPemPublicKey(keyPair.getPublic());
-        SaltSecurityConfig saltSecurityConfig = securityConfig.getSaltSecurityConfig();
-        saltSecurityConfig.setSaltSignPublicKey(BaseEncoding.base64().encode(publicKey.getBytes()));
-        String saltSignPrivateKey = BaseEncoding.base64().encode(privateKey.getBytes());
-        saltSecurityConfig.setSaltSignPrivateKeyVault(saltSignPrivateKey);
+    private void generateSaltSignKeypair(SaltSecurityConfig saltSecurityConfig) {
+        saltSecurityConfig.setSaltSignPrivateKeyVault(PkiUtil.generatePemPrivateKeyInBase64());
     }
 
     private void generateSaltMasterKeypair(SaltSecurityConfig saltSecurityConfig) {
-        KeyPair keyPair = PkiUtil.generateKeypair();
-        String privateKey = PkiUtil.convert(keyPair.getPrivate());
-        String publicKey = PkiUtil.convertPemPublicKey(keyPair.getPublic());
-        saltSecurityConfig.setSaltMasterPublicKey(BaseEncoding.base64().encode(publicKey.getBytes()));
-        saltSecurityConfig.setSaltMasterPrivateKeyVault(BaseEncoding.base64().encode(privateKey.getBytes()));
+        saltSecurityConfig.setSaltMasterPrivateKeyVault(PkiUtil.generatePemPrivateKeyInBase64());
     }
 
     private void generateSaltBootPassword(SaltSecurityConfig saltSecurityConfig) {

@@ -1823,9 +1823,9 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void ping(Set<String> target, GatewayConfig gatewayConfig) throws CloudbreakOrchestratorFailedException {
+    public Map<String, Boolean> ping(Set<String> target, GatewayConfig gatewayConfig) throws CloudbreakOrchestratorFailedException {
         try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
-            saltStateService.ping(sc, new HostList(target));
+            return saltStateService.ping(sc, new HostList(target)).getResultByMinionId();
         } catch (Exception e) {
             LOGGER.error("Error occurred during salt ping.", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);

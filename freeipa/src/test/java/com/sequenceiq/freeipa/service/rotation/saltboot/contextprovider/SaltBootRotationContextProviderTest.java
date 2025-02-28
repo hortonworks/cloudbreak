@@ -17,7 +17,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.google.common.io.BaseEncoding;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
@@ -50,9 +49,9 @@ class SaltBootRotationContextProviderTest {
 
     private static final String NEW_PASSWORD = "newPassword";
 
-    private static final String OLD_PRIVATE_KEY = newPrivateKey();
+    private static final String OLD_PRIVATE_KEY = PkiUtil.generatePemPrivateKeyInBase64();
 
-    private static final String NEW_PRIVATE_KEY = newPrivateKey();
+    private static final String NEW_PRIVATE_KEY = PkiUtil.generatePemPrivateKeyInBase64();
 
     @Mock
     private StackService stackService;
@@ -119,9 +118,5 @@ class SaltBootRotationContextProviderTest {
         assertEquals(List.of("saltboot.stop-saltboot", "saltboot.start-saltboot"), serviceUpdateConfiguration.serviceRestartActions());
         assertEquals(Set.of("host1"), serviceUpdateConfiguration.targetFqdns());
         assertEquals(Set.of("0.0.0.0"), serviceUpdateConfiguration.targetPrivateIps());
-    }
-
-    private static String newPrivateKey() {
-        return BaseEncoding.base64().encode(PkiUtil.convert(PkiUtil.generateKeypair().getPrivate()).getBytes());
     }
 }

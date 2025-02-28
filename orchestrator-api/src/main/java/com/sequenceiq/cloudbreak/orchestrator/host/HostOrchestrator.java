@@ -187,7 +187,7 @@ public interface HostOrchestrator extends HostRecipeExecutor {
     void executeSaltState(GatewayConfig gatewayConfig, Set<String> target, List<String> states, ExitCriteriaModel exitCriteriaModel,
             Optional<Integer> maxRetry, Optional<Integer> maxRetryOnError) throws CloudbreakOrchestratorFailedException;
 
-    void ping(Set<String> target, GatewayConfig gatewayConfig) throws CloudbreakOrchestratorFailedException;
+    Map<String, Boolean> ping(Set<String> target, GatewayConfig gatewayConfig) throws CloudbreakOrchestratorFailedException;
 
     Map<String, Boolean> ping(GatewayConfig gatewayConfig) throws CloudbreakOrchestratorFailedException;
 

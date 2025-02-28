@@ -15,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.client.SaltClientConfig;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterProxyService;
@@ -48,7 +49,7 @@ class TlsSecurityServiceTest {
         when(stack.getId()).thenReturn(STACK_ID);
 
         InstanceMetadataView gatewayInstance = mock(InstanceMetadataView.class);
-        when(securityConfigService.findOneByStackId(eq(STACK_ID))).thenReturn(Optional.of(securityConfig(null, null)));
+        when(securityConfigService.findOneByStackId(eq(STACK_ID))).thenReturn(Optional.of(securityConfig(null)));
         when(clusterProxyService.isCreateConfigForClusterProxy(any())).thenReturn(Boolean.FALSE);
         when(clusterProxyEnablementService.isClusterProxyApplicable(any())).thenReturn(Boolean.FALSE);
         GatewayConfig gatewayConfig = underTest.buildGatewayConfig(stack, gatewayInstance, 1, new SaltClientConfig(null, null, null), false);
@@ -62,7 +63,7 @@ class TlsSecurityServiceTest {
         when(stack.getId()).thenReturn(STACK_ID);
 
         InstanceMetadataView gatewayInstance = mock(InstanceMetadataView.class);
-        SecurityConfig securityConfig = securityConfig("saltMasterPublicKey", "saltMasterPrivateKey");
+        SecurityConfig securityConfig = securityConfig(PkiUtil.generatePemPrivateKeyInBase64());
         when(securityConfigService.findOneByStackId(eq(STACK_ID))).thenReturn(Optional.of(securityConfig));
         when(clusterProxyService.isCreateConfigForClusterProxy(any())).thenReturn(Boolean.FALSE);
         when(clusterProxyEnablementService.isClusterProxyApplicable(any())).thenReturn(Boolean.FALSE);
@@ -71,14 +72,12 @@ class TlsSecurityServiceTest {
         assertNotNull(gatewayConfig.getSaltMasterPublicKey());
     }
 
-    private SecurityConfig securityConfig(String saltMasterPublicKey, String saltMasterPrivateKey) {
+    private SecurityConfig securityConfig(String saltMasterPrivateKey) {
         SecurityConfig securityConfig = new SecurityConfig();
         securityConfig.setClientKey("clientKey");
         securityConfig.setClientCert("clientCert");
         SaltSecurityConfig saltSecurityConfig = new SaltSecurityConfig();
-        saltSecurityConfig.setSaltSignPrivateKey("saltSignPrivateKey");
-        saltSecurityConfig.setSaltSignPublicKey("saltSignPublicKey");
-        saltSecurityConfig.setSaltMasterPublicKey(saltMasterPublicKey);
+        saltSecurityConfig.setSaltSignPrivateKey(PkiUtil.generatePemPrivateKeyInBase64());
         saltSecurityConfig.setSaltMasterPrivateKey(saltMasterPrivateKey);
         securityConfig.setSaltSecurityConfig(saltSecurityConfig);
         return securityConfig;

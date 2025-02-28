@@ -159,6 +159,10 @@ public class PkiUtil {
         }
     }
 
+    public static String generatePemPrivateKeyInBase64() {
+        return BaseEncoding.base64().encode(convert(generateKeypair().getPrivate()).getBytes());
+    }
+
     public static X509Certificate certByCsr(PKCS10CertificationRequest csr, String publicAddress, KeyPair signKey, int validity) {
         try {
             return selfsign(csr, publicAddress, signKey, validity);

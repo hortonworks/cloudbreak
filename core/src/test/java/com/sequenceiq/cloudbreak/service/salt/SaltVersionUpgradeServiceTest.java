@@ -25,6 +25,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -117,7 +118,7 @@ class SaltVersionUpgradeServiceTest {
     }
 
     @Test
-    void testGetSaltSecretRotationTriggerEventWhenSaltMasterAndSaltSignKeysAreIncompatible() {
+    void testGetSaltSecretRotationTriggerEventWhenSaltMasterPrivateKeyNotExistsAndLegacySaltSignPublicKeyExists() {
         SecurityConfig securityConfig = new SecurityConfig();
         SaltSecurityConfig saltSecurityConfig = new SaltSecurityConfig();
         saltSecurityConfig.setSaltSignPublicKey(new String(Base64.encodeBase64("ssh-rsa".getBytes())));
@@ -134,11 +135,10 @@ class SaltVersionUpgradeServiceTest {
     }
 
     @Test
-    void testGetSaltSecretRotationTriggerEventWhenSaltMasterAndSaltSignKeysAreCompatible() {
+    void testGetSaltSecretRotationTriggerEventWhenSaltMasterPrivateKeyExistsAndLegacySaltSignPublicKeyNotExists() {
         SecurityConfig securityConfig = new SecurityConfig();
         SaltSecurityConfig saltSecurityConfig = new SaltSecurityConfig();
-        saltSecurityConfig.setSaltSignPublicKey(new String(Base64.encodeBase64("-----BEGIN PUBLIC KEY-----publickey-----END PUBLIC KEY-----".getBytes())));
-        saltSecurityConfig.setSaltMasterPrivateKey("masterkey");
+        saltSecurityConfig.setSaltMasterPrivateKey(PkiUtil.generatePemPrivateKeyInBase64());
         securityConfig.setSaltSecurityConfig(saltSecurityConfig);
         when(stackDto.getSecurityConfig()).thenReturn(securityConfig);
         when(stackDto.getAllAvailableGatewayInstances()).thenReturn(List.of(mock(InstanceMetadataView.class), mock(InstanceMetadataView.class)));

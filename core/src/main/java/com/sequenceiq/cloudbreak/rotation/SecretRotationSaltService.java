@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -51,13 +52,32 @@ public class SecretRotationSaltService {
         hostOrchestrator.saveCustomPillars(new SaltConfig(servicePillar), exitCriteriaModel, stateParams);
     }
 
-    public void validateSalt(StackDto stackDto) throws CloudbreakOrchestratorFailedException {
+    public void validateSaltPrimaryGateway(StackDto stackDto) throws CloudbreakOrchestratorFailedException {
         OrchestratorStateParams stateParams = saltStateParamsService.createStateParams(stackDto, null, true, MAX_RETRY, MAX_RETRY_ON_ERROR);
         validateSalt(stateParams.getTargetHostNames(), stateParams.getPrimaryGatewayConfig());
     }
 
+    public void validateSalt(StackDto stackDto) throws CloudbreakOrchestratorFailedException {
+        GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stackDto);
+        Map<String, Boolean> result = hostOrchestrator.ping(primaryGatewayConfig);
+        checkPingResponse(result);
+    }
+
     public void validateSalt(Set<String> targets, GatewayConfig gatewayConfig) throws CloudbreakOrchestratorFailedException {
-        hostOrchestrator.ping(targets, gatewayConfig);
+        Map<String, Boolean> result = hostOrchestrator.ping(targets, gatewayConfig);
+        checkPingResponse(result);
+    }
+
+    private void checkPingResponse(Map<String, Boolean> result) throws CloudbreakOrchestratorFailedException {
+        Set<String> failedNodes = result.entrySet().stream()
+                .filter(entry -> !Boolean.TRUE.equals(entry.getValue()))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
+        if (!failedNodes.isEmpty()) {
+            String message = String.format("Salt ping failed: %s", String.join(", ", failedNodes));
+            LOGGER.warn(message);
+            throw new CloudbreakOrchestratorFailedException(message);
+        }
     }
 
     public void executeSaltState(GatewayConfig gatewayConfig, Set<String> targets, List<String> states, ExitCriteriaModel exitCriteriaModel,

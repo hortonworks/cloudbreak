@@ -52,7 +52,7 @@ public class SaltPillarRotationExecutor extends AbstractRotationExecutor<SaltPil
     @Override
     protected void preValidate(SaltPillarRotationContext rotationContext) throws Exception {
         StackDto stackDto = stackDtoService.getByCrn(rotationContext.getResourceCrn());
-        saltService.validateSalt(stackDto);
+        saltService.validateSaltPrimaryGateway(stackDto);
     }
 
     @Override

@@ -7,7 +7,6 @@ import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -72,7 +71,7 @@ public class SaltBootRotationContextProvider implements RotationContextProvider 
     private SaltBootSignKeyUserDataModifier saltBootSignKeyUserDataModifier;
 
     @Inject
-    private SaltSecurityConfigService securityConfigService;
+    private SaltSecurityConfigService saltSecurityConfigService;
 
     @Inject
     private ExitCriteriaProvider exitCriteriaProvider;
@@ -95,17 +94,17 @@ public class SaltBootRotationContextProvider implements RotationContextProvider 
         return CustomJobRotationContext
                 .builder()
                 .withResourceCrn(resourceCrn)
-                .withRotationJob(() -> updateSaltBootPublicKey(resourceCrn, saltBootPrivateKeyPath, RotationSecret::getSecret))
-                .withRollbackJob(() -> updateSaltBootPublicKey(resourceCrn, saltBootPrivateKeyPath, RotationSecret::getBackupSecret))
+                .withFinalizeJob(() -> deletePublicKeyFromDatabaseIfExists(resourceCrn))
                 .build();
     }
 
-    private void updateSaltBootPublicKey(String resourceCrn, String saltBootPrivateKeySecret, Function<RotationSecret, String> mapper) {
+    private void deletePublicKeyFromDatabaseIfExists(String resourceCrn) {
         StackDto stack = stackService.getByCrn(resourceCrn);
-        RotationSecret saltBootPrivateKey = uncachedSecretServiceForRotation.getRotation(saltBootPrivateKeySecret);
         SaltSecurityConfig saltSecurityConfig = stack.getSecurityConfig().getSaltSecurityConfig();
-        saltSecurityConfig.setSaltBootSignPublicKey(PkiUtil.calculatePemPublicKeyInBase64(mapper.apply(saltBootPrivateKey)));
-        securityConfigService.save(saltSecurityConfig);
+        if (saltSecurityConfig.getLegacySaltBootSignPublicKey() != null) {
+            saltSecurityConfig.setSaltBootSignPublicKey(null);
+            saltSecurityConfigService.save(saltSecurityConfig);
+        }
     }
 
     private UserDataRotationContext getUserDataRotationContext(StackDto stack, Secret saltBootPasswordSecret, Secret saltBootPrivateKeySecret) {

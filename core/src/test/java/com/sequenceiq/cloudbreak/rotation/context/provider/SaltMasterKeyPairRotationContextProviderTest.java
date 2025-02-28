@@ -3,16 +3,19 @@ package com.sequenceiq.cloudbreak.rotation.context.provider;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -23,14 +26,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.testcontainers.shaded.com.google.common.io.BaseEncoding;
 
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
 import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.SecretRotationSaltService;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
@@ -38,9 +43,7 @@ import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.saltsecurityconf.SaltSecurityConfigService;
-import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
-import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
@@ -53,9 +56,9 @@ class SaltMasterKeyPairRotationContextProviderTest {
 
     private static final String PRIVATE_KEY_VAULT_PATH = "secret/privateKeyPath";
 
-    private static final String NEW_PRIVATE_KEY = privateKey();
+    private static final String NEW_PRIVATE_KEY = PkiUtil.generatePemPrivateKeyInBase64();
 
-    private static final String OLD_PRIVATE_KEY = privateKey();
+    private static final String OLD_PRIVATE_KEY = PkiUtil.generatePemPrivateKeyInBase64();
 
     @InjectMocks
     private SaltMasterKeyPairRotationContextProvider underTest;
@@ -64,23 +67,19 @@ class SaltMasterKeyPairRotationContextProviderTest {
     private StackDtoService stackDtoService;
 
     @Mock
-    private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
-
-    @Mock
     private SaltSecurityConfigService saltSecurityConfigService;
 
     @Mock
     private ClusterBootstrapper clusterBootstrapper;
 
     @Mock
+    private SecretRotationSaltService secretRotationSaltService;
+
+    @Mock
     private StackDto stack;
 
     @Spy
     private SaltSecurityConfig saltSecurityConfig;
-
-    private static String privateKey() {
-        return BaseEncoding.base64().encode(PkiUtil.convert(PkiUtil.generateKeypair().getPrivate()).getBytes());
-    }
 
     @BeforeEach
     void setUp() {
@@ -110,25 +109,20 @@ class SaltMasterKeyPairRotationContextProviderTest {
         ArgumentCaptor<SaltSecurityConfig> saltSecurityConfigArgumentCaptor = ArgumentCaptor.forClass(SaltSecurityConfig.class);
         verify(saltSecurityConfigService, times(1)).save(saltSecurityConfigArgumentCaptor.capture());
         assertNotNull(saltSecurityConfigArgumentCaptor.getValue().getSaltMasterPrivateKey());
-        assertNotNull(saltSecurityConfigArgumentCaptor.getValue().getSaltMasterPublicKey());
     }
 
     @Test
-    void testSaltMasterKeyPairCustomJobRotationPhase() throws CloudbreakException {
+    void testSaltMasterKeyPairCustomJobRotationPhaseWhenPrivateKeyAlreadyExists() throws CloudbreakException {
         saltSecurityConfig.setSaltMasterPrivateKey(OLD_PRIVATE_KEY);
         when(saltSecurityConfig.getSaltMasterPrivateKeySecret()).thenReturn(new Secret(OLD_PRIVATE_KEY, PRIVATE_KEY_VAULT_PATH));
-        when(uncachedSecretServiceForRotation.getRotation(PRIVATE_KEY_VAULT_PATH)).thenReturn(new RotationSecret(NEW_PRIVATE_KEY, OLD_PRIVATE_KEY));
         when(stack.getId()).thenReturn(STACK_ID);
 
         Map<SecretRotationStep, RotationContext> contexts = underTest.getContexts(RESOURCE_CRN);
         CustomJobRotationContext customJobRotationContext = (CustomJobRotationContext) contexts.get(CommonSecretRotationStep.CUSTOM_JOB);
         customJobRotationContext.getRotationJob().get().run();
 
-        verify(stackDtoService, times(2)).getByCrn(eq(RESOURCE_CRN));
-        ArgumentCaptor<SaltSecurityConfig> saltSecurityConfigArgumentCaptor = ArgumentCaptor.forClass(SaltSecurityConfig.class);
-        verify(saltSecurityConfigService, times(1)).save(saltSecurityConfigArgumentCaptor.capture());
-        assertNotNull(saltSecurityConfigArgumentCaptor.getValue());
-        assertEquals(PkiUtil.calculatePemPublicKeyInBase64(NEW_PRIVATE_KEY), saltSecurityConfigArgumentCaptor.getValue().getSaltMasterPublicKey());
+        verify(stackDtoService, times(1)).getByCrn(eq(RESOURCE_CRN));
+        verify(saltSecurityConfigService, never()).save(any());
         verify(clusterBootstrapper, times(1)).bootstrapMachines(eq(STACK_ID), eq(Boolean.TRUE));
     }
 
@@ -136,27 +130,40 @@ class SaltMasterKeyPairRotationContextProviderTest {
     void testSaltMasterKeyPairCustomJobRollbackPhase() throws CloudbreakException {
         saltSecurityConfig.setSaltMasterPrivateKey(OLD_PRIVATE_KEY);
         when(saltSecurityConfig.getSaltMasterPrivateKeySecret()).thenReturn(new Secret(OLD_PRIVATE_KEY, PRIVATE_KEY_VAULT_PATH));
-        when(uncachedSecretServiceForRotation.getRotation(PRIVATE_KEY_VAULT_PATH)).thenReturn(new RotationSecret(NEW_PRIVATE_KEY, OLD_PRIVATE_KEY));
         when(stack.getId()).thenReturn(STACK_ID);
 
         Map<SecretRotationStep, RotationContext> contexts = underTest.getContexts(RESOURCE_CRN);
         CustomJobRotationContext customJobRotationContext = (CustomJobRotationContext) contexts.get(CommonSecretRotationStep.CUSTOM_JOB);
         customJobRotationContext.getRollbackJob().get().run();
 
-        verify(stackDtoService, times(2)).getByCrn(eq(RESOURCE_CRN));
-        ArgumentCaptor<SaltSecurityConfig> saltSecurityConfigArgumentCaptor = ArgumentCaptor.forClass(SaltSecurityConfig.class);
-        verify(saltSecurityConfigService, times(1)).save(saltSecurityConfigArgumentCaptor.capture());
-        assertNotNull(saltSecurityConfigArgumentCaptor.getValue());
-        assertEquals(PkiUtil.calculatePemPublicKeyInBase64(OLD_PRIVATE_KEY), saltSecurityConfigArgumentCaptor.getValue().getSaltMasterPublicKey());
+        verify(stackDtoService, times(1)).getByCrn(eq(RESOURCE_CRN));
+        verify(saltSecurityConfigService, never()).save(any());
         verify(clusterBootstrapper, times(1)).bootstrapMachines(eq(STACK_ID), eq(Boolean.TRUE));
     }
 
     @Test
-    void testSaltMasterKeyPairCustomJobPreValidatePhaseWhenStoppedInstanceExists() {
+    void testSaltMasterKeyPairCustomJobRollbackPhaseFailed() throws CloudbreakException {
         saltSecurityConfig.setSaltMasterPrivateKey(OLD_PRIVATE_KEY);
         when(saltSecurityConfig.getSaltMasterPrivateKeySecret()).thenReturn(new Secret(OLD_PRIVATE_KEY, PRIVATE_KEY_VAULT_PATH));
-        List<InstanceMetadataView> instances = List.of(instance("instance1", false), instance("instance2", true));
-        when(stack.getAllAvailableInstances()).thenReturn(instances);
+        when(stack.getId()).thenReturn(STACK_ID);
+        doThrow(new CloudbreakException("very serious error")).when(clusterBootstrapper).bootstrapMachines(eq(STACK_ID), eq(Boolean.TRUE));
+
+        Map<SecretRotationStep, RotationContext> contexts = underTest.getContexts(RESOURCE_CRN);
+        CustomJobRotationContext customJobRotationContext = (CustomJobRotationContext) contexts.get(CommonSecretRotationStep.CUSTOM_JOB);
+        SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
+                () -> customJobRotationContext.getRollbackJob().get().run());
+
+        assertEquals("very serious error", secretRotationException.getMessage());
+        verify(stackDtoService, times(1)).getByCrn(eq(RESOURCE_CRN));
+        verify(clusterBootstrapper, times(1)).bootstrapMachines(eq(STACK_ID), eq(Boolean.TRUE));
+    }
+
+    @Test
+    void testSaltMasterKeyPairCustomJobPreValidatePhaseNodeMissingPingResponse() throws CloudbreakOrchestratorFailedException {
+        saltSecurityConfig.setSaltMasterPrivateKey(OLD_PRIVATE_KEY);
+        when(saltSecurityConfig.getSaltMasterPrivateKeySecret()).thenReturn(new Secret(OLD_PRIVATE_KEY, PRIVATE_KEY_VAULT_PATH));
+        GatewayConfig primaryGatewayConfig = new GatewayConfig("conn", "public", "private", 1234, "instance1", Boolean.FALSE);
+        doThrow(new CloudbreakOrchestratorFailedException("Salt ping failed")).when(secretRotationSaltService).validateSalt(eq(stack));
 
         Map<SecretRotationStep, RotationContext> contexts = underTest.getContexts(RESOURCE_CRN);
         CustomJobRotationContext customJobRotationContext = (CustomJobRotationContext) contexts.get(CommonSecretRotationStep.CUSTOM_JOB);
@@ -165,7 +172,42 @@ class SaltMasterKeyPairRotationContextProviderTest {
                 () -> customJobRotationContext.getPreValidateJob().get().run());
 
         verify(stackDtoService, times(2)).getByCrn(eq(RESOURCE_CRN));
-        assertEquals("Unreachable instances found: [instance1], salt master key rotation is not possible!", secretRotationException.getMessage());
+        assertEquals("Salt ping failed", secretRotationException.getMessage());
+    }
+
+    @Test
+    void testSaltMasterKeyPairCustomJobPostValidatePhaseNodeMissingPingResponse() throws CloudbreakOrchestratorFailedException {
+        saltSecurityConfig.setSaltMasterPrivateKey(OLD_PRIVATE_KEY);
+        when(saltSecurityConfig.getSaltMasterPrivateKeySecret()).thenReturn(new Secret(OLD_PRIVATE_KEY, PRIVATE_KEY_VAULT_PATH));
+        GatewayConfig primaryGatewayConfig = new GatewayConfig("conn", "public", "private", 1234, "instance1", Boolean.FALSE);
+        doThrow(new CloudbreakOrchestratorFailedException("Salt ping failed")).when(secretRotationSaltService).validateSalt(eq(stack));
+
+        Map<SecretRotationStep, RotationContext> contexts = underTest.getContexts(RESOURCE_CRN);
+        CustomJobRotationContext customJobRotationContext = (CustomJobRotationContext) contexts.get(CommonSecretRotationStep.CUSTOM_JOB);
+
+        SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
+                () -> customJobRotationContext.getPostValidateJob().get().run());
+
+        verify(stackDtoService, times(2)).getByCrn(eq(RESOURCE_CRN));
+        assertEquals("Salt ping failed", secretRotationException.getMessage());
+    }
+
+    @Test
+    void testSaltMasterKeyPairCustomJobFinalizePhase() {
+        saltSecurityConfig.setSaltMasterPrivateKey(OLD_PRIVATE_KEY);
+        when(saltSecurityConfig.getSaltMasterPrivateKeySecret()).thenReturn(new Secret(OLD_PRIVATE_KEY, PRIVATE_KEY_VAULT_PATH));
+        saltSecurityConfig.setSaltMasterPublicKey("salt master public key");
+        when(stack.getId()).thenReturn(STACK_ID);
+
+        Map<SecretRotationStep, RotationContext> contexts = underTest.getContexts(RESOURCE_CRN);
+        CustomJobRotationContext customJobRotationContext = (CustomJobRotationContext) contexts.get(CommonSecretRotationStep.CUSTOM_JOB);
+        customJobRotationContext.getFinalizeJob().get().run();
+
+        verify(stackDtoService, times(2)).getByCrn(eq(RESOURCE_CRN));
+        ArgumentCaptor<SaltSecurityConfig> saltSecurityConfigArgumentCaptor = ArgumentCaptor.forClass(SaltSecurityConfig.class);
+        verify(saltSecurityConfigService, times(1)).save(saltSecurityConfigArgumentCaptor.capture());
+        SaltSecurityConfig savedSaltSecurityConfig = saltSecurityConfigArgumentCaptor.getValue();
+        assertNull(savedSaltSecurityConfig.getLegacySaltMasterPublicKey());
     }
 
     private InstanceMetadataView instance(String instanceId, boolean reachable) {

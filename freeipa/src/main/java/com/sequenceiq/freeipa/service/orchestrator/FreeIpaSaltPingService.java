@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.orchestrator;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -39,10 +40,23 @@ public class FreeIpaSaltPingService {
         Set<String> hostNames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
         GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, pgwInstanceMetadata);
         try {
-            hostOrchestrator.ping(hostNames, gatewayConfig);
+            saltPing(hostNames, gatewayConfig);
         } catch (CloudbreakOrchestratorFailedException e) {
-            LOGGER.error("Salt ping failed", e);
+            LOGGER.warn("Salt ping failed", e);
             throw new SaltPingFailedException("Salt ping failed", e);
+        }
+    }
+
+    public void saltPing(Set<String> hostNames, GatewayConfig gatewayConfig) throws CloudbreakOrchestratorFailedException, SaltPingFailedException {
+        Map<String, Boolean> result = hostOrchestrator.ping(hostNames, gatewayConfig);
+        Set<String> failedNodes = result.entrySet().stream()
+                .filter(entry -> !Boolean.TRUE.equals(entry.getValue()))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
+        if (!failedNodes.isEmpty()) {
+            String message = String.format("SaltPing failed: %s", String.join(", ", failedNodes));
+            LOGGER.warn(message);
+            throw new SaltPingFailedException(message);
         }
     }
 }

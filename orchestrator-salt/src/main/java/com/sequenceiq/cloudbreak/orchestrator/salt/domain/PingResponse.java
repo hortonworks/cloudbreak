@@ -25,7 +25,9 @@ public class PingResponse {
 
     public Map<String, Boolean> getResultByMinionId() {
         Map<String, Boolean> res = new HashMap<>();
-        result.forEach(res::putAll);
+        if (result != null) {
+            result.forEach(res::putAll);
+        }
         return res;
     }
 }

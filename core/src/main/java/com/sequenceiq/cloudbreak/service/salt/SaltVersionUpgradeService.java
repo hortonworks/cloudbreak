@@ -68,11 +68,11 @@ public class SaltVersionUpgradeService {
         List<SecretType> secretTypes = new ArrayList<>();
         StackDto stack = stackDtoService.getByIdWithoutResources(stackId);
         SaltSecurityConfig saltSecurityConfig = stack.getSecurityConfig().getSaltSecurityConfig();
+        if (StringUtils.isNotEmpty(saltSecurityConfig.getLegacySaltSignPublicKey())) {
+            secretTypes.add(SALT_SIGN_KEY_PAIR);
+        }
         if (stack.getAllAvailableGatewayInstances().size() > 1 && StringUtils.isEmpty(saltSecurityConfig.getSaltMasterPrivateKey())) {
             secretTypes.add(SALT_MASTER_KEY_PAIR);
-        }
-        if (saltSecurityConfig.getSaltSignPublicKey() != null && !isPublicKeyInPemFormat(saltSecurityConfig.getSaltSignPublicKey())) {
-            secretTypes.add(SALT_SIGN_KEY_PAIR);
         }
         if (secretTypes.isEmpty()) {
             LOGGER.info("Secret rotation is not required.");

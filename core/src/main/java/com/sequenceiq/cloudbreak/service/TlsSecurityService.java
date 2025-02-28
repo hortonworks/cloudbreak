@@ -107,19 +107,16 @@ public class TlsSecurityService {
     }
 
     private void setSaltBootSignKeypair(SaltSecurityConfig saltSecurityConfig, Pair<String, String> keyPair) {
-        saltSecurityConfig.setSaltBootSignPublicKey(BaseEncoding.base64().encode(keyPair.getValue().getBytes()));
         saltSecurityConfig.setSaltBootSignPrivateKey(BaseEncoding.base64().encode(keyPair.getKey().getBytes()));
     }
 
     private void setSaltSignKeypair(SecurityConfig securityConfig, Pair<String, String> keyPair) {
         SaltSecurityConfig saltSecurityConfig = securityConfig.getSaltSecurityConfig();
-        saltSecurityConfig.setSaltSignPublicKey(BaseEncoding.base64().encode(keyPair.getValue().getBytes()));
         saltSecurityConfig.setSaltSignPrivateKey(BaseEncoding.base64().encode(keyPair.getKey().getBytes()));
     }
 
     private void setSaltMasterKeypair(SecurityConfig securityConfig, Pair<String, String> keyPair) {
         SaltSecurityConfig saltSecurityConfig = securityConfig.getSaltSecurityConfig();
-        saltSecurityConfig.setSaltMasterPublicKey(BaseEncoding.base64().encode(keyPair.getValue().getBytes()));
         saltSecurityConfig.setSaltMasterPrivateKey(BaseEncoding.base64().encode(keyPair.getKey().getBytes()));
     }
 

@@ -8,7 +8,6 @@ import static com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep.LAUNCH_T
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -33,6 +32,7 @@ import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
+import com.sequenceiq.freeipa.entity.SaltSecurityConfig;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
@@ -99,19 +99,18 @@ public class SaltBootRotationContextProvider implements RotationContextProvider 
         return CustomJobRotationContext
                 .builder()
                 .withResourceCrn(environmentCrn)
-                .withRotationJob(() -> updateSaltSecurityConfigColumns(environmentCrn, accountId, saltBootPrivateKeySecret, RotationSecret::getSecret))
-                .withRollbackJob(() -> updateSaltSecurityConfigColumns(environmentCrn, accountId, saltBootPrivateKeySecret, RotationSecret::getBackupSecret))
+                .withFinalizeJob(() -> deletePublicKeyFromDatabaseIfExists(environmentCrn, accountId))
                 .build();
     }
 
-    private void updateSaltSecurityConfigColumns(String resourceCrn, String accountId, String saltBootPrivateKeySecret,
-            Function<RotationSecret, String> mapper) {
+    private void deletePublicKeyFromDatabaseIfExists(String resourceCrn, String accountId) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(resourceCrn, accountId);
-        SecurityConfig securityConfig = securityConfigService.findOneByStack(stack);
-        RotationSecret saltBootPrivateKey = uncachedSecretServiceForRotation.getRotation(saltBootPrivateKeySecret);
-        String privateKey = mapper.apply(saltBootPrivateKey);
-        securityConfig.getSaltSecurityConfig().setSaltBootSignPublicKey(PkiUtil.calculatePemPublicKeyInBase64(privateKey));
-        securityConfigService.save(securityConfig);
+        SecurityConfig securityConfig = stack.getSecurityConfig();
+        SaltSecurityConfig saltSecurityConfig = securityConfig.getSaltSecurityConfig();
+        if (saltSecurityConfig.getLegacySaltBootSignPublicKey() != null) {
+            saltSecurityConfig.setSaltBootSignPublicKey(null);
+            securityConfigService.save(securityConfig);
+        }
     }
 
     @Override

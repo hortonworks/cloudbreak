@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 
+import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.common.dal.model.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
@@ -26,6 +27,10 @@ public class SaltSecurityConfig implements AccountIdAwareResource {
     @SecretValue
     private Secret saltPasswordVault;
 
+    /**
+     * @deprecated calculate public key based on the private key instead
+     */
+    @Deprecated
     @Column(columnDefinition = "TEXT")
     private String saltSignPublicKey;
 
@@ -33,6 +38,10 @@ public class SaltSecurityConfig implements AccountIdAwareResource {
     @SecretValue
     private Secret saltSignPrivateKeyVault;
 
+    /**
+     * @deprecated calculate public key based on the private key instead
+     */
+    @Deprecated
     @Column(columnDefinition = "TEXT")
     private String saltMasterPublicKey;
 
@@ -44,6 +53,10 @@ public class SaltSecurityConfig implements AccountIdAwareResource {
     @SecretValue
     private Secret saltBootPasswordVault;
 
+    /**
+     * @deprecated calculate public key based on the private key instead
+     */
+    @Deprecated
     @Column(columnDefinition = "TEXT")
     private String saltBootSignPublicKey;
 
@@ -72,10 +85,23 @@ public class SaltSecurityConfig implements AccountIdAwareResource {
         this.securityConfig = securityConfig;
     }
 
-    public String getSaltBootSignPublicKey() {
+    /**
+     * @deprecated calculate public key based on the private key instead
+     */
+    @Deprecated
+    public String getLegacySaltBootSignPublicKey() {
         return saltBootSignPublicKey;
     }
 
+    public String getSaltBootSignPublicKey() {
+        String saltBootSignPrivateKey = getSaltBootSignPrivateKeyVault();
+        return saltBootSignPrivateKey != null ? PkiUtil.calculatePemPublicKeyInBase64(saltBootSignPrivateKey) : null;
+    }
+
+    /**
+     * @deprecated calculate public key based on the private key instead
+     */
+    @Deprecated
     public void setSaltBootSignPublicKey(String saltBootSignPublicKey) {
         this.saltBootSignPublicKey = saltBootSignPublicKey;
     }
@@ -96,10 +122,23 @@ public class SaltSecurityConfig implements AccountIdAwareResource {
         return saltPasswordVault.getSecret();
     }
 
-    public String getSaltSignPublicKey() {
+    /**
+     * @deprecated calculate public key based on the private key instead
+     */
+    @Deprecated
+    public String getLegacySaltSignPublicKey() {
         return saltSignPublicKey;
     }
 
+    public String getSaltSignPublicKey() {
+        String saltSignPrivateKey = getSaltSignPrivateKeyVault();
+        return saltSignPrivateKey != null ? PkiUtil.calculatePemPublicKeyInBase64(saltSignPrivateKey) : null;
+    }
+
+    /**
+     * @deprecated calculate public key based on the private key instead
+     */
+    @Deprecated
     public void setSaltSignPublicKey(String saltSignPublicKey) {
         this.saltSignPublicKey = saltSignPublicKey;
     }
@@ -120,10 +159,23 @@ public class SaltSecurityConfig implements AccountIdAwareResource {
         return saltSignPrivateKeyVault.getSecret();
     }
 
-    public String getSaltMasterPublicKey() {
+    /**
+     * @deprecated calculate public key based on the private key instead
+     */
+    @Deprecated
+    public String getLegacySaltMasterPublicKey() {
         return saltMasterPublicKey;
     }
 
+    public String getSaltMasterPublicKey() {
+        String saltMasterPrivateKey = getSaltMasterPrivateKeyVault();
+        return saltMasterPrivateKey != null ? PkiUtil.calculatePemPublicKeyInBase64(saltMasterPrivateKey) : null;
+    }
+
+    /**
+     * @deprecated calculate public key based on the private key instead
+     */
+    @Deprecated
     public void setSaltMasterPublicKey(String saltMasterPublicKey) {
         this.saltMasterPublicKey = saltMasterPublicKey;
     }

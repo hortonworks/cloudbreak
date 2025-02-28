@@ -20,6 +20,8 @@ import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
+import com.sequenceiq.freeipa.service.orchestrator.FreeIpaSaltPingService;
+import com.sequenceiq.freeipa.service.orchestrator.SaltPingFailedException;
 
 @Service
 public class SecretRotationSaltService {
@@ -42,6 +44,9 @@ public class SecretRotationSaltService {
     @Inject
     private GatewayConfigService gatewayConfigService;
 
+    @Inject
+    private FreeIpaSaltPingService freeIpaSaltPingService;
+
     public void updateSaltPillar(Stack stack, Map<String, SaltPillarProperties> servicePillar)
             throws CloudbreakOrchestratorFailedException {
         LOGGER.info("Salt pillar update, keys: {}", servicePillar.keySet());
@@ -56,7 +61,11 @@ public class SecretRotationSaltService {
     }
 
     public void validateSalt(Set<String> targets, GatewayConfig gatewayConfig) throws CloudbreakOrchestratorFailedException {
-        hostOrchestrator.ping(targets, gatewayConfig);
+        try {
+            freeIpaSaltPingService.saltPing(targets, gatewayConfig);
+        } catch (SaltPingFailedException e) {
+            throw new CloudbreakOrchestratorFailedException(e);
+        }
     }
 
     public void executeSaltState(GatewayConfig gatewayConfig, Set<String> targets, List<String> states, ExitCriteriaModel exitCriteriaModel,
