@@ -31,10 +31,12 @@ import com.sequenceiq.freeipa.converter.telemetry.TelemetryConverter;
 import com.sequenceiq.freeipa.converter.usersync.UserSyncStatusToUserSyncStatusResponseConverter;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.ImageEntity;
+import com.sequenceiq.freeipa.entity.LoadBalancer;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
 import com.sequenceiq.freeipa.service.config.FreeIpaDomainUtils;
+import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerService;
 import com.sequenceiq.freeipa.service.recipe.FreeIpaRecipeService;
 import com.sequenceiq.freeipa.util.BalancedDnsAvailabilityChecker;
 
@@ -71,6 +73,9 @@ public class StackToDescribeFreeIpaResponseConverter {
     @Inject
     private FreeIpaRecipeService freeIpaRecipeService;
 
+    @Inject
+    private FreeIpaLoadBalancerService freeIpaLoadBalancerService;
+
     public DescribeFreeIpaResponse convert(Stack stack, ImageEntity image, FreeIpa freeIpa, Optional<UserSyncStatus> userSyncStatus,
             Boolean includeAllInstances) {
         DescribeFreeIpaResponse describeFreeIpaResponse = new DescribeFreeIpaResponse();
@@ -91,7 +96,7 @@ public class StackToDescribeFreeIpaResponseConverter {
         describeFreeIpaResponse.setStatusString(stack.getStackStatus().getStatusString());
         describeFreeIpaResponse.setStatusReason(stack.getStackStatus().getStatusReason());
         describeFreeIpaResponse.setEnableMultiAz(stack.isMultiAz());
-        decorateFreeIpaServerResponseWithIps(describeFreeIpaResponse.getFreeIpa(), describeFreeIpaResponse.getInstanceGroups());
+        decorateFreeIpaServerResponseWithIps(stack.getId(), describeFreeIpaResponse.getFreeIpa(), describeFreeIpaResponse.getInstanceGroups());
         decorateFreeIpaServerResponseWithLoadBalancedHost(stack, describeFreeIpaResponse.getFreeIpa(), freeIpa);
         describeFreeIpaResponse.setAppVersion(stack.getAppVersion());
         describeFreeIpaResponse.setRecipes(freeIpaRecipeService.getRecipeNamesForStack(stack.getId()));
@@ -113,13 +118,18 @@ public class StackToDescribeFreeIpaResponseConverter {
         return securityResponse;
     }
 
-    private void decorateFreeIpaServerResponseWithIps(FreeIpaServerResponse freeIpa, List<InstanceGroupResponse> instanceGroups) {
+    private void decorateFreeIpaServerResponseWithIps(Long stackId, FreeIpaServerResponse freeIpa, List<InstanceGroupResponse> instanceGroups) {
         if (Objects.nonNull(freeIpa)) {
-            Set<String> privateIps = instanceGroups.stream()
-                    .flatMap(instanceGroupResponse -> instanceGroupResponse.getMetaData().stream())
-                    .map(InstanceMetaDataResponse::getPrivateIp)
-                    .collect(Collectors.toSet());
-            freeIpa.setServerIp(privateIps);
+            Optional<LoadBalancer> loadBalancer = freeIpaLoadBalancerService.findByStackId(stackId);
+            if (loadBalancer.isPresent()) {
+                freeIpa.setServerIp(loadBalancer.get().getIp());
+            } else {
+                Set<String> privateIps = instanceGroups.stream()
+                        .flatMap(instanceGroupResponse -> instanceGroupResponse.getMetaData().stream())
+                        .map(InstanceMetaDataResponse::getPrivateIp)
+                        .collect(Collectors.toSet());
+                freeIpa.setServerIp(privateIps);
+            }
         }
     }
 

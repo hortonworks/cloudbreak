@@ -36,10 +36,12 @@ import com.sequenceiq.freeipa.converter.telemetry.TelemetryConverter;
 import com.sequenceiq.freeipa.converter.usersync.UserSyncStatusToUserSyncStatusResponseConverter;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.ImageEntity;
+import com.sequenceiq.freeipa.entity.LoadBalancer;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackAuthentication;
 import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
+import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerService;
 import com.sequenceiq.freeipa.service.recipe.FreeIpaRecipeService;
 import com.sequenceiq.freeipa.util.BalancedDnsAvailabilityChecker;
 
@@ -82,6 +84,8 @@ class StackToDescribeFreeIpaResponseConverterTest {
 
     private static final String SERVER_IP = "1.1.1.1";
 
+    private static final String LOAD_BALANCER_SERVER_IP = "2.2.2.2";
+
     private static final String VARIANT = "NATIVE";
 
     @InjectMocks
@@ -117,6 +121,9 @@ class StackToDescribeFreeIpaResponseConverterTest {
     @Mock
     private FreeIpaRecipeService freeIpaRecipeService;
 
+    @Mock
+    private FreeIpaLoadBalancerService freeIpaLoadBalancerService;
+
     @BeforeEach
     void initInstanceGroupResponse() {
         InstanceMetaDataResponse instanceMetaDataResponse = new InstanceMetaDataResponse();
@@ -128,12 +135,49 @@ class StackToDescribeFreeIpaResponseConverterTest {
     @EnumSource(Tunnel.class)
     @NullSource
     void convertTest(Tunnel tunnel) {
-        FreeIpaServerResponse freeIpaServerResponse = new FreeIpaServerResponse();
         Stack stack = createStack(tunnel);
         ImageEntity image = new ImageEntity();
         FreeIpa freeIpa = new FreeIpa();
         freeIpa.setDomain(DOMAIN);
+        FreeIpaServerResponse freeIpaServerResponse = new FreeIpaServerResponse();
         UserSyncStatus userSyncStatus = new UserSyncStatus();
+
+        setupMocks(stack, image, freeIpa, freeIpaServerResponse, userSyncStatus);
+
+        DescribeFreeIpaResponse result = underTest.convert(stack, image, freeIpa, Optional.of(userSyncStatus), true);
+
+        validateResult(tunnel, result, freeIpaServerResponse);
+        validateFreeIpaResponse(freeIpaServerResponse, false);
+    }
+
+    @ParameterizedTest(name = "tunnel={0}")
+    @EnumSource(Tunnel.class)
+    @NullSource
+    void convertTestWithLoadBalancer(Tunnel tunnel) {
+        Stack stack = createStack(tunnel);
+        ImageEntity image = new ImageEntity();
+        FreeIpa freeIpa = new FreeIpa();
+        freeIpa.setDomain(DOMAIN);
+        FreeIpaServerResponse freeIpaServerResponse = new FreeIpaServerResponse();
+        UserSyncStatus userSyncStatus = new UserSyncStatus();
+
+        setupMocks(stack, image, freeIpa, freeIpaServerResponse, userSyncStatus);
+        setupLoadBalancerMock(stack.getId());
+
+        DescribeFreeIpaResponse result = underTest.convert(stack, image, freeIpa, Optional.of(userSyncStatus), true);
+
+        validateResult(tunnel, result, freeIpaServerResponse);
+        validateFreeIpaResponse(freeIpaServerResponse, true);
+    }
+
+    private void setupLoadBalancerMock(Long id) {
+        LoadBalancer loadBalancer = new LoadBalancer();
+        loadBalancer.setStackId(id);
+        loadBalancer.setIp(Set.of(LOAD_BALANCER_SERVER_IP));
+        when(freeIpaLoadBalancerService.findByStackId(id)).thenReturn(Optional.of(loadBalancer));
+    }
+
+    private void setupMocks(Stack stack, ImageEntity image, FreeIpa freeIpa, FreeIpaServerResponse freeIpaServerResponse, UserSyncStatus userSyncStatus) {
         when(authenticationResponseConverter.convert(stack.getStackAuthentication())).thenReturn(STACK_AUTHENTICATION_RESPONSE);
         when(imageSettingsResponseConverter.convert(image)).thenReturn(IMAGE_SETTINGS_RESPONSE);
         when(freeIpaServerResponseConverter.convert(freeIpa)).thenReturn(freeIpaServerResponse);
@@ -142,9 +186,9 @@ class StackToDescribeFreeIpaResponseConverterTest {
         when(balancedDnsAvailabilityChecker.isBalancedDnsAvailable(stack)).thenReturn(true);
         when(stackToAvailabilityStatusConverter.convert(stack.getStackStatus())).thenReturn(AvailabilityStatus.AVAILABLE);
         when(freeIpaRecipeService.getRecipeNamesForStack(1L)).thenReturn(Set.of("recipe1", "recipe2"));
+    }
 
-        DescribeFreeIpaResponse result = underTest.convert(stack, image, freeIpa, Optional.of(userSyncStatus), true);
-
+    private static void validateResult(Tunnel tunnel, DescribeFreeIpaResponse result, FreeIpaServerResponse freeIpaServerResponse) {
         assertThat(result)
                 .returns(NAME, DescribeFreeIpaResponse::getName)
                 .returns(ENV_CRN, DescribeFreeIpaResponse::getEnvironmentCrn)
@@ -167,10 +211,15 @@ class StackToDescribeFreeIpaResponseConverterTest {
                 .returns(true, DescribeFreeIpaResponse::isEnableMultiAz);
 
         assertThat(result.getRecipes()).containsExactlyInAnyOrder("recipe1", "recipe2");
+    }
+
+    private static void validateFreeIpaResponse(FreeIpaServerResponse freeIpaServerResponse, boolean loadBalancerSetup) {
+        String serverIp = loadBalancerSetup ? LOAD_BALANCER_SERVER_IP : SERVER_IP;
         assertThat(freeIpaServerResponse)
-                .returns(Set.of(SERVER_IP), FreeIpaServerResponse::getServerIp)
+                .returns(Set.of(serverIp), FreeIpaServerResponse::getServerIp)
                 .returns(FREEIPA_HOST, FreeIpaServerResponse::getFreeIpaHost)
                 .returns(GATEWAY_PORT, FreeIpaServerResponse::getFreeIpaPort);
+
     }
 
     private Stack createStack(Tunnel tunnel) {
