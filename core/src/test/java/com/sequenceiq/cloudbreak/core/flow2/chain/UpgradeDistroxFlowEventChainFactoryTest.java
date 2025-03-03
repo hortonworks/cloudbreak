@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -67,6 +68,7 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeAvailabilityService;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.service.ClusterSizeUpgradeValidator;
+import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
@@ -173,6 +175,10 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     @Test
     void testChainQueueForRollingUpgradeWithReplaceVms() {
         when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
+        lenient().when(stackDto.getPlatformVariant()).thenReturn("originalVariant");
+        InstanceGroupView instanceGroup1 = mock(InstanceGroupView.class);
+        when(instanceGroup1.getGroupName()).thenReturn("master");
+        when(stackDto.getInstanceGroupViews()).thenReturn(List.of(instanceGroup1));
         when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
@@ -195,12 +201,16 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         assertUpdateValidationEvent(flowChainQueue, IMAGE_ID, event.isReplaceVms(), event.isLockComponents(), event.isRollingUpgradeEnabled());
         assertSaltUpdateEvent(flowChainQueue);
         assertImageUpdateEvent(flowChainQueue);
-        assertRepairEvent(flowChainQueue, RepairType.ONE_BY_ONE, 2);
+        assertRepairEvent(flowChainQueue, RepairType.ONE_BY_ONE, 2, "variant");
     }
 
     @Test
     void testChainQueueForReplaceVmsWithHundredNodes() {
         when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
+        lenient().when(stackDto.getPlatformVariant()).thenReturn("originalVariant");
+        InstanceGroupView instanceGroup1 = mock(InstanceGroupView.class);
+        when(instanceGroup1.getGroupName()).thenReturn("compute");
+        when(stackDto.getInstanceGroupViews()).thenReturn(List.of(instanceGroup1));
         when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
@@ -224,18 +234,24 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         assertUpdateValidationEvent(flowChainQueue, IMAGE_ID, event.isReplaceVms(), event.isLockComponents(), event.isRollingUpgradeEnabled());
         assertSaltUpdateEvent(flowChainQueue);
         assertImageUpdateEvent(flowChainQueue);
-        assertRepairEvent(flowChainQueue, RepairType.BATCH, 500);
+        assertRepairEvent(flowChainQueue, RepairType.BATCH, 500, "variant");
         verify(clusterRepairService, times(1)).validateRepair(eq(ManualClusterRepairMode.ALL), eq(STACK_ID), eq(Set.of()), eq(false));
     }
 
     @Test
     void testChainQueueForReplaceVmsWithHundredNodesWhenForceOsUpgradeAndRollingUpgradeEnabled() {
         when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
+        lenient().when(stackDto.getPlatformVariant()).thenReturn("originalVariant");
         InstanceMetadataView master1 = mock(InstanceMetadataView.class);
         when(master1.getInstanceId()).thenReturn("master-1");
         InstanceMetadataView master2 = mock(InstanceMetadataView.class);
         when(master2.getInstanceId()).thenReturn("master-2");
         when(stackDto.getAllAvailableGatewayInstances()).thenReturn(List.of(master1, master2));
+        InstanceGroupView instanceGroup1 = mock(InstanceGroupView.class);
+        when(instanceGroup1.getGroupName()).thenReturn("master");
+        InstanceGroupView instanceGroup2 = mock(InstanceGroupView.class);
+        when(instanceGroup2.getGroupName()).thenReturn("worker");
+        when(stackDto.getInstanceGroupViews()).thenReturn(List.of(instanceGroup1, instanceGroup2));
         when(clusterSizeUpgradeValidator.isClusterSizeLargerThanAllowedForRollingUpgrade(anyLong())).thenReturn(true);
         when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
@@ -262,7 +278,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         assertSaltUpdateEvent(flowChainQueue);
         assertUpgradeEvent(flowChainQueue, IMAGE_ID);
         assertImageUpdateEvent(flowChainQueue);
-        assertRepairEvent(flowChainQueue, RepairType.ONE_BY_ONE, 2);
+        assertRepairEvent(flowChainQueue, RepairType.ONE_BY_ONE, 2, "originalVariant");
         verify(clusterRepairService, times(1)).validateRepair(eq(ManualClusterRepairMode.NODE_ID), eq(STACK_ID), eq(Set.of("master-1", "master-2")), eq(false));
     }
 
@@ -286,6 +302,10 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     @Test
     void testChainQueueForOsUpgradeShouldFilterOutAlreadyUpgradedInstances() {
         when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
+        lenient().when(stackDto.getPlatformVariant()).thenReturn("originalVariant");
+        InstanceGroupView instanceGroup1 = mock(InstanceGroupView.class);
+        when(instanceGroup1.getGroupName()).thenReturn("master");
+        when(stackDto.getInstanceGroupViews()).thenReturn(List.of(instanceGroup1));
         when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
@@ -312,7 +332,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         assertUpdateValidationEvent(flowChainQueue, IMAGE_ID, event.isReplaceVms(), event.isLockComponents(), event.isRollingUpgradeEnabled());
         assertSaltUpdateEvent(flowChainQueue);
         assertImageUpdateEvent(flowChainQueue);
-        assertRepairEvent(flowChainQueue, RepairType.ALL_AT_ONCE, 1);
+        assertRepairEvent(flowChainQueue, RepairType.ALL_AT_ONCE, 1, "variant");
     }
 
     @Test
@@ -406,13 +426,15 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         assertEquals(imageChangeDto.getImageCatalogUrl(), event.getImageCatalogUrl());
     }
 
-    private void assertRepairEvent(FlowTriggerEventQueue flowChainQueue, RepairType repairType, int nodeCount) {
+    private void assertRepairEvent(FlowTriggerEventQueue flowChainQueue, RepairType repairType, int nodeCount, String expectedTriggerStackVariant) {
         Selectable repairEvent = flowChainQueue.getQueue().remove();
+        ClusterRepairTriggerEvent clusterRepairTriggerEvent = (ClusterRepairTriggerEvent) repairEvent;
         assertEquals(CLUSTER_REPAIR_TRIGGER_EVENT, repairEvent.selector());
-        assertEquals(repairType, ((ClusterRepairTriggerEvent) repairEvent).getRepairType());
+        assertEquals(repairType, clusterRepairTriggerEvent.getRepairType());
         assertEquals(STACK_ID, repairEvent.getResourceId());
         assertInstanceOf(ClusterRepairTriggerEvent.class, repairEvent);
-        assertEquals(nodeCount, ((ClusterRepairTriggerEvent) repairEvent).getFailedNodesMap().entrySet().iterator().next().getValue().size());
+        assertEquals(nodeCount, clusterRepairTriggerEvent.getFailedNodesMap().entrySet().iterator().next().getValue().size());
+        assertEquals(expectedTriggerStackVariant, clusterRepairTriggerEvent.getTriggeredStackVariant());
     }
 
     private InstanceMetaData getHost(String hostName, String groupName, InstanceStatus instanceStatus, InstanceGroupType instanceGroupType) {
