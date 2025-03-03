@@ -82,6 +82,8 @@ public class StackDetails implements Serializable {
 
     private String creatorClient;
 
+    private String loadBalancerType;
+
     public Long getId() {
         return id;
     }
@@ -288,5 +290,13 @@ public class StackDetails implements Serializable {
 
     public void setSeLinux(String seLinux) {
         this.seLinux = seLinux;
+    }
+
+    public String getLoadBalancerType() {
+        return loadBalancerType;
+    }
+
+    public void setLoadBalancerType(String loadBalancerType) {
+        this.loadBalancerType = loadBalancerType;
     }
 }

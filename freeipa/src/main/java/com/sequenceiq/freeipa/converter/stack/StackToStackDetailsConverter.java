@@ -21,6 +21,7 @@ import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.service.image.ImageService;
+import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceGroupService;
 
 @Component
@@ -32,6 +33,9 @@ public class StackToStackDetailsConverter {
 
     @Inject
     private InstanceGroupService instanceGroupService;
+
+    @Inject
+    private FreeIpaLoadBalancerService freeIpaLoadBalancerService;
 
     @Inject
     private InstanceGroupToInstanceGroupDetailsConverter instanceGroupToInstanceGroupDetailsConverter;
@@ -61,7 +65,12 @@ public class StackToStackDetailsConverter {
                         .collect(Collectors.toList()));
         stackDetails.setTags(source.getTags());
         convertImage(stackDetails, source);
+        stackDetails.setLoadBalancerType(getLoadBalancerType(source.getId()));
         return stackDetails;
+    }
+
+    private String getLoadBalancerType(Long stackId) {
+        return freeIpaLoadBalancerService.findByStackId(stackId).isPresent() ? "ENABLED" : "DISABLED";
     }
 
     private boolean getMultiAz(Set<InstanceGroup> instanceGroups) {

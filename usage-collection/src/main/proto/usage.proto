@@ -333,6 +333,30 @@ message Event {
     NewLandingPageFeedback newLandingPageFeedback = 161;
     // Feedback given while switching from New Landing Page to Old Landing Page.
     SwitchNewLandingPageFeedback switchNewLandingPageFeedback = 162;
+    // The Model Registry Backup has been requested.
+    CDPCMLModelRegistryBackupRequested cdpcmlModelRegistryBackupRequested = 163;
+    // The Model Registry Backup has been requested.
+    CDPCMLModelRegistryRestoreRequested cdpcmlModelRegistryRestoreRequested = 164;
+    // The Model Registry Upgrade has been requested.
+    CDPCMLModelRegistryUpgradeRequested cdpcmlModelRegistryUpgradeRequested = 165;
+    // A CDP DataFlow Service's active alert.
+    CDPDFActiveAlert cdpDFActiveAlert = 166;
+    // The Cloud Private Link creation has been request.
+    CDPCloudPrivateLinkCreation cdpCloudPrivateLinkCreation = 167;
+    // The Cloud Private Link deletion has been requested.
+    CDPCloudPrivateLinkDeletion cdpCloudPrivateLinkDeletion = 168;
+    // The Cloud Private Link access authorization has been requested.
+    CDPCloudPrivateLinkAccessAuthorization cdpCloudPrivateLinkAccessAuthorization = 169;
+    // The Cloud Private Link access revocation has been requested.
+    CDPCloudPrivateLinkAccessRevocation cdpCloudPrivateLinkAccessRevocation = 170;
+    // A containerized datalake has had a status change.
+    CDPCDLStatusChanged cdpCDLStatusChanged = 171;
+    // An Altus IdentityProviderConnector.
+    AltusIamIdentityProviderConnectorState altusIamIdentityProviderConnectorState = 172;
+    // A CDP DataFlow Service's catalog collection lifecycle event.
+    CDPDFCatalogCollectionLifecycle cdpDFCatalogCollectionLifecycle = 173;
+    // A CDP DataFlow Flow Migration Lifecycle.
+    CDPDFFlowMigrationLifecycle cdPDFFlowMigrationLifecycle = 174;
   }
 }
 
@@ -473,6 +497,19 @@ message AltusIamUserUpdated {
   string state = 6;
 }
 
+// Reason codes for reporting AltusIamUserState
+message AltusIamUserStateReasonCode {
+  enum Value {
+    UNSET = 0;
+    UNKNOWN = 1;
+    CREATED = 2;
+    DELETED = 3;
+    UPDATED = 4;
+    // Backfill is used when re-publishing events, not in relation to any UMS activity
+    BACKFILL = 5;
+  }
+}
+
 // Generated to give the current state of a User.
 message AltusIamUserState {
   // The Altus user ID of the user.
@@ -506,6 +543,7 @@ message AltusIamUserState {
   // 4) CONTROL_PLANE_LOCKED_OUT - user is locked out of control plane.
   string state = 8;
   string reason = 9;
+  AltusIamUserStateReasonCode.Value reasonCode = 10;
 }
 
 // Generated when an Altus IAM user has been deleted.
@@ -656,6 +694,62 @@ message AltusIamAccessTokenCreated {
 message AltusIamAccessTokenDeleted {
   // The access token Id of the deleted access token.
   string accessTokenId = 1;
+}
+
+// The type of a IdP Connector.
+message AltusIamIdentityProviderConnectorType {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    UNKNOWN = 1;
+    SAML = 2;
+    LDAP = 3;
+    LOCAL = 4;
+  }
+}
+
+// Reason why the AltusIamIdentityProviderConnectorState is reported
+message AltusIamIdentityProviderConnectorStateReasonCode {
+  enum Value {
+    UNSET = 0;
+    UNKNOWN = 1;
+    CREATED = 2;
+    DELETED = 3;
+    UPDATED = 4;
+    // Backfill is used when re-publishing events, not in relation to any UMS activity
+    BACKFILL = 5;
+  }
+}
+
+// Generated when an IdP Connector is created/updated.
+message AltusIamIdentityProviderConnectorState {
+  // The Account ID.
+  string accountId = 1;
+  // Name of the identity provider connector.
+  string identityProviderConnectorName = 2;
+  // The identity provider connector CRN.
+  string crn = 3;
+  // The creation date in ms from the java epoch of 1970-01-01T00:00:00Z.
+  uint64 creationDate = 4;
+  AltusIamIdentityProviderConnectorType.Value identityProviderConnectorType = 5;
+  // Identity provider connector id.
+  string identityProviderConnectorId = 6;
+  // Whether to sync groups on login or not. This flag is reversed as the default
+  // behavior before this flag was introduced was to sync group on login and the
+  // default value for protobuf for booleans is 'false'.
+  bool skipGroupSyncOnLogin = 7;
+  // Whether SCIM is enabled on the IDP provider.
+  // SCIM is supported for SAML IDP connectors.
+  bool enableScim = 8;
+  // The SCIM machine user CRN. This will exist if SCIM is enabled, or was enabled in the past.
+  string scimMachineUserCrn = 9;
+  // Whether to generate the user's workload username by email. The default behavior is to generate
+  // the workload username by the identity provider user ID.
+  bool generateWorkloadUsernameByEmail = 10;
+  // Reason for the event.
+  string reason = 11;
+  // Reason code
+  AltusIamIdentityProviderConnectorStateReasonCode.Value reasonCode = 12;
 }
 
 // The type of a CDP environment.
@@ -1138,6 +1232,13 @@ message CDPCMLWorkspaceStatus {
     ROLLBACK_FINISHED = 68;
     // The status indicates that the rollback operation for the CML serving workspace has failed.
     ROLLBACK_FAILED = 69;
+
+    // The status when the operation to Refresh Certificates for the CML infra pods has started.
+    REFRESH_CERTIFICATE_STARTED = 70;
+    // The status when the operation to Refresh Certificates for the CML infra pods has finished.
+    REFRESH_CERTIFICATE_FINISHED = 71;
+    // The status when the operation to Refresh Certificates for the CML infra pods has failed.
+    REFRESH_CERTIFICATE_FAILED = 72;
   }
 }
 
@@ -1307,6 +1408,13 @@ message CDPCMLResourceStatus {
     ROLLBACK_FINISHED = 68;
     // The status indicates that the rollback operation for the CML serving workspace has failed.
     ROLLBACK_FAILED = 69;
+
+    // The status when the operation to Refresh Certificates for the CML infra pods has started.
+    REFRESH_CERTIFICATE_STARTED = 70;
+    // The status when the operation to Refresh Certificates for the CML infra pods has finished.
+    REFRESH_CERTIFICATE_FINISHED = 71;
+    // The status when the operation to Refresh Certificates for the CML infra pods has failed.
+    REFRESH_CERTIFICATE_FAILED = 72;
   }
 }
 
@@ -2163,6 +2271,13 @@ message CDPEnvironmentStatus {
     COMPUTE_CLUSTER_REINIT_FINISHED = 32;
     // The status when default compute cluster reinitialization has been failed on the environment
     COMPUTE_CLUSTER_REINIT_FAILED = 33;
+
+    // The status when enable SeLinux has been triggered on the environment.
+    ENVIRONMENT_ENABLE_SELINUX_STARTED = 34;
+    // The status when enable SeLinux has been finished on the environment.
+    ENVIRONMENT_ENABLE_SELINUX_FINISHED = 35;
+    // The status when enable SeLinux has been failed on the environment.
+    ENVIRONMENT_ENABLE_SELINUX_FAILED = 36;
   }
 }
 
@@ -2254,6 +2369,13 @@ message CDPFreeIPAStatus {
     FREEIPA_REBUILD_FINISHED = 35;
     // The status when rebuild for CDP FreeIPA is failed.
     FREEIPA_REBUILD_FAILED = 36;
+
+    // The status when CDP FreeIPA enable SeLinux is initiated.
+    ENABLE_SELINUX_STARTED = 37;
+    // The status when CDP FreeIPA enable SeLinux has successfully finished.
+    ENABLE_SELINUX_FINISHED = 38;
+    // The status when CDP FreeIPA enable SeLinux has failed.
+    ENABLE_SELINUX_FAILED = 39;
   }
 }
 
@@ -2664,6 +2786,8 @@ message CDPFreeIPAExtendedDetails {
   CDPImageDetails imageDetails = 2;
   // A CDP vertical scale status.
   CDPVerticalScaleDetails cdpVerticalScaleDetails = 3;
+  // This field specifies the type of load balancer used for deploying a FreeIPA cluster.
+  string loadBalancerType = 4;
 }
 
 // Generated when FreeIPA status has changed
@@ -2999,6 +3123,36 @@ message CDPDFCatalogArtifactVersionDeleted {
   CDPDFEventSource.Value eventSource = 5;
 }
 
+// Generated periodically when users create catalog collections in DF
+message CDPDFCatalogCollectionLifecycle {
+  // The crn of the catalog collection.
+  string crn = 1;
+  // The CDP account ID.
+  string accountId = 2;
+  // Optional. The flow definition ids associated with the operation
+  repeated string flowDefinitionIds = 3;
+  // The lifecycle action taken on the catalog collection.
+  CDPDFCatalogCollectionLifecycleAction.Value action = 4;
+  // The source API that triggered the event.
+  CDPDFEventSource.Value eventSource = 5;
+}
+
+// The various lifecycle actions that can be taken on catalog collection.
+message CDPDFCatalogCollectionLifecycleAction {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // A value indicating the catalog collection was created.
+    CREATED = 1;
+    // A value indicating the catalog collection was deleted.
+    DELETED = 2;
+    // A value indicating the catalog collection was updated.
+    UPDATED = 3;
+    // A value indicating the catalog collection had a flow definition added.
+    FLOW_DEFINITION_ASSIGNED = 4;
+  }
+}
+
 // The various lifecycle actions that can be taken on flow designs.
 message CDPDFFlowDesignAction {
   enum Value {
@@ -3173,6 +3327,14 @@ message CDPDFServiceStatus {
     ABORT_UPGRADE_FAILED = 35;
     // The status that indicates that the pre-flight validation was requested before the df service enablement
     ENABLE_VALIDATION_IN_PROGRESS = 36;
+    // The status of a df service that indicates that the DB rotate password was requested
+    DB_ROTATE_PASSWORD_REQUESTED = 37;
+    // The status of a df service that indicates that the DB rotate password is in progress
+    DB_ROTATE_PASSWORD_IN_PROGRESS = 38;
+    // The status of a df service that indicates that the DB rotate password failed
+    DB_ROTATE_PASSWORD_FAILED = 39;
+    // The status of a df service that indicates that the DB rotate password succeeded
+    DB_ROTATE_PASSWORD_SUCCEEDED = 40;
   }
 }
 
@@ -3237,6 +3399,8 @@ message CDPDFServiceRequested {
   string userTags = 19;
   // Is a node image update requested
   bool updateNodeImages = 20;
+  // The region where the workload is running
+  string workloadRegion = 21;
 }
 
 message CDPDFServiceStatusChanged {
@@ -3287,6 +3451,8 @@ message CDPDFServiceUpgradeRequested {
   string actorCrn = 15;
   // Is validation skipped for upgrade request
   bool runValidations = 16;
+  // The region where the workload is running
+  string workloadRegion = 17;
 }
 
 message CDPDFServiceUpgradeStatusChanged {
@@ -3486,6 +3652,12 @@ message CDPDFDeploymentRequested {
   double cores = 25;
   // Requested limit of memory per NiFi node
   double memory = 26;
+  // The content repository storage profile
+  string contentRepoProfile = 27;
+  // The provenance repository storage profile
+  string provenanceRepoProfile = 28;
+  // The flow file repository storage profile
+  string flowFileRepoProfile = 29;
 }
 
 message CDPDFDeploymentStatusChanged {
@@ -3922,6 +4094,182 @@ message CDPDFProjectResourceAssigned {
   string environmentCrn = 9;
   // The CDP account ID.
   string accountId = 10;
+}
+
+message CDPDFActiveAlert {
+  // The id of the Alert Event.
+  string id = 1;
+  // The first occurrence of the alert.
+  uint64 firstOccurrence = 2;
+  // The name of the alert.
+  string name = 3;
+  // The description of the alert.
+  string description = 4;
+  // The severity of the alert.
+  CDPDFEventSeverity.Value severity = 5;
+  // The reference id of the alert.
+  string referenceId = 6;
+  // The reference type of the alert.
+  CDPDFEventReferenceType.Value referenceType = 7;
+  // The type of the alert.
+  CDPDFAlertType.Value alertType = 8;
+  // The crn of the DataFlow Service. This is the crn used by dfx to refer to a dataflow-enabled cdp environment.
+  string dataFlowServiceCrn = 9;
+  // The id of the DataFlow Service. This is the internal id used by dfx to refer to a dataflow-enabled cdp environment.
+  string dataFlowServiceId = 10;
+  // The crn of the CDP environment of the deployment.
+  string environmentCrn = 11;
+  // The timestamp of the alert monitor execution time.
+  uint64 runTimestamp = 12;
+}
+
+message CDPDFEventSeverity {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // indicates a critical error that requires immediate attention.
+    ERROR = 1;
+    // indicates a warning that should be addressed.
+    WARN = 2;
+    // indicates an informational message.
+    INFO = 3;
+    // indicates an unknown severity.
+    UNKNOWN = 4;
+  }
+}
+
+message CDPDFEventReferenceType {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // indicates a deployment reference.
+    DEPLOYMENT = 1;
+    // indicates a service reference.
+    ENVIRONMENT = 2;
+  }
+}
+
+message CDPDFAlertType {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // A value indicating a Cloudbreak error alert.
+    CLOUDBREAK_ERROR_ALERT = 1;
+    // A value indicating a capacity warning alert.
+    AT_CAPACITY_WARNING_ALERT = 2;
+    // A value indicating a KPI out of range warning alert.
+    KPI_OUT_OF_RANGE_WARNING_ALERT = 3;
+    // A value indicating an autoscale warning alert.
+    CANNOT_AUTOSCALE_WARNING_ALERT = 4;
+    // A value indicating an environment orphaned error alert.
+    ENVIRONMENT_ORPHANED_ERROR_ALERT = 5;
+    // A value indicating an environment orphaned warning alert.
+    ENVIRONMENT_ORPHANED_WARN_ALERT = 6;
+    // A value indicating a workload heartbeat missing warning alert.
+    WORKLOAD_HEARTBEAT_MISSING_WARN_ALERT = 7;
+    // A value indicating a deployment heartbeat missing warning alert.
+    DEPLOYMENT_HEARTBEAT_MISSING_WARN_ALERT = 8;
+    // A value indicating a Prometheus memory warning alert.
+    PROMETHEUS_MEMORY_WARNING_ALERT = 9;
+    // A value indicating a metering DBus error alert.
+    METERING_DBUS_ERROR_ALERT = 10;
+    // A value indicating a metering warning alert.
+    METERING_WARNING_ALERT = 11;
+    // A value indicating a metering error alert.
+    METERING_ERROR_ALERT = 12;
+    // A value indicating a certificates expiring soon warning alert.
+    CERTIFICATES_EXPIRING_SOON_WARNING_ALERT = 13;
+    // A value indicating a certificates expired error alert.
+    CERTIFICATES_EXPIRED_ERROR_ALERT = 14;
+    // A value indicating a certificates renewed alert.
+    CERTIFICATES_RENEWED_ALERT = 15;
+    // A value indicating an unused deployment bad health alert.
+    UNUSED_DEPLOYMENT_BAD_HEALTH_ALERT = 16;
+    // A value indicating a SDX output updated alert.
+    SDX_OUTPUT_UPDATED_ALERT = 17;
+    // A value indicating a metrics unavailable alert.
+    METRICS_UNAVAILABLE_ALERT = 18;
+    // A value indicating a awaiting upgrade info alert.
+    AWAITING_UPGRADE_INFO_ALERT = 19;
+    // A value indicating a alertmanager unavailable alert.
+    ALERTMANAGER_UNAVAILABLE_ALERT = 20;
+    // A value indicating a kube metrics unavailable alert.
+    KUBE_METRICS_UNAVAILABLE_ALERT = 21;
+    // A value indicating a deployment not healthy alert.
+    DEPLOYMENT_NOT_HEALTHY = 22;
+    // A value indicating a offload time warning alert.
+    OFFLOAD_TIME_WARNING_ALERT = 23;
+    // A value indicating a minifi unavailable alert.
+    MINIFI_UNAVAILABLE_ALERT = 24;
+    // A value indicating a pod unavailable alert.
+    POD_UNAVAILABLE_ALERT = 25;
+    // A value indicating a statefulset unavailable alert.
+    STATEFULSET_UNAVAILABLE_ALERT = 26;
+    // A value indicating a deployment unavailable alert.
+    DEPLOYMENT_UNAVAILABLE_ALERT = 27;
+    // A value indicating a job unavailable alert.
+    JOB_UNAVAILABLE_ALERT = 28;
+    // A value indicating a memory alert.
+    MEMORY_WARNING_ALERT = 29;
+    // A value indicating a nifi bulletin alert.
+    NIFI_BULLETIN_ALERT = 30;
+    // A value indicating a manual resource cleanup required alert.
+    MANUAL_RESOURCE_CLEANUP_REQUIRED_ALERT = 31;
+    // A value indicating an unknown value
+    UNKNOWN = 32;
+  }
+}
+
+message CDPDFFlowMigrationLifecycle {
+  // The CDP account ID.
+  string accountId = 1;
+  // The crn of the CDP environment.
+  string environmentCrn = 2;
+  // The crn of the DataFlow Service.
+  string dfServiceCrn = 3;
+  // The id of the Flow Migration.
+  string migrationId = 4;
+  // The crn of the Flow Version Under Migration.
+  string flowVersionCrn = 5;
+  // The flow designer id of the migrated flow.
+  string flowDesignerId = 6;
+  // The status of the Flow Migration.
+  CDPDFFlowMigrationStatus.Value status = 7;
+  // The number of processors in the input flow.
+  uint32 processorCount = 8;
+  // The number of controller services in the input flow.
+  uint32 controllerServiceCount = 9;
+  // The number of manual steps needed for the migration.
+  uint32 manualStepsNeeded = 10;
+  // The number of manual verifications needed for the migration.
+  uint32 manualVerificationNeeded = 11;
+  // The reason for the failure of the migration.
+  string failureReason = 12;
+  // The workflow id of the migration.
+  string workflowId = 13;
+  // The run id of the migration.
+  string runId = 14;
+  // The flag to indicate if the flow can be opened in the designer.
+  bool canBeOpenedInDesigner = 15;
+}
+
+message CDPDFFlowMigrationStatus {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // The status of a flow migration that has been created.
+    CREATED = 1;
+    // The status of a flow migration that has been queued.
+    QUEUED = 2;
+    // The status of a flow migration that is in progress.
+    IN_PROGRESS = 3;
+    // The status of a flow migration that has been completed.
+    MIGRATION_COMPLETED = 4;
+    // The status of a flow migration that has been assigned to a flow draft.
+    DRAFT_CREATION_COMPLETED = 5;
+    // The status of a flow migration that has failed.
+    FAILED = 6;
+  }
 }
 
 //Autoscale Policy Type
@@ -4396,6 +4744,15 @@ message CDPCDWRealTimeEventStoreStatusChanged {
   string actorCrn = 7;
 }
 
+message CDPCDEDBDetails {
+  // DB server type
+  string serverType = 1;
+  // DB instance class
+  string instanceClass = 2;
+  // DB high availability
+  bool   highAvailability = 3;
+}
+
 // Generated when a CDP CDE service creation or update is requested.
 message CDPCDEServiceRequested {
   reserved 10, 11, 13;
@@ -4431,6 +4788,8 @@ message CDPCDEServiceRequested {
   string properties = 14;
   // Kubernetes version of CDE service.
   string kubernetesVersion = 16;
+  // DB details
+  CDPCDEDBDetails dbDetails = 17;
 }
 
 // Generated when the status of a CDE service changes.
@@ -5114,7 +5473,7 @@ message CDPDiagnosticEvent {
 // This list below is a subset of the values in the Crn.Service enumeration.
 // The exact value need not match, but it should correspond to some Crn.Service.
 //
-// This should match meteringevents.ServiceType.
+// This should match meteringv2events.ServiceType.
 message ServiceType {
   enum Value {
     // A value indicating the enum is unset.
@@ -5135,6 +5494,16 @@ message ServiceType {
     ENVIRONMENT = 7;
     // Liftie
     LIFTIE = 8;
+    // Observability
+    OBSERVABILITY = 9;
+    // ML Serving (AI Inference)
+    AI_INFERENCE = 10;
+    // Private Link
+    PRIVATE_LINK = 11;
+    // Cloudera Lakehouse Optimizer
+    CLOUDERA_LAKEHOUSE_OPTIMIZER = 12;
+    // Cloudera Data Sharing
+    CDSH = 13;
   }
 }
 
@@ -5317,6 +5686,8 @@ message CDPAssignTrialAccount {
   string trialId = 9;
   // Cloud Account id
   string cloudAccountId = 10;
+  // CDP User email domain of the trial user.
+  string userEmailDomain = 11;
 }
 
 // Generated when a CDP trial account status is changed/updated.
@@ -5339,6 +5710,8 @@ message CDPTrialDetails {
   uint64 startTime = 2;
   // Ending datetime of the trial period.
   uint64 endTime = 3;
+  // Trial id
+  string trialId = 4;
 }
 
 // Status options for CDPTrials.
@@ -5368,12 +5741,13 @@ message CDPTrialEnvironment {
 // The pattern and status for CDP Trial workloads.
 message CDPTrialWorkload {
   // Pattern used by the trial workload. Currently supported CDP trial workload patterns are CDP_OPEN_DATA_LAKEHOUSE, CDP_DATA_DISTRIBUTION_AND_STREAM_ANALYTICS,
-  // CDP_GENERATIVE_AI, CDP_DATA_ENGINEERING and CDP_SHARED_GENERATIVE_AI.
+  // CDP_GENERATIVE_AI, CDP_DATA_ENGINEERING, CDP_SHARED_GENERATIVE_AI and CDP_OPERATIONAL_DATABASE.
   // CDP_OPEN_DATA_LAKEHOUSE - Indicates open data lakehouse pattern for CDP.
   // CDP_DATA_DISTRIBUTION_AND_STREAM_ANALYTICS - Indicates data distribution and stream analytics for CDP.
   // CDP_GENERATIVE_AI - Indicates generative AI pattern for CDP.
   // CDP_DATA_ENGINEERING - Integrates data engineering for CDP.
   // CDP_SHARED_GENERATIVE_AI = Indicates Multi user shared trial pattern for generative AI.
+  // CDP_OPERATIONAL_DATABASE - Indicates operational database pattern for CDP.
 
   string pattern = 1;
   // Status of the workload deployment for the trial.
@@ -5395,12 +5769,14 @@ message CDPTrialWorkloadStatus {
 // Status options for CDP Assign Trial.
 message CDPAssignTrialStatus {
   enum Value {
-    // Indicates CAP Trial Request status is REQUESTED.
+    // Indicates CDP Trial Request status is REQUESTED.
     REQUESTED = 0;
-    // Indicates CAP Trial Request status is ASSIGNED.
+    // Indicates CDP Trial Request status is ASSIGNED.
     ASSIGNED = 1;
-    // Indicates CAP Trial Request status is FAILED.
+    // Indicates CDP Trial Request status is FAILED.
     FAILED = 2;
+    // Indicates CDP Trial Request status is INVITED.
+    INVITED = 3;
   }
 }
 
@@ -6290,4 +6666,254 @@ message SwitchNewLandingPageFeedback {
   string message = 4;
   // Choice to skip feedback.
   bool skipFeedback = 5;
+}
+
+// Generated when a valid CDP CML Model Registry backup creation request has been made
+message CDPCMLModelRegistryBackupRequested{
+  // The CDP model registry crn of the CML Model Registry
+  string modelRegistryCrn = 1;
+  // The CDP backup crn of the CML model registry
+  string backupCrn  = 2;
+  // The user-supplied backup name
+  string backupName = 3;
+  // The CDP account ID of the CML model registry.
+  string accountId = 4;
+  // The environment type.
+  CDPEnvironmentsEnvironmentType.Value environmentType = 5;
+  // The CRN of the CML model registry's environment.
+  string environmentCrn = 6;
+  // The CML crud app version.
+  string cmlVersion = 7;
+  // The CML model registry version deployed.
+  string modelRegistryVersion = 8;
+  // the request id of the create event
+  string requestId = 9;
+  // Tenant type to identify the formfactor i.e. Saas or Paas
+  string tenantType = 10;
+}
+
+// Generated when a valid CDP CML Model Registry backup creation request has been made
+message CDPCMLModelRegistryRestoreRequested{
+  // The CDP model registry crn of the CML Model Registry
+  string modelRegistryCrn = 1;
+  // The CDP backup crn of the CML model registry
+  string backupCrn  = 2;
+  // The user-supplied backup name
+  string backupName = 3;
+  // The CDP account ID of the CML model registry.
+  string accountId = 4;
+  // The environment type.
+  CDPEnvironmentsEnvironmentType.Value environmentType = 5;
+  // The CRN of the CML model registry's environment.
+  string environmentCrn = 6;
+  // The CML crud app version.
+  string cmlVersion = 7;
+  // The CML model registry version deployed.
+  string modelRegistryVersion = 8;
+  // the request id of the create event
+  string requestId = 9;
+  // Tenant type to identify the formfactor i.e. Saas or Paas
+  string tenantType = 10;
+}
+
+// Generated when a valid CDP CML Model Registry backup creation request has been made
+message CDPCMLModelRegistryUpgradeRequested{
+  // The CDP model registry crn of the CML model registry
+  string modelRegistryCrn = 1;
+  // The CDP account ID of the CML Model Registry.
+  string accountId = 2;
+  // The environment type.
+  CDPEnvironmentsEnvironmentType.Value environmentType = 3;
+  // The CRN of the CML model registry's environment.
+  string environmentCrn = 4;
+  // The CML crud app version.
+  string cmlVersion = 5;
+  // The CML model registry version deployed.
+  string modelRegistryVersion = 6;
+  // the request id of the create event
+  string requestId = 7;
+  // Tenant type to identify the formfactor i.e. Saas or Paas
+  string tenantType = 8;
+}
+
+// Generated when a cloud private link creation is requested.
+message CDPCloudPrivateLinkCreation {
+  // The CDP account id
+  string accountId = 1;
+  // The crn for vpc in which privatelink is requested
+  string resourceCrn = 2;
+  // The cloud service provider
+  string cloudProvider = 3;
+  // The service components for which privatelink creation is requested.
+  string serviceComponents = 4;
+  // The corresponding cloud region
+  string region = 5;
+  // The description of error in creation of privatelink if any
+  string errorDescription = 6;
+  // The status of privatelink creation
+  CloudPrivatelinkCreationStatus.Value status = 7;
+}
+
+// Generated when a cloud private link deletion is requested.
+message CDPCloudPrivateLinkDeletion {
+  // The CDP account id
+  string accountId = 1;
+  // The crn for vpc in which privatelink is requested
+  string resourceCrn = 2;
+  // The cloud service provider
+  string cloudProvider = 3;
+  // The service components for which privatelink deletion is requested
+  string serviceComponents = 4;
+  // The corresponding cloud region
+  string region = 5;
+  // The description of error in deletion of privatelink if any
+  string errorDescription = 6;
+  // The status of privatelink deletion
+  CloudPrivatelinkDeletionStatus.Value status = 7;
+}
+
+// Generated when cloud private link access authorization is requested.
+message CDPCloudPrivateLinkAccessAuthorization {
+  // The CDP account id
+  string accountId = 1;
+  // The cloud service provider
+  string cloudProvider = 2;
+  // The corresponding cloud region
+  string region = 3;
+  // The description of error in authorization of privatelink service access if any
+  string errorDescription = 4;
+  // The status of privatelink access authorization
+  CloudPrivatelinkAccessAuthorizationStatus.Value status = 5;
+}
+
+// Generated when cloud private link access revocation is requested.
+message CDPCloudPrivateLinkAccessRevocation {
+  // The CDP account id
+  string accountId = 1;
+  // The cloud service provider
+  string cloudProvider = 2;
+  // The corresponding cloud region
+  string region = 3;
+  // The description of error in revocation of privatelink service access if any
+  string errorDescription = 4;
+  // The status of privatelink access revocation
+  CloudPrivatelinkAccessRevocationStatus.Value status = 5;
+}
+
+// The status of a CDP cloud privatelink creation.
+message CloudPrivatelinkCreationStatus {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // Successful result for creation of privatelink for all service components.
+    SUCCESSFUL = 1;
+    // Failed result for creation of privatelink for all service components.
+    FAILED = 2;
+    // Successful result for creation of privatelink for some of the service components.
+    PARTIAL_SUCCESS = 3;
+  }
+}
+
+// The status of a CDP cloud privatelink deletion.
+message CloudPrivatelinkDeletionStatus {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // Successful result for deletion of privatelinks for all service components.
+    SUCCESSFUL = 1;
+    // Failed result for deletion of privatelinks for all service components.
+    FAILED = 2;
+    // Successful result for deletion of privatelinks for some of the service components.
+    PARTIAL_SUCCESS = 3;
+  }
+}
+
+// The status of a CDP cloud privatelink service access authorization.
+message CloudPrivatelinkAccessAuthorizationStatus {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // Successful result for privatelink service access authorizations for all service components.
+    SUCCESSFUL = 1;
+    // Failed result for privatelink service access authorizations for all service components.
+    FAILED = 2;
+    // Successful result for privatelink service access authorizations for some of the service components.
+    PARTIAL_SUCCESS = 3;
+  }
+}
+
+// The status of a CDP cloud privatelink service access revocation.
+message CloudPrivatelinkAccessRevocationStatus {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // Successful result for privatelink service access revocations for all service components.
+    SUCCESSFUL = 1;
+    // Failed result for privatelink service access revocations for all service components.
+    FAILED = 2;
+    // Successful result for privatelink service access revocations for some of the service components.
+    PARTIAL_SUCCESS = 3;
+  }
+}
+
+// Generated when a status change has been done for a containerized datalake
+message CDPCDLStatusChanged {
+  CDPCDLClusterDetails clusterDetails = 1;
+  CDPCDLStatusChangeDetails statusChangeDetails = 2;
+  CDPCDLWorkflowDetails workflowDetails = 3;
+  // Additional details associated with the status change (especially useful to log creation/upgrade request information).
+  string additionalDetails = 4;
+}
+
+message CDPCDLClusterDetails {
+  // The name of the containerized datalake.
+  string datalakeName = 1;
+  // The CRN of the containerized datalake.
+  string datalakeCrn = 2;
+  // The name of the environment connected to the containerized datalake.
+  string environmentName = 3;
+  // The CRN of the environment connected to the containerized datalake.
+  string environmentCrn = 4;
+  // The CDP account ID associated with the containerized datalake.
+  string accountId = 5;
+  // Whether Ranger RAZ is enabled for the containerized datalake.
+  bool rangerRAZEnabled = 6;
+  // Whether multi AZ is enabled for the containerized datalake.
+  bool multiAZEnabled = 7;
+  // The cloud provider of the containerized datalake.
+  CDPCloudProviderVariantType.Value cloudProvider = 8;
+  // The runtime version the datalake is using.
+  string runtime = 9;
+  // Whether the datalake is using an external DB.
+  bool usingExternalDatabase = 10;
+  // The name of the layout the datalake is using for its services.
+  string layoutName = 11;
+}
+
+message CDPCDLStatusChangeDetails {
+  // The User ID associated with the status change (especially if it's a workflow/request).
+  string userID = 1;
+  // The previous datalake status.
+  string previousStatus = 2;
+  // The previous datalake status reason.
+  string previousStatusReason = 3;
+  // The new datalake status.
+  string newStatus = 4;
+  // The new datalake status reason.
+  string newStatusReason = 5;
+}
+
+message CDPCDLWorkflowDetails {
+  // ID for any ongoing workflow currently operating on the datalake.
+  string workflowID = 1;
+  // Request ID associated with the workflow.
+  string requestID = 2;
+  // Start time for the workflow.
+  string startTime = 3;
+  // End time for the workflow (if present).
+  string endTime = 4;
+  // Whether or not the workflow failed.
+  bool workflowFailed = 5;
+  // Any failure reason/message associated with the workflow.
+  string failureMessage = 6;
 }

@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAExtendedDetails;
 
+import java.util.Optional;
+
 import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
@@ -21,6 +23,7 @@ public class StackDetailsToCDPFreeIPAExtendedDetailsConverter {
         CDPFreeIPAExtendedDetails.Builder cdpFreeIPAExtendedDetails = CDPFreeIPAExtendedDetails.newBuilder();
         cdpFreeIPAExtendedDetails.setFreeIPAShape(freeIPAShapeConverter.convert(stackDetails));
         cdpFreeIPAExtendedDetails.setImageDetails(imageDetailsConverter.convert(stackDetails));
+        cdpFreeIPAExtendedDetails.setLoadBalancerType(Optional.ofNullable(stackDetails).map(StackDetails::getLoadBalancerType).orElse(""));
         return cdpFreeIPAExtendedDetails.build();
     }
 }
