@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.environment.api.v1.proxy.model.request.ProxyRequest;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -37,7 +36,7 @@ class ProxyConfigUserDataAssertions {
 
     public Assertion<FreeIpaTestDto, FreeIpaClient> validateFreeIpaUserDataProxySettings(ProxyTestDto proxy) {
         return (testContext, testDto, client) -> {
-            String variant = testContext.getCloudProvider().getVariant(CdpResourceType.FREEIPA);
+            String variant = testDto.getVariant();
             if (!isAwsNative(variant)) {
                 String stackNamePrefix = getFreeipaStackNamePrefix(testContext);
                 validateUserDataProxySettings(testContext, testDto.getCloudPlatform(), stackNamePrefix, proxy);
@@ -50,7 +49,7 @@ class ProxyConfigUserDataAssertions {
 
     public Assertion<SdxInternalTestDto, SdxClient> validateDatalakeUserDataProxySettings(ProxyTestDto proxy) {
         return (testContext, testDto, client) -> {
-            String variant = testContext.getCloudProvider().getVariant(CdpResourceType.DATALAKE);
+            String variant = testDto.getVariant();
             if (!isAwsNative(variant)) {
                 validateUserDataProxySettings(testContext, testDto.getCloudPlatform(), testDto.getName(), proxy);
             } else {
@@ -62,7 +61,7 @@ class ProxyConfigUserDataAssertions {
 
     public Assertion<DistroXTestDto, CloudbreakClient> validateDatahubUserDataProxySettings(ProxyTestDto proxy) {
         return (testContext, testDto, client) -> {
-            String variant = testContext.getCloudProvider().getVariant(CdpResourceType.DATAHUB);
+            String variant = testDto.getVariant();
             if (!isAwsNative(variant)) {
                 validateUserDataProxySettings(testContext, testDto.getCloudPlatform(), testDto.getName(), proxy);
             } else {
@@ -95,7 +94,7 @@ class ProxyConfigUserDataAssertions {
 
     public Assertion<FreeIpaTestDto, FreeIpaClient> validateFreeIpaUserDataNoProxySettings() {
         return (testContext, testDto, client) -> {
-            String variant = testContext.getCloudProvider().getVariant(CdpResourceType.FREEIPA);
+            String variant = testDto.getVariant();
             if (!isAwsNative(variant)) {
                 String stackNamePrefix = getFreeipaStackNamePrefix(testContext);
                 validateUserDataNoProxySettings(testContext, testDto.getCloudPlatform(), stackNamePrefix);
@@ -108,7 +107,7 @@ class ProxyConfigUserDataAssertions {
 
     public Assertion<SdxInternalTestDto, SdxClient> validateDatalakeUserDataNoProxySettings() {
         return (testContext, testDto, client) -> {
-            String variant = testContext.getCloudProvider().getVariant(CdpResourceType.DATALAKE);
+            String variant = testDto.getVariant();
             if (!isAwsNative(variant)) {
                 validateUserDataNoProxySettings(testContext, testDto.getCloudPlatform(), testDto.getName());
             } else {
@@ -120,7 +119,7 @@ class ProxyConfigUserDataAssertions {
 
     public Assertion<DistroXTestDto, CloudbreakClient> validateDatahubUserDataNoProxySettings() {
         return (testContext, testDto, client) -> {
-            String variant = testContext.getCloudProvider().getVariant(CdpResourceType.DATAHUB);
+            String variant = testDto.getVariant();
             if (!isAwsNative(variant)) {
                 validateUserDataNoProxySettings(testContext, testDto.getCloudPlatform(), testDto.getName());
             } else {

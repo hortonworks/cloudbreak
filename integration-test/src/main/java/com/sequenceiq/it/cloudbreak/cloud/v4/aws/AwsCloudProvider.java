@@ -21,10 +21,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
-import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.common.model.Architecture;
@@ -418,30 +416,6 @@ public class AwsCloudProvider extends AbstractCloudProvider {
             return "AWS_NATIVE_GOV";
         } else {
             return "AWS";
-        }
-    }
-
-    @Override
-    public String getVariant(CdpResourceType cdpResourceType) {
-        if (CdpResourceType.DATAHUB.equals(cdpResourceType)
-        || CdpResourceType.DATALAKE.equals(cdpResourceType)) {
-            VersionComparator versionComparator = new VersionComparator();
-            String runtimeVersion = commonClusterManagerProperties().getRuntimeVersion();
-            if (getGovCloud()) {
-                return "AWS_NATIVE_GOV";
-            } else if (isMultiAZ() || versionComparator.compare(() -> runtimeVersion, () -> "7.3.1") >= 0) {
-                return "AWS_NATIVE";
-            } else {
-                return "AWS";
-            }
-        } else {
-            if (getGovCloud()) {
-                return "AWS_NATIVE_GOV";
-            } else if (isMultiAZ()) {
-                return "AWS_NATIVE";
-            } else {
-                return "AWS";
-            }
         }
     }
 

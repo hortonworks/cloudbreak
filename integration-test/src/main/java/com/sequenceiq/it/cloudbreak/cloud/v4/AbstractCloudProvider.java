@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseImag
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
-import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.InstanceGroupNetworkV1Request;
@@ -328,11 +327,6 @@ public abstract class AbstractCloudProvider implements CloudProvider {
 
     @Override
     public String getVariant() {
-        return null;
-    }
-
-    @Override
-    public String getVariant(CdpResourceType cdpResourceType) {
         return null;
     }
 

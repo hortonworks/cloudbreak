@@ -10,7 +10,6 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.distrox.api.v1.distrox.model.AwsDistroXV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.AzureDistroXV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
@@ -46,7 +45,7 @@ public class DistroXTestDtoBase<T extends DistroXTestDtoBase> extends AbstractCl
                 .withInstanceGroupsEntity(DistroXInstanceGroupTestDto.dataEngHostGroups(getTestContext(), getCloudPlatform()))
                 .withCluster(getTestContext().given(DistroXClusterTestDto.class, getCloudPlatform()))
                 .withImageSettings(getTestContext().given(DistroXImageTestDto.class, getCloudPlatform()))
-                .withVariant(getCloudProvider().getVariant(CdpResourceType.DATAHUB));
+                .withVariant(getCloudProvider().getVariant());
         return getCloudProvider().distrox(this);
     }
 
@@ -223,6 +222,10 @@ public class DistroXTestDtoBase<T extends DistroXTestDtoBase> extends AbstractCl
     public DistroXTestDtoBase<T> addTags(Map<String, String> tags) {
         tags.forEach((key, value) -> getRequest().addTag(key, value));
         return this;
+    }
+
+    public String getVariant() {
+        return getResponse().getVariant();
     }
 
     public DistroXTestDtoBase<T> addApplicationTags(Map<String, String> tags) {
