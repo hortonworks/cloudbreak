@@ -19,6 +19,8 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.wiam.client.GrpcWiamClient;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.events.sync.StructuredSynchronizerJobAdapter;
+import com.sequenceiq.freeipa.events.sync.StructuredSynchronizerJobService;
 import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionEvent;
 import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionState;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.bootstrap.BootstrapMachinesRequest;
@@ -187,6 +189,9 @@ public class FreeIpaProvisionActions {
             private Set<AbstractConfigRegister> configRegisters;
 
             @Inject
+            private StructuredSynchronizerJobService structuredSynchronizerJobService;
+
+            @Inject
             private FreeipaJobService freeipaJobService;
 
             @Inject
@@ -199,6 +204,7 @@ public class FreeIpaProvisionActions {
             protected void doExecute(StackContext context, PostInstallFreeIpaSuccess payload, Map<Object, Object> variables) {
                 configRegisters.forEach(configProvider -> configProvider.register(context.getStack().getId()));
                 metricService.incrementMetricCounter(MetricType.FREEIPA_CREATION_FINISHED, context.getStack());
+                structuredSynchronizerJobService.schedule(context.getStack().getId(), StructuredSynchronizerJobAdapter.class, false);
                 freeipaJobService.schedule(context.getStack().getId());
                 dynamicEntitlementRefreshJobService.schedule(context.getStack().getId());
                 stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.PROVISIONED, "FreeIPA installation finished");

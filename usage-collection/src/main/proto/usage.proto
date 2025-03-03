@@ -357,6 +357,8 @@ message Event {
     CDPDFCatalogCollectionLifecycle cdpDFCatalogCollectionLifecycle = 173;
     // A CDP DataFlow Flow Migration Lifecycle.
     CDPDFFlowMigrationLifecycle cdPDFFlowMigrationLifecycle = 174;
+    // Sync event for a CDP FreeIPA cluster
+    CDPFreeIPASync cdpFreeIPASync = 175;
   }
 }
 
@@ -6916,4 +6918,16 @@ message CDPCDLWorkflowDetails {
   bool workflowFailed = 5;
   // Any failure reason/message associated with the workflow.
   string failureMessage = 6;
+}
+
+// Generated periodically for FreeIPA clusters
+message CDPFreeIPASync {
+  // Operation metadata
+  CDPOperationDetails operationDetails = 1;
+  // FreeIPA extended details
+  CDPFreeIPAExtendedDetails freeIPADetails = 2;
+  // FreeIPA status details
+  CDPFreeIPAStatusDetails statusDetails = 3;
+  // Environment Crn
+  string environmentCrn = 4;
 }

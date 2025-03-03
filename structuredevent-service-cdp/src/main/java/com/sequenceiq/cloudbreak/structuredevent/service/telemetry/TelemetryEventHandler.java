@@ -11,7 +11,9 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredFlowEvent;
-import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.log.CDPTelemetryEventLogger;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.freeipa.CDPFreeipaStructuredSyncEvent;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.log.CDPTelemetryFlowEventLogger;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.log.freeipa.CDPFreeIpaSyncLogger;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
 @Component
@@ -20,7 +22,10 @@ public class TelemetryEventHandler<T extends CDPStructuredEvent> implements Even
     private static final Logger LOGGER = LoggerFactory.getLogger(TelemetryEventHandler.class);
 
     @Inject
-    private List<CDPTelemetryEventLogger> cdpTelemetryEventLoggers;
+    private List<CDPTelemetryFlowEventLogger> cdpTelemetryFlowEventLoggers;
+
+    @Inject
+    private CDPFreeIpaSyncLogger cdpFreeIpaSyncLogger;
 
     @Override
     public String selector() {
@@ -31,16 +36,22 @@ public class TelemetryEventHandler<T extends CDPStructuredEvent> implements Even
     public void accept(Event<T> structuredEvent) {
         try {
             T data = structuredEvent.getData();
-            if (data != null && data instanceof CDPStructuredFlowEvent) {
-                CDPStructuredFlowEvent cdpStructuredFlowEvent = (CDPStructuredFlowEvent) data;
-                for (CDPTelemetryEventLogger cdpTelemetryEventLogger : cdpTelemetryEventLoggers) {
-                    if (cdpTelemetryEventLogger.acceptableEventClass().equals(cdpStructuredFlowEvent.getClass())) {
-                        cdpTelemetryEventLogger.log(cdpStructuredFlowEvent);
-                    }
-                }
+            switch (data) {
+                case null -> LOGGER.warn("Received null data in telemetry event handler! Event: {}", structuredEvent);
+                case CDPStructuredFlowEvent cdpStructuredFlowEvent -> logFlowEvent(cdpStructuredFlowEvent);
+                case CDPFreeipaStructuredSyncEvent cdpFreeipaStructuredSyncEvent -> cdpFreeIpaSyncLogger.log(cdpFreeipaStructuredSyncEvent);
+                default -> LOGGER.debug("We are not sending telemetry log for {}", data.getClass().getSimpleName());
             }
         } catch (Exception e) {
             LOGGER.warn("Cannot perform sending telemetry log!", e);
+        }
+    }
+
+    private void logFlowEvent(CDPStructuredFlowEvent cdpStructuredFlowEvent) {
+        for (CDPTelemetryFlowEventLogger cdpTelemetryFlowEventLogger : cdpTelemetryFlowEventLoggers) {
+            if (cdpTelemetryFlowEventLogger.acceptableEventClass().equals(cdpStructuredFlowEvent.getClass())) {
+                cdpTelemetryFlowEventLogger.log(cdpStructuredFlowEvent);
+            }
         }
     }
 }

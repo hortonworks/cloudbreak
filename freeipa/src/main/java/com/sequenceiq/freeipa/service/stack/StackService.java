@@ -39,6 +39,7 @@ import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.dto.StackIdWithStatus;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.projection.StackUserSyncView;
@@ -70,6 +71,10 @@ public class StackService implements EnvironmentPropertyProvider, PayloadContext
                 STACK_AVAILABLE,
                 DELETE_IN_PROGRESS,
                 DELETE_COMPLETED));
+    }
+
+    public List<JobResource> findAllAliveForAutoSync(Set<Status> statusesNotIn) {
+        return stackRepository.findAllRunningAndStatusNotIn(statusesNotIn);
     }
 
     public Stack getByIdWithListsInTransaction(Long id) {

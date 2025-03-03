@@ -2,7 +2,9 @@ package com.sequenceiq.cloudbreak.common.service;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAmount;
+import java.util.Date;
 
 import org.springframework.stereotype.Service;
 
@@ -23,5 +25,9 @@ public class Clock {
 
     public LocalDateTime getCurrentLocalDateTime() {
         return LocalDateTime.now();
+    }
+
+    public Date getDateForDelayedStart(TemporalAmount delay) {
+        return Date.from(ZonedDateTime.now().toInstant().plus(delay));
     }
 }

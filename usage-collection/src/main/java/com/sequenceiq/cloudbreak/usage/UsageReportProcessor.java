@@ -314,6 +314,21 @@ public class UsageReportProcessor implements UsageReporter {
                 .build(), null);
     }
 
+    @Override
+    public void cdpFreeipaSync(UsageProto.CDPFreeIPASync details) {
+        try {
+            checkNotNull(details);
+            usageProcessingStrategy.processUsage(eventBuilder()
+                    .setCdpFreeIPASync(details)
+                    .build(), UsageContext.Builder.newBuilder()
+                    .accountId(getAccountId(details.getOperationDetails()))
+                    .build());
+            LOGGER.info("Logged binary format for the following usage event: {}", details);
+        } catch (Exception e) {
+            LOGGER.warn("Could not log binary format for the following usage event: {}! Cause: {}", details, e.getMessage());
+        }
+    }
+
     private UsageProto.Event.Builder eventBuilder() {
         return UsageProto.Event.newBuilder()
                 .setId(UUID.randomUUID().toString())

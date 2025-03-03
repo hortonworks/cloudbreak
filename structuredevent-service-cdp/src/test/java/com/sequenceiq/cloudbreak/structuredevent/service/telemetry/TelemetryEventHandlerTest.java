@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -14,14 +15,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.CDPEnvironmentStructuredFlowEvent;
-import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.log.CDPTelemetryEventLogger;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.freeipa.CDPFreeipaStructuredSyncEvent;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.log.CDPTelemetryFlowEventLogger;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.log.freeipa.CDPFreeIpaSyncLogger;
 
 @ExtendWith(MockitoExtension.class)
 class TelemetryEventHandlerTest {
@@ -30,39 +32,56 @@ class TelemetryEventHandlerTest {
     private TelemetryEventHandler underTest;
 
     @Spy
-    private List<CDPTelemetryEventLogger> eventLoggers = new ArrayList<>();
+    private List<CDPTelemetryFlowEventLogger> flowEventLoggers = new ArrayList<>();
 
     @Mock
-    private CDPTelemetryEventLogger eventLogger;
+    private CDPTelemetryFlowEventLogger flowEventLogger;
+
+    @Mock
+    private CDPFreeIpaSyncLogger cdpFreeIpaSyncLogger;
 
     @BeforeEach()
     void setUp() {
-        eventLoggers.add(eventLogger);
+        flowEventLoggers.add(flowEventLogger);
     }
 
     @Test
     void testAcceptWhenDataIsNull() {
         underTest.accept(new Event(null));
-        Mockito.verify(eventLogger, never()).acceptableEventClass();
-        Mockito.verify(eventLogger, never()).log(any());
+
+        verifyNoInteractions(flowEventLogger);
     }
 
     @Test
     void testAcceptWhenNoAcceptableEventFound() {
-        when(eventLogger.acceptableEventClass()).thenReturn(CDPEnvironmentStructuredFlowEvent.class);
+        when(flowEventLogger.acceptableEventClass()).thenReturn(CDPEnvironmentStructuredFlowEvent.class);
         CDPStructuredFlowEvent cdpStructuredFlowEvent = new CDPStructuredFlowEvent();
+
         underTest.accept(new Event(cdpStructuredFlowEvent));
-        Mockito.verify(eventLogger, times(1)).acceptableEventClass();
-        Mockito.verify(eventLogger, never()).log(any());
+
+        verify(flowEventLogger, times(1)).acceptableEventClass();
+        verify(flowEventLogger, never()).log(any());
     }
 
     @Test
     void testAcceptWhenAcceptableEventFound() {
-        when(eventLogger.acceptableEventClass()).thenReturn(CDPEnvironmentStructuredFlowEvent.class);
+        when(flowEventLogger.acceptableEventClass()).thenReturn(CDPEnvironmentStructuredFlowEvent.class);
         CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
+
         underTest.accept(new Event(cdpStructuredFlowEvent));
-        Mockito.verify(eventLogger, times(1)).acceptableEventClass();
-        Mockito.verify(eventLogger, times(1)).log(eq(cdpStructuredFlowEvent));
+
+        verify(flowEventLogger, times(1)).acceptableEventClass();
+        verify(flowEventLogger, times(1)).log(cdpStructuredFlowEvent);
+    }
+
+    @Test
+    void testAcceptWhenFreeIpaSyncEvent() {
+        CDPFreeipaStructuredSyncEvent cdpFreeipaStructuredSyncEvent = new CDPFreeipaStructuredSyncEvent();
+
+        underTest.accept(new Event(cdpFreeipaStructuredSyncEvent));
+
+        verify(cdpFreeIpaSyncLogger).log(cdpFreeipaStructuredSyncEvent);
+        verifyNoInteractions(flowEventLogger);
     }
 
 }

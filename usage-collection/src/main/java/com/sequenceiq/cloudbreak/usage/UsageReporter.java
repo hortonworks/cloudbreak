@@ -198,4 +198,11 @@ public interface UsageReporter {
      */
     void cdpSecretRotationEvent(
             UsageProto.CDPSecretRotationEvent details);
+
+    /**
+     * Reports that a CDP FreeIPA has been periodically synced.
+     * @param details the event details
+     */
+    void cdpFreeipaSync(
+            UsageProto.CDPFreeIPASync details);
 }
