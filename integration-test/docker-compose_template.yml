@@ -101,7 +101,7 @@ services:
       - INTEGRATIONTEST_PROXY_PASSWORD2
       - INTEGRATIONTEST_TESTSUITE_CLEANUP
       - INTEGRATIONTEST_TESTSUITE_CLEANUPONFAILURE
-    image: docker-private.infra.cloudera.com/cloudera_base/ubi8/cldr-openjdk-21-runtime-cis:1.21-1.1739757871-stig-27022025
+    image: docker-private.infra.cloudera.com/cloudera_base/ubi8/cldr-openjdk-21-runtime-cis:1.21-1.1739757871-stig-03032025
     deploy:
       resources:
         limits:
