@@ -54,6 +54,8 @@ public final class FreeIpaOperationDescriptions {
 
     public static final String GET_ENCRYPTION_KEYS = "Get encryption keys of the FreeIPA";
 
+    public static final String SET_SELINUX_TO_ENFORCING = "Enables SELinux 'ENFORCING' of the FreeIPA instances";
+
     private FreeIpaOperationDescriptions() {
     }
 }

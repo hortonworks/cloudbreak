@@ -4,7 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -32,6 +34,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerBase;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.SetSeLinuxToEnforcingResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
@@ -59,6 +62,7 @@ import com.sequenceiq.freeipa.service.stack.FreeIpaUpgradeCcmService;
 import com.sequenceiq.freeipa.service.stack.FreeipaModifyProxyConfigService;
 import com.sequenceiq.freeipa.service.stack.RepairInstancesService;
 import com.sequenceiq.freeipa.service.stack.RootVolumeUpdateService;
+import com.sequenceiq.freeipa.service.stack.SeLinuxEnablementService;
 import com.sequenceiq.freeipa.util.CrnService;
 
 @ExtendWith(MockitoExtension.class)
@@ -94,6 +98,9 @@ class FreeIpaV1ControllerTest {
 
     @Mock
     private FreeIpaRootCertificateService rootCertificateService;
+
+    @Mock
+    private SeLinuxEnablementService seLinuxEnablementService;
 
     @Mock
     private CrnService crnService;
@@ -348,4 +355,15 @@ class FreeIpaV1ControllerTest {
         assertEquals("1", result.getFlowIdentifier().getPollableId());
     }
 
+    @Test
+    void testSetSeLinuxToEnforcingByCrn() {
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "1");
+        SetSeLinuxToEnforcingResponse response = new SetSeLinuxToEnforcingResponse(flowIdentifier);
+        when(seLinuxEnablementService.setSeLinuxToEnforcingByCrn(eq(ENVIRONMENT_CRN), any())).thenReturn(response);
+
+        SetSeLinuxToEnforcingResponse result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.setSeLinuxToEnforcingByCrn(ENVIRONMENT_CRN));
+
+        verify(seLinuxEnablementService).setSeLinuxToEnforcingByCrn(eq(ENVIRONMENT_CRN), eq("hortonworks"));
+        assertEquals("1", result.getFlowIdentifier().getPollableId());
+    }
 }

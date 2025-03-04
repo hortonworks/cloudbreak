@@ -1,10 +1,10 @@
-package com.sequenceiq.environment.environment.flow.enableselinux.freeipa;
+package com.sequenceiq.freeipa.flow.freeipa.enableselinux;
 
-import com.sequenceiq.environment.environment.flow.EnvironmentFillInMemoryStateStoreRestartAction;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.RestartAction;
+import com.sequenceiq.freeipa.flow.FillInMemoryStateStoreRestartAction;
 
-public enum EnvironmentEnableSeLinuxState implements FlowState {
+public enum FreeIpaEnableSeLinuxState implements FlowState {
 
     INIT_STATE,
     ENABLE_SELINUX_FREEIPA_VALIDATION_STATE,
@@ -15,6 +15,6 @@ public enum EnvironmentEnableSeLinuxState implements FlowState {
 
     @Override
     public Class<? extends RestartAction> restartAction() {
-        return EnvironmentFillInMemoryStateStoreRestartAction.class;
+        return FillInMemoryStateStoreRestartAction.class;
     }
 }

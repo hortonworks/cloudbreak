@@ -3,7 +3,7 @@ package com.sequenceiq.common.model;
 import java.util.Locale;
 
 public enum SeLinux {
-    ENFORCING, PERMISSIVE;
+    ENFORCING, PERMISSIVE, DISABLED;
 
     public static SeLinux fromStringWithFallback(String seLinux) {
         if (seLinux != null && !seLinux.isEmpty()) {

@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.freeipa.entity.SaltSecurityConfig;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -107,5 +108,12 @@ class SecurityConfigServiceTest {
         underTest.initSaltSecurityConfigs(2L);
 
         verifyNoInteractions(tlsSecurityService, securityConfigRepository);
+    }
+
+    @Test
+    void testUpdateSeLinuxSecurityConfig() {
+        when(securityConfigRepository.updateSeLinuxSecurityConfig(SeLinux.ENFORCING, 1L)).thenReturn(1);
+        int result = underTest.updateSeLinuxSecurityConfig(1L, SeLinux.ENFORCING);
+        assertEquals(1, result);
     }
 }

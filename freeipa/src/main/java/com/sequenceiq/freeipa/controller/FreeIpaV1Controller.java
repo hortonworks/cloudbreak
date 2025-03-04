@@ -47,6 +47,7 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.RetryableFlowResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.SetSeLinuxToEnforcingResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.binduser.BindUserCreateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageChangeRequest;
@@ -104,6 +105,7 @@ import com.sequenceiq.freeipa.service.stack.FreeipaInstanceMetadataUpdateService
 import com.sequenceiq.freeipa.service.stack.FreeipaModifyProxyConfigService;
 import com.sequenceiq.freeipa.service.stack.RepairInstancesService;
 import com.sequenceiq.freeipa.service.stack.RootVolumeUpdateService;
+import com.sequenceiq.freeipa.service.stack.SeLinuxEnablementService;
 import com.sequenceiq.freeipa.util.CrnService;
 
 @Controller
@@ -201,6 +203,9 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Inject
     private RootVolumeUpdateService rootVolumeUpdateService;
+
+    @Inject
+    private SeLinuxEnablementService seLinuxEnablementService;
 
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
@@ -516,5 +521,12 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @NotEmpty String environmentCrn,
             @Valid @NotNull DiskUpdateRequest rootDiskVolumesRequest) {
         return rootVolumeUpdateService.updateRootVolume(environmentCrn, rootDiskVolumesRequest, ThreadBasedUserCrnProvider.getAccountId());
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
+    public SetSeLinuxToEnforcingResponse setSeLinuxToEnforcingByCrn(
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @NotEmpty String environmentCrn) {
+        return seLinuxEnablementService.setSeLinuxToEnforcingByCrn(environmentCrn, ThreadBasedUserCrnProvider.getAccountId());
     }
 }

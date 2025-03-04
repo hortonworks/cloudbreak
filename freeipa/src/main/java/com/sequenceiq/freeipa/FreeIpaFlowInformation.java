@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa;
 
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.UNKNOWN;
+import static com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaEnableSeLinuxStateSelectors.SET_SELINUX_TO_ENFORCING_EVENT;
 
 import java.util.List;
 
@@ -59,7 +60,8 @@ public class FreeIpaFlowInformation implements ApplicationFlowInformation {
             ModifyProxyConfigEvent.MODIFY_PROXY_TRIGGER_EVENT.event(),
             FlowChainInitEvent.FLOWCHAIN_INIT_TRIGGER_EVENT.event(),
             FlowChainFinalizeEvent.FLOWCHAIN_FINALIZE_TRIGGER_EVENT.event(),
-            FreeIpaProviderTemplateUpdateFlowEvent.FREEIPA_PROVIDER_TEMPLATE_UPDATE_TRIGGER_EVENT.event());
+            FreeIpaProviderTemplateUpdateFlowEvent.FREEIPA_PROVIDER_TEMPLATE_UPDATE_TRIGGER_EVENT.event(),
+            SET_SELINUX_TO_ENFORCING_EVENT.event());
 
     private static final List<Class<? extends FlowConfiguration<?>>> TERMINATION_FLOWS = List.of(StackTerminationFlowConfig.class);
 

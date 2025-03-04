@@ -18,7 +18,8 @@ public enum OperationType {
     MODIFY_PROXY_CONFIG,
     CHANGE_DYNAMIC_ENTITLEMENTS,
     REBUILD,
-    MODIFY_ROOT_VOLUME;
+    MODIFY_ROOT_VOLUME,
+    MODIFY_SELINUX_MODE;
 
     private final String lowerCaseName;
 

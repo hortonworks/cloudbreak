@@ -1,10 +1,10 @@
-package com.sequenceiq.environment.environment.flow.enableselinux.freeipa.event;
+package com.sequenceiq.freeipa.flow.freeipa.enableselinux.event;
 
 import com.sequenceiq.flow.core.FlowEvent;
 
-public enum EnvironmentEnableSeLinuxStateSelectors implements FlowEvent {
+public enum FreeIpaEnableSeLinuxStateSelectors implements FlowEvent {
 
-    ENABLE_SELINUX_FREEIPA_VALIDATION_EVENT,
+    SET_SELINUX_TO_ENFORCING_EVENT,
     ENABLE_SELINUX_FREEIPA_EVENT,
     FINISH_ENABLE_SELINUX_FREEIPA_EVENT,
     FINALIZE_ENABLE_SELINUX_FREEIPA_EVENT,

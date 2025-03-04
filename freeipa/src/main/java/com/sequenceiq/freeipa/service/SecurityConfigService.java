@@ -92,4 +92,8 @@ public class SecurityConfigService {
         saltSecurityConfig.setSaltPasswordVault(password);
         saltSecurityConfigRepository.save(saltSecurityConfig);
     }
+
+    public int updateSeLinuxSecurityConfig(Long securityConfigId, SeLinux selinuxMode) {
+        return securityConfigRepository.updateSeLinuxSecurityConfig(selinuxMode, securityConfigId);
+    }
 }

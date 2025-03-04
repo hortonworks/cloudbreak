@@ -27,8 +27,6 @@ import com.sequenceiq.environment.environment.flow.config.update.event.EnvStackC
 import com.sequenceiq.environment.environment.flow.config.update.event.EnvStackConfigUpdatesStateSelectors;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
-import com.sequenceiq.environment.environment.flow.enableselinux.freeipa.event.EnvironmentEnableSeLinuxEvent;
-import com.sequenceiq.environment.environment.flow.enableselinux.freeipa.event.EnvironmentEnableSeLinuxStateSelectors;
 import com.sequenceiq.environment.environment.flow.externalizedcluster.create.event.ExternalizedComputeClusterCreationEvent;
 import com.sequenceiq.environment.environment.flow.externalizedcluster.create.event.ExternalizedComputeClusterCreationStateSelectors;
 import com.sequenceiq.environment.environment.flow.externalizedcluster.reinitialization.event.ExternalizedComputeClusterReInitializationEvent;
@@ -230,20 +228,6 @@ public class EnvironmentReactorFlowManager {
                 .build();
         FlowIdentifier flowIdentifier = sendEvent(environmentVerticalScaleEvent, userCrn);
         LOGGER.debug("Environment Vertical Scale flow trigger event sent for environment {}", environment.getName());
-        return flowIdentifier;
-    }
-
-    public FlowIdentifier triggerSeLinuxEnableFlow(EnvironmentDto environment, String userCrn) {
-        LOGGER.info("Environment SeLinux enable flow triggered for environment {}", environment.getName());
-        EnvironmentEnableSeLinuxEvent environmentSeLinuxEnableEvent = EnvironmentEnableSeLinuxEvent.builder()
-                .withAccepted(new Promise<>())
-                .withResourceCrn(environment.getResourceCrn())
-                .withResourceId(environment.getId())
-                .withResourceName(environment.getName())
-                .withSelector(EnvironmentEnableSeLinuxStateSelectors.ENABLE_SELINUX_FREEIPA_VALIDATION_EVENT.selector())
-                .build();
-        FlowIdentifier flowIdentifier = sendEvent(environmentSeLinuxEnableEvent, userCrn);
-        LOGGER.debug("Environment Enable SeLinux flow trigger event sent for environment {}", environment.getName());
         return flowIdentifier;
     }
 
