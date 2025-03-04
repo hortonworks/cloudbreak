@@ -12,7 +12,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.authorization.service.model.projection.ResourceCrnAndNameView;
-import com.sequenceiq.cloudbreak.domain.projection.ClusterTemplateStatusView;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
@@ -41,9 +40,6 @@ public interface ClusterTemplateRepository extends WorkspaceResourceRepository<C
     List<String> findAllResourceCrnsByAccountId(@Param("accountId") String accountId);
 
     ClusterTemplate findByResourceCrn(String resourceCrn);
-
-    @Query("SELECT c.status as status FROM ClusterTemplate c WHERE c.resourceCrn = :resourceCrn")
-    ClusterTemplateStatusView findViewByResourceCrn(@Param("resourceCrn") String resourceCrn);
 
     @Query("SELECT c.name as name, c.resourceCrn as crn FROM ClusterTemplate c " +
             "WHERE c.workspace.tenant.name = :accountId AND c.resourceCrn IN (:resourceCrns)")

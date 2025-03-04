@@ -14,7 +14,6 @@ import org.springframework.data.repository.query.Param;
 import com.sequenceiq.authorization.service.model.projection.ResourceCrnAndNameView;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.projection.BlueprintStatusView;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 
@@ -46,9 +45,6 @@ public interface BlueprintRepository extends WorkspaceResourceRepository<Bluepri
 
     @Query("SELECT b.resourceCrn FROM Blueprint b WHERE b.workspace.tenant.name = :accountId")
     List<String> findAllResourceCrnsByAccountId(@Param("accountId") String accountId);
-
-    @Query("SELECT b.status as status FROM Blueprint b WHERE b.resourceCrn = :resourceCrn")
-    BlueprintStatusView findViewByResourceCrn(@Param("resourceCrn") String resourceCrn);
 
     @Query("SELECT s.cluster.blueprint FROM Stack s WHERE s.resourceCrn = :datahubCrn AND s.type = 'WORKLOAD'")
     Optional<Blueprint> findByDatahubCrn(@Param("datahubCrn") String datahubCrn);

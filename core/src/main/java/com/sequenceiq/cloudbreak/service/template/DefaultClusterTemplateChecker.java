@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.domain.projection.ClusterTemplateStatusView;
 public class DefaultClusterTemplateChecker implements DefaultResourceChecker {
 
     @Inject
-    private ClusterTemplateService clusterTemplateService;
+    private ClusterTemplateViewService clusterTemplateService;
 
     @Override
     public AuthorizationResourceType getResourceType() {
