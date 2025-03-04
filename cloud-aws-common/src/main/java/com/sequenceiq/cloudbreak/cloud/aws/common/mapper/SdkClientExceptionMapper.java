@@ -35,7 +35,7 @@ public class SdkClientExceptionMapper {
             message = addMethodNameIfNotContains(message, methodName);
             return new CloudConnectorException(message, e);
         }
-        if (message.contains("Rate exceeded") || message.contains("Request limit exceeded")) {
+        if (message.contains("Rate exceeded") || message.contains("Request limit exceeded") || message.contains("Unable to unmarshall response")) {
             message = addMethodNameIfNotContains(message, methodName);
             return new ActionFailedException(message);
         }

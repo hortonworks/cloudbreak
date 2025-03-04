@@ -149,4 +149,32 @@ class SdkClientExceptionMapperTest {
                 "Cannot execute method: methodName. Activity 123 is in progress. " +
                         "(Service: null, Status Code: 0, Request ID: null)", actual.getMessage());
     }
+
+    @Test
+    void testMapMessageUnableToUnmarshallResponse() {
+        String message = "Unable to unmarshall response (Could not parse XML response.). Response Code: 200, Response Text: OK";
+        SdkClientException e = SdkClientException.create(message);
+
+        when(awsEncodedAuthorizationFailureMessageDecoder.decodeAuthorizationFailureMessageIfNeeded(ac, REGION, message)).thenReturn(message);
+
+        RuntimeException actual = underTest.map(ac, REGION, e, signature);
+
+        assertEquals(Retry.ActionFailedException.class, actual.getClass());
+        assertEquals("Cannot execute method: methodName. Unable to unmarshall response (Could not parse XML response.). " +
+                "Response Code: 200, Response Text: OK", actual.getMessage());
+    }
+
+    @Test
+    void testMapMessageRandomError() {
+        String message = "Random Aws Error Message";
+        SdkClientException e = SdkClientException.create(message);
+
+        when(awsEncodedAuthorizationFailureMessageDecoder.decodeAuthorizationFailureMessageIfNeeded(ac, REGION, message)).thenReturn(message);
+
+        RuntimeException actual = underTest.map(ac, REGION, e, signature);
+
+        assertEquals(SdkClientException.class, actual.getClass());
+        assertEquals("Random Aws Error Message", actual.getMessage());
+    }
+
 }
