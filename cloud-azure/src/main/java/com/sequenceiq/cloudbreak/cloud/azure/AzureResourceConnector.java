@@ -236,6 +236,12 @@ public class AzureResourceConnector extends AbstractResourceConnector {
         }
     }
 
+    @Override
+    public List<CloudResourceStatus> updateLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier) {
+        LOGGER.debug("Updating loadbalancer");
+        return launchLoadBalancers(authenticatedContext, stack, persistenceNotifier);
+    }
+
     private void createLbTemplateDeployment(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier notifier, String stackName,
             String resourceGroupName, String template) {
         AzureClient client = authenticatedContext.getParameter(AzureClient.class);

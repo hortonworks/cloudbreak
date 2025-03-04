@@ -4,6 +4,8 @@ import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.event.EventSelectorUtil;
+import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.update.LoadBalancerUpdateFailureEvent;
+import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.update.LoadBalancerUpdateSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.bootstrap.BootstrapMachinesFailed;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.bootstrap.BootstrapMachinesSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.cloudstorage.ValidateCloudStorageFailed;
@@ -66,6 +68,8 @@ public enum UpscaleFlowEvent implements FlowEvent {
     UPSCALE_VALIDATE_NEW_INSTANCES_HEALTH_FINISHED_EVENT,
     UPSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_FINISHED_EVENT("UPSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_FINISHED_EVENT"),
     UPSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_FAILED_EVENT("UPSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_FAILED_EVENT"),
+    UPSCALE_UPDATE_LOAD_BALANCER_FINISHED_EVENT(EventSelectorUtil.selector(LoadBalancerUpdateSuccess.class)),
+    UPSCALE_UPDATE_LOAD_BALANCER_FAILED_EVENT(EventSelectorUtil.selector(LoadBalancerUpdateFailureEvent.class)),
     UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FINISHED_EVENT("UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FINISHED_EVENT"),
     UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FAILED_EVENT("UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FAILED_EVENT"),
     UPSCALE_FINISHED_EVENT("UPSCALE_FINISHED_EVENT"),

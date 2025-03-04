@@ -200,6 +200,21 @@ public class FreeIpaClientExceptionUtil {
         }
     }
 
+    public static void ignoreEmptyModOrDuplicateException(FreeIpaClientRunnable runnable, String message, Object... messageParams)
+            throws FreeIpaClientException {
+        try {
+            runnable.run();
+        } catch (FreeIpaClientException e) {
+            if (isEmptyModlistException(e) || isDuplicateEntryException(e)) {
+                Optional.ofNullable(message).ifPresentOrElse(
+                        msg -> LOGGER.debug(msg, messageParams),
+                        () -> LOGGER.debug("No modification was needed in FreeIPA is ignored. Exception message: {}", e.getMessage()));
+            } else {
+                throw e;
+            }
+        }
+    }
+
     public static <T> Optional<T> ignoreDuplicateExceptionWithValue(FreeIpaClientCallable<T> callable, String message, Object... messageParams)
             throws FreeIpaClientException {
         try {

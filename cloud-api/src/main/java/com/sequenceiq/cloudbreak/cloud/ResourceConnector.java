@@ -81,6 +81,11 @@ public interface ResourceConnector {
     List<CloudResourceStatus> launchLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier)
             throws Exception;
 
+    default List<CloudResourceStatus> updateLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier)
+            throws Exception {
+        return List.of();
+    }
+
     /**
      * Launches a database stack on a cloud platform. The stack consists of the following resources:
      * - a single database server instance

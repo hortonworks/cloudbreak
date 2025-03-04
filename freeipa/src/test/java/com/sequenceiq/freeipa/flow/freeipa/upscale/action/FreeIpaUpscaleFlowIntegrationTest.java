@@ -98,6 +98,7 @@ import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.flow.FlowIntegrationTestConfig;
+import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.handler.LoadBalancerUpdateHandler;
 import com.sequenceiq.freeipa.flow.freeipa.provision.handler.BootstrapMachineHandler;
 import com.sequenceiq.freeipa.flow.freeipa.provision.handler.ClusterProxyUpdateRegistrationHandler;
 import com.sequenceiq.freeipa.flow.freeipa.provision.handler.InstallFreeIpaServicesHandler;
@@ -134,6 +135,8 @@ import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaPostInstallService;
 import com.sequenceiq.freeipa.service.image.ImageFallbackService;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.image.userdata.UserDataService;
+import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerService;
+import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerUpdateService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.secret.UserdataSecretsService;
@@ -253,6 +256,12 @@ class FreeIpaUpscaleFlowIntegrationTest {
 
     @MockBean
     private NodeValidator nodeValidator;
+
+    @MockBean
+    private FreeIpaLoadBalancerUpdateService loadBalancerUpdateService;
+
+    @MockBean
+    private FreeIpaLoadBalancerService loadBalancerService;
 
     private ResourceConnector resourceConnector = mock(ResourceConnector.class);
 
@@ -429,7 +438,8 @@ class FreeIpaUpscaleFlowIntegrationTest {
             PostInstallFreeIpaHandler.class,
             ValidateInstancesHealthHandler.class,
             UpscaleCreateUserdataSecretsHandler.class,
-            UpscaleUpdateUserdataSecretsHandler.class
+            UpscaleUpdateUserdataSecretsHandler.class,
+            LoadBalancerUpdateHandler.class
     })
     static class Config {
         @MockBean

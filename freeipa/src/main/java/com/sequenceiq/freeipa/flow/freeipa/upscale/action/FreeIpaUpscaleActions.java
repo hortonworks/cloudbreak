@@ -69,6 +69,7 @@ import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Resource;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.update.LoadBalancerUpdateRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.bootstrap.BootstrapMachinesRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.bootstrap.BootstrapMachinesSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.cloudstorage.ValidateCloudStorageRequest;
@@ -100,6 +101,7 @@ import com.sequenceiq.freeipa.flow.freeipa.upscale.failure.CollectMetadataResult
 import com.sequenceiq.freeipa.flow.freeipa.upscale.failure.HostMetadataSetupFailedToUpscaleFailureEventConverter;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.failure.ImageFallbackFailedToUpscaleFailureEventConverter;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.failure.InstallFreeIpaServicesFailedToUpscaleFailureEventConverter;
+import com.sequenceiq.freeipa.flow.freeipa.upscale.failure.LoadBalancerUpdateFailureEventToUpscaleFailureEventConverter;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.failure.PostInstallFreeIpaFailedToUpscaleFailureEventConverter;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.failure.StackFailureEventToUpscaleFailureEventConverter;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.failure.UpscaleStackResultToUpscaleFailureEventConverter;
@@ -656,6 +658,19 @@ public class FreeIpaUpscaleActions {
         };
     }
 
+    @Bean(name = "UPSCALE_UPDATE_LOAD_BALANCER_STATE")
+    public Action<?, ?> updateLoadBalancerAction() {
+        return new AbstractUpscaleAction<>(StackEvent.class) {
+            @Override
+            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
+                Stack stack = context.getStack();
+                stackUpdater.updateStackStatus(stack, getInProgressStatus(variables), "Updating FreeIPA load balancer");
+                sendEvent(context,
+                        new LoadBalancerUpdateRequest(stack.getId(), context.getCloudContext(), context.getCloudCredential(), context.getCloudStack()));
+            }
+        };
+    }
+
     @Bean(name = "UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_STATE")
     public Action<?, ?> updateEnvironmentStackConfigAction() {
         return new AbstractUpscaleAction<>(StackEvent.class) {
@@ -775,6 +790,7 @@ public class FreeIpaUpscaleActions {
                 payloadConverters.add(new ClusterProxyRegistrationFailedToUpscaleFailureEventConverter());
                 payloadConverters.add(new ImageFallbackFailedToUpscaleFailureEventConverter());
                 payloadConverters.add(new ValidateCloudStorageFailedToUpscaleFailureEventConverter());
+                payloadConverters.add(new LoadBalancerUpdateFailureEventToUpscaleFailureEventConverter());
                 // this should be the last one
                 payloadConverters.add(new StackFailureEventToUpscaleFailureEventConverter());
 

@@ -28,7 +28,7 @@ public class FreeIpaLoadBalancerDomainService {
             LoadBalancer lb = loadBalancer.get();
             FreeIpa freeIpa = freeIpaService.findByStackId(stackId);
             for (String ip : lb.getIp()) {
-                FreeIpaClientExceptionUtil.ignoreEmptyModException(() -> freeIpaClient.addDnsARecord(freeIpa.getDomain(), lb.getEndpoint(), ip, true),
+                FreeIpaClientExceptionUtil.ignoreEmptyModOrDuplicateException(() -> freeIpaClient.addDnsARecord(freeIpa.getDomain(), lb.getEndpoint(), ip, true),
                         "LB A record with endpoint [{}], IP [{}], domain [{}] already exists, nothing to do", lb.getEndpoint(), lb.getIp(), freeIpa.getDomain());
             }
             // TODO PEM REG
