@@ -561,7 +561,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     }
 
     public BlueprintStatusView getStatusViewByResourceCrn(String resourceCrn) {
-        return blueprintRepository.findViewByResourceCrn(resourceCrn);
+        return blueprintViewRepository.findViewByResourceCrn(resourceCrn);
     }
 
     @Override
