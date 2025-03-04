@@ -52,6 +52,7 @@ public class DistroXAwsMigrationTest extends AbstractE2ETest {
                 .given(DistroXTestDto.class)
                 .withTemplate(commonClusterManagerProperties.getDataEngDistroXBlueprintName(currentVersion))
                 .withLoadBalancer()
+                .withVariant("AWS")
                 .when(distroXTestClient.create())
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
