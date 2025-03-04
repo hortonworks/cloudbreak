@@ -31,6 +31,7 @@ public class InstanceMetaDataToInstanceMetaDataV4ResponseConverter {
         metaDataJson.setInstanceStatus(source.getInstanceStatus());
         metaDataJson.setInstanceType(source.getInstanceMetadataType());
         metaDataJson.setLifeCycle(source.getLifeCycle());
+        metaDataJson.setProviderInstanceType(source.getProviderInstanceType());
         return metaDataJson;
     }
 
@@ -55,6 +56,7 @@ public class InstanceMetaDataToInstanceMetaDataV4ResponseConverter {
         metaDataJson.setLifeCycle(source.getLifeCycle());
         metaDataJson.setState(source.getInstanceStatus().getAsHostState());
         metaDataJson.setStatusReason(source.getStatusReason());
+        metaDataJson.setProviderInstanceType(source.getProviderInstanceType());
         return metaDataJson;
     }
 

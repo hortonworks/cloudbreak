@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.mock;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.client.Entity;
@@ -27,6 +29,8 @@ import com.sequenceiq.common.api.type.LoadBalancerType;
 public class MockMetadataCollector implements MetadataCollector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockMetadataCollector.class);
+
+    private static final String LARGE = "large";
 
     @Inject
     private MockUrlFactory mockUrlFactory;
@@ -59,6 +63,7 @@ public class MockMetadataCollector implements MetadataCollector {
 
     @Override
     public InstanceTypeMetadata collectInstanceTypes(AuthenticatedContext ac, List<String> instanceIds) {
-        return new InstanceTypeMetadata();
+        Map<String, String> instanceTypes = instanceIds.stream().collect(Collectors.toMap(i -> i, i -> LARGE));
+        return new InstanceTypeMetadata(instanceTypes);
     }
 }

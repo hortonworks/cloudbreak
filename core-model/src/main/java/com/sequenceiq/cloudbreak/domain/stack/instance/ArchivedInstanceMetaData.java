@@ -91,6 +91,8 @@ public class ArchivedInstanceMetaData implements ProvisionEntity {
     @Column(name = "userdatasecretresource_id")
     private Long userdataSecretResourceId;
 
+    private String providerInstanceType;
+
     public Long getId() {
         return id;
     }
@@ -303,6 +305,14 @@ public class ArchivedInstanceMetaData implements ProvisionEntity {
         }
     }
 
+    public String getProviderInstanceType() {
+        return providerInstanceType;
+    }
+
+    public void setProviderInstanceType(String providerInstanceType) {
+        this.providerInstanceType = providerInstanceType;
+    }
+
     @Override
     public String toString() {
         return "ArchivedInstanceMetaData{" +
@@ -331,6 +341,7 @@ public class ArchivedInstanceMetaData implements ProvisionEntity {
                 ", lifeCycle=" + lifeCycle +
                 ", variant='" + variant + '\'' +
                 ", userdataSecretResourceId=" + userdataSecretResourceId +
+                ", providerInstanceType=" + providerInstanceType +
                 '}';
     }
 }

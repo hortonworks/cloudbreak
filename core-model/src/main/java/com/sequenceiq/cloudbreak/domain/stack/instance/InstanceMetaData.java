@@ -115,6 +115,9 @@ public class InstanceMetaData implements ProvisionEntity, OrchestrationNode, Ins
     @Column(name = "userdatasecretresource_id")
     private Long userdataSecretResourceId;
 
+    @Column
+    private String providerInstanceType;
+
     public InstanceGroup getInstanceGroup() {
         return instanceGroup;
     }
@@ -179,6 +182,10 @@ public class InstanceMetaData implements ProvisionEntity, OrchestrationNode, Ins
         return getClusterManagerServer() != null ? getClusterManagerServer() : ambariServer;
     }
 
+    public void setAmbariServer(Boolean ambariServer) {
+        this.ambariServer = ambariServer;
+    }
+
     /**
      * Need this for Jackson serialization
      */
@@ -190,6 +197,10 @@ public class InstanceMetaData implements ProvisionEntity, OrchestrationNode, Ins
         return clusterManagerServer;
     }
 
+    public void setClusterManagerServer(Boolean clusterManagerServer) {
+        this.clusterManagerServer = clusterManagerServer;
+    }
+
     /**
      * Need this for Jackson serialization
      */
@@ -197,17 +208,9 @@ public class InstanceMetaData implements ProvisionEntity, OrchestrationNode, Ins
         return getClusterManagerServer();
     }
 
-    public void setAmbariServer(Boolean ambariServer) {
-        this.ambariServer = ambariServer;
-    }
-
     public void setServer(Boolean server) {
         ambariServer = server;
         clusterManagerServer = server;
-    }
-
-    public void setClusterManagerServer(Boolean clusterManagerServer) {
-        this.clusterManagerServer = clusterManagerServer;
     }
 
     public String getDiscoveryFQDN() {
@@ -425,6 +428,14 @@ public class InstanceMetaData implements ProvisionEntity, OrchestrationNode, Ins
         this.userdataSecretResourceId = userdataSecretResourceId;
     }
 
+    public String getProviderInstanceType() {
+        return providerInstanceType;
+    }
+
+    public void setProviderInstanceType(String providerInstanceType) {
+        this.providerInstanceType = providerInstanceType;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", InstanceMetaData.class.getSimpleName() + "[", "]")
@@ -441,7 +452,8 @@ public class InstanceMetaData implements ProvisionEntity, OrchestrationNode, Ins
                 .add("variant='" + variant + "'")
                 .add("subnetId='" + subnetId + "'")
                 .add("availabilityZone='" + availabilityZone + "'")
-                .add("userdataSecretResourceId=" + userdataSecretResourceId)
+                .add("userdataSecretResourceId='" + userdataSecretResourceId + "'")
+                .add("providerInstanceType='" + providerInstanceType + "'")
                 .toString();
     }
 

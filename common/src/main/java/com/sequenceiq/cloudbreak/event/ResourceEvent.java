@@ -311,6 +311,7 @@ public enum ResourceEvent {
     STACK_DYNAMIC_ENTITLEMENT_STARTED("stack.dynamic.entitlement.started"),
     STACK_DYNAMIC_ENTITLEMENT_FINISHED("stack.dynamic.entitlement.finished"),
     STACK_DYNAMIC_ENTITLEMENT_FAILED("stack.dynamic.entitlement.failed"),
+    STACK_PROVIDER_INSTANCE_TYPE_MISMATCH("stack.provider.instance.type.mismatch"),
 
     CONFIGURE_POLICY("configure.policy"),
     CLUSTER_BUILDING("cluster.building"),

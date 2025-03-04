@@ -631,6 +631,7 @@ public class ModelDescriptions {
         public static final String SUBNET_ID = "ID of the subnet the instance is deployed in";
         public static final String AVAILABILITY_ZONE = "name of the availability zone the instance is deployed in";
         public static final String RACK_ID = "ID of the virtual network rack the instance is deployed in";
+        public static final String PROVIDER_INSTANCE_TYPE = "The actual instance type of the instance";
     }
 
     public static class FailurePolicyModelDescription {

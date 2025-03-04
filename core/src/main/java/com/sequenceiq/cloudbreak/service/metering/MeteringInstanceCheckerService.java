@@ -1,10 +1,9 @@
 package com.sequenceiq.cloudbreak.service.metering;
 
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -24,13 +23,19 @@ import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTypeMetadata;
 import com.sequenceiq.cloudbreak.converter.spi.CloudContextProvider;
-import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
-import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Service
@@ -48,6 +53,8 @@ public class MeteringInstanceCheckerService {
 
     private static final String SALT = "salt";
 
+    private static final String PROVIDER_INSTANCES_ARE_DIFFERENT = "PROVIDER_INSTANCES_ARE_DIFFERENT";
+
     @Inject
     private HostOrchestrator hostOrchestrator;
 
@@ -64,9 +71,16 @@ public class MeteringInstanceCheckerService {
     private CloudContextProvider cloudContextProvider;
 
     @Inject
-    private MismatchedInstanceHandlerService mismatchedInstanceHandlerService;
+    private InstanceMetaDataService instanceMetaDataService;
 
-    public void checkInstanceTypes(StackDto stack) {
+    @Inject
+    private StackService stackService;
+
+    @Inject
+    private CloudbreakEventService cloudbreakEventService;
+
+    public void checkInstanceTypes(Long stackId) {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         try {
             checkInstanceTypesWithFallback(stack);
         } catch (Exception e) {
@@ -85,7 +99,7 @@ public class MeteringInstanceCheckerService {
         }
     }
 
-    private void checkInstanceTypesWithFallback(StackDto stack) throws CloudbreakOrchestratorFailedException {
+    private void checkInstanceTypesWithFallback(Stack stack) throws CloudbreakOrchestratorFailedException {
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         Map<String, JsonNode> responseByHost = hostOrchestrator.getGrainOnAllHosts(gatewayConfig, META_DATA);
         Map<String, String> instanceTypesByHost = responseByHost.entrySet().stream()
@@ -98,14 +112,14 @@ public class MeteringInstanceCheckerService {
             Map<String, String> instanceTypesByInstanceId = instanceTypesByHost.entrySet().stream()
                     .filter(instanceTypeEntry -> instanceIdsByHost.containsKey(instanceTypeEntry.getKey()))
                     .collect(Collectors.toMap(instanceTypeEntry -> instanceIdsByHost.get(instanceTypeEntry.getKey()), Map.Entry::getValue));
-            compareInstanceTypes(stack, instanceTypesByInstanceId, SALT);
+            syncInstanceTypes(stack, instanceTypesByInstanceId, SALT);
         } else {
             throw new RuntimeException("Getting metadata grain from salt returned empty results.");
         }
     }
 
-    private void checkInstanceTypesOnProvider(StackDto stack) {
-        Collection<InstanceMetadataView> instanceMetaDataList = stack.getAllAvailableInstances();
+    private void checkInstanceTypesOnProvider(Stack stack) {
+        List<InstanceMetadataView> instanceMetaDataList = stack.getAllAvailableInstances();
         if (instanceMetaDataList.isEmpty()) {
             LOGGER.debug("No available instance found.");
             return;
@@ -116,40 +130,50 @@ public class MeteringInstanceCheckerService {
         CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
         AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
         InstanceTypeMetadata instanceTypeMetadata = connector.metadata().collectInstanceTypes(ac, instanceIds);
-        compareInstanceTypes(stack, instanceTypeMetadata.getInstanceTypes(), PROVIDER);
+        syncInstanceTypes(stack, instanceTypeMetadata.getInstanceTypes(), PROVIDER);
     }
 
-    private void compareInstanceTypes(StackDto stack, Map<String, String> instanceTypes, String source) {
-        Set<MismatchingInstanceGroup> mismatchingInstanceGroups = collectMismatchingInstanceGroup(stack, instanceTypes, source);
-        mismatchedInstanceHandlerService.handleMismatchingInstanceTypes(stack, mismatchingInstanceGroups);
-    }
+    private void syncInstanceTypes(Stack stack, Map<String, String> providerInstanceTypes, String source) {
+        Set<String> mismatchingInstanceIds = new HashSet<>();
 
-    private Set<MismatchingInstanceGroup> collectMismatchingInstanceGroup(StackDto stack, Map<String, String> instanceTypes, String source) {
-        Set<MismatchingInstanceGroup> mismatchingInstanceGroups = new HashSet<>();
-        for (InstanceGroupDto instanceGroup : stack.getInstanceGroupDtos()) {
-            String instanceTypeFromTemplate = instanceGroup.getInstanceGroup().getTemplate().getInstanceType();
-            Map<String, String> actualInstanceTypesInGroup = new HashMap<>();
-            boolean mismatchingInstanceType = false;
-            for (InstanceMetadataView instanceMetadata : instanceGroup.getNotDeletedAndNotZombieInstanceMetaData()) {
-                String actualInstanceType = instanceTypes.get(instanceMetadata.getInstanceId());
-                if (!instanceTypes.containsKey(instanceMetadata.getInstanceId())) {
-                    LOGGER.warn("Missig actual instance type info for instance with instanceId: {}, fqdn: {}, instanceTypeFromTemplate: {}, source: {}",
-                            instanceMetadata.getInstanceId(), instanceMetadata.getDiscoveryFQDN(), instanceTypeFromTemplate, source);
-                } else if (instanceTypeFromTemplate != null && !instanceTypeFromTemplate.equals(actualInstanceType)) {
-                    LOGGER.warn("Instance type is different in our DB and on the cluster for instance with instanceId: {}, fqdn: {}, " +
-                                    "instanceTypeFromTemplate: {}, actualInstanceType: {}, source: {}",
-                            instanceMetadata.getInstanceId(), instanceMetadata.getDiscoveryFQDN(), instanceTypeFromTemplate, actualInstanceType, source);
-                    mismatchingInstanceType = true;
-                    actualInstanceTypesInGroup.put(instanceMetadata.getInstanceId(), actualInstanceType);
-                } else {
-                    actualInstanceTypesInGroup.put(instanceMetadata.getInstanceId(), actualInstanceType);
+        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+            for (InstanceMetaData instanceMetadata : instanceGroup.getNotDeletedAndNotZombieInstanceMetaDataSet()) {
+                if (StringUtils.isNotEmpty(instanceMetadata.getInstanceId())) {
+                    if (providerInstanceTypes.containsKey(instanceMetadata.getInstanceId())) {
+                        String providerInstanceType = providerInstanceTypes.get(instanceMetadata.getInstanceId());
+                        if (!providerInstanceType.equals(instanceMetadata.getProviderInstanceType())) {
+                            LOGGER.info("Update {} provider instance type from {} to {}",
+                                    instanceMetadata.getInstanceId(), instanceMetadata.getProviderInstanceType(), providerInstanceType);
+                            instanceMetadata.setProviderInstanceType(providerInstanceType);
+                            instanceMetaDataService.save(instanceMetadata);
+                        }
+                        if (!instanceGroup.getTemplate().getInstanceType().equals(providerInstanceType)) {
+                            LOGGER.warn("Instance {} instance type {} does not match template {}",
+                                    instanceMetadata.getInstanceId(), providerInstanceType, instanceMetadata.getProviderInstanceType());
+                            mismatchingInstanceIds.add(instanceMetadata.getInstanceId());
+                        }
+                    } else {
+                        LOGGER.warn("Instance is missing from instance type response: {}", instanceMetadata.getInstanceId());
+                    }
                 }
             }
-            if (mismatchingInstanceType) {
-                mismatchingInstanceGroups.add(new MismatchingInstanceGroup(instanceGroup.getInstanceGroup().getGroupName(),
-                        instanceTypeFromTemplate, actualInstanceTypesInGroup));
+        }
+
+        if (!mismatchingInstanceIds.isEmpty()) {
+            Optional<StructuredNotificationEvent> latestEvent = cloudbreakEventService.cloudbreakLastEventsForStack(stack.getId(),
+                    stack.getType().getResourceType(), 1).stream().findFirst();
+            if (shouldSendWarningMessage(latestEvent)) {
+                cloudbreakEventService.fireCloudbreakEvent(stack.getId(), PROVIDER_INSTANCES_ARE_DIFFERENT, ResourceEvent.STACK_PROVIDER_INSTANCE_TYPE_MISMATCH,
+                        Set.of(mismatchingInstanceIds.toString()));
             }
         }
-        return mismatchingInstanceGroups;
+    }
+
+    private boolean shouldSendWarningMessage(Optional<StructuredNotificationEvent> latestEvent) {
+        if (latestEvent.isEmpty()) {
+            return true;
+        }
+        StructuredNotificationEvent event = latestEvent.get();
+        return event.getNotificationDetails() != null && !PROVIDER_INSTANCES_ARE_DIFFERENT.equals(event.getNotificationDetails().getNotificationType());
     }
 }

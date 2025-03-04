@@ -69,14 +69,18 @@ public class StackDtoToMeteringEventConverter {
                 .map(instanceMetadata -> convertInstance(instanceMetadata, instanceGroup.getInstanceGroup().getTemplate().getInstanceType()));
     }
 
-    private Resource convertInstance(InstanceMetadataView instanceMetadata, String instanceType) {
+    private Resource convertInstance(InstanceMetadataView instanceMetadata, String templateInstanceType) {
         return Resource.newBuilder()
                 .setId(instanceMetadata.getInstanceId())
                 .setInstanceResource(InstanceResource.newBuilder()
                         .setIpAddress(StringUtils.isNotEmpty(instanceMetadata.getPublicIp()) ? instanceMetadata.getPublicIp() : instanceMetadata.getPrivateIp())
-                        .setInstanceType(instanceType)
+                        .setInstanceType(getInstanceType(instanceMetadata, templateInstanceType))
                         .build())
                 .build();
+    }
+
+    private String getInstanceType(InstanceMetadataView instanceMetadata, String templateInstanceType) {
+        return StringUtils.isNotEmpty(instanceMetadata.getProviderInstanceType()) ? instanceMetadata.getProviderInstanceType() : templateInstanceType;
     }
 
     private StatusChange convertStatusChange(StackDtoDelegate stack, ClusterStatus.Value eventOperation) {

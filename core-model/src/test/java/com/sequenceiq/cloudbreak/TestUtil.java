@@ -329,6 +329,7 @@ public class TestUtil {
         instanceMetaData.setInstanceGroup(instanceGroup);
         instanceMetaData.setStartDate(new Date().getTime());
         instanceMetaData.setLifeCycle(InstanceLifeCycle.SPOT);
+        instanceMetaData.setProviderInstanceType(instanceGroup.getTemplate() != null ? instanceGroup.getTemplate().getInstanceType() : null);
         boolean gatewayInstanceGroup = instanceGroup.getInstanceGroupType().equals(InstanceGroupType.GATEWAY);
         InstanceMetadataType imType = gatewayInstanceGroup ? InstanceMetadataType.GATEWAY_PRIMARY : instanceMetadataType;
         instanceMetaData.setInstanceMetadataType(imType);

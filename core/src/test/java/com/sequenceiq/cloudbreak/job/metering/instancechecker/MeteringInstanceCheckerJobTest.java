@@ -1,14 +1,15 @@
 package com.sequenceiq.cloudbreak.job.metering.instancechecker;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETED_ON_PROVIDER_SIDE;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.DELETED_ON_PROVIDER_SIDE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.STOPPED;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,15 +20,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.service.metering.MeteringInstanceCheckerService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
 
 @ExtendWith(MockitoExtension.class)
 class MeteringInstanceCheckerJobTest {
 
-    private static final Long LOCAL_ID = 1L;
+    private static final Long STACK_ID = 1L;
 
     @Mock
     private StackDtoService stackDtoService;
@@ -41,44 +42,39 @@ class MeteringInstanceCheckerJobTest {
     @Mock
     private JobExecutionContext jobExecutionContext;
 
+    @Mock
+    private StackStatusService stackStatusService;
+
     @InjectMocks
     private MeteringInstanceCheckerJob underTest;
 
     @BeforeEach
     public void setUp() {
-        underTest.setLocalId(String.valueOf(LOCAL_ID));
+        underTest.setLocalId(String.valueOf(STACK_ID));
     }
 
     @Test
     void testExecuteWhenClusterRunning() throws JobExecutionException {
-        StackDto stack = stack(AVAILABLE);
-        when(stackDtoService.getById(eq(LOCAL_ID))).thenReturn(stack);
+        when(stackStatusService.findFirstByStackIdOrderByCreatedDesc(eq(STACK_ID))).thenReturn(Optional.of(new StackStatus(null, AVAILABLE)));
         underTest.executeTracedJob(jobExecutionContext);
-        verify(meteringInstanceCheckerJobService, never()).unschedule(eq(String.valueOf(LOCAL_ID)));
-        verify(meteringInstanceCheckerService, times(1)).checkInstanceTypes(eq(stack));
+        verify(meteringInstanceCheckerJobService, never()).unschedule(eq(String.valueOf(STACK_ID)));
+        verify(meteringInstanceCheckerService, times(1)).checkInstanceTypes(eq(STACK_ID));
     }
 
     @Test
     void testExecuteWhenClusterStopped() throws JobExecutionException {
-        StackDto stack = stack(STOPPED);
-        when(stackDtoService.getById(eq(LOCAL_ID))).thenReturn(stack);
+        when(stackStatusService.findFirstByStackIdOrderByCreatedDesc(eq(STACK_ID))).thenReturn(Optional.of(new StackStatus(null, STOPPED)));
         underTest.executeTracedJob(jobExecutionContext);
-        verify(meteringInstanceCheckerJobService, times(1)).unschedule(eq(String.valueOf(LOCAL_ID)));
-        verify(meteringInstanceCheckerService, never()).checkInstanceTypes(eq(stack));
+        verify(meteringInstanceCheckerJobService, times(1)).unschedule(eq(String.valueOf(STACK_ID)));
+        verify(meteringInstanceCheckerService, never()).checkInstanceTypes(eq(STACK_ID));
     }
 
     @Test
     void testExecuteWhenClusterDeletedOnProviderSide() throws JobExecutionException {
-        StackDto stack = stack(DELETED_ON_PROVIDER_SIDE);
-        when(stackDtoService.getById(eq(LOCAL_ID))).thenReturn(stack);
+        when(stackStatusService.findFirstByStackIdOrderByCreatedDesc(eq(STACK_ID)))
+                .thenReturn(Optional.of(new StackStatus(null, DELETED_ON_PROVIDER_SIDE)));
         underTest.executeTracedJob(jobExecutionContext);
-        verify(meteringInstanceCheckerJobService, never()).unschedule(eq(String.valueOf(LOCAL_ID)));
-        verify(meteringInstanceCheckerService, never()).checkInstanceTypes(eq(stack));
-    }
-
-    private StackDto stack(Status status) {
-        StackDto stack = mock(StackDto.class);
-        when(stack.getStatus()).thenReturn(status);
-        return stack;
+        verify(meteringInstanceCheckerJobService, never()).unschedule(eq(String.valueOf(STACK_ID)));
+        verify(meteringInstanceCheckerService, never()).checkInstanceTypes(eq(STACK_ID));
     }
 }

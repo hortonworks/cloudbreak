@@ -139,6 +139,7 @@ public class InstanceMetaDataService {
                     instanceMetaData.setInstanceStatus(com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.REQUESTED);
                     instanceMetaData.setInstanceGroupId(instanceGroup.getId());
                     instanceMetaData.setVariant(stack.getPlatformVariant());
+                    instanceMetaData.setProviderInstanceType(instanceGroup.getTemplate() != null ? instanceGroup.getTemplate().getInstanceType() : null);
                     if (hostNameIterator.hasNext()) {
                         String hostName = hostNameIterator.next();
                         repository.findHostInStack(stack.getId(), hostName).ifPresent(existingHost -> {

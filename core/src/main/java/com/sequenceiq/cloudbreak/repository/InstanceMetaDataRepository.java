@@ -59,7 +59,8 @@ public interface InstanceMetaDataRepository extends JpaRepository<InstanceMetaDa
             "i.lifeCycle as lifeCycle, " +
             "i.variant as variant, " +
             "i.serverCert as serverCert, " +
-            "i.userdataSecretResourceId as userdataSecretResourceId ";
+            "i.userdataSecretResourceId as userdataSecretResourceId, " +
+            "i.providerInstanceType as providerInstanceType ";
 
     @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraphType.LOAD)
     @Query("SELECT i FROM InstanceMetaData i " +

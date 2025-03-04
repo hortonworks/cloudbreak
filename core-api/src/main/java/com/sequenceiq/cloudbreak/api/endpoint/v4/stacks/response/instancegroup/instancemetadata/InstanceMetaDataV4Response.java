@@ -68,6 +68,9 @@ public class InstanceMetaDataV4Response implements JsonEntity {
     @Schema
     private InstanceLifeCycle lifeCycle;
 
+    @Schema(description = InstanceMetaDataModelDescription.PROVIDER_INSTANCE_TYPE)
+    private String providerInstanceType;
+
     public String getInstanceGroup() {
         return instanceGroup;
     }
@@ -156,12 +159,12 @@ public class InstanceMetaDataV4Response implements JsonEntity {
         this.instanceStatus = instanceStatus;
     }
 
-    public void setInstanceType(InstanceMetadataType instanceType) {
-        this.instanceType = instanceType;
-    }
-
     public InstanceMetadataType getInstanceType() {
         return instanceType;
+    }
+
+    public void setInstanceType(InstanceMetadataType instanceType) {
+        this.instanceType = instanceType;
     }
 
     public String getState() {
@@ -194,5 +197,13 @@ public class InstanceMetaDataV4Response implements JsonEntity {
 
     public void setLifeCycle(InstanceLifeCycle lifeCycle) {
         this.lifeCycle = lifeCycle;
+    }
+
+    public String getProviderInstanceType() {
+        return providerInstanceType;
+    }
+
+    public void setProviderInstanceType(String providerInstanceType) {
+        this.providerInstanceType = providerInstanceType;
     }
 }
