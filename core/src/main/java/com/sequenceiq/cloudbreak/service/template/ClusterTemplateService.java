@@ -51,7 +51,6 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionEx
 import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.ClusterTemplateViewToClusterTemplateViewV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Network;
-import com.sequenceiq.cloudbreak.domain.projection.ClusterTemplateStatusView;
 import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -476,10 +475,6 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
 
     public ClusterTemplate getByResourceCrn(String resourceCrn) {
         return clusterTemplateRepository.findByResourceCrn(resourceCrn);
-    }
-
-    public ClusterTemplateStatusView getStatusViewByResourceCrn(String resourceCrn) {
-        return clusterTemplateRepository.findViewByResourceCrn(resourceCrn);
     }
 
     @Override

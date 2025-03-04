@@ -9,6 +9,7 @@ import jakarta.transaction.Transactional.TxType;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.cloudbreak.domain.projection.ClusterTemplateStatusView;
 import com.sequenceiq.cloudbreak.domain.view.ClusterTemplateView;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
@@ -41,6 +42,9 @@ public interface ClusterTemplateViewRepository extends WorkspaceResourceReposito
             @Param("environmentCrn") String environmentCrn,
             @Param("cloudPlatform") String cloudPlatform,
             @Param("runtime") String runtime);
+
+    @Query("SELECT c.status as status FROM ClusterTemplateView c WHERE c.resourceCrn = :resourceCrn")
+    ClusterTemplateStatusView findViewByResourceCrn(@Param("resourceCrn") String resourceCrn);
 
     @Override
     default <S extends ClusterTemplateView> S save(S entity) {
