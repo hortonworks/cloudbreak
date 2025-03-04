@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -40,6 +41,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.converter.cloud.CredentialToCloudCredentialConverter;
@@ -197,6 +199,36 @@ public class DBStackStatusSyncServiceTest {
         when(dbStack.getStatus()).thenReturn(Status.AVAILABLE);
         when(dbStack.getOwnerCrn()).thenReturn(crn);
         when(dbStack.getName()).thenReturn(DB_NAME);
+        when(databaseServer.getParameters()).thenReturn(Map.of(AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.SINGLE_SERVER.name()));
+        when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
+        when(dbStack.getDatabaseServer()).thenReturn(dbServer);
+        when(dbServer.getName()).thenReturn(DBSVR_NAME);
+        DBResource dbResource = new DBResource.Builder().withReference(SINGLE_SERVER_RES_ID).build();
+        when(dbResourceService.findByStackAndNameAndType(eq(DB_STACK_ID), eq(DBSVR_NAME), eq(ResourceType.AZURE_DATABASE))).thenReturn(Optional.of(dbResource));
+        victim.sync(dbStack);
+
+        assertEquals(FLEXIBLE_SERVER.name(), databaseStackCaptor.getAllValues().get(1).getDatabaseServer().getParameters().get(AZURE_DATABASE_TYPE_KEY));
+        verify(dbStackService).save(any(DBStack.class));
+        ArgumentCaptor<DBResource> dbResourceArgumentCaptor = ArgumentCaptor.forClass(DBResource.class);
+        verify(dbResourceService).save(dbResourceArgumentCaptor.capture());
+        assertEquals(FLEXIBLE_SERVER_RES_ID, dbResourceArgumentCaptor.getValue().getResourceReference());
+        verifyNoMoreInteractions(dbStackStatusUpdater);
+        verifyNoInteractions(dbStackJobService);
+    }
+
+    @Test
+    public void shouldCheckSingleToFlexibleMigrationSingleStillRunning()
+            throws Exception {
+        ArgumentCaptor<DatabaseStack> databaseStackCaptor = ArgumentCaptor.forClass(DatabaseStack.class);
+        when(resourceConnector.getDatabaseServerStatus(eq(authenticatedContext), databaseStackCaptor.capture()))
+                .thenReturn(ExternalDatabaseStatus.STARTED)
+                .thenReturn(ExternalDatabaseStatus.STARTED);
+        when(dbStack.getCloudPlatform()).thenReturn(AZURE.name());
+        when(dbStack.getId()).thenReturn(DB_STACK_ID);
+        when(dbStack.getStatus()).thenReturn(Status.AVAILABLE);
+        when(dbStack.getOwnerCrn()).thenReturn(crn);
+        when(dbStack.getName()).thenReturn(DB_NAME);
+        when(databaseServer.getParameters()).thenReturn(Map.of(AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.SINGLE_SERVER.name()));
         when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
         when(dbStack.getDatabaseServer()).thenReturn(dbServer);
         when(dbServer.getName()).thenReturn(DBSVR_NAME);
@@ -225,6 +257,7 @@ public class DBStackStatusSyncServiceTest {
         when(dbStack.getStatus()).thenReturn(Status.AVAILABLE);
         when(dbStack.getOwnerCrn()).thenReturn(crn);
         when(dbStack.getName()).thenReturn(DB_NAME);
+        when(databaseServer.getParameters()).thenReturn(Map.of(AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.SINGLE_SERVER.name()));
         when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
         when(dbStack.getDatabaseServer()).thenReturn(dbServer);
         when(dbServer.getName()).thenReturn(DBSVR_NAME);
@@ -253,6 +286,7 @@ public class DBStackStatusSyncServiceTest {
         when(dbStack.getStatus()).thenReturn(Status.AVAILABLE);
         when(dbStack.getOwnerCrn()).thenReturn(crn);
         when(dbStack.getName()).thenReturn(DB_NAME);
+        when(databaseServer.getParameters()).thenReturn(Map.of(AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.SINGLE_SERVER.name()));
         when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
         when(dbStack.getDatabaseServer()).thenReturn(dbServer);
         when(dbServer.getName()).thenReturn(DBSVR_NAME);

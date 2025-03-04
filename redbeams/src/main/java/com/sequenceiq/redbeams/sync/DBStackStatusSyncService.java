@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilit
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
+import static com.sequenceiq.common.model.AzureDatabaseType.AZURE_DATABASE_TYPE_KEY;
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 
@@ -149,8 +150,12 @@ public class DBStackStatusSyncService {
 
             Optional<ExternalDatabaseStatus> databaseStatusOptional = ofNullable(connector.resources().getDatabaseServerStatus(ac, databaseStack));
             Boolean externalDatabaseDeleted = databaseStatusOptional.map(ExternalDatabaseStatus.DELETED::equals).orElse(false);
-            if (AZURE.equalsIgnoreCase(dbStack.getCloudPlatform()) && externalDatabaseDeleted) {
-                return handleSingleServerAutoMigration(dbStack, databaseStatusOptional, databaseStack, connector, ac);
+            if (AZURE.equalsIgnoreCase(dbStack.getCloudPlatform())) {
+                AzureDatabaseType databaseType =
+                        AzureDatabaseType.valueOf((String) databaseStack.getDatabaseServer().getParameters().get(AZURE_DATABASE_TYPE_KEY));
+                if (databaseType.isSingleServer() || externalDatabaseDeleted) {
+                    return handleSingleServerAutoMigration(dbStack, databaseStatusOptional, databaseStack, connector, ac);
+                }
             }
             return databaseStatusOptional;
         } catch (Exception ex) {
@@ -208,14 +213,14 @@ public class DBStackStatusSyncService {
         com.sequenceiq.redbeams.domain.stack.DatabaseServer databaseServer = dbStack.getDatabaseServer();
         Json attributes = databaseServer.getAttributes();
         Map<String, Object> params = attributes == null ? new HashMap<>() : attributes.getMap();
-        params.put(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.FLEXIBLE_SERVER.name());
+        params.put(AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.FLEXIBLE_SERVER.name());
         databaseServer.setAttributes(new Json(params));
         dbStackService.save(dbStack);
     }
 
     private DatabaseStack convertDatabaseStackToFlipped(DatabaseStack databaseStack, String dbType) {
         Map<String, Object> params = new HashMap<>(databaseStack.getDatabaseServer().getParameters());
-        params.put(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, dbType);
+        params.put(AZURE_DATABASE_TYPE_KEY, dbType);
 
         DatabaseServer dbServer = DatabaseServer.builder(databaseStack.getDatabaseServer())
                 .withParams(params)
