@@ -84,7 +84,7 @@ public class AzureImageTermsSignerService {
                 String message = errorMessageBuilder.buildWithReason(String.format(
                         "authorization error when signing vm image terms and conditions, message is '%s', skipping it", azureException.getMessage()));
                 LOGGER.warn(message, azureException);
-                return AzureImageTermStatus.NOT_ACCEPTED;
+                return AzureImageTermStatus.NON_READABLE;
             } else {
                 throwCloudImageException(errorMessageBuilder, azureException);
             }

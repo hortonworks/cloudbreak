@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.image.marketplace;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -11,7 +12,6 @@ import static org.mockito.Mockito.when;
 import java.net.URI;
 import java.util.Optional;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -75,7 +75,7 @@ public class AzureImageTermsSignerServiceTest {
     void testIsSignedWhenNoToken() {
         when(azureClient.getAccessToken()).thenReturn(Optional.empty());
 
-        Exception exception = Assertions.assertThrows(CloudConnectorException.class,
+        Exception exception = assertThrows(CloudConnectorException.class,
                 () -> underTest.getImageTermStatus(AZURE_SUBSCRIPTION_ID, azureMarketplaceImage, azureClient));
 
         assertEquals("Error when retrieving if marketplace image terms and conditions are signed for " +
@@ -90,7 +90,7 @@ public class AzureImageTermsSignerServiceTest {
         when(azureClient.getAccessToken()).thenReturn(Optional.of(ACCESS_TOKEN));
         when(azureRestOperationsService.httpGet(any(), any(), anyString())).thenThrow(new RestClientException("myMessage"));
 
-        Exception exception = Assertions.assertThrows(CloudConnectorException.class,
+        Exception exception = assertThrows(CloudConnectorException.class,
                 () -> underTest.getImageTermStatus(AZURE_SUBSCRIPTION_ID, azureMarketplaceImage, azureClient));
 
         assertEquals("Error when retrieving if marketplace image terms and conditions are signed for " +
@@ -128,15 +128,15 @@ public class AzureImageTermsSignerServiceTest {
         inOrder.verify(azureRestOperationsService).httpGet(any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
         inOrder.verify(azureRestOperationsService).httpPut(argumentCaptor.capture(), any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
         URI signURI = argumentCaptor.getValue();
-        assertEquals(signURI.toString(), "https://management.azure.com/subscriptions/azureSubscriptionId/providers/Microsoft.MarketplaceOrdering/" +
-                "offerTypes/virtualmachine/publishers/cloudera/offers/my-offer/plans/my-plan/agreements/current?api-version=2021-01-01");
+        assertEquals("https://management.azure.com/subscriptions/azureSubscriptionId/providers/Microsoft.MarketplaceOrdering/" +
+                "offerTypes/virtualmachine/publishers/cloudera/offers/my-offer/plans/my-plan/agreements/current?api-version=2021-01-01", signURI.toString());
     }
 
     @Test
     void testSignWhenNoToken() {
         when(azureClient.getAccessToken()).thenReturn(Optional.empty());
 
-        Exception exception = Assertions.assertThrows(CloudConnectorException.class,
+        Exception exception = assertThrows(CloudConnectorException.class,
                 () -> underTest.sign(AZURE_SUBSCRIPTION_ID, azureMarketplaceImage, azureClient));
 
         assertEquals("Error when signing marketplace image terms and conditions for " +
@@ -156,7 +156,7 @@ public class AzureImageTermsSignerServiceTest {
         when(azureClient.getAccessToken()).thenReturn(Optional.of(ACCESS_TOKEN));
         when(azureRestOperationsService.httpGet(any(), any(), anyString())).thenThrow(restException);
 
-        Exception exception = Assertions.assertThrows(CloudConnectorException.class,
+        Exception exception = assertThrows(CloudConnectorException.class,
                 () -> underTest.sign(AZURE_SUBSCRIPTION_ID, azureMarketplaceImage, azureClient));
 
         assertEquals(String.format("Error when signing marketplace image terms and conditions for " +
@@ -179,7 +179,7 @@ public class AzureImageTermsSignerServiceTest {
         when(azureRestOperationsService.httpGet(any(), any(), anyString())).thenReturn(azureImageTerms);
         when(azureRestOperationsService.httpPut(any(), any(), any(), anyString())).thenThrow(restException);
 
-        Exception exception = Assertions.assertThrows(CloudConnectorException.class,
+        Exception exception = assertThrows(CloudConnectorException.class,
                 () -> underTest.sign(AZURE_SUBSCRIPTION_ID, azureMarketplaceImage, azureClient));
 
         assertEquals(String.format("Error when signing marketplace image terms and conditions for " +
@@ -200,8 +200,9 @@ public class AzureImageTermsSignerServiceTest {
         when(azureRestOperationsService.httpGet(any(), any(), anyString())).thenThrow(
                 new AzureRestResponseException("myMessage", new HttpClientErrorException(HttpStatus.FORBIDDEN)));
 
-        underTest.sign(AZURE_SUBSCRIPTION_ID, azureMarketplaceImage, azureClient);
+        AzureImageTermStatus actual = underTest.sign(AZURE_SUBSCRIPTION_ID, azureMarketplaceImage, azureClient);
 
+        assertEquals(AzureImageTermStatus.NON_READABLE, actual);
         verify(azureClient).getAccessToken();
         verify(azureRestOperationsService).httpGet(any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
         verify(azureRestOperationsService, never()).httpPut(any(), any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
@@ -213,8 +214,9 @@ public class AzureImageTermsSignerServiceTest {
         when(azureRestOperationsService.httpGet(any(), any(), anyString())).thenThrow(
                 new AzureRestResponseException("myMessage", new HttpClientErrorException(HttpStatus.FORBIDDEN)));
 
-        underTest.sign(AZURE_SUBSCRIPTION_ID, azureMarketplaceImage, azureClient);
+        AzureImageTermStatus actual = underTest.sign(AZURE_SUBSCRIPTION_ID, azureMarketplaceImage, azureClient);
 
+        assertEquals(AzureImageTermStatus.NON_READABLE, actual);
         verify(azureClient).getAccessToken();
         verify(azureRestOperationsService).httpGet(any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
         verify(azureRestOperationsService, never()).httpPut(any(), any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
