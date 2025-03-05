@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -49,7 +50,7 @@ public class ImageBasedDefaultCDHEntries {
 
     public Map<String, ImageBasedDefaultCDHInfo> getEntries(Long workspaceId, ImageCatalogPlatform platform, String os, Architecture architecture,
             String imageCatalogName) throws CloudbreakImageCatalogException {
-        String catalogName = Optional.ofNullable(imageCatalogName).orElse(ImageCatalogService.CDP_DEFAULT_CATALOG_NAME);
+        String catalogName = StringUtils.defaultIfEmpty(imageCatalogName, ImageCatalogService.CDP_DEFAULT_CATALOG_NAME);
         StatedImages images = imageCatalogService.getImages(workspaceId, catalogName, null, platform, true, null);
         if (images.getImages().getCdhImages().isEmpty()) {
             LOGGER.warn("Missing CDH images for cloud platform: {}. Falling back to AWS.", platform);
