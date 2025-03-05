@@ -112,7 +112,7 @@ public class MeteringSyncJobService implements JobSchedulerService {
                 .usingJobData(jobDetail.getJobDataMap())
                 .withIdentity(jobDetail.getKey().getName(), TRIGGER_GROUP)
                 .withDescription("Metering sync trigger")
-                .startAt(delayedStart(meteringConfig.getSyncIntervalInSeconds()))
+                .startAt(delayedStart(meteringConfig.getSyncInitialDelayInSeconds()))
                 .withSchedule(SimpleScheduleBuilder.simpleSchedule()
                         .withIntervalInSeconds(meteringConfig.getSyncIntervalInSeconds())
                         .repeatForever()

@@ -13,6 +13,8 @@ public class MeteringConfig {
 
     private static final int DEFAULT_SYNC_INTERVAL_IN_SECONDS = 600;
 
+    private static final int DEFAULT_SYNC_INITIAL_DELAY_IN_SECONDS = 180;
+
     private static final int DEFAULT_INSTANCE_CHECKER_INTERVAL_IN_HOURS = 6;
 
     private static final int DEFAULT_INSTANCE_CHECKER_DELAY_IN_SECONDS = 7200;
@@ -28,6 +30,8 @@ public class MeteringConfig {
     private boolean instanceCheckerEnabled = true;
 
     private int syncIntervalInSeconds = DEFAULT_SYNC_INTERVAL_IN_SECONDS;
+
+    private int syncInitialDelayInSeconds = DEFAULT_SYNC_INITIAL_DELAY_IN_SECONDS;
 
     private int instanceCheckerIntervalInHours = DEFAULT_INSTANCE_CHECKER_INTERVAL_IN_HOURS;
 
@@ -73,6 +77,14 @@ public class MeteringConfig {
 
     public void setSyncIntervalInSeconds(int syncIntervalInSeconds) {
         this.syncIntervalInSeconds = syncIntervalInSeconds;
+    }
+
+    public int getSyncInitialDelayInSeconds() {
+        return syncInitialDelayInSeconds;
+    }
+
+    public void setSyncInitialDelayInSeconds(int syncInitialDelayInSeconds) {
+        this.syncInitialDelayInSeconds = syncInitialDelayInSeconds;
     }
 
     public int getInstanceCheckerIntervalInHours() {

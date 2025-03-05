@@ -49,6 +49,7 @@ class MeteringSyncJobServiceTest {
         JobResource jobResource = mock(JobResource.class);
         when(jobResource.getLocalId()).thenReturn(LOCAL_ID);
         when(meteringConfig.getSyncIntervalInSeconds()).thenReturn(10);
+        when(meteringConfig.getSyncInitialDelayInSeconds()).thenReturn(3);
         underTest.schedule(new MeteringSyncJobAdapter(jobResource));
         verify(scheduler, times(1)).scheduleJob(any(), any());
     }
@@ -59,6 +60,7 @@ class MeteringSyncJobServiceTest {
         JobResource jobResource = mock(JobResource.class);
         when(jobResource.getLocalId()).thenReturn(LOCAL_ID);
         when(meteringConfig.getSyncIntervalInSeconds()).thenReturn(10);
+        when(meteringConfig.getSyncInitialDelayInSeconds()).thenReturn(3);
         underTest.schedule(new MeteringSyncJobAdapter(jobResource));
         verify(scheduler, never()).scheduleJob(any(), any());
     }
@@ -96,6 +98,7 @@ class MeteringSyncJobServiceTest {
         when(jobResourceRepository.getJobResource(eq(Long.valueOf(LOCAL_ID)))).thenReturn(Optional.of(jobResource));
         when(scheduler.getJobDetail(any())).thenReturn(null);
         when(meteringConfig.getSyncIntervalInSeconds()).thenReturn(10);
+        when(meteringConfig.getSyncInitialDelayInSeconds()).thenReturn(3);
         underTest.scheduleIfNotScheduled(Long.valueOf(LOCAL_ID));
         verify(scheduler, times(1)).scheduleJob(any(), any());
     }
