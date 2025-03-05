@@ -10,12 +10,17 @@ import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
+import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.status.StatusCheckResult;
 import com.sequenceiq.cloudbreak.service.ReservedTagValidatorService;
@@ -38,6 +43,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIp
 
 @Service
 public class DistroXService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DistroXService.class);
 
     @Inject
     private StackOperations stackOperations;
@@ -72,6 +79,12 @@ public class DistroXService {
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private LdapConfigService ldapConfigService;
+
+    @Inject
+    private KerberosConfigService kerberosConfigService;
+
     public StackV4Response post(DistroXV1Request request, boolean internalRequest) {
         Workspace workspace = workspaceService.getForCurrentUser();
         validate(request, internalRequest);
@@ -96,15 +109,21 @@ public class DistroXService {
         if (environment.getEnvironmentStatus().isDeleteInProgress()) {
             throw new BadRequestException(format("'%s' Environment can not be delete in progress state.", request.getEnvironmentName()));
         }
-        DescribeFreeIpaResponse freeipa = freeipaClientService.getByEnvironmentCrn(environment.getCrn());
-        if (freeipa == null || freeipa.getAvailabilityStatus() == null || !freeipa.getAvailabilityStatus().isAvailable()) {
-            throw new BadRequestException(format("If you want to provision a Data Hub then the FreeIPA instance must be running in the '%s' Environment.",
-                    environment.getName()));
+        String environmentCrn = environment.getCrn();
+        try {
+            DescribeFreeIpaResponse freeipa = freeipaClientService.getByEnvironmentCrn(environmentCrn);
+            if (freeipa == null || freeipa.getAvailabilityStatus() == null || !freeipa.getAvailabilityStatus().isAvailable()) {
+                throw new BadRequestException(format("If you want to provision a Data Hub then the FreeIPA instance must be running in the '%s' Environment.",
+                        environment.getName()));
+            }
+        } catch (CloudbreakServiceException e) {
+            LOGGER.warn("Failed to fetch FreeIPA for the environment: {}: {}", environmentCrn, e.getMessage());
+            validaLdapAndKerberosSettings(environmentCrn, request.getName());
         }
-        Set<Pair<String, StatusCheckResult>> sdxCrnsWithAvailability = platformAwareSdxConnector.listSdxCrnsWithAvailability(environment.getCrn());
+        Set<Pair<String, StatusCheckResult>> sdxCrnsWithAvailability = platformAwareSdxConnector.listSdxCrnsWithAvailability(environmentCrn);
         if (sdxCrnsWithAvailability.isEmpty()) {
             throw new BadRequestException(format("Data Lake stack cannot be found for environment: %s (%s)",
-                    environment.getName(), environment.getCrn()));
+                    environment.getName(), environmentCrn));
         }
         if (!sdxCrnsWithAvailability.stream().map(Pair::getValue).allMatch(isSdxAvailable())) {
             throw new BadRequestException("Data Lake stacks of environment should be available.");
@@ -116,6 +135,15 @@ public class DistroXService {
             validateAzureDatabaseType(request.getExternalDatabase());
         }
 
+    }
+
+    private void validaLdapAndKerberosSettings(String environmentCrn, String clusterName) {
+        if (!ldapConfigService.isLdapConfigExistsForEnvironment(environmentCrn, clusterName)) {
+            throw new BadRequestException("If you want to provision a Data Hub without FreeIPA then please register an LDAP config");
+        }
+        if (!kerberosConfigService.isKerberosConfigExistsForEnvironment(environmentCrn, clusterName)) {
+            throw new BadRequestException("If you want to provision a Data Hub without FreeIPA then please register a Kerberos config");
+        }
     }
 
     private Predicate<StatusCheckResult> isSdxAvailable() {

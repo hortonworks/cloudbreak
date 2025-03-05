@@ -35,7 +35,10 @@ import org.mockito.verification.VerificationMode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
+import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.status.StatusCheckResult;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
@@ -98,6 +101,12 @@ class DistroXServiceTest {
 
     @Mock
     private EntitlementService entitlementService;
+
+    @Mock
+    private LdapConfigService ldapConfigService;
+
+    @Mock
+    private KerberosConfigService kerberosConfigService;
 
     @InjectMocks
     private DistroXService underTest;
@@ -248,6 +257,90 @@ class DistroXServiceTest {
         verify(workspaceService, calledOnce()).getForCurrentUser();
         verify(stackRequestConverter, calledOnce()).convert(any(DistroXV1Request.class));
         verify(stackRequestConverter, calledOnce()).convert(r);
+    }
+
+    @Test
+    @DisplayName("When the env does not contain FreeIPA, but has LDAP and Kerberos configs registered it should succeed")
+    void testWhenEnvExistsWithoutFreeIPAButLdapAndKerberosExists() throws IllegalAccessException {
+        String envName = "someAwesomeEnvironment";
+        String clusterName = "someClusterName";
+        DistroXV1Request r = new DistroXV1Request();
+        r.setEnvironmentName(envName);
+        r.setName(clusterName);
+
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        envResponse.setEnvironmentStatus(AVAILABLE);
+        envResponse.setCrn("crn");
+        doNothing().when(fedRampModificationService).prepare(any(), any());
+        when(environmentClientService.getByName(envName)).thenReturn(envResponse);
+
+        StackV4Request converted = new StackV4Request();
+        CloudbreakUser cloudbreakUser = mock(CloudbreakUser.class);
+        when(stackRequestConverter.convert(r)).thenReturn(converted);
+        when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any())).thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
+        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
+        when(freeipaClientService.getByEnvironmentCrn("crn")).thenThrow(CloudbreakServiceException.class);
+        when(ldapConfigService.isLdapConfigExistsForEnvironment("crn", clusterName)).thenReturn(true);
+        when(kerberosConfigService.isKerberosConfigExistsForEnvironment("crn", clusterName)).thenReturn(true);
+
+        doAs(ACTOR, () -> underTest.post(r, NOT_INTERNAL_REQUEST));
+
+        verify(environmentClientService, calledOnce()).getByName(any());
+        verify(environmentClientService, calledOnce()).getByName(envName);
+        verify(stackOperations, calledOnce()).post(any(), any(), any(), anyBoolean());
+        verify(stackOperations, calledOnce()).post(eq(USER_ID), eq(cloudbreakUser), eq(converted), eq(true));
+        verify(workspaceService, calledOnce()).getForCurrentUser();
+        verify(stackRequestConverter, calledOnce()).convert(any(DistroXV1Request.class));
+        verify(stackRequestConverter, calledOnce()).convert(r);
+        verify(ldapConfigService, calledOnce()).isLdapConfigExistsForEnvironment("crn", clusterName);
+        verify(kerberosConfigService).isKerberosConfigExistsForEnvironment("crn", clusterName);
+    }
+
+    @Test
+    @DisplayName("When the env does not contain FreeIPA, and Ldap config is not registered, bad request should be thrown")
+    void testWhenEnvExistsWithoutFreeIPAButLdapConfigDoesNotExist() throws IllegalAccessException {
+        String envName = "someAwesomeEnvironment";
+        String clusterName = "someClusterName";
+        DistroXV1Request r = new DistroXV1Request();
+        r.setEnvironmentName(envName);
+        r.setName(clusterName);
+
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        envResponse.setEnvironmentStatus(AVAILABLE);
+        envResponse.setCrn("crn");
+        when(environmentClientService.getByName(envName)).thenReturn(envResponse);
+
+        StackV4Request converted = new StackV4Request();
+        CloudbreakUser cloudbreakUser = mock(CloudbreakUser.class);
+        when(freeipaClientService.getByEnvironmentCrn("crn")).thenThrow(CloudbreakServiceException.class);
+
+        BadRequestException err = assertThrows(BadRequestException.class, () -> doAs(ACTOR, () -> underTest.post(r, NOT_INTERNAL_REQUEST)));
+
+        assertEquals("If you want to provision a Data Hub without FreeIPA then please register an LDAP config", err.getMessage());
+    }
+
+    @Test
+    @DisplayName("When the env does not contain FreeIPA, and Kerberos config is not registered, bad request should be thrown")
+    void testWhenEnvExistsWithoutFreeIPAButKerberosConfigDoesNotExist() throws IllegalAccessException {
+        String envName = "someAwesomeEnvironment";
+        String clusterName = "someClusterName";
+        DistroXV1Request r = new DistroXV1Request();
+        r.setEnvironmentName(envName);
+        r.setName(clusterName);
+
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        envResponse.setEnvironmentStatus(AVAILABLE);
+        envResponse.setCrn("crn");
+        when(environmentClientService.getByName(envName)).thenReturn(envResponse);
+
+        StackV4Request converted = new StackV4Request();
+        CloudbreakUser cloudbreakUser = mock(CloudbreakUser.class);
+        when(freeipaClientService.getByEnvironmentCrn("crn")).thenThrow(CloudbreakServiceException.class);
+        when(ldapConfigService.isLdapConfigExistsForEnvironment("crn", clusterName)).thenReturn(true);
+
+        BadRequestException err = assertThrows(BadRequestException.class, () -> doAs(ACTOR, () -> underTest.post(r, NOT_INTERNAL_REQUEST)));
+
+        assertEquals("If you want to provision a Data Hub without FreeIPA then please register a Kerberos config", err.getMessage());
     }
 
     @Test
