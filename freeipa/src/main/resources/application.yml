@@ -416,3 +416,7 @@ wiam:
   host: localhost
   port: 8982
   grpc.timeout.sec: 60
+
+clusterdns:
+  host: localhost
+  port: 8982

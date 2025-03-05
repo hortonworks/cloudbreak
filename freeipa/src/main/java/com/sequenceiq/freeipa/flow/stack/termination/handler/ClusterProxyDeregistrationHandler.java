@@ -13,6 +13,7 @@ import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 import com.sequenceiq.freeipa.flow.stack.termination.event.clusterproxy.ClusterProxyDeregistrationFinished;
 import com.sequenceiq.freeipa.flow.stack.termination.event.clusterproxy.ClusterProxyDeregistrationRequest;
+import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerDomainService;
 import com.sequenceiq.freeipa.service.stack.ClusterProxyService;
 
 @Component
@@ -26,12 +27,16 @@ public class ClusterProxyDeregistrationHandler implements EventHandler<ClusterPr
     @Inject
     private ClusterProxyService clusterProxyService;
 
+    @Inject
+    private FreeIpaLoadBalancerDomainService freeIpaLoadBalancerDomainService;
+
     @Override
     public void accept(Event<ClusterProxyDeregistrationRequest> requestEvent) {
         ClusterProxyDeregistrationRequest request = requestEvent.getData();
         LOGGER.debug("De-registering freeipa stack {} from cluster proxy", request.getResourceId());
         try {
             clusterProxyService.deregisterFreeIpa(request.getResourceId());
+            freeIpaLoadBalancerDomainService.deregisterLbDomain(request.getResourceId());
         } catch (Exception ex) {
             LOGGER.error("Cluster proxy de-registration failed", ex);
         }
