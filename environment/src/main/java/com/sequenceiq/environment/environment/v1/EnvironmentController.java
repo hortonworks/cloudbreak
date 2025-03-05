@@ -83,7 +83,6 @@ import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.environment.environment.service.EnvironmentCreationService;
 import com.sequenceiq.environment.environment.service.EnvironmentDeletionService;
-import com.sequenceiq.environment.environment.service.EnvironmentEnableSeLinuxService;
 import com.sequenceiq.environment.environment.service.EnvironmentLoadBalancerService;
 import com.sequenceiq.environment.environment.service.EnvironmentModificationService;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
@@ -151,8 +150,6 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     private final EnvironmentVerticalScaleService environmentVerticalScaleService;
 
-    private final EnvironmentEnableSeLinuxService environmentEnableSeLinuxService;
-
     private final StackV4Endpoint stackV4Endpoint;
 
     private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
@@ -181,7 +178,6 @@ public class EnvironmentController implements EnvironmentEndpoint {
             EnvironmentUpgradeCcmService upgradeCcmService,
             EnvironmentVerticalScaleService environmentVerticalScaleService,
             StackV4Endpoint stackV4Endpoint,
-            EnvironmentEnableSeLinuxService environmentEnableSeLinuxService,
             RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory,
             SupportedOperatingSystemService supportedOperatingSystemService,
             ExternalizedComputeFlowService externalizedComputeFlowService,
@@ -204,7 +200,6 @@ public class EnvironmentController implements EnvironmentEndpoint {
         this.environmentFiltering = environmentFiltering;
         this.cloudStorageValidator = cloudStorageValidator;
         this.upgradeCcmService = upgradeCcmService;
-        this.environmentEnableSeLinuxService = environmentEnableSeLinuxService;
         this.environmentVerticalScaleService = environmentVerticalScaleService;
         this.stackV4Endpoint = stackV4Endpoint;
         this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
@@ -538,18 +533,6 @@ public class EnvironmentController implements EnvironmentEndpoint {
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn String crn,
             @RequestObject @Valid VerticalScaleRequest updateRequest) {
         return environmentVerticalScaleService.verticalScaleByCrn(crn, updateRequest);
-    }
-
-    @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
-    public FlowIdentifier enableSeLinuxByName(@ResourceName String name) {
-        return environmentEnableSeLinuxService.enableSeLinuxByName(name);
-    }
-
-    @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
-    public FlowIdentifier enableSeLinuxByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn String crn) {
-        return environmentEnableSeLinuxService.enableSeLinuxByCrn(crn);
     }
 
     @Override

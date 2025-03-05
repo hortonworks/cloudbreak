@@ -376,22 +376,6 @@ public interface EnvironmentEndpoint {
     FlowIdentifier verticalScalingByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
         @Valid VerticalScaleRequest updateRequest);
 
-    @PUT
-    @Path("/name/{name}/enable_selinux")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = EnvironmentOpDescription.ENABLE_SELINUX, description = ENVIRONMENT_NOTES,
-            operationId = "enableSelinuxByName",
-            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    FlowIdentifier enableSeLinuxByName(@PathParam("name") String name);
-
-    @PUT
-    @Path("/crn/{crn}/enable_selinux")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = EnvironmentOpDescription.ENABLE_SELINUX, description = ENVIRONMENT_NOTES,
-            operationId = "enableSelinuxByCrn",
-            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    FlowIdentifier enableSeLinuxByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn);
-
     @GET
     @Path("/crn/{crn}/upgrade_ccm_available")
     @Produces(MediaType.TEXT_PLAIN)
