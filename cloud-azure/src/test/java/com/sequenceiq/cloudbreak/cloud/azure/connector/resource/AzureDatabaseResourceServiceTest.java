@@ -21,6 +21,7 @@ import static com.sequenceiq.common.api.type.ResourceType.RDS_HOSTNAME_CANARY;
 import static com.sequenceiq.common.api.type.ResourceType.RDS_PORT;
 import static com.sequenceiq.common.model.AzureDatabaseType.FLEXIBLE_SERVER;
 import static com.sequenceiq.common.model.AzureDatabaseType.SINGLE_SERVER;
+import static com.sequenceiq.common.model.PrivateEndpointType.USE_PRIVATE_ENDPOINT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -36,6 +37,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -46,6 +48,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -90,6 +93,7 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.database.ExternalDatabaseParameters;
@@ -175,6 +179,9 @@ class AzureDatabaseResourceServiceTest {
     @Mock
     private AzureTemplateDeploymentFailureReasonProvider azureTemplateDeploymentFailureReasonProvider;
 
+    @Mock
+    private Network network;
+
     @InjectMocks
     private AzureDatabaseResourceService underTest;
 
@@ -207,6 +214,11 @@ class AzureDatabaseResourceServiceTest {
     void initTests() {
         lenient().when(ac.getCloudContext()).thenReturn(cloudContext);
         lenient().when(ac.getParameter(AzureClient.class)).thenReturn(client);
+    }
+
+    @AfterEach
+    void afterTests() {
+        verifyNoMoreInteractions(client);
     }
 
     @ParameterizedTest
@@ -302,6 +314,8 @@ class AzureDatabaseResourceServiceTest {
                 verify(persistenceNotifier, times(3)).notifyDeletion(any(), eq(cloudContext));
             }
         } else {
+            when(databaseStack.getNetwork()).thenReturn(network);
+            when(network.getStringParameter("existingDatabasePrivateDnsZoneId")).thenReturn("existingDatabasePrivateDnsZoneId");
             List<CloudResourceStatus> result = underTest.launchCanaryDatabaseForUpgrade(ac, databaseStack, migratedDbStack, persistenceNotifier);
 
             verify(azureCloudResourceService, never()).getPrivateEndpointRdsResourceTypes(true);
@@ -313,6 +327,8 @@ class AzureDatabaseResourceServiceTest {
             assertTrue(result.stream().anyMatch(r -> r.getCloudResource().getType().equals(RDS_PORT)));
             assertTrue(result.stream().anyMatch(r -> r.getCloudResource().getType().equals(RDS_HOSTNAME_CANARY)));
             verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, migratedDbStack);
+            verify(client).createPublicAccessFirewallRuleForFlexibleDb(MIGRATED_SERVER_NAME, RESOURCE_GROUP_NAME);
+            verify(client).createTemplateDeployment(RESOURCE_GROUP_NAME, MIGRATED_SERVER_NAME, template, "{}");
         }
     }
 
@@ -362,6 +378,7 @@ class AzureDatabaseResourceServiceTest {
             verify(azureCloudResourceService).getPrivateEndpointRdsResourceTypes(true);
             verify(persistenceNotifier, times(1)).notifyDeletion(any(), eq(cloudContext));
         }
+        verify(client).createTemplateDeployment(RESOURCE_GROUP_NAME, MIGRATED_SERVER_NAME, template, "{}");
     }
 
     @Test
@@ -393,6 +410,7 @@ class AzureDatabaseResourceServiceTest {
         when(azureResourceGroupMetadataProvider.getResourceGroupUsage(any(DatabaseStack.class))).thenReturn(ResourceGroupUsage.SINGLE);
         when(azureUtils.deleteDatabaseServer(any(), anyString(), anyBoolean())).thenReturn(Optional.empty());
         List<CloudResource> cloudResources = List.of(buildResource(AZURE_DATABASE));
+        when(databaseStack.getDatabaseServer()).thenReturn(buildDatabaseServer(FLEXIBLE_SERVER));
 
         List<CloudResourceStatus> resourceStatuses = underTest.terminateDatabaseServer(ac, databaseStack, cloudResources, false, persistenceNotifier);
 
@@ -489,6 +507,9 @@ class AzureDatabaseResourceServiceTest {
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(DELETED);
         when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
         when(originalDatabaseStack.getDatabaseServer()).thenReturn(originalDatabaseServer);
+        when(databaseStack.getNetwork()).thenReturn(network);
+        when(network.getStringParameter("existingDatabasePrivateDnsZoneId")).thenReturn("");
+        when(network.getStringParameter("endpointType")).thenReturn(USE_PRIVATE_ENDPOINT.name());
 
         doAnswer(invocation -> {
             invocation.getArgument(0, Runnable.class).run();
@@ -515,6 +536,7 @@ class AzureDatabaseResourceServiceTest {
         assertEquals("14", databaseStackArgumentCaptor.getValue().getDatabaseServer().getParameters().get(DB_VERSION));
         verify(persistenceNotifier).notifyAllocations(cloudResourceList, cloudContext);
         verify(client).createTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME, TEMPLATE, "{}");
+        verify(client, never()).createPublicAccessFirewallRuleForFlexibleDb("driver", RESOURCE_GROUP_NAME);
     }
 
     @Test
@@ -635,6 +657,8 @@ class AzureDatabaseResourceServiceTest {
         when(azureCloudResourceService.getPrivateEndpointRdsResourceTypes(false)).thenReturn(List.of(AZURE_PRIVATE_ENDPOINT));
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(DELETED);
         when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
+        when(databaseStack.getNetwork()).thenReturn(network);
+        when(network.getStringParameter("existingDatabasePrivateDnsZoneId")).thenReturn("existingDatabasePrivateDnsZoneId");
 
         underTest.upgradeDatabaseServer(ac, databaseStack, databaseStack, persistenceNotifier, VERSION14, cloudResourceList);
 
@@ -741,6 +765,8 @@ class AzureDatabaseResourceServiceTest {
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(DELETED);
         when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
         when(originalDatabaseStack.getDatabaseServer()).thenReturn(originalDatabaseServer);
+        when(databaseStack.getNetwork()).thenReturn(network);
+        when(network.getStringParameter("existingDatabasePrivateDnsZoneId")).thenReturn("existingDatabasePrivateDnsZoneId");
 
         underTest.upgradeDatabaseServer(ac, originalDatabaseStack, databaseStack, persistenceNotifier, VERSION14, cloudResourceList);
 
@@ -796,6 +822,8 @@ class AzureDatabaseResourceServiceTest {
         when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(List.of(mock(CloudResource.class)));
         when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(DELETED);
+        when(databaseStack.getNetwork()).thenReturn(network);
+        when(network.getStringParameter("existingDatabasePrivateDnsZoneId")).thenReturn("");
 
         underTest.upgradeDatabaseServer(ac, databaseStack, databaseStack, persistenceNotifier, VERSION14, cloudResourceList);
 
@@ -816,6 +844,10 @@ class AzureDatabaseResourceServiceTest {
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(DELETED);
         when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
         when(deployment.outputs()).thenReturn(Map.of("databaseServerFQDN", Map.of("value", "fqdn")));
+        when(databaseStack.getNetwork()).thenReturn(network);
+        when(network.getStringParameter("existingDatabasePrivateDnsZoneId")).thenReturn("existingDatabasePrivateDnsZoneId");
+        DatabaseServer databaseServer = buildDatabaseServer(FLEXIBLE_SERVER);
+        when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
         doAnswer(invocation -> {
             invocation.getArgument(0, Runnable.class).run();
             return null;
@@ -833,6 +865,7 @@ class AzureDatabaseResourceServiceTest {
         verify(persistenceNotifier, times(4)).notifyAllocation(any(CloudResource.class), eq(cloudContext));
         verify(client).createTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME, TEMPLATE, "{}");
         verify(client).getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME);
+        verify(client).createPublicAccessFirewallRuleForFlexibleDb("driver", RESOURCE_GROUP_NAME);
     }
 
     @Test
@@ -869,6 +902,10 @@ class AzureDatabaseResourceServiceTest {
             return null;
         }).when(retryService).testWith2SecDelayMax5Times(any(Runnable.class));
         doAnswer(invocation -> invocation.getArgument(0, Supplier.class).get()).when(retryService).testWith2SecDelayMax5Times(any(Supplier.class));
+        DatabaseServer databaseServer = buildDatabaseServer(FLEXIBLE_SERVER);
+        when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
+        when(databaseStack.getNetwork()).thenReturn(network);
+        when(network.getStringParameter("existingDatabasePrivateDnsZoneId")).thenReturn("existingDatabasePrivateDnsZoneId");
 
         List<CloudResourceStatus> actual = underTest.buildDatabaseResourcesForLaunch(ac, databaseStack, persistenceNotifier);
 
@@ -882,6 +919,7 @@ class AzureDatabaseResourceServiceTest {
         verify(persistenceNotifier, times(4)).notifyAllocation(any(CloudResource.class), eq(cloudContext));
         verify(client).createTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME, TEMPLATE, "{}");
         verify(client).getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME);
+        verify(client).createPublicAccessFirewallRuleForFlexibleDb("driver", RESOURCE_GROUP_NAME);
     }
 
     @Test
@@ -896,6 +934,9 @@ class AzureDatabaseResourceServiceTest {
         when(deployment.outputs()).thenReturn(Map.of("databaseServerFQDN", Map.of("value", "fqdn")));
         doAnswer(invocation -> invocation.getArgument(0, Supplier.class).get()).when(retryService).testWith2SecDelayMax5Times(any(Supplier.class));
         when(syncPollingScheduler.schedule(null)).thenReturn(new ResourcesStatePollerResult(null));
+        when(databaseStack.getNetwork()).thenReturn(network);
+        when(databaseStack.getDatabaseServer()).thenReturn(buildDatabaseServer(FLEXIBLE_SERVER));
+        when(network.getStringParameter("existingDatabasePrivateDnsZoneId")).thenReturn("existingDatabasePrivateDnsZoneId");
 
         List<CloudResourceStatus> actual = underTest.buildDatabaseResourcesForLaunch(ac, databaseStack, persistenceNotifier);
 
@@ -941,6 +982,7 @@ class AzureDatabaseResourceServiceTest {
         when(deployment.outputs()).thenReturn(Map.of("databaseServerFQDN", Map.of("value", "fqdn")));
         doAnswer(invocation -> invocation.getArgument(0, Supplier.class).get()).when(retryService).testWith2SecDelayMax5Times(any(Supplier.class));
         doThrow(new Exception("msg")).when(syncPollingScheduler).schedule(null);
+        when(databaseStack.getDatabaseServer()).thenReturn(buildDatabaseServer(FLEXIBLE_SERVER));
 
         Exception exception = assertThrows(CloudConnectorException.class,
                 () -> underTest.buildDatabaseResourcesForLaunch(ac, databaseStack, persistenceNotifier));
