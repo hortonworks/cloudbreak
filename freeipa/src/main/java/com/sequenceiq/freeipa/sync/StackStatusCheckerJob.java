@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -32,6 +33,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 
@@ -43,7 +45,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
 
     private static final String AUTO_SYNC_LOG_PREFIX = ":::Auto sync::: ";
 
-    private static final EnumSet<Status> LONG_SYNCABLE_STATES = EnumSet.of(Status.DELETED_ON_PROVIDER_SIDE);
+    private static final EnumSet<Status> LONG_SYNCABLE_STATES = EnumSet.of(Status.DELETED_ON_PROVIDER_SIDE, Status.STALE);
 
     @Inject
     private FlowLogService flowLogService;
@@ -74,6 +76,9 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
 
     @Inject
     private StatusCheckerJobService jobService;
+
+    @Value("${freeipa.statuschecker.stale.after.days:3000}")
+    private int staleAfterDays;
 
     @Value("${freeipa.autosync.update.status:true}")
     private boolean updateStatus;
@@ -208,7 +213,8 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
 
     private void updateStackStatus(Stack stack, SyncResult result, List<ProviderSyncResult> providerSyncResults, int alreadyDeletedCount,
             boolean updateStatusFromFlow) {
-        DetailedStackStatus status = providerSyncResults == null ? result.getStatus() : getStackStatus(providerSyncResults, result, alreadyDeletedCount);
+        DetailedStackStatus status = providerSyncResults == null ? result.getStatus() : getStackStatus(providerSyncResults, result, alreadyDeletedCount,
+                stack.getStackStatus());
         if (status != stack.getStackStatus().getDetailedStackStatus()) {
             if (autoSyncConfig.isUpdateStatus()) {
                 if (!updateStatusFromFlow && flowLogService.isOtherFlowRunning(stack.getId())) {
@@ -224,7 +230,8 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         }
     }
 
-    private DetailedStackStatus getStackStatus(List<ProviderSyncResult> providerSyncResults, SyncResult result, int alreadyDeletedCount) {
+    private DetailedStackStatus getStackStatus(List<ProviderSyncResult> providerSyncResults, SyncResult result, int alreadyDeletedCount,
+            StackStatus stackStatus) {
         if (providerSyncResults.stream().allMatch(hasStatus(InstanceStatus.DELETED_ON_PROVIDER_SIDE, InstanceStatus.DELETED_BY_PROVIDER))) {
             return DetailedStackStatus.DELETED_ON_PROVIDER_SIDE;
         }
@@ -234,11 +241,28 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         if (providerSyncResults.stream().allMatch(hasStatus(InstanceStatus.STOPPED))) {
             return DetailedStackStatus.STOPPED;
         }
+        if (providerSyncResults.stream().allMatch(hasStatus(InstanceStatus.UNKNOWN))) {
+            if (isStale(stackStatus)) {
+                return DetailedStackStatus.STALE;
+            } else {
+                return DetailedStackStatus.UNREACHABLE;
+            }
+        }
         if (providerSyncResults.stream().anyMatch(
                 hasStatus(InstanceStatus.DELETED_ON_PROVIDER_SIDE, InstanceStatus.DELETED_BY_PROVIDER, InstanceStatus.STOPPED))) {
             return DetailedStackStatus.UNHEALTHY;
         }
         return result.getStatus();
+    }
+
+    private boolean isStale(StackStatus stackStatus) {
+        if (DetailedStackStatus.UNREACHABLE == stackStatus.getDetailedStackStatus() && stackStatus.getCreated() != null) {
+            long daysInMillis = TimeUnit.DAYS.toMillis(staleAfterDays);
+            return (System.currentTimeMillis() - stackStatus.getCreated()) > daysInMillis;
+        } else if (DetailedStackStatus.STALE == stackStatus.getDetailedStackStatus()) {
+            return true;
+        }
+        return false;
     }
 
     private Predicate<ProviderSyncResult> hasStatus(InstanceStatus... statuses) {

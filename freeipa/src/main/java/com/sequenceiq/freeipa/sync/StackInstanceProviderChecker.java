@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilit
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.util.Benchmark.checkedMeasure;
+import static java.util.stream.Collectors.toList;
 
 import java.util.List;
 import java.util.Set;
@@ -20,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.handler.InstanceStateQuery;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.converter.cloud.InstanceMetaDataToCloudInstanceConverter;
@@ -65,7 +67,9 @@ public class StackInstanceProviderChecker {
                     ":::Auto sync::: get instance statuses in {}ms");
         } catch (Exception e) {
             LOGGER.info(":::Auto sync::: Could not fetch vm statuses: " + e.getMessage(), e);
-            throw e;
+            return instances.stream()
+                    .map(instance -> new CloudVmInstanceStatus(instance, InstanceStatus.UNKNOWN))
+                    .collect(toList());
         }
     }
 

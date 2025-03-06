@@ -82,7 +82,9 @@ public class DelayedStartStackHandler implements CloudPlatformEventHandler<Delay
 
     private List<CloudVmInstanceStatus> startInstance(List<CloudResource> resources, CloudConnector connector,
             AuthenticatedContext authenticatedContext, CloudInstance instance) {
-        LOGGER.info("Stop instance: {}", instance);
-        return connector.instances().start(authenticatedContext, resources, List.of(instance));
+        LOGGER.info("Start instance: {}", instance);
+        List<CloudInstance> vms = new ArrayList<>();
+        vms.add(instance);
+        return connector.instances().start(authenticatedContext, resources, vms);
     }
 }

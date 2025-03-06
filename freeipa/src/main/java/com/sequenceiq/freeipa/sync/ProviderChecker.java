@@ -54,7 +54,7 @@ public class ProviderChecker {
                             .filter(i -> s.getCloudInstance().getInstanceId().equals(i.getInstanceId()))
                             .findFirst();
                     if (instanceMetaData.isPresent()) {
-                        InstanceStatus instanceStatus = updateStatuses(s, instanceMetaData.get(), instanceHealthStatusMap);
+                        InstanceStatus instanceStatus = updateInstanceStatus(s, instanceMetaData.get(), instanceHealthStatusMap);
                         if (instanceStatus != null) {
                             results.add(new ProviderSyncResult("", instanceStatus, false, s.getCloudInstance().getInstanceId()));
                         }
@@ -77,7 +77,7 @@ public class ProviderChecker {
         }, LOGGER, ":::Auto sync::: provider is checked in {}ms");
     }
 
-    private InstanceStatus updateStatuses(CloudVmInstanceStatus vmInstanceStatus, InstanceMetaData instanceMetaData,
+    private InstanceStatus updateInstanceStatus(CloudVmInstanceStatus vmInstanceStatus, InstanceMetaData instanceMetaData,
             Map<InstanceMetaData, DetailedStackStatus> instanceHealthStatusMap) {
         LOGGER.info(":::Auto sync::: {} instance metadata status update in progress, new status: {}",
                 instanceMetaData.getShortHostname(), vmInstanceStatus);
@@ -110,6 +110,10 @@ public class ProviderChecker {
             case TERMINATED_BY_PROVIDER:
                 setStatusIfNotTheSame(instanceMetaData, InstanceStatus.DELETED_BY_PROVIDER);
                 status = InstanceStatus.DELETED_BY_PROVIDER;
+                break;
+            case UNKNOWN:
+                // preserve original status in DB
+                status = InstanceStatus.UNKNOWN;
                 break;
             default:
                 LOGGER.info(":::Auto sync::: the '{}' status is not converted", vmInstanceStatus.getStatus());
