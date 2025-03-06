@@ -79,7 +79,7 @@ public class AltusMachineUserService {
      */
     public Optional<AltusCredential> generateDatabusMachineUserForFluent(StackView stack, Telemetry telemetry, boolean forced,
             CdpAccessKeyType cdpAccessKeyType) {
-        if (StackType.WORKLOAD.equals(stack.getType()) || forced) {
+        if (isAnyDataBusBasedFeatureSupported(telemetry) || forced) {
             return ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> altusIAMService.generateDatabusMachineUserWithAccessKey(
@@ -114,7 +114,7 @@ public class AltusMachineUserService {
     }
 
     public void clearFluentMachineUser(StackView stack, ClusterView cluster, Telemetry telemetry) {
-        if (StackType.WORKLOAD.equals(stack.getType()) || isDataBusCredentialAvailable(cluster)) {
+        if (isAnyDataBusBasedFeatureSupported(telemetry) || isDataBusCredentialAvailable(cluster)) {
             String machineUserName = getFluentDatabusMachineUserName(stack);
             ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
@@ -164,7 +164,7 @@ public class AltusMachineUserService {
             LOGGER.debug("Databus credential does not exist for the stack, it will be created ...");
         }
         CdpAccessKeyType cdpAccessKeyType = getCdpAccessKeyType(stackDto);
-        Optional<AltusCredential> altusCredential = generateDatabusMachineUserForFluent(stack, telemetry, cdpAccessKeyType);
+        Optional<AltusCredential> altusCredential = generateDatabusMachineUserForFluent(stack, telemetry, true, cdpAccessKeyType);
         return storeDataBusCredential(altusCredential, stack, cdpAccessKeyType);
     }
 
@@ -240,6 +240,10 @@ public class AltusMachineUserService {
                         machineUserName,
                         accessKey,
                         telemetry.isUseSharedAltusCredentialEnabled()));
+    }
+
+    public boolean isAnyDataBusBasedFeatureSupported(Telemetry telemetry) {
+        return telemetry != null && telemetry.isMeteringFeatureEnabled();
     }
 
     public boolean isAnyMonitoringFeatureSupported(Telemetry telemetry) {
