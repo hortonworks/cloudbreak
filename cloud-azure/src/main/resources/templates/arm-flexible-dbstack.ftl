@@ -297,19 +297,6 @@
             ]
         }
     }
-    <#elseif !useDelegatedSubnet && !usePrivateEndpoints>
-    ,{
-      "name": "[concat(parameters('dbServerName'), '/publicaccess')]",
-      "type": "Microsoft.DBforPostgreSQL/flexibleServers/firewallRules",
-      "apiVersion": "2022-12-01",
-      "dependsOn": [
-        "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers', parameters('dbServerName'))]"
-      ],
-      "properties": {
-        "startIpAddress": "0.0.0.0",
-        "endIpAddress": "0.0.0.0"
-      }
-    }
     </#if>
   ],
   "outputs": {
