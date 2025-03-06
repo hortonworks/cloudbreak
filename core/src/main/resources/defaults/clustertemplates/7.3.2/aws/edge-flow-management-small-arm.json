@@ -1,0 +1,34 @@
+{
+  "name": "7.3.2 - Edge Flow Management Light Duty (ARM) for AWS",
+  "description": "",
+  "type": "FLOW_MANAGEMENT",
+  "featureState": "INTERNAL",
+  "cloudPlatform": "AWS",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.3.2 - Edge Flow Management Light Duty"
+    },
+    "architecture": "arm64",
+    "externalDatabase": {
+      "availabilityType": "NON_HA"
+    },
+    "instanceGroups": [
+      {
+        "nodeCount": 1,
+        "name": "management",
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL",
+        "template": {
+          "instanceType": "r7gd.2xlarge",
+          "attachedVolumes": [
+            {
+              "size": 100,
+              "count": 1,
+              "type": "standard"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
