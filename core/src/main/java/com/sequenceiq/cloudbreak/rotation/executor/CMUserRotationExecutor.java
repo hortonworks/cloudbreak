@@ -85,7 +85,7 @@ public class CMUserRotationExecutor extends AbstractRotationExecutor<CMUserRotat
     }
 
     @Override
-    protected void finalize(CMUserRotationContext rotationContext) throws Exception {
+    protected void finalizeRotation(CMUserRotationContext rotationContext) throws Exception {
         ClusterSecurityService clusterSecurityService = getClusterSecurityService(rotationContext);
         RotationSecret clientUser = uncachedSecretServiceForRotation.getRotation(rotationContext.getClientUserSecret());
         RotationSecret clientPassword = uncachedSecretServiceForRotation.getRotation(rotationContext.getClientPasswordSecret());

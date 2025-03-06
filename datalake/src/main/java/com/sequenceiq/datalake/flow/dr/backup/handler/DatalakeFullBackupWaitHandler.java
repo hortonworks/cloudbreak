@@ -82,8 +82,7 @@ public class DatalakeFullBackupWaitHandler extends ExceptionCatcherEventHandler<
                 case CANCELLED:
                     response = new DatalakeBackupCancelledEvent(sdxId, userId, request.getOperationId());
                     break;
-                case SUCCESSFUL:
-                case VALIDATION_SUCCESSFUL:
+                case SUCCESSFUL, VALIDATION_SUCCESSFUL:
                     response = new DatalakeBackupSuccessEvent(sdxId, userId, request.getOperationId());
                     break;
                 // failed states are handled via Exception catch block
@@ -102,7 +101,7 @@ public class DatalakeFullBackupWaitHandler extends ExceptionCatcherEventHandler<
             LOGGER.info("Full backup polling failed for cluster: {}", sdxId);
             response = new DatalakeBackupFailedEvent(sdxId, userId, exception);
         } catch (CloudbreakApiException exception) {
-            LOGGER.info("Datalake backup failed. Reason: " + exception.getMessage());
+            LOGGER.info("Datalake backup failed. Reason: {}", exception.getMessage());
             response = new DatalakeBackupFailedEvent(sdxId, userId, exception);
         }
         return response;

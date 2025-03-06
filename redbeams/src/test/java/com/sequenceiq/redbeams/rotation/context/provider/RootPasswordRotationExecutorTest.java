@@ -223,7 +223,7 @@ class RootPasswordRotationExecutorTest {
     }
 
     @Test
-    void finalizeShouldDoNothing() {
+    void finalizeRotationShouldDoNothing() {
         verify(dbStackService, never()).getByCrn(eq(RESOURCE_CRN));
         verify(databaseServerConfigService, never()).getByCrn(eq(RESOURCE_CRN));
         verify(uncachedSecretServiceForRotation, never()).getRotation(eq(ROOT_PASSWORD));

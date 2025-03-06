@@ -39,7 +39,7 @@ public class CloudbreakPollerRotationExecutor extends AbstractRotationExecutor<P
     }
 
     @Override
-    protected void finalize(PollerRotationContext rotationContext) {
+    protected void finalizeRotation(PollerRotationContext rotationContext) {
         LOGGER.info("Finalize cloudbreak secret: {}", rotationContext.getSecretType());
         sdxRotationService.rotateCloudbreakSecret(rotationContext.getResourceCrn(), rotationContext.getSecretType(), FINALIZE,
                 rotationContext.getAdditionalProperties());

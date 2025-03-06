@@ -102,7 +102,7 @@ public class CcmV2JumpgateRotationExecutor extends AbstractRotationExecutor<Rota
     }
 
     @Override
-    protected void finalize(RotationContext rotationContext) throws Exception {
+    protected void finalizeRotation(RotationContext rotationContext) throws Exception {
         String resourceCrn = rotationContext.getResourceCrn();
         Crn environmentCrn = Crn.safeFromString(resourceCrn);
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(resourceCrn, environmentCrn.getAccountId());

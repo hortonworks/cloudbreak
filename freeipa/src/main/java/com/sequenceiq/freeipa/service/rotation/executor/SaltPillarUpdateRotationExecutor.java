@@ -90,7 +90,7 @@ public class SaltPillarUpdateRotationExecutor extends AbstractRotationExecutor<S
     }
 
     @Override
-    public void finalize(SaltPillarUpdateRotationContext rotationContext) {
+    public void finalizeRotation(SaltPillarUpdateRotationContext rotationContext) {
 
     }
 

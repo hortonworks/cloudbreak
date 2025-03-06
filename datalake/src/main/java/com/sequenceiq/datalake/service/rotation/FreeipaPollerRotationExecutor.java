@@ -40,7 +40,7 @@ public class FreeipaPollerRotationExecutor extends AbstractRotationExecutor<Poll
     }
 
     @Override
-    protected void finalize(PollerRotationContext rotationContext) {
+    protected void finalizeRotation(PollerRotationContext rotationContext) {
         LOGGER.info("Finalize redbeams secret: {}", rotationContext.getSecretType());
         sdxRotationService.rotateFreeipaSecret(rotationContext.getResourceCrn(), rotationContext.getSecretType(), FINALIZE,
                 rotationContext.getAdditionalProperties());

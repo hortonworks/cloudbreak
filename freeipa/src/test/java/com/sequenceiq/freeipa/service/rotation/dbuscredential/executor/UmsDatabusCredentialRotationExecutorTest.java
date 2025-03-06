@@ -91,13 +91,13 @@ public class UmsDatabusCredentialRotationExecutorTest {
     }
 
     @Test
-    void testFinalize() throws Exception {
+    void testFinalizeRotation() throws Exception {
         mockStack();
         mockDeletion();
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             try {
-                underTest.finalize(new RotationContext(ENV_CRN));
+                underTest.finalizeRotation(new RotationContext(ENV_CRN));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -108,7 +108,7 @@ public class UmsDatabusCredentialRotationExecutorTest {
     }
 
     @Test
-    void testFinalizeNoRotation() throws Exception {
+    void testFinalizeRotationNoRotation() throws Exception {
         mockStack();
         mockDeletion();
         String secret = "{\"machineUserName\":\"user\",\"accessKey\":\"newAccessKey\"}";
@@ -116,7 +116,7 @@ public class UmsDatabusCredentialRotationExecutorTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             try {
-                underTest.finalize(new RotationContext(ENV_CRN));
+                underTest.finalizeRotation(new RotationContext(ENV_CRN));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

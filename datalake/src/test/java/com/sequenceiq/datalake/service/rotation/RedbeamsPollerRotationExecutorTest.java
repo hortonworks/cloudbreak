@@ -75,7 +75,7 @@ class RedbeamsPollerRotationExecutorTest {
     }
 
     @Test
-    void finalizeShouldThrowSecretRotationExceptionIfCloudbreakFinalizeFailed() {
+    void finalizeShouldThrowSecretRotationExceptionIfCloudbreakFinalizeRotationFailed() {
         doThrow(new RuntimeException("error")).when(sdxRotationService).rotateRedbeamsSecret(anyString(),
                 eq(REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(FINALIZE), any());
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
@@ -86,7 +86,7 @@ class RedbeamsPollerRotationExecutorTest {
     }
 
     @Test
-    void finalizeShouldSucceed() {
+    void finalizeRotationShouldSucceed() {
         underTest.executeFinalize(new PollerRotationContext(RESOURCE_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD), null);
         verify(sdxRotationService, times(1)).rotateRedbeamsSecret(eq(RESOURCE_CRN),
                 eq(REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(FINALIZE), any());

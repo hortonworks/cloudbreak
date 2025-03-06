@@ -56,7 +56,7 @@ public class UserDataRotationExecutor extends AbstractRotationExecutor<UserDataR
     }
 
     @Override
-    protected void finalize(UserDataRotationContext rotationContext) {
+    protected void finalizeRotation(UserDataRotationContext rotationContext) {
 
     }
 

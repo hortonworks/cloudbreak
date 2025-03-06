@@ -74,7 +74,7 @@ public class FreeIpaUserPasswordRotationExecutor extends AbstractRotationExecuto
     }
 
     @Override
-    public void finalize(FreeIpaUserPasswordRotationContext rotationContext) {
+    public void finalizeRotation(FreeIpaUserPasswordRotationContext rotationContext) {
 
     }
 

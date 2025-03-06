@@ -44,7 +44,7 @@ public class FreeIpaPollerRotationExecutor extends AbstractRotationExecutor<Poll
     }
 
     @Override
-    protected void finalize(PollerRotationContext rotationContext) {
+    protected void finalizeRotation(PollerRotationContext rotationContext) {
         LOGGER.info("Finalize FreeIpa secret: {}", rotationContext.getSecretType());
         StackDto stackDto = stackDtoService.getByCrn(rotationContext.getResourceCrn());
         freeipaService.rotateFreeIpaSecret(stackDto.getEnvironmentCrn(), rotationContext.getSecretType(), FINALIZE, rotationContext.getAdditionalProperties());

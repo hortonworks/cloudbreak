@@ -48,7 +48,7 @@ public class SaltBootConfigRotationExecutor extends AbstractRotationExecutor<Sal
     }
 
     @Override
-    protected void finalize(SaltBootConfigRotationContext rotationContext) {
+    protected void finalizeRotation(SaltBootConfigRotationContext rotationContext) {
 
     }
 

@@ -183,7 +183,7 @@ class CcmV2JumpgateRotationExecutorTest {
     }
 
     @Test
-    void finalizeWhenUserDataSecretIsInRotation() throws Exception {
+    void finalizeRotationWhenUserDataSecretIsInRotation() throws Exception {
         Stack stack = new Stack();
         stack.setCcmV2AgentCrn(AGENT_CRN);
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(eq(ENVIRONMENT_CRN), any())).thenReturn(stack);
@@ -191,13 +191,13 @@ class CcmV2JumpgateRotationExecutorTest {
         imageEntity.setGatewayUserdata(NEW_USER_DATA);
         when(imageService.getByStack(eq(stack))).thenReturn(imageEntity);
         when(uncachedSecretServiceForRotation.getRotation(any())).thenReturn(new RotationSecret(NEW_USER_DATA, OLD_USER_DATA));
-        underTest.finalize(new RotationContext(ENVIRONMENT_CRN));
+        underTest.finalizeRotation(new RotationContext(ENVIRONMENT_CRN));
         verify(ccmV2Client, times(1)).deactivateAgentAccessKeyPair(anyString(), eq(OLD_ACCESS_KEY_ID));
         verify(uncachedSecretServiceForRotation, times(1)).update(any(), eq(NEW_USER_DATA));
     }
 
     @Test
-    void finalizeWhenUserDataSecretIsNotInRotation() throws Exception {
+    void finalizeRotationWhenUserDataSecretIsNotInRotation() throws Exception {
         Stack stack = new Stack();
         stack.setCcmV2AgentCrn(AGENT_CRN);
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(eq(ENVIRONMENT_CRN), any())).thenReturn(stack);
@@ -205,7 +205,7 @@ class CcmV2JumpgateRotationExecutorTest {
         imageEntity.setGatewayUserdata(NEW_USER_DATA);
         when(imageService.getByStack(eq(stack))).thenReturn(imageEntity);
         when(uncachedSecretServiceForRotation.getRotation(any())).thenReturn(new RotationSecret(OLD_USER_DATA, null));
-        underTest.finalize(new RotationContext(ENVIRONMENT_CRN));
+        underTest.finalizeRotation(new RotationContext(ENVIRONMENT_CRN));
         verify(ccmV2Client, never()).deactivateAgentAccessKeyPair(anyString(), anyString());
         verify(uncachedSecretServiceForRotation, never()).update(any(), anyString());
     }

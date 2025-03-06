@@ -37,7 +37,7 @@ public class CMServiceConfigRotationExecutor extends AbstractRotationExecutor<CM
     }
 
     @Override
-    protected void finalize(CMServiceConfigRotationContext rotationContext) {
+    protected void finalizeRotation(CMServiceConfigRotationContext rotationContext) {
 
     }
 

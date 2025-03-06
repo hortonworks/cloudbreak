@@ -45,7 +45,7 @@ public class SaltPillarRotationExecutor extends AbstractRotationExecutor<SaltPil
     }
 
     @Override
-    protected void finalize(SaltPillarRotationContext rotationContext) {
+    protected void finalizeRotation(SaltPillarRotationContext rotationContext) {
         LOGGER.info("Finalize salt pillar rotation, nothing to do.");
     }
 

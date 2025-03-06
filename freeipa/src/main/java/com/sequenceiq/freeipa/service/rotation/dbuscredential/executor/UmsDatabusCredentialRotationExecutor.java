@@ -65,7 +65,7 @@ public class UmsDatabusCredentialRotationExecutor extends AbstractRotationExecut
     }
 
     @Override
-    protected void finalize(RotationContext rotationContext) throws Exception {
+    protected void finalizeRotation(RotationContext rotationContext) throws Exception {
         removeCredential(rotationContext.getResourceCrn(), RotationSecret::getBackupSecret, RotationSecret::getSecret);
     }
 

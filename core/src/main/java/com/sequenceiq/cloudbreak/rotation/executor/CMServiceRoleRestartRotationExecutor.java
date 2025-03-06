@@ -40,7 +40,7 @@ public class CMServiceRoleRestartRotationExecutor extends AbstractRotationExecut
     }
 
     @Override
-    public void finalize(CMServiceRoleRestartRotationContext rotationContext) throws Exception {
+    public void finalizeRotation(CMServiceRoleRestartRotationContext rotationContext) throws Exception {
 
     }
 

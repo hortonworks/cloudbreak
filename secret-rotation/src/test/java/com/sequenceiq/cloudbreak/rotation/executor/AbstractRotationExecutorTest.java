@@ -61,14 +61,14 @@ public class AbstractRotationExecutorTest {
     }
 
     @Test
-    public void testFinalize() {
+    public void testFinalizeRotation() {
         underTest.executeFinalize(new RotationContext(""), METADATA);
 
         verify(secretRotationNotificationService).sendNotification(any(), any(), any());
     }
 
     @Test
-    public void testFinalizeFailure() {
+    public void testFinalizeRotationFailure() {
         assertThrows(SecretRotationException.class, () -> underTest.executeFinalize(new RotationContext(null), METADATA));
 
         verify(secretRotationNotificationService).sendNotification(any(), any(), any());
@@ -115,7 +115,7 @@ public class AbstractRotationExecutorTest {
         }
 
         @Override
-        protected void finalize(RotationContext rotationContext) throws Exception {
+        protected void finalizeRotation(RotationContext rotationContext) throws Exception {
             simulateFailure(rotationContext);
         }
 

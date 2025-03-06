@@ -68,13 +68,13 @@ public class UmsDatabusCredentialRotationExecutorTest {
     }
 
     @Test
-    void testFinalize() throws Exception {
+    void testFinalizeRotation() throws Exception {
         mockStack();
         mockDeletion();
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             try {
-                underTest.finalize(new RotationContext(null));
+                underTest.finalizeRotation(new RotationContext(null));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

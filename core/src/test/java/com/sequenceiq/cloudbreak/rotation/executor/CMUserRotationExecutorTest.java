@@ -169,7 +169,7 @@ public class CMUserRotationExecutorTest {
     }
 
     @Test
-    public void testFinalizeIfVaultCompromised() {
+    public void testFinalizeRotationIfVaultCompromised() {
         setup();
         when(uncachedSecretServiceForRotation.getRotation(anyString())).thenAnswer(i ->
                 new RotationSecret(String.valueOf(i.getArguments()[0]), null));
@@ -215,7 +215,7 @@ public class CMUserRotationExecutorTest {
     }
 
     @Test
-    public void testFinalize() throws Exception {
+    public void testFinalizeRotation() throws Exception {
         ClusterSecurityService clusterSecurityService = setup();
         CMUserRotationContext rotationContext = getRotationContext();
 

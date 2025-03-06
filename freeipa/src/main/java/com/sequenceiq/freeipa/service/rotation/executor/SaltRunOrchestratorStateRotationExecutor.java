@@ -36,7 +36,7 @@ public class SaltRunOrchestratorStateRotationExecutor extends AbstractRotationEx
     }
 
     @Override
-    protected void finalize(SaltRunOrchestratorStateRotationContext context) throws Exception {
+    protected void finalizeRotation(SaltRunOrchestratorStateRotationContext context) throws Exception {
         if (context.stateRunNeeded() && context.cleanupStateExists()) {
             saltService.executeSaltRun(getStateParams(context.getCleanupParams(), context.getCleanupStates(), context));
         }

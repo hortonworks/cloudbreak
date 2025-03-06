@@ -70,7 +70,7 @@ public class DatalakeEnableSeLinuxActions {
             protected void doExecute(CommonContext context, DatalakeEnableSeLinuxEvent payload, Map<Object, Object> variables) {
                 sdxStatusService.setStatusForDatalakeAndNotifyWithStatusReason(
                         DATALAKE_ENABLE_SELINUX_ON_DATALAKE_IN_PROGRESS,
-                        String.format("Enable SeLinux on the Data Lake."),
+                        "Enable SeLinux on the Data Lake.",
                         payload.getResourceId());
                 sendEvent(context, ENABLE_SELINUX_DATALAKE_HANDLER.selector(), payload);
             }
@@ -107,10 +107,10 @@ public class DatalakeEnableSeLinuxActions {
             @Override
             protected void doExecute(CommonContext context, DatalakeEnableSeLinuxFailedEvent payload, Map<Object, Object> variables) {
                 LOGGER.error(String.format("Failed to Enable SeLinux in datalake '%s'. Status: '%s'.",
-                        payload.getStatus()), payload.getException());
+                        payload.getResourceCrn(), payload.getStatus()), payload.getException());
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotifyWithStatusReason(
                         DATALAKE_ENABLE_SELINUX_ON_DATALAKE_FAILED,
-                        String.format("Enable SeLinux failed on the Data Lake."),
+                        "Enable SeLinux failed on the Data Lake.",
                         payload.getResourceId());
                 metricService.incrementMetricCounter(SDX_ENABLE_SELINUX_FAILED, sdxCluster);
                 sendEvent(context, HANDLED_FAILED_ENABLE_SELINUX_DATALAKE_EVENT.event(), payload);

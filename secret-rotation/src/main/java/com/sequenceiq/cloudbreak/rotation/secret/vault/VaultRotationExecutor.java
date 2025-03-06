@@ -48,7 +48,7 @@ public class VaultRotationExecutor extends AbstractRotationExecutor<VaultRotatio
     }
 
     @Override
-    protected void finalize(VaultRotationContext rotationContext) throws Exception {
+    protected void finalizeRotation(VaultRotationContext rotationContext) throws Exception {
         for (Map.Entry<String, String> entry : rotationContext.getVaultPathSecretMap().entrySet()) {
             String vaultPath = entry.getKey();
             RotationSecret rotationSecret = uncachedSecretServiceForRotation.getRotation(vaultPath);

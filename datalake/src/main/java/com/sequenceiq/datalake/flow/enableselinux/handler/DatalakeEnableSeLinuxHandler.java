@@ -2,8 +2,6 @@ package com.sequenceiq.datalake.flow.enableselinux.handler;
 
 import static com.sequenceiq.datalake.flow.enableselinux.event.DatalakeEnableSeLinuxStateSelectors.ENABLE_SELINUX_DATALAKE_EVENT;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.eventbus.Event;
@@ -17,8 +15,6 @@ import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 
 @Component
 public class DatalakeEnableSeLinuxHandler extends EventSenderAwareHandler<DatalakeEnableSeLinuxEvent> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(DatalakeEnableSeLinuxHandler.class);
 
     protected DatalakeEnableSeLinuxHandler(EventSender eventSender) {
         super(eventSender);

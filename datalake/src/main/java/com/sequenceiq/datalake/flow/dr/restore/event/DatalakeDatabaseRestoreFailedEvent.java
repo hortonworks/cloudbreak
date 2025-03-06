@@ -21,6 +21,7 @@ public class DatalakeDatabaseRestoreFailedEvent extends SdxEvent {
         return new DatalakeDatabaseRestoreFailedEvent(event.getResourceId(), event.getUserId(), exception);
     }
 
+    @Override
     public Exception getException() {
         return exception;
     }

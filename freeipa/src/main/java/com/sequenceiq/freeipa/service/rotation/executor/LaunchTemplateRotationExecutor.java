@@ -100,7 +100,7 @@ public class LaunchTemplateRotationExecutor extends AbstractRotationExecutor<Rot
     }
 
     @Override
-    protected void finalize(RotationContext rotationContext) throws Exception {
+    protected void finalizeRotation(RotationContext rotationContext) throws Exception {
 
     }
 

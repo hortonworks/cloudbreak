@@ -46,6 +46,7 @@ public class DatalakeHorizontalScaleSdxEvent extends SdxEvent {
         return scaleRequest;
     }
 
+    @Override
     public Exception getException() {
         return exception;
     }

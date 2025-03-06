@@ -40,7 +40,7 @@ public class RedbeamsPollerRotationExecutor extends AbstractRotationExecutor<Pol
     }
 
     @Override
-    protected void finalize(PollerRotationContext rotationContext) {
+    protected void finalizeRotation(PollerRotationContext rotationContext) {
         LOGGER.info("Finalize redbeams secret: {}", rotationContext.getSecretType());
         sdxRotationService.rotateRedbeamsSecret(rotationContext.getResourceCrn(), rotationContext.getSecretType(), FINALIZE,
                 rotationContext.getAdditionalProperties());

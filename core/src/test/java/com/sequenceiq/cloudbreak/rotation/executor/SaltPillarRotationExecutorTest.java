@@ -112,7 +112,7 @@ class SaltPillarRotationExecutorTest {
     }
 
     @Test
-    void finalizeShouldDoNothing() throws CloudbreakOrchestratorFailedException {
+    void finalizeRotationShouldDoNothing() throws CloudbreakOrchestratorFailedException {
         underTest.executeFinalize(new SaltPillarRotationContext(RESOURCE_CRN, getSaltPillarGenerator()), null);
         verify(saltService, never()).updateSaltPillar(any(), any());
     }

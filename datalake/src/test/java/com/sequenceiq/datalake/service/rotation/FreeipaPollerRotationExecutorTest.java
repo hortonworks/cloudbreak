@@ -77,7 +77,7 @@ class FreeipaPollerRotationExecutorTest {
     }
 
     @Test
-    void finalizeShouldThrowSecretRotationExceptionIfCloudbreakFinalizeFailed() {
+    void finalizeShouldThrowSecretRotationExceptionIfCloudbreakFinalizeRotationFailed() {
         doThrow(new RuntimeException("error")).when(sdxRotationService).rotateFreeipaSecret(anyString(),
                 eq(FREEIPA_KERBEROS_BIND_USER), eq(FINALIZE), any());
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
@@ -88,7 +88,7 @@ class FreeipaPollerRotationExecutorTest {
     }
 
     @Test
-    void finalizeShouldSucceed() {
+    void finalizeRotationShouldSucceed() {
         underTest.executeFinalize(new PollerRotationContext(RESOURCE_CRN, FREEIPA_KERBEROS_BIND_USER),
                 RotationMetadataTestUtil.metadataForFinalize(RESOURCE_CRN, null));
         verify(sdxRotationService, times(1)).rotateFreeipaSecret(eq(RESOURCE_CRN),

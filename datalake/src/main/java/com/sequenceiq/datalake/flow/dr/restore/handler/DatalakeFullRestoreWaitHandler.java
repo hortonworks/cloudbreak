@@ -73,7 +73,7 @@ public class DatalakeFullRestoreWaitHandler extends ExceptionCatcherEventHandler
             LOGGER.info("Full restore polling failed for cluster: {}", sdxId);
             response = new DatalakeRestoreFailedEvent(sdxId, userId, exception);
         } catch (CloudbreakApiException exception) {
-            LOGGER.info("Datalake restore failed. Reason: " + exception.getMessage());
+            LOGGER.info("Datalake restore failed. Reason: {}", exception.getMessage());
             response = new DatalakeRestoreFailedEvent(sdxId, userId, exception);
         }
         return response;

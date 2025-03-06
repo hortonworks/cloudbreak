@@ -150,7 +150,7 @@ class RedbeamsPollerRotationExecutorTest {
     }
 
     @Test
-    void finalizeShouldThrowSecretRotationExceptionIfStackNotFound() {
+    void finalizeRotationShouldThrowSecretRotationExceptionIfStackNotFound() {
         when(stackDtoService.getByCrn(eq(RESOURCE_CRN))).thenThrow(NotFoundException.notFound("Stack", RESOURCE_CRN).get());
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
                 () -> underTest.executeFinalize(new PollerRotationContext(RESOURCE_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD),
@@ -160,7 +160,7 @@ class RedbeamsPollerRotationExecutorTest {
     }
 
     @Test
-    void finalizeShouldThrowSecretRotationExceptionIfDatabaseServerCrnNotFound() {
+    void finalizeRotationShouldThrowSecretRotationExceptionIfDatabaseServerCrnNotFound() {
         StackDto stackDto = mock(StackDto.class);
         when(stackDtoService.getByCrn(RESOURCE_CRN)).thenReturn(stackDto);
         when(stackDto.getCluster()).thenReturn(new Cluster());
@@ -172,7 +172,7 @@ class RedbeamsPollerRotationExecutorTest {
     }
 
     @Test
-    void finalizeShouldThrowSecretRotationExceptionIfExternalCallFails() {
+    void finalizeRotationShouldThrowSecretRotationExceptionIfExternalCallFails() {
         StackDto stackDto = mock(StackDto.class);
         when(stackDtoService.getByCrn(RESOURCE_CRN)).thenReturn(stackDto);
         Cluster cluster = new Cluster();
@@ -188,7 +188,7 @@ class RedbeamsPollerRotationExecutorTest {
     }
 
     @Test
-    void finalizeShouldSucceed() {
+    void finalizeRotationShouldSucceed() {
         StackDto stackDto = mock(StackDto.class);
         when(stackDtoService.getByCrn(RESOURCE_CRN)).thenReturn(stackDto);
         Cluster cluster = new Cluster();

@@ -42,7 +42,7 @@ public class ClusterProxyUpdateConfigRotationExecutor extends AbstractRotationEx
     }
 
     @Override
-    protected void finalize(ClusterProxyUpdateConfigRotationContext rotationContext) {
+    protected void finalizeRotation(ClusterProxyUpdateConfigRotationContext rotationContext) {
     }
 
     @Override

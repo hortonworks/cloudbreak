@@ -38,7 +38,7 @@ public class SaltStateApplyRotationExecutor extends AbstractRotationExecutor<Sal
     }
 
     @Override
-    protected void finalize(SaltStateApplyRotationContext context) throws Exception {
+    protected void finalizeRotation(SaltStateApplyRotationContext context) throws Exception {
         executeStatesIfPresent(context.getCleanupStates(), "finalization", context);
     }
 

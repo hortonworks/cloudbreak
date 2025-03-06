@@ -32,7 +32,6 @@ import org.springframework.stereotype.Service;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.gov.CommonGovService;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -58,7 +57,7 @@ public class CDPConfigService {
     public static final long DEFAULT_WORKSPACE_ID = 0;
 
     @VisibleForTesting
-    static final Pattern RESOURCE_TEMPLATE_PATTERN = Pattern.compile(".*/duties/(.[\\d.?]+]*)/([a-z]+)/([a-z_]+)+\\.json");
+    static final Pattern RESOURCE_TEMPLATE_PATTERN = Pattern.compile(".*/duties/(.[\\d.?]+)/([a-z]+)/([a-z_]+)\\.json");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CDPConfigService.class);
 
@@ -81,9 +80,6 @@ public class CDPConfigService {
     private final Map<CDPConfigKey, String> cdpStackRequests = new HashMap<>();
 
     @Inject
-    private EntitlementService entitlementService;
-
-    @Inject
     private ImageCatalogService imageCatalogService;
 
     @Inject
@@ -102,7 +98,6 @@ public class CDPConfigService {
                 if (matcher.find()) {
                     String runtimeVersion = matcher.group(RUNTIME_GROUP);
                     if (supportedRuntimes.isEmpty() || supportedRuntimes.contains(runtimeVersion)) {
-                        CloudPlatform cloudPlatform = CloudPlatform.valueOf(matcher.group(CLOUDPLATFORM_GROUP).toUpperCase(Locale.ROOT));
                         String clusterShapeString = matcher.group(CLUSTERSHAPE_GROUP).toUpperCase(Locale.ROOT);
                         Architecture architecture = Architecture.X86_64;
                         if (clusterShapeString.contains("_ARM")) {
@@ -110,6 +105,7 @@ public class CDPConfigService {
                             architecture = Architecture.ARM64;
                         }
                         SdxClusterShape sdxClusterShape = SdxClusterShape.valueOf(clusterShapeString);
+                        CloudPlatform cloudPlatform = CloudPlatform.valueOf(matcher.group(CLOUDPLATFORM_GROUP).toUpperCase(Locale.ROOT));
                         CDPConfigKey cdpConfigKey = new CDPConfigKey(cloudPlatform, sdxClusterShape, runtimeVersion, architecture);
                         String templateString = IOUtils.toString(resource.getInputStream(), StandardCharsets.UTF_8);
                         if (!cdpStackRequests.containsKey(cdpConfigKey)) {
@@ -120,7 +116,6 @@ public class CDPConfigService {
             }
             LOGGER.info("Cdp configs for datalakes: {}", cdpStackRequests);
         } catch (IOException e) {
-            LOGGER.error("Can't read CDP template files", e);
             throw new IllegalStateException("Can't read CDP template files", e);
         }
     }
@@ -134,7 +129,6 @@ public class CDPConfigService {
                 return JsonUtil.readValue(cdpStackRequest, StackV4Request.class);
             }
         } catch (IOException e) {
-            LOGGER.error("Can't convert json to StackV4Request", e);
             throw new IllegalStateException("Can't convert json to StackV4Request", e);
         }
     }
@@ -159,12 +153,12 @@ public class CDPConfigService {
                     String.join(",", defaultImageCatalogRuntimeVersions));
             runtimeVersions = runtimeVersions.stream()
                     .filter(defaultImageCatalogRuntimeVersions::contains)
-                    .collect(Collectors.toList());
+                    .toList();
         }
         if (govCloudDeployment) {
             runtimeVersions = runtimeVersions.stream()
                     .filter(e -> commonGovService.govCloudCompatibleVersion(e))
-                    .collect(Collectors.toList());
+                    .toList();
         } else {
             runtimeVersions = supportedOsFilter(runtimeVersions, os);
         }
@@ -197,7 +191,7 @@ public class CDPConfigService {
                 .map(version -> (Versioned) () -> version)
                 .sorted(VERSION_COMPARATOR.reversed())
                 .map(Versioned::getVersion)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private Predicate<CDPConfigKey> filterByCloudPlatformIfPresent(String cloudPlatform) {
@@ -206,7 +200,7 @@ public class CDPConfigService {
 
     public List<AdvertisedRuntime> getAdvertisedRuntimes(String cloudPlatform, String os) {
         List<String> runtimeVersions = getDatalakeVersions(cloudPlatform, os).stream()
-                .filter(runtimeVersion -> advertisedRuntimes.isEmpty() || advertisedRuntimes.contains(runtimeVersion)).collect(Collectors.toList());
+                .filter(runtimeVersion -> advertisedRuntimes.isEmpty() || advertisedRuntimes.contains(runtimeVersion)).toList();
         Optional<String> calculatedDefault
                 = Strings.isNullOrEmpty(this.defaultRuntime) ? runtimeVersions.stream().findFirst() : Optional.ofNullable(this.defaultRuntime);
 

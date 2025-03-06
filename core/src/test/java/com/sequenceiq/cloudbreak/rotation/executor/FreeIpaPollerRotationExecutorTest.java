@@ -72,7 +72,7 @@ class FreeIpaPollerRotationExecutorTest {
     }
 
     @Test
-    void finalizeShouldSucceed() {
+    void finalizeRotationShouldSucceed() {
         StackDto stackDto = mock(StackDto.class);
         when(stackDtoService.getByCrn(RESOURCE_CRN)).thenReturn(stackDto);
         when(stackDto.getEnvironmentCrn()).thenReturn(ENVIRONMENT_CRN);
@@ -128,7 +128,7 @@ class FreeIpaPollerRotationExecutorTest {
     }
 
     @Test
-    void finalizeShouldThrowSecretRotationExceptionIfExternalCallFails() {
+    void finalizeRotationShouldThrowSecretRotationExceptionIfExternalCallFails() {
         StackDto stackDto = mock(StackDto.class);
         when(stackDtoService.getByCrn(RESOURCE_CRN)).thenReturn(stackDto);
         when(stackDto.getEnvironmentCrn()).thenReturn(ENVIRONMENT_CRN);

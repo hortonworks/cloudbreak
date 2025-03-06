@@ -39,7 +39,7 @@ public class ClusterProxyReRegisterRotationExecutor extends AbstractRotationExec
     }
 
     @Override
-    protected void finalize(ClusterProxyReRegisterRotationContext rotationContext) {
+    protected void finalizeRotation(ClusterProxyReRegisterRotationContext rotationContext) {
     }
 
     @Override

@@ -26,7 +26,7 @@ public abstract class AbstractRotationExecutor<C extends RotationContext> {
 
     protected abstract void rollback(C rotationContext) throws Exception;
 
-    protected abstract void finalize(C rotationContext) throws Exception;
+    protected abstract void finalizeRotation(C rotationContext) throws Exception;
 
     protected abstract void preValidate(C rotationContext) throws Exception;
 
@@ -49,7 +49,7 @@ public abstract class AbstractRotationExecutor<C extends RotationContext> {
     }
 
     public final void executeFinalize(RotationContext context, RotationMetadata metadata) {
-        invokeRotationPhase(context, metadata, this::finalize,
+        invokeRotationPhase(context, metadata, this::finalizeRotation,
                 () -> String.format("Finalization of rotation failed at %s step for %s regarding secret %s",
                         getType(), context.getResourceCrn(), metadata.secretType()));
     }

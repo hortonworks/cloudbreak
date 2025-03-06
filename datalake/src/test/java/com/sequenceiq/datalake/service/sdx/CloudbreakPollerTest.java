@@ -4,7 +4,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
@@ -75,7 +76,7 @@ class CloudbreakPollerTest {
     }
 
     @Test
-    public void testPollerTimeout() {
+    void testPollerTimeout() {
         whenCheckFlowState().thenReturn(FlowState.RUNNING);
 
         assertThrows(PollerStoppedException.class,
@@ -83,7 +84,7 @@ class CloudbreakPollerTest {
     }
 
     @Test
-    public void testCancelledFlow() {
+    void testCancelledFlow() {
         DatalakeInMemoryStateStore.put(ID, PollGroup.CANCELLED);
 
         UserBreakException exception = assertThrows(UserBreakException.class,
@@ -94,16 +95,17 @@ class CloudbreakPollerTest {
     }
 
     @Test
-    public void testAvailableClusterWhenFlowStateIsUnknown() {
+    void testAvailableClusterWhenFlowStateIsUnknown() {
         whenCheckFlowState().thenReturn(FlowState.UNKNOWN);
         whenCheckStackStatus().thenReturn(statusResponse(Status.AVAILABLE, Status.AVAILABLE));
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.pollStartUntilAvailable(sdxCluster, pollingConfig);
+        verify(cloudbreakFlowService, atLeastOnce()).getLastKnownFlowState(sdxCluster);
     }
 
     @Test
-    public void testWhenClusterEventuallyReachesAvailable() {
+    void testWhenClusterEventuallyReachesAvailable() {
         whenCheckFlowState().thenReturn(FlowState.UNKNOWN);
         whenCheckStackStatus()
                 .thenReturn(statusResponse(Status.UPDATE_IN_PROGRESS, Status.UPDATE_IN_PROGRESS))
@@ -112,10 +114,11 @@ class CloudbreakPollerTest {
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.pollStartUntilAvailable(sdxCluster, pollingConfig);
+        verify(cloudbreakFlowService, atLeastOnce()).getLastKnownFlowState(sdxCluster);
     }
 
     @Test
-    public void testStartFailedStack() {
+    void testStartFailedStack() {
         whenCheckFlowState().thenReturn(FlowState.UNKNOWN);
         whenCheckStackStatus().thenReturn(statusResponse(Status.START_FAILED, "Stack start failed"));
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
@@ -127,7 +130,7 @@ class CloudbreakPollerTest {
     }
 
     @Test
-    public void testStartFailedCluster() {
+    void testStartFailedCluster() {
         whenCheckFlowState().thenReturn(FlowState.UNKNOWN);
         whenCheckStackStatus().thenReturn(statusResponse(Status.AVAILABLE, Status.START_FAILED, "Cluster start failed"));
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
@@ -139,7 +142,7 @@ class CloudbreakPollerTest {
     }
 
     @Test
-    public void testFlowFinishedClusterNotFailedNotAvailable() {
+    void testFlowFinishedClusterNotFailedNotAvailable() {
         whenCheckFlowState().thenReturn(FlowState.FINISHED);
         whenCheckStackStatus().thenReturn(statusResponse(Status.UPDATE_IN_PROGRESS, Status.UPDATE_IN_PROGRESS));
         when(sdxStatusService.getShortStatusMessage(any(StackStatusV4Response.class))).thenReturn("testMessage");
@@ -152,7 +155,7 @@ class CloudbreakPollerTest {
     }
 
     @Test
-    public void testCcmUpgradeFinished() {
+    void testCcmUpgradeFinished() {
         whenCheckFlowState().thenReturn(FlowState.UNKNOWN);
         whenCheckStackStatus()
                 .thenReturn(statusResponse(Status.UPGRADE_CCM_IN_PROGRESS, Status.UPGRADE_CCM_IN_PROGRESS))
@@ -160,10 +163,11 @@ class CloudbreakPollerTest {
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.pollCcmUpgradeUntilAvailable(sdxCluster, pollingConfig);
+        verify(cloudbreakFlowService, atLeastOnce()).getLastKnownFlowState(sdxCluster);
     }
 
     @Test
-    public void pollCertificateRotationUntilAvailable() {
+    void pollCertificateRotationUntilAvailable() {
         whenCheckFlowState().thenReturn(FlowState.UNKNOWN);
         whenCheckStackStatus()
                 .thenReturn(statusResponse(Status.UPDATE_IN_PROGRESS, Status.UPDATE_IN_PROGRESS))
@@ -171,10 +175,12 @@ class CloudbreakPollerTest {
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.pollCertificateRotationUntilAvailable(sdxCluster, pollingConfig);
+        verify(cloudbreakFlowService, atLeastOnce()).getLastKnownFlowState(sdxCluster);
+
     }
 
     @Test
-    public void testCcmUpgradeFailedStack() {
+    void testCcmUpgradeFailedStack() {
         whenCheckFlowState().thenReturn(FlowState.UNKNOWN);
         whenCheckStackStatus()
                 .thenReturn(statusResponse(Status.UPGRADE_CCM_IN_PROGRESS, Status.UPGRADE_CCM_IN_PROGRESS))
@@ -187,7 +193,7 @@ class CloudbreakPollerTest {
     }
 
     @Test
-    public void testCcmUpgradeFailedCluster() {
+    void testCcmUpgradeFailedCluster() {
         whenCheckFlowState().thenReturn(FlowState.UNKNOWN);
         whenCheckStackStatus()
                 .thenReturn(statusResponse(Status.UPGRADE_CCM_IN_PROGRESS, Status.UPGRADE_CCM_IN_PROGRESS))
@@ -204,7 +210,7 @@ class CloudbreakPollerTest {
     }
 
     private OngoingStubbing<StackStatusV4Response> whenCheckStackStatus() {
-        return when(stackV4Endpoint.getStatusByName(eq(0L), eq(sdxCluster.getClusterName()), eq(sdxCluster.getAccountId())));
+        return when(stackV4Endpoint.getStatusByName(0L, sdxCluster.getClusterName(), sdxCluster.getAccountId()));
     }
 
     private StackStatusV4Response statusResponse(Status stackStatus, Status clusterStatus) {

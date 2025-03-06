@@ -37,7 +37,7 @@ public class AwsDatabaseServerParameterSetterTest {
     }
 
     @Test
-    public void testHAServer() {
+    void testHAServer() {
         underTest.setParameters(request, createSdxDatabase(SdxDatabaseAvailabilityType.HA, null), null, "crn");
 
         verify(request).setAws(captor.capture());
@@ -47,7 +47,7 @@ public class AwsDatabaseServerParameterSetterTest {
     }
 
     @Test
-    public void testNonHAServer() {
+    void testNonHAServer() {
         underTest.setParameters(request, createSdxDatabase(SdxDatabaseAvailabilityType.NON_HA, null), null, "crn");
 
         verify(request).setAws(captor.capture());
@@ -57,7 +57,7 @@ public class AwsDatabaseServerParameterSetterTest {
     }
 
     @Test
-    public void testEngineVersion() {
+    void testEngineVersion() {
         underTest.setParameters(request, createSdxDatabase(SdxDatabaseAvailabilityType.NON_HA, "13"), null, "crn");
 
         verify(request).setAws(captor.capture());
@@ -68,10 +68,11 @@ public class AwsDatabaseServerParameterSetterTest {
     }
 
     @Test
-    public void shouldThrowExceptionWhenAvailabilityTypeIsNotSupported() {
+    void shouldThrowExceptionWhenAvailabilityTypeIsNotSupported() {
+        SdxCluster sdxCluster = createSdxDatabase(SdxDatabaseAvailabilityType.NONE, null);
         IllegalArgumentException result =
                 Assertions.assertThrows(IllegalArgumentException.class,
-                        () -> underTest.setParameters(request, createSdxDatabase(SdxDatabaseAvailabilityType.NONE, null), null, "crn"));
+                        () -> underTest.setParameters(request, sdxCluster, null, "crn"));
 
         assertEquals("NONE database availability type is not supported on AWS.", result.getMessage());
     }

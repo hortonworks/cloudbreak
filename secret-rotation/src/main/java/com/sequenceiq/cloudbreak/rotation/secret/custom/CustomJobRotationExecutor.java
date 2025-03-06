@@ -20,7 +20,7 @@ public class CustomJobRotationExecutor extends AbstractRotationExecutor<CustomJo
     }
 
     @Override
-    protected void finalize(CustomJobRotationContext rotationContext) throws Exception {
+    protected void finalizeRotation(CustomJobRotationContext rotationContext) throws Exception {
         rotationContext.getFinalizeJob().ifPresent(Runnable::run);
     }
 

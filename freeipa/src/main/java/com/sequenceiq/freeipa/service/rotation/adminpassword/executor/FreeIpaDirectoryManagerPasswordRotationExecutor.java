@@ -87,7 +87,7 @@ public class FreeIpaDirectoryManagerPasswordRotationExecutor extends AbstractRot
     }
 
     @Override
-    public void finalize(FreeIpaAdminPasswordRotationContext rotationContext) {
+    public void finalizeRotation(FreeIpaAdminPasswordRotationContext rotationContext) {
 
     }
 

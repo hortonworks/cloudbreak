@@ -73,7 +73,7 @@ public class RootPasswordRotationExecutor extends AbstractRotationExecutor<Rotat
     }
 
     @Override
-    protected void finalize(RotationContext rotationContext) {
+    protected void finalizeRotation(RotationContext rotationContext) {
         LOGGER.info("Finalize database root password rotation, nothing to do.");
     }
 

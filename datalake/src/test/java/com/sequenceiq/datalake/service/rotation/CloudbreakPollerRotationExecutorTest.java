@@ -77,7 +77,7 @@ class CloudbreakPollerRotationExecutorTest {
     }
 
     @Test
-    void finalizeShouldThrowSecretRotationExceptionIfCloudbreakFinalizeFailed() {
+    void finalizeShouldThrowSecretRotationExceptionIfCloudbreakFinalizeRotationFailed() {
         doThrow(new RuntimeException("error")).when(sdxRotationService).rotateCloudbreakSecret(anyString(),
                 eq(INTERNAL_DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(FINALIZE), any());
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
@@ -88,7 +88,7 @@ class CloudbreakPollerRotationExecutorTest {
     }
 
     @Test
-    void finalizeShouldSucceed() {
+    void finalizeRotationShouldSucceed() {
         underTest.executeFinalize(new PollerRotationContext(RESOURCE_CRN, INTERNAL_DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD),
                 RotationMetadataTestUtil.metadataForFinalize(RESOURCE_CRN, null));
         verify(sdxRotationService, times(1)).rotateCloudbreakSecret(eq(RESOURCE_CRN),
