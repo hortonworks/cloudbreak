@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.model.component;
 
+import static com.sequenceiq.cloudbreak.service.image.ImageCatalogService.CDP_DEFAULT_CATALOG_NAME;
 import static com.sequenceiq.common.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -148,10 +149,10 @@ public class ImageBasedDefaultCDHEntriesTest {
         StatedImages statedImages = StatedImages.statedImages(images, null, null);
         StatedImages emptyStatedImages = StatedImages.statedImages(emptyImages, null, null);
 
-        when(imageCatalogService.getImages(0L, IMAGE_CATALOG_NAME, null, imageCatalogPlatform, true, null)).thenReturn(emptyStatedImages);
-        when(imageCatalogService.getImages(0L, IMAGE_CATALOG_NAME, null, imageCatalogPlatform, true, null)).thenReturn(statedImages);
+        when(imageCatalogService.getImages(0L, CDP_DEFAULT_CATALOG_NAME, null, imageCatalogPlatform, true, null)).thenReturn(emptyStatedImages);
+        when(imageCatalogService.getImages(0L, CDP_DEFAULT_CATALOG_NAME, null, imageCatalogPlatform, true, null)).thenReturn(statedImages);
 
-        Map<String, ImageBasedDefaultCDHInfo> actual = victim.getEntries(0L, imageCatalogPlatform, null, Architecture.X86_64, IMAGE_CATALOG_NAME);
+        Map<String, ImageBasedDefaultCDHInfo> actual = victim.getEntries(0L, imageCatalogPlatform, null, Architecture.X86_64, "");
 
         Image image = imageList.stream().filter(Image::isDefaultImage).findFirst().get();
 
