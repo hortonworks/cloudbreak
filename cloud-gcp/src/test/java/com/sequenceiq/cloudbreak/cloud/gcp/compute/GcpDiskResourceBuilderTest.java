@@ -25,9 +25,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.Compute.Disks;
+import com.google.api.services.compute.Compute.Disks.Delete;
 import com.google.api.services.compute.Compute.Disks.Insert;
 import com.google.api.services.compute.model.CustomerEncryptionKey;
 import com.google.api.services.compute.model.Disk;
@@ -62,9 +65,18 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class GcpDiskResourceBuilderTest {
 
     private static final Long WORKSPACE_ID = 1L;
+
+    private static final String STACK_AZ = "stack_az";
+
+    private static final String RESOURCE_AZ = "resource_az";
+
+    private static final String PROJECT_ID = "projectId";
+
+    private static final String DISK_NAME = "disk";
 
     @InjectMocks
     private GcpDiskResourceBuilder underTest;
@@ -80,6 +92,9 @@ class GcpDiskResourceBuilderTest {
 
     @Mock
     private Insert insert;
+
+    @Mock
+    private Delete delete;
 
     @Mock
     private GcpStackUtil gcpStackUtil;
@@ -124,12 +139,11 @@ class GcpDiskResourceBuilderTest {
                 .withWorkspaceId(WORKSPACE_ID)
                 .build();
         CloudCredential cloudCredential = new CloudCredential(privateCrn, "credentialname", "account");
-        cloudCredential.putParameter("projectId", "projectId");
+        cloudCredential.putParameter("projectId", PROJECT_ID);
 
-        Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));
-        String projectId = "projectId";
+        Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone(STACK_AZ));
         String serviceAccountId = "serviceAccountId";
-        context = new GcpContext(cloudContext.getName(), location, projectId, serviceAccountId, compute, false, 30, false);
+        context = new GcpContext(cloudContext.getName(), location, PROJECT_ID, serviceAccountId, compute, false, 30, false);
         List<CloudResource> networkResources =
                 Collections.singletonList(CloudResource.builder().withType(ResourceType.GCP_NETWORK).withName("network-test").build());
         context.addNetworkResources(networkResources);
@@ -165,6 +179,7 @@ class GcpDiskResourceBuilderTest {
                 .withStatus(CommonStatus.REQUESTED)
                 .withName("disk")
                 .withParameters(Map.of())
+                .withAvailabilityZone(RESOURCE_AZ)
                 .build());
 
         Map<InstanceGroupType, String> userData = ImmutableMap.of(InstanceGroupType.CORE, "CORE", InstanceGroupType.GATEWAY, "GATEWAY");
@@ -181,6 +196,10 @@ class GcpDiskResourceBuilderTest {
         when(compute.disks()).thenReturn(disks);
         when(disks.insert(anyString(), anyString(), any(Disk.class))).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
+
+        when(disks.delete(PROJECT_ID, STACK_AZ, DISK_NAME)).thenReturn(delete);
+        when(disks.delete(PROJECT_ID, RESOURCE_AZ, DISK_NAME)).thenReturn(delete);
+        when(delete.execute()).thenReturn(operation);
     }
 
     @Test
@@ -228,6 +247,21 @@ class GcpDiskResourceBuilderTest {
         assertNotNull(build);
         verify(disks).insert(anyString(), anyString(), argThat(argument -> argument.getSizeGb().equals((long) rootVolumeSize)));
         verify(insert, times(1)).execute();
+    }
+
+    @Test
+    void testDeleteWithResourceAz() throws Exception {
+        CloudResource disk = underTest.delete(context, auth, buildableResource.get(0));
+        assertNotNull(disk);
+        verify(disks).delete(PROJECT_ID, RESOURCE_AZ, DISK_NAME);
+    }
+
+    @Test
+    void testDeleteWithStackAz() throws Exception {
+        CloudResource cloudResource = CloudResource.builder().cloudResource(buildableResource.get(0)).withAvailabilityZone(null).build();
+        CloudResource disk = underTest.delete(context, auth, cloudResource);
+        assertNotNull(disk);
+        verify(disks).delete(PROJECT_ID, STACK_AZ, DISK_NAME);
     }
 
     private Group createGroup(int rootVolumeSize) {

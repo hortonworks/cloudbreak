@@ -74,7 +74,7 @@ public class InstanceMetaDataToCloudInstanceConverter {
                 instanceTemplate,
                 instanceAuthentication,
                 metaDataEntity.getSubnetId(),
-                stack.getAvailabilityZone(),
+                metaDataEntity.getAvailabilityZone(),
                 params);
     }
 

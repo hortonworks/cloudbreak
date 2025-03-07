@@ -15,6 +15,7 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute.Disks.Insert;
 import com.google.api.services.compute.model.Disk;
 import com.google.api.services.compute.model.Operation;
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpPlatformParameters.GcpDiskType;
@@ -29,7 +30,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
-import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Component
@@ -98,14 +98,8 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
     @Override
     public CloudResource delete(GcpContext context, AuthenticatedContext auth, CloudResource resource) throws Exception {
         String resourceName = resource.getName();
-        VolumeSetAttributes volumeSetAttributes = resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
-
-        String zone;
-        if (volumeSetAttributes != null && volumeSetAttributes.getAvailabilityZone() != null) {
-            zone = volumeSetAttributes.getAvailabilityZone();
-        } else {
-            zone = context.getLocation().getAvailabilityZone().value();
-        }
+        String zone = Strings.isNullOrEmpty(resource.getAvailabilityZone()) ?
+                context.getLocation().getAvailabilityZone().value() : resource.getAvailabilityZone();
         try {
             LOGGER.info("Creating operation to delete disk [name: {}] in project [id: {}] in the following availability zone: {}", resourceName,
                     context.getProjectId(), zone);
