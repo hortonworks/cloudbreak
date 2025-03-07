@@ -52,10 +52,14 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
     public Set<SimpleRemoteEnvironmentResponse> listRemoteEnvironments(String publicCloudAccountId) {
         Set<SimpleRemoteEnvironmentResponse> responses = new HashSet<>();
         if (entitlementService.hybridCloudEnabled(publicCloudAccountId)) {
+            String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
             Set<PrivateControlPlane> privateControlPlanes = privateControlPlaneService.listByAccountId(publicCloudAccountId);
+            LOGGER.info("Starting to list environments from '{}' control planes with actor('{}')", privateControlPlanes.size(), userCrn);
+            String controlPlaneNames = privateControlPlanes.stream().map(PrivateControlPlane::getName).collect(Collectors.joining(","));
+            LOGGER.debug("Starting to list environments from control planes with name '{}' actor('{}')", controlPlaneNames, userCrn);
             privateControlPlanes.stream()
                     .parallel()
-                    .forEach(item -> responses.addAll(listEnvironmentsFromPrivateControlPlane(item)));
+                    .forEach(item -> responses.addAll(listEnvironmentsFromPrivateControlPlaneWithActor(item, userCrn)));
         }
         return responses;
     }
@@ -82,11 +86,6 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
         return response;
     }
 
-    private List<SimpleRemoteEnvironmentResponse> listEnvironmentsFromPrivateControlPlane(PrivateControlPlane controlPlane) {
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        return listEnvironmentsFromPrivateControlPlaneWithActor(controlPlane, userCrn);
-    }
-
     public List<SimpleRemoteEnvironmentResponse> listRemoteEnvironmentsInternal(PrivateControlPlane controlPlane) {
         MachineUser actor = umsClient.getOrCreateMachineUserWithoutAccessKey(Crn.Service.REMOTECLUSTER.getName(), controlPlane.getAccountId());
         return listEnvironmentsFromPrivateControlPlaneWithActor(controlPlane, actor.getCrn());
@@ -98,23 +97,25 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
     }
 
     private List<SimpleRemoteEnvironmentResponse> listEnvironmentsFromPrivateControlPlaneWithActor(PrivateControlPlane controlPlane, String actorCrn) {
-        LOGGER.debug("The listing of private environments on control plane('{}') with actor('{}') is executed by thread: {}", controlPlane.getName(),
+        String cpName = controlPlane.getName();
+        String cpCrn = controlPlane.getResourceCrn();
+        LOGGER.debug("The listing of private environments on control plane('{}/{}') with actor('{}') is executed by thread: {}", cpName, cpCrn,
                 actorCrn, Thread.currentThread().getName());
         List<SimpleRemoteEnvironmentResponse> responses = new ArrayList<>();
         try {
-            responses = measure(() -> clusterProxyHybridClient.listEnvironments(controlPlane.getResourceCrn(), actorCrn)
+            responses = measure(() -> clusterProxyHybridClient.listEnvironments(cpCrn, actorCrn)
                     .getEnvironments()
                     .stream()
                     .filter(resp -> isCrnValidAndWithinAccount(controlPlane.getPrivateCloudAccountId(), resp.getCrn()))
                     .parallel()
                     .map(environment -> {
-                        LOGGER.debug("Remote environment list on private control plane: {} will be executed by thread: {}", controlPlane.getName(),
+                        LOGGER.debug("Remote environment list on private control plane: {}/{} will be executed by thread: {}", cpName, cpCrn,
                                 Thread.currentThread().getName());
                         return privateControlPlaneEnvironmentToRemoteEnvironmentConverter.convert(environment, controlPlane);
                     })
-                    .collect(Collectors.toList()), LOGGER, "Cluster proxy call took us {} ms for pvc {}", controlPlane.getResourceCrn());
+                    .collect(Collectors.toList()), LOGGER, "Cluster proxy call took us {} ms for pvc {}/{}", cpName, cpCrn);
         } catch (Exception e) {
-            LOGGER.warn("Failed to query environments from url {}", controlPlane.getUrl());
+            LOGGER.warn("Failed to query environments from url '{}' of control plane '{}/{}'", controlPlane.getUrl(), cpName, cpCrn);
         }
         return responses;
     }
