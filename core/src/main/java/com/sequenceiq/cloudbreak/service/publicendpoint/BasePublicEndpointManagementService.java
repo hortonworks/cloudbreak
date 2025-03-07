@@ -44,4 +44,8 @@ public abstract class BasePublicEndpointManagementService {
     protected void setCertGenerationEnabled(boolean enabled) {
         this.certGenerationEnabled = enabled;
     }
+
+    public boolean isPemEnabled() {
+        return certGenerationEnabled;
+    }
 }

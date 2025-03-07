@@ -3,20 +3,26 @@ package com.sequenceiq.cloudbreak.service.loadbalancer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
+import com.sequenceiq.cloudbreak.service.publicendpoint.GatewayPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
@@ -40,6 +46,9 @@ class LoadBalancerFqdnUtilTest {
     @Mock
     private LoadBalancerPersistenceService loadBalancerPersistenceService;
 
+    @Mock
+    private GatewayPublicEndpointManagementService gatewayPublicEndpointManagementService;
+
     @InjectMocks
     private LoadBalancerFqdnUtil underTest;
 
@@ -48,6 +57,7 @@ class LoadBalancerFqdnUtilTest {
         Set<LoadBalancer> loadBalancers = createLoadBalancers();
 
         when(loadBalancerPersistenceService.findByStackId(0L)).thenReturn(loadBalancers);
+        when(gatewayPublicEndpointManagementService.isPemEnabled()).thenReturn(true);
 
         String fqdn = underTest.getLoadBalancerUserFacingFQDN(0L);
         assertEquals(PUBLIC_FQDN, fqdn);
@@ -68,6 +78,7 @@ class LoadBalancerFqdnUtilTest {
         Set<LoadBalancer> loadBalancers = createPrivateOnlyLoadBalancer();
 
         when(loadBalancerPersistenceService.findByStackId(0L)).thenReturn(loadBalancers);
+        when(gatewayPublicEndpointManagementService.isPemEnabled()).thenReturn(true);
 
         String fqdn = underTest.getLoadBalancerUserFacingFQDN(0L);
         assertEquals(PRIVATE_FQDN, fqdn);
@@ -84,6 +95,7 @@ class LoadBalancerFqdnUtilTest {
         publicLoadBalancer.setDns(null);
 
         when(loadBalancerPersistenceService.findByStackId(0L)).thenReturn(loadBalancers);
+        when(gatewayPublicEndpointManagementService.isPemEnabled()).thenReturn(true);
 
         String fqdn = underTest.getLoadBalancerUserFacingFQDN(0L);
         assertEquals(PRIVATE_FQDN, fqdn);
@@ -98,6 +110,7 @@ class LoadBalancerFqdnUtilTest {
         publicLoadBalancer.setFqdn(null);
 
         when(loadBalancerPersistenceService.findByStackId(0L)).thenReturn(loadBalancers);
+        when(gatewayPublicEndpointManagementService.isPemEnabled()).thenReturn(true);
 
         String fqdn = underTest.getLoadBalancerUserFacingFQDN(0L);
         assertEquals(PUBLIC_DNS, fqdn);
@@ -113,6 +126,7 @@ class LoadBalancerFqdnUtilTest {
         privateLoadBalancer.setIp(null);
 
         when(loadBalancerPersistenceService.findByStackId(0L)).thenReturn(loadBalancers);
+        when(gatewayPublicEndpointManagementService.isPemEnabled()).thenReturn(true);
 
         String fqdn = underTest.getLoadBalancerUserFacingFQDN(0L);
         assertEquals(PRIVATE_DNS, fqdn);
@@ -128,6 +142,7 @@ class LoadBalancerFqdnUtilTest {
         privateLoadBalancer.setDns(null);
 
         when(loadBalancerPersistenceService.findByStackId(0L)).thenReturn(loadBalancers);
+        when(gatewayPublicEndpointManagementService.isPemEnabled()).thenReturn(true);
 
         String fqdn = underTest.getLoadBalancerUserFacingFQDN(0L);
         assertEquals(PRIVATE_IP, fqdn);
@@ -143,6 +158,7 @@ class LoadBalancerFqdnUtilTest {
         publicLoadBalancer.setDns(null);
 
         when(loadBalancerPersistenceService.findByStackId(0L)).thenReturn(loadBalancers);
+        when(gatewayPublicEndpointManagementService.isPemEnabled()).thenReturn(true);
 
         String fqdn = underTest.getLoadBalancerUserFacingFQDN(0L);
         assertEquals(PUBLIC_IP, fqdn);
@@ -176,10 +192,37 @@ class LoadBalancerFqdnUtilTest {
         LoadBalancer lb1 = mock(LoadBalancer.class);
         LoadBalancer lb2 = mock(LoadBalancer.class);
         Set<LoadBalancer> loadBalancers = Set.of(lb1, lb2);
+
         when(loadBalancerPersistenceService.findByStackId(STACK_ID)).thenReturn(loadBalancers);
+
         Set<LoadBalancer> result = underTest.getLoadBalancersForStack(STACK_ID);
+
         verify(loadBalancerPersistenceService).findByStackId(STACK_ID);
         assertThat(result).isEqualTo(loadBalancers);
+    }
+
+    static Stream<Arguments> pemEnabledTest() {
+        return Stream.of(
+                arguments(Boolean.FALSE, "dns.cloudera"),
+                arguments(Boolean.TRUE, "fqdn.cloudera")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("pemEnabledTest")
+    void testGetLoadBalancerUserFacingFQDNUsingPemEnabled(boolean pemEnabled, String fqdn) {
+        LoadBalancer lb1 = new LoadBalancer();
+        lb1.setType(LoadBalancerType.PUBLIC);
+        lb1.setFqdn("fqdn.cloudera");
+        lb1.setDns("dns.cloudera");
+
+        Set<LoadBalancer> loadBalancers = Set.of(lb1);
+        when(loadBalancerPersistenceService.findByStackId(STACK_ID)).thenReturn(loadBalancers);
+        when(gatewayPublicEndpointManagementService.isPemEnabled()).thenReturn(pemEnabled);
+
+        String result = underTest.getLoadBalancerUserFacingFQDN(STACK_ID);
+
+        assertThat(result).isEqualTo(fqdn);
     }
 
     private Set<LoadBalancer> createLoadBalancers(boolean createPrivate, boolean createPublic, boolean createOutbound) {

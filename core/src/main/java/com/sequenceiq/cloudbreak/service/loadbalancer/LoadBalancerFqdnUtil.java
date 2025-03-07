@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
+import com.sequenceiq.cloudbreak.service.publicendpoint.GatewayPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
@@ -18,6 +19,9 @@ public class LoadBalancerFqdnUtil {
 
     @Inject
     private LoadBalancerPersistenceService loadBalancerPersistenceService;
+
+    @Inject
+    private GatewayPublicEndpointManagementService gatewayPublicEndpointManagementService;
 
     /*
      * Favors public, then gateway_private over private
@@ -49,7 +53,7 @@ public class LoadBalancerFqdnUtil {
     }
 
     private String getBestAddressable(LoadBalancer lb) {
-        if (StringUtils.isNotBlank(lb.getFqdn())) {
+        if (gatewayPublicEndpointManagementService.isPemEnabled() && StringUtils.isNotBlank(lb.getFqdn())) {
             return lb.getFqdn();
         }
         if (StringUtils.isNotBlank(lb.getDns())) {

@@ -169,14 +169,17 @@ public class LoadBalancer implements ProvisionEntity  {
     @Override
     public String toString() {
         return "LoadBalancer{" +
-            "id=" + id +
-            ", dns='" + dns + '\'' +
-            ", hostedZoneId='" + hostedZoneId + '\'' +
-            ", type='" + type + '\'' +
-            ", endpoint='" + endpoint + '\'' +
-            ", fqdn='" + fqdn + '\'' +
-            ", sku='" + sku + '\'' +
-            ", providerConfig='" + providerConfig + '\'' +
-            '}';
+                "id=" + id +
+                ", stack=" + stack +
+                ", dns='" + dns + '\'' +
+                ", hostedZoneId='" + hostedZoneId + '\'' +
+                ", ip='" + ip + '\'' +
+                ", type=" + type +
+                ", endpoint='" + endpoint + '\'' +
+                ", targetGroupSet=" + targetGroupSet +
+                ", fqdn='" + fqdn + '\'' +
+                ", providerConfig=" + providerConfig +
+                ", sku=" + sku +
+                '}';
     }
 }

@@ -78,14 +78,26 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
     }
 
     public void generateCertAndSaveForStackAndUpdateDnsEntry(StackDtoDelegate stack) {
-        if (stack != null && isCertRenewalTriggerable(stack.getStack())) {
-            if (StringUtils.isEmpty(stack.getSecurityConfig().getUserFacingCert())) {
-                generateCertAndSaveForStack(stack);
+        if (stack != null) {
+            if (isCertRenewalTriggerable(stack.getStack())) {
+                if (StringUtils.isEmpty(stack.getSecurityConfig().getUserFacingCert())) {
+                    generateCertAndSaveForStack(stack);
+                }
+                updateDnsEntryForCluster(stack);
+                updateDnsEntryForLoadBalancers(stack);
+            } else {
+                LOGGER.info("External FQDN in PEM service and valid certificate creation is disabled.");
+                setLoadBalancerFqdn(stack);
             }
-            updateDnsEntryForCluster(stack);
-            updateDnsEntryForLoadBalancers(stack);
-        } else {
-            LOGGER.info("External FQDN and valid certificate creation is disabled.");
+        }
+    }
+
+    private void setLoadBalancerFqdn(StackDtoDelegate stack) {
+        Optional<LoadBalancer> loadBalancerOptional = getLoadBalancerWithEndpoint(stack);
+        if (loadBalancerOptional.isPresent()) {
+            Set<String> hueHostGroups = getHueHostGroups(stack);
+            DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
+            setLoadBalancerFqdn(hueHostGroups, loadBalancerOptional.get(), environment, ThreadBasedUserCrnProvider.getAccountId());
         }
     }
 
@@ -163,7 +175,8 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
                 LOGGER.warn(message);
                 throw new CloudbreakServiceException(message);
             }
-            setLoadBalancerFqdn(hueHostGroups, loadBalancer, endpoint, environment, accountId);
+
+            setLoadBalancerFqdn(hueHostGroups, loadBalancer, environment, accountId);
         } catch (PemDnsEntryCreateOrUpdateException exception) {
             String message = String.format("Failed to create or update DNS entry for load balancer with endpoint '%s' and environment name '%s'",
                     loadBalancer.getEndpoint(), environment.getName());
@@ -173,8 +186,8 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         }
     }
 
-    private void setLoadBalancerFqdn(Set<String> hueHostGroups, LoadBalancer loadBalancer, String endpoint, DetailedEnvironmentResponse env, String accountId) {
-        loadBalancer.setFqdn(getDomainNameProvider().getFullyQualifiedEndpointName(hueHostGroups, endpoint, env));
+    private void setLoadBalancerFqdn(Set<String> hueHostGroups, LoadBalancer loadBalancer, DetailedEnvironmentResponse env, String accountId) {
+        loadBalancer.setFqdn(getDomainNameProvider().getFullyQualifiedEndpointName(hueHostGroups, loadBalancer.getEndpoint(), env));
         loadBalancerPersistenceService.save(loadBalancer);
         LOGGER.info("Set load balancer's FQDN to {}.", loadBalancer.getFqdn());
     }
