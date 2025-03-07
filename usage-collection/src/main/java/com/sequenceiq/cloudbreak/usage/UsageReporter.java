@@ -205,4 +205,11 @@ public interface UsageReporter {
      */
     void cdpFreeipaSync(
             UsageProto.CDPFreeIPASync details);
+
+    /**
+     * Reports that a CDP Environment has been periodically synced.
+     * @param details the event details
+     */
+    void cdpEnvironmentSync(
+            UsageProto.CDPEnvironmentSync details);
 }

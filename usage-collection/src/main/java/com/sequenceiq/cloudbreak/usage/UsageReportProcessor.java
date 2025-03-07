@@ -329,6 +329,21 @@ public class UsageReportProcessor implements UsageReporter {
         }
     }
 
+    @Override
+    public void cdpEnvironmentSync(UsageProto.CDPEnvironmentSync details) {
+        try {
+            checkNotNull(details);
+            usageProcessingStrategy.processUsage(eventBuilder()
+                    .setCdpEnvironmentSync(details)
+                    .build(), UsageContext.Builder.newBuilder()
+                    .accountId(getAccountId(details.getOperationDetails()))
+                    .build());
+            LOGGER.info("Logged binary format for the following usage event: {}", details);
+        } catch (Exception e) {
+            LOGGER.warn("Could not log binary format for the following usage event: {}! Cause: {}", details, e.getMessage());
+        }
+    }
+
     private UsageProto.Event.Builder eventBuilder() {
         return UsageProto.Event.newBuilder()
                 .setId(UUID.randomUUID().toString())

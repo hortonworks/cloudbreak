@@ -11,8 +11,10 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredFlowEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.CDPEnvironmentStructuredSyncEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.freeipa.CDPFreeipaStructuredSyncEvent;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.log.CDPTelemetryFlowEventLogger;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.log.environment.CDPEnvironmentSyncLogger;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.log.freeipa.CDPFreeIpaSyncLogger;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
@@ -27,6 +29,9 @@ public class TelemetryEventHandler<T extends CDPStructuredEvent> implements Even
     @Inject
     private CDPFreeIpaSyncLogger cdpFreeIpaSyncLogger;
 
+    @Inject
+    private CDPEnvironmentSyncLogger cdpEnvironmentSyncLogger;
+
     @Override
     public String selector() {
         return TelemetryAsyncEventSender.TELEMETRY_EVENT_LOG_MESSAGE;
@@ -40,6 +45,7 @@ public class TelemetryEventHandler<T extends CDPStructuredEvent> implements Even
                 case null -> LOGGER.warn("Received null data in telemetry event handler! Event: {}", structuredEvent);
                 case CDPStructuredFlowEvent cdpStructuredFlowEvent -> logFlowEvent(cdpStructuredFlowEvent);
                 case CDPFreeipaStructuredSyncEvent cdpFreeipaStructuredSyncEvent -> cdpFreeIpaSyncLogger.log(cdpFreeipaStructuredSyncEvent);
+                case CDPEnvironmentStructuredSyncEvent cdpEnvironmentStructuredSyncEvent -> cdpEnvironmentSyncLogger.log(cdpEnvironmentStructuredSyncEvent);
                 default -> LOGGER.debug("We are not sending telemetry log for {}", data.getClass().getSimpleName());
             }
         } catch (Exception e) {

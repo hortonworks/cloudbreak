@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetails;
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,10 +18,18 @@ public class EnvironmentDetailsToCDPEnvironmentTelemetryFeatureDetailsConverter 
     public CDPEnvironmentTelemetryFeatureDetails convert(EnvironmentDetails environmentDetails) {
         CDPEnvironmentTelemetryFeatureDetails.Builder cdpTelemetryFeatureDetailsBuilder = CDPEnvironmentTelemetryFeatureDetails.newBuilder();
 
-        if (environmentDetails != null && environmentDetails.getEnvironmentTelemetryFeatures() != null) {
-            EnvironmentFeatures environmentFeatures = environmentDetails.getEnvironmentTelemetryFeatures();
-            if (environmentFeatures.getWorkloadAnalytics() != null && environmentFeatures.getWorkloadAnalytics().getEnabled() != null) {
-                cdpTelemetryFeatureDetailsBuilder.setWorkloadAnalytics(environmentFeatures.getWorkloadAnalytics().getEnabled().toString());
+        if (environmentDetails != null) {
+            if (environmentDetails.getEnvironmentTelemetryFeatures() != null) {
+                EnvironmentFeatures environmentFeatures = environmentDetails.getEnvironmentTelemetryFeatures();
+                if (environmentFeatures.getWorkloadAnalytics() != null && environmentFeatures.getWorkloadAnalytics().getEnabled() != null) {
+                    cdpTelemetryFeatureDetailsBuilder.setWorkloadAnalytics(environmentFeatures.getWorkloadAnalytics().getEnabled().toString());
+                }
+            }
+            if (environmentDetails.getTelemetryDetails() != null) {
+                cdpTelemetryFeatureDetailsBuilder.setStorageLocationBase(
+                        defaultIfNull(environmentDetails.getTelemetryDetails().storageLocationBase(), ""));
+                cdpTelemetryFeatureDetailsBuilder.setBackupStorageLocationBase(
+                        defaultIfNull(environmentDetails.getTelemetryDetails().backupStorageLocationBase(), ""));
             }
         }
 

@@ -115,6 +115,8 @@ public class EnvironmentDetailsToCDPEnvironmentDetailsConverter {
             cdpEnvironmentDetails.setSecretEncryptionEnabled(srcEnvironmentDetails.isEnableSecretEncryption());
             cdpEnvironmentDetails.setCreatorClient(srcEnvironmentDetails.creatorClient());
             cdpEnvironmentDetails.setComputeClusterDetails(convertComputeClusterDetails(srcEnvironmentDetails));
+            cdpEnvironmentDetails.setEnvironmentDeletionType(
+                    EnvironmentDeletionTypeToCDPEnvironmentDeletionType.convert(srcEnvironmentDetails.getEnvironmentDeletionTypeAsString()));
         }
 
         CDPEnvironmentDetails ret = cdpEnvironmentDetails.build();
@@ -177,6 +179,10 @@ public class EnvironmentDetailsToCDPEnvironmentDetailsConverter {
                         .map(AzureParametersDto::getAzureResourceEncryptionParametersDto)
                         .map(AzureResourceEncryptionParametersDto::getEncryptionKeyUrl);
                 builder.setResourceEncryptionEnabled(encryptionKeyUrl.isPresent());
+                Optional<String> encryptionManagedIdentity = Optional.of(azureParametersDto)
+                        .map(AzureParametersDto::getAzureResourceEncryptionParametersDto)
+                        .map(AzureResourceEncryptionParametersDto::getUserManagedIdentity);
+                builder.setEncryptionManagedIdentity(encryptionManagedIdentity.orElse(""));
             }
         }
         return builder.build();

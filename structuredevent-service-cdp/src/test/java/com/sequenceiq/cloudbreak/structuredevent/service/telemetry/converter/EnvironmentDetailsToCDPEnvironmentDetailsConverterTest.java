@@ -415,7 +415,37 @@ class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
         assertThat(computeClusterDetails.getKubeApiAuthorizedIpRangesList()).containsOnly("0.0.0.0/0", "1.1.1.1/1");
         assertThat(computeClusterDetails.getWorkerNodeSubnetIdsList()).containsOnly("subnet1", "subnet2");
         UsageProto.CDPAzureComputeClusterDetails azureComputeClusterDetails = computeClusterDetails.getAzureComputeClusterDetails();
-        assertThat(azureComputeClusterDetails);
         assertEquals("udr", azureComputeClusterDetails.getOutboundType());
+    }
+
+    @Test
+    void testEncryptionManagedIdentityConversion() {
+        ParametersDto parametersDto = ParametersDto.builder()
+                .withAzureParametersDto(AzureParametersDto.builder()
+                        .withAzureResourceGroupDto(AzureResourceGroupDto.builder()
+                                .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE)
+                                .build())
+                        .withAzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto.builder()
+                                .withEncryptionKeyUrl("dummyEncryptionKeyUrl")
+                                .withUserManagedIdentity("userManagedIdentity")
+                                .build())
+                        .build())
+                .build();
+
+        when(environmentDetails.getParameters()).thenReturn(parametersDto);
+
+        UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
+
+        assertTrue(cdpEnvironmentDetails.getAzureDetails().getResourceEncryptionEnabled());
+        assertEquals("userManagedIdentity", cdpEnvironmentDetails.getAzureDetails().getEncryptionManagedIdentity());
+    }
+
+    @Test
+    void testEnvironmentDeletionTypeConversion() {
+        when(environmentDetails.getEnvironmentDeletionTypeAsString()).thenReturn("FORCE");
+
+        UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
+
+        assertEquals(UsageProto.CDPEnvironmentDeletionType.Value.FORCE, cdpEnvironmentDetails.getEnvironmentDeletionType());
     }
 }

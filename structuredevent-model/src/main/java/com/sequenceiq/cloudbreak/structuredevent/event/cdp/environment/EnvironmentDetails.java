@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.credential.CredentialDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.proxy.ProxyDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.telemetry.EnvironmentTelemetryDetails;
 import com.sequenceiq.common.api.type.CcmV2TlsType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.environment.domain.Region;
@@ -21,6 +22,8 @@ public interface EnvironmentDetails {
     Set<Region> getRegions();
 
     String getCloudPlatform();
+
+    String getStatusAsString();
 
     String getStatusReason();
 
@@ -51,5 +54,9 @@ public interface EnvironmentDetails {
     String creatorClient();
 
     ExternalizedComputeClusterDto getExternalizedComputeCluster();
+
+    EnvironmentTelemetryDetails getTelemetryDetails();
+
+    String getEnvironmentDeletionTypeAsString();
 
 }

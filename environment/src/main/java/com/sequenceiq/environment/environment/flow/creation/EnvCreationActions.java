@@ -34,6 +34,8 @@ import static com.sequenceiq.environment.environment.flow.creation.event.EnvCrea
 import java.util.Map;
 import java.util.Set;
 
+import jakarta.inject.Inject;
+
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +53,8 @@ import com.sequenceiq.environment.environment.scheduled.sync.EnvironmentJobServi
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.validation.ValidationType;
 import com.sequenceiq.environment.events.EventSenderService;
+import com.sequenceiq.environment.events.sync.StructuredSynchronizerJobAdapter;
+import com.sequenceiq.environment.events.sync.StructuredSynchronizerJobService;
 import com.sequenceiq.environment.exception.ExternalizedComputeOperationFailedException;
 import com.sequenceiq.environment.metrics.EnvironmentMetricService;
 import com.sequenceiq.environment.metrics.MetricType;
@@ -316,6 +320,10 @@ public class EnvCreationActions {
     @Bean(name = "ENV_CREATION_FINISHED_STATE")
     public Action<?, ?> finishedAction() {
         return new AbstractEnvironmentCreationAction<>(EnvCreationEvent.class) {
+
+            @Inject
+            private StructuredSynchronizerJobService structuredSynchronizerJobService;
+
             @Override
             protected void doExecute(CommonContext context, EnvCreationEvent payload, Map<Object, Object> variables) {
                 LOGGER.debug("Finished to create environment with payload {}", payload);
@@ -325,6 +333,7 @@ public class EnvCreationActions {
                             environment.setStatus(EnvironmentStatus.AVAILABLE);
                             environment.setStatusReason(null);
                             Environment result = environmentService.save(environment);
+                            structuredSynchronizerJobService.schedule(environment.getId(), StructuredSynchronizerJobAdapter.class, false);
                             environmentJobService.schedule(result.getId());
                             EnvironmentDto environmentDto = environmentService.getEnvironmentDto(result);
                             metricService.incrementMetricCounter(MetricType.ENV_CREATION_FINISHED, environmentDto);

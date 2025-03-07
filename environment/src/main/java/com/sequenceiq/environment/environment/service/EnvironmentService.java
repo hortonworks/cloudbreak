@@ -405,6 +405,10 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
         return environmentRepository.findAllRunningAndStatusNotIn(EnvironmentStatus.skipFromStatusChecker());
     }
 
+    public List<JobResource> findAllAliveForAutoSync(Set<EnvironmentStatus> statusesNotIn) {
+        return environmentRepository.findAllRunningAndStatusNotIn(statusesNotIn);
+    }
+
     @Override
     protected AccountAwareResourceRepository<Environment, Long> repository() {
         return environmentRepository;

@@ -1,11 +1,13 @@
 package com.sequenceiq.environment.environment.dto;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.common.dal.model.AccountAwareResource;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.telemetry.EnvironmentTelemetryDetails;
 import com.sequenceiq.common.api.type.CcmV2TlsType;
 import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -16,6 +18,7 @@ import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.dataservices.EnvironmentDataServices;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
+import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentLogging;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
@@ -228,6 +231,10 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
         return status;
     }
 
+    public String getStatusAsString() {
+        return status.name();
+    }
+
     public void setStatus(EnvironmentStatus status) {
         this.status = status;
     }
@@ -377,6 +384,10 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
         return deletionType;
     }
 
+    public String getEnvironmentDeletionTypeAsString() {
+        return deletionType != null ? deletionType.name() : null;
+    }
+
     public void setDeletionType(EnvironmentDeletionType deletionType) {
         this.deletionType = deletionType;
     }
@@ -435,6 +446,13 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
 
     public void setEnvironmentType(EnvironmentType environmentType) {
         this.environmentType = environmentType;
+    }
+
+    public EnvironmentTelemetryDetails getTelemetryDetails() {
+        return telemetry == null ? null : EnvironmentTelemetryDetails.builder()
+                .withStorageLocationBase(Optional.of(telemetry.getLogging()).map(EnvironmentLogging::getStorageLocation).orElse(null))
+                .withBackupStorageLocationBase(Optional.of(backup).map(EnvironmentBackup::getStorageLocation).orElse(null))
+                .build();
     }
 
     @Override

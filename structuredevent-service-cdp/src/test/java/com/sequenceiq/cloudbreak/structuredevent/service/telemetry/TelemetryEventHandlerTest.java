@@ -21,8 +21,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.CDPEnvironmentStructuredFlowEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.CDPEnvironmentStructuredSyncEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.freeipa.CDPFreeipaStructuredSyncEvent;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.log.CDPTelemetryFlowEventLogger;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.log.environment.CDPEnvironmentSyncLogger;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.log.freeipa.CDPFreeIpaSyncLogger;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,6 +41,9 @@ class TelemetryEventHandlerTest {
 
     @Mock
     private CDPFreeIpaSyncLogger cdpFreeIpaSyncLogger;
+
+    @Mock
+    private CDPEnvironmentSyncLogger cdpEnvironmentSyncLogger;
 
     @BeforeEach()
     void setUp() {
@@ -82,6 +87,17 @@ class TelemetryEventHandlerTest {
 
         verify(cdpFreeIpaSyncLogger).log(cdpFreeipaStructuredSyncEvent);
         verifyNoInteractions(flowEventLogger);
+        verifyNoInteractions(cdpEnvironmentSyncLogger);
     }
 
+    @Test
+    void testAcceptWhenEnvironmentSyncEvent() {
+        CDPEnvironmentStructuredSyncEvent cdpEnvironmentStructuredSyncEvent = new CDPEnvironmentStructuredSyncEvent();
+
+        underTest.accept(new Event(cdpEnvironmentStructuredSyncEvent));
+
+        verify(cdpEnvironmentSyncLogger).log(cdpEnvironmentStructuredSyncEvent);
+        verifyNoInteractions(flowEventLogger);
+        verifyNoInteractions(cdpFreeIpaSyncLogger);
+    }
 }

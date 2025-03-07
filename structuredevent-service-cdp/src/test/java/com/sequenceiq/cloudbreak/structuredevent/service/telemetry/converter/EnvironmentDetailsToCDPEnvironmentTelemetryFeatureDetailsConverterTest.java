@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,11 +11,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.EnvironmentDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.telemetry.EnvironmentTelemetryDetails;
 import com.sequenceiq.common.api.type.FeatureSetting;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 
 @ExtendWith(MockitoExtension.class)
-public class EnvironmentDetailsToCDPEnvironmentTelemetryFeatureDetailsConverterTest {
+class EnvironmentDetailsToCDPEnvironmentTelemetryFeatureDetailsConverterTest {
 
     private EnvironmentDetailsToCDPEnvironmentTelemetryFeatureDetailsConverter underTest;
 
@@ -25,38 +26,49 @@ public class EnvironmentDetailsToCDPEnvironmentTelemetryFeatureDetailsConverterT
     @Mock
     private EnvironmentFeatures environmentFeatures;
 
+    @Mock
+    private EnvironmentTelemetryDetails environmentTelemetryDetails;
+
     @BeforeEach()
-    public void setUp() {
+    void setUp() {
         underTest = new EnvironmentDetailsToCDPEnvironmentTelemetryFeatureDetailsConverter();
     }
 
     @Test
-    public void testNull() {
+    void testNull() {
         UsageProto.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = underTest.convert(null);
 
-        Assertions.assertEquals("", telemetryFeatureDetails.getClusterLogsCollection());
-        Assertions.assertEquals("", telemetryFeatureDetails.getWorkloadAnalytics());
+        assertEquals("", telemetryFeatureDetails.getClusterLogsCollection());
+        assertEquals("", telemetryFeatureDetails.getWorkloadAnalytics());
+        assertEquals("", telemetryFeatureDetails.getStorageLocationBase());
+        assertEquals("", telemetryFeatureDetails.getBackupStorageLocationBase());
     }
 
     @Test
-    public void testConvertingEmptyEnvironmentDetails() {
+    void testConvertingEmptyEnvironmentDetails() {
         UsageProto.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = underTest.convert(environmentDetails);
 
-        Assertions.assertEquals("", telemetryFeatureDetails.getClusterLogsCollection());
-        Assertions.assertEquals("", telemetryFeatureDetails.getWorkloadAnalytics());
+        assertEquals("", telemetryFeatureDetails.getClusterLogsCollection());
+        assertEquals("", telemetryFeatureDetails.getWorkloadAnalytics());
+        assertEquals("", telemetryFeatureDetails.getStorageLocationBase());
+        assertEquals("", telemetryFeatureDetails.getBackupStorageLocationBase());
     }
 
     @Test
-    public void testConversionTelemetry() {
+    void testConversionTelemetry() {
         FeatureSetting workloadAnalytics = new FeatureSetting();
         workloadAnalytics.setEnabled(Boolean.FALSE);
+        EnvironmentTelemetryDetails telemetryDetails = new EnvironmentTelemetryDetails("storageLocationBase", "backupStorageLocationBase");
 
         when(environmentDetails.getEnvironmentTelemetryFeatures()).thenReturn(environmentFeatures);
         when(environmentFeatures.getWorkloadAnalytics()).thenReturn(workloadAnalytics);
+        when(environmentDetails.getTelemetryDetails()).thenReturn(telemetryDetails);
 
         UsageProto.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = underTest.convert(environmentDetails);
 
-        Assertions.assertEquals("", telemetryFeatureDetails.getClusterLogsCollection());
-        Assertions.assertEquals("false", telemetryFeatureDetails.getWorkloadAnalytics());
+        assertEquals("", telemetryFeatureDetails.getClusterLogsCollection());
+        assertEquals("false", telemetryFeatureDetails.getWorkloadAnalytics());
+        assertEquals("storageLocationBase", telemetryFeatureDetails.getStorageLocationBase());
+        assertEquals("backupStorageLocationBase", telemetryFeatureDetails.getBackupStorageLocationBase());
     }
 }

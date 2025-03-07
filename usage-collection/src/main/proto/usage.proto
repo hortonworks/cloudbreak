@@ -330,9 +330,9 @@ message Event {
     // An Altus user.
     AltusIamUserState altusIamUserState = 160;
     // A feedback given by the user on the new landing page.
-    NewLandingPageFeedback newLandingPageFeedback = 161;
+    CDPUINewLandingPageFeedback cdpUINewLandingPageFeedback = 161;
     // Feedback given while switching from New Landing Page to Old Landing Page.
-    SwitchNewLandingPageFeedback switchNewLandingPageFeedback = 162;
+    CDPUISwitchNewLandingPageFeedback cdpUISwitchNewLandingPageFeedback = 162;
     // The Model Registry Backup has been requested.
     CDPCMLModelRegistryBackupRequested cdpcmlModelRegistryBackupRequested = 163;
     // The Model Registry Backup has been requested.
@@ -359,6 +359,8 @@ message Event {
     CDPDFFlowMigrationLifecycle cdPDFFlowMigrationLifecycle = 174;
     // Sync event for a CDP FreeIPA cluster
     CDPFreeIPASync cdpFreeIPASync = 175;
+    // Sync event for a CDP Environment
+    CDPEnvironmentSync cdpEnvironmentSync = 176;
   }
 }
 
@@ -1469,6 +1471,22 @@ message CDPCMLAWSWorkspaceMetadata {
   string gpuInstanceType = 6;
 }
 
+// GCP metadata about the workspace when it was created or updated.
+message CDPCMLGCPWorkspaceMetadata {
+  // Requested min workers for the auto scaling workers group.
+  int32 minWorkers = 1;
+  // Requested max workers for the auto scaling workers group.
+  int32 maxWorkers = 2;
+  // Requested min gpu for the auto scaling gpu group.
+  int32 minGpu = 3;
+  // Requested max gpu for the auto scaling gpu group.
+  int32 maxGpu = 4;
+  // The instance type selected for the workers auto scaling group.
+  string workerInstanceType = 5;
+  // The instance type selected for the gpu auto scaling group.
+  string gpuInstanceType = 6;
+}
+
 // Azure metadata about the workspace when it was created or updated.
 message CDPCMLAzureWorkspaceMetadata {
   // Requested min workers for the auto scaling workers group.
@@ -1521,6 +1539,8 @@ message CDPCMLWorkspaceRequested {
     CDPCMLAWSWorkspaceMetadata cdpCMLAWSWorkspaceMetadata = 8;
     // AZURE specific metadata about the workspace.
     CDPCMLAzureWorkspaceMetadata cdpCMLAzureWorkspaceMetadata = 9;
+    // GCP specific metadata about the workspace.
+    CDPCMLGCPWorkspaceMetadata cdpCMLGCPWorkspaceMetadata = 20;
   }
   // The CML workspace version deployed.
   string workspaceVersion = 10;
@@ -2557,12 +2577,19 @@ message CDPClusterStatus {
     // The status when the datalake resize validation failed
     DATALAKE_RESIZE_VALIDATION_FAILED = 73;
 
+    // The status when CDP Cluster enable SeLinux is initiated.
+    ENABLE_SELINUX_STARTED = 74;
+    // The status when CDP Cluster enable SeLinux has successfully finished.
+    ENABLE_SELINUX_FINISHED = 75;
+    // The status when CDP Cluster enable SeLinux has failed.
+    ENABLE_SELINUX_FAILED = 76;
+
     // The status when the process of setting the default Java version has started.
-    SET_DEFAULT_JAVA_VERSION_STARTED = 74;
+    SET_DEFAULT_JAVA_VERSION_STARTED = 77;
     // The status when the process of setting the default Java version has completed successfully.
-    SET_DEFAULT_JAVA_VERSION_FINISHED = 75;
+    SET_DEFAULT_JAVA_VERSION_FINISHED = 78;
     // The status when the process of setting the default Java version has failed.
-    SET_DEFAULT_JAVA_VERSION_FAILED = 76;
+    SET_DEFAULT_JAVA_VERSION_FAILED = 79;
   }
 }
 
@@ -2622,6 +2649,8 @@ message CDPEnvironmentDetails {
   string creatorClient = 12;
   // Compute cluster specific details of the environment
   CDPComputeClusterDetails computeClusterDetails = 13;
+  // Environment deletion type
+  CDPEnvironmentDeletionType.Value environmentDeletionType = 14;
 }
 
 // CDP FreeIPA details closely related to the CDP Environment
@@ -2642,6 +2671,8 @@ message CDPEnvironmentAzureDetails {
   bool singleResourceGroup = 1;
   // True if user provides encryption key URL to encrypt Azure managed disks with CMK
   bool resourceEncryptionEnabled = 2;
+  // The user's encryption managed identity
+  string encryptionManagedIdentity = 3;
 }
 
 // GCP specific environment details
@@ -2661,6 +2692,10 @@ message CDPEnvironmentTelemetryFeatureDetails {
   string workloadAnalytics = 1;
   // Cluster log collection is enabled on this environment
   string clusterLogsCollection = 2;
+  // Location where logs and other data are stored
+  string storageLocationBase = 3;
+  // Location where FreeIPA and DataLake backups are stored
+  string backupStorageLocationBase = 4;
 }
 
 message CDPProxyDetails {
@@ -3221,6 +3256,8 @@ message CDPDFSharedParameterGroupLifecycle {
   string username = 10;
   // The source of the shared parameter group.
   CDPDFSharedParameterGroupSource.Value parameterGroupSource = 11;
+  // The count of the associated deployments for the shared parameter group.
+  int32 associatedDeploymentCount = 12;
 }
 
 // The various lifecycle actions that can be taken on shared parameter groups.
@@ -3234,8 +3271,10 @@ message CDPDFSharedParameterGroupAction {
     DELETED = 2;
     // A value indicating the shared parameter group was updated.
     UPDATED = 3;
+    // Deprecated: use ASSOCIATION_UPDATED instead. A value indicating the shared parameter group association was updated.
+    FLOW_DRAFT_ASSOCIATION_UPDATED = 4 [deprecated = true];
     // A value indicating the shared parameter group association was updated.
-    FLOW_DRAFT_ASSOCIATION_UPDATED = 4;
+    ASSOCIATION_UPDATED = 5;
   }
 }
 
@@ -6641,7 +6680,7 @@ message CDPCODStorageDetailsForWorker {
 }
 
 // NewLandingPageFeedback event.
-message NewLandingPageFeedback {
+message CDPUINewLandingPageFeedback {
   // Crn of the user.
   string userCrn = 1;
   // Account Id of the user.
@@ -6657,7 +6696,7 @@ message NewLandingPageFeedback {
 }
 
 // SwitchNewLandingPageFeedback event.
-message SwitchNewLandingPageFeedback {
+message CDPUISwitchNewLandingPageFeedback {
   // Crn of the user.
   string userCrn = 1;
   // Account Id of the user.
@@ -6930,4 +6969,31 @@ message CDPFreeIPASync {
   CDPFreeIPAStatusDetails statusDetails = 3;
   // Environment Crn
   string environmentCrn = 4;
+}
+
+// Generated periodically for Environments
+message CDPEnvironmentSync {
+  // Operation metadata
+  CDPOperationDetails operationDetails = 1;
+  // Environment status
+  string status = 2;
+  // Environment metadata
+  CDPEnvironmentDetails environmentDetails = 3;
+  // Data collection metadata
+  CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 4;
+  // FreeIPA metadata
+  CDPFreeIPADetails freeIPA = 5;
+}
+
+message CDPEnvironmentDeletionType {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // No environment deletion type set.
+    NONE = 1;
+    // Normal environment deletion.
+    SIMPLE = 2;
+    // Forced environment deletion.
+    FORCE = 3;
+  }
 }
