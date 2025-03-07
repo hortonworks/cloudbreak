@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.service.upgrade.validation;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +54,7 @@ public class DiskSpaceValidationService {
     private ResourceService resourceService;
 
     public void validateFreeSpaceForUpgrade(Stack stack, long requiredFreeSpace) {
-        Map<String, String> freeDiskSpaceByNodes = getFreeDiskSpaceByNodes(stack);
+        Map<String, Double> freeDiskSpaceByNodes = getFreeDiskSpaceByNodes(stack);
         LOGGER.debug("Required free space for parcels {} KB. Free space by nodes in KB: {}", requiredFreeSpace, freeDiskSpaceByNodes);
         Map<String, String> notEligibleNodes = getNotEligibleNodes(freeDiskSpaceByNodes, requiredFreeSpace,
                 stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata());
@@ -63,23 +65,36 @@ public class DiskSpaceValidationService {
         }
     }
 
-    private Map<String, String> getFreeDiskSpaceByNodes(Stack stack) {
+    private Map<String, Double> getFreeDiskSpaceByNodes(Stack stack) {
         stack.setResources(new HashSet<>(resourceService.getAllByStackId(stack.getId())));
         Set<Node> nodes = stackUtil.collectNodesWithDiskData(stack);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
         OrchestratorRunParams runParams = new OrchestratorRunParams(nodes, gatewayConfigs,
                 DISK_FREE_SPACE_COMMAND, "Failed to get free disk space on hosts.");
-        return hostOrchestrator.runShellCommandOnNodes(runParams);
+        Map<String, String> result = hostOrchestrator.runShellCommandOnNodes(runParams);
+        List<String> failedNodes = new ArrayList<>();
+        Map<String, Double> freeDiskSpaceByNodes = new HashMap<>();
+        for (Map.Entry<String, String> freeDiskSpaceByNode : result.entrySet()) {
+            try {
+                freeDiskSpaceByNodes.put(freeDiskSpaceByNode.getKey(), Double.parseDouble(freeDiskSpaceByNode.getValue()));
+            } catch (NumberFormatException e) {
+                failedNodes.add(freeDiskSpaceByNode.getKey());
+            }
+        }
+        if (!failedNodes.isEmpty()) {
+            throw new UpgradeValidationFailedException(String.format("Failed to get free disk space from nodes: %s", failedNodes));
+        }
+        return freeDiskSpaceByNodes;
     }
 
-    private Map<String, String> getNotEligibleNodes(Map<String, String> freeDiskSpaceByNodes, long parcelSize, List<InstanceMetadataView> gatewayInstances) {
+    private Map<String, String> getNotEligibleNodes(Map<String, Double> freeDiskSpaceByNodes, long parcelSize, List<InstanceMetadataView> gatewayInstances) {
         Map<String, Long> nodesByRequiredFreeSpace = getNodesByRequiredFreeSpace(freeDiskSpaceByNodes, parcelSize, gatewayInstances);
         return nodesByRequiredFreeSpace.entrySet().stream()
-                .filter(node -> node.getValue() > Double.parseDouble(freeDiskSpaceByNodes.get(node.getKey())))
+                .filter(node -> node.getValue() > freeDiskSpaceByNodes.get(node.getKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, node -> formatDiskSpace(node.getValue())));
     }
 
-    private Map<String, Long> getNodesByRequiredFreeSpace(Map<String, String> freeDiskSpaceByNodes, long parcelSize,
+    private Map<String, Long> getNodesByRequiredFreeSpace(Map<String, Double> freeDiskSpaceByNodes, long parcelSize,
             List<InstanceMetadataView> gatewayInstances) {
         return freeDiskSpaceByNodes.entrySet()
                 .stream()
@@ -100,14 +115,14 @@ public class DiskSpaceValidationService {
                 :  new DecimalFormat("#").format(diskSpace / DIVIDER_TO_MB) + " MB";
     }
 
-    private String formatValidationFailureMessage(Map<String, String> requiredDiskSpaceByNodes, Map<String, String> freeDiskSpaceByNodes) {
+    private String formatValidationFailureMessage(Map<String, String> requiredDiskSpaceByNodes, Map<String, Double> freeDiskSpaceByNodes) {
         return requiredDiskSpaceByNodes.entrySet().stream()
                 .map(map ->
                         map.getKey()
                                 .concat(": required free space is: ")
                                 .concat(map.getValue())
                                 .concat(" and the available free space is: ")
-                                .concat(formatDiskSpace(Double.parseDouble(freeDiskSpaceByNodes.get(map.getKey())))))
+                                .concat(formatDiskSpace(freeDiskSpaceByNodes.get(map.getKey()))))
                 .collect(Collectors.joining(", "));
     }
 }

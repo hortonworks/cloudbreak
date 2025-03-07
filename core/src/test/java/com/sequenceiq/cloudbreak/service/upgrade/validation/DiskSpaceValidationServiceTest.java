@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -67,12 +68,12 @@ class DiskSpaceValidationServiceTest {
         stack = createStack();
         gatewayConfigs = Collections.emptyList();
         nodes = Collections.emptySet();
-        freeSpaceByNodes = createFreeSpaceByNodesMap();
+        freeSpaceByNodes = createFreeSpaceByNodesMap("91000", "170000");
 
         when(resourceService.getAllByStackId(STACK_ID)).thenReturn(emptySet());
         when(stackUtil.collectNodesWithDiskData(stack)).thenReturn(nodes);
         when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(gatewayConfigs);
-        when(hostOrchestrator.runShellCommandOnNodes(any(OrchestratorRunParams.class))).thenReturn(freeSpaceByNodes);
+        lenient().when(hostOrchestrator.runShellCommandOnNodes(any(OrchestratorRunParams.class))).thenReturn(freeSpaceByNodes);
     }
 
     @Test
@@ -101,6 +102,14 @@ class DiskSpaceValidationServiceTest {
         verifyMocks();
     }
 
+    @Test
+    void testValidateFreeSpaceForUpgradeShouldThrowExceptionWhenMinionsAreUnreachable() {
+        when(hostOrchestrator.runShellCommandOnNodes(any(OrchestratorRunParams.class))).thenReturn(createFreeSpaceByNodesMap("23423423", "false"));
+        Exception exception = assertThrows(UpgradeValidationFailedException.class, () -> underTest.validateFreeSpaceForUpgrade(stack, 100L));
+        assertEquals("Failed to get free disk space from nodes: [host2]", exception.getMessage());
+        verifyMocks();
+    }
+
     private void verifyMocks() {
         verify(resourceService).getAllByStackId(STACK_ID);
         verify(stackUtil).collectNodesWithDiskData(stack);
@@ -113,10 +122,10 @@ class DiskSpaceValidationServiceTest {
         assertThat(params.command()).contains("df -k");
     }
 
-    private Map<String, String> createFreeSpaceByNodesMap() {
+    private Map<String, String> createFreeSpaceByNodesMap(String freeSpaceOnHost1, String freeSpaceOnHost2) {
         return Map.of(
-                "host1", "91000",
-                "host2", "170000");
+                "host1", freeSpaceOnHost1,
+                "host2", freeSpaceOnHost2);
     }
 
     private Stack createStack() {
