@@ -5,7 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.stream.Stream;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 public class JsonTest {
 
@@ -70,5 +75,36 @@ public class JsonTest {
         underTest = new Json(null);
 
         assertTrue(underTest.getMap().isEmpty());
+    }
+
+    static Stream<Arguments> provideJsonForEqualityTest() {
+        return Stream.of(
+                Arguments.of(new Json("{\"key\":\"value\"}"), new Json("{\"key\":\"value\"}"), true),
+                Arguments.of(new Json("{\"key\":\"value\"}"), new Json("{\"key\":\"differentValue\"}"), false),
+                Arguments.of(new Json("{\"availabilitySet\":{\"faultDomainCount\":2,\"name\":\"mmolnar-azurenv-freeipa-master-as-std\"}}"),
+                        new Json("{\"availabilitySet\":{\"name\":\"mmolnar-azurenv-freeipa-master-as\",\"faultDomainCount\":2}}"), false),
+                Arguments.of(new Json("{\"availabilitySet\":{\"faultDomainCount\":2,\"name\":\"mmolnar-azurenv-freeipa-master-as\"}}"),
+                        new Json("{\"availabilitySet\":{\"name\":\"mmolnar-azurenv-freeipa-master-as\",\"faultDomainCount\":2}}"), true),
+                Arguments.of(new Json("{\"availabilitySet\":{\"faultDomainCount\":2,\"name\":\"mmolnar-azurenv-freeipa-master-as\"}}"),
+                        new Json("{\"availabilitySet\":{\"name\":\"mmolnar-azurenv-freeipa-master-as-std\",\"faultDomainCount\":2}}"), false),
+                Arguments.of(new Json("{\"key\":\"value\"}"), null, false),
+                Arguments.of(new Json("{\"key\":\"value\"}"), "SomeString", false),
+                Arguments.of(new Json("[\"value1\",\"value2\"]"), new Json("[\"value1\",\"value2\"]"), true),
+                Arguments.of(new Json("[\"value1\",\"value2\"]"), new Json("[\"value2\",\"value1\"]"), false),
+                Arguments.of(new Json("[\"value2\",\"value1\"]"), new Json("[\"value2\",\"value1\",\"value3\"]"), false),
+                Arguments.of(new Json("{\"key\":\"value\"}"), new Json("[\"key\", \"value\"]"), false)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideJsonForEqualityTest")
+    public void testEquals(Json json1, Object json2, boolean expected) {
+        assertEquals(expected, json1.equals(json2));
+    }
+
+    @Test
+    public void testEqualsWithSameInstance() {
+        Json json = new Json("{\"key\":\"value\"}");
+        assertTrue(json.equals(json));
     }
 }

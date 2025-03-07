@@ -119,6 +119,7 @@ import com.sequenceiq.freeipa.service.image.ImageFallbackService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.secret.UserdataSecretsService;
+import com.sequenceiq.freeipa.service.stack.InstanceGroupAttributeAndStackTemplateUpdater;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceGroupService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
@@ -179,6 +180,9 @@ public class FreeIpaUpscaleActions {
     public Action<?, ?> startingAction() {
         return new AbstractUpscaleAction<>(UpscaleEvent.class) {
 
+            @Inject
+            private InstanceGroupAttributeAndStackTemplateUpdater instanceGroupAttributeAndStackTemplateUpdater;
+
             @Override
             protected void prepareExecution(UpscaleEvent payload, Map<Object, Object> variables) {
                 if (payload.getTriggeredVariant() != null) {
@@ -198,8 +202,10 @@ public class FreeIpaUpscaleActions {
                 setInstanceIds(variables, payload.getInstanceIds());
                 LOGGER.info("Starting upscale {}", payload);
                 stackUpdater.updateStackStatus(stack, getInProgressStatus(variables), "Starting upscale");
+                instanceGroupAttributeAndStackTemplateUpdater.updateInstanceGroupAttributesAndTemplateIfDefaultDifferent(context, stack);
                 sendEvent(context, UPSCALE_STARTING_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
             }
+
         };
     }
 

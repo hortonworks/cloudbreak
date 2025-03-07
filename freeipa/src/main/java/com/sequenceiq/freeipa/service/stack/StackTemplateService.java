@@ -34,6 +34,10 @@ public class StackTemplateService {
                 .withVariant(stack.getPlatformvariant())
                 .build();
         CloudCredential cloudCredential = credentialConverter.convert(credential);
+        return triggerGetTemplate(cloudContext, cloudCredential);
+    }
+
+    public GetPlatformTemplateRequest triggerGetTemplate(CloudContext cloudContext, CloudCredential cloudCredential) {
         GetPlatformTemplateRequest getPlatformTemplateRequest = new GetPlatformTemplateRequest(cloudContext, cloudCredential);
         freeIpaFlowManager.notifyNonFlowEvent(getPlatformTemplateRequest);
         return getPlatformTemplateRequest;
