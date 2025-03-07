@@ -142,6 +142,7 @@ import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.secret.UserdataSecretsService;
 import com.sequenceiq.freeipa.service.stack.ClusterProxyService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaSafeInstanceHealthDetailsService;
+import com.sequenceiq.freeipa.service.stack.InstanceGroupAttributeAndStackTemplateUpdater;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceGroupService;
@@ -258,6 +259,9 @@ class FreeIpaUpscaleFlowIntegrationTest {
     private NodeValidator nodeValidator;
 
     @MockBean
+    private InstanceGroupAttributeAndStackTemplateUpdater instanceGroupAttributeAndStackTemplateUpdater;
+
+    @MockBean
     private FreeIpaLoadBalancerUpdateService loadBalancerUpdateService;
 
     @MockBean
@@ -317,6 +321,7 @@ class FreeIpaUpscaleFlowIntegrationTest {
         testFlow();
         verify(imageFallbackService).determineFallbackImageIfPermitted(any());
         verify(operationService).completeOperation(eq(stack.getAccountId()), eq(OPERATION_ID), any(), any());
+        verify(instanceGroupAttributeAndStackTemplateUpdater).updateInstanceGroupAttributesAndTemplateIfDefaultDifferent(any(), eq(stack));
     }
 
     @Test

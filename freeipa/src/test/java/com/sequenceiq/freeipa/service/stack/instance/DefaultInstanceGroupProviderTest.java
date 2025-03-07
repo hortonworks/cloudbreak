@@ -148,7 +148,7 @@ class DefaultInstanceGroupProviderTest {
 
         assertThat(availabilitySet.getInt(AzureInstanceGroupParameters.FAULT_DOMAIN_COUNT)).isEqualTo(2);
         assertThat(availabilitySet.getInt(AzureInstanceGroupParameters.UPDATE_DOMAIN_COUNT)).isEqualTo(20);
-        assertThat(availabilitySet.getString(AzureInstanceGroupParameters.NAME)).isEqualTo(String.format("%s-%s-as", STACK_NM, IG_NAME));
+        assertThat(availabilitySet.getString(AzureInstanceGroupParameters.NAME)).isEqualTo(String.format("%s-%s-as-std", STACK_NM, IG_NAME));
     }
 
     @Test

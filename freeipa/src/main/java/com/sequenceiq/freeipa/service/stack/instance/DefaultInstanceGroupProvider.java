@@ -106,7 +106,7 @@ public class DefaultInstanceGroupProvider {
     public Json createAttributes(CloudPlatform cloudPlatform, String stackName, String instanceGroupName) {
         if (cloudPlatform == AZURE) {
             Map<String, Object> asParameters = Map.ofEntries(
-                    entry(AzureInstanceGroupParameters.NAME, String.format("%s-%s-as", stackName, instanceGroupName)),
+                    entry(AzureInstanceGroupParameters.NAME, String.format("%s-%s-as-std", stackName, instanceGroupName)),
                     entry(AzureInstanceGroupParameters.FAULT_DOMAIN_COUNT, DEFAULT_FAULT_DOMAIN_COUNTER),
                     entry(AzureInstanceGroupParameters.UPDATE_DOMAIN_COUNT, DEFAULT_UPDATE_DOMAIN_COUNTER));
             return new Json(Map.of("availabilitySet", asParameters));

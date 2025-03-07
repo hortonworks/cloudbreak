@@ -126,9 +126,15 @@ public class Json implements Serializable {
 
         Json json = (Json) o;
 
-        return new EqualsBuilder()
-                .append(value, json.value)
-                .isEquals();
+        if (isObject() && json.isObject()) {
+            return JSONObject.fromObject(value).equals(JSONObject.fromObject(json.value));
+        } else if (isArray() && json.isArray()) {
+            return JSONArray.fromObject(value).equals(JSONArray.fromObject(json.value));
+        } else {
+            return new EqualsBuilder()
+                    .append(value, json.value)
+                    .isEquals();
+        }
     }
 
     @Override
