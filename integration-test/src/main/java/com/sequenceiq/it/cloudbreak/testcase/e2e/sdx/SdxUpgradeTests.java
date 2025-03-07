@@ -16,7 +16,9 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.LoadBalancerResponse;
 import com.sequenceiq.it.cloudbreak.assertion.audit.DatalakeAuditGrpcServiceAssertion;
+import com.sequenceiq.it.cloudbreak.assertion.sdx.SdxAssertion;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProvider;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
@@ -59,6 +61,9 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
     @Inject
     private PatchUpgradeCandidateProvider patchUpgradeCandidateProvider;
 
+    @Inject
+    private SdxAssertion sdxAssertion;
+
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
@@ -99,6 +104,11 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
                         testDto.getResponse().getDatabaseEngineVersion(), tc, testDto))
                 // This assertion is disabled until the Audit Service is not configured.
                 //.then(datalakeAuditGrpcServiceAssertion::upgradeClusterByNameInternal)
+                .then((tc, testDto, client) -> {
+                    List<LoadBalancerResponse> loadBalancers = sdxUtil.getLoadbalancers(testDto, client);
+                    sdxAssertion.validateLoadBalancerFQDNInTheHosts(testDto, loadBalancers);
+                    return testDto;
+                })
                 .validate();
     }
 
@@ -143,6 +153,11 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
                 .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
                 .then((tc, testDto, client) -> sdxUpgradeDatabaseTestUtil.checkCloudProviderDatabaseVersionFromPrimaryGateway(
                         testDto.getResponse().getDatabaseEngineVersion(), tc, testDto))
+                .then((tc, testDto, client) -> {
+                    List<LoadBalancerResponse> loadBalancers = sdxUtil.getLoadbalancers(testDto, client);
+                    sdxAssertion.validateLoadBalancerFQDNInTheHosts(testDto, loadBalancers);
+                    return testDto;
+                })
                 .validate();
     }
 

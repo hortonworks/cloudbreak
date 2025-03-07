@@ -19,9 +19,11 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.LoadBalancerResponse;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.InstanceGroupName;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.it.cloudbreak.assertion.sdx.SdxAssertion;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
@@ -71,6 +73,9 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
 
     @Inject
     private ImageCatalogTestClient imageCatalogTestClient;
+
+    @Inject
+    private SdxAssertion sdxAssertion;
 
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
@@ -126,6 +131,11 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                     return testDto;
                 })
                 .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
+                .then((tc, testDto, client) -> {
+                    List<LoadBalancerResponse> loadBalancers = sdxUtil.getLoadbalancers(testDto, client);
+                    sdxAssertion.validateLoadBalancerFQDNInTheHosts(testDto, loadBalancers);
+                    return testDto;
+                })
                 .validate();
     }
 
@@ -274,6 +284,11 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                     return testDto;
                 })
                 .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
+                .then((tc, testDto, client) -> {
+                    List<LoadBalancerResponse> loadBalancers = sdxUtil.getLoadbalancers(testDto, client);
+                    sdxAssertion.validateLoadBalancerFQDNInTheHosts(testDto, loadBalancers);
+                    return testDto;
+                })
                 .validate();
     }
 

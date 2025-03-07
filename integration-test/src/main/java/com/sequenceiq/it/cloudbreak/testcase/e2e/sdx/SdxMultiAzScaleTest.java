@@ -19,6 +19,8 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.LoadBalancerResponse;
+import com.sequenceiq.it.cloudbreak.assertion.sdx.SdxAssertion;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -27,6 +29,7 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxScaleTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
+import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
@@ -41,6 +44,12 @@ public class SdxMultiAzScaleTest extends PreconditionSdxE2ETest {
 
     @Inject
     private CommonClusterManagerProperties commonClusterManagerProperties;
+
+    @Inject
+    private SdxUtil sdxUtil;
+
+    @Inject
+    private SdxAssertion sdxAssertion;
 
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
@@ -90,6 +99,11 @@ public class SdxMultiAzScaleTest extends PreconditionSdxE2ETest {
                 .when(sdxTestClient.describe(), key(sdx))
                 .then((tc, testDto, client) -> {
                     validateMultiAz(testDto, tc, "Downscale");
+                    return testDto;
+                })
+                .then((tc, testDto, client) -> {
+                    List<LoadBalancerResponse> loadBalancers = sdxUtil.getLoadbalancers(testDto, client);
+                    sdxAssertion.validateLoadBalancerFQDNInTheHosts(testDto, loadBalancers);
                     return testDto;
                 })
                 .validate();

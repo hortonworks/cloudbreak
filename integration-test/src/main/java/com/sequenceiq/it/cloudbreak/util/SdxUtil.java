@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.LoadBalancerResponse;
 import com.sequenceiq.it.cloudbreak.dto.AbstractSdxTestDto;
 import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
@@ -59,6 +60,12 @@ public class SdxUtil {
     public String getStatusReason(AbstractSdxTestDto testDto, SdxClient sdxClient) {
         return getSdxClusterDetailResponse(testDto, sdxClient)
                 .getStatusReason();
+    }
+
+    public List<LoadBalancerResponse> getLoadbalancers(AbstractSdxTestDto testDto, SdxClient sdxClient) {
+        return getSdxClusterDetailResponse(testDto, sdxClient)
+                .getStackV4Response()
+                .getLoadBalancers();
     }
 
     private SdxClusterDetailResponse getSdxClusterDetailResponse(AbstractSdxTestDto testDto, SdxClient sdxClient) {

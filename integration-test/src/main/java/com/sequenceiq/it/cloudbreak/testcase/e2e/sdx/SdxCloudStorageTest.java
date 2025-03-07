@@ -2,17 +2,22 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.sdx;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
+import java.util.List;
+
 import jakarta.inject.Inject;
 
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.LoadBalancerResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.it.cloudbreak.assertion.sdx.SdxAssertion;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
+import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
@@ -25,6 +30,12 @@ public class SdxCloudStorageTest extends PreconditionSdxE2ETest {
 
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
+
+    @Inject
+    private SdxUtil sdxUtil;
+
+    @Inject
+    private SdxAssertion sdxAssertion;
 
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
@@ -58,6 +69,11 @@ public class SdxCloudStorageTest extends PreconditionSdxE2ETest {
                 .then((tc, testDto, client) -> {
                     getCloudFunctionality(tc).cloudStorageListContainerFreeIpa(getBaseLocation(testDto),
                             describeFreeIpaResponse.getName(), describeFreeIpaResponse.getCrn());
+                    return testDto;
+                })
+                .then((tc, testDto, client) -> {
+                    List<LoadBalancerResponse> loadBalancers = sdxUtil.getLoadbalancers(testDto, client);
+                    sdxAssertion.validateLoadBalancerFQDNInTheHosts(testDto, loadBalancers);
                     return testDto;
                 })
                 .validate();
