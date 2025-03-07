@@ -23,6 +23,17 @@ public class Clock {
         return Instant.now().minus(amount);
     }
 
+    /**
+     * Use {@link #getCurrentZonedDateTime() getCurrentZonedDateTime} or {@link #getCurrentLocalDateTime() getCurrentLocalDateTime} instead if you can!
+     */
+    public Date getCurrentDateLowPrecision() {
+        return new Date();
+    }
+
+    public ZonedDateTime getCurrentZonedDateTime() {
+        return ZonedDateTime.now();
+    }
+
     public LocalDateTime getCurrentLocalDateTime() {
         return LocalDateTime.now();
     }

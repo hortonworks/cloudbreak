@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.job.dynamicentitlement;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -9,9 +9,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
+import java.util.Date;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,8 +24,8 @@ import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
-import org.springframework.context.ApplicationContext;
 
+import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.job.dynamicentitlement.scheduler.DynamicEntitlementRefreshTransactionalScheduler;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
@@ -46,7 +46,7 @@ class DynamicEntitlementRefreshJobServiceTest {
     private DynamicEntitlementRefreshTransactionalScheduler scheduler;
 
     @Mock
-    private ApplicationContext applicationContext;
+    private Clock clock;
 
     @Mock
     private JobKey jobKey;
@@ -60,6 +60,7 @@ class DynamicEntitlementRefreshJobServiceTest {
         when(jobResource.getLocalId()).thenReturn(LOCAL_ID);
         when(dynamicEntitlementRefreshConfig.getIntervalInMinutes()).thenReturn(10);
         when(dynamicEntitlementRefreshConfig.isDynamicEntitlementEnabled()).thenReturn(Boolean.TRUE);
+        when(clock.getCurrentDateLowPrecision()).thenCallRealMethod();
         underTest.schedule(new DynamicEntitlementRefreshJobAdapter(jobResource));
         verify(scheduler, times(1)).scheduleJob(any(), any());
     }
@@ -73,28 +74,27 @@ class DynamicEntitlementRefreshJobServiceTest {
     }
 
     @Test
-    void testUnscheduleIfNotScheduled() throws SchedulerException, TransactionService.TransactionExecutionException {
-        when(scheduler.getJobDetail(eq(jobKey))).thenReturn(null);
+    void testUnscheduleIfNotScheduled() throws TransactionService.TransactionExecutionException {
         underTest.unschedule(eq(jobKey));
         verify(scheduler, never()).deleteJob(eq(jobKey));
     }
 
     @Test
-    void testRescheduleWithBackoff() throws SchedulerException, TransactionService.TransactionExecutionException {
+    void testRescheduleWithBackoff() throws TransactionService.TransactionExecutionException {
         JobDetail jobDetail = mock(JobDetail.class);
         when(jobDetail.getKey()).thenReturn(jobKey);
         when(jobKey.getName()).thenReturn(LOCAL_ID);
         when(jobDetail.getJobDataMap()).thenReturn(new JobDataMap());
         when(dynamicEntitlementRefreshConfig.getIntervalInMinutes()).thenReturn(ORIGINAL_INTERVAL);
         when(dynamicEntitlementRefreshConfig.isDynamicEntitlementEnabled()).thenReturn(Boolean.TRUE);
+        Date now = new Date();
+        when(clock.getCurrentDateLowPrecision()).thenReturn(now);
 
-        LocalDateTime now = LocalDateTime.now();
         underTest.reScheduleWithBackoff(1L, jobDetail, ERROR_COUNT);
 
         ArgumentCaptor<Trigger> triggerArgumentCaptor = ArgumentCaptor.forClass(Trigger.class);
         verify(scheduler).scheduleJob(eq(jobDetail), triggerArgumentCaptor.capture());
-        long diff = ChronoUnit.MINUTES.between(now,
-                triggerArgumentCaptor.getValue().getStartTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
+        long diff = ChronoUnit.MINUTES.between(now.toInstant(), triggerArgumentCaptor.getValue().getStartTime().toInstant().atZone(ZoneId.systemDefault()));
         assertEquals((2 << ERROR_COUNT) + ORIGINAL_INTERVAL, diff);
     }
 

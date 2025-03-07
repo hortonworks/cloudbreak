@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.job.dynamicentitlement;
 
 import java.time.Duration;
-import java.time.ZonedDateTime;
 import java.util.Date;
 
 import jakarta.inject.Inject;
@@ -18,6 +17,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
 import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.util.RandomUtil;
@@ -42,6 +42,9 @@ public class DynamicEntitlementRefreshJobService implements JobSchedulerService 
 
     @Inject
     private DynamicEntitlementRefreshConfig properties;
+
+    @Inject
+    private Clock clock;
 
     @Override
     public String getJobGroup() {
@@ -149,19 +152,17 @@ public class DynamicEntitlementRefreshJobService implements JobSchedulerService 
     private Date backoffFirstStart(int errorCount, Long stackId) {
         if (errorCount == 0) {
             LOGGER.debug("DynamicEntitlementRefreshJob will be rescheduled in {} minutes for stack {}.", properties.getIntervalInMinutes(), stackId);
-            return Date.from(ZonedDateTime.now().toInstant().plus(Duration.ofMinutes(properties.getIntervalInMinutes())));
+            return Date.from(clock.getCurrentDateLowPrecision().toInstant().plus(Duration.ofMinutes(properties.getIntervalInMinutes())));
         } else {
             int count = Math.min(errorCount, MAX_ERROR_COUNT);
             // backoff strategy, delay = 2^(errorcount+1) + original interval
             int exponentialBackOffInMinutes = (2 << count) + properties.getIntervalInMinutes();
             LOGGER.debug("DynamicEntitlementRefreshJob will be rescheduled in {} minutes for stack {}.", exponentialBackOffInMinutes, stackId);
-            return Date.from(ZonedDateTime.now().toInstant()
-                    .plus(Duration.ofMinutes(exponentialBackOffInMinutes)));
+            return Date.from(clock.getCurrentDateLowPrecision().toInstant().plus(Duration.ofMinutes(exponentialBackOffInMinutes)));
         }
     }
 
     private Date delayedFirstStart() {
-        return Date.from(ZonedDateTime.now().toInstant()
-                .plus(Duration.ofMinutes(RandomUtil.getInt(properties.getIntervalInMinutes()))));
+        return Date.from(clock.getCurrentDateLowPrecision().toInstant().plus(Duration.ofMinutes(RandomUtil.getInt(properties.getIntervalInMinutes()))));
     }
 }
