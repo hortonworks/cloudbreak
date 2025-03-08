@@ -137,15 +137,11 @@ import reactor.core.publisher.Mono;
 
 public class AzureClient {
 
-    public static final String FIREWALL_RULE_NAME = "publicaccess";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureClient.class);
 
     private static final int MAX_AZURE_MANAGED_DISK_SIZE_WITH_CACHE = 4095;
 
     private static final Pattern ENCRYPTION_KEY_URL_VAULT_NAME = Pattern.compile("https://([^.]+)\\.vault.*");
-
-    private static final String FIREWALL_IP_ADDRESS = "0.0.0.0";
 
     private final AzureResourceManager azure;
 
@@ -1190,17 +1186,5 @@ public class AzureClient {
         } else {
             return new DiskUpdate().withDiskSizeGB(size);
         }
-    }
-
-    public void createPublicAccessFirewallRuleForFlexibleDb(String dbServerName, String resourceGroupName) {
-        handleException(() ->
-            postgreSqlFlexibleManager
-                .firewallRules()
-                .define(FIREWALL_RULE_NAME)
-                .withExistingFlexibleServer(resourceGroupName, dbServerName)
-                .withStartIpAddress(FIREWALL_IP_ADDRESS)
-                .withEndIpAddress(FIREWALL_IP_ADDRESS)
-                .create()
-        );
     }
 }
