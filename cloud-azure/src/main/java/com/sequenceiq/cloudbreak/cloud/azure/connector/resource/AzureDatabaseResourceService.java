@@ -14,7 +14,6 @@ import static com.sequenceiq.common.api.type.ResourceType.AZURE_RESOURCE_GROUP;
 import static com.sequenceiq.common.api.type.ResourceType.RDS_HOSTNAME;
 import static com.sequenceiq.common.api.type.ResourceType.RDS_HOSTNAME_CANARY;
 import static com.sequenceiq.common.api.type.ResourceType.RDS_PORT;
-import static com.sequenceiq.common.model.PrivateEndpointType.USE_PRIVATE_ENDPOINT;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import com.azure.core.management.exception.ManagementException;
 import com.azure.resourcemanager.postgresql.models.StorageProfile;
@@ -54,7 +52,6 @@ import com.sequenceiq.cloudbreak.cloud.azure.util.AzureTemplateDeploymentFailure
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzurePermissionValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureRDSAutoMigrationValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureDatabaseServerView;
-import com.sequenceiq.cloudbreak.cloud.azure.view.AzureNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -154,8 +151,7 @@ public class AzureDatabaseResourceService {
         CloudContext cloudContext = ac.getCloudContext();
         AzureClient client = ac.getParameter(AzureClient.class);
 
-        DatabaseServer databaseServer = stack.getDatabaseServer();
-        azurePermissionValidator.validateFlexibleServerPermission(client, databaseServer);
+        azurePermissionValidator.validateFlexibleServerPermission(client, stack.getDatabaseServer());
         String stackName = azureUtils.getStackName(cloudContext);
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
         ResourceGroupUsage resourceGroupUsage = azureResourceGroupMetadataProvider.getResourceGroupUsage(stack);
@@ -166,45 +162,7 @@ public class AzureDatabaseResourceService {
         createTemplateResource(persistenceNotifier, cloudContext, stackName);
         List<CloudResource> cloudResources = createOrFetchDeployment(persistenceNotifier, stackName, resourceGroupName, template, client, ac);
 
-        AzureDatabaseType databaseType = getAzureDatabaseType(stack);
-        if (AzureDatabaseType.FLEXIBLE_SERVER.equals(databaseType)) {
-            setUpPublicAccessBasedOnNetworkSettings(stack, client, databaseServer, resourceGroupName);
-        }
-
         return convertWithStatus(cloudResources);
-    }
-
-    private void setUpPublicAccessBasedOnNetworkSettings(DatabaseStack stack, AzureClient client, DatabaseServer databaseServer, String resourceGroupName) {
-        AzureNetworkView azureNetworkView = new AzureNetworkView(stack.getNetwork());
-        boolean useDelegatedSubnet = StringUtils.hasText(azureNetworkView.getExistingDatabasePrivateDnsZoneId()) &&
-                StringUtils.hasText(azureNetworkView.getFlexibleServerDelegatedSubnetId());
-        boolean usePrivateEndpoints = USE_PRIVATE_ENDPOINT.equals(azureNetworkView.getEndpointType());
-        LOGGER.info("Checking if firewall rule creation necessary: useDelegatedSubnet: {}, usePrivateEndpoints: {}", useDelegatedSubnet, usePrivateEndpoints);
-        if (!useDelegatedSubnet && !usePrivateEndpoints) {
-            try {
-                createPublicAccessFirewallRuleForFlexibleDbWithRetry(client, databaseServer, resourceGroupName);
-            } catch (Retry.ActionFailedException e) {
-                throw azureUtils.convertToCloudConnectorException(e.getCause(), "Firewall rule creation failed with conflict after several attempts.");
-            } catch (ManagementException e) {
-                throw azureUtils.convertToCloudConnectorException(e, "Firewall rule creation failed.");
-            }
-        }
-    }
-
-    private void createPublicAccessFirewallRuleForFlexibleDbWithRetry(AzureClient client, DatabaseServer databaseServer, String resourceGroupName) {
-        LOGGER.info("Creating firewall rule for public access.");
-        retryService.testWith2SecDelayMax5Times(() -> {
-            try {
-                client.createPublicAccessFirewallRuleForFlexibleDb(databaseServer.getServerId(), resourceGroupName);
-            } catch (ManagementException e) {
-                if (azureExceptionHandler.isExceptionCodeConflict(e)) {
-                    LOGGER.info("Firewall rule for public access failed with a conflict. It's retried 5 times before failing.", e);
-                    throw Retry.ActionFailedException.ofCause(e);
-                } else {
-                    throw e;
-                }
-            }
-        });
     }
 
     private List<CloudResourceStatus> convertWithStatus(List<CloudResource> cloudResources) {
@@ -712,7 +670,6 @@ public class AzureDatabaseResourceService {
         } else {
             waitForDeployment(stackName, resourceGroupName, ac);
         }
-
     }
 
     private void waitForDeployment(String stackName, String resourceGroupName, AuthenticatedContext ac) {
@@ -772,13 +729,11 @@ public class AzureDatabaseResourceService {
             CloudContext cloudContext = authenticatedContext.getCloudContext();
             String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, migratedDbStack);
             AzureClient client = authenticatedContext.getParameter(AzureClient.class);
-            DatabaseServer databaseServer = migratedDbStack.getDatabaseServer();
-            ExternalDatabaseStatus externalDatabaseStatus = getExternalDatabaseStatus(databaseServer, client, resourceGroupName);
-            String deploymentName = databaseServer.getServerId();
+            ExternalDatabaseStatus externalDatabaseStatus = getExternalDatabaseStatus(migratedDbStack.getDatabaseServer(), client, resourceGroupName);
+            String deploymentName = migratedDbStack.getDatabaseServer().getServerId();
             if (externalDatabaseStatus.isRelaunchable()) {
                 String template = azureDatabaseTemplateBuilder.build(cloudContext, migratedDbStack);
                 resources = createOrFetchDeployment(persistenceNotifier, deploymentName, resourceGroupName, template, client, authenticatedContext);
-                setUpPublicAccessBasedOnNetworkSettings(stack, client, databaseServer, resourceGroupName);
             } else {
                 LOGGER.debug("Database server deployment is already present with status {} and name {}, so skipping canary launch",
                         externalDatabaseStatus, deploymentName);

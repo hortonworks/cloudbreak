@@ -90,7 +90,6 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
-import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.database.ExternalDatabaseParameters;
@@ -175,9 +174,6 @@ class AzureDatabaseResourceServiceTest {
 
     @Mock
     private AzureTemplateDeploymentFailureReasonProvider azureTemplateDeploymentFailureReasonProvider;
-
-    @Mock
-    private Network network;
 
     @InjectMocks
     private AzureDatabaseResourceService underTest;
@@ -306,8 +302,6 @@ class AzureDatabaseResourceServiceTest {
                 verify(persistenceNotifier, times(3)).notifyDeletion(any(), eq(cloudContext));
             }
         } else {
-            when(databaseStack.getNetwork()).thenReturn(network);
-            when(network.getStringParameter("existingDatabasePrivateDnsZoneId")).thenReturn("existingDatabasePrivateDnsZoneId");
             List<CloudResourceStatus> result = underTest.launchCanaryDatabaseForUpgrade(ac, databaseStack, migratedDbStack, persistenceNotifier);
 
             verify(azureCloudResourceService, never()).getPrivateEndpointRdsResourceTypes(true);
@@ -399,7 +393,6 @@ class AzureDatabaseResourceServiceTest {
         when(azureResourceGroupMetadataProvider.getResourceGroupUsage(any(DatabaseStack.class))).thenReturn(ResourceGroupUsage.SINGLE);
         when(azureUtils.deleteDatabaseServer(any(), anyString(), anyBoolean())).thenReturn(Optional.empty());
         List<CloudResource> cloudResources = List.of(buildResource(AZURE_DATABASE));
-        when(databaseStack.getDatabaseServer()).thenReturn(buildDatabaseServer(FLEXIBLE_SERVER));
 
         List<CloudResourceStatus> resourceStatuses = underTest.terminateDatabaseServer(ac, databaseStack, cloudResources, false, persistenceNotifier);
 
@@ -823,10 +816,6 @@ class AzureDatabaseResourceServiceTest {
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(DELETED);
         when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
         when(deployment.outputs()).thenReturn(Map.of("databaseServerFQDN", Map.of("value", "fqdn")));
-        when(databaseStack.getNetwork()).thenReturn(network);
-        when(network.getStringParameter("existingDatabasePrivateDnsZoneId")).thenReturn("existingDatabasePrivateDnsZoneId");
-        DatabaseServer databaseServer = buildDatabaseServer(FLEXIBLE_SERVER);
-        when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
         doAnswer(invocation -> {
             invocation.getArgument(0, Runnable.class).run();
             return null;
@@ -880,10 +869,6 @@ class AzureDatabaseResourceServiceTest {
             return null;
         }).when(retryService).testWith2SecDelayMax5Times(any(Runnable.class));
         doAnswer(invocation -> invocation.getArgument(0, Supplier.class).get()).when(retryService).testWith2SecDelayMax5Times(any(Supplier.class));
-        DatabaseServer databaseServer = buildDatabaseServer(FLEXIBLE_SERVER);
-        when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
-        when(databaseStack.getNetwork()).thenReturn(network);
-        when(network.getStringParameter("existingDatabasePrivateDnsZoneId")).thenReturn("existingDatabasePrivateDnsZoneId");
 
         List<CloudResourceStatus> actual = underTest.buildDatabaseResourcesForLaunch(ac, databaseStack, persistenceNotifier);
 
@@ -911,9 +896,6 @@ class AzureDatabaseResourceServiceTest {
         when(deployment.outputs()).thenReturn(Map.of("databaseServerFQDN", Map.of("value", "fqdn")));
         doAnswer(invocation -> invocation.getArgument(0, Supplier.class).get()).when(retryService).testWith2SecDelayMax5Times(any(Supplier.class));
         when(syncPollingScheduler.schedule(null)).thenReturn(new ResourcesStatePollerResult(null));
-        when(databaseStack.getNetwork()).thenReturn(network);
-        when(databaseStack.getDatabaseServer()).thenReturn(buildDatabaseServer(FLEXIBLE_SERVER));
-        when(network.getStringParameter("existingDatabasePrivateDnsZoneId")).thenReturn("existingDatabasePrivateDnsZoneId");
 
         List<CloudResourceStatus> actual = underTest.buildDatabaseResourcesForLaunch(ac, databaseStack, persistenceNotifier);
 
@@ -959,7 +941,6 @@ class AzureDatabaseResourceServiceTest {
         when(deployment.outputs()).thenReturn(Map.of("databaseServerFQDN", Map.of("value", "fqdn")));
         doAnswer(invocation -> invocation.getArgument(0, Supplier.class).get()).when(retryService).testWith2SecDelayMax5Times(any(Supplier.class));
         doThrow(new Exception("msg")).when(syncPollingScheduler).schedule(null);
-        when(databaseStack.getDatabaseServer()).thenReturn(buildDatabaseServer(FLEXIBLE_SERVER));
 
         Exception exception = assertThrows(CloudConnectorException.class,
                 () -> underTest.buildDatabaseResourcesForLaunch(ac, databaseStack, persistenceNotifier));
