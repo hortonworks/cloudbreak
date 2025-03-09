@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -75,6 +74,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.TargetGroupPersistenceService;
 import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
 @ExtendWith(MockitoExtension.class)
@@ -268,6 +268,7 @@ class MetadataSetupServiceTest {
         LoadBalancer loadBalancer = new LoadBalancer();
         loadBalancer.setStack(stack);
         loadBalancer.setType(LoadBalancerType.PUBLIC);
+        loadBalancer.setSku(LoadBalancerSku.STANDARD);
 
         Set<LoadBalancer> loadBalancerSet = new HashSet<>();
         loadBalancerSet.add(loadBalancer);
@@ -277,9 +278,7 @@ class MetadataSetupServiceTest {
         stackStatus.setStatus(Status.AVAILABLE);
         stackStatus.setStack(stack);
 
-
         StackIdView stackIdView = new StackIdViewImpl(STACK_ID, STACK_NAME, "no");
-
 
         when(stackService.getByEnvironmentCrnAndStackType(STACK_CRN, StackType.DATALAKE)).thenReturn(List.of(stackIdView));
         when(stackStatusService.findFirstByStackIdOrderByCreatedDesc(STACK_ID)).thenReturn(Optional.of(stackStatus));
@@ -293,6 +292,7 @@ class MetadataSetupServiceTest {
         assertThat(loadBalancerValue.getHostedZoneId()).isSameAs(HOSTED_ZONE);
         assertThat(loadBalancerValue.getIp()).isSameAs(PUBLIC_IP);
         assertThat(loadBalancerValue.getDns()).isSameAs(CLOUD_DNS);
+        assertThat(loadBalancerValue.getSku()).isSameAs(LoadBalancerSku.STANDARD);
         assertThat(loadBalancerValue.getEndpoint()).isEqualTo("STACK_NAME-gateway");
     }
 
@@ -530,14 +530,14 @@ class MetadataSetupServiceTest {
         List<InstanceMetaData> savedInstanceMetadatas = instanceMetaDataCaptor.getAllValues();
         List<InstanceMetaData> primaryGWs = savedInstanceMetadatas.stream()
                 .filter(instanceMetaData -> GATEWAY_PRIMARY.equals(instanceMetaData.getInstanceMetadataType()))
-                .collect(Collectors.toList());
+                .toList();
         assertEquals(1, primaryGWs.size());
-        assertEquals(primaryGWDiscoveryFQDN, primaryGWs.get(0).getDiscoveryFQDN());
+        assertEquals(primaryGWDiscoveryFQDN, primaryGWs.getFirst().getDiscoveryFQDN());
         List<InstanceMetaData> gws = savedInstanceMetadatas.stream()
                 .filter(instanceMetaData -> GATEWAY.equals(instanceMetaData.getInstanceMetadataType()))
-                .collect(Collectors.toList());
+                .toList();
         assertEquals(1, gws.size());
-        assertEquals(gw1DiscoveryFQDN, gws.get(0).getDiscoveryFQDN());
+        assertEquals(gw1DiscoveryFQDN, gws.getFirst().getDiscoveryFQDN());
     }
 
     @Test
@@ -602,14 +602,14 @@ class MetadataSetupServiceTest {
         List<InstanceMetaData> primaryGWs = savedInstanceMetadatas.stream()
                 .filter(instanceMetaData -> GATEWAY_PRIMARY.equals(instanceMetaData.getInstanceMetadataType()))
                 .distinct()
-                .collect(Collectors.toList());
+                .toList();
         assertEquals(1, primaryGWs.size());
-        assertEquals(gw1DiscoveryFQDN, primaryGWs.get(0).getDiscoveryFQDN());
+        assertEquals(gw1DiscoveryFQDN, primaryGWs.getFirst().getDiscoveryFQDN());
         List<InstanceMetaData> gws = savedInstanceMetadatas.stream()
                 .filter(instanceMetaData -> GATEWAY.equals(instanceMetaData.getInstanceMetadataType()))
-                .collect(Collectors.toList());
+                .toList();
         assertEquals(1, gws.size());
-        assertEquals(gw2DiscoveryFQDN, gws.get(0).getDiscoveryFQDN());
+        assertEquals(gw2DiscoveryFQDN, gws.getFirst().getDiscoveryFQDN());
     }
 
     @Test

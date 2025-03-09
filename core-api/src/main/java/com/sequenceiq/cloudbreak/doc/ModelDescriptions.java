@@ -281,6 +281,7 @@ public class ModelDescriptions {
         public static final String LOAD_BALANCER_AZURE = "The Azure load balancer cloud resource information.";
         public static final String TARGET_GROUP_AZURE = "The Azure target availability set information.";
         public static final String AZURE_LB_NAME = "The Azure Load Balancer name";
+        public static final String AZURE_LB_SKU = "The Azure Load Balancer SKU";
         public static final String AZURE_LB_AVAILABILITY_SET = "The availability set that contains the instances recieving traffic from the load balancer " +
                 "on the specificed port.";
         public static final String LOAD_BALANCER_GCP = "The GCP load balancer information";

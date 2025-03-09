@@ -4,8 +4,8 @@ import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AZURE;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
 import static com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerConfigConverter.MISSING_CLOUD_RESOURCE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -14,11 +14,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsLoadBalancerMetadataView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureLoadBalancerMetadataView;
@@ -36,8 +38,10 @@ import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.azure.AzureTargetGrou
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.gcp.GcpLoadBalancerConfigDb;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.gcp.GcpLoadBalancerNamesDb;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.gcp.GcpTargetGroupConfigDb;
+import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.api.type.TargetGroupType;
 
+@ExtendWith(MockitoExtension.class)
 public class LoadBalancerConfigConverterTest {
 
     private static final String LB_ARN = "arn://loadbalancer";
@@ -66,18 +70,14 @@ public class LoadBalancerConfigConverterTest {
     @InjectMocks
     private LoadBalancerConfigConverter underTest;
 
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-    }
-
     @Test
     public void testConvertAwsLoadBalancer() {
         CloudLoadBalancerMetadata cloudLoadBalancerMetadata = CloudLoadBalancerMetadata.builder()
             .withParameters(createAwsParams(0))
             .build();
 
-        LoadBalancerConfigDbWrapper cloudLoadBalancerConfigDbWrapper = underTest.convertLoadBalancer(AWS, cloudLoadBalancerMetadata);
+        LoadBalancerConfigDbWrapper cloudLoadBalancerConfigDbWrapper = underTest.convertLoadBalancer(AWS, cloudLoadBalancerMetadata,
+                LoadBalancerSku.getDefault());
         assertNotNull(cloudLoadBalancerConfigDbWrapper.getAwsConfig());
         AwsLoadBalancerConfigDb awsLoadBalancerConfigDb = cloudLoadBalancerConfigDbWrapper.getAwsConfig();
         assertEquals(LB_ARN, awsLoadBalancerConfigDb.getArn());
@@ -148,16 +148,18 @@ public class LoadBalancerConfigConverterTest {
         assertEquals(MISSING_CLOUD_RESOURCE, targetGroupArns.getTargetGroupArn());
     }
 
-    @Test
-    public void testConvertAzureLoadBalancer() {
+    @ParameterizedTest
+    @EnumSource(value = LoadBalancerSku.class)
+    public void testConvertAzureLoadBalancer(LoadBalancerSku sku) {
         CloudLoadBalancerMetadata cloudLoadBalancerMetadata = CloudLoadBalancerMetadata.builder()
                 .withParameters(createAzureParams(0))
                 .build();
 
-        LoadBalancerConfigDbWrapper cloudLoadBalancerConfigDbWrapper = underTest.convertLoadBalancer(AZURE, cloudLoadBalancerMetadata);
+        LoadBalancerConfigDbWrapper cloudLoadBalancerConfigDbWrapper = underTest.convertLoadBalancer(AZURE, cloudLoadBalancerMetadata, sku);
         assertNotNull(cloudLoadBalancerConfigDbWrapper.getAzureConfig());
         AzureLoadBalancerConfigDb azureLoadBalancerConfigDb = cloudLoadBalancerConfigDbWrapper.getAzureConfig();
         assertEquals(LB_NAME, azureLoadBalancerConfigDb.getName());
+        assertEquals(sku, azureLoadBalancerConfigDb.getSku());
     }
 
     @Test
@@ -213,7 +215,8 @@ public class LoadBalancerConfigConverterTest {
         CloudLoadBalancerMetadata cloudLoadBalancerMetadata = CloudLoadBalancerMetadata.builder()
                 .withParameters(creatGcpParams(0))
                 .build();
-        LoadBalancerConfigDbWrapper cloudLoadBalancerConfigDbWrapper = underTest.convertLoadBalancer(GCP, cloudLoadBalancerMetadata);
+        LoadBalancerConfigDbWrapper cloudLoadBalancerConfigDbWrapper = underTest.convertLoadBalancer(GCP, cloudLoadBalancerMetadata,
+                LoadBalancerSku.getDefault());
         assertNotNull(cloudLoadBalancerConfigDbWrapper.getGcpConfig());
         GcpLoadBalancerConfigDb gcpLoadBalancerConfigDb = cloudLoadBalancerConfigDbWrapper.getGcpConfig();
         assertEquals(LB_NAME, gcpLoadBalancerConfigDb.getName());

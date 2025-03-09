@@ -397,7 +397,7 @@ public class MetadataSetupService {
 
                 if (!stoppedDatalakes.isEmpty()) {
                     /* Starts to check for a situation where we are resizing a datalake that did not previously have loadbalancers
-                        so that we can use the same endpoint name for a seamless transistion
+                        so that we can use the same endpoint name for a seamless transition
                      */
                     LOGGER.info("Using old datalake endpoint name for resized datalake: {}, env: {}", stack.getName(), stack.getEnvironmentCrn());
                     if (stoppedDatalakes.size() > 1) {
@@ -405,10 +405,9 @@ public class MetadataSetupService {
                                 .map(Object::toString).collect(Collectors.joining(","));
                         LOGGER.warn("more than one datalake found to resize from: {}", ids);
                     }
-                    Long oldId = stoppedDatalakes.get(0).getStack().getId();
-
-                    Set<LoadBalancer> oldLoadbalancers = loadBalancerPersistenceService.findByStackId(oldId);
-                    if (oldLoadbalancers.isEmpty()) {
+                    Long oldId = stoppedDatalakes.getFirst().getStack().getId();
+                    Set<LoadBalancer> oldLoadBalancers = loadBalancerPersistenceService.findByStackId(oldId);
+                    if (oldLoadBalancers.isEmpty()) {
                         Stack oldStack = stackService.getByIdWithGatewayInTransaction(oldId);
                         if (stack.getDisplayName().equals(oldStack.getDisplayName())) {
                             endpoint = oldStack.getPrimaryGatewayInstance().getShortHostname();
@@ -419,7 +418,7 @@ public class MetadataSetupService {
                 LOGGER.info("Saving load balancer endpoint as: {}", endpoint);
                 loadBalancerEntry.setEndpoint(endpoint);
                 loadBalancerEntry.setProviderConfig(loadBalancerConfigConverter.convertLoadBalancer(stack.getCloudPlatform(),
-                    cloudLoadBalancerMetadata));
+                    cloudLoadBalancerMetadata, loadBalancerEntry.getSku()));
 
                 loadBalancerPersistenceService.save(loadBalancerEntry);
 
@@ -473,11 +472,9 @@ public class MetadataSetupService {
     }
 
     private String generateLoadBalancerEndpoint(StackView stack) {
-        StringBuilder name = new StringBuilder()
-                .append(stack.getName())
-                .append('-')
-                .append(ENDPOINT_SUFFIX);
-        return name.toString();
+        return stack.getName() +
+                '-' +
+                ENDPOINT_SUFFIX;
     }
 
 }

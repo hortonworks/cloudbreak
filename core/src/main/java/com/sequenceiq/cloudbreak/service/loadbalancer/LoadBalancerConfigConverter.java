@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.azure.AzureTargetGrou
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.gcp.GcpLoadBalancerConfigDb;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.gcp.GcpLoadBalancerNamesDb;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.gcp.GcpTargetGroupConfigDb;
+import com.sequenceiq.common.api.type.LoadBalancerSku;
 
 @Service
 public class LoadBalancerConfigConverter {
@@ -38,17 +39,13 @@ public class LoadBalancerConfigConverter {
     @Inject
     private TargetGroupPortProvider targetGroupPortProvider;
 
-    public LoadBalancerConfigDbWrapper convertLoadBalancer(String cloudPlatform, CloudLoadBalancerMetadata cloudLoadBalancerMetadata) {
-        switch (cloudPlatform) {
-            case AWS:
-                return buildAwsConfig(new AwsLoadBalancerMetadataView(cloudLoadBalancerMetadata));
-            case AZURE:
-                return buildAzureConfig(new AzureLoadBalancerMetadataView(cloudLoadBalancerMetadata));
-            case GCP:
-                return buildGcpConfig(new GcpLoadBalancerMetadataView(cloudLoadBalancerMetadata));
-            default:
-                return new LoadBalancerConfigDbWrapper();
-        }
+    public LoadBalancerConfigDbWrapper convertLoadBalancer(String cloudPlatform, CloudLoadBalancerMetadata cloudLoadBalancerMetadata, LoadBalancerSku sku) {
+        return switch (cloudPlatform) {
+            case AWS -> buildAwsConfig(new AwsLoadBalancerMetadataView(cloudLoadBalancerMetadata));
+            case AZURE -> buildAzureConfig(new AzureLoadBalancerMetadataView(cloudLoadBalancerMetadata), sku);
+            case GCP -> buildGcpConfig(new GcpLoadBalancerMetadataView(cloudLoadBalancerMetadata));
+            default -> new LoadBalancerConfigDbWrapper();
+        };
     }
 
     private LoadBalancerConfigDbWrapper buildAwsConfig(AwsLoadBalancerMetadataView awsMetadata) {
@@ -59,10 +56,11 @@ public class LoadBalancerConfigConverter {
         return cloudLoadBalancerConfigDbWrapper;
     }
 
-    private LoadBalancerConfigDbWrapper buildAzureConfig(AzureLoadBalancerMetadataView azureMetadata) {
+    private LoadBalancerConfigDbWrapper buildAzureConfig(AzureLoadBalancerMetadataView azureMetadata, LoadBalancerSku sku) {
         LoadBalancerConfigDbWrapper cloudLoadBalancerConfigDbWrapper = new LoadBalancerConfigDbWrapper();
         AzureLoadBalancerConfigDb azureLoadBalancerConfigDb = new AzureLoadBalancerConfigDb();
         azureLoadBalancerConfigDb.setName(azureMetadata.getLoadbalancerName());
+        azureLoadBalancerConfigDb.setSku(sku);
         cloudLoadBalancerConfigDbWrapper.setAzureConfig(azureLoadBalancerConfigDb);
         return cloudLoadBalancerConfigDbWrapper;
     }
@@ -76,16 +74,12 @@ public class LoadBalancerConfigConverter {
     }
 
     public TargetGroupConfigDbWrapper convertTargetGroup(String cloudPlatform, CloudLoadBalancerMetadata cloudLoadBalancerMetadata, TargetGroup targetGroup) {
-        switch (cloudPlatform) {
-            case AWS:
-                return buildAwsConfig(new AwsLoadBalancerMetadataView(cloudLoadBalancerMetadata), targetGroup);
-            case AZURE:
-                return buildAzureConfig(new AzureLoadBalancerMetadataView(cloudLoadBalancerMetadata), targetGroup);
-            case GCP:
-                return buildGcpConfig(new GcpLoadBalancerMetadataView(cloudLoadBalancerMetadata), targetGroup);
-            default:
-                return new TargetGroupConfigDbWrapper();
-        }
+        return switch (cloudPlatform) {
+            case AWS -> buildAwsConfig(new AwsLoadBalancerMetadataView(cloudLoadBalancerMetadata), targetGroup);
+            case AZURE -> buildAzureConfig(new AzureLoadBalancerMetadataView(cloudLoadBalancerMetadata), targetGroup);
+            case GCP -> buildGcpConfig(new GcpLoadBalancerMetadataView(cloudLoadBalancerMetadata), targetGroup);
+            default -> new TargetGroupConfigDbWrapper();
+        };
     }
 
     private TargetGroupConfigDbWrapper buildAwsConfig(AwsLoadBalancerMetadataView awsMetadata, TargetGroup targetGroup) {

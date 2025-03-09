@@ -82,6 +82,7 @@ public class LoadBalancerToLoadBalancerResponseConverter {
         if (azureMetadata != null) {
             AzureLoadBalancerResponse azureSettings = new AzureLoadBalancerResponse();
             azureSettings.setName(azureMetadata.getName());
+            azureSettings.setSku(azureMetadata.getSku());
             return azureSettings;
         }
         return null;

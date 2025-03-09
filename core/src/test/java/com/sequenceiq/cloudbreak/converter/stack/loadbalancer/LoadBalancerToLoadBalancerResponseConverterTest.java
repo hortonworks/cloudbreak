@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.converter.stack.loadbalancer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
@@ -11,11 +11,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.AwsTargetGroupResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.AzureTargetGroupResponse;
@@ -43,8 +46,10 @@ import com.sequenceiq.cloudbreak.service.loadbalancer.TargetGroupPortProvider;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.TargetGroupPersistenceService;
+import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
+@ExtendWith(MockitoExtension.class)
 public class LoadBalancerToLoadBalancerResponseConverterTest extends AbstractEntityConverterTest<LoadBalancer> {
 
     private static final String LB_FQDN = "loadbalancer.domain.name";
@@ -88,11 +93,10 @@ public class LoadBalancerToLoadBalancerResponseConverterTest extends AbstractEnt
     @InjectMocks
     private LoadBalancerToLoadBalancerResponseConverter underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         when(instanceGroupService.findByTargetGroupId(any())).thenReturn(List.of(new InstanceGroup()));
-        when(instanceMetaDataService.findAliveInstancesInInstanceGroup(any())).thenReturn(ceateInstanceMetadata());
+        when(instanceMetaDataService.findAliveInstancesInInstanceGroup(any())).thenReturn(createInstanceMetadata());
         when(targetGroupPortProvider.getTargetGroupPortPairs(any())).thenReturn(Set.of(new TargetGroupPortPair(PORT, PORT)));
     }
 
@@ -130,19 +134,21 @@ public class LoadBalancerToLoadBalancerResponseConverterTest extends AbstractEnt
         assertEquals(TG_ARN, awsTargetGroupResponse.getTargetGroupArn());
     }
 
-    @Test
-    public void testConvertAzure() {
+    @ParameterizedTest
+    @EnumSource(LoadBalancerSku.class)
+    public void testConvertAzure(LoadBalancerSku sku) {
         LoadBalancer source = getSource();
         // GIVEN
-        getSource().setProviderConfig(createAzureLoadBalancerConfig());
+        getSource().setProviderConfig(createAzureLoadBalancerConfig(sku));
         given(targetGroupService.findByLoadBalancerId(any())).willReturn(createAzureTargetGroups());
         // WHEN
         LoadBalancerResponse response = underTest.convert(source);
         // THEN
         assertAllFieldsNotNull(response, List.of("awsResourceId", "gcpResourceId"));
         assertEquals(AZURE_LB_NAME, response.getAzureResourceId().getName());
+        assertEquals(sku, response.getAzureResourceId().getSku());
         assertEquals(1, response.getTargets().size());
-        TargetGroupResponse targetGroupResponse = response.getTargets().get(0);
+        TargetGroupResponse targetGroupResponse = response.getTargets().getFirst();
         assertEquals(PORT, targetGroupResponse.getPort());
         assertEquals(Set.of(INSTANCE_ID), targetGroupResponse.getTargetInstances());
         AzureTargetGroupResponse azureTargetGroupResponse = targetGroupResponse.getAzureResourceId();
@@ -162,7 +168,7 @@ public class LoadBalancerToLoadBalancerResponseConverterTest extends AbstractEnt
         assertAllFieldsNotNull(response, List.of("awsResourceId", "azureResourceId"));
         assertEquals(GCP_LB_NAME, response.getGcpResourceId().getName());
         assertEquals(1, response.getTargets().size());
-        TargetGroupResponse targetGroupResponse = response.getTargets().get(0);
+        TargetGroupResponse targetGroupResponse = response.getTargets().getFirst();
         assertEquals(PORT, targetGroupResponse.getPort());
         assertEquals(Set.of(INSTANCE_ID), targetGroupResponse.getTargetInstances());
         GcpTargetGroupResponse gcpTargetGroupResponse = targetGroupResponse.getGcpResourceId();
@@ -203,15 +209,16 @@ public class LoadBalancerToLoadBalancerResponseConverterTest extends AbstractEnt
         return Set.of(targetGroup);
     }
 
-    private List<InstanceMetaData> ceateInstanceMetadata() {
+    private List<InstanceMetaData> createInstanceMetadata() {
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setInstanceId(INSTANCE_ID);
         return List.of(instanceMetaData);
     }
 
-    private LoadBalancerConfigDbWrapper createAzureLoadBalancerConfig() {
+    private LoadBalancerConfigDbWrapper createAzureLoadBalancerConfig(LoadBalancerSku sku) {
         AzureLoadBalancerConfigDb azureLoadBalancerConfigDb = new AzureLoadBalancerConfigDb();
         azureLoadBalancerConfigDb.setName(AZURE_LB_NAME);
+        azureLoadBalancerConfigDb.setSku(sku);
         LoadBalancerConfigDbWrapper cloudLoadBalancerConfigDbWrapper = new LoadBalancerConfigDbWrapper();
         cloudLoadBalancerConfigDbWrapper.setAzureConfig(azureLoadBalancerConfigDb);
         return cloudLoadBalancerConfigDbWrapper;
