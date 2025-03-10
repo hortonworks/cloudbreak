@@ -362,6 +362,7 @@ public class SdxReactorFlowManager {
                 }
             }
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new CloudbreakApiException(e.getMessage());
         }
     }

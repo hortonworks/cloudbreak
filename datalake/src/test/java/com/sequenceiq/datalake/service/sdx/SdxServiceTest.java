@@ -4,10 +4,10 @@ import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static com.sequenceiq.datalake.service.sdx.SdxService.DATABASE_SSL_ENABLED;
-import static com.sequenceiq.datalake.service.sdx.SdxService.MEDIUM_DUTY_REQUIRED_VERSION;
 import static com.sequenceiq.datalake.service.sdx.SdxService.PREVIOUS_CLUSTER_SHAPE;
 import static com.sequenceiq.datalake.service.sdx.SdxService.PREVIOUS_DATABASE_CRN;
 import static com.sequenceiq.datalake.service.sdx.SdxService.WORKSPACE_ID_DEFAULT;
+import static com.sequenceiq.datalake.service.sdx.SdxVersionRuleEnforcer.MEDIUM_DUTY_REQUIRED_VERSION;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.ENTERPRISE;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.LIGHT_DUTY;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.MEDIUM_DUTY_HA;
@@ -94,7 +94,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.t
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.volume.VolumeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.network.NetworkV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.tags.TagsV4Response;
-import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -259,6 +258,9 @@ class SdxServiceTest {
     @Mock
     private SdxResizeValidator sdxResizeValidator;
 
+    @Mock
+    private SdxVersionRuleEnforcer sdxVersionRuleEnforcer;
+
     @InjectMocks
     private SdxService underTest;
 
@@ -416,7 +418,6 @@ class SdxServiceTest {
         sdxCluster.setRuntime("7.2.11");
 
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
-        environmentResponse.setCreator(USER_CRN);
         environmentResponse.setCloudPlatform("AWS");
 
         RangerRazEnabledV4Response response = mock(RangerRazEnabledV4Response.class);
@@ -425,6 +426,7 @@ class SdxServiceTest {
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(sdxVersionRuleEnforcer.isRazSupported(any(), any())).thenReturn(true);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.updateRangerRazEnabled(sdxCluster));
 
         assertTrue(sdxCluster.isRangerRazEnabled());
@@ -1301,7 +1303,7 @@ class SdxServiceTest {
         FlowIdentifier sdxFlowIdentifier = mock(FlowIdentifier.class);
         when(sdxReactorFlowManager.triggerSaltPasswordRotationTracker(sdxCluster)).thenReturn(sdxFlowIdentifier);
 
-        FlowIdentifier result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.rotateSaltPassword(sdxCluster, RotateSaltPasswordReason.MANUAL));
+        FlowIdentifier result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.rotateSaltPassword(sdxCluster));
 
         assertEquals(sdxFlowIdentifier, result);
         verify(sdxReactorFlowManager).triggerSaltPasswordRotationTracker(sdxCluster);
@@ -1400,7 +1402,7 @@ class SdxServiceTest {
     public void testAddRmsToSdxCluster() throws IOException, TransactionExecutionException {
         DetailedEnvironmentResponse environmentResponse = getDetailedEnvironmentResponse();
         when(entitlementService.isRmsEnabledOnDatalake(any())).thenReturn(true);
-        when(virtualMachineConfiguration.getSupportedJavaVersions()).thenReturn(Set.of(11, 13, 17, 18));
+        when(virtualMachineConfiguration.isJavaVersionSupported(11)).thenReturn(true);
         when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
         when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyBoolean())).thenReturn(imageCatalogPlatform);
         BaseStackDetailsV4Response baseStackDetailsV4Response = new BaseStackDetailsV4Response();
@@ -1412,9 +1414,10 @@ class SdxServiceTest {
         StackV4Request stackV4Request = JsonUtil.readValue(enterpriseJson, StackV4Request.class);
         when(cdpConfigService.getConfigForKey(any())).thenReturn(stackV4Request);
         SdxClusterRequest sdxClusterRequest = getSdxClusterRequest();
+        when(sdxVersionRuleEnforcer.isRazSupported(any(), any())).thenReturn(true);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "name", sdxClusterRequest, null));
 
-        verify(virtualMachineConfiguration, times(1)).getSupportedJavaVersions();
+        verify(virtualMachineConfiguration, times(1)).isJavaVersionSupported(11);
         verify(imageCatalogService, times(1)).getImageResponseFromImageRequest(any(), any());
         verify(environmentClientService, times(2)).getByName(anyString());
         verify(cdpConfigService, times(1)).getConfigForKey(any());
@@ -1530,7 +1533,6 @@ class SdxServiceTest {
 
     @Test
     void testShapeValidationOfSDXCreation() throws IOException {
-        when(virtualMachineConfiguration.getSupportedJavaVersions()).thenReturn(Set.of(11, 17, 21));
         DetailedEnvironmentResponse detailedEnvironmentResponse = getDetailedEnvironmentResponse();
         when(environmentClientService.getByName(eq("env-name"))).thenReturn(detailedEnvironmentResponse);
         when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyBoolean())).thenReturn(imageCatalogPlatform);
@@ -1549,6 +1551,8 @@ class SdxServiceTest {
         // MEDIUM_DUTY and 7.2.17 => non throws
         sdxClusterRequest.setClusterShape(MEDIUM_DUTY_HA);
         sdxClusterRequest.setRuntime("7.2.17");
+        when(sdxVersionRuleEnforcer.isRazSupported(any(), any())).thenReturn(true);
+        when(virtualMachineConfiguration.isJavaVersionSupported(21)).thenReturn(true);
         assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
 
         // MEDIUM_DUTY and 7.2.18 => throws
@@ -1927,6 +1931,7 @@ class SdxServiceTest {
                 .thenReturn(stackV4Response);
         when(cdpConfigService.getConfigForKey(any()))
                 .thenReturn(JsonUtil.readValue(enterpriseDutyJson, StackV4Request.class));
+        when(sdxVersionRuleEnforcer.isRazSupported(any(), any())).thenReturn(true);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, CLUSTER_NAME, resizeRequest));
 
@@ -2030,7 +2035,7 @@ class SdxServiceTest {
                 .thenReturn(stackV4Response);
         when(cdpConfigService.getConfigForKey(any()))
                 .thenReturn(JsonUtil.readValue(enterpriseDutyJson, StackV4Request.class));
-
+        when(sdxVersionRuleEnforcer.isRazSupported(any(), any())).thenReturn(true);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, CLUSTER_NAME, resizeRequest));
 
         ArgumentCaptor<SdxCluster> sdxClusterArgumentCaptor = ArgumentCaptor.forClass(SdxCluster.class);

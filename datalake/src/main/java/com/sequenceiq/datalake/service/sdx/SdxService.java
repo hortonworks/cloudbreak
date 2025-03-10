@@ -12,6 +12,13 @@ import static com.sequenceiq.cloudbreak.common.request.CreatorClientConstants.US
 import static com.sequenceiq.cloudbreak.common.request.HeaderValueProvider.getHeaderOrItsFallbackValueOrDefault;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+import static com.sequenceiq.datalake.service.sdx.SdxVersionRuleEnforcer.CCMV2_JUMPGATE_REQUIRED_VERSION;
+import static com.sequenceiq.datalake.service.sdx.SdxVersionRuleEnforcer.CCMV2_REQUIRED_VERSION;
+import static com.sequenceiq.datalake.service.sdx.SdxVersionRuleEnforcer.ENTERPRISE_DATALAKE_REQUIRED_VERSION;
+import static com.sequenceiq.datalake.service.sdx.SdxVersionRuleEnforcer.MEDIUM_DUTY_MAXIMUM_VERSION;
+import static com.sequenceiq.datalake.service.sdx.SdxVersionRuleEnforcer.MEDIUM_DUTY_REQUIRED_VERSION;
+import static com.sequenceiq.datalake.service.sdx.SdxVersionRuleEnforcer.MICRO_DUTY_REQUIRED_VERSION;
+import static com.sequenceiq.datalake.service.sdx.SdxVersionRuleEnforcer.MIN_RUNTIME_VERSION_FOR_RMS;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.ArrayList;
@@ -93,7 +100,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.AttachRe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
-import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
@@ -166,18 +172,6 @@ import com.sequenceiq.sdx.api.model.SdxRefreshDatahubResponse;
 @Service
 public class SdxService implements ResourceIdProvider, PayloadContextProvider, HierarchyAuthResourcePropertyProvider {
 
-    public static final String MICRO_DUTY_REQUIRED_VERSION = "7.2.12";
-
-    public static final String MEDIUM_DUTY_REQUIRED_VERSION = "7.2.7";
-
-    public static final String MEDIUM_DUTY_MAXIMUM_VERSION = "7.2.17";
-
-    public static final String ENTERPRISE_DATALAKE_REQUIRED_VERSION = "7.2.17";
-
-    public static final String CCMV2_JUMPGATE_REQUIRED_VERSION = "7.2.6";
-
-    public static final String CCMV2_REQUIRED_VERSION = "7.2.1";
-
     public static final long WORKSPACE_ID_DEFAULT = 0L;
 
     public static final String INSTANCE_TYPE = "instancetype";
@@ -190,15 +184,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     public static final String DATABASE_SSL_ENABLED = "databaseSslEnabled";
 
-    public static final Map<CloudPlatform, Versioned> MIN_RUNTIME_VERSION_FOR_RAZ = new HashMap<>() {
-        {
-            put(AWS, () -> "7.2.2");
-            put(AZURE, () -> "7.2.2");
-            put(GCP, () -> "7.2.17");
-        }
-    };
-
-    public static final Versioned MIN_RUNTIME_VERSION_FOR_RMS = () -> "7.2.18";
+    private static final String SDX_CLUSTER = "SDX cluster";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxService.class);
 
@@ -286,6 +272,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     @Inject
     private SdxResizeValidator sdxResizeValidator;
 
+    @Inject
+    private SdxVersionRuleEnforcer sdxVersionRuleEnforcer;
+
     public List<ResourceWithId> findAsAuthorizationResorces(String accountId) {
         return sdxClusterRepository.findAuthorizationResourcesByAccountId(accountId);
     }
@@ -323,7 +312,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         if (sdxClusters.isPresent()) {
             return sdxClusters.get();
         } else {
-            throw notFound("SDX cluster", id).get();
+            throw notFound(SDX_CLUSTER, id).get();
         }
     }
 
@@ -354,18 +343,18 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     public SdxCluster getByCrn(String userCrn, String clusterCrn) {
-        LOGGER.info("Searching for SDX cluster by crn {}", clusterCrn);
+        LOGGER.info("Searching for single SDX cluster by crn {}", clusterCrn);
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
         Optional<SdxCluster> sdxCluster = sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(accountIdFromCrn, clusterCrn);
         if (sdxCluster.isPresent()) {
             return sdxCluster.get();
         } else {
-            throw notFound("SDX cluster", clusterCrn).get();
+            throw notFound(SDX_CLUSTER, clusterCrn).get();
         }
     }
 
     public List<SdxCluster> getSdxClustersByCrn(String userCrn, String clusterCrn, boolean includeDeleted) {
-        LOGGER.info("Searching for SDX cluster by crn {}", clusterCrn);
+        LOGGER.info("Searching for all SDX clusters by crn {}", clusterCrn);
         List<SdxCluster> sdxClusterList = new ArrayList<>();
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
         Optional<SdxCluster> sdxCluster = sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(accountIdFromCrn, clusterCrn);
@@ -378,7 +367,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             sdxClusterList.addAll(sdxClusterRepository.findByAccountIdAndOriginalCrnAndDeletedIsNull(accountIdFromCrn, clusterCrn));
         }
         if (sdxClusterList.isEmpty()) {
-            throw notFound("SDX cluster", clusterCrn).get();
+            throw notFound(SDX_CLUSTER, clusterCrn).get();
         } else {
             return sdxClusterList;
         }
@@ -390,18 +379,18 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         if (sdxCluster.isPresent()) {
             return sdxCluster.get();
         } else {
-            throw notFound("SDX cluster", clusterCrn).get();
+            throw notFound(SDX_CLUSTER, clusterCrn).get();
         }
     }
 
     public String getEnvCrnByCrn(String userCrn, String clusterCrn) {
-        LOGGER.info("Searching for SDX cluster by crn {}", clusterCrn);
+        LOGGER.info("Searching Environment Crn by SDX cluster {}", clusterCrn);
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
         Optional<String> envCrn = sdxClusterRepository.findEnvCrnByAccountIdAndCrnAndDeletedIsNull(accountIdFromCrn, clusterCrn);
         if (envCrn.isPresent()) {
             return envCrn.get();
         } else {
-            throw notFound("SDX cluster", clusterCrn).get();
+            throw notFound(SDX_CLUSTER, clusterCrn).get();
         }
     }
 
@@ -411,7 +400,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         Optional<SdxCluster> sdxCluster = measure(() ->
                         sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(accountIdFromCrn, name), LOGGER,
                 "Fetching SDX cluster took {}ms from DB. Name: [{}]", name);
-        return sdxCluster.orElseThrow(notFound("SDX cluster", name));
+        return sdxCluster.orElseThrow(notFound(SDX_CLUSTER, name));
     }
 
     public SdxCluster getByNameInAccountAllowDetached(String userCrn, String name) {
@@ -420,7 +409,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         Optional<SdxCluster> sdxCluster = measure(() ->
                         sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(accountIdFromCrn, name), LOGGER,
                 "Fetching SDX cluster allowing detached took {}ms from DB. Name: [{}]", name);
-        return sdxCluster.orElseThrow(notFound("SDX cluster", name));
+        return sdxCluster.orElseThrow(notFound(SDX_CLUSTER, name));
     }
 
     public void delete(SdxCluster sdxCluster) {
@@ -518,7 +507,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         setSecurity(sdxClusterRequest, sdxCluster, userCrn);
 
         if (isCloudStorageConfigured(sdxClusterRequest)) {
-            validateCloudStorageRequest(sdxClusterRequest.getCloudStorage(), environment);
+            validateCloudStorageRequest(sdxClusterRequest.getCloudStorage());
             String trimmedBaseLocation = StringUtils.stripEnd(sdxClusterRequest.getCloudStorage().getBaseLocation(), "/");
             sdxCluster.setCloudStorageBaseLocation(trimmedBaseLocation);
             sdxCluster.setCloudStorageFileSystemType(sdxClusterRequest.getCloudStorage().getFileSystemType());
@@ -545,7 +534,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
         overrideDefaultInstanceType(stackRequest, sdxClusterRequest.getCustomInstanceGroups(), Collections.emptyList(), Collections.emptyList(),
                 sdxClusterRequest.getClusterShape());
-        validateRecipes(sdxClusterRequest, stackRequest, userCrn);
+        validateRecipes(sdxClusterRequest, stackRequest);
         prepareCloudStorageForStack(sdxClusterRequest, stackRequest, sdxCluster, environment);
         prepareDefaultSecurityConfigs(sdxClusterRequest.getClusterShape(), stackRequest, cloudPlatform);
         prepareProviderSpecificParameters(stackRequest, sdxClusterRequest, cloudPlatform);
@@ -683,7 +672,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         }
     }
 
-    private void validateRecipes(SdxClusterRequest sdxClusterRequest, StackV4Request stackV4Request, String userCrn) {
+    private void validateRecipes(SdxClusterRequest sdxClusterRequest, StackV4Request stackV4Request) {
         Set<SdxRecipe> recipes = sdxClusterRequest.getRecipes();
         if (CollectionUtils.isNotEmpty(recipes)) {
             List<InstanceGroupV4Request> igs = stackV4Request.getInstanceGroups();
@@ -732,7 +721,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         }
 
         final SdxCluster sdxCluster = sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(accountIdFromCrn, clusterName)
-                .orElseThrow(() -> notFound("SDX cluster", clusterName).get());
+                .orElseThrow(() -> notFound(SDX_CLUSTER, clusterName).get());
 
         MDCBuilder.buildMdcContext(sdxCluster);
 
@@ -909,7 +898,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         SdxRefreshDatahubResponse response = new SdxRefreshDatahubResponse();
         String accountIdFromCrn = getAccountIdFromCrn(ThreadBasedUserCrnProvider.getUserCrn());
         SdxCluster sdxCluster = sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(accountIdFromCrn, clusterName)
-                .orElseThrow(() -> notFound("SDX cluster", clusterName).get());
+                .orElseThrow(() -> notFound(SDX_CLUSTER, clusterName).get());
         if (Strings.isNullOrEmpty(datahubName)) {
             distroxService.restartAttachedDistroxClusters(sdxCluster.getEnvCrn());
             distroxService.getAttachedDistroXClusters(sdxCluster.getEnvCrn())
@@ -1191,9 +1180,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             case AZURE:
                 updateAzureLoadBalancerSkuIfPresent(stackRequest, sdxClusterRequest);
                 break;
-            case GCP:
-            case YARN:
-            case MOCK:
+            case GCP, YARN, MOCK:
             default:
                 break;
         }
@@ -1254,7 +1241,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         return getByNameInAccount(userCrn, resourceName).getId();
     }
 
-    private void validateCloudStorageRequest(SdxCloudStorageRequest cloudStorage, DetailedEnvironmentResponse environment) {
+    private void validateCloudStorageRequest(SdxCloudStorageRequest cloudStorage) {
         if (cloudStorage != null) {
             ValidationResultBuilder validationBuilder = new ValidationResultBuilder();
             validationBuilder.ifError(() -> cloudStorage.getFileSystemType() == null, "'fileSystemType' must be set in 'cloudStorage'!");
@@ -1321,10 +1308,10 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                         platformConfig.getRazSupportedPlatforms().stream()
                                 .map(CloudPlatform::getDislayName)
                                 .collect(Collectors.joining(", "))));
-            } else if (!isRazSupported(runtime, cloudPlatform)) {
+            } else if (!sdxVersionRuleEnforcer.isRazSupported(runtime, cloudPlatform)) {
                 validationBuilder.error(String.format("Provisioning Ranger Raz on %s is only valid for Cloudera Runtime version greater than or " +
                                 "equal to %s and not %s", cloudPlatform.getDislayName(),
-                        MIN_RUNTIME_VERSION_FOR_RAZ.get(cloudPlatform).getVersion(), runtime));
+                        sdxVersionRuleEnforcer.getSupportedRazVersionForPlatform(cloudPlatform), runtime));
             } else if (cloudPlatform.equals(GCP) && !entitlementService.isRazForGcpEnabled(Crn.safeFromString(environment.getCreator()).getAccountId())) {
                 validationBuilder.error("Provisioning Ranger Raz on GCP is not enabled for this account");
             }
@@ -1361,10 +1348,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     private void validateJavaVersion(Integer javaVersion) {
-        if (javaVersion != null) {
-            if (!virtualMachineConfiguration.getSupportedJavaVersions().contains(javaVersion)) {
-                throw new BadRequestException(String.format("Java version %d is not supported.", javaVersion));
-            }
+        if (javaVersion != null && !virtualMachineConfiguration.isJavaVersionSupported(javaVersion)) {
+            throw new BadRequestException(String.format("Java version %d is not supported.", javaVersion));
         }
     }
 
@@ -1429,18 +1414,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         }
         Comparator<Versioned> versionedComparator = new VersionComparator();
         return versionedComparator.compare(() -> runtime, () -> shapeVersion) < 1;
-    }
-
-    /**
-     * Ranger Raz is only on 7.2.1 and later on Microsoft Azure, and only on 7.2.2 and later on Amazon Web Services.
-     * If runtime is empty, then sdx-internal call was used.
-     */
-    private boolean isRazSupported(String runtime, CloudPlatform cloudPlatform) {
-        if (StringUtils.isEmpty(runtime)) {
-            return true;
-        }
-        Comparator<Versioned> versionComparator = new VersionComparator();
-        return versionComparator.compare(() -> runtime, MIN_RUNTIME_VERSION_FOR_RAZ.get(cloudPlatform)) > -1;
     }
 
     private boolean isCloudStorageConfigured(SdxClusterRequest clusterRequest) {
@@ -1702,7 +1675,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                     () -> environmentClientService.getByCrn(sdxCluster.getEnvCrn()));
             return PayloadContext.create(sdxCluster.getCrn(), envResp.getCloudPlatform());
         } catch (NotFoundException ignored) {
-            LOGGER.info("exception happened {}", ignored);
+            LOGGER.info("Cannot find environment, ignoring", ignored);
         } catch (Exception e) {
             LOGGER.warn("Error happened during fetching payload context for datalake with environment response.", e);
         }
@@ -1770,7 +1743,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         return result;
     }
 
-    public FlowIdentifier rotateSaltPassword(SdxCluster sdxCluster, RotateSaltPasswordReason reason) {
+    public FlowIdentifier rotateSaltPassword(SdxCluster sdxCluster) {
         return sdxReactorFlowManager.triggerSaltPasswordRotationTracker(sdxCluster);
     }
 

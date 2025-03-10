@@ -38,7 +38,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
@@ -388,7 +387,7 @@ public class SdxController implements SdxEndpoint {
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.ROTATE_SALTUSER_PASSWORD_DATALAKE)
     public FlowIdentifier rotateSaltPasswordByCrn(@ResourceCrn String crn) {
         SdxCluster sdxCluster = getSdxClusterByCrn(crn);
-        return sdxService.rotateSaltPassword(sdxCluster, RotateSaltPasswordReason.MANUAL);
+        return sdxService.rotateSaltPassword(sdxCluster);
     }
 
     @Override

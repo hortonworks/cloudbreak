@@ -320,8 +320,11 @@ public class SdxRecommendationService {
         } catch (TimeoutException e) {
             LOGGER.debug("Image validation request timeout [{}s] happened. Cancelling request thread", IMAGE_VALIDATION_TIMEOUT);
             responseFuture.cancel(true);
-        } catch (ExecutionException | InterruptedException e) {
+        } catch (ExecutionException e) {
             LOGGER.warn("An error occurred while executing the image validation request.", e);
+        } catch (InterruptedException e) {
+            LOGGER.warn("Thread was interruped during image validation", e);
+            Thread.currentThread().interrupt();
         } finally {
             executor.shutdownNow();
         }

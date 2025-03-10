@@ -25,7 +25,6 @@ import org.quartz.JobKey;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatusResponse;
-import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceCrnEndpoints;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -167,7 +166,7 @@ class SdxSaltStatusCheckerJobTest {
 
         underTest.executeTracedJob(context);
 
-        verify(sdxService).rotateSaltPassword(sdxCluster, RotateSaltPasswordReason.UNAUTHORIZED);
+        verify(sdxService).rotateSaltPassword(sdxCluster);
     }
 
     private void setStatus(DatalakeStatusEnum status) {

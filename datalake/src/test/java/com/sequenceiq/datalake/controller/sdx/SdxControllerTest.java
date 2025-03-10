@@ -36,7 +36,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateReques
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.BackupOperationType;
@@ -300,7 +299,7 @@ class SdxControllerTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.rotateSaltPasswordByCrn(sdxCluster.getCrn()));
 
-        verify(sdxService).rotateSaltPassword(sdxCluster, RotateSaltPasswordReason.MANUAL);
+        verify(sdxService).rotateSaltPassword(sdxCluster);
     }
 
     @Test

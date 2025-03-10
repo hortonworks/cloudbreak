@@ -25,4 +25,8 @@ public class VirtualMachineConfiguration {
     public Set<Integer> getSupportedJavaVersions() {
         return supportedJavaVersions;
     }
+
+    public boolean isJavaVersionSupported(int version) {
+        return supportedJavaVersions.contains(version);
+    }
 }

@@ -95,7 +95,7 @@ public class SdxSaltStatusCheckerJob extends StatusCheckerJob {
                 if (reasonOptional.isPresent()) {
                     LOGGER.info("Salt password rotation is needed for SDX {} based on response {}", sdxCluster.getCrn(), saltPasswordStatus);
                     try {
-                        sdxService.rotateSaltPassword(sdxCluster, reasonOptional.get());
+                        sdxService.rotateSaltPassword(sdxCluster);
                     } catch (WebApplicationException e) {
                         String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
                         LOGGER.warn("Salt password rotation failed. {}", errorMessage);

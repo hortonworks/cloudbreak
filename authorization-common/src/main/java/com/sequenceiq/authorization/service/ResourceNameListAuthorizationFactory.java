@@ -1,7 +1,6 @@
 package com.sequenceiq.authorization.service;
 
 import static java.util.function.Predicate.not;
-import static java.util.stream.Collectors.toList;
 
 import java.util.Collection;
 import java.util.List;
@@ -70,7 +69,7 @@ public class ResourceNameListAuthorizationFactory extends TypedAuthorizationFact
     private List<String> getNotNullValues(Collection<String> values) {
         return values.stream()
                 .filter(not(StringUtils::isBlank))
-                .collect(toList());
+                .toList();
     }
 
     @Override
