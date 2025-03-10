@@ -369,4 +369,8 @@ public interface InstanceMetaDataRepository extends JpaRepository<InstanceMetaDa
             "WHERE s.environmentCrn = :environmentCrn " +
             "AND im.instanceStatus <> 'TERMINATED' ")
     List<SubnetIdWithResourceNameAndCrn> findAllUsedSubnetsByEnvironmentCrn(@Param("environmentCrn") String environmentCrn);
+
+    @Modifying
+    @Query("UPDATE InstanceMetaData SET publicIp = :publicIp WHERE instanceId = :instanceId")
+    void updatePublicIp(@Param("instanceId") String instanceId, @Param("publicIp") String publicIp);
 }

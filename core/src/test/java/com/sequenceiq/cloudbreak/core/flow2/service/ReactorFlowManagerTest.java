@@ -209,6 +209,7 @@ class ReactorFlowManagerTest {
         doReturn(CloudVolumeUsageType.GENERAL.toString()).when(stackAddVolumesRequest).getCloudVolumeUsageType();
         underTest.triggerAddVolumes(STACK_ID, stackAddVolumesRequest);
         underTest.triggerRotateRdsCertificate(STACK_ID);
+        underTest.triggerSkuMigration(STACK_ID, true);
         underTest.triggerExternalDatabaseUserOperation(STACK_ID, "name", "crn", ExternalDatabaseUserOperation.CREATION, DatabaseType.HIVE, "user");
 
         int count = 0;

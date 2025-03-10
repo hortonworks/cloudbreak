@@ -540,6 +540,11 @@ public class StackOperationService {
         return flowManager.triggerStackUpdateDisks(stack, updateRequest);
     }
 
+    public FlowIdentifier triggerSkuMigration(NameOrCrn name, String accountId, boolean force) {
+        StackDto stack = stackDtoService.getByNameOrCrn(name, accountId);
+        return flowManager.triggerSkuMigration(stack.getId(), force);
+    }
+
     public StackDatabaseServerCertificateStatusV4Responses
     listDatabaseServersCertificateStatus(StackDatabaseServerCertificateStatusV4Request request, String userCrn) {
         try {

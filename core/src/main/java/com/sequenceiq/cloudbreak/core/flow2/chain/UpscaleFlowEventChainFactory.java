@@ -5,10 +5,12 @@ import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPCluste
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UPSCALE_FINISHED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UPSCALE_STARTED;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleEvent.DECOMMISSION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.skumigration.SkuMigrationFlowEvent.SKU_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.CLUSTER_UPSCALE_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleEvent.STACK_DOWNSCALE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.STACK_SYNC_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.ADD_INSTANCES_EVENT;
+import static com.sequenceiq.common.api.type.LoadBalancerSku.STANDARD;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -19,12 +21,16 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.MapUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.skumigration.SkuMigrationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleTriggerEvent;
@@ -34,8 +40,10 @@ import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.domain.view.ClusterView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterUseCaseAware;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
@@ -44,11 +52,19 @@ import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 @Component
 public class UpscaleFlowEventChainFactory implements FlowEventChainFactory<StackAndClusterUpscaleTriggerEvent>, ClusterUseCaseAware {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(UpscaleFlowEventChainFactory.class);
+
+    @Inject
+    private LoadBalancerPersistenceService loadBalancerPersistenceService;
+
     @Inject
     private StackService stackService;
 
     @Value("${cb.upscale.zombie.auto.cleanup.enabled}")
     private boolean zombieAutoCleanupEnabled;
+
+    @Value("${cb.loadbalancer.upscale.sku.migration.enabled:true}")
+    private boolean skuMigrationEnabled;
 
     @Override
     public String initEvent() {
@@ -61,6 +77,7 @@ public class UpscaleFlowEventChainFactory implements FlowEventChainFactory<Stack
         ClusterView clusterView = stackView.getClusterView();
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         addStackSyncTriggerEvent(event, flowEventChain);
+        addSkuMigrationIfNecessary(stackView, flowEventChain);
         addStackScaleTriggerEvent(event, flowEventChain);
         addClusterScaleTriggerEventIfNeeded(event, stackView, clusterView, flowEventChain);
         if (zombieAutoCleanupEnabled) {
@@ -80,6 +97,19 @@ public class UpscaleFlowEventChainFactory implements FlowEventChainFactory<Stack
             return UPSCALE_FAILED;
         } else {
             return UNSET;
+        }
+    }
+
+    private void addSkuMigrationIfNecessary(StackView stackView, Queue<Selectable> flowTriggers) {
+        if (skuMigrationEnabled && CloudPlatform.AZURE.name().equalsIgnoreCase(stackView.cloudPlatform())) {
+            Set<LoadBalancer> loadBalancers = loadBalancerPersistenceService.findByStackId(stackView.getId());
+            boolean notStandardSkuLB = loadBalancers.stream().anyMatch(loadBalancer -> !STANDARD.equals(loadBalancer.getSku()));
+            if (notStandardSkuLB) {
+                LOGGER.info("We found non Standard SKU LB in our database, lets do the migration: {}", loadBalancers);
+                SkuMigrationTriggerEvent skuMigrationTriggerEvent =
+                        new SkuMigrationTriggerEvent(SKU_MIGRATION_EVENT.event(), stackView.getId(), false);
+                flowTriggers.add(skuMigrationTriggerEvent);
+            }
         }
     }
 

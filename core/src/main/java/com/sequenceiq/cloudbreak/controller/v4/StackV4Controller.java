@@ -701,6 +701,12 @@ public class StackV4Controller extends NotificationController implements StackV4
     }
 
     @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
+    public FlowIdentifier triggerSkuMigration(Long workspaceId, String name, boolean force) {
+        return stackOperationService.triggerSkuMigration(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId(), force);
+    }
+
+    @Override
     @InternalOnly
     public FlowIdentifier instanceMetadataUpdate(Long workspaceId, @InitiatorUserCrn String initiatorUserCrn,
             StackInstanceMetadataUpdateV4Request request) {

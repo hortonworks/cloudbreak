@@ -41,6 +41,8 @@ import com.azure.core.management.exception.AdditionalInfo;
 import com.azure.core.management.exception.ManagementError;
 import com.azure.core.management.exception.ManagementException;
 import com.azure.resourcemanager.compute.models.PolicyViolation;
+import com.azure.resourcemanager.network.models.LoadBalancer;
+import com.azure.resourcemanager.network.models.LoadBalancerSkuType;
 import com.azure.resourcemanager.network.models.Subnet;
 import com.azure.resourcemanager.resources.models.Deployment;
 import com.azure.resourcemanager.resources.models.DeploymentOperation;
@@ -61,6 +63,8 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudExceptionConverter;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudImageException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
+import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -74,6 +78,7 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.Retry;
+import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.api.type.ResourceType;
 
 import reactor.core.publisher.Flux;
@@ -524,6 +529,19 @@ public class AzureUtils {
             logAndWrapCompositeException(e, "Error(s) occurred while waiting for load balancer deletion: {}",
                     "Error(s) occurred while waiting for load balancer deletion: ");
         }
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public List<CloudLoadBalancer> describeLoadBalancers(AzureClient azureClient, String resourceGroupName,
+            Collection<CloudLoadBalancerMetadata> loadBalancers) {
+        List<CloudLoadBalancer> cloudLoadBalancers = new ArrayList<>();
+        for (CloudLoadBalancerMetadata loadBalancerMetadata : loadBalancers) {
+            LOGGER.info("Describing load balancer: {}", loadBalancerMetadata.getName());
+            LoadBalancer loadBalancer = azureClient.getLoadBalancer(resourceGroupName, loadBalancerMetadata.getName());
+            LoadBalancerSku loadBalancerSku = LoadBalancerSkuType.STANDARD.equals(loadBalancer.sku()) ? LoadBalancerSku.STANDARD : LoadBalancerSku.BASIC;
+            cloudLoadBalancers.add(new CloudLoadBalancer(loadBalancerMetadata.getType(), loadBalancerSku, false));
+        }
+        return cloudLoadBalancers;
     }
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)

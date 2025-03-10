@@ -11,6 +11,8 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
+import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -80,6 +82,48 @@ public interface ResourceConnector {
      */
     List<CloudResourceStatus> launchLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier)
             throws Exception;
+
+    /**
+     * Delete load balancers for a stack
+     *
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param stack                contains the full description of infrastructure
+     */
+    default void deleteLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, List<String> loadBalancersToRemove) {
+        throw new UnsupportedOperationException("Load balancer removal is not supported for this provider.");
+    }
+
+    /**
+     * Describe load balancers for a stack
+     *
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param stack                contains the full description of infrastructure
+     */
+    default List<CloudLoadBalancer> describeLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack,
+            List<CloudLoadBalancerMetadata> loadBalancers) {
+        throw new UnsupportedOperationException("Describing load balancers is not supported for this provider.");
+    }
+
+    /**
+     * Detach public IP addresses from VMs
+     *
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param stack                contains the full description of infrastructure
+     */
+    default void detachPublicIpAddressesForVMsIfNotPrivate(AuthenticatedContext authenticatedContext, CloudStack stack) {
+        throw new UnsupportedOperationException("Detaching public IP addresses is not supported for this provider.");
+    }
+
+    /**
+     * Attach public IP addresses for VMs
+     *
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param stack                contains the full description of infrastructure
+     */
+    default List<CloudResource> attachPublicIpAddressesForVMsAndAddLB(AuthenticatedContext authenticatedContext, CloudStack stack,
+            PersistenceNotifier persistenceNotifier) {
+        throw new UnsupportedOperationException("Attaching public IP addresses and LBs is not supported for this provider.");
+    }
 
     /**
      * Launches a database stack on a cloud platform. The stack consists of the following resources:

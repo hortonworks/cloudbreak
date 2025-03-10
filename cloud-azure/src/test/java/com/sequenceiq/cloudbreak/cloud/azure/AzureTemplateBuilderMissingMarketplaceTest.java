@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.cloud.azure.subnetstrategy.AzureSubnetSt
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
@@ -18,7 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,8 +31,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage;
@@ -208,33 +204,6 @@ public class AzureTemplateBuilderMissingMarketplaceTest {
                 .thenReturn(new CloudVmTypes());
     }
 
-    /**
-     * Check that the template string is a valid JSON object.
-     * We're using the Jackson ObjectMapper because Gson has looser rules on what "valid" JSON is.
-     * For instance, a leading comma in an array is valid according to Gson.
-     * <pre>{@code [, "valid"]}</pre>
-     *
-     * @param templateString the string to validate
-     */
-    private void validateJson(String templateString) {
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            mapper.readTree(templateString);
-        } catch (JsonProcessingException jpe) {
-            int contextLines = 2;
-            int lineNumberOfIssue = jpe.getLocation().getLineNr();
-            List<String> lines = templateString.lines().collect(Collectors.toList());
-            int startingIndex = Math.max(lineNumberOfIssue - (contextLines + 1), 0);
-            int endingIndex = Math.min(lineNumberOfIssue + contextLines, lines.size() - 1);
-
-            List<String> context = lines.subList(startingIndex, endingIndex);
-
-            String message = String.join("\n", context);
-            LOGGER.warn("Error reading String as JSON at line {}:\n{}", lineNumberOfIssue, message);
-            fail("Generated ARM template is not valid JSON.\n" + jpe.getMessage());
-        }
-    }
-
     @Test
     @SuppressWarnings("checkstyle:RegexpSingleline")
     public void buildTestWithNoMarketplaceTemplateNoLoadBalancer() throws Exception {
@@ -303,7 +272,7 @@ public class AzureTemplateBuilderMissingMarketplaceTest {
         ArgumentCaptor<Template> templateCaptor = ArgumentCaptor.forClass(Template.class);
         verify(freeMarkerTemplateUtils).processTemplateIntoString(templateCaptor.capture(), any(Map.class));
         assertEquals(freemarkerConfigurationHelper.getTemplate(LATEST_TEMPLATE_PATH, "UTF-8").toString(), templateCaptor.getValue().toString());
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @Test
@@ -368,12 +337,12 @@ public class AzureTemplateBuilderMissingMarketplaceTest {
                                 "publisher": "cloudera"
                            },
         """);
-        assertThat(templateString).doesNotContain("\"Standard\"");
-        assertThat(templateString).contains("\"Basic\"");
+        assertThat(templateString).doesNotContain("\"Basic\"");
+        assertThat(templateString).contains("\"Standard\"");
         ArgumentCaptor<Template> templateCaptor = ArgumentCaptor.forClass(Template.class);
         verify(freeMarkerTemplateUtils).processTemplateIntoString(templateCaptor.capture(), any(Map.class));
         assertEquals(freemarkerConfigurationHelper.getTemplate(LATEST_TEMPLATE_PATH, "UTF-8").toString(), templateCaptor.getValue().toString());
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @Test
@@ -438,12 +407,12 @@ public class AzureTemplateBuilderMissingMarketplaceTest {
                                 "publisher": "cloudera"
                            },
         """);
-        assertThat(templateString).doesNotContain("\"Standard\"");
-        assertThat(templateString).contains("\"Basic\"");
+        assertThat(templateString).doesNotContain("\"Basic\"");
+        assertThat(templateString).contains("\"Standard\"");
         ArgumentCaptor<Template> templateCaptor = ArgumentCaptor.forClass(Template.class);
         verify(freeMarkerTemplateUtils).processTemplateIntoString(templateCaptor.capture(), any(Map.class));
         assertEquals(freemarkerConfigurationHelper.getTemplate(LATEST_TEMPLATE_PATH, "UTF-8").toString(), templateCaptor.getValue().toString());
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @Test
@@ -493,7 +462,7 @@ public class AzureTemplateBuilderMissingMarketplaceTest {
         ArgumentCaptor<Template> templateCaptor = ArgumentCaptor.forClass(Template.class);
         verify(freeMarkerTemplateUtils).processTemplateIntoString(templateCaptor.capture(), any(Map.class));
         assertEquals(new Template(LATEST_TEMPLATE_PATH, cloudStack.getTemplate(), freemarkerConfiguration).toString(), templateCaptor.getValue().toString());
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     private Group getGatewayGroup() {

@@ -609,6 +609,15 @@ public enum ResourceEvent {
     CLUSTER_SET_DEFAULT_JAVA_VERSION_FINISHED("cluster.set.default.java.version.finished"),
     CLUSTER_SET_DEFAULT_JAVA_VERSION_FAILED("cluster.set.default.java.version.failed"),
 
+    CHECK_LOAD_BALANCERS_SKU("check.load.balancers.sku"),
+    LOAD_BALANCER_SKU_IS_STANDARD("load.balancers.sku.is.standard"),
+    DETACH_PUBLIC_IPS("detach.public.ips"),
+    REMOVE_LOAD_BALACERS("remove.load.balancers"),
+    ATTACH_PUBLIC_IPS_AND_ADD_LB("attach.public.ips.and.add.lb"),
+    UPDATE_DNS_FOR_LB("update.dns.for.lb"),
+    SKU_MIGRATION_FINISHED("sku.migration.finished"),
+    SKU_MIGRATION_FAILED("sku.migration.failed"),
+
     KERBEROS_CONFIG_VALIDATION_FAILED("cluster.kerberosconfig.validation.failed"),
 
     CLOUD_CONFIG_VALIDATION_FAILED("cluster.cloudconfig.validation.failed"),
