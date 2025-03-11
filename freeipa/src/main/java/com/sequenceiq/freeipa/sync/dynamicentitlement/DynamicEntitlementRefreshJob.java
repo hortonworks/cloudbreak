@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.auth.security.internal.InternalCrnModifier;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 import com.sequenceiq.flow.core.FlowLogService;
@@ -55,6 +56,9 @@ public class DynamicEntitlementRefreshJob extends StatusCheckerJob {
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Inject
+    private InternalCrnModifier internalCrnModifier;
+
+    @Inject
     private AvailabilityChecker availabilityChecker;
 
     @Override
@@ -78,13 +82,15 @@ public class DynamicEntitlementRefreshJob extends StatusCheckerJob {
             LOGGER.info("DynamicEntitlementRefreshJob cannot run, because required package (cdp-prometheus) is missing, probably its an old image.");
         } else if (!status.isAvailable()) {
             LOGGER.info("DynamicEntitlementRefreshJob store new watched entitlements without triggering related flow, because status is {}", status);
-            ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam(stack.getAccountId()).getInternalCrnForServiceAsString(),
+            ThreadBasedUserCrnProvider.doAs(
+                    internalCrnModifier.changeAccountIdInCrnString(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                            stack.getAccountId()).toString(),
                     () -> dynamicEntitlementRefreshService.getChangedWatchedEntitlementsAndStoreNewFromUms(stack));
         } else {
             LOGGER.info("DynamicEntitlementRefreshJob will apply watched entitlement changes for FreeIPA");
-            String operationId = ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam(stack.getAccountId()).getInternalCrnForServiceAsString(),
+            String operationId = ThreadBasedUserCrnProvider.doAs(
+                    internalCrnModifier.changeAccountIdInCrnString(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                            stack.getAccountId()).toString(),
                     () -> dynamicEntitlementRefreshService.changeClusterConfigurationIfEntitlementsChanged(stack));
             rescheduleIfPreviousFlowChainFailed(stack, context.getJobDetail(), operationId);
         }

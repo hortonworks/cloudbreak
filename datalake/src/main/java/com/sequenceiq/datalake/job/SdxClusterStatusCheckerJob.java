@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.auth.security.internal.InternalCrnModifier;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
@@ -50,7 +50,7 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
     private StatusCheckerJobService jobService;
 
     @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+    private InternalCrnModifier internalCrnModifier;
 
     @Override
     protected Optional<Object> getMdcContextObject() {
@@ -69,7 +69,7 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
             LOGGER.debug("Sdx StatusChecker Job is unscheduled for datalake: '{}'", getLocalId());
         } else {
             ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam(Crn.safeFromString(getRemoteResourceCrn()).getAccountId()).getInternalCrnForServiceAsString(),
+                    internalCrnModifier.getInternalCrnWithAccountId(Crn.safeFromString(getRemoteResourceCrn()).getAccountId()),
                     () -> syncSdxStatus(context));
         }
     }

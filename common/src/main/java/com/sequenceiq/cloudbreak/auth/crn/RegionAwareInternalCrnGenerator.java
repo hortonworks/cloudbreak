@@ -25,8 +25,6 @@ public class RegionAwareInternalCrnGenerator {
 
     private final String region;
 
-    private final String accountId;
-
     /**
      * Creates a new {@code InternalCrnBuilder} instance using the given {@code serviceType}. Please read the class javadoc for the implications of how this
      * parameter is interpreted.
@@ -34,7 +32,7 @@ public class RegionAwareInternalCrnGenerator {
      * @param serviceType service type to base the CRN on; must not be {@code null}
      * @throws NullPointerException if {@code serviceType == null}
      */
-    private RegionAwareInternalCrnGenerator(Service serviceType, String partition, String region, String accountId) {
+    private RegionAwareInternalCrnGenerator(Service serviceType, String partition, String region) {
         checkNotNull(serviceType, "serviceType should not be null.");
         checkNotNull(partition, "partition should not be null.");
         checkNotNull(region, "region should not be null.");
@@ -42,11 +40,10 @@ public class RegionAwareInternalCrnGenerator {
         this.serviceType = serviceType;
         this.region = region;
         this.partition = partition;
-        this.accountId = accountId;
     }
 
-    public static RegionAwareInternalCrnGenerator regionalAwareInternalCrnGenerator(Service serviceType, String partition, String region, String accountId) {
-        return new RegionAwareInternalCrnGenerator(serviceType, partition, region, accountId);
+    public static RegionAwareInternalCrnGenerator regionalAwareInternalCrnGenerator(Service serviceType, String partition, String region) {
+        return new RegionAwareInternalCrnGenerator(serviceType, partition, region);
     }
 
     public boolean isInternalCrnForService(String crn) {
@@ -55,15 +52,15 @@ public class RegionAwareInternalCrnGenerator {
     }
 
     public String getInternalCrnForServiceAsString() {
-        return getInternalCrnForService(Crn.Partition.safeFromString(getPartition()), Crn.Region.safeFromString(getRegion()), getAccountId()).toString();
+        return getInternalCrnForService(Crn.Partition.safeFromString(getPartition()), Crn.Region.safeFromString(getRegion())).toString();
     }
 
-    private Crn getInternalCrnForService(Crn.Partition partition, Crn.Region region, String accountId) {
+    private Crn getInternalCrnForService(Crn.Partition partition, Crn.Region region) {
         return Crn.builder()
                 .setPartition(partition)
                 .setRegion(region)
                 .setService(serviceType)
-                .setAccountId(accountId == null ? INTERNAL_ACCOUNT : accountId)
+                .setAccountId(INTERNAL_ACCOUNT)
                 .setResourceType(Crn.ResourceType.USER)
                 .setResource(INTERNAL_USER_CRN)
                 .build();
@@ -75,9 +72,5 @@ public class RegionAwareInternalCrnGenerator {
 
     public String getRegion() {
         return region;
-    }
-
-    public String getAccountId() {
-        return accountId;
     }
 }

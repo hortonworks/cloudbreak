@@ -390,7 +390,7 @@ class RebuildFlowIntegrationTest {
         healthDetails.setStatus(InstanceStatus.CREATED);
         when(healthDetailsService.getInstanceHealthDetails(stack, instanceMetaData)).thenReturn(healthDetails);
         when(regionAwareInternalCrnGeneratorFactory.iam())
-                .thenReturn(RegionAwareInternalCrnGenerator.regionalAwareInternalCrnGenerator(Crn.Service.IAM, "cdp", "us-west-1", null));
+                .thenReturn(RegionAwareInternalCrnGenerator.regionalAwareInternalCrnGenerator(Crn.Service.IAM, "cdp", "us-west-1"));
         when(stackToCloudStackConverter.convert(stack)).thenReturn(cloudStack);
         when(cloudInstance.getInstanceId()).thenReturn("instance-id");
         doNothing().when(nodeValidator).checkForRecentHeartbeat();

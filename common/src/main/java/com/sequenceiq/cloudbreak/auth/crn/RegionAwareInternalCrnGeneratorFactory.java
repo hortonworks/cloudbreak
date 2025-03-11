@@ -17,16 +17,8 @@ public class RegionAwareInternalCrnGeneratorFactory {
         return init(Crn.Service.DATAHUB);
     }
 
-    /**
-     * @deprecated use {@link #iam(String)} instead
-     */
-    @Deprecated
     public RegionAwareInternalCrnGenerator iam() {
         return init(Crn.Service.IAM);
-    }
-
-    public RegionAwareInternalCrnGenerator iam(String accountId) {
-        return init(Crn.Service.IAM, accountId);
     }
 
     public RegionAwareInternalCrnGenerator sdxAdmin() {
@@ -50,23 +42,19 @@ public class RegionAwareInternalCrnGeneratorFactory {
     }
 
     private RegionAwareInternalCrnGenerator init(Crn.Service serviceType) {
-        return init(serviceType, null);
-    }
-
-    private RegionAwareInternalCrnGenerator init(Crn.Service serviceType, String accountId) {
-        return regionalAwareInternalCrnGenerator(serviceType, partition, region, accountId);
+        return regionalAwareInternalCrnGenerator(serviceType, partition, region);
     }
 
     public String getPartition() {
         return partition;
     }
 
-    public void setPartition(String partition) {
-        this.partition = partition;
-    }
-
     public String getRegion() {
         return region;
+    }
+
+    public void setPartition(String partition) {
+        this.partition = partition;
     }
 
     public void setRegion(String region) {

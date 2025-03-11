@@ -723,7 +723,7 @@ public class UmsClient {
      * @return the account
      */
     public Account getAccount(String accountId) {
-        warnIfAccountIdIsInternal(accountId);
+        validateAccountIdWithWarning(accountId);
         return newStub().getAccount(
                 GetAccountRequest.newBuilder()
                         .setAccountId(accountId)
@@ -829,7 +829,7 @@ public class UmsClient {
      */
     public List<String> listMachineUserAccessKeys(String accountId, String machineUserName, boolean userAccessKeyId) {
         checkNotNull(machineUserName, "machineUserName should not be null.");
-        warnIfAccountIdIsInternal(accountId);
+        validateAccountIdWithWarning(accountId);
         List<String> accessKeys = new ArrayList<>();
         UserManagementProto.ListAccessKeysRequest.Builder listAccessKeysRequestBuilder =
                 UserManagementProto.ListAccessKeysRequest.newBuilder()
@@ -877,7 +877,7 @@ public class UmsClient {
      * @param accountId     account id for the user
      */
     void deleteAccessKeys(List<String> accessKeyCrns, String accountId) {
-        warnIfAccountIdIsInternal(accountId);
+        validateAccountIdWithWarning(accountId);
         checkNotNull(accessKeyCrns, "accessKeyCrns should not be null.");
         accessKeyCrns.forEach(accessKeyCrn -> {
             try {
@@ -898,6 +898,7 @@ public class UmsClient {
     }
 
     UserManagementProto.GetAccessKeyResponse getAccessKey(String accessKeyId, String accountId) {
+        validateAccountIdWithWarning(accountId);
         return newStub().getAccessKey(UserManagementProto.GetAccessKeyRequest.newBuilder()
                 .setAccountId(accountId)
                 .setAccessKeyIdOrCrn(accessKeyId)
@@ -910,6 +911,7 @@ public class UmsClient {
      * @param accountId id of the account
      */
     UserManagementProto.GetEventGenerationIdsResponse getEventGenerationIds(String accountId) {
+        validateAccountIdWithWarning(accountId);
         return newStub().getEventGenerationIds(UserManagementProto.GetEventGenerationIdsRequest.newBuilder()
                 .setAccountId(accountId)
                 .build());
@@ -1054,6 +1056,7 @@ public class UmsClient {
     }
 
     public Set<String> listResourceRoles(String accountId) {
+        validateAccountIdWithWarning(accountId);
         UserManagementBlockingStub stub = newStub();
         UserManagementProto.ListResourceRolesRequest.Builder requestBuilder = UserManagementProto.ListResourceRolesRequest.newBuilder().setAccountId(accountId);
         UserManagementProto.ListResourceRolesResponse response;
@@ -1067,6 +1070,7 @@ public class UmsClient {
     }
 
     public Set<String> listRoles(String accountId) {
+        validateAccountIdWithWarning(accountId);
         UserManagementBlockingStub stub = newStub();
         UserManagementProto.ListRolesRequest.Builder requestBuilder = UserManagementProto.ListRolesRequest.newBuilder().setAccountId(accountId);
         UserManagementProto.ListRolesResponse response;
@@ -1085,7 +1089,7 @@ public class UmsClient {
     }
 
     public void grantEntitlement(String accountId, String entitlementName) {
-        checkNotNull(accountId, "accountId should not be null.");
+        validateAccountIdWithWarning(accountId);
         GrantEntitlementRequest request = GrantEntitlementRequest.newBuilder()
                 .setAccountId(UserManagementProto.AccountId.newBuilder().setAccountId(accountId).build())
                 .setEntitlementName(entitlementName)
@@ -1094,7 +1098,7 @@ public class UmsClient {
     }
 
     public void revokeEntitlement(String accountId, String entitlementName) {
-        checkNotNull(accountId, "accountId should not be null.");
+        validateAccountIdWithWarning(accountId);
         RevokeEntitlementRequest request = RevokeEntitlementRequest.newBuilder()
                 .setAccountId(UserManagementProto.AccountId.newBuilder().setAccountId(accountId).build())
                 .setEntitlementName(entitlementName)

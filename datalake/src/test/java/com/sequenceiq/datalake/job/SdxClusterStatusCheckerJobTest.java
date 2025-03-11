@@ -31,9 +31,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.auth.security.internal.InternalCrnModifier;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceCrnEndpoints;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
@@ -73,7 +71,7 @@ class SdxClusterStatusCheckerJobTest {
     private FlowLogService flowLogService;
 
     @MockBean
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+    private InternalCrnModifier internalCrnModifier;
 
     @Mock
     private CloudbreakServiceCrnEndpoints cloudbreakServiceCrnEndpoints;
@@ -106,8 +104,7 @@ class SdxClusterStatusCheckerJobTest {
         when(cloudbreakInternalCrnClient.withInternalCrn()).thenReturn(cloudbreakServiceCrnEndpoints);
         when(cloudbreakServiceCrnEndpoints.autoscaleEndpoint()).thenReturn(autoscaleV4Endpoint);
         when(autoscaleV4Endpoint.getStatusByCrn(RESOURCE_CRN.toString())).thenReturn(stack);
-        when(regionAwareInternalCrnGeneratorFactory.iam(anyString()))
-                .thenReturn(RegionAwareInternalCrnGenerator.regionalAwareInternalCrnGenerator(Crn.Service.IAM, "cdp", "us-west-1", "accountId"));
+        when(internalCrnModifier.getInternalCrnWithAccountId(anyString())).thenReturn("internalCrn");
 
         status = new SdxStatusEntity();
         status.setDatalake(sdxCluster);
