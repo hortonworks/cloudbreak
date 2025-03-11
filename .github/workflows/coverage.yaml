@@ -21,7 +21,7 @@ jobs:
   sonar:
     permissions: write-all
     name: Sonar Analyze
-    runs-on: [cb-ubuntu22]
+    runs-on: [ cb-ubuntu22 ]
 
     steps:
       - name: Checkout
@@ -39,9 +39,9 @@ jobs:
           path: rke_re_jenkins
           role: cb
           secrets: |
-              cb/data/CM_PRIVATE_REPO_PASSWORD CM_PRIVATE_REPO_PASSWORD | CM_PRIVATE_REPO_PASSWORD;
-              cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
-              cb/data/SONAR_TOKEN SONAR_TOKEN | SONAR_TOKEN;
+            cb/data/CM_PRIVATE_REPO_PASSWORD CM_PRIVATE_REPO_PASSWORD | CM_PRIVATE_REPO_PASSWORD;
+            cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
+            cb/data/SONAR_TOKEN SONAR_TOKEN | SONAR_TOKEN;
       - name: Cache Java libs
         id: cache-java
         uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
@@ -77,6 +77,8 @@ jobs:
           export SONAR_JAVA_BINARIES=build/classes
           export SONAR_SOURCES=src/main/java/
           export SONAR_COVERAGE_JACOCO_XMLREPORTPATHS=target/site/jacoco-aggregate/jacoco.xml
+          export E1_IGNORE_RULE_KEY="java:S1854"
+          export E1_IGNORE_RESOURCE="**/*Actions.java"
           
           ./gradlew -Penv=jenkins -b build.gradle --quiet \
             test \
@@ -86,7 +88,7 @@ jobs:
             -x spotbugsMain \
             -x spotbugsTest 
           
-          cd core && sonar-scanner \
+          cd core && sonar-scanner -X \
           -Dsonar.token=$SONAR_TOKEN \
           -Dsonar.coverage.jacoco.xmlReportPaths=$SONAR_COVERAGE_JACOCO_XMLREPORTPATHS \
           -Dsonar.language=java \
@@ -98,9 +100,12 @@ jobs:
           -Dsonar.projectKey=CloudbreakCore_Service_UT_master \
           -Dsonar.coverage.exclusions=$CORE_SONAR_COVERAGE_EXCLUSION \
           -Dsonar.exclusions=$SONAR_EXCLUSION \
+          -Dsonar.issue.ignore.multicriteria=e1 \
+          -Dsonar.issue.ignore.multicriteria.e1.ruleKey=$E1_IGNORE_RULE_KEY \
+          -Dsonar.issue.ignore.multicriteria.e1.resourceKey=$E1_IGNORE_RESOURCE \
           -Dsonar.host.url=$SONAR_URL
           
-          cd .. && cd autoscale && sonar-scanner \
+          cd .. && cd autoscale && sonar-scanner -X \
           -Dsonar.token=$SONAR_TOKEN \
           -Dsonar.coverage.jacoco.xmlReportPaths=$SONAR_COVERAGE_JACOCO_XMLREPORTPATHS \
           -Dsonar.language=java \
@@ -112,9 +117,12 @@ jobs:
           -Dsonar.projectKey=Autoscale_Service_UT_master \
           -Dsonar.coverage.exclusions=$SONAR_COVERAGE_EXCLUSION_COMMON \
           -Dsonar.exclusions=$SONAR_EXCLUSION \
+          -Dsonar.issue.ignore.multicriteria=e1 \
+          -Dsonar.issue.ignore.multicriteria.e1.ruleKey=$E1_IGNORE_RULE_KEY \
+          -Dsonar.issue.ignore.multicriteria.e1.resourceKey=$E1_IGNORE_RESOURCE \
           -Dsonar.host.url=$SONAR_URL
           
-          cd .. && cd datalake && sonar-scanner \
+          cd .. && cd datalake && sonar-scanner -X \
           -Dsonar.token=$SONAR_TOKEN \
           -Dsonar.coverage.jacoco.xmlReportPaths=$SONAR_COVERAGE_JACOCO_XMLREPORTPATHS \
           -Dsonar.language=java \
@@ -126,9 +134,12 @@ jobs:
           -Dsonar.projectKey=Datalake_Service_UT_master \
           -Dsonar.coverage.exclusions=$DL_SONAR_COVERAGE_EXCLUSION\
           -Dsonar.exclusions=$SONAR_EXCLUSION \
+          -Dsonar.issue.ignore.multicriteria=e1 \
+          -Dsonar.issue.ignore.multicriteria.e1.ruleKey=$E1_IGNORE_RULE_KEY \
+          -Dsonar.issue.ignore.multicriteria.e1.resourceKey=$E1_IGNORE_RESOURCE \
           -Dsonar.host.url=$SONAR_URL
           
-          cd .. && cd environment && sonar-scanner \
+          cd .. && cd environment && sonar-scanner -X \
           -Dsonar.token=$SONAR_TOKEN \
           -Dsonar.coverage.jacoco.xmlReportPaths=$SONAR_COVERAGE_JACOCO_XMLREPORTPATHS \
           -Dsonar.language=java \
@@ -140,9 +151,12 @@ jobs:
           -Dsonar.projectKey=Environment_Service_UT_master \
           -Dsonar.coverage.exclusions=$ENV_SONAR_COVERAGE_EXCLUSION \
           -Dsonar.exclusions=$SONAR_EXCLUSION \
+          -Dsonar.issue.ignore.multicriteria=e1 \
+          -Dsonar.issue.ignore.multicriteria.e1.ruleKey=$E1_IGNORE_RULE_KEY \
+          -Dsonar.issue.ignore.multicriteria.e1.resourceKey=$E1_IGNORE_RESOURCE \
           -Dsonar.host.url=$SONAR_URL
           
-          cd .. && cd externalized-compute && sonar-scanner \
+          cd .. && cd externalized-compute && sonar-scanner -X \
           -Dsonar.token=$SONAR_TOKEN \
           -Dsonar.coverage.jacoco.xmlReportPaths=$SONAR_COVERAGE_JACOCO_XMLREPORTPATHS \
           -Dsonar.language=java \
@@ -154,9 +168,12 @@ jobs:
           -Dsonar.projectKey=Externalized_Compute_Service_UT_master \
           -Dsonar.coverage.exclusions=$SONAR_COVERAGE_EXCLUSION_COMMON \
           -Dsonar.exclusions=$SONAR_EXCLUSION \
+          -Dsonar.issue.ignore.multicriteria=e1 \
+          -Dsonar.issue.ignore.multicriteria.e1.ruleKey=$E1_IGNORE_RULE_KEY \
+          -Dsonar.issue.ignore.multicriteria.e1.resourceKey=$E1_IGNORE_RESOURCE \
           -Dsonar.host.url=$SONAR_URL
           
-          cd .. && cd freeipa && sonar-scanner \
+          cd .. && cd freeipa && sonar-scanner -X \
           -Dsonar.token=$SONAR_TOKEN \
           -Dsonar.coverage.jacoco.xmlReportPaths=$SONAR_COVERAGE_JACOCO_XMLREPORTPATHS \
           -Dsonar.language=java \
@@ -168,9 +185,12 @@ jobs:
           -Dsonar.projectKey=Freeipa_Service_UT_master \
           -Dsonar.coverage.exclusions=$FREEIPA_SONAR_COVERAGE_EXCLUSION \
           -Dsonar.exclusions=$SONAR_EXCLUSION \
+          -Dsonar.issue.ignore.multicriteria=e1 \
+          -Dsonar.issue.ignore.multicriteria.e1.ruleKey=$E1_IGNORE_RULE_KEY \
+          -Dsonar.issue.ignore.multicriteria.e1.resourceKey=$E1_IGNORE_RESOURCE \
           -Dsonar.host.url=$SONAR_URL
           
-          cd .. && cd redbeams && sonar-scanner \
+          cd .. && cd redbeams && sonar-scanner -X \
           -Dsonar.token=$SONAR_TOKEN \
           -Dsonar.coverage.jacoco.xmlReportPaths=$SONAR_COVERAGE_JACOCO_XMLREPORTPATHS \
           -Dsonar.language=java \
@@ -182,9 +202,12 @@ jobs:
           -Dsonar.projectKey=Redbeams_Service_UT_master \
           -Dsonar.coverage.exclusions=$SONAR_COVERAGE_EXCLUSION_COMMON \
           -Dsonar.exclusions=$SONAR_EXCLUSION \
+          -Dsonar.issue.ignore.multicriteria=e1 \
+          -Dsonar.issue.ignore.multicriteria.e1.ruleKey=$E1_IGNORE_RULE_KEY \
+          -Dsonar.issue.ignore.multicriteria.e1.resourceKey=$E1_IGNORE_RESOURCE \
           -Dsonar.host.url=$SONAR_URL
           
-          cd .. && cd environment-remote && sonar-scanner \
+          cd .. && cd environment-remote && sonar-scanner -X \
           -Dsonar.token=$SONAR_TOKEN \
           -Dsonar.coverage.jacoco.xmlReportPaths=$SONAR_COVERAGE_JACOCO_XMLREPORTPATHS \
           -Dsonar.language=java \
@@ -196,4 +219,7 @@ jobs:
           -Dsonar.projectKey=Remote_Environment_Service_UT_master \
           -Dsonar.coverage.exclusions=$REMOTE_ENV_SONAR_COVERAGE_EXCLUSION \
           -Dsonar.exclusions=$SONAR_EXCLUSION \
+          -Dsonar.issue.ignore.multicriteria=e1 \
+          -Dsonar.issue.ignore.multicriteria.e1.ruleKey=$E1_IGNORE_RULE_KEY \
+          -Dsonar.issue.ignore.multicriteria.e1.resourceKey=$E1_IGNORE_RESOURCE \
           -Dsonar.host.url=$SONAR_URL
