@@ -164,11 +164,11 @@
                    "zones": [
                      "${instance.instance.availabilityZone}"
                    ],
+                   </#if>
                    "sku": {
                      "name": "Standard",
                      "tier": "Regional"
                    },
-                   </#if>
                    "properties": {
                        "publicIPAllocationMethod": "Static"
                    }
