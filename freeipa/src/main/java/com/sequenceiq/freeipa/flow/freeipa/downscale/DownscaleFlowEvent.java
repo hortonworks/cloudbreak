@@ -25,6 +25,7 @@ public enum DownscaleFlowEvent implements FlowEvent {
     DOWNSCALE_COLLECT_ADDITIONAL_HOSTNAMES_FINISHED_EVENT(EventSelectorUtil.selector(CollectAdditionalHostnamesResponse.class)),
     DOWNSCALE_COLLECT_ADDITIONAL_HOSTNAMES_FAILED_EVENT("DOWNSCALE_COLLECT_ADDITIONAL_HOSTNAMES_FAILED_EVENT"),
     DOWNSCALE_ADD_ADDITIONAL_HOSTNAMES_FINISHED_EVENT("DOWNSCALE_ADD_ADDITIONAL_HOSTNAMES_FINISHED_EVENT"),
+    STOP_HEALTH_AGENT_FINISHED,
     STOP_TELEMETRY_FINISHED_EVENT(EventSelectorUtil.selector(StopTelemetryResponse.class)),
     DOWNSCALE_REMOVE_USERDATA_SECRETS_FINISHED_EVENT(EventSelectorUtil.selector(RemoveUserdataSecretsSuccess.class)),
     COLLECT_RESOURCES_FINISHED_EVENT(EventSelectorUtil.selector(DownscaleStackCollectResourcesResult.class)),
@@ -56,6 +57,10 @@ public enum DownscaleFlowEvent implements FlowEvent {
 
     DownscaleFlowEvent(String event) {
         this.event = event;
+    }
+
+    DownscaleFlowEvent() {
+        this.event = name();
     }
 
     @Override

@@ -17,6 +17,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -47,6 +48,7 @@ import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
+import com.sequenceiq.freeipa.entity.LoadBalancer;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.CleanupEvent;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.cert.RevokeCertsRequest;
@@ -66,6 +68,7 @@ import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removehosts.RemoveHos
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removereplication.RemoveReplicationAgreementsRequest;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removeserver.RemoveServersRequest;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removeserver.RemoveServersResponse;
+import com.sequenceiq.freeipa.flow.freeipa.downscale.event.stophealthagent.StopHealthAgentRequest;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.stoptelemetry.StopTelemetryRequest;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.stoptelemetry.StopTelemetryResponse;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.userdatasecrets.RemoveUserdataSecretsRequest;
@@ -85,6 +88,7 @@ import com.sequenceiq.freeipa.flow.stack.termination.action.TerminationService;
 import com.sequenceiq.freeipa.service.EnvironmentService;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.config.KerberosConfigUpdateService;
+import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceGroupService;
@@ -199,6 +203,29 @@ public class FreeIpaDownscaleActions {
                     setDownscaleHosts(variables, allHostnamesToRemove);
                 }
                 sendEvent(context, DOWNSCALE_ADD_ADDITIONAL_HOSTNAMES_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
+            }
+        };
+    }
+
+    @Bean(name = "DOWNSCALE_STOP_HEALTH_AGENT_STATE")
+    public Action<?, ?> stopHealthAgenAction() {
+        return new AbstractDownscaleAction<>(StackEvent.class) {
+
+            @Inject
+            private FreeIpaLoadBalancerService loadBalancerService;
+
+            @Override
+            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
+                Stack stack = context.getStack();
+                Optional<LoadBalancer> loadBalancer = loadBalancerService.findByStackId(payload.getResourceId());
+                if (loadBalancer.isPresent()) {
+                    stackUpdater.updateStackStatus(stack, getInProgressStatus(variables), "Stopping health agent");
+                    List<String> downscaleHosts = getDownscaleHosts(variables);
+                    StopHealthAgentRequest stopHealthAgentRequest = new StopHealthAgentRequest(stack.getId(), downscaleHosts);
+                    sendEvent(context, stopHealthAgentRequest);
+                } else {
+                    sendEvent(context, new StackEvent(DownscaleFlowEvent.STOP_HEALTH_AGENT_FINISHED.event(), stack.getId()));
+                }
             }
         };
     }

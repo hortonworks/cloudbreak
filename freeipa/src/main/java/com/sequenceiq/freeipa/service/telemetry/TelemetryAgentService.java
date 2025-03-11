@@ -5,6 +5,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import jakarta.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -16,30 +18,26 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteriaModel;
-import com.sequenceiq.freeipa.repository.InstanceMetaDataRepository;
-import com.sequenceiq.freeipa.repository.StackRepository;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
+import com.sequenceiq.freeipa.service.stack.StackService;
+import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
 @Service
 public class TelemetryAgentService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TelemetryAgentService.class);
 
-    private final TelemetryOrchestrator telemetryOrchestrator;
+    @Inject
+    private TelemetryOrchestrator telemetryOrchestrator;
 
-    private final GatewayConfigService gatewayConfigService;
+    @Inject
+    private GatewayConfigService gatewayConfigService;
 
-    private final StackRepository stackRepository;
+    @Inject
+    private StackService stackService;
 
-    private final InstanceMetaDataRepository instanceMetaDataRepository;
-
-    public TelemetryAgentService(TelemetryOrchestrator telemetryOrchestrator, GatewayConfigService gatewayConfigService,
-            StackRepository stackRepository, InstanceMetaDataRepository instanceMetaDataRepository) {
-        this.telemetryOrchestrator = telemetryOrchestrator;
-        this.gatewayConfigService = gatewayConfigService;
-        this.stackRepository = stackRepository;
-        this.instanceMetaDataRepository = instanceMetaDataRepository;
-    }
+    @Inject
+    private InstanceMetaDataService instanceMetaDataService;
 
     public void stopTelemetryAgent(Long stackId) {
         stopTelemetryAgent(stackId, null);
@@ -47,8 +45,8 @@ public class TelemetryAgentService {
 
     public void stopTelemetryAgent(Long stackId, List<String> instanceIds) {
         try {
-            Stack stack = stackRepository.findById(stackId).get();
-            Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataRepository.findNotTerminatedForStack(stackId);
+            Stack stack = stackService.getStackById(stackId);
+            Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stackId);
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getGatewayConfigs(stack, instanceMetaDataSet);
             Set<Node> targetNodes = instanceMetaDataSet.stream()
                     .filter(instanceMetaData -> Objects.isNull(instanceIds) || instanceIds.contains(instanceMetaData.getInstanceId()))
