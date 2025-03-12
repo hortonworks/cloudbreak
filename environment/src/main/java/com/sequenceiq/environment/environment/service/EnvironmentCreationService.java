@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.credential.domain.Credential;
@@ -231,6 +232,7 @@ public class EnvironmentCreationService {
             validationBuilder.merge(validatorService.validateExternalizedComputeCluster(creationDto.getExternalizedComputeCluster(),
                     creationDto.getAccountId(), environmentSubnets));
         }
+        validationBuilder.merge(validateEnvironmentType(creationDto));
         ValidationResult validationResult = validationBuilder.build();
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
@@ -286,6 +288,14 @@ public class EnvironmentCreationService {
                 break;
             default:
                 break;
+        }
+        return resultBuilder.build();
+    }
+
+    private ValidationResult validateEnvironmentType(EnvironmentCreationDto creationDto) {
+        ValidationResultBuilder resultBuilder = ValidationResult.builder();
+        if (EnvironmentType.HYBRID.equals(creationDto.getEnvironmentType()) && !entitlementService.hybridCloudEnabled(creationDto.getAccountId())) {
+            resultBuilder.error("Creating Hybrid Environment requires CDP_HYBRID_CLOUD entitlement for your account");
         }
         return resultBuilder.build();
     }
