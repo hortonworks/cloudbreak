@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.HostsResourceApi;
 import com.cloudera.api.swagger.RolesResourceApi;
+import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
@@ -42,6 +43,7 @@ import com.cloudera.api.swagger.model.ApiRole;
 import com.cloudera.api.swagger.model.ApiRoleList;
 import com.cloudera.api.swagger.model.ApiRoleRef;
 import com.cloudera.api.swagger.model.ApiRoleState;
+import com.cloudera.api.swagger.model.ApiService;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
@@ -60,6 +62,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnRoles;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.type.HealthCheckResult;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.view.ClusterView;
@@ -113,6 +116,24 @@ public class ClouderaManagerClusterHealthService implements ClusterHealthService
             apiClient = clouderaManagerApiClientProvider.getV31Client(stack.getGatewayPort(), user, password, httpClientConfig);
         } catch (ClouderaManagerClientInitException e) {
             throw new ClusterClientInitException(e);
+        }
+    }
+
+    @Override
+    public Map<String, String> readServicesHealth(String stackName) {
+        ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(apiClient);
+        try {
+            List<ApiService> apiServiceList = servicesResourceApi.readServices(stackName, DataView.FULL.name()).getItems();
+            Map<String, String> componentWithHealthCheck = apiServiceList.stream()
+                    .flatMap(apiService -> apiService.getHealthChecks().stream())
+                    .collect(Collectors.toMap(
+                            apiHealthCheck -> apiHealthCheck.getName(),
+                            apiHealthCheck -> apiHealthCheck.getSummary().toString()
+                    ));
+            return componentWithHealthCheck;
+        } catch (ApiException e) {
+            LOGGER.error("Error when reading services from CM", e);
+            throw new CloudbreakServiceException(e.getMessage(), e);
         }
     }
 

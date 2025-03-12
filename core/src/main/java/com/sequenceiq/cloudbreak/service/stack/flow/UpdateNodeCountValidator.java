@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
@@ -18,6 +20,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataTyp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.cluster.api.ClusterHealthService;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
@@ -29,6 +32,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.DependentRolesHealthCheckService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
@@ -41,6 +45,10 @@ import com.sequenceiq.cloudbreak.view.StackView;
 
 @Component
 public class UpdateNodeCountValidator {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(UpdateNodeCountValidator.class);
+
+    private static final String GOOD_HEALTH = "GOOD";
 
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
@@ -65,6 +73,9 @@ public class UpdateNodeCountValidator {
 
     @Inject
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
+
+    @Inject
+    private ClusterApiConnectors clusterApiConnectors;
 
     @Inject
     private TargetedUpscaleSupportService targetedUpscaleSupportService;
@@ -157,17 +168,28 @@ public class UpdateNodeCountValidator {
         } else {
             List<String> unhealthyHostGroupNames = dependentRolesHealthCheckService.getUnhealthyDependentHostGroups(stack, processor, dependentComponents);
             if (!unhealthyHostGroupNames.isEmpty()) {
-                if (scalingAdjustment > 0) {
-                    throw new BadRequestException(format("Upscaling is Not Allowed for HostGroup: '%s' as Data hub '%s' has " +
-                                    "services which may not be healthy for instances in hostGroup(s): [%s]",
-                            instanceGroup, stack.getStack().getName(), unhealthyHostGroupNames));
-                } else if (scalingAdjustment < 0) {
-                    throw new BadRequestException(format("Downscaling is Not Allowed for HostGroup: '%s' as Data hub '%s' has " +
-                                    "services which may not be healthy for instances in hostGroup(s): [%s]",
-                            instanceGroup, stack.getStack().getName(), unhealthyHostGroupNames));
+                LOGGER.info("Unhealthy Hostgroups: {}", unhealthyHostGroupNames);
+                Set<String> dependentComponentsHealthCheckNames = dependentRolesHealthCheckService.getDependentComponentsHeathChecksForHostGroup(processor,
+                        instanceGroup);
+                Set<String> unhealthyHealthChecks = getUnhealthyHealthChecks(dependentComponentsHealthCheckNames, stack);
+                if (!unhealthyHealthChecks.isEmpty()) {
+                    throw new BadRequestException(format("%s is not allowed for HostGroup: '%s' as Data hub '%s' has " +
+                                    "health checks which are not healthy: [%s] for instances in hostGroup(s): [%s]",
+                            (scalingAdjustment > 0) ? "Upscaling" : "Downscaling", instanceGroup, stack.getStack().getName(), unhealthyHealthChecks,
+                            unhealthyHostGroupNames));
                 }
             }
         }
+    }
+
+    private Set<String> getUnhealthyHealthChecks(Set<String> healthCheckNames, StackDto stack) {
+        ClusterHealthService clusterHealthService = clusterApiConnectors.getConnector(stack).clusterHealthService();
+        Map<String, String> hostServicesHealth = clusterHealthService.readServicesHealth(stack.getStack().getName());
+        Set<String> unhealthyHealthChecks = healthCheckNames.stream()
+                .filter(healthCheck -> !GOOD_HEALTH.equalsIgnoreCase(hostServicesHealth.getOrDefault(healthCheck, "BAD")))
+                .collect(Collectors.toSet());
+        LOGGER.info("Health checks having bad or concerning health are: {}", unhealthyHealthChecks);
+        return unhealthyHealthChecks;
     }
 
     public void validateServiceRoles(StackDto stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson) {
