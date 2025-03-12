@@ -34,15 +34,16 @@ public class FreeIpaUpgradeAction implements Action<FreeIpaTestDto, FreeIpaClien
     }
 
     public FreeIpaTestDto action(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient client) throws Exception {
-        Log.whenJson(LOGGER, format(" FreeIPA post request:%n"), testDto.getRequest());
         FreeIpaUpgradeRequest request = new FreeIpaUpgradeRequest();
         request.setEnvironmentCrn(testDto.getRequest().getEnvironmentCrn());
+        request.setAllowMajorOsUpgrade(Boolean.TRUE);
         if (Strings.isNotNullAndNotEmpty(imageCatalogUrl) && Strings.isNotNullAndNotEmpty(imageId)) {
             ImageSettingsRequest imageSettingsRequest = new ImageSettingsRequest();
             imageSettingsRequest.setCatalog(imageCatalogUrl);
             imageSettingsRequest.setId(imageId);
             request.setImage(imageSettingsRequest);
         }
+        Log.whenJson(LOGGER, format(" FreeIPA upgrade request:%n"), request);
         FreeIpaUpgradeResponse response = client.getDefaultClient()
                 .getFreeIpaUpgradeV1Endpoint()
                 .upgradeFreeIpa(request);
