@@ -24,6 +24,9 @@ public class DependentRolesHealthCheckService {
     private static final Map<String, List<String>> ROLE_DEPENDENCIES = Map.ofEntries(
             Map.entry("NODEMANAGER", List.of("RESOURCEMANAGER")));
 
+    private static final Map<String, List<String>> DEPENENT_COMPONENTS_HEALTH_CHECKS = Map.ofEntries(
+            Map.entry("NODEMANAGER", List.of("YARN_RESOURCEMANAGERS_HEALTH")));
+
     /**
      * Returns Set of Dependent Components on which the Source Components of the hostgroup depends.
      * @param hostGroup We need to find the dependentComponents for the components present in this hostGroup.
@@ -34,6 +37,20 @@ public class DependentRolesHealthCheckService {
     public Set<String> getDependentComponentsForHostGroup(CmTemplateProcessor processor, String hostGroup) {
         return processor.getNonGatewayComponentsByHostGroup().get(hostGroup).stream()
                 .map(srcComponent -> ROLE_DEPENDENCIES.getOrDefault(srcComponent, Collections.singletonList(UNDEFINED_DEPENDENCY)))
+                .flatMap(Collection::stream)
+                .collect(toSet());
+    }
+
+    /**
+     * Returns Set of Dependent Components health check names on which the Source Components of the hostgroup depends.
+     * @param hostGroup We need to find the dependentComponents for the components present in this hostGroup.
+     * @param processor it is used to find all the components which are running in the given hostgroup.
+     * @return Set of components health check names on which the Source Components of the given hostGroup Depends.
+     */
+
+    public Set<String> getDependentComponentsHeathChecksForHostGroup(CmTemplateProcessor processor, String hostGroup) {
+        return processor.getNonGatewayComponentsByHostGroup().get(hostGroup).stream()
+                .map(srcComponent -> DEPENENT_COMPONENTS_HEALTH_CHECKS.getOrDefault(srcComponent, Collections.singletonList(UNDEFINED_DEPENDENCY)))
                 .flatMap(Collection::stream)
                 .collect(toSet());
     }
