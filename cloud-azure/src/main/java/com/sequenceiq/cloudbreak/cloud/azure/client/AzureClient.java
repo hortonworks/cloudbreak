@@ -147,6 +147,8 @@ public class AzureClient {
 
     private static final String FIREWALL_IP_ADDRESS = "0.0.0.0";
 
+    private static final String FLEXIBLE_SERVER_EXTENSIONS = "PG_STAT_STATEMENTS,PG_BUFFERCACHE";
+
     private final AzureResourceManager azure;
 
     private final PrivateDnsZoneManager privateDnsZoneManager;
@@ -1202,5 +1204,14 @@ public class AzureClient {
                 .withEndIpAddress(FIREWALL_IP_ADDRESS)
                 .create()
         );
+    }
+
+    public void addAzureExtensionsToFlexibleServer(String resourceGroupName, String serverName) {
+        handleException(() -> postgreSqlFlexibleManager.configurations().define("azure.extensions")
+                .withExistingFlexibleServer(resourceGroupName, serverName)
+                .withValue(FLEXIBLE_SERVER_EXTENSIONS)
+                .withSource("user-override")
+                .create());
+
     }
 }

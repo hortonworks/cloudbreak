@@ -125,6 +125,8 @@ class AzureDatabaseResourceServiceTest {
 
     private static final String NEW_PASSWORD = "newPassword";
 
+    private static final String SERVER_ID = "driver";
+
     @Mock
     private AzureDatabaseTemplateBuilder azureDatabaseTemplateBuilder;
 
@@ -329,6 +331,7 @@ class AzureDatabaseResourceServiceTest {
             verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, migratedDbStack);
             verify(client).createPublicAccessFirewallRuleForFlexibleDb(MIGRATED_SERVER_NAME, RESOURCE_GROUP_NAME);
             verify(client).createTemplateDeployment(RESOURCE_GROUP_NAME, MIGRATED_SERVER_NAME, template, "{}");
+            verify(client).addAzureExtensionsToFlexibleServer(RESOURCE_GROUP_NAME, MIGRATED_SERVER_NAME);
         }
     }
 
@@ -536,7 +539,8 @@ class AzureDatabaseResourceServiceTest {
         assertEquals("14", databaseStackArgumentCaptor.getValue().getDatabaseServer().getParameters().get(DB_VERSION));
         verify(persistenceNotifier).notifyAllocations(cloudResourceList, cloudContext);
         verify(client).createTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME, TEMPLATE, "{}");
-        verify(client, never()).createPublicAccessFirewallRuleForFlexibleDb("driver", RESOURCE_GROUP_NAME);
+        verify(client, never()).createPublicAccessFirewallRuleForFlexibleDb(SERVER_ID, RESOURCE_GROUP_NAME);
+        verify(client).addAzureExtensionsToFlexibleServer(RESOURCE_GROUP_NAME, SERVER_ID);
     }
 
     @Test
@@ -865,7 +869,8 @@ class AzureDatabaseResourceServiceTest {
         verify(persistenceNotifier, times(4)).notifyAllocation(any(CloudResource.class), eq(cloudContext));
         verify(client).createTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME, TEMPLATE, "{}");
         verify(client).getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME);
-        verify(client).createPublicAccessFirewallRuleForFlexibleDb("driver", RESOURCE_GROUP_NAME);
+        verify(client).createPublicAccessFirewallRuleForFlexibleDb(SERVER_ID, RESOURCE_GROUP_NAME);
+        verify(client).addAzureExtensionsToFlexibleServer(RESOURCE_GROUP_NAME, SERVER_ID);
     }
 
     @Test
@@ -919,7 +924,8 @@ class AzureDatabaseResourceServiceTest {
         verify(persistenceNotifier, times(4)).notifyAllocation(any(CloudResource.class), eq(cloudContext));
         verify(client).createTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME, TEMPLATE, "{}");
         verify(client).getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME);
-        verify(client).createPublicAccessFirewallRuleForFlexibleDb("driver", RESOURCE_GROUP_NAME);
+        verify(client).createPublicAccessFirewallRuleForFlexibleDb(SERVER_ID, RESOURCE_GROUP_NAME);
+        verify(client).addAzureExtensionsToFlexibleServer(RESOURCE_GROUP_NAME, SERVER_ID);
     }
 
     @Test
@@ -1170,7 +1176,7 @@ class AzureDatabaseResourceServiceTest {
 
         return DatabaseServer.builder()
                 .withConnectionDriver("driver")
-                .withServerId("driver")
+                .withServerId(SERVER_ID)
                 .withConnectorJarUrl("driver")
                 .withEngine(DatabaseEngine.POSTGRESQL)
                 .withLocation("location")

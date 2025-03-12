@@ -169,6 +169,7 @@ public class AzureDatabaseResourceService {
         AzureDatabaseType databaseType = getAzureDatabaseType(stack);
         if (AzureDatabaseType.FLEXIBLE_SERVER.equals(databaseType)) {
             setUpPublicAccessBasedOnNetworkSettings(stack, client, databaseServer, resourceGroupName);
+            addAzureExtensionsToFlexibleServerWithRetry(client, resourceGroupName, databaseServer.getServerId());
         }
 
         return convertWithStatus(cloudResources);
@@ -205,6 +206,27 @@ public class AzureDatabaseResourceService {
                 }
             }
         });
+    }
+
+    private void addAzureExtensionsToFlexibleServerWithRetry(AzureClient client, String resourceGroupName, String serverName) {
+        try {
+            retryService.testWith2SecDelayMax5Times(() -> {
+                try {
+                    client.addAzureExtensionsToFlexibleServer(resourceGroupName, serverName);
+                } catch (ManagementException e) {
+                    if (azureExceptionHandler.isExceptionCodeConflict(e)) {
+                        LOGGER.info("Adding azure.extensions failed. It's retried 5 times before failing.", e);
+                        throw Retry.ActionFailedException.ofCause(e);
+                    } else {
+                        throw e;
+                    }
+                }
+            });
+        } catch (Retry.ActionFailedException e) {
+            LOGGER.warn("Adding Azure extensions failed after several attempts.", e);
+        } catch (ManagementException e) {
+            LOGGER.warn("Adding Azure extensions failed.", e);
+        }
     }
 
     private List<CloudResourceStatus> convertWithStatus(List<CloudResource> cloudResources) {
@@ -584,6 +606,7 @@ public class AzureDatabaseResourceService {
             String template = azureDatabaseTemplateBuilder.build(cloudContext, stack);
             deployDatabaseServer(stackName, resourceGroupName, template, client, authenticatedContext);
             setUpPublicAccessBasedOnNetworkSettings(stack, client, databaseServer, resourceGroupName);
+            addAzureExtensionsToFlexibleServerWithRetry(client, resourceGroupName, databaseServer.getServerId());
         } catch (ManagementException e) {
             Optional<String> deploymentOperationError = azureTemplateDeploymentFailureReasonProvider.getFailureMessage(resourceGroupName, stackName, client);
             throw azureUtils.convertToCloudConnectorExceptionWithFailureReason(e, "Database stack upgrade", deploymentOperationError.orElse(null));
@@ -714,7 +737,6 @@ public class AzureDatabaseResourceService {
         } else {
             waitForDeployment(stackName, resourceGroupName, ac);
         }
-
     }
 
     private void waitForDeployment(String stackName, String resourceGroupName, AuthenticatedContext ac) {
@@ -781,6 +803,7 @@ public class AzureDatabaseResourceService {
                 String template = azureDatabaseTemplateBuilder.build(cloudContext, migratedDbStack);
                 resources = createOrFetchDeployment(persistenceNotifier, deploymentName, resourceGroupName, template, client, authenticatedContext);
                 setUpPublicAccessBasedOnNetworkSettings(stack, client, databaseServer, resourceGroupName);
+                addAzureExtensionsToFlexibleServerWithRetry(client, resourceGroupName, databaseServer.getServerId());
             } else {
                 LOGGER.debug("Database server deployment is already present with status {} and name {}, so skipping canary launch",
                         externalDatabaseStatus, deploymentName);
