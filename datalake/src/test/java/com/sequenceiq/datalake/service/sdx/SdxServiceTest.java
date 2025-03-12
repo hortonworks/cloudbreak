@@ -117,6 +117,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.vm.VirtualMachineConfiguration;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
 import com.sequenceiq.common.model.SeLinux;
@@ -874,6 +875,37 @@ class SdxServiceTest {
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest)),
                 "BadRequestException should thrown");
         assertEquals("The environment is in delete in progress phase. Please create a new environment first!", badRequestException.getMessage());
+    }
+
+    @Test
+    void testSdxResizeForHybridEnvironment() {
+        SdxClusterResizeRequest sdxClusterResizeRequest = new SdxClusterResizeRequest();
+        sdxClusterResizeRequest.setClusterShape(MEDIUM_DUTY_HA);
+        sdxClusterResizeRequest.setEnvironment(ENVIRONMENT_NAME);
+
+        SdxCluster sdxCluster = getSdxCluster();
+        sdxCluster.setClusterShape(LIGHT_DUTY);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(null);
+
+        when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
+        when(sdxBackupRestoreService.isDatalakeInBackupProgress(anyString(), anyString())).thenReturn(false);
+        when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(false);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setName(sdxClusterResizeRequest.getEnvironment());
+        detailedEnvironmentResponse.setCloudPlatform(AWS.name());
+        detailedEnvironmentResponse.setCrn(getCrn());
+        detailedEnvironmentResponse.setEnvironmentStatus(EnvironmentStatus.AVAILABLE);
+        detailedEnvironmentResponse.setEnvironmentType(EnvironmentType.HYBRID.toString());
+        when(environmentClientService.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest)),
+                "BadRequestException should thrown");
+        assertEquals("Creating or Resizing datalake is not supported for Hybrid Environment", badRequestException.getMessage());
     }
 
     @ParameterizedTest

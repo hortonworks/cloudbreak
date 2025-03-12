@@ -130,6 +130,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBui
 import com.sequenceiq.cloudbreak.vm.VirtualMachineConfiguration;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.type.CertExpirationState;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.FileSystemType;
@@ -1007,6 +1008,10 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             throw new BadRequestException("The environment is starting. Please wait until finished!");
         } else if (environment.getEnvironmentStatus().isFailed()) {
             throw new BadRequestException("The environment is in failed phase. Please fix the environment or create a new one first!");
+        }
+
+        if (EnvironmentType.HYBRID.toString().equals(environment.getEnvironmentType())) {
+            throw new BadRequestException("Creating or Resizing datalake is not supported for Hybrid Environment");
         }
     }
 
