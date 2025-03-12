@@ -1,10 +1,12 @@
 package com.sequenceiq.datalake.service.resize.recovery;
 
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DELETE_FAILED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.RUNNING;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.STOPPED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.STOP_FAILED;
 import static com.sequenceiq.datalake.service.resize.recovery.ResizeRecoveryService.FAILURE_STATES;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
@@ -90,6 +92,15 @@ class ResizeRecoveryServiceTest {
         sdxStatusEntity.setStatus(status);
         SdxRecoverableResponse sdxRecoverableResponse = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateRecovery(cluster));
         assertEquals(RecoveryStatus.NON_RECOVERABLE, sdxRecoverableResponse.getStatus(), status + " should be non-recoverable");
+
+        assertTrue(sdxRecoverableResponse.getReason().startsWith("Resize can not be recovered from this point "));
+        if (RUNNING.equals(status)) {
+            assertTrue(sdxRecoverableResponse.getReason().endsWith("Datalake is running, resize can not be recovered from this point"));
+        } else if (DELETE_FAILED.equals(status)) {
+            assertTrue(sdxRecoverableResponse.getReason().endsWith("Failed to delete original data lake, not a recoverable error"));
+        } else {
+            assertTrue(sdxRecoverableResponse.getReason().contains("Cannot recover from resize due to Datalake not being in a recoverable status: "));
+        }
     }
 
     public void testGetClusterRecoverableForStatusRecoverable(DatalakeStatusEnum status) {

@@ -22,8 +22,6 @@ import java.util.Set;
 
 import jakarta.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -57,8 +55,6 @@ public class ResizeRecoveryService implements RecoveryService {
             NODE_FAILURE, SYNC_FAILED, CERT_ROTATION_FAILED, CERT_RENEWAL_FAILED, DATALAKE_RESTORE_FAILED, RECOVERY_FAILED,
             DATAHUB_REFRESH_FAILED
     );
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ResizeRecoveryService.class);
 
     @Inject
     private EntitlementService entitlementService;
@@ -112,13 +108,13 @@ public class ResizeRecoveryService implements RecoveryService {
     }
 
     private String getReasonNonRecoverable(DatalakeStatusEnum status) {
-        String reason = "";
         if (RUNNING.equals(status)) {
-            reason = "Datalake is running, resize can not be recovered from this point";
+            return "Datalake is running, resize can not be recovered from this point";
         } else if (DELETE_FAILED.equals(status)) {
-            reason = "Failed to delete original data lake, not a recoverable error";
+            return "Failed to delete original data lake, not a recoverable error";
+        } else {
+            return "Cannot recover from resize due to Datalake not being in a recoverable status: " + status;
         }
-        return reason.isEmpty() ? reason : (": " + reason);
     }
 
     private SdxRecoverableResponse validateRecoveryResizedClusterPresent(DatalakeStatusEnum status, String statusReason, boolean force) {
@@ -137,7 +133,7 @@ public class ResizeRecoveryService implements RecoveryService {
             );
         }
         return new SdxRecoverableResponse(
-                "Resize can not be recovered from this point" + getReasonNonRecoverable(status),
+                "Resize can not be recovered from this point for the new cluster: " + getReasonNonRecoverable(status),
                 RecoveryStatus.NON_RECOVERABLE
         );
     }
@@ -158,7 +154,7 @@ public class ResizeRecoveryService implements RecoveryService {
             return new SdxRecoverableResponse("Resize can be recovered from a failed stop", RecoveryStatus.RECOVERABLE);
         }
         return new SdxRecoverableResponse(
-                "Resize can not be recovered from this point" + getReasonNonRecoverable(status),
+                "Resize can not be recovered from this point for single cluster: " + getReasonNonRecoverable(status),
                 RecoveryStatus.NON_RECOVERABLE
         );
     }
