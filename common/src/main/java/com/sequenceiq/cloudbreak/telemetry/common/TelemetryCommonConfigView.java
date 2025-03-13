@@ -47,6 +47,8 @@ public class TelemetryCommonConfigView implements TelemetryConfigView {
 
     private final Integer repoGpgCheck;
 
+    private final Boolean devTelemetrySupported;
+
     private TelemetryCommonConfigView(Builder builder) {
         clusterDetails = builder.clusterDetails;
         rules = builder.rules;
@@ -62,6 +64,7 @@ public class TelemetryCommonConfigView implements TelemetryConfigView {
         repoBaseUrl = builder.repoBaseUrl;
         repoGpgKey = builder.repoGpgKey;
         repoGpgCheck = builder.repoGpgCheck;
+        devTelemetrySupported = builder.devTelemetrySupported;
     }
 
     @Override
@@ -87,6 +90,7 @@ public class TelemetryCommonConfigView implements TelemetryConfigView {
         map.put("repoBaseUrl", repoBaseUrl);
         map.put("repoGpgCheck", repoGpgCheck);
         map.put("repoGpgKey", repoGpgKey);
+        map.put("devTelemetrySupported", devTelemetrySupported);
         return map;
     }
 
@@ -119,6 +123,8 @@ public class TelemetryCommonConfigView implements TelemetryConfigView {
         private String repoGpgKey;
 
         private Integer repoGpgCheck;
+
+        private Boolean devTelemetrySupported = Boolean.FALSE;
 
         public TelemetryCommonConfigView build() {
             return new TelemetryCommonConfigView(this);
@@ -186,6 +192,16 @@ public class TelemetryCommonConfigView implements TelemetryConfigView {
 
         public Builder withRepoGpgKey(String repoGpgKey) {
             this.repoGpgKey = repoGpgKey;
+            return this;
+        }
+
+        public Builder withDevTelemetrySupported() {
+            this.devTelemetrySupported = Boolean.TRUE;
+            return this;
+        }
+
+        public Builder withDevTelemetrySupported(Boolean devTelemetrySupported) {
+            this.devTelemetrySupported = devTelemetrySupported;
             return this;
         }
 

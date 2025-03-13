@@ -6,8 +6,9 @@
 {% endif %}
 {% set os = salt['grains.get']('os') %}
 {% set cpuarch = salt['grains.get']('cpuarch') %}
-{% set cdp_logging_agent_version = '1.3.3' %}
-{% set cdp_logging_agent_build_number = 'b18' %}
+{% set cdp_logging_agent_version = '1.3.5' %}
+{% set cdp_logging_agent_build_number = 'b1' %}
+{% set cdp_logging_agent_dev_version = '0.1.0*' %}
 {% if os == "RedHat" %}
     {% if cpuarch != 'aarch64' %}
         {% set rpm_os = 'redhat8' %}
@@ -238,5 +239,6 @@
     "cdpLoggingAgentInstalled": cdp_logging_agent_installed,
     "cdpLoggingAgentRpm": cdp_logging_agent_rpm,
     "cdpLoggingAgentPackageVersion": cdp_logging_agent_package_version,
+    "cdpLoggingAgentDevVersion": cdp_logging_agent_dev_version,
     "uninstallTdAgent": uninstall_td_agent
 }) %}

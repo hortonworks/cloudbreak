@@ -21,6 +21,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.altus.AltusDatabusConnectionConfiguration;
+import com.sequenceiq.cloudbreak.telemetry.DevTelemetryRepoConfigurationHolder;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryComponentUpgradeConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryRepoConfiguration;
@@ -49,13 +50,16 @@ public class TelemetryCommonConfigServiceTest {
     private TelemetryRepoConfigurationHolder telemetryRepoConfigurationHolder;
 
     @Mock
+    private DevTelemetryRepoConfigurationHolder devTelemetryRepoConfigurationHolder;
+
+    @Mock
     private AltusDatabusConnectionConfiguration altusDatabusConnectionConfiguration;
 
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
         underTest = new TelemetryCommonConfigService(anonymizationRuleResolver, telemetryUpgradeConfiguration,
-                telemetryRepoConfigurationHolder, altusDatabusConnectionConfiguration);
+                telemetryRepoConfigurationHolder, devTelemetryRepoConfigurationHolder, altusDatabusConnectionConfiguration);
     }
 
     @Test

@@ -28,6 +28,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SECRET_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SECRET_ROTATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_TLS_1_3;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_USE_DEV_TELEMETRY_YUM_REPO;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_WIRE_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CENTRAL_COMPUTE_MONITORING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_IDENTITY_MAPPING;
@@ -605,6 +606,10 @@ public class EntitlementService {
 
     public boolean isSingleServerRejectEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_AZURE_DATABASE_SINGLE_SERVER_REJECT);
+    }
+
+    public boolean isDevTelemetryRepoEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CB_USE_DEV_TELEMETRY_YUM_REPO);
     }
 
 }

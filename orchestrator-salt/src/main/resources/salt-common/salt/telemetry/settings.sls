@@ -100,6 +100,7 @@
 {% else %}
   {% set test_infra_repo_curl_cmd = 'curl -o /dev/null -s -w "%{http_code}" --max-time 30 -s -k -L -f ' + repo_gpg_key + ' | grep 200' %}
 {% endif %}
+{% set dev_telemetry_supported = salt['pillar.get']('telemetry:devTelemetrySupported') %}
 
 {% do telemetry.update({
     "platform": platform,
@@ -130,5 +131,6 @@
     "logs": logs,
     "skipValidation": skip_validation,
     "testCloudStorageUploadParams": test_cloud_storage_upload_params,
-    "testInfraRepoCurlCmd": test_infra_repo_curl_cmd
+    "testInfraRepoCurlCmd": test_infra_repo_curl_cmd,
+    "devTelemetrySupported": dev_telemetry_supported
 }) %}

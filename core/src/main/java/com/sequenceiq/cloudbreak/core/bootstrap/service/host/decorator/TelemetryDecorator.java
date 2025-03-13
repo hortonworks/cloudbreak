@@ -131,6 +131,10 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
             telemetryContext.setLogShipperContext(createLogShipperContext(stack, telemetry));
             telemetryContext.setMonitoringContext(createMonitoringContext(stack, cluster, telemetryContext, accountId, monitoringCredential, cdpAccessKeyType));
         }
+
+        if (entitlementService.isDevTelemetryRepoEnabled(accountId)) {
+            telemetryContext.setDevTelemetryRepo(Boolean.TRUE);
+        }
         return telemetryContext;
     }
 

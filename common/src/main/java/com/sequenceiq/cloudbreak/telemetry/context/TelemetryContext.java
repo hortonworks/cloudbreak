@@ -38,6 +38,8 @@ public class TelemetryContext {
 
     private String cloudPlatform;
 
+    private Boolean devTelemetryRepo = Boolean.FALSE;
+
     public <T extends TelemetryConfigView> void addConfigView(T configView) {
         configs.put(configView.getClass(), configView);
     }
@@ -148,6 +150,14 @@ public class TelemetryContext {
 
     public void setArchitecture(String architecture) {
         this.architecture = architecture;
+    }
+
+    public Boolean getDevTelemetryRepo() {
+        return devTelemetryRepo;
+    }
+
+    public void setDevTelemetryRepo(Boolean devTelemetryRepo) {
+        this.devTelemetryRepo = devTelemetryRepo;
     }
 
     @Override

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.PropertyPlaceholderHelper;
 
 import com.sequenceiq.cloudbreak.altus.AltusDatabusConnectionConfiguration;
+import com.sequenceiq.cloudbreak.telemetry.DevTelemetryRepoConfigurationHolder;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfigView;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryPillarConfigGenerator;
@@ -40,14 +41,18 @@ public class TelemetryCommonConfigService implements TelemetryPillarConfigGenera
 
     private final TelemetryRepoConfigurationHolder telemetryRepoConfigurationHolder;
 
+    private final DevTelemetryRepoConfigurationHolder devTelemetryRepoConfigurationHolder;
+
     private final AltusDatabusConnectionConfiguration altusDatabusConnectionConfiguration;
 
     public TelemetryCommonConfigService(AnonymizationRuleResolver anonymizationRuleResolver, TelemetryUpgradeConfiguration telemetryUpgradeConfiguration,
-            TelemetryRepoConfigurationHolder telemetryRepoConfigurationHolder, AltusDatabusConnectionConfiguration altusDatabusConnectionConfiguration) {
+            TelemetryRepoConfigurationHolder telemetryRepoConfigurationHolder, DevTelemetryRepoConfigurationHolder devTelemetryRepoConfigurationHolder,
+            AltusDatabusConnectionConfiguration altusDatabusConnectionConfiguration) {
         this.anonymizationRuleResolver = anonymizationRuleResolver;
         this.telemetryUpgradeConfiguration = telemetryUpgradeConfiguration;
         this.altusDatabusConnectionConfiguration = altusDatabusConnectionConfiguration;
         this.telemetryRepoConfigurationHolder = telemetryRepoConfigurationHolder;
+        this.devTelemetryRepoConfigurationHolder = devTelemetryRepoConfigurationHolder;
     }
 
     @Override
@@ -70,7 +75,9 @@ public class TelemetryCommonConfigService implements TelemetryPillarConfigGenera
             }
         }
 
-        TelemetryRepoConfiguration telemetryRepoConfiguration = telemetryRepoConfigurationHolder.selectCorrectRepoConfig(context);
+        TelemetryRepoConfiguration telemetryRepoConfiguration = context.getDevTelemetryRepo() ?
+                devTelemetryRepoConfigurationHolder.selectCorrectRepoConfig(context) :
+                telemetryRepoConfigurationHolder.selectCorrectRepoConfig(context);
 
         return builder
                 .withClusterDetails(clusterDetails)
@@ -84,6 +91,7 @@ public class TelemetryCommonConfigService implements TelemetryPillarConfigGenera
                 .withRepoBaseUrl(telemetryRepoConfiguration.baseUrl())
                 .withRepoGpgKey(telemetryRepoConfiguration.gpgKey())
                 .withRepoGpgCheck(telemetryRepoConfiguration.gpgCheck())
+                .withDevTelemetrySupported(context.getDevTelemetryRepo())
                 .build();
     }
 

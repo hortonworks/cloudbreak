@@ -24,21 +24,27 @@ altus:
     grpc-timeout-sec: 60
 telemetry:
   repos:
-    rhel7:
+    name: cdp-infra-tools
+    base-url: https://archive.cloudera.com/cdp-infra-tools/latest/%s/yum
+    gpg-key: https://archive.cloudera.com/cdp-infra-tools/latest/%s/yum/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+    gpg-check: 1
+    platform-values:
+        CENTOS7:
+            X86_64: redhat7
+        RHEL8:
+            X86_64: redhat8
+            ARM64: redhat8arm64
+  devrepos:
       name: cdp-infra-tools
-      base-url: https://archive.cloudera.com/cdp-infra-tools/latest/redhat7/yum
-      gpg-key: https://archive.cloudera.com/cdp-infra-tools/latest/redhat7/yum/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+      base-url: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/64129287/cdp-infra-tools/0.x/%s/yum
+      gpg-key: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/64129287/cdp-infra-tools/0.x/%s/yum/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
       gpg-check: 1
-    rhel8:
-      name: cdp-infra-tools
-      base-url: https://archive.cloudera.com/cdp-infra-tools/latest/redhat8/yum
-      gpg-key: https://archive.cloudera.com/cdp-infra-tools/latest/redhat8/yum/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
-      gpg-check: 1
-    rhel8Arm:
-      name: cdp-infra-tools
-      base-url: https://archive.cloudera.com/cdp-infra-tools/latest/redhat8arm64/yum
-      gpg-key: https://archive.cloudera.com/cdp-infra-tools/latest/redhat8arm64/yum/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
-      gpg-check: 1
+      platform-values:
+          CENTOS7:
+              X86_64: redhat7
+          RHEL8:
+              X86_64: redhat8
+              ARM64: redhat8arm64
   monitoring:
     remote-write-url: ""
     remote-write-internal-url: ""

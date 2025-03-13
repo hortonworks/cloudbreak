@@ -103,6 +103,7 @@ auth:
         enabled: true
     ranger.ldap.usersync: true
     tlsv13.enable: false
+    dev.telemetry.yum.repo.enabled: false
 crn:
   partition: cdp
   region: us-west-1

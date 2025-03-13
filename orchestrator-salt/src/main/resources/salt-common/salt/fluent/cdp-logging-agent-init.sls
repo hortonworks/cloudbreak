@@ -25,6 +25,13 @@ install_cdp_logging_agent_warning:
 {% endif %}
 {% endif %}
 
+{% if telemetry.devTelemetrySupported %}
+intstall-dev-cdp-logging-agent:
+  pkg.installed:
+    - name: cdp-logging-agent
+    - version: '{{ fluent.cdpLoggingAgentDevVersion }}'
+{% endif %}
+
 /etc/cdp-logging-agent/pos:
   file.directory:
     - name: /etc/cdp-logging-agent/pos

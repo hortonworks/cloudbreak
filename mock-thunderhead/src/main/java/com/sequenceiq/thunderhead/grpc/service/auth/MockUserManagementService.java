@@ -32,6 +32,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SECRET_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SECRET_ROTATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_TLS_1_3;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_USE_DEV_TELEMETRY_YUM_REPO;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CENTRAL_COMPUTE_MONITORING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_IDENTITY_MAPPING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION;
@@ -571,6 +572,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.datahub.force.os.upgrade}")
     private boolean datahubForceOsUpgradeEnabled;
 
+    @Value("${auth.mock.dev.telemetry.yum.repo.enabled}")
+    private boolean devTelemetryYumRepoEnabled;
+
     @Inject
     private MockEnvironmentUserResourceRole mockEnvironmentUserResourceRole;
 
@@ -1059,6 +1063,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (awsArmDataLakeEnabled) {
             builder.addEntitlements(createEntitlement(CDP_AWS_ARM_DATALAKE));
+        }
+        if (devTelemetryYumRepoEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_CB_USE_DEV_TELEMETRY_YUM_REPO));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
