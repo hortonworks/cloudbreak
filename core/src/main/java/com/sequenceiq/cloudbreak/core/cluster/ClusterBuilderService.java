@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import jakarta.inject.Inject;
 
@@ -51,6 +53,8 @@ import com.sequenceiq.cloudbreak.view.StackView;
 
 @Service
 public class ClusterBuilderService implements LocalPaasRemoteDataContextSupplier {
+
+    private static final Pattern HANDLEBAR_REGEX = Pattern.compile("\\{\\{\\{([a-zA-Z0-9. ]+)}}}");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterBuilderService.class);
 
@@ -303,9 +307,11 @@ public class ClusterBuilderService implements LocalPaasRemoteDataContextSupplier
     }
 
     private void validateExtendedBlueprintTextDoesNotContainUnresolvedHandlebarParams(String template) {
-        if (template.matches(".*\\{\\{\\{.*}}}.*")) {
-            throw new IllegalStateException("Some of the template parameters has not been resolved! Please check your custom properties at cluster the " +
-                    "cluster creation to be able to resolve them!");
+        Matcher matcher = HANDLEBAR_REGEX.matcher(template);
+        if (matcher.find()) {
+            throw new IllegalStateException(String.format("Some of the template parameters has not been resolved!" +
+                    " Please check your custom properties at cluster the cluster creation to be able to resolve them!" +
+                    " Remaining handlebar value: {{{%s}}}", matcher.group(1)));
         }
     }
 }

@@ -161,8 +161,8 @@ class ClusterBuilderServiceTest {
 
     @Test
     void testPrepareExtendedTemplateWhenBlueprintTextContainUnfilledHandlebarPropertiesThenItShouldThrowException() {
-        String firstHandlebarProperty = "stuff.value";
-        String secondHandlebarProperty = "stuff2.value";
+        String firstHandlebarProperty = "stuFF.value";
+        String secondHandlebarProperty = "stuFF2.value";
         String blueprintWithHandlebars = String.format("{\"some\":\"thing\",\"other\":\"{{{ %s }}}\",\"some2\":\"thingie\",\"rehto\":\"{{{ %s }}}\"}",
                 firstHandlebarProperty, secondHandlebarProperty);
 
@@ -172,8 +172,8 @@ class ClusterBuilderServiceTest {
         IllegalStateException expectedException = Assertions.assertThrows(IllegalStateException.class, () ->
                 underTest.prepareExtendedTemplate(STACK_ID));
 
-        assertEquals("Some of the template parameters has not been resolved! Please check your custom properties at cluster the " +
-                "cluster creation to be able to resolve them!", expectedException.getMessage());
+        assertEquals(String.format("Some of the template parameters has not been resolved! Please check your custom properties at cluster the " +
+                "cluster creation to be able to resolve them! Remaining handlebar value: {{{ %s }}}", firstHandlebarProperty), expectedException.getMessage());
 
         verify(mockClusterService, times(1)).updateExtendedBlueprintText(any(), anyString());
     }

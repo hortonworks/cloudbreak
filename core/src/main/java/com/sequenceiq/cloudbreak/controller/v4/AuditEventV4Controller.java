@@ -9,8 +9,6 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.StreamingOutput;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CustomPermissionCheck;
@@ -24,8 +22,6 @@ import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLoca
 
 @Controller
 public class AuditEventV4Controller implements AuditEventV4Endpoint {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AuditEventV4Controller.class);
 
     @Inject
     private AuditEventService auditEventService;

@@ -12,11 +12,7 @@ public class V4AuditEventRestUrlParser extends LegacyRestUrlParser {
 
     public static final int WORKSPACE_ID_GROUP_NUMBER = 1;
 
-    public static final int RESOURCE_NAME_GROUP_NUMBER = 7;
-
-    public static final int RESOURCE_EVENT_GROUP_NUMBER = 8;
-
-    private static final Pattern PATTERN = Pattern.compile("v4/(\\d+)/([a-z_]+)/((type)|(zip/type))/([a-z_]+)?([A-Za-z_: ]+)/crn/([a-z\\-\\d_:]+)");
+    private static final Pattern PATTERN = Pattern.compile("v4/(\\d+)/audits/?[zip]|([\\d+])");
 
     @Override
     public Pattern getPattern() {
@@ -30,7 +26,7 @@ public class V4AuditEventRestUrlParser extends LegacyRestUrlParser {
 
     @Override
     protected String getResourceName(Matcher matcher) {
-        return matcher.group(RESOURCE_NAME_GROUP_NUMBER);
+        return null;
     }
 
     @Override
@@ -50,7 +46,7 @@ public class V4AuditEventRestUrlParser extends LegacyRestUrlParser {
 
     @Override
     protected String getResourceEvent(Matcher matcher) {
-        return matcher.group(RESOURCE_EVENT_GROUP_NUMBER);
+        return null;
     }
 
 }

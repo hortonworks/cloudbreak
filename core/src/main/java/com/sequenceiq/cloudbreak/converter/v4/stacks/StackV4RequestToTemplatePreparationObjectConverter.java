@@ -188,7 +188,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter {
                     .withGeneralClusterConfigs(generalClusterConfigs)
                     .withLdapConfig(ldapConfig)
                     .withCustomInputs(source.getInputs())
-                    .withKerberosConfig(getKerberosConfig(source, environment))
+                    .withKerberosConfig(getDummyKerberosConfigForGeneratedBp(source, environment))
                     .withStackType(source.getType())
                     .withVirtualGroupView(virtualGroupRequest);
             decorateBuilderWithPlacement(source, builder);
@@ -279,26 +279,26 @@ public class StackV4RequestToTemplatePreparationObjectConverter {
                 .build();
     }
 
-    private KerberosConfig getKerberosConfig(StackV4Request source, DetailedEnvironmentResponse environment) {
+    private KerberosConfig getDummyKerberosConfigForGeneratedBp(StackV4Request source, DetailedEnvironmentResponse environment) {
         return KerberosConfig.KerberosConfigBuilder.aKerberosConfig()
                 .withType(KerberosType.FREEIPA)
                 .withPassword("dummy-password")
-                .withUrl(String.format("kdc.%s.%s.wl.<account-name>.site",
+                .withUrl(String.format("kdc.%s.%s.wl.<account-name>.site.DUMMY",
                         environment.getName(),
                         source.getName()))
-                .withAdminUrl(String.format("kerberos.%s.%s.wl.<account-name>.site",
+                .withAdminUrl(String.format("kerberos.%s.%s.wl.<account-name>.site.DUMMY",
                         environment.getName(),
                         source.getName()))
-                .withRealm(String.format("%s.%s.WL.<ACCOUNT-NAME>.SITE",
+                .withRealm(String.format("%s.%s.WL.<ACCOUNT-NAME>.SITE.DUMMY",
                         environment.getName().toUpperCase(Locale.ROOT),
                         source.getName().toUpperCase(Locale.ROOT)))
                 .withTcpAllowed(false)
-                .withPrincipal("kerberosbind-sdfsdfsf")
+                .withPrincipal("kerberosbind-dummy-principal")
                 .withVerifyKdcTrust(true)
                 .withDomain(String.format("%s.%s.wl.<account-name>.site",
                         environment.getName(),
                         source.getName()))
-                .withNameServers("10.112.23.17")
+                .withNameServers("<dummy-ip: 1.2.3.4>")
                 .build();
     }
 
