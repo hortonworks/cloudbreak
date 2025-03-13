@@ -96,6 +96,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATA_LAKE_L
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.E2E_TEST_ONLY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.ENABLE_RMS_ON_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA_BATCH_CALL;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.JUMPGATE_ENABLE_NEW_ROOT_CA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.MEDIUM_DUTY_UPGRADE_ON_HIGHER_RUNTIME;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OBSERVABILITY_DMP;
@@ -603,6 +604,10 @@ public class EntitlementService {
 
     public boolean isFlexibleServerUpgradeLongPollingEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_AZURE_DATABASE_FLEXIBLE_SERVER_UPGRADE_LONG_POLLING);
+    }
+
+    public boolean isJumpgateNewRootCertEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, JUMPGATE_ENABLE_NEW_ROOT_CA);
     }
 
     public boolean isSingleServerRejectEnabled(String accountId) {

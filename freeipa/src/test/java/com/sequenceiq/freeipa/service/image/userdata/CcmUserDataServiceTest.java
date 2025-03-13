@@ -66,6 +66,8 @@ class CcmUserDataServiceTest {
 
     private static final String NEW_HMAC_KEY = "newHmacKey";
 
+    private static final String NEW_INVERTINGPROXY_CERT = "newInvertingProxyCert";
+
     private static final String NEW_HMAC_FOR_PRIVATE_KEY = "newHmacForPrivateKey";
 
     private static final String MODIFIED_USER_DATA = """
@@ -191,7 +193,7 @@ class CcmUserDataServiceTest {
     }
 
     @Test
-    void testSaveOrUpdateStackCcmParametersWhenCcmConnectivityParametersIsNotNull() {
+    void testSaveOrUpdateStackCcmParametersWhenCcmConnectivityParametersIsNotNullNewInvertingProxyCert() {
         Stack stack = getAStack();
         stack.setTunnel(Tunnel.CCMV2_JUMPGATE);
         stack.setCcmParameters(new CcmConnectivityParameters(new DefaultCcmV2JumpgateParameters("ccmInvertingProxyHost",
@@ -207,7 +209,44 @@ class CcmUserDataServiceTest {
                 .setHmacForPrivateKey(NEW_HMAC_FOR_PRIVATE_KEY)
                 .build();
 
-        underTest.saveOrUpdateStackCcmParameters(stack, invertingProxyAgent, null, Optional.of(NEW_HMAC_KEY));
+        underTest.saveOrUpdateStackCcmParameters(stack, invertingProxyAgent, null,
+                Optional.of(NEW_HMAC_KEY), Optional.of(NEW_INVERTINGPROXY_CERT));
+        ArgumentCaptor<Stack> stackCaptor = ArgumentCaptor.forClass(Stack.class);
+        verify(stackService, times(1)).save(stackCaptor.capture());
+        Stack savedStack = stackCaptor.getValue();
+        assertEquals(NEW_ACCESS_KEY_ID, savedStack.getCcmParameters().getCcmV2JumpgateParameters().getAgentMachineUserAccessKey());
+        assertEquals(NEW_ENCIPHERED_ACCESS_KEY, savedStack.getCcmParameters().getCcmV2JumpgateParameters().getAgentMachineUserEncipheredAccessKey());
+        assertEquals(NEW_INITIALISATION_VECTOR, savedStack.getCcmParameters().getCcmV2JumpgateParameters().getInitialisationVector());
+        assertEquals(NEW_HMAC_FOR_PRIVATE_KEY, savedStack.getCcmParameters().getCcmV2JumpgateParameters().getHmacForPrivateKey());
+        assertEquals(NEW_HMAC_KEY, savedStack.getCcmParameters().getCcmV2JumpgateParameters().getHmacKey());
+        assertEquals(NEW_INVERTINGPROXY_CERT, savedStack.getCcmParameters().getCcmV2JumpgateParameters().getInvertingProxyCertificate());
+        assertEquals(TEST_ENVIRONMENT_CRN, savedStack.getCcmParameters().getCcmV2JumpgateParameters().getEnvironmentCrn());
+        assertEquals("stackAgentCrn", savedStack.getCcmParameters().getCcmV2JumpgateParameters().getAgentCrn());
+        assertEquals("ccmAgentCertificate", savedStack.getCcmParameters().getCcmV2JumpgateParameters().getAgentCertificate());
+        assertEquals("ccmAgentEncipheredPrivateKey", savedStack.getCcmParameters().getCcmV2JumpgateParameters().getAgentEncipheredPrivateKey());
+        assertEquals("ccmAgentKeyId", savedStack.getCcmParameters().getCcmV2JumpgateParameters().getAgentKeyId());
+        assertEquals("ccmInvertingProxyHost", savedStack.getCcmParameters().getCcmV2JumpgateParameters().getInvertingProxyHost());
+    }
+
+    @Test
+    void testSaveOrUpdateStackCcmParametersWhenCcmConnectivityParametersIsNotNullOldInvertingProxyCert() {
+        Stack stack = getAStack();
+        stack.setTunnel(Tunnel.CCMV2_JUMPGATE);
+        stack.setCcmParameters(new CcmConnectivityParameters(new DefaultCcmV2JumpgateParameters("ccmInvertingProxyHost",
+                "ccmInvertingProxyCertificate", "ccmAgentCrn", "ccmAgentKeyId", "ccmAgentEncipheredPrivateKey",
+                "ccmAgentCertificate", "ccmEnvironmentCrn", "ccmAgentMachineUserAccessKey",
+                "ccmAgentMachineUserEncipheredAccessKey", "ccmHmacKey", "ccmInitialisationVector",
+                "ccmHmacForPrivateKey")));
+
+        ClusterConnectivityManagementV2Proto.InvertingProxyAgent invertingProxyAgent = ClusterConnectivityManagementV2Proto.InvertingProxyAgent.newBuilder()
+                .setAccessKeyId(NEW_ACCESS_KEY_ID)
+                .setEncipheredAccessKey(NEW_ENCIPHERED_ACCESS_KEY)
+                .setInitialisationVector(NEW_INITIALISATION_VECTOR)
+                .setHmacForPrivateKey(NEW_HMAC_FOR_PRIVATE_KEY)
+                .build();
+
+        underTest.saveOrUpdateStackCcmParameters(stack, invertingProxyAgent, null,
+                Optional.of(NEW_HMAC_KEY), Optional.empty());
         ArgumentCaptor<Stack> stackCaptor = ArgumentCaptor.forClass(Stack.class);
         verify(stackService, times(1)).save(stackCaptor.capture());
         Stack savedStack = stackCaptor.getValue();
@@ -237,7 +276,8 @@ class CcmUserDataServiceTest {
                 .setHmacForPrivateKey(NEW_HMAC_FOR_PRIVATE_KEY)
                 .build();
 
-        underTest.saveOrUpdateStackCcmParameters(stack, invertingProxyAgent, MODIFIED_USER_DATA, Optional.of(NEW_HMAC_KEY));
+        underTest.saveOrUpdateStackCcmParameters(stack, invertingProxyAgent, MODIFIED_USER_DATA,
+                Optional.of(NEW_HMAC_KEY), Optional.of(NEW_INVERTINGPROXY_CERT));
         ArgumentCaptor<Stack> stackCaptor = ArgumentCaptor.forClass(Stack.class);
         verify(stackService, times(1)).save(stackCaptor.capture());
         Stack savedStack = stackCaptor.getValue();
@@ -250,6 +290,7 @@ class CcmUserDataServiceTest {
         assertEquals("stackAgentCrn", savedStack.getCcmParameters().getCcmV2JumpgateParameters().getAgentCrn());
         assertEquals("userDataAgentCertificate", savedStack.getCcmParameters().getCcmV2JumpgateParameters().getAgentCertificate());
         assertEquals("userDataAgentEncipheredPrivateKey", savedStack.getCcmParameters().getCcmV2JumpgateParameters().getAgentEncipheredPrivateKey());
+        assertEquals("userDataInvertingProxyCertificate", savedStack.getCcmParameters().getCcmV2JumpgateParameters().getInvertingProxyCertificate());
         assertEquals("userDataAgentKeyId", savedStack.getCcmParameters().getCcmV2JumpgateParameters().getAgentKeyId());
         assertEquals("userDataInvertingProxyCertificate", savedStack.getCcmParameters().getCcmV2JumpgateParameters().getInvertingProxyCertificate());
         assertEquals("userDataInvertingProxyHost", savedStack.getCcmParameters().getCcmV2JumpgateParameters().getInvertingProxyHost());

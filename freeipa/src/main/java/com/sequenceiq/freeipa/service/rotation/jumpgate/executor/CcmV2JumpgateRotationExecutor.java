@@ -1,10 +1,10 @@
 package com.sequenceiq.freeipa.service.rotation.jumpgate.executor;
 
-import static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent;
 import static com.sequenceiq.freeipa.service.rotation.jumpgate.executor.CcmV2JumpgateUserDataEnvironmentNameConstants.CCM_V2_AGENT_ACCESS_KEY_ID;
 import static com.sequenceiq.freeipa.service.rotation.jumpgate.executor.CcmV2JumpgateUserDataEnvironmentNameConstants.CCM_V2_AGENT_ENCIPHERED_ACCESS_KEY;
 import static com.sequenceiq.freeipa.service.rotation.jumpgate.executor.CcmV2JumpgateUserDataEnvironmentNameConstants.CCM_V_2_AGENT_HMAC_FOR_PRIVATE_KEY;
 import static com.sequenceiq.freeipa.service.rotation.jumpgate.executor.CcmV2JumpgateUserDataEnvironmentNameConstants.CCM_V_2_AGENT_HMAC_KEY;
+import static com.sequenceiq.freeipa.service.rotation.jumpgate.executor.CcmV2JumpgateUserDataEnvironmentNameConstants.CCM_V_2_INVERTING_PROXY_CERTIFICATE;
 import static com.sequenceiq.freeipa.service.rotation.jumpgate.executor.CcmV2JumpgateUserDataEnvironmentNameConstants.CCM_V_2_IV;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 
@@ -16,6 +16,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxy;
+import com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.ccmimpl.ccmv2.CcmV2RetryingClient;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
@@ -63,6 +66,9 @@ public class CcmV2JumpgateRotationExecutor extends AbstractRotationExecutor<Rota
     @Inject
     private CcmUserDataService ccmUserDataService;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     @Override
     protected void rotate(RotationContext rotationContext) throws Exception {
         String resourceCrn = rotationContext.getResourceCrn();
@@ -72,16 +78,20 @@ public class CcmV2JumpgateRotationExecutor extends AbstractRotationExecutor<Rota
         Optional<String> hmacKey = ccmUserDataService.getHmacKeyOpt(stack);
         InvertingProxyAgent updatedInvertingProxyAgent = ccmV2Client.createAgentAccessKeyPair(environmentCrn.getAccountId(), stack.getCcmV2AgentCrn(), hmacKey);
         ImageEntity image = imageService.getByStack(stack);
-        UserDataReplacer userDataReplacer = new UserDataReplacer(image.getGatewayUserdata());
-        String modifiedUserData = userDataReplacer
+        UserDataReplacer userDataReplacer = new UserDataReplacer(image.getGatewayUserdata())
                 .replaceQuoted(CCM_V2_AGENT_ACCESS_KEY_ID, updatedInvertingProxyAgent.getAccessKeyId())
                 .replaceQuoted(CCM_V2_AGENT_ENCIPHERED_ACCESS_KEY, updatedInvertingProxyAgent.getEncipheredAccessKey())
                 .replaceQuoted(CCM_V_2_IV, updatedInvertingProxyAgent.getInitialisationVector())
                 .replaceQuoted(CCM_V_2_AGENT_HMAC_KEY, hmacKey.orElse(EMPTY))
-                .replaceQuoted(CCM_V_2_AGENT_HMAC_FOR_PRIVATE_KEY, updatedInvertingProxyAgent.getHmacForPrivateKey())
-                .getUserData();
-
-        ccmUserDataService.saveOrUpdateStackCcmParameters(stack, updatedInvertingProxyAgent, modifiedUserData, hmacKey);
+                .replaceQuoted(CCM_V_2_AGENT_HMAC_FOR_PRIVATE_KEY, updatedInvertingProxyAgent.getHmacForPrivateKey());
+        Optional<String> newInvertingProxyCert = Optional.empty();
+        if (entitlementService.isJumpgateNewRootCertEnabled(environmentCrn.getAccountId())) {
+            InvertingProxy updatedInvertingProxy = ccmV2Client.awaitReadyInvertingProxyForAccount(environmentCrn.getAccountId());
+            userDataReplacer.replaceQuoted(CCM_V_2_INVERTING_PROXY_CERTIFICATE, updatedInvertingProxy.getCertificate());
+            newInvertingProxyCert = Optional.of(updatedInvertingProxy.getCertificate());
+        }
+        String modifiedUserData = userDataReplacer.getUserData();
+        ccmUserDataService.saveOrUpdateStackCcmParameters(stack, updatedInvertingProxyAgent, modifiedUserData, hmacKey, newInvertingProxyCert);
         uncachedSecretServiceForRotation.putRotation(image.getGatewayUserdataSecret().getSecret(), modifiedUserData);
     }
 

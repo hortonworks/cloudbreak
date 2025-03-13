@@ -176,9 +176,9 @@ public class CcmUserDataService {
     }
 
     public void saveOrUpdateStackCcmParameters(Stack stack, InvertingProxyAgent updatedInvertingProxyAgent, String modifiedUserData,
-            Optional<String> hmacKey) {
+            Optional<String> hmacKey, Optional<String> invertingProxyCert) {
         if (stack.getCcmParameters() != null && stack.getCcmParameters().getCcmV2JumpgateParameters() != null) {
-            stack.setCcmParameters(updateCcmConnectivityParamsFromStack(stack, updatedInvertingProxyAgent, hmacKey));
+            stack.setCcmParameters(updateCcmConnectivityParamsFromStack(stack, updatedInvertingProxyAgent, hmacKey, invertingProxyCert));
         } else if (stack.getCcmParameters() == null || stack.getCcmParameters().getCcmV2JumpgateParameters() == null) {
             stack.setCcmParameters(createCcmConnectivityParametersFromUserData(stack, modifiedUserData));
         }
@@ -186,13 +186,13 @@ public class CcmUserDataService {
     }
 
     private CcmConnectivityParameters updateCcmConnectivityParamsFromStack(Stack stack, InvertingProxyAgent updatedInvertingProxyAgent,
-            Optional<String> hmacKey) {
+            Optional<String> hmacKey, Optional<String> newInveringProxyCertificate) {
         CcmV2JumpgateParameters ccmV2JumpgateParameters = stack.getCcmParameters().getCcmV2JumpgateParameters();
         DefaultCcmV2JumpgateParameters modifiedCcmV2JumpgateParameters = new DefaultCcmV2JumpgateParameters(ccmV2JumpgateParameters.getInvertingProxyHost(),
-                ccmV2JumpgateParameters.getInvertingProxyCertificate(), stack.getCcmV2AgentCrn(), ccmV2JumpgateParameters.getAgentKeyId(),
-                ccmV2JumpgateParameters.getAgentEncipheredPrivateKey(), ccmV2JumpgateParameters.getAgentCertificate(), stack.getEnvironmentCrn(),
-                updatedInvertingProxyAgent.getAccessKeyId(), updatedInvertingProxyAgent.getEncipheredAccessKey(), hmacKey.orElse(EMPTY),
-                updatedInvertingProxyAgent.getInitialisationVector(), updatedInvertingProxyAgent.getHmacForPrivateKey());
+                newInveringProxyCertificate.orElse(ccmV2JumpgateParameters.getInvertingProxyCertificate()), stack.getCcmV2AgentCrn(),
+                ccmV2JumpgateParameters.getAgentKeyId(), ccmV2JumpgateParameters.getAgentEncipheredPrivateKey(), ccmV2JumpgateParameters.getAgentCertificate(),
+                stack.getEnvironmentCrn(), updatedInvertingProxyAgent.getAccessKeyId(), updatedInvertingProxyAgent.getEncipheredAccessKey(),
+                hmacKey.orElse(EMPTY), updatedInvertingProxyAgent.getInitialisationVector(), updatedInvertingProxyAgent.getHmacForPrivateKey());
         return new CcmConnectivityParameters(modifiedCcmV2JumpgateParameters);
     }
 
