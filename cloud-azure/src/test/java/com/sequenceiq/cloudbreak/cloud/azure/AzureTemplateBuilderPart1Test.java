@@ -5,7 +5,6 @@ import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -40,8 +39,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
@@ -293,34 +290,7 @@ public class AzureTemplateBuilderPart1Test {
         String templateString =
                 azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
                         AzureInstanceTemplateOperation.UPSCALE, null);
-        validateJson(templateString);
-    }
-
-    /**
-     * Check that the template string is a valid JSON object.
-     * We're using the Jackson ObjectMapper because Gson has looser rules on what "valid" JSON is.
-     * For instance, a leading comma in an array is valid according to Gson.
-     * <pre>{@code [, "valid"]}</pre>
-     *
-     * @param templateString the string to validate
-     */
-    private void validateJson(String templateString) {
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            mapper.readTree(templateString);
-        } catch (JsonProcessingException jpe) {
-            int contextLines = 2;
-            int lineNumberOfIssue = jpe.getLocation().getLineNr();
-            List<String> lines = templateString.lines().collect(Collectors.toList());
-            int startingIndex = Math.max(lineNumberOfIssue - (contextLines + 1), 0);
-            int endingIndex = Math.min(lineNumberOfIssue + contextLines, lines.size() - 1);
-
-            List<String> context = lines.subList(startingIndex, endingIndex);
-
-            String message = String.join("\n", context);
-            LOGGER.warn("Error reading String as JSON at line {}:\n{}", lineNumberOfIssue, message);
-            fail("Generated ARM template is not valid JSON.\n" + jpe.getMessage());
-        }
+        AzureTestUtils.validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildWithInstanceGroupTypeGatewayShouldNotContainsCoreCustomData {0}")
@@ -351,7 +321,7 @@ public class AzureTemplateBuilderPart1Test {
                         AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         gson.fromJson(templateString, Map.class);
         assertFalse(templateString.contains("\"customData\": \"" + base64EncodedUserData(CORE_CUSTOM_DATA) + '"'));
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildWithInstanceGroupTypeGatewayAndCore {0}")
@@ -384,7 +354,7 @@ public class AzureTemplateBuilderPart1Test {
         gson.fromJson(templateString, Map.class);
         assertTrue(templateString.contains("\"customData\": \"" + base64EncodedUserData(CORE_CUSTOM_DATA) + '"'));
         assertTrue(templateString.contains("\"customData\": \"" + base64EncodedUserData(GATEWAY_CUSTOM_DATA) + '"'));
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestResourceGroupName {0}")
@@ -416,7 +386,7 @@ public class AzureTemplateBuilderPart1Test {
                         AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         gson.fromJson(templateString, Map.class);
         assertFalse(templateString.contains("resourceGroupName"));
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestExistingVNETName {0}")
@@ -454,7 +424,7 @@ public class AzureTemplateBuilderPart1Test {
         assertTrue(templateString.contains("existingVNETName"));
         assertTrue(templateString.contains("existingSubnet"));
         assertTrue(templateString.contains("existingResourceGroup"));
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestExistingSubnetNameNotInTemplate {0}")
@@ -486,7 +456,7 @@ public class AzureTemplateBuilderPart1Test {
                         AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         gson.fromJson(templateString, Map.class);
         assertFalse(templateString.contains("existingSubnetName"));
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestVirtualNetworkNamePrefix {0}")
@@ -518,7 +488,7 @@ public class AzureTemplateBuilderPart1Test {
                         AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         gson.fromJson(templateString, Map.class);
         assertTrue(templateString.contains("virtualNetworkNamePrefix"));
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestSubnet1Prefix {0}")
@@ -550,7 +520,7 @@ public class AzureTemplateBuilderPart1Test {
                         AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         gson.fromJson(templateString, Map.class);
         assertTrue(templateString.contains("subnet1Prefix"));
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestDisksFor1xVersions {0}")
@@ -585,7 +555,7 @@ public class AzureTemplateBuilderPart1Test {
         gson.fromJson(templateString, Map.class);
         assertThat(templateString).contains("[concat('datadisk', 'm0-c4ca4238', '0')]");
         assertThat(templateString).contains("[concat('datadisk', 'm0-c4ca4238', '1')]");
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestDisksOnAllVersionsAndVerifyOsDisks {0}")
@@ -617,7 +587,7 @@ public class AzureTemplateBuilderPart1Test {
                         AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         gson.fromJson(templateString, Map.class);
         assertTrue(templateString.contains("[concat(parameters('vmNamePrefix'),'-osDisk', 'm0-c4ca4238')]"));
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestDisksWhenTheVersion210OrGreater {0}")
@@ -651,7 +621,7 @@ public class AzureTemplateBuilderPart1Test {
         gson.fromJson(templateString, Map.class);
         assertTrue(templateString.contains("[concat(parameters('vmNamePrefix'),'-osDisk', 'm0-c4ca4238')]"));
         assertFalse(templateString.contains("[concat('datadisk', 'm0', '1')]"));
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestAvailabilitySetInTemplate {0}")
@@ -695,7 +665,7 @@ public class AzureTemplateBuilderPart1Test {
         assertFalse(templateString.contains("coreAsName"));
         assertTrue(templateString.contains("'Microsoft.Compute/availabilitySets', 'gateway-as'"));
         assertFalse(templateString.contains("'Microsoft.Compute/availabilitySets', 'core-as'"));
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestWithVmVersion {0}")
@@ -729,7 +699,7 @@ public class AzureTemplateBuilderPart1Test {
         gson.fromJson(templateString, Map.class);
         assertThat(templateString).contains("                   \"apiVersion\": \"2023-07-01\",\n" +
                 "                   \"type\": \"Microsoft.Compute/virtualMachines\",\n");
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestWithNoManagedIdentity {0}")
@@ -761,7 +731,7 @@ public class AzureTemplateBuilderPart1Test {
                         AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         gson.fromJson(templateString, Map.class);
         assertThat(templateString).doesNotContain("\"identity\": {");
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestWithManagedIdentityGiven {0}")
@@ -807,7 +777,7 @@ public class AzureTemplateBuilderPart1Test {
                 "                            \"myIdentity\": {\n" +
                 "                            }\n" +
                 "                        }\n");
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestWithMarketplaceRegularImage {0}")
@@ -835,7 +805,7 @@ public class AzureTemplateBuilderPart1Test {
                                         "publisher": "cloudera"
                                    },
                 """);
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestWithMarketplaceNullImage {0}")
@@ -848,7 +818,7 @@ public class AzureTemplateBuilderPart1Test {
                         AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         gson.fromJson(templateString, Map.class);
         assertThat(templateString).doesNotContain("\"plan\": {");
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestWithMarketplaceCentosSourceImage {0}")
@@ -873,7 +843,7 @@ public class AzureTemplateBuilderPart1Test {
         assertThat(templateString).doesNotContain("""
                                    "plan": {
                 """);
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestWithMarketplaceCentosSourceImage {0}")
@@ -902,7 +872,7 @@ public class AzureTemplateBuilderPart1Test {
                                         "publisher": "redhat"
                                    },
                 """);
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestWithMarketplaceClouderaSourceImage {0}")
@@ -931,7 +901,7 @@ public class AzureTemplateBuilderPart1Test {
                                         "publisher": "cloudera"
                                    },
                 """);
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestWithMarketplaceClouderaFreeipaSourceImage {0}")
@@ -960,7 +930,7 @@ public class AzureTemplateBuilderPart1Test {
                                         "publisher": "cloudera"
                                    },
                 """);
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestWithMarketplaceClouderaUnknownSourceImage {0}")
@@ -989,7 +959,7 @@ public class AzureTemplateBuilderPart1Test {
                                         "publisher": "cloudera"
                                    },
                 """);
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     private void setupMarketplaceTests(String templatePath) {
@@ -1046,7 +1016,7 @@ public class AzureTemplateBuilderPart1Test {
                         AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         gson.fromJson(templateString, Map.class);
         assertThat(templateString).doesNotContain("\"diskEncryptionSet\": {");
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestWithDiskEncryptionSetIdGiven {0}")
@@ -1082,7 +1052,7 @@ public class AzureTemplateBuilderPart1Test {
         gson.fromJson(templateString, Map.class);
         assertThat(templateString).contains("\"diskEncryptionSet\": {");
         assertThat(templateString).contains("\"id\": \"myDES\"");
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     private Group getGroup(String name, InstanceGroupType type) {

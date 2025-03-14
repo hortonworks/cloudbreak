@@ -13,6 +13,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCrea
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateEvent.ROTATE_RDS_CERTIFICATE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent.SALT_UPDATE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.services.restart.ClusterServicesRestartEvent.CLUSTER_SERVICES_RESTART_TRIGGER_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.skumigration.SkuMigrationFlowEvent.SKU_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.CLUSTER_START_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.sync.ClusterSyncEvent.CLUSTER_SYNC_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.CLUSTER_UPSCALE_TRIGGER_EVENT;
@@ -63,6 +64,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.enableselinux.event.CoreEnab
 import com.sequenceiq.cloudbreak.core.flow2.cluster.java.SetDefaultJavaVersionTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.restart.RestartInstancesWithRdsStartEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.services.restart.event.ClusterServicesRestartTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.skumigration.SkuMigrationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateStateSelectors;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateEvent;
 import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
@@ -534,6 +536,11 @@ public class ReactorFlowManager {
                 .build();
         LOGGER.debug("Disk Update flow trigger event sent for datahub {}", stack.getName());
         return reactorNotifier.notify(stackId, selector, datahubDiskUpdateTriggerEvent);
+    }
+
+    public FlowIdentifier triggerSkuMigration(Long stackId, boolean force) {
+        SkuMigrationTriggerEvent event = new SkuMigrationTriggerEvent(SKU_MIGRATION_EVENT.event(), stackId, force);
+        return reactorNotifier.notify(stackId, SKU_MIGRATION_EVENT.event(), event);
     }
 
     public FlowIdentifier triggerRefreshEntitlementParams(Long stackId, String crn, Map<String, Boolean> changedEntitlements, Boolean saltRefreshNeeded) {

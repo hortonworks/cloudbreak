@@ -19,6 +19,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.InstanceGroupName;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
@@ -30,6 +31,7 @@ import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
+import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.VolumeUtils;
@@ -82,12 +84,24 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
 
         List<String> actualVolumeIds = new ArrayList<>();
         List<String> expectedVolumeIds = new ArrayList<>();
+        CloudPlatform cloudPlatform = testContext.getCloudPlatform();
 
-        testContext
-                .given(sdx, SdxTestDto.class).withCloudStorage()
+        SdxTestDto sdxTestDto = testContext
+                .given(sdx, SdxTestDto.class)
+                .withCloudStorage()
+                .withName(sdx)
                 .when(sdxTestClient.create(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
-                .awaitForHealthyInstances()
+                .awaitForHealthyInstances();
+        if (CloudPlatform.AZURE.equals(cloudPlatform)) {
+            testContext
+                    .given(StackTestDto.class)
+                    .withName(sdx)
+                    .when(stackTestClient.refreshV4())
+                    .when(stackTestClient.skuMigration())
+                    .awaitForFlow();
+        }
+        sdxTestDto
                 .then((tc, testDto, client) -> assertCronCreatedOnMasterNodesForUserHomeCreation(testDto))
                 .then((tc, testDto, client) -> {
                     List<String> instancesToDelete = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());

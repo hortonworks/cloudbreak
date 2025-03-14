@@ -17,6 +17,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -124,6 +126,7 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
                 .getHostGroupsWithComponent(HueRoles.HUE_SERVER);
     }
 
+    @Retryable(maxAttempts = 3, backoff = @Backoff(delay = 5000))
     public void updateDnsEntryForLoadBalancers(StackDtoDelegate stack) {
         if (stack != null && manageCertificateAndDnsInPem(stack.getStack())) {
             Optional<LoadBalancer> loadBalancerOptional = getLoadBalancerWithEndpoint(stack);

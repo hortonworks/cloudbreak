@@ -860,6 +860,14 @@ public interface StackV4Endpoint {
             @QueryParam("staleServicesOnly") @DefaultValue("false") boolean staleServicesOnly);
 
     @PUT
+    @Path("{name}/trigger_sku_migration")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Triggering SKU migration", operationId = "triggerSkuMigration",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier triggerSkuMigration(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+            @QueryParam("force") @DefaultValue("false") boolean force);
+
+    @PUT
     @Path("imd_update")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = IMD_UPDATE, operationId = "imdUpdate",
