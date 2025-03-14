@@ -5,7 +5,6 @@ import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
@@ -39,8 +38,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -289,7 +286,7 @@ public class AzureTemplateBuilderPart2Test {
         assertFalse(templateString.contains("publicIPAddress"));
         assertTrue(templateString.contains("\"testtagkey1\": \"testtagvalue1\""));
         assertTrue(templateString.contains("\"testtagkey2\": \"testtagvalue2\""));
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildNoPublicIpNoFirewallButExistingNetwork {0}")
@@ -326,7 +323,7 @@ public class AzureTemplateBuilderPart2Test {
         gson.fromJson(templateString, Map.class);
         assertFalse(templateString.contains("publicIPAddress"));
         assertTrue(templateString.contains("existingNetworkName"));
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildNoPublicIpButFirewall {0}")
@@ -359,7 +356,7 @@ public class AzureTemplateBuilderPart2Test {
         gson.fromJson(templateString, Map.class);
         assertFalse(templateString.contains("publicIPAddress"));
         assertTrue(templateString.contains("networkSecurityGroups"));
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildWithPublicIpAndFirewall {0}")
@@ -392,7 +389,7 @@ public class AzureTemplateBuilderPart2Test {
         gson.fromJson(templateString, Map.class);
         assertTrue(templateString.contains("publicIPAddress"));
         assertTrue(templateString.contains("networkSecurityGroups"));
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     private String base64EncodedUserData(String data) {
@@ -427,7 +424,7 @@ public class AzureTemplateBuilderPart2Test {
                         AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         gson.fromJson(templateString, Map.class);
         assertTrue(templateString.contains("\"customData\": \"" + base64EncodedUserData(CORE_CUSTOM_DATA) + '"'));
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildWithInstanceGroupTypeCoreShouldNotContainsGatewayCustomData {0}")
@@ -458,7 +455,7 @@ public class AzureTemplateBuilderPart2Test {
                         AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         gson.fromJson(templateString, Map.class);
         assertFalse(templateString.contains("\"customData\": \"" + base64EncodedUserData(GATEWAY_CUSTOM_DATA) + '"'));
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildWithInstanceGroupTypeGateway {0}")
@@ -489,7 +486,7 @@ public class AzureTemplateBuilderPart2Test {
                         AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         gson.fromJson(templateString, Map.class);
         assertTrue(templateString.contains("\"customData\": \"" + base64EncodedUserData(GATEWAY_CUSTOM_DATA) + '"'));
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildWithGatewayInstanceGroupTypeAndLoadBalancer {0}")
@@ -531,7 +528,7 @@ public class AzureTemplateBuilderPart2Test {
         assertTrue(templateString.contains("\"name\": \"port-443-rule\","));
         assertTrue(templateString.contains("\"name\": \"port-8443-probe\","));
         assertTrue(templateString.contains("\"type\": \"Microsoft.Network/publicIPAddresses\","));
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildWithGatewayInstanceGroupTypeAndStandardLoadBalancerAndExistingNetworkAndUpscaleWithNoInstances {0}")
@@ -582,7 +579,7 @@ public class AzureTemplateBuilderPart2Test {
         assertTrue(templateString.contains("\"name\": \"Standard\""));
         String strippedTemplateString = templateString.replaceAll("\\s", "");
         assertFalse(strippedTemplateString.contains(ZONE_REDUNDANT));
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildWithGatewayInstanceGroupTypeAndStandardLoadBalancerAndNonExistingNetworkAndUpscaleWithNoInstances {0}")
@@ -635,7 +632,7 @@ public class AzureTemplateBuilderPart2Test {
         assertTrue(templateString.contains("\"name\": \"Standard\""));
         String strippedTemplateString = templateString.replaceAll("\\s", "");
         assertFalse(strippedTemplateString.contains(ZONE_REDUNDANT));
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildWithGatewayInstanceGroupTypeAndStandardLoadBalancerAndNonExistingNetworkAndUpscaleWithNoInstances {0}")
@@ -673,7 +670,7 @@ public class AzureTemplateBuilderPart2Test {
         gson.fromJson(templateString, Map.class);
         String strippedTemplateString = templateString.replaceAll("\\s", "");
         assertFalse(strippedTemplateString.contains(ZONE_REDUNDANT));
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildWithGatewayInstanceGroupTypeAndStandardLoadBalancer {0}")
@@ -719,7 +716,7 @@ public class AzureTemplateBuilderPart2Test {
         assertTrue(templateString.contains("\"tier\": \"Regional\""));
         String strippedTemplateString = templateString.replaceAll("\\s", "");
         assertFalse(strippedTemplateString.contains(ZONE_REDUNDANT));
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildWithStandardLoadBalancerOnlyTargetGroupsUpdated {0}")
@@ -775,7 +772,7 @@ public class AzureTemplateBuilderPart2Test {
         String strippedTemplateString = templateString.replaceAll("\\s", "");
         assertTrue(strippedTemplateString.contains(lbGroupExpectedBlob));
         assertTrue(strippedTemplateString.contains(nonLbGroupExpectedBlob));
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildWithGatewayInstanceGroupTypeAndMultipleLoadBalancers {0}")
@@ -832,7 +829,7 @@ public class AzureTemplateBuilderPart2Test {
         assertEquals(1, StringUtils.countMatches(templateString,
                 "\"id\": \"[resourceId('Microsoft.Network/publicIPAddresses', 'LoadBalancertestStackPUBLIC-publicIp')]\""));
         assertFalse(StringUtils.contains(templateString, "\"name\": \"group-gateway-group-outbound-rule\","));
-        validateJson(templateString);
+        AzureTestUtils.validateJson(templateString);
     }
 
     @ParameterizedTest(name = "testNicDependenciesAreValidJson {0}")
@@ -874,32 +871,7 @@ public class AzureTemplateBuilderPart2Test {
         String templateString =
                 azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
                         AzureInstanceTemplateOperation.UPSCALE, null);
-        validateJson(templateString);
-    }
-
-    /**
-     * Check that the template string is a valid JSON object.
-     * We're using the Jackson ObjectMapper because Gson has looser rules on what "valid" JSON is.
-     * For instance, a leading comma in an array is valid according to Gson.
-     * <pre>{@code [, "valid"]}</pre>
-     *
-     * @param templateString the string to validate
-     */
-    private void validateJson(String templateString) {
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            mapper.readTree(templateString);
-        } catch (JsonProcessingException jpe) {
-            int contextLines = 2;
-            int lineNumberOfIssue = jpe.getLocation().getLineNr();
-            List<String> lines = templateString.lines().collect(Collectors.toList());
-            int startingIndex = Math.max(lineNumberOfIssue - (contextLines + 1), 0);
-            int endingIndex = Math.min(lineNumberOfIssue + contextLines, lines.size() - 1);
-            List<String> context = lines.subList(startingIndex, endingIndex);
-            String message = String.join("\n", context);
-            LOGGER.warn("Error reading String as JSON at line {}:\n{}", lineNumberOfIssue, message);
-            fail("Generated ARM template is not valid JSON.\n" + jpe.getMessage());
-        }
+        AzureTestUtils.validateJson(templateString);
     }
 
     private boolean isTemplateVersionGreaterOrEqualThan2100(String templatePath) {

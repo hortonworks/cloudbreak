@@ -541,4 +541,8 @@ public class InstanceMetaDataService {
     public List<SubnetIdWithResourceNameAndCrn> findAllUsedSubnetsByEnvironmentCrn(String environmentCrn) {
         return repository.findAllUsedSubnetsByEnvironmentCrn(environmentCrn);
     }
+
+    public void updatePublicIp(String instanceId, String publicIp) {
+        repository.updatePublicIp(instanceId, publicIp);
+    }
 }

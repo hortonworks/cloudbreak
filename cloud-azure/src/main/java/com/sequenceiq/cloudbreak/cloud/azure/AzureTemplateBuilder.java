@@ -51,6 +51,12 @@ public class AzureTemplateBuilder {
     @Value("${cb.arm.template.lb.path:}")
     private String armTemplateLbPath;
 
+    @Value("${cb.arm.template.remove.publicip.path:}")
+    private String armTemplateRemovePublicIpPath;
+
+    @Value("${cb.arm.template.attach.publicip.path:}")
+    private String armTemplateAttachPublicIpPath;
+
     @Value("${cb.arm.parameter.path:}")
     private String armTemplateParametersPath;
 
@@ -105,7 +111,7 @@ public class AzureTemplateBuilder {
             AzureSecurityView armSecurityView = new AzureSecurityView(cloudStack.getGroups());
             boolean containsMarketplaceImageDetails = cloudStack.getTemplate().contains("marketplaceImageDetails");
 
-            AzureLoadBalancerModelBuilder loadBalancerModelBuilder = new AzureLoadBalancerModelBuilder(cloudStack, stackName, !containsMarketplaceImageDetails);
+            AzureLoadBalancerModelBuilder loadBalancerModelBuilder = new AzureLoadBalancerModelBuilder(cloudStack, stackName);
             Region region = cloudContext.getLocation().getRegion();
             CloudVmTypes cloudVmTypes = platformResources.virtualMachinesNonExtended(armCredentialView.getCloudCredential(), region, null);
 
@@ -154,6 +160,54 @@ public class AzureTemplateBuilder {
         }
     }
 
+    public String buildPublicIpDetachForVMs(String stackName, CloudContext cloudContext, AzureStackView armStack, CloudStack cloudStack) {
+        Network network = cloudStack.getNetwork();
+        Map<String, Object> model = new HashMap<>();
+        model.put("groups", armStack.getInstancesByGroupType());
+        model.put("igs", armStack.getInstanceGroups());
+        model.put("stackname", stackName);
+        model.put("existingVPC", azureUtils.isExistingNetwork(network));
+        model.put("resourceGroupName", azureUtils.getCustomResourceGroupName(network));
+        model.put("existingVNETName", azureUtils.getCustomNetworkId(network));
+        model.put("region", cloudContext.getLocation().getRegion().value());
+        try {
+            return freeMarkerTemplateUtils.processTemplateIntoString(getTemplate(armTemplateRemovePublicIpPath), model);
+        } catch (IOException | TemplateException e) {
+            throw new CloudConnectorException("Failed to process the ARM TemplateBuilder for public IP detachment", e);
+        }
+    }
+
+    public String buildAttachPublicIpsForVMsAndAddLB(String stackName, CloudContext cloudContext, AzureCredentialView armCredentialView, AzureStackView armStack,
+            CloudStack cloudStack) {
+        Network network = cloudStack.getNetwork();
+        Region region = cloudContext.getLocation().getRegion();
+        AzureLoadBalancerModelBuilder loadBalancerModelBuilder = new AzureLoadBalancerModelBuilder(cloudStack, stackName);
+        AzureSecurityView armSecurityView = new AzureSecurityView(cloudStack.getGroups());
+        CloudVmTypes cloudVmTypes = platformResources.virtualMachinesNonExtended(armCredentialView.getCloudCredential(), region, null);
+        Map<String, Object> model = new HashMap<>();
+        model.put("groups", armStack.getInstancesByGroupType());
+        model.put("igs", armStack.getInstanceGroups());
+        model.put("stackname", stackName);
+        model.put("existingVPC", azureUtils.isExistingNetwork(network));
+        model.put("resourceGroupName", azureUtils.getCustomResourceGroupName(network));
+        model.put("existingVNETName", azureUtils.getCustomNetworkId(network));
+        model.put("region", region.value());
+        model.put("noPublicIp", azureUtils.isPrivateIp(network));
+        model.put("multiAz", cloudStack.isMultiAz());
+        model.put("userDefinedTags", cloudStack.getTags());
+        model.put("existingSubnetName", azureUtils.getCustomSubnetIds(network).stream().findFirst().orElse(""));
+        model.put("endpointGwSubnet", azureUtils.getCustomEndpointGatewaySubnetIds(network).stream().findFirst().orElse(""));
+        model.put("securityGroups", armSecurityView.getSecurityGroupIds());
+        model.put("acceleratedNetworkEnabled", azureAcceleratedNetworkValidator
+                .validate(armStack, cloudVmTypes.getCloudVmResponses().getOrDefault(region.value(), Set.of())));
+        model.putAll(loadBalancerModelBuilder.buildModel());
+        try {
+            return freeMarkerTemplateUtils.processTemplateIntoString(getTemplate(armTemplateAttachPublicIpPath), model);
+        } catch (IOException | TemplateException e) {
+            throw new CloudConnectorException("Failed to process the ARM TemplateBuilder for public IP and LB attachment", e);
+        }
+    }
+
     public String buildLoadBalancer(String stackName, AzureCredentialView armCredentialView, AzureStackView armStack, CloudContext cloudContext,
             CloudStack cloudStack, AzureInstanceTemplateOperation azureInstanceTemplateOperation) {
         if (!StringUtils.hasText(armTemplateLbPath)) {
@@ -164,7 +218,7 @@ public class AzureTemplateBuilder {
                 Network network = cloudStack.getNetwork();
                 AzureSecurityView armSecurityView = new AzureSecurityView(cloudStack.getGroups());
 
-                AzureLoadBalancerModelBuilder loadBalancerModelBuilder = new AzureLoadBalancerModelBuilder(cloudStack, stackName, false);
+                AzureLoadBalancerModelBuilder loadBalancerModelBuilder = new AzureLoadBalancerModelBuilder(cloudStack, stackName);
                 Region region = cloudContext.getLocation().getRegion();
                 CloudVmTypes cloudVmTypes = platformResources.virtualMachinesNonExtended(armCredentialView.getCloudCredential(), region, null);
 

@@ -39,6 +39,8 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudImageException;
 import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
+import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -240,6 +242,55 @@ public class AzureResourceConnector extends AbstractResourceConnector {
     public List<CloudResourceStatus> updateLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier) {
         LOGGER.debug("Updating loadbalancer");
         return launchLoadBalancers(authenticatedContext, stack, persistenceNotifier);
+    }
+
+    public void deleteLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, List<String> loadBalancersToRemove) {
+        AzureClient client = authenticatedContext.getParameter(AzureClient.class);
+        CloudContext cloudContext = authenticatedContext.getCloudContext();
+        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
+        azureUtils.deleteLoadBalancers(client, resourceGroupName, loadBalancersToRemove);
+    }
+
+    @Override
+    public List<CloudLoadBalancer> describeLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack,
+            List<CloudLoadBalancerMetadata> loadBalancers) {
+        AzureClient client = authenticatedContext.getParameter(AzureClient.class);
+        CloudContext cloudContext = authenticatedContext.getCloudContext();
+        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
+        return azureUtils.describeLoadBalancers(client, resourceGroupName, loadBalancers);
+    }
+
+    @Override
+    public void detachPublicIpAddressesForVMsIfNotPrivate(AuthenticatedContext authenticatedContext, CloudStack stack) {
+        if (!azureUtils.isPrivateIp(stack.getNetwork())) {
+            LOGGER.info("Stack has public IPs, we will detach public IP addresses from the VMs.");
+            AzureClient client = authenticatedContext.getParameter(AzureClient.class);
+            AzureCredentialView azureCredentialView = new AzureCredentialView(authenticatedContext.getCloudCredential());
+            AzureStackView azureStackView = azureStackViewProvider.getAzureStack(azureCredentialView, stack, client, authenticatedContext);
+            CloudContext cloudContext = authenticatedContext.getCloudContext();
+            String stackName = azureUtils.getStackName(cloudContext);
+            String template = azureTemplateBuilder.buildPublicIpDetachForVMs(stackName, cloudContext, azureStackView, stack);
+            String parameters = azureTemplateBuilder.buildParameters();
+            String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
+            LOGGER.info("Template for detaching public IP addresses from the VMs: {}", template);
+            client.createTemplateDeployment(resourceGroupName, stackName, template, parameters);
+        }
+    }
+
+    @Override
+    public List<CloudResource> attachPublicIpAddressesForVMsAndAddLB(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier notifier) {
+        AzureClient client = authenticatedContext.getParameter(AzureClient.class);
+        AzureCredentialView azureCredentialView = new AzureCredentialView(authenticatedContext.getCloudCredential());
+        AzureStackView azureStackView = azureStackViewProvider.getAzureStack(azureCredentialView, stack, client, authenticatedContext);
+        CloudContext cloudContext = authenticatedContext.getCloudContext();
+        String stackName = azureUtils.getStackName(cloudContext);
+        String template = azureTemplateBuilder.buildAttachPublicIpsForVMsAndAddLB(stackName, cloudContext, azureCredentialView, azureStackView, stack);
+        String parameters = azureTemplateBuilder.buildParameters();
+        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
+        LOGGER.info("Template for attaching public IP addresses and add LBs: {}", template);
+        Deployment templateDeployment = client.createTemplateDeployment(resourceGroupName, stackName, template, parameters);
+        persistCloudResources(authenticatedContext, stack, notifier, cloudContext, stackName, resourceGroupName, templateDeployment);
+        return azureCloudResourceService.getDeploymentCloudResources(templateDeployment);
     }
 
     private void createLbTemplateDeployment(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier notifier, String stackName,
