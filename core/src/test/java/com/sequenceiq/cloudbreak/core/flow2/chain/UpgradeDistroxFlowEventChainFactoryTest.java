@@ -68,7 +68,6 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeAvailabilityService;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.service.ClusterSizeUpgradeValidator;
-import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
@@ -176,9 +175,6 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     void testChainQueueForRollingUpgradeWithReplaceVms() {
         when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
         lenient().when(stackDto.getPlatformVariant()).thenReturn("originalVariant");
-        InstanceGroupView instanceGroup1 = mock(InstanceGroupView.class);
-        when(instanceGroup1.getGroupName()).thenReturn("master");
-        when(stackDto.getInstanceGroupViews()).thenReturn(List.of(instanceGroup1));
         when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
@@ -208,9 +204,6 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     void testChainQueueForReplaceVmsWithHundredNodes() {
         when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
         lenient().when(stackDto.getPlatformVariant()).thenReturn("originalVariant");
-        InstanceGroupView instanceGroup1 = mock(InstanceGroupView.class);
-        when(instanceGroup1.getGroupName()).thenReturn("compute");
-        when(stackDto.getInstanceGroupViews()).thenReturn(List.of(instanceGroup1));
         when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
@@ -247,11 +240,6 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         InstanceMetadataView master2 = mock(InstanceMetadataView.class);
         when(master2.getInstanceId()).thenReturn("master-2");
         when(stackDto.getAllAvailableGatewayInstances()).thenReturn(List.of(master1, master2));
-        InstanceGroupView instanceGroup1 = mock(InstanceGroupView.class);
-        when(instanceGroup1.getGroupName()).thenReturn("master");
-        InstanceGroupView instanceGroup2 = mock(InstanceGroupView.class);
-        when(instanceGroup2.getGroupName()).thenReturn("worker");
-        when(stackDto.getInstanceGroupViews()).thenReturn(List.of(instanceGroup1, instanceGroup2));
         when(clusterSizeUpgradeValidator.isClusterSizeLargerThanAllowedForRollingUpgrade(anyLong())).thenReturn(true);
         when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
@@ -303,9 +291,6 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     void testChainQueueForOsUpgradeShouldFilterOutAlreadyUpgradedInstances() {
         when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
         lenient().when(stackDto.getPlatformVariant()).thenReturn("originalVariant");
-        InstanceGroupView instanceGroup1 = mock(InstanceGroupView.class);
-        when(instanceGroup1.getGroupName()).thenReturn("master");
-        when(stackDto.getInstanceGroupViews()).thenReturn(List.of(instanceGroup1));
         when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
