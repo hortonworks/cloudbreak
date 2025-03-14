@@ -42,7 +42,7 @@ public class GcpLabelUtil {
                 LOGGER.debug("Ignoring CRN ({}) parse error during tag value generation : {}", value, e.getMessage());
             }
         }
-        String sanitized = value.split("@")[0].toLowerCase(Locale.ROOT).replaceAll("[^\\w]", "-");
+        String sanitized = value.split("@")[0].toLowerCase(Locale.ROOT).replaceAll("[^\\w-]", "_");
         String shortenedValue = StringUtils.right(sanitized, GCP_MAX_TAG_LEN);
         LOGGER.debug("GCP label element has been transformed from '{}' to '{}'", value, shortenedValue);
         return shortenedValue;
