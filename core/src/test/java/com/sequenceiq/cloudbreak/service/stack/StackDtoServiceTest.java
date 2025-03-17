@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.repository.ClusterDtoRepository;
 import com.sequenceiq.cloudbreak.repository.StackDtoRepository;
-import com.sequenceiq.cloudbreak.repository.StackParametersRepository;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
@@ -83,7 +82,7 @@ class StackDtoServiceTest {
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Mock
-    private StackParametersRepository stackParametersRepository;
+    private StackParametersService stackParametersService;
 
     @Mock
     private RuntimeVersionService runtimeVersionService;

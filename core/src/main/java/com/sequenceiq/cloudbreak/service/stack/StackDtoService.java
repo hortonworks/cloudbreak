@@ -42,7 +42,6 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterDtoRepository;
 import com.sequenceiq.cloudbreak.repository.StackDtoRepository;
-import com.sequenceiq.cloudbreak.repository.StackParametersRepository;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxAccessView;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
@@ -103,7 +102,7 @@ public class StackDtoService implements LocalPaasSdxService {
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Inject
-    private StackParametersRepository stackParametersRepository;
+    private StackParametersService stackParametersService;
 
     @Inject
     private RuntimeVersionService runtimeVersionService;
@@ -200,7 +199,7 @@ public class StackDtoService implements LocalPaasSdxService {
             additionalFileSystem = cluster.getAdditionalFileSystem();
             components = clusterComponentConfigProvider.getComponentsByClusterIdAndInComponentType(cluster.getId(), COMPONENT_TYPES_TO_FETCH);
         }
-        List<StackParameters> parameters = stackParametersRepository.findAllByStackId(stackView.getId());
+        List<StackParameters> parameters = stackParametersService.findAllByStackId(stackView.getId());
         SecurityConfig securityConfig = stackDtoRepository.getSecurityByStackId(stackView.getId());
         Map<InstanceGroupView, List<String>> availabilityZonesByStackId = new HashMap<>();
         if (!instanceGroups.isEmpty()) {
@@ -293,7 +292,7 @@ public class StackDtoService implements LocalPaasSdxService {
     }
 
     public List<StackParameters> getStackParameters(Long stackId) {
-        return stackParametersRepository.findAllByStackId(stackId);
+        return stackParametersService.findAllByStackId(stackId);
     }
 
     public void updateDomainDnsResolver(Long stackId, DnsResolverType actualDnsResolverType) {

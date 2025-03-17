@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack;
 
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.LOAD_BALANCER_SKU_PARAMETER;
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.STANDARD_SKU_MIGRATION_PARAMETER;
+
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -56,7 +59,8 @@ public class AzureStackV4Parameters extends StackV4ParameterBase {
         Map<String, Object> map = super.asMap();
         putIfValueNotNull(map, "resourceGroupName", resourceGroupName);
         putIfValueNotNull(map, "encryptStorage", encryptStorage);
-        putIfValueNotNull(map, "loadBalancerSku", loadBalancerSku.name());
+        putIfValueNotNull(map, LOAD_BALANCER_SKU_PARAMETER, loadBalancerSku.name());
+        map.put(STANDARD_SKU_MIGRATION_PARAMETER, "NOT_NEEDED");
         return map;
     }
 

@@ -92,7 +92,7 @@ public class CheckSkuHandlerTest {
         HandlerEvent<CheckSkuRequest> handlerEvent = new HandlerEvent<>(new Event<>(request));
         Selectable selectable = underTest.doAccept(handlerEvent);
 
-        verify(skuMigrationService, times(0)).updateSkuToStandard(Set.of(loadBalancer));
+        verify(skuMigrationService, times(0)).updateSkuToStandard(STACK_ID, Set.of(loadBalancer));
         verifyNoInteractions(flowMessageService);
         List<CloudLoadBalancerMetadata> loadBalancerMetadataListToDescribe = lbListArgumentCaptor.getValue();
         assertEquals(1, loadBalancerMetadataListToDescribe.size());
@@ -136,7 +136,7 @@ public class CheckSkuHandlerTest {
         HandlerEvent<CheckSkuRequest> handlerEvent = new HandlerEvent<>(new Event<>(request));
         Selectable selectable = underTest.doAccept(handlerEvent);
 
-        verify(skuMigrationService, times(1)).updateSkuToStandard(Set.of(loadBalancer));
+        verify(skuMigrationService, times(1)).updateSkuToStandard(STACK_ID, Set.of(loadBalancer));
         verify(flowMessageService, times(1)).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(), LOAD_BALANCER_SKU_IS_STANDARD);
         List<CloudLoadBalancerMetadata> loadBalancerMetadataListToDescribe = lbListArgumentCaptor.getValue();
         assertEquals(1, loadBalancerMetadataListToDescribe.size());
