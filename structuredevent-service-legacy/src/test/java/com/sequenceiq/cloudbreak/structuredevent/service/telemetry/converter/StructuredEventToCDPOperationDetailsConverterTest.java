@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
+import static com.sequenceiq.cloudbreak.common.request.CreatorClientConstants.CALLER_ID_NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -263,4 +264,77 @@ class StructuredEventToCDPOperationDetailsConverterTest {
 
         assertEquals(UsageProto.CDPEnvironmentsEnvironmentType.Value.AWS, syncOperationDetails.getEnvironmentType());
     }
+
+    @Test
+    void creatorClientSetCorrectlyWhenNotEmptyForStructuredFlowEvent() {
+        StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
+        StackDetails stackDetails = new StackDetails();
+        stackDetails.setCreatorClient("testClient");
+        structuredFlowEvent.setStack(stackDetails);
+
+        UsageProto.CDPOperationDetails details = underTest.convert(structuredFlowEvent);
+
+        assertEquals("testClient", details.getCreatorClient());
+    }
+
+    @Test
+    void creatorClientSetToCallerIdNotFoundWhenEmptyForStructuredFlowEvent() {
+        StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
+        StackDetails stackDetails = new StackDetails();
+        stackDetails.setCreatorClient("");
+        structuredFlowEvent.setStack(stackDetails);
+
+        UsageProto.CDPOperationDetails details = underTest.convert(structuredFlowEvent);
+
+        assertEquals(CALLER_ID_NOT_FOUND, details.getCreatorClient());
+    }
+
+    @Test
+    void creatorClientSetToCallerIdNotFoundWhenNullForStructuredFlowEvent() {
+        StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
+        StackDetails stackDetails = new StackDetails();
+        stackDetails.setCreatorClient(null);
+        structuredFlowEvent.setStack(stackDetails);
+
+        UsageProto.CDPOperationDetails details = underTest.convert(structuredFlowEvent);
+
+        assertEquals(CALLER_ID_NOT_FOUND, details.getCreatorClient());
+    }
+
+    @Test
+    void creatorClientSetCorrectlyWhenNotEmptyForStructuredSyncEvent() {
+        StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
+        StackDetails stackDetails = new StackDetails();
+        stackDetails.setCreatorClient("testClient");
+        structuredSyncEvent.setStack(stackDetails);
+
+        UsageProto.CDPOperationDetails details = underTest.convert(structuredSyncEvent);
+
+        assertEquals("testClient", details.getCreatorClient());
+    }
+
+    @Test
+    void creatorClientSetToCallerIdNotFoundWhenEmptyForStructuredSyncEvent() {
+        StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
+        StackDetails stackDetails = new StackDetails();
+        stackDetails.setCreatorClient("");
+        structuredSyncEvent.setStack(stackDetails);
+
+        UsageProto.CDPOperationDetails details = underTest.convert(structuredSyncEvent);
+
+        assertEquals(CALLER_ID_NOT_FOUND, details.getCreatorClient());
+    }
+
+    @Test
+    void creatorClientSetToCallerIdNotFoundWhenNullForStructuredSyncEvent() {
+        StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
+        StackDetails stackDetails = new StackDetails();
+        stackDetails.setCreatorClient(null);
+        structuredSyncEvent.setStack(stackDetails);
+
+        UsageProto.CDPOperationDetails details = underTest.convert(structuredSyncEvent);
+
+        assertEquals(CALLER_ID_NOT_FOUND, details.getCreatorClient());
+    }
+
 }

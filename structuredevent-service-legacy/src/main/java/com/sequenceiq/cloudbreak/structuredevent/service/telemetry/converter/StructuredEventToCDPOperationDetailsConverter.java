@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import jakarta.inject.Inject;
 
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
+import com.sequenceiq.cloudbreak.common.request.CreatorClientConstants;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
@@ -65,9 +67,16 @@ public class StructuredEventToCDPOperationDetailsConverter {
             cdpOperationDetails.setCorrelationId(defaultIfEmpty(structuredOperationDetails.getUuid(), ""));
         }
 
-        if (stackDetails != null && stackDetails.getCloudPlatform() != null) {
-            cdpOperationDetails.setEnvironmentType(UsageProto.CDPEnvironmentsEnvironmentType
-                    .Value.valueOf(stackDetails.getCloudPlatform()));
+        if (stackDetails != null) {
+            if (stackDetails.getCloudPlatform() != null) {
+                cdpOperationDetails.setEnvironmentType(UsageProto.CDPEnvironmentsEnvironmentType
+                        .Value.valueOf(stackDetails.getCloudPlatform()));
+            }
+            String client = stackDetails.getCreatorClient();
+            if (isEmpty(client)) {
+                client = CreatorClientConstants.CALLER_ID_NOT_FOUND;
+            }
+            cdpOperationDetails.setCreatorClient(client);
         }
 
         if (flowDetails != null) {
