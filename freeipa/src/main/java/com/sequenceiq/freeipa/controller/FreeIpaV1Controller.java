@@ -505,7 +505,7 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Override
     @InternalOnly
-    public UsedSubnetsByEnvironmentResponse getUsedSubnetsByEnvironment(String environmentCrn) {
+    public UsedSubnetsByEnvironmentResponse getUsedSubnetsByEnvironment(@TenantAwareParam String environmentCrn) {
         List<SubnetIdWithResourceNameAndCrn> allUsedSubnets = freeIpaListService.getAllUsedSubnetsByEnvironmentCrn(environmentCrn);
         return new UsedSubnetsByEnvironmentResponse(allUsedSubnets
                 .stream().map(s -> new UsedSubnetWithResourceResponse(s.getName(), s.getSubnetId(), s.getResourceCrn(), s.getType()))

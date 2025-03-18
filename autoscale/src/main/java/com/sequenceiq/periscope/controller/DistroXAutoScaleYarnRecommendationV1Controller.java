@@ -7,9 +7,9 @@ import jakarta.inject.Inject;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
-import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.periscope.api.endpoint.v1.DistroXAutoScaleYarnRecommendationV1Endpoint;
 import com.sequenceiq.periscope.api.model.DistroXAutoScaleYarnRecommendationResponse;
 import com.sequenceiq.periscope.service.YarnRecommendationService;
@@ -21,9 +21,8 @@ public class DistroXAutoScaleYarnRecommendationV1Controller implements DistroXAu
     private YarnRecommendationService yarnRecommendationService;
 
     @Override
-    @InternalOnly
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
-    public DistroXAutoScaleYarnRecommendationResponse getYarnRecommendation(@ResourceCrn String clusterCrn) throws Exception {
+    public DistroXAutoScaleYarnRecommendationResponse getYarnRecommendation(@ResourceCrn @TenantAwareParam String clusterCrn) throws Exception {
         DistroXAutoScaleYarnRecommendationResponse distroXAutoScaleYarnRecommendationResponse = new DistroXAutoScaleYarnRecommendationResponse();
         List<String> yarnRecommendedDecommissionHosts = yarnRecommendationService.getRecommendationFromYarn(clusterCrn);
         distroXAutoScaleYarnRecommendationResponse.setDecommissionNodeIds(yarnRecommendedDecommissionHosts);

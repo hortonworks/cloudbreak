@@ -1,6 +1,5 @@
 package com.sequenceiq.authorization;
 
-import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Method;
@@ -8,6 +7,7 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -55,8 +55,8 @@ public class EnforceAuthorizationTestUtil {
 
     public static void validateMethodByFunction(Function<Method, List<String>> validatorFunction) {
         Set<Class<?>> authorizationResourceClasses = REFLECTIONS.getTypesAnnotatedWith(Controller.class);
-        Set<Class<?>> disabledAuthzOrInternalOnlyClasses = Sets.union(REFLECTIONS.getTypesAnnotatedWith(InternalOnly.class),
-            REFLECTIONS.getTypesAnnotatedWith(DisableCheckPermissions.class));
+        Set<Class<?>> internalOnlyClasses = REFLECTIONS.getTypesAnnotatedWith(InternalOnly.class);
+        Set<Class<?>> disabledAuthzOrInternalOnlyClasses = Sets.union(internalOnlyClasses, REFLECTIONS.getTypesAnnotatedWith(DisableCheckPermissions.class));
         List<String> validationErrors = Sets.difference(authorizationResourceClasses,
                         Sets.union(Set.of("ExampleAuthorizationResourceClass"), disabledAuthzOrInternalOnlyClasses))
                 .stream()
@@ -65,7 +65,18 @@ public class EnforceAuthorizationTestUtil {
                 .filter(method -> Modifier.isPublic(method.getModifiers()))
                 .map(validatorFunction)
                 .flatMap(Collection::stream)
-                .collect(toList());
+                .toList();
         assertTrue(validationErrors.isEmpty(), Joiner.on(System.lineSeparator()).join(validationErrors));
+
+        List<String> internalOnlyClassValidationErrors = internalOnlyClasses
+                .stream()
+                .map(Class::getDeclaredMethods)
+                .flatMap(Arrays::stream)
+                .filter(method -> Modifier.isPublic(method.getModifiers()))
+                .map(EnforceAuthorizationAnnotationTestUtil.hasInternalOnlyRequiredAnnotation())
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
+        assertTrue(internalOnlyClassValidationErrors.isEmpty(), Joiner.on(System.lineSeparator()).join(internalOnlyClassValidationErrors));
     }
 }

@@ -14,6 +14,7 @@ import com.sequenceiq.remoteenvironment.api.v1.environment.model.DescribeRemoteE
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponses;
 import com.sequenceiq.remoteenvironment.service.RemoteEnvironmentService;
 
+@DisableCheckPermissions
 @Controller
 public class RemoteEnvironmentController implements RemoteEnvironmentEndpoint {
 
@@ -21,7 +22,6 @@ public class RemoteEnvironmentController implements RemoteEnvironmentEndpoint {
     private RemoteEnvironmentService remoteEnvironmentService;
 
     @Override
-    @DisableCheckPermissions
     public SimpleRemoteEnvironmentResponses list() {
         MDCBuilder.buildMdcContext();
         return new SimpleRemoteEnvironmentResponses(

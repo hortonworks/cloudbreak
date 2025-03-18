@@ -22,7 +22,6 @@ import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.cloudbreak.auth.ReflectionUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
@@ -52,9 +51,6 @@ public class PermissionCheckService {
     @Inject
     private ResourceAuthorizationService resourceAuthorizationService;
 
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     public Object hasPermission(ProceedingJoinPoint proceedingJoinPoint) {
         long startTime = System.currentTimeMillis();
         MethodSignature methodSignature = (MethodSignature) proceedingJoinPoint.getSignature();
@@ -79,8 +75,8 @@ public class PermissionCheckService {
             return ThreadBasedUserCrnProvider.doAs(initiatorUserCrnParameter.get(), () ->
                     commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime));
         } else {
-            if (regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString()
-                    .equals(Crn.safeFromString(userCrn).getAccountId()) && accountIdNeeded(methodSignature)) {
+            // InternalCrnModifier.changeInternalCrn method should handle when @AccountId or @TenantAwareParam provided and change accountId in userCrn
+            if (RegionAwareInternalCrnGeneratorUtil.INTERNAL_ACCOUNT.equals(Crn.safeFromString(userCrn).getAccountId()) && accountIdNeeded(methodSignature)) {
                 LOGGER.error("Method {} is not prepared to call internally, please check readme in authorization module.",
                         methodSignature.getMethod().getDeclaringClass().getSimpleName() + '#' + methodSignature.getMethod().getName());
                 throw new ForbiddenException("This API is not prepared to use it in service-to-service communication.");

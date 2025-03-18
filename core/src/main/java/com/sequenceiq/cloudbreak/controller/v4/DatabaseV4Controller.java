@@ -9,6 +9,7 @@ import jakarta.transaction.Transactional.TxType;
 
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
@@ -50,6 +51,7 @@ public class DatabaseV4Controller extends NotificationController implements Data
     @Inject
     private DatabaseV4RequestToRDSConfigConverter databaseV4RequestToRDSConfigConverter;
 
+    @AccountIdNotNeeded
     @Override
     public DatabaseV4Responses list(Long workspaceId, String environment, Boolean attachGlobal) {
         Set<RDSConfig> allInWorkspaceAndEnvironment = databaseService.findAllByWorkspaceId(threadLocalService.getRequestedWorkspaceId());
@@ -59,12 +61,14 @@ public class DatabaseV4Controller extends NotificationController implements Data
         );
     }
 
+    @AccountIdNotNeeded
     @Override
     public DatabaseV4Response get(Long workspaceId, String name) {
         RDSConfig database = databaseService.getByNameForWorkspaceId(name, threadLocalService.getRequestedWorkspaceId());
         return rdsConfigToDatabaseV4ResponseConverter.convert(database);
     }
 
+    @AccountIdNotNeeded
     @Override
     public DatabaseV4Response create(Long workspaceId, DatabaseV4Request request) {
         RDSConfig database = databaseService.createForLoggedInUser(databaseV4RequestToRDSConfigConverter.convert(request),
@@ -73,6 +77,7 @@ public class DatabaseV4Controller extends NotificationController implements Data
         return rdsConfigToDatabaseV4ResponseConverter.convert(database);
     }
 
+    @AccountIdNotNeeded
     @Override
     public DatabaseV4Response delete(Long workspaceId, String name) {
         RDSConfig deleted = databaseService.deleteByNameFromWorkspace(name,
@@ -81,6 +86,7 @@ public class DatabaseV4Controller extends NotificationController implements Data
         return rdsConfigToDatabaseV4ResponseConverter.convert(deleted);
     }
 
+    @AccountIdNotNeeded
     @Override
     public DatabaseV4Responses deleteMultiple(Long workspaceId, Set<String> names) {
         Set<RDSConfig> deleted = databaseService.deleteMultipleByNameFromWorkspace(names, threadLocalService.getRequestedWorkspaceId());
@@ -91,6 +97,7 @@ public class DatabaseV4Controller extends NotificationController implements Data
         );
     }
 
+    @AccountIdNotNeeded
     @Override
     public DatabaseV4Request getRequest(Long workspaceId, String name) {
         RDSConfig database = databaseService.getByNameForWorkspaceId(name, threadLocalService.getRequestedWorkspaceId());

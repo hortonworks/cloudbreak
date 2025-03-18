@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.periscope.api.endpoint.v2.AutoScaleClusterV2Endpoint;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterResponse;
@@ -34,6 +35,7 @@ public class AutoScaleClusterV2Controller implements AutoScaleClusterV2Endpoint 
     @Inject
     private ClusterConverter clusterConverter;
 
+    @AccountIdNotNeeded
     @Override
     public AutoscaleClusterResponse getByCloudbreakCluster(Long stackId) {
         Cluster cluster = clusterService.findOneByStackId(stackId);
@@ -41,12 +43,14 @@ public class AutoScaleClusterV2Controller implements AutoScaleClusterV2Endpoint 
                 autoScaleClusterCommonService.getCluster(cluster.getId()));
     }
 
+    @AccountIdNotNeeded
     @Override
     public void deleteByCloudbreakCluster(Long stackId) {
         Cluster cluster = clusterService.findOneByStackId(stackId);
         autoScaleClusterCommonService.deleteCluster(cluster.getId());
     }
 
+    @AccountIdNotNeeded
     @Override
     public AutoscaleClusterResponse runByCloudbreakCluster(Long stackId) {
         Cluster cluster = clusterService.findOneByStackId(stackId);
@@ -54,6 +58,7 @@ public class AutoScaleClusterV2Controller implements AutoScaleClusterV2Endpoint 
                 autoScaleClusterCommonService.setState(cluster.getId(), StateJson.running()));
     }
 
+    @AccountIdNotNeeded
     @Override
     public AutoscaleClusterResponse suspendByCloudbreakCluster(Long stackId) {
         Cluster cluster = clusterService.findOneByStackId(stackId);
@@ -61,6 +66,7 @@ public class AutoScaleClusterV2Controller implements AutoScaleClusterV2Endpoint 
                 autoScaleClusterCommonService.setState(cluster.getId(), StateJson.suspended()));
     }
 
+    @AccountIdNotNeeded
     @Override
     public AutoscaleClusterResponse enableAutoscaleStateByCloudbreakCluster(Long stackId) {
         Cluster cluster = clusterService.findOneByStackId(stackId);
@@ -68,6 +74,7 @@ public class AutoScaleClusterV2Controller implements AutoScaleClusterV2Endpoint 
                 autoScaleClusterCommonService.setAutoscaleState(cluster.getId(), AutoscaleClusterState.enable()));
     }
 
+    @AccountIdNotNeeded
     @Override
     public AutoscaleClusterResponse disableAutoscaleStateByCloudbreakCluster(Long stackId) {
         Cluster cluster = clusterService.findOneByStackId(stackId);

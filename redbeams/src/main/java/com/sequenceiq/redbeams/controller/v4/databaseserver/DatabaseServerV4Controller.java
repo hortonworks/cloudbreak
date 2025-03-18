@@ -349,7 +349,7 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     @Override
     @InternalOnly
-    public UsedSubnetsByEnvironmentResponse getUsedSubnetsByEnvironment(String environmentCrn) {
+    public UsedSubnetsByEnvironmentResponse getUsedSubnetsByEnvironment(@TenantAwareParam String environmentCrn) {
         LOGGER.info("We don't store the used subnet id so we don't give it back");
         return new UsedSubnetsByEnvironmentResponse(Collections.emptyList());
     }

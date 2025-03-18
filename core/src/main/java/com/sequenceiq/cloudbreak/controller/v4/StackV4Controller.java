@@ -670,7 +670,7 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     @InternalOnly
-    public UsedSubnetsByEnvironmentResponse getUsedSubnetsByEnvironment(Long workspaceId, String environmentCrn) {
+    public UsedSubnetsByEnvironmentResponse getUsedSubnetsByEnvironment(Long workspaceId, @TenantAwareParam String environmentCrn) {
         List<SubnetIdWithResourceNameAndCrn> allUsedSubnets = stackOperations.getUsedSubnetsByEnvironment(environmentCrn);
         return new UsedSubnetsByEnvironmentResponse(allUsedSubnets
                 .stream().map(s -> new UsedSubnetWithResourceResponse(s.getName(), s.getSubnetId(), s.getResourceCrn(), s.getType().name()))
@@ -750,7 +750,8 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     @InternalOnly
-    public void validateDefaultJavaVersionUpdateByCrnInternal(Long workspaceId, String crn, SetDefaultJavaVersionRequest request) {
+    public void validateDefaultJavaVersionUpdateByCrnInternal(Long workspaceId, @TenantAwareParam String crn,
+            SetDefaultJavaVersionRequest request) {
         stackOperationService.validateDefaultJavaVersionUpdate(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(), request);
     }
 

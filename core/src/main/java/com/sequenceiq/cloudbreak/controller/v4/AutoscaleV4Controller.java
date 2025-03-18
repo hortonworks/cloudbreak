@@ -214,6 +214,7 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Override
     @InternalOnly
+    @AccountIdNotNeeded
     public List<StackStatusV4Response> getDeletedStacks(Long since) {
         return stackOperations.getDeletedStacks(since);
     }

@@ -55,6 +55,7 @@ public class CloudProviderServicesV4Controller implements CloudProviderServicesV
     }
 
     @Override
+    @AccountIdNotNeeded
     public NoSqlTableMetadataResponse getNoSqlTableMetaData(@Valid NoSqlTableMetadataRequest request) {
         try {
             return cloudProviderService.getNoSqlTableMetaData(request);
@@ -64,6 +65,7 @@ public class CloudProviderServicesV4Controller implements CloudProviderServicesV
     }
 
     @Override
+    @AccountIdNotNeeded
     public NoSqlTableDeleteResponse deleteNoSqlTable(@Valid NoSqlTableDeleteRequest request) {
         try {
             return cloudProviderService.deleteNoSqlTable(request);

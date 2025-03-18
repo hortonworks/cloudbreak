@@ -87,7 +87,8 @@ public class ExternalizedComputeInternalController implements ExternalizedComput
     }
 
     @Override
-    public ExternalizedComputeClusterCredentialValidationResponse validateCredential(String credentialName, String region, String initiatorUserCrn) {
+    public ExternalizedComputeClusterCredentialValidationResponse validateCredential(String credentialName, String region,
+            @InitiatorUserCrn String initiatorUserCrn) {
         return externalizedComputeClusterService.validateCredential(credentialName, region, initiatorUserCrn);
     }
 

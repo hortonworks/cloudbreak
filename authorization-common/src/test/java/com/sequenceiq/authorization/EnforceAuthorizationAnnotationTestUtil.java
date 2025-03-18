@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Arrays;
@@ -30,6 +31,7 @@ import org.springframework.stereotype.Controller;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByCompositeRequestProperty;
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
@@ -48,6 +50,9 @@ import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
 import com.sequenceiq.authorization.service.list.AbstractAuthorizationFiltering;
 import com.sequenceiq.authorization.util.AuthorizationAnnotationUtils;
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
+import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
+import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 
 public class EnforceAuthorizationAnnotationTestUtil {
 
@@ -59,7 +64,7 @@ public class EnforceAuthorizationAnnotationTestUtil {
                     .put(CheckPermissionByResourceNameList.class, anyCollectionFrom(ResourceNameList.class, list(String.class), set(String.class)))
                     .put(DisableCheckPermissions.class, noRestriction())
                     .put(CheckPermissionByAccount.class, noRestriction())
-                    .put(InternalOnly.class, noRestriction())
+                    .put(InternalOnly.class, hasInternalOnlyRequiredAnnotation())
                     .put(CustomPermissionCheck.class, noRestriction())
                     .put(FilterListBasedOnPermissions.class, hasListFilteringInController())
                     .put(CheckPermissionByRequestProperty.class, hasParamWhere(RequestObject.class, requestObject()))
@@ -165,12 +170,49 @@ public class EnforceAuthorizationAnnotationTestUtil {
 
     private static Function<Method, Optional<String>> hasParam(Class<? extends Annotation> annotation, Class<?> type) {
         return method -> {
-            long count = Arrays.stream(method.getParameters())
-                    .filter(parameter -> parameter.isAnnotationPresent(annotation) && type.equals(parameter.getType()))
-                    .count();
-            String errorMessageCommon = " method parameter with @" + annotation.getSimpleName() + " annotation and type " + type.getSimpleName();
-            return evaluateResult(method, count, errorMessageCommon);
+            return hasParam(annotation, type, method);
         };
+    }
+
+    private static Optional<String> hasParam(Class<? extends Annotation> annotation, Class<?> type, Method method) {
+        long count = Arrays.stream(method.getParameters())
+                .filter(parameter -> parameter.isAnnotationPresent(annotation) && type.equals(parameter.getType()))
+                .count();
+        String errorMessageCommon = " method parameter with @" + annotation.getSimpleName() + " annotation and type " + type.getSimpleName();
+        return evaluateResult(method, count, errorMessageCommon);
+    }
+
+    public static Function<Method, Optional<String>> hasInternalOnlyRequiredAnnotation() {
+        return method -> {
+            boolean hasRequiredAnnotation = hasInternalOnlyRequiredMethodParameter(method)
+                    || hasTenantAwareParamObjectParameter(method)
+                    || method.isAnnotationPresent(AccountIdNotNeeded.class);
+            if (hasRequiredAnnotation) {
+                return Optional.empty();
+            } else {
+                return Optional.of(invalid(method, String.format("One of the following annotations are missing to use @InternalOnly annotation: %s",
+                        Set.of(TenantAwareParam.class.getSimpleName(), AccountId.class.getSimpleName(),
+                                InitiatorUserCrn.class.getSimpleName(), AccountIdNotNeeded.class.getSimpleName()))));
+            }
+        };
+    }
+
+    private static boolean hasTenantAwareParamObjectParameter(Method method) {
+        Optional<Parameter> requestObjectParam = Arrays.stream(method.getParameters())
+                .filter(parameter -> parameter.isAnnotationPresent(TenantAwareParam.class))
+                .findAny();
+        if (requestObjectParam.isPresent()) {
+            Class<?> requestObjectType = requestObjectParam.get().getType();
+            return Arrays.stream(requestObjectType.getDeclaredFields())
+                    .anyMatch(field -> field.isAnnotationPresent(TenantAwareParam.class) && String.class.equals(field.getType()));
+        }
+        return false;
+    }
+
+    private static boolean hasInternalOnlyRequiredMethodParameter(Method method) {
+        return hasParam(TenantAwareParam.class, String.class, method).isEmpty()
+                || hasParam(AccountId.class, String.class, method).isEmpty()
+                || hasParam(InitiatorUserCrn.class, String.class, method).isEmpty();
     }
 
     private static Function<Method, Optional<String>> anyCollectionFrom(Class<? extends Annotation> annotation, GenericType... genericTypes) {

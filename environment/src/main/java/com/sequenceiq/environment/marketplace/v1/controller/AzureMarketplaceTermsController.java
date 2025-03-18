@@ -12,6 +12,7 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.environment.api.v1.marketplace.endpoint.AzureMarketplaceTermsEndpoint;
 import com.sequenceiq.environment.api.v1.marketplace.model.AzureMarketplaceTermsRequest;
 import com.sequenceiq.environment.api.v1.marketplace.model.AzureMarketplaceTermsResponse;
@@ -39,7 +40,7 @@ public class AzureMarketplaceTermsController extends NotificationController impl
 
     @Override
     @InternalOnly
-    public AzureMarketplaceTermsResponse getInAccount(String accountId) {
+    public AzureMarketplaceTermsResponse getInAccount(@AccountId String accountId) {
         Boolean accepted = azureMarketplaceTermsService.get(accountId);
         LOGGER.debug("Automatic image terms acceptance setting in account {}: {}", accountId, accepted);
         return new AzureMarketplaceTermsResponse(accepted);
