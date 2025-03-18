@@ -31,12 +31,12 @@ import com.azure.resourcemanager.authorization.fluent.models.RoleAssignmentInner
 import com.azure.resourcemanager.msi.models.Identity;
 import com.azure.resourcemanager.resources.fluentcore.arm.ResourceId;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
-import com.azure.resourcemanager.storage.models.Kind;
 import com.azure.resourcemanager.storage.models.StorageAccount;
 import com.gs.collections.api.set.MutableSet;
 import com.gs.collections.impl.factory.Sets;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureListResultFactory;
 import com.sequenceiq.cloudbreak.cloud.azure.service.AzureClientCachedOperations;
@@ -65,6 +65,9 @@ public class AzureIDBrokerObjectStorageValidator {
 
     @Inject
     private AzureStorage azureStorage;
+
+    @Inject
+    private AzureUtils azureUtils;
 
     @Inject
     private EntitlementService entitlementService;
@@ -123,7 +126,11 @@ public class AzureIDBrokerObjectStorageValidator {
             String logsLocationBase, String backupLocationBase,
             String accountId, ValidationResultBuilder resultBuilder) {
         for (String storageAccountName : getStorageAccountNames(spiFileSystem, logsLocationBase, backupLocationBase)) {
-            Optional<StorageAccount> storageAccount = azureClientCachedOperations.getStorageAccount(client, accountId, storageAccountName, Kind.STORAGE_V2);
+            Optional<StorageAccount> storageAccount = azureClientCachedOperations.getStorageAccount(
+                    client,
+                    accountId,
+                    storageAccountName,
+                    azureUtils.getSupportedAzureStorageKinds());
             boolean hierarchical = storageAccount.map(StorageAccount::isHnsEnabled).orElse(false);
             if (storageAccount.isPresent() && !hierarchical) {
                 addError(resultBuilder, String.format("Hierarchical namespace is mandatory for Storage Account '%s'. " +

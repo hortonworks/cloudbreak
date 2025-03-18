@@ -97,6 +97,9 @@ import com.azure.resourcemanager.resources.fluentcore.model.Creatable;
 import com.azure.resourcemanager.resources.fluentcore.model.HasInnerModel;
 import com.azure.resourcemanager.resources.fluentcore.model.implementation.IndexableRefreshableWrapperImpl;
 import com.azure.resourcemanager.resources.implementation.GenericResourcesImpl;
+import com.azure.resourcemanager.storage.models.Kind;
+import com.azure.resourcemanager.storage.models.StorageAccount;
+import com.azure.resourcemanager.storage.models.StorageAccounts;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDisk;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureLoadBalancerFrontend;
@@ -672,5 +675,119 @@ class AzureClientTest {
         List<Disk> disk = underTest.listDisksByTag(RESOURCE_GROUP_NAME, TAG_NAME, List.of("fqdn4"));
 
         assertEquals(0, disk.size());
+    }
+
+    @Test
+    void testGetStorageAccountFound() {
+        Set<Kind> targetedAccountKinds = Set.of(Kind.STORAGE_V2, Kind.BLOCK_BLOB_STORAGE);
+        StorageAccounts storageAccounts = mock(StorageAccounts.class);
+        AzureListResult<StorageAccount> storageAccountAzureListResult = mock(AzureListResult.class);
+
+        StorageAccount storageAccount1 = mock(StorageAccount.class);
+        lenient().when(storageAccount1.kind()).thenReturn(Kind.STORAGE_V2);
+        lenient().when(storageAccount1.name()).thenReturn("storageAccount1");
+
+        StorageAccount storageAccount2 = mock(StorageAccount.class);
+        lenient().when(storageAccount2.kind()).thenReturn(Kind.BLOCK_BLOB_STORAGE);
+        lenient().when(storageAccount2.name()).thenReturn("storageAccount2");
+
+        Set<StorageAccount> accounts = Set.of(
+                storageAccount1,
+                storageAccount2
+        );
+
+        when(storageAccountAzureListResult.getStream()).thenReturn(accounts.stream());
+        when(azureResourceManager.storageAccounts()).thenReturn(storageAccounts);
+        when(azureListResultFactory.list(eq(storageAccounts))).thenReturn(storageAccountAzureListResult);
+
+        Optional<StorageAccount> result = underTest.getStorageAccount("storageAccount2", targetedAccountKinds);
+
+        assertTrue(result.isPresent());
+        assertEquals(storageAccount2, result.get());
+    }
+
+    @Test
+    void testGetStorageAccountNotFound() {
+        Set<Kind> targetedAccountKinds = Set.of(Kind.STORAGE_V2, Kind.BLOCK_BLOB_STORAGE);
+        StorageAccounts storageAccounts = mock(StorageAccounts.class);
+        AzureListResult<StorageAccount> storageAccountAzureListResult = mock(AzureListResult.class);
+
+        StorageAccount storageAccount1 = mock(StorageAccount.class);
+        lenient().when(storageAccount1.kind()).thenReturn(Kind.STORAGE_V2);
+        lenient().when(storageAccount1.name()).thenReturn("storageAccount1");
+
+        StorageAccount storageAccount2 = mock(StorageAccount.class);
+        lenient().when(storageAccount2.kind()).thenReturn(Kind.BLOCK_BLOB_STORAGE);
+        lenient().when(storageAccount2.name()).thenReturn("storageAccount2");
+
+        Set<StorageAccount> accounts = Set.of(
+                storageAccount1,
+                storageAccount2
+        );
+
+        when(storageAccountAzureListResult.getStream()).thenReturn(accounts.stream());
+        when(azureResourceManager.storageAccounts()).thenReturn(storageAccounts);
+        when(azureListResultFactory.list(eq(storageAccounts))).thenReturn(storageAccountAzureListResult);
+
+        Optional<StorageAccount> result = underTest.getStorageAccount("storageAccount3", targetedAccountKinds);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void testGetStorageAccountDifferentKind() {
+        Set<Kind> targetedAccountKinds = Set.of(Kind.STORAGE_V2, Kind.BLOCK_BLOB_STORAGE);
+        StorageAccounts storageAccounts = mock(StorageAccounts.class);
+        AzureListResult<StorageAccount> storageAccountAzureListResult = mock(AzureListResult.class);
+
+        StorageAccount storageAccount1 = mock(StorageAccount.class);
+        lenient().when(storageAccount1.kind()).thenReturn(Kind.STORAGE_V2);
+        lenient().when(storageAccount1.name()).thenReturn("storageAccount1");
+
+        StorageAccount storageAccount2 = mock(StorageAccount.class);
+        lenient().when(storageAccount2.kind()).thenReturn(Kind.BLOB_STORAGE);
+        lenient().when(storageAccount2.name()).thenReturn("storageAccount2");
+
+        Set<StorageAccount> accounts = Set.of(
+                storageAccount1,
+                storageAccount2
+        );
+
+        when(storageAccountAzureListResult.getStream()).thenReturn(accounts.stream());
+        when(azureResourceManager.storageAccounts()).thenReturn(storageAccounts);
+        when(azureListResultFactory.list(eq(storageAccounts))).thenReturn(storageAccountAzureListResult);
+
+        Optional<StorageAccount> result = underTest.getStorageAccount("storageAccount2", targetedAccountKinds);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void testGetStorageAccountCaseInsensitiveName() {
+        Set<Kind> targetedAccountKinds = Set.of(Kind.STORAGE_V2, Kind.BLOCK_BLOB_STORAGE);
+        StorageAccounts storageAccounts = mock(StorageAccounts.class);
+        AzureListResult<StorageAccount> storageAccountAzureListResult = mock(AzureListResult.class);
+
+        StorageAccount storageAccount1 = mock(StorageAccount.class);
+        lenient().when(storageAccount1.kind()).thenReturn(Kind.STORAGE_V2);
+        lenient().when(storageAccount1.name()).thenReturn("storageAccount1");
+
+        StorageAccount storageAccount2 = mock(StorageAccount.class);
+        lenient().when(storageAccount2.kind()).thenReturn(Kind.BLOCK_BLOB_STORAGE);
+        lenient().when(storageAccount2.name()).thenReturn("storageAccount2");
+
+        Set<StorageAccount> accounts = Set.of(
+                storageAccount1,
+                storageAccount2
+        );
+
+        when(storageAccountAzureListResult.getStream()).thenReturn(accounts.stream());
+        when(azureResourceManager.storageAccounts()).thenReturn(storageAccounts);
+        when(azureListResultFactory.list(eq(storageAccounts))).thenReturn(storageAccountAzureListResult);
+
+        Optional<StorageAccount> result = underTest.getStorageAccount("storageaccount2", targetedAccountKinds);
+
+        assertTrue(result.isPresent());
+        assertEquals(storageAccount2, result.get());
     }
 }

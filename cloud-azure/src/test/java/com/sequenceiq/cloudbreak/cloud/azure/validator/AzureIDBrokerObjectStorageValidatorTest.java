@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -33,9 +34,11 @@ import com.azure.resourcemanager.authorization.fluent.models.RoleAssignmentInner
 import com.azure.resourcemanager.msi.models.Identity;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
 import com.azure.resourcemanager.resources.models.Subscription;
+import com.azure.resourcemanager.storage.models.Kind;
 import com.azure.resourcemanager.storage.models.StorageAccount;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureListResult;
 import com.sequenceiq.cloudbreak.cloud.azure.service.AzureClientCachedOperations;
@@ -123,6 +126,9 @@ class AzureIDBrokerObjectStorageValidatorTest {
     private AzureClient client;
 
     @Mock
+    private AzureUtils azureUtils;
+
+    @Mock
     private AdlsGen2ConfigGenerator adlsGen2ConfigGenerator;
 
     @Mock
@@ -190,6 +196,7 @@ class AzureIDBrokerObjectStorageValidatorTest {
         lenient().when(dataAccess.principalId()).thenReturn(DATA_ACCESS_IDENTITY_PRINCIPAL_ID);
         lenient().when(user.id()).thenReturn(USER_IDENTITY_1);
         lenient().when(group.id()).thenReturn(GROUP_IDENTITY_1);
+        lenient().when(azureUtils.getSupportedAzureStorageKinds()).thenReturn(Set.of(Kind.STORAGE_V2, Kind.BLOCK_BLOB_STORAGE));
         lenient().when(azureStorage.findStorageAccountIdInVisibleSubscriptions(any(), anyString(), any())).thenReturn(Optional.of(ABFS_STORAGE_ACCOUNT_ID));
         lenient().when(entitlementService.isDatalakeBackupRestorePrechecksEnabled(any())).thenReturn(true);
         AzureListResult<Identity> azureListResult = mock(AzureListResult.class);

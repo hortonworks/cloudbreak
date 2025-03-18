@@ -61,7 +61,7 @@ public class AzureStorage {
     private String imageStorePrefix;
 
     @Inject
-    private AzureUtils armUtils;
+    private AzureUtils azureUtils;
 
     @Inject
     private SkuTypeResolver skuTypeResolver;
@@ -175,9 +175,9 @@ public class AzureStorage {
     private String getPersistentStorageName(String prefix, AzureCredentialView acv, String region, String resourceGroup) {
         String subscriptionIdPart = StringUtils.isBlank(resourceGroup)
                 ? acv.getSubscriptionId().replaceAll("-", "").toLowerCase(Locale.ROOT)
-                : armUtils.encodeString(acv.getSubscriptionId().replaceAll("-", "").toLowerCase(Locale.ROOT));
+                : azureUtils.encodeString(acv.getSubscriptionId().replaceAll("-", "").toLowerCase(Locale.ROOT));
         String regionInitials = WordUtils.initials(RegionUtil.findByLabelOrName(region).label(), ' ').toLowerCase(Locale.ROOT);
-        String resourceGroupPart = armUtils.encodeString(resourceGroup);
+        String resourceGroupPart = azureUtils.encodeString(resourceGroup);
         String result = String.format("%s%s%s%s", prefix, regionInitials, subscriptionIdPart, resourceGroupPart);
         if (result.length() > MAX_LENGTH_OF_RESOURCE_NAME) {
             result = result.substring(0, MAX_LENGTH_OF_RESOURCE_NAME);
@@ -187,7 +187,7 @@ public class AzureStorage {
     }
 
     public String getDiskContainerName(CloudContext cloudContext) {
-        return armUtils.getStackName(cloudContext);
+        return azureUtils.getStackName(cloudContext);
     }
 
     private Optional<StorageAccount> findStorageAccount(AzureClient client, String storageName) {
@@ -205,7 +205,11 @@ public class AzureStorage {
     }
 
     public Optional<String> findStorageAccountIdInVisibleSubscriptions(AzureClient client, String storageAccountName, String accountId) {
-        Optional<StorageAccount> storageAccount = azureClientCachedOperations.getStorageAccount(client, accountId, storageAccountName, Kind.STORAGE_V2);
+        Optional<StorageAccount> storageAccount = azureClientCachedOperations.getStorageAccount(
+                client,
+                accountId,
+                storageAccountName,
+                azureUtils.getSupportedAzureStorageKinds());
         LOGGER.debug("checking current subscription for storage account");
         if (storageAccount.isPresent()) {
             return storageAccount.map(HasId::id);

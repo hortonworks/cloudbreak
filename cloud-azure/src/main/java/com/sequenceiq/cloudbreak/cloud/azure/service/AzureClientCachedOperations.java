@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.service;
 
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
@@ -13,7 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 public class AzureClientCachedOperations {
 
     @Cacheable(value = AzureClientOperationsCache.AZURE_CLIENT_OPERATIONS_CACHE, key = "{ #accountId,#storageName }")
-    public Optional<StorageAccount> getStorageAccount(AzureClient azureClient, String accountId, String storageName, Kind accountKind) {
+    public Optional<StorageAccount> getStorageAccount(AzureClient azureClient, String accountId, String storageName, Set<Kind> accountKind) {
         return azureClient.getStorageAccount(storageName, accountKind);
     }
 }

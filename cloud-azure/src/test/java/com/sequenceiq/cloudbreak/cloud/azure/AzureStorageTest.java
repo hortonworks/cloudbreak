@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -55,7 +56,7 @@ public class AzureStorageTest {
     private static final String RESOURCE_GROUP = "resource-group";
 
     @Mock
-    private AzureUtils armUtils;
+    private AzureUtils azureUtils;
 
     @Mock
     private SkuTypeResolver skuTypeResolver;
@@ -82,13 +83,15 @@ public class AzureStorageTest {
         AzureClient client = mock(AzureClient.class);
         StorageAccount storageAccount = mock(StorageAccount.class);
         when(storageAccount.id()).thenReturn("storageAccountOneId");
-        when(client.getStorageAccount(STORAGE_ACCOUNT_IN_CURRENT_SUBSCRIPTION, Kind.STORAGE_V2)).thenReturn(Optional.of(storageAccount));
+        when(azureUtils.getSupportedAzureStorageKinds()).thenReturn(Set.of(Kind.STORAGE_V2, Kind.BLOCK_BLOB_STORAGE));
+        when(client.getStorageAccount(STORAGE_ACCOUNT_IN_CURRENT_SUBSCRIPTION, Set.of(Kind.STORAGE_V2, Kind.BLOCK_BLOB_STORAGE)))
+                .thenReturn(Optional.of(storageAccount));
 
         Optional<String> storageAccountId = underTest.findStorageAccountIdInVisibleSubscriptions(client, "storageAccountOne", "");
 
         assertTrue(storageAccountId.isPresent());
         assertEquals("storageAccountOneId", storageAccountId.get());
-        verify(client).getStorageAccount(STORAGE_ACCOUNT_IN_CURRENT_SUBSCRIPTION, Kind.STORAGE_V2);
+        verify(client).getStorageAccount(STORAGE_ACCOUNT_IN_CURRENT_SUBSCRIPTION, Set.of(Kind.STORAGE_V2, Kind.BLOCK_BLOB_STORAGE));
         verify(client, never()).listSubscriptions();
     }
 
@@ -97,7 +100,8 @@ public class AzureStorageTest {
         AzureClient client = mock(AzureClient.class);
         StorageAccountInner storageAccount = mock(StorageAccountInner.class);
         when(storageAccount.id()).thenReturn(STORAGE_ACCOUNT_IN_ANOTHER_SUBSCRIPTION);
-        when(client.getStorageAccount(STORAGE_ACCOUNT_IN_CURRENT_SUBSCRIPTION, Kind.STORAGE_V2)).thenReturn(Optional.empty());
+        when(azureUtils.getSupportedAzureStorageKinds()).thenReturn(Set.of(Kind.STORAGE_V2, Kind.BLOCK_BLOB_STORAGE));
+        when(client.getStorageAccount(STORAGE_ACCOUNT_IN_CURRENT_SUBSCRIPTION, Set.of(Kind.STORAGE_V2))).thenReturn(Optional.empty());
         setupSubscriptions(client);
         when(client.getStorageAccountBySubscription(STORAGE_ACCOUNT_IN_ANOTHER_SUBSCRIPTION, SUBSCRIPTION_ONE, Kind.STORAGE_V2))
                 .thenReturn(Optional.empty());
@@ -108,7 +112,7 @@ public class AzureStorageTest {
 
         assertTrue(storageAccountId.isPresent());
         assertEquals(STORAGE_ACCOUNT_IN_ANOTHER_SUBSCRIPTION, storageAccountId.get());
-        verify(client).getStorageAccount(STORAGE_ACCOUNT_IN_ANOTHER_SUBSCRIPTION, Kind.STORAGE_V2);
+        verify(client).getStorageAccount(STORAGE_ACCOUNT_IN_ANOTHER_SUBSCRIPTION, Set.of(Kind.STORAGE_V2, Kind.BLOCK_BLOB_STORAGE));
         verify(client).listSubscriptions();
     }
 
@@ -122,8 +126,8 @@ public class AzureStorageTest {
 
         when(azureResourceGroupMetadataProvider.useSingleResourceGroup(cloudStack)).thenReturn(true);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudStack)).thenReturn(RESOURCE_GROUP);
-        when(armUtils.encodeString(RESOURCE_GROUP)).thenReturn("2b8305c3");
-        when(armUtils.encodeString("subscriptionone")).thenReturn("33890668");
+        when(azureUtils.encodeString(RESOURCE_GROUP)).thenReturn("2b8305c3");
+        when(azureUtils.encodeString("subscriptionone")).thenReturn("33890668");
 
         String imageStorageName = underTest.getImageStorageName(azureCredentialView, cloudContext, cloudStack);
         assertEquals("cbimgwu2338906682b8305c3", imageStorageName);
@@ -137,8 +141,8 @@ public class AzureStorageTest {
         CloudContext cloudContext = createCloudContext();
 
         when(azureResourceGroupMetadataProvider.useSingleResourceGroup(cloudStack)).thenReturn(false);
-        when(armUtils.encodeString("subscriptionone")).thenReturn("33890668");
-        when(armUtils.encodeString(null)).thenReturn("");
+        when(azureUtils.encodeString("subscriptionone")).thenReturn("33890668");
+        when(azureUtils.encodeString(null)).thenReturn("");
 
         String imageStorageName = underTest.getImageStorageName(azureCredentialView, cloudContext, cloudStack);
         assertEquals("cbimgwu2subscriptionone", imageStorageName);
