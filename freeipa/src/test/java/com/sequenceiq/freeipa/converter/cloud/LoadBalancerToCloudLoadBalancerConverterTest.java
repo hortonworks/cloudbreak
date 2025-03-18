@@ -62,9 +62,9 @@ class LoadBalancerToCloudLoadBalancerConverterTest {
                 .anyMatch(
                         entry -> entry.getKey().getHealthCheckPort().equals(HEALTH_CHECK_PORT) &&
                                 entry.getKey().getTrafficPort().equals(TRAFFIC_PORT) &&
-                                entry.getKey().getHealthCheckPath().equals(HEALTH_CHECK_PATH) &&
+                                entry.getKey().getHealthProbeParameters().getPath().equals(HEALTH_CHECK_PATH) &&
                                 entry.getKey().getTrafficProtocol().equals(NetworkProtocol.TCP) &&
-                                entry.getKey().getHealthCheckProtocol().equals(NetworkProtocol.HTTPS) &&
+                                entry.getKey().getHealthProbeParameters().getProtocol().equals(NetworkProtocol.HTTPS) &&
                                 entry.getValue().equals(groups)));
     }
 

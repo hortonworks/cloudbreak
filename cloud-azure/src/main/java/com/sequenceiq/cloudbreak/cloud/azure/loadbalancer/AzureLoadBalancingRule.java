@@ -5,6 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.Optional;
 
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.HealthProbeParameters;
 import com.sequenceiq.cloudbreak.cloud.model.NetworkProtocol;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 
@@ -31,8 +32,17 @@ public final class AzureLoadBalancingRule {
 
         this.protocol = Optional.ofNullable(trafficProtocol).map(NetworkProtocol::name).orElse("");
         this.name = defaultNameFromPort(portPair.getTrafficPort(), protocol);
-        String healthCheckProtocol = Optional.ofNullable(portPair).map(TargetGroupPortPair::getHealthCheckProtocol).map(NetworkProtocol::name).orElse("");
-        this.probe = new AzureLoadBalancerProbe(portPair.getHealthCheckPort(), null, portPair.getHealthCheckPath(), healthCheckProtocol);
+        String healthCheckProtocol = Optional.ofNullable(portPair)
+                .map(TargetGroupPortPair::getHealthProbeParameters)
+                .map(HealthProbeParameters::getProtocol).map(NetworkProtocol::name).orElse("");
+        HealthProbeParameters healthProbeParameters = portPair.getHealthProbeParameters();
+        this.probe = new AzureLoadBalancerProbe(
+                portPair.getHealthCheckPort(),
+                null,
+                healthProbeParameters.getPath(),
+                healthCheckProtocol,
+                healthProbeParameters.getInterval(),
+                healthProbeParameters.getProbeDownThreshold());
         this.groupName = checkNotNull(group, "Group must be provided.").getName();
     }
 
