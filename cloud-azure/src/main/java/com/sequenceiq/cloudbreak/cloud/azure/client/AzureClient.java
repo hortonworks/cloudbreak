@@ -129,7 +129,6 @@ import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.azure.util.RegionUtil;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
-import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
 import reactor.core.publisher.Flux;
@@ -240,13 +239,6 @@ public class AzureClient {
                 .orElse(ResourceStatus.DELETED);
     }
 
-    public CommonStatus getTemplateDeploymentCommonStatus(String resourceGroupName, String deploymentName) {
-        return handleException(() -> Optional.ofNullable(getTemplateDeployment(resourceGroupName, deploymentName)))
-                .map(Deployment::provisioningState)
-                .map(AzureStatusMapper::mapCommonStatus)
-                .orElse(CommonStatus.DETACHED);
-    }
-
     public void deleteTemplateDeployment(String resourceGroupName, String deploymentName) {
         handleException(() -> azure.deployments().deleteByResourceGroup(resourceGroupName, deploymentName));
     }
@@ -275,10 +267,10 @@ public class AzureClient {
         return handleException(() -> azure.storageAccounts().getByResourceGroup(resourceGroup, storageName));
     }
 
-    public Optional<StorageAccount> getStorageAccount(String storageName, Kind accountKind) {
+    public Optional<StorageAccount> getStorageAccount(String storageName, Set<Kind> targetedAccountKinds) {
         return azureListResultFactory.list(azure.storageAccounts())
                 .getStream()
-                .filter(account -> account.kind().equals(accountKind)
+                .filter(account -> targetedAccountKinds.contains(account.kind())
                         && account.name().equalsIgnoreCase(storageName))
                 .findAny();
     }

@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.azure.core.management.exception.ManagementException;
-import com.azure.resourcemanager.storage.models.Kind;
 import com.azure.resourcemanager.storage.models.StorageAccount;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -66,9 +65,11 @@ public class AzureObjectStorageConnector implements ObjectStorageConnector {
     public ObjectStorageMetadataResponse getObjectStorageMetadata(ObjectStorageMetadataRequest request) {
         AzureClient client = azureClientService.getClient(request.getCredential());
         String accountId = request.getCredential().getAccountId();
-        Optional<StorageAccount> storageAccount = azureClientCachedOperations.getStorageAccount(client, accountId,
+        Optional<StorageAccount> storageAccount = azureClientCachedOperations.getStorageAccount(
+                client,
+                accountId,
                 azureStorageAccountNameExtractor.extractStorageAccountNameIfNecessary(request.getObjectStoragePath()),
-                Kind.STORAGE_V2);
+                azureUtils.getSupportedAzureStorageKinds());
         if (storageAccount.isPresent()) {
             return ObjectStorageMetadataResponse.builder()
                     .withStatus(ResponseStatus.OK)

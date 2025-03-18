@@ -47,6 +47,7 @@ import com.azure.resourcemanager.network.models.Subnet;
 import com.azure.resourcemanager.resources.models.Deployment;
 import com.azure.resourcemanager.resources.models.DeploymentOperation;
 import com.azure.resourcemanager.resources.models.GenericResource;
+import com.azure.resourcemanager.storage.models.Kind;
 import com.google.common.base.Splitter;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage;
@@ -211,6 +212,10 @@ public class AzureUtils {
             armResourceStatus = new CloudResourceStatus(resource, AzureStatusMapper.mapResourceStatus(status));
         }
         return armResourceStatus;
+    }
+
+    public Set<Kind> getSupportedAzureStorageKinds() {
+        return Set.of(Kind.STORAGE_V2, Kind.BLOCK_BLOB_STORAGE);
     }
 
     public boolean isExistingNetwork(Network network) {
