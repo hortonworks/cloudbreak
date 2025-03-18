@@ -197,8 +197,8 @@
                {
                  "name": "${probe.name}",
                  "properties": {
-                   "intervalInSeconds": 5,
-                   "numberOfProbes": 2,
+                   "intervalInSeconds": "${probe.interval}",
+                   "probeThreshold": "${probe.threshold}",
                    "port": ${probe.port},
                    "requestPath": "${probe.path}",
                    "protocol": "${probe.protocol}"

@@ -53,6 +53,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
+import com.sequenceiq.cloudbreak.cloud.model.HealthProbeParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
@@ -273,7 +274,7 @@ public class AzureTemplateBuilderFreeIpaTest {
 
         CloudLoadBalancer loadBalancer = new CloudLoadBalancer(LoadBalancerType.PRIVATE, LoadBalancerSku.STANDARD, false);
         loadBalancer.addPortToTargetGroupMapping(
-                new TargetGroupPortPair(636, NetworkProtocol.TCP, 5030, "/lb-healthcheck", NetworkProtocol.HTTPS),
+                new TargetGroupPortPair(636, NetworkProtocol.TCP, new HealthProbeParameters("/lb-healthcheck", 5030, NetworkProtocol.HTTPS, 10, 2)),
                 Set.of(masterGroup));
         List<CloudLoadBalancer> loadBalancers = List.of(loadBalancer);
         cloudStack = new CloudStack(groups, network, image, parameters, tags, "",

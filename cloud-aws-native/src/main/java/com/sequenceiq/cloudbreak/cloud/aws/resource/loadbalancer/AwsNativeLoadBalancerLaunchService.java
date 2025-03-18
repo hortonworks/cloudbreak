@@ -17,10 +17,10 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonElasticLoadBalancingClient;
@@ -74,12 +74,6 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetTypeEn
 public class AwsNativeLoadBalancerLaunchService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsNativeLoadBalancerLaunchService.class);
-
-    private static final int TARGET_GROUP_HEALTH_CHECK_INTERVAL_SECONDS = 10;
-
-    private static final int HEALTHY_THRESHOLD_COUNT = 2;
-
-    private static final int UNHEALTHY_THRESHOLD_COUNT = 2;
 
     private static final boolean DONT_USE_STICKY_SESSION_FOR_TARGET_GROUP = false;
 
@@ -205,7 +199,7 @@ public class AwsNativeLoadBalancerLaunchService {
             return context.getLoadBalancingClient().registerLoadBalancer(request);
         } catch (AwsServiceException amazonServiceException) {
             String errorCode = amazonServiceException.awsErrorDetails().errorCode();
-            if (StringUtils.isNotEmpty(errorCode) && errorCode.contains(DUPLICATE_LOAD_BALANCER_NAME)) {
+            if (StringUtils.hasLength(errorCode) && errorCode.contains(DUPLICATE_LOAD_BALANCER_NAME)) {
                 DescribeLoadBalancersRequest describeLoadBalancersRequest = DescribeLoadBalancersRequest.builder().names(request.name()).build();
                 DescribeLoadBalancersResponse describeLoadBalancersResponse = context.getLoadBalancingClient()
                         .describeLoadBalancers(describeLoadBalancersRequest);
@@ -251,12 +245,12 @@ public class AwsNativeLoadBalancerLaunchService {
                     .protocol(Optional.ofNullable(targetGroup.getProtocol()).orElse(ProtocolEnum.TCP))
                     .targetType(TargetTypeEnum.INSTANCE)
                     .healthCheckPort(targetGroup.getHealthCheckPort())
-                    .healthCheckIntervalSeconds(TARGET_GROUP_HEALTH_CHECK_INTERVAL_SECONDS)
-                    .healthyThresholdCount(HEALTHY_THRESHOLD_COUNT)
-                    .unhealthyThresholdCount(UNHEALTHY_THRESHOLD_COUNT)
+                    .healthCheckIntervalSeconds(targetGroup.getHealthCheckIntervalSeconds())
+                    .healthyThresholdCount(targetGroup.getHealthCheckThresholdCount())
+                    .unhealthyThresholdCount(targetGroup.getHealthCheckThresholdCount())
                     .vpcId(awsNetworkView.getExistingVpc())
                     .tags(context.getTags());
-            Optional.ofNullable(targetGroup.getHealthCheckPath()).ifPresent(targetGroupRequestBuilder::healthCheckPath);
+            Optional.ofNullable(targetGroup.getHealthCheckPath()).filter(StringUtils::hasLength).ifPresent(targetGroupRequestBuilder::healthCheckPath);
             Optional.ofNullable(targetGroup.getHealthCheckProtocol()).ifPresent(targetGroupRequestBuilder::healthCheckProtocol);
             CreateTargetGroupResponse targetGroupResponse = createOrGetTargetGroup(context, targetGroupRequestBuilder.build());
             targetGroupArn = targetGroupResponse.targetGroups()
@@ -284,7 +278,7 @@ public class AwsNativeLoadBalancerLaunchService {
             return context.getLoadBalancingClient().createTargetGroup(targetGroupRequest);
         } catch (AwsServiceException amazonServiceException) {
             String errorCode = amazonServiceException.awsErrorDetails().errorCode();
-            if (StringUtils.isNotEmpty(errorCode) && errorCode.contains(DUPLICATE_TARGET_GROUP_NAME)) {
+            if (StringUtils.hasLength(errorCode) && errorCode.contains(DUPLICATE_TARGET_GROUP_NAME)) {
                 String targetGroupName = targetGroupRequest.name();
                 LOGGER.info("Load balancer target group already exists with name ('{}'), for load balancer ('{}')", targetGroupName, context.loadBalancerArn);
                 DescribeTargetGroupsRequest describeTargetGroupsRequest = DescribeTargetGroupsRequest.builder().names(targetGroupName).build();
@@ -355,7 +349,7 @@ public class AwsNativeLoadBalancerLaunchService {
             return context.getLoadBalancingClient().registerListener(listenerRequest);
         } catch (AwsServiceException amazonServiceException) {
             String errorCode = amazonServiceException.awsErrorDetails().errorCode();
-            if (StringUtils.isNotEmpty(errorCode) && errorCode.contains(DUPLICATE_LISTENER)) {
+            if (StringUtils.hasLength(errorCode) && errorCode.contains(DUPLICATE_LISTENER)) {
                 String loadBalancerArn = context.getLoadBalancerArn();
                 DescribeListenersRequest describeListenersRequest = DescribeListenersRequest.builder().loadBalancerArn(loadBalancerArn).build();
                 DescribeListenersResponse describeListenersResponse = context.getLoadBalancingClient().describeListeners(describeListenersRequest);

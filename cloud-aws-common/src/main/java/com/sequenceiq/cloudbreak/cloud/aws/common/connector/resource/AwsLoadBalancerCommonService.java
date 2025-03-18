@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.GroupSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.HealthProbeParameters;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
@@ -242,13 +243,11 @@ public class AwsLoadBalancerCommonService {
         for (Map.Entry<TargetGroupPortPair, Set<Group>> entry : cloudLoadBalancer.getPortToTargetGroupMapping().entrySet()) {
             TargetGroupPortPair targetGroup = entry.getKey();
             ProtocolEnum protocol = Optional.ofNullable(targetGroup.getTrafficProtocol()).map(p -> ProtocolEnum.fromValue(p.name())).orElse(null);
-            ProtocolEnum healthCheckProtocol = Optional.ofNullable(targetGroup.getHealthCheckProtocol()).map(p -> ProtocolEnum.fromValue(p.name())).orElse(null);
+            HealthProbeParameters healthProbe = targetGroup.getHealthProbeParameters();
             AwsListener listener = awsLoadBalancer.getOrCreateListener(
                     targetGroup.getTrafficPort(),
                     protocol,
-                    targetGroup.getHealthCheckPath(),
-                    targetGroup.getHealthCheckPort(),
-                    healthCheckProtocol);
+                    healthProbe);
             Set<String> instanceIds = entry.getValue()
                     .stream()
                     .flatMap(tg -> instanceIdsByGroupName.get(tg.getName()).stream())

@@ -49,12 +49,14 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.HealthProbeParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.cloud.model.NetworkProtocol;
 import com.sequenceiq.cloudbreak.cloud.model.PortDefinition;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
@@ -1610,7 +1612,7 @@ public class CloudFormationTemplateBuilderTest {
     private AwsLoadBalancer setupLoadBalancer(AwsLoadBalancerScheme scheme, int port, boolean setArn) {
         AwsLoadBalancer loadBalancer = new AwsLoadBalancer(scheme);
         loadBalancer.addSubnets(Set.of("subnet1"));
-        AwsListener listener = loadBalancer.getOrCreateListener(port, ProtocolEnum.TCP, "/", 8443, ProtocolEnum.HTTPS);
+        AwsListener listener = loadBalancer.getOrCreateListener(port, ProtocolEnum.TCP, new HealthProbeParameters("/", 8443, NetworkProtocol.HTTPS, 10, 2));
         listener.addInstancesToTargetGroup(Set.of("instance1-" + port, "instance2-" + port));
 
         if (setArn) {

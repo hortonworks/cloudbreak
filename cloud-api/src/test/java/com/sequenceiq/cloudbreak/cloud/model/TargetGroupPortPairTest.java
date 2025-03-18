@@ -15,23 +15,26 @@ public class TargetGroupPortPairTest {
 
     @Test
     public void testEquals() {
-        TargetGroupPortPair a = new TargetGroupPortPair(TRAFFIC_PORT, HEALTH_PORT);
-        TargetGroupPortPair b = new TargetGroupPortPair(TRAFFIC_PORT, HEALTH_PORT);
+        HealthProbeParameters healthProbeParameters = new HealthProbeParameters("", HEALTH_PORT, NetworkProtocol.TCP, 0, 0);
+        TargetGroupPortPair a = new TargetGroupPortPair(TRAFFIC_PORT, NetworkProtocol.TCP, healthProbeParameters);
+        TargetGroupPortPair b = new TargetGroupPortPair(TRAFFIC_PORT, NetworkProtocol.TCP, healthProbeParameters);
         assert a.equals(b);
         assert b.equals(a);
     }
 
     @Test
     public void testHashCode() {
-        TargetGroupPortPair a = new TargetGroupPortPair(TRAFFIC_PORT, HEALTH_PORT);
-        TargetGroupPortPair b = new TargetGroupPortPair(TRAFFIC_PORT, HEALTH_PORT);
+        HealthProbeParameters healthProbeParameters = new HealthProbeParameters("", HEALTH_PORT, NetworkProtocol.TCP, 0, 0);
+        TargetGroupPortPair a = new TargetGroupPortPair(TRAFFIC_PORT, NetworkProtocol.TCP, healthProbeParameters);
+        TargetGroupPortPair b = new TargetGroupPortPair(TRAFFIC_PORT, NetworkProtocol.TCP, healthProbeParameters);
         assertEquals(a.hashCode(), b.hashCode());
     }
 
     @Test
     public void testSetKey() {
-        TargetGroupPortPair a = new TargetGroupPortPair(TRAFFIC_PORT, HEALTH_PORT);
-        TargetGroupPortPair b = new TargetGroupPortPair(TRAFFIC_PORT, HEALTH_PORT);
+        HealthProbeParameters healthProbeParameters = new HealthProbeParameters("", HEALTH_PORT, NetworkProtocol.TCP, 0, 0);
+        TargetGroupPortPair a = new TargetGroupPortPair(TRAFFIC_PORT, NetworkProtocol.TCP, healthProbeParameters);
+        TargetGroupPortPair b = new TargetGroupPortPair(TRAFFIC_PORT, NetworkProtocol.TCP, healthProbeParameters);
         Set<TargetGroupPortPair> set = new HashSet<>();
         set.add(a);
         set.add(b);

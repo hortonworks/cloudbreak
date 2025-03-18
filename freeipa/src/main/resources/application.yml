@@ -167,6 +167,8 @@ freeipa:
       port: 5080
       path: /lb-health-check
       protocol: HTTPS
+      interval: 10
+      probeDownThreshold: 2
     targets:
       53: TCP_UDP
       88: TCP_UDP

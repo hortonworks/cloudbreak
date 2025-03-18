@@ -47,7 +47,9 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.HealthProbeParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.cloud.model.NetworkProtocol;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
@@ -983,7 +985,8 @@ class AwsNativeLoadBalancerLaunchServiceTest {
 
     private AwsLoadBalancer getAwsLoadBalancer(AwsLoadBalancerScheme scheme) {
         AwsLoadBalancer awsLoadBalancer = new AwsLoadBalancer(scheme);
-        awsLoadBalancer.getOrCreateListener(USER_FACING_PORT, ProtocolEnum.TCP, "/health", HEALTH_CHECK_PORT, ProtocolEnum.HTTPS);
+        HealthProbeParameters healthProbe = new HealthProbeParameters("/lb-healthcheck", 5030, NetworkProtocol.HTTPS, 10, 2);
+        awsLoadBalancer.getOrCreateListener(USER_FACING_PORT, ProtocolEnum.TCP, healthProbe);
         return awsLoadBalancer;
     }
 

@@ -14,11 +14,17 @@ public class AzureLoadBalancerProbe {
 
     private final String protocol;
 
-    public AzureLoadBalancerProbe(int port, String name, String healthCheckPath, String healthCheckProtocol) {
+    private final int interval;
+
+    private final int threshold;
+
+    public AzureLoadBalancerProbe(int port, String name, String healthCheckPath, String healthCheckProtocol, int interval, int threshold) {
         this.port = port;
         this.name = StringUtils.isBlank(name) ? "port-" + port + "-probe" : name;
         this.path = healthCheckPath;
         this.protocol = healthCheckProtocol;
+        this.interval = interval;
+        this.threshold = threshold;
     }
 
     public int getPort() {
@@ -37,6 +43,14 @@ public class AzureLoadBalancerProbe {
         return protocol;
     }
 
+    public int getInterval() {
+        return interval;
+    }
+
+    public int getThreshold() {
+        return threshold;
+    }
+
     @Override
     public String toString() {
         return "AzureLoadBalancerProbe{" +
@@ -44,6 +58,8 @@ public class AzureLoadBalancerProbe {
                 ", name='" + name + '\'' +
                 ", path='" + path + '\'' +
                 ", protocol='" + protocol + '\'' +
+                ", interval='" + interval + '\'' +
+                ", threshold='" + threshold + '\'' +
                 '}';
     }
 
@@ -71,6 +87,8 @@ public class AzureLoadBalancerProbe {
                 .append(port)
                 .append(path)
                 .append(protocol)
+                .append(interval)
+                .append(threshold)
                 .toHashCode();
     }
 }

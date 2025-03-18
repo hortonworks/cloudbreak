@@ -56,8 +56,10 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.HealthProbeParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.cloud.model.NetworkProtocol;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
@@ -319,7 +321,7 @@ class AwsLoadBalancerLaunchServiceTest {
     @Test
     void testSetLoadBalancerMetadata() {
         AwsLoadBalancer loadBalancer = new AwsLoadBalancer(AwsLoadBalancerScheme.INTERNAL);
-        loadBalancer.getOrCreateListener(PORT, ProtocolEnum.TCP, "/", PORT, ProtocolEnum.HTTPS);
+        loadBalancer.getOrCreateListener(PORT, ProtocolEnum.TCP, new HealthProbeParameters("/", PORT, NetworkProtocol.HTTPS, 10, 2));
 
         underTest.setLoadBalancerMetadata(List.of(loadBalancer), createListStackResourcesResponse(createFullSummaries(Set.of(LoadBalancerType.PRIVATE))));
 
@@ -578,7 +580,7 @@ class AwsLoadBalancerLaunchServiceTest {
                 scheme = AwsLoadBalancerScheme.INTERNAL;
             }
             AwsLoadBalancer awsLoadBalancer = new AwsLoadBalancer(scheme);
-            awsLoadBalancer.getOrCreateListener(PORT, ProtocolEnum.TCP, "/", PORT, ProtocolEnum.HTTPS);
+            awsLoadBalancer.getOrCreateListener(PORT, ProtocolEnum.TCP, new HealthProbeParameters("/", PORT, NetworkProtocol.HTTPS, 10, 2));
             awsLoadBalancers.add(awsLoadBalancer);
         }
         when(cfStackUtil.getCfStackName(any())).thenReturn(STACK_NAME);
@@ -601,9 +603,9 @@ class AwsLoadBalancerLaunchServiceTest {
 
     private List<AwsLoadBalancer> setupAwsLoadBalancers() {
         AwsLoadBalancer privateLb = new AwsLoadBalancer(AwsLoadBalancerScheme.INTERNAL);
-        privateLb.getOrCreateListener(PORT, ProtocolEnum.TCP, "/", PORT, ProtocolEnum.HTTPS);
+        privateLb.getOrCreateListener(PORT, ProtocolEnum.TCP, new HealthProbeParameters("/", PORT, NetworkProtocol.HTTPS, 10, 2));
         AwsLoadBalancer publicLb = new AwsLoadBalancer(AwsLoadBalancerScheme.INTERNET_FACING);
-        publicLb.getOrCreateListener(PORT, ProtocolEnum.TCP, "/", PORT, ProtocolEnum.HTTPS);
+        publicLb.getOrCreateListener(PORT, ProtocolEnum.TCP, new HealthProbeParameters("/", PORT, NetworkProtocol.HTTPS, 10, 2));
         return List.of(privateLb, publicLb);
     }
 }

@@ -741,6 +741,12 @@ cb:
 
   loadBalancer:
     supportedPlatforms: AWS,YARN,AZURE,GCP
+    health-check:
+        port: 443
+        path:
+        protocol: TCP
+        interval: 10
+        probeDownThreshold: 2
 
   upscale:
     zombie.auto.cleanup.enabled: true

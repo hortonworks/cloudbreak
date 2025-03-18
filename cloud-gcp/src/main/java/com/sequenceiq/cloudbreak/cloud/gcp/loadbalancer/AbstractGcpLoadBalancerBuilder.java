@@ -77,7 +77,9 @@ public abstract class AbstractGcpLoadBalancerBuilder extends AbstractGcpResource
             });
             hcPortToTrafficPorts.forEach((healthCheckPort, trafficPorts) -> {
                 String resourceName = getResourceNameService().loadBalancerWithPort(context.getName(), loadBalancer.getType(), healthCheckPort);
-                Map<String, Object> parameters = Map.of(TRAFFICPORTS, trafficPorts, HCPORT, healthCheckPort,
+                Map<String, Object> parameters = Map.of(
+                        TRAFFICPORTS, trafficPorts,
+                        HCPORT, healthCheckPort,
                         CloudResource.ATTRIBUTES, Enum.valueOf(LoadBalancerTypeAttribute.class, loadBalancer.getType().name()));
                 resources.add(CloudResource.builder()
                         .withType(resourceType())
