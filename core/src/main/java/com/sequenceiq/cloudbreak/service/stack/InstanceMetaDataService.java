@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +59,6 @@ import com.sequenceiq.cloudbreak.view.delegate.InstanceMetadataViewDelegate;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
 @Service
 public class InstanceMetaDataService {
@@ -164,12 +164,23 @@ public class InstanceMetaDataService {
 
     private String getStackAz(String stackSubnetId, DetailedEnvironmentResponse environment) {
         if (stackSubnetId != null) {
-            return Optional.ofNullable(environment)
-                    .map(DetailedEnvironmentResponse::getNetwork)
-                    .map(EnvironmentNetworkResponse::getSubnetMetas)
-                    .map(subnetMetas -> subnetMetas.get(stackSubnetId))
-                    .map(CloudSubnet::getAvailabilityZone)
-                    .orElse(null);
+            Map<String, String> subnetAzPairs = new HashMap<>();
+            if (environment != null && environment.getNetwork() != null && environment.getNetwork().getSubnetMetas() != null) {
+                for (Map.Entry<String, CloudSubnet> entry : environment.getNetwork().getSubnetMetas().entrySet()) {
+                    CloudSubnet value = entry.getValue();
+                    if (!isNullOrEmpty(value.getName())) {
+                        subnetAzPairs.put(value.getName(), value.getAvailabilityZone());
+                        if (!isNullOrEmpty(value.getName())) {
+                            subnetAzPairs.put(value.getName(), value.getAvailabilityZone());
+                        }
+                        if (!isNullOrEmpty(value.getId())) {
+                            subnetAzPairs.put(value.getId(), value.getAvailabilityZone());
+                        }
+                    }
+                }
+            }
+
+            return subnetAzPairs.get(stackSubnetId);
         }
 
         return null;

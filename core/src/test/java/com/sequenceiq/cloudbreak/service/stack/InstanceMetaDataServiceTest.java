@@ -317,7 +317,7 @@ class InstanceMetaDataServiceTest {
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         if (stackSubnetId != null) {
             environmentResponse.setNetwork(EnvironmentNetworkResponse.builder()
-                    .withSubnetMetas(Map.of(stackSubnetId, new CloudSubnet.Builder().availabilityZone(stackAz).build()))
+                    .withSubnetMetas(Map.of(stackSubnetId, new CloudSubnet.Builder().name("subnet1").availabilityZone(stackAz).build()))
                     .build());
         }
         when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environmentResponse);
