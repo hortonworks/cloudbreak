@@ -60,6 +60,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_REBUILD;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_HYBRID_CLOUD;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_LAKEHOUSE_OPTIMIZER_ENABLED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_DUTY_SDX;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_EXCEPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_SKIP_ATTACHED_DATAHUBS_CHECK;
@@ -610,6 +611,10 @@ public class EntitlementService {
 
     public boolean isDevTelemetryRepoEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CB_USE_DEV_TELEMETRY_YUM_REPO);
+    }
+
+    public boolean isLakehouseOptimizerEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_LAKEHOUSE_OPTIMIZER_ENABLED);
     }
 
 }

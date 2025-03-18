@@ -188,6 +188,9 @@ class EntitlementServiceTest {
 
                 {"CDP_AZURE_DATABASE_SINGLE_SERVER_REJECT", (EntitlementCheckFunction) EntitlementService::isSingleServerRejectEnabled, false},
                 {"CDP_AZURE_DATABASE_SINGLE_SERVER_REJECT", (EntitlementCheckFunction) EntitlementService::isSingleServerRejectEnabled, true},
+
+                {"CDP_LAKEHOUSE_OPTIMIZER_ENABLED", (EntitlementCheckFunction) EntitlementService::isLakehouseOptimizerEnabled, false},
+                {"CDP_LAKEHOUSE_OPTIMIZER_ENABLED", (EntitlementCheckFunction) EntitlementService::isLakehouseOptimizerEnabled, true},
         };
     }
 

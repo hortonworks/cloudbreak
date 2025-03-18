@@ -59,6 +59,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_REBUILD;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_HYBRID_CLOUD;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_LAKEHOUSE_OPTIMIZER_ENABLED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_DUTY_SDX;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_EXCEPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_SKIP_ATTACHED_DATAHUBS_CHECK;
@@ -575,6 +576,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.dev.telemetry.yum.repo.enabled}")
     private boolean devTelemetryYumRepoEnabled;
 
+    @Value("${auth.mock.lakehouse.optimizer.enabled}")
+    private boolean lakehouseOptimizerEnabled;
+
     @Inject
     private MockEnvironmentUserResourceRole mockEnvironmentUserResourceRole;
 
@@ -1066,6 +1070,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (devTelemetryYumRepoEnabled) {
             builder.addEntitlements(createEntitlement(CDP_CB_USE_DEV_TELEMETRY_YUM_REPO));
+        }
+        if (lakehouseOptimizerEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_LAKEHOUSE_OPTIMIZER_ENABLED));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

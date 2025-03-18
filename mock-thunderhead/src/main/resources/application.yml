@@ -104,6 +104,7 @@ auth:
     ranger.ldap.usersync: true
     tlsv13.enable: false
     dev.telemetry.yum.repo.enabled: false
+    lakehouse.optimizer.enabled: true
 crn:
   partition: cdp
   region: us-west-1
