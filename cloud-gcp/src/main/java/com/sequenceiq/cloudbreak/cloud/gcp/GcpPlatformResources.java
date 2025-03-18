@@ -176,6 +176,7 @@ public class GcpPlatformResources implements PlatformResources {
                                 regionCoordinateSpecification.isK8sSupported(),
                                 regionCoordinateSpecification.getEntitlements(),
                                 regionCoordinateSpecification.getDefaultDbVmtype(),
+                                null,
                                 regionCoordinateSpecification.getCdpSupportedServices()));
             }
         } catch (IOException ignored) {
@@ -434,6 +435,7 @@ public class GcpPlatformResources implements PlatformResources {
                     regionCoordinateSpecification.isK8sSupported(),
                     regionCoordinateSpecification.getEntitlements(),
                     regionCoordinateSpecification.getDefaultDbVmType(),
+                    null,
                     cdpServices);
             coordinates.put(enabledRegion.getKey(), coordinate);
         }

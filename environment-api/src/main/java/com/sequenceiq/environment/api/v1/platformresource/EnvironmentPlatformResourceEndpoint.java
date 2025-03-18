@@ -213,6 +213,7 @@ public interface EnvironmentPlatformResourceEndpoint {
             @QueryParam("region") String region,
             @QueryParam("platformVariant") String platformVariant,
             @QueryParam("availabilityZone") String availabilityZone,
-            @QueryParam("databaseType") DatabaseCapabilityType databaseType);
+            @QueryParam("databaseType") DatabaseCapabilityType databaseType,
+            @QueryParam("architecture") String architecture);
 
 }

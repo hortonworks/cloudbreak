@@ -22,12 +22,14 @@ public class Coordinate {
 
     private final String defaultDbVmType;
 
+    private final String defaultArmDbVmType;
+
     private final List<String> entitlements;
 
     private final Set<CdpSupportedServices> cdpSupportedServices;
 
-    protected Coordinate(Double longitude, Double latitude, String displayName, String key, boolean k8sSupported,
-        List<String> entitlements, String defaultDbVmType, Set<CdpSupportedServices> cdpSupportedServices) {
+    protected Coordinate(Double longitude, Double latitude, String displayName, String key, boolean k8sSupported, List<String> entitlements,
+        String defaultDbVmType, String defaultArmDbVmType, Set<CdpSupportedServices> cdpSupportedServices) {
         this.longitude = longitude;
         this.latitude = latitude;
         this.displayName = displayName;
@@ -35,6 +37,7 @@ public class Coordinate {
         this.k8sSupported = k8sSupported;
         this.entitlements = entitlements;
         this.defaultDbVmType = defaultDbVmType;
+        this.defaultArmDbVmType = defaultArmDbVmType;
         this.cdpSupportedServices = cdpSupportedServices;
     }
 
@@ -70,6 +73,10 @@ public class Coordinate {
         return defaultDbVmType;
     }
 
+    public String getDefaultArmDbVmType() {
+        return defaultArmDbVmType;
+    }
+
     public Set<CdpSupportedServices> getCdpSupportedServices() {
         return cdpSupportedServices;
     }
@@ -79,7 +86,8 @@ public class Coordinate {
     }
 
     public static Coordinate coordinate(String longitude, String latitude, String displayName, String key, boolean k8sSupported,
-        List<String> entitlements, String defaultDbVmType, Set<CdpSupportedServices> cdpSupportedServices) {
+                                        List<String> entitlements, String defaultDbVmType, String defaultArmDbVmType,
+                                        Set<CdpSupportedServices> cdpSupportedServices) {
         return new Coordinate(
                 Double.parseDouble(longitude),
                 Double.parseDouble(latitude),
@@ -88,6 +96,7 @@ public class Coordinate {
                 k8sSupported,
                 entitlements,
                 defaultDbVmType,
+                defaultArmDbVmType,
                 cdpSupportedServices == null ? new HashSet<>() : cdpSupportedServices);
     }
 
@@ -99,6 +108,7 @@ public class Coordinate {
                 "us-west-1",
                 false,
                 new ArrayList<>(),
+                null,
                 null,
                 Set.of());
     }

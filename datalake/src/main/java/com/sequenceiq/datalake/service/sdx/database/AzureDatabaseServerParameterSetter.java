@@ -140,8 +140,8 @@ public class AzureDatabaseServerParameterSetter implements DatabaseServerParamet
                         env.getLocation().getName(),
                         env.getCloudPlatform(),
                         null,
-                        AZURE_FLEXIBLE)
-        );
+                        AZURE_FLEXIBLE,
+                        null));
     }
 
     private AzureHighAvailabiltyMode getHighAvailabilityMode(SdxDatabaseAvailabilityType availabilityType, boolean zoneRedundantEnabled) {

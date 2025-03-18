@@ -19,6 +19,7 @@ public class AzureCoordinate extends Coordinate {
                 builder.k8sSupported,
                 builder.entitlements,
                 builder.defaultDbVmType,
+                null,
                 builder.cdpSupportedServices);
     }
 

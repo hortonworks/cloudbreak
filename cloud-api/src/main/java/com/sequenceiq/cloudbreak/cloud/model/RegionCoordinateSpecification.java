@@ -29,6 +29,9 @@ public class RegionCoordinateSpecification {
     @JsonProperty("defaultDbVmtype")
     private String defaultDbVmtype;
 
+    @JsonProperty("defaultArmDbVmtype")
+    private String defaultArmDbVmtype;
+
     @JsonProperty("cdpSupportedServices")
     private Set<CdpSupportedServices> cdpSupportedServices = new HashSet<>();
 
@@ -86,6 +89,14 @@ public class RegionCoordinateSpecification {
 
     public void setDefaultDbVmtype(String defaultDbVmtype) {
         this.defaultDbVmtype = defaultDbVmtype;
+    }
+
+    public String getDefaultArmDbVmtype() {
+        return defaultArmDbVmtype;
+    }
+
+    public void setDefaultArmDbVmtype(String defaultArmDbVmtype) {
+        this.defaultArmDbVmtype = defaultArmDbVmtype;
     }
 
     public Set<CdpSupportedServices> getCdpSupportedServices() {

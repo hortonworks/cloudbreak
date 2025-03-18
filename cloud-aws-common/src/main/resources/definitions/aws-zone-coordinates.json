@@ -6,6 +6,7 @@
       "latitude": "-22.51956989",
       "longitude": "-44.09496769",
       "k8sSupported": true,
+      "defaultArmDbVmtype": "db.m7g.large",
       "cdpSupportedServices": [ "ALL" ]
     },
     {
@@ -22,6 +23,7 @@
       "latitude": "35.68501691",
       "longitude": "139.7514074",
       "k8sSupported": true,
+      "defaultArmDbVmtype": "db.m7g.large",
       "cdpSupportedServices": [ "ALL" ]
     },
     {
@@ -30,6 +32,7 @@
       "latitude": "53.33306114",
       "longitude": "-6.248905682",
       "k8sSupported": true,
+      "defaultArmDbVmtype": "db.m7g.large",
       "cdpSupportedServices": [ "ALL" ]
     },
     {
@@ -38,6 +41,7 @@
       "latitude": "41.6500",
       "longitude": "-0.875673",
       "k8sSupported": true,
+      "defaultArmDbVmtype": "db.m7g.large",
       "cdpSupportedServices": [ "ENVIRONMENT", "DATAHUB" ]
     },
     {
@@ -46,6 +50,7 @@
       "latitude": "48.86669293",
       "longitude": "2.333335326",
       "k8sSupported": true,
+      "defaultArmDbVmtype": "db.m7g.large",
       "cdpSupportedServices": [ "ALL" ]
     },
     {
@@ -54,6 +59,7 @@
       "latitude": "59.329444",
       "longitude": "18.068611",
       "k8sSupported": true,
+      "defaultArmDbVmtype": "db.m7g.large",
       "cdpSupportedServices": [ "ALL" ]
     },
     {
@@ -70,6 +76,7 @@
       "latitude": "37.5663491",
       "longitude": "126.999731",
       "k8sSupported": true,
+      "defaultArmDbVmtype": "db.m7g.large",
       "cdpSupportedServices": [ "ALL" ]
     },
     {
@@ -78,6 +85,7 @@
       "latitude": "38.89954938",
       "longitude": "-77.00941858",
       "k8sSupported": true,
+      "defaultArmDbVmtype": "db.m7g.large",
       "cdpSupportedServices": [ "ALL" ]
     },
     {
@@ -86,6 +94,7 @@
       "latitude": "37.74000775",
       "longitude": "-122.4599777",
       "k8sSupported": false,
+      "defaultArmDbVmtype": "db.m7g.large",
       "cdpSupportedServices": [ "ALL" ]
     },
     {
@@ -94,6 +103,7 @@
       "latitude": "45.5428",
       "longitude": "-122.6544",
       "k8sSupported": true,
+      "defaultArmDbVmtype": "db.m7g.large",
       "cdpSupportedServices": [ "ALL" ]
     },
     {
@@ -102,6 +112,7 @@
       "latitude": "1.293033466",
       "longitude": "103.8558207",
       "k8sSupported": true,
+      "defaultArmDbVmtype": "db.m7g.large",
       "cdpSupportedServices": [ "ALL" ]
     },
     {
@@ -110,6 +121,7 @@
       "latitude": "-33.92001097",
       "longitude": "151.1851798",
       "k8sSupported": true,
+      "defaultArmDbVmtype": "db.m7g.large",
       "cdpSupportedServices": [ "ALL" ]
     },
     {
@@ -118,6 +130,7 @@
       "latitude": "-6.200000",
       "longitude": "106.816666",
       "k8sSupported": true,
+      "defaultArmDbVmtype": "db.m7g.large",
       "cdpSupportedServices": [ "ALL" ]
     },
     {
@@ -126,6 +139,7 @@
       "latitude": "19.01699038",
       "longitude": "72.8569893",
       "k8sSupported": true,
+      "defaultArmDbVmtype": "db.m7g.large",
       "cdpSupportedServices": [ "ALL" ]
     },
     {
@@ -134,6 +148,7 @@
       "latitude": "17.387140",
       "longitude": "78.491684",
       "k8sSupported": true,
+      "defaultArmDbVmtype": "db.m7g.large",
       "cdpSupportedServices": [ "ALL" ]
     },
     {
@@ -142,6 +157,7 @@
       "latitude": "51.49999473",
       "longitude": "-0.116721844",
       "k8sSupported": true,
+      "defaultArmDbVmtype": "db.m7g.large",
       "cdpSupportedServices": [ "ALL" ]
     },
     {
@@ -150,6 +166,7 @@
       "latitude": "43.69997988",
       "longitude": "-79.42002079",
       "k8sSupported": true,
+      "defaultArmDbVmtype": "db.m7g.large",
       "cdpSupportedServices": [ "ALL" ]
     },
     {
@@ -167,6 +184,7 @@
       "latitude": "39.94028688",
       "longitude": "-82.01332503",
       "k8sSupported": true,
+      "defaultArmDbVmtype": "db.m7g.large",
       "cdpSupportedServices": [ "ALL" ]
     },
     {
@@ -183,6 +201,7 @@
       "latitude": "37.29998293",
       "longitude": "-121.8499891",
       "k8sSupported": true,
+      "defaultArmDbVmtype": "db.m7g.large",
       "cdpSupportedServices": [ "ALL" ]
     },
     {
@@ -207,6 +226,7 @@
       "latitude": "25.563633",
       "longitude": "50.36539",
       "k8sSupported": true,
+      "defaultArmDbVmtype": "db.m7g.large",
       "cdpSupportedServices": [ "ENVIRONMENT", "DATAHUB" ]
     },
     {
@@ -215,6 +235,7 @@
       "latitude": "23.4241",
       "longitude": "53.8478",
       "k8sSupported": true,
+      "defaultArmDbVmtype": "db.m7g.large",
       "cdpSupportedServices": [ "ENVIRONMENT", "DATAHUB" ]
     },
     {

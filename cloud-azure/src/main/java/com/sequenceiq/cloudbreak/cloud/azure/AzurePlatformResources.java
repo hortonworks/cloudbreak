@@ -285,6 +285,7 @@ public class AzurePlatformResources implements PlatformResources {
                     regionCoordinateSpecification.isK8sSupported(),
                     regionCoordinateSpecification.getEntitlements(),
                     regionCoordinateSpecification.getDefaultDbVmType(),
+                    regionCoordinateSpecification.getDefaultArmDbVmType(),
                     cdpServices);
             coordinates.put(enabledRegion.getKey(), coordinate);
         }

@@ -383,6 +383,7 @@ public enum ResourceEvent {
     DATALAKE_UPGRADE_CCM_ALREADY_UPGRADED("datalake.ccm.upgrade.already.upgraded"),
     DATALAKE_UPGRADE_CCM_NOT_UPGRADEABLE("datalake.ccm.upgrade.not.upgradeable"),
     DATALAKE_UPGRADE_CCM_NOT_AVAILABLE("datalake.ccm.upgrade.not.available"),
+    DATALAKE_DATABASE_ARM_RDS_NOT_AVAILABLE("datalake.db.arm.rds.not.available"),
     DATALAKE_DATABASE_CERTIFICATE_ROTATION("datalake.db.certificate.rotation"),
     DATALAKE_DATABASE_CERTIFICATE_ROTATION_NOT_AVAILABLE("datalake.db.certificate.rotation.not.available"),
     DATALAKE_DATABASE_CERTIFICATE_ROTATION_NO_DATALAKE("datalake.db.certificate.rotation.no.datalake"),

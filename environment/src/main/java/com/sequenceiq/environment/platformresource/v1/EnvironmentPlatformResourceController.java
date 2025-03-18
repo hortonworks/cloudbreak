@@ -504,7 +504,8 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
             String region,
             String platformVariant,
             String availabilityZone,
-            DatabaseCapabilityType databaseType) {
+            DatabaseCapabilityType databaseType,
+            String architecture) {
         String accountId = getAccountId();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequestByEnvironment(
                 accountId,
@@ -514,6 +515,9 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 availabilityZone,
                 null,
                 databaseType);
+        if (architecture != null) {
+            request.getFilters().put("architecture", Architecture.fromStringWithValidation(architecture).getName());
+        }
         LOGGER.info("Get /platform_resources/database_capabilities, request: {}", request);
         PlatformDatabaseCapabilities platformDatabaseCapabilities = platformParameterService.getDatabaseCapabilities(request);
         PlatformDatabaseCapabilitiesResponse response = databaseCapabilitiesToPlatformDatabaseCapabilitiesResponseConverter

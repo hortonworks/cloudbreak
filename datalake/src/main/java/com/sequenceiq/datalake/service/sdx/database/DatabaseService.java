@@ -33,7 +33,9 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.common.model.DatabaseCapabilityType;
 import com.sequenceiq.common.model.DatabaseType;
@@ -42,11 +44,13 @@ import com.sequenceiq.datalake.converter.DatabaseServerConverter;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxDatabase;
+import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.repository.SdxDatabaseRepository;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxDatabaseOperation;
+import com.sequenceiq.datalake.service.sdx.SdxNotificationService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -126,6 +130,12 @@ public class DatabaseService {
     @Inject
     private AzureDatabaseAttributesService azureDatabaseAttributesService;
 
+    @Inject
+    private SdxNotificationService sdxNotificationService;
+
+    @Inject
+    private EventSenderService eventSenderService;
+
     public DatabaseServerStatusV4Response create(SdxCluster sdxCluster, DetailedEnvironmentResponse env) {
         LOGGER.info("Create databaseServer in environment {} for SDX {}", env.getName(), sdxCluster.getClusterName());
         String dbResourceCrn;
@@ -139,9 +149,9 @@ public class DatabaseService {
                     throw new CloudbreakServiceException("Datalake deletion in progress! Do not provision database, create flow cancelled");
                 }
                 serverStatusV4Response =
-                ThreadBasedUserCrnProvider.doAsInternalActor(
-                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                        () -> databaseServerV4Endpoint.createInternal(getDatabaseRequest(sdxCluster, env, initiatorUserCrn), initiatorUserCrn));
+                        ThreadBasedUserCrnProvider.doAsInternalActor(
+                                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                                () -> databaseServerV4Endpoint.createInternal(getDatabaseRequest(sdxCluster, env, initiatorUserCrn), initiatorUserCrn));
                 dbResourceCrn = serverStatusV4Response.getResourceCrn();
                 DatabaseParameterFallbackUtil.setDatabaseCrn(sdxCluster, dbResourceCrn);
                 sdxDatabaseRepository.save(sdxCluster.getSdxDatabase());
@@ -271,13 +281,19 @@ public class DatabaseService {
         if (previousDatabaseOp.isPresent()) {
             DatabaseServerV4Response previousDatabase = previousDatabaseOp.get();
             instanceType = previousDatabase.getInstanceType();
-            storageSize =  previousDatabase.getStorageSize();
+            storageSize = previousDatabase.getStorageSize();
         } else {
             DatabaseCapabilityType databaseCapabilityType = CloudPlatform.AZURE.equals(cloudPlatform) ?
                     getAzureDatabaseCapability(databaseType) : DatabaseCapabilityType.DEFAULT;
-            PlatformDatabaseCapabilitiesResponse databaseCapabilities = getDatabaseCapabilities(env, initiatorUserCrn, databaseCapabilityType);
+            PlatformDatabaseCapabilitiesResponse databaseCapabilities = getDatabaseCapabilities(env, initiatorUserCrn, databaseCapabilityType,
+                    sdxCluster.getArchitecture());
             instanceType = databaseCapabilities.getRegionDefaultInstances().get(env.getLocation().getName());
-            storageSize =  databaseConfig.getVolumeSize();
+            if (instanceType == null && Architecture.ARM64.equals(sdxCluster.getArchitecture())) {
+                sendArmDatabaseNotAvailableNotification(sdxCluster, initiatorUserCrn);
+                databaseCapabilities = getDatabaseCapabilities(env, initiatorUserCrn, databaseCapabilityType, Architecture.X86_64);
+                instanceType = databaseCapabilities.getRegionDefaultInstances().get(env.getLocation().getName());
+            }
+            storageSize = databaseConfig.getVolumeSize();
         }
 
         DatabaseServerV4StackRequest req = new DatabaseServerV4StackRequest();
@@ -292,20 +308,28 @@ public class DatabaseService {
         return req;
     }
 
+    private void sendArmDatabaseNotAvailableNotification(SdxCluster sdxCluster, String initiatorUserCrn) {
+        LOGGER.info("Arm64 database is not available in current region. Defaulting to x86.");
+        ThreadBasedUserCrnProvider.doAs(initiatorUserCrn,
+                () -> {
+                    sdxNotificationService.send(ResourceEvent.DATALAKE_DATABASE_ARM_RDS_NOT_AVAILABLE, sdxCluster, initiatorUserCrn);
+                    eventSenderService.sendEventAndNotification(sdxCluster, ResourceEvent.DATALAKE_DATABASE_ARM_RDS_NOT_AVAILABLE);
+                });
+    }
+
     private DatabaseCapabilityType getAzureDatabaseCapability(DatabaseType databaseType) {
         return FLEXIBLE_SERVER.equals(databaseType) ? DatabaseCapabilityType.AZURE_FLEXIBLE : DatabaseCapabilityType.AZURE_SINGLE_SERVER;
     }
 
-    private PlatformDatabaseCapabilitiesResponse getDatabaseCapabilities(DetailedEnvironmentResponse env,
-        String initiatorUserCrn, DatabaseCapabilityType capabilityType) {
-        return ThreadBasedUserCrnProvider.doAs(initiatorUserCrn, () ->
-                environmentPlatformResourceEndpoint.getDatabaseCapabilities(
-                        env.getCrn(),
-                        env.getLocation().getName(),
-                        env.getCloudPlatform(),
-                        null,
-                        capabilityType)
-        );
+    private PlatformDatabaseCapabilitiesResponse getDatabaseCapabilities(DetailedEnvironmentResponse env, String initiatorUserCrn,
+            DatabaseCapabilityType capabilityType, Architecture architecture) {
+        return ThreadBasedUserCrnProvider.doAs(initiatorUserCrn, () -> environmentPlatformResourceEndpoint.getDatabaseCapabilities(
+                env.getCrn(),
+                env.getLocation().getName(),
+                env.getCloudPlatform(),
+                null,
+                capabilityType,
+                architecture == null ? null : architecture.getName()));
     }
 
     private Optional<DatabaseServerV4Response> getPreviousDatabaseIfPropertiesWereModified(Map<String, Object> attributes, CloudPlatform cloudPlatform,
@@ -329,8 +353,7 @@ public class DatabaseService {
 
     public DatabaseServerStatusV4Response waitAndGetDatabase(SdxCluster sdxCluster, String databaseCrn,
             SdxDatabaseOperation sdxDatabaseOperation, boolean cancellable) {
-        PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS,
-                durationInMinutes, TimeUnit.MINUTES);
+        PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES);
         return waitAndGetDatabase(sdxCluster, databaseCrn, pollingConfig, sdxDatabaseOperation, cancellable);
     }
 

@@ -155,7 +155,7 @@ public class AzureDatabaseServerParameterDecorator implements DatabaseServerPara
                 env.getLocation().getName(),
                 env.getCloudPlatform(),
                 null,
-                (azureDatabaseType == null || azureDatabaseType.isSingleServer()) ? AZURE_SINGLE_SERVER :  AZURE_FLEXIBLE);
+                (azureDatabaseType == null || azureDatabaseType.isSingleServer()) ? AZURE_SINGLE_SERVER :  AZURE_FLEXIBLE, null);
     }
 
     private AzureHighAvailabiltyMode getHighAvailabilityMode(DatabaseAvailabilityType availabilityType, boolean zoneRedundantEnabled) {

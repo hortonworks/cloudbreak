@@ -339,6 +339,7 @@ public class AwsPlatformResources implements PlatformResources {
                                 regionCoordinateSpecification.isK8sSupported(),
                                 regionCoordinateSpecification.getEntitlements(),
                                 regionCoordinateSpecification.getDefaultDbVmtype(),
+                                regionCoordinateSpecification.getDefaultArmDbVmtype(),
                                 cdpServices));
             }
         } catch (IOException ignored) {
@@ -624,6 +625,7 @@ public class AwsPlatformResources implements PlatformResources {
                     regionCoordinateSpecification.isK8sSupported(),
                     regionCoordinateSpecification.getEntitlements(),
                     regionCoordinateSpecification.getDefaultDbVmType(),
+                    regionCoordinateSpecification.getDefaultArmDbVmType(),
                     regionCoordinateSpecification.getCdpSupportedServices());
             coordinates.put(enabledRegion.getKey(), coordinate);
         }
@@ -736,9 +738,19 @@ public class AwsPlatformResources implements PlatformResources {
         try {
             CloudRegions regions = regions((ExtendedCloudCredential) cloudCredential, region, filters, false);
             Map<Region, String> regionDefaultInstanceTypeMap = new HashMap<>();
+            String architecture = filters.getOrDefault("architecture", Architecture.X86_64.getName());
             for (Region actualRegion : regions.getCloudRegions().keySet()) {
-                String defaultDbVmType = regionCoordinates.get(actualRegion).getDefaultDbVmType();
-                regionDefaultInstanceTypeMap.put(actualRegion, defaultDbVmType == null ? awsDatabaseVmDefault : defaultDbVmType);
+                Coordinate coordinate = regionCoordinates.get(actualRegion);
+                String defaultDbVmType;
+                if (Architecture.ARM64.getName().equals(architecture)) {
+                    defaultDbVmType = coordinate.getDefaultArmDbVmType();
+                } else {
+                    defaultDbVmType = coordinate.getDefaultDbVmType();
+                    if (defaultDbVmType == null) {
+                        defaultDbVmType = awsDatabaseVmDefault;
+                    }
+                }
+                regionDefaultInstanceTypeMap.put(actualRegion, defaultDbVmType);
             }
             return new PlatformDatabaseCapabilities(new HashMap<>(), regionDefaultInstanceTypeMap);
         } catch (Exception e) {

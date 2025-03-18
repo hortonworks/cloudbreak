@@ -59,6 +59,7 @@ class PlatformRegionsToRegionV1ResponseConverterTest {
                 true,
                 List.of(),
                 "deafult",
+                "defaultArm",
                 new HashSet<>(Arrays.asList(CdpSupportedServices.ALL)));
         Coordinate coord2 = coordinate(
                 "1",
@@ -68,6 +69,7 @@ class PlatformRegionsToRegionV1ResponseConverterTest {
                 true,
                 List.of(),
                 "deafult",
+                "defaultArm",
                 new HashSet<>(Arrays.asList(CdpSupportedServices.ALL)));
         coordinates.put(region1, coord1);
         coordinates.put(region2, coord2);
