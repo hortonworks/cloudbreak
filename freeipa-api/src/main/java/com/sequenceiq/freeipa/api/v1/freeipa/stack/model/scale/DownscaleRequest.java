@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale;
 
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions.FORCE;
+
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -23,6 +25,9 @@ public class DownscaleRequest extends ScaleRequestBase {
     @Schema(description = ModelDescriptions.INSTANCE_ID)
     private Set<String> instanceIds;
 
+    @Schema(description = FORCE)
+    private boolean force;
+
     public AvailabilityType getTargetAvailabilityType() {
         return targetAvailabilityType;
     }
@@ -39,11 +44,20 @@ public class DownscaleRequest extends ScaleRequestBase {
         this.instanceIds = instanceIds;
     }
 
+    public boolean isForce() {
+        return force;
+    }
+
+    public void setForce(boolean force) {
+        this.force = force;
+    }
+
     @Override
     public String toString() {
         return "DownscaleRequest{" +
                 "targetAvailabilityType=" + targetAvailabilityType +
                 ", instanceIds=" + instanceIds +
+                ", force=" + force +
                 "} " + super.toString();
     }
 }

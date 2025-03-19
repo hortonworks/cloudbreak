@@ -38,34 +38,35 @@ public class FreeIpaScalingValidationService {
 
     public void validateStackForUpscale(Set<InstanceMetaData> allInstances, Stack stack, ScalingPath scalingPath) {
         validateScalingIsUpscale(scalingPath);
-        executeCommonValidations(allInstances, stack, scalingPath, OperationType.UPSCALE);
+        executeCommonValidations(allInstances, stack, scalingPath, OperationType.UPSCALE, false);
     }
 
     public void validateStackForVerticalUpscale(Stack stack, VerticalScaleRequest request) {
         verticalScalingValidatorService.validateRequest(stack, request);
     }
 
-    public void validateStackForDownscale(Set<InstanceMetaData> allInstances, Stack stack, ScalingPath scalingPath, Set<String> instanceIdsToDelete) {
+    public void validateStackForDownscale(Set<InstanceMetaData> allInstances, Stack stack, ScalingPath scalingPath, Set<String> instanceIdsToDelete,
+            boolean force) {
         validateScalingIsDownscale(scalingPath);
-        validateInstanceIdsToDelete(allInstances, instanceIdsToDelete);
-        executeCommonValidations(allInstances, stack, scalingPath, OperationType.DOWNSCALE);
+        validateInstanceIdsToDelete(allInstances, instanceIdsToDelete, force);
+        executeCommonValidations(allInstances, stack, scalingPath, OperationType.DOWNSCALE, force);
     }
 
-    private void validateInstanceIdsToDelete(Set<InstanceMetaData> allInstances, Set<String> instanceIdsToDelete) {
+    private void validateInstanceIdsToDelete(Set<InstanceMetaData> allInstances, Set<String> instanceIdsToDelete, boolean force) {
         if (Objects.nonNull(instanceIdsToDelete)) {
             validateInstanceIdsAreNotEmpty(instanceIdsToDelete);
             validateInstanceIdsArePartOfAllInstances(allInstances, instanceIdsToDelete);
-            validateInstanceIdToDeleteAreNotPrimaryGateways(allInstances, instanceIdsToDelete);
+            validateInstanceIdToDeleteAreNotPrimaryGateways(allInstances, instanceIdsToDelete, force);
         }
     }
 
-    private void validateInstanceIdToDeleteAreNotPrimaryGateways(Set<InstanceMetaData> allInstances, Set<String> instanceIds) {
+    private void validateInstanceIdToDeleteAreNotPrimaryGateways(Set<InstanceMetaData> allInstances, Set<String> instanceIds, boolean force) {
         Set<String> primaryGatewayInstanceMetadata = allInstances.stream()
                 .filter(imd -> instanceIds.contains(imd.getInstanceId()))
                 .filter(imd -> InstanceMetadataType.GATEWAY_PRIMARY == imd.getInstanceMetadataType())
                 .map(InstanceMetaData::getInstanceId)
                 .collect(Collectors.toSet());
-        if (!primaryGatewayInstanceMetadata.isEmpty()) {
+        if (!primaryGatewayInstanceMetadata.isEmpty() && !force) {
             String message = String.format("Refusing %s as instance ids contains an instance that is a primary gateway. Please select another " +
                     "instance. Primary gateway instance: %s.", OperationType.DOWNSCALE.getLowerCaseName(), primaryGatewayInstanceMetadata);
             LOGGER.warn(message);
@@ -104,14 +105,15 @@ public class FreeIpaScalingValidationService {
         }
     }
 
-    private void executeCommonValidations(Set<InstanceMetaData> allInstances, Stack stack, ScalingPath scalingPath, OperationType operationType) {
+    private void executeCommonValidations(Set<InstanceMetaData> allInstances, Stack stack, ScalingPath scalingPath, OperationType operationType,
+            boolean force) {
         if (allInstances.isEmpty()) {
             throwErrorForNoInstance();
         }
-        if (isAnyInstanceInNotAvailableState(allInstances)) {
+        if (isAnyInstanceInNotAvailableState(allInstances) && !force) {
             throwErrorForNotAvailableInstances(allInstances);
         }
-        if (!stack.isAvailable()) {
+        if (!stack.isAvailable() && !force) {
             throwErrorForUnavailableStack(stack, operationType);
         }
         if (nodeCountAlreadyMatchesTarget(allInstances, scalingPath)) {
