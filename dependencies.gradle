@@ -65,7 +65,7 @@ ext {
   commonsBeanutilsVersion = '1.10.1'
 
   // Logging
-  logbackVersion = '1.5.17'
+  logbackVersion = '1.5.18'
   logbackJsonClassicVersion = '0.1.5'
   slf4jApiVersion = '2.0.17'
 
