@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.AuthorizationResourceCrnProvider;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -31,9 +30,6 @@ public class CredentialClientService implements AuthorizationResourceCrnProvider
 
     @Inject
     private CredentialConverter credentialConverter;
-
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Inject
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
@@ -69,7 +65,6 @@ public class CredentialClientService implements AuthorizationResourceCrnProvider
             //TODO Revise paramaters because most of them should be a secret
             CredentialResponse credentialResponse = ThreadBasedUserCrnProvider
                     .doAsInternalActor(
-                            regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                             () -> credentialEndpoint.getByEnvironmentCrn(envCrn));
             return credentialConverter.convert(credentialResponse);
         } catch (WebApplicationException | IllegalStateException e) {

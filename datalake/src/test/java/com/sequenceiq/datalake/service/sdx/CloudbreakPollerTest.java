@@ -25,8 +25,6 @@ import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
@@ -48,12 +46,6 @@ class CloudbreakPollerTest {
 
     @Mock
     private SdxStatusService sdxStatusService;
-
-    @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
     @InjectMocks
     private CloudbreakPoller underTest;
@@ -98,8 +90,6 @@ class CloudbreakPollerTest {
     void testAvailableClusterWhenFlowStateIsUnknown() {
         whenCheckFlowState().thenReturn(FlowState.UNKNOWN);
         whenCheckStackStatus().thenReturn(statusResponse(Status.AVAILABLE, Status.AVAILABLE));
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.pollStartUntilAvailable(sdxCluster, pollingConfig);
         verify(cloudbreakFlowService, atLeastOnce()).getLastKnownFlowState(sdxCluster);
     }
@@ -111,8 +101,6 @@ class CloudbreakPollerTest {
                 .thenReturn(statusResponse(Status.UPDATE_IN_PROGRESS, Status.UPDATE_IN_PROGRESS))
                 .thenReturn(statusResponse(Status.UPDATE_IN_PROGRESS, Status.UPDATE_IN_PROGRESS))
                 .thenReturn(statusResponse(Status.AVAILABLE, Status.AVAILABLE));
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.pollStartUntilAvailable(sdxCluster, pollingConfig);
         verify(cloudbreakFlowService, atLeastOnce()).getLastKnownFlowState(sdxCluster);
     }
@@ -121,8 +109,6 @@ class CloudbreakPollerTest {
     void testStartFailedStack() {
         whenCheckFlowState().thenReturn(FlowState.UNKNOWN);
         whenCheckStackStatus().thenReturn(statusResponse(Status.START_FAILED, "Stack start failed"));
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         UserBreakException exception = assertThrows(UserBreakException.class,
                 () -> underTest.pollStartUntilAvailable(sdxCluster, pollingConfig));
 
@@ -133,8 +119,6 @@ class CloudbreakPollerTest {
     void testStartFailedCluster() {
         whenCheckFlowState().thenReturn(FlowState.UNKNOWN);
         whenCheckStackStatus().thenReturn(statusResponse(Status.AVAILABLE, Status.START_FAILED, "Cluster start failed"));
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         UserBreakException exception = assertThrows(UserBreakException.class,
                 () -> underTest.pollStartUntilAvailable(sdxCluster, pollingConfig));
 
@@ -146,8 +130,6 @@ class CloudbreakPollerTest {
         whenCheckFlowState().thenReturn(FlowState.FINISHED);
         whenCheckStackStatus().thenReturn(statusResponse(Status.UPDATE_IN_PROGRESS, Status.UPDATE_IN_PROGRESS));
         when(sdxStatusService.getShortStatusMessage(any(StackStatusV4Response.class))).thenReturn("testMessage");
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         UserBreakException exception = assertThrows(UserBreakException.class,
                 () -> underTest.pollStartUntilAvailable(sdxCluster, pollingConfig));
 
@@ -160,8 +142,6 @@ class CloudbreakPollerTest {
         whenCheckStackStatus()
                 .thenReturn(statusResponse(Status.UPGRADE_CCM_IN_PROGRESS, Status.UPGRADE_CCM_IN_PROGRESS))
                 .thenReturn(statusResponse(Status.AVAILABLE, Status.AVAILABLE));
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.pollCcmUpgradeUntilAvailable(sdxCluster, pollingConfig);
         verify(cloudbreakFlowService, atLeastOnce()).getLastKnownFlowState(sdxCluster);
     }
@@ -172,8 +152,6 @@ class CloudbreakPollerTest {
         whenCheckStackStatus()
                 .thenReturn(statusResponse(Status.UPDATE_IN_PROGRESS, Status.UPDATE_IN_PROGRESS))
                 .thenReturn(statusResponse(Status.AVAILABLE, Status.AVAILABLE));
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.pollCertificateRotationUntilAvailable(sdxCluster, pollingConfig);
         verify(cloudbreakFlowService, atLeastOnce()).getLastKnownFlowState(sdxCluster);
 
@@ -185,8 +163,6 @@ class CloudbreakPollerTest {
         whenCheckStackStatus()
                 .thenReturn(statusResponse(Status.UPGRADE_CCM_IN_PROGRESS, Status.UPGRADE_CCM_IN_PROGRESS))
                 .thenReturn(statusResponse(Status.UPGRADE_CCM_FAILED, "stack error"));
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         assertThatThrownBy(() -> underTest.pollCcmUpgradeUntilAvailable(sdxCluster, pollingConfig))
                 .hasMessage("CCM upgrade failed on 'clusterName' cluster. Reason: stack error")
                 .isInstanceOf(UserBreakException.class);
@@ -198,8 +174,6 @@ class CloudbreakPollerTest {
         whenCheckStackStatus()
                 .thenReturn(statusResponse(Status.UPGRADE_CCM_IN_PROGRESS, Status.UPGRADE_CCM_IN_PROGRESS))
                 .thenReturn(statusResponse(Status.AVAILABLE, Status.UPGRADE_CCM_FAILED, "cluster error"));
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         assertThatThrownBy(() -> underTest.pollCcmUpgradeUntilAvailable(sdxCluster, pollingConfig))
                 .hasMessage("CCM upgrade failed on 'clusterName' cluster. Reason: cluster error")
                 .isInstanceOf(UserBreakException.class);

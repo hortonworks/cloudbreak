@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.model.StatusKind;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -69,9 +68,6 @@ public class ProvisionerService {
     @Inject
     private CloudbreakPoller cloudbreakPoller;
 
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     private AttemptResult<StackV4Response> sdxCreationFailed(String statusReason) {
         String errorMessage = "Data Lake creation failed: " + statusReason;
         LOGGER.error(errorMessage);
@@ -83,9 +79,7 @@ public class ProvisionerService {
         try {
             String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
             ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                    () ->
-                    stackV4Endpoint.deleteInternal(0L, sdxCluster.getClusterName(), forced, initiatorUserCrn));
+                    () -> stackV4Endpoint.deleteInternal(0L, sdxCluster.getClusterName(), forced, initiatorUserCrn));
             sdxStatusService.setStatusForDatalakeAndNotify(
                     DatalakeStatusEnum.STACK_DELETION_IN_PROGRESS, List.of(sdxCluster.getClusterName()),
                     "Datalake stack deletion in progress", sdxCluster
@@ -112,9 +106,7 @@ public class ProvisionerService {
                     LOGGER.info("Deletion polling cloudbreak for stack status: '{}' in '{}' env", sdxCluster.getClusterName(), sdxCluster.getEnvName());
                     try {
                         StackV4Response stackV4Response = ThreadBasedUserCrnProvider.doAsInternalActor(
-                                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                                () -> stackV4Endpoint
-                                .get(0L, sdxCluster.getClusterName(), Collections.emptySet(), sdxCluster.getAccountId()));
+                                () -> stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet(), sdxCluster.getAccountId()));
                         LOGGER.info("Stack status of SDX {} by response from cloudbreak: {}", sdxCluster.getClusterName(),
                                 stackV4Response.getStatus().name());
                         LOGGER.debug("Response from cloudbreak: {}", JsonUtil.writeValueAsString(stackV4Response));
@@ -193,7 +185,6 @@ public class ProvisionerService {
 
     private StackV4Response getStackByCrn(SdxCluster sdxCluster) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> stackV4Endpoint.getByCrn(0L, sdxCluster.getCrn(), null));
     }
 
@@ -201,7 +192,6 @@ public class ProvisionerService {
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         try {
             return ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> stackV4Endpoint.postInternal(0L, stackV4Request, initiatorUserCrn));
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
@@ -221,7 +211,6 @@ public class ProvisionerService {
         cloudbreakPoller.pollCreateUntilAvailable(sdxCluster, pollingConfig);
         sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_FINISHED, "Stack created for Datalake", sdxCluster);
         return ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet(), sdxCluster.getAccountId()));
     }
 

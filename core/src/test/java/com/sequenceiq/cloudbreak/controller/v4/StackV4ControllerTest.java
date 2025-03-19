@@ -199,10 +199,10 @@ class StackV4ControllerTest {
         StackDatabaseServerCertificateStatusV4Responses mockClusterResponses = new StackDatabaseServerCertificateStatusV4Responses();
         mockClusterResponses.setResponses(mockResponsesList);
 
-        when(stackOperationService.listDatabaseServersCertificateStatus(request, "usercrn")).thenReturn(mockClusterResponses);
+        when(stackOperationService.listDatabaseServersCertificateStatus(request, USER_CRN)).thenReturn(mockClusterResponses);
 
-        StackDatabaseServerCertificateStatusV4Responses result = doAs("usercrn", () ->
-                underTest.internalListDatabaseServersCertificateStatus(0L, request, "usercrn"));
+        StackDatabaseServerCertificateStatusV4Responses result = doAs(USER_CRN, () ->
+                underTest.internalListDatabaseServersCertificateStatus(0L, request, USER_CRN));
 
         assertNotNull(result);
         assertEquals(2, result.getResponses().size());
@@ -223,7 +223,7 @@ class StackV4ControllerTest {
         assertEquals(OUTDATED, resultResponse2.getSslStatus());
         assertEquals("crn-2", resultResponse2.getCrn());
 
-        verify(stackOperationService, times(1)).listDatabaseServersCertificateStatus(request, "usercrn");
+        verify(stackOperationService, times(1)).listDatabaseServersCertificateStatus(request, USER_CRN);
     }
 
     @Test

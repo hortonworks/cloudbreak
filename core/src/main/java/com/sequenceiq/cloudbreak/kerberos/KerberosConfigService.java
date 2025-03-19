@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.vault.VaultException;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
@@ -35,9 +34,6 @@ public class KerberosConfigService {
     @Inject
     private WebApplicationExceptionMessageExtractor exceptionMessageExtractor;
 
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     public boolean isKerberosConfigExistsForEnvironment(String environmentCrn, String clusterName) {
         return describeKerberosConfig(environmentCrn, clusterName).isPresent();
     }
@@ -50,7 +46,6 @@ public class KerberosConfigService {
     private Optional<DescribeKerberosConfigResponse> describeKerberosConfig(String environmentCrn, String clusterName) {
         try {
             return Optional.of(ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> kerberosConfigV1Endpoint.getForCluster(environmentCrn, clusterName)));
         } catch (NotFoundException ex) {
             LOGGER.debug("No Kerberos config found for {} environment. Ldap setup will be skipped!", environmentCrn, ex);

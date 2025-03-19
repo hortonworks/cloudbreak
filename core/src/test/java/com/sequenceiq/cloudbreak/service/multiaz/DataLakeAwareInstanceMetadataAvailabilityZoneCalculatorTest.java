@@ -25,7 +25,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.AvailabilityZoneConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
@@ -75,14 +74,56 @@ class DataLakeAwareInstanceMetadataAvailabilityZoneCalculatorTest {
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
-
-    @Mock
     private EnvironmentClientService environmentClientService;
 
     @Spy
     @InjectMocks
     private DataLakeAwareInstanceMetadataAvailabilityZoneCalculator underTest;
+
+    // @formatter:off
+    // CHECKSTYLE:OFF
+    static Object[][] testAvailabilityZoneDistributionForWholeInstanceGroupData() {
+        return new Object[][]{
+                //masterInstanceCount, auxiliaryInstanceCount, expectedZonesForGroups, expectedInstanceCountByAz
+                {11,                    6,                      Set.of("1"),           Map.of("1", 17, "2", 0, "3", 0)},
+                {11,                    6,                      Set.of("1", "2"),      Map.of("1", 9, "2", 8, "3", 0)},
+                {11,                    6,                      Set.of("1", "2", "3"), Map.of("1", 6, "2", 6, "3", 5)},
+                {2,                     1,                      Set.of("1", "2", "3"), Map.of("1", 1, "2", 1, "3", 1)},
+                {1,                     2,                      Set.of("1", "2", "3"), Map.of("1", 1, "2", 1, "3", 1)},
+                {1,                     1,                      Set.of("1", "2", "3"), Map.of("1", 1, "2", 1, "3", 0)},
+                {0,                     7,                      Set.of("1", "2", "3"), Map.of("1", 3, "2", 2, "3", 2)},
+                {56,                    0,                      Set.of("1", "2", "3"), Map.of("1", 19, "2", 19, "3", 18)},
+                {5,                     4,                      Set.of("2", "3"),      Map.of("1", 0, "2", 5, "3", 4)},
+                {1,                     1,                      Set.of("2", "3"),      Map.of("1", 0, "2", 1, "3", 1)},
+        };
+    }
+
+    private static InstanceGroup getInstanceGroup(Set<String> environmentAvailabilityZones, long groupId, InstanceGroupName groupName, Stack stack) {
+        return getInstanceGroup(environmentAvailabilityZones, groupId, groupName, stack, environmentAvailabilityZones.size());
+    }
+
+    private static InstanceGroup getInstanceGroup(Set<String> environmentAvailabilityZones, long groupId, InstanceGroupName groupName, Stack stack,
+            int instanceCount) {
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setId(groupId);
+        instanceGroup.setInstanceGroupType(InstanceGroupType.CORE);
+        instanceGroup.setGroupName(groupName.getName());
+        instanceGroup.setInstanceMetaData(TestUtil.generateInstanceMetaDatas(instanceCount, instanceGroup.getId(), instanceGroup));
+        instanceGroup.setAvailabilityZones(getAvailabilityZoneSet(environmentAvailabilityZones, instanceGroup));
+        instanceGroup.setStack(stack);
+        return instanceGroup;
+    }
+
+    private static Set<AvailabilityZone> getAvailabilityZoneSet(Set<String> environmentAvailabilityZones, InstanceGroup ig) {
+        return environmentAvailabilityZones.stream()
+                .map(zone -> {
+                    AvailabilityZone availabilityZone = new AvailabilityZone();
+                    availabilityZone.setInstanceGroup(ig);
+                    availabilityZone.setAvailabilityZone(zone);
+                    return availabilityZone;
+                })
+                .collect(Collectors.toSet());
+    }
 
     @Test
     void testPopulateWhenTheStackCouldNotBeFoundShouldThrowNotFoundException() {
@@ -100,8 +141,6 @@ class DataLakeAwareInstanceMetadataAvailabilityZoneCalculatorTest {
         Stack stack = TestUtil.stack();
         stack.setMultiAz(Boolean.FALSE);
         when(stackService.getByIdWithLists(anyLong())).thenReturn(stack);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environmentResponse);
 
         underTest.populate(1L);
@@ -117,8 +156,6 @@ class DataLakeAwareInstanceMetadataAvailabilityZoneCalculatorTest {
         stack.setMultiAz(Boolean.FALSE);
         when(stackService.getByIdWithLists(anyLong())).thenReturn(stack);
         when(cloudPlatformConnectors.get(any()).availabilityZoneConnector()).thenReturn(null);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environmentResponse);
 
         underTest.populate(1L);
@@ -148,6 +185,8 @@ class DataLakeAwareInstanceMetadataAvailabilityZoneCalculatorTest {
         verify(underTest, times(1)).updateInstancesMetaData(stack.getNotTerminatedInstanceMetaDataSet());
         verify(underTest, times(1)).populate(stack);
     }
+    // CHECKSTYLE:ON
+    // @formatter:on
 
     @Test
     void testPopulateWhenTheStackIsMultiAzEnabledAndPlatformIsSupportedAndNonEnterpriseDataLake() {
@@ -240,26 +279,6 @@ class DataLakeAwareInstanceMetadataAvailabilityZoneCalculatorTest {
         }
     }
 
-    // @formatter:off
-    // CHECKSTYLE:OFF
-    static Object[][] testAvailabilityZoneDistributionForWholeInstanceGroupData() {
-        return new Object[][]{
-                //masterInstanceCount, auxiliaryInstanceCount, expectedZonesForGroups, expectedInstanceCountByAz
-                {11,                    6,                      Set.of("1"),           Map.of("1", 17, "2", 0, "3", 0)},
-                {11,                    6,                      Set.of("1", "2"),      Map.of("1", 9, "2", 8, "3", 0)},
-                {11,                    6,                      Set.of("1", "2", "3"), Map.of("1", 6, "2", 6, "3", 5)},
-                {2,                     1,                      Set.of("1", "2", "3"), Map.of("1", 1, "2", 1, "3", 1)},
-                {1,                     2,                      Set.of("1", "2", "3"), Map.of("1", 1, "2", 1, "3", 1)},
-                {1,                     1,                      Set.of("1", "2", "3"), Map.of("1", 1, "2", 1, "3", 0)},
-                {0,                     7,                      Set.of("1", "2", "3"), Map.of("1", 3, "2", 2, "3", 2)},
-                {56,                    0,                      Set.of("1", "2", "3"), Map.of("1", 19, "2", 19, "3", 18)},
-                {5,                     4,                      Set.of("2", "3"),      Map.of("1", 0, "2", 5, "3", 4)},
-                {1,                     1,                      Set.of("2", "3"),      Map.of("1", 0, "2", 1, "3", 1)},
-        };
-    }
-    // CHECKSTYLE:ON
-    // @formatter:on
-
     @ParameterizedTest(name = "testPopulateShouldDistributeNodesAcrossInstancesOfTheMasterAndAuxiliaryGroups settings " +
             "when {0} master instances and {1} auxiliary instances and {2} expected zones for groups should result in {3} instance count by availability zone")
     @MethodSource("testAvailabilityZoneDistributionForWholeInstanceGroupData")
@@ -299,32 +318,5 @@ class DataLakeAwareInstanceMetadataAvailabilityZoneCalculatorTest {
                     .count();
             assertEquals(Long.valueOf(expectedCountByZone), actualCount);
         }
-    }
-
-    private static InstanceGroup getInstanceGroup(Set<String> environmentAvailabilityZones, long groupId, InstanceGroupName groupName, Stack stack) {
-        return getInstanceGroup(environmentAvailabilityZones, groupId, groupName, stack, environmentAvailabilityZones.size());
-    }
-
-    private static InstanceGroup getInstanceGroup(Set<String> environmentAvailabilityZones, long groupId, InstanceGroupName groupName, Stack stack,
-            int instanceCount) {
-        InstanceGroup instanceGroup = new InstanceGroup();
-        instanceGroup.setId(groupId);
-        instanceGroup.setInstanceGroupType(InstanceGroupType.CORE);
-        instanceGroup.setGroupName(groupName.getName());
-        instanceGroup.setInstanceMetaData(TestUtil.generateInstanceMetaDatas(instanceCount, instanceGroup.getId(), instanceGroup));
-        instanceGroup.setAvailabilityZones(getAvailabilityZoneSet(environmentAvailabilityZones, instanceGroup));
-        instanceGroup.setStack(stack);
-        return instanceGroup;
-    }
-
-    private static Set<AvailabilityZone> getAvailabilityZoneSet(Set<String> environmentAvailabilityZones, InstanceGroup ig) {
-        return environmentAvailabilityZones.stream()
-                .map(zone -> {
-                    AvailabilityZone availabilityZone = new AvailabilityZone();
-                    availabilityZone.setInstanceGroup(ig);
-                    availabilityZone.setAvailabilityZone(zone);
-                    return availabilityZone;
-                })
-                .collect(Collectors.toSet());
     }
 }

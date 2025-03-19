@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
@@ -36,19 +35,15 @@ public class StackService {
 
     private final WebApplicationExceptionMessageExtractor messageExtractor;
 
-    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     public StackService(
-        StackV4Endpoint stackV4Endpoint,
-        FlowCancelService flowCancelService,
-        FlowLogDBService flowLogDBService,
-        WebApplicationExceptionMessageExtractor messageExtractor,
-        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+            StackV4Endpoint stackV4Endpoint,
+            FlowCancelService flowCancelService,
+            FlowLogDBService flowLogDBService,
+            WebApplicationExceptionMessageExtractor messageExtractor) {
         this.stackV4Endpoint = stackV4Endpoint;
         this.flowCancelService = flowCancelService;
         this.flowLogDBService = flowLogDBService;
         this.messageExtractor = messageExtractor;
-        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     public void triggerConfigUpdateForStack(String stackCrn) {
@@ -79,11 +74,10 @@ public class StackService {
         for (String name : names) {
             try {
                 ThreadBasedUserCrnProvider.doAsInternalActor(
-                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                         () -> {
-                    FlowIdentifier flowidentifier = stackV4Endpoint.updateLoadBalancersInternal(0L, name, initiatorUserCrn);
-                    flowIdentifiers.add(flowidentifier);
-                });
+                            FlowIdentifier flowidentifier = stackV4Endpoint.updateLoadBalancersInternal(0L, name, initiatorUserCrn);
+                            flowIdentifiers.add(flowidentifier);
+                        });
             } catch (WebApplicationException e) {
                 String errorMessage = messageExtractor.getErrorMessage(e);
                 LOGGER.error(String.format("Failed update load balancer for stack %s due to: '%s'.", name, errorMessage), e);

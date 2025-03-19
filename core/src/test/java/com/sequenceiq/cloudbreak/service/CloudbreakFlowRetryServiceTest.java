@@ -21,8 +21,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsFlowConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -53,16 +51,10 @@ class CloudbreakFlowRetryServiceTest {
     private FlowRetryService flowRetryService;
 
     @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
     private CloudbreakEventService eventService;
 
     @Mock
     private DatabaseServerV4Endpoint databaseServerV4Endpoint;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
     @InjectMocks
     private CloudbreakFlowRetryService underTest;
@@ -82,8 +74,6 @@ class CloudbreakFlowRetryServiceTest {
             ((Consumer<FlowLog>) invocation.getArgument(1)).accept(successfulFlowLog);
             return new RetryResponse("name", flowIdentifier);
         });
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("internal-crn");
         Cluster cluster = new Cluster();
         cluster.setDatabaseServerCrn("dbcrn");
         when(stackDtoService.getClusterViewByStackId(STACK_ID)).thenReturn(cluster);
@@ -109,8 +99,6 @@ class CloudbreakFlowRetryServiceTest {
             ((Consumer<FlowLog>) invocation.getArgument(1)).accept(successfulFlowLog);
             return new RetryResponse("name", flowIdentifier);
         });
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("internal-crn");
         Cluster cluster = new Cluster();
         cluster.setDatabaseServerCrn("dbcrn");
         when(stackDtoService.getClusterViewByStackId(STACK_ID)).thenReturn(cluster);

@@ -36,9 +36,9 @@ class EventParameterFactoryTest {
 
     @Test
     void threadBasedUser() {
-        Map<String, Object> result = ThreadBasedUserCrnProvider.doAs("user", () -> underTest.createEventParameters(RESOURCE_ID));
+        Map<String, Object> result = ThreadBasedUserCrnProvider.doAs("crn:cdp:iam:us-west-1:1234:user:1", () -> underTest.createEventParameters(RESOURCE_ID));
 
-        assertEquals("user", result.get(FlowConstants.FLOW_TRIGGER_USERCRN));
+        assertEquals("crn:cdp:iam:us-west-1:1234:user:1", result.get(FlowConstants.FLOW_TRIGGER_USERCRN));
     }
 
     @Test

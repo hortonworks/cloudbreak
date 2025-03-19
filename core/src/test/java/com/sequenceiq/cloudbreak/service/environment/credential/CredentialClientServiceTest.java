@@ -17,8 +17,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -39,9 +37,6 @@ class CredentialClientServiceTest {
     @Mock
     private CredentialConverter credentialConverter;
 
-    @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     @Spy
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
@@ -53,9 +48,6 @@ class CredentialClientServiceTest {
 
     @Test
     void testGetCloudCredential() {
-        RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator = mock(RegionAwareInternalCrnGenerator.class);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("internalCrn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         CredentialResponse credentialResponse = new CredentialResponse();
         when(credentialEndpoint.getByEnvironmentCrn(eq(ENVIRONMENT_CRN))).thenReturn(credentialResponse);
         Credential credential = Credential.builder().crn("crn").name("name").account("account").attributes(new Json(new HashMap<>())).build();
@@ -63,8 +55,6 @@ class CredentialClientServiceTest {
 
         CloudCredential cloudCredential = underTest.getCloudCredential(ENVIRONMENT_CRN);
 
-        verify(regionAwareInternalCrnGeneratorFactory, times(1)).iam();
-        verify(regionAwareInternalCrnGenerator, times(1)).getInternalCrnForServiceAsString();
         verify(credentialEndpoint, times(1)).getByEnvironmentCrn(eq(ENVIRONMENT_CRN));
         assertEquals("crn", cloudCredential.getId());
         assertEquals("name", cloudCredential.getName());
@@ -73,9 +63,6 @@ class CredentialClientServiceTest {
 
     @Test
     void testExtendedCloudCredential() {
-        RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator = mock(RegionAwareInternalCrnGenerator.class);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("internalCrn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         CredentialResponse credentialResponse = new CredentialResponse();
         when(credentialEndpoint.getByEnvironmentCrn(eq(ENVIRONMENT_CRN))).thenReturn(credentialResponse);
         ExtendedCloudCredential extendedCloudCredential = mock(ExtendedCloudCredential.class);

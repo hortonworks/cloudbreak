@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXUpgradeV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
@@ -32,17 +31,13 @@ public class DatahubService {
 
     private final WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
-    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     public DatahubService(DistroXV1Endpoint distroXV1Endpoint,
             DistroXUpgradeV1Endpoint distroXUpgradeV1Endpoint,
-            WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor,
-            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+            WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor) {
 
         this.distroXV1Endpoint = distroXV1Endpoint;
         this.distroXUpgradeV1Endpoint = distroXUpgradeV1Endpoint;
         this.webApplicationExceptionMessageExtractor = webApplicationExceptionMessageExtractor;
-        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     public StackViewV4Responses list(String environmentCrn) {
@@ -98,7 +93,7 @@ public class DatahubService {
     public DistroXCcmUpgradeV1Response upgradeCcm(String datahubCrn) {
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         try {
-            return ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
                     () ->  distroXUpgradeV1Endpoint.upgradeCcmByCrnInternal(datahubCrn, initiatorUserCrn));
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
@@ -110,7 +105,7 @@ public class DatahubService {
 
     public FlowIdentifier modifyProxy(String datahubCrn, String previousProxyConfigCrn) {
         try {
-            return ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
                     initiatorUserCrn -> distroXV1Endpoint.modifyProxyInternal(datahubCrn, previousProxyConfigCrn, initiatorUserCrn));
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);

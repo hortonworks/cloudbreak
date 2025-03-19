@@ -21,8 +21,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryValidationV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -61,12 +59,6 @@ public class SdxUpgradeRecoveryServiceTest {
     @Mock
     private WebApplicationExceptionMessageExtractor exceptionMessageExtractor;
 
-    @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
-
     @InjectMocks
     private SdxUpgradeRecoveryService underTest;
 
@@ -81,9 +73,6 @@ public class SdxUpgradeRecoveryServiceTest {
 
     @Test
     public void testGetClusterRecoverableByNameInternalThrowsExceptionShouldThrowApiException() {
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-
         WebApplicationException webApplicationException = new WebApplicationException();
         doThrow(webApplicationException).when(stackV4Endpoint).getClusterRecoverableByNameInternal(WORKSPACE_ID, CLUSTER_NAME, USER_CRN);
         when(exceptionMessageExtractor.getErrorMessage(webApplicationException)).thenReturn("web-error");
@@ -95,8 +84,6 @@ public class SdxUpgradeRecoveryServiceTest {
 
     @Test
     public void testNonRecoverableStatusShouldReturnNonRecoverable() {
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         String errorMessage = "error message";
 
         RecoveryValidationV4Response recoveryV4Response = new RecoveryValidationV4Response(errorMessage, RecoveryStatus.NON_RECOVERABLE);
@@ -110,8 +97,6 @@ public class SdxUpgradeRecoveryServiceTest {
 
     @Test
     public void testValidateStatusSuccessfulShouldStartRecoveryFlow() {
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         String reason = "Datalake upgrade recovery requested. Cluster will be terminated and re-launched with the original runtime.";
         RecoveryValidationV4Response recoveryV4Response = new RecoveryValidationV4Response(reason, RecoveryStatus.RECOVERABLE);
 
@@ -130,8 +115,6 @@ public class SdxUpgradeRecoveryServiceTest {
 
     @Test
     public void testValidateWithDataAndSuccessfulBackupShouldStartRecoveryFlow() {
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         String reason = "There is no successful backup taken yet for data lake cluster with runtime 7.2.2.";
         RecoveryValidationV4Response recoveryV4Response = new RecoveryValidationV4Response(reason, RecoveryStatus.RECOVERABLE);
 

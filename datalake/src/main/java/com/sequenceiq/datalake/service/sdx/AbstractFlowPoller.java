@@ -16,7 +16,6 @@ import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptResults;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
@@ -33,9 +32,6 @@ public abstract class AbstractFlowPoller {
 
     @Inject
     private FlowCheckResponseToFlowStateConverter flowCheckResponseToFlowStateConverter;
-
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     protected abstract FlowEndpoint flowEndpoint();
 
@@ -68,12 +64,10 @@ public abstract class AbstractFlowPoller {
         FlowCheckResponse flowCheckResponse;
         if (flowIdentifier.getType() == FlowType.FLOW) {
             flowCheckResponse = ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> flowEndpoint().hasFlowRunningByFlowId(flowIdentifier.getPollableId())
             );
         } else if (flowIdentifier.getType() == FlowType.FLOW_CHAIN) {
             flowCheckResponse = ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> flowEndpoint().hasFlowRunningByChainId(flowIdentifier.getPollableId())
             );
         } else if (flowIdentifier.getType() == FlowType.NOT_TRIGGERED) {

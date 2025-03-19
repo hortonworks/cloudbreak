@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderS
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.BackupOperationType;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
@@ -57,9 +56,6 @@ public class StorageValidationService {
     private EnvironmentClientService environmentClientService;
 
     @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Inject
     private CloudStorageValidator cloudStorageValidator;
 
     @Inject
@@ -93,9 +89,7 @@ public class StorageValidationService {
                 .withCloudStorageRequest(cloudStorageRequest)
                 .withBackupOperationType(BackupOperationType.NONE)
                 .build();
-        return ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                () -> cloudProviderServicesV4Endpoint.validateObjectStorage(objectStorageValidateRequest));
+        return ThreadBasedUserCrnProvider.doAsInternalActor(() -> cloudProviderServicesV4Endpoint.validateObjectStorage(objectStorageValidateRequest));
     }
 
     public ValidationResult validateBackupStorage(SdxCluster sdxCluster, BackupOperationType backupOperationType, String backupLocation) {
@@ -166,7 +160,6 @@ public class StorageValidationService {
         try {
             LOGGER.info("Calling cloudbreak for SDX cluster details by name {}", cluster.getName());
             return ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> stackV4Endpoint.get(WORKSPACE_ID_DEFAULT, cluster.getName(), Collections.emptySet(), cluster.getAccountId()));
         } catch (jakarta.ws.rs.NotFoundException e) {
             LOGGER.info("Sdx cluster not found on CB side", e);

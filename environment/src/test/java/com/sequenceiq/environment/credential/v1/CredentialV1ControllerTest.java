@@ -20,7 +20,7 @@ import com.sequenceiq.environment.credential.v1.converter.CredentialToCredential
 @ExtendWith(MockitoExtension.class)
 class CredentialV1ControllerTest {
 
-    private static final String USER_CRN = "USER_CRN";
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
     private static final String PLATFORM = "PLATFORM";
 

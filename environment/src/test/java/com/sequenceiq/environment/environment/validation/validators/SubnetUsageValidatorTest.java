@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -16,7 +15,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.UsedSubnetWithResourceResponse;
 import com.sequenceiq.common.api.UsedSubnetsByEnvironmentResponse;
@@ -36,23 +34,15 @@ public class SubnetUsageValidatorTest {
 
     private final DatabaseServerV4Endpoint databaseServerV4Endpoint = mock(DatabaseServerV4Endpoint.class);
 
-    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory = mock(RegionAwareInternalCrnGeneratorFactory.class);
-
     private final SubnetUsageValidator underTest = new SubnetUsageValidator(stackV4Endpoint,
             freeIpaV1Endpoint,
-            databaseServerV4Endpoint,
-            regionAwareInternalCrnGeneratorFactory);
+            databaseServerV4Endpoint);
 
     @Mock
     private Environment environment;
 
     @Mock
     private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
-
-    @BeforeEach
-    public void beforeEach() {
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-    }
 
     @Test
     public void testValidateWhenNoSubnetMetasAndNoUsedSubnet() {

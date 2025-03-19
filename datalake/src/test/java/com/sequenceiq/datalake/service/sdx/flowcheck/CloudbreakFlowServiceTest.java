@@ -23,8 +23,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.flow.api.FlowEndpoint;
@@ -54,12 +52,6 @@ public class CloudbreakFlowServiceTest {
     @Mock
     private FlowCheckResponseToFlowStateConverter flowCheckResponseToFlowStatusConverter;
 
-    @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
-
     @InjectMocks
     private CloudbreakFlowService underTest;
 
@@ -74,8 +66,6 @@ public class CloudbreakFlowServiceTest {
         cluster.setClusterName(CLUSTER_NAME);
 
         when(flowEndpoint.hasFlowRunningByChainId(eq(FLOW_CHAIN_ID))).thenReturn(createFlowCheckResponse(TRUE));
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         assertEquals(FlowState.RUNNING, underTest.getLastKnownFlowState(cluster));
 
         when(flowEndpoint.hasFlowRunningByChainId(eq(FLOW_CHAIN_ID))).thenReturn(createFlowCheckResponse(TRUE));
@@ -92,8 +82,6 @@ public class CloudbreakFlowServiceTest {
         cluster.setClusterName(CLUSTER_NAME);
 
         when(flowEndpoint.hasFlowRunningByChainId(eq(FLOW_CHAIN_ID))).thenReturn(createFlowCheckResponse(FALSE, TRUE));
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         assertEquals(FAILED, underTest.getLastKnownFlowState(cluster));
 
         cluster.setLastCbFlowChainId(null);
@@ -109,8 +97,6 @@ public class CloudbreakFlowServiceTest {
         cluster.setClusterName(CLUSTER_NAME);
 
         when(flowEndpoint.hasFlowRunningByChainId(eq(FLOW_CHAIN_ID))).thenThrow(new RuntimeException("something"));
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         assertEquals(FlowState.UNKNOWN, underTest.getLastKnownFlowState(cluster));
     }
 
@@ -119,8 +105,6 @@ public class CloudbreakFlowServiceTest {
         SdxCluster cluster = new SdxCluster();
         cluster.setLastCbFlowChainId(FLOW_CHAIN_ID);
         cluster.setClusterName(CLUSTER_NAME);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(flowEndpoint.hasFlowRunningByChainId(eq(FLOW_CHAIN_ID))).thenThrow(new NotFoundException("something"));
 
         assertEquals(FlowState.UNKNOWN, underTest.getLastKnownFlowState(cluster));
@@ -138,8 +122,6 @@ public class CloudbreakFlowServiceTest {
 
         when(flowEndpoint.hasFlowRunningByFlowId(anyString()))
                 .thenReturn(flowCheckResponse);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         assertEquals(FlowState.RUNNING, underTest.getLastKnownFlowState(cluster));
         verify(flowEndpoint).hasFlowRunningByFlowId(FLOW_ID);
     }
@@ -156,8 +138,6 @@ public class CloudbreakFlowServiceTest {
         response.setFlowId(FLOW_ID);
         when(flowEndpoint.getLastFlowByResourceName(any(), anyString())).thenReturn(response);
         when(sdxClusterRepository.save(any())).thenReturn(cluster);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.saveLastCloudbreakFlowChainId(cluster, null);
 
         verify(flowEndpoint).getLastFlowByResourceName(any(), anyString());
@@ -180,8 +160,6 @@ public class CloudbreakFlowServiceTest {
         when(flowEndpoint.getLastFlowByResourceName(any(), anyString()))
                 .thenReturn(response);
         when(sdxClusterRepository.save(any())).thenReturn(cluster);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.saveLastCloudbreakFlowChainId(cluster, null);
 
         verify(flowEndpoint).getLastFlowByResourceName(any(), anyString());
@@ -205,8 +183,6 @@ public class CloudbreakFlowServiceTest {
         when(flowEndpoint.getLastFlowByResourceName(any(), anyString()))
                 .thenReturn(response);
         when(sdxClusterRepository.save(any())).thenReturn(cluster);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.saveLastCloudbreakFlowChainId(cluster, null);
 
         verify(flowEndpoint).getLastFlowByResourceName(any(), anyString());
@@ -223,8 +199,6 @@ public class CloudbreakFlowServiceTest {
         cluster.setClusterName(CLUSTER_NAME);
 
         when(flowEndpoint.getLastFlowByResourceName(any(), anyString())).thenThrow(new NotFoundException("something"));
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.saveLastCloudbreakFlowChainId(cluster, null);
 
         verify(flowEndpoint).getLastFlowByResourceName(any(), anyString());
@@ -288,8 +262,6 @@ public class CloudbreakFlowServiceTest {
         FlowCheckResponse flowCheckResponse = new FlowCheckResponse();
 
         when(flowEndpoint.hasFlowRunningByChainId(eq(FLOW_CHAIN_ID))).thenReturn(flowCheckResponse);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
 
         // All field values are null if there's no value set.
         FlowCheckResponse lastKnownFlowCheckResponse = underTest.getLastKnownFlowCheckResponse(cluster);
@@ -327,8 +299,6 @@ public class CloudbreakFlowServiceTest {
         FlowCheckResponse flowCheckResponseWithFlowID = new FlowCheckResponse();
 
         when(flowEndpoint.hasFlowRunningByChainId(eq(FLOW_ID))).thenReturn(flowCheckResponseWithFlowID);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
 
         flowCheckResponseWithFlowID.setCurrentState("TEST_WITH_FLOW_ID");
         flowCheckResponseWithFlowID.setNextEvent("TEST_WITH_FLOW_ID");

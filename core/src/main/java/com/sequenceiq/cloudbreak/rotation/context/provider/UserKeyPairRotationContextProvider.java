@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.repository.StackAuthenticationRepository;
@@ -39,9 +38,6 @@ public class UserKeyPairRotationContextProvider implements RotationContextProvid
     private EnvironmentClientService environmentClientService;
 
     @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Inject
     private StackAuthenticationRepository stackAuthenticationRepository;
 
     @Inject
@@ -52,7 +48,6 @@ public class UserKeyPairRotationContextProvider implements RotationContextProvid
         Map<SecretRotationStep, RotationContext> result = Maps.newHashMap();
         StackDto stack = stackService.getByCrn(resourceCrn);
         DetailedEnvironmentResponse environment = ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> environmentClientService.getByCrn(stack.getEnvironmentCrn()));
 
         boolean changedKeyPair = customerChangedTheKeyPair(stack.getStackAuthentication(), environment.getAuthentication());

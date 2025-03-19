@@ -1,7 +1,6 @@
 package com.sequenceiq.datalake.service.sdx;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -16,8 +15,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -43,9 +40,6 @@ class SdxUpgradePrepareServiceTest {
     private SdxStatusService sdxStatusService;
 
     @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
     private StackV4Endpoint stackV4Endpoint;
 
     @Mock
@@ -65,8 +59,6 @@ class SdxUpgradePrepareServiceTest {
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "pollId");
         when(stackV4Endpoint.prepareClusterUpgradeByCrnInternal(0L, cluster.getCrn(), IMAGE_ID, USER_CRN))
                 .thenReturn(flowIdentifier);
-        RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator = mock(RegionAwareInternalCrnGenerator.class);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.prepareUpgrade(STACK_ID, IMAGE_ID));
 
@@ -83,8 +75,6 @@ class SdxUpgradePrepareServiceTest {
         WebApplicationException webApplicationException = new WebApplicationException();
         when(stackV4Endpoint.prepareClusterUpgradeByCrnInternal(0L, cluster.getCrn(), IMAGE_ID, USER_CRN))
                 .thenThrow(webApplicationException);
-        RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator = mock(RegionAwareInternalCrnGenerator.class);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(exceptionMessageExtractor.getErrorMessage(webApplicationException)).thenReturn("fail");
 
         assertThrows(CloudbreakApiException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.prepareUpgrade(STACK_ID, IMAGE_ID)));

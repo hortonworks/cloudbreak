@@ -20,8 +20,6 @@ import org.springframework.util.ReflectionUtils;
 
 import com.dyngr.core.AttemptResults;
 import com.dyngr.exception.UserBreakException;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.sdx.paas.flowpolling.FlowPollingService;
 import com.sequenceiq.cloudbreak.sdx.paas.service.PaasSdxStartStopService;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
@@ -38,12 +36,6 @@ class PaasSdxStartStopServiceTest {
     private SdxEndpoint sdxEndpoint;
 
     @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
-
-    @Mock
     private FlowPollingService flowPollingService;
 
     @InjectMocks
@@ -58,8 +50,6 @@ class PaasSdxStartStopServiceTest {
         Field sleepTime = ReflectionUtils.findField(PaasSdxStartStopService.class, "pollSleepTime");
         ReflectionUtils.makeAccessible(sleepTime);
         ReflectionUtils.setField(sleepTime, paasSdxStartStopService, 1);
-
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
     }
 
     @Test

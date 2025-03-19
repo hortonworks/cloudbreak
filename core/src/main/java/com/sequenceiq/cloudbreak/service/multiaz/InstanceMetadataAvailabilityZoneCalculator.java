@@ -69,6 +69,19 @@ public class InstanceMetadataAvailabilityZoneCalculator {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
+    private static InstanceGroupDto getInstanceGroupDtoByGroupName(StackDtoDelegate stack, String hostGroupName) {
+        return stack.getInstanceGroupDtos().stream()
+                .filter(ig -> hostGroupName.equals(ig.getInstanceGroup().getGroupName()))
+                .findFirst()
+                .orElseThrow(() -> new CloudbreakServiceException(String.format(GROUP_NOT_EXISTS_WITH_NAME_PATTERN, hostGroupName)));
+    }
+
+    private static Set<InstanceMetaData> getInstancesByInstanceGroupId(Set<InstanceMetaData> notDeletedInstanceMetadataForStack, Long instanceGroupId) {
+        return notDeletedInstanceMetadataForStack.stream()
+                .filter(im -> instanceGroupId.equals(im.getInstanceGroupId()))
+                .collect(Collectors.toSet());
+    }
+
     public void populate(Long stackId) {
         Stack stack = stackService.getByIdWithLists(stackId);
         populate(stack);
@@ -213,9 +226,7 @@ public class InstanceMetadataAvailabilityZoneCalculator {
 
     protected DetailedEnvironmentResponse getDetailedEnvironmentResponse(String environmentCrn) {
         return measure(() ->
-                        ThreadBasedUserCrnProvider.doAsInternalActor(
-                                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                                () -> environmentClientService.getByCrn(environmentCrn)),
+                        ThreadBasedUserCrnProvider.doAsInternalActor(() -> environmentClientService.getByCrn(environmentCrn)),
                 LOGGER,
                 "Get Environment from Environment service took {} ms");
     }
@@ -253,19 +264,6 @@ public class InstanceMetadataAvailabilityZoneCalculator {
                     notDeletedInstancesForGroup,
                     networkScaleDetails));
         }
-    }
-
-    private static InstanceGroupDto getInstanceGroupDtoByGroupName(StackDtoDelegate stack, String hostGroupName) {
-        return stack.getInstanceGroupDtos().stream()
-                .filter(ig -> hostGroupName.equals(ig.getInstanceGroup().getGroupName()))
-                .findFirst()
-                .orElseThrow(() -> new CloudbreakServiceException(String.format(GROUP_NOT_EXISTS_WITH_NAME_PATTERN, hostGroupName)));
-    }
-
-    private static Set<InstanceMetaData> getInstancesByInstanceGroupId(Set<InstanceMetaData> notDeletedInstanceMetadataForStack, Long instanceGroupId) {
-        return notDeletedInstanceMetadataForStack.stream()
-                .filter(im -> instanceGroupId.equals(im.getInstanceGroupId()))
-                .collect(Collectors.toSet());
     }
 
     private Set<InstanceMetaData> populateOnInstancesOfGroupForRepair(StackDtoDelegate stack, String hostGroupName,

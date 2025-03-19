@@ -22,8 +22,6 @@ import org.mockito.MockitoAnnotations;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -74,12 +72,6 @@ public class SdxAttachServiceTest {
 
     @Mock
     private StatusCheckerJobService mockJobService;
-
-    @Mock
-    private RegionAwareInternalCrnGeneratorFactory mockRegionAwareInternalCrnGeneratorFactory;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator mockRegionAwareInternalCrnGenerator;
 
     @Mock
     private CloudbreakPoller mockCloudbreakPoller;
@@ -137,8 +129,6 @@ public class SdxAttachServiceTest {
 
     @Test
     void testReattachStack() {
-        when(mockRegionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(mockRegionAwareInternalCrnGeneratorFactory.iam()).thenReturn(mockRegionAwareInternalCrnGenerator);
         testCluster.setClusterName(ORIGINAL_TEST_CLUSTER_NAME);
         testCluster.setCrn(ORIGINAL_TEST_CLUSTER_CRN);
         sdxAttachService.reattachStack(testCluster, TEST_CLUSTER_NAME);
@@ -150,8 +140,6 @@ public class SdxAttachServiceTest {
 
     @Test
     void testReattachStackNoStackNoError() {
-        when(mockRegionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(mockRegionAwareInternalCrnGeneratorFactory.iam()).thenReturn(mockRegionAwareInternalCrnGenerator);
         testCluster.setClusterName(ORIGINAL_TEST_CLUSTER_NAME);
         testCluster.setCrn(ORIGINAL_TEST_CLUSTER_CRN);
         doThrow(new NotFoundException("Stack not found.")).when(mockStackV4Endpoint).updateNameAndCrn(any(), any(), any(), any(), any(), eq(false));
@@ -160,8 +148,6 @@ public class SdxAttachServiceTest {
 
     @Test
     void testReattachExternalDatabase() {
-        when(mockRegionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(mockRegionAwareInternalCrnGeneratorFactory.iam()).thenReturn(mockRegionAwareInternalCrnGenerator);
         when(mockSdxDetachNameGenerator.generateOriginalNameFromDetached(any())).thenReturn(ORIGINAL_TEST_CLUSTER_NAME);
         when(mockStackV4Endpoint.reRegisterClusterProxyConfig(any(), any(), eq(false), any(), any())).thenReturn(FlowIdentifier.notTriggered());
         when(mockSdxService.save(any())).thenReturn(testCluster);
@@ -179,8 +165,6 @@ public class SdxAttachServiceTest {
 
     @Test
     void testReattachExternalDatabaseNoDBNoError() {
-        when(mockRegionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(mockRegionAwareInternalCrnGeneratorFactory.iam()).thenReturn(mockRegionAwareInternalCrnGenerator);
         when(mockSdxDetachNameGenerator.generateOriginalNameFromDetached(any())).thenReturn(ORIGINAL_TEST_CLUSTER_NAME);
         when(mockStackV4Endpoint.reRegisterClusterProxyConfig(any(), any(), eq(false), any(), any())).thenReturn(FlowIdentifier.notTriggered());
         when(mockSdxService.save(any())).thenReturn(testCluster);
@@ -213,8 +197,6 @@ public class SdxAttachServiceTest {
     @Test
     void testReRegisterClusterProxyConfig() {
         testCluster.getSdxDatabase().setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.NONE);
-        when(mockRegionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(mockRegionAwareInternalCrnGeneratorFactory.iam()).thenReturn(mockRegionAwareInternalCrnGenerator);
         when(mockSdxDetachNameGenerator.generateOriginalNameFromDetached(any())).thenReturn(ORIGINAL_TEST_CLUSTER_NAME);
         when(mockStackV4Endpoint.reRegisterClusterProxyConfig(any(), any(), eq(false), any(), any())).thenReturn(FlowIdentifier.notTriggered());
         when(mockSdxService.save(any())).thenReturn(testCluster);
@@ -231,8 +213,6 @@ public class SdxAttachServiceTest {
     @Test
     void testReRegisterClusterProxyConfigCCMv1() {
         testCluster.getSdxDatabase().setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.NONE);
-        when(mockRegionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(mockRegionAwareInternalCrnGeneratorFactory.iam()).thenReturn(mockRegionAwareInternalCrnGenerator);
         when(mockSdxDetachNameGenerator.generateOriginalNameFromDetached(any())).thenReturn(ORIGINAL_TEST_CLUSTER_NAME);
         when(mockStackV4Endpoint.reRegisterClusterProxyConfig(any(), any(), anyBoolean(), any(), any())).thenReturn(FlowIdentifier.notTriggered());
         when(mockSdxService.save(any())).thenReturn(testCluster);

@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.exception.SdxOperationFailedException;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -37,18 +36,14 @@ public class SdxService {
 
     private final WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
-    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     public SdxService(SdxEndpoint sdxEndpoint, SdxUpgradeEndpoint sdxUpgradeEndpoint, SdxInternalEndpoint sdxInternalEndpoint,
-            OperationEndpoint sdxOperationEndpoint, WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor,
-            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+            OperationEndpoint sdxOperationEndpoint, WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor) {
 
         this.sdxEndpoint = sdxEndpoint;
         this.sdxUpgradeEndpoint = sdxUpgradeEndpoint;
         this.sdxInternalEndpoint = sdxInternalEndpoint;
         this.sdxOperationEndpoint = sdxOperationEndpoint;
         this.webApplicationExceptionMessageExtractor = webApplicationExceptionMessageExtractor;
-        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     public SdxClusterResponse getByCrn(String clusterCrn) {
@@ -75,7 +70,6 @@ public class SdxService {
         try {
             String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
             return ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> sdxEndpoint.isStoppableInternal(crn, initiatorUserCrn)
             );
         } catch (WebApplicationException e) {
@@ -91,7 +85,7 @@ public class SdxService {
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         try {
             LOGGER.debug("Calling SDX Upgrade CCM by environment CRN {}", environmentCrn);
-            return ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
                     () -> sdxUpgradeEndpoint.upgradeCcm(environmentCrn, initiatorUserCrn));
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
@@ -114,7 +108,7 @@ public class SdxService {
     public FlowIdentifier modifyProxy(String datalakeCrn, String previousProxyCrn) {
         try {
             LOGGER.debug("Calling SDX modify proxy by CRN {}", datalakeCrn);
-            return ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
                     initiatorUserCrn -> sdxInternalEndpoint.modifyProxy(datalakeCrn, previousProxyCrn, initiatorUserCrn));
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);

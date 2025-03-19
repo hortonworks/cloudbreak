@@ -53,8 +53,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Reque
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -218,22 +216,23 @@ public class StackCreatorServiceTest {
     private EntitlementService entitlementService;
 
     @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
-
-    @Mock
     private DetailedEnvironmentResponse environment;
 
     @Mock
     private StackV4RequestToStackConverter stackV4RequestToStackConverter;
 
+    static Object[][] fillInstanceMetadataTestWhenSubnetAndAvailabilityZoneAndRackIdAndRoundRobinDataProvider() {
+        return new Object[][]{
+                // testCaseName subnetId availabilityZone
+                {"subnetId=\"subnet-1\", availabilityZone=null", "subnet-1", null},
+                {"subnetId=\"subnet-1\", availabilityZone=\"az-1\"", "subnet-1", "az-1"},
+        };
+    }
+
     @BeforeEach
     void before() {
         underTestSpy = spy(new StackCreatorService());
         MockitoAnnotations.openMocks(this);
-        lenient().when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         lenient().when(environmentClientService.getByCrn(any())).thenReturn(environment);
         lenient().when(environment.getRegions()).thenReturn(mock());
     }
@@ -333,7 +332,7 @@ public class StackCreatorServiceTest {
         when(stackDtoService.getStackViewByNameOrCrnOpt(any(), anyString())).thenReturn(Optional.empty());
 
         BadRequestException e = assertThrows(BadRequestException.class, () ->
-                ThreadBasedUserCrnProvider.doAsInternalActor(INTERNAL_USER_CRN, () -> underTest.createStack(user, workspace, stackRequest, true)));
+                ThreadBasedUserCrnProvider.doAs(INTERNAL_USER_CRN, () -> underTest.createStack(user, workspace, stackRequest, true)));
 
         assertEquals("The selected architecture (arm64) is not enabled in your account", e.getMessage());
         verify(recipeValidatorService).validateRecipeExistenceOnInstanceGroups(any(), any());
@@ -355,7 +354,7 @@ public class StackCreatorServiceTest {
         when(entitlementService.isCODUseGraviton(any())).thenReturn(Boolean.TRUE);
 
         Exception e = assertThrows(Exception.class, () ->
-                ThreadBasedUserCrnProvider.doAsInternalActor(INTERNAL_USER_CRN, () -> underTest.createStack(user, workspace, stackRequest, true)));
+                ThreadBasedUserCrnProvider.doAs(INTERNAL_USER_CRN, () -> underTest.createStack(user, workspace, stackRequest, true)));
 
         assertFalse(e instanceof BadRequestException);
         verify(recipeValidatorService).validateRecipeExistenceOnInstanceGroups(any(), any());
@@ -374,7 +373,7 @@ public class StackCreatorServiceTest {
         when(stackDtoService.getStackViewByNameOrCrnOpt(any(), anyString())).thenReturn(Optional.empty());
 
         BadRequestException e = assertThrows(BadRequestException.class, () ->
-                ThreadBasedUserCrnProvider.doAsInternalActor(INTERNAL_USER_CRN, () -> underTest.createStack(user, workspace, stackRequest, true)));
+                ThreadBasedUserCrnProvider.doAs(INTERNAL_USER_CRN, () -> underTest.createStack(user, workspace, stackRequest, true)));
 
         assertEquals("The selected architecture (arm64) is not enabled in your account", e.getMessage());
         verify(recipeValidatorService).validateRecipeExistenceOnInstanceGroups(any(), any());
@@ -721,14 +720,6 @@ public class StackCreatorServiceTest {
 
     private String cloudSubnetAz(int i) {
         return "az-" + i;
-    }
-
-    static Object[][] fillInstanceMetadataTestWhenSubnetAndAvailabilityZoneAndRackIdAndRoundRobinDataProvider() {
-        return new Object[][]{
-                // testCaseName subnetId availabilityZone
-                {"subnetId=\"subnet-1\", availabilityZone=null", "subnet-1", null},
-                {"subnetId=\"subnet-1\", availabilityZone=\"az-1\"", "subnet-1", "az-1"},
-        };
     }
 
     @ParameterizedTest(name = "{0}")

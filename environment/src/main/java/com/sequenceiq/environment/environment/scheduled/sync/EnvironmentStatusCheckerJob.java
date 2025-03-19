@@ -78,21 +78,21 @@ public class EnvironmentStatusCheckerJob extends StatusCheckerJob {
     @VisibleForTesting
     void syncAnEnv(Environment environment) {
         try {
-            ThreadBasedUserCrnProvider.doAsInternalActor(
+            ThreadBasedUserCrnProvider.doAs(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> {
-                EnvironmentStatus status = environmentSyncService.getStatusByFreeipa(environment);
-                if (environment.getStatus() != status) {
-                    if (!flowLogService.isOtherFlowRunning(environment.getId())) {
-                        updateIfEnabled(environment, status);
-                    } else {
-                        LOGGER.info("EnvironmentStatusCheckerJob wants to update the status but it's ignored because a flow started on: {}",
-                                environment.getName());
-                    }
-                } else {
-                    LOGGER.info("Environment status is the same ({}), the update is skipped", status);
-                }
-            });
+                        EnvironmentStatus status = environmentSyncService.getStatusByFreeipa(environment);
+                        if (environment.getStatus() != status) {
+                            if (!flowLogService.isOtherFlowRunning(environment.getId())) {
+                                updateIfEnabled(environment, status);
+                            } else {
+                                LOGGER.info("EnvironmentStatusCheckerJob wants to update the status but it's ignored because a flow started on: {}",
+                                        environment.getName());
+                            }
+                        } else {
+                            LOGGER.info("Environment status is the same ({}), the update is skipped", status);
+                        }
+                    });
         } catch (Exception e) {
             LOGGER.info("Environment sync is failed for {}, error: {}", environment.getName(), e.getMessage(), e);
         }

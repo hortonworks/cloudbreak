@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 
@@ -17,8 +16,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -52,9 +49,6 @@ class RebuildUpdateEnvironmentStackConfigActionTest {
     private EventBus eventBus;
 
     @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
     private EnvironmentEndpoint environmentEndpoint;
 
     @InjectMocks
@@ -68,7 +62,6 @@ class RebuildUpdateEnvironmentStackConfigActionTest {
         CloudCredential cloudCredential = mock(CloudCredential.class);
         CloudStack cloudStack = mock(CloudStack.class);
         StackContext context = new StackContext(mock(FlowParameters.class), stack, cloudContext, cloudCredential, cloudStack);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(mock(RegionAwareInternalCrnGenerator.class));
 
         underTest.doExecute(context, new StackEvent(STACK_ID), new HashMap<>());
 
@@ -89,7 +82,6 @@ class RebuildUpdateEnvironmentStackConfigActionTest {
         CloudCredential cloudCredential = mock(CloudCredential.class);
         CloudStack cloudStack = mock(CloudStack.class);
         StackContext context = new StackContext(mock(FlowParameters.class), stack, cloudContext, cloudCredential, cloudStack);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(mock(RegionAwareInternalCrnGenerator.class));
         doThrow(new RuntimeException("asf")).when(environmentEndpoint).updateConfigsInEnvironmentByCrn(stack.getEnvironmentCrn());
 
         underTest.doExecute(context, new StackEvent(STACK_ID), new HashMap<>());

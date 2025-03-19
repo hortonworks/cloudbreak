@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DiskUpdateEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskModificationRequest;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
@@ -38,9 +37,6 @@ public class DatalakeDiskUpdateHandler extends EventSenderAwareHandler<DatalakeD
     private static final int SLEEP_INTERVAL = 30;
 
     private static final int DURATION_IN_MINUTES = 30;
-
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Inject
     private CloudbreakFlowService cloudbreakFlowService;
@@ -77,7 +73,6 @@ public class DatalakeDiskUpdateHandler extends EventSenderAwareHandler<DatalakeD
             diskModificationRequest.setDiskUpdateRequest(payload.getDatalakeDiskUpdateRequest());
             LOGGER.debug("Calling updateDiskTypeAndSize with request :: {}", diskModificationRequest);
             FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.sdxAdmin().getInternalCrnForServiceAsString(),
                     () -> {
                         try {
                             return diskUpdateEndpoint.updateDiskTypeAndSize(diskModificationRequest);

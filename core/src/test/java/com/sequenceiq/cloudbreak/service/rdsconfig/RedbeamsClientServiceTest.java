@@ -29,8 +29,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
@@ -59,12 +57,6 @@ class RedbeamsClientServiceTest {
     @Mock
     private SupportV4Endpoint supportV4Endpoint;
 
-    @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
-
     @InjectMocks
     private RedbeamsClientService underTest;
 
@@ -79,16 +71,12 @@ class RedbeamsClientServiceTest {
     @Test
     void deleteByCrnNotFoundIsRethrownAsIs() {
         when(redbeamsServerEndpoint.deleteByCrn(any(), anyBoolean())).thenThrow(new NotFoundException("not found"));
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         assertThatThrownBy(() -> underTest.deleteByCrn("crn", true)).isExactlyInstanceOf(NotFoundException.class);
     }
 
     @Test
     void rotateSslCert() {
         when(redbeamsServerEndpoint.rotateSslCert(any())).thenReturn(new FlowIdentifier(FlowType.FLOW_CHAIN, "123"));
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
 
         FlowIdentifier flowIdentifier = underTest.rotateSslCert("crn");
 
@@ -101,8 +89,6 @@ class RedbeamsClientServiceTest {
     void getLatestCertificate() {
         SslCertificateEntryResponse sslCertificateEntryResponse = new SslCertificateEntryResponse();
         when(supportV4Endpoint.getLatestCertificate(any(), anyString())).thenReturn(sslCertificateEntryResponse);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
 
         SslCertificateEntryResponse aws = underTest.getLatestCertificate("AWS", "eu-central-1");
 
@@ -113,8 +99,6 @@ class RedbeamsClientServiceTest {
     @Test
     void updateToLatestSslCert() {
         when(redbeamsServerEndpoint.updateToLatestSslCert(any())).thenReturn(new FlowIdentifier(FlowType.FLOW_CHAIN, "123"));
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
 
         FlowIdentifier flowIdentifier = underTest.updateToLatestSslCert("crn");
 
@@ -126,8 +110,6 @@ class RedbeamsClientServiceTest {
     @Test
     void getByClusterCrnNotFoundIsRethrownAsIs() {
         when(redbeamsServerEndpoint.getByClusterCrn(anyString(), anyString())).thenThrow(new NotFoundException("not found"));
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         assertThatThrownBy(() -> underTest.getByClusterCrn("crn", "crn2")).isExactlyInstanceOf(NotFoundException.class);
     }
 
@@ -146,8 +128,6 @@ class RedbeamsClientServiceTest {
     @Test
     void rotateSecretShouldCallRedbeamsClient() {
         when(redbeamsServerEndpoint.rotateSecret(any(), any())).thenReturn(new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_CHAIN_ID));
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         RotateDatabaseServerSecretV4Request request = new RotateDatabaseServerSecretV4Request();
         request.setSecret(SECRET);
         request.setCrn(DATABASE_SERVER_CRN);
@@ -160,8 +140,6 @@ class RedbeamsClientServiceTest {
     @Test
     void rotateSecretShouldThrowCloudbreakServiceExceptionWhenClientCallFails() {
         when(redbeamsServerEndpoint.rotateSecret(any(), any())).thenThrow(new BadRequestException("bad request"));
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         RotateDatabaseServerSecretV4Request request = new RotateDatabaseServerSecretV4Request();
         request.setSecret(SECRET);
         request.setCrn(DATABASE_SERVER_CRN);
@@ -176,8 +154,6 @@ class RedbeamsClientServiceTest {
     @Test
     public void testListDatabaseServersCertificateStatusByStackCrns() {
         ClusterDatabaseServerCertificateStatusV4Request request = new ClusterDatabaseServerCertificateStatusV4Request();
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ClusterDatabaseServerCertificateStatusV4Responses mockResponse = new ClusterDatabaseServerCertificateStatusV4Responses();
 
         when(redbeamsServerEndpoint.listDatabaseServersCertificateStatusByStackCrns(request, "usercrn")).thenReturn(mockResponse);
@@ -198,8 +174,6 @@ class RedbeamsClientServiceTest {
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW, "flow-123");
         expectedResponse.setFlowIdentifier(flowId);
 
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("internal-crn");
         when(redbeamsServerEndpoint.validateUpgrade(crn, request)).thenReturn(expectedResponse);
 
         // When
@@ -218,8 +192,6 @@ class RedbeamsClientServiceTest {
         request.setUpgradeTargetMajorVersion(UpgradeTargetMajorVersion.VERSION_14);
         ProcessingException processingException = new ProcessingException("Processing error");
 
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("internal-crn");
         when(redbeamsServerEndpoint.validateUpgrade(crn, request)).thenThrow(processingException);
 
         // When
@@ -242,8 +214,6 @@ class RedbeamsClientServiceTest {
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW, "flow-123");
         expectedResponse.setFlowIdentifier(flowId);
 
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("internal-crn");
         when(redbeamsServerEndpoint.validateUpgradeCleanup(crn)).thenReturn(expectedResponse);
 
         // When
@@ -260,8 +230,6 @@ class RedbeamsClientServiceTest {
         String crn = "crn:altus:iam:us-west-1:123:user:456";
         ProcessingException processingException = new ProcessingException("Processing error");
 
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("internal-crn");
         when(redbeamsServerEndpoint.validateUpgradeCleanup(crn)).thenThrow(processingException);
 
         // When

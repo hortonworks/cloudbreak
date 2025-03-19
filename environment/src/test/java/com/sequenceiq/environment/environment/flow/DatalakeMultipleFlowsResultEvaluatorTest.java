@@ -6,7 +6,6 @@ import static org.mockito.Mockito.lenient;
 import java.util.List;
 import java.util.UUID;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -14,8 +13,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
@@ -27,19 +24,35 @@ public class DatalakeMultipleFlowsResultEvaluatorTest {
     @Mock
     private SdxFlowEndpoint flowEndpoint;
 
-    @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
-
     @InjectMocks
     private DatalakeMultipleFlowsResultEvaluator underTest;
 
-    @BeforeEach
-    void setUp() {
-        lenient().when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        lenient().when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+    // @formatter:off
+    // CHECKSTYLE:OFF
+    public static Object[][] scenariosAllFinished() {
+        return new Object[][] {
+                // testName                     flow1Active flow1Failed flow2Active flow2Failed allFinished
+                { "Flow1 and Flow2 finished",   false,      false,      false,      false,      true  },
+                { "Flow1 active",               true,       false,      false,      false,      false },
+                { "Flow1 failed",               false,      true,       false,      false,      true  },
+                { "Flow2 active",               false,      false,      true,       false,      false },
+                { "Flow2 failed",               false,      false,      false,      true,       true  },
+                { "Flow1 and Flow2 active",     true,       false,      true,       false,      false },
+                { "Flow1 and Flow2 failed",     false,      true,       false,      true,       true  },
+        };
+    }
+
+    public static Object[][] scenariosAnyFailed() {
+        return new Object[][] {
+                // testName                     flow1Active flow1Failed flow2Active flow2Failed allFinished
+                { "Flow1 and Flow2 finished",   false,      false,      false,      false,      false },
+                { "Flow1 active",               true,       false,      false,      false,      false },
+                { "Flow1 failed",               false,      true,       false,      false,      true  },
+                { "Flow2 active",               false,      false,      true,       false,      false },
+                { "Flow2 failed",               false,      false,      false,      true,       true  },
+                { "Flow1 and Flow2 active",     true,       false,      true,       false,      false },
+                { "Flow1 and Flow2 failed",     false,      true,       false,      true,       true  },
+        };
     }
 
     @ParameterizedTest(name = "{0}")
@@ -80,34 +93,6 @@ public class DatalakeMultipleFlowsResultEvaluatorTest {
         checkResponse.setHasActiveFlow(flowActive);
         checkResponse.setLatestFlowFinalizedAndFailed(flowFailed);
         return checkResponse;
-    }
-
-    // @formatter:off
-    // CHECKSTYLE:OFF
-    public static Object[][] scenariosAllFinished() {
-        return new Object[][] {
-                // testName                     flow1Active flow1Failed flow2Active flow2Failed allFinished
-                { "Flow1 and Flow2 finished",   false,      false,      false,      false,      true  },
-                { "Flow1 active",               true,       false,      false,      false,      false },
-                { "Flow1 failed",               false,      true,       false,      false,      true  },
-                { "Flow2 active",               false,      false,      true,       false,      false },
-                { "Flow2 failed",               false,      false,      false,      true,       true  },
-                { "Flow1 and Flow2 active",     true,       false,      true,       false,      false },
-                { "Flow1 and Flow2 failed",     false,      true,       false,      true,       true  },
-        };
-    }
-
-    public static Object[][] scenariosAnyFailed() {
-        return new Object[][] {
-                // testName                     flow1Active flow1Failed flow2Active flow2Failed allFinished
-                { "Flow1 and Flow2 finished",   false,      false,      false,      false,      false },
-                { "Flow1 active",               true,       false,      false,      false,      false },
-                { "Flow1 failed",               false,      true,       false,      false,      true  },
-                { "Flow2 active",               false,      false,      true,       false,      false },
-                { "Flow2 failed",               false,      false,      false,      true,       true  },
-                { "Flow1 and Flow2 active",     true,       false,      true,       false,      false },
-                { "Flow1 and Flow2 failed",     false,      true,       false,      true,       true  },
-        };
     }
     // CHECKSTYLE:ON
     // @formatter:on

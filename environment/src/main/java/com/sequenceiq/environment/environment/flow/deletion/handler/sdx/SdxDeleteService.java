@@ -8,7 +8,6 @@ import com.dyngr.Polling;
 import com.dyngr.core.AttemptMaker;
 import com.dyngr.exception.PollerStoppedException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.service.EnvironmentResourceDeletionService;
@@ -26,16 +25,12 @@ public class SdxDeleteService {
 
     private final EnvironmentResourceDeletionService environmentResourceDeletionService;
 
-    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     public SdxDeleteService(PlatformAwareSdxConnector platformAwareSdxConnector,
-        StackV4Endpoint stackV4Endpoint,
-        EnvironmentResourceDeletionService environmentResourceDeletionService,
-        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+            StackV4Endpoint stackV4Endpoint,
+            EnvironmentResourceDeletionService environmentResourceDeletionService) {
         this.platformAwareSdxConnector = platformAwareSdxConnector;
         this.stackV4Endpoint = stackV4Endpoint;
         this.environmentResourceDeletionService = environmentResourceDeletionService;
-        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     public void deleteSdxClustersForEnvironment(PollingConfig pollingConfig, EnvironmentView environment, boolean force) {

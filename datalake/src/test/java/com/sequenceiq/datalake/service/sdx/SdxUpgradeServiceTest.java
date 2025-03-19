@@ -32,8 +32,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.Cluster
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerProductV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseResponse;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
@@ -76,12 +74,6 @@ public class SdxUpgradeServiceTest {
     @Mock
     private WebApplicationExceptionMessageExtractor exceptionMessageExtractor;
 
-    @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
-
     @Captor
     private ArgumentCaptor<SdxCluster> sdxClusterArgumentCaptor;
 
@@ -102,8 +94,6 @@ public class SdxUpgradeServiceTest {
         StackV4Response stackV4Response = getStackV4Response();
         when(stackV4Endpoint.get(eq(0L), eq("test-sdx-cluster"), eq(Set.of()), anyString()))
                 .thenReturn(stackV4Response);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_USER_CRN);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.updateRuntimeVersionFromCloudbreak(STACK_ID);
 
         verify(sdxService, times(1)).updateRuntimeVersionFromStackResponse(eq(sdxCluster), eq(stackV4Response));
@@ -128,8 +118,6 @@ public class SdxUpgradeServiceTest {
         stackV4Response.getCluster().getCm().setProducts(List.of(spark3));
         when(stackV4Endpoint.get(eq(0L), eq("test-sdx-cluster"), eq(Set.of()), anyString()))
                 .thenReturn(stackV4Response);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_USER_CRN);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.updateRuntimeVersionFromCloudbreak(STACK_ID);
 
         verify(sdxService, times(0)).save(any());
@@ -143,8 +131,6 @@ public class SdxUpgradeServiceTest {
         stackV4Response.getCluster().setCm(null);
         when(stackV4Endpoint.get(eq(0L), eq("test-sdx-cluster"), eq(Set.of()), anyString()))
                 .thenReturn(stackV4Response);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_USER_CRN);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.updateRuntimeVersionFromCloudbreak(STACK_ID);
 
         verify(sdxService, times(0)).save(any());
@@ -158,8 +144,6 @@ public class SdxUpgradeServiceTest {
         stackV4Response.setCluster(null);
         when(stackV4Endpoint.get(eq(0L), eq("test-sdx-cluster"), eq(Set.of()), anyString()))
                 .thenReturn(stackV4Response);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_USER_CRN);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.updateRuntimeVersionFromCloudbreak(STACK_ID);
 
         verify(sdxService, times(0)).save(any());
@@ -175,8 +159,6 @@ public class SdxUpgradeServiceTest {
         stackV4Response.getCluster().getCm().setProducts(List.of(cdp));
         when(stackV4Endpoint.get(eq(0L), eq("test-sdx-cluster"), eq(Set.of()), anyString()))
                 .thenReturn(stackV4Response);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_USER_CRN);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.updateRuntimeVersionFromCloudbreak(STACK_ID);
 
         verify(sdxService, times(0)).save(any());
@@ -186,8 +168,6 @@ public class SdxUpgradeServiceTest {
     public void testOsUpgradeShouldCallRegularOsUpgrade() {
         FlowIdentifier flowIdentifier = mock(FlowIdentifier.class);
         when(sdxService.getById(STACK_ID)).thenReturn(sdxCluster);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_USER_CRN);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(stackV4Endpoint.upgradeOsInternal(any(), any(), any(), any())).thenReturn(flowIdentifier);
 
         underTest.upgradeOs(STACK_ID, TARGET_IMAGE_ID, false, true);
@@ -205,8 +185,6 @@ public class SdxUpgradeServiceTest {
         FlowIdentifier flowIdentifier = mock(FlowIdentifier.class);
         OrderedOSUpgradeSetRequest orderedOSUpgradeSetRequest = new OrderedOSUpgradeSetRequest();
         when(sdxService.getById(STACK_ID)).thenReturn(sdxCluster);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_USER_CRN);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getClusterName()), eq(Set.of()), anyString())).thenReturn(stackV4Response);
         when(orderedOSUpgradeRequestProvider.createDatalakeOrderedOSUpgradeSetRequest(stackV4Response, TARGET_IMAGE_ID, sdxCluster.getClusterShape()))
                 .thenReturn(orderedOSUpgradeSetRequest);
@@ -228,8 +206,6 @@ public class SdxUpgradeServiceTest {
         FlowIdentifier flowIdentifier = mock(FlowIdentifier.class);
         OrderedOSUpgradeSetRequest orderedOSUpgradeSetRequest = new OrderedOSUpgradeSetRequest();
         when(sdxService.getById(STACK_ID)).thenReturn(sdxCluster);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_USER_CRN);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getClusterName()), eq(Set.of()), anyString())).thenReturn(stackV4Response);
         when(orderedOSUpgradeRequestProvider.createDatalakeOrderedOSUpgradeSetRequest(stackV4Response, TARGET_IMAGE_ID, sdxCluster.getClusterShape()))
                 .thenReturn(orderedOSUpgradeSetRequest);
@@ -248,8 +224,6 @@ public class SdxUpgradeServiceTest {
     public void testOsUpgradeShouldThrowException() {
         WebApplicationException exception = new WebApplicationException("error");
         when(sdxService.getById(STACK_ID)).thenReturn(sdxCluster);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_USER_CRN);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(stackV4Endpoint.upgradeOsInternal(any(), any(), any(), any())).thenThrow(exception);
         when(exceptionMessageExtractor.getErrorMessage(exception)).thenReturn(exception.getMessage());
 
@@ -265,8 +239,6 @@ public class SdxUpgradeServiceTest {
     void testUpdateDbEngineVersionIfEmbeddedDbUpgradeHappenedNoDbInfo() {
         StackV4Response stackV4Response = getStackV4Response();
         when(sdxService.getById(STACK_ID)).thenReturn(sdxCluster);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_USER_CRN);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getClusterName()), eq(Set.of()), anyString())).thenReturn(stackV4Response);
 
         underTest.updateDbEngineVersionIfEmbeddedDbUpgradeHappened(STACK_ID);
@@ -281,8 +253,6 @@ public class SdxUpgradeServiceTest {
         databaseResponse.setDatabaseEngineVersion("14");
         stackV4Response.setExternalDatabase(databaseResponse);
         when(sdxService.getById(STACK_ID)).thenReturn(sdxCluster);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_USER_CRN);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getClusterName()), eq(Set.of()), anyString())).thenReturn(stackV4Response);
 
         underTest.updateDbEngineVersionIfEmbeddedDbUpgradeHappened(STACK_ID);

@@ -33,7 +33,6 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -80,9 +79,6 @@ public class RecipeService extends AbstractArchivistService<Recipe> implements C
     private FreeipaClientService freeipaClientService;
 
     @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Inject
     private RecipeUsageService recipeUsageService;
 
     public void sendClusterCreationUsageReport(Stack stack) {
@@ -121,7 +117,7 @@ public class RecipeService extends AbstractArchivistService<Recipe> implements C
     @Override
     public Set<Recipe> delete(Set<Recipe> resources) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        return ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(), () -> {
+        return ThreadBasedUserCrnProvider.doAsInternalActor(() -> {
             List<String> recipesUsedInFMS = freeipaClientService.recipes(accountId);
             return resources.stream().peek(recipe -> super.delete(recipe, r -> prepareDeletion(recipe, recipesUsedInFMS))).collect(Collectors.toSet());
         });
@@ -221,7 +217,7 @@ public class RecipeService extends AbstractArchivistService<Recipe> implements C
         checkIfRecipeUsedByHostGroups(recipe);
         Crn resourceCrn = Crn.fromString(recipe.getResourceCrn());
         if (resourceCrn != null) {
-            ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(), () -> {
+            ThreadBasedUserCrnProvider.doAsInternalActor(() -> {
                 List<String> recipesUsedInFMS = freeipaClientService.recipes(resourceCrn.getAccountId());
                 recipeUsedInFMS(recipe, recipesUsedInFMS);
             });

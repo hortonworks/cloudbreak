@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
@@ -27,16 +26,12 @@ public class EnvironmentService {
     @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     public void setFreeIpaNodeCount(String envCrn, int nodeCount) {
         try {
             EnvironmentEditRequest environmentEditRequest = new EnvironmentEditRequest();
             environmentEditRequest.setFreeIpaNodeCount(nodeCount);
             LOGGER.debug("Modifying freeIpa count to {} on {} environment.", nodeCount, envCrn);
             ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> environmentEndpoint.editByCrn(envCrn, environmentEditRequest)
             );
         } catch (ClientErrorException e) {

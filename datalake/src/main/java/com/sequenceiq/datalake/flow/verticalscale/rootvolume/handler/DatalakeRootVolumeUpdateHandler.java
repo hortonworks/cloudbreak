@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
@@ -41,9 +40,6 @@ public class DatalakeRootVolumeUpdateHandler extends ExceptionCatcherEventHandle
     private static final int DURATION_IN_MINUTES = 30;
 
     private static final Long WORKSPACE_ID = 0L;
-
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Inject
     private CloudbreakFlowService cloudbreakFlowService;
@@ -81,7 +77,6 @@ public class DatalakeRootVolumeUpdateHandler extends ExceptionCatcherEventHandle
             LOGGER.debug("Starting Disk Update for datalake.");
             LOGGER.debug("Calling updateRootVolumeByStackCrnInternal with request :: {}", rootVolumeUpdateRequest);
             FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.sdxAdmin().getInternalCrnForServiceAsString(),
                     () -> {
                         DiskUpdateRequest diskUpdateRequest = new DiskUpdateRequest(rootVolumeUpdateRequest.getVolumeType(),
                                 rootVolumeUpdateRequest.getSize(), rootVolumeUpdateRequest.getGroup(), rootVolumeUpdateRequest.getDiskType());

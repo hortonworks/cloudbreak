@@ -12,7 +12,6 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.UserV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
@@ -29,9 +28,6 @@ public class FreeIpaCommunicator {
     @Inject
     private PeriscopeMetricService metricService;
 
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory internalCrnGeneratorFactory;
-
     public FreeIpaCommunicator(UserV1Endpoint userV1Endpoint) {
         this.userV1Endpoint = userV1Endpoint;
     }
@@ -41,7 +37,6 @@ public class FreeIpaCommunicator {
         LOGGER.info("Invoking freeIpa user sync request: {}", request);
         String envCrn = request.getEnvironments().iterator().next();
         SyncOperationStatus lastSyncStatus = ThreadBasedUserCrnProvider.doAsInternalActor(
-                internalCrnGeneratorFactory.autoscale().getInternalCrnForServiceAsString(),
                 () -> userV1Endpoint.getLastSyncOperationStatus(envCrn));
         if (SynchronizationStatus.RUNNING.equals(lastSyncStatus.getStatus())) {
             LOGGER.info("There is a user sync operation already running for environment: {} with operationId: {}, " +
@@ -55,7 +50,6 @@ public class FreeIpaCommunicator {
     private SyncOperationStatus invokeFreeipaUserSyncAndHandleException(SynchronizeAllUsersRequest request, String envCrn) {
         try {
             SyncOperationStatus status = ThreadBasedUserCrnProvider.doAsInternalActor(
-                    internalCrnGeneratorFactory.autoscale().getInternalCrnForServiceAsString(),
                     () -> userV1Endpoint.synchronizeAllUsers(request));
             metricService.incrementMetricCounter(IPA_USER_SYNC_INVOCATION);
             return status;

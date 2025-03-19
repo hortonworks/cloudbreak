@@ -17,8 +17,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.entity.Operation;
@@ -39,12 +37,6 @@ class AbstractUserSyncTaskRunnerTest {
     @Mock
     private OperationService operationService;
 
-    @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
-
     @InjectMocks
     private AbstractUserSyncTaskRunner underTest = spy(create());
 
@@ -60,8 +52,6 @@ class AbstractUserSyncTaskRunnerTest {
             inv.getArgument(2, Runnable.class).run();
             return null;
         }).when(operationService).tryWithOperationCleanup(eq(operation.getOperationId()), eq(ACCOUNT_ID), any(Runnable.class));
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
 
         underTest.runUserSyncTasks(ENVIRONMENT_CRN, ACCOUNT_ID);
 

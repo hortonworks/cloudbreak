@@ -32,7 +32,6 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackCollectResourcesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackCollectResourcesResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackRequest;
@@ -103,9 +102,6 @@ public class FreeIpaDownscaleActions {
 
     @Inject
     private TerminationService terminationService;
-
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Inject
     private CachedEnvironmentClientService cachedEnvironmentClientService;
@@ -439,7 +435,6 @@ public class FreeIpaDownscaleActions {
                 try {
                     if (!isRepair(variables) || !isChainedAction(variables) || isFinalChain(variables)) {
                         ThreadBasedUserCrnProvider.doAsInternalActor(
-                                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                                 () -> environmentEndpoint.updateConfigsInEnvironmentByCrn(stack.getEnvironmentCrn()));
                     }
                     sendEvent(context, DOWNSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));

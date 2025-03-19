@@ -31,8 +31,6 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
@@ -87,12 +85,6 @@ public class FreeIpaCleanupServiceTest {
     @Mock
     private EnvironmentConfigProvider environmentConfigProvider;
 
-    @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
-
     @Spy
     private InstanceMetadataProcessor instanceMetadataProcessor;
 
@@ -108,8 +100,6 @@ public class FreeIpaCleanupServiceTest {
         OperationStatus operationStatus = new OperationStatus(null, OperationType.CLEANUP, null, null, null, null, 0L, null);
 
         when(stackDto.getStack()).thenReturn(stack);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(kerberosConfigService.get(ENVIRONMENT_CRN, STACK_NAME)).thenReturn(kerberosConfig);
         when(environmentConfigProvider.isChildEnvironment(ENVIRONMENT_CRN)).thenReturn(true);
         when(kerberosDetailService.keytabsShouldBeUpdated(CLOUD_PLATFORM, true, kerberosConfig)).thenReturn(true);
@@ -144,8 +134,6 @@ public class FreeIpaCleanupServiceTest {
         Optional<KerberosConfig> kerberosConfig = Optional.of(mock(KerberosConfig.class));
 
         when(stackDto.getStack()).thenReturn(stack);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(kerberosConfigService.get(ENVIRONMENT_CRN, STACK_NAME)).thenReturn(kerberosConfig);
         when(environmentConfigProvider.isChildEnvironment(ENVIRONMENT_CRN)).thenReturn(false);
         when(kerberosDetailService.keytabsShouldBeUpdated(CLOUD_PLATFORM, false, kerberosConfig)).thenReturn(true);
@@ -176,8 +164,6 @@ public class FreeIpaCleanupServiceTest {
         Optional<KerberosConfig> kerberosConfig = Optional.of(mock(KerberosConfig.class));
 
         when(stackDto.getStack()).thenReturn(stack);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(kerberosConfigService.get(ENVIRONMENT_CRN, STACK_NAME)).thenReturn(kerberosConfig);
         when(environmentConfigProvider.isChildEnvironment(ENVIRONMENT_CRN)).thenReturn(false);
         when(kerberosDetailService.keytabsShouldBeUpdated(CLOUD_PLATFORM, false, kerberosConfig)).thenReturn(true);
@@ -209,8 +195,6 @@ public class FreeIpaCleanupServiceTest {
     public void testCleanupOnScale() {
         Stack stack = spy(aStack());
         Optional<KerberosConfig> kerberosConfig = Optional.of(mock(KerberosConfig.class));
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(kerberosConfigService.get(ENVIRONMENT_CRN, STACK_NAME)).thenReturn(kerberosConfig);
         when(environmentConfigProvider.isChildEnvironment(ENVIRONMENT_CRN)).thenReturn(false);
         when(kerberosDetailService.keytabsShouldBeUpdated(CLOUD_PLATFORM, false, kerberosConfig)).thenReturn(true);
@@ -236,8 +220,6 @@ public class FreeIpaCleanupServiceTest {
     public void testCleanupOnRecover() {
         Stack stack = spy(aStack());
         Optional<KerberosConfig> kerberosConfig = Optional.of(mock(KerberosConfig.class));
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(kerberosConfigService.get(ENVIRONMENT_CRN, STACK_NAME)).thenReturn(kerberosConfig);
         when(environmentConfigProvider.isChildEnvironment(ENVIRONMENT_CRN)).thenReturn(false);
         when(kerberosDetailService.keytabsShouldBeUpdated(CLOUD_PLATFORM, false, kerberosConfig)).thenReturn(true);
@@ -263,8 +245,6 @@ public class FreeIpaCleanupServiceTest {
     public void testCleanupDnsOnly() {
         Stack stack = spy(aStack());
         Optional<KerberosConfig> kerberosConfig = Optional.of(mock(KerberosConfig.class));
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(kerberosConfigService.get(ENVIRONMENT_CRN, STACK_NAME)).thenReturn(kerberosConfig);
         when(environmentConfigProvider.isChildEnvironment(ENVIRONMENT_CRN)).thenReturn(false);
         when(kerberosDetailService.keytabsShouldBeUpdated(CLOUD_PLATFORM, false, kerberosConfig)).thenReturn(true);

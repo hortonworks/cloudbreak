@@ -23,8 +23,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DiskUpdateEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
@@ -58,9 +56,6 @@ public class DatalakeDiskUpdateHandlerTest {
     private CloudbreakFlowService cloudbreakFlowService;
 
     @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
     private SdxWaitService sdxWaitService;
 
     private DatalakeDiskUpdateHandler underTest;
@@ -75,7 +70,6 @@ public class DatalakeDiskUpdateHandlerTest {
     void setUp() {
         underTest = new DatalakeDiskUpdateHandler(eventSender);
         ReflectionTestUtils.setField(underTest, null, cloudbreakFlowService, CloudbreakFlowService.class);
-        ReflectionTestUtils.setField(underTest, null, regionAwareInternalCrnGeneratorFactory, RegionAwareInternalCrnGeneratorFactory.class);
         ReflectionTestUtils.setField(underTest, null, sdxService, SdxService.class);
         ReflectionTestUtils.setField(underTest, null, diskUpdateEndpoint, DiskUpdateEndpoint.class);
         ReflectionTestUtils.setField(underTest, null, sdxWaitService, SdxWaitService.class);
@@ -101,9 +95,6 @@ public class DatalakeDiskUpdateHandlerTest {
                 .withCloudPlatform("AWS")
                 .withStackId(STACK_ID)
                 .build();
-        RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator = mock(RegionAwareInternalCrnGenerator.class);
-        doReturn("TEST").when(regionAwareInternalCrnGenerator).getInternalCrnForServiceAsString();
-        doReturn(regionAwareInternalCrnGenerator).when(regionAwareInternalCrnGeneratorFactory).sdxAdmin();
         underTest.accept(new Event<>(event));
         verify(eventSender, times(1)).sendEvent(captor.capture(), any());
         assertEquals(DatalakeDiskUpdateStateSelectors.DATALAKE_DISK_UPDATE_FINISH_EVENT.selector(), captor.getValue().getSelector());

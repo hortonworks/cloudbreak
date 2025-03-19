@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -43,13 +42,9 @@ public class RedbeamsClientService {
     @Inject
     private SupportV4Endpoint supportV4Endpoint;
 
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     public DatabaseServerV4Response getByCrn(String dbCrn) {
         try {
             return ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> redbeamsServerEndpoint.getByCrn(dbCrn));
         } catch (WebApplicationException | ProcessingException e) {
             String message = String.format("Failed to GET DatabaseServer properties by dbCrn: %s", dbCrn);
@@ -62,7 +57,6 @@ public class RedbeamsClientService {
         try {
             String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
             return ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> redbeamsServerEndpoint.createInternal(request, initiatorUserCrn));
         } catch (WebApplicationException | ProcessingException e) {
             String message = String.format("Failed to create DatabaseServer %s", request.getName());
@@ -74,7 +68,6 @@ public class RedbeamsClientService {
     public DatabaseServerV4Response deleteByCrn(String crn, boolean force) {
         try {
             return ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> redbeamsServerEndpoint.deleteByCrn(crn, force));
         } catch (NotFoundException e) {
             String message = String.format("DatabaseServer with CRN %s was not found by Redbeams service in the deleteByCrn call.", crn);
@@ -90,7 +83,6 @@ public class RedbeamsClientService {
     public void startByCrn(String crn) {
         try {
             ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> redbeamsServerEndpoint.start(crn));
         } catch (WebApplicationException | ProcessingException e) {
             String message = String.format("Failed to start DatabaseServer with CRN %s", crn);
@@ -102,7 +94,6 @@ public class RedbeamsClientService {
     public void stopByCrn(String crn) {
         try {
             ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> redbeamsServerEndpoint.stop(crn));
         } catch (WebApplicationException | ProcessingException e) {
             String message = String.format("Failed to stop DatabaseServer with CRN %s", crn);
@@ -118,7 +109,6 @@ public class RedbeamsClientService {
     public FlowIdentifier rotateSslCert(String crn) {
         try {
             return ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> redbeamsServerEndpoint.rotateSslCert(crn));
         } catch (WebApplicationException | ProcessingException e) {
             String message = String.format("Failed to rotate certificate DatabaseServer with CRN %s", crn);
@@ -141,7 +131,6 @@ public class RedbeamsClientService {
     public SslCertificateEntryResponse getLatestCertificate(String cloudPlatform, String region) {
         try {
             return ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> supportV4Endpoint.getLatestCertificate(cloudPlatform, region));
         } catch (WebApplicationException | ProcessingException e) {
             String message = String.format("Failed to get certificate for %s cloudPlatform and %s region.", cloudPlatform, region);
@@ -153,7 +142,6 @@ public class RedbeamsClientService {
     public FlowIdentifier updateToLatestSslCert(String crn) {
         try {
             return ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> redbeamsServerEndpoint.updateToLatestSslCert(crn));
         } catch (WebApplicationException | ProcessingException e) {
             String message = String.format("Failed to rotate certificate DatabaseServer with CRN %s", crn);
@@ -165,7 +153,6 @@ public class RedbeamsClientService {
     public UpgradeDatabaseServerV4Response upgradeByCrn(String crn, UpgradeDatabaseServerV4Request request) {
         try {
             return ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> redbeamsServerEndpoint.upgrade(crn, request));
         } catch (WebApplicationException | ProcessingException e) {
             String message = String.format("Failed to upgrade DatabaseServer with CRN %s to version %s due to error: %s",
@@ -180,7 +167,6 @@ public class RedbeamsClientService {
     public UpgradeDatabaseServerV4Response validateUpgrade(String crn, UpgradeDatabaseServerV4Request request) {
         try {
             return ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> redbeamsServerEndpoint.validateUpgrade(crn, request));
         } catch (WebApplicationException | ProcessingException e) {
             String message = String.format("Failed to validate upgrade DatabaseServer with CRN %s to version %s due to error: %s",
@@ -195,7 +181,6 @@ public class RedbeamsClientService {
     public UpgradeDatabaseServerV4Response validateUpgradeCleanup(String crn) {
         try {
             return ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> redbeamsServerEndpoint.validateUpgradeCleanup(crn));
         } catch (WebApplicationException | ProcessingException e) {
             String message = String.format("Failed to clean up validate upgrade DatabaseServer with CRN %s due to error: %s",
@@ -210,7 +195,6 @@ public class RedbeamsClientService {
         validateForGetByClusterCrn(environmentCrn, clusterCrn);
         try {
             return ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> redbeamsServerEndpoint.getByClusterCrn(environmentCrn, clusterCrn));
         } catch (NotFoundException e) {
             String message = String.format("DatabaseServer with Environment CRN %s and Cluster CRN %s was not found", environmentCrn, clusterCrn);
@@ -227,7 +211,6 @@ public class RedbeamsClientService {
         try {
             String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
             return ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> redbeamsServerEndpoint.rotateSecret(request, initiatorUserCrn));
         } catch (WebApplicationException | ProcessingException e) {
             String message = String.format("Failed to rotate DatabaseServer secret %s with CRN %s due to error: %s",
@@ -248,26 +231,22 @@ public class RedbeamsClientService {
 
     public FlowCheckResponse hasFlowRunningByFlowId(String flowId) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> redBeamsFlowEndpoint.hasFlowRunningByFlowId(flowId));
     }
 
     public FlowCheckResponse hasFlowChainRunningByFlowChainId(String flowChainId) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> redBeamsFlowEndpoint.hasFlowRunningByChainId(flowChainId));
     }
 
     public FlowLogResponse getLastFlowId(String resourceCrn) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> redBeamsFlowEndpoint.getLastFlowByResourceCrn(resourceCrn));
     }
 
     public ClusterDatabaseServerCertificateStatusV4Responses listDatabaseServersCertificateStatusByStackCrns(
             ClusterDatabaseServerCertificateStatusV4Request request, String userCrn) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> redbeamsServerEndpoint.listDatabaseServersCertificateStatusByStackCrns(request, userCrn));
     }
 }

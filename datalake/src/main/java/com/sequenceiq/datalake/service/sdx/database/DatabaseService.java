@@ -27,7 +27,6 @@ import com.dyngr.core.AttemptResults;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -122,9 +121,6 @@ public class DatabaseService {
     private OperationV4Endpoint operationV4Endpoint;
 
     @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Inject
     private EnvironmentPlatformResourceEndpoint environmentPlatformResourceEndpoint;
 
     @Inject
@@ -149,9 +145,8 @@ public class DatabaseService {
                     throw new CloudbreakServiceException("Datalake deletion in progress! Do not provision database, create flow cancelled");
                 }
                 serverStatusV4Response =
-                        ThreadBasedUserCrnProvider.doAsInternalActor(
-                                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                                () -> databaseServerV4Endpoint.createInternal(getDatabaseRequest(sdxCluster, env, initiatorUserCrn), initiatorUserCrn));
+                ThreadBasedUserCrnProvider.doAsInternalActor(
+                        () -> databaseServerV4Endpoint.createInternal(getDatabaseRequest(sdxCluster, env, initiatorUserCrn), initiatorUserCrn));
                 dbResourceCrn = serverStatusV4Response.getResourceCrn();
                 DatabaseParameterFallbackUtil.setDatabaseCrn(sdxCluster, dbResourceCrn);
                 sdxDatabaseRepository.save(sdxCluster.getSdxDatabase());
@@ -178,7 +173,6 @@ public class DatabaseService {
         LOGGER.info("Terminating databaseServer of SDX {}", sdxCluster.getClusterName());
         try {
             DatabaseServerV4Response resp = ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> databaseServerV4Endpoint.deleteByCrn(sdxCluster.getDatabaseCrn(), forced));
             sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.EXTERNAL_DATABASE_DELETION_IN_PROGRESS,
                     "External database deletion in progress", sdxCluster);
@@ -193,7 +187,6 @@ public class DatabaseService {
         String databaseCrn = sdxCluster.getDatabaseCrn();
         try {
             ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> databaseServerV4Endpoint.start(databaseCrn));
             waitAndGetDatabase(sdxCluster, databaseCrn, SdxDatabaseOperation.START, false);
         } catch (NotFoundException notFoundException) {
@@ -206,7 +199,6 @@ public class DatabaseService {
         String databaseCrn = sdxCluster.getDatabaseCrn();
         try {
             ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> databaseServerV4Endpoint.stop(databaseCrn));
             waitAndGetDatabase(sdxCluster, databaseCrn, SdxDatabaseOperation.STOP, false);
         } catch (NotFoundException notFoundException) {
@@ -393,13 +385,11 @@ public class DatabaseService {
 
     public OperationView getOperationProgressStatus(String databaseCrn, boolean detailed) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> operationV4Endpoint.getRedbeamsOperationProgressByResourceCrn(databaseCrn, detailed));
     }
 
     private DatabaseServerStatusV4Response getDatabaseStatus(String databaseCrn) {
         DatabaseServerV4Response response = ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> databaseServerV4Endpoint.getByCrn(databaseCrn));
         DatabaseServerStatusV4Response statusResponse = new DatabaseServerStatusV4Response();
         statusResponse.setEnvironmentCrn(response.getEnvironmentCrn());
@@ -420,7 +410,6 @@ public class DatabaseService {
 
     public StackDatabaseServerResponse getDatabaseServer(String databaseServerCrn) {
         DatabaseServerV4Response databaseServerV4Response = ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> databaseServerV4Endpoint.getByCrn(databaseServerCrn));
 
         return databaseServerConverter.convert(databaseServerV4Response);
@@ -428,7 +417,6 @@ public class DatabaseService {
 
     public DatabaseServerV4Response getDatabaseServerV4Response(String databaseServerCrn) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> databaseServerV4Endpoint.getByCrn(databaseServerCrn));
     }
 

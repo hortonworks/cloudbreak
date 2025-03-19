@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -36,8 +35,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.I
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.DatalakeInstanceGroupScalingDetails;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -76,12 +73,6 @@ public class SdxHorizontalScalingServiceTest {
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
     @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
-
-    @Mock
     private CloudbreakFlowService cloudbreakFlowService;
 
     @InjectMocks
@@ -89,9 +80,6 @@ public class SdxHorizontalScalingServiceTest {
 
     @Test
     void testDatalakeHorizontalScaleInvoke() {
-        RegionAwareInternalCrnGenerator mockCrnGenerator = mock(RegionAwareInternalCrnGenerator.class);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(mockCrnGenerator);
-        when(mockCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(stackV4Endpoint.putScaling(any(), anyString(), any(), anyString())).thenReturn(new FlowIdentifier(FlowType.FLOW, "flowId"));
         SdxCluster sdxCluster = getSdxCluster();
         StackScaleV4Request scaleRequest = new StackScaleV4Request();

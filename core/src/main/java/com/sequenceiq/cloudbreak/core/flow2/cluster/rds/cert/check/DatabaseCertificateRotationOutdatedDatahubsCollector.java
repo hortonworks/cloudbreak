@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.database.DatabaseService;
@@ -31,20 +30,16 @@ public class DatabaseCertificateRotationOutdatedDatahubsCollector {
 
     private final StackService stackService;
 
-    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     private final SupportV4Endpoint supportV4Endpoint;
 
     private final DatabaseService databaseService;
 
     public DatabaseCertificateRotationOutdatedDatahubsCollector(
         StackDtoService stackDtoService,
-        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory,
         SupportV4Endpoint supportV4Endpoint,
         DatabaseService databaseService,
         StackService stackService) {
         this.stackDtoService = stackDtoService;
-        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
         this.supportV4Endpoint = supportV4Endpoint;
         this.databaseService = databaseService;
         this.stackService = stackService;
@@ -57,7 +52,6 @@ public class DatabaseCertificateRotationOutdatedDatahubsCollector {
                         datalake.getEnvironmentCrn(),
                         List.of(WORKLOAD));
         SslCertificateEntryResponse latestCertificate = ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> supportV4Endpoint.getLatestCertificate(datalake.getCloudPlatform(), datalake.getRegion()));
         for (StackDto response : stackViewV4Responses) {
             if (externalDbConfigured(response)) {

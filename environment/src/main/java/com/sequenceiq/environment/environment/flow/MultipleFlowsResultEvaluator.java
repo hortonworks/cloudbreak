@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -19,13 +18,8 @@ public class MultipleFlowsResultEvaluator {
 
     private final FlowEndpoint flowEndpoint;
 
-    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    public MultipleFlowsResultEvaluator(FlowEndpoint flowEndpoint,
-            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
-
+    public MultipleFlowsResultEvaluator(FlowEndpoint flowEndpoint) {
         this.flowEndpoint = flowEndpoint;
-        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     public boolean anyFailed(List<FlowIdentifier> flowIds) {
@@ -37,12 +31,10 @@ public class MultipleFlowsResultEvaluator {
         switch (flowId.getType()) {
             case FLOW:
                 flowCheckResponse = ThreadBasedUserCrnProvider.doAsInternalActor(
-                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                         () -> flowEndpoint.hasFlowRunningByFlowId(flowId.getPollableId()));
                 break;
             case FLOW_CHAIN:
                 flowCheckResponse = ThreadBasedUserCrnProvider.doAsInternalActor(
-                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                         () -> flowEndpoint.hasFlowRunningByChainId(flowId.getPollableId()));
                 break;
             case NOT_TRIGGERED:

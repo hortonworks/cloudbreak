@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxStatusService;
 import com.sequenceiq.cloudbreak.sdx.common.status.StatusCheckResult;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
@@ -25,13 +24,9 @@ public class PaasSdxStatusService extends AbstractPaasSdxService implements Plat
     @Inject
     private SdxEndpoint sdxEndpoint;
 
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     @Override
     public Set<Pair<String, SdxClusterStatusResponse>> listSdxCrnStatusPair(String environmentCrn) {
-        return ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                () -> sdxEndpoint.getByEnvCrn(environmentCrn, false))
+        return ThreadBasedUserCrnProvider.doAsInternalActor(() -> sdxEndpoint.getByEnvCrn(environmentCrn, false))
                 .stream()
                 .map(sdxResponse -> Pair.of(sdxResponse.getCrn(), sdxResponse.getStatus()))
                 .collect(Collectors.toSet());

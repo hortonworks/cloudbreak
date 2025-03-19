@@ -11,7 +11,6 @@ import com.dyngr.core.AttemptMaker;
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptResults;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.store.EnvironmentInMemoryStateStore;
@@ -35,13 +34,8 @@ public class FreeIpaPollerProvider {
 
     private final FreeIpaService freeIpaService;
 
-    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    public FreeIpaPollerProvider(
-            FreeIpaService freeIpaService,
-            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+    public FreeIpaPollerProvider(FreeIpaService freeIpaService) {
         this.freeIpaService = freeIpaService;
-        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     public AttemptMaker<Void> startPoller(Long envId, String envCrn) {
@@ -169,7 +163,6 @@ public class FreeIpaPollerProvider {
             return AttemptResults.breakFor("FreeIpa polling cancelled in inmemory store, id: " + envId);
         }
         FlowLogResponse flowLogResponse = ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () ->  freeIpaService.getFlowStatus(flowId));
         LOGGER.debug("[----------FREEIPA - CHECK----------]Flow status: {}", flowLogResponse);
         return checkVerticalScaleStatus(flowLogResponse);
@@ -204,7 +197,6 @@ public class FreeIpaPollerProvider {
         StateStatus state = flowLogResponse.getStateStatus();
         if (flowCompleted(flowLogResponse) && state.equals(StateStatus.SUCCESSFUL)) {
             FlowCheckResponse flowCheckResponse = ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> freeIpaService.getFlowCheckStatus(flowLogResponse.getFlowId()));
             Boolean latestFlowFinalizedAndFailed = flowCheckResponse.getLatestFlowFinalizedAndFailed();
             if (latestFlowFinalizedAndFailed) {

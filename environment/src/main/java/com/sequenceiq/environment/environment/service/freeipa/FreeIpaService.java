@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.events.EventSenderService;
@@ -51,8 +50,6 @@ public class FreeIpaService {
 
     private final WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
-    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     private final EventSenderService eventService;
 
     private final FreeIpaV1FlowEndpoint flowEndpoint;
@@ -62,13 +59,11 @@ public class FreeIpaService {
             FreeIpaV1FlowEndpoint flowEndpoint,
             UserV1Endpoint userV1Endpoint,
             WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor,
-            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory,
             EventSenderService eventService) {
         this.freeIpaV1Endpoint = freeIpaV1Endpoint;
         this.operationV1Endpoint = operationV1Endpoint;
         this.userV1Endpoint = userV1Endpoint;
         this.webApplicationExceptionMessageExtractor = webApplicationExceptionMessageExtractor;
-        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
         this.eventService = eventService;
         this.flowEndpoint = flowEndpoint;
     }
@@ -155,7 +150,6 @@ public class FreeIpaService {
     public SyncOperationStatus getSyncOperationStatus(String environmentCrn, String operationId) {
         try {
             return ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> userV1Endpoint.getSyncOperationStatusInternal(Crn.fromString(environmentCrn).getAccountId(), operationId));
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
@@ -226,7 +220,6 @@ public class FreeIpaService {
         try {
             LOGGER.debug("Calling FreeIPA CCM upgrade for environment {}", environmentCrn);
             return ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> freeIpaV1Endpoint.upgradeCcmInternal(environmentCrn, userCrn));
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
@@ -239,7 +232,6 @@ public class FreeIpaService {
         try {
             LOGGER.debug("Calling FreeIPA modify proxy config for environment {} with previousProxyCrn {}", environmentCrn, previousProxyCrn);
             return ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     initiatorUserCrn -> freeIpaV1Endpoint.modifyProxyConfigInternal(environmentCrn, previousProxyCrn, initiatorUserCrn));
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
@@ -252,7 +244,6 @@ public class FreeIpaService {
         try {
             LOGGER.debug("Calling FreeIPA CCM upgrade for environment {}", environmentCrn);
             return ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> freeIpaV1Endpoint.verticalScalingByCrn(environmentCrn, freeIPAVerticalScaleRequest));
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);

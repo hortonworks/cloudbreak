@@ -17,6 +17,7 @@
     <suppress checks="IllegalThrow" files="ResponseModifierService.java"/>
     <suppress checks="IllegalThrow" files="ResponseModifierServiceTest.java"/>
     <suppress checks="IllegalThrow" files="MeasureAspects.java|FlowParametersAspects.java"/>
+    <suppress checks="IllegalThrow" files="ThreadBasedUserCrnProvider.java"/>
     <suppress checks="RedundantModifier" files="CoreApi.java"/>
     <suppress checks="RegexpMultilineCheck" files="ShellConfiguration.java"/>
     <suppress checks="RegexpMultilineCheck" files="IntegrationTestApp.java"/>

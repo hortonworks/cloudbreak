@@ -23,7 +23,6 @@ import org.mockito.Mockito;
 
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptState;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
@@ -45,9 +44,59 @@ class FreeIpaPollerProviderTest {
 
     private final FreeIpaService freeIpaService = Mockito.mock(FreeIpaService.class);
 
-    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory = Mockito.mock(RegionAwareInternalCrnGeneratorFactory.class);
+    private final FreeIpaPollerProvider underTest = new FreeIpaPollerProvider(freeIpaService);
 
-    private final FreeIpaPollerProvider underTest = new FreeIpaPollerProvider(freeIpaService, regionAwareInternalCrnGeneratorFactory);
+    private static Stream<Arguments> freeIpaStopStatuses() {
+        return Stream.of(
+                Arguments.of(STOPPED, AttemptState.FINISH, ""),
+                Arguments.of(STOP_IN_PROGRESS, AttemptState.CONTINUE, ""),
+                Arguments.of(STOP_FAILED, AttemptState.BREAK, "FreeIpa stop failed 'crn', reason")
+        );
+    }
+
+    private static Stream<Arguments> freeIpaStartStatuses() {
+        return Stream.of(
+                Arguments.of(AVAILABLE, AttemptState.FINISH, ""),
+                Arguments.of(UPDATE_IN_PROGRESS, AttemptState.CONTINUE, ""),
+                Arguments.of(START_FAILED, AttemptState.BREAK, "FreeIpa start failed 'crn', reason")
+        );
+    }
+
+    private static Stream<Arguments> freeIpaSyncStatuses() {
+        return Stream.of(
+                Arguments.of(createStatus(SynchronizationStatus.REQUESTED, ""), AttemptState.CONTINUE, ""),
+                Arguments.of(createStatus(SynchronizationStatus.RUNNING, ""), AttemptState.CONTINUE, ""),
+                Arguments.of(createStatus(SynchronizationStatus.COMPLETED, ""), AttemptState.FINISH, ""),
+                Arguments.of(createStatus(SynchronizationStatus.FAILED, "failed"), AttemptState.BREAK, getSyncErrorMessage("failed")),
+                Arguments.of(createStatus(SynchronizationStatus.REJECTED, "rejected"), AttemptState.BREAK, getSyncErrorMessage("rejected")),
+                Arguments.of(createStatus(SynchronizationStatus.TIMEDOUT, "timeout"), AttemptState.BREAK, getSyncErrorMessage("timeout"))
+        );
+    }
+
+    public static Stream<Arguments> upgradeCcmStatuses() {
+        return Stream.of(
+                Arguments.of(OperationState.COMPLETED, AttemptState.FINISH, ""),
+                Arguments.of(OperationState.FAILED, AttemptState.BREAK, "FreeIpa Upgrade CCM failed: error message"),
+                Arguments.of(OperationState.REJECTED, AttemptState.BREAK, "FreeIpa Upgrade CCM operation request was rejected."),
+                Arguments.of(OperationState.REQUESTED, AttemptState.CONTINUE, ""),
+                Arguments.of(OperationState.RUNNING, AttemptState.CONTINUE, ""),
+                Arguments.of(OperationState.TIMEDOUT, AttemptState.BREAK, "FreeIpa Upgrade CCM failed: timeout.")
+        );
+    }
+
+    private static String getSyncErrorMessage(String error) {
+        return String.format("FreeIpa user synchronization failed '%s', [FailureDetails{environment='%s', message='%s'additionalDetails='{}'}]",
+                OPERATION_ID, ENV_ID, error);
+    }
+
+    private static SyncOperationStatus createStatus(SynchronizationStatus syncStatus, String error) {
+        List<FailureDetails> failureDetails = new ArrayList<>();
+        if (StringUtils.isNotBlank(error)) {
+            failureDetails.add(new FailureDetails(ENV_ID.toString(), error));
+        }
+        return new SyncOperationStatus(OPERATION_ID, SyncOperationType.USER_SYNC, syncStatus,
+                List.of(), failureDetails, error, System.currentTimeMillis(), null);
+    }
 
     @ParameterizedTest
     @MethodSource("freeIpaStopStatuses")
@@ -106,49 +155,6 @@ class FreeIpaPollerProviderTest {
         Assertions.assertEquals(message, result.getMessage());
     }
 
-    private static Stream<Arguments> freeIpaStopStatuses() {
-        return Stream.of(
-                Arguments.of(STOPPED, AttemptState.FINISH, ""),
-                Arguments.of(STOP_IN_PROGRESS, AttemptState.CONTINUE, ""),
-                Arguments.of(STOP_FAILED, AttemptState.BREAK, "FreeIpa stop failed 'crn', reason")
-        );
-    }
-
-    private static Stream<Arguments> freeIpaStartStatuses() {
-        return Stream.of(
-                Arguments.of(AVAILABLE, AttemptState.FINISH, ""),
-                Arguments.of(UPDATE_IN_PROGRESS, AttemptState.CONTINUE, ""),
-                Arguments.of(START_FAILED, AttemptState.BREAK, "FreeIpa start failed 'crn', reason")
-        );
-    }
-
-    private static Stream<Arguments> freeIpaSyncStatuses() {
-        return Stream.of(
-                Arguments.of(createStatus(SynchronizationStatus.REQUESTED, ""), AttemptState.CONTINUE, ""),
-                Arguments.of(createStatus(SynchronizationStatus.RUNNING, ""), AttemptState.CONTINUE, ""),
-                Arguments.of(createStatus(SynchronizationStatus.COMPLETED, ""), AttemptState.FINISH, ""),
-                Arguments.of(createStatus(SynchronizationStatus.FAILED, "failed"), AttemptState.BREAK, getSyncErrorMessage("failed")),
-                Arguments.of(createStatus(SynchronizationStatus.REJECTED, "rejected"), AttemptState.BREAK, getSyncErrorMessage("rejected")),
-                Arguments.of(createStatus(SynchronizationStatus.TIMEDOUT, "timeout"), AttemptState.BREAK, getSyncErrorMessage("timeout"))
-        );
-    }
-
-    public static Stream<Arguments> upgradeCcmStatuses() {
-        return Stream.of(
-                Arguments.of(OperationState.COMPLETED, AttemptState.FINISH, ""),
-                Arguments.of(OperationState.FAILED, AttemptState.BREAK, "FreeIpa Upgrade CCM failed: error message"),
-                Arguments.of(OperationState.REJECTED, AttemptState.BREAK, "FreeIpa Upgrade CCM operation request was rejected."),
-                Arguments.of(OperationState.REQUESTED, AttemptState.CONTINUE, ""),
-                Arguments.of(OperationState.RUNNING, AttemptState.CONTINUE, ""),
-                Arguments.of(OperationState.TIMEDOUT, AttemptState.BREAK, "FreeIpa Upgrade CCM failed: timeout.")
-        );
-    }
-
-    private static String getSyncErrorMessage(String error) {
-        return String.format("FreeIpa user synchronization failed '%s', [FailureDetails{environment='%s', message='%s'additionalDetails='{}'}]",
-                OPERATION_ID, ENV_ID, error);
-    }
-
     private DescribeFreeIpaResponse getDescribeFreeIpaResponse(Status status, String name) {
         DescribeFreeIpaResponse stack1 = new DescribeFreeIpaResponse();
         stack1.setStatus(status);
@@ -156,14 +162,5 @@ class FreeIpaPollerProviderTest {
         stack1.setCrn(name);
         stack1.setStatusReason("reason");
         return stack1;
-    }
-
-    private static SyncOperationStatus createStatus(SynchronizationStatus syncStatus, String error) {
-        List<FailureDetails> failureDetails = new ArrayList<>();
-        if (StringUtils.isNotBlank(error)) {
-            failureDetails.add(new FailureDetails(ENV_ID.toString(), error));
-        }
-        return new SyncOperationStatus(OPERATION_ID, SyncOperationType.USER_SYNC, syncStatus,
-                List.of(), failureDetails, error, System.currentTimeMillis(), null);
     }
 }

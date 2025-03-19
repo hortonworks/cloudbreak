@@ -46,7 +46,6 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hue.HueRoles;
@@ -167,9 +166,6 @@ public class StackCreatorService {
     private StackToStackV4ResponseConverter stackToStackV4ResponseConverter;
 
     @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Inject
     private JavaVersionValidator javaVersionValidator;
 
     @Inject
@@ -203,7 +199,6 @@ public class StackCreatorService {
 
         DetailedEnvironmentResponse environment = measure(
                 () -> ThreadBasedUserCrnProvider.doAsInternalActor(
-                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                         () -> environmentClientService.getByCrn(stackRequest.getEnvironmentCrn())),
                 LOGGER,
                 "Get Environment from Environment service took {} ms");

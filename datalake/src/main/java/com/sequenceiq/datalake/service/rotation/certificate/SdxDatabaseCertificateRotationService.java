@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.rotaterdscert.S
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
@@ -69,9 +68,6 @@ public class SdxDatabaseCertificateRotationService {
     private CloudbreakFlowService cloudbreakFlowService;
 
     @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Inject
     private DatabaseServerV4Endpoint databaseServerV4Endpoint;
 
     public SdxRotateRdsCertificateV1Response rotateCertificate(String dlCrn) {
@@ -89,7 +85,6 @@ public class SdxDatabaseCertificateRotationService {
         clusterDatabaseServerCertificateStatusV4Request.setCrns(request.getCrns());
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         ClusterDatabaseServerCertificateStatusV4Responses clusterDatabaseServerCertificateStatusV4Responses = ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> databaseServerV4Endpoint.listDatabaseServersCertificateStatusByStackCrns(clusterDatabaseServerCertificateStatusV4Request, userCrn)
         );
         Set<StackDatabaseServerCertificateStatusV4Response> responses = new HashSet<>();
@@ -107,7 +102,7 @@ public class SdxDatabaseCertificateRotationService {
         LOGGER.debug("Initiating Certificate rotation on stack CRN {} for datalake {}", stackCrn, sdxCluster.getName());
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         StackRotateRdsCertificateV4Response stackRotateRdsCertificateV4Response =
-                ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                ThreadBasedUserCrnProvider.doAsInternalActor(
                         () -> stackV4Endpoint.rotateRdsCertificateByCrnInternal(0L, stackCrn, initiatorUserCrn));
         cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, stackRotateRdsCertificateV4Response.getFlowIdentifier());
         LOGGER.debug("Waiting for Certificate rotation on stack CRN {} for datalake {}", stackCrn, sdxCluster.getName());

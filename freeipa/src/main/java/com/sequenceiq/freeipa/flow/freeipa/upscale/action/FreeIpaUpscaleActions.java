@@ -40,7 +40,6 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -165,9 +164,6 @@ public class FreeIpaUpscaleActions {
 
     @Inject
     private PrivateIdProvider privateIdProvider;
-
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Inject
     private ImageFallbackService imageFallbackService;
@@ -695,10 +691,7 @@ public class FreeIpaUpscaleActions {
                 stackUpdater.updateStackStatus(stack, getInProgressStatus(variables), "Updating environment stack config");
                 try {
                     ThreadBasedUserCrnProvider.doAsInternalActor(
-                            regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                            () -> {
-                                environmentEndpoint.updateConfigsInEnvironmentByCrn(stack.getEnvironmentCrn());
-                            });
+                            () -> environmentEndpoint.updateConfigsInEnvironmentByCrn(stack.getEnvironmentCrn()));
                     if (isChainedAction(variables) && !isFinalChain(variables)) {
                         sendEvent(context, new DelayEvent(stack.getId(),
                                 new StackEvent(UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FINISHED_EVENT.selector(), stack.getId()), delayInSec, true));

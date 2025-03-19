@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
@@ -78,9 +77,6 @@ public class ServiceProviderConnectorAdapter {
 
     @Inject
     private CredentialClientService credentialClientService;
-
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Inject
     private ResourceService resourceService;
@@ -182,7 +178,6 @@ public class ServiceProviderConnectorAdapter {
                 .build();
         Credential credential = ThreadBasedUserCrnProvider
                 .doAsInternalActor(
-                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                         () -> credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn()));
         CloudCredential cloudCredential = credentialConverter.convert(credential);
         GetPlatformTemplateRequest getPlatformTemplateRequest = new GetPlatformTemplateRequest(cloudContext, cloudCredential);
@@ -238,7 +233,6 @@ public class ServiceProviderConnectorAdapter {
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         Credential credential = ThreadBasedUserCrnProvider
                 .doAsInternalActor(
-                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                         () -> credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn()));
         CloudContext cloudContext = CloudContext.Builder.builder()
                 .withPlatform(stack.getCloudPlatform())

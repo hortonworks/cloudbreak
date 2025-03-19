@@ -22,7 +22,6 @@ import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
 import com.sequenceiq.authorization.service.CustomCheckUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -72,9 +71,6 @@ public class UserSyncService {
 
     @Inject
     private UserSyncRequestValidator userSyncRequestValidator;
-
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Inject
     private UserSyncForEnvService userSyncForEnvService;
@@ -145,8 +141,8 @@ public class UserSyncService {
 
         if (operation.getStatus() == OperationState.RUNNING) {
             operationService.tryWithOperationCleanup(operation.getOperationId(), accountId, () ->
-                    ThreadBasedUserCrnProvider.doAs(
-                            regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(), () -> {
+                    ThreadBasedUserCrnProvider.doAsInternalActor(
+                            () -> {
                                 if (userSyncFilter.isFullSync()) {
                                     stacks.forEach(stack -> updateUserSyncStatusForStack(operation, stack));
                                 }

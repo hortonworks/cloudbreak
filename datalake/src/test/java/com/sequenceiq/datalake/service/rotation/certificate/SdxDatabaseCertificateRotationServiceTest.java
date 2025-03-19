@@ -17,7 +17,6 @@ import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -27,8 +26,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.rotaterdscert.StackRotateRdsCertificateV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -62,12 +59,6 @@ class SdxDatabaseCertificateRotationServiceTest {
 
     @Mock
     private CloudbreakFlowService cloudbreakFlowService;
-
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
     @InjectMocks
     private SdxDatabaseCertificateRotationService underTest;
@@ -136,10 +127,7 @@ class SdxDatabaseCertificateRotationServiceTest {
         SdxCluster sdxCluster = mock(SdxCluster.class);
         when(sdxCluster.getStackCrn()).thenReturn("stackCrn");
         when(sdxCluster.getName()).thenReturn("datalakeName");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         PollingConfig pollingConfig = mock(PollingConfig.class);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
-                .thenReturn("internalCrn");
         StackRotateRdsCertificateV4Response stackRotateRdsCertificateV4Response = mock(StackRotateRdsCertificateV4Response.class);
         when(stackRotateRdsCertificateV4Response.getFlowIdentifier()).thenReturn(mock(FlowIdentifier.class));
         when(stackV4Endpoint.rotateRdsCertificateByCrnInternal(anyLong(), anyString(), any()))

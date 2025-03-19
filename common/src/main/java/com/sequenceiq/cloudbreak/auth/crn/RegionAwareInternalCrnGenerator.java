@@ -5,6 +5,8 @@ import static com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator
 import static com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil.INTERNAL_USER_CRN;
 import static com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil.isInternalCrn;
 
+import com.sequenceiq.cloudbreak.auth.crn.Crn.Partition;
+import com.sequenceiq.cloudbreak.auth.crn.Crn.Region;
 import com.sequenceiq.cloudbreak.auth.crn.Crn.Service;
 
 /**
@@ -25,6 +27,8 @@ public class RegionAwareInternalCrnGenerator {
 
     private final String region;
 
+    private final String accountId;
+
     /**
      * Creates a new {@code InternalCrnBuilder} instance using the given {@code serviceType}. Please read the class javadoc for the implications of how this
      * parameter is interpreted.
@@ -32,18 +36,24 @@ public class RegionAwareInternalCrnGenerator {
      * @param serviceType service type to base the CRN on; must not be {@code null}
      * @throws NullPointerException if {@code serviceType == null}
      */
-    private RegionAwareInternalCrnGenerator(Service serviceType, String partition, String region) {
+    private RegionAwareInternalCrnGenerator(Service serviceType, String partition, String region, String accountId) {
         checkNotNull(serviceType, "serviceType should not be null.");
         checkNotNull(partition, "partition should not be null.");
         checkNotNull(region, "region should not be null.");
+        checkNotNull(accountId, "accountId should not be null.");
 
         this.serviceType = serviceType;
         this.region = region;
         this.partition = partition;
+        this.accountId = accountId;
     }
 
     public static RegionAwareInternalCrnGenerator regionalAwareInternalCrnGenerator(Service serviceType, String partition, String region) {
-        return new RegionAwareInternalCrnGenerator(serviceType, partition, region);
+        return new RegionAwareInternalCrnGenerator(serviceType, partition, region, INTERNAL_ACCOUNT);
+    }
+
+    public static RegionAwareInternalCrnGenerator regionalAwareInternalCrnGenerator(Service serviceType, String partition, String region, String accountId) {
+        return new RegionAwareInternalCrnGenerator(serviceType, partition, region, accountId);
     }
 
     public boolean isInternalCrnForService(String crn) {
@@ -52,25 +62,15 @@ public class RegionAwareInternalCrnGenerator {
     }
 
     public String getInternalCrnForServiceAsString() {
-        return getInternalCrnForService(Crn.Partition.safeFromString(getPartition()), Crn.Region.safeFromString(getRegion())).toString();
-    }
-
-    private Crn getInternalCrnForService(Crn.Partition partition, Crn.Region region) {
         return Crn.builder()
-                .setPartition(partition)
-                .setRegion(region)
+                .setPartition(Partition.safeFromString(partition))
+                .setRegion(Region.safeFromString(region))
                 .setService(serviceType)
-                .setAccountId(INTERNAL_ACCOUNT)
+                .setAccountId(accountId)
                 .setResourceType(Crn.ResourceType.USER)
                 .setResource(INTERNAL_USER_CRN)
-                .build();
+                .build()
+                .toString();
     }
 
-    public String getPartition() {
-        return partition;
-    }
-
-    public String getRegion() {
-        return region;
-    }
 }

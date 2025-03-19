@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.eventbus.Event;
@@ -40,9 +39,6 @@ public class DatalakeAddVolumesHandler extends ExceptionCatcherEventHandler<Data
 
     @Inject
     private SdxService sdxService;
-
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Inject
     private SdxWaitService sdxWaitService;
@@ -75,7 +71,6 @@ public class DatalakeAddVolumesHandler extends ExceptionCatcherEventHandler<Data
             String stackCrn = sdxCluster.getStackCrn();
             LOGGER.debug("Calling add_volumes with request :: {}", stackAddVolumesRequest);
             FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.sdxAdmin().getInternalCrnForServiceAsString(),
                     () -> {
                         try {
                             return distroXV1Endpoint.addVolumesByStackCrn(stackCrn, stackAddVolumesRequest);

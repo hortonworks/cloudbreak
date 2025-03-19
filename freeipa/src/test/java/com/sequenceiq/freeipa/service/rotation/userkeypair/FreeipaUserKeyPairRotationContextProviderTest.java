@@ -3,7 +3,6 @@ package com.sequenceiq.freeipa.service.rotation.userkeypair;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
@@ -18,8 +17,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -46,12 +43,6 @@ class FreeipaUserKeyPairRotationContextProviderTest {
     private CachedEnvironmentClientService environmentClientService;
 
     @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
-
-    @Mock
     private StackAuthenticationRepository stackAuthenticationRepository;
 
     @Mock
@@ -72,10 +63,8 @@ class FreeipaUserKeyPairRotationContextProviderTest {
     @Test
     void testGetContext() {
         try (MockedStatic<ThreadBasedUserCrnProvider> threadBasedUserCrnProvider = Mockito.mockStatic(ThreadBasedUserCrnProvider.class)) {
-            threadBasedUserCrnProvider.when(() -> ThreadBasedUserCrnProvider.doAsInternalActor(anyString(), (Supplier<DetailedEnvironmentResponse>) any()))
+            threadBasedUserCrnProvider.when(() -> ThreadBasedUserCrnProvider.doAsInternalActor((Supplier<DetailedEnvironmentResponse>) any()))
                     .thenReturn(detailedEnvironmentResponse);
-            when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-            when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(RESOURCE_CRN);
             when(stackService.getByEnvironmentCrnAndAccountIdWithLists(any(), any())).thenReturn(stack);
             when(stack.getStackAuthentication()).thenReturn(stackAuthentication);
             when(detailedEnvironmentResponse.getAuthentication()).thenReturn(environmentAuthenticationResponse);

@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptResults;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.endpoint.SdxFlowEndpoint;
@@ -20,12 +19,8 @@ public class FlowPollingService {
 
     private final SdxFlowEndpoint sdxFlowEndpoint;
 
-    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    public FlowPollingService(SdxFlowEndpoint sdxFlowEndpoint,
-            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+    public FlowPollingService(SdxFlowEndpoint sdxFlowEndpoint) {
         this.sdxFlowEndpoint = sdxFlowEndpoint;
-        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     public AttemptResult<Object> pollFlowIdAndReturnAttemptResult(FlowIdentifier flowId) {
@@ -46,12 +41,10 @@ public class FlowPollingService {
         switch (flowId.getType()) {
             case FLOW:
                 flowCheckResponse = Optional.of(ThreadBasedUserCrnProvider.doAsInternalActor(
-                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                         () -> sdxFlowEndpoint.hasFlowRunningByFlowId(flowId.getPollableId())));
                 break;
             case FLOW_CHAIN:
                 flowCheckResponse = Optional.of(ThreadBasedUserCrnProvider.doAsInternalActor(
-                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                         () -> sdxFlowEndpoint.hasFlowRunningByChainId(flowId.getPollableId())));
                 break;
             case NOT_TRIGGERED:

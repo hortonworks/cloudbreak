@@ -19,7 +19,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.datalakemetrics.datasizes.DetermineDatalakeDataSizesBaseEvent;
@@ -45,9 +44,6 @@ public class DetermineDatalakeDataSizesActions {
 
     @Inject
     private SdxEndpoint sdxEndpoint;
-
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Inject
     private PartialSaltStateUpdateService partialSaltStateUpdateService;
@@ -91,10 +87,8 @@ public class DetermineDatalakeDataSizesActions {
                 LOGGER.info("Submitting datalake data sizes info '{}' for cluster {}.", payload.getDataSizesResult(), stack.getResourceCrn());
                 String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
                 ThreadBasedUserCrnProvider.doAsInternalActor(
-                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                         () -> sdxEndpoint.submitDatalakeDataSizesInternal(
-                                stack.getResourceCrn(), context.getOperationId(), payload.getDataSizesResult(), initiatorUserCrn
-                        )
+                                stack.getResourceCrn(), context.getOperationId(), payload.getDataSizesResult(), initiatorUserCrn)
                 );
 
                 stackUpdater.updateStackStatus(

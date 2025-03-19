@@ -51,12 +51,9 @@ public class DBStackStatusSyncJob extends StatusCheckerJob {
         } else {
             try {
                 measure(() -> {
-                    ThreadBasedUserCrnProvider.doAsInternalActor(
+                    ThreadBasedUserCrnProvider.doAs(
                             regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                            () -> {
-                                dbStackStatusSyncService.sync(dbStack);
-                            }
-                    );
+                            () -> dbStackStatusSyncService.sync(dbStack));
                 }, LOGGER, ":::Auto sync::: DB stack sync in {}ms");
             } catch (Exception e) {
                 LOGGER.info(":::Auto sync::: Error occurred during DB sync: {}", e.getMessage(), e);

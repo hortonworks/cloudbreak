@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
@@ -34,9 +33,6 @@ public class MachineUserRemoveHandler implements EventHandler<RemoveMachineUserR
     @Inject
     private AltusMachineUserService altusMachineUserService;
 
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     @Override
     public String selector() {
         return EventSelectorUtil.selector(RemoveMachineUserRequest.class);
@@ -59,13 +55,11 @@ public class MachineUserRemoveHandler implements EventHandler<RemoveMachineUserR
             if (StringUtils.isNotBlank(stack.getDatabusCredential())) {
                 LOGGER.info("Cleanup fluent machine user.");
                 ThreadBasedUserCrnProvider.doAsInternalActor(
-                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                         () -> altusMachineUserService.cleanupMachineUser(stack, telemetry));
             }
             if (StringUtils.isNotBlank(stack.getMonitoringCredential())) {
                 LOGGER.info("Cleanup monitoring machine user.");
                 ThreadBasedUserCrnProvider.doAsInternalActor(
-                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                         () -> altusMachineUserService.cleanupMonitoringMachineUser(stack));
             }
         }

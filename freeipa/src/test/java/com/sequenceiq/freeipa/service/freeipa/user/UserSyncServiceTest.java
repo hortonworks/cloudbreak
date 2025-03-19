@@ -35,8 +35,6 @@ import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
 import com.sequenceiq.authorization.service.CustomCheckUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.WorkloadCredentialsUpdateType;
@@ -62,7 +60,7 @@ public class UserSyncServiceTest {
     private static final String ACTOR_CRN = "crn:cdp:users:us-west-1:"
             + ACCOUNT_ID + ":user:" + UUID.randomUUID();
 
-    private static final String INTERNAL_ACTOR = "crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__";
+    private static final String INTERNAL_ACTOR = "crn:cdp:iam:us-west-1:altus:user:__internal__actor__";
 
     private static final Long TIMEOUT = 6L;
 
@@ -82,12 +80,6 @@ public class UserSyncServiceTest {
 
     @Mock
     private EntitlementService entitlementService;
-
-    @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
     @Mock
     private ExecutorService asyncTaskExecutor;
@@ -121,9 +113,6 @@ public class UserSyncServiceTest {
             runnable.run();
             return null;
         }).when(operationService).tryWithOperationCleanup(eq(operation.getOperationId()), eq(ACCOUNT_ID), any(Runnable.class));
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
-                .thenReturn(INTERNAL_ACTOR);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         UserSyncStatus userSyncStatus = new UserSyncStatus();
         when(userSyncStatusService.getOrCreateForStack(STACK_ID)).thenReturn(userSyncStatus);
         when(entitlementService.usersyncCredentialsUpdateOptimizationEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
@@ -173,9 +162,6 @@ public class UserSyncServiceTest {
             runnable.run();
             return null;
         }).when(operationService).tryWithOperationCleanup(eq(operation.getOperationId()), eq(ACCOUNT_ID), any(Runnable.class));
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
-                .thenReturn(INTERNAL_ACTOR);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(entitlementService.usersyncCredentialsUpdateOptimizationEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
         when(entitlementService.isFmsToFreeipaBatchCallEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
         doAnswer(inv -> {
@@ -222,9 +208,6 @@ public class UserSyncServiceTest {
             runnable.run();
             return null;
         }).when(operationService).tryWithOperationCleanup(eq(operation.getOperationId()), eq(ACCOUNT_ID), any(Runnable.class));
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
-                .thenReturn(INTERNAL_ACTOR);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         UserSyncStatus userSyncStatus = new UserSyncStatus();
         when(userSyncStatusService.getOrCreateForStack(STACK_ID)).thenReturn(userSyncStatus);
         when(entitlementService.usersyncCredentialsUpdateOptimizationEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
@@ -279,9 +262,6 @@ public class UserSyncServiceTest {
             runnable.run();
             return null;
         }).when(operationService).tryWithOperationCleanup(eq(operation.getOperationId()), eq(ACCOUNT_ID), any(Runnable.class));
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
-                .thenReturn(INTERNAL_ACTOR);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         UserSyncStatus userSyncStatus = new UserSyncStatus();
         when(userSyncStatusService.getOrCreateForStack(STACK_ID)).thenReturn(userSyncStatus);
         when(entitlementService.usersyncCredentialsUpdateOptimizationEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
@@ -330,9 +310,6 @@ public class UserSyncServiceTest {
             runnable.run();
             return null;
         }).when(operationService).tryWithOperationCleanup(eq(operation.getOperationId()), eq(ACCOUNT_ID), any(Runnable.class));
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
-                .thenReturn(INTERNAL_ACTOR);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         UserSyncStatus userSyncStatus = new UserSyncStatus();
         when(userSyncStatusService.getOrCreateForStack(STACK_ID)).thenReturn(userSyncStatus);
         when(entitlementService.usersyncCredentialsUpdateOptimizationEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);

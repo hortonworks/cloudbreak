@@ -19,7 +19,6 @@ import com.dyngr.Polling;
 import com.dyngr.core.AttemptMaker;
 import com.dyngr.exception.PollerStoppedException;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxStartStopService;
 import com.sequenceiq.cloudbreak.sdx.paas.flowpolling.FlowPollingService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -45,23 +44,18 @@ public class PaasSdxStartStopService extends AbstractPaasSdxService implements P
     private SdxEndpoint sdxEndpoint;
 
     @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Inject
     private FlowPollingService flowPollingService;
 
     @Override
     public void startSdx(String sdxCrn) {
-        SdxClusterResponse sdx = ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                () -> sdxEndpoint.getByCrn(sdxCrn));
+        SdxClusterResponse sdx = ThreadBasedUserCrnProvider.doAsInternalActor(() -> sdxEndpoint.getByCrn(sdxCrn));
         if (SKIP_START_OPERATION.contains(sdx.getStatus())) {
             LOGGER.info("No need to call start for SDX {} as it is already running or starting.", sdxCrn);
             return;
         }
 
         LOGGER.info("Calling start for SDX PaaS cluster {}", sdxCrn);
-        FlowIdentifier flowId = ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                () -> sdxEndpoint.startByCrn(sdxCrn));
+        FlowIdentifier flowId = ThreadBasedUserCrnProvider.doAsInternalActor(() -> sdxEndpoint.startByCrn(sdxCrn));
 
         LOGGER.info("Polling start for SDX PaaS cluster {}", sdxCrn);
         pollOperation(() -> flowPollingService.pollFlowIdAndReturnAttemptResult(flowId));
@@ -69,16 +63,14 @@ public class PaasSdxStartStopService extends AbstractPaasSdxService implements P
 
     @Override
     public void stopSdx(String sdxCrn) {
-        SdxClusterResponse sdx = ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                () -> sdxEndpoint.getByCrn(sdxCrn));
+        SdxClusterResponse sdx = ThreadBasedUserCrnProvider.doAsInternalActor(() -> sdxEndpoint.getByCrn(sdxCrn));
         if (SKIP_STOP_OPERATION.contains(sdx.getStatus())) {
             LOGGER.info("No need to call stop for SDX {} as it is already stopped or stopping.", sdxCrn);
             return;
         }
 
         LOGGER.info("Calling stop for SDX PaaS cluster {}", sdxCrn);
-        FlowIdentifier flowId = ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                () -> sdxEndpoint.stopByCrn(sdxCrn));
+        FlowIdentifier flowId = ThreadBasedUserCrnProvider.doAsInternalActor(() -> sdxEndpoint.stopByCrn(sdxCrn));
 
         LOGGER.info("Polling stop for SDX PaaS cluster {}", sdxCrn);
         pollOperation(() -> flowPollingService.pollFlowIdAndReturnAttemptResult(flowId));

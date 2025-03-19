@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupFlowConfig;
 import com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreFlowConfig;
@@ -49,9 +48,6 @@ public class SdxRetryService {
     @Inject
     private StackV4Endpoint stackV4Endpoint;
 
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     public FlowIdentifier retrySdx(SdxCluster sdxCluster) {
         FlowLog flowLog = flow2Handler.getFirstRetryableStateLogfromLatestFlow(sdxCluster.getId());
         if (!flowLog.getFlowType().isOnClassPath()) {
@@ -70,7 +66,6 @@ public class SdxRetryService {
             LOGGER.info("Last successful state was " + lastSuccessfulStateLog.getNextEvent() + ", so try a retry on stack");
             try {
                 ThreadBasedUserCrnProvider.doAsInternalActor(
-                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                         () -> stackV4Endpoint.retry(0L, sdxCluster.getClusterName(), sdxCluster.getAccountId()));
             } catch (BadRequestException e) {
                 LOGGER.info("Sdx retry failed on cloudbreak side, but try to restart the flow. Related exception: ", e);

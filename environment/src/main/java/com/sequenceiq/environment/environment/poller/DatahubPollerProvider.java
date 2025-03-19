@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.environment.environment.service.datahub.DatahubService;
 import com.sequenceiq.environment.store.EnvironmentInMemoryStateStore;
@@ -37,17 +36,14 @@ public class DatahubPollerProvider {
 
     private final FlowEndpoint flowEndpoint;
 
-    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     private final FlowResultPollerEvaluator flowResultPollerEvaluator;
 
     public DatahubPollerProvider(DatahubService datahubService, ClusterPollerResultEvaluator clusterPollerResultEvaluator, FlowEndpoint flowEndpoint,
-            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory, FlowResultPollerEvaluator flowResultPollerEvaluator) {
+            FlowResultPollerEvaluator flowResultPollerEvaluator) {
 
         this.datahubService = datahubService;
         this.clusterPollerResultEvaluator = clusterPollerResultEvaluator;
         this.flowEndpoint = flowEndpoint;
-        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
         this.flowResultPollerEvaluator = flowResultPollerEvaluator;
     }
 
@@ -186,12 +182,10 @@ public class DatahubPollerProvider {
         switch (flowId.getType()) {
             case FLOW:
                 flowCheckResponse = ThreadBasedUserCrnProvider.doAsInternalActor(
-                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                         () -> flowEndpoint.hasFlowRunningByFlowId(flowId.getPollableId()));
                 break;
             case FLOW_CHAIN:
                 flowCheckResponse = ThreadBasedUserCrnProvider.doAsInternalActor(
-                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                         () -> flowEndpoint.hasFlowRunningByChainId(flowId.getPollableId()));
                 break;
             case NOT_TRIGGERED:

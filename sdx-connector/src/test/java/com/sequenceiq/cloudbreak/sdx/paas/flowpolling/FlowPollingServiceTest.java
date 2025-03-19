@@ -12,8 +12,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptState;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
@@ -28,19 +26,11 @@ class FlowPollingServiceTest {
     @Mock
     private SdxFlowEndpoint sdxFlowEndpoint;
 
-    @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
-
     @InjectMocks
     private FlowPollingService flowPollingService;
 
     @Test
     void finalizedSuccessfulFlowFinishesPoll() {
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW, FLOW_POLL_ID);
         FlowCheckResponse flowCheckResponse = new FlowCheckResponse();
         flowCheckResponse.setLatestFlowFinalizedAndFailed(false);
@@ -53,8 +43,6 @@ class FlowPollingServiceTest {
 
     @Test
     void ongoingFlowContinuesPoll() {
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW, FLOW_POLL_ID);
         FlowCheckResponse flowCheckResponse = new FlowCheckResponse();
         flowCheckResponse.setLatestFlowFinalizedAndFailed(false);
@@ -67,8 +55,6 @@ class FlowPollingServiceTest {
 
     @Test
     void failedFlowFailsPoll() {
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW, FLOW_POLL_ID);
         FlowCheckResponse flowCheckResponse = new FlowCheckResponse();
         flowCheckResponse.setLatestFlowFinalizedAndFailed(true);
@@ -82,8 +68,6 @@ class FlowPollingServiceTest {
 
     @Test
     void finalizedSuccessfulFlowChainFinishesPoll() {
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_POLL_ID);
         FlowCheckResponse flowCheckResponse = new FlowCheckResponse();
         flowCheckResponse.setLatestFlowFinalizedAndFailed(false);
@@ -96,8 +80,6 @@ class FlowPollingServiceTest {
 
     @Test
     void ongoingFlowChainContinuesPoll() {
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_POLL_ID);
         FlowCheckResponse flowCheckResponse = new FlowCheckResponse();
         flowCheckResponse.setLatestFlowFinalizedAndFailed(false);
@@ -110,8 +92,6 @@ class FlowPollingServiceTest {
 
     @Test
     void failedFlowChainFailsPoll() {
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_POLL_ID);
         FlowCheckResponse flowCheckResponse = new FlowCheckResponse();
         flowCheckResponse.setLatestFlowFinalizedAndFailed(true);

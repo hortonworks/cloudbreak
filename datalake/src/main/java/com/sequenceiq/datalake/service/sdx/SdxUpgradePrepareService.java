@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -29,9 +28,6 @@ public class SdxUpgradePrepareService {
     private SdxStatusService sdxStatusService;
 
     @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Inject
     private StackV4Endpoint stackV4Endpoint;
 
     @Inject
@@ -48,9 +44,7 @@ public class SdxUpgradePrepareService {
             String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
             LOGGER.debug("Initiating upgrade prepare for {} with image {}", sdxCluster, imageId);
             FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                    () ->
-                            stackV4Endpoint.prepareClusterUpgradeByCrnInternal(0L, sdxCluster.getCrn(), imageId, initiatorUserCrn));
+                    () -> stackV4Endpoint.prepareClusterUpgradeByCrnInternal(0L, sdxCluster.getCrn(), imageId, initiatorUserCrn));
             LOGGER.debug("Upgrade prepare initiated with flow {}", flowIdentifier);
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
         } catch (WebApplicationException e) {

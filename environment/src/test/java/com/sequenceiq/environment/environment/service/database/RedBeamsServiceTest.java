@@ -17,8 +17,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentDatabaseServerCertificateStatusV4Request;
 import com.sequenceiq.environment.exception.RedbeamsOperationFailedException;
@@ -36,12 +34,6 @@ class RedBeamsServiceTest {
     @Mock
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
-    @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
-
     @InjectMocks
     private RedBeamsService redBeamsService;
 
@@ -49,9 +41,6 @@ class RedBeamsServiceTest {
     public void testListDatabaseServersCertificateStatusByEnvironmentCrnsSuccess() {
         EnvironmentDatabaseServerCertificateStatusV4Request request = new EnvironmentDatabaseServerCertificateStatusV4Request();
         request.setEnvironmentCrns(Set.of("env1", "env2"));
-
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
 
         DatabaseServerCertificateStatusV4Responses expectedResponse = new DatabaseServerCertificateStatusV4Responses();
         when(databaseServerV4Endpoint.listDatabaseServersCertificateStatus(any(), anyString())).thenReturn(expectedResponse);
@@ -66,9 +55,6 @@ class RedBeamsServiceTest {
     public void testListDatabaseServersCertificateStatusByEnvironmentCrnsWebApplicationException() {
         EnvironmentDatabaseServerCertificateStatusV4Request request = new EnvironmentDatabaseServerCertificateStatusV4Request();
         request.setEnvironmentCrns(Set.of("env1", "env2"));
-
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
 
         WebApplicationException webApplicationException = new WebApplicationException("Error");
         when(databaseServerV4Endpoint.listDatabaseServersCertificateStatus(any(), anyString())).thenThrow(webApplicationException);

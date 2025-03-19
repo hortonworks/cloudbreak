@@ -15,8 +15,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataRequest;
@@ -72,12 +70,6 @@ public class CloudStorageLocationValidatorTest {
     @Mock
     private AdlsGen2CloudStorageV1Parameters adlsGen2;
 
-    @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
-
     @InjectMocks
     private CloudStorageLocationValidator underTest;
 
@@ -104,8 +96,6 @@ public class CloudStorageLocationValidatorTest {
                 .build();
         ObjectStorageMetadataResponse response = ObjectStorageMetadataResponse.builder().withRegion(ENV_REGION).withStatus(ResponseStatus.OK).build();
         when(cloudProviderServicesEndpoint.getObjectStorageMetaData(eq(request))).thenReturn(response);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
         underTest.validate(S3_OBJECT_PATH, environment, validationResultBuilder);
 
@@ -125,8 +115,6 @@ public class CloudStorageLocationValidatorTest {
                 .build();
         ObjectStorageMetadataResponse response = ObjectStorageMetadataResponse.builder().withRegion(ENV_REGION).withStatus(ResponseStatus.OK).build();
         when(cloudProviderServicesEndpoint.getObjectStorageMetaData(eq(request))).thenReturn(response);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
         underTest.validate(ABFS_OBJECT_PATH, environment, validationResultBuilder);
 
@@ -141,8 +129,6 @@ public class CloudStorageLocationValidatorTest {
                 .withObjectStoragePath(BUCKET_NAME)
                 .withRegion(ENV_REGION)
                 .build();
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ObjectStorageMetadataResponse response = ObjectStorageMetadataResponse.builder().withRegion(ENV_REGION).withStatus(ResponseStatus.OK).build();
         when(cloudProviderServicesEndpoint.getObjectStorageMetaData(eq(request))).thenReturn(response);
 
@@ -162,8 +148,6 @@ public class CloudStorageLocationValidatorTest {
                 .build();
         ObjectStorageMetadataResponse response = ObjectStorageMetadataResponse.builder().withStatus(ResponseStatus.ACCESS_DENIED).build();
         when(cloudProviderServicesEndpoint.getObjectStorageMetaData(eq(request))).thenReturn(response);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
         underTest.validate(OBJECT_PATH, environment, validationResultBuilder);
 
@@ -180,8 +164,6 @@ public class CloudStorageLocationValidatorTest {
                 .build();
         ObjectStorageMetadataResponse response = ObjectStorageMetadataResponse.builder().withRegion(OTHER_REGION).withStatus(ResponseStatus.OK).build();
         when(cloudProviderServicesEndpoint.getObjectStorageMetaData(eq(request))).thenReturn(response);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
         underTest.validate(OBJECT_PATH, environment, validationResultBuilder);
         ValidationResult result = validationResultBuilder.build();
@@ -202,8 +184,6 @@ public class CloudStorageLocationValidatorTest {
                 .build();
         ObjectStorageMetadataResponse response = ObjectStorageMetadataResponse.builder().withStatus(ResponseStatus.RESOURCE_NOT_FOUND).build();
         when(cloudProviderServicesEndpoint.getObjectStorageMetaData(eq(request))).thenReturn(response);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
         underTest.validate(OBJECT_PATH, environment, validationResultBuilder);
         ValidationResult result = validationResultBuilder.build();

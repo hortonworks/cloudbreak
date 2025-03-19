@@ -27,8 +27,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseServerSslConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.check.DatabaseCertificateRotationOutdatedDatahubsCollector;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -53,9 +51,6 @@ class DatabaseCertificateRotationOutdatedDatahubsCollectorTest {
     private StackService stackService;
 
     @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
     private SupportV4Endpoint supportV4Endpoint;
 
     @Mock
@@ -73,7 +68,6 @@ class DatabaseCertificateRotationOutdatedDatahubsCollectorTest {
     void setUp() {
         underTest = new DatabaseCertificateRotationOutdatedDatahubsCollector(
                 stackDtoService,
-                regionAwareInternalCrnGeneratorFactory,
                 supportV4Endpoint,
                 databaseService,
                 stackService);
@@ -109,9 +103,6 @@ class DatabaseCertificateRotationOutdatedDatahubsCollectorTest {
         when(datalake.getEnvironmentCrn()).thenReturn("envCrn");
         when(datalake.getRegion()).thenReturn("region");
 
-        RegionAwareInternalCrnGenerator mock = mock(RegionAwareInternalCrnGenerator.class);
-        when(mock.getInternalCrnForServiceAsString()).thenReturn("internalCrn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(mock);
         SslCertificateEntryResponse certificateEntryResponse = mock(SslCertificateEntryResponse.class);
         when(certificateEntryResponse.getVersion()).thenReturn(3);
         when(certificateEntryResponse.getCertPem()).thenReturn(latestCert);

@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
@@ -37,9 +36,6 @@ public class FreeipaUserKeypairRotationContextProvider implements RotationContex
     private CachedEnvironmentClientService environmentClientService;
 
     @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Inject
     private StackAuthenticationRepository stackAuthenticationRepository;
 
     @Inject
@@ -54,7 +50,6 @@ public class FreeipaUserKeypairRotationContextProvider implements RotationContex
         Crn environmentCrn = Crn.safeFromString(resourceCrn);
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(resourceCrn, environmentCrn.getAccountId());
         DetailedEnvironmentResponse environment = ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> environmentClientService.getByCrn(resourceCrn));
 
         boolean changedKeyPair = customerChangedTheKeyPair(stack.getStackAuthentication(), environment.getAuthentication());

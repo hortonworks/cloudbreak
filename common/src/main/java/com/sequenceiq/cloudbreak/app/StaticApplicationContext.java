@@ -22,4 +22,12 @@ public class StaticApplicationContext {
         return context.getBean(requiredType);
     }
 
+    public static String getProperty(String key, String defaultValue) {
+        if (context != null && context.getEnvironment() != null) {
+            return context.getEnvironment().getProperty(key, defaultValue);
+        } else {
+            return defaultValue;
+        }
+    }
+
 }

@@ -11,7 +11,6 @@ import jakarta.ws.rs.core.Response;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.api.v1.tags.endpoint.AccountTagEndpoint;
@@ -27,14 +26,10 @@ public class AccountTagService {
     @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     public Map<String, String> list() {
         try {
             String accountId = ThreadBasedUserCrnProvider.getAccountId();
             AccountTagResponses list = ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> accountTagEndpoint.listInAccount(accountId));
             return list.getResponses()
                     .stream()

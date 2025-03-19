@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxAccessView;
@@ -37,9 +36,6 @@ public class PaasSdxDescribeService extends AbstractPaasSdxService implements Pl
     @Inject
     private Optional<LocalPaasSdxService> localPaasSdxService;
 
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     @Override
     public Optional<String> getRemoteDataContext(String crn) {
         return localRdcSupplier.map(rdcSupplier -> rdcSupplier.getPaasSdxRemoteDataContext(crn))
@@ -51,14 +47,14 @@ public class PaasSdxDescribeService extends AbstractPaasSdxService implements Pl
         if (localPaasSdxService.isPresent()) {
             return localPaasSdxService.get().listSdxCrns(environmentCrn);
         }
-        return ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
                 () -> sdxEndpoint.getByEnvCrn(environmentCrn, false)).stream().map(SdxClusterResponse::getCrn).collect(Collectors.toSet());
     }
 
     @Override
     public Optional<SdxBasicView> getSdxByEnvironmentCrn(String environmentCrn) {
         return localPaasSdxService.flatMap(localPaasService -> localPaasService.getSdxBasicView(environmentCrn)).or(() ->
-                ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                ThreadBasedUserCrnProvider.doAsInternalActor(
                         () -> sdxEndpoint.getByEnvCrn(environmentCrn, false))
                     .stream()
                     .filter(Predicate.not(SdxClusterResponse::isDetached))
@@ -84,7 +80,7 @@ public class PaasSdxDescribeService extends AbstractPaasSdxService implements Pl
         if (localPaasSdxService.isPresent()) {
             return localPaasSdxService.get().listSdxCrns(environmentCrn);
         }
-        return ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
                 () -> sdxEndpoint.getByEnvCrn(environmentCrn, true)).stream().map(SdxClusterResponse::getCrn).collect(Collectors.toSet());
     }
 

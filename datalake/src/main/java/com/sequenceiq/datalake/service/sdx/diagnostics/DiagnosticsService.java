@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.CmDiagnostics
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.DiagnosticsCollectionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.common.api.diagnostics.ListDiagnosticsCollectionResponse;
@@ -60,9 +59,6 @@ public class DiagnosticsService {
 
     @Inject
     private Flow2Handler flow2Handler;
-
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     public FlowIdentifier collectDiagnostics(DiagnosticsCollectionRequest request) {
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
@@ -115,7 +111,6 @@ public class DiagnosticsService {
 
     public List<String> getCmRoles(String stackCrn) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> diagnosticsV4Endpoint.getCmRoles(stackCrn));
     }
 

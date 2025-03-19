@@ -17,8 +17,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.co2.ClusterCO2V4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.cost.ClusterCostV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.co2.EnvironmentRealTimeCO2;
 import com.sequenceiq.cloudbreak.common.co2.RealTimeCO2;
 import com.sequenceiq.cloudbreak.common.co2.RealTimeCO2Response;
@@ -46,12 +44,6 @@ public class EnvironmentCostServiceTest {
     @Mock
     private EntitlementService entitlementService;
 
-    @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
-
     @InjectMocks
     private EnvironmentCostService underTest;
 
@@ -60,8 +52,6 @@ public class EnvironmentCostServiceTest {
         when(entitlementService.isUsdCostCalculationEnabled(any())).thenReturn(Boolean.TRUE);
         when(clusterCostV4Endpoint.listByEnv(any(), any())).thenReturn(getRealTimeCostResponseForClusters());
         when(freeIpaCostV1Endpoint.list(any(), any())).thenReturn(getRealTimeCostResponseForFreeipa());
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:iam:us-west-1:1234:user:1");
 
         ThreadBasedUserCrnProvider.doAs("crn:cdp:iam:us-west-1:1234:user:1", () -> {
             Map<String, EnvironmentRealTimeCost> environmentCosts = underTest.getCosts(List.of("ENVIRONMENT_CRN"), List.of("DATALAKE_CRN", "DATAHUB_CRN"));
@@ -81,8 +71,6 @@ public class EnvironmentCostServiceTest {
         when(entitlementService.isCO2CalculationEnabled(any())).thenReturn(Boolean.TRUE);
         when(clusterCO2V4Endpoint.listByEnv(any(), any())).thenReturn(getRealTimeCO2ResponseForClusters());
         when(freeIpaCO2V1Endpoint.list(any(), any())).thenReturn(getRealTimeCO2ResponseForFreeipa());
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:iam:us-west-1:1234:user:1");
 
         ThreadBasedUserCrnProvider.doAs("crn:cdp:iam:us-west-1:1234:user:1", () -> {
             Map<String, EnvironmentRealTimeCO2> environmentCO2s = underTest.getCO2(List.of("ENVIRONMENT_CRN"), List.of("DATALAKE_CRN", "DATAHUB_CRN"));

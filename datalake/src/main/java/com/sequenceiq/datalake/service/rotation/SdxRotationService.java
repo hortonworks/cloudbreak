@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.requests.StackV4Secret
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.SecretTypeConverter;
@@ -60,9 +59,6 @@ public class SdxRotationService {
 
     @Inject
     private SdxClusterRepository sdxClusterRepository;
-
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Inject
     private StackV4Endpoint stackV4Endpoint;
@@ -116,7 +112,6 @@ public class SdxRotationService {
         request.setExecutionType(executionType);
         request.setAdditionalProperties(additionalProperties);
         FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 initiatorUserCrn -> stackV4Endpoint.rotateSecrets(1L, request, initiatorUserCrn)
         );
 
@@ -142,7 +137,6 @@ public class SdxRotationService {
         request.setAdditionalProperties(additionalProperties);
 
         FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 initiatorUserCrn -> databaseServerV4Endpoint.rotateSecret(request, initiatorUserCrn)
         );
 
@@ -208,7 +202,6 @@ public class SdxRotationService {
         request.setAdditionalProperties(additionalProperties);
 
         FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 initiatorUserCrn -> freeIpaRotationV1Endpoint.rotateSecretsByCrn(sdxCluster.getEnvCrn(), request)
         );
 

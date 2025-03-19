@@ -40,7 +40,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
@@ -151,8 +150,6 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     private final StackV4Endpoint stackV4Endpoint;
 
-    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     private final SupportedOperatingSystemService supportedOperatingSystemService;
 
     private final ExternalizedComputeFlowService externalizedComputeFlowService;
@@ -177,7 +174,6 @@ public class EnvironmentController implements EnvironmentEndpoint {
             EnvironmentUpgradeCcmService upgradeCcmService,
             EnvironmentVerticalScaleService environmentVerticalScaleService,
             StackV4Endpoint stackV4Endpoint,
-            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory,
             SupportedOperatingSystemService supportedOperatingSystemService,
             ExternalizedComputeFlowService externalizedComputeFlowService,
             EnvironmentReactorFlowManager environmentReactorFlowManager,
@@ -201,7 +197,6 @@ public class EnvironmentController implements EnvironmentEndpoint {
         this.upgradeCcmService = upgradeCcmService;
         this.environmentVerticalScaleService = environmentVerticalScaleService;
         this.stackV4Endpoint = stackV4Endpoint;
-        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
         this.supportedOperatingSystemService = supportedOperatingSystemService;
         this.externalizedComputeFlowService = externalizedComputeFlowService;
         this.redBeamsService = redBeamsService;
@@ -541,7 +536,6 @@ public class EnvironmentController implements EnvironmentEndpoint {
         return Tunnel.getUpgradables().contains(environmentDto.getTunnel()) ||
                 environmentDto.getTunnel() == Tunnel.latestUpgradeTarget() &&
                         ThreadBasedUserCrnProvider.doAsInternalActor(
-                                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                                 () -> stackV4Endpoint.getNotCcmUpgradedStackCount(0L, crn, ThreadBasedUserCrnProvider.getUserCrn()) > 0);
     }
 

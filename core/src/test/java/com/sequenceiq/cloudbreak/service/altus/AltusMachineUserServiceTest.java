@@ -24,8 +24,6 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.auth.altus.model.CdpAccessKeyType;
 import com.sequenceiq.cloudbreak.auth.altus.service.AltusIAMService;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -58,13 +56,7 @@ public class AltusMachineUserServiceTest {
     private ClusterService clusterService;
 
     @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
     private ComponentConfigProviderService componentConfigProviderService;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
     @Mock
     private EntitlementService entitlementService;
@@ -103,7 +95,7 @@ public class AltusMachineUserServiceTest {
         features.setMetering(metering);
         telemetry.setFeatures(features);
         underTest = new AltusMachineUserService(altusIAMService, stackDtoService,
-                clusterService, componentConfigProviderService, regionAwareInternalCrnGeneratorFactory, entitlementService, telemetryFeatureService);
+                clusterService, componentConfigProviderService, entitlementService, telemetryFeatureService);
     }
 
     @Test
@@ -111,8 +103,6 @@ public class AltusMachineUserServiceTest {
         // GIVEN
         Optional<AltusCredential> altusCredential = Optional.of(new AltusCredential("accessKey", "secretKey".toCharArray()));
         when(altusIAMService.generateDatabusMachineUserWithAccessKey(any(), anyBoolean())).thenReturn(altusCredential);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         // WHEN
         underTest.generateDatabusMachineUserForFluent(stack, telemetry, CdpAccessKeyType.ED25519);
 
@@ -124,8 +114,6 @@ public class AltusMachineUserServiceTest {
     @Test
     public void testCleanupMachineUser() {
         // GIVEN
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         doNothing().when(altusIAMService).clearMachineUser(any(), any(), anyBoolean());
         // WHEN
         underTest.clearFluentMachineUser(stack, cluster, telemetry);

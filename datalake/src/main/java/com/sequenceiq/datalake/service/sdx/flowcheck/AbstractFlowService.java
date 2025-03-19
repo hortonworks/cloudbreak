@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
@@ -18,16 +17,12 @@ public abstract class AbstractFlowService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFlowService.class);
 
     @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Inject
     private FlowCheckResponseToFlowStateConverter flowCheckResponseToFlowStateConverter;
 
     protected abstract FlowEndpoint flowEndpoint();
 
     public FlowLogResponse getLastFlowId(String resourceCrn) {
         FlowLogResponse lastFlowByResourceName = ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> flowEndpoint().getLastFlowByResourceCrn(resourceCrn));
         logFlowLogResponse(lastFlowByResourceName);
         return lastFlowByResourceName;
@@ -40,7 +35,6 @@ public abstract class AbstractFlowService {
     public FlowState getLastKnownFlowStateByFlowId(String flowId) {
         LOGGER.info("Checking {} {}", FlowType.FLOW, flowId);
         FlowCheckResponse flowCheckResponse = ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> flowEndpoint().hasFlowRunningByFlowId(flowId)
         );
         logFlowStatus(flowId, flowCheckResponse.getHasActiveFlow());

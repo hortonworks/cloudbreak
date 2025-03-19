@@ -11,7 +11,6 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -29,8 +28,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidationService;
@@ -72,9 +69,6 @@ class SdxRotationServiceTest {
 
     @Mock
     private SdxClusterRepository sdxClusterRepository;
-
-    @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Mock
     private StackV4Endpoint stackV4Endpoint;
@@ -125,14 +119,10 @@ class SdxRotationServiceTest {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setId(SDX_CLUSTER_ID);
         when(sdxClusterRepository.findByCrnAndDeletedIsNull(eq(RESOURCE_CRN))).thenReturn(Optional.of(sdxCluster));
-        RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator = mock(RegionAwareInternalCrnGenerator.class);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("internalCrn");
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_CHAIN_ID);
         when(stackV4Endpoint.rotateSecrets(eq(1L), any(), any())).thenReturn(flowIdentifier);
         underTest.rotateCloudbreakSecret(RESOURCE_CRN, INTERNAL_DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD, ROTATE, null);
         verify(sdxClusterRepository, times(1)).findByCrnAndDeletedIsNull(eq(RESOURCE_CRN));
-        verify(regionAwareInternalCrnGeneratorFactory, times(1)).iam();
         verify(stackV4Endpoint, times(1)).rotateSecrets(eq(1L), any(), any());
         verify(cloudbreakPoller, times(1))
                 .pollFlowStateByFlowIdentifierUntilComplete(eq("Secret rotation"), eq(flowIdentifier), eq(SDX_CLUSTER_ID), any());
@@ -146,14 +136,10 @@ class SdxRotationServiceTest {
         sdxDatabase.setDatabaseCrn(DATABASE_CRN);
         sdxCluster.setSdxDatabase(sdxDatabase);
         when(sdxClusterRepository.findByCrnAndDeletedIsNull(eq(RESOURCE_CRN))).thenReturn(Optional.of(sdxCluster));
-        RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator = mock(RegionAwareInternalCrnGenerator.class);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("internalCrn");
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_CHAIN_ID);
         when(databaseServerV4Endpoint.rotateSecret(any(), any())).thenReturn(flowIdentifier);
         underTest.rotateRedbeamsSecret(RESOURCE_CRN, RedbeamsSecretType.REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD, ROTATE, null);
         verify(sdxClusterRepository, times(1)).findByCrnAndDeletedIsNull(eq(RESOURCE_CRN));
-        verify(regionAwareInternalCrnGeneratorFactory, times(1)).iam();
         verify(databaseServerV4Endpoint, times(1)).rotateSecret(any(), any());
         verify(redbeamsPoller, times(1))
                 .pollFlowStateByFlowIdentifierUntilComplete(eq("Secret rotation"), eq(flowIdentifier), eq(SDX_CLUSTER_ID), any());
@@ -165,14 +151,10 @@ class SdxRotationServiceTest {
         sdxCluster.setId(SDX_CLUSTER_ID);
         sdxCluster.setEnvCrn(ENV_CRN);
         when(sdxClusterRepository.findByCrnAndDeletedIsNull(eq(RESOURCE_CRN))).thenReturn(Optional.of(sdxCluster));
-        RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator = mock(RegionAwareInternalCrnGenerator.class);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("internalCrn");
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_CHAIN_ID);
         when(freeIpaRotationV1Endpoint.rotateSecretsByCrn(any(), any())).thenReturn(flowIdentifier);
         underTest.rotateFreeipaSecret(RESOURCE_CRN, FreeIpaSecretType.FREEIPA_KERBEROS_BIND_USER, ROTATE, null);
         verify(sdxClusterRepository, times(1)).findByCrnAndDeletedIsNull(eq(RESOURCE_CRN));
-        verify(regionAwareInternalCrnGeneratorFactory, times(1)).iam();
         verify(freeIpaRotationV1Endpoint, times(1)).rotateSecretsByCrn(any(), any());
         verify(freeipaPoller, times(1))
                 .pollFlowStateByFlowIdentifierUntilComplete(eq("Secret rotation"), eq(flowIdentifier), eq(SDX_CLUSTER_ID), any());

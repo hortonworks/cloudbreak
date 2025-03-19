@@ -24,8 +24,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.imagecatalog.GenerateImageCatalogV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
@@ -53,12 +51,6 @@ class SdxImageCatalogServiceTest {
     @Mock
     private StackV4Endpoint stackV4Endpoint;
 
-    @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
-
     @InjectMocks
     private SdxImageCatalogService underTest;
 
@@ -82,8 +74,6 @@ class SdxImageCatalogServiceTest {
 
     @Test
     void shouldConvertException() {
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         doThrow(CloudbreakServiceException.class).when(stackV4Endpoint)
                 .changeImageCatalogInternal(eq(WORKSPACE_ID_DEFAULT), eq(CLUSTER_NAME), any(), any());
 
@@ -93,8 +83,6 @@ class SdxImageCatalogServiceTest {
 
     @Test
     void shouldCallChangeImageWhenEverythingIsValid() {
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.changeImageCatalog(SDX_CLUSTER, IMAGE_CATALOG));
 
         verify(stackV4Endpoint).changeImageCatalogInternal(eq(WORKSPACE_ID_DEFAULT), eq(CLUSTER_NAME), eq(USER_CRN), requestCaptor.capture());
@@ -107,10 +95,6 @@ class SdxImageCatalogServiceTest {
         CloudbreakImageCatalogV3 imageCatalogV3 = mock(CloudbreakImageCatalogV3.class);
         GenerateImageCatalogV4Response response = new GenerateImageCatalogV4Response(imageCatalogV3);
         when(stackV4Endpoint.generateImageCatalogInternal(WORKSPACE_ID_DEFAULT, CLUSTER_NAME, USER_CRN)).thenReturn(response);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         CloudbreakImageCatalogV3 actual = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.generateImageCatalog(CLUSTER_NAME));
 
         assertEquals(imageCatalogV3, actual);
@@ -120,8 +104,6 @@ class SdxImageCatalogServiceTest {
     void generateImageCatalogShouldThrowApiExceptionInCaseOfServiceException() {
         when(stackV4Endpoint.generateImageCatalogInternal(WORKSPACE_ID_DEFAULT, CLUSTER_NAME, USER_CRN))
                 .thenThrow(new CloudbreakServiceException(EXCEPTION_MESSAGE));
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.generateImageCatalog(CLUSTER_NAME)))
                 .isInstanceOf(CloudbreakApiException.class)
                 .hasMessage(EXCEPTION_MESSAGE);

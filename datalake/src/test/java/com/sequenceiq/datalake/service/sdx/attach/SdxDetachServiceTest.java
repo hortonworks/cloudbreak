@@ -20,8 +20,6 @@ import org.mockito.Mock;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -67,12 +65,6 @@ public class SdxDetachServiceTest {
 
     @Mock
     private StatusCheckerJobService mockJobService;
-
-    @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
     @Mock
     private EnvironmentClientService environmentClientService;
@@ -136,8 +128,6 @@ public class SdxDetachServiceTest {
     void testDetachStack() {
         testCluster.setClusterName(NEW_TEST_CLUSTER_NAME);
         testCluster.setCrn(NEW_TEST_CLUSTER_CRN);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         sdxDetachService.detachStack(testCluster, TEST_CLUSTER_NAME);
         verify(mockStackV4Endpoint).updateNameAndCrn(
                 eq(0L), eq(TEST_CLUSTER_NAME), any(), eq(NEW_TEST_CLUSTER_NAME), eq(NEW_TEST_CLUSTER_CRN), eq(true)
@@ -148,8 +138,6 @@ public class SdxDetachServiceTest {
     void testDetachStackNoStackNoError() {
         testCluster.setClusterName(NEW_TEST_CLUSTER_NAME);
         testCluster.setCrn(NEW_TEST_CLUSTER_CRN);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         doThrow(new NotFoundException("Stack not found.")).when(mockStackV4Endpoint).updateNameAndCrn(any(), any(), any(), any(), any(), eq(true));
         sdxDetachService.detachStack(testCluster, TEST_CLUSTER_NAME);
     }
@@ -158,8 +146,6 @@ public class SdxDetachServiceTest {
     void testDetachExternalDatabase() {
         testCluster.setOriginalCrn(TEST_CLUSTER_CRN);
         testCluster.setCrn(NEW_TEST_CLUSTER_CRN);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         sdxDetachService.detachExternalDatabase(testCluster);
         verify(mockRedbeamsServerEndpoint).updateClusterCrn(
                 eq(TEST_CLUSTER_ENV_CRN), eq(TEST_CLUSTER_CRN), eq(NEW_TEST_CLUSTER_CRN), any()
@@ -170,8 +156,6 @@ public class SdxDetachServiceTest {
     void testDetachExternalDatabaseNoDBNoError() {
         testCluster.setOriginalCrn(TEST_CLUSTER_CRN);
         testCluster.setCrn(NEW_TEST_CLUSTER_CRN);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         doThrow(new NotFoundException("DB not found.")).when(mockRedbeamsServerEndpoint).updateClusterCrn(any(), any(), any(), any());
         sdxDetachService.detachExternalDatabase(testCluster);
     }

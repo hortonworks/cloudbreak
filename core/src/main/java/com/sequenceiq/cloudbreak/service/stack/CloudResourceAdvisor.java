@@ -30,7 +30,6 @@ import com.google.common.io.BaseEncoding;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.DefaultClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.AutoscaleRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
@@ -97,9 +96,6 @@ public class CloudResourceAdvisor {
     private EntitlementService entitlementService;
 
     @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Inject
     private TransactionService transactionService;
 
     @Inject
@@ -118,7 +114,6 @@ public class CloudResourceAdvisor {
     public PlatformRecommendation createForBlueprintByCredCrn(Long workspaceId, String definitionName, String blueprintName, String credentialCrn,
             String region, String platformVariant, String availabilityZone, CdpResourceType cdpResourceType) {
         Credential credential = ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> credentialClientService.getByCrn(credentialCrn));
         return createForBlueprintByCred(workspaceId, definitionName, blueprintName, credential, region,
                 platformVariant, availabilityZone, cdpResourceType, null);

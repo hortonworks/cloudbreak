@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.UsedSubnetWithResourceResponse;
 import com.sequenceiq.common.api.util.ResourceTypeConverter;
@@ -37,17 +36,13 @@ public class SubnetUsageValidator {
 
     private final DatabaseServerV4Endpoint databaseServerV4Endpoint;
 
-    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     public SubnetUsageValidator(
             StackV4Endpoint stackV4Endpoint,
             FreeIpaV1Endpoint freeIpaV1Endpoint,
-            DatabaseServerV4Endpoint databaseServerV4Endpoint,
-            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+            DatabaseServerV4Endpoint databaseServerV4Endpoint) {
         this.stackV4Endpoint = stackV4Endpoint;
         this.freeIpaV1Endpoint = freeIpaV1Endpoint;
         this.databaseServerV4Endpoint = databaseServerV4Endpoint;
-        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     public void validate(Environment environment, NetworkDto network, ValidationResult.ValidationResultBuilder resultBuilder) {
@@ -74,12 +69,11 @@ public class SubnetUsageValidator {
     }
 
     private Collection<UsedSubnetWithResourceResponse> listAllUsedSubnets(String environmentCrn) {
-        String internalActor = regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString();
-        Collection<UsedSubnetWithResourceResponse> usedSubnetInCore = ThreadBasedUserCrnProvider.doAsInternalActor(internalActor,
+        Collection<UsedSubnetWithResourceResponse> usedSubnetInCore = ThreadBasedUserCrnProvider.doAsInternalActor(
                 () -> stackV4Endpoint.getUsedSubnetsByEnvironment(0L, environmentCrn).getResponses());
-        Collection<UsedSubnetWithResourceResponse> usedSubnetInFreeIpa = ThreadBasedUserCrnProvider.doAsInternalActor(internalActor,
+        Collection<UsedSubnetWithResourceResponse> usedSubnetInFreeIpa = ThreadBasedUserCrnProvider.doAsInternalActor(
                 () -> freeIpaV1Endpoint.getUsedSubnetsByEnvironment(environmentCrn).getResponses());
-        Collection<UsedSubnetWithResourceResponse> usedSubnetInRedBeams = ThreadBasedUserCrnProvider.doAsInternalActor(internalActor,
+        Collection<UsedSubnetWithResourceResponse> usedSubnetInRedBeams = ThreadBasedUserCrnProvider.doAsInternalActor(
                 () -> databaseServerV4Endpoint.getUsedSubnetsByEnvironment(environmentCrn).getResponses());
         List<UsedSubnetWithResourceResponse> allUsedSubnets = new ArrayList<>();
         allUsedSubnets.addAll(usedSubnetInCore);

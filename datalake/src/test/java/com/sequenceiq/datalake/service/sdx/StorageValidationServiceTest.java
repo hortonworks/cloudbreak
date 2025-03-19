@@ -22,8 +22,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.BackupOperationType;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -63,12 +61,6 @@ class StorageValidationServiceTest {
 
     @Mock
     private StackV4Endpoint stackV4Endpoint;
-
-    @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
     @InjectMocks
     private StorageValidationService underTest;
@@ -235,7 +227,6 @@ class StorageValidationServiceTest {
 
     @Test
     public void validateBackupStorageEnvironmentSuccess() {
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         CloudStorageRequest cloudStorageRequest = new CloudStorageRequest();
         cloudStorageRequest.setLocations(List.of(new StorageLocationBase(), new StorageLocationBase()));
         cloudStorageRequest.setIdentities(List.of(new StorageIdentityBase(), new StorageIdentityBase()));
@@ -264,7 +255,6 @@ class StorageValidationServiceTest {
 
     @Test
     public void validateBackupStorageEnvironmentSuccessWithNonDefaultLocation() {
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         CloudStorageRequest cloudStorageRequest = new CloudStorageRequest();
         cloudStorageRequest.setLocations(List.of(new StorageLocationBase(), new StorageLocationBase()));
         cloudStorageRequest.setIdentities(List.of(new StorageIdentityBase(), new StorageIdentityBase()));

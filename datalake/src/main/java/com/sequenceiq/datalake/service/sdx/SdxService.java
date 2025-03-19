@@ -107,7 +107,6 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
@@ -238,9 +237,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     private ImageCatalogService imageCatalogService;
 
     @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Inject
     private DistroXV1Endpoint distroXV1Endpoint;
 
     @Inject
@@ -335,7 +331,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         try {
             LOGGER.info("Calling cloudbreak for SDX cluster details by name {}", name);
             return ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> stackV4Endpoint.get(WORKSPACE_ID_DEFAULT, name, entries, accountId));
         } catch (jakarta.ws.rs.NotFoundException e) {
             LOGGER.info("Sdx cluster not found on CB side", e);
@@ -420,21 +415,18 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     public UpdateRecipesV4Response refreshRecipes(SdxCluster sdxCluster, UpdateRecipesV4Request request) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         return ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> stackV4Endpoint.refreshRecipesInternal(WORKSPACE_ID_DEFAULT, request, sdxCluster.getName(), userCrn));
     }
 
     public AttachRecipeV4Response attachRecipe(SdxCluster sdxCluster, AttachRecipeV4Request request) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         return ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> stackV4Endpoint.attachRecipeInternal(WORKSPACE_ID_DEFAULT, request, sdxCluster.getName(), userCrn));
     }
 
     public DetachRecipeV4Response detachRecipe(SdxCluster sdxCluster, DetachRecipeV4Request request) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         return ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> stackV4Endpoint.detachRecipeInternal(WORKSPACE_ID_DEFAULT, request, sdxCluster.getName(), userCrn));
     }
 
@@ -465,7 +457,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     public void updateRangerRazEnabled(SdxCluster sdxCluster) {
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> {
                     RangerRazEnabledV4Response response = stackV4Endpoint.rangerRazEnabledInternal(WORKSPACE_ID_DEFAULT, sdxCluster.getCrn(), initiatorUserCrn);
                     if (response.isRangerRazEnabled()) {
@@ -688,7 +679,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     private Set<String> fetchRecipesFromCore() {
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         RecipeViewV4Responses recipeResponses = ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> recipeV4Endpoint.listInternal(
                         WORKSPACE_ID_DEFAULT, initiatorUserCrn));
         return recipeResponses.getResponses()
@@ -1124,14 +1114,12 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     public FlowIdentifier sync(String name, String accountId) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> stackV4Endpoint.sync(WORKSPACE_ID_DEFAULT, name, accountId));
     }
 
     public void syncByCrn(String userCrn, String crn) {
         SdxCluster sdxCluster = getByCrn(userCrn, crn);
         ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> stackV4Endpoint.sync(WORKSPACE_ID_DEFAULT, sdxCluster.getClusterName(), Crn.fromString(crn).getAccountId()));
     }
 
@@ -1676,7 +1664,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         try {
             SdxCluster sdxCluster = getById(resourceId);
             DetailedEnvironmentResponse envResp = ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> environmentClientService.getByCrn(sdxCluster.getEnvCrn()));
             return PayloadContext.create(sdxCluster.getCrn(), envResp.getCloudPlatform());
         } catch (NotFoundException ignored) {
@@ -1754,7 +1741,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     public FlowIdentifier modifyProxyConfig(SdxCluster sdxCluster, String previousProxyConfigCrn) {
         FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 initiatorUserCrn -> stackV4Endpoint.modifyProxyConfigInternal(WORKSPACE_ID_DEFAULT, sdxCluster.getCrn(),
                         previousProxyConfigCrn, initiatorUserCrn)
         );
@@ -1804,9 +1790,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     private void validateOnCoreInternalApiWithExceptionHandling(Runnable endpointCall, String operationNameToValidate) {
         LOGGER.info("Calling Cloudbreak to validate {} is triggerable", operationNameToValidate);
         try {
-            ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                    endpointCall);
+            ThreadBasedUserCrnProvider.doAsInternalActor(endpointCall);
         } catch (jakarta.ws.rs.BadRequestException e) {
             String msg = String.format("Validation failed %s is not triggerable", operationNameToValidate);
             LOGGER.info(msg, e);
@@ -1861,7 +1845,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         try {
             LOGGER.info("Calling cloudbreak for SDX cluster details by name {}", name);
             return ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> stackV4Endpoint.getWithResources(WORKSPACE_ID_DEFAULT, name, entries, accountId));
         } catch (jakarta.ws.rs.NotFoundException e) {
             LOGGER.info("Sdx cluster not found on CB side", e);

@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.auth.altus.service.RoleCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 
 @Service
@@ -29,9 +28,6 @@ public class ClouderaManagerDatabusService {
 
     @Inject
     private AltusIAMService altusIAMService;
-
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Inject
     private RoleCrnGenerator roleCrnGenerator;
@@ -49,7 +45,6 @@ public class ClouderaManagerDatabusService {
     AltusCredential createMachineUserAndGenerateKeys(StackDtoDelegate stack, Map<String, String> resourceRoles) {
         String machineUserName = getWAMachineUserName(stack);
         return ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> altusIAMService.generateMachineUserWithAccessKeyForLegacyCm(
                         machineUserName,
                         ThreadBasedUserCrnProvider.getUserCrn(),
@@ -65,7 +60,6 @@ public class ClouderaManagerDatabusService {
         try {
             String machineUserName = getWAMachineUserName(stack);
             ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () ->  altusIAMService.clearLegacyMachineUser(machineUserName, Crn.fromString(stack.getResourceCrn()).getAccountId()));
         } catch (Exception e) {
             LOGGER.warn("Cluster Databus resource cleanup failed. It is not a fatal issue, "

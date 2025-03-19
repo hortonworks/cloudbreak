@@ -20,7 +20,6 @@ import org.springframework.stereotype.Component;
 import com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.PvcControlPlaneConfiguration;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
 import com.sequenceiq.cloudbreak.quartz.MdcQuartzJob;
 import com.sequenceiq.remotecluster.client.GrpcRemoteClusterClient;
@@ -39,9 +38,6 @@ public class PrivateControlPlaneQueryJob extends MdcQuartzJob {
 
     @Inject
     private PrivateControlPlaneService privateControlPlaneService;
-
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Override
     protected Optional<MdcContextInfoProvider> getMdcContextConfigProvider() {

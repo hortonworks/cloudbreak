@@ -33,8 +33,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.Databa
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -122,12 +120,6 @@ public class DatabaseServiceTest {
     private EntitlementService entitlementService;
 
     @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
-
-    @Mock
     private EnvironmentPlatformResourceEndpoint environmentPlatformResourceEndpoint;
 
     @Mock
@@ -185,8 +177,6 @@ public class DatabaseServiceTest {
         when(dbConfigs.get(dbConfigKey)).thenReturn(databaseConfig);
         when(databaseParameterSetterMap.get(CloudPlatform.AWS)).thenReturn(getDatabaseParameterSetter());
         when(platformConfig.isExternalDatabaseSslEnforcementSupportedFor(CloudPlatform.AWS)).thenReturn(supportedPlatform);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         SdxStatusEntity status = new SdxStatusEntity();
         status.setStatus(DatalakeStatusEnum.REQUESTED);
         when(sdxStatusService.getActualStatusForSdx(any(SdxCluster.class))).thenReturn(status);
@@ -242,8 +232,6 @@ public class DatabaseServiceTest {
 
         when(databaseServerV4Endpoint.getByCrn(DATABASE_CRN)).thenReturn(databaseServerV4Response);
         when(databaseServerV4Response.getStatus()).thenReturn(Status.AVAILABLE);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.start(cluster);
 
         verify(databaseServerV4Endpoint).start(DATABASE_CRN);
@@ -254,8 +242,6 @@ public class DatabaseServiceTest {
         SdxCluster cluster = getSdxCluster();
 
         DatabaseServerV4Response databaseServerV4Response = mock(DatabaseServerV4Response.class);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(databaseServerV4Endpoint.getByCrn(DATABASE_CRN)).thenReturn(databaseServerV4Response);
         when(databaseServerV4Response.getStatus()).thenReturn(Status.STOPPED);
 
@@ -268,8 +254,6 @@ public class DatabaseServiceTest {
     public void testGetDatabaseServerShouldReturnDatabaseServer() {
         SdxCluster cluster = getSdxCluster();
         when(sdxService.getByCrn(USER_CRN, CLUSTER_CRN)).thenReturn(cluster);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
         databaseServerV4Response.setCrn(DATABASE_CRN);
         databaseServerV4Response.setClusterCrn(CLUSTER_CRN);
@@ -392,7 +376,6 @@ public class DatabaseServiceTest {
         when(dbConfigs.get(dbConfigKeyLight)).thenReturn(databaseConfig);
         when(databaseParameterSetterMap.get(CloudPlatform.AWS)).thenReturn(getDatabaseParameterSetter());
         when(databaseServerV4Endpoint.getByCrn(DATABASE_CRN)).thenReturn(databaseServerV4Response);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
 
         DatabaseServerV4StackRequest databaseServerV4StackRequest = underTest.getDatabaseServerRequest(CloudPlatform.AWS, cluster, env,
                 "initiatorUserCrn");
@@ -427,7 +410,6 @@ public class DatabaseServiceTest {
         when(dbConfigs.get(dbConfigKeyLight)).thenReturn(databaseConfig);
         when(databaseParameterSetterMap.get(CloudPlatform.AZURE)).thenReturn(getAzureDatabaseParameterSetter());
         when(databaseServerV4Endpoint.getByCrn(DATABASE_CRN)).thenReturn(databaseServerV4Response);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
 
         DatabaseServerV4StackRequest databaseServerV4StackRequest = underTest.getDatabaseServerRequest(CloudPlatform.AZURE, cluster, env,
                 "initiatorUserCrn");
@@ -468,8 +450,6 @@ public class DatabaseServiceTest {
         when(dbConfigs.get(dbConfigKey)).thenReturn(databaseConfig);
         when(databaseParameterSetterMap.get(CloudPlatform.AWS)).thenReturn(getDatabaseParameterSetter());
         when(platformConfig.isExternalDatabaseSslEnforcementSupportedFor(CloudPlatform.AWS)).thenReturn(supportedPlatform);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         SdxStatusEntity status = new SdxStatusEntity();
         status.setStatus(DatalakeStatusEnum.REQUESTED);
         when(sdxStatusService.getActualStatusForSdx(any(SdxCluster.class))).thenReturn(status);
@@ -527,8 +507,6 @@ public class DatabaseServiceTest {
         DatabaseConfigKey dbConfigKey = new DatabaseConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY);
         when(dbConfigs.get(dbConfigKey)).thenReturn(databaseConfig);
         when(databaseParameterSetterMap.get(CloudPlatform.AWS)).thenReturn(getDatabaseParameterSetter());
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         SdxStatusEntity status = new SdxStatusEntity();
         status.setStatus(DatalakeStatusEnum.REQUESTED);
         when(sdxStatusService.getActualStatusForSdx(any(SdxCluster.class))).thenReturn(status);
@@ -580,8 +558,6 @@ public class DatabaseServiceTest {
         when(dbConfigs.get(dbConfigKey)).thenReturn(databaseConfig);
         when(databaseParameterSetterMap.get(CloudPlatform.AWS)).thenReturn(getDatabaseParameterSetter());
         when(platformConfig.isExternalDatabaseSslEnforcementSupportedFor(CloudPlatform.AWS)).thenReturn(supportedPlatform);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         SdxStatusEntity status = new SdxStatusEntity();
         status.setStatus(DatalakeStatusEnum.REQUESTED);
         when(sdxStatusService.getActualStatusForSdx(any(SdxCluster.class))).thenReturn(status);
@@ -667,8 +643,6 @@ public class DatabaseServiceTest {
         when(azureDatabaseAttributesService.getAzureDatabaseType(sdxDatabase)).thenReturn(AzureDatabaseType.SINGLE_SERVER);
         when(sdxDatabaseRepository.save(any(SdxDatabase.class))).thenReturn(sdxDatabase);
         when(databaseServerV4Endpoint.getByCrn(anyString())).thenReturn(databaseServerV4Response);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
 
         SdxDatabase result = underTest.updateDatabaseTypeFromRedbeams(sdxDatabase);
 
@@ -688,8 +662,6 @@ public class DatabaseServiceTest {
         databasePropertiesV4Response.setDatabaseType(AzureDatabaseType.FLEXIBLE_SERVER.name());
         when(azureDatabaseAttributesService.getAzureDatabaseType(sdxDatabase)).thenReturn(AzureDatabaseType.FLEXIBLE_SERVER);
         when(databaseServerV4Endpoint.getByCrn(anyString())).thenReturn(databaseServerV4Response);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
 
         SdxDatabase result = underTest.updateDatabaseTypeFromRedbeams(sdxDatabase);
 
@@ -723,8 +695,6 @@ public class DatabaseServiceTest {
         databaseServerV4Response.setDatabasePropertiesV4Response(databasePropertiesV4Response);
         databasePropertiesV4Response.setDatabaseType(null);
         when(databaseServerV4Endpoint.getByCrn(anyString())).thenReturn(databaseServerV4Response);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
 
         SdxDatabase result = underTest.updateDatabaseTypeFromRedbeams(sdxDatabase);
 
@@ -740,8 +710,6 @@ public class DatabaseServiceTest {
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
         databaseServerV4Response.setDatabasePropertiesV4Response(null);
         when(databaseServerV4Endpoint.getByCrn(anyString())).thenReturn(databaseServerV4Response);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
 
         SdxDatabase result = underTest.updateDatabaseTypeFromRedbeams(sdxDatabase);
 

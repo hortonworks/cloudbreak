@@ -25,8 +25,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.BackupOperationType;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
@@ -60,14 +58,17 @@ public class CloudStorageValidatorTest {
     @Mock
     private CloudProviderServicesV4Endopint cloudProviderServicesV4Endpoint;
 
-    @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
-
     @InjectMocks
     private CloudStorageValidator underTest;
+
+    static Stream<Arguments> parameterScenarios() {
+        return Stream.of(
+                Arguments.of("7.2.15", false),
+                Arguments.of("7.2.16", false),
+                Arguments.of("7.2.17", true),
+                Arguments.of("7.2.18", true)
+        );
+    }
 
     @Test
     public void validateEnvironmentRequestCloudStorageValidationDisabled() {
@@ -99,8 +100,6 @@ public class CloudStorageValidatorTest {
     public void validateEnvironmentRequestCloudStorageValidation() {
         when(environment.getCloudStorageValidation()).thenReturn(CloudStorageValidation.ENABLED);
         when(environment.getCredential()).thenReturn(new CredentialResponse());
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(credentialResponseToCloudCredentialConverter.convert(any())).thenReturn(
                 new CloudCredential("id", "name", Map.of("secretKey", "thisshouldnotappearinlog"), "acc"));
         when(entitlementService.cloudStorageValidationEnabled(any())).thenReturn(true);
@@ -114,8 +113,6 @@ public class CloudStorageValidatorTest {
     public void validateBackupLocation() {
         when(environment.getCredential()).thenReturn(new CredentialResponse());
         when(environment.getBackupLocation()).thenReturn(BACKUP_LOCATION);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(credentialResponseToCloudCredentialConverter.convert(any())).thenReturn(
                 new CloudCredential("id", "name", Map.of("secretKey", "thisshouldnotappearinlog"), "acc"));
 
@@ -130,8 +127,6 @@ public class CloudStorageValidatorTest {
     public void validateCustomBackupLocation() {
         ArgumentCaptor<ObjectStorageValidateRequest> captor = ArgumentCaptor.forClass(ObjectStorageValidateRequest.class);
         when(environment.getCredential()).thenReturn(new CredentialResponse());
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(credentialResponseToCloudCredentialConverter.convert(any())).thenReturn(
                 new CloudCredential("id", "name", Map.of("secretKey", "thisshouldnotappearinlog"), "acc"));
 
@@ -150,8 +145,6 @@ public class CloudStorageValidatorTest {
         when(environment.getCredential()).thenReturn(new CredentialResponse());
         when(environment.getCloudPlatform()).thenReturn("AWS");
         when(environment.getBackupLocation()).thenReturn(BACKUP_LOCATION);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(credentialResponseToCloudCredentialConverter.convert(any())).thenReturn(
                 new CloudCredential("id", "name", Map.of("secretKey", "thisshouldnotappearinlog"), "acc"));
 
@@ -177,8 +170,6 @@ public class CloudStorageValidatorTest {
         ArgumentCaptor<ObjectStorageValidateRequest> captor = ArgumentCaptor.forClass(ObjectStorageValidateRequest.class);
         when(environment.getCredential()).thenReturn(new CredentialResponse());
         when(environment.getCloudPlatform()).thenReturn("AWS");
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(credentialResponseToCloudCredentialConverter.convert(any())).thenReturn(
                 new CloudCredential("id", "name", Map.of("secretKey", "thisshouldnotappearinlog"), "acc"));
 
@@ -200,15 +191,6 @@ public class CloudStorageValidatorTest {
         assertEquals("dummy failure", validationResultBuilderforFailure.build().getFormattedErrors());
     }
 
-    static Stream<Arguments> parameterScenarios() {
-        return Stream.of(
-                Arguments.of("7.2.15", false),
-                Arguments.of("7.2.16", false),
-                Arguments.of("7.2.17", true),
-                Arguments.of("7.2.18", true)
-        );
-    }
-
     @ParameterizedTest(name = "runtime = {0}, skipLogRoleValidationforBackup = {1}")
     @MethodSource("parameterScenarios")
     public void validateSkipLogRoleValidationforBackup(String runtime, boolean skipLogRoleValidationforBackup) {
@@ -216,8 +198,6 @@ public class CloudStorageValidatorTest {
         when(objectStorageValidateResponse.getStatus()).thenReturn(ResponseStatus.OK);
         when(environment.getCredential()).thenReturn(new CredentialResponse());
         when(environment.getBackupLocation()).thenReturn(BACKUP_LOCATION);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(credentialResponseToCloudCredentialConverter.convert(any())).thenReturn(
                 new CloudCredential("id", "name", Map.of("secretKey", "thisshouldnotappearinlog"), "acc"));
 

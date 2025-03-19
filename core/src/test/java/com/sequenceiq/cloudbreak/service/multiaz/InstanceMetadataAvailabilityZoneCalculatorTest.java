@@ -41,7 +41,6 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.AvailabilityZoneConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
@@ -92,9 +91,6 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
-
-    @Mock
     private EnvironmentClientService environmentClientService;
 
     @Captor
@@ -107,6 +103,32 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
     static void beforeAll() {
         Logger rootLogger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         rootLogger.setLevel(Level.DEBUG);
+    }
+
+    // @formatter:off
+    // CHECKSTYLE:OFF
+    static Object[][] testAvailabilityZoneDistributionForWholeInstanceGroupData() {
+        return new Object[][]{
+                //instanceCountByGroup, groupLevelZones,        expectedInstanceCountByAz
+                {17,                   Set.of("1"),            Map.of("1", 17, "2", 0, "3", 0)},
+                {17,                   Set.of("2", "3"),       Map.of("1", 0, "2", 9, "3", 8)},
+                {19,                   Set.of("1", "2", "3"),  Map.of("1", 7, "2", 6, "3", 6)},
+                {37,                   Set.of("1", "2", "3"),  Map.of("1", 13, "2", 12, "3", 12)},
+                {41,                   Set.of("1", "2", "3"),  Map.of("1", 14, "2", 14, "3", 13)},
+        };
+    }
+
+    // @formatter:off
+    // CHECKSTYLE:OFF
+    static Object[][] testAvailabilityZoneDistributionForAwsInstanceGroupData() {
+        return new Object[][]{
+                //instanceCountByGroup, groupLevelZones,        expectedInstanceCountByAz,  expectedInstanceCountBySubnet
+                {17,                   Set.of("eu-central-1a"),            Map.of("eu-central-1a", 17, "eu-central-1b", 0, "eu-central-1c", 0), Map.of("subnet1", 17, "subnet2", 0, "subnet3", 0)},
+                {17,                   Set.of("eu-central-1b", "eu-central-1c"),       Map.of("eu-central-1a", 0, "eu-central-1b", 8, "eu-central-1c", 9), Map.of("subnet1", 0, "subnet2", 8, "subnet3", 9)},
+                {19,                   Set.of("eu-central-1a", "eu-central-1b", "eu-central-1c"),  Map.of("eu-central-1a", 7, "eu-central-1b", 6, "eu-central-1c", 6), Map.of("subnet1", 7, "subnet2", 6, "subnet3", 6)},
+                {37,                   Set.of("eu-central-1a", "eu-central-1b", "eu-central-1c"),  Map.of("eu-central-1a", 13, "eu-central-1b", 12, "eu-central-1c", 12), Map.of("subnet1", 13, "subnet2", 12, "subnet3", 12)},
+                {41,                   Set.of("eu-central-1a", "eu-central-1b", "eu-central-1c"),  Map.of("eu-central-1a", 14, "eu-central-1b", 13, "eu-central-1c", 14), Map.of("subnet1", 14, "subnet2", 13, "subnet3", 14)},
+        };
     }
 
     @Test
@@ -180,6 +202,8 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
         assertTrue(instancesExpectedToBeUpdated.stream()
                 .allMatch(im -> ("/" + im.getAvailabilityZone()).equals(im.getRackId())));
     }
+    // CHECKSTYLE:ON
+    // @formatter:on
 
     @Test
     void testPopulateWhenTheStackIsMultiAzEnabledAndAzConfiguredOnGroupNetworkAndTheInstanceLevelAlreadyShouldNotTouchAzSettings() {
@@ -206,21 +230,6 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
         verifyNoInteractions(instanceMetaDataService);
         stack.getNotTerminatedInstanceMetaDataSet().forEach(instance -> assertEquals("1", instance.getAvailabilityZone()));
     }
-
-    // @formatter:off
-    // CHECKSTYLE:OFF
-    static Object[][] testAvailabilityZoneDistributionForWholeInstanceGroupData() {
-        return new Object[][]{
-                //instanceCountByGroup, groupLevelZones,        expectedInstanceCountByAz
-                {17,                   Set.of("1"),            Map.of("1", 17, "2", 0, "3", 0)},
-                {17,                   Set.of("2", "3"),       Map.of("1", 0, "2", 9, "3", 8)},
-                {19,                   Set.of("1", "2", "3"),  Map.of("1", 7, "2", 6, "3", 6)},
-                {37,                   Set.of("1", "2", "3"),  Map.of("1", 13, "2", 12, "3", 12)},
-                {41,                   Set.of("1", "2", "3"),  Map.of("1", 14, "2", 14, "3", 13)},
-        };
-    }
-    // CHECKSTYLE:ON
-    // @formatter:on
 
     @ParameterizedTest(name = "testPopulateShouldDistributeNodesAcrossInstancesOfTheGroup settings " +
             "when {0} environment level zones and {1} instances count and {2} group level zones should result in {3} subnet counts")
@@ -258,19 +267,6 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
             }
         }
     }
-
-    // @formatter:off
-    // CHECKSTYLE:OFF
-    static Object[][] testAvailabilityZoneDistributionForAwsInstanceGroupData() {
-        return new Object[][]{
-                //instanceCountByGroup, groupLevelZones,        expectedInstanceCountByAz,  expectedInstanceCountBySubnet
-                {17,                   Set.of("eu-central-1a"),            Map.of("eu-central-1a", 17, "eu-central-1b", 0, "eu-central-1c", 0), Map.of("subnet1", 17, "subnet2", 0, "subnet3", 0)},
-                {17,                   Set.of("eu-central-1b", "eu-central-1c"),       Map.of("eu-central-1a", 0, "eu-central-1b", 8, "eu-central-1c", 9), Map.of("subnet1", 0, "subnet2", 8, "subnet3", 9)},
-                {19,                   Set.of("eu-central-1a", "eu-central-1b", "eu-central-1c"),  Map.of("eu-central-1a", 7, "eu-central-1b", 6, "eu-central-1c", 6), Map.of("subnet1", 7, "subnet2", 6, "subnet3", 6)},
-                {37,                   Set.of("eu-central-1a", "eu-central-1b", "eu-central-1c"),  Map.of("eu-central-1a", 13, "eu-central-1b", 12, "eu-central-1c", 12), Map.of("subnet1", 13, "subnet2", 12, "subnet3", 12)},
-                {41,                   Set.of("eu-central-1a", "eu-central-1b", "eu-central-1c"),  Map.of("eu-central-1a", 14, "eu-central-1b", 13, "eu-central-1c", 14), Map.of("subnet1", 14, "subnet2", 13, "subnet3", 14)},
-        };
-    }
     // CHECKSTYLE:ON
     // @formatter:on
 
@@ -292,8 +288,6 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
         instanceGroupNetwork.setAttributes(new Json("{\"subnetIds\":[\"subnet1\",\"subnet2\",\"subnet3\"]}"));
         stack.getInstanceGroups().forEach(ig -> ig.setInstanceGroupNetwork(instanceGroupNetwork));
         when(stackService.getByIdWithLists(anyLong())).thenReturn(stack);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environmentResponse);
         when(environmentResponse.getNetwork()).thenReturn(environmentNetworkResponse);
         when(environmentNetworkResponse.getSubnetMetas())

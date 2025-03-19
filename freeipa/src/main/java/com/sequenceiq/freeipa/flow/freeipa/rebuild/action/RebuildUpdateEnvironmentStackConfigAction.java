@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
@@ -23,9 +22,6 @@ import com.sequenceiq.freeipa.flow.stack.StackEvent;
 @Component("RebuildUpdateEnvironmentStackConfigAction")
 public class RebuildUpdateEnvironmentStackConfigAction extends AbstractRebuildAction<StackEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(RebuildUpdateEnvironmentStackConfigAction.class);
-
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Inject
     private EnvironmentEndpoint environmentEndpoint;
@@ -42,10 +38,7 @@ public class RebuildUpdateEnvironmentStackConfigAction extends AbstractRebuildAc
         stackUpdater().updateStackStatus(context.getStack(), DetailedStackStatus.REBUILD_IN_PROGRESS, "Updating clusters' configuration");
         try {
             ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                    () -> {
-                        environmentEndpoint.updateConfigsInEnvironmentByCrn(context.getStack().getEnvironmentCrn());
-                    });
+                    () -> environmentEndpoint.updateConfigsInEnvironmentByCrn(context.getStack().getEnvironmentCrn()));
             sendEvent(context, new StackEvent(UPDATE_ENVIRONMENT_STACK_CONFIG_FINISHED_EVENT.event(), payload.getResourceId()));
         } catch (ClientErrorException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);

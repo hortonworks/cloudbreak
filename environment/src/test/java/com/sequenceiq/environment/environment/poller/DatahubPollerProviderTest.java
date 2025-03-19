@@ -33,8 +33,6 @@ import com.dyngr.core.AttemptState;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.environment.environment.service.datahub.DatahubService;
 import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
@@ -58,14 +56,45 @@ class DatahubPollerProviderTest {
     @Spy
     private FlowResultPollerEvaluator flowResultPollerEvaluator;
 
-    @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
-
     @InjectMocks
     private DatahubPollerProvider underTest;
+
+    private static Stream<Arguments> distroxStopStatuses() {
+        return Stream.of(
+                Arguments.of(STOPPED, STOPPED, STOPPED, STOPPED, AttemptState.FINISH, "", Collections.emptyList()),
+                Arguments.of(STOPPED, STOP_IN_PROGRESS, STOPPED, STOPPED, AttemptState.CONTINUE, "", List.of("crn1")),
+                Arguments.of(STOP_IN_PROGRESS, STOPPED, STOPPED, STOPPED, AttemptState.CONTINUE, "", List.of("crn1")),
+                Arguments.of(STOPPED, STOP_FAILED, STOPPED, STOPPED, AttemptState.BREAK, "Datahub cluster stop failed 'crn1', cluster reason",
+                        List.of("crn1")),
+                Arguments.of(STOP_FAILED, STOPPED, STOPPED, STOPPED, AttemptState.BREAK, "Datahub stack stop failed 'crn1', reason", List.of("crn1"))
+        );
+    }
+
+    private static Stream<Arguments> distroxStartStatuses() {
+        return Stream.of(
+                Arguments.of(AVAILABLE, AVAILABLE, AVAILABLE, AVAILABLE, AttemptState.FINISH, "", emptyList()),
+                Arguments.of(AVAILABLE, UPDATE_IN_PROGRESS, AVAILABLE, AVAILABLE, AttemptState.CONTINUE, "", List.of("crn1")),
+                Arguments.of(UPDATE_IN_PROGRESS, AVAILABLE, AVAILABLE, AVAILABLE, AttemptState.CONTINUE, "", List.of("crn1")),
+                Arguments.of(AVAILABLE, START_FAILED, AVAILABLE, AVAILABLE, AttemptState.BREAK, "Datahub cluster start failed 'crn1', cluster reason",
+                        List.of("crn1")),
+                Arguments.of(START_FAILED, AVAILABLE, AVAILABLE, AVAILABLE, AttemptState.BREAK, "Datahub stack start failed 'crn1', reason", List.of("crn1"))
+        );
+    }
+
+    // @formatter:off
+    // CHECKSTYLE:OFF
+    public static Object[][] upgradeCcmPollerScenarios() {
+        return new Object[][] {
+                // testName                     flow1Active flow1Failed flow2Active flow2Result AttemptState
+                { "Flow1 and Flow2 finished",   false,      false,      false,      false,      AttemptState.FINISH },
+                { "Flow1 active",               true,       false,      false,      false,      AttemptState.CONTINUE },
+                { "Flow1 failed",               false,      true,       false,      false,      AttemptState.FINISH },
+                { "Flow2 active",               false,      false,      true,       false,      AttemptState.CONTINUE },
+                { "Flow2 failed",               false,      false,      false,      true,       AttemptState.FINISH },
+                { "Flow1 and Flow2 active",     true,       false,      true,       false,      AttemptState.CONTINUE },
+                { "Flow1 and Flow2 failed",     false,      true,       false,      true,       AttemptState.FINISH },
+        };
+    }
 
     @Test
     void testStopPollerWhenPollerCrnIsEmpty() throws Exception {
@@ -114,8 +143,6 @@ class DatahubPollerProviderTest {
     @MethodSource("upgradeCcmPollerScenarios")
     void testUpgradeCcmPoller(String testName, boolean flow1Active, boolean flow1Failed, boolean flow2Active, boolean flow2Failed, AttemptState expectedResult)
             throws Exception {
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-
         FlowIdentifier flowId1 = createFlowIdentifier();
         FlowIdentifier flowId2 = createFlowIdentifier();
         FlowCheckResponse checkResponse1 = createFlowCheckResponse(flowId1, flow1Active, flow1Failed);
@@ -140,28 +167,6 @@ class DatahubPollerProviderTest {
         return checkResponse;
     }
 
-    private static Stream<Arguments> distroxStopStatuses() {
-        return Stream.of(
-                Arguments.of(STOPPED, STOPPED, STOPPED, STOPPED, AttemptState.FINISH, "", Collections.emptyList()),
-                Arguments.of(STOPPED, STOP_IN_PROGRESS, STOPPED, STOPPED, AttemptState.CONTINUE, "", List.of("crn1")),
-                Arguments.of(STOP_IN_PROGRESS, STOPPED, STOPPED, STOPPED, AttemptState.CONTINUE, "", List.of("crn1")),
-                Arguments.of(STOPPED, STOP_FAILED, STOPPED, STOPPED, AttemptState.BREAK, "Datahub cluster stop failed 'crn1', cluster reason",
-                        List.of("crn1")),
-                Arguments.of(STOP_FAILED, STOPPED, STOPPED, STOPPED, AttemptState.BREAK, "Datahub stack stop failed 'crn1', reason", List.of("crn1"))
-        );
-    }
-
-    private static Stream<Arguments> distroxStartStatuses() {
-        return Stream.of(
-                Arguments.of(AVAILABLE, AVAILABLE, AVAILABLE, AVAILABLE, AttemptState.FINISH, "", emptyList()),
-                Arguments.of(AVAILABLE, UPDATE_IN_PROGRESS, AVAILABLE, AVAILABLE, AttemptState.CONTINUE, "", List.of("crn1")),
-                Arguments.of(UPDATE_IN_PROGRESS, AVAILABLE, AVAILABLE, AVAILABLE, AttemptState.CONTINUE, "", List.of("crn1")),
-                Arguments.of(AVAILABLE, START_FAILED, AVAILABLE, AVAILABLE, AttemptState.BREAK, "Datahub cluster start failed 'crn1', cluster reason",
-                        List.of("crn1")),
-                Arguments.of(START_FAILED, AVAILABLE, AVAILABLE, AVAILABLE, AttemptState.BREAK, "Datahub stack start failed 'crn1', reason", List.of("crn1"))
-        );
-    }
-
     private StackV4Response getStackV4Response(Status status, Status clusterStatus, String crn) {
         StackV4Response stack1 = new StackV4Response();
         stack1.setStatus(status);
@@ -174,21 +179,6 @@ class DatahubPollerProviderTest {
         stack1.setCrn(crn);
         stack1.setStatusReason("reason");
         return stack1;
-    }
-
-    // @formatter:off
-    // CHECKSTYLE:OFF
-    public static Object[][] upgradeCcmPollerScenarios() {
-        return new Object[][] {
-                // testName                     flow1Active flow1Failed flow2Active flow2Result AttemptState
-                { "Flow1 and Flow2 finished",   false,      false,      false,      false,      AttemptState.FINISH },
-                { "Flow1 active",               true,       false,      false,      false,      AttemptState.CONTINUE },
-                { "Flow1 failed",               false,      true,       false,      false,      AttemptState.FINISH },
-                { "Flow2 active",               false,      false,      true,       false,      AttemptState.CONTINUE },
-                { "Flow2 failed",               false,      false,      false,      true,       AttemptState.FINISH },
-                { "Flow1 and Flow2 active",     true,       false,      true,       false,      AttemptState.CONTINUE },
-                { "Flow1 and Flow2 failed",     false,      true,       false,      true,       AttemptState.FINISH },
-        };
     }
     // CHECKSTYLE:ON
     // @formatter:on

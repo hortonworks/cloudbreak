@@ -137,7 +137,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     public void syncAStack(Stack stack, boolean updateStatusFromFlow) {
         try {
             checkedMeasure(() -> {
-                ThreadBasedUserCrnProvider.doAsInternalActor(internalCrnModifier.getInternalCrnWithAccountId(stack.getAccountId()), () -> {
+                ThreadBasedUserCrnProvider.doAs(internalCrnModifier.getInternalCrnWithAccountId(stack.getAccountId()), () -> {
                     Set<InstanceMetaData> notTerminatedForStack = stack.getAllInstanceMetaDataList().stream()
                             .filter(Predicate.not(InstanceMetaData::isTerminated))
                             .collect(Collectors.toSet());

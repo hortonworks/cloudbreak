@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.StackCcmUpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -66,9 +65,6 @@ public class SdxCcmUpgradeService {
     @Inject
     private CloudbreakFlowService cloudbreakFlowService;
 
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     public SdxCcmUpgradeResponse upgradeCcm(String environmentCrn) {
         checkEnvironment(environmentCrn);
         Optional<SdxCluster> sdxClusterOpt = getSdxCluster(environmentCrn);
@@ -92,8 +88,7 @@ public class SdxCcmUpgradeService {
         LOGGER.debug("Initiating CCM upgrade on stack CRN {} for datalake {}", stackCrn, sdxCluster.getName());
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         StackCcmUpgradeV4Response upgradeResponse =
-                ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                        () -> stackV4Endpoint.upgradeCcmByCrnInternal(0L, stackCrn, initiatorUserCrn));
+                ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackV4Endpoint.upgradeCcmByCrnInternal(0L, stackCrn, initiatorUserCrn));
         cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, upgradeResponse.getFlowIdentifier());
         LOGGER.debug("Waiting for CCM upgrade on stack CRN {} for datalake {}", stackCrn, sdxCluster.getName());
         cloudbreakPoller.pollCcmUpgradeUntilAvailable(sdxCluster, pollingConfig);

@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxInternalEndpoint;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
@@ -28,9 +27,6 @@ public class SdxClientService {
     @Inject
     private SdxInternalEndpoint internalEndpoint;
 
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     public List<SdxClusterResponse> getByEnvironmentCrn(String environmentCrn) {
         try {
             return sdxEndpoint.getByEnvCrn(environmentCrn, false);
@@ -41,12 +37,12 @@ public class SdxClientService {
     }
 
     public SdxClusterResponse getByCrnInternal(String crn) {
-        return ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
                 () -> sdxEndpoint.getByCrn(crn));
     }
 
     public void updateDatabaseEngineVersion(String crn, String databaseEngineVersion) {
-        ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+        ThreadBasedUserCrnProvider.doAsInternalActor(
                 () -> internalEndpoint.updateDbEngineVersion(crn, databaseEngineVersion));
     }
 }

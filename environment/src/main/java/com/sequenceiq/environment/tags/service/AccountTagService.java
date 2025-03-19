@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -35,20 +34,16 @@ public class AccountTagService {
 
     private final RegionAwareCrnGenerator regionAwareCrnGenerator;
 
-    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     public AccountTagService(AccountTagRepository accountTagRepository, CostTagging costTagging, EntitlementService entitlementService,
-            RegionAwareCrnGenerator regionAwareCrnGenerator, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+            RegionAwareCrnGenerator regionAwareCrnGenerator) {
         this.accountTagRepository = accountTagRepository;
         this.costTagging = costTagging;
         this.entitlementService = entitlementService;
         this.regionAwareCrnGenerator = regionAwareCrnGenerator;
-        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     public Set<AccountTag> get(String accountId) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> accountTagRepository.findAllInAccount(accountId));
     }
 

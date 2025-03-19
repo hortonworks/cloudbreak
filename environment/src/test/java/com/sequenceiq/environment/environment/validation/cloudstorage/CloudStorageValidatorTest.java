@@ -17,8 +17,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
@@ -43,12 +41,6 @@ public class CloudStorageValidatorTest {
     private CloudProviderServicesV4Endopint cloudProviderServicesV4Endpoint;
 
     @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
-
-    @Mock
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
     @InjectMocks
@@ -57,8 +49,6 @@ public class CloudStorageValidatorTest {
     @Test
     public void validateCloudStorageSkipLocationBaseWhenLoggingIsNotConfigured() {
         when(credentialService.getByCrnForAccountId(anyString(), anyString(), any(), anyBoolean())).thenReturn(new Credential());
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         EnvironmentCloudStorageValidationRequest request = new EnvironmentCloudStorageValidationRequest();
         request.setCredentialCrn("credential");
         ArgumentCaptor<ObjectStorageValidateRequest> requestCaptor = ArgumentCaptor.forClass(ObjectStorageValidateRequest.class);
@@ -75,8 +65,6 @@ public class CloudStorageValidatorTest {
     @Test
     public void validateCloudStorageSetLocationBaseWhenLoggingIsConfigured() {
         when(credentialService.getByCrnForAccountId(anyString(), anyString(), any(), anyBoolean())).thenReturn(new Credential());
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         EnvironmentCloudStorageValidationRequest request = new EnvironmentCloudStorageValidationRequest();
         TelemetryRequest telemetryRequest = new TelemetryRequest();
         LoggingRequest loggingRequest = new LoggingRequest();

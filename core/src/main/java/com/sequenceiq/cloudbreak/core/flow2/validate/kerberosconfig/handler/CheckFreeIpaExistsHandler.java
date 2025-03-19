@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.config.KerberosConfigValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.event.CheckFreeIpaExistsEvent;
@@ -35,9 +34,6 @@ public class CheckFreeIpaExistsHandler extends ExceptionCatcherEventHandler<Chec
     @Inject
     @Qualifier("stackViewServiceDeprecated")
     private StackViewService stackViewService;
-
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Override
     public String selector() {
@@ -65,7 +61,6 @@ public class CheckFreeIpaExistsHandler extends ExceptionCatcherEventHandler<Chec
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         try {
             ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> freeIpaV1Endpoint.describeInternal(stack.getEnvironmentCrn(), accountId));
             LOGGER.info("FreeIPA exists for env [{}] in account [{}]", stack.getEnvironmentCrn(), accountId);
             return true;

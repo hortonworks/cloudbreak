@@ -26,8 +26,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CertificatesRotationV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -65,12 +63,6 @@ class CertRotationServiceTest {
     @Mock
     private CloudbreakPoller statusChecker;
 
-    @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
-
     @InjectMocks
     private CertRotationService underTest;
 
@@ -98,8 +90,6 @@ class CertRotationServiceTest {
         CertificatesRotationV4Request request = new CertificatesRotationV4Request();
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setClusterName("testclustername");
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(sdxService.getById(1L)).thenReturn(sdxCluster);
         CertificatesRotationV4Response response = new CertificatesRotationV4Response();
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "pollid");
@@ -117,8 +107,6 @@ class CertRotationServiceTest {
         CertificatesRotationV4Request request = new CertificatesRotationV4Request();
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setClusterName("testclustername");
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(sdxService.getById(1L)).thenReturn(sdxCluster);
         when(stackV4Endpoint.rotateAutoTlsCertificates(0L, sdxCluster.getClusterName(), TEST_USER_CRN, request)).thenThrow(new WebApplicationException("asdf"));
 

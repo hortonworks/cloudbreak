@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentDatabaseServerCertificateStatusV4Request;
 import com.sequenceiq.environment.exception.RedbeamsOperationFailedException;
@@ -24,14 +23,10 @@ public class RedBeamsService {
 
     private final WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
-    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     public RedBeamsService(DatabaseServerV4Endpoint databaseServerV4Endpoint,
-            WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor,
-            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+            WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor) {
         this.databaseServerV4Endpoint = databaseServerV4Endpoint;
         this.webApplicationExceptionMessageExtractor = webApplicationExceptionMessageExtractor;
-        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     public DatabaseServerCertificateStatusV4Responses
@@ -40,7 +35,6 @@ public class RedBeamsService {
             DatabaseServerCertificateStatusV4Request databaseServerCertificateStatusV4Request = new DatabaseServerCertificateStatusV4Request();
             databaseServerCertificateStatusV4Request.setEnvironmentCrns(request.getEnvironmentCrns());
             return ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> databaseServerV4Endpoint.listDatabaseServersCertificateStatus(databaseServerCertificateStatusV4Request, userCrn));
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);

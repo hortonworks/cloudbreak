@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.sdx.CloudbreakPoller;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
@@ -36,9 +35,6 @@ public class SdxAttachDetachUtils {
     private DatabaseServerV4Endpoint redbeamsServerEndpoint;
 
     @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Inject
     private CloudbreakPoller cloudbreakPoller;
 
     public void updateClusterNameAndCrn(SdxCluster sdxCluster, String newName, String newCrn) {
@@ -51,8 +47,7 @@ public class SdxAttachDetachUtils {
     public void updateStack(String originalName, String newName, String newCrn, boolean retainOriginalName) {
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         ThreadBasedUserCrnProvider.doAsInternalActor(
-            regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-            () -> {
+                () -> {
                 try {
                     stackV4Endpoint.updateNameAndCrn(
                             0L, originalName, initiatorUserCrn, newName, newCrn, retainOriginalName
@@ -68,7 +63,6 @@ public class SdxAttachDetachUtils {
     public void updateExternalDatabase(SdxCluster cluster, String originalCrn) {
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> {
                     try {
                         redbeamsServerEndpoint.updateClusterCrn(
@@ -86,7 +80,6 @@ public class SdxAttachDetachUtils {
         LOGGER.info("Attempting to re-register the cluster proxy config for SDX cluster with ID: {}", cluster.getId());
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> stackV4Endpoint.reRegisterClusterProxyConfig(0L, cluster.getCrn(), skipFullReRegistration, originalCrn, initiatorUserCrn)
         );
         PollingConfig pollingConfig = new PollingConfig(

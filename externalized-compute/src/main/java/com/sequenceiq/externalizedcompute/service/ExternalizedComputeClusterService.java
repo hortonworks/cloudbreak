@@ -232,7 +232,6 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
         try {
             ExternalizedComputeCluster externalizedComputeCluster = getExternalizedComputeCluster(resourceId);
             DetailedEnvironmentResponse envResp = ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> environmentEndpoint.getByCrn(externalizedComputeCluster.getEnvironmentCrn()));
             return PayloadContext.create(externalizedComputeCluster.getResourceCrn(), envResp.getCrn(), envResp.getCloudPlatform());
         } catch (NotFoundException exception) {

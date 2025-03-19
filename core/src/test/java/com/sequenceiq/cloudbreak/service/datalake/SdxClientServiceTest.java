@@ -3,8 +3,6 @@ package com.sequenceiq.cloudbreak.service.datalake;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -12,15 +10,12 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxInternalEndpoint;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
@@ -36,18 +31,8 @@ public class SdxClientServiceTest {
     @Mock
     private SdxInternalEndpoint internalEndpoint;
 
-    @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     @InjectMocks
     private SdxClientService sdxClientService;
-
-    @BeforeEach
-    public void setUp() {
-        RegionAwareInternalCrnGenerator crnGenerator = mock(RegionAwareInternalCrnGenerator.class);
-        lenient().when(crnGenerator.getInternalCrnForServiceAsString()).thenReturn("internalCrn");
-        lenient().when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(crnGenerator);
-    }
 
     @Test
     public void testGetByEnvironmentCrn() {
@@ -71,7 +56,6 @@ public class SdxClientServiceTest {
 
         assertEquals(cluster, result);
         verify(sdxEndpoint, times(1)).getByCrn(CRN);
-        verify(regionAwareInternalCrnGeneratorFactory.iam(), times(1)).getInternalCrnForServiceAsString();
     }
 
     @Test
@@ -81,6 +65,5 @@ public class SdxClientServiceTest {
         sdxClientService.updateDatabaseEngineVersion(CRN, databaseEngineVersion);
 
         verify(internalEndpoint, times(1)).updateDbEngineVersion(CRN, databaseEngineVersion);
-        verify(regionAwareInternalCrnGeneratorFactory.iam(), times(1)).getInternalCrnForServiceAsString();
     }
 }

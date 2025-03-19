@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
@@ -52,9 +51,6 @@ public class CloudbreakFlowRetryService {
     private FlowRetryService flowRetryService;
 
     @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Inject
     private CloudbreakEventService eventService;
 
     @Inject
@@ -74,7 +70,6 @@ public class CloudbreakFlowRetryService {
             if (StringUtils.isNotEmpty(clusterView.getDatabaseServerCrn())) {
                 try {
                     ThreadBasedUserCrnProvider.doAsInternalActor(
-                            regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                             () -> databaseServerV4Endpoint.retry(clusterView.getDatabaseServerCrn()));
                 } catch (BadRequestException e) {
                     LOGGER.info("Cloudbreak retry failed on redbeams side, but try to restart the flow. Related exception: ", e);

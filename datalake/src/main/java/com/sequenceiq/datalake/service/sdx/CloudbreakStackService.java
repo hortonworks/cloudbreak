@@ -15,7 +15,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.imdupdate.StackI
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.RdsUpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.imdupdate.InstanceMetadataUpdateType;
@@ -32,9 +31,6 @@ public class CloudbreakStackService {
     private static final long WORKSPACE_ID = 0L;
 
     @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Inject
     private StackV4Endpoint stackV4Endpoint;
 
     @Inject
@@ -46,7 +42,6 @@ public class CloudbreakStackService {
     public StackV4Response getStack(SdxCluster cluster) {
         try {
             return ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> stackV4Endpoint.get(WORKSPACE_ID, cluster.getClusterName(), Set.of(), cluster.getAccountId()));
         } catch (WebApplicationException e) {
             String exceptionMessage = exceptionMessageExtractor.getErrorMessage(e);
@@ -58,7 +53,7 @@ public class CloudbreakStackService {
     public void checkUpgradeRdsByClusterNameInternal(SdxCluster sdxCluster, TargetMajorVersion targetMajorVersion) {
         try {
             String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
-            ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+            ThreadBasedUserCrnProvider.doAsInternalActor(
                     () -> stackV4Endpoint.checkUpgradeRdsByClusterNameInternal(WORKSPACE_ID, sdxCluster.getClusterName(), targetMajorVersion,
                             initiatorUserCrn));
         } catch (RuntimeException e) {
@@ -73,7 +68,7 @@ public class CloudbreakStackService {
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         try {
             RdsUpgradeV4Response upgradeResponse =
-                    ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    ThreadBasedUserCrnProvider.doAsInternalActor(
                             () -> stackV4Endpoint.upgradeRdsByClusterNameInternal(WORKSPACE_ID, sdxCluster.getClusterName(), targetMajorVersion,
                                     initiatorUserCrn, forced));
             LOGGER.debug("Launching database server upgrade in core returned: {}", upgradeResponse);
@@ -89,7 +84,6 @@ public class CloudbreakStackService {
     public void updateSaltByName(SdxCluster sdxCluster) {
         try {
             FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> stackV4Endpoint.updateSaltByName(WORKSPACE_ID, sdxCluster.getClusterName(), sdxCluster.getAccountId()));
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
         } catch (WebApplicationException e) {
@@ -106,7 +100,6 @@ public class CloudbreakStackService {
             request.setCrn(sdxCluster.getCrn());
             request.setUpdateType(updateType);
             FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> stackV4Endpoint.instanceMetadataUpdate(WORKSPACE_ID, userCrn, request));
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
         } catch (WebApplicationException e) {
@@ -125,7 +118,6 @@ public class CloudbreakStackService {
             setDefaultJavaVersionRequest.setRollingRestart(rollingRestart);
             String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
             FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> stackV4Endpoint.setDefaultJavaVersionByCrnInternal(WORKSPACE_ID, sdxCluster.getCrn(),
                             setDefaultJavaVersionRequest, initiatorUserCrn));
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);

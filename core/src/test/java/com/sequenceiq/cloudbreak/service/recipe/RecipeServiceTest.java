@@ -32,7 +32,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -41,7 +40,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -109,9 +107,6 @@ public class RecipeServiceTest {
     @Mock
     private RecipeUsageService recipeUsageService;
 
-    @Spy
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     @BeforeEach
     public void setUp() throws TransactionExecutionException {
         lenient().when(clock.getCurrentTimeMillis()).thenReturn(659602800L);
@@ -119,8 +114,6 @@ public class RecipeServiceTest {
         lenient().doNothing().when(ownerAssignmentService).assignResourceOwnerRoleIfEntitled(anyString(), anyString());
         lenient().doNothing().when(ownerAssignmentService).notifyResourceDeleted(anyString());
         CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
-        regionAwareInternalCrnGeneratorFactory.setPartition("cdp");
-        regionAwareInternalCrnGeneratorFactory.setRegion("us-west-1");
         lenient().doNothing().when(recipeUsageService).sendDeletedUsageReport(anyString(), anyString(), anyString());
         lenient().doNothing().when(recipeUsageService).sendCreatedUsageReport(anyString(), anyString(), anyString());
     }

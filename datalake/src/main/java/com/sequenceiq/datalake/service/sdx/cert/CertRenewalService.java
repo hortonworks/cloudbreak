@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
@@ -64,9 +63,6 @@ public class CertRenewalService {
     @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     public FlowIdentifier triggerRenewCertificate(SdxCluster sdxCluster, String userCrn) {
         MDCBuilder.buildMdcContext(sdxCluster);
         return sdxReactorFlowManager.triggerCertRenewal(new SdxStartCertRenewalEvent(sdxCluster.getId(), userCrn), sdxCluster.getClusterName());
@@ -83,7 +79,6 @@ public class CertRenewalService {
             transactionService.required(() -> {
                 try {
                     FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
-                            regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                             () -> stackV4Endpoint.renewCertificate(WORKSPACE_ID_DEFAULT, sdxCluster.getClusterName(), userCrn));
                     saveChainIdAndStatus(sdxCluster, flowIdentifier);
                 } catch (ClientErrorException e) {
@@ -104,7 +99,6 @@ public class CertRenewalService {
         try {
             try {
                 FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
-                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                         () -> stackV4Endpoint.renewInternalCertificate(WORKSPACE_ID_DEFAULT, sdxCluster.getStackCrn()));
                 transactionService.required(() -> saveChainIdAndStatus(sdxCluster, flowIdentifier));
             } catch (ClientErrorException e) {

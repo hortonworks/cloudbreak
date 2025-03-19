@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DatalakeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
@@ -43,18 +42,15 @@ public class EnvironmentResourceDeletionService {
 
     private final ExternalizedComputeService externalizedComputeService;
 
-    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     public EnvironmentResourceDeletionService(PlatformAwareSdxConnector platformAwareSdxConnector, DatalakeV4Endpoint datalakeV4Endpoint,
             DistroXV1Endpoint distroXV1Endpoint, ClusterTemplateV4Endpoint clusterTemplateV4Endpoint, ExperienceConnectorService experienceConnectorService,
-            ExternalizedComputeService externalizedComputeService, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+            ExternalizedComputeService externalizedComputeService) {
         this.platformAwareSdxConnector = platformAwareSdxConnector;
         this.datalakeV4Endpoint = datalakeV4Endpoint;
         this.distroXV1Endpoint = distroXV1Endpoint;
         this.clusterTemplateV4Endpoint = clusterTemplateV4Endpoint;
         this.experienceConnectorService = experienceConnectorService;
         this.externalizedComputeService = externalizedComputeService;
-        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     public void deleteClusterDefinitionsOnCloudbreak(String environmentCrn) {
@@ -95,7 +91,6 @@ public class EnvironmentResourceDeletionService {
         LOGGER.debug("Get Datalake clusters of the environment: '{}'", environment.getName());
         try {
             Set<String> datalakeClusterNames = doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> datalakeV4Endpoint
                             .list(null, environment.getResourceCrn())
                             .getResponses()

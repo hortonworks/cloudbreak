@@ -213,12 +213,10 @@ public class UserV1ControllerTest {
         SyncOperationStatus status = mock(SyncOperationStatus.class);
         when(operationToSyncOperationStatus.convert(operation)).thenReturn(status);
 
-        assertEquals(status, ThreadBasedUserCrnProvider
-                .doAsInternalActor("crn:altus:iam:us-west-1:altus:user:__internal__actor__",
-                        () -> underTest.synchronizeAllUsers(request)));
+        assertEquals(status, ThreadBasedUserCrnProvider.doAsInternalActor(() -> underTest.synchronizeAllUsers(request)));
 
         UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(users, machineUsers, Optional.empty());
-        verify(userSyncService, times(1)).synchronizeUsersWithCustomPermissionCheck(ACCOUNT_ID, "crn:altus:iam:us-west-1:altus:user:__internal__actor__",
+        verify(userSyncService, times(1)).synchronizeUsersWithCustomPermissionCheck(ACCOUNT_ID, "crn:cdp:iam:us-west-1:altus:user:__internal__actor__",
                 environments, userSyncFilter, WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
     }
 
@@ -273,7 +271,7 @@ public class UserV1ControllerTest {
         SyncOperationStatus status = mock(SyncOperationStatus.class);
         when(operationToSyncOperationStatus.convert(operation)).thenReturn(status);
 
-        assertEquals(status, ThreadBasedUserCrnProvider.doAsInternalActor("crn", () ->
+        assertEquals(status, ThreadBasedUserCrnProvider.doAsInternalActor(() ->
                 underTest.getSyncOperationStatusInternal(ACCOUNT_ID, operationId)));
 
         verify(operationService, times(1)).getOperationForAccountIdAndOperationId(ACCOUNT_ID, operationId);

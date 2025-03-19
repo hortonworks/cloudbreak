@@ -28,7 +28,6 @@ import com.sequenceiq.cloudbreak.auth.JsonCMLicense;
 import com.sequenceiq.cloudbreak.auth.PaywallAccessChecker;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrSkipOptions;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
@@ -79,10 +78,13 @@ public class SdxRuntimeUpgradeService {
     private ClouderaManagerLicenseProvider clouderaManagerLicenseProvider;
 
     @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Inject
     private SdxUpgradeFilter upgradeFilter;
+
+    private static String getTargetCdhVersion(List<ImageInfoV4Response> upgradeCandidates, String targetImageId) {
+        return upgradeCandidates.stream().filter(image -> image.getImageId().equals(targetImageId)).findFirst()
+                .orElseThrow(() -> new BadRequestException(String.format("The %s image id is not present among the candidates", targetImageId)))
+                .getComponentVersions().getCdp();
+    }
 
     public SdxUpgradeResponse checkForUpgradeByName(String clusterName, SdxUpgradeRequest upgradeSdxClusterRequest, String accountId,
             boolean upgradePreparation) {
@@ -134,9 +136,7 @@ public class SdxRuntimeUpgradeService {
 
         UpgradeV4Response upgradeV4Response = ThreadBasedUserCrnProvider
                 .doAsInternalActor(
-                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                        () -> stackV4Endpoint.checkForClusterUpgradeByName(WORKSPACE_ID, clusterName,
-                                request, accountId));
+                        () -> stackV4Endpoint.checkForClusterUpgradeByName(WORKSPACE_ID, clusterName, request, accountId));
         SdxCluster datalake = sdxService.getByNameOrCrn(ThreadBasedUserCrnProvider.getUserCrn(), NameOrCrn.ofName(clusterName));
         UpgradeV4Response filteredUpgradeV4Response = upgradeFilter.filterSdxUpgradeResponse(upgradeSdxClusterRequest, upgradeV4Response,
                 datalake.getClusterShape(), accountId);
@@ -161,12 +161,6 @@ public class SdxRuntimeUpgradeService {
         FlowIdentifier flowIdentifier = triggerDatalakeUpgradeFlow(request, cluster, targetImageId);
         String message = messagesService.getMessage(ResourceEvent.DATALAKE_UPGRADE.getMessage(), List.of(targetCdhVersion, targetImageId));
         return new SdxUpgradeResponse(message, flowIdentifier);
-    }
-
-    private static String getTargetCdhVersion(List<ImageInfoV4Response> upgradeCandidates, String targetImageId) {
-        return upgradeCandidates.stream().filter(image -> image.getImageId().equals(targetImageId)).findFirst()
-                .orElseThrow(() -> new BadRequestException(String.format("The %s image id is not present among the candidates", targetImageId)))
-                .getComponentVersions().getCdp();
     }
 
     private FlowIdentifier triggerDatalakeUpgradeFlow(SdxUpgradeRequest request, SdxCluster cluster, String imageId) {

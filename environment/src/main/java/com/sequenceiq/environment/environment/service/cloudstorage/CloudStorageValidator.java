@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.BackupOperationType;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
@@ -33,17 +32,13 @@ public class CloudStorageValidator {
 
     private final CloudProviderServicesV4Endopint cloudProviderServicesV4Endpoint;
 
-    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     private final CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
     public CloudStorageValidator(CredentialService credentialService,
             CloudProviderServicesV4Endopint cloudProviderServicesV4Endpoint,
-            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory,
             CredentialToCloudCredentialConverter credentialToCloudCredentialConverter) {
         this.credentialService = credentialService;
         this.cloudProviderServicesV4Endpoint = cloudProviderServicesV4Endpoint;
-        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
         this.credentialToCloudCredentialConverter = credentialToCloudCredentialConverter;
     }
 
@@ -75,9 +70,7 @@ public class CloudStorageValidator {
         }
         ObjectStorageValidateRequest objectStorageValidateRequest = objectStorageValidateBuilder.build();
         return ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                () ->
-                cloudProviderServicesV4Endpoint.validateObjectStorage(objectStorageValidateRequest));
+                () -> cloudProviderServicesV4Endpoint.validateObjectStorage(objectStorageValidateRequest));
     }
 
     private void addLogIdentity(CloudStorageRequest cloudStorageRequest,

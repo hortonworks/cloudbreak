@@ -54,8 +54,6 @@ public class CloudStorageValidator {
 
     private final CloudProviderServicesV4Endopint cloudProviderServicesV4Endpoint;
 
-    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     public CloudStorageValidator(CredentialResponseToCloudCredentialConverter credentialResponseToCloudCredentialConverter,
             EntitlementService entitlementService,
             CloudProviderServicesV4Endopint cloudProviderServicesV4Endpoint,
@@ -63,7 +61,6 @@ public class CloudStorageValidator {
         this.credentialResponseToCloudCredentialConverter = credentialResponseToCloudCredentialConverter;
         this.entitlementService = entitlementService;
         this.cloudProviderServicesV4Endpoint = cloudProviderServicesV4Endpoint;
-        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     public void validate(CloudStorageRequest cloudStorageRequest, DetailedEnvironmentResponse environment,
@@ -87,7 +84,6 @@ public class CloudStorageValidator {
 
             ObjectStorageValidateRequest request = createObjectStorageValidateRequest(cloudCredential, cloudStorageRequest, environment);
             ObjectStorageValidateResponse response = ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> cloudProviderServicesV4Endpoint.validateObjectStorage(request));
 
             LOGGER.info("ValidateObjectStorage: request: {}, response: {}", AnonymizerUtil.anonymize(JsonUtil.writeValueAsStringSilent(request)),
@@ -121,7 +117,6 @@ public class CloudStorageValidator {
         ObjectStorageValidateRequest request = createBackupLocationValidateRequest(cloudCredential, backupOperationType, cloudStorageRequest,
                 environment, backupLocation, clouderaRuntime);
         ObjectStorageValidateResponse response = ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> cloudProviderServicesV4Endpoint.validateObjectStorage(request));
         cloudStorageRequest.setLocations(locations);
 

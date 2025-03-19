@@ -17,7 +17,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.app.StaticApplicationContext;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.Crn.Service;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil;
 import com.sequenceiq.cloudbreak.logger.MdcContext;
 
@@ -27,21 +30,24 @@ public class ThreadBasedUserCrnProvider {
 
     private static final InheritableThreadLocal<String> USER_CRN = new InheritableThreadLocal<>();
 
+    private static final String DEFAULT_REGION = "us-west-1";
+
+    private static final String DEFAULT_PARTITION = "cdp";
+
+    private static final String REGION_KEY = "crn.region";
+
+    private static final String PARTITION_KEY = "crn.partition";
+
+    private static String region;
+
+    private static String partition;
+
     private ThreadBasedUserCrnProvider() {
     }
 
     @Nullable
     public static String getUserCrn() {
         return USER_CRN.get();
-    }
-
-    public static String getAccountId() {
-        String userCrn = getUserCrn();
-        if (userCrn != null) {
-            return Optional.ofNullable(Crn.fromString(userCrn)).orElseThrow(() -> new IllegalStateException("Unable to obtain crn!")).getAccountId();
-        } else {
-            throw new IllegalStateException("Crn is not set!");
-        }
     }
 
     private static void setUserCrn(String userCrn) {
@@ -54,6 +60,15 @@ public class ThreadBasedUserCrnProvider {
         } else {
             USER_CRN.set(userCrn);
             addUserCrnAndTenantToMdcContext(userCrn);
+        }
+    }
+
+    public static String getAccountId() {
+        String userCrn = getUserCrn();
+        if (userCrn != null) {
+            return Optional.ofNullable(Crn.fromString(userCrn)).orElseThrow(() -> new IllegalStateException("Unable to obtain crn!")).getAccountId();
+        } else {
+            throw new IllegalStateException("Crn is not set!");
         }
     }
 
@@ -71,10 +86,7 @@ public class ThreadBasedUserCrnProvider {
         }
     }
 
-    // CHECKSTYLE:OFF
-
     public static <T, W extends Throwable> T doAsAndThrow(String userCrn, ThrowableCallable<T, W> callable) throws Throwable {
-        // CHECKSTYLE:ON
         String previousUserCrn = getUserCrn();
         removeUserCrn();
         setUserCrn(userCrn);
@@ -116,11 +128,13 @@ public class ThreadBasedUserCrnProvider {
         }
     }
 
-    public static <T> T doAsInternalActor(String internalCrn, Supplier<T> callable) {
+    public static <T> T doAsInternalActor(Supplier<T> callable) {
         String originalUserCrn = getUserCrn();
-        if (originalUserCrn != null && RegionAwareInternalCrnGeneratorUtil.isInternalCrn(originalUserCrn)) {
-            return doAs(originalUserCrn, callable);
+        String accountId = getAccountIdIfAvailable(originalUserCrn);
+        if (StringUtils.isEmpty(accountId) || RegionAwareInternalCrnGeneratorUtil.INTERNAL_ACCOUNT.equals(accountId)) {
+            LOGGER.warn("Internal actor used without accountId", new IllegalArgumentException());
         }
+        String internalCrn = getInternalUserCrn(accountId);
         return doAs(internalCrn, callable);
     }
 
@@ -138,21 +152,58 @@ public class ThreadBasedUserCrnProvider {
         }
     }
 
-    public static void doAsInternalActor(String internalCrn, Runnable runnable) {
+    public static void doAsInternalActor(Runnable runnable) {
         String originalUserCrn = getUserCrn();
-        if (originalUserCrn != null && RegionAwareInternalCrnGeneratorUtil.isInternalCrn(originalUserCrn)) {
-            doAs(originalUserCrn, runnable);
+        String accountId = getAccountIdIfAvailable(originalUserCrn);
+        if (StringUtils.isEmpty(accountId) || RegionAwareInternalCrnGeneratorUtil.INTERNAL_ACCOUNT.equals(accountId)) {
+            LOGGER.warn("Internal actor used without accountId", new IllegalArgumentException());
+        }
+        String internalCrn = getInternalUserCrn(accountId);
+        doAs(internalCrn, runnable);
+    }
+
+    public static <W> void doAsInternalActor(Runnable runnable, String accountId) {
+        String internalCrn = getInternalUserCrn(accountId);
+        doAs(internalCrn, runnable);
+    }
+
+    public static <T> T doAsInternalActor(Function<String, T> originalUserCrnConsumer) {
+        String originalUserCrn = getUserCrn();
+        String accountId = getAccountIdIfAvailable(originalUserCrn);
+        if (StringUtils.isEmpty(accountId) || RegionAwareInternalCrnGeneratorUtil.INTERNAL_ACCOUNT.equals(accountId)) {
+            LOGGER.warn("Internal actor used without accountId", new IllegalArgumentException());
+        }
+        String internalCrn = getInternalUserCrn(accountId);
+        return doAs(internalCrn, () -> originalUserCrnConsumer.apply(originalUserCrn));
+    }
+
+    private static String getAccountIdIfAvailable(String originalUserCrn) {
+        if (originalUserCrn == null) {
+            return null;
+        }
+        Crn originalUser = Crn.fromString(originalUserCrn);
+        if (originalUser == null) {
+            return null;
+        }
+        return originalUser.getAccountId();
+    }
+
+    private static String getInternalUserCrn(String accountId) {
+        loadRegionAwareConfiguration();
+        if (accountId == null) {
+            return RegionAwareInternalCrnGenerator.regionalAwareInternalCrnGenerator(Service.IAM, partition, region).getInternalCrnForServiceAsString();
         } else {
-            doAs(internalCrn, runnable);
+            return RegionAwareInternalCrnGenerator.regionalAwareInternalCrnGenerator(Service.IAM, partition, region, accountId)
+                    .getInternalCrnForServiceAsString();
         }
     }
 
-    public static <T> T doAsInternalActor(String internalCrn, Function<String, T> originalUserCrnConsumer) {
-        String originalUserCrn = getUserCrn();
-        if (originalUserCrn != null && RegionAwareInternalCrnGeneratorUtil.isInternalCrn(originalUserCrn)) {
-            return doAs(originalUserCrn, () -> originalUserCrnConsumer.apply(originalUserCrn));
-        } else {
-            return doAs(internalCrn, () -> originalUserCrnConsumer.apply(originalUserCrn));
+    private static void loadRegionAwareConfiguration() {
+        if (region == null) {
+            region = StaticApplicationContext.getProperty(REGION_KEY, DEFAULT_REGION);
+        }
+        if (partition == null) {
+            partition = StaticApplicationContext.getProperty(PARTITION_KEY, DEFAULT_PARTITION);
         }
     }
 

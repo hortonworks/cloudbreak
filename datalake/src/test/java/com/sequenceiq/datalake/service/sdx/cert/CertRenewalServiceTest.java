@@ -28,8 +28,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.dyngr.exception.PollerStoppedException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
@@ -86,12 +84,6 @@ public class CertRenewalServiceTest {
     @Mock
     private FlowIdentifier flowIdentifier;
 
-    @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
-
     @Captor
     private ArgumentCaptor<SdxStartCertRenewalEvent> captor;
 
@@ -138,8 +130,6 @@ public class CertRenewalServiceTest {
     public void testRenewCertificate() throws TransactionExecutionException {
         when(sdxCluster.getId()).thenReturn(1L);
         when(sdxCluster.getClusterName()).thenReturn("cluster");
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         doAnswer(invocation -> {
             invocation.getArgument(0, Runnable.class).run();
             return null;
@@ -161,8 +151,6 @@ public class CertRenewalServiceTest {
     public void testInternalRenewCertificate() throws TransactionExecutionException {
         when(sdxCluster.getId()).thenReturn(1L);
         when(sdxCluster.getStackCrn()).thenReturn("crn");
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         doAnswer(invocation -> {
             invocation.getArgument(0, Runnable.class).run();
             return null;
@@ -183,8 +171,6 @@ public class CertRenewalServiceTest {
     @Test
     public void testRenewCertificateNotSetStatusWhenExceptionThrown() throws TransactionExecutionException {
         when(sdxCluster.getClusterName()).thenReturn("cluster");
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         doAnswer(invocation -> {
             invocation.getArgument(0, Runnable.class).run();
             return null;
@@ -202,8 +188,6 @@ public class CertRenewalServiceTest {
     public void testInternalRenewCertificateNotSetStatusWhenExceptionThrown() throws TransactionExecutionException {
         when(sdxCluster.getStackCrn()).thenReturn("crn");
         when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("cant start");
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         doThrow(new WebApplicationException("Can't start."))
                 .when(stackV4Endpoint).renewInternalCertificate(anyLong(), anyString());
 

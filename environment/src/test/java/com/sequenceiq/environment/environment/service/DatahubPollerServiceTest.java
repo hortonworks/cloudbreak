@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.environment.poller.ClusterPollerResultEvaluator;
 import com.sequenceiq.environment.environment.poller.DatahubPollerProvider;
@@ -46,10 +45,8 @@ class DatahubPollerServiceTest {
 
     private final FlowEndpoint flowEndpoint = Mockito.mock(FlowEndpoint.class);
 
-    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory = Mockito.mock(RegionAwareInternalCrnGeneratorFactory.class);
-
     private final DatahubPollerProvider datahubPollerProvider = new DatahubPollerProvider(datahubService, new ClusterPollerResultEvaluator(), flowEndpoint,
-            regionAwareInternalCrnGeneratorFactory, new FlowResultPollerEvaluator());
+            new FlowResultPollerEvaluator());
 
     private final DatahubPollerService underTest =
             new DatahubPollerService(datahubService, datahubPollerProvider, new WebApplicationExceptionMessageExtractor());

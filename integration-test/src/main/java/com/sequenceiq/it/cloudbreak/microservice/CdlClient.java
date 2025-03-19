@@ -15,8 +15,6 @@ public class CdlClient<E extends Enum<E>, W extends WaitObject> extends Microser
 
     private GrpcSdxCdlClient cdlClient;
 
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     public CdlClient(String host, int port, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         cdlClient = GrpcSdxCdlClient.createClient(SdxCdlChannelConfig.newManagedChannelWrapper(host, port), regionAwareInternalCrnGeneratorFactory);
     }

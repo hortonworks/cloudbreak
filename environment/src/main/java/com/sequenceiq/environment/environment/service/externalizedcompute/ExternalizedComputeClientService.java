@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.exception.ExternalizedComputeOperationFailedException;
 import com.sequenceiq.externalizedcompute.api.endpoint.ExternalizedComputeClusterInternalEndpoint;
@@ -31,39 +30,31 @@ public class ExternalizedComputeClientService {
     private ExternalizedComputeClusterInternalEndpoint endpoint;
 
     @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
     public FlowIdentifier createComputeCluster(ExternalizedComputeClusterInternalRequest request) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 initiatorUserCrn -> handleException(() -> endpoint.create(request, initiatorUserCrn), "Failed to create compute cluster"));
     }
 
     public FlowIdentifier reInitializeComputeCluster(ExternalizedComputeClusterInternalRequest request, boolean force) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 initiatorUserCrn -> handleException(() -> endpoint.reInitialize(request, initiatorUserCrn, force), "Failed to reinitialize compute cluster"));
     }
 
     public FlowIdentifier deleteComputeCluster(String environmentCrn, String name, boolean force) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 initiatorUserCrn -> handleException(() -> endpoint.delete(environmentCrn, initiatorUserCrn, name, force), "Failed to delete compute cluster"));
     }
 
     public ExternalizedComputeClusterCredentialValidationResponse validateCredential(String credentialName, String region) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 initiatorUserCrn -> handleException(() -> endpoint.validateCredential(credentialName, region, initiatorUserCrn),
                         "Failed to validate credential"));
     }
 
     public Optional<ExternalizedComputeClusterResponse> getComputeCluster(String environmentCrn, String name) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 initiatorUserCrn -> handleException(() -> {
                     try {
                         return Optional.of(endpoint.describe(environmentCrn, name));
@@ -76,7 +67,6 @@ public class ExternalizedComputeClientService {
 
     public List<ExternalizedComputeClusterResponse> list(String environmentCrn) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 initiatorUserCrn -> handleException(() -> endpoint.list(environmentCrn), "Failed to list compute clusters"));
     }
 

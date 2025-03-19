@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
@@ -43,9 +42,6 @@ public class CloudbreakPoller extends AbstractFlowPoller {
 
     @Inject
     private SdxStatusService sdxStatusService;
-
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Inject
     private FlowEndpoint flowEndpoint;
@@ -157,7 +153,6 @@ public class CloudbreakPoller extends AbstractFlowPoller {
 
     private StackStatusV4Response getStackAndClusterStatusWithInternalActor(SdxCluster sdxCluster) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> stackV4Endpoint.getStatusByName(0L, sdxCluster.getClusterName(), sdxCluster.getAccountId()));
     }
 

@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.flow.api.FlowEndpoint;
@@ -34,9 +33,6 @@ public class CloudbreakFlowService extends AbstractFlowService {
     @Inject
     private FlowCheckResponseToFlowStateConverter flowCheckResponseToFlowStateConverter;
 
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     @Override
     protected FlowEndpoint flowEndpoint() {
         return flowEndpoint;
@@ -44,7 +40,6 @@ public class CloudbreakFlowService extends AbstractFlowService {
 
     public List<FlowLogResponse> getFlowLogsByFlowId(String flowId) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> flowEndpoint.getFlowLogsByFlowId(flowId));
     }
 
@@ -53,7 +48,6 @@ public class CloudbreakFlowService extends AbstractFlowService {
             if (sdxCluster.getLastCbFlowChainId() != null) {
                 LOGGER.info("Checking cloudbreak {} {}", FlowType.FLOW_CHAIN, sdxCluster.getLastCbFlowChainId());
                 FlowCheckResponse flowCheckResponse = ThreadBasedUserCrnProvider.doAsInternalActor(
-                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                         () -> flowEndpoint.hasFlowRunningByChainId(sdxCluster.getLastCbFlowChainId()));
                 logCbFlowChainStatus(sdxCluster.getLastCbFlowChainId(), flowCheckResponse.getHasActiveFlow());
                 return flowCheckResponseToFlowStateConverter.convert(flowCheckResponse);
@@ -76,14 +70,12 @@ public class CloudbreakFlowService extends AbstractFlowService {
             if (sdxCluster.getLastCbFlowChainId() != null) {
                 LOGGER.info("Checking cloudbreak {} {} to get flow check response", FlowType.FLOW_CHAIN, sdxCluster.getLastCbFlowChainId());
                 FlowCheckResponse flowCheckResponse = ThreadBasedUserCrnProvider.doAsInternalActor(
-                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                         () -> flowEndpoint.hasFlowRunningByChainId(sdxCluster.getLastCbFlowChainId()));
                 return flowCheckResponse;
             } else if (sdxCluster.getLastCbFlowId() != null) {
                 String flowId = sdxCluster.getLastCbFlowId();
                 LOGGER.info("Checking cloudbreak {} {} to get flow check response", FlowType.FLOW, flowId);
                 FlowCheckResponse flowCheckResponse = ThreadBasedUserCrnProvider.doAsInternalActor(
-                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                         () -> flowEndpoint.hasFlowRunningByFlowId(flowId)
                 );
                 return flowCheckResponse;
@@ -125,9 +117,7 @@ public class CloudbreakFlowService extends AbstractFlowService {
     private void trySaveLastCbFlowIdOrFlowChainId(SdxCluster sdxCluster) {
         try {
             FlowLogResponse lastFlowByResourceName = ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                    () ->
-                    flowEndpoint.getLastFlowByResourceName(sdxCluster.getAccountId(), sdxCluster.getClusterName()));
+                    () -> flowEndpoint.getLastFlowByResourceName(sdxCluster.getAccountId(), sdxCluster.getClusterName()));
             logFlowLogResponse(lastFlowByResourceName);
             if (StringUtils.isNotBlank(lastFlowByResourceName.getFlowChainId())) {
                 setFlowChainIdAndResetFlowId(sdxCluster, lastFlowByResourceName.getFlowChainId());

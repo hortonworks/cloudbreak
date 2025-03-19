@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
@@ -31,9 +30,6 @@ public abstract class AbstractUserSyncTaskRunner {
     @Inject
     private OperationService operationService;
 
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     public Operation runUserSyncTasks(String environmentCrn, String accountId) {
         Operation operation = operationService.startOperation(accountId, OperationType.USER_SYNC, List.of(environmentCrn), List.of());
         MDCBuilder.addOperationId(operation.getOperationId());
@@ -42,8 +38,7 @@ public abstract class AbstractUserSyncTaskRunner {
                 Stack stack = stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
                 MDCBuilder.buildMdcContext(stack);
                 LOGGER.info("Starting usersync task");
-                ThreadBasedUserCrnProvider.doAs(
-                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                ThreadBasedUserCrnProvider.doAsInternalActor(
                         () -> asyncRunTask(operation.getOperationId(), accountId, stack));
             });
         } else {

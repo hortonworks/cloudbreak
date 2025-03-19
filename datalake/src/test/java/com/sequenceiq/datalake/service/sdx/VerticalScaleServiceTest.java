@@ -15,8 +15,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DiskUpdateEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
@@ -43,9 +41,6 @@ public class VerticalScaleServiceTest {
     private EventSender eventSender;
 
     @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
     private SdxReactorFlowManager sdxReactorFlowManager;
 
     @Mock
@@ -66,7 +61,6 @@ public class VerticalScaleServiceTest {
     @Test
     public void testGetDiskTypeChangeSupported() {
         doReturn(true).when(diskUpdateEndpoint).isDiskTypeChangeSupported("AWS");
-        doReturn(mock(RegionAwareInternalCrnGenerator.class)).when(regionAwareInternalCrnGeneratorFactory).sdxAdmin();
         underTest.getDiskTypeChangeSupported("AWS");
         verify(diskUpdateEndpoint).isDiskTypeChangeSupported("AWS");
     }

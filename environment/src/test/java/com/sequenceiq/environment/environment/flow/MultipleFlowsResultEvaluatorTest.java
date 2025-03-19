@@ -6,7 +6,6 @@ import static org.mockito.Mockito.lenient;
 import java.util.List;
 import java.util.UUID;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -15,8 +14,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -28,19 +25,22 @@ class MultipleFlowsResultEvaluatorTest {
     @Mock
     private FlowEndpoint flowEndpoint;
 
-    @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
-
     @InjectMocks
     private MultipleFlowsResultEvaluator underTest;
 
-    @BeforeEach
-    void setUp() {
-        lenient().when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        lenient().when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+    // @formatter:off
+    // CHECKSTYLE:OFF
+    public static Object[][] scenarios() {
+        return new Object[][] {
+                // testName                     flow1Active flow1Failed flow2Active flow2Result anyFailed
+                { "Flow1 and Flow2 finished",   false,      false,      false,      false,      false },
+                { "Flow1 active",               true,       false,      false,      false,      true  },
+                { "Flow1 failed",               false,      true,       false,      false,      true  },
+                { "Flow2 active",               false,      false,      true,       false,      true  },
+                { "Flow2 failed",               false,      false,      false,      true,       true  },
+                { "Flow1 and Flow2 active",     true,       false,      true,       false,      true  },
+                { "Flow1 and Flow2 failed",     false,      true,       false,      true,       true  },
+        };
     }
 
     @ParameterizedTest(name = "{0}")
@@ -72,21 +72,6 @@ class MultipleFlowsResultEvaluatorTest {
         checkResponse.setHasActiveFlow(flowActive);
         checkResponse.setLatestFlowFinalizedAndFailed(flowFailed);
         return checkResponse;
-    }
-
-    // @formatter:off
-    // CHECKSTYLE:OFF
-    public static Object[][] scenarios() {
-        return new Object[][] {
-                // testName                     flow1Active flow1Failed flow2Active flow2Result anyFailed
-                { "Flow1 and Flow2 finished",   false,      false,      false,      false,      false },
-                { "Flow1 active",               true,       false,      false,      false,      true  },
-                { "Flow1 failed",               false,      true,       false,      false,      true  },
-                { "Flow2 active",               false,      false,      true,       false,      true  },
-                { "Flow2 failed",               false,      false,      false,      true,       true  },
-                { "Flow1 and Flow2 active",     true,       false,      true,       false,      true  },
-                { "Flow1 and Flow2 failed",     false,      true,       false,      true,       true  },
-        };
     }
     // CHECKSTYLE:ON
     // @formatter:on

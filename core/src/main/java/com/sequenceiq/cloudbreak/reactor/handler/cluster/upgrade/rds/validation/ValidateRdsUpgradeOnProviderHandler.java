@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseConnectionProperties;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -52,9 +51,6 @@ public class ValidateRdsUpgradeOnProviderHandler extends ExceptionCatcherEventHa
 
     @Inject
     private RedbeamsClientService redbeamsClientService;
-
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Inject
     private TargetMajorVersionToUpgradeTargetVersionConverter targetMajorVersionToUpgradeTargetVersionConverter;
@@ -114,7 +110,6 @@ public class ValidateRdsUpgradeOnProviderHandler extends ExceptionCatcherEventHa
         DatabaseServerV4StackRequest migratedRequest = externalDatabaseService.migrateDatabaseSettingsIfNeeded(stack, targetMajorVersion);
         if (Objects.nonNull(migratedRequest)) {
             DatabaseServerV4Response existingDbResponse = ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () ->  redbeamsClientService.getByCrn(cluster.getDatabaseServerCrn()));
             ConnectionNameFormat connectionNameFormat = Optional.ofNullable(existingDbResponse.getDatabasePropertiesV4Response())
                     .map(DatabasePropertiesV4Response::getConnectionNameFormat).orElse(USERNAME_ONLY);

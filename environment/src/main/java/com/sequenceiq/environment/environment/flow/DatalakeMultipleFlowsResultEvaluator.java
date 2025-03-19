@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.endpoint.SdxFlowEndpoint;
@@ -20,13 +19,8 @@ public class DatalakeMultipleFlowsResultEvaluator {
 
     private final SdxFlowEndpoint sdxFlowEndpoint;
 
-    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    public DatalakeMultipleFlowsResultEvaluator(SdxFlowEndpoint sdxFlowEndpoint,
-            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
-
+    public DatalakeMultipleFlowsResultEvaluator(SdxFlowEndpoint sdxFlowEndpoint) {
         this.sdxFlowEndpoint = sdxFlowEndpoint;
-        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     public boolean allFinished(List<FlowIdentifier> flowIds) {
@@ -42,12 +36,10 @@ public class DatalakeMultipleFlowsResultEvaluator {
         switch (flowId.getType()) {
             case FLOW:
                 flowCheckResponse = Optional.of(ThreadBasedUserCrnProvider.doAsInternalActor(
-                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                         () -> sdxFlowEndpoint.hasFlowRunningByFlowId(flowId.getPollableId())));
                 break;
             case FLOW_CHAIN:
                 flowCheckResponse = Optional.of(ThreadBasedUserCrnProvider.doAsInternalActor(
-                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                         () -> sdxFlowEndpoint.hasFlowRunningByChainId(flowId.getPollableId())));
                 break;
             case NOT_TRIGGERED:

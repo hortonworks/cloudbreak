@@ -30,7 +30,6 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
@@ -75,9 +74,6 @@ public class InstanceMetaDataService {
 
     @Inject
     private ResourceRetriever resourceRetriever;
-
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     public void updateServerCert(String serverCert, String instanceId, String discoveryFQDN) {
         int modifiedRows = repository.updateServerCert(serverCert, instanceId, discoveryFQDN);
@@ -247,7 +243,6 @@ public class InstanceMetaDataService {
     private DetailedEnvironmentResponse getDetailedEnvironmentResponse(String environmentCrn) {
         return measure(() ->
                         ThreadBasedUserCrnProvider.doAsInternalActor(
-                                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                                 () -> environmentClientService.getByCrn(environmentCrn)),
                 LOGGER,
                 "Get Environment from Environment service took {} ms");

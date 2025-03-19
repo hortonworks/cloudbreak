@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.auth.altus.model.CdpAccessKeyType;
 import com.sequenceiq.cloudbreak.auth.altus.model.MachineUserRequest;
 import com.sequenceiq.cloudbreak.auth.altus.service.AltusIAMService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -42,20 +41,15 @@ public class AltusMachineUserService {
 
     private final TransactionService transactionService;
 
-    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    public AltusMachineUserService(AltusIAMService altusIAMService, StackService stackService,  TransactionService transactionService,
-            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+    public AltusMachineUserService(AltusIAMService altusIAMService, StackService stackService,  TransactionService transactionService) {
         this.altusIAMService = altusIAMService;
         this.stackService = stackService;
         this.transactionService = transactionService;
-        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     public Optional<AltusCredential> createDatabusMachineUserWithAccessKeys(Stack stack, Telemetry telemetry, CdpAccessKeyType cdpAccessKeyType) {
         String machineUserName = getFluentMachineUser(stack);
         return ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> altusIAMService.generateDatabusMachineUserWithAccessKey(new MachineUserRequest()
                                 .setName(machineUserName)
                                 .setAccountId(Crn.fromString(stack.getResourceCrn()).getAccountId())
@@ -67,7 +61,6 @@ public class AltusMachineUserService {
     public Optional<AltusCredential> createMonitoringMachineUserWithAccessKeys(Stack stack, Telemetry telemetry, CdpAccessKeyType cdpAccessKeyType) {
         String machineUserName = getMonitoringMachineUser(stack);
         return ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> altusIAMService.generateMonitoringMachineUserWithAccessKey(new MachineUserRequest()
                                 .setName(machineUserName)
                                 .setAccountId(Crn.fromString(stack.getResourceCrn()).getAccountId())
@@ -78,7 +71,6 @@ public class AltusMachineUserService {
 
     public void cleanupMachineUser(String machineUserName, String accountId) {
         ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> altusIAMService.clearMachineUser(machineUserName, accountId)
         );
     }
@@ -86,7 +78,6 @@ public class AltusMachineUserService {
     public void cleanupMachineUser(Stack stack, Telemetry telemetry) {
         String machineUserName = getFluentMachineUser(stack);
         ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> altusIAMService.clearMachineUser(machineUserName,
                         Crn.fromString(stack.getResourceCrn()).getAccountId(),
                         telemetry.isUseSharedAltusCredentialEnabled()));
@@ -95,14 +86,12 @@ public class AltusMachineUserService {
     public void cleanupMonitoringMachineUser(Stack stack) {
         String machineUserName = getMonitoringMachineUser(stack);
         ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> altusIAMService.clearMachineUser(machineUserName,
                         Crn.fromString(stack.getResourceCrn()).getAccountId()));
     }
 
     public List<UserManagementProto.MachineUser> getAllInternalMachineUsers(String accountId) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> altusIAMService.getAllMachineUsersForAccount(accountId)
         );
     }
@@ -232,7 +221,6 @@ public class AltusMachineUserService {
 
     public boolean isCredentialExists(Telemetry telemetry, String machineUser, String accessKey, Stack stack) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> altusIAMService.doesMachineUserHasAccessKey(
                         ThreadBasedUserCrnProvider.getUserCrn(),
                         Crn.fromString(stack.getResourceCrn()).getAccountId(),

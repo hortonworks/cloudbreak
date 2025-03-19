@@ -29,8 +29,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.StackCcmUpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.model.CcmUpgradeResponseType;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -75,12 +73,6 @@ class SdxCcmUpgradeServiceTest {
 
     @Mock
     private CloudbreakPoller cloudbreakPoller;
-
-    @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
     @Mock
     private CloudbreakFlowService cloudbreakFlowService;
@@ -175,9 +167,6 @@ class SdxCcmUpgradeServiceTest {
 
     @Test
     void testInitAndWaitForStackUpgrade() {
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
-                .thenReturn("crn:altus:iam:us-west-1:altus:user:__internal__actor__");
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW, "pollableId");
         StackCcmUpgradeV4Response upgradeResponse = new StackCcmUpgradeV4Response(CcmUpgradeResponseType.TRIGGERED, flowId, null, "resourceCrn");
         when(stackV4Endpoint.upgradeCcmByCrnInternal(eq(0L), eq(STACK_CRN), any())).thenReturn(upgradeResponse);

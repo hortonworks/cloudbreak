@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.cost.ClusterCostV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.cost.requests.ClusterCostV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.co2.EnvironmentRealTimeCO2;
 import com.sequenceiq.cloudbreak.common.co2.RealTimeCO2;
 import com.sequenceiq.cloudbreak.common.co2.RealTimeCO2Response;
@@ -48,9 +47,6 @@ public class EnvironmentCostService {
     @Inject
     private EntitlementService entitlementService;
 
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     public Map<String, EnvironmentRealTimeCost> getCosts(List<String> environmentCrns, List<String> clusterCrns) {
         errorIfCostCalculationFeatureIsNotEnabled();
 
@@ -58,16 +54,15 @@ public class EnvironmentCostService {
         Map<String, RealTimeCost> totalCosts = new HashMap<>();
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
 
-        String internalCrn = regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString();
         if (CollectionUtils.isNotEmpty(environmentCrns)) {
-            RealTimeCostResponse freeipaCostResponse = ThreadBasedUserCrnProvider.doAsInternalActor(internalCrn,
+            RealTimeCostResponse freeipaCostResponse = ThreadBasedUserCrnProvider.doAsInternalActor(
                     () -> freeIpaCostV1Endpoint.list(environmentCrns, initiatorUserCrn));
             totalCosts.putAll(freeipaCostResponse.getCost());
         }
         ClusterCostV4Request request = new ClusterCostV4Request();
         request.setEnvironmentCrns(environmentCrns);
         request.setClusterCrns(clusterCrns);
-        RealTimeCostResponse clusterCostResponse = ThreadBasedUserCrnProvider.doAsInternalActor(internalCrn,
+        RealTimeCostResponse clusterCostResponse = ThreadBasedUserCrnProvider.doAsInternalActor(
                 () -> clusterCostV4Endpoint.listByEnv(request, initiatorUserCrn));
         totalCosts.putAll(clusterCostResponse.getCost());
 
@@ -91,16 +86,15 @@ public class EnvironmentCostService {
         Map<String, RealTimeCO2> totalCO2 = new HashMap<>();
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
 
-        String internalCrn = regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString();
         if (CollectionUtils.isNotEmpty(environmentCrns)) {
-            RealTimeCO2Response freeipaCO2Response = ThreadBasedUserCrnProvider.doAsInternalActor(internalCrn,
+            RealTimeCO2Response freeipaCO2Response = ThreadBasedUserCrnProvider.doAsInternalActor(
                     () -> freeIpaCO2V1Endpoint.list(environmentCrns, initiatorUserCrn));
             totalCO2.putAll(freeipaCO2Response.getCo2());
         }
         ClusterCO2V4Request clusterCO2V4Request = new ClusterCO2V4Request();
         clusterCO2V4Request.setEnvironmentCrns(environmentCrns);
         clusterCO2V4Request.setClusterCrns(clusterCrns);
-        RealTimeCO2Response clusterCO2Response = ThreadBasedUserCrnProvider.doAsInternalActor(internalCrn,
+        RealTimeCO2Response clusterCO2Response = ThreadBasedUserCrnProvider.doAsInternalActor(
                 () -> clusterCO2V4Endpoint.listByEnv(clusterCO2V4Request, initiatorUserCrn));
         totalCO2.putAll(clusterCO2Response.getCo2());
 

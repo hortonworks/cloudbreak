@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -32,8 +31,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.imdupdate.StackI
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.RdsUpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
@@ -56,9 +53,6 @@ public class CloudbreakStackServiceTest {
     private static final String ERROR_MSG = "error";
 
     @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
     private StackV4Endpoint stackV4Endpoint;
 
     @Mock
@@ -70,10 +64,22 @@ public class CloudbreakStackServiceTest {
     @InjectMocks
     private CloudbreakStackService underTest;
 
+    private static RdsUpgradeV4Response setupResponse(FlowIdentifier flowIdentifier) {
+        RdsUpgradeV4Response rdsUpgradeV4Response = new RdsUpgradeV4Response();
+        rdsUpgradeV4Response.setFlowIdentifier(flowIdentifier);
+        return rdsUpgradeV4Response;
+    }
+
+    private static SdxCluster setupSdxCluster() {
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setClusterName(SDX_NAME);
+        sdxCluster.setAccountId(SDX_ACCOUNT_ID);
+        return sdxCluster;
+    }
+
     @Test
     void testGetStack() {
         SdxCluster sdxCluster = setupSdxCluster();
-        setupIam();
         StackV4Response stackV4Response = new StackV4Response();
         when(stackV4Endpoint.get(WORKSPACE_ID, SDX_NAME, Set.of(), SDX_ACCOUNT_ID)).thenReturn(stackV4Response);
 
@@ -86,7 +92,6 @@ public class CloudbreakStackServiceTest {
     @Test
     void testGetStackWhenWebApplicationException() {
         SdxCluster sdxCluster = setupSdxCluster();
-        setupIam();
         when(stackV4Endpoint.get(WORKSPACE_ID, SDX_NAME, Set.of(), SDX_ACCOUNT_ID)).thenThrow(WebApplicationException.class);
 
         Assertions.assertThrows(CloudbreakApiException.class, () ->
@@ -99,12 +104,11 @@ public class CloudbreakStackServiceTest {
     void testUpgradeRdsByClusterNameInternal(boolean forced) {
         try (MockedStatic<ThreadBasedUserCrnProvider> threadBasedUserCrnProvider = Mockito.mockStatic(ThreadBasedUserCrnProvider.class)) {
             SdxCluster sdxCluster = setupSdxCluster();
-            setupIam();
             TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
             FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "pollableId");
             RdsUpgradeV4Response rdsUpgradeV4Response = setupResponse(flowIdentifier);
             threadBasedUserCrnProvider.when(ThreadBasedUserCrnProvider::getUserCrn).thenReturn(USER_CRN);
-            threadBasedUserCrnProvider.when(() -> ThreadBasedUserCrnProvider.doAsInternalActor(any(), any(Supplier.class))).thenReturn(rdsUpgradeV4Response);
+            threadBasedUserCrnProvider.when(() -> ThreadBasedUserCrnProvider.doAsInternalActor(any(Supplier.class))).thenReturn(rdsUpgradeV4Response);
 
             RdsUpgradeV4Response response = underTest.upgradeRdsByClusterNameInternal(sdxCluster, targetMajorVersion, forced);
 
@@ -118,10 +122,9 @@ public class CloudbreakStackServiceTest {
     void testUpgradeRdsByClusterNameInternalWhenErrorResponse(boolean forced) {
         try (MockedStatic<ThreadBasedUserCrnProvider> threadBasedUserCrnProvider = Mockito.mockStatic(ThreadBasedUserCrnProvider.class)) {
             SdxCluster sdxCluster = setupSdxCluster();
-            setupIam();
             TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
             threadBasedUserCrnProvider.when(ThreadBasedUserCrnProvider::getUserCrn).thenReturn(USER_CRN);
-            threadBasedUserCrnProvider.when(() -> ThreadBasedUserCrnProvider.doAsInternalActor(any(), any(Supplier.class)))
+            threadBasedUserCrnProvider.when(() -> ThreadBasedUserCrnProvider.doAsInternalActor(any(Supplier.class)))
                     .thenThrow(new WebApplicationException());
 
             Assertions.assertThrows(CloudbreakApiException.class, () ->
@@ -135,7 +138,6 @@ public class CloudbreakStackServiceTest {
     @Test
     void testCheckUpgradeRdsByClusterNameInternal() {
         SdxCluster sdxCluster = setupSdxCluster();
-        setupIam();
         TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.checkUpgradeRdsByClusterNameInternal(sdxCluster, targetMajorVersion));
@@ -146,7 +148,6 @@ public class CloudbreakStackServiceTest {
     @Test
     void testCheckUpgradeRdsByClusterNameInternalThrowsException() {
         SdxCluster sdxCluster = setupSdxCluster();
-        setupIam();
         TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
         when(exceptionMessageExtractor.getErrorMessage(any(Exception.class))).thenReturn(ERROR_MSG);
         doThrow(new RuntimeException(ERROR_MSG)).when(stackV4Endpoint)
@@ -162,7 +163,6 @@ public class CloudbreakStackServiceTest {
     @Test
     void testUpdateSaltByName() {
         SdxCluster sdxCluster = setupSdxCluster();
-        setupIam();
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.updateSaltByName(sdxCluster));
 
@@ -172,7 +172,6 @@ public class CloudbreakStackServiceTest {
     @Test
     void testUpdateSaltByNameThrowsError() {
         SdxCluster sdxCluster = setupSdxCluster();
-        setupIam();
         when(exceptionMessageExtractor.getErrorMessage(any(WebApplicationException.class))).thenReturn(ERROR_MSG);
         doThrow(new WebApplicationException(ERROR_MSG)).when(stackV4Endpoint)
                 .updateSaltByName(WORKSPACE_ID, sdxCluster.getClusterName(), sdxCluster.getAccountId());
@@ -187,7 +186,6 @@ public class CloudbreakStackServiceTest {
     @Test
     void testImdUpdate() {
         SdxCluster sdxCluster = setupSdxCluster();
-        setupIam();
         when(stackV4Endpoint.instanceMetadataUpdate(any(), any(), any())).thenReturn(new FlowIdentifier(FlowType.FLOW, "1"));
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.updateInstanceMetadata(sdxCluster, IMDS_HTTP_TOKEN_REQUIRED));
@@ -200,7 +198,6 @@ public class CloudbreakStackServiceTest {
     @Test
     void testImdUpdateFailure() {
         SdxCluster sdxCluster = setupSdxCluster();
-        setupIam();
         when(exceptionMessageExtractor.getErrorMessage(any(WebApplicationException.class))).thenReturn(ERROR_MSG);
         doThrow(new WebApplicationException(ERROR_MSG)).when(stackV4Endpoint).instanceMetadataUpdate(any(), any(), any());
 
@@ -211,22 +208,4 @@ public class CloudbreakStackServiceTest {
                 .hasMessage("Could not launch instance metadata update in core, reason: " + ERROR_MSG);
     }
 
-    private static RdsUpgradeV4Response setupResponse(FlowIdentifier flowIdentifier) {
-        RdsUpgradeV4Response rdsUpgradeV4Response = new RdsUpgradeV4Response();
-        rdsUpgradeV4Response.setFlowIdentifier(flowIdentifier);
-        return rdsUpgradeV4Response;
-    }
-
-    private static SdxCluster setupSdxCluster() {
-        SdxCluster sdxCluster = new SdxCluster();
-        sdxCluster.setClusterName(SDX_NAME);
-        sdxCluster.setAccountId(SDX_ACCOUNT_ID);
-        return sdxCluster;
-    }
-
-    private void setupIam() {
-        RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator = mock(RegionAwareInternalCrnGenerator.class);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("internalCrn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-    }
 }

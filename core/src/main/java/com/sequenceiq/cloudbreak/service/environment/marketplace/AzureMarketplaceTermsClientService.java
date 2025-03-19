@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.environment.api.v1.marketplace.endpoint.AzureMarketplaceTermsEndpoint;
 import com.sequenceiq.environment.api.v1.marketplace.model.AzureMarketplaceTermsResponse;
@@ -24,14 +23,10 @@ public class AzureMarketplaceTermsClientService {
     @Inject
     private AzureMarketplaceTermsEndpoint azureMarketplaceTermsEndpoint;
 
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     public Boolean getAccepted(String resourceCrn) {
         String accountId = Crn.safeFromString(resourceCrn).getAccountId();
         try {
             AzureMarketplaceTermsResponse response = ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> azureMarketplaceTermsEndpoint.getInAccount(accountId));
             return response.getAccepted();
         } catch (NotFoundException e) {

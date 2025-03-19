@@ -22,8 +22,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -58,9 +56,6 @@ class DatalakeRootVolumeUpdateHandlerTest {
     private SdxService sdxService;
 
     @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
     private SdxWaitService sdxWaitService;
 
     @Mock
@@ -74,9 +69,6 @@ class DatalakeRootVolumeUpdateHandlerTest {
 
     @Mock
     private SdxCluster sdxCluster;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
     private DatalakeRootVolumeUpdateEvent datalakeRootVolumeUpdateEvent;
 
@@ -144,7 +136,5 @@ class DatalakeRootVolumeUpdateHandlerTest {
     private void initMocks() {
         doReturn(sdxCluster).when(sdxService).getByNameInAccount(any(), eq(SDX_NAME));
         doReturn(SDX_CRN).when(sdxCluster).getStackCrn();
-        doReturn(regionAwareInternalCrnGenerator).when(regionAwareInternalCrnGeneratorFactory).sdxAdmin();
-        doReturn(SDX_CRN).when(regionAwareInternalCrnGenerator).getInternalCrnForServiceAsString();
     }
 }

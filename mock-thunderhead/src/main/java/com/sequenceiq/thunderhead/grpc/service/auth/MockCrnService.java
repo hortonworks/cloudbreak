@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil;
 import com.sequenceiq.thunderhead.grpc.GrpcActorContext;
 
@@ -23,9 +22,6 @@ class MockCrnService {
     @Inject
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     Crn createCrn(String accountId, CrnResourceDescriptor resourceDescriptor, String resource) {
         return regionAwareCrnGenerator.generateCrn(resourceDescriptor, resource, accountId);
     }
@@ -34,7 +30,7 @@ class MockCrnService {
         // For some reason the mock ums translates it to UNKNOWN
         String actorCrn = GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn();
         LOGGER.info("Ensure internal actor: {}", actorCrn);
-        if (!regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString().equals(actorCrn)) {
+        if (!RegionAwareInternalCrnGeneratorUtil.isInternalCrn(actorCrn)) {
             throw Status.PERMISSION_DENIED.withDescription("This operation is only allowed for internal services").asRuntimeException();
         }
     }

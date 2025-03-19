@@ -60,7 +60,7 @@ class RotateCertificateActionsTest {
 
     private static final String FLOW_ID = "flowId";
 
-    private static final String FLOW_TRIGGER_USER_CRN = "flowTriggerUserCrn";
+    private static final String FLOW_TRIGGER_USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
     private static final String ACTION_PAYLOAD_SELECTOR = "selector";
 

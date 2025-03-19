@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.auth;
 
+import static com.sequenceiq.cloudbreak.util.TestConstants.ACCOUNT_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
@@ -17,14 +19,25 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.junit.jupiter.api.Test;
 
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil;
+import com.sequenceiq.cloudbreak.util.TestConstants;
+
 class ThreadBasedUserCrnProviderTest {
 
     private static final int NUMBER_OF_TESTS = 1000;
 
+    private static final String INTERNAL_CRN = RegionAwareInternalCrnGenerator
+            .regionalAwareInternalCrnGenerator(Crn.Service.IAM, "cdp", "us-west-1").getInternalCrnForServiceAsString();
+
+    private static final String INTERNAL_CRN_WITH_ACCOUNT_ID = RegionAwareInternalCrnGenerator
+            .regionalAwareInternalCrnGenerator(Crn.Service.IAM, "cdp", "us-west-1", ACCOUNT_ID).getInternalCrnForServiceAsString();
+
     private ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
 
     @Test
-    public void testWhenVirtualThreadStartsNewThreadTheSubThreadUsesTheSameUserCrn() {
+    void testWhenVirtualThreadStartsNewThreadTheSubThreadUsesTheSameUserCrn() {
         List<Pair<String, Future<String>>> list = IntStream.range(0, NUMBER_OF_TESTS)
                 .boxed()
                 .map(i -> {
@@ -46,7 +59,7 @@ class ThreadBasedUserCrnProviderTest {
     }
 
     @Test
-    public void testVirtualThreadCancellationDoesntCancelOtherThreads() throws InterruptedException {
+    void testVirtualThreadCancellationDoesntCancelOtherThreads() throws InterruptedException {
         List<Triple<String, Boolean, Future<String>>> list = IntStream.range(0, 1000)
                 .boxed()
                 .map(i -> {
@@ -85,6 +98,50 @@ class ThreadBasedUserCrnProviderTest {
         scheduledExecutorService.awaitTermination(10, TimeUnit.SECONDS);
     }
 
+    @Test
+    void testDoAs() {
+        assertEmptyThreadLocals();
+        String userCrn = TestConstants.CRN;
+        ThreadBasedUserCrnProvider.doAs(userCrn, () -> {
+            assertEquals(userCrn, ThreadBasedUserCrnProvider.getUserCrn());
+            assertEquals(ACCOUNT_ID, ThreadBasedUserCrnProvider.getAccountId());
+        });
+        assertEmptyThreadLocals();
+    }
+
+    @Test
+    void testDoAsInternalActor() {
+        assertEmptyThreadLocals();
+        ThreadBasedUserCrnProvider.doAsInternalActor(() -> {
+            assertEquals(INTERNAL_CRN, ThreadBasedUserCrnProvider.getUserCrn());
+            assertEquals(RegionAwareInternalCrnGeneratorUtil.INTERNAL_ACCOUNT, ThreadBasedUserCrnProvider.getAccountId());
+        });
+        assertEmptyThreadLocals();
+    }
+
+    @Test
+    void testDoAsInternalActorWithAlreadyExistingUserCrn() {
+        assertEmptyThreadLocals();
+        String userCrn = TestConstants.CRN;
+        ThreadBasedUserCrnProvider.doAs(userCrn, () -> {
+            ThreadBasedUserCrnProvider.doAsInternalActor(() -> {
+                assertEquals(INTERNAL_CRN_WITH_ACCOUNT_ID, ThreadBasedUserCrnProvider.getUserCrn());
+                assertEquals(ACCOUNT_ID, ThreadBasedUserCrnProvider.getAccountId());
+            }, ACCOUNT_ID);
+        });
+        assertEmptyThreadLocals();
+    }
+
+    @Test
+    void testDoAsInternalActorWithAccountId() {
+        assertEmptyThreadLocals();
+        ThreadBasedUserCrnProvider.doAsInternalActor(() -> {
+            assertEquals(INTERNAL_CRN_WITH_ACCOUNT_ID, ThreadBasedUserCrnProvider.getUserCrn());
+            assertEquals(ACCOUNT_ID, ThreadBasedUserCrnProvider.getAccountId());
+        }, ACCOUNT_ID);
+        assertEmptyThreadLocals();
+    }
+
     private Future<String> submitSleepTask(String userCrn, boolean willBeCancelled) {
         return ThreadBasedUserCrnProvider.doAs(userCrn, () -> executor.submit(() -> {
             Future<String> innerFuture = executor.submit(() -> {
@@ -101,5 +158,9 @@ class ThreadBasedUserCrnProviderTest {
             });
             return innerFuture.get();
         }));
+    }
+
+    private void assertEmptyThreadLocals() {
+        assertNull(ThreadBasedUserCrnProvider.getUserCrn());
     }
 }

@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.rotation.context.provider;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
@@ -18,8 +17,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.repository.StackAuthenticationRepository;
@@ -46,12 +43,6 @@ class UserKeyPairRotationContextProviderTest {
     private EnvironmentClientService environmentClientService;
 
     @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
-
-    @Mock
     private StackAuthenticationRepository stackAuthenticationRepository;
 
     @Mock
@@ -72,10 +63,8 @@ class UserKeyPairRotationContextProviderTest {
     @Test
     void testGetContext() {
         try (MockedStatic<ThreadBasedUserCrnProvider> threadBasedUserCrnProvider = Mockito.mockStatic(ThreadBasedUserCrnProvider.class)) {
-            threadBasedUserCrnProvider.when(() -> ThreadBasedUserCrnProvider.doAsInternalActor(anyString(), (Supplier<DetailedEnvironmentResponse>) any()))
+            threadBasedUserCrnProvider.when(() -> ThreadBasedUserCrnProvider.doAsInternalActor((Supplier<DetailedEnvironmentResponse>) any()))
                     .thenReturn(detailedEnvironmentResponse);
-            when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-            when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(RESOURCE_CRN);
             when(stackService.getByCrn(any())).thenReturn(stackDto);
             when(stackDto.getStackAuthentication()).thenReturn(stackAuthentication);
             when(detailedEnvironmentResponse.getAuthentication()).thenReturn(environmentAuthenticationResponse);

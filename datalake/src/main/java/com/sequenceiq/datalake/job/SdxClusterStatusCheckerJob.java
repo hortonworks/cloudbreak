@@ -68,7 +68,7 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
             jobService.unschedule(getLocalId());
             LOGGER.debug("Sdx StatusChecker Job is unscheduled for datalake: '{}'", getLocalId());
         } else {
-            ThreadBasedUserCrnProvider.doAsInternalActor(
+            ThreadBasedUserCrnProvider.doAs(
                     internalCrnModifier.getInternalCrnWithAccountId(Crn.safeFromString(getRemoteResourceCrn()).getAccountId()),
                     () -> syncSdxStatus(context));
         }

@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEven
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -54,9 +53,6 @@ public class SdxEventsService {
 
     @Inject
     private EventV4Endpoint eventV4Endpoint;
-
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     public List<CDPStructuredEvent> getDatalakeAuditEvents(String environmentCrn, List<StructuredEventType> types) {
         List<CDPStructuredEvent> dlEvents;
@@ -130,9 +126,7 @@ public class SdxEventsService {
         try {
             // Get and translate the cloudbreak events
             List<CloudbreakEventV4Response> cloudbreakEventV4Responses = ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                    () ->
-                            eventV4Endpoint.getPagedCloudbreakEventListByCrn(getCloudbreakCrn(sdxCluster), page, size, false));
+                    () -> eventV4Endpoint.getPagedCloudbreakEventListByCrn(getCloudbreakCrn(sdxCluster), page, size, false));
             return cloudbreakEventV4Responses.stream().map(entry -> convert(entry, sdxCluster.getCrn())).collect(toList());
         } catch (NotFoundException notFoundException) {
             LOGGER.error("Failed to retrieve paged cloudbreak service events due to not found exception!", notFoundException);
@@ -157,9 +151,7 @@ public class SdxEventsService {
         try {
             // Get and translate the cloudbreak events
             StructuredEventContainer structuredEventContainer = ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                    () ->
-                    eventV4Endpoint.structuredByCrn(getCloudbreakCrn(sdxCluster), false));
+                    () -> eventV4Endpoint.structuredByCrn(getCloudbreakCrn(sdxCluster), false));
             return structuredEventContainer.getNotification().stream().map(entry -> convert(entry, sdxCluster.getCrn())).collect(toList());
         } catch (Exception exception) {
             LOGGER.error("Failed to retrieve cloudbreak service events!", exception);
