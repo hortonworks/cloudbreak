@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.common.api.type.DeploymentRestriction.DATALAKE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -43,7 +44,7 @@ class MultiAzDecoratorTest {
 
     private static final String SUBNET_ID4 = "fourthSubnetId";
 
-    private static final String PLATFORM_AWS = CloudPlatform.AWS.name();
+    private static final String PLATFORM_AWS = AWS.name();
 
     private static final String PLATFORM_AZURE = CloudPlatform.AZURE.name();
 
@@ -329,6 +330,31 @@ class MultiAzDecoratorTest {
         environment.setCloudPlatform(PLATFORM_GCP);
 
         underTest.decorateStackRequestWithMultiAz(stackV4Request, environment, clusterShape);
+
+        assertThat(stackV4Request.isEnableMultiAz()).isTrue();
+    }
+
+    @Test
+    void decorateStackRequestWithPreviousNetworkAWS() {
+        StackV4Request stackV4Request = new StackV4Request();
+        stackV4Request.setInstanceGroups(List.of(getInstanceGroupV4Request(InstanceGroupType.GATEWAY), getInstanceGroupV4Request(InstanceGroupType.CORE)));
+        Map<String, Set<String>> subnetsByAz = Map.of("az1", Set.of("subnet1", "subnet2"), "az2", Set.of("subnet3", "subnet4"));
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        environment.setCloudPlatform(String.valueOf(AWS));
+
+        underTest.decorateStackRequestWithPreviousNetwork(stackV4Request, environment, SdxClusterShape.ENTERPRISE, subnetsByAz);
+
+        assertTrue(stackV4Request
+                .getInstanceGroups()
+                .stream()
+                .filter(ig -> InstanceGroupType.GATEWAY.equals(ig.getType()))
+                .allMatch(ig -> ig.getNetwork().getAws().getSubnetIds().size() == 2));
+
+        assertTrue(stackV4Request
+                .getInstanceGroups()
+                .stream()
+                .filter(ig -> !InstanceGroupType.GATEWAY.equals(ig.getType()))
+                .allMatch(ig -> ig.getNetwork().getAws().getSubnetIds().containsAll(List.of("subnet1", "subnet2", "subnet3", "subnet4"))));
 
         assertThat(stackV4Request.isEnableMultiAz()).isTrue();
     }

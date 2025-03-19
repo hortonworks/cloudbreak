@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -119,14 +121,14 @@ public class MultiAzDecorator {
                 .map(Map::entrySet)
                 .map(cbSubnetEntrySet -> cbSubnetEntrySet.stream()
                         .filter(subnetEntry -> subnetEntry.getValue().getDeploymentRestrictions().contains(datalakeDeploymentRestriction))
-                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)))
+                        .collect(Collectors.toMap(Entry::getKey, Entry::getValue)))
                 .orElse(new HashMap<>());
     }
 
     private static Map<String, CloudSubnet> filterSubnetMetasBySubnetType(DetailedEnvironmentResponse environment, SubnetType subnetType) {
         return environment.getNetwork().getSubnetMetas().entrySet().stream()
                 .filter(subnetEntry -> subnetType.equals(subnetEntry.getValue().getType()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }
 
     private List<String> distinctSubnetsByAz(Map<String, CloudSubnet> subnetMetas) {
@@ -139,4 +141,50 @@ public class MultiAzDecorator {
         return new ArrayList<>(distinctedSubnetByAz.values());
     }
 
+    public void decorateStackRequestWithPreviousNetwork(StackV4Request stackV4Request, DetailedEnvironmentResponse environment, SdxClusterShape clusterShape,
+            Map<String, Set<String>> subnetsByAz) {
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
+        if (cloudPlatform == CloudPlatform.AWS) {
+            decorateStackRequestWithPreviousMultiAzNetworkAws(stackV4Request, subnetsByAz);
+        }
+    }
+
+    private void decorateStackRequestWithPreviousMultiAzNetworkAws(StackV4Request stackV4Request, Map<String, Set<String>> subnetsByAz) {
+        LOGGER.info("Decorate stackRequest with previous network configuration");
+
+        stackV4Request.getInstanceGroups().forEach(ig -> {
+            if (ig.getNetwork() == null) {
+                ig.setNetwork(new InstanceGroupNetworkV4Request());
+                InstanceGroupAwsNetworkV4Parameters networkParameter = ig.getNetwork().createAws();
+                List<String> subnets = collectSubnetIdsFromPreviousNetwork(ig, subnetsByAz);
+                LOGGER.info("Subnets used in instance group {}: {}", ig.getName(), subnets);
+
+                networkParameter.setSubnetIds(subnets);
+            }
+        });
+        stackV4Request.setEnableMultiAz(true);
+    }
+
+    private List<String> collectSubnetIdsFromPreviousNetwork(InstanceGroupV4Request ig, Map<String, Set<String>> subnetsByAz) {
+        if (ig.getType() == InstanceGroupType.GATEWAY) {
+            return getOneSubnetFromEachAvailabilityZone(subnetsByAz);
+        } else {
+            return subnetsByAz
+                    .values()
+                    .stream()
+                    .flatMap(Set::stream)
+                    .collect(Collectors.toList());
+        }
+    }
+
+    private List<String> getOneSubnetFromEachAvailabilityZone(Map<String, Set<String>> subnetsByAz) {
+        return subnetsByAz
+                .values()
+                .stream()
+                .map(subnetsSet -> subnetsSet.stream()
+                        .findFirst()
+                        .orElse(null))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
 }

@@ -90,6 +90,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.customdomain.Cu
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.InstanceTemplateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.volume.VolumeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.network.NetworkV4Response;
@@ -253,6 +254,9 @@ class SdxServiceTest {
 
     @Mock
     private SdxVersionRuleEnforcer sdxVersionRuleEnforcer;
+
+    @Mock
+    private MultiAzDecorator multiAzDecorator;
 
     @InjectMocks
     private SdxService underTest;
@@ -2208,5 +2212,71 @@ class SdxServiceTest {
         StackV4Response result = underTest.getDetailWithResources("test", entries, "accountId");
         assertNull(result);
         verify(stackV4Endpoint).getWithResources(0L, "test", entries, "accountId");
+    }
+
+    @Test
+    void testSdxResizeUsingPreviousDatalakeNetwork() throws IOException {
+        SdxClusterResizeRequest resizeRequest = new SdxClusterResizeRequest();
+        resizeRequest.setEnvironment(ENVIRONMENT_NAME);
+        resizeRequest.setClusterShape(ENTERPRISE);
+        SdxCluster sdxCluster = getSdxCluster();
+        sdxCluster.setId(SDX_ID);
+        sdxCluster.setClusterShape(LIGHT_DUTY);
+        sdxCluster.setEnableMultiAz(true);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(null);
+        sdxCluster.setRuntime("7.2.18");
+        sdxCluster.setCloudStorageBaseLocation("s3a://some/dir/");
+        sdxCluster.setSeLinux(SeLinux.PERMISSIVE);
+
+        when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString()))
+                .thenReturn(Optional.of(sdxCluster));
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
+        when(sdxBackupRestoreService.isDatalakeInBackupProgress(anyString(), anyString())).thenReturn(false);
+        when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(false);
+
+        mockEnvironmentCall(resizeRequest, AWS);
+        when(sdxReactorFlowManager.triggerSdxResize(anyLong(), any(SdxCluster.class), any(DatalakeDrSkipOptions.class), eq(false)))
+                .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+
+        String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.18/aws/enterprise.json");
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(mediumDutyJson, StackV4Request.class));
+
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setStatus(Status.STOPPED);
+        stackV4Response.setCloudPlatform(AWS);
+        StackImageV4Response image = new StackImageV4Response();
+        image.setOs(OS_NAME);
+        image.setCatalogName(CATALOG_NAME);
+        stackV4Response.setImage(image);
+        ClusterV4Response clusterV4Response = new ClusterV4Response();
+        stackV4Response.setCluster(clusterV4Response);
+        InstanceGroupV4Response coreInstaceGroup = new InstanceGroupV4Response();
+        coreInstaceGroup.setName("core");
+        InstanceMetaDataV4Response coreMetadata = new InstanceMetaDataV4Response();
+        coreMetadata.setSubnetId("subnet1");
+        coreMetadata.setAvailabilityZone("az1");
+        coreInstaceGroup.setMetadata(Set.of(coreMetadata));
+        InstanceGroupV4Response masterInstaceGroup = new InstanceGroupV4Response();
+        masterInstaceGroup.setName("master");
+        InstanceMetaDataV4Response masterMetadata = new InstanceMetaDataV4Response();
+        masterMetadata.setSubnetId("subnet2");
+        masterMetadata.setAvailabilityZone("az2");
+        masterInstaceGroup.setMetadata(Set.of(masterMetadata));
+        InstanceGroupV4Response gatewayInstaceGroup = new InstanceGroupV4Response();
+        gatewayInstaceGroup.setName("gateway");
+        InstanceMetaDataV4Response gatewayMetadata = new InstanceMetaDataV4Response();
+        gatewayMetadata.setSubnetId("subnet3");
+        gatewayMetadata.setAvailabilityZone("az3");
+        gatewayInstaceGroup.setMetadata(Set.of(gatewayMetadata));
+        stackV4Response.setInstanceGroups(List.of(coreInstaceGroup, masterInstaceGroup, gatewayInstaceGroup));
+        stackV4Response.setNetwork(getNetworkForCurrentDatalake());
+
+        when(stackV4Endpoint.get(anyLong(), anyString(), anySet(), anyString())).thenReturn(stackV4Response);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, CLUSTER_NAME, resizeRequest));
+
+        Map<String, Set<String>> subnetsByAz = Map.of("az1", Set.of("subnet1"), "az2", Set.of("subnet2"), "az3", Set.of("subnet3"));
+        verify(multiAzDecorator, times(1)).decorateStackRequestWithPreviousNetwork(any(), any(), any(), eq(subnetsByAz));
     }
 }

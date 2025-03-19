@@ -21,6 +21,7 @@ import static com.sequenceiq.datalake.service.sdx.SdxVersionRuleEnforcer.MICRO_D
 import static com.sequenceiq.datalake.service.sdx.SdxVersionRuleEnforcer.MIN_RUNTIME_VERSION_FOR_RMS;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -32,6 +33,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -272,6 +274,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     @Inject
     private SdxVersionRuleEnforcer sdxVersionRuleEnforcer;
+
+    @Inject
+    private MultiAzDecorator multiAzDecorator;
 
     public List<ResourceWithId> findAsAuthorizationResorces(String accountId) {
         return sdxClusterRepository.findAuthorizationResourcesByAccountId(accountId);
@@ -765,6 +770,11 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         overrideDefaultDatabaseProperties(newSdxCluster.getSdxDatabase(), sdxClusterResizeRequest.getCustomSdxDatabaseComputeStorage(),
                 sdxCluster.getSdxDatabase().getDatabaseCrn(), sdxCluster.getClusterShape(), stackV4Response.getCluster().isDbSSLEnabled());
         stackRequest.setNetwork(createNetworkRequestFromCurrentDatalake(stackV4Response.getNetwork()));
+
+        if (newSdxCluster.isEnableMultiAz()) {
+            decorateRequestWithMultiAz(stackRequest, stackV4Response, environment, sdxCluster.getClusterShape(), sdxCluster.isEnableMultiAz());
+        }
+
         newSdxCluster.setStackRequest(stackRequest);
         sdxRecommendationService.validateVmTypeOverride(environment, newSdxCluster);
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxResize(sdxCluster.getId(), newSdxCluster,
@@ -772,6 +782,35 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                         sdxClusterResizeRequest.isSkipRangerAudits(), sdxClusterResizeRequest.isSkipRangerMetadata()),
                 sdxClusterResizeRequest.isValidationOnly());
         return Pair.of(sdxCluster, flowIdentifier);
+    }
+
+    private void decorateRequestWithMultiAz(StackV4Request stackRequest, StackV4Response stackResponse, DetailedEnvironmentResponse environmentResponse,
+            SdxClusterShape clusterShape, boolean currentSdxIsMultiAz) {
+        if (currentSdxIsMultiAz && stackResponse.getCloudPlatform().equals(AWS)) {
+            Map<String, Set<String>> subnetsByAz = collectSubnetsByAz(stackResponse);
+            multiAzDecorator.decorateStackRequestWithPreviousNetwork(stackRequest, environmentResponse, clusterShape, subnetsByAz);
+        } else {
+            multiAzDecorator.decorateStackRequestWithMultiAz(stackRequest, environmentResponse, clusterShape);
+        }
+    }
+
+    private Map<String, Set<String>> collectSubnetsByAz(StackV4Response stackV4Response) {
+        LOGGER.info("Collecting subnets by avaliability zone from instance metadata");
+        Map<String, Set<String>> subnetsByAZ = new HashMap<>();
+        return stackV4Response
+                .getInstanceGroups()
+                .stream()
+                .flatMap(ig -> ig.getMetadata().stream())
+                .filter(metadata -> metadata.getSubnetId() != null && metadata.getAvailabilityZone() != null)
+                .map(meta ->
+                        new SimpleEntry<>(meta.getAvailabilityZone(), meta.getSubnetId()))
+                .collect(Collectors
+                        .toMap(Entry::getKey, entry -> new HashSet<>(Collections.singletonList(entry.getValue())),
+                                (existingSet, newSet) -> {
+                                    existingSet.addAll(newSet);
+                                    return existingSet;
+                                }
+                        ));
     }
 
     private void setSecurityRequest(SdxCluster sdxCluster, StackV4Request stackRequest) {
