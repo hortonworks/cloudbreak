@@ -152,11 +152,11 @@ class FreeIpaScalingServiceTest {
         Stack stack = mock(Stack.class);
         Set<InstanceMetaData> allInstances = createValidImSet();
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
-        when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
+        when(stack.getNotTerminatedInstanceMetaDataSet()).thenReturn(allInstances);
         DownscaleRequest request = createDownscaleRequest();
         when(freeipaDownscaleNodeCalculatorService.calculateTargetAvailabilityType(request, allInstances.size())).thenReturn(NON_HA);
         doThrow(new BadRequestException("validation failed")).when(validationService).validateStackForDownscale(allInstances, stack,
-                new ScalingPath(TWO_NODE_BASED, NON_HA), null);
+                new ScalingPath(TWO_NODE_BASED, NON_HA), null, false);
 
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.downscale(ACCOUNT_ID, request));
 
@@ -173,7 +173,7 @@ class FreeIpaScalingServiceTest {
         when(stack.getAccountId()).thenReturn(ACCOUNT_ID);
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
         when(operationService.startOperation(ACCOUNT_ID, OperationType.DOWNSCALE, List.of(ENV_CRN), List.of())).thenReturn(operation);
-        when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
+        when(stack.getNotTerminatedInstanceMetaDataSet()).thenReturn(allInstances);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, POLLABLE_ID);
         when(flowManager.notify(anyString(), any())).thenReturn(flowIdentifier);
         DownscaleRequest request = createDownscaleRequest();
@@ -200,7 +200,7 @@ class FreeIpaScalingServiceTest {
         when(stack.getAccountId()).thenReturn(ACCOUNT_ID);
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
         when(operationService.startOperation(ACCOUNT_ID, OperationType.DOWNSCALE, List.of(ENV_CRN), List.of())).thenReturn(operation);
-        when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
+        when(stack.getNotTerminatedInstanceMetaDataSet()).thenReturn(allInstances);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, POLLABLE_ID);
         when(flowManager.notify(anyString(), any())).thenReturn(flowIdentifier);
         Set<String> instanceIdsToDelete = Set.of("im2");
@@ -232,7 +232,7 @@ class FreeIpaScalingServiceTest {
         when(stack.getAccountId()).thenReturn(ACCOUNT_ID);
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
         when(operationService.startOperation(ACCOUNT_ID, OperationType.DOWNSCALE, List.of(ENV_CRN), List.of())).thenReturn(operation);
-        when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
+        when(stack.getNotTerminatedInstanceMetaDataSet()).thenReturn(allInstances);
         DownscaleRequest request = createDownscaleRequest();
 
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.downscale(ACCOUNT_ID, request));

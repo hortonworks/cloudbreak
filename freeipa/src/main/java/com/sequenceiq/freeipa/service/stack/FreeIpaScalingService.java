@@ -83,12 +83,12 @@ public class FreeIpaScalingService {
     public DownscaleResponse downscale(String accountId, DownscaleRequest request) {
         LOGGER.debug("Freeipa downscale request: {}", request);
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(request.getEnvironmentCrn(), accountId);
-        Set<InstanceMetaData> allInstances = stack.getNotDeletedInstanceMetaDataSet();
+        Set<InstanceMetaData> allInstances = stack.getNotTerminatedInstanceMetaDataSet();
         AvailabilityInfo originalAvailabilityInfo = new AvailabilityInfo(allInstances.size());
         AvailabilityType targetAvailabilityType = freeipaDownscaleNodeCalculatorService.calculateTargetAvailabilityType(request, allInstances.size());
         ScalingPath scalingPath = new ScalingPath(originalAvailabilityInfo.getAvailabilityType(), targetAvailabilityType);
         logRequest(OperationType.DOWNSCALE, request, originalAvailabilityInfo);
-        validationService.validateStackForDownscale(allInstances, stack, scalingPath, request.getInstanceIds());
+        validationService.validateStackForDownscale(allInstances, stack, scalingPath, request.getInstanceIds(), request.isForce());
         return triggerDownscale(request, stack, originalAvailabilityInfo, targetAvailabilityType, request.getInstanceIds());
     }
 
