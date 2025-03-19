@@ -89,7 +89,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason",
                 "clusterManagerIp", "fileSystem", "additionalFileSystem", "rdsConfigs", "attributes", "uptime", "proxyConfigCrn",
                 "configStrategy", "extendedBlueprintText", "environmentCrn", "variant", "description", "databaseServerCrn", "fqdn", "customConfigurations",
-                "dbSslEnabled", "dbSslRootCertBundle"));
+                "dbSslEnabled", "dbSslRootCertBundle", "certExpirationDetails"));
     }
 
     @Test
@@ -109,7 +109,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason",
                 "clusterManagerIp", "additionalFileSystem", "rdsConfigs", "attributes", "uptime", "proxyConfigCrn",
                 "extendedBlueprintText", "environmentCrn", "variant", "description", "databaseServerCrn", "fqdn", "configStrategy", "customConfigurations",
-                "dbSslEnabled", "dbSslRootCertBundle"));
+                "dbSslEnabled", "dbSslRootCertBundle", "certExpirationDetails"));
     }
 
     @Test
@@ -125,7 +125,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason",
                 "clusterManagerIp", "fileSystem", "additionalFileSystem", "rdsConfigs", "attributes", "uptime", "proxyConfigCrn",
                 "configStrategy", "extendedBlueprintText", "gateway", "environmentCrn", "variant", "description", "databaseServerCrn", "fqdn",
-                "customConfigurations", "dbSslEnabled", "dbSslRootCertBundle"));
+                "customConfigurations", "dbSslEnabled", "dbSslRootCertBundle", "certExpirationDetails"));
         assertNull(result.getGateway());
     }
 

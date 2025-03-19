@@ -59,7 +59,7 @@ class ClouderaManagerHostServicesHealthCheckerTaskTest {
     void testDoStatusCheckWhenNoFailedHostsFouns() throws ApiException {
         when(clouderaManagerHealthService.getExtendedHostStatuses(eq(apiClient), any()))
                 .thenReturn(new ExtendedHostStatuses(Map.of(HostName.hostName("host1"),
-                        Set.of(new HealthCheck(HealthCheckType.SERVICES, HealthCheckResult.HEALTHY, Optional.empty())))));
+                        Set.of(new HealthCheck(HealthCheckType.SERVICES, HealthCheckResult.HEALTHY, Optional.empty(), Optional.empty())))));
         boolean result = underTest.doStatusCheck(new ClouderaManagerPollerObject(stack, apiClient));
         assertTrue(result);
     }
@@ -68,7 +68,7 @@ class ClouderaManagerHostServicesHealthCheckerTaskTest {
     void testDoStatusCheckWhenFailedHostsFouns() throws ApiException {
         when(clouderaManagerHealthService.getExtendedHostStatuses(eq(apiClient), any()))
                 .thenReturn(new ExtendedHostStatuses(Map.of(HostName.hostName("host1"),
-                        Set.of(new HealthCheck(HealthCheckType.SERVICES, HealthCheckResult.UNHEALTHY, Optional.of("error"))))));
+                        Set.of(new HealthCheck(HealthCheckType.SERVICES, HealthCheckResult.UNHEALTHY, Optional.of("error"), Optional.empty())))));
         boolean result = underTest.doStatusCheck(new ClouderaManagerPollerObject(stack, apiClient));
         assertFalse(result);
     }

@@ -139,6 +139,9 @@ public class ClusterV4Response implements JsonEntity {
 
     private String dbSslRootCertBundle;
 
+    @Schema(description = ClusterModelDescription.CERT_EXPIRATION_DETAILS)
+    private String certExpirationDetails;
+
     public Long getId() {
         return id;
     }
@@ -417,5 +420,13 @@ public class ClusterV4Response implements JsonEntity {
 
     public void setDbSslRootCertBundle(String dbSslRootCertBundle) {
         this.dbSslRootCertBundle = dbSslRootCertBundle;
+    }
+
+    public String getCertExpirationDetails() {
+        return certExpirationDetails;
+    }
+
+    public void setCertExpirationDetails(String certExpirationDetails) {
+        this.certExpirationDetails = certExpirationDetails;
     }
 }

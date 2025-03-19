@@ -48,6 +48,7 @@ public class SdxClusterConverter {
         sdxClusterResponse.setSeLinuxPolicy(sdxCluster.getSeLinux().name());
         sdxClusterResponse.setTags(getTags(sdxCluster.getTags()));
         sdxClusterResponse.setCertExpirationState(sdxCluster.getCertExpirationState());
+        sdxClusterResponse.setCertExpirationDetails(sdxCluster.getCertExpirationDetails());
         sdxClusterResponse.setSdxClusterServiceVersion(sdxCluster.getSdxClusterServiceVersion());
         sdxClusterResponse.setDetached(sdxCluster.isDetached());
         sdxClusterResponse.setEnableMultiAz(sdxCluster.isEnableMultiAz());

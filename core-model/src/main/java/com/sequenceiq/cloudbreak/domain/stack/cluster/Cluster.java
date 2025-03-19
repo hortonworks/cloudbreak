@@ -221,6 +221,8 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
 
     private Boolean dbSslEnabled;
 
+    private String certExpirationDetails;
+
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
@@ -764,6 +766,14 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
 
     public void setDbSslEnabled(Boolean dbSslEnabled) {
         this.dbSslEnabled = dbSslEnabled;
+    }
+
+    public String getCertExpirationDetails() {
+        return certExpirationDetails;
+    }
+
+    public void setCertExpirationDetails(String certExpiryDetails) {
+        this.certExpirationDetails = certExpiryDetails;
     }
 
     @Override

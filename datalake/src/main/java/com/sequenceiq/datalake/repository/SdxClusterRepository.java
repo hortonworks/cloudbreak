@@ -79,8 +79,8 @@ public interface SdxClusterRepository extends AccountAwareResourceRepository<Sdx
     Optional<String> findStackCrnByClusterCrn(@Param("accountId") String accountId, @Param("crn") String crn);
 
     @Modifying
-    @Query("UPDATE SdxCluster s SET s.certExpirationState = :state WHERE s.id = :id")
-    void updateCertExpirationState(@Param("id") Long id, @Param("state") CertExpirationState state);
+    @Query("UPDATE SdxCluster s SET s.certExpirationState = :state, s.certExpirationDetails = :details WHERE s.id = :id")
+    void updateCertExpirationState(@Param("id") Long id, @Param("state") CertExpirationState state, @Param("details") String details);
 
     @Query("SELECT new com.sequenceiq.authorization.service.list.ResourceWithId(s.id, s.crn, s.envCrn) FROM SdxCluster s " +
             "WHERE s.accountId = :accountId AND s.deleted IS NULL")

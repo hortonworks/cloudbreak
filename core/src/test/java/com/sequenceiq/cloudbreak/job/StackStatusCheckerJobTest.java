@@ -303,14 +303,14 @@ public class StackStatusCheckerJobTest {
         verify(metricsClient, times(1)).processStackStatus(anyString(), anyString(), anyString(), anyInt(), any());
         verify(clusterOperationService, times(1)).reportHealthChange(any(), any(), anySet());
         verify(stackInstanceStatusChecker).queryInstanceStatuses(eq(stackDto), any());
-        verify(clusterService, times(1)).updateClusterCertExpirationState(stack.getCluster(), true);
+        verify(clusterService, times(1)).updateClusterCertExpirationState(stack.getCluster(), true, "");
     }
 
     @Test
     public void testInstanceSyncCMRunningNodeStopped() {
         setupForCM();
-        Set<HealthCheck> healthChecks = Sets.newHashSet(new HealthCheck(HealthCheckType.HOST, HealthCheckResult.UNHEALTHY, Optional.empty()),
-                new HealthCheck(HealthCheckType.CERT, HealthCheckResult.UNHEALTHY, Optional.empty()));
+        Set<HealthCheck> healthChecks = Sets.newHashSet(new HealthCheck(HealthCheckType.HOST, HealthCheckResult.UNHEALTHY, Optional.empty(), Optional.empty()),
+                new HealthCheck(HealthCheckType.CERT, HealthCheckResult.UNHEALTHY, Optional.empty(), Optional.empty()));
         ExtendedHostStatuses extendedHostStatuses = new ExtendedHostStatuses(Map.of(HostName.hostName("host1"), healthChecks));
         when(clusterStatusService.getExtendedHostStatuses(any())).thenReturn(extendedHostStatuses);
         when(instanceMetaData.getInstanceStatus()).thenReturn(InstanceStatus.STOPPED);
@@ -322,7 +322,7 @@ public class StackStatusCheckerJobTest {
 
         verify(clusterOperationService, times(1)).reportHealthChange(any(), any(), anySet());
         verify(stackInstanceStatusChecker).queryInstanceStatuses(eq(stackDto), any());
-        verify(clusterService, times(1)).updateClusterCertExpirationState(stack.getCluster(), true);
+        verify(clusterService, times(1)).updateClusterCertExpirationState(stack.getCluster(), true, "");
         verify(clusterService, times(1)).updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.NODE_FAILURE);
     }
 
@@ -348,8 +348,8 @@ public class StackStatusCheckerJobTest {
 
     private void internalTestInstanceSyncStopStart(String instanceHgName, InstanceStatus instanceStatus, DetailedStackStatus expected) {
         setupForCM();
-        Set<HealthCheck> healthChecks = Sets.newHashSet(new HealthCheck(HealthCheckType.HOST, HealthCheckResult.UNHEALTHY, Optional.empty()),
-                new HealthCheck(HealthCheckType.CERT, HealthCheckResult.UNHEALTHY, Optional.empty()));
+        Set<HealthCheck> healthChecks = Sets.newHashSet(new HealthCheck(HealthCheckType.HOST, HealthCheckResult.UNHEALTHY, Optional.empty(), Optional.empty()),
+                new HealthCheck(HealthCheckType.CERT, HealthCheckResult.UNHEALTHY, Optional.empty(), Optional.empty()));
         ExtendedHostStatuses extendedHostStatuses = new ExtendedHostStatuses(Map.of(HostName.hostName("host1"), healthChecks));
         when(clusterStatusService.getExtendedHostStatuses(any())).thenReturn(extendedHostStatuses);
         when(instanceMetaData.getInstanceStatus()).thenReturn(instanceStatus);
@@ -366,7 +366,7 @@ public class StackStatusCheckerJobTest {
 
         verify(clusterOperationService, times(1)).reportHealthChange(any(), any(), anySet());
         verify(stackInstanceStatusChecker).queryInstanceStatuses(eq(stackDto), any());
-        verify(clusterService, times(1)).updateClusterCertExpirationState(stack.getCluster(), true);
+        verify(clusterService, times(1)).updateClusterCertExpirationState(stack.getCluster(), true, "");
         verify(clusterService, times(1)).updateClusterStatusByStackId(stack.getId(), expected);
     }
 
@@ -391,8 +391,8 @@ public class StackStatusCheckerJobTest {
         setStackStatus(DetailedStackStatus.AVAILABLE);
         lenient().when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
         lenient().when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(true);
-        Set<HealthCheck> healthChecks = Sets.newHashSet(new HealthCheck(HealthCheckType.HOST, HealthCheckResult.HEALTHY, Optional.empty()),
-                new HealthCheck(HealthCheckType.CERT, HealthCheckResult.UNHEALTHY, Optional.empty()));
+        Set<HealthCheck> healthChecks = Sets.newHashSet(new HealthCheck(HealthCheckType.HOST, HealthCheckResult.HEALTHY, Optional.empty(), Optional.empty()),
+                new HealthCheck(HealthCheckType.CERT, HealthCheckResult.UNHEALTHY, Optional.empty(), Optional.empty()));
         ExtendedHostStatuses extendedHostStatuses = new ExtendedHostStatuses(Map.of(HostName.hostName("host1"), healthChecks));
         lenient().when(clusterStatusService.getExtendedHostStatuses(any())).thenReturn(extendedHostStatuses);
         lenient().when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of(instanceMetaData));

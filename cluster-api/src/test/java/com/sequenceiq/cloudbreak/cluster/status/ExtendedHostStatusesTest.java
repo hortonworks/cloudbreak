@@ -86,10 +86,10 @@ public class ExtendedHostStatusesTest {
     }
 
     private HealthCheck createHealthCheck(HealthCheckType type, HealthCheckResult result) {
-        return new HealthCheck(type, result, Optional.empty());
+        return new HealthCheck(type, result, Optional.empty(), Optional.empty());
     }
 
     private HealthCheck createHealthCheck(HealthCheckType type, HealthCheckResult result, String reason) {
-        return new HealthCheck(type, result, Optional.of(reason));
+        return new HealthCheck(type, result, Optional.of(reason), Optional.empty());
     }
 }

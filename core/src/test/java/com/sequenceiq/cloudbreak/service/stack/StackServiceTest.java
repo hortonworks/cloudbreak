@@ -715,6 +715,12 @@ class StackServiceTest {
             public CertExpirationState getCertExpirationState() {
                 return CertExpirationState.HOST_CERT_EXPIRING;
             }
+
+            @Override
+            public String getCertExpirationDetails() {
+                return "Certificate of Cloudera Manager Agent will expire within 364 days. Warning threshold: 366.";
+            }
+
         }));
 
         List<StackClusterStatusView> statuses = underTest.getStatusesByCrnsInternal(List.of("crn1"), StackType.WORKLOAD);

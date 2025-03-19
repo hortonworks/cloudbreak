@@ -29,6 +29,9 @@ public class StackStatusV4Response {
     @Schema(description = ClusterModelDescription.CERT_EXPIRATION)
     private CertExpirationState certExpirationState;
 
+    @Schema(description = ClusterModelDescription.CERT_EXPIRATION_DETAILS)
+    private String certExpirationDetails;
+
     public Long getId() {
         return id;
     }
@@ -85,6 +88,14 @@ public class StackStatusV4Response {
         this.certExpirationState = certExpirationState;
     }
 
+    public String getCertExpirationDetails() {
+        return certExpirationDetails;
+    }
+
+    public void setCertExpirationDetails(String certExpirationDetails) {
+        this.certExpirationDetails = certExpirationDetails;
+    }
+
     @Override
     public String toString() {
         return "StackStatusV4Response{" +
@@ -94,7 +105,8 @@ public class StackStatusV4Response {
                 ", clusterStatus=" + clusterStatus +
                 ", clusterStatusReason='" + clusterStatusReason + '\'' +
                 ", crn='" + crn + '\'' +
-                ", certExpirationState=" + certExpirationState +
+                ", certExpirationState=" + certExpirationState + '\'' +
+                ", certExpirationDetails='" + certExpirationDetails +
                 '}';
     }
 }

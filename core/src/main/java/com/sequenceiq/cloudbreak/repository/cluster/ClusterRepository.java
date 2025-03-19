@@ -76,8 +76,8 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
     Long countAliveOnesByWorkspaceAndEnvironment(@Param("workspaceId") Long workspaceId, @Param("environmentCrn") String environmentCrn);
 
     @Modifying
-    @Query("UPDATE Cluster c SET c.certExpirationState = :state WHERE c.id = :id")
-    void updateCertExpirationState(@Param("id") Long id, @Param("state") CertExpirationState state);
+    @Query("UPDATE Cluster c SET c.certExpirationState = :state, c.certExpirationDetails = :details WHERE c.id = :id")
+    void updateCertExpirationState(@Param("id") Long id, @Param("state") CertExpirationState state, @Param("details") String certExpirationDetails);
 
     @Query("SELECT c FROM Cluster c " +
             "JOIN c.stack s " +

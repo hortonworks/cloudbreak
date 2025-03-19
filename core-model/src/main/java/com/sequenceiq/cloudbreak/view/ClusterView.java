@@ -39,6 +39,8 @@ public interface ClusterView extends MdcContextInfoProvider {
 
     CertExpirationState getCertExpirationState();
 
+    String getCertExpirationDetails();
+
     String getEnvironmentCrn();
 
     String getProxyConfigCrn();

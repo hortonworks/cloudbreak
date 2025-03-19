@@ -152,7 +152,7 @@ class VmStatusCheckerConclusionStepTest {
         Map<HostName, Set<HealthCheck>> hostStatuses = new HashMap<>();
         HealthCheckResult status = healthy ? HealthCheckResult.HEALTHY : HealthCheckResult.UNHEALTHY;
         String reason = healthy ? null : "error";
-        Set<HealthCheck> healthChecks = Sets.newHashSet(new HealthCheck(HealthCheckType.HOST, status, Optional.ofNullable(reason)));
+        Set<HealthCheck> healthChecks = Sets.newHashSet(new HealthCheck(HealthCheckType.HOST, status, Optional.ofNullable(reason), Optional.empty()));
         hostStatuses.put(HostName.hostName("host1"), healthChecks);
         hostStatuses.put(HostName.hostName("host2"), healthChecks);
         return new ExtendedHostStatuses(hostStatuses);

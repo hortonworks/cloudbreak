@@ -1751,7 +1751,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     public void updateCertExpirationState(Long id, CertExpirationState state) {
-        sdxClusterRepository.updateCertExpirationState(id, state);
+        sdxClusterRepository.updateCertExpirationState(id, state, "");
     }
 
     @Override

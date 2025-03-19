@@ -289,7 +289,8 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 LOGGER.debug("Cluster '{}' state check, host certicates expiring: [{}], cm running, hoststates: {}",
                         stack.getId(), extendedHostStatuses.isAnyCertExpiring(), hostStatuses);
                 reportHealthAndSyncInstances(stack, runningInstances, getFailedInstancesInstanceMetadata(stack, extendedHostStatuses, runningInstances),
-                        getNewHealthyHostNames(extendedHostStatuses, runningInstances), extendedHostStatuses.isAnyCertExpiring());
+                        getNewHealthyHostNames(extendedHostStatuses, runningInstances), extendedHostStatuses.isAnyCertExpiring(),
+                        extendedHostStatuses.getCertExpirationDetails());
             } else {
                 syncInstances(stack, runningInstances);
             }
@@ -300,25 +301,27 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     }
 
     private void reportHealthAndSyncInstances(StackDto stack, Collection<InstanceMetadataView> runningInstances,
-            Map<InstanceMetadataView, Optional<String>> failedInstances, Set<String> newHealthyHostNames, boolean hostCertExpiring) {
+            Map<InstanceMetadataView, Optional<String>> failedInstances, Set<String> newHealthyHostNames, boolean hostCertExpiring,
+            String certExpirationDetails) {
         Map<String, Optional<String>> newFailedNodeNamesWithReason = failedInstances.entrySet()
                 .stream()
                 .filter(e -> !Set.of(SERVICES_UNHEALTHY, STOPPED)
                         .contains(e.getKey().getInstanceStatus()))
                 .filter(e -> e.getKey().getDiscoveryFQDN() != null)
                 .collect(Collectors.toMap(e -> e.getKey().getDiscoveryFQDN(), Map.Entry::getValue));
-        runIfFlowNotRunning(() -> updateStates(stack, failedInstances.keySet(), newFailedNodeNamesWithReason, newHealthyHostNames, hostCertExpiring));
+        runIfFlowNotRunning(
+                () -> updateStates(stack, failedInstances.keySet(), newFailedNodeNamesWithReason, newHealthyHostNames, hostCertExpiring, certExpirationDetails));
         syncInstances(stack, runningInstances, failedInstances.keySet(), InstanceSyncState.RUNNING, true);
     }
 
     private void updateStates(StackDto stack, Collection<InstanceMetadataView> failedInstances, Map<String, Optional<String>> newFailedNodeNamesWithReason,
-            Set<String> newHealthyHostNames, boolean hostCertExpiring) {
+            Set<String> newHealthyHostNames, boolean hostCertExpiring, String certExpirationDetails) {
         LOGGER.info("Updating status: Failed instances: {} New failed node names: {} New healthy host name: {} Host cert expiring: {}",
                 failedInstances.stream().map(s -> s.getDiscoveryFQDN()).collect(toSet()),
                 newFailedNodeNamesWithReason.keySet(),
                 newHealthyHostNames,
                 hostCertExpiring);
-        clusterService.updateClusterCertExpirationState(stack.getCluster(), hostCertExpiring);
+        clusterService.updateClusterCertExpirationState(stack.getCluster(), hostCertExpiring, certExpirationDetails);
         if (!failedInstances.isEmpty()) {
             if (stackUtil.stopStartScalingEntitlementEnabled(stack.getStack())) {
                 Set<InstanceMetadataView> stoppedInstances = failedInstances.stream().filter(im -> im.getInstanceStatus().equals(STOPPED)).collect(toSet());

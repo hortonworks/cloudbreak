@@ -98,6 +98,8 @@ public class ClusterService {
 
     private static final String RANGER_RAZ = "RANGER_RAZ";
 
+    private static final int MAX_WIDTH_CERT_EXPIRATION_DETAILS = 255;
+
     @Inject
     private StackDtoService stackDtoService;
 
@@ -338,7 +340,7 @@ public class ClusterService {
         } else {
             ExtendedHostStatuses extendedHostStatuses = connector.clusterStatusService().getExtendedHostStatuses(
                     runtimeVersionService.getRuntimeVersion(stack.getCluster().getId()));
-            updateClusterCertExpirationState(stack.getCluster(), extendedHostStatuses.isAnyCertExpiring());
+            updateClusterCertExpirationState(stack.getCluster(), extendedHostStatuses.isAnyCertExpiring(), extendedHostStatuses.getCertExpirationDetails());
             List<InstanceMetadataView> notTerminatedInstanceMetaDatas = stack.getNotTerminatedInstanceMetaData();
             List<InstanceMetadataView> updatedInstanceMetaData = updateInstanceStatuses(notTerminatedInstanceMetaDatas, extendedHostStatuses);
             fireHostStatusUpdateNotification(stackId, updatedInstanceMetaData);
@@ -386,16 +388,17 @@ public class ClusterService {
 
     public void updateClusterCertExpirationState(Long stackId, boolean hostCertificateExpiring) {
         Optional<Cluster> cluster = findOneByStackId(stackId);
-        cluster.ifPresent(c -> updateClusterCertExpirationState(c, hostCertificateExpiring));
+        cluster.ifPresent(c -> updateClusterCertExpirationState(c, hostCertificateExpiring, ""));
     }
 
-    public void updateClusterCertExpirationState(ClusterView cluster, boolean hostCertificateExpiring) {
+    public void updateClusterCertExpirationState(ClusterView cluster, boolean hostCertificateExpiring, String certExpirationDetails) {
         if (VALID == cluster.getCertExpirationState() && hostCertificateExpiring) {
             LOGGER.info("Update cert expiration state from {} to {}", cluster.getCertExpirationState(), HOST_CERT_EXPIRING);
-            repository.updateCertExpirationState(cluster.getId(), HOST_CERT_EXPIRING);
+            repository.updateCertExpirationState(cluster.getId(), HOST_CERT_EXPIRING,
+                    StringUtils.abbreviate(certExpirationDetails, MAX_WIDTH_CERT_EXPIRATION_DETAILS));
         } else if (HOST_CERT_EXPIRING == cluster.getCertExpirationState() && !hostCertificateExpiring) {
             LOGGER.info("Update cert expiration state from {} to {}", cluster.getCertExpirationState(), VALID);
-            repository.updateCertExpirationState(cluster.getId(), VALID);
+            repository.updateCertExpirationState(cluster.getId(), VALID, "");
         }
     }
 

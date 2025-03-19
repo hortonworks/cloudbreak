@@ -156,6 +156,8 @@ public class SdxCluster implements AccountAwareResource {
     @Column(name = "architecture")
     private Architecture architecture;
 
+    private String certExpirationDetails;
+
     public Long getId() {
         return id;
     }
@@ -459,6 +461,14 @@ public class SdxCluster implements AccountAwareResource {
         this.architecture = architecture;
     }
 
+    public String getCertExpirationDetails() {
+        return certExpirationDetails;
+    }
+
+    public void setCertExpirationDetails(String certExpirationDetails) {
+        this.certExpirationDetails = certExpirationDetails;
+    }
+
     //CHECKSTYLE:OFF
     @Override
     public boolean equals(Object o) {
@@ -532,6 +542,7 @@ public class SdxCluster implements AccountAwareResource {
                 ", sdxClusterServiceVersion='" + sdxClusterServiceVersion + '\'' +
                 ", detached=" + detached +
                 ", sdxDatabase=" + sdxDatabase +
+                ", certExpirationDetails='" + certExpirationDetails +
                 '}';
     }
 

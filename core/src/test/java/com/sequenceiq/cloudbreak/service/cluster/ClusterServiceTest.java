@@ -115,25 +115,26 @@ class ClusterServiceTest {
 
     static Object[][] updateClusterCertExpirationStateScenarios() {
         return new Object[][]{
-                {"Change from valid to expiring", VALID, Boolean.TRUE, Boolean.TRUE, HOST_CERT_EXPIRING},
-                {"Change from expiring to valid", HOST_CERT_EXPIRING, Boolean.FALSE, Boolean.TRUE, VALID},
-                {"No change when valid", VALID, Boolean.FALSE, Boolean.FALSE, null},
-                {"No change when expiring", HOST_CERT_EXPIRING, Boolean.TRUE, Boolean.FALSE, null}
+                {"Change from valid to expiring", VALID, Boolean.TRUE, Boolean.TRUE, HOST_CERT_EXPIRING,
+                        "Certificate of Cloudera Manager Agent will expire within 364 days. Warning threshold: 366."},
+                {"Change from expiring to valid", HOST_CERT_EXPIRING, Boolean.FALSE, Boolean.TRUE, VALID, ""},
+                {"No change when valid", VALID, Boolean.FALSE, Boolean.FALSE, null, ""},
+                {"No change when expiring", HOST_CERT_EXPIRING, Boolean.TRUE, Boolean.FALSE, null, ""}
         };
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("updateClusterCertExpirationStateScenarios")
     public void testUpdateClusterCertExpirationState(String name, CertExpirationState current, Boolean hostCertificateExpiring, Boolean stateChanged,
-            CertExpirationState newState) {
+            CertExpirationState newState, String certExpirationDetails) {
         Cluster cluster = new Cluster();
         cluster.setId(1L);
         cluster.setCertExpirationState(current);
 
-        underTest.updateClusterCertExpirationState(cluster, hostCertificateExpiring);
+        underTest.updateClusterCertExpirationState(cluster, hostCertificateExpiring, certExpirationDetails);
 
         if (stateChanged) {
-            verify(repository, times(1)).updateCertExpirationState(cluster.getId(), newState);
+            verify(repository, times(1)).updateCertExpirationState(cluster.getId(), newState, certExpirationDetails);
         } else {
             verifyNoInteractions(repository);
         }
@@ -318,7 +319,7 @@ class ClusterServiceTest {
         Map<HostName, Set<HealthCheck>> clusterManagerStateMap = new HashMap<>();
         if (healthCheckResult != null) {
             clusterManagerStateMap.put(HostName.hostName(FQDN1),
-                    Sets.newHashSet(new HealthCheck(HealthCheckType.HOST, healthCheckResult, Optional.ofNullable(statusReason))));
+                    Sets.newHashSet(new HealthCheck(HealthCheckType.HOST, healthCheckResult, Optional.ofNullable(statusReason), Optional.empty())));
         }
         ExtendedHostStatuses extendedHostStatuses = new ExtendedHostStatuses(clusterManagerStateMap);
         when(clusterStatusService.getExtendedHostStatuses(any())).thenReturn(extendedHostStatuses);

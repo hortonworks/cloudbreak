@@ -22,4 +22,6 @@ public interface StackClusterStatusView {
     String getCrn();
 
     CertExpirationState getCertExpirationState();
+
+    String getCertExpirationDetails();
 }

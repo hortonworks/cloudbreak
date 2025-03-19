@@ -52,6 +52,8 @@ import com.sequenceiq.common.api.type.CertExpirationState;
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConverterTest<Cluster> {
 
+    public static final String CERT_EXPIRATION_DETAILS = "Cert will expire in 60 days";
+
     @InjectMocks
     private ClusterToClusterV4ResponseConverter underTest;
 
@@ -105,6 +107,7 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
         source.setFqdn("some.fqdn");
         source.setDbSslRootCertBundle("bundle");
         source.setCertExpirationState(CertExpirationState.HOST_CERT_EXPIRING);
+        source.setCertExpirationDetails(CERT_EXPIRATION_DETAILS);
         Blueprint blueprint = source.getBlueprint();
         when(stackDtoDelegate.getBlueprint()).thenReturn(blueprint);
         when(stackDtoDelegate.getStack()).thenReturn(source.getStack());
@@ -126,6 +129,7 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
         assertEquals(1L, (long) result.getId());
         assertEquals(getSource().getExtendedBlueprintText(), result.getExtendedBlueprintText());
         assertEquals(CertExpirationState.HOST_CERT_EXPIRING, result.getCertExpirationState());
+        assertEquals(CERT_EXPIRATION_DETAILS, result.getCertExpirationDetails());
 
         List<String> skippedFields = Lists.newArrayList("customContainers", "cm", "creationFinished", "cloudStorage", "gateway", "customConfigurationsName",
                 "customConfigurationsCrn");

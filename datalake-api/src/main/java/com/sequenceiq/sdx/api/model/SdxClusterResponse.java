@@ -74,6 +74,9 @@ public class SdxClusterResponse {
     @Schema(description = ClusterModelDescription.CERT_EXPIRATION)
     private CertExpirationState certExpirationState;
 
+    @Schema(description = ClusterModelDescription.CERT_EXPIRATION_DETAILS)
+    private String certExpirationDetails;
+
     @Schema(description = ModelDescriptions.DATA_LAKE_CLUSTER_SERVICE_VERSION)
     private String sdxClusterServiceVersion;
 
@@ -225,6 +228,14 @@ public class SdxClusterResponse {
         this.certExpirationState = certExpirationState;
     }
 
+    public String getCertExpirationDetails() {
+        return certExpirationDetails;
+    }
+
+    public void setCertExpirationDetails(String certExpirationDetails) {
+        this.certExpirationDetails = certExpirationDetails;
+    }
+
     public String getSdxClusterServiceVersion() {
         return sdxClusterServiceVersion;
     }
@@ -307,7 +318,8 @@ public class SdxClusterResponse {
                 ", enableMultiAz=" + enableMultiAz +
                 ", tags=" + tags +
                 ", seLinuxPolicy=" + seLinuxPolicy +
-                ", certExpirationState=" + certExpirationState +
+                ", certExpirationState=" + certExpirationState + '\'' +
+                ", certExpirationDetails='" + certExpirationDetails + '\'' +
                 ", sdxClusterServiceVersion='" + sdxClusterServiceVersion + '\'' +
                 ", detached=" + detached +
                 ", databaseEngineVersion='" + databaseEngineVersion + '\'' +

@@ -135,6 +135,7 @@ public class ClusterToClusterV4ResponseConverter {
         clusterResponse.setCertExpirationState(source.getCertExpirationState());
         clusterResponse.setDbSSLEnabled(source.getDbSslEnabled() != null && source.getDbSslEnabled());
         clusterResponse.setDbSslRootCertBundle(source.getDbSslRootCertBundle());
+        clusterResponse.setCertExpirationDetails(source.getCertExpirationDetails());
         return clusterResponse;
     }
 

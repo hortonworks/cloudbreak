@@ -62,6 +62,19 @@ public class ExtendedHostStatuses {
         return hostsHealth;
     }
 
+    public String getCertExpirationDetails() {
+        Optional<String> optionalDetails = hostsHealth.values().stream()
+                .filter(Objects::nonNull)
+                .flatMap(Collection::stream)
+                .filter(healthCheck -> HealthCheckType.CERT.equals(healthCheck.getType()))
+                .filter(certHealth -> HealthCheckResult.UNHEALTHY.equals(certHealth.getResult()))
+                .map(HealthCheck::getDetails)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .findFirst();
+        return optionalDetails.orElse("");
+    }
+
     @Override
     public String toString() {
         return "ExtendedHostStatuses{" +

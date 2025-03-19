@@ -268,7 +268,7 @@ class StackStatusIntegrationTest {
         verify(flowManager, never()).triggerClusterRepairFlow(anyLong(), any(), anyBoolean());
         verify(instanceMetaDataService, never()).saveAll(any());
         verify(clusterService, never()).updateClusterStatusByStackId(any(), any(), any());
-        verify(clusterService).updateClusterCertExpirationState(stack.getCluster(), false);
+        verify(clusterService).updateClusterCertExpirationState(stack.getCluster(), false, "");
 
         verify(instanceMetaDataService, never()).save(any());
         verify(stackUpdater, never()).updateStackStatus(eq(STACK_ID), any(DetailedStackStatus.class));
@@ -298,7 +298,7 @@ class StackStatusIntegrationTest {
         verify(flowManager, never()).triggerClusterRepairFlow(anyLong(), any(), anyBoolean());
         verify(instanceMetaDataService, never()).saveAll(any());
         verify(clusterService, never()).updateClusterStatusByStackId(any(), any(), any());
-        verify(clusterService).updateClusterCertExpirationState(stack.getCluster(), false);
+        verify(clusterService).updateClusterCertExpirationState(stack.getCluster(), false, "");
 
         assertInstancesSavedWithStatuses(Map.of(INSTANCE_2, InstanceStatus.DELETED_BY_PROVIDER));
 
@@ -330,7 +330,7 @@ class StackStatusIntegrationTest {
         verify(flowManager, never()).triggerClusterRepairFlow(anyLong(), any(), anyBoolean());
         verify(instanceMetaDataService, never()).saveAll(any());
         verify(clusterService, never()).updateClusterStatusByStackId(any(), any(), any());
-        verify(clusterService).updateClusterCertExpirationState(stack.getCluster(), false);
+        verify(clusterService).updateClusterCertExpirationState(stack.getCluster(), false, "");
 
         assertInstancesSavedWithStatuses(Map.of(
                 INSTANCE_1, InstanceStatus.DELETED_BY_PROVIDER,
@@ -363,7 +363,7 @@ class StackStatusIntegrationTest {
         verify(flowManager, never()).triggerClusterRepairFlow(anyLong(), any(), anyBoolean());
         verify(instanceMetaDataService, never()).saveAll(any());
         verify(clusterService, never()).updateClusterStatusByStackId(any(), any(), any());
-        verify(clusterService).updateClusterCertExpirationState(stack.getCluster(), false);
+        verify(clusterService).updateClusterCertExpirationState(stack.getCluster(), false, "");
 
         assertInstancesSavedWithStatuses(Map.of(
                 INSTANCE_1, InstanceStatus.DELETED_BY_PROVIDER,
@@ -400,7 +400,7 @@ class StackStatusIntegrationTest {
 
     private void setUpHealthForInstance(String fqdn, HealthCheckResult healthCheckResult) {
         hostStatuses.put(hostName(fqdn), Sets.newHashSet(
-                new HealthCheck(HealthCheckType.HOST, healthCheckResult, Optional.empty())));
+                new HealthCheck(HealthCheckType.HOST, healthCheckResult, Optional.empty(), Optional.empty())));
     }
 
     @Configuration

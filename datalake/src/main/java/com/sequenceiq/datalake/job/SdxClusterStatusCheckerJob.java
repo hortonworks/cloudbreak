@@ -114,8 +114,9 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
 
     private void updateCertExpirationStateIfDifferent(SdxCluster sdx, StackStatusV4Response stack) {
         if (sdx.getCertExpirationState() != stack.getCertExpirationState()) {
-            LOGGER.info("Updating CertExpirationState from [{}] to [{}]", sdx.getCertExpirationState(), stack.getCertExpirationState());
-            sdxClusterRepository.updateCertExpirationState(sdx.getId(), stack.getCertExpirationState());
+            LOGGER.info("Updating CertExpirationState from [{}] to [{}] with details [{}]",
+                    sdx.getCertExpirationState(), stack.getCertExpirationState(), stack.getCertExpirationDetails());
+            sdxClusterRepository.updateCertExpirationState(sdx.getId(), stack.getCertExpirationState(), stack.getCertExpirationDetails());
         }
     }
 

@@ -77,7 +77,7 @@ public class ClouderaManagerHealthService {
         Set<String> servicesWithBadHealth = collectServicesWithBadHealthOnHost(host);
         if (!servicesWithBadHealth.isEmpty()) {
             String statusReason = String.format("The following services are in bad health: %s.", Joiner.on(", ").join(servicesWithBadHealth));
-            return Optional.of(new HealthCheck(HealthCheckType.SERVICES, HealthCheckResult.UNHEALTHY, Optional.of(statusReason)));
+            return Optional.of(new HealthCheck(HealthCheckType.SERVICES, HealthCheckResult.UNHEALTHY, Optional.of(statusReason), Optional.empty()));
         }
         return Optional.empty();
     }
@@ -97,7 +97,8 @@ public class ClouderaManagerHealthService {
             HealthCheckResult result = ApiHealthSummary.BAD.equals(healthCheck.get().getSummary())
                     || ApiHealthSummary.CONCERNING.equals(healthCheck.get().getSummary()) ? HealthCheckResult.UNHEALTHY : HealthCheckResult.HEALTHY;
             Optional<String> reason = Optional.ofNullable(healthCheck.get().getSummary()).map(apiSum -> "Cert health on CM: " + apiSum.getValue());
-            return Optional.of(new HealthCheck(HealthCheckType.CERT, result, reason));
+            Optional<String> details = result == HealthCheckResult.UNHEALTHY ? Optional.ofNullable(healthCheck.get().getExplanation()) : Optional.empty();
+            return Optional.of(new HealthCheck(HealthCheckType.CERT, result, reason, details));
         }
         return Optional.empty();
     }
@@ -110,7 +111,7 @@ public class ClouderaManagerHealthService {
                 .map(apiHealthCheck -> new HealthCheck(
                         HealthCheckType.HOST,
                         healthSummaryToHealthCheckResult(apiHealthCheck.getSummary(), apiHost.getMaintenanceMode()),
-                        getHostHealthMessage(apiHealthCheck.getSummary(), apiHealthCheck.getExplanation(), apiHost.getMaintenanceMode())));
+                        getHostHealthMessage(apiHealthCheck.getSummary(), apiHealthCheck.getExplanation(), apiHost.getMaintenanceMode()), Optional.empty()));
     }
 
     private static Optional<String> getHostHealthMessage(ApiHealthSummary healthSummary, String explanation, Boolean maintenanceMode) {
@@ -151,7 +152,7 @@ public class ClouderaManagerHealthService {
         boolean cmServicesHealthCheckAllowed = CMRepositoryVersionUtil.isCmServicesHealthCheckAllowed(runtimeVersion);
         Map<HostName, Set<HealthCheck>> hostStates = Maps.newHashMap();
         apiHostList.forEach(apiHost -> hostStates.merge(hostName(apiHost.getHostname()), getHealthChecks(apiHost, cmServicesHealthCheckAllowed),
-                (k, v) -> Set.of(new HealthCheck(HealthCheckType.HOST, HealthCheckResult.UNHEALTHY, Optional.of(DUPLICATED_HOST)))));
+                (k, v) -> Set.of(new HealthCheck(HealthCheckType.HOST, HealthCheckResult.UNHEALTHY, Optional.of(DUPLICATED_HOST), Optional.empty()))));
         hostStates.entrySet().removeIf(entry -> entry.getValue().isEmpty());
         LOGGER.debug("Creating 'ExtendedHostStatuses' with {}", hostStates);
         return new ExtendedHostStatuses(hostStates);
