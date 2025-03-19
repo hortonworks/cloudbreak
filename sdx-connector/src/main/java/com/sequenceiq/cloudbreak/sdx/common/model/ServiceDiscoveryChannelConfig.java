@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.sdx.cdl.config;
+package com.sequenceiq.cloudbreak.sdx.common.model;
 
 import static io.grpc.internal.GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE;
 

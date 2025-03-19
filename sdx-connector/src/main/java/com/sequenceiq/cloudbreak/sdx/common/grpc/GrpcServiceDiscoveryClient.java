@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.sdx.cdl.grpc;
+package com.sequenceiq.cloudbreak.sdx.common.grpc;
 
 import java.util.Collections;
 import java.util.Objects;
@@ -19,7 +19,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
-import com.sequenceiq.cloudbreak.sdx.cdl.config.ServiceDiscoveryChannelConfig;
+import com.sequenceiq.cloudbreak.sdx.common.model.ServiceDiscoveryChannelConfig;
 
 @Component
 public class GrpcServiceDiscoveryClient {

@@ -10,7 +10,8 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 public enum TargetPlatform {
 
     PAAS(CrnResourceDescriptor.VM_DATALAKE),
-    CDL(CrnResourceDescriptor.CDL);
+    CDL(CrnResourceDescriptor.CDL),
+    PDL(CrnResourceDescriptor.ENVIRONMENT);
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TargetPlatform.class);
 

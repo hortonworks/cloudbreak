@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.sdx.common;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -98,7 +99,12 @@ public class PlatformAwareSdxConnector {
         LOGGER.info("Getting SDX CRN'S for the datalakes in the environment {}", environmentCrn);
         Set<String> paasSdxCrns = platformDependentSdxDescribeServices.get(TargetPlatform.PAAS).listSdxCrns(environmentCrn);
         if (CollectionUtils.isEmpty(paasSdxCrns)) {
-            return platformDependentSdxDescribeServices.get(TargetPlatform.CDL).listSdxCrns(environmentCrn);
+            for (TargetPlatform targetPlatform : List.of(TargetPlatform.CDL, TargetPlatform.PDL)) {
+                Set<String> sdxCrns =  platformDependentSdxDescribeServices.get(targetPlatform).listSdxCrns(environmentCrn);
+                if (!CollectionUtils.isEmpty(sdxCrns)) {
+                    return sdxCrns;
+                }
+            }
         }
         return paasSdxCrns;
     }
@@ -137,6 +143,8 @@ public class PlatformAwareSdxConnector {
         } else if (sdxCrns.stream().allMatch(crn -> CrnResourceDescriptor.VM_DATALAKE.checkIfCrnMatches(Crn.safeFromString(crn))
                 || CrnResourceDescriptor.DATAHUB.checkIfCrnMatches(Crn.safeFromString(crn)))) {
             return TargetPlatform.PAAS;
+        } else if (sdxCrns.stream().allMatch(crn -> CrnResourceDescriptor.ENVIRONMENT.checkIfCrnMatches(Crn.safeFromString(crn)))) {
+            return TargetPlatform.PDL;
         }
         LOGGER.error("Could not decide target SDX platform based on SDX CRN list [{}].", Joiner.on(",").join(sdxCrns));
         throw new IllegalStateException("Invalid Data Lake CRN has been found, please contact Cloudera support!");

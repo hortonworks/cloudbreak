@@ -17,8 +17,6 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
-import com.sequenceiq.remoteenvironment.api.client.internal.RemoteEnvironmentApiClientParams;
-
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics;
 
@@ -30,25 +28,11 @@ public class AppConfig implements AsyncConfigurer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppConfig.class);
 
-    @Value("${rest.debug:false}")
-    private boolean restDebug;
-
-    @Value("${cert.validation:true}")
-    private boolean certificateValidation;
-
-    @Value("${cert.ignorePreValidation:true}")
-    private boolean ignorePreValidation;
-
     @Value("${remoteenvironment.delayed.threadpool.core.size:10}")
     private int delayedCorePoolSize;
 
     @Inject
     private MeterRegistry meterRegistry;
-
-    @Bean
-    public RemoteEnvironmentApiClientParams privateEnvironmentApiClientParams() {
-        return new RemoteEnvironmentApiClientParams(restDebug, certificateValidation, ignorePreValidation);
-    }
 
     @Bean(name = DELAYED_TASK_EXECUTOR)
     public ScheduledExecutorService delayedTaskExecutor() {

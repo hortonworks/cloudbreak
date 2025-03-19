@@ -7,16 +7,22 @@ import java.util.Optional;
 
 import jakarta.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.registry.ServiceAddressResolver;
+import com.sequenceiq.cloudbreak.registry.ServiceAddressResolvingException;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDeleteService;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDescribeService;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDhTearDownService;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxStartStopService;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxStatusService;
+import com.sequenceiq.environment.client.internal.EnvironmentApiClientParams;
+import com.sequenceiq.remoteenvironment.api.client.internal.RemoteEnvironmentApiClientParams;
 
 @Configuration
 public class SdxConnectorPlatformConfig {
@@ -35,6 +41,36 @@ public class SdxConnectorPlatformConfig {
 
     @Inject
     private Optional<List<PlatformAwareSdxDhTearDownService>> platformDependentSdxDhTearDownServices;
+
+    @Value("${cb.remoteEnvironment.url:http://localhost:8092}")
+    private String remoteEnvironmentServiceUrl;
+
+    @Value("${cb.remoteEnvironment.contextPath:/remoteenvironmentservice}")
+    private String remoteEnvironmentContextPath;
+
+    @Value("${cb.remoteEnvironment.serviceid:}")
+    private String remoteEnvironmentServiceId;
+
+    @Value("${cb.environment.url:http://localhost:8088}")
+    private String environmentServiceUrl;
+
+    @Value("${cb.environment.contextPath:/environmentservice}")
+    private String environmentContextPath;
+
+    @Value("${cb.environment.serviceid:}")
+    private String environmentServiceId;
+
+    @Value("${rest.debug:false}")
+    private boolean restDebug;
+
+    @Value("${cert.validation:true}")
+    private boolean certificateValidation;
+
+    @Value("${cert.ignorePreValidation:true}")
+    private boolean ignorePreValidation;
+
+    @Inject
+    private ServiceAddressResolver serviceAddressResolver;
 
     @Bean
     public Map<TargetPlatform, PlatformAwareSdxStatusService<?>> platformDependentSdxStatusServicesMap() {
@@ -99,5 +135,27 @@ public class SdxConnectorPlatformConfig {
         } else {
             return Map.of();
         }
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(RemoteEnvironmentApiClientParams.class)
+    public RemoteEnvironmentApiClientParams remoteEnvironmentApiClientParams() {
+        return new RemoteEnvironmentApiClientParams(restDebug, certificateValidation, ignorePreValidation, remoteEnvironmentServerUrl());
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(EnvironmentApiClientParams.class)
+    public EnvironmentApiClientParams environmentApiClientParams() {
+        return new EnvironmentApiClientParams(restDebug, certificateValidation, ignorePreValidation, environmentServerUrl());
+    }
+
+    private String remoteEnvironmentServerUrl() throws ServiceAddressResolvingException {
+        return serviceAddressResolver.resolveUrl(remoteEnvironmentServiceUrl + remoteEnvironmentContextPath, "http",
+                remoteEnvironmentServiceId);
+    }
+
+    private String environmentServerUrl() throws ServiceAddressResolvingException {
+        return serviceAddressResolver.resolveUrl(environmentServiceUrl + environmentContextPath, "http",
+                environmentServiceId);
     }
 }

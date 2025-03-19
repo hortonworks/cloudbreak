@@ -8,11 +8,14 @@ public class RemoteEnvironmentApiClientParams {
 
     private boolean ignorePreValidation;
 
+    private String serviceUrl;
+
     public RemoteEnvironmentApiClientParams(boolean restDebug, boolean certificateValidation,
-                                            boolean ignorePreValidation) {
+                                            boolean ignorePreValidation, String remoteEnvironmentUrl) {
         this.restDebug = restDebug;
         this.certificateValidation = certificateValidation;
         this.ignorePreValidation = ignorePreValidation;
+        this.serviceUrl = remoteEnvironmentUrl;
     }
 
     public boolean isCertificateValidation() {
@@ -25,5 +28,9 @@ public class RemoteEnvironmentApiClientParams {
 
     public boolean isRestDebug() {
         return restDebug;
+    }
+
+    public String getServiceUrl() {
+        return serviceUrl;
     }
 }

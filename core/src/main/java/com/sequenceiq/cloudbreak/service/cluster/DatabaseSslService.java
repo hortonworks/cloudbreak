@@ -143,6 +143,7 @@ public class DatabaseSslService {
                 return switch (sdxBasicViewOptional.get().platform()) {
                     case PAAS -> isSslEnforcementForVMDatalakeEmbeddedDbEnabled(stackView, creation);
                     case CDL -> isSslEnforcementForCDLEmbeddedDbEnabled(sdxBasicViewOptional.get());
+                    case PDL -> false;
                 };
             }
         } else {
