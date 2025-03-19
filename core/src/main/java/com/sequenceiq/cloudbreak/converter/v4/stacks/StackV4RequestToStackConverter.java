@@ -4,6 +4,8 @@ import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+import static com.sequenceiq.common.api.type.LoadBalancerSku.BASIC;
+import static com.sequenceiq.common.api.type.LoadBalancerSku.STANDARD;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -231,11 +233,21 @@ public class StackV4RequestToStackConverter {
         determineServiceTypeTag(stack, source.getTags());
         determineServiceFeatureTag(stack, source.getTags());
 
-        Set<LoadBalancer> loadBalancers = loadBalancerConfigService.createLoadBalancers(stack, environment, source);
-        stack.setLoadBalancers(loadBalancers);
+        createStandardLoadBalancers(environment, source, stack);
         stack.setJavaVersion(source.getJavaVersion());
         stack.setArchitecture(Architecture.fromStringWithValidation(source.getArchitecture()));
         return stack;
+    }
+
+    private void createStandardLoadBalancers(DetailedEnvironmentResponse environment, StackV4Request source, Stack stack) {
+        Set<LoadBalancer> loadBalancers = loadBalancerConfigService.createLoadBalancers(stack, environment, source);
+        loadBalancers.forEach(lb -> {
+            if (BASIC.equals(lb.getSku())) {
+                LOGGER.debug("Overriding BASIC Load Balancer SKU to STANDARD as BASIC is no longer supported by Azure");
+                lb.setSku(STANDARD);
+            }
+        });
+        stack.setLoadBalancers(loadBalancers);
     }
 
     private void convertDatabase(StackV4Request source, Stack stack) {
