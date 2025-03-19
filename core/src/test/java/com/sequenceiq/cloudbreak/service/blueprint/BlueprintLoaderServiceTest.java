@@ -22,15 +22,19 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintFile;
@@ -82,6 +86,12 @@ class BlueprintLoaderServiceTest {
 
     @Mock
     private Workspace workspace;
+
+    @Spy
+    private BlueprintListFilters blueprintListFilters;
+
+    @Mock
+    private EntitlementService entitlementService;
 
     public static Blueprint createBlueprint(ResourceStatus resourceStatus, int index, BlueprintUpgradeOption upgradeOption) {
         Blueprint blueprint = new Blueprint();
@@ -267,7 +277,9 @@ class BlueprintLoaderServiceTest {
         Set<Blueprint> blueprints = generateBlueprintData(3, BlueprintUpgradeOption.ENABLED);
         setupMock(generateCacheData(3, BlueprintUpgradeOption.ENABLED));
 
-        Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheWorkspace(blueprints, workspace, this::mockSave);
+        Collection<Blueprint> resultSet = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.loadBlueprintsForTheWorkspace(blueprints, workspace, this::mockSave));
+
         assertEquals(3L, resultSet.size());
     }
 
@@ -278,11 +290,12 @@ class BlueprintLoaderServiceTest {
         blueprints.add(blueprint);
         setupMock(generateCacheData(1, BlueprintUpgradeOption.ENABLED));
 
-        Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheWorkspace(blueprints, workspace, this::mockSave);
+        Collection<Blueprint> resultSet = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.loadBlueprintsForTheWorkspace(blueprints, workspace, this::mockSave));
 
         assertTrue(resultSet.stream().findFirst().isPresent());
-        assertEquals(resultSet.stream().findFirst().get().getStatus(), DEFAULT);
-        assertEquals(blueprint.getStatus(), DEFAULT);
+        assertEquals(DEFAULT, resultSet.stream().findFirst().get().getStatus());
+        assertEquals(DEFAULT, blueprint.getStatus());
     }
 
     @Test
@@ -295,8 +308,8 @@ class BlueprintLoaderServiceTest {
         Collection<Blueprint> resultSet = ThreadBasedUserCrnProvider.doAs(USER_CRN,
                 () -> underTest.loadBlueprintsForTheWorkspace(blueprints, workspace, this::mockSave));
         assertTrue(resultSet.stream().findFirst().isPresent());
-        assertEquals(resultSet.stream().findFirst().get().getStatus(), DEFAULT);
-        assertEquals(blueprint.getStatus(), USER_MANAGED);
+        assertEquals(DEFAULT, resultSet.stream().findFirst().get().getStatus());
+        assertEquals(USER_MANAGED, blueprint.getStatus());
     }
 
     @Test
@@ -309,13 +322,34 @@ class BlueprintLoaderServiceTest {
                 .collect(Collectors.toSet());
         setupMock(generateCacheData(3, BlueprintUpgradeOption.ENABLED));
 
-        Set<Blueprint> result = underTest.loadBlueprintsForTheWorkspace(blueprints, workspace, this::mockSave);
+        Set<Blueprint> result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.loadBlueprintsForTheWorkspace(blueprints, workspace, this::mockSave));
 
         assertTrue(result.stream().allMatch(bp -> bp.getBlueprintText() == null && bp.getDefaultBlueprintText() != null));
     }
 
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testLoadBlueprintsForTheWorkspaceWhenLakehouseOptimizerDefaultBlueprintsAreMissing(boolean lakehouseOptimizerEnabled) {
+        Map<String, BlueprintFile> defaultBlueprints = generateCacheData(3, BlueprintUpgradeOption.ENABLED);
+        defaultBlueprints.put("7.3.1 - Lakehouse Optimizer", new BlueprintFile.Builder()
+                .stackName("cloudera_lakehouse_optimizer")
+                .blueprintText("blueprintText")
+                .stackVersion("stackVersion")
+                .stackType("CDH")
+                .name("7.3.1 - Lakehouse Optimizer")
+                .build());
+        setupMock(defaultBlueprints);
+        when(entitlementService.isLakehouseOptimizerEnabled("1234")).thenReturn(lakehouseOptimizerEnabled);
+
+        Set<Blueprint> result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.loadBlueprintsForTheWorkspace(new HashSet<>(), workspace, this::mockSave));
+
+        assertEquals(lakehouseOptimizerEnabled ? 4 : 3, result.size());
+    }
+
     @Test
-    void testisAddingDefaultBlueprintsNecessaryForTheUserWhenBlueprintTextUnchangedButDefaultBlueprintTextNullForDefaultBlueprintInDBThenUpdateDB() {
+    void testIsAddingDefaultBlueprintsNecessaryForTheUserWhenBlueprintTextUnchangedButDefaultBlueprintTextNullForDefaultBlueprintInDBThenUpdateDB() {
         Set<Blueprint> blueprintsFromDatabase = generateBlueprintData(3, BlueprintUpgradeOption.ENABLED).stream()
                 .map(bp -> {
                     bp.setDefaultBlueprintText(null);

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.BlueprintFile;
 import com.sequenceiq.cloudbreak.domain.view.BlueprintView;
 import com.sequenceiq.cloudbreak.service.runtimes.SupportedRuntimes;
 
@@ -16,6 +17,8 @@ import com.sequenceiq.cloudbreak.service.runtimes.SupportedRuntimes;
 public class BlueprintListFilters {
 
     private static final String SHARED_SERVICES_READY = "shared_services_ready";
+
+    private static final String LAKEHOUSE_OPTIMIZER_STACK_NAME = "cloudera_lakehouse_optimizer";
 
     @Inject
     private SupportedRuntimes supportedRuntimes;
@@ -51,4 +54,7 @@ public class BlueprintListFilters {
         return Optional.ofNullable((Boolean) tags.getMap().get(SHARED_SERVICES_READY)).orElse(false);
     }
 
+    public boolean isLakehouseOptimizer(BlueprintFile blueprintFile) {
+        return LAKEHOUSE_OPTIMIZER_STACK_NAME.equals(blueprintFile.getStackName());
+    }
 }

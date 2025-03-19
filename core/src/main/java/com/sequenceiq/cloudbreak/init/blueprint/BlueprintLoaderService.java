@@ -26,9 +26,11 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintFile;
 import com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintListFilters;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.template.ClusterTemplateService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -45,6 +47,12 @@ public class BlueprintLoaderService {
 
     @Inject
     private ClusterTemplateService clusterTemplateService;
+
+    @Inject
+    private BlueprintListFilters blueprintListFilters;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     public boolean isAddingDefaultBlueprintsNecessaryForTheUser(Collection<Blueprint> blueprints) {
         for (Blueprint blueprintFromDatabase : blueprints) {
@@ -119,14 +127,19 @@ public class BlueprintLoaderService {
     private Set<Blueprint> addMissingBlueprints(Collection<Blueprint> blueprintsInDatabase, Workspace workspace) {
         Set<Blueprint> resultList = new HashSet<>();
         LOGGER.debug("Adding default blueprints which are missing for the user.");
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         for (Entry<String, BlueprintFile> diffBlueprint : collectDeviationOfExistingAndDefaultBlueprints(blueprintsInDatabase).entrySet()) {
+            if (blueprintListFilters.isLakehouseOptimizer(diffBlueprint.getValue()) && !entitlementService.isLakehouseOptimizerEnabled(accountId)) {
+                LOGGER.info("Lakehouse Optimizer blueprints are not enabled for workspace '{}', therefore not adding blueprint '{}' to the database.",
+                        workspace.getId(), diffBlueprint.getKey());
+                continue;
+            }
             LOGGER.debug("Default blueprint '{}' needs to be added for the '{}' workspace because the default validation missing.",
                     diffBlueprint.getKey(), workspace.getId());
             Blueprint bp = new Blueprint();
             prepareBlueprint(bp, diffBlueprint.getValue(), workspace);
             bp.setName(diffBlueprint.getValue().getName());
             bp = setupBlueprint(bp, workspace);
-            String accountId = ThreadBasedUserCrnProvider.getAccountId();
             blueprintService.decorateWithCrn(bp, accountId);
             resultList.add(bp);
         }

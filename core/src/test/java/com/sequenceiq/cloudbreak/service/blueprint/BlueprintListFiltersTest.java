@@ -19,6 +19,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.domain.BlueprintFile;
 import com.sequenceiq.cloudbreak.domain.view.BlueprintView;
 import com.sequenceiq.cloudbreak.service.runtimes.SupportedRuntimes;
 
@@ -62,6 +63,13 @@ class BlueprintListFiltersTest {
         assertTrue(underTest.isDistroXDisplayed(createBlueprintView(DEFAULT, "7.2.0", TRUE)));
     }
 
+    @Test
+    void testIsLakehouseOptimizer() {
+        assertTrue(underTest.isLakehouseOptimizer(createBlueprintFile("cloudera_lakehouse_optimizer")));
+        assertFalse(underTest.isLakehouseOptimizer(createBlueprintFile("cloudera_tohaz_optimalizalo")));
+        assertFalse(underTest.isLakehouseOptimizer(createBlueprintFile("enterprise-datalake")));
+    }
+
     private BlueprintView createBlueprintView(ResourceStatus status, String version, Boolean sdxReady) {
         BlueprintView blueprint = new BlueprintView();
         blueprint.setStatus(status);
@@ -70,5 +78,15 @@ class BlueprintListFiltersTest {
             blueprint.setTags(Json.silent(Map.of("shared_services_ready", sdxReady)));
         }
         return blueprint;
+    }
+
+    private BlueprintFile createBlueprintFile(String stackName) {
+        return new BlueprintFile.Builder()
+                .name("name")
+                .blueprintText("blueprintText")
+                .stackName(stackName)
+                .stackVersion("stackVersion")
+                .stackType("stackType")
+                .build();
     }
 }
