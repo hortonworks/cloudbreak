@@ -12,6 +12,8 @@ public class RotationFailedEvent extends RotationEvent {
 
     private final Exception exception;
 
+    private final RotationFlowExecutionType failedAt;
+
     @JsonCreator
     public RotationFailedEvent(@JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long resourceId,
@@ -19,18 +21,24 @@ public class RotationFailedEvent extends RotationEvent {
             @JsonProperty("secretType") SecretType secretType,
             @JsonProperty("executionType") RotationFlowExecutionType executionType,
             @JsonProperty("additionalProperties") Map<String, String> additionalProperties,
-            @JsonProperty("exception") Exception exception) {
+            @JsonProperty("exception") Exception exception,
+            @JsonProperty("failedAt") RotationFlowExecutionType failedAt) {
         super(selector, resourceId, resourceCrn, secretType, executionType, additionalProperties);
         this.exception = exception;
+        this.failedAt = failedAt;
     }
 
-    public static RotationFailedEvent fromPayload(RotationEvent payload, Exception ex) {
+    public static RotationFailedEvent fromPayload(RotationEvent payload, Exception ex, RotationFlowExecutionType failedAt) {
         return new RotationFailedEvent(EventSelectorUtil.selector(RotationFailedEvent.class), payload.getResourceId(), payload.getResourceCrn(),
-                payload.getSecretType(), payload.getExecutionType(), payload.getAdditionalProperties(), ex);
+                payload.getSecretType(), payload.getExecutionType(), payload.getAdditionalProperties(), ex, failedAt);
     }
 
     public Exception getException() {
         return exception;
+    }
+
+    public RotationFlowExecutionType getFailedAt() {
+        return failedAt;
     }
 
     @Override
