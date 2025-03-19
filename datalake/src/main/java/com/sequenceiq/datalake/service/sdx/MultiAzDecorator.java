@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import static com.sequenceiq.flow.core.ApplicationFlowInformation.LOGGER;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
