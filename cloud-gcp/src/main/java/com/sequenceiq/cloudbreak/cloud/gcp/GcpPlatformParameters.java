@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.TTL_MILLIS;
+import static com.sequenceiq.cloudbreak.cloud.gcp.DistroxEnabledInstanceTypes.GCP_ENABLED_TYPES_LIST;
 import static com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType;
 import static com.sequenceiq.cloudbreak.cloud.model.DisplayName.displayName;
 import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
@@ -9,9 +10,11 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
@@ -39,6 +42,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.CredentialType;
 
 @Service
@@ -114,6 +118,11 @@ public class GcpPlatformParameters implements PlatformParameters {
         List<StackParamValidation> additionalStackParameterValidations = Lists.newArrayList();
         additionalStackParameterValidations.add(new StackParamValidation(TTL_MILLIS, false, String.class, Optional.of("^[0-9]*$")));
         return additionalStackParameterValidations;
+    }
+
+    @Override
+    public Set<String> getDistroxEnabledInstanceTypes(Architecture architecture) {
+        return new HashSet<>(GCP_ENABLED_TYPES_LIST);
     }
 
     @Override

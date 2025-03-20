@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.cloud.aws.common;
 
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.TTL_MILLIS;
 import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformParameters.DEDICATED_INSTANCES;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes.AWS_ENABLED_ARM64_TYPES_LIST;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes.AWS_ENABLED_X86_TYPES_LIST;
 import static com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType;
 import static com.sequenceiq.cloudbreak.cloud.model.DisplayName.displayName;
 import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
@@ -15,6 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Base64;
@@ -40,6 +43,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.AwsDiskType;
 
 @ExtendWith(MockitoExtension.class)
@@ -152,6 +156,20 @@ class AwsPlatformParametersTest {
         List<StackParamValidation> result = underTest.additionalStackParameters();
         assertThat(result).hasSize(2);
         assertThat(underTest.additionalStackParameters()).hasSameElementsAs(expected);
+    }
+
+    @Test
+    void testDistroxEnabledInstanceTypes() {
+        Set<String> expected = AWS_ENABLED_X86_TYPES_LIST;
+        Set<String> result = underTest.getDistroxEnabledInstanceTypes(Architecture.X86_64);
+        assertThat(result).hasSameElementsAs(expected);
+    }
+
+    @Test
+    void testDistroxEnabledArmInstanceTypes() {
+        Set<String> expected = AWS_ENABLED_ARM64_TYPES_LIST;
+        Set<String> result = underTest.getDistroxEnabledInstanceTypes(Architecture.ARM64);
+        assertThat(result).hasSameElementsAs(expected);
     }
 
     @Test

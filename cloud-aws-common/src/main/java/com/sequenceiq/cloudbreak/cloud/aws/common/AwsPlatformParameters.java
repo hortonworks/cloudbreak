@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.TTL_MILLIS;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes.AWS_ENABLED_ARM64_TYPES_LIST;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes.AWS_ENABLED_X86_TYPES_LIST;
 import static com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType;
 import static com.sequenceiq.cloudbreak.cloud.model.DisplayName.displayName;
 import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
@@ -13,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
@@ -44,6 +47,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.AwsDiskType;
 
 @Service
@@ -186,6 +190,15 @@ public class AwsPlatformParameters implements PlatformParameters {
         additionalStackParameterValidations.add(new StackParamValidation(TTL_MILLIS, false, String.class, Optional.of("^[0-9]*$")));
         additionalStackParameterValidations.add(new StackParamValidation(DEDICATED_INSTANCES, false, Boolean.class, Optional.empty()));
         return additionalStackParameterValidations;
+    }
+
+    @Override
+    public Set<String> getDistroxEnabledInstanceTypes(Architecture architecture) {
+        if (architecture.equals(Architecture.X86_64)) {
+            return AWS_ENABLED_X86_TYPES_LIST;
+        } else {
+            return AWS_ENABLED_ARM64_TYPES_LIST;
+        }
     }
 
     @Override

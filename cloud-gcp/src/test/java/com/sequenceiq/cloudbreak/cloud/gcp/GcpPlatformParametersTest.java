@@ -1,9 +1,13 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
+import static com.sequenceiq.cloudbreak.cloud.gcp.DistroxEnabledInstanceTypes.GCP_ENABLED_TYPES_LIST;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
+import com.sequenceiq.common.model.Architecture;
 
 @ExtendWith(MockitoExtension.class)
 public class GcpPlatformParametersTest {
@@ -76,6 +81,13 @@ public class GcpPlatformParametersTest {
     public void testAdditionalStackParameters() {
         List<StackParamValidation> stackParamValidations = underTest.additionalStackParameters();
         Assert.assertEquals(1, stackParamValidations.size());
+    }
+
+    @Test
+    void testDistroxEnabledInstanceTypes() {
+        List<String> expected = GCP_ENABLED_TYPES_LIST;
+        Set<String> result = underTest.getDistroxEnabledInstanceTypes(Architecture.X86_64);
+        Assertions.assertThat(result).hasSameElementsAs(new HashSet<>(expected));
     }
 
     @Test

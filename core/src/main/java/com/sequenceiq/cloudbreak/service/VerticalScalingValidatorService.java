@@ -1,9 +1,12 @@
 package com.sequenceiq.cloudbreak.service;
 
+import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.constant.AwsPlatformResourcesFilterConstants.ARCHITECTURE;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -15,8 +18,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolum
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
@@ -62,6 +68,9 @@ public class VerticalScalingValidatorService {
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private CloudPlatformConnectors cloudPlatformConnectors;
+
     public void validateProviderForDelete(Stack stack, String message, boolean checkStackStopped) {
         if (!cloudParameterCache.isDeleteVolumesSupported(stack.getCloudPlatform())) {
             throw new BadRequestException(String.format("%s is not supported on %s cloudplatform", message, stack.getCloudPlatform()));
@@ -83,6 +92,14 @@ public class VerticalScalingValidatorService {
         }
         if (!stack.isStopped()) {
             throw new BadRequestException(String.format("You must stop %s to be able to vertically scale it.", stack.getName()));
+        }
+    }
+
+    public void validateIfInstanceAvailable(String requestedInstanceType, Architecture architecture, String cloudPlatformVariant, String cloudPlatform) {
+        CloudConnector cloudConnector = cloudPlatformConnectors.get(platform(cloudPlatform), Variant.variant(cloudPlatformVariant));
+        Set<String> distroxEnabledInstanceTypes = cloudConnector.parameters().getDistroxEnabledInstanceTypes(architecture);
+        if (!distroxEnabledInstanceTypes.contains(requestedInstanceType)) {
+            throw new BadRequestException("The requested instancetype: " + requestedInstanceType + " is not enabled for vertical scaling.");
         }
     }
 
@@ -175,14 +192,14 @@ public class VerticalScalingValidatorService {
     }
 
     public void validateEntitlementForDelete(Stack stack) {
-        if (CloudPlatform.valueOf(stack.getCloudPlatform()) == CloudPlatform.AZURE
+        if (CloudPlatform.valueOf(stack.getCloudPlatform()) == AZURE
                 && !entitlementService.azureDeleteDiskEnabled(Crn.safeFromString(stack.getResourceCrn()).getAccountId())) {
             throw new BadRequestException("Deleting Disk for Azure is not enabled for this account");
         }
     }
 
     public void validateEntitlementForAddVolumes(Stack stack) {
-        if (CloudPlatform.valueOf(stack.getCloudPlatform()) == CloudPlatform.AZURE
+        if (CloudPlatform.valueOf(stack.getCloudPlatform()) == AZURE
                 && !entitlementService.azureAddDiskEnabled(Crn.safeFromString(stack.getResourceCrn()).getAccountId())) {
             throw new BadRequestException("Adding Disk for Azure is not enabled for this account");
         }

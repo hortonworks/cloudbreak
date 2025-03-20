@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service;
 
+import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.cloud.model.VmType.vmTypeWithMeta;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -7,6 +8,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -31,11 +33,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolum
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureAvailabilityZoneConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
@@ -54,6 +59,7 @@ import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClient
 import com.sequenceiq.cloudbreak.service.multiaz.ProviderBasedMultiAzSetupValidator;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.verticalscale.VerticalScaleInstanceProvider;
+import com.sequenceiq.common.model.Architecture;
 
 @ExtendWith(MockitoExtension.class)
 public class VerticalScalingValidatorServiceTest {
@@ -74,6 +80,12 @@ public class VerticalScalingValidatorServiceTest {
 
     @Mock
     private CloudPlatformConnectors cloudPlatformConnectors;
+
+    @Mock
+    private CloudConnector cloudConnector;
+
+    @Mock
+    private PlatformParameters platformParameters;
 
     @Mock
     private ProviderBasedMultiAzSetupValidator providerBasedMultiAzSetupValidator;
@@ -162,6 +174,20 @@ public class VerticalScalingValidatorServiceTest {
         instanceGroup.setTemplate(template);
         instanceGroup.setAvailabilityZones(Set.of(az1, az2));
         return instanceGroup;
+    }
+
+    @Test
+    public void testValidateIfInstanceAvailableForDhVerticalScaling() {
+        String requestedInstanceType = "m7.4xlarge";
+        String cloudPlatform = "AWS";
+        String cloudPlatformVariant = "AWS";
+        when(cloudPlatformConnectors.get(platform(cloudPlatform), Variant.variant(cloudPlatformVariant))).thenReturn(cloudConnector);
+        lenient().when(cloudConnector.parameters()).thenReturn(platformParameters);
+        when(platformParameters.getDistroxEnabledInstanceTypes(Architecture.ARM64)).thenReturn(Set.of("m7.xlarge"));
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
+            underTest.validateIfInstanceAvailable(requestedInstanceType, Architecture.ARM64, cloudPlatformVariant, cloudPlatform);
+        });
+        assertEquals("The requested instancetype: m7.4xlarge is not enabled for vertical scaling.", badRequestException.getMessage());
     }
 
     @Test

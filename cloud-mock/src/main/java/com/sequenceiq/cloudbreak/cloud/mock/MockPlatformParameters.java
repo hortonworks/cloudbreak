@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -29,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
+import com.sequenceiq.common.model.Architecture;
 
 @Service
 public class MockPlatformParameters implements PlatformParameters {
@@ -79,6 +81,11 @@ public class MockPlatformParameters implements PlatformParameters {
     @Override
     public List<StackParamValidation> additionalStackParameters() {
         return new ArrayList<>();
+    }
+
+    @Override
+    public Set<String> getDistroxEnabledInstanceTypes(Architecture architecture) {
+        return Set.of("xlarge");
     }
 
     @Override

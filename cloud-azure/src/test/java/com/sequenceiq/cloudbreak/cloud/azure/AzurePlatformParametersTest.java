@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static com.sequenceiq.cloudbreak.cloud.azure.DistroxEnabledInstanceTypes.AZURE_ENABLED_TYPES_LIST;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -7,8 +8,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.security.SecureRandom;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.assertj.core.api.Assertions;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +24,7 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterRequest;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterResponse;
+import com.sequenceiq.common.model.Architecture;
 
 public class AzurePlatformParametersTest {
 
@@ -62,6 +68,13 @@ public class AzurePlatformParametersTest {
         assertEquals(workerAsMap.get(AS_UPDATE_DOMAIN_COUNTER_KEY), 50);
 
         assertFalse(instanceGroupParameterResponseMap.get(COMPUTE_GROUP_NAME).getParameters().containsKey(AS_KEY));
+    }
+
+    @Test
+    void testDistroxEnabledInstanceTypes() {
+        List<String> expected = AZURE_ENABLED_TYPES_LIST;
+        Set<String> result = underTest.getDistroxEnabledInstanceTypes(Architecture.X86_64);
+        Assertions.assertThat(result).hasSameElementsAs(new HashSet<>(expected));
     }
 
     @Test

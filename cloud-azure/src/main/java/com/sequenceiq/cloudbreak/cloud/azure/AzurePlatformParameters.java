@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_
 import static com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType.LOCALLY_REDUNDANT;
 import static com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType.PREMIUM_LOCALLY_REDUNDANT;
 import static com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType.STANDARD_SSD_LRS;
+import static com.sequenceiq.cloudbreak.cloud.azure.DistroxEnabledInstanceTypes.AZURE_ENABLED_TYPES_LIST;
 import static com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType;
 import static com.sequenceiq.cloudbreak.cloud.model.DisplayName.displayName;
 import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
@@ -12,6 +13,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -49,6 +51,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.common.model.Architecture;
 
 @Service
 public class AzurePlatformParameters implements PlatformParameters {
@@ -169,6 +172,11 @@ public class AzurePlatformParameters implements PlatformParameters {
         additionalStackParameterValidations.add(new StackParamValidation(RESOURCE_GROUP_NAME_PARAMETER, false, String.class,
                 Optional.empty()));
         return additionalStackParameterValidations;
+    }
+
+    @Override
+    public Set<String> getDistroxEnabledInstanceTypes(Architecture architecture) {
+        return new HashSet<>(AZURE_ENABLED_TYPES_LIST);
     }
 
     @Override

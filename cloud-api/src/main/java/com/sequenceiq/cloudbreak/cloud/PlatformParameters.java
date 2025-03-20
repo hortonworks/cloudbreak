@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.generic.StringType;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.common.model.Architecture;
 
 /**
  * Platform parameters.
@@ -71,6 +73,16 @@ public interface PlatformParameters {
      * @return the {@link StackParamValidation} of a platform
      */
     List<StackParamValidation> additionalStackParameters();
+
+    /**
+     * Returns the Set of instances types which are available for datahub
+     *
+     * @param architecture the specific architecture for which distrox enabled instances are required
+     * @return Set of datahub enabled instances
+     */
+    default Set<String> getDistroxEnabledInstanceTypes(Architecture architecture) {
+        return Collections.emptySet();
+    }
 
     /**
      * Return the supported orchestrator types for a platform
