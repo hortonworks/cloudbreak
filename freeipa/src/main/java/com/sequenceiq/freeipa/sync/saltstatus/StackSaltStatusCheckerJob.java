@@ -8,7 +8,6 @@ import jakarta.inject.Inject;
 
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -52,7 +51,7 @@ public class StackSaltStatusCheckerJob extends StatusCheckerJob {
     }
 
     @Override
-    protected void executeTracedJob(JobExecutionContext context) throws JobExecutionException {
+    protected void executeJob(JobExecutionContext context) {
         Long stackId = getStackId();
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         MDCBuilder.buildMdcContext(stack);

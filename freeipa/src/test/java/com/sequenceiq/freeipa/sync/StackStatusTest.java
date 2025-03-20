@@ -27,8 +27,6 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.auth.security.internal.InternalCrnModifier;
 import com.sequenceiq.cloudbreak.client.RPCMessage;
 import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -89,16 +87,10 @@ class StackStatusTest {
     private EntitlementService entitlementService;
 
     @MockBean
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @MockBean
     private MetricsClient metricsClient;
 
     @MockBean
     private StatusCheckerJobService jobService;
-
-    @MockBean
-    private InternalCrnModifier internalCrnModifier;
 
     @Mock
     private FreeIpaClient freeIpaClient;
@@ -114,8 +106,6 @@ class StackStatusTest {
 
     void setUp(int instanceCount) throws Exception {
         underTest.setLocalId(STACK_ID.toString());
-        when(internalCrnModifier.getInternalCrnWithAccountId(any()))
-                .thenReturn("crn:altus:iam:us-west-1:altus:user:__internal__actor__");
 
         stack = new Stack();
         stack.setId(STACK_ID);
@@ -171,7 +161,7 @@ class StackStatusTest {
         stackStatus.setDetailedStackStatus(DetailedStackStatus.AVAILABLE);
         stack.setStackStatus(stackStatus);
 
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(stackUpdater, never()).updateStackStatus(eq(stack), any(), any());
     }
@@ -205,7 +195,7 @@ class StackStatusTest {
         stackStatus.setDetailedStackStatus(DetailedStackStatus.AVAILABLE);
         stack.setStackStatus(stackStatus);
 
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(stackUpdater).updateStackStatus(eq(stack), eq(DetailedStackStatus.UNHEALTHY), any());
         assertEquals(InstanceStatus.FAILED, instance2.getInstanceStatus());
@@ -241,7 +231,7 @@ class StackStatusTest {
         stackStatus.setDetailedStackStatus(DetailedStackStatus.AVAILABLE);
         stack.setStackStatus(stackStatus);
 
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verifyNoInteractions(stackUpdater);
         assertEquals(InstanceStatus.TERMINATED, instance2.getInstanceStatus());
@@ -259,7 +249,7 @@ class StackStatusTest {
         when(stackInstanceProviderChecker.checkStatus(stack, notTerminatedInstances)).thenReturn(List.of(
                 createCloudVmInstanceStatus(INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER)
         ));
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(stackUpdater).updateStackStatus(eq(stack), eq(DetailedStackStatus.DELETED_ON_PROVIDER_SIDE), any());
     }
@@ -276,7 +266,7 @@ class StackStatusTest {
         when(stackInstanceProviderChecker.checkStatus(stack, notTerminatedInstances)).thenReturn(List.of(
                 createCloudVmInstanceStatus(INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STOPPED)
         ));
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(stackUpdater).updateStackStatus(eq(stack), eq(DetailedStackStatus.STOPPED), any());
     }
@@ -294,7 +284,7 @@ class StackStatusTest {
                 createCloudVmInstanceStatus(INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STOPPED),
                 createCloudVmInstanceStatus(INSTANCE_2, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STOPPED)
         ));
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(stackUpdater).updateStackStatus(eq(stack), eq(DetailedStackStatus.STOPPED), any());
     }
@@ -312,7 +302,7 @@ class StackStatusTest {
                 createCloudVmInstanceStatus(INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STARTED),
                 createCloudVmInstanceStatus(INSTANCE_2, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STOPPED)
         ));
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(stackUpdater).updateStackStatus(eq(stack), eq(DetailedStackStatus.UNHEALTHY), any());
     }
@@ -331,7 +321,7 @@ class StackStatusTest {
                 createCloudVmInstanceStatus(INSTANCE_2, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER),
                 createCloudVmInstanceStatus(INSTANCE_3, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STARTED)
         ));
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(stackUpdater).updateStackStatus(eq(stack), eq(DetailedStackStatus.UNHEALTHY), any());
     }
@@ -351,7 +341,7 @@ class StackStatusTest {
         ));
         when(jobService.isLongSyncJob(jobExecutionContext)).thenReturn(Boolean.FALSE);
 
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(stackUpdater).updateStackStatus(eq(stack), eq(DetailedStackStatus.DELETED_ON_PROVIDER_SIDE), any());
     }
@@ -375,7 +365,7 @@ class StackStatusTest {
         ));
         when(jobService.isLongSyncJob(jobExecutionContext)).thenReturn(Boolean.FALSE);
 
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verifyNoInteractions(stackUpdater);
         verify(jobService).scheduleLongIntervalCheck(eq(STACK_ID), any());
@@ -401,7 +391,7 @@ class StackStatusTest {
         ));
         when(jobService.isLongSyncJob(jobExecutionContext)).thenReturn(Boolean.TRUE);
 
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verifyNoInteractions(stackUpdater);
         verify(jobService).schedule(eq(STACK_ID), any());

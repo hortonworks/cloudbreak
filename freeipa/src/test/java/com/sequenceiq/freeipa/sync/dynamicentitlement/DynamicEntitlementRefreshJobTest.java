@@ -23,10 +23,6 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.JobKey;
 
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.auth.security.internal.InternalCrnModifier;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
@@ -68,19 +64,10 @@ class DynamicEntitlementRefreshJobTest {
     private FlowLogService flowLogService;
 
     @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
-
-    @Mock
     private JobExecutionContext jobExecutionContext;
 
     @Mock
     private JobDetail jobDetail;
-
-    @Mock
-    private InternalCrnModifier internalCrnModifier;
 
     @Mock
     private AvailabilityChecker availabilityChecker;
@@ -98,9 +85,6 @@ class DynamicEntitlementRefreshJobTest {
     public void setUp() {
         underTest.setLocalId(String.valueOf(LOCAL_ID));
         lenient().when(dynamicEntitlementRefreshConfig.isDynamicEntitlementEnabled()).thenReturn(Boolean.TRUE);
-        lenient().when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        lenient().when(internalCrnModifier.changeAccountIdInCrnString(eq(INTERNAL_CRN), eq(ACCOUNT_ID))).thenReturn(Crn.fromString(MODIFIED_INTERNAL_CRN));
-        lenient().when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_CRN);
         lenient().when(operationService.getOperationForAccountIdAndOperationId(ACCOUNT_ID, OPERATION_ID)).thenReturn(operation);
         lenient().when(operation.getStatus()).thenReturn(OperationState.RUNNING);
         lenient().when(jobExecutionContext.getJobDetail()).thenReturn(jobDetail);
@@ -112,7 +96,7 @@ class DynamicEntitlementRefreshJobTest {
         Stack stack = stack(Status.AVAILABLE);
         when(stackService.getByIdWithListsInTransaction(eq(LOCAL_ID))).thenReturn(stack);
         when(dynamicEntitlementRefreshConfig.isDynamicEntitlementEnabled()).thenReturn(Boolean.FALSE);
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
         verify(flowLogService, never()).isOtherFlowRunning(any());
         verify(dynamicEntitlementRefreshJobService, never()).unschedule(any());
         verify(availabilityChecker, never()).isRequiredPackagesInstalled(any(), any());
@@ -127,7 +111,7 @@ class DynamicEntitlementRefreshJobTest {
         when(dynamicEntitlementRefreshConfig.isDynamicEntitlementEnabled()).thenReturn(Boolean.TRUE);
         when(flowLogService.isOtherFlowRunning(LOCAL_ID)).thenReturn(Boolean.TRUE);
 
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
         verify(flowLogService, times(1)).isOtherFlowRunning(eq(LOCAL_ID));
         verify(dynamicEntitlementRefreshJobService, never()).unschedule(any());
         verify(availabilityChecker, never()).isRequiredPackagesInstalled(any(), any());
@@ -148,7 +132,7 @@ class DynamicEntitlementRefreshJobTest {
         when(dynamicEntitlementRefreshService.changeClusterConfigurationIfEntitlementsChanged(stack)).thenReturn(OPERATION_ID);
         lenient().when(availabilityChecker.isRequiredPackagesInstalled(eq(stack), eq(Set.of(ImagePackageVersion.CDP_PROMETHEUS.getKey())))).thenReturn(true);
 
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(dynamicEntitlementRefreshJobService, never()).unschedule(eq(jobKey));
         verify(dynamicEntitlementRefreshService, times(1)).changeClusterConfigurationIfEntitlementsChanged(eq(stack));
@@ -168,7 +152,7 @@ class DynamicEntitlementRefreshJobTest {
         when(dynamicEntitlementRefreshService.changeClusterConfigurationIfEntitlementsChanged(stack)).thenReturn(OPERATION_ID);
         lenient().when(availabilityChecker.isRequiredPackagesInstalled(eq(stack), eq(Set.of(ImagePackageVersion.CDP_PROMETHEUS.getKey())))).thenReturn(true);
 
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(dynamicEntitlementRefreshJobService, never()).unschedule(eq(jobKey));
         verify(dynamicEntitlementRefreshService, times(1)).changeClusterConfigurationIfEntitlementsChanged(eq(stack));
@@ -185,7 +169,7 @@ class DynamicEntitlementRefreshJobTest {
         when(dynamicEntitlementRefreshConfig.isDynamicEntitlementEnabled()).thenReturn(Boolean.TRUE);
         when(flowLogService.isOtherFlowRunning(LOCAL_ID)).thenReturn(Boolean.FALSE);
         lenient().when(availabilityChecker.isRequiredPackagesInstalled(eq(stack), eq(Set.of(ImagePackageVersion.CDP_PROMETHEUS.getKey())))).thenReturn(true);
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
         verify(flowLogService, times(1)).isOtherFlowRunning(eq(LOCAL_ID));
         verify(dynamicEntitlementRefreshJobService, times(1)).unschedule(eq(jobKey));
         verify(availabilityChecker, never()).isRequiredPackagesInstalled(any(), any());
@@ -199,7 +183,7 @@ class DynamicEntitlementRefreshJobTest {
         when(stackService.getByIdWithListsInTransaction(eq(LOCAL_ID))).thenReturn(stack);
         when(dynamicEntitlementRefreshConfig.isDynamicEntitlementEnabled()).thenReturn(Boolean.TRUE);
         when(availabilityChecker.isRequiredPackagesInstalled(eq(stack), eq(Set.of(ImagePackageVersion.CDP_PROMETHEUS.getKey())))).thenReturn(false);
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
         verify(flowLogService, times(1)).isOtherFlowRunning(eq(LOCAL_ID));
         verify(dynamicEntitlementRefreshJobService, never()).unschedule(any());
         verify(availabilityChecker, times(1)).isRequiredPackagesInstalled(eq(stack), any());
@@ -211,14 +195,11 @@ class DynamicEntitlementRefreshJobTest {
     void testExecuteWhenClusterNotAvailable() {
         Stack stack = stack(Status.STOPPED);
         when(dynamicEntitlementRefreshConfig.isDynamicEntitlementEnabled()).thenReturn(Boolean.TRUE);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        when(internalCrnModifier.changeAccountIdInCrnString(eq(INTERNAL_CRN), eq(ACCOUNT_ID))).thenReturn(Crn.fromString(MODIFIED_INTERNAL_CRN));
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_CRN);
         JobKey jobKey = new JobKey(LOCAL_ID.toString(), "dynamic-entitlement-jobs");
         when(stackService.getByIdWithListsInTransaction(eq(LOCAL_ID))).thenReturn(stack);
         when(flowLogService.isOtherFlowRunning(LOCAL_ID)).thenReturn(Boolean.FALSE);
         when(availabilityChecker.isRequiredPackagesInstalled(eq(stack), eq(Set.of(ImagePackageVersion.CDP_PROMETHEUS.getKey())))).thenReturn(true);
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
         verify(flowLogService, times(1)).isOtherFlowRunning(eq(LOCAL_ID));
         verify(dynamicEntitlementRefreshJobService, never()).unschedule(any());
         verify(availabilityChecker, times(1)).isRequiredPackagesInstalled(eq(stack), any());
@@ -231,13 +212,10 @@ class DynamicEntitlementRefreshJobTest {
         Stack stack = stack(Status.AVAILABLE);
         when(stackService.getByIdWithListsInTransaction(eq(LOCAL_ID))).thenReturn(stack);
         when(dynamicEntitlementRefreshConfig.isDynamicEntitlementEnabled()).thenReturn(Boolean.TRUE);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        when(internalCrnModifier.changeAccountIdInCrnString(eq(INTERNAL_CRN), eq(ACCOUNT_ID))).thenReturn(Crn.fromString(MODIFIED_INTERNAL_CRN));
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_CRN);
         when(dynamicEntitlementRefreshService.changeClusterConfigurationIfEntitlementsChanged(stack)).thenReturn(OPERATION_ID);
         lenient().when(availabilityChecker.isRequiredPackagesInstalled(eq(stack), eq(Set.of(ImagePackageVersion.CDP_PROMETHEUS.getKey())))).thenReturn(true);
 
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
         verify(flowLogService, times(1)).isOtherFlowRunning(eq(LOCAL_ID));
         verify(dynamicEntitlementRefreshJobService, never()).unschedule(any());
         verify(availabilityChecker, times(1)).isRequiredPackagesInstalled(eq(stack), any());

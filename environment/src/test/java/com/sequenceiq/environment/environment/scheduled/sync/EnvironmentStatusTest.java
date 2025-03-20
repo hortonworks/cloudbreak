@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Configuration;
@@ -24,8 +23,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -57,12 +54,6 @@ class EnvironmentStatusTest {
     @MockBean
     private EnvironmentStatusUpdateService environmentStatusUpdateService;
 
-    @MockBean
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
-
     @Mock
     private JobExecutionContext jobExecutionContext;
 
@@ -88,12 +79,10 @@ class EnvironmentStatusTest {
             "WHEN FreeIpa is available " +
             "THEN environment status should not be updated"
     )
-    void available() throws JobExecutionException {
+    void available() {
         environment.setStatus(EnvironmentStatus.AVAILABLE);
         setFreeIpaStatus(Status.AVAILABLE);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(environmentStatusUpdateService, never()).updateEnvironmentStatusAndNotify(eq(environment), any(), any());
     }
@@ -104,12 +93,10 @@ class EnvironmentStatusTest {
             "WHEN FreeIpa is deleted on provider side " +
             "THEN environment status should be updated"
     )
-    void deleted() throws JobExecutionException {
+    void deleted() {
         environment.setStatus(EnvironmentStatus.AVAILABLE);
         setFreeIpaStatus(Status.DELETED_ON_PROVIDER_SIDE);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
                 environment,

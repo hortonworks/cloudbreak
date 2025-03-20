@@ -6,9 +6,6 @@ import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.security.internal.InternalCrnModifier;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
 import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;
@@ -22,9 +19,6 @@ public class ClusterPublicEndpointPatchService extends ExistingStackPatchService
 
     @Inject
     private ClusterPublicEndpointPatchConfig clusterPublicEndpointPatchConfig;
-
-    @Inject
-    private InternalCrnModifier internalCrnModifier;
 
     @Override
     public StackPatchType getStackPatchType() {
@@ -40,9 +34,7 @@ public class ClusterPublicEndpointPatchService extends ExistingStackPatchService
 
     @Override
     boolean doApply(Stack stack) {
-        ThreadBasedUserCrnProvider.doAs(
-                internalCrnModifier.getInternalCrnWithAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId()),
-                () -> clusterPublicEndpointManagementService.start(stack));
+        clusterPublicEndpointManagementService.start(stack);
         return true;
     }
 }

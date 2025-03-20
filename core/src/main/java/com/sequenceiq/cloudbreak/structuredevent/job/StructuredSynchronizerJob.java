@@ -51,7 +51,7 @@ public class StructuredSynchronizerJob extends StatusCheckerJob {
     }
 
     @Override
-    protected void executeTracedJob(JobExecutionContext context) throws JobExecutionException {
+    protected void executeJob(JobExecutionContext context) throws JobExecutionException {
         Long stackId = getLocalIdAsLong();
         try {
             Stack stack = stackService.get(stackId);

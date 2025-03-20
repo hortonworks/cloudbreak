@@ -35,10 +35,6 @@ public class InternalCrnModifier {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
-    public String getInternalCrnWithAccountId(String accountId) {
-        return getAccountIdModifiedCrn(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(), accountId);
-    }
-
     public Object changeInternalCrn(ProceedingJoinPoint proceedingJoinPoint) {
         String userCrnString = ThreadBasedUserCrnProvider.getUserCrn();
         MethodSignature methodSignature = (MethodSignature) proceedingJoinPoint.getSignature();
@@ -102,7 +98,7 @@ public class InternalCrnModifier {
         return Optional.of(newUserCrn);
     }
 
-    public Crn changeAccountIdInCrnString(String userCrnString, String accountId) {
+    private Crn changeAccountIdInCrnString(String userCrnString, String accountId) {
         return Crn.copyWithDifferentAccountId(Crn.safeFromString(userCrnString), accountId);
     }
 

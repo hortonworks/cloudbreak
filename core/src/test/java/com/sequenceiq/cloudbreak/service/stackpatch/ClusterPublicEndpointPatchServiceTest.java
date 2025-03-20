@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.stackpatch;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -18,7 +17,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.auth.security.internal.InternalCrnModifier;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;
@@ -32,9 +30,6 @@ class ClusterPublicEndpointPatchServiceTest {
 
     @Mock
     private ClusterPublicEndpointPatchConfig clusterPublicEndpointPatchConfig;
-
-    @Mock
-    private InternalCrnModifier internalCrnModifier;
 
     @InjectMocks
     private ClusterPublicEndpointPatchService underTest;
@@ -66,7 +61,6 @@ class ClusterPublicEndpointPatchServiceTest {
 
     @Test
     public void testDoApply() {
-        when(internalCrnModifier.getInternalCrnWithAccountId(anyString())).thenReturn("crn:cdp:iam:us-west-1:1234:user:__internal__actor__");
         Stack stack = TestUtil.stack();
         boolean result = underTest.doApply(stack);
         assertTrue(result);

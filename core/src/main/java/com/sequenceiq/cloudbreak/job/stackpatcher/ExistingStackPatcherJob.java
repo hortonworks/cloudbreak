@@ -53,7 +53,7 @@ public class ExistingStackPatcherJob extends StatusCheckerJob {
     }
 
     @Override
-    protected void executeTracedJob(JobExecutionContext context) throws JobExecutionException {
+    protected void executeJob(JobExecutionContext context) throws JobExecutionException {
         Stack stack = stackService.getByIdWithListsInTransaction(getStackId());
         Status stackStatus = stack.getStatus();
         String stackPatchTypeName = context.getJobDetail().getJobDataMap().getString(STACK_PATCH_TYPE_NAME);

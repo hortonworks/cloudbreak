@@ -30,7 +30,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.security.internal.InternalCrnModifier;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -67,13 +66,13 @@ public class StackImageServiceTest {
 
     private static final String TARGET_IMAGE = "TARGET_IMAGE";
 
+    private final Map<String, String> packageVersions = Collections.singletonMap("package", "version");
+
     private Stack stack;
 
     private Image image;
 
     private StatedImage statedImage;
-
-    private final Map<String, String> packageVersions = Collections.singletonMap("package", "version");
 
     @Mock
     private ComponentConfigProviderService componentConfigProviderService;
@@ -86,9 +85,6 @@ public class StackImageServiceTest {
 
     @Mock
     private ImageCatalogService imageCatalogService;
-
-    @Mock
-    private InternalCrnModifier internalCrnModifier;
 
     @Mock
     private PlatformStringTransformer platformStringTransformer;
@@ -262,7 +258,6 @@ public class StackImageServiceTest {
         when(imageComp.getImageCatalogName()).thenReturn(TARGET_IMAGE_CATALOG);
         when(imageComp.getImageId()).thenReturn(IMAGE_ID);
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(imageComp);
-        when(internalCrnModifier.getInternalCrnWithAccountId(anyString())).thenReturn("accountId");
         when(imageCatalogService.getImageCatalogByName(anyLong(), anyString())).thenReturn(imageCatalog);
         when(imageCatalogService.getImageByCatalogName(anyLong(), anyString(), anyString())).thenReturn(statedImage);
 

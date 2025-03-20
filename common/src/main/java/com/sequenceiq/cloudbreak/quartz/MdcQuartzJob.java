@@ -28,6 +28,9 @@ public abstract class MdcQuartzJob extends QuartzJobBean {
         LOGGER.debug("{} job started with key: {}", jobClassName, jobKey);
         try {
             executeTracedJob(context);
+        } catch (JobExecutionException e) {
+            LOGGER.error("Failed to execute job with class name '{}'", jobClassName, e);
+            throw e;
         } catch (Exception e) {
             LOGGER.error("Failed to execute job with class name '{}'", jobClassName, e);
             throw new JobExecutionException(e);

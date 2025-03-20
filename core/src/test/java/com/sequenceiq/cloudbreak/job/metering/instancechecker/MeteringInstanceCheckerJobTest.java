@@ -18,7 +18,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.service.metering.MeteringInstanceCheckerService;
@@ -54,26 +53,26 @@ class MeteringInstanceCheckerJobTest {
     }
 
     @Test
-    void testExecuteWhenClusterRunning() throws JobExecutionException {
+    void testExecuteWhenClusterRunning() {
         when(stackStatusService.findFirstByStackIdOrderByCreatedDesc(eq(STACK_ID))).thenReturn(Optional.of(new StackStatus(null, AVAILABLE)));
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
         verify(meteringInstanceCheckerJobService, never()).unschedule(eq(String.valueOf(STACK_ID)));
         verify(meteringInstanceCheckerService, times(1)).checkInstanceTypes(eq(STACK_ID));
     }
 
     @Test
-    void testExecuteWhenClusterStopped() throws JobExecutionException {
+    void testExecuteWhenClusterStopped() {
         when(stackStatusService.findFirstByStackIdOrderByCreatedDesc(eq(STACK_ID))).thenReturn(Optional.of(new StackStatus(null, STOPPED)));
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
         verify(meteringInstanceCheckerJobService, times(1)).unschedule(eq(String.valueOf(STACK_ID)));
         verify(meteringInstanceCheckerService, never()).checkInstanceTypes(eq(STACK_ID));
     }
 
     @Test
-    void testExecuteWhenClusterDeletedOnProviderSide() throws JobExecutionException {
+    void testExecuteWhenClusterDeletedOnProviderSide() {
         when(stackStatusService.findFirstByStackIdOrderByCreatedDesc(eq(STACK_ID)))
                 .thenReturn(Optional.of(new StackStatus(null, DELETED_ON_PROVIDER_SIDE)));
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
         verify(meteringInstanceCheckerJobService, never()).unschedule(eq(String.valueOf(STACK_ID)));
         verify(meteringInstanceCheckerService, never()).checkInstanceTypes(eq(STACK_ID));
     }

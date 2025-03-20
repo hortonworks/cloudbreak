@@ -31,8 +31,6 @@ import org.quartz.JobKey;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
 import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordService;
@@ -52,9 +50,6 @@ class StackSaltStatusCheckerJobTest {
 
     @Mock
     private StackDtoService stackDtoService;
-
-    @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Mock
     private RotateSaltPasswordService rotateSaltPasswordService;
@@ -120,40 +115,40 @@ class StackSaltStatusCheckerJobTest {
     }
 
     @Test
-    void executeTracedJobWithoutStack() throws JobExecutionException {
+    void executeJobWithoutStack() throws JobExecutionException {
         when(stackDtoService.getByIdOpt(STACK_ID)).thenReturn(Optional.empty());
 
-        underTest.executeTracedJob(context);
+        underTest.executeJob(context);
 
         verify(jobService).unschedule(jobKey);
         verifyNoInteractions(rotateSaltPasswordService);
     }
 
     @Test
-    void executeTracedJobWithStackInUnschedulableStatus() throws JobExecutionException {
+    void executeJobWithStackInUnschedulableStatus() throws JobExecutionException {
         when(stackDto.getStatus()).thenReturn(Status.DELETE_COMPLETED);
 
-        underTest.executeTracedJob(context);
+        underTest.executeJob(context);
 
         verify(jobService).unschedule(jobKey);
         verifyNoInteractions(rotateSaltPasswordService);
     }
 
     @Test
-    void executeTracedJobWithStackInIgnoredStatus() throws JobExecutionException {
+    void executeJobWithStackInIgnoredStatus() throws JobExecutionException {
         when(stackDto.getStatus()).thenReturn(Status.CREATE_IN_PROGRESS);
 
-        underTest.executeTracedJob(context);
+        underTest.executeJob(context);
 
         verifyNoInteractions(jobService);
         verifyNoInteractions(rotateSaltPasswordService);
     }
 
     @Test
-    void executeTracedJobWithStackInUnhandledStatus() throws JobExecutionException {
+    void executeJobWithStackInUnhandledStatus() throws JobExecutionException {
         when(stackDto.getStatus()).thenReturn(Status.UPDATE_REQUESTED);
 
-        underTest.executeTracedJob(context);
+        underTest.executeJob(context);
 
         verifyNoInteractions(jobService);
         verifyNoInteractions(rotateSaltPasswordService);
@@ -162,16 +157,11 @@ class StackSaltStatusCheckerJobTest {
     @Nested
     class SyncableStack {
 
-        @BeforeEach
-        void setUp() {
-            when(regionAwareInternalCrnGeneratorFactory.datahub()).thenReturn(mock(RegionAwareInternalCrnGenerator.class));
-        }
-
         @Test
         void okStatus() throws JobExecutionException {
             when(saltPasswordStatusService.getSaltPasswordStatus(stackDto)).thenReturn(SaltPasswordStatus.OK);
 
-            underTest.executeTracedJob(context);
+            underTest.executeJob(context);
 
             verify(saltPasswordStatusService).getSaltPasswordStatus(stackDto);
             verify(rotateSaltPasswordValidator).validateRotateSaltPassword(stackDto);
@@ -182,7 +172,7 @@ class StackSaltStatusCheckerJobTest {
         void failedToCheckStatus() throws JobExecutionException {
             when(saltPasswordStatusService.getSaltPasswordStatus(stackDto)).thenReturn(SaltPasswordStatus.FAILED_TO_CHECK);
 
-            underTest.executeTracedJob(context);
+            underTest.executeJob(context);
 
             verify(saltPasswordStatusService).getSaltPasswordStatus(stackDto);
             verify(rotateSaltPasswordValidator).validateRotateSaltPassword(stackDto);
@@ -193,7 +183,7 @@ class StackSaltStatusCheckerJobTest {
         void expiresStatus() throws JobExecutionException {
             when(saltPasswordStatusService.getSaltPasswordStatus(stackDto)).thenReturn(SaltPasswordStatus.EXPIRES);
 
-            underTest.executeTracedJob(context);
+            underTest.executeJob(context);
 
             verify(saltPasswordStatusService).getSaltPasswordStatus(stackDto);
             verify(rotateSaltPasswordValidator).validateRotateSaltPassword(stackDto);
@@ -204,7 +194,7 @@ class StackSaltStatusCheckerJobTest {
         void invalidStatus() throws JobExecutionException {
             when(saltPasswordStatusService.getSaltPasswordStatus(stackDto)).thenReturn(SaltPasswordStatus.INVALID);
 
-            underTest.executeTracedJob(context);
+            underTest.executeJob(context);
 
             verify(saltPasswordStatusService).getSaltPasswordStatus(stackDto);
             verify(rotateSaltPasswordValidator).validateRotateSaltPassword(stackDto);
@@ -217,7 +207,7 @@ class StackSaltStatusCheckerJobTest {
             RuntimeException cause = new RuntimeException("cause");
             doThrow(cause).when(saltPasswordStatusService).getSaltPasswordStatus(stackDto);
 
-            underTest.executeTracedJob(context);
+            underTest.executeJob(context);
 
             verify(saltPasswordStatusService).getSaltPasswordStatus(stackDto);
             verify(rotateSaltPasswordValidator).validateRotateSaltPassword(stackDto);

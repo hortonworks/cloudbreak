@@ -10,7 +10,6 @@ import jakarta.inject.Inject;
 
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -44,7 +43,7 @@ public class MeteringSyncJob extends StatusCheckerJob {
     }
 
     @Override
-    protected void executeTracedJob(JobExecutionContext context) throws JobExecutionException {
+    protected void executeJob(JobExecutionContext context) {
         StackView stack = stackDtoService.getStackViewById(getLocalIdAsLong());
         if (Sets.union(Status.getUnschedulableStatuses(), Set.of(STOPPED)).contains(stack.getStatus())) {
             LOGGER.info("Metering sync job will be unscheduled, stack state is {}", stack.getStatus());

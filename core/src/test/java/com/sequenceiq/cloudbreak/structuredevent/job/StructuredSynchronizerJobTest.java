@@ -61,7 +61,7 @@ public class StructuredSynchronizerJobTest {
     @Test
     public void testUnscheduleJobWhenStackServiceThrowsNotFoundException() throws JobExecutionException {
         when(stackService.get(anyLong())).thenThrow(new NotFoundException("Stack not found"));
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(syncJobService, times(1)).unschedule("1");
     }
@@ -69,7 +69,7 @@ public class StructuredSynchronizerJobTest {
     @Test
     public void testUnscheduleJobWhenStackServiceReturnNull() throws JobExecutionException {
         when(stackService.get(anyLong())).thenReturn(null);
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(syncJobService, times(1)).unschedule("1");
     }
@@ -78,7 +78,7 @@ public class StructuredSynchronizerJobTest {
     public void testUnscheduleJobWhenStackIsInUnschedulableState() throws JobExecutionException {
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.DELETE_COMPLETED));
         when(stackService.get(anyLong())).thenReturn(stack);
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(syncJobService, times(1)).unschedule("1");
     }
@@ -87,7 +87,7 @@ public class StructuredSynchronizerJobTest {
     public void testNoActionWhenStackStateIsNull() throws JobExecutionException {
         stack.setStackStatus(null);
         when(stackService.get(anyLong())).thenReturn(stack);
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(syncJobService, times(0)).unschedule(any());
         verify(structuredSyncEventFactory, times(0)).createStructuredSyncEvent(any());
@@ -100,7 +100,7 @@ public class StructuredSynchronizerJobTest {
         when(stackService.get(anyLong())).thenReturn(stack);
         StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
         when(structuredSyncEventFactory.createStructuredSyncEvent(1L)).thenReturn(structuredSyncEvent);
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(syncJobService, times(0)).unschedule(any());
         verify(structuredSyncEventFactory, times(1)).createStructuredSyncEvent(1L);

@@ -39,13 +39,19 @@ public class StructuredSynchronizerJob extends StatusCheckerJob {
     @Inject
     private CDPDefaultStructuredEventClient cdpDefaultStructuredEventClient;
 
+    public static Set<EnvironmentStatus> unschedulableStates() {
+        return EnumSet.of(
+                EnvironmentStatus.ARCHIVED
+        );
+    }
+
     @Override
     protected Optional<MdcContextInfoProvider> getMdcContextConfigProvider() {
         return Optional.empty();
     }
 
     @Override
-    protected void executeTracedJob(JobExecutionContext context) {
+    protected void executeJob(JobExecutionContext context) {
         Long id = getLocalIdAsLong();
         try {
             Environment environment = environmentService.findEnvironmentByIdOrThrow(id);
@@ -68,11 +74,5 @@ public class StructuredSynchronizerJob extends StatusCheckerJob {
         } catch (Exception ex) {
             LOGGER.error("Error happened during CDPEnvironmentStructuredSyncEvent generation! The event won't be stored!", ex);
         }
-    }
-
-    public static Set<EnvironmentStatus> unschedulableStates() {
-        return EnumSet.of(
-                EnvironmentStatus.ARCHIVED
-        );
     }
 }

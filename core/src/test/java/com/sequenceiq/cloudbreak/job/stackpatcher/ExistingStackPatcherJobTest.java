@@ -108,7 +108,7 @@ class ExistingStackPatcherJobTest {
     void shouldUnscheduleWhenStackIsInFailedOrDeletedStatus() throws JobExecutionException, ExistingStackPatchApplyException {
         setStackStatus(Status.CREATE_FAILED);
 
-        underTest.executeTracedJob(context);
+        underTest.executeJob(context);
 
         verifyUnschedule();
         verify(existingStackPatchService, never()).apply(stack);
@@ -118,7 +118,7 @@ class ExistingStackPatcherJobTest {
     void shouldNotApplyWhenStackIsAlreadyFixed() throws JobExecutionException, ExistingStackPatchApplyException {
         stackPatch.setStatus(StackPatchStatus.FIXED);
 
-        underTest.executeTracedJob(context);
+        underTest.executeJob(context);
 
         verifyUnschedule();
         verify(existingStackPatchService, never()).apply(stack);
@@ -128,7 +128,7 @@ class ExistingStackPatcherJobTest {
     void shouldNotApplyWhenStackIsNotAffected() throws JobExecutionException, ExistingStackPatchApplyException {
         when(existingStackPatchService.isAffected(stack)).thenReturn(false);
 
-        underTest.executeTracedJob(context);
+        underTest.executeJob(context);
 
         verifyUnschedule();
         verify(existingStackPatchService, never()).apply(stack);
@@ -138,7 +138,7 @@ class ExistingStackPatcherJobTest {
     void shouldApplyWhenStackIsAffected() throws JobExecutionException, ExistingStackPatchApplyException {
         when(existingStackPatchService.isAffected(stack)).thenReturn(true);
 
-        underTest.executeTracedJob(context);
+        underTest.executeJob(context);
 
         verify(existingStackPatchService).apply(stack);
         verify(stackPatchService).updateStatusAndReportUsage(stackPatch, StackPatchStatus.AFFECTED);
@@ -150,7 +150,7 @@ class ExistingStackPatcherJobTest {
         stackPatch.setStatus(stackPatchStatus);
         when(existingStackPatchService.isAffected(stack)).thenReturn(true);
 
-        underTest.executeTracedJob(context);
+        underTest.executeJob(context);
 
         verify(existingStackPatchService).apply(stack);
         verify(stackPatchService).updateStatus(stackPatch, StackPatchStatus.AFFECTED);
@@ -161,7 +161,7 @@ class ExistingStackPatcherJobTest {
         when(existingStackPatchService.isAffected(stack)).thenReturn(true);
         when(existingStackPatchService.apply(stack)).thenReturn(true);
 
-        underTest.executeTracedJob(context);
+        underTest.executeJob(context);
 
         verifyUnschedule();
         verify(existingStackPatchService).apply(stack);
@@ -175,7 +175,7 @@ class ExistingStackPatcherJobTest {
         String errorMessage = "error message";
         doThrow(new ExistingStackPatchApplyException(errorMessage)).when(existingStackPatchService).apply(stack);
 
-        Assertions.assertThatThrownBy(() -> underTest.executeTracedJob(context))
+        Assertions.assertThatThrownBy(() -> underTest.executeJob(context))
                 .isInstanceOf(JobExecutionException.class)
                 .hasMessageStartingWith("Failed to patch stack");
 
@@ -191,7 +191,7 @@ class ExistingStackPatcherJobTest {
         doThrow(UnknownStackPatchTypeException.class).when(existingStackPatcherServiceProvider).provide(anyString());
 
         String errorMessage = "Unknown stack patch type: " + stackPatchTypeName;
-        Assertions.assertThatThrownBy(() -> underTest.executeTracedJob(context))
+        Assertions.assertThatThrownBy(() -> underTest.executeJob(context))
                 .isInstanceOf(JobExecutionException.class)
                 .hasMessage(errorMessage);
         verifyUnschedule();

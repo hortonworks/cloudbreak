@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.service.stackpatch;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -21,7 +19,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.security.internal.InternalCrnModifier;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -58,9 +55,6 @@ class UnboundRestartPatchServiceTest {
     @Mock
     private FlowService flowService;
 
-    @Mock
-    private InternalCrnModifier internalCrnModifier;
-
     @InjectMocks
     private UnboundRestartPatchService underTest;
 
@@ -71,8 +65,6 @@ class UnboundRestartPatchServiceTest {
         stack = new Stack();
         stack.setId(123L);
         stack.setResourceCrn("crn:cdp:datalake:us-west-1:tenant:datalake:935ad382-fe9c-400b-bf38-2156c1f09b6d");
-
-        lenient().when(internalCrnModifier.getInternalCrnWithAccountId(any())).thenReturn(INTERNAL_CRN_WITH_ACCOUNT_ID);
 
         setCmServerReachability(true);
     }
@@ -135,7 +127,7 @@ class UnboundRestartPatchServiceTest {
         });
         setFlowState(true, false);
 
-        underTest.doApply(stack);
+        ThreadBasedUserCrnProvider.doAsAndThrow(INTERNAL_CRN_WITH_ACCOUNT_ID, () -> underTest.doApply(stack));
 
         assertThat(actor.get()).isEqualTo(INTERNAL_CRN_WITH_ACCOUNT_ID);
     }

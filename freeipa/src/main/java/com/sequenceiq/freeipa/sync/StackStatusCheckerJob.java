@@ -22,8 +22,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.security.internal.InternalCrnModifier;
 import com.sequenceiq.cloudbreak.metrics.MetricsClient;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
@@ -69,9 +67,6 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     private FreeipaStatusInfoLogger freeipaStatusInfoLogger;
 
     @Inject
-    private InternalCrnModifier internalCrnModifier;
-
-    @Inject
     private MetricsClient metricsClient;
 
     @Inject
@@ -89,7 +84,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     }
 
     @Override
-    protected void executeTracedJob(JobExecutionContext context) {
+    protected void executeJob(JobExecutionContext context) {
         Long stackId = getStackId();
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         try {
@@ -137,43 +132,40 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     public void syncAStack(Stack stack, boolean updateStatusFromFlow) {
         try {
             checkedMeasure(() -> {
-                ThreadBasedUserCrnProvider.doAs(internalCrnModifier.getInternalCrnWithAccountId(stack.getAccountId()), () -> {
-                    Set<InstanceMetaData> notTerminatedForStack = stack.getAllInstanceMetaDataList().stream()
-                            .filter(Predicate.not(InstanceMetaData::isTerminated))
-                            .collect(Collectors.toSet());
+                Set<InstanceMetaData> notTerminatedForStack = stack.getAllInstanceMetaDataList().stream()
+                        .filter(Predicate.not(InstanceMetaData::isTerminated))
+                        .collect(Collectors.toSet());
 
-                    Set<InstanceMetaData> unusableInstances = collectAndUpdateUnusableInstances(notTerminatedForStack);
+                Set<InstanceMetaData> unusableInstances = collectAndUpdateUnusableInstances(notTerminatedForStack);
 
-                    Set<InstanceMetaData> checkableInstances = Sets.newHashSet(Sets.difference(notTerminatedForStack, unusableInstances));
+                Set<InstanceMetaData> checkableInstances = Sets.newHashSet(Sets.difference(notTerminatedForStack, unusableInstances));
 
-                    int alreadyDeletedCount = notTerminatedForStack.size() - checkableInstances.size();
-                    if (alreadyDeletedCount > 0) {
-                        LOGGER.info(AUTO_SYNC_LOG_PREFIX + "Count of already in deleted on provider side state: {}", alreadyDeletedCount);
-                    }
-                    if (!checkableInstances.isEmpty()) {
-                        SyncResult syncResult = freeipaChecker.getStatus(stack, checkableInstances);
-                        if (DetailedStackStatus.AVAILABLE == syncResult.getStatus()) {
-                            for (Map.Entry<InstanceMetaData, DetailedStackStatus> entry : syncResult.getInstanceStatusMap().entrySet()) {
-                                updateInstanceStatus(entry.getKey(), entry.getValue());
-                            }
-                            updateStackStatus(stack, syncResult, null, alreadyDeletedCount, updateStatusFromFlow);
-                        } else {
-                            List<ProviderSyncResult> results = providerChecker.updateAndGetStatuses(stack, checkableInstances,
-                                    syncResult.getInstanceStatusMap(), updateStatusFromFlow);
-                            if (!results.isEmpty()) {
-                                updateStackStatus(stack, syncResult, results, alreadyDeletedCount, updateStatusFromFlow);
-                            } else {
-                                LOGGER.debug(AUTO_SYNC_LOG_PREFIX + "results is empty, skip update");
-                            }
+                int alreadyDeletedCount = notTerminatedForStack.size() - checkableInstances.size();
+                if (alreadyDeletedCount > 0) {
+                    LOGGER.info(AUTO_SYNC_LOG_PREFIX + "Count of already in deleted on provider side state: {}", alreadyDeletedCount);
+                }
+                if (!checkableInstances.isEmpty()) {
+                    SyncResult syncResult = freeipaChecker.getStatus(stack, checkableInstances);
+                    if (DetailedStackStatus.AVAILABLE == syncResult.getStatus()) {
+                        for (Map.Entry<InstanceMetaData, DetailedStackStatus> entry : syncResult.getInstanceStatusMap().entrySet()) {
+                            updateInstanceStatus(entry.getKey(), entry.getValue());
                         }
-                    } else if (alreadyDeletedCount > 0) {
-                        SyncResult syncResult = new SyncResult("FreeIpa is " + DetailedStackStatus.DELETED_ON_PROVIDER_SIDE,
-                                DetailedStackStatus.DELETED_ON_PROVIDER_SIDE, null);
                         updateStackStatus(stack, syncResult, null, alreadyDeletedCount, updateStatusFromFlow);
+                    } else {
+                        List<ProviderSyncResult> results = providerChecker.updateAndGetStatuses(stack, checkableInstances,
+                                syncResult.getInstanceStatusMap(), updateStatusFromFlow);
+                        if (!results.isEmpty()) {
+                            updateStackStatus(stack, syncResult, results, alreadyDeletedCount, updateStatusFromFlow);
+                        } else {
+                            LOGGER.debug(AUTO_SYNC_LOG_PREFIX + "results is empty, skip update");
+                        }
                     }
-                    freeipaStatusInfoLogger.logFreeipaStatus(stack.getId(), checkableInstances);
-                });
-                return null;
+                } else if (alreadyDeletedCount > 0) {
+                    SyncResult syncResult = new SyncResult("FreeIpa is " + DetailedStackStatus.DELETED_ON_PROVIDER_SIDE,
+                            DetailedStackStatus.DELETED_ON_PROVIDER_SIDE, null);
+                    updateStackStatus(stack, syncResult, null, alreadyDeletedCount, updateStatusFromFlow);
+                }
+                freeipaStatusInfoLogger.logFreeipaStatus(stack.getId(), checkableInstances);
             }, LOGGER, AUTO_SYNC_LOG_PREFIX + "freeipa stack sync in {}ms");
         } catch (Exception e) {
             LOGGER.info(AUTO_SYNC_LOG_PREFIX + "Error occurred during freeipa sync: {}", e.getMessage(), e);

@@ -12,10 +12,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
@@ -42,12 +39,6 @@ public class DBStackStatusSyncJobTest {
     @Mock
     private DBStack dbStack;
 
-    @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
-
     @InjectMocks
     private DBStackStatusSyncJob victim;
 
@@ -60,21 +51,18 @@ public class DBStackStatusSyncJobTest {
     }
 
     @Test
-    public void shouldNotCallSyncWhenOtherFlowIsRunning() throws JobExecutionException {
+    public void shouldNotCallSyncWhenOtherFlowIsRunning() {
         when(flowLogService.isOtherFlowRunning(DB_STACK_ID)).thenReturn(true);
 
-        victim.executeTracedJob(jobExecutionContext);
+        victim.executeJob(jobExecutionContext);
 
         verifyNoInteractions(dbStackStatusSyncService);
     }
 
     @Test
-    public void shouldCallSync() throws JobExecutionException {
+    public void shouldCallSync() {
         when(flowLogService.isOtherFlowRunning(DB_STACK_ID)).thenReturn(false);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
-                .thenReturn("crn:altus:iam:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        victim.executeTracedJob(jobExecutionContext);
+        victim.executeJob(jobExecutionContext);
 
         verify(dbStackStatusSyncService).sync(dbStack);
     }

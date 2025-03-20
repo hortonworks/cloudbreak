@@ -1,5 +1,10 @@
 package com.sequenceiq.cloudbreak.quartz.statuschecker.job;
 
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.quartz.MdcQuartzJob;
 
 public abstract class StatusCheckerJob extends MdcQuartzJob {
@@ -28,4 +33,10 @@ public abstract class StatusCheckerJob extends MdcQuartzJob {
         return Long.valueOf(getLocalId());
     }
 
+    @Override
+    protected void executeTracedJob(JobExecutionContext context) throws JobExecutionException {
+        ThreadBasedUserCrnProvider.doAsInternalActor(() -> executeJob(context), Crn.safeFromString(remoteResourceCrn).getAccountId());
+    }
+
+    protected abstract void executeJob(JobExecutionContext context) throws JobExecutionException;
 }

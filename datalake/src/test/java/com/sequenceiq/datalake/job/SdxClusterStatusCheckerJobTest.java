@@ -20,7 +20,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Configuration;
@@ -31,7 +30,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
-import com.sequenceiq.cloudbreak.auth.security.internal.InternalCrnModifier;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceCrnEndpoints;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
@@ -70,9 +68,6 @@ class SdxClusterStatusCheckerJobTest {
     @MockBean
     private FlowLogService flowLogService;
 
-    @MockBean
-    private InternalCrnModifier internalCrnModifier;
-
     @Mock
     private CloudbreakServiceCrnEndpoints cloudbreakServiceCrnEndpoints;
 
@@ -104,7 +99,6 @@ class SdxClusterStatusCheckerJobTest {
         when(cloudbreakInternalCrnClient.withInternalCrn()).thenReturn(cloudbreakServiceCrnEndpoints);
         when(cloudbreakServiceCrnEndpoints.autoscaleEndpoint()).thenReturn(autoscaleV4Endpoint);
         when(autoscaleV4Endpoint.getStatusByCrn(RESOURCE_CRN.toString())).thenReturn(stack);
-        when(internalCrnModifier.getInternalCrnWithAccountId(anyString())).thenReturn("internalCrn");
 
         status = new SdxStatusEntity();
         status.setDatalake(sdxCluster);
@@ -117,30 +111,30 @@ class SdxClusterStatusCheckerJobTest {
     }
 
     @Test
-    public void doNotExecuteTracedJobWhenThereIsARunningFlow() {
+    public void doNotExecuteJobWhenThereIsARunningFlow() {
         JobExecutionContext context = Mockito.mock(JobExecutionContext.class);
         when(flowLogService.isOtherFlowRunning(any())).thenReturn(true);
-        underTest.executeTracedJob(context);
+        underTest.executeJob(context);
         verify(cloudbreakInternalCrnClient, times(0)).withInternalCrn();
     }
 
     @Test
-    void available() throws JobExecutionException {
+    void available() {
         setUpSdxStatus(DatalakeStatusEnum.RUNNING);
         stack.setStatus(Status.AVAILABLE);
 
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(sdxStatusService, never()).setStatusForDatalakeAndNotify(any(), any(ResourceEvent.class), anyString(), eq(sdxCluster));
     }
 
     @Test
-    void ambiguousToClusterUnreachable() throws JobExecutionException {
+    void ambiguousToClusterUnreachable() {
         setUpSdxStatus(DatalakeStatusEnum.CLUSTER_AMBIGUOUS);
         stack.setStatus(Status.UNREACHABLE);
         stack.setStatusReason("connection failure");
 
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotify(eq(DatalakeStatusEnum.CLUSTER_UNREACHABLE),
                 eq(ResourceEvent.CLUSTER_AMBARI_CLUSTER_SYNCHRONIZED),
@@ -150,12 +144,12 @@ class SdxClusterStatusCheckerJobTest {
     }
 
     @Test
-    void ambiguousToNodeFailure() throws JobExecutionException {
+    void ambiguousToNodeFailure() {
         setUpSdxStatus(DatalakeStatusEnum.CLUSTER_AMBIGUOUS);
         stack.setStatus(Status.NODE_FAILURE);
         stack.setStatusReason("cm agent down");
 
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotify(eq(DatalakeStatusEnum.NODE_FAILURE),
                 eq(ResourceEvent.CLUSTER_AMBARI_CLUSTER_SYNCHRONIZED),
@@ -165,11 +159,11 @@ class SdxClusterStatusCheckerJobTest {
     }
 
     @Test
-    void runningToDeletedOnProviderSide() throws JobExecutionException {
+    void runningToDeletedOnProviderSide() {
         setUpSdxStatus(DatalakeStatusEnum.RUNNING);
         stack.setStatus(Status.DELETED_ON_PROVIDER_SIDE);
 
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotify(eq(DatalakeStatusEnum.DELETED_ON_PROVIDER_SIDE),
                 eq(ResourceEvent.SDX_CLUSTER_DELETED_ON_PROVIDER_SIDE),
@@ -179,13 +173,13 @@ class SdxClusterStatusCheckerJobTest {
     }
 
     @Test
-    void deletedOnProviderSideToRunning() throws JobExecutionException {
+    void deletedOnProviderSideToRunning() {
         setUpSdxStatus(DatalakeStatusEnum.DELETED_ON_PROVIDER_SIDE);
         stack.setStatus(Status.AVAILABLE);
         stack.setClusterStatus(Status.AVAILABLE);
         jobDataMap.put(StatusCheckerJobService.SYNC_JOB_TYPE, StatusCheckerJobService.LONG_SYNC_JOB_TYPE);
 
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotify(eq(DatalakeStatusEnum.RUNNING),
                 eq(ResourceEvent.CLUSTER_AMBARI_CLUSTER_SYNCHRONIZED),
@@ -196,12 +190,12 @@ class SdxClusterStatusCheckerJobTest {
     }
 
     @Test
-    void longSyncJobShouldntChangeScheduleWhenDeletedOnProviderSide() throws JobExecutionException {
+    void longSyncJobShouldntChangeScheduleWhenDeletedOnProviderSide() {
         setUpSdxStatus(DatalakeStatusEnum.DELETED_ON_PROVIDER_SIDE);
         stack.setStatus(Status.DELETED_ON_PROVIDER_SIDE);
         jobDataMap.put(StatusCheckerJobService.SYNC_JOB_TYPE, StatusCheckerJobService.LONG_SYNC_JOB_TYPE);
 
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(sdxStatusService, times(0)).setStatusForDatalakeAndNotify(any(), any(), any(), any(), eq(sdxCluster));
         verify(jobService, times(0)).schedule(any());
@@ -209,12 +203,12 @@ class SdxClusterStatusCheckerJobTest {
     }
 
     @Test
-    void deletedOnProviderSideToDeleted() throws JobExecutionException {
+    void deletedOnProviderSideToDeleted() {
         setUpSdxStatus(DatalakeStatusEnum.DELETED_ON_PROVIDER_SIDE);
         stack.setStatus(Status.DELETE_COMPLETED);
         jobDataMap.put(StatusCheckerJobService.SYNC_JOB_TYPE, StatusCheckerJobService.LONG_SYNC_JOB_TYPE);
 
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotify(eq(DatalakeStatusEnum.STACK_DELETED),
                 eq(ResourceEvent.SDX_CLUSTER_DELETION_FINISHED),
@@ -224,12 +218,12 @@ class SdxClusterStatusCheckerJobTest {
     }
 
     @Test
-    void stoppedToRunning() throws JobExecutionException {
+    void stoppedToRunning() {
         setUpSdxStatus(DatalakeStatusEnum.STOPPED);
         stack.setStatus(Status.AVAILABLE);
         stack.setClusterStatus(Status.AVAILABLE);
 
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotify(eq(DatalakeStatusEnum.RUNNING),
                 eq(ResourceEvent.CLUSTER_AMBARI_CLUSTER_SYNCHRONIZED),
@@ -239,10 +233,10 @@ class SdxClusterStatusCheckerJobTest {
     }
 
     @Test
-    void unscheduleSdxClustersInStackDeletedStatus() throws JobExecutionException {
+    void unscheduleSdxClustersInStackDeletedStatus() {
         setUpSdxStatus(DatalakeStatusEnum.STACK_DELETED);
 
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(sdxStatusService, times(1)).getActualStatusForSdx(eq(sdxCluster));
         verify(jobService, times(1)).unschedule(eq(String.valueOf(SDX_ID)));

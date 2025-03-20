@@ -14,8 +14,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateService;
@@ -32,18 +30,12 @@ public class EnvironmentStatusCheckerJobTest {
 
     private final EnvironmentStatusUpdateService environmentStatusUpdateService = Mockito.mock(EnvironmentStatusUpdateService.class);
 
-    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory =
-            Mockito.mock(RegionAwareInternalCrnGeneratorFactory.class);
-
-    private final RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator =
-            Mockito.mock(RegionAwareInternalCrnGenerator.class);
-
     private final EnvironmentJobService environmentJobService = Mockito.mock(EnvironmentJobService.class);
 
     private final AutoSyncConfig autoSyncConfig = Mockito.mock(AutoSyncConfig.class);
 
     private final EnvironmentStatusCheckerJob underTest = new EnvironmentStatusCheckerJob(environmentService, flowLogService, environmentSyncService,
-            environmentStatusUpdateService, environmentJobService, autoSyncConfig, regionAwareInternalCrnGeneratorFactory);
+            environmentStatusUpdateService, environmentJobService, autoSyncConfig);
 
     @Test
     void testSyncAnEnvSameStatus() {
@@ -66,8 +58,6 @@ public class EnvironmentStatusCheckerJobTest {
 
         when(environmentSyncService.getStatusByFreeipa(environment)).thenReturn(AVAILABLE);
         when(autoSyncConfig.isUpdateStatus()).thenReturn(true);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.syncAnEnv(environment);
 
         verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(environment, AVAILABLE, ENVIRONMENT_SYNC_FINISHED);
@@ -81,8 +71,6 @@ public class EnvironmentStatusCheckerJobTest {
 
         when(environmentSyncService.getStatusByFreeipa(environment)).thenReturn(AVAILABLE);
         when(autoSyncConfig.isUpdateStatus()).thenReturn(false);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.syncAnEnv(environment);
 
         verify(autoSyncConfig).isUpdateStatus();

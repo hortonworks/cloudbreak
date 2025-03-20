@@ -27,10 +27,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.auth.CrnUser;
 import com.sequenceiq.cloudbreak.auth.ReflectionUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 
 @ExtendWith(MockitoExtension.class)
-public class InternalCrnModifierTest {
+class InternalCrnModifierTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
@@ -56,18 +55,12 @@ public class InternalCrnModifierTest {
     private InternalCrnModifier underTest;
 
     @BeforeEach
-    public void before() {
+    void before() {
         lenient().when(proceedingJoinPoint.getSignature()).thenReturn(methodSignature);
     }
 
     @Test
-    void testChangeAccountIdInCrnString() {
-        Crn result = underTest.changeAccountIdInCrnString(INTERNAL_CRN, "1234");
-        assertEquals(EXPECTED_INTERNAL_CRN, result.toString());
-    }
-
-    @Test
-    public void testModificationIfUserCrnIsRealUser() {
+    void testModificationIfUserCrnIsRealUser() {
         AtomicBoolean assertationHappened = new AtomicBoolean(false);
         when(reflectionUtil.proceed(any())).thenAnswer(invocation -> {
             assertEquals(USER_CRN, ThreadBasedUserCrnProvider.getUserCrn());
@@ -84,7 +77,7 @@ public class InternalCrnModifierTest {
     }
 
     @Test
-    public void testModificationIfUserCrnIsNull() {
+    void testModificationIfUserCrnIsNull() {
         AtomicBoolean assertationHappened = new AtomicBoolean(false);
         when(reflectionUtil.proceed(any())).thenAnswer(invocation -> {
             assertNull(ThreadBasedUserCrnProvider.getUserCrn());
@@ -101,7 +94,7 @@ public class InternalCrnModifierTest {
     }
 
     @Test
-    public void testModificationIfUserCrnIsInternalButThereIsNoResourceCrnParameter() {
+    void testModificationIfUserCrnIsInternalButThereIsNoResourceCrnParameter() {
         when(reflectionUtil.getParameter(any(), any(), eq(AccountId.class))).thenReturn(Optional.empty());
         when(reflectionUtil.getParameter(any(), any(), eq(ResourceCrn.class))).thenReturn(Optional.empty());
         when(reflectionUtil.getParameter(any(), any(), eq(RequestObject.class))).thenReturn(Optional.empty());
@@ -122,7 +115,7 @@ public class InternalCrnModifierTest {
     }
 
     @Test
-    public void testModificationIfUserCrnIsInternalButResourceCrnParameterIsNotString() {
+    void testModificationIfUserCrnIsInternalButResourceCrnParameterIsNotString() {
         when(reflectionUtil.getParameter(any(), any(), eq(AccountId.class))).thenReturn(Optional.empty());
         when(reflectionUtil.getParameter(any(), any(), eq(ResourceCrn.class))).thenReturn(Optional.of(2));
         when(reflectionUtil.getParameter(any(), any(), eq(RequestObject.class))).thenReturn(Optional.empty());
@@ -143,7 +136,7 @@ public class InternalCrnModifierTest {
     }
 
     @Test
-    public void testModificationIfUserCrnIsInternalButResourceCrnParameterIsNotCrn() {
+    void testModificationIfUserCrnIsInternalButResourceCrnParameterIsNotCrn() {
         when(reflectionUtil.getParameter(any(), any(), eq(AccountId.class))).thenReturn(Optional.empty());
         when(reflectionUtil.getParameter(any(), any(), eq(ResourceCrn.class))).thenReturn(Optional.of("not_crn"));
         when(reflectionUtil.getParameter(any(), any(), eq(RequestObject.class))).thenReturn(Optional.empty());
@@ -164,7 +157,7 @@ public class InternalCrnModifierTest {
     }
 
     @Test
-    public void testModificationIfUserCrnIsInternal() {
+    void testModificationIfUserCrnIsInternal() {
         when(reflectionUtil.getParameter(any(), any(), eq(AccountId.class))).thenReturn(Optional.empty());
         when(reflectionUtil.getParameter(any(), any(), eq(ResourceCrn.class))).thenReturn(Optional.of(STACK_CRN));
         doNothing().when(internalUserModifier).persistModifiedInternalUser(any());
@@ -188,7 +181,7 @@ public class InternalCrnModifierTest {
     }
 
     @Test
-    public void testModificationIfUserCrnIsInternalAndTenantAwareObjectPresent() {
+    void testModificationIfUserCrnIsInternalAndTenantAwareObjectPresent() {
         when(reflectionUtil.getParameter(any(), any(), eq(AccountId.class))).thenReturn(Optional.empty());
         when(reflectionUtil.getParameter(any(), any(), eq(ResourceCrn.class))).thenReturn(Optional.empty());
         when(reflectionUtil.getParameter(any(), any(), eq(RequestObject.class))).thenReturn(Optional.of(new SampleTenantAwareObject(STACK_CRN)));
@@ -213,7 +206,7 @@ public class InternalCrnModifierTest {
     }
 
     @Test
-    public void testModificationIfUserCrnIsInternalAndTenantAwareObjectPresentButCrnIsNull() {
+    void testModificationIfUserCrnIsInternalAndTenantAwareObjectPresentButCrnIsNull() {
         when(reflectionUtil.getParameter(any(), any(), eq(AccountId.class))).thenReturn(Optional.empty());
         when(reflectionUtil.getParameter(any(), any(), eq(ResourceCrn.class))).thenReturn(Optional.empty());
         when(reflectionUtil.getParameter(any(), any(), eq(RequestObject.class))).thenReturn(Optional.of(new SampleTenantAwareObject(null)));
@@ -240,7 +233,7 @@ public class InternalCrnModifierTest {
         @ResourceCrn
         private String crn;
 
-        public SampleTenantAwareObject(String crn) {
+        SampleTenantAwareObject(String crn) {
             this.crn = crn;
         }
 

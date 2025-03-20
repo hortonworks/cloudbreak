@@ -16,9 +16,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.auth.security.internal.InternalCrnModifier;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -58,19 +55,13 @@ public class DynamicEntitlementRefreshJob extends StatusCheckerJob {
     private DynamicEntitlementRefreshConfig config;
 
     @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Inject
-    private InternalCrnModifier internalCrnModifier;
-
-    @Inject
     private ImageService imageService;
 
     @Inject
     private FlowService flowService;
 
     @Override
-    protected void executeTracedJob(JobExecutionContext context) throws JobExecutionException {
+    protected void executeJob(JobExecutionContext context) throws JobExecutionException {
         StackDto stack = stackDtoService.getById(getLocalIdAsLong());
         if (!config.isDynamicEntitlementEnabled()) {
             LOGGER.info("DynamicEntitlementRefreshJob cannot run because feature is disabled.");
@@ -81,17 +72,14 @@ public class DynamicEntitlementRefreshJob extends StatusCheckerJob {
             LOGGER.info("DynamicEntitlementRefreshJob cannot run, because required package (cdp-prometheus) is missing, probably its an old image.");
         } else if (!stack.getStatus().isAvailable()) {
             LOGGER.info("DynamicEntitlementRefreshJob store new watched entitlements without triggering related flow, because status is {}", stack.getStatus());
-            getChangedWatchedEntitlementsAndStoreNewFromUms(stack);
+            dynamicEntitlementRefreshService.getChangedWatchedEntitlementsAndStoreNewFromUms(stack);
         } else if (anyInstanceStopped(stack)) {
             LOGGER.info("DynamicEntitlementRefreshJob store new watched entitlements without triggering related flow, because there are stopped instances.");
-            getChangedWatchedEntitlementsAndStoreNewFromUms(stack);
+            dynamicEntitlementRefreshService.getChangedWatchedEntitlementsAndStoreNewFromUms(stack);
         } else {
             LOGGER.info("DynamicEntitlementRefreshJob will apply watched entitlement changes for stack: {}.", stack.getResourceCrn());
             try {
-                FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAs(
-                        internalCrnModifier.changeAccountIdInCrnString(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                                stack.getAccountId()).toString(),
-                        () -> dynamicEntitlementRefreshService.changeClusterConfigurationIfEntitlementsChanged(stack));
+                FlowIdentifier flowIdentifier = dynamicEntitlementRefreshService.changeClusterConfigurationIfEntitlementsChanged(stack);
                 if (FlowType.NOT_TRIGGERED != flowIdentifier.getType()) {
                     rescheduleIfPreviousFlowChainFailed(stack, context.getJobDetail(), flowIdentifier.getPollableId());
                 }
@@ -99,13 +87,6 @@ public class DynamicEntitlementRefreshJob extends StatusCheckerJob {
                 LOGGER.info("DynamicEntitlementRefreshJob cannot run because another flow is running: {}", e.getMessage());
             }
         }
-    }
-
-    private void getChangedWatchedEntitlementsAndStoreNewFromUms(StackDto stack) {
-        ThreadBasedUserCrnProvider.doAs(
-                internalCrnModifier.changeAccountIdInCrnString(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                        stack.getAccountId()).toString(),
-                () -> dynamicEntitlementRefreshService.getChangedWatchedEntitlementsAndStoreNewFromUms(stack));
     }
 
     private boolean isRequiredPackagesInstalled(StackDto stack) {

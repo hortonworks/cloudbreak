@@ -17,9 +17,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
@@ -87,9 +84,6 @@ public class StackSaltStatusCheckerJob extends StatusCheckerJob {
     private StackDtoService stackDtoService;
 
     @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Inject
     private RotateSaltPasswordService rotateSaltPasswordService;
 
     @Inject
@@ -107,7 +101,7 @@ public class StackSaltStatusCheckerJob extends StatusCheckerJob {
     }
 
     @Override
-    protected void executeTracedJob(JobExecutionContext context) throws JobExecutionException {
+    protected void executeJob(JobExecutionContext context) throws JobExecutionException {
         try {
             measure(() -> {
                 Optional<StackDto> stackOptional = stackDtoService.getByIdOpt(getStackId());
@@ -124,8 +118,7 @@ public class StackSaltStatusCheckerJob extends StatusCheckerJob {
                         LOGGER.debug("Stack salt sync is skipped, stack state is {}", stackStatus);
                     } else if (SYNCABLE_STATES.contains(stackStatus)) {
                         rotateSaltPasswordValidator.validateRotateSaltPassword(stack);
-                        RegionAwareInternalCrnGenerator dataHub = regionAwareInternalCrnGeneratorFactory.datahub();
-                        ThreadBasedUserCrnProvider.doAs(dataHub.getInternalCrnForServiceAsString(), () -> rotateSaltPasswordIfNeeded(stack));
+                        rotateSaltPasswordIfNeeded(stack);
                     } else {
                         LOGGER.warn("Unhandled stack status, {}", stackStatus);
                     }

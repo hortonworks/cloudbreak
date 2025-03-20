@@ -7,7 +7,6 @@ import jakarta.ws.rs.WebApplicationException;
 
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -63,7 +62,7 @@ public class SdxSaltStatusCheckerJob extends StatusCheckerJob {
     }
 
     @Override
-    protected void executeTracedJob(JobExecutionContext context) throws JobExecutionException {
+    protected void executeJob(JobExecutionContext context) {
         if (getLocalId() != null && flowLogService.isOtherFlowRunning(Long.valueOf(getLocalId()))) {
             LOGGER.debug("SdxSaltStatusCheckerJob cannot run, because flow is running for datalake: {}", getLocalId());
             return;

@@ -19,7 +19,6 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.quartz.JobKey;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
@@ -103,68 +102,68 @@ class SdxSaltStatusCheckerJobTest {
     }
 
     @Test
-    void otherFlowRunning() throws JobExecutionException {
+    void otherFlowRunning() {
         when(flowLogService.isOtherFlowRunning(CLUSTER_ID)).thenReturn(true);
 
-        underTest.executeTracedJob(context);
+        underTest.executeJob(context);
 
         verifySkip();
     }
 
     @Test
-    void nullCrn() throws JobExecutionException {
+    void nullCrn() {
         underTest.setRemoteResourceCrn(null);
 
-        underTest.executeTracedJob(context);
+        underTest.executeJob(context);
 
         verify(jobService).unschedule(jobKey);
     }
 
     @Test
-    void emptyCluster() throws JobExecutionException {
+    void emptyCluster() {
         when(sdxClusterRepository.findById(CLUSTER_ID)).thenReturn(Optional.empty());
 
-        underTest.executeTracedJob(context);
+        underTest.executeJob(context);
 
         verify(jobService).unschedule(jobKey);
     }
 
     @EnumSource(value = DatalakeStatusEnum.class, names = {"STACK_DELETION_IN_PROGRESS", "PROVISIONING_FAILED", "DELETED_ON_PROVIDER_SIDE"})
     @ParameterizedTest
-    void unscheduleStatuses(DatalakeStatusEnum status) throws JobExecutionException {
+    void unscheduleStatuses(DatalakeStatusEnum status) {
         setStatus(status);
 
-        underTest.executeTracedJob(context);
+        underTest.executeJob(context);
 
         verifyNoInteractions(cloudbreakInternalCrnClient);
         verify(jobService).unschedule(jobKey);
     }
 
     @Test
-    void stoppedStatus() throws JobExecutionException {
+    void stoppedStatus() {
         setStatus(DatalakeStatusEnum.STOPPED);
 
-        underTest.executeTracedJob(context);
+        underTest.executeJob(context);
 
         verifySkip();
     }
 
     @Test
-    void statusOk() throws JobExecutionException {
+    void statusOk() {
         setStatus(DatalakeStatusEnum.RUNNING);
         when(saltPasswordStatus.getStatus()).thenReturn(SaltPasswordStatus.OK);
 
-        underTest.executeTracedJob(context);
+        underTest.executeJob(context);
 
         verifyNoInteractions(sdxService);
     }
 
     @Test
-    void statusInvalid() throws JobExecutionException {
+    void statusInvalid() {
         setStatus(DatalakeStatusEnum.RUNNING);
         when(saltPasswordStatus.getStatus()).thenReturn(SaltPasswordStatus.INVALID);
 
-        underTest.executeTracedJob(context);
+        underTest.executeJob(context);
 
         verify(sdxService).rotateSaltPassword(sdxCluster);
     }

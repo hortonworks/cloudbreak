@@ -63,7 +63,7 @@ class StructuredSynchronizerJobTest {
     void testExecuteTracedJobWhenEnvironmentNotFound() {
         when(environmentService.findEnvironmentByIdOrThrow(ENVIRONMENT_ID)).thenThrow(NotFoundException.class);
 
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(structuredSynchronizerJobService).unschedule(ENVIRONMENT_ID.toString());
         verifyNoInteractions(jobExecutionContext, structuredSyncEventFactory, cdpDefaultStructuredEventClient);
@@ -73,7 +73,7 @@ class StructuredSynchronizerJobTest {
     void testExecuteTracedJobWhenEnvironmentIsNull() {
         when(environmentService.findEnvironmentByIdOrThrow(ENVIRONMENT_ID)).thenReturn(null);
 
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(structuredSynchronizerJobService).unschedule(ENVIRONMENT_ID.toString());
         verifyNoInteractions(jobExecutionContext, structuredSyncEventFactory, cdpDefaultStructuredEventClient);
@@ -85,7 +85,7 @@ class StructuredSynchronizerJobTest {
         when(environment.getStatus()).thenReturn(null);
         when(environmentService.findEnvironmentByIdOrThrow(ENVIRONMENT_ID)).thenReturn(environment);
 
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verifyNoInteractions(jobExecutionContext, structuredSynchronizerJobService, structuredSyncEventFactory, cdpDefaultStructuredEventClient);
     }
@@ -96,7 +96,7 @@ class StructuredSynchronizerJobTest {
         when(environment.getStatus()).thenReturn(EnvironmentStatus.ARCHIVED);
         when(environmentService.findEnvironmentByIdOrThrow(ENVIRONMENT_ID)).thenReturn(environment);
 
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(structuredSynchronizerJobService).unschedule(ENVIRONMENT_ID.toString());
         verifyNoInteractions(jobExecutionContext, structuredSyncEventFactory, cdpDefaultStructuredEventClient);
@@ -110,7 +110,7 @@ class StructuredSynchronizerJobTest {
         when(environmentService.findEnvironmentByIdOrThrow(ENVIRONMENT_ID)).thenReturn(environment);
         when(structuredSyncEventFactory.createCDPEnvironmentStructuredSyncEvent(ENVIRONMENT_ID)).thenReturn(cdpEnvironmentStructuredSyncEvent);
 
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(cdpDefaultStructuredEventClient).sendStructuredEvent(cdpEnvironmentStructuredSyncEvent);
     }
@@ -124,6 +124,6 @@ class StructuredSynchronizerJobTest {
         when(structuredSyncEventFactory.createCDPEnvironmentStructuredSyncEvent(ENVIRONMENT_ID)).thenReturn(cdpEnvironmentStructuredSyncEvent);
         doThrow(RuntimeException.class).when(cdpDefaultStructuredEventClient).sendStructuredEvent(cdpEnvironmentStructuredSyncEvent);
 
-        assertDoesNotThrow(() -> underTest.executeTracedJob(jobExecutionContext));
+        assertDoesNotThrow(() -> underTest.executeJob(jobExecutionContext));
     }
 }

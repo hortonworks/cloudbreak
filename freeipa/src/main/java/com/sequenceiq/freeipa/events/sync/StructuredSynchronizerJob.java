@@ -39,13 +39,19 @@ public class StructuredSynchronizerJob extends StatusCheckerJob {
     @Inject
     private CDPDefaultStructuredEventClient cdpDefaultStructuredEventClient;
 
+    public static Set<Status> unschedulableStates() {
+        return EnumSet.of(
+                Status.DELETE_COMPLETED
+        );
+    }
+
     @Override
     protected Optional<MdcContextInfoProvider> getMdcContextConfigProvider() {
         return Optional.empty();
     }
 
     @Override
-    protected void executeTracedJob(JobExecutionContext context) {
+    protected void executeJob(JobExecutionContext context) {
         Long stackId = getLocalIdAsLong();
         try {
             Stack stack = stackService.getStackById(stackId);
@@ -68,11 +74,5 @@ public class StructuredSynchronizerJob extends StatusCheckerJob {
         } catch (Exception ex) {
             LOGGER.error("Error happened during CDPFreeipaStructuredSyncEvent generation! The event won't be stored!", ex);
         }
-    }
-
-    public static Set<Status> unschedulableStates() {
-        return EnumSet.of(
-                Status.DELETE_COMPLETED
-        );
     }
 }

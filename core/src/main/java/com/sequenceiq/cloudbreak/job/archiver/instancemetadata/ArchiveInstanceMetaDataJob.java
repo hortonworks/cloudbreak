@@ -46,7 +46,7 @@ public class ArchiveInstanceMetaDataJob extends StatusCheckerJob {
     }
 
     @Override
-    protected void executeTracedJob(JobExecutionContext context) throws JobExecutionException {
+    protected void executeJob(JobExecutionContext context) throws JobExecutionException {
         StackView stackView = stackViewService.findById(getStackId()).orElseGet(StackView::new);
         Status stackStatus = stackView.getStatus();
         if (!Status.getUnschedulableStatuses().contains(stackStatus)) {

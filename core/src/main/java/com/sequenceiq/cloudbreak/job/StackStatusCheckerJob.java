@@ -25,7 +25,6 @@ import jakarta.inject.Inject;
 
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,9 +34,6 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.HostName;
@@ -202,9 +198,6 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     private MetricsClient metricsClient;
 
     @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Inject
     private ServiceStatusCheckerLogLocationDecorator serviceStatusCheckerLogLocationDecorator;
 
     @Inject
@@ -219,7 +212,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     }
 
     @Override
-    protected void executeTracedJob(JobExecutionContext context) throws JobExecutionException {
+    protected void executeJob(JobExecutionContext context) {
         if (shouldSkipStatusCheck()) {
             LOGGER.info("Status check skipped for stack {}", getStackId());
             return;
@@ -238,8 +231,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 } else if (null == stackStatus || IGNORED_STATES.contains(stackStatus)) {
                     LOGGER.debug("Stack sync is skipped, stack state is {}", stackStatus);
                 } else if (SYNCABLE_STATES.contains(stackStatus)) {
-                    RegionAwareInternalCrnGenerator dataHub = regionAwareInternalCrnGeneratorFactory.datahub();
-                    ThreadBasedUserCrnProvider.doAs(dataHub.getInternalCrnForServiceAsString(), () -> doSync(stack));
+                    doSync(stack);
                     switchToShortSyncIfNecessary(context, stack);
                 } else {
                     LOGGER.warn("Unhandled stack status, {}", stackStatus);

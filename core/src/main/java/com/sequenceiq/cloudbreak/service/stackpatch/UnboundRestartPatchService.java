@@ -14,9 +14,6 @@ import org.springframework.stereotype.Service;
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptResults;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.security.internal.InternalCrnModifier;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -50,9 +47,6 @@ public class UnboundRestartPatchService extends ExistingStackPatchService {
     @Inject
     private FlowService flowService;
 
-    @Inject
-    private InternalCrnModifier internalCrnModifier;
-
     @Override
     public StackPatchType getStackPatchType() {
         return UNBOUND_RESTART;
@@ -80,9 +74,7 @@ public class UnboundRestartPatchService extends ExistingStackPatchService {
     @Override
     boolean doApply(Stack stack) throws ExistingStackPatchApplyException {
         if (isCmServerReachable(stack)) {
-            FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAs(
-                    internalCrnModifier.getInternalCrnWithAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId()),
-                    () -> clusterOperationService.updateSalt(stack.getId()));
+            FlowIdentifier flowIdentifier = clusterOperationService.updateSalt(stack.getId());
             LOGGER.debug("Starting update salt for stack {} with flow {}", stack.getResourceCrn(), flowIdentifier.getPollableId());
             Boolean success = Polling.waitPeriodly(1, TimeUnit.MINUTES)
                     .run(() -> pollFlowState(flowIdentifier));

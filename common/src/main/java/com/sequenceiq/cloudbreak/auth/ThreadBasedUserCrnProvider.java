@@ -86,7 +86,7 @@ public class ThreadBasedUserCrnProvider {
         }
     }
 
-    public static <T, W extends Throwable> T doAsAndThrow(String userCrn, ThrowableCallable<T, W> callable) throws Throwable {
+    public static <T, W extends Throwable> T doAsAndThrow(String userCrn, ThrowableCallable<T, W> callable) throws W {
         String previousUserCrn = getUserCrn();
         removeUserCrn();
         setUserCrn(userCrn);
@@ -162,9 +162,23 @@ public class ThreadBasedUserCrnProvider {
         doAs(internalCrn, runnable);
     }
 
-    public static <W> void doAsInternalActor(Runnable runnable, String accountId) {
+    public static <E extends Throwable> void doAsInternalActor(ThrowableRunnable<E> runnable, String accountId) throws E {
         String internalCrn = getInternalUserCrn(accountId);
-        doAs(internalCrn, runnable);
+        doAsAndThrow(internalCrn, runnable);
+    }
+
+    public static <E extends Throwable> void doAsAndThrow(String userCrn, ThrowableRunnable<E> runnable) throws E {
+        String previousUserCrn = getUserCrn();
+        removeUserCrn();
+        setUserCrn(userCrn);
+        try {
+            runnable.run();
+        } finally {
+            removeUserCrn();
+            if (previousUserCrn != null) {
+                setUserCrn(previousUserCrn);
+            }
+        }
     }
 
     public static <T> T doAsInternalActor(Function<String, T> originalUserCrnConsumer) {

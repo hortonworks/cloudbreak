@@ -14,8 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.security.internal.InternalCrnModifier;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -49,9 +47,6 @@ public class StackImageService {
 
     @Inject
     private ComponentConfigProviderService componentConfigProviderService;
-
-    @Inject
-    private InternalCrnModifier internalCrnModifier;
 
     @Inject
     private PlatformStringTransformer platformStringTransformer;
@@ -163,7 +158,7 @@ public class StackImageService {
     }
 
     public Optional<StatedImage> getStatedImageInternal(StackView stack, com.sequenceiq.cloudbreak.cloud.model.Image image, ImageCatalog imageCatalog) {
-        return ThreadBasedUserCrnProvider.doAs(getInternalUserCrn(stack),
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
                 () -> {
                     try {
                         return Optional.ofNullable(imageCatalogService.getImageByCatalogName(
@@ -182,11 +177,7 @@ public class StackImageService {
     }
 
     public ImageCatalog getImageCatalogFromStackAndImage(StackView stack, com.sequenceiq.cloudbreak.cloud.model.Image image) {
-        return ThreadBasedUserCrnProvider.doAs(getInternalUserCrn(stack),
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
                 () -> imageCatalogService.getImageCatalogByName(stack.getWorkspaceId(), image.getImageCatalogName()));
-    }
-
-    private String getInternalUserCrn(StackView stack) {
-        return internalCrnModifier.getInternalCrnWithAccountId(Crn.fromString(stack.getResourceCrn()).getAccountId());
     }
 }

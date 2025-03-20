@@ -64,7 +64,7 @@ class StructuredSynchronizerJobTest {
     void testExecuteTracedJobWhenStackNotFound() {
         when(stackService.getStackById(STACK_ID)).thenThrow(NotFoundException.class);
 
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(structuredSynchronizerJobService).unschedule(STACK_ID.toString());
         verifyNoInteractions(jobExecutionContext, structuredSyncEventFactory, cdpDefaultStructuredEventClient);
@@ -74,7 +74,7 @@ class StructuredSynchronizerJobTest {
     void testExecuteTracedJobWhenStackIsNull() {
         when(stackService.getStackById(STACK_ID)).thenReturn(null);
 
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(structuredSynchronizerJobService).unschedule(STACK_ID.toString());
         verifyNoInteractions(jobExecutionContext, structuredSyncEventFactory, cdpDefaultStructuredEventClient);
@@ -86,7 +86,7 @@ class StructuredSynchronizerJobTest {
         when(stack.getStackStatus()).thenReturn(null);
         when(stackService.getStackById(STACK_ID)).thenReturn(stack);
 
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verifyNoInteractions(jobExecutionContext, structuredSynchronizerJobService, structuredSyncEventFactory, cdpDefaultStructuredEventClient);
     }
@@ -99,7 +99,7 @@ class StructuredSynchronizerJobTest {
         when(stackStatus.getStatus()).thenReturn(null);
         when(stackService.getStackById(STACK_ID)).thenReturn(stack);
 
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verifyNoInteractions(jobExecutionContext, structuredSynchronizerJobService, structuredSyncEventFactory, cdpDefaultStructuredEventClient);
     }
@@ -112,7 +112,7 @@ class StructuredSynchronizerJobTest {
         when(stackStatus.getStatus()).thenReturn(Status.DELETE_COMPLETED);
         when(stackService.getStackById(STACK_ID)).thenReturn(stack);
 
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(structuredSynchronizerJobService).unschedule(STACK_ID.toString());
         verifyNoInteractions(jobExecutionContext, structuredSyncEventFactory, cdpDefaultStructuredEventClient);
@@ -128,7 +128,7 @@ class StructuredSynchronizerJobTest {
         when(stackService.getStackById(STACK_ID)).thenReturn(stack);
         when(structuredSyncEventFactory.createCDPFreeipaStructuredSyncEvent(STACK_ID)).thenReturn(cdpFreeipaStructuredSyncEvent);
 
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(cdpDefaultStructuredEventClient).sendStructuredEvent(cdpFreeipaStructuredSyncEvent);
     }
@@ -144,7 +144,7 @@ class StructuredSynchronizerJobTest {
         when(structuredSyncEventFactory.createCDPFreeipaStructuredSyncEvent(STACK_ID)).thenReturn(cdpFreeipaStructuredSyncEvent);
         doThrow(RuntimeException.class).when(cdpDefaultStructuredEventClient).sendStructuredEvent(cdpFreeipaStructuredSyncEvent);
 
-        assertDoesNotThrow(() -> underTest.executeTracedJob(jobExecutionContext));
+        assertDoesNotThrow(() -> underTest.executeJob(jobExecutionContext));
     }
 
 }

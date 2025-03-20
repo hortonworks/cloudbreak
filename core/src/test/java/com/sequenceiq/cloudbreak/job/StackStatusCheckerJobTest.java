@@ -36,7 +36,6 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.Sets;
@@ -44,8 +43,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.HostName;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterStatusService;
@@ -169,12 +166,6 @@ public class StackStatusCheckerJobTest {
     private CmTemplateProcessor cmTemplateProcessor;
 
     @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
-
-    @Mock
     private MetricsClient metricsClient;
 
     @Mock
@@ -219,7 +210,7 @@ public class StackStatusCheckerJobTest {
     }
 
     @Test
-    public void testNotRunningIfFlowEndedIn2Minutes() throws JobExecutionException {
+    public void testNotRunningIfFlowEndedIn2Minutes() {
         FlowLog lastFlowLog = new FlowLog();
         lastFlowLog.setEndTime(1676030290000L);
         when(flowLogService.getLastFlowLogWithEndTime(anyLong())).thenReturn(Optional.of(lastFlowLog));
@@ -228,14 +219,14 @@ public class StackStatusCheckerJobTest {
         when(clock.nowMinus(temporalAmountArgumentCaptor.capture())).thenReturn(nowMinus2Minutes);
         ReflectionTestUtils.setField(underTest, "skipWindow", 2);
 
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         assertEquals(120, ((Duration) temporalAmountArgumentCaptor.getValue()).getSeconds());
         verify(stackDtoService, times(0)).getById(anyLong());
     }
 
     @Test
-    public void testNotRunningIfFlowEndedAtTheSameTime() throws JobExecutionException {
+    public void testNotRunningIfFlowEndedAtTheSameTime() {
         FlowLog lastFlowLog = new FlowLog();
         lastFlowLog.setEndTime(1676030290000L);
         when(flowLogService.getLastFlowLogWithEndTime(anyLong())).thenReturn(Optional.of(lastFlowLog));
@@ -244,14 +235,14 @@ public class StackStatusCheckerJobTest {
         when(clock.nowMinus(temporalAmountArgumentCaptor.capture())).thenReturn(nowMinus2Minutes);
         ReflectionTestUtils.setField(underTest, "skipWindow", 2);
 
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         assertEquals(120, ((Duration) temporalAmountArgumentCaptor.getValue()).getSeconds());
         verify(stackDtoService, times(1)).getById(anyLong());
     }
 
     @Test
-    public void testNotRunningIfFlowEndedInTime() throws JobExecutionException {
+    public void testNotRunningIfFlowEndedInTime() {
         FlowLog lastFlowLog = new FlowLog();
         lastFlowLog.setEndTime(1676030290000L);
         when(flowLogService.getLastFlowLogWithEndTime(anyLong())).thenReturn(Optional.of(lastFlowLog));
@@ -260,46 +251,42 @@ public class StackStatusCheckerJobTest {
         when(clock.nowMinus(temporalAmountArgumentCaptor.capture())).thenReturn(nowMinus2Minutes);
         ReflectionTestUtils.setField(underTest, "skipWindow", 2);
 
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         assertEquals(120, ((Duration) temporalAmountArgumentCaptor.getValue()).getSeconds());
         verify(stackDtoService, times(0)).getById(anyLong());
     }
 
     @Test
-    public void testNotRunningIfFlowInProgress() throws JobExecutionException {
+    public void testNotRunningIfFlowInProgress() {
         when(flowLogService.isOtherFlowRunning(anyLong())).thenReturn(Boolean.TRUE);
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(stackDtoService, times(0)).getById(anyLong());
     }
 
     @Test
-    public void testNotRunningIfStackFailedOrBeingDeleted() throws JobExecutionException {
+    public void testNotRunningIfStackFailedOrBeingDeleted() {
         setStackStatus(DetailedStackStatus.DELETE_COMPLETED);
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(metricsClient, times(1)).processStackStatus(anyString(), anyString(), anyString(), anyInt(), any());
         verify(clusterApiConnectors, times(0)).getConnector(stackDto);
     }
 
     @Test
-    public void testInstanceSyncIfCMNotAccessible() throws JobExecutionException {
+    public void testInstanceSyncIfCMNotAccessible() {
         setupForCMNotAccessible();
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.datahub()).thenReturn(regionAwareInternalCrnGenerator);
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(metricsClient, times(1)).processStackStatus(anyString(), anyString(), anyString(), anyInt(), any());
         verify(stackInstanceStatusChecker).queryInstanceStatuses(eq(stackDto), any());
     }
 
     @Test
-    public void testInstanceSyncCMNotRunning() throws JobExecutionException {
+    public void testInstanceSyncCMNotRunning() {
         setupForCM();
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.datahub()).thenReturn(regionAwareInternalCrnGenerator);
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(metricsClient, times(1)).processStackStatus(anyString(), anyString(), anyString(), anyInt(), any());
         verify(clusterOperationService, times(0)).reportHealthChange(anyString(), any(), anySet());
@@ -307,13 +294,11 @@ public class StackStatusCheckerJobTest {
     }
 
     @Test
-    public void testInstanceSyncCMRunning() throws JobExecutionException {
+    public void testInstanceSyncCMRunning() {
         setupForCM();
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
         when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.datahub()).thenReturn(regionAwareInternalCrnGenerator);
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(metricsClient, times(1)).processStackStatus(anyString(), anyString(), anyString(), anyInt(), any());
         verify(clusterOperationService, times(1)).reportHealthChange(any(), any(), anySet());
@@ -322,7 +307,7 @@ public class StackStatusCheckerJobTest {
     }
 
     @Test
-    public void testInstanceSyncCMRunningNodeStopped() throws JobExecutionException {
+    public void testInstanceSyncCMRunningNodeStopped() {
         setupForCM();
         Set<HealthCheck> healthChecks = Sets.newHashSet(new HealthCheck(HealthCheckType.HOST, HealthCheckResult.UNHEALTHY, Optional.empty()),
                 new HealthCheck(HealthCheckType.CERT, HealthCheckResult.UNHEALTHY, Optional.empty()));
@@ -332,10 +317,8 @@ public class StackStatusCheckerJobTest {
         when(instanceMetaData.getDiscoveryFQDN()).thenReturn("host1");
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
         when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.datahub()).thenReturn(regionAwareInternalCrnGenerator);
         when(serviceStatusCheckerLogLocationDecorator.decorate(any(), any(), any())).thenAnswer(i -> i.getArgument(0));
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(clusterOperationService, times(1)).reportHealthChange(any(), any(), anySet());
         verify(stackInstanceStatusChecker).queryInstanceStatuses(eq(stackDto), any());
@@ -344,35 +327,32 @@ public class StackStatusCheckerJobTest {
     }
 
     @Test
-    public void testInstanceSyncCMRunningNodeStoppedAndStopStartEnabledInstanceStopped() throws JobExecutionException {
+    public void testInstanceSyncCMRunningNodeStoppedAndStopStartEnabledInstanceStopped() {
         internalTestInstanceSyncStopStart("compute", InstanceStatus.STOPPED, DetailedStackStatus.AVAILABLE);
     }
 
     @Test
-    public void testInstanceSyncCMRunningNodeStoppedAndStopStartEnabledInstanceUnhealthy() throws JobExecutionException {
+    public void testInstanceSyncCMRunningNodeStoppedAndStopStartEnabledInstanceUnhealthy() {
         internalTestInstanceSyncStopStart("compute", InstanceStatus.SERVICES_UNHEALTHY, DetailedStackStatus.NODE_FAILURE);
     }
 
     @Test
-    public void testInstanceSyncCMRunningNodeStoppedAndStopStartEnabledOtherHgStopped() throws JobExecutionException {
+    public void testInstanceSyncCMRunningNodeStoppedAndStopStartEnabledOtherHgStopped() {
         internalTestInstanceSyncStopStart("notcompute", InstanceStatus.STOPPED, DetailedStackStatus.NODE_FAILURE);
     }
 
     @Test
-    public void testInstanceSyncCMRunningNodeStoppedAndStopStartEnabledOtherHgUnhealthy() throws JobExecutionException {
+    public void testInstanceSyncCMRunningNodeStoppedAndStopStartEnabledOtherHgUnhealthy() {
         internalTestInstanceSyncStopStart("notcompute", InstanceStatus.SERVICES_UNHEALTHY, DetailedStackStatus.NODE_FAILURE);
     }
 
-    private void internalTestInstanceSyncStopStart(String instanceHgName, InstanceStatus instanceStatus, DetailedStackStatus expected)
-            throws JobExecutionException {
+    private void internalTestInstanceSyncStopStart(String instanceHgName, InstanceStatus instanceStatus, DetailedStackStatus expected) {
         setupForCM();
         Set<HealthCheck> healthChecks = Sets.newHashSet(new HealthCheck(HealthCheckType.HOST, HealthCheckResult.UNHEALTHY, Optional.empty()),
                 new HealthCheck(HealthCheckType.CERT, HealthCheckResult.UNHEALTHY, Optional.empty()));
         ExtendedHostStatuses extendedHostStatuses = new ExtendedHostStatuses(Map.of(HostName.hostName("host1"), healthChecks));
         when(clusterStatusService.getExtendedHostStatuses(any())).thenReturn(extendedHostStatuses);
         when(instanceMetaData.getInstanceStatus()).thenReturn(instanceStatus);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.datahub()).thenReturn(regionAwareInternalCrnGenerator);
         when(instanceMetaData.getDiscoveryFQDN()).thenReturn("host1");
         lenient().when(instanceMetaData.getInstanceGroupName()).thenReturn(instanceHgName);
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
@@ -382,7 +362,7 @@ public class StackStatusCheckerJobTest {
         computeGroups.add("compute");
         when(cmTemplateProcessor.getComputeHostGroups(any())).thenReturn(computeGroups);
         when(serviceStatusCheckerLogLocationDecorator.decorate(any(), any(), any())).thenAnswer(i -> i.getArgument(0));
-        underTest.executeTracedJob(jobExecutionContext);
+        underTest.executeJob(jobExecutionContext);
 
         verify(clusterOperationService, times(1)).reportHealthChange(any(), any(), anySet());
         verify(stackInstanceStatusChecker).queryInstanceStatuses(eq(stackDto), any());
