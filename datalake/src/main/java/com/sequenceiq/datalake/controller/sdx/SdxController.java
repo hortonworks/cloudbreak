@@ -701,4 +701,20 @@ public class SdxController implements SdxEndpoint {
         SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
         return SdxClusterDetailResponse.create(sdxClusterResponse, stackV4Response);
     }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.REPAIR_DATALAKE)
+    public FlowIdentifier triggerSkuMigrationByName(@ResourceName String name, boolean force) {
+        SdxCluster sdxCluster = getSdxClusterByName(name);
+        sdxService.validateSkuMigration(sdxCluster);
+        return sdxReactorFlowManager.triggerSkuMigration(sdxCluster, force);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_DATALAKE)
+    public FlowIdentifier triggerSkuMigrationByCrn(@ResourceCrn String crn, boolean force) {
+        SdxCluster sdxCluster = getSdxClusterByName(crn);
+        sdxService.validateSkuMigration(sdxCluster);
+        return sdxReactorFlowManager.triggerSkuMigration(sdxCluster, force);
+    }
 }

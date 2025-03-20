@@ -72,6 +72,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.Upgrade
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
@@ -702,8 +703,9 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
-    public FlowIdentifier triggerSkuMigration(Long workspaceId, String name, boolean force) {
-        return stackOperationService.triggerSkuMigration(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId(), force);
+    public FlowIdentifier triggerSkuMigration(Long workspaceId, String name, boolean force, @InitiatorUserCrn String initiatorUserCrn) {
+        Crn userCrn = Crn.ofUser(initiatorUserCrn);
+        return stackOperationService.triggerSkuMigration(NameOrCrn.ofName(name), userCrn.getAccountId(), force);
     }
 
     @Override

@@ -817,4 +817,20 @@ public interface DistroXV1Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier setDefaultJavaVersionByCrn(@NotEmpty @ValidCrn(resource = DATAHUB) @PathParam("crn") String crn,
             @NotNull @Valid SetDefaultJavaVersionRequest request);
+
+    @PUT
+    @Path("name/{name}/trigger_sku_migration")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Triggering SKU migration on the DataHub by its name", operationId = "triggerDataHubSkuMigrationByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier triggerSkuMigrationByName(@PathParam("name") String name,
+            @QueryParam("force") @DefaultValue("false") boolean force);
+
+    @PUT
+    @Path("crn/{crn}/trigger_sku_migration")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Triggering SKU migration on the DataHub by its crn", operationId = "triggerDataHubSkuMigrationByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier triggerSkuMigrationByCrn(@NotEmpty @ValidCrn(resource = DATAHUB) @PathParam("crn") String crn,
+            @QueryParam("force") @DefaultValue("false") boolean force);
 }
