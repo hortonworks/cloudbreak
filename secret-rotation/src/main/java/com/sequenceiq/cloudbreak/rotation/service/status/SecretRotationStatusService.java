@@ -21,4 +21,6 @@ public interface SecretRotationStatusService {
     void finalizeFinished(String resourceCrn, SecretType secretType);
 
     void finalizeFailed(String resourceCrn, SecretType secretType, String reason);
+
+    void preVaildationFailed(String resourceCrn);
 }
