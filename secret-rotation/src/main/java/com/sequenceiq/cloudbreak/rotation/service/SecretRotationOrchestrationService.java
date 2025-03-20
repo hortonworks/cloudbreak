@@ -13,8 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.service.phase.SecretRotationFinalizeService;
@@ -54,14 +52,17 @@ public class SecretRotationOrchestrationService {
     @Inject
     private SecretRotationFinalizeService finalizeService;
 
-    @Inject
-    private TransactionService transactionService;
-
     public void preValidateIfNeeded(SecretType secretType, String resourceCrn, RotationFlowExecutionType executionType,
             Map<String, String> additionalProperties) {
         RotationMetadata rotationMetadata = getRotationMetadata(secretType, resourceCrn, executionType, PREVALIDATE, additionalProperties);
         if (executionDecisionProvider.executionRequired(rotationMetadata)) {
-            preValidateService.preValidate(rotationMetadata);
+            try {
+                preValidateService.preValidate(rotationMetadata);
+            } catch (Exception e) {
+                // for prevalidation we do not need to store failed progress in DB
+                secretRotationProgressService.deleteCurrentRotation(rotationMetadata);
+                throw e;
+            }
         }
     }
 
@@ -101,12 +102,9 @@ public class SecretRotationOrchestrationService {
             try {
                 secretRotationStatusService.finalizeStarted(resourceCrn, secretType);
                 finalizeService.finalize(rotationMetadata);
-                transactionService.required(() -> secretRotationProgressService.deleteCurrentRotation(rotationMetadata));
+                secretRotationProgressService.deleteCurrentRotation(rotationMetadata);
                 secretRotationStatusService.finalizeFinished(resourceCrn, secretType);
                 secretRotationUsageService.rotationFinished(secretType, resourceCrn, executionType);
-            } catch (TransactionService.TransactionExecutionException te) {
-                secretRotationStatusService.finalizeFailed(resourceCrn, secretType, te.getMessage());
-                throw new CloudbreakServiceException(te);
             } catch (Exception e) {
                 secretRotationStatusService.finalizeFailed(resourceCrn, secretType, e.getMessage());
                 throw e;

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.ExecuteRollbackFinishedEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.RollbackRotationTriggerEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.RotationFailedEvent;
@@ -27,7 +28,7 @@ public class RollbackRotationHandler extends ExceptionCatcherEventHandler<Rollba
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<RollbackRotationTriggerEvent> event) {
-        return RotationFailedEvent.fromPayload(event.getData(), e);
+        return RotationFailedEvent.fromPayload(event.getData(), e, RotationFlowExecutionType.ROLLBACK);
     }
 
     @Override

@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.rotation.common.TestSecretType.TEST;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -16,9 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.stubbing.Answer;
 
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.service.phase.SecretRotationFinalizeService;
@@ -62,9 +59,6 @@ public class SecretRotationOrchestrationServiceTest {
 
     @Mock
     private SecretRotationFinalizeService finalizeService;
-
-    @Mock
-    private TransactionService transactionService;
 
     @InjectMocks
     private SecretRotationOrchestrationService underTest;
@@ -124,12 +118,7 @@ public class SecretRotationOrchestrationServiceTest {
     }
 
     @Test
-    public void testFinalize() throws TransactionService.TransactionExecutionException {
-        doAnswer((Answer<Void>) invocation -> {
-            Runnable runnable = invocation.getArgument(0);
-            runnable.run();
-            return null;
-        }).when(transactionService).required(any(Runnable.class));
+    public void testFinalize() {
         when(decisionProvider.executionRequired(any())).thenReturn(Boolean.TRUE);
         doNothing().when(finalizeService).finalize(any());
         doNothing().when(secretRotationStepProgressService).deleteCurrentRotation(any());
