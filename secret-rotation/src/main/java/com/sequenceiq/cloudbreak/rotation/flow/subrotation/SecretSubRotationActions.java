@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.rotation.flow.subrotation;
 
+import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.PREVALIDATE;
+
 import java.util.Map;
 import java.util.Optional;
 
@@ -78,7 +80,11 @@ public class SecretSubRotationActions {
                 Flow flow = getFlow(context.getFlowId());
                 flow.setFlowFailed(exception);
                 secretRotationUsageService.rotationFailed(context.getSecretType(), resourceCrn, message, context.getExecutionType());
-                secretRotationStatusService.rotationFailed(resourceCrn, payload.getSecretType(), message);
+                if (PREVALIDATE.equals(payload.getExecutionType())) {
+                    secretRotationStatusService.preVaildationFailed(resourceCrn);
+                } else {
+                    secretRotationStatusService.rotationFailed(resourceCrn, payload.getSecretType(), message);
+                }
                 sendEvent(context, SubRotationEvent.fromContext(SecretSubRotationStateSelectors.SUB_ROTATION_FAILURE_HANDLED_EVENT.event(), context));
             }
 

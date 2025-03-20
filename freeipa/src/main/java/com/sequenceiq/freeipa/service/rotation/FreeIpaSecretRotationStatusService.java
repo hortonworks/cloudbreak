@@ -43,4 +43,11 @@ public class FreeIpaSecretRotationStatusService extends DefaultSecretRotationSta
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(resourceCrn, environmentCrn.getAccountId());
         stackUpdater.updateStackStatus(stack, DetailedStackStatus.SECRET_ROTATION_FAILED, "Secret rotation failed");
     }
+
+    @Override
+    public void preVaildationFailed(String resourceCrn) {
+        Crn environmentCrn = Crn.safeFromString(resourceCrn);
+        Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(resourceCrn, environmentCrn.getAccountId());
+        stackUpdater.updateStackStatus(stack, DetailedStackStatus.AVAILABLE, "");
+    }
 }

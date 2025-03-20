@@ -970,6 +970,13 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
                 .map(InstanceMetadataView::getPrivateId).collect(Collectors.toSet());
     }
 
+    public void updateTemplateForStackToLatest(Long stackId) {
+        Stack stack = get(stackId);
+        GetPlatformTemplateRequest templateRequest = connector.triggerGetTemplate(stack);
+        String latestTemplate = connector.waitGetTemplate(templateRequest);
+        componentConfigProviderService.updateStackTemplate(stack.getId(), latestTemplate);
+    }
+
     private Set<? extends InstanceMetadataView> getInstanceMetadatasForHostNames(Collection<? extends InstanceMetadataView> instanceMetaDataList,
             Collection<String> hostNames) {
         return instanceMetaDataList.stream()

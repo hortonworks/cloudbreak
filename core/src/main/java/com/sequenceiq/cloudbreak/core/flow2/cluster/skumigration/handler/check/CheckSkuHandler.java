@@ -65,11 +65,12 @@ public class CheckSkuHandler extends ExceptionCatcherEventHandler<CheckSkuReques
             List<CloudLoadBalancer> describedLoadBalancers = connector.resources().describeLoadBalancers(ac, request.getCloudStack(), loadBalancerMetadataList);
             boolean nonStandardLoadBalancerFound = describedLoadBalancers.stream()
                     .anyMatch(describedLoadBalancer -> !LoadBalancerSku.STANDARD.equals(describedLoadBalancer.getSku()));
-            if (nonStandardLoadBalancerFound) {
-                LOGGER.info("There is a basic load balancer for the stack, proceed with the migration flow");
+            LOGGER.info("Non-standard found: {}. Load balancers for stack: {}", nonStandardLoadBalancerFound, describedLoadBalancers);
+            if (loadBalancers.isEmpty() || nonStandardLoadBalancerFound) {
+                LOGGER.info("Proceed with migration");
                 return new CheckSkuResult(request.getResourceId());
             } else {
-                skuMigrationService.updateSkuToStandard(loadBalancers);
+                skuMigrationService.updateSkuToStandard(request.getResourceId(), loadBalancers);
                 flowMessageService.fireEventAndLog(request.getResourceId(), Status.UPDATE_IN_PROGRESS.name(), LOAD_BALANCER_SKU_IS_STANDARD);
                 return new SkuMigrationFinished(request.getResourceId());
             }

@@ -103,6 +103,11 @@ public class StackSecretRotationStatusService implements SecretRotationStatusSer
         fireCloudbreakEvent(stack, ResourceEvent.SECRET_ROTATION_FINALIZE_FAILED);
     }
 
+    @Override
+    public void preVaildationFailed(String resourceCrn) {
+        stackUpdater.updateStackStatus(resourceCrn, DetailedStackStatus.AVAILABLE, "");
+    }
+
     private void fireCloudbreakEvent(StackView stack, ResourceEvent event) {
         cloudbreakEventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), event);
     }

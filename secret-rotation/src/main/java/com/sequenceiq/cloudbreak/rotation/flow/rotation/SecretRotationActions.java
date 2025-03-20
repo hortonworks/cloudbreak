@@ -1,5 +1,10 @@
 package com.sequenceiq.cloudbreak.rotation.flow.rotation;
 
+import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.FINALIZE;
+import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.PREVALIDATE;
+import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROLLBACK;
+import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROTATE;
+
 import java.util.Map;
 import java.util.Optional;
 
@@ -12,6 +17,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationPollerExternalSvcOutageException;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.config.SecretRotationState;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.config.SecretRotationStateSelectors;
@@ -60,7 +66,7 @@ public class SecretRotationActions {
 
             @Override
             protected Object getFailurePayload(SecretRotationTriggerEvent payload, Optional<RotationFlowContext> flowContext, Exception ex) {
-                return RotationFailedEvent.fromPayload(payload, ex);
+                return RotationFailedEvent.fromPayload(payload, ex, PREVALIDATE);
             }
         };
     }
@@ -84,7 +90,7 @@ public class SecretRotationActions {
             @Override
             protected Object getFailurePayload(PreValidateRotationFinishedEvent payload, Optional<RotationFlowContext> flowContext, Exception ex) {
                 if (ex.getCause() instanceof RotationPollerExternalSvcOutageException) {
-                    return RotationFailedEvent.fromPayload(payload, ex);
+                    return RotationFailedEvent.fromPayload(payload, ex, ROTATE);
                 }
                 return ExecuteRotationFailedEvent.fromPayload(payload, ex);
             }
@@ -109,7 +115,7 @@ public class SecretRotationActions {
 
             @Override
             protected Object getFailurePayload(ExecuteRotationFinishedEvent payload, Optional<RotationFlowContext> flowContext, Exception ex) {
-                return RotationFailedEvent.fromPayload(payload, ex);
+                return RotationFailedEvent.fromPayload(payload, ex, FINALIZE);
             }
         };
     }
@@ -132,7 +138,7 @@ public class SecretRotationActions {
 
             @Override
             protected Object getFailurePayload(ExecuteRotationFailedEvent payload, Optional<RotationFlowContext> flowContext, Exception ex) {
-                return RotationFailedEvent.fromPayload(payload, ex);
+                return RotationFailedEvent.fromPayload(payload, ex, ROLLBACK);
             }
         };
     }
@@ -151,13 +157,18 @@ public class SecretRotationActions {
             @Override
             protected void doExecute(RotationFlowContext context, RotationFailedEvent payload, Map<Object, Object> variables) {
                 Exception exception = payload.getException();
+                RotationFlowExecutionType failedAt = payload.getFailedAt();
                 String message = exception.getMessage();
                 String resourceCrn = context.getResourceCrn();
                 LOGGER.warn("Secret rotation failed for secreType: {}", context.getSecretType(), exception);
                 Flow flow = getFlow(context.getFlowId());
                 flow.setFlowFailed(exception);
                 secretRotationUsageService.rotationFailed(context.getSecretType(), resourceCrn, message, context.getExecutionType());
-                secretRotationStatusService.rotationFailed(resourceCrn, payload.getSecretType(), message);
+                if (PREVALIDATE.equals(failedAt)) {
+                    secretRotationStatusService.preVaildationFailed(resourceCrn);
+                } else {
+                    secretRotationStatusService.rotationFailed(resourceCrn, payload.getSecretType(), message);
+                }
                 sendEvent(context, RotationEvent.fromContext(SecretRotationStateSelectors.ROTATION_FAILURE_HANDLED_EVENT.event(), context));
             }
 

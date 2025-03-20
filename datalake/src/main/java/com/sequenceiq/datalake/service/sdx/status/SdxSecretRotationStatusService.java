@@ -100,6 +100,12 @@ public class SdxSecretRotationStatusService implements SecretRotationStatusServi
                 String.format("%s, reason: %s", statusReason, reason), resourceCrn);
     }
 
+    @Override
+    public void preVaildationFailed(String resourceCrn) {
+        SdxCluster sdxCluster = sdxService.getByCrn(resourceCrn);
+        sdxStatusService.setStatusForDatalake(DatalakeStatusEnum.RUNNING, "", sdxCluster);
+    }
+
     private String getCode(SecretType secretType) {
         return secretType.getClazz().getSimpleName() + "." + SecretListField.DISPLAY_NAME.name() + "." + secretType.value();
     }
