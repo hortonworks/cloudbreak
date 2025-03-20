@@ -21,12 +21,14 @@ import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
+import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
-import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
+import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.rotation.ExitCriteriaProvider;
 import com.sequenceiq.freeipa.service.rotation.context.SaltStateApplyRotationContext;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -42,6 +44,9 @@ public class FreeipaLUKSVolumePassphraseRotationContextProvider implements Rotat
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private CachedEnvironmentClientService cachedEnvironmentClientService;
 
     @Inject
     private GatewayConfigService gatewayConfigService;
@@ -72,8 +77,12 @@ public class FreeipaLUKSVolumePassphraseRotationContextProvider implements Rotat
         return CustomJobRotationContext.builder()
                 .withResourceCrn(stack.getEnvironmentCrn())
                 .withPreValidateJob(() -> {
+                    DetailedEnvironmentResponse environment = cachedEnvironmentClientService.getByCrn(stack.getEnvironmentCrn());
+                    if (!environment.isEnableSecretEncryption()) {
+                        throw new SecretRotationException("LUKS passphrase rotation is only available on environments with secret encryption enabled.");
+                    }
                     if (stack.getNotDeletedInstanceMetaDataSet().stream().anyMatch(Predicate.not(InstanceMetaData::isAvailable))) {
-                        throw new CloudbreakRuntimeException("All instances of the stack need to be in an availabe state " +
+                        throw new SecretRotationException("All instances of the stack need to be in an availabe state " +
                                 "before starting the 'LUKS_VOLUME_PASSPHRASE' rotation.");
                     }
                 })

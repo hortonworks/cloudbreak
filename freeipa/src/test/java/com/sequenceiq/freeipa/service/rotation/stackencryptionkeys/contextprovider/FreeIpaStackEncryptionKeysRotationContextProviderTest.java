@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.service.rotation.stackencryptionkeys.contextprovi
 import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants.AWS_DEFAULT_VARIANT;
 import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
@@ -30,9 +31,11 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
+import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.dto.Credential;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -40,6 +43,7 @@ import com.sequenceiq.freeipa.entity.StackEncryption;
 import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.StackEncryptionService;
+import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.encryption.CloudInformationDecorator;
 import com.sequenceiq.freeipa.service.encryption.CloudInformationDecoratorProvider;
 import com.sequenceiq.freeipa.service.encryption.EncryptionKeyService;
@@ -78,6 +82,9 @@ class FreeIpaStackEncryptionKeysRotationContextProviderTest {
 
     @Mock
     private CloudInformationDecorator cloudInformationDecorator;
+
+    @Mock
+    private CachedEnvironmentClientService cachedEnvironmentClientService;
 
     @Mock
     private ResourceRetriever resourceRetriever;
@@ -124,12 +131,16 @@ class FreeIpaStackEncryptionKeysRotationContextProviderTest {
         when(credentialService.getCredentialByEnvCrn(ENVIRONMENT_CRN)).thenReturn(credential);
         CloudCredential cloudCredential = mock(CloudCredential.class);
         when(credentialToCloudCredentialConverter.convert(credential)).thenReturn(cloudCredential);
+        when(cachedEnvironmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(DetailedEnvironmentResponse.builder()
+                .withEnableSecretEncryption(true)
+                .build());
 
         Map<SecretRotationStep, ? extends RotationContext> result = ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.getContexts(ENVIRONMENT_CRN));
         assertEquals(1, result.size());
-        CustomJobRotationContext customJobRotationContext = (CustomJobRotationContext) result.get(CommonSecretRotationStep.CUSTOM_JOB);
-        customJobRotationContext.getRotationJob().get().run();
 
+        CustomJobRotationContext customJobRotationContext = (CustomJobRotationContext) result.get(CommonSecretRotationStep.CUSTOM_JOB);
+        assertDoesNotThrow(customJobRotationContext.getPreValidateJob().get()::run);
+        assertDoesNotThrow(customJobRotationContext.getRotationJob().get()::run);
         verify(encryptionResources).rotateEncryptionKey(encryptionKeyRotationRequestCaptor.capture());
         EncryptionKeyRotationRequest encryptionKeyRotationRequest = encryptionKeyRotationRequestCaptor.getValue();
         assertThat(encryptionKeyRotationRequest.cloudResources()).containsExactlyInAnyOrder(luksCloudResource, cloudSecretManagerCloudResource);
@@ -139,14 +150,33 @@ class FreeIpaStackEncryptionKeysRotationContextProviderTest {
     }
 
     @Test
+    void testGetContextsWhenSecretEncryptionIsNotEnabled() {
+        Stack stack = mock(Stack.class);
+        when(stack.getEnvironmentCrn()).thenReturn(ENVIRONMENT_CRN);
+        when(stack.getPlatformvariant()).thenReturn(AWS_NATIVE_GOV_VARIANT.variant().getValue());
+        when(stackService.getByEnvironmentCrnAndAccountId(ENVIRONMENT_CRN, TEST_ACCOUNT_ID)).thenReturn(stack);
+        CloudResource luksCloudResource = mock(CloudResource.class);
+        CloudResource cloudSecretManagerCloudResource = mock(CloudResource.class);
+        when(cachedEnvironmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(DetailedEnvironmentResponse.builder()
+                .withEnableSecretEncryption(false)
+                .build());
+
+        Map<SecretRotationStep, ? extends RotationContext> result = ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.getContexts(ENVIRONMENT_CRN));
+        assertEquals(1, result.size());
+
+        CustomJobRotationContext customJobRotationContext = (CustomJobRotationContext) result.get(CommonSecretRotationStep.CUSTOM_JOB);
+        assertThrows(SecretRotationException.class, customJobRotationContext.getPreValidateJob().get()::run,
+                "Stack encryption key rotation is only available on environments with secret encryption enabled.");
+    }
+
+    @Test
     void testGetContextsWhenNotGovVariant() {
         Stack stack = mock(Stack.class);
         when(stack.getPlatformvariant()).thenReturn(AWS_DEFAULT_VARIANT.getValue());
         when(stackService.getByEnvironmentCrnAndAccountId(ENVIRONMENT_CRN, TEST_ACCOUNT_ID)).thenReturn(stack);
 
-        BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.getContexts(ENVIRONMENT_CRN)));
-        assertEquals("Stack encryption key rotation is only available on AWS Gov environments.", exception.getMessage());
+        assertThrows(BadRequestException.class, () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.getContexts(ENVIRONMENT_CRN)),
+                "Stack encryption key rotation is only available on AWS Gov environments.");
     }
 
     @Test

@@ -29,14 +29,17 @@ import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
+import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
 import com.sequenceiq.cloudbreak.service.encryption.CloudInformationDecorator;
 import com.sequenceiq.cloudbreak.service.encryption.CloudInformationDecoratorProvider;
 import com.sequenceiq.cloudbreak.service.encryption.EncryptionKeyService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.stack.StackEncryptionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.common.api.type.CommonStatus;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
 public class CBStackEncryptionKeysRotationContextProvider implements RotationContextProvider {
@@ -54,6 +57,9 @@ public class CBStackEncryptionKeysRotationContextProvider implements RotationCon
     private CloudInformationDecoratorProvider cloudInformationDecoratorProvider;
 
     @Inject
+    private EnvironmentClientService environmentClientService;
+
+    @Inject
     private ResourceRetriever resourceRetriever;
 
     @Inject
@@ -69,12 +75,20 @@ public class CBStackEncryptionKeysRotationContextProvider implements RotationCon
             throw new BadRequestException("Stack encryption key rotation is only available on AWS Gov environments.");
         }
 
-        StackEncryption stackEncryption = stackEncryptionService.getStackEncryption(stack.getId());
-        EncryptionResources encryptionResources = encryptionKeyService.getEncryptionResources(stack);
-        CloudInformationDecorator cloudInformationDecorator = cloudInformationDecoratorProvider.getForStack(stack);
         CustomJobRotationContext customJobRotationContext = CustomJobRotationContext.builder()
                 .withResourceCrn(resourceCrn)
-                .withRotationJob(() -> rotateStackEncryptionKeys(stackEncryption, encryptionResources, stack, cloudInformationDecorator))
+                .withPreValidateJob(() -> {
+                    DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
+                    if (!environment.isEnableSecretEncryption()) {
+                        throw new SecretRotationException("Stack encryption key rotation is only available on environments with secret encryption enabled.");
+                    }
+                })
+                .withRotationJob(() -> {
+                    StackEncryption stackEncryption = stackEncryptionService.getStackEncryption(stack.getId());
+                    EncryptionResources encryptionResources = encryptionKeyService.getEncryptionResources(stack);
+                    CloudInformationDecorator cloudInformationDecorator = cloudInformationDecoratorProvider.getForStack(stack);
+                    rotateStackEncryptionKeys(stackEncryption, encryptionResources, stack, cloudInformationDecorator);
+                })
                 .build();
         return Map.of(CUSTOM_JOB, customJobRotationContext);
     }

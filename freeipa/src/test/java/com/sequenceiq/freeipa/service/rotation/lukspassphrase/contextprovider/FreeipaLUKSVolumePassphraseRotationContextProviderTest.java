@@ -25,13 +25,15 @@ import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
+import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
-import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep;
 import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
+import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.rotation.ExitCriteriaProvider;
 import com.sequenceiq.freeipa.service.rotation.context.SaltStateApplyRotationContext;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -45,6 +47,9 @@ class FreeipaLUKSVolumePassphraseRotationContextProviderTest {
 
     @Mock
     private StackService stackService;
+
+    @Mock
+    private CachedEnvironmentClientService cachedEnvironmentClientService;
 
     @Mock
     private GatewayConfigService gatewayConfigService;
@@ -72,13 +77,16 @@ class FreeipaLUKSVolumePassphraseRotationContextProviderTest {
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(Set.of(instance1, instance2));
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(RESOURCE_CRN, ACCOUNT_ID)).thenReturn(stack);
         when(gatewayConfigService.getPrimaryGatewayConfig(stack)).thenReturn(gatewayConfig);
+        when(cachedEnvironmentClientService.getByCrn(RESOURCE_CRN)).thenReturn(DetailedEnvironmentResponse.builder()
+                .withEnableSecretEncryption(true)
+                .build());
 
         Map<SecretRotationStep, ? extends RotationContext> result = underTest.getContexts(RESOURCE_CRN);
         assertEquals(2, result.size());
 
         CustomJobRotationContext customJobRotationContext = (CustomJobRotationContext) result.get(CommonSecretRotationStep.CUSTOM_JOB);
         assertEquals(RESOURCE_CRN, customJobRotationContext.getResourceCrn());
-        assertDoesNotThrow(() -> customJobRotationContext.getPreValidateJob().get().run());
+        assertDoesNotThrow(customJobRotationContext.getPreValidateJob().get()::run);
 
         SaltStateApplyRotationContext saltStateApplyRotationContext = (SaltStateApplyRotationContext) result.get(FreeIpaSecretRotationStep.SALT_STATE_APPLY);
         assertEquals(RESOURCE_CRN, saltStateApplyRotationContext.getResourceCrn());
@@ -88,6 +96,25 @@ class FreeipaLUKSVolumePassphraseRotationContextProviderTest {
         assertThat(saltStateApplyRotationContext.getStates()).containsExactly("rotateluks");
         assertThat(saltStateApplyRotationContext.getCleanupStates().get()).containsExactly("rotateluks/finalize");
         assertThat(saltStateApplyRotationContext.getRollBackStates().get()).containsExactly("rotateluks/rollback");
+    }
+
+    @Test
+    void testGetContextsWhenSecretEncryptionIsNotEnabled() {
+        Stack stack = mock(Stack.class);
+        when(stack.getEnvironmentCrn()).thenReturn(RESOURCE_CRN);
+        when(stack.getPlatformvariant()).thenReturn(AWS_NATIVE_GOV_VARIANT.variant().getValue());
+        when(stackService.getByEnvironmentCrnAndAccountIdWithLists(RESOURCE_CRN, ACCOUNT_ID)).thenReturn(stack);
+        when(cachedEnvironmentClientService.getByCrn(RESOURCE_CRN)).thenReturn(DetailedEnvironmentResponse.builder()
+                .withEnableSecretEncryption(false)
+                .build());
+
+        Map<SecretRotationStep, ? extends RotationContext> result = underTest.getContexts(RESOURCE_CRN);
+        assertEquals(2, result.size());
+
+        CustomJobRotationContext customJobRotationContext = (CustomJobRotationContext) result.get(CommonSecretRotationStep.CUSTOM_JOB);
+        assertEquals(RESOURCE_CRN, customJobRotationContext.getResourceCrn());
+        assertThrows(SecretRotationException.class, customJobRotationContext.getPreValidateJob().get()::run,
+                "LUKS passphrase rotation is only available on environments with secret encryption enabled.");
     }
 
     @Test
@@ -101,13 +128,17 @@ class FreeipaLUKSVolumePassphraseRotationContextProviderTest {
         when(instance2.isAvailable()).thenReturn(false);
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(Set.of(instance1, instance2));
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(RESOURCE_CRN, ACCOUNT_ID)).thenReturn(stack);
+        when(cachedEnvironmentClientService.getByCrn(RESOURCE_CRN)).thenReturn(DetailedEnvironmentResponse.builder()
+                .withEnableSecretEncryption(true)
+                .build());
 
         Map<SecretRotationStep, ? extends RotationContext> result = underTest.getContexts(RESOURCE_CRN);
         assertEquals(2, result.size());
 
         CustomJobRotationContext customJobRotationContext = (CustomJobRotationContext) result.get(CommonSecretRotationStep.CUSTOM_JOB);
         assertEquals(RESOURCE_CRN, customJobRotationContext.getResourceCrn());
-        assertThrows(CloudbreakRuntimeException.class, () -> customJobRotationContext.getPreValidateJob().get().run());
+        assertThrows(SecretRotationException.class, customJobRotationContext.getPreValidateJob().get()::run,
+                "All instances of the stack need to be in an availabe state before starting the 'LUKS_VOLUME_PASSPHRASE' rotation.");
     }
 
     @Test
@@ -116,8 +147,8 @@ class FreeipaLUKSVolumePassphraseRotationContextProviderTest {
         when(stack.getPlatformvariant()).thenReturn(AWS_DEFAULT_VARIANT.getValue());
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(RESOURCE_CRN, ACCOUNT_ID)).thenReturn(stack);
 
-        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.getContexts(RESOURCE_CRN));
-        assertEquals("LUKS passphrase rotation is only available on AWS Gov environments.", exception.getMessage());
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.getContexts(RESOURCE_CRN),
+                "LUKS passphrase rotation is only available on AWS Gov environments.");
     }
 
     @Test

@@ -22,9 +22,9 @@ class DatalakeLUKSVolumePassphraseRotationContextProviderTest {
     @Test
     void testGetContexts() {
         Map<SecretRotationStep, ? extends RotationContext> result = underTest.getContexts(RESOURCE_CRN);
-        PollerRotationContext pollerRotationContext = (PollerRotationContext) result.get(CommonSecretRotationStep.CLOUDBREAK_ROTATE_POLLING);
-
         assertEquals(1, result.size());
+
+        PollerRotationContext pollerRotationContext = (PollerRotationContext) result.get(CommonSecretRotationStep.CLOUDBREAK_ROTATE_POLLING);
         assertEquals(RESOURCE_CRN, pollerRotationContext.getResourceCrn());
         assertEquals(CloudbreakSecretType.LUKS_VOLUME_PASSPHRASE, pollerRotationContext.getSecretType());
     }

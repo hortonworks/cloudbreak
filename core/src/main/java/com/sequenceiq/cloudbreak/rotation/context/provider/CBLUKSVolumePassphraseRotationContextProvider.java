@@ -23,12 +23,14 @@ import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
+import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.context.SaltStateApplyRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
-import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
 public class CBLUKSVolumePassphraseRotationContextProvider implements RotationContextProvider {
@@ -41,6 +43,9 @@ public class CBLUKSVolumePassphraseRotationContextProvider implements RotationCo
 
     @Inject
     private StackDtoService stackDtoService;
+
+    @Inject
+    private EnvironmentClientService environmentClientService;
 
     @Inject
     private GatewayConfigService gatewayConfigService;
@@ -70,8 +75,12 @@ public class CBLUKSVolumePassphraseRotationContextProvider implements RotationCo
         return CustomJobRotationContext.builder()
                 .withResourceCrn(stack.getResourceCrn())
                 .withPreValidateJob(() -> {
+                    DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
+                    if (!environment.isEnableSecretEncryption()) {
+                        throw new SecretRotationException("LUKS passphrase rotation is only available on environments with secret encryption enabled.");
+                    }
                     if (stack.getNotDeletedInstanceMetaData().stream().anyMatch(Predicate.not(InstanceMetadataView::isReachable))) {
-                        throw new CloudbreakRuntimeException("All instances of the stack need to be in a reachable state " +
+                        throw new SecretRotationException("All instances of the stack need to be in a reachable state " +
                                 "before starting the 'LUKS_VOLUME_PASSPHRASE' rotation.");
                     }
                 })
