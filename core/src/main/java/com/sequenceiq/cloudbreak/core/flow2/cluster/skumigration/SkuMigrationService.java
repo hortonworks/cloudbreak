@@ -36,6 +36,9 @@ public class SkuMigrationService {
     @Value("${cb.upscale.sku.migration.enabled:false}")
     private boolean upscaleSkuMigrationEnabled;
 
+    @Value("${cb.repair.sku.migration.enabled:false}")
+    private boolean repairSkuMigrationEnabled;
+
     public void updateSkuToStandard(Long stackId, Set<LoadBalancer> loadBalancers) {
         if (!loadBalancers.isEmpty()) {
             loadBalancers.forEach(loadBalancer -> {
@@ -69,5 +72,9 @@ public class SkuMigrationService {
 
     public boolean isUpscaleSkuMigrationEnabled() {
         return upscaleSkuMigrationEnabled;
+    }
+
+    public boolean isRepairSkuMigrationEnabled() {
+        return repairSkuMigrationEnabled;
     }
 }

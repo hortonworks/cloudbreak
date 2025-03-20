@@ -4,6 +4,7 @@ import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPCluste
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.REPAIR_FINISHED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.REPAIR_STARTED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UNSET;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.skumigration.SkuMigrationFlowEvent.SKU_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.CoreVerticalScaleEvent.STACK_VERTICALSCALE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleEvent.STACK_DOWNSCALE_EVENT;
 import static com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType.ALL_AT_ONCE;
@@ -44,6 +45,8 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleState;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.skumigration.SkuMigrationService;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.skumigration.SkuMigrationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.AwsVariantMigrationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
@@ -129,6 +132,9 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     @Inject
     private DefaultRootVolumeSizeProvider rootVolumeSizeProvider;
 
+    @Inject
+    private SkuMigrationService skuMigrationService;
+
     @Override
     public String initEvent() {
         return FlowChainTriggers.CLUSTER_REPAIR_TRIGGER_EVENT;
@@ -210,10 +216,22 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         if (rootDiskRepairMigrationEnabled) {
             addRootDiskUpdateIfNecessary(event, stackDto, repairableGroupsWithHostNames, flowTriggers);
         }
+        addSkuMigrationIfNecessary(stackDto, flowTriggers);
         addDownscaleAndUpscaleEvents(event, flowTriggers, repairableGroupsWithHostNames, singlePrimaryGW, stackDto);
         flowTriggers.add(rescheduleStatusCheckEvent(event));
         flowTriggers.add(new FlowChainFinalizePayload(getName(), event.getResourceId(), event.accepted()));
         return flowTriggers;
+    }
+
+    private void addSkuMigrationIfNecessary(StackDto stackDto, Queue<Selectable> flowTriggers) {
+        if (skuMigrationService.isRepairSkuMigrationEnabled()) {
+            if (skuMigrationService.isMigrationNecessary(stackDto)) {
+                LOGGER.info("Lets do the BASIC to STANDARD SKU migration before repair");
+                SkuMigrationTriggerEvent skuMigrationTriggerEvent =
+                        new SkuMigrationTriggerEvent(SKU_MIGRATION_EVENT.event(), stackDto.getId(), false);
+                flowTriggers.add(skuMigrationTriggerEvent);
+            }
+        }
     }
 
     private void addClusterScaleTriggerEventIfNeeded(StackView stackView, Queue<Selectable> flowEventChain, List<String> stoppedInstances, String hostGroup) {
