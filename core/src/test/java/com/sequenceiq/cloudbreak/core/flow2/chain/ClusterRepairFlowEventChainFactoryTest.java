@@ -38,6 +38,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.skumigration.SkuMigrationService;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.skumigration.SkuMigrationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.AwsVariantMigrationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
@@ -137,6 +139,9 @@ class ClusterRepairFlowEventChainFactoryTest {
 
     @Mock
     private DefaultRootVolumeSizeProvider rootVolumeSizeProvider;
+
+    @Mock
+    private SkuMigrationService skuMigrationService;
 
     @InjectMocks
     private ClusterRepairFlowEventChainFactory underTest;
@@ -610,6 +615,31 @@ class ClusterRepairFlowEventChainFactoryTest {
     }
 
     @Test
+    void testSkuMigration() {
+        when(skuMigrationService.isMigrationNecessary(any())).thenReturn(true);
+        when(skuMigrationService.isRepairSkuMigrationEnabled()).thenReturn(true);
+        Stack stack = getStack();
+        stack.setId(STACK_ID);
+        setupHostGroup(InstanceGroupType.CORE);
+
+        FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedCore().build());
+
+        assertEvents(eventQueues, List.of("FLOWCHAIN_INIT_TRIGGER_EVENT",
+                "IMAGE_VALIDATION_EVENT",
+                "SKU_MIGRATION_EVENT",
+                "FULL_DOWNSCALE_TRIGGER_EVENT",
+                "FULL_UPSCALE_TRIGGER_EVENT",
+                "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
+                "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));
+
+        eventQueues.getQueue().remove();
+        ImageValidationTriggerEvent imageValidationTriggerEvent = (ImageValidationTriggerEvent) eventQueues.getQueue().poll();
+        assertNotNull(imageValidationTriggerEvent);
+        SkuMigrationTriggerEvent skuMigrationTriggerEvent = (SkuMigrationTriggerEvent) eventQueues.getQueue().poll();
+        assertEquals(STACK_ID, skuMigrationTriggerEvent.getResourceId());
+    }
+
+    @Test
     void testRepairSingleGatewayWhenNonRollingUpgrade() {
         Stack stack = getStack();
         setupHostGroup(HG_MASTER, setupInstanceGroup(InstanceGroupType.GATEWAY));
@@ -718,6 +748,7 @@ class ClusterRepairFlowEventChainFactoryTest {
     }
 
     private void setupStackDto() {
+        lenient().when(stackDto.getId()).thenReturn(STACK_ID);
         lenient().when(stackDto.getStack()).thenReturn(stackView);
         lenient().when(stackDto.getCluster()).thenReturn(clusterView);
         lenient().when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
