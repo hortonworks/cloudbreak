@@ -10,7 +10,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscal
 import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleEvent.STACK_DOWNSCALE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.STACK_SYNC_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.ADD_INSTANCES_EVENT;
-import static com.sequenceiq.common.api.type.LoadBalancerSku.STANDARD;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -28,8 +27,8 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.skumigration.SkuMigrationService;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.skumigration.SkuMigrationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
@@ -40,10 +39,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState;
-import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
-import com.sequenceiq.cloudbreak.domain.view.ClusterView;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterUseCaseAware;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
@@ -55,16 +51,13 @@ public class UpscaleFlowEventChainFactory implements FlowEventChainFactory<Stack
     private static final Logger LOGGER = LoggerFactory.getLogger(UpscaleFlowEventChainFactory.class);
 
     @Inject
-    private LoadBalancerPersistenceService loadBalancerPersistenceService;
+    private StackService stackService;
 
     @Inject
-    private StackService stackService;
+    private SkuMigrationService skuMigrationService;
 
     @Value("${cb.upscale.zombie.auto.cleanup.enabled}")
     private boolean zombieAutoCleanupEnabled;
-
-    @Value("${cb.loadbalancer.upscale.sku.migration.enabled:true}")
-    private boolean skuMigrationEnabled;
 
     @Override
     public String initEvent() {
@@ -73,16 +66,15 @@ public class UpscaleFlowEventChainFactory implements FlowEventChainFactory<Stack
 
     @Override
     public FlowTriggerEventQueue createFlowTriggerEventQueue(StackAndClusterUpscaleTriggerEvent event) {
-        StackView stackView = stackService.getViewByIdWithoutAuth(event.getResourceId());
-        ClusterView clusterView = stackView.getClusterView();
+        StackDto stackDto = stackService.getStackProxyById(event.getResourceId());
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         addStackSyncTriggerEvent(event, flowEventChain);
-        addSkuMigrationIfNecessary(stackView, flowEventChain);
+        addSkuMigrationIfNecessary(stackDto, flowEventChain);
         addStackScaleTriggerEvent(event, flowEventChain);
-        addClusterScaleTriggerEventIfNeeded(event, stackView, clusterView, flowEventChain);
+        addClusterScaleTriggerEventIfNeeded(event, stackDto, flowEventChain);
         if (zombieAutoCleanupEnabled) {
             addClusterDownscaleTriggerEventForZombieNodes(event, flowEventChain);
-            addStackDownscaleTriggerEventForZombieNodes(event, flowEventChain, stackView);
+            addStackDownscaleTriggerEventForZombieNodes(event, flowEventChain, stackDto);
         }
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
@@ -100,14 +92,12 @@ public class UpscaleFlowEventChainFactory implements FlowEventChainFactory<Stack
         }
     }
 
-    private void addSkuMigrationIfNecessary(StackView stackView, Queue<Selectable> flowTriggers) {
-        if (skuMigrationEnabled && CloudPlatform.AZURE.name().equalsIgnoreCase(stackView.cloudPlatform())) {
-            Set<LoadBalancer> loadBalancers = loadBalancerPersistenceService.findByStackId(stackView.getId());
-            boolean notStandardSkuLB = loadBalancers.stream().anyMatch(loadBalancer -> !STANDARD.equals(loadBalancer.getSku()));
-            if (notStandardSkuLB) {
-                LOGGER.info("We found non Standard SKU LB in our database, lets do the migration: {}", loadBalancers);
+    private void addSkuMigrationIfNecessary(StackDto stackDto, Queue<Selectable> flowTriggers) {
+        if (skuMigrationService.isUpscaleSkuMigrationEnabled()) {
+            if (skuMigrationService.isMigrationNecessary(stackDto)) {
+                LOGGER.info("Lets do the BASIC to STANDARD SKU migration");
                 SkuMigrationTriggerEvent skuMigrationTriggerEvent =
-                        new SkuMigrationTriggerEvent(SKU_MIGRATION_EVENT.event(), stackView.getId(), false);
+                        new SkuMigrationTriggerEvent(SKU_MIGRATION_EVENT.event(), stackDto.getId(), false);
                 flowTriggers.add(skuMigrationTriggerEvent);
             }
         }
@@ -122,12 +112,11 @@ public class UpscaleFlowEventChainFactory implements FlowEventChainFactory<Stack
         );
     }
 
-    private void addClusterScaleTriggerEventIfNeeded(StackAndClusterUpscaleTriggerEvent event, StackView stackView, ClusterView clusterView,
-        Queue<Selectable> flowEventChain) {
-        if (ScalingType.isClusterUpScale(event.getScalingType()) && clusterView != null) {
+    private void addClusterScaleTriggerEventIfNeeded(StackAndClusterUpscaleTriggerEvent event, StackDto stackDto, Queue<Selectable> flowEventChain) {
+        if (ScalingType.isClusterUpScale(event.getScalingType()) && stackDto.getCluster() != null) {
             flowEventChain.add(
                     new ClusterScaleTriggerEvent(CLUSTER_UPSCALE_TRIGGER_EVENT.event(),
-                            stackView.getId(),
+                            stackDto.getId(),
                             event.getHostGroupsWithAdjustment(),
                             event.getHostGroupsWithPrivateIds(),
                             event.getHostGroupsWithHostNames(),
@@ -165,11 +154,11 @@ public class UpscaleFlowEventChainFactory implements FlowEventChainFactory<Stack
         }
     }
 
-    private void addStackDownscaleTriggerEventForZombieNodes(StackAndClusterUpscaleTriggerEvent event, Queue<Selectable> flowEventChain, StackView stackView) {
+    private void addStackDownscaleTriggerEventForZombieNodes(StackAndClusterUpscaleTriggerEvent event, Queue<Selectable> flowEventChain, StackDto stackDto) {
         Set<String> hostGroups = getHostGroups(event);
         if (!event.isRepair() && !hostGroups.isEmpty()) {
             flowEventChain.add(new StackDownscaleTriggerEvent(STACK_DOWNSCALE_EVENT.event(), event.getResourceId(), Collections.emptyMap(),
-                    Collections.emptyMap(), Collections.emptyMap(), stackView.getPlatformVariant()));
+                    Collections.emptyMap(), Collections.emptyMap(), stackDto.getPlatformVariant()));
         }
     }
 

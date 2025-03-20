@@ -91,7 +91,7 @@ class RemoveLoadBalancerHandlerTest {
         Selectable selectable = underTest.doAccept(handlerEvent);
 
         assertEquals(RemoveLoadBalancerResult.class, selectable.getClass());
-        verify(skuMigrationService, times(1)).updateSkuToStandard(loadBalancers);
+        verify(skuMigrationService, times(1)).updateSkuToStandard(STACK_ID, loadBalancers);
         verify(resourceConnector, times(1)).deleteLoadBalancers(authenticatedContext, cloudStack, List.of("azureLbName"));
     }
 

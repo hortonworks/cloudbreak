@@ -731,8 +731,8 @@ public class AzureTemplateBuilderPart2Test {
                         "n')]\",\"tags\":{},\"dependsOn\":[\"[concat('Microsoft.Network/networkSecurityGroups/',variable" +
                         "s('gateway-groupsecGroupName'))]\"";
         String nonLbGroupExpectedBlob =
-                "\"tags\":{},\"properties\":{\"publicIPAllocationMethod\":\"Dynamic\"}},{\"apiVersion\":\"2023-06-01\",\"" +
-                        "type\":\"Microsoft.Network/networkInterfaces\",\"name\":\"[concat(parameters('nicNamePrefix'),'" +
+                "\"tags\":{},\"sku\":{\"name\":\"Standard\",\"tier\":\"Regional\"},\"properties\":{\"publicIPAllocationMethod\":\"Static\"}}," +
+                        "{\"apiVersion\":\"2023-06-01\",\"type\":\"Microsoft.Network/networkInterfaces\",\"name\":\"[concat(parameters('nicNamePrefix'),'" +
                         "m0-c4ca4238')]\",\"location\":\"[parameters('region')]\",\"tags\":{},\"dependsOn\":[\"[concat('Microsoft" +
                         ".Network/networkSecurityGroups/',variables('core-groupsecGroupName'))]\"";
         Network network = new Network(new Subnet(SUBNET_CIDR));

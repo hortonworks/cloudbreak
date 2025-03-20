@@ -34,6 +34,10 @@ public class PlatformParametersConsts {
 
     public static final String RESOURCE_GROUP_USAGE_PARAMETER = "resourceGroupUsage";
 
+    public static final String STANDARD_SKU_MIGRATION_PARAMETER = "standardSkuMigration";
+
+    public static final String LOAD_BALANCER_SKU_PARAMETER = "loadBalancerSku";
+
     public static final String ENVIRONMENT_RESOURCE_ENCRYPTION_KEY = "environmentResourceEncryptionKey";
 
     public static final String RESOURCE_CRN_PARAMETER = "resourceCrn";
