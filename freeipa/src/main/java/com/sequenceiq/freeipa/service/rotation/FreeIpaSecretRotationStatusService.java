@@ -45,7 +45,7 @@ public class FreeIpaSecretRotationStatusService extends DefaultSecretRotationSta
     }
 
     @Override
-    public void preVaildationFailed(String resourceCrn) {
+    public void preVaildationFailed(String resourceCrn, SecretType secretType, String statusReason) {
         Crn environmentCrn = Crn.safeFromString(resourceCrn);
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(resourceCrn, environmentCrn.getAccountId());
         stackUpdater.updateStackStatus(stack, DetailedStackStatus.AVAILABLE, "");

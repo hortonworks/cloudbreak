@@ -101,9 +101,9 @@ public class SdxSecretRotationStatusService implements SecretRotationStatusServi
     }
 
     @Override
-    public void preVaildationFailed(String resourceCrn) {
-        SdxCluster sdxCluster = sdxService.getByCrn(resourceCrn);
-        sdxStatusService.setStatusForDatalake(DatalakeStatusEnum.RUNNING, "", sdxCluster);
+    public void preVaildationFailed(String resourceCrn, SecretType secretType, String reason) {
+        String eventMessage = String.format("Rotation prevalidation failed for secret type %s, reason: %s", secretType.value(), reason);
+        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING, "", eventMessage, resourceCrn);
     }
 
     private String getCode(SecretType secretType) {

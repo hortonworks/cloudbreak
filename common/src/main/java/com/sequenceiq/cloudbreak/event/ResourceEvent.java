@@ -719,6 +719,7 @@ public enum ResourceEvent {
     SECRET_ROTATION_FINALIZE_IN_PROGRESS("secret.rotation.finalize.in.progress"),
     SECRET_ROTATION_FINALIZE_FINISHED("secret.rotation.finalize.finished"),
     SECRET_ROTATION_FINALIZE_FAILED("secret.rotation.finalize.failed"),
+    SECRET_ROTATION_PREVALIDATE_FAILED("secret.rotation.prevalidate.failed"),
     SECRET_ROTATION_STEP("secret.rotation.step"),
     IMD_UPDATE_STARTED("instance.metadata.update.started"),
     IMD_UPDATE_FINISHED("instance.metadata.update.finished"),
