@@ -50,6 +50,7 @@ import com.sequenceiq.it.cloudbreak.action.sdx.SdxRotateSecretAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRotateSecretInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxScaleAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxSetDefaultJavaVersionAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxSkuMigrationAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxStartAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxStartByNameAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxStatusAction;
@@ -305,5 +306,9 @@ public class SdxTestClient {
 
     public Action<SdxInternalTestDto, SdxClient> describeInternalWithResources() {
         return new SdxDetailWithResourceAction();
+    }
+
+    public Action<SdxTestDto, SdxClient> skuMigration() {
+        return new SdxSkuMigrationAction();
     }
 }

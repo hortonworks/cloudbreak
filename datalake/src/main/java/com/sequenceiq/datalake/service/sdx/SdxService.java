@@ -1875,4 +1875,12 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             return null;
         }
     }
+
+    public void validateSkuMigration(SdxCluster sdxCluster) {
+        DetailedEnvironmentResponse environmentResponse = environmentClientService.getByCrn(sdxCluster.getEnvCrn());
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environmentResponse.getCloudPlatform());
+        if (!AZURE.equals(cloudPlatform)) {
+            throw new BadRequestException("SKU migration is only supported on Data Lakes running on the Azure platform");
+        }
+    }
 }

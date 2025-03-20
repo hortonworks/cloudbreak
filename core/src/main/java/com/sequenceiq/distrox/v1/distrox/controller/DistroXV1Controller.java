@@ -911,4 +911,16 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
         NameOrCrn nameOrCrn = NameOrCrn.ofCrn(crn);
         return stackOperationService.triggerEnableSELinux(nameOrCrn, accountId);
     }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.REPAIR_DATAHUB)
+    public FlowIdentifier triggerSkuMigrationByName(@ResourceName String name, boolean force) {
+        return stackOperationService.triggerSkuMigration(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId(), force);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_DATAHUB)
+    public FlowIdentifier triggerSkuMigrationByCrn(@ResourceCrn String crn, boolean force) {
+        return stackOperationService.triggerSkuMigration(NameOrCrn.ofName(crn), ThreadBasedUserCrnProvider.getAccountId(), force);
+    }
 }
