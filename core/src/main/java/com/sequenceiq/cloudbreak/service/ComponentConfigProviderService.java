@@ -102,6 +102,20 @@ public class ComponentConfigProviderService {
         }
     }
 
+    public void updateStackTemplate(Long stackId, String newTemplate) {
+        try {
+            Component component = getComponent(stackId, ComponentType.STACK_TEMPLATE, ComponentType.STACK_TEMPLATE.name());
+            if (component != null) {
+                StackTemplate stackTemplate = component.getAttributes().get(StackTemplate.class);
+                stackTemplate.setTemplate(newTemplate);
+                component.setAttributes(Json.silent(stackTemplate));
+                store(component);
+            }
+        } catch (IOException e) {
+            throw new CloudbreakServiceException("Failed to read template for stack.", e);
+        }
+    }
+
     public StackTemplate getStackTemplate(Long stackId) {
         try {
             Component component = getComponent(stackId, ComponentType.STACK_TEMPLATE, ComponentType.STACK_TEMPLATE.name());

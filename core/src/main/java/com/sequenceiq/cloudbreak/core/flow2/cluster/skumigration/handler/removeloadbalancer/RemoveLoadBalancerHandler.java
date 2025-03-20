@@ -46,7 +46,6 @@ public class RemoveLoadBalancerHandler extends ExceptionCatcherEventHandler<Remo
         RemoveLoadBalancerRequest request = event.getData();
         try {
             Set<LoadBalancer> loadBalancers = loadBalancerPersistenceService.findByStackId(request.getResourceId());
-            skuMigrationService.updateSkuToStandard(loadBalancers);
             CloudConnector connector = request.getCloudConnector();
             AuthenticatedContext ac = connector.authentication().authenticate(request.getCloudContext(), request.getCloudCredential());
             List<String> loadBalancerNames = loadBalancers.stream()
@@ -56,6 +55,7 @@ public class RemoveLoadBalancerHandler extends ExceptionCatcherEventHandler<Remo
             LOGGER.info("Removing load balancers: {}", loadBalancerNames);
             measure(() -> connector.resources().deleteLoadBalancers(ac, request.getCloudStack(), loadBalancerNames), LOGGER,
                     "Deleting load balancers took {} ms");
+            skuMigrationService.updateSkuToStandard(request.getResourceId(), loadBalancers);
         } catch (Exception e) {
             return new SkuMigrationFailedEvent(SkuMigrationFlowEvent.SKU_MIGRATION_FAILED_EVENT.event(),
                     request.getResourceId(), e);

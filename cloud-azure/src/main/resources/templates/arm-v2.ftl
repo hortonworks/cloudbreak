@@ -233,18 +233,12 @@
                        "${instance.instance.availabilityZone}"
                      ],
                    </#if>
-                   <#if (loadBalancerMapping[instance.groupName]?? && (loadBalancers?filter(loadBalancer -> loadBalancer.sku == "STANDARD")?size > 0)) || (multiAz && instance.instance.availabilityZone?? && instance.instance.availabilityZone?has_content)>
-                     "sku": {
-                         "name": "Standard",
-                         "tier": "Regional"
-                     },
-                   </#if>
+                   "sku": {
+                       "name": "Standard",
+                       "tier": "Regional"
+                   },
                    "properties": {
-                       <#if multiAz || instanceGroup == "GATEWAY" || (instance.availabilitySetName?? && instance.availabilitySetName?has_content)>
                        "publicIPAllocationMethod": "Static"
-                       <#else>
-                       "publicIPAllocationMethod": "Dynamic"
-                       </#if>
                    }
                  },
                  </#if>

@@ -34,10 +34,10 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.skumigration.handler.removel
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
-import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Configuration
 public class SkuMigrationActions {
@@ -45,13 +45,16 @@ public class SkuMigrationActions {
     private static final Logger LOGGER = LoggerFactory.getLogger(SkuMigrationActions.class);
 
     @Inject
-    private CloudbreakMessagesService messagesService;
-
-    @Inject
     private StackUpdater stackUpdater;
 
     @Inject
     private CloudbreakFlowMessageService flowMessageService;
+
+    @Inject
+    private SkuMigrationService skuMigrationService;
+
+    @Inject
+    private StackService stackService;
 
     @Bean(name = "SKU_MIGRATION_CHECK_SKU_STATE")
     public Action<?, ?> checkSkuAction() {
@@ -134,13 +137,15 @@ public class SkuMigrationActions {
     }
 
     @Bean(name = "SKU_MIGRATION_FINISHED_STATE")
-    public Action<?, ?> loadBalancerFinishedAction() {
+    public Action<?, ?> skuMigrationFinishedAction() {
         return new AbstractSkuMigrationAction<>(SkuMigrationFinished.class) {
 
             @Override
             protected void doExecute(SkuMigrationContext context, SkuMigrationFinished payload, Map<Object, Object> variables) {
                 LOGGER.info("Load Balancer Migration successfully completed from Basic to Standard SKU");
                 stackUpdater.updateStackStatus(payload.getResourceId(), DetailedStackStatus.AVAILABLE);
+                stackService.updateTemplateForStackToLatest(payload.getResourceId());
+                skuMigrationService.setSkuMigrationParameter(payload.getResourceId());
                 flowMessageService.fireEventAndLog(payload.getResourceId(), Status.AVAILABLE.name(), SKU_MIGRATION_FINISHED);
                 sendEvent(context);
             }
@@ -153,7 +158,7 @@ public class SkuMigrationActions {
     }
 
     @Bean(name = "SKU_MIGRATION_FAILED_STATE")
-    public Action<?, ?> loadBalancerMigrationFailedAction() {
+    public Action<?, ?> skuMigrationFailedAction() {
         return new AbstractStackFailureAction<SkuMigrationFlowState, SkuMigrationFlowEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
