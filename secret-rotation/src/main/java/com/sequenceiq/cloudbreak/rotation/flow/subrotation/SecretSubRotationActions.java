@@ -81,7 +81,7 @@ public class SecretSubRotationActions {
                 flow.setFlowFailed(exception);
                 secretRotationUsageService.rotationFailed(context.getSecretType(), resourceCrn, message, context.getExecutionType());
                 if (PREVALIDATE.equals(payload.getExecutionType())) {
-                    secretRotationStatusService.preVaildationFailed(resourceCrn);
+                    secretRotationStatusService.preVaildationFailed(resourceCrn, payload.getSecretType(), message);
                 } else {
                     secretRotationStatusService.rotationFailed(resourceCrn, payload.getSecretType(), message);
                 }
