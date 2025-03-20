@@ -1,6 +1,8 @@
 package com.sequenceiq.datalake.service.sdx;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static com.sequenceiq.common.api.type.DeploymentRestriction.DATALAKE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -355,6 +357,54 @@ class MultiAzDecoratorTest {
                 .stream()
                 .filter(ig -> !InstanceGroupType.GATEWAY.equals(ig.getType()))
                 .allMatch(ig -> ig.getNetwork().getAws().getSubnetIds().containsAll(List.of("subnet1", "subnet2", "subnet3", "subnet4"))));
+
+        assertThat(stackV4Request.isEnableMultiAz()).isTrue();
+    }
+
+    @Test
+    void decorateStackRequestWithPreviousNetworkAzure() {
+        StackV4Request stackV4Request = new StackV4Request();
+        stackV4Request.setInstanceGroups(List.of(getInstanceGroupV4Request(InstanceGroupType.GATEWAY), getInstanceGroupV4Request(InstanceGroupType.CORE)));
+        Map<String, Set<String>> subnetsByAz = Map.of("1", Set.of("subnet1", "subnet2"), "2", Set.of("subnet1", "subnet2"),
+                "3", Set.of("subnet1", "subnet2"));
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        environment.setCloudPlatform(String.valueOf(AZURE));
+
+        underTest.decorateStackRequestWithPreviousNetwork(stackV4Request, environment, SdxClusterShape.ENTERPRISE, subnetsByAz);
+
+        assertTrue(stackV4Request
+                .getInstanceGroups()
+                .stream()
+                .allMatch(ig -> ig.getNetwork().getAzure().getSubnetIds().containsAll(List.of("subnet1", "subnet2"))));
+
+        assertTrue(stackV4Request
+                .getInstanceGroups()
+                .stream()
+                .allMatch(ig -> ig.getNetwork().getAzure().getAvailabilityZones().containsAll(Set.of("1", "2", "3"))));
+
+        assertThat(stackV4Request.isEnableMultiAz()).isTrue();
+    }
+
+    @Test
+    void decorateStackRequestWithPreviousNetworkGcp() {
+        StackV4Request stackV4Request = new StackV4Request();
+        stackV4Request.setInstanceGroups(List.of(getInstanceGroupV4Request(InstanceGroupType.GATEWAY), getInstanceGroupV4Request(InstanceGroupType.CORE)));
+        Map<String, Set<String>> subnetsByAz = Map.of("1", Set.of("subnet1", "subnet2"), "2", Set.of("subnet1", "subnet2"),
+                "3", Set.of("subnet1", "subnet2"));
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        environment.setCloudPlatform(String.valueOf(GCP));
+
+        underTest.decorateStackRequestWithPreviousNetwork(stackV4Request, environment, SdxClusterShape.ENTERPRISE, subnetsByAz);
+
+        assertTrue(stackV4Request
+                .getInstanceGroups()
+                .stream()
+                .allMatch(ig -> ig.getNetwork().getGcp().getSubnetIds().containsAll(List.of("subnet1", "subnet2"))));
+
+        assertTrue(stackV4Request
+                .getInstanceGroups()
+                .stream()
+                .allMatch(ig -> ig.getNetwork().getGcp().getAvailabilityZones().containsAll(Set.of("1", "2", "3"))));
 
         assertThat(stackV4Request.isEnableMultiAz()).isTrue();
     }

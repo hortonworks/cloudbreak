@@ -788,15 +788,22 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     private void decorateRequestWithMultiAz(StackV4Request stackRequest, StackV4Response stackResponse, DetailedEnvironmentResponse environmentResponse,
             SdxClusterShape clusterShape, boolean currentSdxIsMultiAz) {
-        if (currentSdxIsMultiAz && stackResponse.getCloudPlatform().equals(AWS)) {
-            Map<String, Set<String>> subnetsByAz = collectSubnetsByAz(stackResponse);
+        if (currentSdxIsMultiAz) {
+            Map<String, Set<String>> subnetsByAz = null;
+            if (stackResponse.getCloudPlatform().equals(AWS)) {
+                subnetsByAz = collectSubnetsByAzFromMetadata(stackResponse);
+            } else if (stackResponse.getCloudPlatform().equals(AZURE)) {
+                subnetsByAz = collectSubnetsByAzFromAzure(stackResponse);
+            } else if (stackResponse.getCloudPlatform().equals(GCP)) {
+                subnetsByAz = collectSubnetsByAzFromGcp(stackResponse);
+            }
             multiAzDecorator.decorateStackRequestWithPreviousNetwork(stackRequest, environmentResponse, clusterShape, subnetsByAz);
         } else {
             multiAzDecorator.decorateStackRequestWithMultiAz(stackRequest, environmentResponse, clusterShape);
         }
     }
 
-    private Map<String, Set<String>> collectSubnetsByAz(StackV4Response stackV4Response) {
+    private Map<String, Set<String>> collectSubnetsByAzFromMetadata(StackV4Response stackV4Response) {
         LOGGER.info("Collecting subnets by avaliability zone from instance metadata");
         Map<String, Set<String>> subnetsByAZ = new HashMap<>();
         return stackV4Response
@@ -813,6 +820,44 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                                     return existingSet;
                                 }
                         ));
+    }
+
+    private Map<String, Set<String>> collectSubnetsByAzFromAzure(StackV4Response stackV4Response) {
+        LOGGER.info("Collecting subnets by avaliability zone from Azure network");
+        return stackV4Response
+                .getInstanceGroups()
+                .stream()
+                .map(InstanceGroupV4Response::getNetwork)
+                .flatMap(network -> network
+                        .getAzure()
+                        .getAvailabilityZones()
+                        .stream()
+                        .map(key -> new SimpleEntry<>(key, network.getAzure().getSubnetIds())))
+                .collect(Collectors.toMap(Entry::getKey, entry -> new HashSet<>(entry.getValue()),
+                        (existingSet, newSet) -> {
+                            existingSet.addAll(newSet);
+                            return existingSet;
+                        }
+                ));
+    }
+
+    private Map<String, Set<String>> collectSubnetsByAzFromGcp(StackV4Response stackV4Response) {
+        LOGGER.info("Collecting subnets by avaliability zone from GCP network");
+        return stackV4Response
+                .getInstanceGroups()
+                .stream()
+                .map(InstanceGroupV4Response::getNetwork)
+                .flatMap(network -> network
+                        .getGcp()
+                        .getAvailabilityZones()
+                        .stream()
+                        .map(key -> new SimpleEntry<>(key, network.getGcp().getSubnetIds())))
+                .collect(Collectors.toMap(Entry::getKey, entry -> new HashSet<>(entry.getValue()),
+                        (existingSet, newSet) -> {
+                            existingSet.addAll(newSet);
+                            return existingSet;
+                        }
+                ));
     }
 
     private void setSecurityRequest(SdxCluster sdxCluster, StackV4Request stackRequest) {

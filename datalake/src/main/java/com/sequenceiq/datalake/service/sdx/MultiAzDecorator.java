@@ -17,6 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.aws.InstanceGroupAwsNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.azure.InstanceGroupAzureNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.gcp.InstanceGroupGcpNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
@@ -145,15 +147,18 @@ public class MultiAzDecorator {
 
     public void decorateStackRequestWithPreviousNetwork(StackV4Request stackV4Request, DetailedEnvironmentResponse environment, SdxClusterShape clusterShape,
             Map<String, Set<String>> subnetsByAz) {
+        LOGGER.info("Decorate stackRequest with previous network configuration");
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
-        if (cloudPlatform == CloudPlatform.AWS) {
-            decorateStackRequestWithPreviousMultiAzNetworkAws(stackV4Request, subnetsByAz);
+
+        switch (cloudPlatform) {
+            case AWS -> decorateStackRequestWithPreviousMultiAzNetworkAws(stackV4Request, subnetsByAz);
+            case AZURE -> decorateStackRequestWithPreviousMultiAzNetworkAzure(stackV4Request, subnetsByAz);
+            case GCP -> decorateStackRequestWithPreviousMultiAzNetworkGcp(stackV4Request, subnetsByAz);
+            default -> throw new IllegalStateException("Multi-az is not supported by " + cloudPlatform);
         }
     }
 
     private void decorateStackRequestWithPreviousMultiAzNetworkAws(StackV4Request stackV4Request, Map<String, Set<String>> subnetsByAz) {
-        LOGGER.info("Decorate stackRequest with previous network configuration");
-
         stackV4Request.getInstanceGroups().forEach(ig -> {
             if (ig.getNetwork() == null) {
                 ig.setNetwork(new InstanceGroupNetworkV4Request());
@@ -188,5 +193,43 @@ public class MultiAzDecorator {
                         .orElse(null))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
+    }
+
+    private void decorateStackRequestWithPreviousMultiAzNetworkAzure(StackV4Request stackV4Request, Map<String, Set<String>> subnetsByAz) {
+        stackV4Request.getInstanceGroups().forEach(ig -> {
+            if (ig.getNetwork() == null) {
+                ig.setNetwork(new InstanceGroupNetworkV4Request());
+                InstanceGroupAzureNetworkV4Parameters networkParameter = ig.getNetwork().createAzure();
+                List<String> subnetIds = subnetsByAz.values()
+                        .stream()
+                        .flatMap(Set::stream)
+                        .distinct()
+                        .collect(Collectors.toList());
+                LOGGER.info("Subnets used in instance group {}: {}", ig.getName(), subnetIds);
+
+                networkParameter.setSubnetIds(subnetIds);
+                networkParameter.setAvailabilityZones(subnetsByAz.keySet());
+            }
+        });
+        stackV4Request.setEnableMultiAz(true);
+    }
+
+    private void decorateStackRequestWithPreviousMultiAzNetworkGcp(StackV4Request stackV4Request, Map<String, Set<String>> subnetsByAz) {
+        stackV4Request.getInstanceGroups().forEach(ig -> {
+            if (ig.getNetwork() == null) {
+                ig.setNetwork(new InstanceGroupNetworkV4Request());
+                InstanceGroupGcpNetworkV4Parameters networkParameter = ig.getNetwork().createGcp();
+                List<String> subnetIds = subnetsByAz.values()
+                        .stream()
+                        .flatMap(Set::stream)
+                        .distinct()
+                        .collect(Collectors.toList());
+                LOGGER.info("Subnets used in instance group {}: {}", ig.getName(), subnetIds);
+
+                networkParameter.setSubnetIds(subnetIds);
+                networkParameter.setAvailabilityZones(subnetsByAz.keySet());
+            }
+        });
+        stackV4Request.setEnableMultiAz(true);
     }
 }

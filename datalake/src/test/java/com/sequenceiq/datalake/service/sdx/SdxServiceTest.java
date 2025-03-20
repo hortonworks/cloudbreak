@@ -36,6 +36,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -57,6 +58,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -73,6 +75,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.azure.InstanceGroupAzureNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.gcp.InstanceGroupGcpNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.GcpNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -91,6 +95,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.Databa
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.network.InstanceGroupNetworkV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.InstanceTemplateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.volume.VolumeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.network.NetworkV4Response;
@@ -2278,5 +2283,115 @@ class SdxServiceTest {
 
         Map<String, Set<String>> subnetsByAz = Map.of("az1", Set.of("subnet1"), "az2", Set.of("subnet2"), "az3", Set.of("subnet3"));
         verify(multiAzDecorator, times(1)).decorateStackRequestWithPreviousNetwork(any(), any(), any(), eq(subnetsByAz));
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @ValueSource(strings = {"AZURE", "GCP"})
+    void testSdxResizeUsingPreviousDatalakeNetwork(String cloudPlatform) throws IOException {
+        SdxClusterResizeRequest resizeRequest = new SdxClusterResizeRequest();
+        resizeRequest.setEnvironment(ENVIRONMENT_NAME);
+        resizeRequest.setClusterShape(ENTERPRISE);
+        SdxCluster sdxCluster = getSdxCluster();
+        sdxCluster.setId(SDX_ID);
+        sdxCluster.setClusterShape(LIGHT_DUTY);
+        sdxCluster.setEnableMultiAz(true);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(null);
+        sdxCluster.setRuntime("7.2.18");
+        sdxCluster.setCloudStorageBaseLocation("s3a://some/dir/");
+        sdxCluster.setSeLinux(SeLinux.PERMISSIVE);
+
+        when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString()))
+                .thenReturn(Optional.of(sdxCluster));
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
+        when(sdxBackupRestoreService.isDatalakeInBackupProgress(anyString(), anyString())).thenReturn(false);
+        when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(false);
+
+        mockEnvironmentCall(resizeRequest, AWS);
+        when(sdxReactorFlowManager.triggerSdxResize(anyLong(), any(SdxCluster.class), any(DatalakeDrSkipOptions.class), eq(false)))
+                .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+
+        String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.18/aws/enterprise.json");
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(mediumDutyJson, StackV4Request.class));
+
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setStatus(Status.STOPPED);
+        stackV4Response.setCloudPlatform(CloudPlatform.valueOf(cloudPlatform));
+        StackImageV4Response image = new StackImageV4Response();
+        image.setOs(OS_NAME);
+        image.setCatalogName(CATALOG_NAME);
+        stackV4Response.setImage(image);
+        ClusterV4Response clusterV4Response = new ClusterV4Response();
+        stackV4Response.setCluster(clusterV4Response);
+
+        stackV4Response.setInstanceGroups(getInstanceGroups(CloudPlatform.valueOf(cloudPlatform)));
+        stackV4Response.setNetwork(getNetworkForCurrentDatalake());
+
+        when(stackV4Endpoint.get(anyLong(), anyString(), anySet(), anyString())).thenReturn(stackV4Response);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, CLUSTER_NAME, resizeRequest));
+
+        Map<String, Set<String>> subnetsByAz = Map.of("1", Set.of("subnet1", "subnet2"), "2", Set.of("subnet1", "subnet2"),
+                "3", Set.of("subnet1", "subnet2"));
+
+        verify(multiAzDecorator, times(1)).decorateStackRequestWithPreviousNetwork(any(), any(), any(), eq(subnetsByAz));
+    }
+
+    private List<InstanceGroupV4Response> getInstanceGroups(CloudPlatform cloudPlatform) {
+        List<InstanceGroupV4Response> instanceGroups = new ArrayList<>();
+        if (cloudPlatform.equals(AZURE)) {
+            InstanceGroupV4Response masterInstanceGroup = new InstanceGroupV4Response();
+            InstanceGroupNetworkV4Response masterNetwork = new InstanceGroupNetworkV4Response();
+            InstanceGroupAzureNetworkV4Parameters azureMaster = new InstanceGroupAzureNetworkV4Parameters();
+            masterInstanceGroup.setNetwork(masterNetwork);
+            masterNetwork.setAzure(azureMaster);
+            azureMaster.setAvailabilityZones(Set.of("1", "2", "3"));
+            azureMaster.setSubnetIds(List.of("subnet1"));
+
+            InstanceGroupV4Response gatewayInstanceGroup = new InstanceGroupV4Response();
+            InstanceGroupNetworkV4Response gatewayNetwork = new InstanceGroupNetworkV4Response();
+            InstanceGroupAzureNetworkV4Parameters gatewayAzure = new InstanceGroupAzureNetworkV4Parameters();
+            gatewayInstanceGroup.setNetwork(gatewayNetwork);
+            gatewayNetwork.setAzure(gatewayAzure);
+            gatewayAzure.setAvailabilityZones(Set.of("1", "2", "3"));
+            gatewayAzure.setSubnetIds(List.of("subnet2"));
+
+            InstanceGroupV4Response coreInstanceGroup = new InstanceGroupV4Response();
+            InstanceGroupNetworkV4Response coreNetwork = new InstanceGroupNetworkV4Response();
+            InstanceGroupAzureNetworkV4Parameters coreAzure = new InstanceGroupAzureNetworkV4Parameters();
+            coreInstanceGroup.setNetwork(coreNetwork);
+            coreNetwork.setAzure(coreAzure);
+            coreAzure.setAvailabilityZones(Set.of("1", "2", "3"));
+            coreAzure.setSubnetIds(List.of("subnet1"));
+
+            instanceGroups.addAll(List.of(masterInstanceGroup, gatewayInstanceGroup, coreInstanceGroup));
+        } else if (cloudPlatform.equals(GCP)) {
+            InstanceGroupV4Response masterInstanceGroup = new InstanceGroupV4Response();
+            InstanceGroupNetworkV4Response masterNetwork = new InstanceGroupNetworkV4Response();
+            InstanceGroupGcpNetworkV4Parameters gcpMaster = new InstanceGroupGcpNetworkV4Parameters();
+            masterInstanceGroup.setNetwork(masterNetwork);
+            masterNetwork.setGcp(gcpMaster);
+            gcpMaster.setAvailabilityZones(Set.of("1", "2", "3"));
+            gcpMaster.setSubnetIds(List.of("subnet1"));
+
+            InstanceGroupV4Response gatewayInstanceGroup = new InstanceGroupV4Response();
+            InstanceGroupNetworkV4Response gatewayNetwork = new InstanceGroupNetworkV4Response();
+            InstanceGroupGcpNetworkV4Parameters gatewayGcp = new InstanceGroupGcpNetworkV4Parameters();
+            gatewayInstanceGroup.setNetwork(gatewayNetwork);
+            gatewayNetwork.setGcp(gatewayGcp);
+            gatewayGcp.setAvailabilityZones(Set.of("1", "2", "3"));
+            gatewayGcp.setSubnetIds(List.of("subnet2"));
+
+            InstanceGroupV4Response coreInstanceGroup = new InstanceGroupV4Response();
+            InstanceGroupNetworkV4Response coreNetwork = new InstanceGroupNetworkV4Response();
+            InstanceGroupGcpNetworkV4Parameters coreGcp = new InstanceGroupGcpNetworkV4Parameters();
+            coreInstanceGroup.setNetwork(coreNetwork);
+            coreNetwork.setGcp(coreGcp);
+            coreGcp.setAvailabilityZones(Set.of("1", "2", "3"));
+            coreGcp.setSubnetIds(List.of("subnet1"));
+
+            instanceGroups.addAll(List.of(masterInstanceGroup, gatewayInstanceGroup, coreInstanceGroup));
+        }
+        return instanceGroups;
     }
 }
