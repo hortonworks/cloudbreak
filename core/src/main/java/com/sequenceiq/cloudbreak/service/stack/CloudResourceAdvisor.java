@@ -112,7 +112,7 @@ public class CloudResourceAdvisor {
             String region, String platformVariant, String availabilityZone, CdpResourceType cdpResourceType) {
         Credential credential = credentialClientService.getByName(credentialName);
         return getPlatformRecommendationByCredential(workspaceId, definitionName, blueprintName, region,
-                platformVariant, availabilityZone, cdpResourceType, credential);
+                platformVariant, availabilityZone, cdpResourceType, credential, null);
     }
 
     public PlatformRecommendation createForBlueprintByCredCrn(Long workspaceId, String definitionName, String blueprintName, String credentialCrn,
@@ -121,17 +121,17 @@ public class CloudResourceAdvisor {
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> credentialClientService.getByCrn(credentialCrn));
         return createForBlueprintByCred(workspaceId, definitionName, blueprintName, credential, region,
-                platformVariant, availabilityZone, cdpResourceType);
+                platformVariant, availabilityZone, cdpResourceType, null);
     }
 
     public PlatformRecommendation createForBlueprintByCred(Long workspaceId, String definitionName, String blueprintName, Credential credential,
-            String region, String platformVariant, String availabilityZone, CdpResourceType cdpResourceType) {
+            String region, String platformVariant, String availabilityZone, CdpResourceType cdpResourceType, String architecture) {
         return getPlatformRecommendationByCredential(workspaceId, definitionName, blueprintName, region,
-                platformVariant, availabilityZone, cdpResourceType, credential);
+                platformVariant, availabilityZone, cdpResourceType, credential, architecture);
     }
 
     private PlatformRecommendation getPlatformRecommendationByCredential(Long workspaceId, String definitionName, String blueprintName, String region,
-            String platformVariant, String availabilityZone, CdpResourceType cdpResourceType, Credential credential) {
+            String platformVariant, String availabilityZone, CdpResourceType cdpResourceType, Credential credential, String architectureString) {
         String cloudPlatform = credential.cloudPlatform();
         Map<String, VmType> vmTypesByHostGroup = new HashMap<>();
         Map<String, Boolean> hostGroupContainsMasterComp = new HashMap<>();
@@ -152,7 +152,14 @@ public class CloudResourceAdvisor {
                 platformDisks.getDiskDisplayNames().get(platform));
 
         Map<String, String> templateInfo = getInfoFromClusterTemplate(definitionName, workspaceId);
-        Architecture architecture = Architecture.fromStringWithFallback(templateInfo.get(ARCHITECTURE));
+        Architecture architecture = null;
+        if (templateInfo.containsKey(ARCHITECTURE)) {
+            architecture = Architecture.fromStringWithFallback(templateInfo.get(ARCHITECTURE));
+        } else if (architectureString != null) {
+            architecture = Architecture.fromStringWithFallback(architectureString);
+        } else {
+            architecture = Architecture.X86_64;
+        }
         CloudVmTypes vmTypes = vmAdvisor.recommendVmTypes(blueprintTextProcessor, region, platformVariant, cdpResourceType, credential, architecture);
         VmType defaultVmType = getDefaultVmType(availabilityZone, vmTypes);
         if (defaultVmType != null) {

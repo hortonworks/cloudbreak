@@ -231,10 +231,10 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     }
 
     public RecommendationV4Response getRecommendationByEnvironmentCrn(Long workspaceId, String definitionName, String blueprintName, String environmentCrn,
-            String region, String platformVariant, String availabilityZone, CdpResourceType cdpResourceType) {
+            String region, String platformVariant, String availabilityZone, CdpResourceType cdpResourceType, String architecture) {
         Credential credential = credentialClientService.getByEnvironmentCrn(environmentCrn);
         PlatformRecommendation recommendation = cloudResourceAdvisor.createForBlueprintByCred(workspaceId, definitionName, blueprintName, credential, region,
-                platformVariant, availabilityZone, cdpResourceType);
+                platformVariant, availabilityZone, cdpResourceType, architecture);
         return platformRecommendationToPlatformRecommendationV4ResponseConverter.convert(recommendation);
     }
 

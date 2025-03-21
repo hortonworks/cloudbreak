@@ -105,7 +105,7 @@ public class BlueprintUtilV4Controller extends NotificationController implements
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
     public RecommendationV4Response createRecommendationByEnvCrn(Long workspaceId, String definitionName, String blueprintName,
             @TenantAwareParam @ResourceCrn String environmentCrn, @NotEmpty String region, String platformVariant,
-            String availabilityZone, CdpResourceType resourceType) {
+            String availabilityZone, CdpResourceType resourceType, String architecture) {
         return blueprintService.getRecommendationByEnvironmentCrn(
                 threadLocalService.getRequestedWorkspaceId(),
                 definitionName,
@@ -114,7 +114,8 @@ public class BlueprintUtilV4Controller extends NotificationController implements
                 region,
                 platformVariant,
                 availabilityZone,
-                resourceType);
+                resourceType,
+                architecture);
     }
 
     @Override
