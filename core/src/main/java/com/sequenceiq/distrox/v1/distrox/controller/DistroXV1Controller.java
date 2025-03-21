@@ -848,7 +848,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DATAHUB_VERTICAL_SCALING)
-    public FlowIdentifier addVolumesByStackCrn(@ResourceCrn String crn, StackAddVolumesRequest addVolumesRequest) {
+    public FlowIdentifier addVolumesByStackCrn(@TenantAwareParam @ResourceCrn String crn, StackAddVolumesRequest addVolumesRequest) {
         return stackOperations.putAddVolumes(NameOrCrn.ofCrn(crn), addVolumesRequest, ThreadBasedUserCrnProvider.getAccountId());
     }
 
