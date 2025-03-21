@@ -12,7 +12,6 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.CustomConfigurationsV4Endpoint;
@@ -24,6 +23,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.responses.CustomConfigurationsV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.responses.RoleTypeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.responses.ServiceTypeV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.converter.CustomConfigurationsToCustomConfigurationsV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.CustomConfigurationsV4RequestToCustomConfigurationsConverter;
 import com.sequenceiq.cloudbreak.domain.CustomConfigurations;

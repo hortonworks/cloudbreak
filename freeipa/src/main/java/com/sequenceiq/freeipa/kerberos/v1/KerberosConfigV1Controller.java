@@ -13,10 +13,9 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
-import com.sequenceiq.authorization.annotation.RequestObject;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.freeipa.api.v1.kerberos.KerberosConfigV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.CreateKerberosConfigRequest;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.describe.DescribeKerberosConfigResponse;
@@ -36,13 +35,13 @@ public class KerberosConfigV1Controller extends NotificationController implement
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
-    public DescribeKerberosConfigResponse describe(@TenantAwareParam @ResourceCrn String environmentCrn) {
+    public DescribeKerberosConfigResponse describe(@ResourceCrn String environmentCrn) {
         return kerberosConfigV1Service.describe(environmentCrn);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
-    public DescribeKerberosConfigResponse getForCluster(@ResourceCrn @NotEmpty @TenantAwareParam String environmentCrn,
+    public DescribeKerberosConfigResponse getForCluster(@ResourceCrn @NotEmpty String environmentCrn,
             @NotEmpty String clusterName) {
         String accountId = crnService.getCurrentAccountId();
         try {

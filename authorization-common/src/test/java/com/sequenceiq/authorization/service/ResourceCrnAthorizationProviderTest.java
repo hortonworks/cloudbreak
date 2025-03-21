@@ -18,12 +18,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.service.model.AuthorizationRule;
 import com.sequenceiq.authorization.service.model.HasRight;
 import com.sequenceiq.authorization.service.model.HasRightOnAny;
 import com.sequenceiq.authorization.utils.CrnAccountValidator;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 
 @ExtendWith(MockitoExtension.class)
 public class ResourceCrnAthorizationProviderTest {

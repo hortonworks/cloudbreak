@@ -21,7 +21,6 @@ import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.InternalOnly;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
@@ -41,7 +40,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Re
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.cloud.model.AutoscaleRecommendation;
 import com.sequenceiq.cloudbreak.conf.LimitConfiguration;
 import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.AutoscaleRecommendationToAutoscaleRecommendationV4ResponseConverter;
@@ -103,13 +102,13 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public FlowIdentifier putStack(@TenantAwareParam @ResourceCrn String crn, String userId, @Valid UpdateStackV4Request updateRequest) {
+    public FlowIdentifier putStack(@ResourceCrn String crn, String userId, @Valid UpdateStackV4Request updateRequest) {
         return stackCommonService.putInDefaultWorkspace(crn, updateRequest);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public FlowIdentifier putStackStartInstancesByCrn(@TenantAwareParam @ResourceCrn String crn, @Valid UpdateStackV4Request updateRequest) {
+    public FlowIdentifier putStackStartInstancesByCrn(@ResourceCrn String crn, @Valid UpdateStackV4Request updateRequest) {
         return stackCommonService.putStartInstancesInDefaultWorkspace(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(),
                 updateRequest, ScalingStrategy.STOPSTART);
     }
@@ -123,13 +122,13 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public FlowIdentifier putCluster(@TenantAwareParam @ResourceCrn String crn, String userId, @Valid UpdateClusterV4Request updateRequest) {
+    public FlowIdentifier putCluster(@ResourceCrn String crn, String userId, @Valid UpdateClusterV4Request updateRequest) {
         return clusterCommonService.put(crn, updateRequest);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public void decommissionInstancesForClusterCrn(@TenantAwareParam @ResourceCrn String clusterCrn, Long workspaceId,
+    public void decommissionInstancesForClusterCrn(@ResourceCrn String clusterCrn, Long workspaceId,
             List<String> instanceIds, Boolean forced) {
         stackCommonService.deleteMultipleInstancesInWorkspace(NameOrCrn.ofCrn(clusterCrn), ThreadBasedUserCrnProvider.getAccountId(),
                 new HashSet(instanceIds), forced);
@@ -137,7 +136,7 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public AutoscaleStackV4Response getAutoscaleClusterByCrn(@TenantAwareParam @ResourceCrn String crn) {
+    public AutoscaleStackV4Response getAutoscaleClusterByCrn(@ResourceCrn String crn) {
         Stack stack = stackService.getNotTerminatedByCrnInWorkspace(crn, restRequestThreadLocalService.getRequestedWorkspaceId());
         return stackToAutoscaleStackV4ResponseConverter.convert(stack);
     }
@@ -157,7 +156,7 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Override
     @InternalOnly
-    public FlowIdentifier decommissionInternalInstancesForClusterCrn(@TenantAwareParam @ResourceCrn String clusterCrn,
+    public FlowIdentifier decommissionInternalInstancesForClusterCrn(@ResourceCrn String clusterCrn,
             List<String> instanceIds, Boolean forced) {
         LOGGER.info("decommissionInternalInstancesForClusterCrn. forced={}, clusterCrn={}, instanceIds=[{}]",
                 forced, clusterCrn, instanceIds);
@@ -167,7 +166,7 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public FlowIdentifier stopInstancesForClusterCrn(@TenantAwareParam @ResourceCrn String clusterCrn, @NotEmpty List<String> instanceIds,
+    public FlowIdentifier stopInstancesForClusterCrn(@ResourceCrn String clusterCrn, @NotEmpty List<String> instanceIds,
             Boolean forced, ScalingStrategy scalingStrategy) {
         LOGGER.info("stopInstancesForClusterCrn. ScalingStrategy={}, forced={}, clusterCrn={}, instanceIds=[{}]",
                 scalingStrategy, forced, clusterCrn, instanceIds);
@@ -195,20 +194,20 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Override
     @InternalOnly
-    public StackV4Response get(@TenantAwareParam String crn) {
+    public StackV4Response get(@ResourceCrn String crn) {
         return stackCommonService.getByCrn(crn);
     }
 
     @Override
     @InternalOnly
-    public DependentHostGroupsV4Response getDependentHostGroupsForMultipleHostGroups(@TenantAwareParam String crn, Set<String> hostGroups) {
+    public DependentHostGroupsV4Response getDependentHostGroupsForMultipleHostGroups(@ResourceCrn String crn, Set<String> hostGroups) {
         StackDto stack = stackDtoService.getByCrn(crn);
         return stackToDependentHostGroupV4ResponseConverter.convert(stack, hostGroups);
     }
 
     @Override
     @InternalOnly
-    public StackStatusV4Response getStatusByCrn(@TenantAwareParam String crn) {
+    public StackStatusV4Response getStatusByCrn(@ResourceCrn String crn) {
         return stackOperations.getStatus(crn);
     }
 
@@ -221,7 +220,7 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Override
     @InternalOnly
-    public AuthorizeForAutoscaleV4Response authorizeForAutoscale(@TenantAwareParam String crn, String userId, String tenant, String permission) {
+    public AuthorizeForAutoscaleV4Response authorizeForAutoscale(@ResourceCrn String crn, String userId, String tenant, String permission) {
         AuthorizeForAutoscaleV4Response response = new AuthorizeForAutoscaleV4Response();
         try {
             restRequestThreadLocalService.setCloudbreakUserByUsernameAndTenant(userId, tenant);
@@ -236,7 +235,7 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Override
     @InternalOnly
-    public CertificateV4Response getCertificate(@TenantAwareParam String crn) {
+    public CertificateV4Response getCertificate(@ResourceCrn String crn) {
         return stackCommonService.getCertificate(crn);
     }
 
@@ -256,7 +255,7 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Override
     @InternalOnly
-    public AutoscaleRecommendationV4Response getRecommendation(@TenantAwareParam String crn) {
+    public AutoscaleRecommendationV4Response getRecommendation(@ResourceCrn String crn) {
         Stack stack = stackService.getByCrn(crn);
 
         String blueprintName = stack.getCluster().getBlueprint().getName();

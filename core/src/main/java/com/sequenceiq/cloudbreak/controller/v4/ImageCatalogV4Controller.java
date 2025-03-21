@@ -25,8 +25,6 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
-import com.sequenceiq.authorization.annotation.RequestObject;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
@@ -44,6 +42,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.RuntimeV
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
+import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.authorization.ImageCatalogFiltering;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;

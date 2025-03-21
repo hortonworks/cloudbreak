@@ -24,7 +24,6 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
@@ -37,7 +36,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.Clust
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
@@ -125,7 +124,7 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
-    public ClusterTemplateViewV4Responses listByEnv(Long workspaceId, @TenantAwareParam @ResourceCrn String environmentCrn) {
+    public ClusterTemplateViewV4Responses listByEnv(Long workspaceId, @ResourceCrn String environmentCrn) {
         boolean internalTenant = isInternalTenant();
         measure(() -> blueprintService.updateDefaultBlueprintCollection(threadLocalService.getRequestedWorkspaceId()),
                 LOGGER, "Blueprints fetched in {}ms");
@@ -174,7 +173,7 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_CLUSTER_DEFINITION)
-    public ClusterTemplateV4Response getByCrn(Long workspaceId, @TenantAwareParam @ResourceCrn String crn) {
+    public ClusterTemplateV4Response getByCrn(Long workspaceId, @ResourceCrn String crn) {
         boolean internalTenant = isInternalTenant();
         try {
             ClusterTemplate clusterTemplate = transactionService.required(() ->
@@ -195,7 +194,7 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DELETE_CLUSTER_DEFINITION)
-    public ClusterTemplateV4Response deleteByCrn(Long workspaceId, @TenantAwareParam @ResourceCrn String crn) {
+    public ClusterTemplateV4Response deleteByCrn(Long workspaceId, @ResourceCrn String crn) {
         boolean internalTenant = isInternalTenant();
         ClusterTemplate clusterTemplate = clusterTemplateService.deleteByCrn(crn, threadLocalService.getRequestedWorkspaceId(), internalTenant);
         return clusterTemplateToClusterTemplateV4ResponseConverter.convert(clusterTemplate);

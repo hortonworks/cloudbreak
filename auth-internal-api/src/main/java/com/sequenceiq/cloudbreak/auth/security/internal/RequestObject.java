@@ -1,4 +1,4 @@
-package com.sequenceiq.authorization.annotation;
+package com.sequenceiq.cloudbreak.auth.security.internal;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

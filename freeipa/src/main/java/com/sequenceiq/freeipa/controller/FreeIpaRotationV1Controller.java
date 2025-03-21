@@ -16,9 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretListField;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
@@ -49,7 +48,7 @@ public class FreeIpaRotationV1Controller implements FreeIpaRotationV1Endpoint {
     @Override
     @CheckPermissionByResourceCrn(action = ROTATE_FREEIPA_SECRETS)
     public FlowIdentifier rotateSecretsByCrn(
-            @ValidCrn(resource = ENVIRONMENT) @ResourceCrn @NotEmpty @TenantAwareParam String environmentCrn,
+            @ValidCrn(resource = ENVIRONMENT) @ResourceCrn @NotEmpty String environmentCrn,
             @Valid @NotNull FreeIpaSecretRotationRequest request) {
         String accountIdFrmCrn = Crn.safeFromString(environmentCrn).getAccountId();
         return freeIpaSecretRotationService.rotateSecretsByCrn(accountIdFrmCrn, environmentCrn, request);
@@ -58,7 +57,7 @@ public class FreeIpaRotationV1Controller implements FreeIpaRotationV1Endpoint {
     @Override
     @CheckPermissionByResourceCrn(action = ROTATE_FREEIPA_SECRETS)
     public List<FreeipaSecretTypeResponse> listRotatableFreeipaSecretType(
-            @ValidCrn(resource = ENVIRONMENT) @ResourceCrn @NotEmpty @TenantAwareParam String environmentCrn) {
+            @ValidCrn(resource = ENVIRONMENT) @ResourceCrn @NotEmpty String environmentCrn) {
         // further improvement needed to query secret types for resource
         return enabledSecretTypes.stream()
                 .filter(Predicate.not(SecretType::internal))

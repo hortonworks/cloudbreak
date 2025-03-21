@@ -12,11 +12,10 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.InternalOnly;
-import com.sequenceiq.authorization.annotation.RequestObject;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.ldap.LdapConfigV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.ldap.model.create.CreateLdapConfigRequest;
@@ -43,13 +42,13 @@ public class LdapConfigV1Controller extends NotificationController implements Ld
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
-    public DescribeLdapConfigResponse describe(@TenantAwareParam @ResourceCrn String environmentCrn) {
+    public DescribeLdapConfigResponse describe(@ResourceCrn String environmentCrn) {
         return ldapConfigV1Service.describe(environmentCrn);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
-    public DescribeLdapConfigResponse getForCluster(@ResourceCrn @TenantAwareParam String environmentCrn, String clusterName) {
+    public DescribeLdapConfigResponse getForCluster(@ResourceCrn String environmentCrn, String clusterName) {
         String accountId = crnService.getCurrentAccountId();
         try {
             return ldapConfigV1Service.getForCluster(environmentCrn, accountId, clusterName);
@@ -84,7 +83,7 @@ public class LdapConfigV1Controller extends NotificationController implements Ld
 
     @Override
     @InternalOnly
-    public DescribeLdapConfigResponse getForUserSync(@TenantAwareParam String environmentCrn) {
+    public DescribeLdapConfigResponse getForUserSync(@ResourceCrn String environmentCrn) {
         MDCBuilder.addEnvironmentCrn(environmentCrn);
         return userSyncBindUserService.getUserSyncLdapConfigIfExistsOrThrowNotFound(environmentCrn, Crn.safeFromString(environmentCrn).getAccountId());
     }

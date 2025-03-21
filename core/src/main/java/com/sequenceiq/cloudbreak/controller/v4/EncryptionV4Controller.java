@@ -5,9 +5,9 @@ import jakarta.inject.Inject;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.encryption.EncryptionV4Endpoint;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackEncryptionToStackEncryptionResponseConverter;
 import com.sequenceiq.cloudbreak.domain.stack.StackEncryption;
 import com.sequenceiq.cloudbreak.dto.StackDto;

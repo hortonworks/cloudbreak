@@ -18,7 +18,6 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.InternalOnly;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -75,7 +74,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -135,7 +134,7 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
-    public StackViewV4Responses list(Long workspaceId, @TenantAwareParam String environmentCrn, boolean onlyDatalakes) {
+    public StackViewV4Responses list(Long workspaceId, @ResourceCrn String environmentCrn, boolean onlyDatalakes) {
         List<StackType> types = new ArrayList<>();
         if (onlyDatalakes) {
             types.add(StackType.DATALAKE);
@@ -173,7 +172,7 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
-    public StackV4Response getByCrn(Long workspaceId, @TenantAwareParam String crn, Set<String> entries) {
+    public StackV4Response getByCrn(Long workspaceId, @ResourceCrn String crn, Set<String> entries) {
         return stackOperations.get(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(), entries, null, false);
     }
 
@@ -272,7 +271,7 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     @InternalOnly
-    public SaltPasswordStatusResponse getSaltPasswordStatus(Long workspaceId, @TenantAwareParam String crn) {
+    public SaltPasswordStatusResponse getSaltPasswordStatus(Long workspaceId, @ResourceCrn String crn) {
         SaltPasswordStatusResponse response = new SaltPasswordStatusResponse();
         SaltPasswordStatus saltPasswordStatus = stackOperations.getSaltPasswordStatus(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId());
         response.setStatus(com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus.valueOf(saltPasswordStatus.name()));
@@ -312,7 +311,7 @@ public class StackV4Controller extends NotificationController implements StackV4
     }
 
     @InternalOnly
-    public FlowIdentifier upgradeOsByUpgradeSetsInternal(Long workspaceId, @TenantAwareParam @ResourceCrn String crn,
+    public FlowIdentifier upgradeOsByUpgradeSetsInternal(Long workspaceId, @ResourceCrn String crn,
             OrderedOSUpgradeSetRequest orderedOsUpgradeSetRequest) {
         return stackUpgradeOperations.upgradeOsByUpgradeSets(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getRequestedWorkspaceId(),
                 orderedOsUpgradeSetRequest);
@@ -494,7 +493,7 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
-    public FlowIdentifier updatePillarConfigurationByCrn(Long workspaceId, @TenantAwareParam String crn) {
+    public FlowIdentifier updatePillarConfigurationByCrn(Long workspaceId, @ResourceCrn String crn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return stackOperations.updatePillarConfiguration(NameOrCrn.ofCrn(crn), accountId);
     }
@@ -613,7 +612,7 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     @InternalOnly
-    public FlowIdentifier renewInternalCertificate(Long workspaceId, @TenantAwareParam String crn) {
+    public FlowIdentifier renewInternalCertificate(Long workspaceId, @ResourceCrn String crn) {
         try {
             return stackOperationService.renewInternalCertificate(crn);
         } catch (Exception e) {
@@ -670,7 +669,7 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     @InternalOnly
-    public UsedSubnetsByEnvironmentResponse getUsedSubnetsByEnvironment(Long workspaceId, @TenantAwareParam String environmentCrn) {
+    public UsedSubnetsByEnvironmentResponse getUsedSubnetsByEnvironment(Long workspaceId, @ResourceCrn String environmentCrn) {
         List<SubnetIdWithResourceNameAndCrn> allUsedSubnets = stackOperations.getUsedSubnetsByEnvironment(environmentCrn);
         return new UsedSubnetsByEnvironmentResponse(allUsedSubnets
                 .stream().map(s -> new UsedSubnetWithResourceResponse(s.getName(), s.getSubnetId(), s.getResourceCrn(), s.getType().name()))
@@ -750,7 +749,7 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     @InternalOnly
-    public void validateDefaultJavaVersionUpdateByCrnInternal(Long workspaceId, @TenantAwareParam String crn,
+    public void validateDefaultJavaVersionUpdateByCrnInternal(Long workspaceId, @ResourceCrn String crn,
             SetDefaultJavaVersionRequest request) {
         stackOperationService.validateDefaultJavaVersionUpdate(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(), request);
     }
@@ -770,7 +769,7 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     @InternalOnly
-    public FlowIdentifier enableSeLinuxByCrn(Long workspaceId, @TenantAwareParam @ResourceCrn String crn) {
+    public FlowIdentifier enableSeLinuxByCrn(Long workspaceId, @ResourceCrn String crn) {
         return stackOperationService.triggerEnableSELinux(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId());
     }
 }

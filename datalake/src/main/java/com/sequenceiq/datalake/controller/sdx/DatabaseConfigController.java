@@ -8,7 +8,7 @@ import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseConfigV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DbConnectionParamsV4Response;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.sdx.api.endpoint.DatabaseConfigEndpoint;
 
@@ -23,7 +23,7 @@ public class DatabaseConfigController implements DatabaseConfigEndpoint {
     private DatabaseConfigV4Endpoint databaseConfigV4Endpoint;
 
     @Override
-    public DbConnectionParamsV4Response getDbConfig(@TenantAwareParam String datalakeCrn, DatabaseType databaseType) {
+    public DbConnectionParamsV4Response getDbConfig(@ResourceCrn String datalakeCrn, DatabaseType databaseType) {
         String stackCrn = sdxService.getStackCrnByClusterCrn(datalakeCrn);
         return databaseConfigV4Endpoint.getDbConfig(stackCrn, databaseType);
     }

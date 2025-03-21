@@ -5,11 +5,10 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentDefaultComputeClusterEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.request.ExternalizedComputeCreateRequest;
@@ -42,7 +41,7 @@ public class EnvironmentDefaultComputeClusterController implements EnvironmentDe
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
-    public FlowIdentifier createDefaultExternalizedComputeCluster(@ResourceCrn @TenantAwareParam String crn,
+    public FlowIdentifier createDefaultExternalizedComputeCluster(@ResourceCrn String crn,
             ExternalizedComputeCreateRequest request, boolean force) {
         return triggerInitializeFlow(crn, request, force);
     }
@@ -55,7 +54,7 @@ public class EnvironmentDefaultComputeClusterController implements EnvironmentDe
     @Deprecated
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
-    public FlowIdentifier reinitializeDefaultExternalizedComputeCluster(@ResourceCrn @TenantAwareParam String crn,
+    public FlowIdentifier reinitializeDefaultExternalizedComputeCluster(@ResourceCrn String crn,
             ExternalizedComputeCreateRequest request, boolean force) {
         return triggerInitializeFlow(crn, request, force);
     }

@@ -27,15 +27,14 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
-import com.sequenceiq.authorization.annotation.RequestObject;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
@@ -284,7 +283,7 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
-    public String getRootCertificate(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @NotEmpty @TenantAwareParam String environmentCrn) {
+    public String getRootCertificate(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @NotEmpty String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
         try {
             return freeIpaRootCertificateService.getRootCertificate(environmentCrn, accountId);
@@ -457,8 +456,7 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
-    public Image getImage(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @NotEmpty @TenantAwareParam
-        String environmentCrn) {
+    public Image getImage(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @NotEmpty String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
         return freeIpaDescribeService.getImage(environmentCrn, accountId);
     }
@@ -491,7 +489,7 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     @Override
     @InternalOnly
     public VerticalScaleResponse verticalScalingByCrn(
-            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @NotEmpty @TenantAwareParam String environmentCrn,
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @NotEmpty String environmentCrn,
             @RequestObject @Valid @NotNull VerticalScaleRequest updateRequest) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return freeIpaScalingService.verticalScale(accountId, environmentCrn, updateRequest);
@@ -505,7 +503,7 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Override
     @InternalOnly
-    public UsedSubnetsByEnvironmentResponse getUsedSubnetsByEnvironment(@TenantAwareParam String environmentCrn) {
+    public UsedSubnetsByEnvironmentResponse getUsedSubnetsByEnvironment(@ResourceCrn String environmentCrn) {
         List<SubnetIdWithResourceNameAndCrn> allUsedSubnets = freeIpaListService.getAllUsedSubnetsByEnvironmentCrn(environmentCrn);
         return new UsedSubnetsByEnvironmentResponse(allUsedSubnets
                 .stream().map(s -> new UsedSubnetWithResourceResponse(s.getName(), s.getSubnetId(), s.getResourceCrn(), s.getType()))
@@ -515,7 +513,7 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.ENVIRONMENT_VERTICAL_SCALING)
     public UpdateRootVolumeResponse updateRootVolumeByCrn(
-            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @NotEmpty @TenantAwareParam String environmentCrn,
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @NotEmpty String environmentCrn,
             @Valid @NotNull DiskUpdateRequest rootDiskVolumesRequest) {
         return rootVolumeUpdateService.updateRootVolume(environmentCrn, rootDiskVolumesRequest, ThreadBasedUserCrnProvider.getAccountId());
     }

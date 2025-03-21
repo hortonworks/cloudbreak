@@ -18,11 +18,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.facade.CloudbreakEventsFacade;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -53,7 +52,7 @@ public class DistroXV1EventController implements DistroXV1EventEndpoint {
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
     public List<CDPStructuredEvent> getAuditEvents(
-            @NotNull @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @ResourceCrn @TenantAwareParam String resourceCrn,
+            @NotNull @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @ResourceCrn String resourceCrn,
             @Min(0) @Max(200) Integer page,
             @Min(1) @Max(200) Integer size) {
         LOGGER.info("Get Data Hub audit events for {}, page {}, size {}", resourceCrn, page, size);

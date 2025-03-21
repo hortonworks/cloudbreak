@@ -10,7 +10,7 @@ import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseConfigV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DbConnectionParamsV4Response;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultSecret;
@@ -26,7 +26,7 @@ public class DatabaseConfigV4Controller implements DatabaseConfigV4Endpoint {
     private RdsConfigService rdsConfigService;
 
     @Override
-    public DbConnectionParamsV4Response getDbConfig(@TenantAwareParam String stackCrn, DatabaseType databaseType) {
+    public DbConnectionParamsV4Response getDbConfig(@ResourceCrn String stackCrn, DatabaseType databaseType) {
         RDSConfig rdsConfig = rdsConfigService.getByStackCrnAndType(stackCrn, databaseType);
         return new DbConnectionParamsV4Response(
                 getPath(rdsConfig.getConnectionUserNameSecret()),

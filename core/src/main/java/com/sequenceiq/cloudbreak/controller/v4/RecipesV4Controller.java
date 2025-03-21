@@ -17,7 +17,6 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
@@ -30,7 +29,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4R
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.authorization.RecipeFiltering;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.converter.v4.recipes.RecipeToRecipeV4RequestConverter;
@@ -106,7 +105,7 @@ public class RecipesV4Controller extends NotificationController implements Recip
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_RECIPE)
-    public RecipeV4Response getByCrn(Long workspaceId, @TenantAwareParam @NotNull @ResourceCrn String crn) {
+    public RecipeV4Response getByCrn(Long workspaceId, @NotNull @ResourceCrn String crn) {
         Recipe recipe = recipeService.get(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getRequestedWorkspaceId());
         return recipeToRecipeV4ResponseConverter.convert(recipe);
     }

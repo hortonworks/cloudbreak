@@ -13,7 +13,7 @@ import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
-import com.sequenceiq.authorization.annotation.RequestObject;
+import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
 import com.sequenceiq.cloudbreak.common.co2.EnvironmentRealTimeCO2;
 import com.sequenceiq.cloudbreak.common.co2.EnvironmentRealTimeCO2Response;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;

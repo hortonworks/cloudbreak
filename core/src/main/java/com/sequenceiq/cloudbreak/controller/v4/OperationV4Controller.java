@@ -5,10 +5,9 @@ import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.operation.OperationV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.service.operation.OperationService;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.flow.api.model.operation.OperationStatusResponse;
@@ -35,7 +34,7 @@ public class OperationV4Controller implements OperationV4Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_DATAHUB)
-    public OperationStatusResponse getOperationStatus(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @TenantAwareParam @ResourceCrn String resourceCrn,
+    public OperationStatusResponse getOperationStatus(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @ResourceCrn String resourceCrn,
             String operationId) {
         return flowService.getOperationStatus(resourceCrn, operationId);
     }

@@ -11,10 +11,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.service.model.AuthorizationRule;
 import com.sequenceiq.authorization.utils.CrnAccountValidator;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 
 @Component
 public class ResourceCrnAthorizationFactory extends TypedAuthorizationFactory<CheckPermissionByResourceCrn> {

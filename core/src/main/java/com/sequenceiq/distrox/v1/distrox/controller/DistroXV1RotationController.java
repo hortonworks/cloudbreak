@@ -15,9 +15,8 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
-import com.sequenceiq.authorization.annotation.RequestObject;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretListField;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
@@ -42,14 +41,14 @@ public class DistroXV1RotationController implements DistroXV1RotationEndpoint {
 
     @Override
     @CheckPermissionByRequestProperty(type = CRN, path = "crn", action = ROTATE_DH_SECRETS)
-    public FlowIdentifier rotateSecrets(@TenantAwareParam @RequestObject DistroXSecretRotationRequest request) {
+    public FlowIdentifier rotateSecrets(@RequestObject DistroXSecretRotationRequest request) {
         return stackRotationService.rotateSecrets(request.getCrn(), request.getSecrets(), request.getExecutionType(), request.getAdditionalProperties());
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = ROTATE_DH_SECRETS)
     public List<DistroXSecretTypeResponse> listRotatableDistroXSecretType(
-            @ValidCrn(resource = DATAHUB) @ResourceCrn @NotEmpty @TenantAwareParam String datahubCrn) {
+            @ValidCrn(resource = DATAHUB) @ResourceCrn @NotEmpty String datahubCrn) {
         // further improvement needed to query secret types for resource
         return enabledSecretTypes.stream()
                 .filter(Predicate.not(SecretType::internal))

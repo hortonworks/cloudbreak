@@ -18,13 +18,12 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CustomPermissionCheck;
 import com.sequenceiq.authorization.annotation.InternalOnly;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.UserV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.EnvironmentUserSyncState;
@@ -155,7 +154,7 @@ public class UserV1Controller implements UserV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.GET_OPERATION_STATUS)
-    public SyncOperationStatus getLastSyncOperationStatus(@ResourceCrn @TenantAwareParam @NotEmpty String environmentCrn) {
+    public SyncOperationStatus getLastSyncOperationStatus(@ResourceCrn @NotEmpty String environmentCrn) {
         Crn envCrn = Crn.safeFromString(environmentCrn);
         EnvironmentUserSyncState userSyncState = environmentUserSyncStateCalculator.calculateEnvironmentUserSyncState(envCrn.getAccountId(), envCrn);
         return operationToSyncOperationStatus.convert(
@@ -164,7 +163,7 @@ public class UserV1Controller implements UserV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
-    public EnvironmentUserSyncState getUserSyncState(@ResourceCrn @TenantAwareParam @NotEmpty String environmentCrn) {
+    public EnvironmentUserSyncState getUserSyncState(@ResourceCrn @NotEmpty String environmentCrn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Crn envCrn = Crn.safeFromString(environmentCrn);
         return environmentUserSyncStateCalculator.calculateEnvironmentUserSyncState(accountId, envCrn);
@@ -172,7 +171,7 @@ public class UserV1Controller implements UserV1Endpoint {
 
     @Override
     @InternalOnly
-    public SyncOperationStatus preSynchronize(@TenantAwareParam String environmentCrn) {
+    public SyncOperationStatus preSynchronize(@ResourceCrn String environmentCrn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Operation operation = preUserSyncService.runUserSyncTasks(environmentCrn, accountId);
         SyncOperationStatus syncOperationStatus = operationToSyncOperationStatus.convert(operation);
@@ -181,7 +180,7 @@ public class UserV1Controller implements UserV1Endpoint {
 
     @Override
     @InternalOnly
-    public SyncOperationStatus postSynchronize(@TenantAwareParam String environmentCrn) {
+    public SyncOperationStatus postSynchronize(@ResourceCrn String environmentCrn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Operation operation = postUserSyncService.runUserSyncTasks(environmentCrn, accountId);
         SyncOperationStatus syncOperationStatus = operationToSyncOperationStatus.convert(operation);

@@ -2,7 +2,7 @@ package com.sequenceiq.periscope.api.model;
 
 import jakarta.validation.constraints.NotNull;
 
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.periscope.doc.ApiDescription.ClusterJsonsProperties;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema
 public class DistroXAutoscaleClusterServerCertUpdateRequest implements Json {
 
-    @TenantAwareParam
+    @ResourceCrn
     @Schema(description = ClusterJsonsProperties.STACK_CRN)
     private @NotNull String crn;
 

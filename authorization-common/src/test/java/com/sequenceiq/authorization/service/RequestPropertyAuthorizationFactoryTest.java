@@ -29,13 +29,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
-import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationVariableType;
 import com.sequenceiq.authorization.service.model.AuthorizationRule;
 import com.sequenceiq.authorization.service.model.HasRight;
 import com.sequenceiq.authorization.service.model.HasRightOnAll;
 import com.sequenceiq.authorization.utils.CrnAccountValidator;
+import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 
 @ExtendWith(MockitoExtension.class)

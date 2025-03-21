@@ -11,7 +11,7 @@ import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
-import com.sequenceiq.authorization.annotation.RequestObject;
+import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.recipe.RecipeV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.recipe.model.RecipeAttachDetachRequest;

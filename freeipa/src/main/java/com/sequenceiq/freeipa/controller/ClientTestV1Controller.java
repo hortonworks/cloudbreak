@@ -11,8 +11,8 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
-import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
 import com.sequenceiq.freeipa.api.v1.freeipa.test.ClientTestV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.test.model.CheckGroupsV1Request;
 import com.sequenceiq.freeipa.api.v1.freeipa.test.model.CheckUsersInGroupV1Request;

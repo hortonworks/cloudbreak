@@ -14,10 +14,10 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.periscope.api.endpoint.v1.DistroXAutoScaleClusterV1Endpoint;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
@@ -125,7 +125,7 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
 
     @InternalOnly
     @Override
-    public void updateServerCertificate(@TenantAwareParam DistroXAutoscaleClusterServerCertUpdateRequest request) {
+    public void updateServerCertificate(@RequestObject DistroXAutoscaleClusterServerCertUpdateRequest request) {
         Optional<Cluster> optionalCluster = clusterService.findOneByStackCrn(request.getCrn());
         optionalCluster.ifPresent(cluster -> securityConfigService.updateServerCertInSecurityConfig(cluster, request.getNewServerCert()));
     }

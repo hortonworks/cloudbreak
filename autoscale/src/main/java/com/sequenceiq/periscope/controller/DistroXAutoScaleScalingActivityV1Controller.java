@@ -14,10 +14,9 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.periscope.api.endpoint.v1.DistroXAutoScaleScalingActivityV1Endpoint;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleScalingActivityResponse;
 import com.sequenceiq.periscope.converter.DistroXAutoscaleScalingActivityResponseConverter;
@@ -38,7 +37,7 @@ public class DistroXAutoScaleScalingActivityV1Controller implements DistroXAutoS
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
-    public DistroXAutoscaleScalingActivityResponse getScalingActivityUsingOperationIdAndClusterCrn(@ResourceCrn @TenantAwareParam String clusterCrn,
+    public DistroXAutoscaleScalingActivityResponse getScalingActivityUsingOperationIdAndClusterCrn(@ResourceCrn String clusterCrn,
             String operationId) {
         return distroXAutoscaleScalingActivityResponseConverter.convert(scalingActivityService.findByOperationIdAndClusterCrn(operationId, clusterCrn));
     }

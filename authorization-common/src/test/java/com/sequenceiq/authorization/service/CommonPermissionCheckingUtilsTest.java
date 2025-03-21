@@ -37,13 +37,13 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.defaults.CrnsByCategory;
 import com.sequenceiq.authorization.service.defaults.DefaultResourceChecker;
 import com.sequenceiq.authorization.utils.AuthorizationMessageUtilsService;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 
 @ExtendWith(MockitoExtension.class)
 public class CommonPermissionCheckingUtilsTest {

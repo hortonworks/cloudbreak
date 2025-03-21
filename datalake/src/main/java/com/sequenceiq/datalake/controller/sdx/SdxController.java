@@ -26,8 +26,6 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
 import com.sequenceiq.authorization.annotation.FilterParam;
 import com.sequenceiq.authorization.annotation.InternalOnly;
-import com.sequenceiq.authorization.annotation.RequestObject;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
@@ -43,7 +41,8 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -248,7 +247,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DELETE_DATALAKE)
-    public FlowIdentifier deleteByCrn(@TenantAwareParam @ResourceCrn String clusterCrn, Boolean forced) {
+    public FlowIdentifier deleteByCrn(@ResourceCrn String clusterCrn, Boolean forced) {
         return sdxDeleteService.deleteSdxByClusterCrn(ThreadBasedUserCrnProvider.getAccountId(), clusterCrn, forced);
     }
 
@@ -261,7 +260,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_DATALAKE)
-    public SdxClusterResponse getByCrn(@TenantAwareParam @ResourceCrn String clusterCrn) {
+    public SdxClusterResponse getByCrn(@ResourceCrn String clusterCrn) {
         SdxCluster sdxCluster = getSdxClusterByCrn(clusterCrn);
         return sdxClusterConverter.sdxClusterToResponse(sdxCluster);
     }
@@ -283,7 +282,7 @@ public class SdxController implements SdxEndpoint {
     @Override
     @FilterListBasedOnPermissions
     public List<SdxClusterResponse> getByEnvCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @FilterParam(DataLakeFiltering.ENV_CRN)
-    @TenantAwareParam String envCrn, boolean includeDetached) {
+    @ResourceCrn String envCrn, boolean includeDetached) {
         List<SdxCluster> sdxClusters = dataLakeFiltering.filterDataLakesByEnvCrn(DESCRIBE_DATALAKE, envCrn, includeDetached);
         return convertAttachedSdxClusters(sdxClusters, includeDetached);
     }
@@ -299,7 +298,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_DETAILED_DATALAKE)
-    public SdxClusterDetailResponse getDetailByCrn(@TenantAwareParam @ResourceCrn String clusterCrn, Set<String> entries) {
+    public SdxClusterDetailResponse getDetailByCrn(@ResourceCrn String clusterCrn, Set<String> entries) {
         SdxCluster sdxCluster = getSdxClusterByCrn(clusterCrn);
         StackV4Response stackV4Response = sdxService.getDetail(sdxCluster.getClusterName(), entries, sdxCluster.getAccountId());
         SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
@@ -315,14 +314,14 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_DATALAKE)
-    public FlowIdentifier repairClusterByCrn(@ResourceCrn @TenantAwareParam String clusterCrn, SdxRepairRequest clusterRepairRequest) {
+    public FlowIdentifier repairClusterByCrn(@ResourceCrn String clusterCrn, SdxRepairRequest clusterRepairRequest) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         return repairService.triggerRepairByCrn(userCrn, clusterCrn, clusterRepairRequest);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_DATALAKE)
-    public FlowIdentifier renewCertificate(@ResourceCrn @TenantAwareParam String crn) {
+    public FlowIdentifier renewCertificate(@ResourceCrn String crn) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.getByCrn(userCrn, crn);
         return certRenewalService.triggerRenewCertificate(sdxCluster, userCrn);
@@ -336,7 +335,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SYNC_DATALAKE)
-    public void syncByCrn(@ResourceCrn @TenantAwareParam String crn) {
+    public void syncByCrn(@ResourceCrn String crn) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         sdxService.syncByCrn(userCrn, crn);
     }
@@ -350,7 +349,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.RETRY_DATALAKE_OPERATION)
-    public FlowIdentifier retryByCrn(@ResourceCrn @TenantAwareParam String crn) {
+    public FlowIdentifier retryByCrn(@ResourceCrn String crn) {
         SdxCluster sdxCluster = getSdxClusterByCrn(crn);
         return sdxRetryService.retrySdx(sdxCluster);
     }
@@ -364,7 +363,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.START_DATALAKE)
-    public FlowIdentifier startByCrn(@ResourceCrn @TenantAwareParam String crn) {
+    public FlowIdentifier startByCrn(@ResourceCrn String crn) {
         SdxCluster sdxCluster = getSdxClusterByCrn(crn);
         return sdxStartService.triggerStartIfClusterNotRunning(sdxCluster);
     }
@@ -378,7 +377,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.STOP_DATALAKE)
-    public FlowIdentifier stopByCrn(@ResourceCrn @TenantAwareParam String crn) {
+    public FlowIdentifier stopByCrn(@ResourceCrn String crn) {
         SdxCluster sdxCluster = getSdxClusterByCrn(crn);
         return sdxStopService.triggerStopIfClusterNotStopped(sdxCluster);
     }
@@ -411,7 +410,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @InternalOnly
-    public RangerCloudIdentitySyncStatus setRangerCloudIdentityMapping(@TenantAwareParam String envCrn, SetRangerCloudIdentityMappingRequest request) {
+    public RangerCloudIdentitySyncStatus setRangerCloudIdentityMapping(@ResourceCrn String envCrn, SetRangerCloudIdentityMappingRequest request) {
         if (request.getAzureGroupMapping() != null) {
             throw new IllegalArgumentException("Azure group mappings is unsupported");
         }
@@ -420,13 +419,13 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @InternalOnly
-    public RangerCloudIdentitySyncStatus getRangerCloudIdentitySyncStatus(@TenantAwareParam String envCrn, long commandId) {
+    public RangerCloudIdentitySyncStatus getRangerCloudIdentitySyncStatus(@ResourceCrn String envCrn, long commandId) {
         return rangerCloudIdentityService.getRangerCloudIdentitySyncStatus(envCrn, List.of(commandId));
     }
 
     @Override
     @InternalOnly
-    public RangerCloudIdentitySyncStatus getRangerCloudIdentitySyncStatus(@TenantAwareParam String envCrn, List<Long> commandIds) {
+    public RangerCloudIdentitySyncStatus getRangerCloudIdentitySyncStatus(@ResourceCrn String envCrn, List<Long> commandIds) {
         return rangerCloudIdentityService.getRangerCloudIdentitySyncStatus(envCrn, commandIds);
     }
 
@@ -451,7 +450,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.ROTATE_CERT_DATALAKE)
-    public FlowIdentifier rotateAutoTlsCertificatesByCrn(@ResourceCrn @TenantAwareParam String crn,
+    public FlowIdentifier rotateAutoTlsCertificatesByCrn(@ResourceCrn String crn,
             @Valid CertificatesRotationV4Request rotateCertificateRequest) {
         SdxCluster sdxCluster = getSdxClusterByCrn(crn);
         return certRotationService.rotateAutoTlsCertificates(sdxCluster, rotateCertificateRequest);
@@ -513,7 +512,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @InternalOnly
-    public SdxStopValidationResponse isStoppableInternal(@TenantAwareParam String crn, @InitiatorUserCrn String initiatorUserCrn) {
+    public SdxStopValidationResponse isStoppableInternal(@ResourceCrn String crn, @InitiatorUserCrn String initiatorUserCrn) {
         SdxCluster sdxCluster = sdxService.getByCrn(initiatorUserCrn, crn);
         Optional<String> unstoppableReason = sdxStopService.checkIfStoppable(sdxCluster);
         return new SdxStopValidationResponse(unstoppableReason.isEmpty(), unstoppableReason.orElse(null));
@@ -521,7 +520,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DATALAKE_VERTICAL_SCALING)
-    public FlowIdentifier verticalScalingByCrn(@ResourceCrn @TenantAwareParam String crn, @Valid StackVerticalScaleV4Request updateRequest) {
+    public FlowIdentifier verticalScalingByCrn(@ResourceCrn String crn, @Valid StackVerticalScaleV4Request updateRequest) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.getByCrn(crn);
         return verticalScaleService.verticalScaleDatalake(sdxCluster, updateRequest, userCrn);
@@ -537,7 +536,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @InternalOnly
-    public void submitDatalakeDataSizesInternal(@TenantAwareParam String crn, String operationId, String dataSizesJson,
+    public void submitDatalakeDataSizesInternal(@ResourceCrn String crn, String operationId, String dataSizesJson,
             @InitiatorUserCrn String initiatorUserCrn) {
         sdxService.getByCrn(crn);
         sdxBackupRestoreService.submitDatalakeDataInfo(operationId, dataSizesJson, ThreadBasedUserCrnProvider.getUserCrn());
@@ -559,7 +558,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DATALAKE_VERTICAL_SCALING)
-    public FlowIdentifier diskUpdateByCrn(@ResourceCrn @TenantAwareParam String crn, DiskUpdateRequest updateRequest) {
+    public FlowIdentifier diskUpdateByCrn(@ResourceCrn String crn, DiskUpdateRequest updateRequest) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = getSdxClusterByCrn(crn);
         return verticalScaleService.updateDisksDatalake(sdxCluster, updateRequest, userCrn);
@@ -575,7 +574,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DATALAKE_VERTICAL_SCALING)
-    public FlowIdentifier addVolumesByStackCrn(@ResourceCrn @TenantAwareParam String crn, StackAddVolumesRequest addVolumesRequest) {
+    public FlowIdentifier addVolumesByStackCrn(@ResourceCrn String crn, StackAddVolumesRequest addVolumesRequest) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = getSdxClusterByCrn(crn);
         return verticalScaleService.addVolumesDatalake(sdxCluster, addVolumesRequest, userCrn);
@@ -594,7 +593,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_DATALAKE)
-    public SdxRotateRdsCertificateV1Response rotateRdsCertificateByCrn(@ResourceCrn @TenantAwareParam String crn) {
+    public SdxRotateRdsCertificateV1Response rotateRdsCertificateByCrn(@ResourceCrn String crn) {
         return certificateRotationService.rotateCertificate(crn);
     }
 
@@ -613,7 +612,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_DATALAKE)
-    public SdxMigrateDatabaseV1Response migrateDatabaseToSslByCrn(@TenantAwareParam @ResourceCrn String crn) {
+    public SdxMigrateDatabaseV1Response migrateDatabaseToSslByCrn(@ResourceCrn String crn) {
         return null;
     }
 
@@ -628,7 +627,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = UPGRADE_DATALAKE)
-    public FlowIdentifier setDefaultJavaVersionByCrn(@TenantAwareParam @ResourceCrn String crn, SetDefaultJavaVersionRequest request) {
+    public FlowIdentifier setDefaultJavaVersionByCrn(@ResourceCrn String crn, SetDefaultJavaVersionRequest request) {
         SdxCluster sdxCluster = getSdxClusterByCrn(crn);
         sdxService.validateDefaultJavaVersionUpdate(crn, request);
         return sdxReactorFlowManager.triggerSetDefaultJavaVersion(sdxCluster, request.getDefaultJavaVersion(), request.isRestartServices(),
@@ -645,7 +644,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DATALAKE_VERTICAL_SCALING)
-    public FlowIdentifier updateRootVolumeByDatalakeCrn(@ResourceCrn @TenantAwareParam String crn, DiskUpdateRequest updateRequest) {
+    public FlowIdentifier updateRootVolumeByDatalakeCrn(@ResourceCrn String crn, DiskUpdateRequest updateRequest) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = getSdxClusterByCrn(crn);
         return verticalScaleService.updateRootVolumeDatalake(sdxCluster, updateRequest, userCrn);
@@ -661,7 +660,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action =  AuthorizationResourceAction.REPAIR_DATALAKE)
-    public FlowIdentifier enableSeLinuxByCrn(@ResourceCrn @TenantAwareParam String crn) {
+    public FlowIdentifier enableSeLinuxByCrn(@ResourceCrn String crn) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = getSdxClusterByCrn(crn);
         return seLinuxService.enableSeLinuxOnDatalake(sdxCluster, userCrn);

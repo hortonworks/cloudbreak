@@ -11,7 +11,7 @@ import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.metric.MetricType;
@@ -53,21 +53,21 @@ public class SdxInternalController implements SdxInternalEndpoint {
 
     @Override
     @InternalOnly
-    public FlowIdentifier renewCertificate(@TenantAwareParam String crn) {
+    public FlowIdentifier renewCertificate(@ResourceCrn String crn) {
         SdxCluster sdxCluster = sdxService.getByCrn(crn);
         return certRenewalService.triggerInternalRenewCertificate(sdxCluster);
     }
 
     @Override
     @InternalOnly
-    public void updateDbEngineVersion(@TenantAwareParam String crn, String dbEngineVersion) {
+    public void updateDbEngineVersion(@ResourceCrn String crn, String dbEngineVersion) {
         MDCBuilder.addResourceCrn(crn);
         sdxService.updateDatabaseEngineVersion(crn, dbEngineVersion);
     }
 
     @Override
     @InternalOnly
-    public FlowIdentifier modifyProxy(@TenantAwareParam String crn, String previousProxyCrn, @InitiatorUserCrn String initiatorUserCrn) {
+    public FlowIdentifier modifyProxy(@ResourceCrn String crn, String previousProxyCrn, @InitiatorUserCrn String initiatorUserCrn) {
         SdxCluster sdxCluster = sdxService.getByCrn(crn);
         return sdxService.modifyProxyConfig(sdxCluster, previousProxyCrn);
     }

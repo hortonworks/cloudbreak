@@ -14,7 +14,7 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
@@ -45,12 +45,12 @@ public class FlowController implements FlowEndpoint {
     }
 
     @Override
-    public FlowLogResponse getLastFlowByResourceCrn(@TenantAwareParam String resourceCrn) {
+    public FlowLogResponse getLastFlowByResourceCrn(@ResourceCrn String resourceCrn) {
         return flowService.getLastFlowByResourceCrn(resourceCrn);
     }
 
     @Override
-    public List<FlowLogResponse> getFlowLogsByResourceCrn(@TenantAwareParam String resourceCrn) {
+    public List<FlowLogResponse> getFlowLogsByResourceCrn(@ResourceCrn String resourceCrn) {
         return flowService.getFlowLogsByResourceCrn(resourceCrn);
     }
 

@@ -8,9 +8,9 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.periscope.api.endpoint.v1.HistoryEndpoint;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterHistoryResponse;
 import com.sequenceiq.periscope.converter.HistoryConverter;

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentInternalEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.PolicyValidationErrorResponses;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
@@ -40,14 +40,14 @@ public class EnvironmentInternalV1Controller extends NotificationController impl
 
     @Override
     @InternalOnly
-    public PolicyValidationErrorResponses policyValidationByEnvironmentCrn(@TenantAwareParam String crn, List<String> services) {
+    public PolicyValidationErrorResponses policyValidationByEnvironmentCrn(@ResourceCrn String crn, List<String> services) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return credentialService.validatePolicy(accountId, crn, services);
     }
 
     @Override
     @InternalOnly
-    public SimpleEnvironmentResponse internalGetByCrn(@TenantAwareParam String crn, boolean withNetwork) {
+    public SimpleEnvironmentResponse internalGetByCrn(@ResourceCrn String crn, boolean withNetwork) {
         EnvironmentDto environmentDto = environmentService.internalGetByCrn(crn);
         return environmentResponseConverter.dtoToSimpleResponse(environmentDto, withNetwork, false);
     }

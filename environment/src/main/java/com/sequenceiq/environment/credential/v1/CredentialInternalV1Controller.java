@@ -6,7 +6,7 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialInternalEndpoint;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.credential.service.CredentialService;
@@ -29,7 +29,7 @@ public class CredentialInternalV1Controller extends NotificationController imple
 
     @Override
     @InternalOnly
-    public CredentialResponse getByResourceCrn(@TenantAwareParam String credentialCrn) {
+    public CredentialResponse getByResourceCrn(@ResourceCrn String credentialCrn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return credentialConverter.convert(credentialService.getByCrnForAccountId(credentialCrn, accountId, ENVIRONMENT, true));
     }

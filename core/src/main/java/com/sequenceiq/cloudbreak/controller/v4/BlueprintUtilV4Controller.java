@@ -12,7 +12,6 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.BlueprintUtilV4Endpoint;
@@ -22,7 +21,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.Recommendat
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.ServiceDependencyMatrixV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.SupportedVersionsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.ScaleRecommendationV4Response;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.cloud.model.ScaleRecommendation;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateGeneratorService;
 import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.GeneratedCmTemplateToGeneratedCmTemplateV4Response;
@@ -88,7 +87,7 @@ public class BlueprintUtilV4Controller extends NotificationController implements
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_CREDENTIAL)
     public RecommendationV4Response createRecommendationByCredCrn(Long workspaceId, String definitionName, String blueprintName,
-            @TenantAwareParam @ResourceCrn String credentialCrn, @NotEmpty String region, String platformVariant,
+            @ResourceCrn String credentialCrn, @NotEmpty String region, String platformVariant,
             String availabilityZone, CdpResourceType resourceType) {
         return blueprintService.getRecommendationByCredentialCrn(
                 threadLocalService.getRequestedWorkspaceId(),
@@ -104,7 +103,7 @@ public class BlueprintUtilV4Controller extends NotificationController implements
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
     public RecommendationV4Response createRecommendationByEnvCrn(Long workspaceId, String definitionName, String blueprintName,
-            @TenantAwareParam @ResourceCrn String environmentCrn, @NotEmpty String region, String platformVariant,
+            @ResourceCrn String environmentCrn, @NotEmpty String region, String platformVariant,
             String availabilityZone, CdpResourceType resourceType, String architecture) {
         return blueprintService.getRecommendationByEnvironmentCrn(
                 threadLocalService.getRequestedWorkspaceId(),

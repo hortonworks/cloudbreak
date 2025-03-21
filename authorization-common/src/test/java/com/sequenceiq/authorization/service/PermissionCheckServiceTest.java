@@ -30,7 +30,6 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.service.list.AbstractAuthorizationFiltering;
 import com.sequenceiq.authorization.service.list.ResourceWithId;
@@ -39,7 +38,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalUserModifier;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 
 @ExtendWith(MockitoExtension.class)
 public class PermissionCheckServiceTest {
@@ -311,7 +310,7 @@ public class PermissionCheckServiceTest {
         }
 
         @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_CREDENTIAL)
-        public void resourceBasedMethodCalledInternally(@TenantAwareParam @ResourceCrn String crn) {
+        public void resourceBasedMethodCalledInternally(@ResourceCrn String crn) {
 
         }
 

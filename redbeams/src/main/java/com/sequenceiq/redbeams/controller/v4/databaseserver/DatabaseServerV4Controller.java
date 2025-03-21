@@ -28,15 +28,14 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrnList;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.InternalOnly;
-import com.sequenceiq.authorization.annotation.RequestObject;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceCrnList;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -143,7 +142,7 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
-    public DatabaseServerV4Responses list(@ResourceCrn @TenantAwareParam String environmentCrn) {
+    public DatabaseServerV4Responses list(@ResourceCrn String environmentCrn) {
         Set<DatabaseServerConfig> all = databaseServerConfigService.findAll(DEFAULT_WORKSPACE, environmentCrn);
         return new DatabaseServerV4Responses(all.stream()
                 .map(d -> databaseServerConfigToDatabaseServerV4ResponseConverter.convert(d))
@@ -167,21 +166,21 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_DATABASE_SERVER)
-    public DatabaseServerV4Response getByName(@TenantAwareParam String environmentCrn, @ResourceName String name) {
+    public DatabaseServerV4Response getByName(@ResourceCrn String environmentCrn, @ResourceName String name) {
         DatabaseServerConfig server = databaseServerConfigService.getByName(DEFAULT_WORKSPACE, environmentCrn, name);
         return databaseServerConfigToDatabaseServerV4ResponseConverter.convert(server);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_DATABASE_SERVER)
-    public DatabaseServerV4Response getByCrn(@TenantAwareParam @ResourceCrn String crn) {
+    public DatabaseServerV4Response getByCrn(@ResourceCrn String crn) {
         DatabaseServerConfig server = databaseServerConfigService.getByCrn(crn);
         return databaseServerConfigToDatabaseServerV4ResponseConverter.convert(server);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
-    public DatabaseServerV4Response getByClusterCrn(@ResourceCrn @TenantAwareParam String environmentCrn, String clusterCrn) {
+    public DatabaseServerV4Response getByClusterCrn(@ResourceCrn String environmentCrn, String clusterCrn) {
         DatabaseServerConfig server = databaseServerConfigService.findByClusterCrn(environmentCrn, clusterCrn).orElseThrow(() ->
                 new NotFoundException(String.format("No database server config found with cluster CRN '%s' in environment '%s'", clusterCrn, environmentCrn)));
         return databaseServerConfigToDatabaseServerV4ResponseConverter.convert(server);
@@ -189,7 +188,7 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
-    public DatabaseServerV4Responses listByClusterCrn(@ResourceCrn @TenantAwareParam String environmentCrn, String clusterCrn) {
+    public DatabaseServerV4Responses listByClusterCrn(@ResourceCrn String environmentCrn, String clusterCrn) {
         List<DatabaseServerConfig> servers = databaseServerConfigService.listByClusterCrn(environmentCrn, clusterCrn);
         return new DatabaseServerV4Responses(servers.stream()
                 .map(server -> databaseServerConfigToDatabaseServerV4ResponseConverter.convert(server))
@@ -212,7 +211,7 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     @Override
     @InternalOnly
     public DatabaseServerStatusV4Response migrateDatabaseToSslByCrnInternal(
-            @TenantAwareParam @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String crn,
+            @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String crn,
             @InitiatorUserCrn String initiatorUserCrn) {
         return null;
     }
@@ -220,7 +219,7 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     @Override
     @InternalOnly
     public void enforceSslOnDatabaseByCrnInternal(
-            @TenantAwareParam @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String crn,
+            @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String crn,
             @InitiatorUserCrn String initiatorUserCrn) {
     }
 
@@ -257,7 +256,7 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DELETE_DATABASE_SERVER)
-    public DatabaseServerV4Response release(@TenantAwareParam @ResourceCrn String crn) {
+    public DatabaseServerV4Response release(@ResourceCrn String crn) {
         DatabaseServerConfig server = databaseServerConfigService.release(crn);
         return databaseServerConfigToDatabaseServerV4ResponseConverter.convert(server);
     }
@@ -272,7 +271,7 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DELETE_DATABASE_SERVER)
-    public DatabaseServerV4Response deleteByCrn(@TenantAwareParam @ResourceCrn String crn, boolean force) {
+    public DatabaseServerV4Response deleteByCrn(@ResourceCrn String crn, boolean force) {
         // RedbeamsTerminationService handles both service-managed and user-managed database servers
         DatabaseServerConfig deleted = redbeamsTerminationService.terminateByCrn(crn, force);
         return databaseServerConfigToDatabaseServerV4ResponseConverter.convert(deleted);
@@ -280,7 +279,7 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DELETE_DATABASE_SERVER)
-    public DatabaseServerV4Response deleteByName(@TenantAwareParam String environmentCrn, @ResourceName String name, boolean force) {
+    public DatabaseServerV4Response deleteByName(@ResourceCrn String environmentCrn, @ResourceName String name, boolean force) {
         // RedbeamsTerminationService handles both service-managed and user-managed database servers
         DatabaseServerConfig deleted = redbeamsTerminationService.terminateByName(environmentCrn, name, force);
         return databaseServerConfigToDatabaseServerV4ResponseConverter.convert(deleted);
@@ -315,48 +314,48 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.START_DATABASE_SERVER)
-    public void start(@TenantAwareParam @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String crn) {
+    public void start(@ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String crn) {
         redbeamsStartService.startDatabaseServer(crn);
     }
 
     @Override
     @InternalOnly
     @AccountIdNotNeeded
-    public FlowIdentifier rotateSslCert(@TenantAwareParam @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String crn) {
+    public FlowIdentifier rotateSslCert(@ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String crn) {
         return redbeamsRotateSslService.rotateDatabaseServerSslCert(crn);
     }
 
     @Override
     @InternalOnly
     @AccountIdNotNeeded
-    public FlowIdentifier updateToLatestSslCert(@TenantAwareParam @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String crn) {
+    public FlowIdentifier updateToLatestSslCert(@ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String crn) {
         return redbeamsRotateSslService.updateToLatestDatabaseServerSslCert(crn);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.STOP_DATABASE_SERVER)
-    public void stop(@TenantAwareParam @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String crn) {
+    public void stop(@ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String crn) {
         redbeamsStopService.stopDatabaseServer(crn);
     }
 
     @Override
     @InternalOnly
-    public UpgradeDatabaseServerV4Response upgrade(@TenantAwareParam @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER)
-    String databaseServerCrn, @Valid @NotNull UpgradeDatabaseServerV4Request request) {
+    public UpgradeDatabaseServerV4Response upgrade(@ResourceCrn @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) String databaseServerCrn,
+            @Valid @NotNull UpgradeDatabaseServerV4Request request) {
         UpgradeDatabaseRequest upgradeDatabaseRequest = upgradeDatabaseServerV4RequestConverter.convert(request);
         return upgradeDatabaseServerV4ResponseConverter.convert(redbeamsUpgradeService.upgradeDatabaseServer(databaseServerCrn, upgradeDatabaseRequest));
     }
 
     @Override
     @InternalOnly
-    public UsedSubnetsByEnvironmentResponse getUsedSubnetsByEnvironment(@TenantAwareParam String environmentCrn) {
+    public UsedSubnetsByEnvironmentResponse getUsedSubnetsByEnvironment(@ResourceCrn String environmentCrn) {
         LOGGER.info("We don't store the used subnet id so we don't give it back");
         return new UsedSubnetsByEnvironmentResponse(Collections.emptyList());
     }
 
     @Override
     @InternalOnly
-    public UpgradeDatabaseServerV4Response validateUpgrade(@TenantAwareParam @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) String crn,
+    public UpgradeDatabaseServerV4Response validateUpgrade(@ResourceCrn @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) String crn,
             @Valid @NotNull UpgradeDatabaseServerV4Request request) {
         UpgradeDatabaseRequest upgradeDatabaseRequest = upgradeDatabaseServerV4RequestConverter.convert(request);
         return upgradeDatabaseServerV4ResponseConverter.convert(redbeamsUpgradeService.validateUpgradeDatabaseServer(crn, upgradeDatabaseRequest));
@@ -364,7 +363,7 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     @Override
     @InternalOnly
-    public UpgradeDatabaseServerV4Response validateUpgradeCleanup(@TenantAwareParam @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER)
+    public UpgradeDatabaseServerV4Response validateUpgradeCleanup(@ResourceCrn @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER)
     String crn) {
         return upgradeDatabaseServerV4ResponseConverter.convert(redbeamsUpgradeService.validateUpgradeDatabaseServerCleanup(crn));
     }
@@ -379,7 +378,7 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     @Override
     @InternalOnly
     @AccountIdNotNeeded
-    public FlowIdentifier retry(@TenantAwareParam @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String databaseCrn) {
+    public FlowIdentifier retry(@ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String databaseCrn) {
         return retryService.retry(databaseCrn);
     }
 
@@ -387,7 +386,7 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     @InternalOnly
     @AccountIdNotNeeded
     public List<RetryableFlowResponse> listRetryableFlows(
-            @TenantAwareParam @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String databaseCrn) {
+            @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String databaseCrn) {
         return retryService.getRetryableFlows(databaseCrn);
     }
 }

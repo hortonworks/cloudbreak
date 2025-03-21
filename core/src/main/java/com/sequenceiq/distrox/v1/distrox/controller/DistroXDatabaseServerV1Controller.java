@@ -7,11 +7,10 @@ import jakarta.inject.Inject;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.service.database.DatabaseService;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXDatabaseServerV1Endpoint;
 
@@ -23,7 +22,7 @@ public class DistroXDatabaseServerV1Controller implements DistroXDatabaseServerV
 
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_DATAHUB)
-    public StackDatabaseServerResponse getDatabaseServerByCrn(@TenantAwareParam @ResourceCrn String clusterCrn) {
+    public StackDatabaseServerResponse getDatabaseServerByCrn(@ResourceCrn String clusterCrn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return databaseService.getDatabaseServer(NameOrCrn.ofCrn(clusterCrn), accountId);
     }

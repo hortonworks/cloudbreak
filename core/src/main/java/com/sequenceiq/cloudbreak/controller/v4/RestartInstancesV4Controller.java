@@ -11,13 +11,12 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.restartinstances.RestartInstancesV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
@@ -32,7 +31,7 @@ public class RestartInstancesV4Controller implements RestartInstancesV4Endpoint 
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public FlowIdentifier restartInstancesForClusterCrn(@TenantAwareParam @ResourceCrn String clusterCrn, List<String> instanceIds) {
+    public FlowIdentifier restartInstancesForClusterCrn(@ResourceCrn String clusterCrn, List<String> instanceIds) {
         LOGGER.info("restartInstancesForClusterCrn: clusterCrn={}, instanceIds=[{}]", clusterCrn, instanceIds);
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return stackCommonService.restartMultipleInstances(NameOrCrn.ofCrn(clusterCrn), accountId, instanceIds);

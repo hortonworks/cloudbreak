@@ -16,12 +16,11 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
-import com.sequenceiq.authorization.annotation.RequestObject;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.DiagnosticsV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.CmDiagnosticsCollectionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.DiagnosticsCollectionRequest;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterDiagnosticsService;
 import com.sequenceiq.cloudbreak.service.diagnostics.DiagnosticsService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -87,7 +86,7 @@ public class DiagnosticsV4Controller implements DiagnosticsV4Endpoint {
 
     @Override
     @InternalOnly
-    public List<String> getCmRoles(@TenantAwareParam String stackCrn) {
+    public List<String> getCmRoles(@ResourceCrn String stackCrn) {
         return clusterDiagnosticsService.getClusterComponents(stackCrn);
     }
 }

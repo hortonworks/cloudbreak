@@ -7,7 +7,7 @@ import jakarta.inject.Inject;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.datalake.service.sdx.progress.ProgressService;
 import com.sequenceiq.sdx.api.endpoint.ProgressEndpoint;
 import com.sequenceiq.sdx.api.model.SdxProgressListResponse;

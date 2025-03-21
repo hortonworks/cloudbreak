@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotEmpty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.rotation.annotation.ValidSecretTypes;
 import com.sequenceiq.cloudbreak.rotation.request.BaseSecretRotationRequest;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
@@ -20,7 +20,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxSecretRotationRequest extends BaseSecretRotationRequest {
 
-    @TenantAwareParam
+    @ResourceCrn
     @ValidCrn(resource = CrnResourceDescriptor.VM_DATALAKE)
     @Schema(description = ModelDescriptions.DATA_LAKE_CRN)
     private String crn;

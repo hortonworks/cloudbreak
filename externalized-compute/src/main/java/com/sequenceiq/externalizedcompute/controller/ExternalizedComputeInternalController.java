@@ -14,7 +14,8 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.externalizedcompute.api.endpoint.ExternalizedComputeClusterInternalEndpoint;
@@ -44,21 +45,21 @@ public class ExternalizedComputeInternalController implements ExternalizedComput
     private ExternalizedComputeClusterConverterService externalizedComputeClusterConverterService;
 
     @Override
-    public FlowIdentifier create(@TenantAwareParam ExternalizedComputeClusterInternalRequest request, @InitiatorUserCrn String initiatorUserCrn) {
+    public FlowIdentifier create(@RequestObject ExternalizedComputeClusterInternalRequest request, @InitiatorUserCrn String initiatorUserCrn) {
         LOGGER.info("Externalized Compute Cluster internal request: {}", request);
         Crn userCrn = Crn.ofUser(ThreadBasedUserCrnProvider.getUserCrn());
         return externalizedComputeClusterService.prepareComputeClusterCreation(request, request.isDefaultCluster(), userCrn);
     }
 
     @Override
-    public FlowIdentifier reInitialize(@TenantAwareParam ExternalizedComputeClusterRequest request, @InitiatorUserCrn String initiatorUserCrn, boolean force) {
+    public FlowIdentifier reInitialize(@RequestObject ExternalizedComputeClusterRequest request, @InitiatorUserCrn String initiatorUserCrn, boolean force) {
         LOGGER.info("Externalized Compute Cluster internal reinitialization initiated, request: {}", request);
         return externalizedComputeClusterService.reInitializeComputeCluster(request, force);
     }
 
     @Override
     public FlowIdentifier delete(
-            @TenantAwareParam @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) String environmentCrn,
+            @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) String environmentCrn,
             @InitiatorUserCrn String initiatorUserCrn,
             @NotEmpty String name,
             boolean force) {
@@ -70,7 +71,7 @@ public class ExternalizedComputeInternalController implements ExternalizedComput
 
     @Override
     public ExternalizedComputeClusterResponse describe(
-            @TenantAwareParam @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) String environmentCrn,
+            @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) String environmentCrn,
             @NotEmpty String name) {
         ExternalizedComputeCluster externalizedComputeCluster = getExternalizedComputeCluster(environmentCrn, name);
         MDCBuilder.buildMdcContext(externalizedComputeCluster);
@@ -79,7 +80,7 @@ public class ExternalizedComputeInternalController implements ExternalizedComput
 
     @Override
     public List<ExternalizedComputeClusterResponse> list(
-            @TenantAwareParam @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) String environmentCrn) {
+            @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) String environmentCrn) {
         return externalizedComputeClusterService.getAllByEnvironmentCrn(environmentCrn, ThreadBasedUserCrnProvider.getAccountId())
                 .stream()
                 .map(externalizedComputeClusterConverterService::convertToResponse)

@@ -14,9 +14,8 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
-import com.sequenceiq.authorization.annotation.RequestObject;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretListField;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
@@ -44,14 +43,14 @@ public class SdxRotationController implements SdxRotationEndpoint {
 
     @Override
     @CheckPermissionByRequestProperty(type = CRN, path = "crn", action = ROTATE_DL_SECRETS)
-    public FlowIdentifier rotateSecrets(@TenantAwareParam @RequestObject SdxSecretRotationRequest request) {
+    public FlowIdentifier rotateSecrets(@RequestObject SdxSecretRotationRequest request) {
         return sdxRotationService.triggerSecretRotation(request.getCrn(), request.getSecrets(), request.getExecutionType(), request.getAdditionalProperties());
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = ROTATE_DL_SECRETS)
     public List<SdxSecretTypeResponse> listRotatableSdxSecretType(
-            @ValidCrn(resource = VM_DATALAKE) @ResourceCrn @NotEmpty @TenantAwareParam String datalakeCrn) {
+            @ValidCrn(resource = VM_DATALAKE) @ResourceCrn @NotEmpty String datalakeCrn) {
         // further improvement needed to query secret types for resource
         return enabledSecretTypes.stream()
                 .filter(Predicate.not(SecretType::internal))

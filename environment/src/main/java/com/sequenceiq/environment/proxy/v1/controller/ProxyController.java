@@ -15,14 +15,13 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.environment.api.v1.proxy.endpoint.ProxyEndpoint;
 import com.sequenceiq.environment.api.v1.proxy.model.request.ProxyRequest;
@@ -80,7 +79,7 @@ public class ProxyController extends NotificationController implements ProxyEndp
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
-    public ProxyResponse getByEnvironmentCrn(@ResourceCrn @TenantAwareParam String environmentCrn) {
+    public ProxyResponse getByEnvironmentCrn(@ResourceCrn String environmentCrn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         ProxyConfig proxyConfig = proxyConfigService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
         return proxyConfigToProxyResponseConverter.convert(proxyConfig);
@@ -88,7 +87,7 @@ public class ProxyController extends NotificationController implements ProxyEndp
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_PROXY)
-    public ProxyResponse getByResourceCrn(@ResourceCrn @TenantAwareParam String crn) {
+    public ProxyResponse getByResourceCrn(@ResourceCrn String crn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         ProxyConfig config = proxyConfigService.getByCrnForAccountId(crn, accountId);
         return proxyConfigToProxyResponseConverter.convert(config);

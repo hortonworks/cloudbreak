@@ -17,7 +17,6 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
@@ -30,7 +29,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ParametersQueryV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.converter.v4.blueprint.BlueprintToBlueprintV4RequestConverter;
 import com.sequenceiq.cloudbreak.converter.v4.blueprint.BlueprintToBlueprintV4ResponseConverter;
@@ -91,7 +90,7 @@ public class BlueprintV4Controller extends NotificationController implements Blu
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_CLUSTER_TEMPLATE)
-    public BlueprintV4Response getByCrn(Long workspaceId, @NotNull @TenantAwareParam @ResourceCrn String crn) {
+    public BlueprintV4Response getByCrn(Long workspaceId, @NotNull @ResourceCrn String crn) {
         Blueprint blueprint = blueprintService.getByWorkspace(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getRequestedWorkspaceId());
         return blueprintToBlueprintV4ResponseConverter.convert(blueprint);
     }
@@ -126,7 +125,7 @@ public class BlueprintV4Controller extends NotificationController implements Blu
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DELETE_CLUSTER_TEMPLATE)
-    public BlueprintV4Response deleteByCrn(Long workspaceId, @NotNull @ResourceCrn @TenantAwareParam String crn) {
+    public BlueprintV4Response deleteByCrn(Long workspaceId, @NotNull @ResourceCrn String crn) {
         Blueprint deleted = blueprintService.deleteByWorkspace(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getRequestedWorkspaceId());
         notify(ResourceEvent.BLUEPRINT_DELETED);
         return blueprintToBlueprintV4ResponseConverter.convert(deleted);

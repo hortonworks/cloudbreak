@@ -7,11 +7,10 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.recovery.SdxRecoverySelectorService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
@@ -38,7 +37,7 @@ public class SdxRecoveryController implements SdxRecoveryEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.RECOVER_DATALAKE)
-    public SdxRecoveryResponse recoverClusterByCrn(@ResourceCrn @TenantAwareParam String crn,
+    public SdxRecoveryResponse recoverClusterByCrn(@ResourceCrn String crn,
             @Valid SdxRecoveryRequest recoverSdxClusterRequest) {
         SdxCluster cluster = sdxService.getByCrn(ThreadBasedUserCrnProvider.getUserCrn(), crn);
         return sdxRecoverySelectorService.triggerRecovery(cluster, recoverSdxClusterRequest);
@@ -53,7 +52,7 @@ public class SdxRecoveryController implements SdxRecoveryEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.RECOVER_DATALAKE)
-    public SdxRecoverableResponse getClusterRecoverableByCrn(@ResourceCrn @TenantAwareParam String crn) {
+    public SdxRecoverableResponse getClusterRecoverableByCrn(@ResourceCrn String crn) {
         SdxCluster cluster = sdxService.getByCrn(ThreadBasedUserCrnProvider.getUserCrn(), crn);
         return sdxRecoverySelectorService.validateRecovery(cluster);
     }

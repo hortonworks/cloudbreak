@@ -103,7 +103,8 @@ public class InternalCrnModifierTest {
     @Test
     public void testModificationIfUserCrnIsInternalButThereIsNoResourceCrnParameter() {
         when(reflectionUtil.getParameter(any(), any(), eq(AccountId.class))).thenReturn(Optional.empty());
-        when(reflectionUtil.getParameter(any(), any(), eq(TenantAwareParam.class))).thenReturn(Optional.empty());
+        when(reflectionUtil.getParameter(any(), any(), eq(ResourceCrn.class))).thenReturn(Optional.empty());
+        when(reflectionUtil.getParameter(any(), any(), eq(RequestObject.class))).thenReturn(Optional.empty());
 
         AtomicBoolean assertationHappened = new AtomicBoolean(false);
         when(reflectionUtil.proceed(any())).thenAnswer(invocation -> {
@@ -123,7 +124,8 @@ public class InternalCrnModifierTest {
     @Test
     public void testModificationIfUserCrnIsInternalButResourceCrnParameterIsNotString() {
         when(reflectionUtil.getParameter(any(), any(), eq(AccountId.class))).thenReturn(Optional.empty());
-        when(reflectionUtil.getParameter(any(), any(), eq(TenantAwareParam.class))).thenReturn(Optional.of(2));
+        when(reflectionUtil.getParameter(any(), any(), eq(ResourceCrn.class))).thenReturn(Optional.of(2));
+        when(reflectionUtil.getParameter(any(), any(), eq(RequestObject.class))).thenReturn(Optional.empty());
 
         AtomicBoolean assertationHappened = new AtomicBoolean(false);
         when(reflectionUtil.proceed(any())).thenAnswer(invocation -> {
@@ -143,7 +145,8 @@ public class InternalCrnModifierTest {
     @Test
     public void testModificationIfUserCrnIsInternalButResourceCrnParameterIsNotCrn() {
         when(reflectionUtil.getParameter(any(), any(), eq(AccountId.class))).thenReturn(Optional.empty());
-        when(reflectionUtil.getParameter(any(), any(), eq(TenantAwareParam.class))).thenReturn(Optional.of("not_crn"));
+        when(reflectionUtil.getParameter(any(), any(), eq(ResourceCrn.class))).thenReturn(Optional.of("not_crn"));
+        when(reflectionUtil.getParameter(any(), any(), eq(RequestObject.class))).thenReturn(Optional.empty());
 
         AtomicBoolean assertationHappened = new AtomicBoolean(false);
         when(reflectionUtil.proceed(any())).thenAnswer(invocation -> {
@@ -163,7 +166,7 @@ public class InternalCrnModifierTest {
     @Test
     public void testModificationIfUserCrnIsInternal() {
         when(reflectionUtil.getParameter(any(), any(), eq(AccountId.class))).thenReturn(Optional.empty());
-        when(reflectionUtil.getParameter(any(), any(), eq(TenantAwareParam.class))).thenReturn(Optional.of(STACK_CRN));
+        when(reflectionUtil.getParameter(any(), any(), eq(ResourceCrn.class))).thenReturn(Optional.of(STACK_CRN));
         doNothing().when(internalUserModifier).persistModifiedInternalUser(any());
 
         AtomicBoolean assertationHappened = new AtomicBoolean(false);
@@ -187,7 +190,8 @@ public class InternalCrnModifierTest {
     @Test
     public void testModificationIfUserCrnIsInternalAndTenantAwareObjectPresent() {
         when(reflectionUtil.getParameter(any(), any(), eq(AccountId.class))).thenReturn(Optional.empty());
-        when(reflectionUtil.getParameter(any(), any(), eq(TenantAwareParam.class))).thenReturn(Optional.of(new SampleTenantAwareObject(STACK_CRN)));
+        when(reflectionUtil.getParameter(any(), any(), eq(ResourceCrn.class))).thenReturn(Optional.empty());
+        when(reflectionUtil.getParameter(any(), any(), eq(RequestObject.class))).thenReturn(Optional.of(new SampleTenantAwareObject(STACK_CRN)));
         doNothing().when(internalUserModifier).persistModifiedInternalUser(any());
 
         AtomicBoolean assertationHappened = new AtomicBoolean(false);
@@ -211,7 +215,8 @@ public class InternalCrnModifierTest {
     @Test
     public void testModificationIfUserCrnIsInternalAndTenantAwareObjectPresentButCrnIsNull() {
         when(reflectionUtil.getParameter(any(), any(), eq(AccountId.class))).thenReturn(Optional.empty());
-        when(reflectionUtil.getParameter(any(), any(), eq(TenantAwareParam.class))).thenReturn(Optional.of(new SampleTenantAwareObject(null)));
+        when(reflectionUtil.getParameter(any(), any(), eq(ResourceCrn.class))).thenReturn(Optional.empty());
+        when(reflectionUtil.getParameter(any(), any(), eq(RequestObject.class))).thenReturn(Optional.of(new SampleTenantAwareObject(null)));
 
         AtomicBoolean assertationHappened = new AtomicBoolean(false);
         when(reflectionUtil.proceed(any())).thenAnswer(invocation -> {
@@ -232,7 +237,7 @@ public class InternalCrnModifierTest {
 
     public class SampleTenantAwareObject {
 
-        @TenantAwareParam
+        @ResourceCrn
         private String crn;
 
         public SampleTenantAwareObject(String crn) {

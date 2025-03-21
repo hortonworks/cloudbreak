@@ -43,8 +43,6 @@ import com.sequenceiq.authorization.annotation.CustomPermissionCheck;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
-import com.sequenceiq.authorization.annotation.RequestObject;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceCrnList;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
@@ -52,7 +50,8 @@ import com.sequenceiq.authorization.service.list.AbstractAuthorizationFiltering;
 import com.sequenceiq.authorization.util.AuthorizationAnnotationUtils;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 
 public class EnforceAuthorizationAnnotationTestUtil {
 
@@ -185,32 +184,32 @@ public class EnforceAuthorizationAnnotationTestUtil {
     public static Function<Method, Optional<String>> hasInternalOnlyRequiredAnnotation() {
         return method -> {
             boolean hasRequiredAnnotation = hasInternalOnlyRequiredMethodParameter(method)
-                    || hasTenantAwareParamObjectParameter(method)
+                    || hasRequestObjectParameterWithResourceCrnField(method)
                     || method.isAnnotationPresent(AccountIdNotNeeded.class);
             if (hasRequiredAnnotation) {
                 return Optional.empty();
             } else {
                 return Optional.of(invalid(method, String.format("One of the following annotations are missing to use @InternalOnly annotation: %s",
-                        Set.of(TenantAwareParam.class.getSimpleName(), AccountId.class.getSimpleName(),
+                        Set.of(RequestObject.class.getSimpleName(), ResourceCrn.class.getSimpleName(), AccountId.class.getSimpleName(),
                                 InitiatorUserCrn.class.getSimpleName(), AccountIdNotNeeded.class.getSimpleName()))));
             }
         };
     }
 
-    private static boolean hasTenantAwareParamObjectParameter(Method method) {
+    private static boolean hasRequestObjectParameterWithResourceCrnField(Method method) {
         Optional<Parameter> requestObjectParam = Arrays.stream(method.getParameters())
-                .filter(parameter -> parameter.isAnnotationPresent(TenantAwareParam.class))
+                .filter(parameter -> parameter.isAnnotationPresent(RequestObject.class))
                 .findAny();
         if (requestObjectParam.isPresent()) {
             Class<?> requestObjectType = requestObjectParam.get().getType();
             return Arrays.stream(requestObjectType.getDeclaredFields())
-                    .anyMatch(field -> field.isAnnotationPresent(TenantAwareParam.class) && String.class.equals(field.getType()));
+                    .anyMatch(field -> field.isAnnotationPresent(ResourceCrn.class) && String.class.equals(field.getType()));
         }
         return false;
     }
 
     private static boolean hasInternalOnlyRequiredMethodParameter(Method method) {
-        return hasParam(TenantAwareParam.class, String.class, method).isEmpty()
+        return hasParam(ResourceCrn.class, String.class, method).isEmpty()
                 || hasParam(AccountId.class, String.class, method).isEmpty()
                 || hasParam(InitiatorUserCrn.class, String.class, method).isEmpty();
     }

@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.annotation.ValidSecretTypes;
@@ -19,7 +19,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DistroXSecretRotationRequest extends BaseSecretRotationRequest {
 
-    @TenantAwareParam
+    @ResourceCrn
     @ValidCrn(resource = CrnResourceDescriptor.DATAHUB)
     private String crn;
 

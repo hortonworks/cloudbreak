@@ -16,12 +16,10 @@ import org.springframework.stereotype.Controller;
 import com.google.common.base.Strings;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.InternalOnly;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
-import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.environment.api.v1.tags.endpoint.AccountTagEndpoint;
 import com.sequenceiq.environment.api.v1.tags.model.request.AccountTagRequests;
 import com.sequenceiq.environment.api.v1.tags.model.response.AccountTagResponse;
@@ -103,7 +101,7 @@ public class AccountTagController extends NotificationController implements Acco
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
-    public GeneratedAccountTagResponses generate(@ResourceName String environmentName, @ResourceCrn @TenantAwareParam String environmentCrn) {
+    public GeneratedAccountTagResponses generate(String environmentName, @ResourceCrn String environmentCrn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto environmentDto = null;
         if (!Strings.isNullOrEmpty(environmentCrn)) {

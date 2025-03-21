@@ -7,7 +7,6 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.AttachRecipeV4Request;
@@ -17,7 +16,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.AttachRe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -33,7 +32,7 @@ public class SdxRecipeController implements SdxRecipeEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REFRESH_RECIPES_DATALAKE)
-    public UpdateRecipesV4Response refreshRecipesByCrn(@TenantAwareParam @ResourceCrn String crn, @Valid UpdateRecipesV4Request request) {
+    public UpdateRecipesV4Response refreshRecipesByCrn(@ResourceCrn String crn, @Valid UpdateRecipesV4Request request) {
         SdxCluster sdxCluster = getSdxClusterByCrn(crn);
         return sdxService.refreshRecipes(sdxCluster, request);
     }
@@ -47,7 +46,7 @@ public class SdxRecipeController implements SdxRecipeEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REFRESH_RECIPES_DATALAKE)
-    public AttachRecipeV4Response attachRecipeByCrn(@ResourceCrn @TenantAwareParam String crn, @Valid AttachRecipeV4Request request) {
+    public AttachRecipeV4Response attachRecipeByCrn(@ResourceCrn String crn, @Valid AttachRecipeV4Request request) {
         SdxCluster sdxCluster = getSdxClusterByCrn(crn);
         return sdxService.attachRecipe(sdxCluster, request);
     }
@@ -61,7 +60,7 @@ public class SdxRecipeController implements SdxRecipeEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REFRESH_RECIPES_DATALAKE)
-    public DetachRecipeV4Response detachRecipeByCrn(@ResourceCrn @TenantAwareParam String crn, @Valid DetachRecipeV4Request request) {
+    public DetachRecipeV4Response detachRecipeByCrn(@ResourceCrn String crn, @Valid DetachRecipeV4Request request) {
         SdxCluster sdxCluster = getSdxClusterByCrn(crn);
         return sdxService.detachRecipe(sdxCluster, request);
     }

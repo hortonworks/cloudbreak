@@ -9,7 +9,7 @@ import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
-import com.sequenceiq.authorization.annotation.RequestObject;
+import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
 import com.sequenceiq.freeipa.api.v2.freeipa.FreeIpaV2Endpoint;
 import com.sequenceiq.freeipa.api.v2.freeipa.model.rebuild.RebuildV2Request;

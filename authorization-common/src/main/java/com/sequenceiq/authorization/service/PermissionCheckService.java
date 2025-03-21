@@ -75,7 +75,7 @@ public class PermissionCheckService {
             return ThreadBasedUserCrnProvider.doAs(initiatorUserCrnParameter.get(), () ->
                     commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime));
         } else {
-            // InternalCrnModifier.changeInternalCrn method should handle when @AccountId or @TenantAwareParam provided and change accountId in userCrn
+            // InternalCrnModifier.changeInternalCrn method should handle when @AccountId or @ResourceCrn provided and change accountId in userCrn
             if (RegionAwareInternalCrnGeneratorUtil.INTERNAL_ACCOUNT.equals(Crn.safeFromString(userCrn).getAccountId()) && accountIdNeeded(methodSignature)) {
                 LOGGER.error("Method {} is not prepared to call internally, please check readme in authorization module.",
                         methodSignature.getMethod().getDeclaringClass().getSimpleName() + '#' + methodSignature.getMethod().getName());

@@ -44,7 +44,7 @@ public class InternalCrnModifier {
         MethodSignature methodSignature = (MethodSignature) proceedingJoinPoint.getSignature();
         if (userCrnString != null && RegionAwareInternalCrnGeneratorUtil.isInternalCrn(userCrnString)) {
             return ThreadBasedUserCrnProvider.doAs(getNewUserCrnIfAccountIdParamDefined(proceedingJoinPoint, methodSignature, userCrnString)
-                        .or(() -> getNewUserCrnIfTenantAwareParamDefined(proceedingJoinPoint, methodSignature, userCrnString))
+                        .or(() -> getNewUserCrnIfResourceCrnParamDefined(proceedingJoinPoint, methodSignature, userCrnString))
                         .orElse(userCrnString),
                     () -> reflectionUtil.proceed(proceedingJoinPoint));
         }
@@ -61,29 +61,34 @@ public class InternalCrnModifier {
         return Optional.empty();
     }
 
-    private Optional<String> getNewUserCrnIfTenantAwareParamDefined(ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature,
+    private Optional<String> getNewUserCrnIfResourceCrnParamDefined(ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature,
             String userCrnString) {
-        Optional<Object> tenantAwareCrnOrObjectOptional = reflectionUtil.getParameter(proceedingJoinPoint, methodSignature, TenantAwareParam.class);
-        if (tenantAwareCrnOrObjectOptional.isPresent()) {
-            Object tenantAwareCrnOrObject = tenantAwareCrnOrObjectOptional.get();
-            if (tenantAwareCrnOrObject instanceof String && Crn.isCrn((String) tenantAwareCrnOrObject)) {
-                return getAccountModifiedUserCrnByTenantAwareCrnObject(userCrnString, tenantAwareCrnOrObject);
-            } else if (Arrays.stream(tenantAwareCrnOrObject.getClass().getDeclaredFields()).
-                    anyMatch(aField -> aField.isAnnotationPresent(TenantAwareParam.class))) {
-                return getAccountModifiedUserCrnByTenantAwareField(userCrnString, tenantAwareCrnOrObject);
+        Optional<Object> resourceCrnObjectOptional = reflectionUtil.getParameter(proceedingJoinPoint, methodSignature, ResourceCrn.class);
+        if (resourceCrnObjectOptional.isPresent()) {
+            Object resourceCrnObject = resourceCrnObjectOptional.get();
+            if (resourceCrnObject instanceof String && Crn.isCrn((String) resourceCrnObject)) {
+                return getAccountModifiedUserCrnByResourceCrnObject(userCrnString, resourceCrnObject);
+            }
+        }
+        Optional<Object> requestObjectOptional = reflectionUtil.getParameter(proceedingJoinPoint, methodSignature, RequestObject.class);
+        if (requestObjectOptional.isPresent()) {
+            Object requestObject = requestObjectOptional.get();
+            if (Arrays.stream(requestObject.getClass().getDeclaredFields()).
+                    anyMatch(aField -> aField.isAnnotationPresent(ResourceCrn.class))) {
+                return getAccountModifiedUserCrnByResourceCrnField(userCrnString, requestObject);
             }
         }
         return Optional.empty();
     }
 
-    private Optional<String> getAccountModifiedUserCrnByTenantAwareField(String userCrnString, Object tenantAwareCrnOrObject) {
+    private Optional<String> getAccountModifiedUserCrnByResourceCrnField(String userCrnString, Object requestObject) {
         try {
-            Optional<Field> tenantAwareParamField = Arrays.stream(tenantAwareCrnOrObject.getClass().getDeclaredFields())
-                    .filter(aField -> aField.isAnnotationPresent(TenantAwareParam.class))
+            Optional<Field> resourceCrnField = Arrays.stream(requestObject.getClass().getDeclaredFields())
+                    .filter(aField -> aField.isAnnotationPresent(ResourceCrn.class))
                     .findFirst();
-            Object tenantAwareParamFieldObject = PropertyUtils.getProperty(tenantAwareCrnOrObject, tenantAwareParamField.get().getName());
-            if (tenantAwareParamFieldObject instanceof String && Crn.isCrn((String) tenantAwareParamFieldObject)) {
-                return getAccountModifiedUserCrnByTenantAwareCrnObject(userCrnString, tenantAwareParamFieldObject);
+            Object resourceCrnFieldObject = PropertyUtils.getProperty(requestObject, resourceCrnField.get().getName());
+            if (resourceCrnFieldObject instanceof String && Crn.isCrn((String) resourceCrnFieldObject)) {
+                return getAccountModifiedUserCrnByResourceCrnObject(userCrnString, resourceCrnFieldObject);
             }
         } catch (Exception e) {
             return Optional.empty();
@@ -91,14 +96,14 @@ public class InternalCrnModifier {
         return Optional.empty();
     }
 
-    private Optional<String> getAccountModifiedUserCrnByTenantAwareCrnObject(String userCrnString, Object tenantAwareCrnObject) {
-        String accountId = Crn.safeFromString((String) tenantAwareCrnObject).getAccountId();
+    private Optional<String> getAccountModifiedUserCrnByResourceCrnObject(String userCrnString, Object resourceCrnObject) {
+        String accountId = Crn.safeFromString((String) resourceCrnObject).getAccountId();
         String newUserCrn = getAccountIdModifiedCrn(userCrnString, accountId);
         return Optional.of(newUserCrn);
     }
 
     public Crn changeAccountIdInCrnString(String userCrnString, String accountId) {
-        return Crn.copyWithDifferentAccountId(Crn.fromString(userCrnString), accountId);
+        return Crn.copyWithDifferentAccountId(Crn.safeFromString(userCrnString), accountId);
     }
 
     private String getAccountIdModifiedCrn(String userCrnString, String accountId) {

@@ -11,12 +11,11 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.flow.api.model.operation.OperationStatusResponse;
 import com.sequenceiq.flow.api.model.operation.OperationView;
@@ -66,7 +65,7 @@ public class OperationV1Controller implements OperationV1Endpoint {
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
     public OperationStatusResponse getFlowOperationStatus(
-            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @TenantAwareParam @ResourceCrn String environmentCrn, String flowOperationId) {
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn String environmentCrn, String flowOperationId) {
         String resourceCrn = stackService.getFreeIpaStackWithMdcContext(environmentCrn, crnService.getCurrentAccountId()).getResourceCrn();
         return flowService.getOperationStatus(resourceCrn, flowOperationId);
     }

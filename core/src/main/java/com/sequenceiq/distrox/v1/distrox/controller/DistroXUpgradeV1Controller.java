@@ -11,7 +11,6 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.InternalOnly;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -22,7 +21,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.Upgrade
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.ccm.StackCcmUpgradeService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -145,7 +144,7 @@ public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
 
     @Override
     @InternalOnly
-    public FlowIdentifier osUpgradeByUpgradeSetsInternal(@TenantAwareParam @ResourceCrn String crn, OrderedOSUpgradeSetRequest orderedOsUpgradeSetRequest) {
+    public FlowIdentifier osUpgradeByUpgradeSetsInternal(@ResourceCrn String crn, OrderedOSUpgradeSetRequest orderedOsUpgradeSetRequest) {
         Long workspaceId = restRequestThreadLocalService.getRequestedWorkspaceId();
         return upgradeService.triggerOsUpgradeByUpgradeSets(NameOrCrn.ofCrn(crn), workspaceId, orderedOsUpgradeSetRequest.getImageId(),
                 orderedOsUpgradeSetRequest.getOrderedOsUpgradeSets());
