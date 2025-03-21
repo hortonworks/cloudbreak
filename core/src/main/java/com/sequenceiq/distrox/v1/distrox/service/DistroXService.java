@@ -25,7 +25,9 @@ import com.sequenceiq.cloudbreak.service.image.ImageOsService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.model.AzureDatabaseType;
+import com.sequenceiq.distrox.api.v1.distrox.model.AzureDistroXV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAzureRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
@@ -115,7 +117,20 @@ public class DistroXService {
         if (entitlementService.isSingleServerRejectEnabled(accountId)) {
             validateAzureDatabaseType(request.getExternalDatabase());
         }
+        validateLoadBalancerSku(request.getAzure());
+    }
 
+    private void validateLoadBalancerSku(AzureDistroXV1Parameters azure) {
+        Optional.ofNullable(azure)
+                .map(AzureDistroXV1Parameters::getLoadBalancerSku)
+                .ifPresent(sku -> {
+                    if (LoadBalancerSku.BASIC.equals(sku)) {
+                        throw new BadRequestException("The Basic SKU type is no longer supported for Load Balancers. "
+                                + "Please use the Standard SKU to provision a Load Balancer. Check documentation for more information: "
+                                + "https://azure.microsoft.com/en-gb/updates?id="
+                                + "azure-basic-load-balancer-will-be-retired-on-30-september-2025-upgrade-to-standard-load-balancer");
+                    }
+                });
     }
 
     private Predicate<StatusCheckResult> isSdxAvailable() {

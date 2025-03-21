@@ -125,6 +125,7 @@ import com.sequenceiq.cloudbreak.vm.VirtualMachineConfiguration;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
@@ -516,7 +517,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
         if (isCloudStorageConfigured(sdxClusterRequest)) {
-            validateCloudStorageRequest(sdxClusterRequest.getCloudStorage(), environment);
+            validateCloudStorageRequest(sdxClusterRequest.getCloudStorage());
             String trimmedBaseLocation = StringUtils.stripEnd(sdxClusterRequest.getCloudStorage().getBaseLocation(), "/");
             sdxCluster.setCloudStorageBaseLocation(trimmedBaseLocation);
             sdxCluster.setCloudStorageFileSystemType(sdxClusterRequest.getCloudStorage().getFileSystemType());
@@ -1181,6 +1182,12 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                 .map(SdxAzureBase::getLoadBalancerSku)
                 .ifPresent(sku -> {
                     AzureStackV4Parameters azureParameters = stackRequest.createAzure();
+                    if (LoadBalancerSku.BASIC.equals(sku)) {
+                        throw new BadRequestException("The Basic SKU type is no longer supported for Load Balancers. "
+                                + "Please use the Standard SKU to provision a Load Balancer. Check documentation for more information: "
+                                + "https://azure.microsoft.com/en-gb/updates?id="
+                                + "azure-basic-load-balancer-will-be-retired-on-30-september-2025-upgrade-to-standard-load-balancer");
+                    }
                     azureParameters.setLoadBalancerSku(sku);
                     stackRequest.setAzure(azureParameters);
                 });
@@ -1204,7 +1211,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         return getByNameInAccount(userCrn, resourceName).getId();
     }
 
-    private void validateCloudStorageRequest(SdxCloudStorageRequest cloudStorage, DetailedEnvironmentResponse environment) {
+    private void validateCloudStorageRequest(SdxCloudStorageRequest cloudStorage) {
         if (cloudStorage != null) {
             ValidationResultBuilder validationBuilder = new ValidationResultBuilder();
             validationBuilder.ifError(() -> cloudStorage.getFileSystemType() == null, "'fileSystemType' must be set in 'cloudStorage'!");
