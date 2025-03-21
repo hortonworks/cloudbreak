@@ -44,7 +44,7 @@ public class DefaultSecretRotationStatusService implements SecretRotationStatusS
     }
 
     @Override
-    public void preVaildationFailed(String resourceCrn) {
+    public void preVaildationFailed(String resourceCrn, SecretType secretType, String statusReason) {
 
     }
 }

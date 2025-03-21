@@ -165,7 +165,7 @@ public class SecretRotationActions {
                 flow.setFlowFailed(exception);
                 secretRotationUsageService.rotationFailed(context.getSecretType(), resourceCrn, message, context.getExecutionType());
                 if (PREVALIDATE.equals(failedAt)) {
-                    secretRotationStatusService.preVaildationFailed(resourceCrn);
+                    secretRotationStatusService.preVaildationFailed(resourceCrn, payload.getSecretType(), message);
                 } else {
                     secretRotationStatusService.rotationFailed(resourceCrn, payload.getSecretType(), message);
                 }

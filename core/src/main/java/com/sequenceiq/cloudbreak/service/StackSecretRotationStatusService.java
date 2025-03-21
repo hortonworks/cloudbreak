@@ -2,6 +2,9 @@ package com.sequenceiq.cloudbreak.service;
 
 import static com.sequenceiq.redbeams.api.model.common.Status.UPDATE_IN_PROGRESS;
 
+import java.util.Collection;
+import java.util.List;
+
 import jakarta.inject.Inject;
 
 import org.springframework.context.annotation.Primary;
@@ -104,11 +107,17 @@ public class StackSecretRotationStatusService implements SecretRotationStatusSer
     }
 
     @Override
-    public void preVaildationFailed(String resourceCrn) {
+    public void preVaildationFailed(String resourceCrn, SecretType secretType, String reason) {
         stackUpdater.updateStackStatus(resourceCrn, DetailedStackStatus.AVAILABLE, "");
+        StackView stack = stackDtoService.getStackViewByCrn(resourceCrn);
+        fireCloudbreakEvent(stack, ResourceEvent.SECRET_ROTATION_PREVALIDATE_FAILED, List.of(secretType.value(), reason));
     }
 
     private void fireCloudbreakEvent(StackView stack, ResourceEvent event) {
         cloudbreakEventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), event);
+    }
+
+    private void fireCloudbreakEvent(StackView stack, ResourceEvent event, Collection<String> eventMessageArgs) {
+        cloudbreakEventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), event, eventMessageArgs);
     }
 }
