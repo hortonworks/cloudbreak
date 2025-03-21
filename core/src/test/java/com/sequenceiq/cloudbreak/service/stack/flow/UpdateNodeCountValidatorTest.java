@@ -44,6 +44,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
+import com.sequenceiq.cloudbreak.cluster.api.ClusterHealthService;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
@@ -57,6 +59,8 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.DependentRolesHealthCheckService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
@@ -95,6 +99,15 @@ public class UpdateNodeCountValidatorTest {
 
     @InjectMocks
     private UpdateNodeCountValidator underTest;
+
+    @Mock
+    private ClusterApiConnectors clusterApiConnectors;
+
+    @Mock
+    private ClusterApi connector;
+
+    @Mock
+    private ClusterHealthService clusterHealthService;
 
     @Mock
     private TargetedUpscaleSupportService targetedUpscaleSupportService;
@@ -222,7 +235,13 @@ public class UpdateNodeCountValidatorTest {
         when(stackdto.getStack()).thenReturn(stackView);
         when(stackdto.getStack().getName()).thenReturn("master-stack");
         when(stackdto.getStack().getStatus()).thenReturn(status);
+        when(clusterApiConnectors.getConnector(any(StackDtoDelegate.class))).thenReturn(connector);
+        when(connector.clusterHealthService()).thenReturn(clusterHealthService);
+        Map<String, String> componentsHealth = Map.of("YARN_RESOURCEMANAGER_HEALTH", "BAD");
+        when(clusterHealthService.readServicesHealth("master-stack")).thenReturn(componentsHealth);
+
         when(dependentRolesHealthCheckService.getUnhealthyDependentHostGroups(any(), any(), any())).thenReturn(unHealthyHosts);
+        when(dependentRolesHealthCheckService.getDependentComponentsHeathChecksForHostGroup(any(), any())).thenReturn(Set.of("YARN_RESOURCEMANAGER_HEALTH"));
 
         if (unDefinedDependencyPresent) {
             dependComponents.add(UNDEFINED_DEPENDENCY);
@@ -263,11 +282,13 @@ public class UpdateNodeCountValidatorTest {
                 Arguments.of(AVAILABLE, NO_ERROR, "compute", false, false, 1),
                 Arguments.of(AVAILABLE, NO_ERROR, "compute", false, false, -1),
                 Arguments.of(AVAILABLE,
-                        Optional.of("Upscaling is Not Allowed for HostGroup: 'compute' as Data hub 'master-stack' " +
-                                "has services which may not be healthy for instances in hostGroup(s): [[master]]"), "compute", false, true, 1),
+                        Optional.of("Upscaling is not allowed for HostGroup: 'compute' as Data hub 'master-stack' has " +
+                                "health checks which are not healthy: [[YARN_RESOURCEMANAGER_HEALTH]] for instances in hostGroup(s): [[master]]"),
+                        "compute", false, true, 1),
                 Arguments.of(AVAILABLE,
-                        Optional.of("Downscaling is Not Allowed for HostGroup: 'compute' as Data hub 'master-stack' " +
-                                "has services which may not be healthy for instances in hostGroup(s): [[master]]"), "compute", false, true, -1),
+                        Optional.of("Downscaling is not allowed for HostGroup: 'compute' as Data hub 'master-stack' has " +
+                                "health checks which are not healthy: [[YARN_RESOURCEMANAGER_HEALTH]] for instances in hostGroup(s): [[master]]"),
+                        "compute", false, true, -1),
                 Arguments.of(AVAILABLE, NO_ERROR, "compute", true, false, 1),
                 Arguments.of(AVAILABLE, NO_ERROR, "compute", true, false, -1),
                 Arguments.of(UPDATE_IN_PROGRESS,
@@ -281,11 +302,13 @@ public class UpdateNodeCountValidatorTest {
                 Arguments.of(NODE_FAILURE, NO_ERROR, "compute", false, false, 1),
                 Arguments.of(NODE_FAILURE, NO_ERROR, "compute", false, false, -1),
                 Arguments.of(NODE_FAILURE,
-                        Optional.of("Upscaling is Not Allowed for HostGroup: 'compute' as Data hub 'master-stack' " +
-                                "has services which may not be healthy for instances in hostGroup(s): [[master]]"), "compute", false, true, 1),
+                        Optional.of("Upscaling is not allowed for HostGroup: 'compute' as Data hub 'master-stack' has " +
+                                "health checks which are not healthy: [[YARN_RESOURCEMANAGER_HEALTH]] for instances in hostGroup(s): [[master]]"), "compute",
+                        false, true, 1),
                 Arguments.of(NODE_FAILURE,
-                        Optional.of("Downscaling is Not Allowed for HostGroup: 'compute' as Data hub 'master-stack' " +
-                                "has services which may not be healthy for instances in hostGroup(s): [[master]]"), "compute", false, true, -1),
+                        Optional.of("Downscaling is not allowed for HostGroup: 'compute' as Data hub 'master-stack' has " +
+                                "health checks which are not healthy: [[YARN_RESOURCEMANAGER_HEALTH]] for instances in hostGroup(s): [[master]]"), "compute",
+                        false, true, -1),
                 Arguments.of(NODE_FAILURE,
                         Optional.of("Data Hub 'master-stack' has 'NODE_FAILURE' state. Node group start operation is not allowed for this state."),
                         "compute", true, false, 1),

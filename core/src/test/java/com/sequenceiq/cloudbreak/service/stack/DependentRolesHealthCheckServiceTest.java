@@ -96,6 +96,15 @@ class DependentRolesHealthCheckServiceTest {
     }
 
     @Test
+    void testgetDependentComponentsHealthChecksWithDependencyDefined() {
+        CmTemplateProcessor processor = new CmTemplateProcessor(getBlueprintText("input/de-ha.bp"));
+        Set<String> expected = new HashSet<>();
+        expected.add("YARN_RESOURCEMANAGERS_HEALTH");
+        Set<String> actual = underTest.getDependentComponentsHeathChecksForHostGroup(processor, "compute");
+        assertEquals(actual, expected);
+    }
+
+    @Test
     void testGetDependentHostGroupsForGivenHostGroup() {
         CmTemplateProcessor processor = new CmTemplateProcessor(getBlueprintText("input/de-ha.bp"));
         Set<String> dependentHostGroups = Set.of("master");

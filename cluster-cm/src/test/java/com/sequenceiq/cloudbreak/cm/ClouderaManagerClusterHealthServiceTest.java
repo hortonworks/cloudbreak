@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cm;
 
 import static com.sequenceiq.cloudbreak.cloud.model.HostName.hostName;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -10,6 +11,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -22,6 +25,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.cloudera.api.swagger.HostsResourceApi;
 import com.cloudera.api.swagger.RolesResourceApi;
+import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommissionState;
@@ -34,6 +38,8 @@ import com.cloudera.api.swagger.model.ApiRole;
 import com.cloudera.api.swagger.model.ApiRoleList;
 import com.cloudera.api.swagger.model.ApiRoleRef;
 import com.cloudera.api.swagger.model.ApiRoleState;
+import com.cloudera.api.swagger.model.ApiService;
+import com.cloudera.api.swagger.model.ApiServiceList;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cluster.status.DetailedHostStatuses;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
@@ -49,6 +55,8 @@ class ClouderaManagerClusterHealthServiceTest {
     private static final String NODEMANAGER = YarnRoles.NODEMANAGER;
 
     private static final String HOST_SCM_HEALTH = "HOST_SCM_HEALTH";
+
+    private static final String YARN_RESOURCEMANAGERS_HEALTH = "YARN_RESOURCEMANAGERS_HEALTH";
 
     private static final String HOST_AGENT_CERTIFICATE_EXPIRY = "HOST_AGENT_CERTIFICATE_EXPIRY";
 
@@ -78,6 +86,9 @@ class ClouderaManagerClusterHealthServiceTest {
     private HostsResourceApi hostsResourceApi;
 
     @Mock
+    private ServicesResourceApi servicesResourceApi;
+
+    @Mock
     private RolesResourceApi rolesResourceApi;
 
     @InjectMocks
@@ -99,6 +110,19 @@ class ClouderaManagerClusterHealthServiceTest {
 
         when(clouderaManagerApiFactory.getHostsResourceApi(apiClient)).thenReturn(hostsResourceApi);
         when(clouderaManagerApiFactory.getRolesResourceApi(apiClient)).thenReturn(rolesResourceApi);
+    }
+
+    @Test
+    void testReadServicesHealth() throws ApiException {
+        underTest = spy(underTest);
+        when(clouderaManagerApiFactory.getServicesResourceApi(apiClient)).thenReturn(servicesResourceApi);
+        ApiService apiService = new ApiService().name("yarn").addHealthChecksItem(new ApiHealthCheck()
+                .name(YARN_RESOURCEMANAGERS_HEALTH).summary(ApiHealthSummary.GOOD));
+        ApiServiceList apiServiceList =  new ApiServiceList().items(Collections.singletonList(apiService));
+        when(servicesResourceApi.readServices("trial", DataView.FULL.name())).thenReturn(apiServiceList);
+
+        Map<String, String> result = underTest.readServicesHealth("trial");
+        assertEquals(result.get(YARN_RESOURCEMANAGERS_HEALTH), "GOOD");
     }
 
     @Test

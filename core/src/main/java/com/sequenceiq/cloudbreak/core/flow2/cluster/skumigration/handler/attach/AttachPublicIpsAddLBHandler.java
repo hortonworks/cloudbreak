@@ -96,10 +96,11 @@ public class AttachPublicIpsAddLBHandler extends ExceptionCatcherEventHandler<At
             metadataSetupService.saveLoadBalancerMetadata(stack, loadBalancerStatuses);
 
             List<InstanceMetadataView> instances = instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(stack.getId());
-            List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(instances, stack);
-            List<CloudVmMetaDataStatus> instanceStatuses = connector.metadata().collect(ac, cloudResources, cloudInstances, cloudInstances);
-
-            updatePublicIps(instanceStatuses);
+            if (!instances.isEmpty()) {
+                List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(instances, stack);
+                List<CloudVmMetaDataStatus> instanceStatuses = connector.metadata().collect(ac, cloudResources, cloudInstances, cloudInstances);
+                updatePublicIps(instanceStatuses);
+            }
         } catch (Exception e) {
             LOGGER.error("Failed to attach public IPs and add LB", e);
             return new SkuMigrationFailedEvent(SkuMigrationFlowEvent.SKU_MIGRATION_FAILED_EVENT.event(),
