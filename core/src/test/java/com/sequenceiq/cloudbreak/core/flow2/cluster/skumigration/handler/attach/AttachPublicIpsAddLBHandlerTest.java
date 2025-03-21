@@ -126,6 +126,7 @@ class AttachPublicIpsAddLBHandlerTest {
         CloudInstance cloudInstance2 = new CloudInstance("i-2", null, null, null, null);
         List<CloudInstance> cloudInstances = List.of(cloudInstance1, cloudInstance2);
         ArrayList<InstanceMetadataView> instanceMetadataViews = new ArrayList<>();
+        instanceMetadataViews.add(mock(InstanceMetadataView.class));
         when(instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(STACK_ID)).thenReturn(instanceMetadataViews);
         when(cloudInstanceConverter.convert(instanceMetadataViews, stack)).thenReturn(cloudInstances);
         MetadataCollector metadataCollector = mock(MetadataCollector.class);
@@ -151,6 +152,56 @@ class AttachPublicIpsAddLBHandlerTest {
         verify(resourceConnector).attachPublicIpAddressesForVMsAndAddLB(authenticatedContext, cloudStack, persistenceNotifier);
         verify(instanceMetaDataService, times(1)).updatePublicIp("i-1", "80.1.1.1");
         verify(instanceMetaDataService, times(1)).updatePublicIp("i-2", "80.1.1.2");
+    }
+
+    @Test
+    void testDoAcceptWithoutAvailableInstances() {
+        StackView stack = mock(StackView.class);
+        when(stack.getId()).thenReturn(STACK_ID);
+
+        CloudConnector cloudConnector = mock(CloudConnector.class);
+        ResourceConnector resourceConnector = mock(ResourceConnector.class);
+        when(cloudConnector.resources()).thenReturn(resourceConnector);
+
+        LoadBalancer loadBalancer = new LoadBalancer();
+        loadBalancer.setType(LoadBalancerType.PRIVATE);
+        when(loadBalancerPersistenceService.findByStackId(STACK_ID)).thenReturn(Set.of(loadBalancer));
+
+        CloudCredential cloudCredential = new CloudCredential();
+        List<CloudResource> resources = new ArrayList<>();
+        CloudResource resource = mock(CloudResource.class);
+        resources.add(resource);
+
+        CloudContext cloudContext = mock(CloudContext.class);
+        when(cloudContext.getId()).thenReturn(STACK_ID);
+        Authenticator authenticator = mock(Authenticator.class);
+        when(cloudConnector.authentication()).thenReturn(authenticator);
+        AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
+        when(authenticator.authenticate(cloudContext, cloudCredential)).thenReturn(authenticatedContext);
+        CloudStack cloudStack = mock(CloudStack.class);
+        when(resourceConnector.attachPublicIpAddressesForVMsAndAddLB(authenticatedContext, cloudStack, persistenceNotifier)).thenReturn(resources);
+        CloudResource armTemplate = mock(CloudResource.class);
+        when(resourceRetriever.findByStatusAndTypeAndStack(CREATED, ARM_TEMPLATE, cloudContext.getId())).thenReturn(Optional.of(armTemplate));
+        CloudLoadBalancerMetadata cloudLoadBalancerMetadata = mock(CloudLoadBalancerMetadata.class);
+        List<CloudLoadBalancerMetadata> loadBalancerMetadataList = List.of(cloudLoadBalancerMetadata);
+        ArgumentCaptor<List<CloudResource>> summedCloudResources = ArgumentCaptor.forClass(List.class);
+        when(loadBalancerMetadataService.collectMetadata(eq(cloudContext), eq(cloudCredential), eq(List.of(LoadBalancerType.PRIVATE)),
+                summedCloudResources.capture())).thenReturn(loadBalancerMetadataList);
+        ArrayList<InstanceMetadataView> instanceMetadataViews = new ArrayList<>();
+        when(instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(STACK_ID)).thenReturn(instanceMetadataViews);
+
+        AttachPublicIpsAddLBRequest request = new AttachPublicIpsAddLBRequest(stack, cloudContext, cloudCredential, cloudConnector, cloudStack);
+        HandlerEvent<AttachPublicIpsAddLBRequest> handlerEvent = new HandlerEvent<>(new Event<>(request));
+        Selectable result = underTest.doAccept(handlerEvent);
+
+        assertNotNull(result);
+        assertEquals(AttachPublicIpsAddLBResult.class, result.getClass());
+        List<CloudResource> cloudResourcesForCollect = summedCloudResources.getValue();
+        assertThat(cloudResourcesForCollect).containsAll(resources).contains(armTemplate);
+        verify(metadataSetupService, times(1)).saveLoadBalancerMetadata(stack, loadBalancerMetadataList);
+        verify(resourceConnector).attachPublicIpAddressesForVMsAndAddLB(authenticatedContext, cloudStack, persistenceNotifier);
+        verify(instanceMetaDataService, times(0)).updatePublicIp("i-1", "80.1.1.1");
+        verify(instanceMetaDataService, times(0)).updatePublicIp("i-2", "80.1.1.2");
     }
 
     @Test

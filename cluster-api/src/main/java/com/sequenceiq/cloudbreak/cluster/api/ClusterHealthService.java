@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cluster.api;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -15,4 +16,6 @@ public interface ClusterHealthService {
     DetailedHostStatuses getDetailedHostStatuses(Optional<String> runtimeVersion);
 
     Set<String> getDisconnectedNodeManagers();
+
+    Map<String, String> readServicesHealth(String stackName);
 }

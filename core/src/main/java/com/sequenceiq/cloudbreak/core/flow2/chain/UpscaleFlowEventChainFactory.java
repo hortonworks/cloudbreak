@@ -95,7 +95,7 @@ public class UpscaleFlowEventChainFactory implements FlowEventChainFactory<Stack
     private void addSkuMigrationIfNecessary(StackDto stackDto, Queue<Selectable> flowTriggers) {
         if (skuMigrationService.isUpscaleSkuMigrationEnabled()) {
             if (skuMigrationService.isMigrationNecessary(stackDto)) {
-                LOGGER.info("Lets do the BASIC to STANDARD SKU migration");
+                LOGGER.info("Lets do the BASIC to STANDARD SKU migration before upscale");
                 SkuMigrationTriggerEvent skuMigrationTriggerEvent =
                         new SkuMigrationTriggerEvent(SKU_MIGRATION_EVENT.event(), stackDto.getId(), false);
                 flowTriggers.add(skuMigrationTriggerEvent);
