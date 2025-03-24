@@ -24,7 +24,7 @@
               "type": "NONE"
             }
           },
-          "instanceType": "m5.4xlarge"
+          "instanceType": "m5.2xlarge"
         },
         "nodeCount": 1,
         "type": "GATEWAY",
@@ -45,9 +45,9 @@
               "type": "NONE"
             }
           },
-          "instanceType": "r5d.2xlarge"
+          "instanceType": "r5d.xlarge"
         },
-        "nodeCount": 1,
+        "nodeCount": 0,
         "type": "CORE",
         "recoveryMode": "MANUAL"
       },
@@ -66,9 +66,9 @@
               "type": "NONE"
             }
           },
-          "instanceType": "r5d.2xlarge"
+          "instanceType": "r5d.xlarge"
         },
-        "nodeCount": 3,
+        "nodeCount": 2,
         "type": "CORE",
         "recoveryMode": "MANUAL"
       },

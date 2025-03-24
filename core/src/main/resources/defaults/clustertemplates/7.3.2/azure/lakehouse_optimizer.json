@@ -26,7 +26,7 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_D16s_v3"
+          "instanceType": "Standard_D8s_v3"
         },
         "nodeCount": 1,
         "type": "GATEWAY",
@@ -43,9 +43,9 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_D16s_v3"
+          "instanceType": "Standard_E8ds_v5"
         },
-        "nodeCount": 1,
+        "nodeCount": 0,
         "type": "CORE",
         "recoveryMode": "MANUAL"
       },
@@ -66,9 +66,9 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_D16s_v3"
+          "instanceType": "Standard_E8ds_v5"
         },
-        "nodeCount": 3,
+        "nodeCount": 2,
         "type": "CORE",
         "recoveryMode": "MANUAL"
       },
