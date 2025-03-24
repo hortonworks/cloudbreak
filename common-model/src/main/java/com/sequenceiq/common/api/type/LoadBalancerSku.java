@@ -4,6 +4,7 @@ import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 
 public enum LoadBalancerSku {
+    @Deprecated
     BASIC("Basic"),
     STANDARD("Standard"),
     NONE("None");

@@ -132,6 +132,7 @@ import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
@@ -1223,6 +1224,12 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                 .map(SdxAzureBase::getLoadBalancerSku)
                 .ifPresent(sku -> {
                     AzureStackV4Parameters azureParameters = stackRequest.createAzure();
+                    if (LoadBalancerSku.BASIC.equals(sku)) {
+                        throw new BadRequestException("The Basic SKU type is no longer supported for Load Balancers. "
+                                + "Please use the Standard SKU to provision a Load Balancer. Check documentation for more information: "
+                                + "https://azure.microsoft.com/en-gb/updates?id="
+                                + "azure-basic-load-balancer-will-be-retired-on-30-september-2025-upgrade-to-standard-load-balancer");
+                    }
                     azureParameters.setLoadBalancerSku(sku);
                     stackRequest.setAzure(azureParameters);
                 });
