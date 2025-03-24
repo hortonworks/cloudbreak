@@ -53,6 +53,7 @@ import com.sequenceiq.cloudbreak.cloud.model.database.ExternalDatabaseParameters
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.template.AbstractResourceConnector;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
+import com.sequenceiq.cloudbreak.common.provider.ProviderResourceSyncer;
 import com.sequenceiq.cloudbreak.service.Retry.ActionFailedException;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
@@ -108,6 +109,9 @@ public class AzureResourceConnector extends AbstractResourceConnector {
 
     @Inject
     private AzureExceptionHandler azureExceptionHandler;
+
+    @Inject
+    private List<ProviderResourceSyncer> providerResourceSyncers;
 
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier notifier,
@@ -400,6 +404,10 @@ public class AzureResourceConnector extends AbstractResourceConnector {
         List<CloudResourceStatus> result = new ArrayList<>();
         AzureClient client = authenticatedContext.getParameter(AzureClient.class);
         String stackName = azureUtils.getStackName(authenticatedContext.getCloudContext());
+
+        providerResourceSyncers.stream()
+                .filter(syncer -> syncer.platform().equals(authenticatedContext.getCloudContext().getPlatform()))
+                .forEach(syncer -> result.addAll(syncer.sync(authenticatedContext, resources)));
 
         for (CloudResource resource : resources) {
             ResourceType resourceType = resource.getType();

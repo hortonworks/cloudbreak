@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.retry.RetryUtil;
 
 @Component
 public class ResourcePersistenceHandler implements Consumer<Event<ResourceNotification>> {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourcePersistenceHandler.class);
 
     @Inject
@@ -33,7 +34,6 @@ public class ResourcePersistenceHandler implements Consumer<Event<ResourceNotifi
                         case CREATE -> cloudResourcePersisterService.persist(notification);
                         case UPDATE -> cloudResourcePersisterService.update(notification);
                         case DELETE -> cloudResourcePersisterService.delete(notification);
-                        default -> throw new IllegalArgumentException("Unsupported notification type: " + notification.getType());
                     };
                     notificationPersisted.getPromise().onNext(new ResourcePersisted());
                 })

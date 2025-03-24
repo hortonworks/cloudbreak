@@ -124,6 +124,11 @@ public class CloudResource extends DynamicModel {
         return type.getCommonResourceType();
     }
 
+    public <T> void setTypedAttributes(T attributes) {
+        putParameter(ATTRIBUTES, attributes);
+        putParameter(ATTRIBUTE_TYPE, attributes.getClass().getCanonicalName());
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", CloudResource.class.getSimpleName() + "[", "]")

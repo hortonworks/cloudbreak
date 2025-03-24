@@ -33,10 +33,6 @@ public class DynamicEntitlementRefreshJob extends StatusCheckerJob {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DynamicEntitlementRefreshJob.class);
 
-    private static final int ATTEMPT_NUMBER = 100;
-
-    private static final int SLEEP_TIME = 10;
-
     @Inject
     private StackService stackService;
 
