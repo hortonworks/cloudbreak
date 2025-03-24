@@ -1939,4 +1939,20 @@ public class SaltOrchestrator implements HostOrchestrator {
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
+
+    @Override
+    public void enableSeLinuxOnNodes(List<GatewayConfig> allGateway, Set<Node> allNodesInTargetGroup,
+            ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException {
+        GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGateway);
+        Set<String> gatewayTargetIpAddresses = getGatewayPrivateIps(allGateway);
+        try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
+            StateAllRunner stateAllRunner = new StateAllRunner(saltStateService, gatewayTargetIpAddresses, allNodesInTargetGroup, "selinux.init");
+            OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, stateAllRunner);
+            Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitModel);
+            saltJobRunBootstrapRunner.call();
+        } catch (Exception e) {
+            LOGGER.info("Error occurred during the salt enableSeLinuxOnNodes operation", e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
 }

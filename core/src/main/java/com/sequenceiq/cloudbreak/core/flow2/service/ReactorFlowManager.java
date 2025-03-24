@@ -9,6 +9,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.PillarC
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.dr.restore.DatabaseRestoreEvent.DATABASE_RESTORE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.metrics.datasizes.DetermineDatalakeDataSizesEvent.DETERMINE_DATALAKE_DATA_SIZES_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_VALIDATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.enableselinux.event.CoreEnableSeLinuxStateSelectors.CORE_SET_SELINUX_TO_ENFORCING_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CLUSTER_CREATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateEvent.ROTATE_RDS_CERTIFICATE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent.SALT_UPDATE_EVENT;
@@ -584,10 +585,9 @@ public class ReactorFlowManager {
                 new SetDefaultJavaVersionTriggerEvent(selector, stackId, javaVersion, restartServices, restartCM, rollingRestart));
     }
 
-    public FlowIdentifier triggerEnableSelinux(Long stackId, String stackName, String stackCrn) {
-        String selector = FlowChainTriggers.ENABLE_SELINUX_CORE_VALIDATION_EVENT;
-        return reactorNotifier.notify(stackId, selector,
-                new CoreEnableSeLinuxEvent(selector, stackId, stackName, stackCrn));
+    public FlowIdentifier triggerEnableSelinux(Long stackId) {
+        String selector = CORE_SET_SELINUX_TO_ENFORCING_EVENT.event();
+        return reactorNotifier.notify(stackId, selector, new CoreEnableSeLinuxEvent(selector, stackId));
     }
 
     public FlowIdentifier triggerExternalDatabaseUserOperation(Long stackId, String name, String crn, ExternalDatabaseUserOperation operation,

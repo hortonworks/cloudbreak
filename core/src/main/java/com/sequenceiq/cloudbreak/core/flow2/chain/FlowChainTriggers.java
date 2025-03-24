@@ -72,8 +72,6 @@ public class FlowChainTriggers {
 
     public static final String CORE_ROOT_VOLUME_UPDATE_TRIGGER_EVENT = "CORE_ROOT_VOLUME_UPDATE_TRIGGER_EVENT";
 
-    public static final String ENABLE_SELINUX_CORE_VALIDATION_EVENT = "ENABLE_SELINUX_CORE_VALIDATION_EVENT";
-
     private FlowChainTriggers() {
     }
 }

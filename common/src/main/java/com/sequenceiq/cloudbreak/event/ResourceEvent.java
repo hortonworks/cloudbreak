@@ -777,7 +777,11 @@ public enum ResourceEvent {
     DATALAKE_STALE_STATUS("datalake.stale.status"),
     STALE_STATUS_NOTIFICATION("stale.status.notification"),
     IMAGE_VALIDATION_FAILED("stack.image.validation"),
-    AWS_LARGE_CLUSTER_START("spi.aws.start.large.cluster");
+    AWS_LARGE_CLUSTER_START("spi.aws.start.large.cluster"),
+    STACK_VALIDATING_SELINUX("stack.validating.selinux.mode"),
+    STACK_CHANGING_SELINUX("stack.changing.selinux.mode"),
+    STACK_CHANGED_SELINUX("stack.changed.selinux.mode"),
+    STACK_FAILED_SELINUX("stack.failed.selinux.mode");
 
     private final String message;
 

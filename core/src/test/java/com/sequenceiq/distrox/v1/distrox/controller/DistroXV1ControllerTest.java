@@ -323,4 +323,29 @@ class DistroXV1ControllerTest {
 
         assertEquals(result, response.getResponses());
     }
+
+    @Test
+    void testEnableSeLinuxByName() {
+        doAs(TEST_USER_CRN, () -> {
+            try {
+                distroXV1Controller.enableSeLinuxByName(NAME);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        verify(stackOperationService).triggerEnableSELinux(NameOrCrn.ofName(NAME), "accountId");
+    }
+
+    @Test
+    void testEnableSeLinuxByCrn() {
+        doAs(TEST_USER_CRN, () -> {
+            try {
+                distroXV1Controller.enableSeLinuxByCrn(CRN);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+        verify(stackOperationService).triggerEnableSELinux(NameOrCrn.ofCrn(CRN), "accountId");
+    }
 }

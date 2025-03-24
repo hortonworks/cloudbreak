@@ -115,4 +115,7 @@ public class SecurityConfigService {
         LOGGER.info("Successfully changed salt password of security config {}", securityConfig.getId());
     }
 
+    public int updateSeLinuxSecurityConfig(Long securityConfigId, SeLinux selinuxMode) {
+        return securityConfigRepository.updateSeLinuxSecurityConfig(selinuxMode, securityConfigId);
+    }
 }

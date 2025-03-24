@@ -696,4 +696,15 @@ class StackOperationServiceTest {
 
         assertEquals("Test validation error", exception.getMessage());
     }
+
+    @Test
+    public void testTriggerEnableSELinux() throws Exception {
+        StackDto stack = mock(StackDto.class);
+        when(stack.getId()).thenReturn(STACK_ID);
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
+        when(stackDtoService.getByNameOrCrn(eq(nameOrCrn), eq("accountId"))).thenReturn(stack);
+        underTest.triggerEnableSELinux(nameOrCrn, "accountId");
+
+        verify(flowManager).triggerEnableSelinux(STACK_ID);
+    }
 }

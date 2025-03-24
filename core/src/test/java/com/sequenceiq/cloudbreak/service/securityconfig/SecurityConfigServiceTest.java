@@ -2,8 +2,10 @@ package com.sequenceiq.cloudbreak.service.securityconfig;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -11,14 +13,13 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.AdditionalAnswers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SecurityV4Request;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -33,7 +34,7 @@ import com.sequenceiq.cloudbreak.service.saltsecurityconf.SaltSecurityConfigServ
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.model.SeLinux;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class SecurityConfigServiceTest {
 
     @InjectMocks
@@ -56,9 +57,9 @@ public class SecurityConfigServiceTest {
 
     private Stack stack;
 
-    @Before
+    @BeforeEach
     public void setUp() throws TransactionService.TransactionExecutionException {
-        when(transactionService.required(any(Supplier.class))).then(invocationOnMock -> ((Supplier) invocationOnMock.getArgument(0)).get());
+        lenient().when(transactionService.required(any(Supplier.class))).then(invocationOnMock -> ((Supplier) invocationOnMock.getArgument(0)).get());
         stack = new Stack();
         stack.setId(123L);
         stack.setWorkspace(new Workspace());
@@ -66,7 +67,7 @@ public class SecurityConfigServiceTest {
     }
 
     @Test
-    public void testSecurityConfigExistsAndPermissiveSelinux() {
+    void testSecurityConfigExistsAndPermissiveSelinux() {
         // This can happen when the flow is restarted
         SecurityConfig existingSecurityConfig = new SecurityConfig();
         existingSecurityConfig.setSeLinux(SeLinux.PERMISSIVE);
@@ -75,23 +76,23 @@ public class SecurityConfigServiceTest {
 
         SecurityConfig securityConfig = underTest.initSaltSecurityConfigs(stack);
 
-        Assert.assertEquals("It should return the exisiting SecurityConfig", existingSecurityConfig, securityConfig);
-        Assert.assertEquals(SeLinux.PERMISSIVE, securityConfig.getSeLinux());
+        assertEquals(existingSecurityConfig, securityConfig);
+        assertEquals(SeLinux.PERMISSIVE, securityConfig.getSeLinux());
     }
 
     @Test
-    public void validateRequestShouldThrowBadRequestExceptionWhenSeLinuxIsEnforcingEntitlementNotGranted() {
+    void validateRequestShouldThrowBadRequestExceptionWhenSeLinuxIsEnforcingEntitlementNotGranted() {
         SecurityV4Request mockRequest = mock(SecurityV4Request.class);
         when(mockRequest.getSeLinux()).thenReturn(SeLinux.ENFORCING.name());
         when(entitlementService.isCdpSecurityEnforcingSELinux(any())).thenReturn(false);
 
-        BadRequestException exception = Assert.assertThrows(BadRequestException.class,
+        BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> underTest.validateRequest(mockRequest, "accountId"));
         assertEquals("SELinux enforcing requires CDP_SECURITY_ENFORCING_SELINUX entitlement for your account.", exception.getMessage());
     }
 
     @Test
-    public void validateRequestShouldNOTThrowBadRequestExceptionWhenSeLinuxIsEnforcingEntitlementGranted() {
+    void validateRequestShouldNOTThrowBadRequestExceptionWhenSeLinuxIsEnforcingEntitlementGranted() {
         SecurityV4Request mockRequest = mock(SecurityV4Request.class);
         when(mockRequest.getSeLinux()).thenReturn(SeLinux.ENFORCING.name());
         when(entitlementService.isCdpSecurityEnforcingSELinux(any())).thenReturn(true);
@@ -100,7 +101,7 @@ public class SecurityConfigServiceTest {
     }
 
     @Test
-    public void validateRequestShouldNotThrowExceptionWhenSeLinuxIsPermissive() {
+    void validateRequestShouldNotThrowExceptionWhenSeLinuxIsPermissive() {
         SecurityV4Request mockRequest = mock(SecurityV4Request.class);
         when(mockRequest.getSeLinux()).thenReturn(SeLinux.PERMISSIVE.name());
 
@@ -108,12 +109,12 @@ public class SecurityConfigServiceTest {
     }
 
     @Test
-    public void validateRequestShouldNotThrowExceptionWhenSecurityRequestIsNull() {
+    void validateRequestShouldNotThrowExceptionWhenSecurityRequestIsNull() {
         assertDoesNotThrow(() -> underTest.validateRequest(null, "accountId"));
     }
 
     @Test
-    public void testSecurityConfigExistsAndNoSelinux() {
+    void testSecurityConfigExistsAndNoSelinux() {
         // This can happen when the flow is restarted
         SecurityConfig existingSecurityConfig = new SecurityConfig();
         existingSecurityConfig.setSeLinux(SeLinux.PERMISSIVE);
@@ -122,23 +123,23 @@ public class SecurityConfigServiceTest {
 
         SecurityConfig securityConfig = underTest.initSaltSecurityConfigs(stack);
 
-        Assert.assertEquals("It should return the exisiting SecurityConfig", existingSecurityConfig, securityConfig);
-        Assert.assertEquals(SeLinux.PERMISSIVE, securityConfig.getSeLinux());
+        assertEquals(existingSecurityConfig, securityConfig);
+        assertEquals(SeLinux.PERMISSIVE, securityConfig.getSeLinux());
     }
 
     @Test
-    public void testSecurityConfigDoesNotExists() {
+    void testSecurityConfigDoesNotExists() {
         SecurityConfig createdSecurityConfig = new SecurityConfig();
         when(tlsSecurityService.generateSecurityKeys(any(Workspace.class), any(SecurityConfig.class))).thenReturn(createdSecurityConfig);
         when(securityConfigRepository.save(any(SecurityConfig.class))).then(AdditionalAnswers.returnsFirstArg());
 
         SecurityConfig securityConfig = underTest.initSaltSecurityConfigs(stack);
 
-        Assert.assertEquals("It should create a new SecurityConfig", createdSecurityConfig, securityConfig);
+        assertEquals(createdSecurityConfig, securityConfig);
     }
 
     @Test
-    public void testChangeSaltPassword() {
+    void testChangeSaltPassword() {
         SecurityConfig securityConfig = new SecurityConfig();
         SaltSecurityConfig saltSecurityConfig = new SaltSecurityConfig();
         saltSecurityConfig.setSaltPassword("old-pw");
@@ -148,7 +149,14 @@ public class SecurityConfigServiceTest {
         underTest.changeSaltPassword(securityConfig, newPassword);
 
         verify(saltSecurityConfigService).save(saltSecurityConfig);
-        Assert.assertEquals(newPassword, saltSecurityConfig.getSaltPassword());
+        assertEquals(newPassword, saltSecurityConfig.getSaltPassword());
+    }
+
+    @Test
+    void testUpdateSeLinuxSecurityConfig() {
+        when(securityConfigRepository.updateSeLinuxSecurityConfig(SeLinux.ENFORCING, 1L)).thenReturn(1);
+        int result = underTest.updateSeLinuxSecurityConfig(1L, SeLinux.ENFORCING);
+        assertEquals(1, result);
     }
 
 }

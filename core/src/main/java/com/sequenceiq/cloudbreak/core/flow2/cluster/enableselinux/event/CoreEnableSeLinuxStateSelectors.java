@@ -4,7 +4,7 @@ import com.sequenceiq.flow.core.FlowEvent;
 
 public enum CoreEnableSeLinuxStateSelectors implements FlowEvent {
 
-    ENABLE_SELINUX_CORE_VALIDATION_EVENT,
+    CORE_SET_SELINUX_TO_ENFORCING_EVENT,
     ENABLE_SELINUX_CORE_EVENT,
     FINISH_ENABLE_SELINUX_CORE_EVENT,
     FINALIZE_ENABLE_SELINUX_CORE_EVENT,

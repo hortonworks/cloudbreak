@@ -611,7 +611,7 @@ public class StackOperationService {
     public FlowIdentifier triggerEnableSELinux(NameOrCrn nameOrCrn, String accountId) {
         LOGGER.info("Triggering enable selinux update on stack ('{}')", nameOrCrn);
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
-        return flowManager.triggerEnableSelinux(stack.getId(), stack.getName(), stack.getResourceCrn());
+        return flowManager.triggerEnableSelinux(stack.getId());
     }
 
     public void validateDefaultJavaVersionUpdate(NameOrCrn nameOrCrn, String accountId, SetDefaultJavaVersionRequest request) {

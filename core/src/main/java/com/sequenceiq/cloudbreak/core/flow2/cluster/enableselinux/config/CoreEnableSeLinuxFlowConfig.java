@@ -6,8 +6,8 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.enableselinux.CoreEna
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.enableselinux.CoreEnableSeLinuxState.ENABLE_SELINUX_CORE_VALIDATION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.enableselinux.CoreEnableSeLinuxState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.enableselinux.CoreEnableSeLinuxState.INIT_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.enableselinux.event.CoreEnableSeLinuxStateSelectors.CORE_SET_SELINUX_TO_ENFORCING_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.enableselinux.event.CoreEnableSeLinuxStateSelectors.ENABLE_SELINUX_CORE_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.enableselinux.event.CoreEnableSeLinuxStateSelectors.ENABLE_SELINUX_CORE_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.enableselinux.event.CoreEnableSeLinuxStateSelectors.FAILED_ENABLE_SELINUX_CORE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.enableselinux.event.CoreEnableSeLinuxStateSelectors.FINALIZE_ENABLE_SELINUX_CORE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.enableselinux.event.CoreEnableSeLinuxStateSelectors.FINISH_ENABLE_SELINUX_CORE_EVENT;
@@ -30,7 +30,7 @@ public class CoreEnableSeLinuxFlowConfig extends StackStatusFinalizerAbstractFlo
 
             .from(INIT_STATE)
             .to(ENABLE_SELINUX_CORE_VALIDATION_STATE)
-            .event(ENABLE_SELINUX_CORE_VALIDATION_EVENT)
+            .event(CORE_SET_SELINUX_TO_ENFORCING_EVENT)
             .defaultFailureEvent()
 
             .from(ENABLE_SELINUX_CORE_VALIDATION_STATE)
@@ -71,7 +71,7 @@ public class CoreEnableSeLinuxFlowConfig extends StackStatusFinalizerAbstractFlo
 
     @Override
     public CoreEnableSeLinuxStateSelectors[] getInitEvents() {
-        return new CoreEnableSeLinuxStateSelectors[] {ENABLE_SELINUX_CORE_VALIDATION_EVENT};
+        return new CoreEnableSeLinuxStateSelectors[] {CORE_SET_SELINUX_TO_ENFORCING_EVENT};
     }
 
     @Override

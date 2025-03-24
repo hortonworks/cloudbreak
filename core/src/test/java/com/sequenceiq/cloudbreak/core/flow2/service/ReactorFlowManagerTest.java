@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.service;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.ADD_VOLUMES_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_VALIDATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.enableselinux.event.CoreEnableSeLinuxStateSelectors.CORE_SET_SELINUX_TO_ENFORCING_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateEvent.ROTATE_RDS_CERTIFICATE_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -53,6 +54,7 @@ import com.sequenceiq.cloudbreak.common.imdupdate.InstanceMetadataUpdateType;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesRequest;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.enableselinux.event.CoreEnableSeLinuxEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateStateSelectors;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseBackupTriggerEvent;
@@ -412,6 +414,15 @@ class ReactorFlowManagerTest {
         ArgumentCaptor<CoreRootVolumeUpdateTriggerEvent> eventCaptor = ArgumentCaptor.forClass(CoreRootVolumeUpdateTriggerEvent.class);
         verify(reactorNotifier).notify(eq(1L), eq(FlowChainTriggers.CORE_ROOT_VOLUME_UPDATE_TRIGGER_EVENT), eventCaptor.capture());
         assertEquals(1L, eventCaptor.getValue().getResourceId());
+    }
+
+    @Test
+    void testTriggerEnableSelinux() {
+        underTest.triggerEnableSelinux(1L);
+        ArgumentCaptor<CoreEnableSeLinuxEvent> eventCaptor = ArgumentCaptor.forClass(CoreEnableSeLinuxEvent.class);
+        verify(reactorNotifier).notify(eq(1L), eq(CORE_SET_SELINUX_TO_ENFORCING_EVENT.event()), eventCaptor.capture());
+        assertEquals(1L, eventCaptor.getValue().getResourceId());
+        assertEquals(CORE_SET_SELINUX_TO_ENFORCING_EVENT.event(), eventCaptor.getValue().getSelector());
     }
 
     private static class TestAcceptable implements Acceptable {

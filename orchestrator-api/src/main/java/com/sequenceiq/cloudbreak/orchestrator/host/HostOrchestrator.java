@@ -199,4 +199,7 @@ public interface HostOrchestrator extends HostRecipeExecutor {
 
     Map<String, Map<String, String>> formatAndMountDisksAfterModifyingVolumesOnNodes(List<GatewayConfig> allGateway,
             Set<Node> nodesWithDiskData, Set<Node> allNodes, ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException;
+
+    void enableSeLinuxOnNodes(List<GatewayConfig> allGateway, Set<Node> allNodesInTargetGroup,
+            ExitCriteriaModel exitModel) throws CloudbreakOrchestratorException;
 }
