@@ -8,7 +8,16 @@ beautify:
 	 ./gradlew jsformatter
 
 generate-flow-graphs:
-	 ./gradlew -PmainClass=com.sequenceiq.flow.core.config.generator.OfflineStateGenerator -q :core:execute
+	 ./gradlew -PmainClassValue=com.sequenceiq.cloudbreak.core.flow2.generator.FlowOfflineStateGraphGenerator -q :core:execute
+	 ./gradlew -PmainClassValue=com.sequenceiq.datalake.flow.graph.FlowOfflineStateGraphGenerator -q :datalake:execute
+	 ./gradlew -PmainClassValue=com.sequenceiq.environment.environment.flow.generator.FlowOfflineStateGraphGenerator -q :environment:execute
+	 ./gradlew -PmainClassValue=com.sequenceiq.freeipa.flow.graph.FlowOfflineStateGraphGenerator -q :freeipa:execute
+	 ./gradlew -PmainClassValue=com.sequenceiq.externalizedcompute.flow.graph.FlowOfflineStateGraphGenerator -q :externalized-compute:execute
+	 ./gradlew -PmainClassValue=com.sequenceiq.redbeams.flow.graph.FlowOfflineStateGraphGenerator -q :redbeams:execute
+	 ./gradlew -PmainClassValue=com.sequenceiq.cloudbreak.rotation.flow.graph.FlowOfflineStateGraphGenerator -q :secret-rotation:execute
+
+generate-flow-graph-pictures:
+	 ./scripts/generate-flow-graph-pictures.sh
 
 build-rc:
 	 ./scripts/build-rc.sh

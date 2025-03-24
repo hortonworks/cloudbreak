@@ -222,10 +222,3 @@ publishing {
         }
     }
 }
-
-task execute(type: JavaExec) {
-  if (project.hasProperty('mainClass')) {
-    main = mainClass
-    classpath = sourceSets.main.runtimeClasspath
-  }
-}

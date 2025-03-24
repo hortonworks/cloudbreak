@@ -380,6 +380,13 @@ subprojects {
   compileJava {
     dependsOn buildInfo
   }
+
+  task execute(type: JavaExec) {
+    if (project.hasProperty('mainClassValue')) {
+      mainClass = mainClassValue
+      classpath = sourceSets.main.runtimeClasspath
+    }
+  }
 }
 
 class BuildInfoTask extends DefaultTask {

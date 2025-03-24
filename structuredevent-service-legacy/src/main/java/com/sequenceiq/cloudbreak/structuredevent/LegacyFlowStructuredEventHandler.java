@@ -4,6 +4,7 @@ import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 import org.springframework.messaging.Message;
@@ -26,7 +27,8 @@ public class LegacyFlowStructuredEventHandler<S, E> extends StateMachineListener
     private static final Logger LOGGER = LoggerFactory.getLogger(LegacyFlowStructuredEventHandler.class);
 
     @Inject
-    private LegacyDefaultStructuredEventClient legacyStructuredEventClient;
+    @Qualifier("legacyDefaultStructuredEventClient")
+    private LegacyBaseStructuredEventClient legacyStructuredEventClient;
 
     @Inject
     private LegacyStructuredFlowEventFactory legacyStructuredFlowEventFactory;

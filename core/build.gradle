@@ -75,6 +75,10 @@ bootJar {
     requiresUnpack '**/bc*.jar'
 }
 
+springBoot {
+  mainClass = 'com.sequenceiq.cloudbreak.CloudbreakApplication'
+}
+
 publishing {
     publications {
         bootJava(MavenPublication) {
@@ -296,13 +300,6 @@ dependencies {
   testImplementation group: 'org.hamcrest',               name: 'hamcrest',            version: hamcrestVersion
   testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind',    version: jacksonVersion
   testImplementation group: "com.openpojo",               name: "openpojo",            version: openPojoVersion
-}
-
-task execute(type: JavaExec) {
-    if (project.hasProperty('mainClass')) {
-        main = mainClass
-        classpath = sourceSets.main.runtimeClasspath
-    }
 }
 
 sourceSets {
