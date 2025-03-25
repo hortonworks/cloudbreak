@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CompactViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.FeatureState;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterTemplateViewModelDescription;
+import com.sequenceiq.common.model.Architecture;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -48,6 +49,8 @@ public class ClusterTemplateViewV4Response extends CompactViewV4Response {
     private Long lastUpdated;
 
     private FeatureState featureState;
+
+    private Architecture architecture;
 
     public FeatureState getFeatureState() {
         return featureState;
@@ -143,5 +146,13 @@ public class ClusterTemplateViewV4Response extends CompactViewV4Response {
 
     public void setLastupdated(Long lastupdated) {
         this.lastUpdated = lastupdated;
+    }
+
+    public Architecture getArchitecture() {
+        return architecture;
+    }
+
+    public void setArchitecture(Architecture architecture) {
+        this.architecture = architecture;
     }
 }

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v4.clustertemplate;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ import com.sequenceiq.cloudbreak.domain.view.ClusterTemplateClusterApiView;
 import com.sequenceiq.cloudbreak.domain.view.ClusterTemplateInstanceGroupView;
 import com.sequenceiq.cloudbreak.domain.view.ClusterTemplateStackApiView;
 import com.sequenceiq.cloudbreak.domain.view.ClusterTemplateView;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
 
@@ -46,11 +48,17 @@ public class ClusterTemplateViewToClusterTemplateViewV4ResponseConverter {
             if (stackTemplate.getEnvironmentCrn() != null) {
                 clusterTemplateViewV4Response.setEnvironmentCrn(stackTemplate.getEnvironmentCrn());
             }
+            clusterTemplateViewV4Response.setArchitecture(Optional.ofNullable(stackTemplate.getArchitecture())
+                    .map(Architecture::fromStringWithValidation)
+                    .orElse(Architecture.X86_64));
         } else if (source.getStatus().isDefault()) {
             try {
                 DistroXV1Request distroXV1Request = new Json(getTemplateString(source.getTemplateContent()))
                         .get(DefaultClusterTemplateV4Request.class)
                         .getDistroXTemplate();
+                clusterTemplateViewV4Response.setArchitecture(Optional.ofNullable(distroXV1Request.getArchitecture())
+                        .map(Architecture::fromStringWithFallback)
+                        .orElse(Architecture.X86_64));
                 clusterTemplateViewV4Response.setNodeCount(getFullNodeCount(distroXV1Request));
                 clusterTemplateViewV4Response.setStackType("CDH");
                 clusterTemplateViewV4Response.setStackVersion(source.getClouderaRuntimeVersion());

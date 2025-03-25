@@ -39,6 +39,8 @@ public class ClusterTemplateStackApiView extends CompactView {
 
     private String resourceCrn;
 
+    private String architecture;
+
     public String getResourceCrn() {
         return resourceCrn;
     }
@@ -85,5 +87,13 @@ public class ClusterTemplateStackApiView extends CompactView {
 
     public void setType(StackType type) {
         this.type = type;
+    }
+
+    public String getArchitecture() {
+        return architecture;
+    }
+
+    public void setArchitecture(String architecture) {
+        this.architecture = architecture;
     }
 }
