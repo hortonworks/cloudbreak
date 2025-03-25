@@ -12,6 +12,8 @@ tests:
         excludedMethods:
           - testSDXMediumDutyRepair
           - testSDXEnterpriseRepair
+          - testSDXMultiRepairIDBRokerAndMasterWithTerminatedEC2InstancesAws
+          - testSDXMultiRepairIDBRokerAndMasterWithTerminatedEC2InstancesAwsNative
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.gov.SecretEncryptionTests
         excludedMethods:
           - testCreateStopStartUpscaleDownscaleFreeIpaWithSecretEncryption

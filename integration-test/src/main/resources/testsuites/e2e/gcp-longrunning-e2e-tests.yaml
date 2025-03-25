@@ -12,6 +12,9 @@ tests:
           - testSDXDatabaseUpgradeWithEncryption
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxUpgradeTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxRepairTests
+        excludedMethods:
+          - testSDXMultiRepairIDBRokerAndMasterWithTerminatedEC2InstancesAws
+          - testSDXMultiRepairIDBRokerAndMasterWithTerminatedEC2InstancesAwsNative
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxResizeTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxResizeRecoveryTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaRebuildv2Tests
@@ -24,4 +27,3 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxMultiAzRepairTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXMultiAzUpgradeTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXMultiAzRepairTest
-

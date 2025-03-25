@@ -12,6 +12,8 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXUpgradeTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.ephemeral.DistroXEphemeralTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxRepairTests
+        excludedMethods:
+          - testSDXMultiRepairIDBRokerAndMasterWithTerminatedEC2Instances
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaUpgradeTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaRebuildv2Tests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxResizeTests
@@ -23,3 +25,5 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXRestartInstancesTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxRestartInstancesTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaRootVolumeModificationTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaUpgradeNativeTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxNativeMigrationTests

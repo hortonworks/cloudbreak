@@ -438,6 +438,15 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         return awaitForInstance(instanceStatusMap);
     }
 
+    public SdxInternalTestDto awaitForDeletedInstancesOnProvider() {
+        Map<List<String>, InstanceStatus> instanceStatusMap = getInstanceStatusMapIfAvailableInResponse(() ->
+                getResponse().getStackV4Response().getInstanceGroups().stream().collect(Collectors.toMap(
+                        instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream()
+                                .map(InstanceMetaDataV4Response::getInstanceId).collect(Collectors.toList()),
+                        instanceMetaDataV4Response -> InstanceStatus.DELETED_ON_PROVIDER_SIDE)));
+        return awaitForInstance(instanceStatusMap);
+    }
+
     public SdxInternalTestDto awaitForStoppedInstances() {
         Map<List<String>, InstanceStatus> instanceStatusMap = getInstanceStatusMapIfAvailableInResponse(() ->
                 InstanceUtil.getInstanceStatusMapForStatus(getResponse().getStackV4Response(), InstanceStatus.STOPPED));

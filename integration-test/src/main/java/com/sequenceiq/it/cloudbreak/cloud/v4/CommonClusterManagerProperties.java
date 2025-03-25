@@ -98,6 +98,10 @@ public class CommonClusterManagerProperties {
         return String.format(dataMartDistroXBlueprintName, runtimeVersion);
     }
 
+    public String getDataMartDistroXBlueprintName(String runtimeVersion) {
+        return String.format(dataMartDistroXBlueprintName, runtimeVersion);
+    }
+
     public void setDataMartDistroXBlueprintName(String dataMartDistroXBlueprintName) {
         this.dataMartDistroXBlueprintName = dataMartDistroXBlueprintName;
     }

@@ -38,8 +38,40 @@ public class FreeIpaRebuildTests extends AbstractE2ETest {
 
         testContext
                 .given(freeIpa, FreeIpaTestDto.class)
-                    .withFreeIpaHa(instanceGroupCount, instanceCountByGroup)
-                    .withTelemetry("telemetry")
+                .withFreeIpaHa(instanceGroupCount, instanceCountByGroup)
+                .withTelemetry("telemetry")
+                .when(freeIpaTestClient.create(), key(freeIpa))
+                .await(FREEIPA_AVAILABLE)
+                .when(freeIpaTestClient.delete())
+                .await(FREEIPA_DELETE_COMPLETED)
+                .when(freeIpaTestClient.rebuild())
+                .await(Status.UPDATE_IN_PROGRESS, waitForFlow().withWaitForFlow(Boolean.FALSE))
+                .await(FREEIPA_AVAILABLE)
+                .awaitForHealthyInstances()
+                .given(freeIpa, FreeIpaTestDto.class)
+                .then((tc, testDto, client) -> freeIpaTestClient.delete().action(tc, testDto, client))
+                .await(FREEIPA_DELETE_COMPLETED)
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT)
+    @Description(
+            given = "there is a running cloudbreak",
+            when = "a valid stack create request is sent with 2 FreeIPA instances with AWS_NATIVE variant " +
+                    "AND the stack is deleted " +
+                    "AND the stack is rebuilt",
+            then = "the stack should be available AND deletable")
+    public void testRebuildFreeIpaWithTwoInstancesAwsNative(TestContext testContext) {
+        String freeIpa = resourcePropertyProvider().getName();
+
+        int instanceGroupCount = 1;
+        int instanceCountByGroup = 2;
+
+        testContext
+                .given(freeIpa, FreeIpaTestDto.class)
+                .withFreeIpaHa(instanceGroupCount, instanceCountByGroup)
+                .withVariant("AWS_NATIVE")
+                .withTelemetry("telemetry")
                 .when(freeIpaTestClient.create(), key(freeIpa))
                 .await(FREEIPA_AVAILABLE)
                 .when(freeIpaTestClient.delete())

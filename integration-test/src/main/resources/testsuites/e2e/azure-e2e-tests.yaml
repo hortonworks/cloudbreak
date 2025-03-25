@@ -7,6 +7,9 @@ tests:
         includedMethods:
           - testCreateDistroXWithEncryptedVolumesInSingleRG
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXRepairTests
+        excludedMethods:
+          - testSecretRotationAndMasterRepairWithTerminatedInstancesAwsNative
+          - testSecretRotationAndMasterRepairWithTerminatedInstancesAws
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXScaleTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXMarketplaceImageTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaScalingTests

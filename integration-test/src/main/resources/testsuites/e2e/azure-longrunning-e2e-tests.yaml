@@ -7,6 +7,9 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.environment.EnvironmentStopStartTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXUpgradeTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxRepairTests
+        excludedMethods:
+          - testSDXMultiRepairIDBRokerAndMasterWithTerminatedEC2InstancesAws
+          - testSDXMultiRepairIDBRokerAndMasterWithTerminatedEC2InstancesAwsNative
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaUpgradeTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxResizeTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxResizeRecoveryTests

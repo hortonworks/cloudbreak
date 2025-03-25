@@ -28,17 +28,26 @@ import org.testng.annotations.Test;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
+import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAvailabilityType;
+import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
 import com.sequenceiq.it.cloudbreak.assertion.distrox.AwsAvailabilityZoneAssertion;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
+import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceGroupTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.DistroxUtil;
 import com.sequenceiq.it.cloudbreak.util.SecretRotationCheckUtil;
 import com.sequenceiq.it.cloudbreak.util.VolumeUtils;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
+import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public class DistroXRepairTests extends AbstractE2ETest {
     private static final Logger LOGGER = LoggerFactory.getLogger(DistroXRepairTests.class);
@@ -47,10 +56,16 @@ public class DistroXRepairTests extends AbstractE2ETest {
     private DistroXTestClient distroXTestClient;
 
     @Inject
+    private SdxTestClient sdxTestClient;
+
+    @Inject
     private DistroxUtil distroxUtil;
 
     @Inject
     private SecretRotationCheckUtil secretRotationCheckUtil;
+
+    @Inject
+    private CommonClusterManagerProperties commonClusterManagerProperties;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -58,7 +73,6 @@ public class DistroXRepairTests extends AbstractE2ETest {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         initializeDefaultBlueprints(testContext);
-        createDataMartDatahubWithAutoTlsAndExternalDb(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -70,6 +84,107 @@ public class DistroXRepairTests extends AbstractE2ETest {
             then = "all the actions (secret rotation then recovery) should be successful, the cluster should be available"
     )
     public void testSecretRotationAndMasterRepairWithTerminatedInstances(TestContext testContext) {
+        createDataMartDatahubWithAutoTlsAndExternalDb(testContext);
+        String cloudProvider = commonCloudProperties().getCloudProvider();
+
+        secretRotation(testContext, cloudProvider);
+        masterRepairValidate(testContext);
+    }
+
+    @Test(dataProvider = TEST_CONTEXT)
+    @UseSpotInstances
+    @Description(
+            given = "there is an environment and DistroX with AWS_NATIVE variant and Auto TLS in available state",
+            when = "secrets are getting rotated (AWS - all secrets, non-AWS - limited set of secrets) before " +
+                    "recovery called on the MASTER host group, where the instance had been terminated",
+            then = "all the actions (secret rotation then recovery) should be successful, the cluster should be available"
+    )
+    public void testSecretRotationAndMasterRepairWithTerminatedInstancesAwsNative(TestContext testContext) {
+        initiateEnvironmentCreation(testContext);
+        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
+        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
+
+        testContext
+                .given(SdxInternalTestDto.class)
+                .withDatabase(sdxDatabaseRequest)
+                .withVariant("AWS_NATIVE")
+                .withRuntimeVersion(commonClusterManagerProperties.getUpgrade().getTargetRuntimeVersion())
+                .withAutoTls()
+                .withCloudStorage(getCloudStorageRequest(testContext))
+                .withEnableMultiAz()
+                .withTelemetry("telemetry")
+                .when(sdxTestClient.createInternal())
+                .validate();
+        waitForEnvironmentCreation(testContext);
+        setFreeIpaResponse(testContext);
+        waitForUserSync(testContext);
+        setFreeIpaResponse(testContext);
+        waitForDatalakeCreation(testContext);
+        DistroXDatabaseRequest distroxDatabaseRequest = new DistroXDatabaseRequest();
+        distroxDatabaseRequest.setAvailabilityType(DistroXDatabaseAvailabilityType.NON_HA);
+
+        testContext
+                .given(DistroXTestDto.class)
+                .withAutoTls()
+                .withVariant("AWS_NATIVE")
+                .withExternalDatabase(distroxDatabaseRequest)
+                .withCluster(testContext.given(DistroXClusterTestDto.class)
+                        .withBlueprintName(commonClusterManagerProperties
+                                .getDataMartDistroXBlueprintName(commonClusterManagerProperties.getUpgrade().getTargetRuntimeVersion())))
+                .withInstanceGroupsEntity(DistroXInstanceGroupTestDto.dataMartHostGroups(testContext, testContext.getCloudPlatform()))
+                .when(distroXTestClient.create())
+                .validate();
+        waitForDatahubCreation(testContext);
+        String cloudProvider = commonCloudProperties().getCloudProvider();
+
+        secretRotation(testContext, cloudProvider);
+        masterRepairValidate(testContext);
+    }
+
+    @Test(dataProvider = TEST_CONTEXT)
+    @UseSpotInstances
+    @Description(
+            given = "there is an environment and DistroX with AWS variant and Auto TLS in available state",
+            when = "secrets are getting rotated (AWS - all secrets, non-AWS - limited set of secrets) before " +
+                    "recovery called on the MASTER host group, where the instance had been terminated",
+            then = "all the actions (secret rotation then recovery) should be successful, the cluster should be available"
+    )
+    public void testSecretRotationAndMasterRepairWithTerminatedInstancesAws(TestContext testContext) {
+        initiateEnvironmentCreation(testContext);
+        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
+        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
+
+        testContext
+                .given(SdxInternalTestDto.class)
+                .withDatabase(sdxDatabaseRequest)
+                .withVariant("AWS")
+                .withRuntimeVersion(commonClusterManagerProperties.getUpgrade()
+                        .getDistroXUpgradeCurrentVersion(testContext.getCloudProvider().getGovCloud()))
+                .withAutoTls()
+                .withCloudStorage(getCloudStorageRequest(testContext))
+                .withEnableMultiAz()
+                .withTelemetry("telemetry")
+                .when(sdxTestClient.createInternal())
+                .validate();
+        waitForEnvironmentCreation(testContext);
+        setFreeIpaResponse(testContext);
+        waitForUserSync(testContext);
+        setFreeIpaResponse(testContext);
+        waitForDatalakeCreation(testContext);
+        DistroXDatabaseRequest distroxDatabaseRequest = new DistroXDatabaseRequest();
+        distroxDatabaseRequest.setAvailabilityType(DistroXDatabaseAvailabilityType.NON_HA);
+
+        testContext
+                .given(DistroXTestDto.class)
+                .withAutoTls()
+                .withVariant("AWS")
+                .withExternalDatabase(distroxDatabaseRequest)
+                .withCluster(testContext.given(DistroXClusterTestDto.class)
+                        .withBlueprintName(testContext.getCloudProvider().getDataMartDistroXBlueprintName()))
+                .withInstanceGroupsEntity(DistroXInstanceGroupTestDto.dataMartHostGroups(testContext, testContext.getCloudPlatform()))
+                .when(distroXTestClient.create())
+                .validate();
+        waitForDatahubCreation(testContext);
         String cloudProvider = commonCloudProperties().getCloudProvider();
 
         secretRotation(testContext, cloudProvider);

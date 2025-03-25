@@ -5,9 +5,14 @@ tests:
     classes:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaRebuildTests
+        excludedMethods:
+          - testRebuildFreeIpaWithTwoInstancesAwsNative
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaScalingTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXEncryptedVolumeTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXRepairTests
+        excludedMethods:
+          - testSecretRotationAndMasterRepairWithTerminatedInstancesAwsNative
+          - testSecretRotationAndMasterRepairWithTerminatedInstancesAws
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXScaleTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxImagesTests
         excludedMethods:

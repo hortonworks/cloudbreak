@@ -32,6 +32,7 @@ import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
@@ -139,7 +140,137 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 .validate();
     }
 
+    @Test(dataProvider = TEST_CONTEXT)
+    @UseSpotInstances
+    @Description(
+            given = "there is a running Cloudbreak, and an SDX cluster with AWS_NATIVE variant in available state",
+            when = "recovery called on the IDBROKER and MASTER host group, where the EC2 instance had been terminated",
+            then = "SDX recovery should be successful, the cluster should be up and running"
+    )
+    public void testSDXMultiRepairIDBRokerAndMasterWithTerminatedEC2InstancesAwsNative(TestContext testContext) {
+        String sdx = resourcePropertyProvider().getName();
+
+        List<String> actualVolumeIds = new ArrayList<>();
+        List<String> expectedVolumeIds = new ArrayList<>();
+        CloudPlatform cloudPlatform = testContext.getCloudPlatform();
+
+        SdxInternalTestDto sdxTestDto = testContext
+                .given(sdx, SdxInternalTestDto.class)
+                .withCloudStorage()
+                .withVariant("AWS_NATIVE")
+                .withName(sdx)
+                .when(sdxTestClient.createInternal(), key(sdx))
+                .await(SdxClusterStatusResponse.RUNNING, key(sdx))
+                .awaitForHealthyInstances();
+        if (CloudPlatform.AZURE.equals(cloudPlatform)) {
+            testContext
+                    .given(StackTestDto.class)
+                    .withName(sdx)
+                    .when(stackTestClient.refreshV4())
+                    .when(stackTestClient.skuMigration())
+                    .awaitForFlow();
+        }
+        sdxTestDto
+                .then((tc, testDto, client) -> assertCronCreatedOnMasterNodesForUserHomeCreation(testDto))
+                .then((tc, testDto, client) -> {
+                    List<String> instancesToDelete = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
+                    instancesToDelete.addAll(sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName()));
+                    expectedVolumeIds.addAll(getCloudFunctionality(tc).listInstancesVolumeIds(testDto.getName(), instancesToDelete));
+                    getCloudFunctionality(tc).deleteInstances(testDto.getName(), instancesToDelete);
+                    return testDto;
+                })
+                .awaitForDeletedInstancesOnProvider()
+                .await(SdxClusterStatusResponse.DELETED_ON_PROVIDER_SIDE,
+                        key(sdx).withWaitForFlow(Boolean.FALSE)
+                                .withIgnoredStatues(Set.of(SdxClusterStatusResponse.NODE_FAILURE, SdxClusterStatusResponse.CLUSTER_UNREACHABLE)))
+                .when(sdxTestClient.repairInternal(MASTER.getName(), IDBROKER.getName()), key(sdx))
+                .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS,
+                        key(sdx).withWaitForFlow(Boolean.FALSE).withIgnoredStatues(Set.of(SdxClusterStatusResponse.DELETED_ON_PROVIDER_SIDE)))
+                .await(SdxClusterStatusResponse.RUNNING, key(sdx))
+                .awaitForHealthyInstances()
+                .then((tc, testDto, client) -> {
+                    List<String> instanceIds = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
+                    instanceIds.addAll(sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName()));
+                    actualVolumeIds.addAll(getCloudFunctionality(tc).listInstancesVolumeIds(testDto.getName(), instanceIds));
+                    return testDto;
+                })
+                .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT)
+    @UseSpotInstances
+    @Description(
+            given = "there is a running Cloudbreak, and an SDX cluster with AWS variant in available state",
+            when = "recovery called on the IDBROKER and MASTER host group, where the EC2 instance had been terminated",
+            then = "SDX recovery should be successful, the cluster should be up and running"
+    )
+    public void testSDXMultiRepairIDBRokerAndMasterWithTerminatedEC2InstancesAws(TestContext testContext) {
+        String sdx = resourcePropertyProvider().getName();
+
+        List<String> actualVolumeIds = new ArrayList<>();
+        List<String> expectedVolumeIds = new ArrayList<>();
+        CloudPlatform cloudPlatform = testContext.getCloudPlatform();
+
+        SdxInternalTestDto sdxTestDto = testContext
+                .given(sdx, SdxInternalTestDto.class)
+                .withCloudStorage()
+                .withName(sdx)
+                .withVariant("AWS")
+                .when(sdxTestClient.createInternal(), key(sdx))
+                .await(SdxClusterStatusResponse.RUNNING, key(sdx))
+                .awaitForHealthyInstances();
+        if (CloudPlatform.AZURE.equals(cloudPlatform)) {
+            testContext
+                    .given(StackTestDto.class)
+                    .withName(sdx)
+                    .when(stackTestClient.refreshV4())
+                    .when(stackTestClient.skuMigration())
+                    .awaitForFlow();
+        }
+        sdxTestDto
+                .then((tc, testDto, client) -> assertCronCreatedOnMasterNodesForUserHomeCreation(testDto))
+                .then((tc, testDto, client) -> {
+                    List<String> instancesToDelete = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
+                    instancesToDelete.addAll(sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName()));
+                    expectedVolumeIds.addAll(getCloudFunctionality(tc).listInstancesVolumeIds(testDto.getName(), instancesToDelete));
+                    getCloudFunctionality(tc).deleteInstances(testDto.getName(), instancesToDelete);
+                    return testDto;
+                })
+                .awaitForDeletedInstancesOnProvider()
+                .await(SdxClusterStatusResponse.DELETED_ON_PROVIDER_SIDE,
+                        key(sdx).withWaitForFlow(Boolean.FALSE)
+                                .withIgnoredStatues(Set.of(SdxClusterStatusResponse.NODE_FAILURE, SdxClusterStatusResponse.CLUSTER_UNREACHABLE)))
+                .when(sdxTestClient.repairInternal(MASTER.getName(), IDBROKER.getName()), key(sdx))
+                .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS,
+                        key(sdx).withWaitForFlow(Boolean.FALSE).withIgnoredStatues(Set.of(SdxClusterStatusResponse.DELETED_ON_PROVIDER_SIDE)))
+                .await(SdxClusterStatusResponse.RUNNING, key(sdx))
+                .awaitForHealthyInstances()
+                .then((tc, testDto, client) -> {
+                    List<String> instanceIds = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
+                    instanceIds.addAll(sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName()));
+                    actualVolumeIds.addAll(getCloudFunctionality(tc).listInstancesVolumeIds(testDto.getName(), instanceIds));
+                    return testDto;
+                })
+                .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
+                .validate();
+    }
+
     private SdxTestDto assertCronCreatedOnMasterNodesForUserHomeCreation(SdxTestDto testDto) {
+        Map<String, Pair<Integer, String>> crontabListResultByIpsMap =
+                sshJClientActions.executeSshCommandOnHost(testDto.getResponse().getStackV4Response().getInstanceGroups(),
+                        List.of(MASTER.getName()), CRONTAB_LIST, false);
+        Set<String> nodesWithoutCrontabForUserHomeCreation = crontabListResultByIpsMap.entrySet().stream()
+                .filter(entry -> !entry.getValue().getValue().contains("createuserhome.sh"))
+                .map(Entry::getKey)
+                .collect(Collectors.toSet());
+        if (!nodesWithoutCrontabForUserHomeCreation.isEmpty()) {
+            throw new TestFailException("Missing crontab for user home creation for nodes: " + nodesWithoutCrontabForUserHomeCreation);
+        }
+        return testDto;
+    }
+
+    private SdxInternalTestDto assertCronCreatedOnMasterNodesForUserHomeCreation(SdxInternalTestDto testDto) {
         Map<String, Pair<Integer, String>> crontabListResultByIpsMap =
                 sshJClientActions.executeSshCommandOnHost(testDto.getResponse().getStackV4Response().getInstanceGroups(),
                         List.of(MASTER.getName()), CRONTAB_LIST, false);
