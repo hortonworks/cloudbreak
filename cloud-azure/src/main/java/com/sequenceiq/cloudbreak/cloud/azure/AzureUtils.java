@@ -538,8 +538,10 @@ public class AzureUtils {
         for (CloudLoadBalancerMetadata loadBalancerMetadata : loadBalancers) {
             LOGGER.info("Describing load balancer: {}", loadBalancerMetadata.getName());
             LoadBalancer loadBalancer = azureClient.getLoadBalancer(resourceGroupName, loadBalancerMetadata.getName());
-            LoadBalancerSku loadBalancerSku = LoadBalancerSkuType.STANDARD.equals(loadBalancer.sku()) ? LoadBalancerSku.STANDARD : LoadBalancerSku.BASIC;
-            cloudLoadBalancers.add(new CloudLoadBalancer(loadBalancerMetadata.getType(), loadBalancerSku, false));
+            if (loadBalancer != null) {
+                LoadBalancerSku loadBalancerSku = LoadBalancerSkuType.STANDARD.equals(loadBalancer.sku()) ? LoadBalancerSku.STANDARD : LoadBalancerSku.BASIC;
+                cloudLoadBalancers.add(new CloudLoadBalancer(loadBalancerMetadata.getType(), loadBalancerSku, false));
+            }
         }
         return cloudLoadBalancers;
     }
