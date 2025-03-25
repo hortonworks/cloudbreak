@@ -79,7 +79,7 @@ class SaltPillarRotationExecutorTest {
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
                 () -> underTest.executeRotate(new SaltPillarRotationContext(RESOURCE_CRN, getSaltPillarGenerator()),
                         RotationMetadataTestUtil.metadataForRotation(RESOURCE_CRN, null)));
-        assertEquals("Execution of rotation failed at SALT_PILLAR step for resourceCrn regarding secret null, reason: Stack 'resourceCrn' not found.",
+        assertEquals("Execution of rotation failed at SALT_PILLAR step regarding secret null, reason: Stack 'resourceCrn' not found.",
                 secretRotationException.getMessage());
     }
 
@@ -90,7 +90,7 @@ class SaltPillarRotationExecutorTest {
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
                 () -> underTest.executeRotate(new SaltPillarRotationContext(RESOURCE_CRN, getSaltPillarGenerator()),
                         RotationMetadataTestUtil.metadataForRotation(RESOURCE_CRN, null)));
-        assertEquals("Execution of rotation failed at SALT_PILLAR step for resourceCrn regarding secret null, reason: error",
+        assertEquals("Execution of rotation failed at SALT_PILLAR step regarding secret null, reason: error",
                 secretRotationException.getMessage());
         verify(saltService, times(1)).updateSaltPillar(any(), any());
     }

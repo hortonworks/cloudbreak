@@ -53,7 +53,7 @@ class RedbeamsPollerRotationExecutorTest {
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
                 () -> underTest.executeRotate(new PollerRotationContext(RESOURCE_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD),
                         RotationMetadataTestUtil.metadataForRotation(RESOURCE_CRN, null)));
-        assertEquals("Execution of rotation failed at REDBEAMS_ROTATE_POLLING step for resourceCrn regarding secret null, " +
+        assertEquals("Execution of rotation failed at REDBEAMS_ROTATE_POLLING step regarding secret null, " +
                         "reason: Stack 'resourceCrn' not found.", secretRotationException.getMessage());
     }
 
@@ -65,7 +65,7 @@ class RedbeamsPollerRotationExecutorTest {
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
                 () -> underTest.executeRotate(new PollerRotationContext(RESOURCE_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD),
                         RotationMetadataTestUtil.metadataForRotation(RESOURCE_CRN, null)));
-        assertEquals("Execution of rotation failed at REDBEAMS_ROTATE_POLLING step for resourceCrn regarding secret null, " +
+        assertEquals("Execution of rotation failed at REDBEAMS_ROTATE_POLLING step regarding secret null, " +
                         "reason: No database server found for cluster: resourceCrn", secretRotationException.getMessage());
     }
 
@@ -81,7 +81,7 @@ class RedbeamsPollerRotationExecutorTest {
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
                 () -> underTest.executeRotate(new PollerRotationContext(RESOURCE_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD),
                         RotationMetadataTestUtil.metadataForRotation(RESOURCE_CRN, null)));
-        assertEquals("Execution of rotation failed at REDBEAMS_ROTATE_POLLING step for resourceCrn regarding secret null, reason: error",
+        assertEquals("Execution of rotation failed at REDBEAMS_ROTATE_POLLING step regarding secret null, reason: error",
                 secretRotationException.getMessage());
     }
 
@@ -104,7 +104,7 @@ class RedbeamsPollerRotationExecutorTest {
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
                 () -> underTest.executeRollback(new PollerRotationContext(RESOURCE_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD),
                         RotationMetadataTestUtil.metadataForRollback(RESOURCE_CRN, null)));
-        assertEquals("Rollback of rotation failed at REDBEAMS_ROTATE_POLLING step for resourceCrn regarding secret null, " +
+        assertEquals("Rollback of rotation failed at REDBEAMS_ROTATE_POLLING step regarding secret null, " +
                         "reason: Stack 'resourceCrn' not found.", secretRotationException.getMessage());
     }
 
@@ -116,7 +116,7 @@ class RedbeamsPollerRotationExecutorTest {
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
                 () -> underTest.executeRollback(new PollerRotationContext(RESOURCE_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD),
                         RotationMetadataTestUtil.metadataForRollback(RESOURCE_CRN, null)));
-        assertEquals("Rollback of rotation failed at REDBEAMS_ROTATE_POLLING step for resourceCrn regarding secret null, " +
+        assertEquals("Rollback of rotation failed at REDBEAMS_ROTATE_POLLING step regarding secret null, " +
                         "reason: No database server found for cluster: resourceCrn", secretRotationException.getMessage());
     }
 
@@ -132,7 +132,7 @@ class RedbeamsPollerRotationExecutorTest {
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
                 () -> underTest.executeRollback(new PollerRotationContext(RESOURCE_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD),
                         RotationMetadataTestUtil.metadataForRollback(RESOURCE_CRN, null)));
-        assertEquals("Rollback of rotation failed at REDBEAMS_ROTATE_POLLING step for resourceCrn regarding secret null, reason: error",
+        assertEquals("Rollback of rotation failed at REDBEAMS_ROTATE_POLLING step regarding secret null, reason: error",
                 secretRotationException.getMessage());
     }
 
@@ -155,7 +155,7 @@ class RedbeamsPollerRotationExecutorTest {
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
                 () -> underTest.executeFinalize(new PollerRotationContext(RESOURCE_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD),
                         RotationMetadataTestUtil.metadataForFinalize(RESOURCE_CRN, null)));
-        assertEquals("Finalization of rotation failed at REDBEAMS_ROTATE_POLLING step for resourceCrn regarding secret null, " +
+        assertEquals("Finalization of rotation failed at REDBEAMS_ROTATE_POLLING step regarding secret null, " +
                         "reason: Stack 'resourceCrn' not found.", secretRotationException.getMessage());
     }
 
@@ -167,7 +167,7 @@ class RedbeamsPollerRotationExecutorTest {
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
                 () -> underTest.executeFinalize(new PollerRotationContext(RESOURCE_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD),
                         RotationMetadataTestUtil.metadataForFinalize(RESOURCE_CRN, null)));
-        assertEquals("Finalization of rotation failed at REDBEAMS_ROTATE_POLLING step for resourceCrn regarding secret null, " +
+        assertEquals("Finalization of rotation failed at REDBEAMS_ROTATE_POLLING step regarding secret null, " +
                         "reason: No database server found for cluster: resourceCrn", secretRotationException.getMessage());
     }
 
@@ -183,7 +183,7 @@ class RedbeamsPollerRotationExecutorTest {
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
                 () -> underTest.executeFinalize(new PollerRotationContext(RESOURCE_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD),
                         RotationMetadataTestUtil.metadataForFinalize(RESOURCE_CRN, null)));
-        assertEquals("Finalization of rotation failed at REDBEAMS_ROTATE_POLLING step for resourceCrn regarding secret null, reason: error",
+        assertEquals("Finalization of rotation failed at REDBEAMS_ROTATE_POLLING step regarding secret null, reason: error",
                 secretRotationException.getMessage());
     }
 

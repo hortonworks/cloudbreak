@@ -161,8 +161,8 @@ class RootPasswordRotationExecutorTest {
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
                 () -> underTest.executeRotate(new RotationContext(RESOURCE_CRN), RotationMetadataTestUtil.metadataForRotation("resource", null)));
 
-        assertEquals("Execution of rotation failed at PROVIDER_DATABASE_ROOT_PASSWORD step for resourceCrn regarding secret null, " +
-                        "reason: Root password is not in rotation state in Vault, rotation is not possible.", secretRotationException.getMessage());
+        assertEquals("Execution of rotation failed at PROVIDER_DATABASE_ROOT_PASSWORD step regarding secret null, " +
+                "reason: Root password is not in rotation state in Vault, rotation is not possible.", secretRotationException.getMessage());
         verify(dbStackService, times(1)).getByCrn(eq(RESOURCE_CRN));
         verify(databaseServerConfigService, times(1)).getByCrn(eq(RESOURCE_CRN));
         verify(uncachedSecretServiceForRotation, times(1)).getRotation(eq(ROOT_PASSWORD));

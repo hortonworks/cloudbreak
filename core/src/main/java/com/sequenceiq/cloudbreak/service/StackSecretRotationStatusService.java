@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.service;
 
+import static com.sequenceiq.redbeams.api.model.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.redbeams.api.model.common.Status.UPDATE_IN_PROGRESS;
+import static java.lang.String.format;
 
-import java.util.Collection;
 import java.util.List;
 
 import jakarta.inject.Inject;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
+import com.sequenceiq.cloudbreak.rotation.service.notification.SecretListField;
+import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
 import com.sequenceiq.cloudbreak.rotation.service.status.SecretRotationStatusService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
@@ -31,20 +34,31 @@ public class StackSecretRotationStatusService implements SecretRotationStatusSer
     @Inject
     private CloudbreakEventService cloudbreakEventService;
 
+    @Inject
+    private SecretRotationNotificationService secretRotationNotificationService;
+
     @Override
     public void rotationStarted(String resourceCrn, SecretType secretType) {
+        String secretTypeName = secretRotationNotificationService.getMessage(secretType, SecretListField.DISPLAY_NAME);
         stackUpdater.updateStackStatus(resourceCrn, DetailedStackStatus.SECRET_ROTATION_STARTED,
-                String.format("Rotation started, secret type: %s", secretType.value()));
+                format("Secret rotation started: %s", secretTypeName));
         StackView stack = stackDtoService.getStackViewByCrn(resourceCrn);
-        fireCloudbreakEvent(stack, ResourceEvent.SECRET_ROTATION_IN_PROGRESS);
+        if (stack.isDatahub()) {
+            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.SECRET_ROTATION_IN_PROGRESS,
+                    List.of(secretTypeName));
+        }
     }
 
     @Override
     public void rotationFinished(String resourceCrn, SecretType secretType) {
+        String secretTypeName = secretRotationNotificationService.getMessage(secretType, SecretListField.DISPLAY_NAME);
         stackUpdater.updateStackStatus(resourceCrn, DetailedStackStatus.SECRET_ROTATION_FINISHED,
-                String.format("Rotation finished, secret type: %s", secretType.value()));
+                format("Secret rotation finished: %s", secretTypeName));
         StackView stack = stackDtoService.getStackViewByCrn(resourceCrn);
-        fireCloudbreakEvent(stack, ResourceEvent.SECRET_ROTATION_FINISHED);
+        if (stack.isDatahub()) {
+            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.SECRET_ROTATION_FINISHED,
+                    List.of(secretTypeName));
+        }
     }
 
     @Override
@@ -52,72 +66,97 @@ public class StackSecretRotationStatusService implements SecretRotationStatusSer
         StackView stack = stackDtoService.getStackViewByCrn(resourceCrn);
         if (stack.getStackStatus().getDetailedStackStatus() != DetailedStackStatus.SECRET_ROTATION_ROLLBACK_FAILED
                 && stack.getStackStatus().getDetailedStackStatus() != DetailedStackStatus.SECRET_ROTATION_FINALIZE_FAILED) {
+            String secretTypeName = secretRotationNotificationService.getMessage(secretType, SecretListField.DISPLAY_NAME);
             stackUpdater.updateStackStatus(resourceCrn, DetailedStackStatus.SECRET_ROTATION_FAILED,
-                    String.format("Rotation failed, secret type: %s, reason: %s", secretType.value(), reason));
-            fireCloudbreakEvent(stack, ResourceEvent.SECRET_ROTATION_FAILED);
+                    format("Secret rotation failed: %s", secretTypeName));
+            if (stack.isDatahub()) {
+                cloudbreakEventService.fireCloudbreakEvent(stack.getId(), UPDATE_FAILED.name(), ResourceEvent.SECRET_ROTATION_FAILED,
+                        List.of(secretTypeName, reason));
+            }
         }
     }
 
     @Override
     public void rollbackStarted(String resourceCrn, SecretType secretType, String reason) {
+        String secretTypeName = secretRotationNotificationService.getMessage(secretType, SecretListField.DISPLAY_NAME);
         stackUpdater.updateStackStatus(resourceCrn, DetailedStackStatus.SECRET_ROTATION_ROLLBACK_STARTED,
-                String.format("Rotation rollback started, secret type: %s, reason: %s", secretType.value(), reason));
+                format("Secret rotation rollback started: %s", secretTypeName));
         StackView stack = stackDtoService.getStackViewByCrn(resourceCrn);
-        fireCloudbreakEvent(stack, ResourceEvent.SECRET_ROTATION_ROLLBACK_IN_PROGRESS);
+        if (stack.isDatahub()) {
+            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), UPDATE_FAILED.name(), ResourceEvent.SECRET_ROTATION_ROLLBACK_IN_PROGRESS,
+                    List.of(secretTypeName, reason));
+        }
     }
 
     @Override
     public void rollbackFinished(String resourceCrn, SecretType secretType) {
+        String secretTypeName = secretRotationNotificationService.getMessage(secretType, SecretListField.DISPLAY_NAME);
         stackUpdater.updateStackStatus(resourceCrn, DetailedStackStatus.SECRET_ROTATION_ROLLBACK_FINISHED,
-                String.format("Rotation rollback finished, secret type: %s", secretType.value()));
+                format("Secret rotation rollback finished: %s", secretTypeName));
         StackView stack = stackDtoService.getStackViewByCrn(resourceCrn);
-        fireCloudbreakEvent(stack, ResourceEvent.SECRET_ROTATION_ROLLBACK_FINISHED);
+        if (stack.isDatahub()) {
+            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.SECRET_ROTATION_ROLLBACK_FINISHED,
+                    List.of(secretTypeName));
+        }
     }
 
     @Override
     public void rollbackFailed(String resourceCrn, SecretType secretType, String reason) {
+        String secretTypeName = secretRotationNotificationService.getMessage(secretType, SecretListField.DISPLAY_NAME);
         stackUpdater.updateStackStatus(resourceCrn, DetailedStackStatus.SECRET_ROTATION_ROLLBACK_FAILED,
-                String.format("Rotation rollback failed, secret type: %s, reason: %s", secretType.value(), reason));
+                format("Secret rotation rollback failed: %s", secretTypeName));
         StackView stack = stackDtoService.getStackViewByCrn(resourceCrn);
-        fireCloudbreakEvent(stack, ResourceEvent.SECRET_ROTATION_ROLLBACK_FAILED);
+        if (stack.isDatahub()) {
+            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), UPDATE_FAILED.name(), ResourceEvent.SECRET_ROTATION_ROLLBACK_FAILED,
+                    List.of(secretTypeName, reason));
+        }
     }
 
     @Override
     public void finalizeStarted(String resourceCrn, SecretType secretType) {
+        String secretTypeName = secretRotationNotificationService.getMessage(secretType, SecretListField.DISPLAY_NAME);
         stackUpdater.updateStackStatus(resourceCrn, DetailedStackStatus.SECRET_ROTATION_FINALIZE_STARTED,
-                String.format("Rotation finalize started, secret type: %s", secretType.value()));
+                format("Secret rotation finalize started: %s", secretTypeName));
         StackView stack = stackDtoService.getStackViewByCrn(resourceCrn);
-        fireCloudbreakEvent(stack, ResourceEvent.SECRET_ROTATION_FINALIZE_IN_PROGRESS);
+        if (stack.isDatahub()) {
+            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.SECRET_ROTATION_FINALIZE_IN_PROGRESS,
+                    List.of(secretTypeName));
+        }
     }
 
     @Override
     public void finalizeFinished(String resourceCrn, SecretType secretType) {
+        String secretTypeName = secretRotationNotificationService.getMessage(secretType, SecretListField.DISPLAY_NAME);
         stackUpdater.updateStackStatus(resourceCrn, DetailedStackStatus.SECRET_ROTATION_FINALIZE_FINISHED,
-                String.format("Rotation finalize finished, secret type: %s", secretType.value()));
+                format("Secret rotation finalize finished: %s", secretTypeName));
         StackView stack = stackDtoService.getStackViewByCrn(resourceCrn);
-        fireCloudbreakEvent(stack, ResourceEvent.SECRET_ROTATION_FINALIZE_FINISHED);
+        if (stack.isDatahub()) {
+            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.SECRET_ROTATION_FINALIZE_FINISHED,
+                    List.of(secretTypeName));
+        }
     }
 
     @Override
     public void finalizeFailed(String resourceCrn, SecretType secretType, String reason) {
+        String secretTypeName = secretRotationNotificationService.getMessage(secretType, SecretListField.DISPLAY_NAME);
         stackUpdater.updateStackStatus(resourceCrn, DetailedStackStatus.SECRET_ROTATION_FINALIZE_FAILED,
-                String.format("Rotation finalize failed, secret type: %s, reason: %s", secretType.value(), reason));
+                format("Secret rotation finalize failed: %s", secretTypeName));
         StackView stack = stackDtoService.getStackViewByCrn(resourceCrn);
-        fireCloudbreakEvent(stack, ResourceEvent.SECRET_ROTATION_FINALIZE_FAILED);
+        if (stack.isDatahub()) {
+            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), UPDATE_FAILED.name(), ResourceEvent.SECRET_ROTATION_FINALIZE_FAILED,
+                    List.of(secretTypeName, reason));
+        }
     }
 
     @Override
     public void preVaildationFailed(String resourceCrn, SecretType secretType, String reason) {
-        stackUpdater.updateStackStatus(resourceCrn, DetailedStackStatus.AVAILABLE, "");
+        String secretTypeName = secretRotationNotificationService.getMessage(secretType, SecretListField.DISPLAY_NAME);
+        stackUpdater.updateStackStatus(resourceCrn, DetailedStackStatus.SECRET_ROTATION_PREVALIDATION_FAILED,
+                format("Secret rotation pre-validation failed: %s", secretTypeName));
         StackView stack = stackDtoService.getStackViewByCrn(resourceCrn);
-        fireCloudbreakEvent(stack, ResourceEvent.SECRET_ROTATION_PREVALIDATE_FAILED, List.of(secretType.value(), reason));
-    }
-
-    private void fireCloudbreakEvent(StackView stack, ResourceEvent event) {
-        cloudbreakEventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), event);
-    }
-
-    private void fireCloudbreakEvent(StackView stack, ResourceEvent event, Collection<String> eventMessageArgs) {
-        cloudbreakEventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), event, eventMessageArgs);
+        if (stack.isDatahub()) {
+            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), UPDATE_FAILED.name(), ResourceEvent.SECRET_ROTATION_PREVALIDATE_FAILED,
+                    List.of(secretTypeName, reason));
+        }
     }
 }

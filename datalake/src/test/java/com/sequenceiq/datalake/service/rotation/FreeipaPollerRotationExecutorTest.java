@@ -45,7 +45,7 @@ class FreeipaPollerRotationExecutorTest {
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
                 () -> underTest.executeRotate(new PollerRotationContext(RESOURCE_CRN, FREEIPA_KERBEROS_BIND_USER),
                         RotationMetadataTestUtil.metadataForRotation(RESOURCE_CRN, null)));
-        assertEquals("Execution of rotation failed at FREEIPA_ROTATE_POLLING step for resourceCrn regarding secret null, reason: error",
+        assertEquals("Execution of rotation failed at FREEIPA_ROTATE_POLLING step regarding secret null, reason: error",
                 secretRotationException.getMessage());
     }
 
@@ -64,7 +64,7 @@ class FreeipaPollerRotationExecutorTest {
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
                 () -> underTest.executeRollback(new PollerRotationContext(RESOURCE_CRN, FREEIPA_KERBEROS_BIND_USER),
                         RotationMetadataTestUtil.metadataForRollback(RESOURCE_CRN, null)));
-        assertEquals("Rollback of rotation failed at FREEIPA_ROTATE_POLLING step for resourceCrn regarding secret null, reason: error",
+        assertEquals("Rollback of rotation failed at FREEIPA_ROTATE_POLLING step regarding secret null, reason: error",
                 secretRotationException.getMessage());
     }
 
@@ -83,7 +83,7 @@ class FreeipaPollerRotationExecutorTest {
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
                 () -> underTest.executeFinalize(new PollerRotationContext(RESOURCE_CRN, FREEIPA_KERBEROS_BIND_USER),
                         RotationMetadataTestUtil.metadataForFinalize(RESOURCE_CRN, null)));
-        assertEquals("Finalization of rotation failed at FREEIPA_ROTATE_POLLING step for resourceCrn regarding secret null, reason: error",
+        assertEquals("Finalization of rotation failed at FREEIPA_ROTATE_POLLING step regarding secret null, reason: error",
                 secretRotationException.getMessage());
     }
 

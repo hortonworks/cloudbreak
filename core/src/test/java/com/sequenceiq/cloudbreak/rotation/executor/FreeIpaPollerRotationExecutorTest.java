@@ -107,7 +107,7 @@ class FreeIpaPollerRotationExecutorTest {
                 () -> underTest.executeRotate(new PollerRotationContext(RESOURCE_CRN, FREEIPA_LDAP_BIND_PASSWORD),
                         RotationMetadataTestUtil.metadataForRotation(RESOURCE_CRN, null)));
 
-        assertEquals("Execution of rotation failed at FREEIPA_ROTATE_POLLING step for resourceCrn regarding secret null, reason: error",
+        assertEquals("Execution of rotation failed at FREEIPA_ROTATE_POLLING step regarding secret null, reason: error",
                 secretRotationException.getMessage());
     }
 
@@ -123,7 +123,7 @@ class FreeIpaPollerRotationExecutorTest {
                 () -> underTest.executeRollback(new PollerRotationContext(RESOURCE_CRN, FREEIPA_LDAP_BIND_PASSWORD),
                         RotationMetadataTestUtil.metadataForRollback(RESOURCE_CRN, null)));
 
-        assertEquals("Rollback of rotation failed at FREEIPA_ROTATE_POLLING step for resourceCrn regarding secret null, reason: error",
+        assertEquals("Rollback of rotation failed at FREEIPA_ROTATE_POLLING step regarding secret null, reason: error",
                 secretRotationException.getMessage());
     }
 
@@ -139,7 +139,7 @@ class FreeIpaPollerRotationExecutorTest {
                 () -> underTest.executeFinalize(new PollerRotationContext(RESOURCE_CRN, FREEIPA_LDAP_BIND_PASSWORD),
                         RotationMetadataTestUtil.metadataForFinalize(RESOURCE_CRN, null)));
 
-        assertEquals("Finalization of rotation failed at FREEIPA_ROTATE_POLLING step for resourceCrn regarding secret null, reason: error",
+        assertEquals("Finalization of rotation failed at FREEIPA_ROTATE_POLLING step regarding secret null, reason: error",
                 secretRotationException.getMessage());
     }
 

@@ -152,6 +152,10 @@ public interface StackView extends MdcContextInfoProvider {
         return getType() == StackType.DATALAKE;
     }
 
+    default boolean isDatahub() {
+        return getType() == StackType.WORKLOAD;
+    }
+
     default ResourceType getDiskResourceType() {
         switch (getPlatformVariant()) {
             case CloudConstants.AWS:
