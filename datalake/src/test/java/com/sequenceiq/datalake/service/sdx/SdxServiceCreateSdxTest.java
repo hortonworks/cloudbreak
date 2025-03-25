@@ -84,6 +84,7 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.vm.VirtualMachineConfiguration;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.type.EnvironmentType;
+import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.configuration.CDPConfigService;
@@ -103,6 +104,7 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.sdx.api.model.SdxAwsRequest;
 import com.sequenceiq.sdx.api.model.SdxAwsSpotParameters;
+import com.sequenceiq.sdx.api.model.SdxAzureRequest;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
@@ -317,6 +319,38 @@ class SdxServiceCreateSdxTest {
         StackV4Request stackV4Request = new StackV4Request();
         ClusterV4Request clusterV4Request = new ClusterV4Request();
         stackV4Request.setCluster(clusterV4Request);
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, stackV4Request));
+    }
+
+    @Test
+    void testCreateShouldThrowExceptionWhenTheRequestContainsBasicLoadBalancerSku() {
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.1", CUSTOM);
+        SdxAzureRequest azureRequest = new SdxAzureRequest();
+        azureRequest.setLoadBalancerSku(LoadBalancerSku.BASIC);
+        sdxClusterRequest.setAzure(azureRequest);
+        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
+        mockEnvironmentCall(sdxClusterRequest, AZURE, null);
+        StackV4Request stackV4Request = new StackV4Request();
+        ClusterV4Request clusterV4Request = new ClusterV4Request();
+        stackV4Request.setCluster(clusterV4Request);
+
+        assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, stackV4Request)))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("The Basic SKU type is no longer supported for Load Balancers. Please use the Standard SKU to provision a Load Balancer. "
+                        + "Check documentation for more information: https://azure.microsoft.com/en-gb/updates?id="
+                        + "azure-basic-load-balancer-will-be-retired-on-30-september-2025-upgrade-to-standard-load-balancer");
+    }
+
+    @Test
+    void testShouldNotThrowExceptionWhenTheAzureLoadBalancerSkuIsNull() {
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.1", CUSTOM);
+        sdxClusterRequest.setAzure(new SdxAzureRequest());
+        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
+        mockEnvironmentCall(sdxClusterRequest, AZURE, null);
+        StackV4Request stackV4Request = new StackV4Request();
+        ClusterV4Request clusterV4Request = new ClusterV4Request();
+        stackV4Request.setCluster(clusterV4Request);
+
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, stackV4Request));
     }
 
