@@ -11,6 +11,7 @@ public class DistroXOpDescription {
     public static final String GET_STACK_CERT = "retrieves the TLS certificate used by the gateway";
     public static final String GET_ALL = "retrieve all stacks";
     public static final String LIST = "list stacks by environment crn";
+    public static final String LIST_BY_SERVICE_TYPES = "list stacks which have any of the given service types in their cluster template";
     public static final String GET_BY_NAME = "get stack by name";
     public static final String GET_BY_CRN = "get stack by crn";
     public static final String GET_BY_CRN_INTERNAL = "get stack by crn (for internal user)";

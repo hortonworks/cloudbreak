@@ -1,66 +1,50 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.dto;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
-public class NameOrCrnTest {
+class NameOrCrnTest {
 
     private static final String CRN = "my-crn";
 
     private static final String NAME = "my-name";
 
-    @Rule
-    public final ExpectedException thrown = ExpectedException.none();
-
     @Test
     public void testOfName() {
         NameOrCrn nameOrCrn = NameOrCrn.ofName(NAME);
 
-        assertEquals(NAME, nameOrCrn.name);
+        assertEquals(NAME, nameOrCrn.getName());
     }
 
     @Test
     public void testOfNameWhenNull() {
-        thrown.expectMessage("Name must be provided.");
-        thrown.expect(IllegalArgumentException.class);
-
-        NameOrCrn.ofName(null);
+        assertThrows(IllegalArgumentException.class, () -> NameOrCrn.ofName(null), "Name must be provided.");
     }
 
     @Test
     public void testOfNameWhenZeroLength() {
-        thrown.expectMessage("Name must be provided.");
-        thrown.expect(IllegalArgumentException.class);
-
-        NameOrCrn.ofName("");
+        assertThrows(IllegalArgumentException.class, () -> NameOrCrn.ofName(""), "Name must be provided.");
     }
 
     @Test
     public void testOfCrn() {
         NameOrCrn nameOrCrn = NameOrCrn.ofCrn(CRN);
 
-        assertEquals(CRN, nameOrCrn.crn);
+        assertEquals(CRN, nameOrCrn.getCrn());
     }
 
     @Test
     public void testOfCrnWhenNull() {
-        thrown.expectMessage("Crn must be provided.");
-        thrown.expect(IllegalArgumentException.class);
-
-        NameOrCrn.ofCrn(null);
+        assertThrows(IllegalArgumentException.class, () -> NameOrCrn.ofCrn(null), "Crn must be provided.");
     }
 
     @Test
     public void testOfCrnWhenZeroLength() {
-        thrown.expectMessage("Crn must be provided.");
-        thrown.expect(IllegalArgumentException.class);
-
-        NameOrCrn.ofCrn("");
+        assertThrows(IllegalArgumentException.class, () -> NameOrCrn.ofCrn(""), "Crn must be provided.");
     }
 
     @Test
@@ -106,34 +90,16 @@ public class NameOrCrnTest {
     }
 
     @Test
-    public void testReaderGetName() {
-        NameOrCrn nameOrCrn = NameOrCrn.ofName(NAME);
-
-        assertEquals(NAME, nameOrCrn.getName());
-    }
-
-    @Test
-    public void testReaderGetCrn() {
-        NameOrCrn nameOrCrn = NameOrCrn.ofCrn(CRN);
-
-        assertEquals(CRN, nameOrCrn.getCrn());
-    }
-
-    @Test
     public void testGetNameWhenCrnProvided() {
-        thrown.expectMessage("Request to get name when crn was provided on [NameOrCrn of crn: 'my-crn']");
-        thrown.expect(IllegalArgumentException.class);
         NameOrCrn nameOrCrn = NameOrCrn.ofCrn(CRN);
 
-        nameOrCrn.getName();
+        assertThrows(IllegalArgumentException.class, nameOrCrn::getName, "Request to get name when crn was provided on [NameOrCrn of crn: 'my-crn']");
     }
 
     @Test
     public void testGetCrnWhenCrnProvided() {
-        thrown.expectMessage("Request to get crn when name was provided on [NameOrCrn of name: 'my-name']");
-        thrown.expect(IllegalArgumentException.class);
         NameOrCrn nameOrCrn = NameOrCrn.ofName(NAME);
 
-        nameOrCrn.getCrn();
+        assertThrows(IllegalArgumentException.class, nameOrCrn::getCrn, "Request to get crn when name was provided on [NameOrCrn of name: 'my-name']");
     }
 }

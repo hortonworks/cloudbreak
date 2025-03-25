@@ -1,55 +1,54 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.domain.view.StackStatusView;
 import com.sequenceiq.flow.core.FlowLogService;
 
-@RunWith(MockitoJUnitRunner.class)
-public class StackApiViewServiceTest {
+@ExtendWith(MockitoExtension.class)
+class StackApiViewServiceTest {
 
     @Mock
     private FlowLogService flowLogService;
 
     @InjectMocks
-    private StackApiViewService stackApiViewService;
+    private StackApiViewService underTest;
 
     @Test
-    public void testCanChangeCredentialWithNullStatus() {
+    void testCanChangeCredentialWithNullStatus() {
         StackApiView stackApiView = new StackApiView();
         stackApiView.setStackStatus(null);
 
-        boolean result = stackApiViewService.canChangeCredential(stackApiView);
+        boolean result = underTest.canChangeCredential(stackApiView);
 
         assertFalse(result);
     }
 
     @Test
-    public void testCanChangeCredentialWithStatusIsNotAvailable() {
+    void testCanChangeCredentialWithStatusIsNotAvailable() {
         StackApiView stackApiView = new StackApiView();
         StackStatusView stackStatusView = Mockito.mock(StackStatusView.class);
         when(stackStatusView.getStatus()).thenReturn(Status.CREATE_IN_PROGRESS);
         stackApiView.setStackStatus(stackStatusView);
 
-        boolean result = stackApiViewService.canChangeCredential(stackApiView);
+        boolean result = underTest.canChangeCredential(stackApiView);
 
         assertFalse(result);
     }
 
     @Test
-    public void testCanChangeCredentialWithOngoingFlowOperation() {
+    void testCanChangeCredentialWithOngoingFlowOperation() {
         Long stackId = 1L;
         StackApiView stackApiView = new StackApiView();
         stackApiView.setId(stackId);
@@ -58,13 +57,13 @@ public class StackApiViewServiceTest {
         stackApiView.setStackStatus(stackStatusView);
         when(flowLogService.isOtherNonTerminationFlowRunning(stackId)).thenReturn(true);
 
-        boolean result = stackApiViewService.canChangeCredential(stackApiView);
+        boolean result = underTest.canChangeCredential(stackApiView);
 
         assertFalse(result);
     }
 
     @Test
-    public void testCanChangeCredentialHappyPath() {
+    void testCanChangeCredentialHappyPath() {
         Long stackId = 1L;
         StackApiView stackApiView = new StackApiView();
         stackApiView.setId(stackId);
@@ -73,8 +72,9 @@ public class StackApiViewServiceTest {
         stackApiView.setStackStatus(stackStatusView);
         when(flowLogService.isOtherNonTerminationFlowRunning(stackId)).thenReturn(false);
 
-        boolean result = stackApiViewService.canChangeCredential(stackApiView);
+        boolean result = underTest.canChangeCredential(stackApiView);
 
         assertTrue(result);
     }
+
 }

@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.ScaleRecommendation;
 import com.sequenceiq.cloudbreak.cmtemplate.CentralBlueprintParameterQueryService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hue.HueRoles;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
@@ -70,6 +71,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.stack.CloudResourceAdvisor;
 import com.sequenceiq.cloudbreak.service.template.ClusterTemplateViewService;
+import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject.Builder;
 import com.sequenceiq.cloudbreak.validation.HueWorkaroundValidatorService;
@@ -137,6 +139,9 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     @Inject
     private CredentialClientService credentialClientService;
+
+    @Inject
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     public Blueprint get(Long id) {
         return blueprintRepository.findById(id).orElseThrow(notFound("Cluster definition", id));
@@ -262,6 +267,31 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         User user = getLoggedInUser();
         Workspace workspace = getWorkspaceService().get(workspaceId, user);
         return getAllAvailableInWorkspace(workspace);
+    }
+
+    public Set<Blueprint> findAllByWorkspaceWithoutUpdate(Workspace workspace) {
+        return getAllAvailableInWorkspaceWithoutUpdate(workspace);
+    }
+
+    public Set<Blueprint> findAllByWorkspaceIdWithoutUpdate(Long workspaceId) {
+        User user = getLoggedInUser();
+        Workspace workspace = getWorkspaceService().get(workspaceId, user);
+        return getAllAvailableInWorkspaceWithoutUpdate(workspace);
+    }
+
+    @Measure(BlueprintService.class)
+    public Set<Blueprint> findAllByWorkspaceIdWithServiceTypesPresent(Long workspaceId, List<String> serviceTypes) {
+        return findAllByWorkspaceIdWithoutUpdate(workspaceId).stream()
+                .filter(b -> {
+                    try {
+                        CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(b.getBlueprintJsonText());
+                        return serviceTypes.stream().anyMatch(cmTemplateProcessor::isServiceTypePresent);
+                    } catch (BlueprintProcessingException e) {
+                        LOGGER.warn("Failed to process blueprint with id: {}", b.getId(), e);
+                        return false;
+                    }
+                })
+                .collect(Collectors.toSet());
     }
 
     @Measure(BlueprintService.class)

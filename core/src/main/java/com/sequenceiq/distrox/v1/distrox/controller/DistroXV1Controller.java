@@ -17,6 +17,7 @@ import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NA
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -67,6 +68,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBluepr
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackEndpointV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.migraterds.MigrateDatabaseV1Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.AttachRecipeV4Response;
@@ -75,6 +77,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryValidationV4Response;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
@@ -202,6 +205,18 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     public StackViewV4Responses list(@FilterParam(DataHubFiltering.ENV_NAME) String environmentName,
             @FilterParam(DataHubFiltering.ENV_CRN) String environmentCrn) {
         return dataHubFiltering.filterDataHubs(DESCRIBE_DATAHUB, environmentName, environmentCrn);
+    }
+
+    @Override
+    @FilterListBasedOnPermissions
+    public StackViewV4Responses listByServiceTypes(List<String> serviceTypes) {
+        Set<StackViewV4Response> result = Set.of();
+        if (!CollectionUtils.isEmpty(serviceTypes)) {
+            Set<StackViewV4Response> stackViewV4Responses = new HashSet<>(
+                    dataHubFiltering.filterResources(Crn.safeFromString(ThreadBasedUserCrnProvider.getUserCrn()), DESCRIBE_DATAHUB, Map.of()).getResponses());
+            result = stackOperations.filterByServiceTypesPresent(getWorkspaceIdForCurrentUser(), stackViewV4Responses, serviceTypes);
+        }
+        return new StackViewV4Responses(result);
     }
 
     @Override

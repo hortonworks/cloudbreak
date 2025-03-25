@@ -20,10 +20,13 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -56,7 +59,7 @@ import com.sequenceiq.cloudbreak.template.views.CustomConfigurationPropertyView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @ExtendWith(MockitoExtension.class)
-public class CmTemplateProcessorTest {
+class CmTemplateProcessorTest {
 
     private CmTemplateProcessor underTest;
 
@@ -70,7 +73,7 @@ public class CmTemplateProcessorTest {
     private IniFile safetyValveRole;
 
     @Test
-    public void testAddServiceConfigs() {
+    void testAddServiceConfigs() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
         List<ApiClusterTemplateConfig> configs = new ArrayList<>();
         configs.add(new ApiClusterTemplateConfig().name("hive_metastore_database_type").variable("hive-hive_metastore_database_type"));
@@ -85,7 +88,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void testAddServiceConfigsWhenDuplicatedEntries() {
+    void testAddServiceConfigsWhenDuplicatedEntries() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/ENGESC-26635.bp"));
 
         Map<String, ServiceComponent> stringServiceComponentMap = underTest.mapRoleRefsToServiceComponents();
@@ -98,7 +101,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void testAddServiceConfigsWhenDuplicatedEntries2() {
+    void testAddServiceConfigsWhenDuplicatedEntries2() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/ENGESC-26635-2.bp"));
 
         Map<String, ServiceComponent> stringServiceComponentMap = underTest.mapRoleRefsToServiceComponents();
@@ -111,7 +114,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void addExistingServiceConfigs() {
+    void addExistingServiceConfigs() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-existing-conf.bp"));
         List<ApiClusterTemplateConfig> configs = new ArrayList<>();
         configs.add(new ApiClusterTemplateConfig().name("redaction_policy_enabled").value("true"));
@@ -128,7 +131,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void addExistingSafetyValveConfigs() {
+    void addExistingSafetyValveConfigs() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-existing-conf.bp"));
 
         List<ApiClusterTemplateConfig> configs = new ArrayList<>();
@@ -168,7 +171,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void addExistingSafetyValveConfigsIniFile() {
+    void addExistingSafetyValveConfigsIniFile() {
         when(iniFileFactory.create()).thenReturn(safetyValveService, safetyValveRole);
 
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-existing-conf.bp"), iniFileFactory);
@@ -209,7 +212,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void testAddRoleConfigs() {
+    void testAddRoleConfigs() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
         Map<String, List<ApiClusterTemplateConfig>> configs = new HashMap<>();
         configs.put("hdfs-NAMENODE-BASE", List.of(new ApiClusterTemplateConfig().name("dfs_name_dir_list").variable("master_NAMENODE")));
@@ -230,7 +233,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void testAddRoleConfigsWithNoMatchingRefName() {
+    void testAddRoleConfigsWithNoMatchingRefName() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
         Map<String, List<ApiClusterTemplateConfig>> configs = new HashMap<>();
         configs.put("hdfs-NAMENODE-nomatch", List.of(new ApiClusterTemplateConfig().name("dfs_name_dir_list").variable("master_NAMENODE")));
@@ -249,7 +252,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void addExistingRoleConfigs() {
+    void addExistingRoleConfigs() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-existing-conf.bp"));
         Map<String, List<ApiClusterTemplateConfig>> configs = new HashMap<>();
         configs.put("hdfs-NAMENODE-BASE", List.of(new ApiClusterTemplateConfig().name("dfs_name_dir_list").variable("master_NAMENODE")));
@@ -277,7 +280,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void testIsRoleTypePresentInServiceWithSingleRole() {
+    void testIsRoleTypePresentInServiceWithSingleRole() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
 
         boolean present = underTest.isRoleTypePresentInService("HDFS", List.of("NAMENODE"));
@@ -286,7 +289,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void testIsRoleTypePresentInServiceWithMultipleRole() {
+    void testIsRoleTypePresentInServiceWithMultipleRole() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
 
         boolean present = underTest.isRoleTypePresentInService("HDFS", List.of("DATANODE", "NAMENODE"));
@@ -295,7 +298,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void testIsRoleTypePresentInServiceWithFakeRole() {
+    void testIsRoleTypePresentInServiceWithFakeRole() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
 
         boolean present = underTest.isRoleTypePresentInService("HDFS", List.of("MYROLE"));
@@ -304,7 +307,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void testAddInstantiatorWithBaseRoles() {
+    void testAddInstantiatorWithBaseRoles() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
         ClouderaManagerRepo clouderaManagerRepoDetails = new ClouderaManagerRepo();
         clouderaManagerRepoDetails.setVersion(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_6_3_0.getVersion());
@@ -325,7 +328,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void testAddInstantiatorWithoutBaseRoles() {
+    void testAddInstantiatorWithoutBaseRoles() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-custom-ref.bp"));
         ClouderaManagerRepo clouderaManagerRepoDetails = new ClouderaManagerRepo();
         clouderaManagerRepoDetails.setVersion(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_6_3_0.getVersion());
@@ -343,7 +346,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void addInstantiatorKeepsCustomClusterName() {
+    void addInstantiatorKeepsCustomClusterName() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-custom_cluster_name.bp"));
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
         generalClusterConfigs.setClusterName("cluster");
@@ -358,7 +361,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void mapRoleRefsToServiceComponents() {
+    void mapRoleRefsToServiceComponents() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
         Map<String, ServiceComponent> expected = new HashMap<>();
         expected.put("hbase-MASTER-BASE", ServiceComponent.of("HBASE", "MASTER"));
@@ -387,7 +390,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void testGetAllComponents() {
+    void testGetAllComponents() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
         Set<ServiceComponent> expected = Set.of(
                 ServiceComponent.of("HBASE", "MASTER"),
@@ -417,7 +420,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void testGetServiceComponentsByHostGroup() {
+    void testGetServiceComponentsByHostGroup() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
         Map<String, Set<ServiceComponent>> expected = Map.of(
                 "master", Set.of(
@@ -454,7 +457,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void testGetComponentsInHostGroup() {
+    void testGetComponentsInHostGroup() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
         Set<String> expected = Set.of("REGIONSERVER", "DATANODE", "GATEWAY", "IMPALAD", "NODEMANAGER");
 
@@ -464,7 +467,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void testGetHostGroupsWithComponent() {
+    void testGetHostGroupsWithComponent() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
         assertEquals(Set.of(), underTest.getHostGroupsWithComponent("FAKE_COMPONENT"));
         assertEquals(Set.of("master"), underTest.getHostGroupsWithComponent("HIVEMETASTORE"));
@@ -473,7 +476,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void testExtendTemplateWithAdditionalServicesWithNoAdditionalServices() {
+    void testExtendTemplateWithAdditionalServicesWithNoAdditionalServices() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
         String originalTemplate = templateToString(underTest.getTemplate());
 
@@ -484,7 +487,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void testExtendTemplateWithAdditionalServicesWithKnoxService() {
+    void testExtendTemplateWithAdditionalServicesWithKnoxService() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
         ApiClusterTemplateService knox = new ApiClusterTemplateService().serviceType("KNOX").refName("knox");
         ApiClusterTemplateRoleConfigGroup knoxGateway = new ApiClusterTemplateRoleConfigGroup()
@@ -500,7 +503,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void testExtendTemplateWithAdditionalServicesWithKnoxServiceAndMultipleGateway() {
+    void testExtendTemplateWithAdditionalServicesWithKnoxServiceAndMultipleGateway() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-multi-gateway.bp"));
         ApiClusterTemplateService knox = new ApiClusterTemplateService().serviceType("KNOX").refName("knox");
         ApiClusterTemplateRoleConfigGroup knoxGateway = new ApiClusterTemplateRoleConfigGroup()
@@ -516,7 +519,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void danglingVariablesAreRemoved() {
+    void danglingVariablesAreRemoved() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-variables.bp"));
 
         underTest.removeDanglingVariableReferences();
@@ -531,7 +534,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void getCardinalityByHostGroup() {
+    void getCardinalityByHostGroup() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-multi-gateway.bp"));
 
         Map<String, InstanceCount> expected = Map.of(
@@ -562,7 +565,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void recommendGatewayTestWhenNameAndCardinality() {
+    void recommendGatewayTestWhenNameAndCardinality() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-multi-gateway.bp"));
         assertEquals(new GatewayRecommendation(Set.of("master")), underTest.recommendGateway());
 
@@ -577,7 +580,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void recommendGatewayTestWhenExplicitAndSingleEntryAndNoMatch() {
+    void recommendGatewayTestWhenExplicitAndSingleEntryAndNoMatch() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/namenode-ha-single-worker-with-knox-of-0.bp"));
 
         GatewayRecommendation result = underTest.recommendGateway();
@@ -586,7 +589,7 @@ public class CmTemplateProcessorTest {
 
     @ParameterizedTest(name = "path={0}")
     @ValueSource(strings = {"input/namenode-ha-with-knox.bp", "input/namenode-ha-single-worker-with-knox-of-2.bp"})
-    public void recommendGatewayTestWhenExplicitAndSingleEntryAndMatch(String path) {
+    void recommendGatewayTestWhenExplicitAndSingleEntryAndMatch(String path) {
         underTest = new CmTemplateProcessor(getBlueprintText(path));
 
         GatewayRecommendation result = underTest.recommendGateway();
@@ -594,7 +597,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void recommendGatewayTestWhenExplicitAndMultipleEntriesButNoMatch() {
+    void recommendGatewayTestWhenExplicitAndMultipleEntriesButNoMatch() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/namenode-ha-single-worker-with-knoxes-of-0-0.bp"));
 
         GatewayRecommendation result = underTest.recommendGateway();
@@ -602,7 +605,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void recommendGatewayTestWhenExplicitAndMultipleEntriesAndOneMatch() {
+    void recommendGatewayTestWhenExplicitAndMultipleEntriesAndOneMatch() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/namenode-ha-single-worker-with-knoxes-of-0-2.bp"));
 
         GatewayRecommendation result = underTest.recommendGateway();
@@ -610,7 +613,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void recommendGatewayTestWhenExplicitAndMultipleEntriesAndTwoMatchesAndSameCounts() {
+    void recommendGatewayTestWhenExplicitAndMultipleEntriesAndTwoMatchesAndSameCounts() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/namenode-ha-single-worker-with-knoxes-of-2-2.bp"));
 
         GatewayRecommendation result = underTest.recommendGateway();
@@ -618,7 +621,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void recommendGatewayTestWhenExplicitAndMultipleEntriesAndTwoMatchesAndDifferentCounts() {
+    void recommendGatewayTestWhenExplicitAndMultipleEntriesAndTwoMatchesAndDifferentCounts() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/namenode-ha-single-worker-with-knoxes-of-1-2.bp"));
 
         GatewayRecommendation result = underTest.recommendGateway();
@@ -627,7 +630,7 @@ public class CmTemplateProcessorTest {
 
     @ParameterizedTest(name = "path={0}")
     @ValueSource(strings = {"input/namenode-ha-single-worker-with-knoxes-of-1-1-2.bp", "input/namenode-ha-single-worker-with-knoxes-of-1-2-3.bp"})
-    public void recommendGatewayTestWhenExplicitAndMultipleEntriesAndThreeMatches(String path) {
+    void recommendGatewayTestWhenExplicitAndMultipleEntriesAndThreeMatches(String path) {
         underTest = new CmTemplateProcessor(getBlueprintText(path));
 
         GatewayRecommendation result = underTest.recommendGateway();
@@ -635,7 +638,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void recommendAutoscale() {
+    void recommendAutoscale() {
         Versioned blueprintVersion = () -> "7.2.11";
 
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-multi-gateway.bp"));
@@ -663,7 +666,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void recommendResize() {
+    void recommendResize() {
         Versioned blueprintVersion = () -> "7.2.11";
 
         underTest = new CmTemplateProcessor(getBlueprintText("input/kafka.bp"));
@@ -682,14 +685,14 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void getHostTemplates() {
+    void getHostTemplates() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/cdp-invalid-multi-host-template-name.bp"));
         assertEquals(3, underTest.getHostTemplateNames().size());
         assertEquals(2, underTest.getHostTemplateNames().stream().filter("master"::equals).count());
     }
 
     @Test
-    public void testGetComputeHostGroups() {
+    void testGetComputeHostGroups() {
         Versioned blueprintVersion = () -> "7.2.11";
 
         underTest = new CmTemplateProcessor(getBlueprintText("input/custom-hostgroups-for-nms.bp"));
@@ -697,7 +700,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void testYARNServiceAttributes() {
+    void testYARNServiceAttributes() {
         Versioned blueprintVersion = () -> "7.2.11";
 
         underTest = new CmTemplateProcessor(getBlueprintText("input/custom-hostgroups-for-nms.bp"));
@@ -730,7 +733,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void testHostWithUpperCase() {
+    void testHostWithUpperCase() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-host-with-uppercase.bp"));
         Set<String> hosts = Set.of("master", "executor", "coordinator");
         assertTrue(underTest.getTemplate().getHostTemplates().stream().allMatch(ht -> hosts.contains(ht.getRefName())));
@@ -758,7 +761,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void testIfCustomServiceConfigsAreAddedWithSafetyValue() {
+    void testIfCustomServiceConfigsAreAddedWithSafetyValue() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/de-ha.bp"));
         List<ApiClusterTemplateConfig> zeppelinConfig = List.of(
                 new ApiClusterTemplateConfig().name("ZEPPELIN_service_env_safety_valve")
@@ -782,7 +785,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void testIfCustomServiceConfigsAreMerged() {
+    void testIfCustomServiceConfigsAreMerged() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/de-ha.bp"));
         // config not present in template
         List<ApiClusterTemplateConfig> sparkConfigs = List.of(
@@ -812,7 +815,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void mergeHueSafetyValuesIniFile() {
+    void mergeHueSafetyValuesIniFile() {
         when(iniFileFactory.create()).thenReturn(safetyValveService, safetyValveRole);
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-existing-conf.bp"), iniFileFactory);
 
@@ -837,7 +840,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void testIfSingleValuedCustomRoleConfigAreMerged() {
+    void testIfSingleValuedCustomRoleConfigAreMerged() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/de.bp"));
 
         // config not present in template
@@ -863,7 +866,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void testIfMultipleValuedCustomRoleConfigAreMerged() {
+    void testIfMultipleValuedCustomRoleConfigAreMerged() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/de.bp"));
 
         // config not present in template
@@ -890,7 +893,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void testIfMultipleValuedCustomRoleConfigAreMergedInDifferentManner() {
+    void testIfMultipleValuedCustomRoleConfigAreMergedInDifferentManner() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/de.bp"));
 
         // config not present in template
@@ -917,7 +920,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void testIfCustomRoleConfigsAreMerged() {
+    void testIfCustomRoleConfigsAreMerged() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/de-ha.bp"));
         // present in cluster template/blueprint
         List<ApiClusterTemplateConfig> hs2RoleConfigs = List.of(new ApiClusterTemplateConfig().name("hiveserver2_mv_files_thread").value("30"));
@@ -1024,10 +1027,29 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void getHostTemplateRoleNames() {
+    void getHostTemplateRoleNames() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/cdp-invalid-multi-host-template-name.bp"));
         assertEquals(5, underTest.getHostTemplateRoleNames("worker").size());
         assertEquals(1, underTest.getHostTemplateRoleNames("worker").stream().filter("hdfs-DATANODE-BASE"::equals).count());
+    }
+
+    private static Stream<Arguments> testIsServiceTypePresentArguments() {
+        return Stream.of(
+                Arguments.of(true, "input/de.bp", "HDFS"),
+                Arguments.of(true, "input/de.bp", "HIVE"),
+                Arguments.of(true, "input/de.bp", "HUE"),
+                Arguments.of(true, "input/de.bp", "ZOOKEEPER"),
+                Arguments.of(false, "input/de.bp", "LAKEHOUSE_OPTIMIZER"),
+                Arguments.of(false, "input/de.bp", "FAKE_SERVICE"),
+                Arguments.of(false, "input/de.bp", ""),
+                Arguments.of(false, "input/de.bp", null)
+        );
+    }
+
+    @MethodSource("testIsServiceTypePresentArguments")
+    @ParameterizedTest
+    void testIsServiceTypePresent(boolean expectedResult, String blueprint, String serviceType) {
+        assertEquals(expectedResult, new CmTemplateProcessor(getBlueprintText(blueprint)).isServiceTypePresent(serviceType));
     }
 
     private static void assertSortedEquals(Set<?> expected, Set<?> actual) {

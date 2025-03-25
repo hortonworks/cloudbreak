@@ -14,6 +14,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -45,6 +46,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -68,6 +71,7 @@ import com.sequenceiq.cloudbreak.service.template.ClusterTemplateViewService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.validation.HueWorkaroundValidatorService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -126,6 +130,9 @@ class BlueprintServiceTest {
 
     @Mock
     private ImageCatalogService imageCatalogService;
+
+    @Mock
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     @InjectMocks
     private BlueprintService underTest;
@@ -564,6 +571,29 @@ class BlueprintServiceTest {
         BadRequestException actual = Assertions.assertThrows(BadRequestException.class, () -> underTest.prepareDeletion(blueprint));
         assertEquals("The cluster with name ['Cluster Name'] uses cluster template 'TemplateName'. "
                 + "Please remove the cluster before deleting the cluster template.", actual.getMessage());
+    }
+
+    @Test
+    void testFindAllByWorkspaceIdWithServiceTypesPresent() {
+        Blueprint blueprint1 = mock(Blueprint.class);
+        when(blueprint1.getBlueprintJsonText()).thenReturn("blueprint1");
+        when(cmTemplateProcessorFactory.get("blueprint1")).thenReturn(mock(CmTemplateProcessor.class));
+        Blueprint blueprint2 = mock(Blueprint.class);
+        when(blueprint2.getBlueprintJsonText()).thenReturn("blueprint2");
+        CmTemplateProcessor cmTemplateProcessor2 = mock(CmTemplateProcessor.class);
+        when(cmTemplateProcessor2.isServiceTypePresent("HIVE")).thenReturn(false);
+        when(cmTemplateProcessor2.isServiceTypePresent("HBASE")).thenReturn(true);
+        when(cmTemplateProcessorFactory.get("blueprint2")).thenReturn(cmTemplateProcessor2);
+        Blueprint blueprint3 = mock(Blueprint.class);
+        when(blueprint3.getBlueprintJsonText()).thenReturn("blueprint3");
+        when(cmTemplateProcessorFactory.get("blueprint3")).thenThrow(BlueprintProcessingException.class);
+        Set<Blueprint> blueprintsInDB = Set.of(blueprint1, blueprint2, blueprint3);
+        when(blueprintRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(blueprintsInDB);
+
+        Set<Blueprint> result = underTest.findAllByWorkspaceIdWithServiceTypesPresent(1L, List.of("HIVE", "HBASE"));
+
+        assertEquals(1, result.size());
+        assertEquals(blueprint2, result.stream().findFirst().get());
     }
 
     private Cluster getCluster(String name, Long id, Blueprint blueprint, DetailedStackStatus detailedStackStatus) {

@@ -919,6 +919,13 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
                 .anyMatch(rcg -> roleTypes.stream().anyMatch(roleType -> roleType.equalsIgnoreCase(rcg.getRoleType())));
     }
 
+    public boolean isServiceTypePresent(String serviceType) {
+        if (Strings.isNullOrEmpty(serviceType)) {
+            return false;
+        }
+        return cmTemplate.getServices().stream().anyMatch(s -> serviceType.equalsIgnoreCase(s.getServiceType()));
+    }
+
     public Optional<ApiClusterTemplateService> getServiceByType(String serviceType) {
         for (ApiClusterTemplateService service : cmTemplate.getServices()) {
             if (serviceType.equalsIgnoreCase(service.getServiceType())) {

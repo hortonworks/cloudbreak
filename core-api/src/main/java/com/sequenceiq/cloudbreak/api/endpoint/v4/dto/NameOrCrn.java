@@ -6,24 +6,16 @@ import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.google.common.annotations.VisibleForTesting;
+public record NameOrCrn(
+        String name,
+        String crn
+) {
 
-public class NameOrCrn {
+    public static final NameOrCrn EMPTY = new NameOrCrn(null, null);
 
     private static final String NAME_MUST_BE_PROVIDED_EXCEPTION_MESSAGE = "Name must be provided.";
 
     private static final String CRN_MUST_BE_PROVIDED_EXCEPTION_MESSAGE = "Crn must be provided.";
-
-    @VisibleForTesting
-    final String name;
-
-    @VisibleForTesting
-    final String crn;
-
-    private NameOrCrn(String name, String crn) {
-        this.name = name;
-        this.crn = crn;
-    }
 
     public static NameOrCrn ofName(String name) {
         if (StringUtils.isEmpty(name)) {
@@ -37,10 +29,6 @@ public class NameOrCrn {
             throw new IllegalArgumentException(CRN_MUST_BE_PROVIDED_EXCEPTION_MESSAGE);
         }
         return new NameOrCrn(null, crn);
-    }
-
-    public static NameOrCrn empty() {
-        return new NameOrCrn(null, null);
     }
 
     public String getName() {

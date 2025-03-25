@@ -67,6 +67,7 @@ import com.sequenceiq.cloudbreak.converter.v4.stacks.UserNamePasswordV4RequestTo
 import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.InstanceMetaDataToInstanceMetaDataV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.view.StackApiViewToStackViewV4ResponseConverter;
 import com.sequenceiq.cloudbreak.core.flow2.stack.detach.StackUpdateService;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackCrnView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -77,6 +78,7 @@ import com.sequenceiq.cloudbreak.dto.SubnetIdWithResourceNameAndCrn;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.DatabaseBackupRestoreService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.datalakemetrics.DetermineDatalakeDataSizesService;
 import com.sequenceiq.cloudbreak.service.image.GenerateImageCatalogService;
@@ -176,6 +178,9 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
     @Inject
     private ClusterPublicEndpointManagementService clusterPublicEndpointManagementService;
 
+    @Inject
+    private BlueprintService blueprintService;
+
     public StackViewV4Responses listByEnvironmentName(Long workspaceId, String environmentName, List<StackType> stackTypes) {
         Set<StackViewV4Response> stackViewResponses;
         LOGGER.info("List for Stack in workspace {} and environmentName {}.", workspaceId, environmentName);
@@ -184,7 +189,7 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
                 .map(s -> stackApiViewToStackViewV4ResponseConverter.convert(s))
                 .collect(Collectors.toSet());
         LOGGER.info("Adding environment name and credential to the responses.");
-        NameOrCrn nameOrCrn = StringUtils.isEmpty(environmentName) ? NameOrCrn.empty() : NameOrCrn.ofName(environmentName);
+        NameOrCrn nameOrCrn = StringUtils.isEmpty(environmentName) ? NameOrCrn.EMPTY : NameOrCrn.ofName(environmentName);
         environmentServiceDecorator.prepareEnvironmentsAndCredentialName(stackViewResponses, nameOrCrn);
         return new StackViewV4Responses(stackViewResponses);
     }
@@ -197,7 +202,7 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
                         .map(s -> stackApiViewToStackViewV4ResponseConverter.convert(s))
                         .collect(Collectors.toSet());
         LOGGER.info("Adding environment name and credential to the responses.");
-        NameOrCrn nameOrCrn = StringUtils.isEmpty(environmentCrn) ? NameOrCrn.empty() : NameOrCrn.ofCrn(environmentCrn);
+        NameOrCrn nameOrCrn = StringUtils.isEmpty(environmentCrn) ? NameOrCrn.EMPTY : NameOrCrn.ofCrn(environmentCrn);
         environmentServiceDecorator.prepareEnvironmentsAndCredentialName(stackViewResponses, nameOrCrn);
         return new StackViewV4Responses(stackViewResponses);
     }
@@ -209,9 +214,19 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
                 .map(s -> stackApiViewToStackViewV4ResponseConverter.convert(s))
                 .collect(Collectors.toSet());
         LOGGER.info("Adding environment name and credential to the responses.");
-        NameOrCrn nameOrCrn = Strings.isNullOrEmpty(environmentCrn) ? NameOrCrn.empty() : NameOrCrn.ofCrn(environmentCrn);
+        NameOrCrn nameOrCrn = Strings.isNullOrEmpty(environmentCrn) ? NameOrCrn.EMPTY : NameOrCrn.ofCrn(environmentCrn);
         environmentServiceDecorator.prepareEnvironmentsAndCredentialName(stackViewResponses, nameOrCrn);
         return new StackViewV4Responses(stackViewResponses);
+    }
+
+    public Set<StackViewV4Response> filterByServiceTypesPresent(Long workspaceId, Set<StackViewV4Response> stackViewResponses, List<String> serviceTypes) {
+        Set<Long> blueprintIds = blueprintService.findAllByWorkspaceIdWithServiceTypesPresent(workspaceId, serviceTypes).stream()
+                .map(Blueprint::getId)
+                .collect(Collectors.toSet());
+        Set<StackViewV4Response> result = stackViewResponses.stream()
+                .filter(s -> blueprintIds.contains(s.getCluster().getBlueprint().getId()))
+                .collect(Collectors.toSet());
+        return result;
     }
 
     public StackV4Response post(Long workspaceId, CloudbreakUser cloudbreakUser, @Valid StackV4Request request, boolean distroxRequest) {
@@ -423,7 +438,7 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
 
     @SuppressWarnings("ParameterNumber")
     public FlowIdentifier backupClusterDatabase(@NotNull NameOrCrn nameOrCrn, Long workspaceId, String location, String backupId,
-                                                boolean closeConnections, List<String> skipDatabaseNames, int databaseMaxDurationInMin, boolean dryRun) {
+            boolean closeConnections, List<String> skipDatabaseNames, int databaseMaxDurationInMin, boolean dryRun) {
         databaseBackupRestoreService.validate(workspaceId, nameOrCrn, location, backupId);
         LOGGER.debug("Starting cluster database backup: " + nameOrCrn);
         return databaseBackupRestoreService.backupDatabase(workspaceId, nameOrCrn, location, backupId, closeConnections, skipDatabaseNames,
@@ -478,7 +493,7 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
     }
 
     public CertificatesRotationV4Response rotateAutoTlsCertificates(@NotNull NameOrCrn nameOrCrn, String accountId,
-                                                                    CertificatesRotationV4Request certificatesRotationV4Request) {
+            CertificatesRotationV4Request certificatesRotationV4Request) {
         LOGGER.debug("Starting cluster AutoTLS certificates rotation: " + nameOrCrn);
         return clusterCommonService.rotateAutoTlsCertificates(nameOrCrn, accountId, certificatesRotationV4Request);
     }

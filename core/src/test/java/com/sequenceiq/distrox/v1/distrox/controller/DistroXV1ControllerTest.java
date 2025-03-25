@@ -1,5 +1,6 @@
 package com.sequenceiq.distrox.v1.distrox.controller;
 
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.doAs;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -12,6 +13,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,17 +25,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.rotaterdscert.StackRotateRdsCertificateV4Response;
 import com.sequenceiq.cloudbreak.api.model.RotateRdsCertResponseType;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.rotaterdscert.StackRotateRdsCertificateService;
@@ -101,7 +106,7 @@ class DistroXV1ControllerTest {
         StackViewV4Responses actual = distroXV1Controller.list(NAME, CRN);
 
         assertEquals(expected, actual);
-        verify(datahubFiltering).filterDataHubs(AuthorizationResourceAction.DESCRIBE_DATAHUB, NAME, CRN);
+        verify(datahubFiltering).filterDataHubs(DESCRIBE_DATAHUB, NAME, CRN);
     }
 
     @Test
@@ -300,5 +305,22 @@ class DistroXV1ControllerTest {
             }
         });
         verify(stackOperationService).rootVolumeDiskUpdate(NameOrCrn.ofCrn(CRN), diskUpdateRequest, "accountId");
+    }
+
+    @Test
+    void testListByServiceTypes() {
+        List<String> serviceTypes = List.of("HIVE", "RANGER");
+        Set<StackViewV4Response> stackViewV4ResponseSet = Set.of();
+        Set<StackViewV4Response> result = Set.of();
+        when(workspaceService.getForCurrentUser()).thenReturn(workspace);
+        when(workspace.getId()).thenReturn(WORKSPACE_ID);
+        StackViewV4Responses stackViewV4Responses = mock(StackViewV4Responses.class);
+        when(stackViewV4Responses.getResponses()).thenReturn(stackViewV4ResponseSet);
+        when(datahubFiltering.filterResources(Crn.safeFromString(TEST_USER_CRN), DESCRIBE_DATAHUB, Map.of())).thenReturn(stackViewV4Responses);
+        when(stackOperations.filterByServiceTypesPresent(WORKSPACE_ID, stackViewV4ResponseSet, serviceTypes)).thenReturn(result);
+
+        StackViewV4Responses response = doAs(TEST_USER_CRN, () -> distroXV1Controller.listByServiceTypes(serviceTypes));
+
+        assertEquals(result, response.getResponses());
     }
 }

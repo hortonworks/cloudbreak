@@ -38,6 +38,7 @@ import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_STATUS_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.IMD_UPDATE;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.LIST;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.LIST_BY_SERVICE_TYPES;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.LIST_FLOW_PROGRESS;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.MIGRATE_DATABASE_TO_SSL_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.MIGRATE_DATABASE_TO_SSL_BY_NAME;
@@ -150,6 +151,13 @@ public interface DistroXV1Endpoint {
     StackViewV4Responses list(
             @QueryParam("environmentName") String environmentName,
             @QueryParam("environmentCrn") String environmentCrn);
+
+    @GET
+    @Path("list_by_service_types")
+    @Operation(summary = LIST_BY_SERVICE_TYPES, description = Notes.STACK_NOTES,
+            operationId = "listByServiceTypesDistroXV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    StackViewV4Responses listByServiceTypes(@QueryParam("serviceTypes") List<String> serviceTypes);
 
     @POST
     @Path("")
