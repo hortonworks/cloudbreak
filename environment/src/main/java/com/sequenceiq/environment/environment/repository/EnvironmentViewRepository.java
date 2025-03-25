@@ -79,6 +79,8 @@ public interface EnvironmentViewRepository extends JpaRepository<EnvironmentView
 
     Set<EnvironmentView> findAllByCredentialIdAndArchivedIsFalse(Long credentialId);
 
+    Set<EnvironmentView> findAllByProxyConfigIdAndArchivedIsFalse(Long proxyConfigId);
+
     Long getIdByNameAndAccountIdAndArchivedIsFalse(String name, String accountId);
 
     Long getIdByResourceCrnAndAccountIdAndArchivedIsFalse(String resourceCrn, String accountId);

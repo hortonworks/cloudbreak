@@ -110,4 +110,8 @@ public class EnvironmentViewService {
     public List<String> findNameWithAccountIdAndParentEnvIdAndArchivedIsFalse(String accountId, Long parentEnvironmentId) {
         return environmentViewRepository.findNameWithAccountIdAndParentEnvIdAndArchivedIsFalse(accountId, parentEnvironmentId);
     }
+
+    public Set<EnvironmentView> findAllByProxyConfigIdAndArchivedIsFalse(Long proxyConfigId) {
+        return environmentViewRepository.findAllByProxyConfigIdAndArchivedIsFalse(proxyConfigId);
+    }
 }

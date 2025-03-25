@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.proxy.v1.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
@@ -25,6 +27,8 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.environment.environment.domain.EnvironmentView;
+import com.sequenceiq.environment.environment.service.EnvironmentViewService;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 import com.sequenceiq.environment.proxy.repository.ProxyConfigRepository;
 import com.sequenceiq.environment.proxy.service.ProxyConfigModificationService;
@@ -46,6 +50,9 @@ public class ProxyConfigServiceTest {
 
     @Mock
     private ProxyConfigRepository proxyConfigRepository;
+
+    @Mock
+    private EnvironmentViewService environmentViewService;
 
     @Mock
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
@@ -75,38 +82,38 @@ public class ProxyConfigServiceTest {
     public void testGetValidResult() {
         final long id = 1L;
         when(proxyConfigRepository.findById(id)).thenReturn(Optional.of(PROXY_CONFIG));
-        Assertions.assertEquals(PROXY_CONFIG, underTestProxyConfigService.get(id));
+        assertEquals(PROXY_CONFIG, underTestProxyConfigService.get(id));
     }
 
     @Test
     public void testGetNullAndNotFound() {
         final long id = 2L;
         when(proxyConfigRepository.findById(id)).thenReturn(Optional.empty());
-        Assertions.assertThrows(NotFoundException.class, () -> underTestProxyConfigService.get(id));
+        assertThrows(NotFoundException.class, () -> underTestProxyConfigService.get(id));
     }
 
     @Test
     public void testGetByNameForAccountIdEmpty() {
         when(proxyConfigRepository.findByNameInAccount(NAME, ACCOUNT_ID)).thenReturn(Optional.empty());
-        Assertions.assertThrows(NotFoundException.class, () -> underTestProxyConfigService.getByNameForAccountId(NAME, ACCOUNT_ID));
+        assertThrows(NotFoundException.class, () -> underTestProxyConfigService.getByNameForAccountId(NAME, ACCOUNT_ID));
     }
 
     @Test
     public void testGetByNameForAccountIdHasResult() {
         when(proxyConfigRepository.findByNameInAccount(NAME, ACCOUNT_ID)).thenReturn(Optional.of(PROXY_CONFIG));
-        Assertions.assertEquals(PROXY_CONFIG, underTestProxyConfigService.getByNameForAccountId(NAME, ACCOUNT_ID));
+        assertEquals(PROXY_CONFIG, underTestProxyConfigService.getByNameForAccountId(NAME, ACCOUNT_ID));
     }
 
     @Test
     public void testGetByCrnForAccountIdEmpty() {
         when(proxyConfigRepository.findByResourceCrnInAccount(CRN, ACCOUNT_ID)).thenReturn(Optional.empty());
-        Assertions.assertThrows(NotFoundException.class, () -> underTestProxyConfigService.getByCrnForAccountId(CRN, ACCOUNT_ID));
+        assertThrows(NotFoundException.class, () -> underTestProxyConfigService.getByCrnForAccountId(CRN, ACCOUNT_ID));
     }
 
     @Test
     public void testGetByCrnForAccountIdHasResult() {
         when(proxyConfigRepository.findByResourceCrnInAccount(CRN, ACCOUNT_ID)).thenReturn(Optional.of(PROXY_CONFIG));
-        Assertions.assertEquals(PROXY_CONFIG, underTestProxyConfigService.getByCrnForAccountId(CRN, ACCOUNT_ID));
+        assertEquals(PROXY_CONFIG, underTestProxyConfigService.getByCrnForAccountId(CRN, ACCOUNT_ID));
     }
 
     @Test
@@ -119,7 +126,7 @@ public class ProxyConfigServiceTest {
     public void testListInAccountWithResult() {
         Set<ProxyConfig> proxyConfigs = Set.of(PROXY_CONFIG);
         when(proxyConfigRepository.findAllInAccount(ACCOUNT_ID)).thenReturn(proxyConfigs);
-        Assertions.assertEquals(proxyConfigs, underTestProxyConfigService.listInAccount(ACCOUNT_ID));
+        assertEquals(proxyConfigs, underTestProxyConfigService.listInAccount(ACCOUNT_ID));
     }
 
     @Test
@@ -131,59 +138,91 @@ public class ProxyConfigServiceTest {
     @Test
     public void testCreateAlreadyExist() {
         when(proxyConfigRepository.findResourceCrnByNameAndTenantId(anyString(), any())).thenReturn(Optional.of(PROXY_CONFIG.getName()));
-        Assertions.assertThrows(BadRequestException.class, () -> underTestProxyConfigService.create(PROXY_CONFIG, ACCOUNT_ID, CREATOR));
+        assertThrows(BadRequestException.class, () -> underTestProxyConfigService.create(PROXY_CONFIG, ACCOUNT_ID, CREATOR));
     }
 
     @Test
     public void testCreateOtherException() {
         Class<JDBCException> throwableType = JDBCException.class;
         when(proxyConfigRepository.save(PROXY_CONFIG)).thenThrow(throwableType);
-        Assertions.assertThrows(throwableType, () -> underTestProxyConfigService.create(PROXY_CONFIG, ACCOUNT_ID, CREATOR));
+        assertThrows(throwableType, () -> underTestProxyConfigService.create(PROXY_CONFIG, ACCOUNT_ID, CREATOR));
     }
 
     @Test
     public void testDeleteByCrnInAccountNonExisting() {
         when(proxyConfigRepository.findByResourceCrnInAccount(CRN, ACCOUNT_ID)).thenReturn(Optional.empty());
-        Assertions.assertThrows(NotFoundException.class, () -> underTestProxyConfigService.deleteByCrnInAccount(CRN, ACCOUNT_ID));
+        assertThrows(NotFoundException.class, () -> underTestProxyConfigService.deleteByCrnInAccount(CRN, ACCOUNT_ID));
     }
 
     @Test
     public void testDeleteByCrnInAccountExisting() {
         when(proxyConfigRepository.findByResourceCrnInAccount(CRN, ACCOUNT_ID)).thenReturn(Optional.of(PROXY_CONFIG));
-        Assertions.assertEquals(PROXY_CONFIG, underTestProxyConfigService.deleteByCrnInAccount(CRN, ACCOUNT_ID));
+        assertEquals(PROXY_CONFIG, underTestProxyConfigService.deleteByCrnInAccount(CRN, ACCOUNT_ID));
     }
 
     @Test
     public void testDeleteByCrnOtherException() {
         Class<JDBCException> throwableType = JDBCException.class;
         when(proxyConfigRepository.findByResourceCrnInAccount(CRN, ACCOUNT_ID)).thenThrow(throwableType);
-        Assertions.assertThrows(throwableType, () -> underTestProxyConfigService.deleteByCrnInAccount(CRN, ACCOUNT_ID));
+        assertThrows(throwableType, () -> underTestProxyConfigService.deleteByCrnInAccount(CRN, ACCOUNT_ID));
     }
 
     @Test
     public void testDeleteByNameForAccountIdEmpty() {
         when(proxyConfigRepository.findByNameInAccount(NAME, ACCOUNT_ID)).thenReturn(Optional.empty());
-        Assertions.assertThrows(NotFoundException.class, () -> underTestProxyConfigService.deleteByNameInAccount(NAME, ACCOUNT_ID));
+        assertThrows(NotFoundException.class, () -> underTestProxyConfigService.deleteByNameInAccount(NAME, ACCOUNT_ID));
     }
 
     @Test
-    public void testDeleteByNameForAccountIdHasResult() {
+    public void testDeleteByNameForAccountIdHasResultAndNotAssignedToAnyEnvThenDeleteSuccess() {
+        when(environmentViewService.findAllByProxyConfigIdAndArchivedIsFalse(any())).thenReturn(Set.of());
         when(proxyConfigRepository.findByNameInAccount(NAME, ACCOUNT_ID)).thenReturn(Optional.of(PROXY_CONFIG));
-        Assertions.assertEquals(PROXY_CONFIG, underTestProxyConfigService.deleteByNameInAccount(NAME, ACCOUNT_ID));
+        assertEquals(PROXY_CONFIG, underTestProxyConfigService.deleteByNameInAccount(NAME, ACCOUNT_ID));
+    }
+
+    @Test
+    public void testDeleteByNameForAccountIdHasResultAssignedToAnyEnvThenDeleteFails() {
+        EnvironmentView environmentView = new EnvironmentView();
+        environmentView.setName("env1");
+        when(environmentViewService.findAllByProxyConfigIdAndArchivedIsFalse(any())).thenReturn(Set.of(environmentView));
+        when(proxyConfigRepository.findByNameInAccount(NAME, ACCOUNT_ID)).thenReturn(Optional.of(PROXY_CONFIG));
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTestProxyConfigService.deleteByNameInAccount(NAME, ACCOUNT_ID));
+        assertEquals(badRequestException.getMessage(),
+                "Proxy Configuration 'name' cannot be deleted because the following environments are using it: [env1].");
+    }
+
+    @Test
+    public void testDeleteByCrnForAccountIdHasResultAssignedToAnyEnvThenDeleteFails() {
+        EnvironmentView environmentView = new EnvironmentView();
+        environmentView.setName("env1");
+        when(environmentViewService.findAllByProxyConfigIdAndArchivedIsFalse(any())).thenReturn(Set.of(environmentView));
+        when(proxyConfigRepository.findByResourceCrnInAccount(CRN, ACCOUNT_ID)).thenReturn(Optional.of(PROXY_CONFIG));
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTestProxyConfigService.deleteByCrnInAccount(CRN, ACCOUNT_ID));
+        assertEquals(badRequestException.getMessage(),
+                "Proxy Configuration 'name' cannot be deleted because the following environments are using it: [env1].");
+    }
+
+    @Test
+    public void testDeleteByCrnForAccountIdHasResultAndNotAssignedToAnyEnvThenDeleteSuccess() {
+        when(environmentViewService.findAllByProxyConfigIdAndArchivedIsFalse(any())).thenReturn(Set.of());
+        when(proxyConfigRepository.findByResourceCrnInAccount(CRN, ACCOUNT_ID)).thenReturn(Optional.of(PROXY_CONFIG));
+        assertEquals(PROXY_CONFIG, underTestProxyConfigService.deleteByCrnInAccount(CRN, ACCOUNT_ID));
     }
 
     @Test
     public void testDeleteByNameForAccountOtherException() {
         Class<JDBCException> throwableType = JDBCException.class;
         when(proxyConfigRepository.findByNameInAccount(NAME, ACCOUNT_ID)).thenThrow(throwableType);
-        Assertions.assertThrows(throwableType, () -> underTestProxyConfigService.deleteByNameInAccount(NAME, ACCOUNT_ID));
+        assertThrows(throwableType, () -> underTestProxyConfigService.deleteByNameInAccount(NAME, ACCOUNT_ID));
     }
 
     @Test
     public void testDeleteMultipleInAccountEmpty() {
         Set<String> names = Set.of(NAME);
         when(proxyConfigRepository.findByNameOrResourceCrnInAccount(names, ACCOUNT_ID)).thenReturn(Set.of());
-        Assertions.assertThrows(NotFoundException.class, () -> underTestProxyConfigService.deleteMultipleInAccount(names, ACCOUNT_ID));
+        assertThrows(NotFoundException.class, () -> underTestProxyConfigService.deleteMultipleInAccount(names, ACCOUNT_ID));
     }
 
     @Test
@@ -192,7 +231,7 @@ public class ProxyConfigServiceTest {
         String name2 = "another";
         Set<String> names = Set.of(name1, name2);
         when(proxyConfigRepository.findByNameOrResourceCrnInAccount(names, ACCOUNT_ID)).thenReturn(Set.of(PROXY_CONFIG));
-        Assertions.assertThrows(NotFoundException.class, () -> underTestProxyConfigService.deleteMultipleInAccount(names, ACCOUNT_ID));
+        assertThrows(NotFoundException.class, () -> underTestProxyConfigService.deleteMultipleInAccount(names, ACCOUNT_ID));
     }
 
     @Test
@@ -206,6 +245,6 @@ public class ProxyConfigServiceTest {
         proxyConfig2.setId(2L);
         Set<ProxyConfig> proxyConfigs = Set.of(proxyConfig2, proxyConfig1);
         when(proxyConfigRepository.findByNameOrResourceCrnInAccount(names, ACCOUNT_ID)).thenReturn(proxyConfigs);
-        Assertions.assertEquals(proxyConfigs, underTestProxyConfigService.deleteMultipleInAccount(names, ACCOUNT_ID));
+        assertEquals(proxyConfigs, underTestProxyConfigService.deleteMultipleInAccount(names, ACCOUNT_ID));
     }
 }

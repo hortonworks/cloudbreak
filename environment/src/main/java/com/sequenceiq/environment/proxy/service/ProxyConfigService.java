@@ -27,6 +27,8 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.environment.environment.domain.EnvironmentView;
+import com.sequenceiq.environment.environment.service.EnvironmentViewService;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 import com.sequenceiq.environment.proxy.repository.ProxyConfigRepository;
 
@@ -43,16 +45,20 @@ public class ProxyConfigService implements CompositeAuthResourcePropertyProvider
 
     private final ProxyConfigModificationService proxyConfigModificationService;
 
+    private final EnvironmentViewService environmentService;
+
     public ProxyConfigService(ProxyConfigRepository proxyConfigRepository,
             RegionAwareCrnGenerator regionAwareCrnGenerator,
             OwnerAssignmentService ownerAssignmentService,
             TransactionService transactionService,
-            ProxyConfigModificationService proxyConfigModificationService) {
+            ProxyConfigModificationService proxyConfigModificationService,
+            EnvironmentViewService environmentService) {
         this.proxyConfigRepository = proxyConfigRepository;
         this.regionAwareCrnGenerator = regionAwareCrnGenerator;
         this.ownerAssignmentService = ownerAssignmentService;
         this.transactionService = transactionService;
         this.proxyConfigModificationService = proxyConfigModificationService;
+        this.environmentService = environmentService;
     }
 
     public ProxyConfig get(Long id) {
@@ -62,27 +68,33 @@ public class ProxyConfigService implements CompositeAuthResourcePropertyProvider
     public ProxyConfig deleteByNameInAccount(String name, String accountId) {
         ProxyConfig proxyConfig = proxyConfigRepository.findByNameInAccount(name, accountId)
                 .orElseThrow(notFound("Proxy config with name:", name));
-        MDCBuilder.buildMdcContext(proxyConfig);
-        proxyConfigRepository.delete(proxyConfig);
-        ownerAssignmentService.notifyResourceDeleted(proxyConfig.getResourceCrn());
+        checkForProxyConfigIfUsedByAnyEnvironment(proxyConfig);
         return proxyConfig;
     }
 
     public ProxyConfig deleteByCrnInAccount(String crn, String accountId) {
         ProxyConfig proxyConfig = proxyConfigRepository.findByResourceCrnInAccount(crn, accountId)
                 .orElseThrow(notFound("Proxy config with crn:", crn));
-        MDCBuilder.buildMdcContext(proxyConfig);
-        proxyConfigRepository.delete(proxyConfig);
-        ownerAssignmentService.notifyResourceDeleted(proxyConfig.getResourceCrn());
+        checkForProxyConfigIfUsedByAnyEnvironment(proxyConfig);
         return proxyConfig;
     }
 
     public Set<ProxyConfig> deleteMultipleInAccount(Set<String> names, String accountId) {
         Set<ProxyConfig> toBeDeleted = getByNamesForAccountId(names, accountId);
-        proxyConfigRepository.deleteAll(toBeDeleted);
-        toBeDeleted.stream().forEach(proxy ->
-                ownerAssignmentService.notifyResourceDeleted(proxy.getResourceCrn()));
+        toBeDeleted.forEach(this::checkForProxyConfigIfUsedByAnyEnvironment);
         return toBeDeleted;
+    }
+
+    private void checkForProxyConfigIfUsedByAnyEnvironment(ProxyConfig proxyConfig) {
+        MDCBuilder.buildMdcContext(proxyConfig);
+        Set<EnvironmentView> environments = environmentService.findAllByProxyConfigIdAndArchivedIsFalse(proxyConfig.getId());
+        if (!environments.isEmpty()) {
+            String environmentList = environments.stream().map(EnvironmentView::getName).collect(Collectors.joining(", "));
+            String message = "Proxy Configuration '%s' cannot be deleted because the following environments are using it: [%s].";
+            throw new BadRequestException(String.format(message, proxyConfig.getName(), environmentList));
+        }
+        proxyConfigRepository.delete(proxyConfig);
+        ownerAssignmentService.notifyResourceDeleted(proxyConfig.getResourceCrn());
     }
 
     private Set<ProxyConfig> getByNamesForAccountId(Set<String> names, String accountId) {
