@@ -48,7 +48,9 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.model.AzureDatabaseType;
+import com.sequenceiq.distrox.api.v1.distrox.model.AzureDistroXV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAzureRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
@@ -71,6 +73,10 @@ class DistroXServiceTest {
     private static final boolean NOT_INTERNAL_REQUEST = false;
 
     private static final String ACTOR = "crn:cdp:iam:us-west-1:cloudera:user:__internal__actor__";
+
+    private static final String ENV_NAME = "someAwesomeEnvironment";
+
+    private static final String CRN = "crn";
 
     @Mock
     private DistroXV1RequestToStackV4RequestConverter stackRequestConverter;
@@ -141,19 +147,18 @@ class DistroXServiceTest {
     }
 
     @Test
-    void testWithNotAvailableEnvironmentButFreeipaAvailableAndRunWithoutException() throws IllegalAccessException {
-        String envName = "someAwesomeEnvironment";
+    void testWithNotAvailableEnvironmentButFreeipaAvailableAndRunWithoutException() {
         DistroXV1Request request = new DistroXV1Request();
-        request.setEnvironmentName(envName);
+        request.setEnvironmentName(ENV_NAME);
         DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
         envResponse.setEnvironmentStatus(START_DATAHUB_STARTED);
-        envResponse.setCrn("crn");
+        envResponse.setCrn(CRN);
         DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
         freeipa.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
         freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
         doNothing().when(fedRampModificationService).prepare(any(), any());
-        when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
-        when(environmentClientService.getByName(envName)).thenReturn(envResponse);
+        when(freeipaClientService.getByEnvironmentCrn(CRN)).thenReturn(freeipa);
+        when(environmentClientService.getByName(ENV_NAME)).thenReturn(envResponse);
         when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any())).thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
 
         doAs(ACTOR, () -> underTest.post(request, NOT_INTERNAL_REQUEST));
@@ -172,14 +177,14 @@ class DistroXServiceTest {
             r.setEnvironmentName(envName);
 
             DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
-            envResponse.setCrn("crn");
+            envResponse.setCrn(CRN);
             envResponse.setEnvironmentStatus(AVAILABLE);
             envResponse.setName(envName);
 
             DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
             freeipa.setAvailabilityStatus(detailedStackStatus.getAvailabilityStatus());
             freeipa.setStatus(detailedStackStatus.getStatus());
-            when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
+            when(freeipaClientService.getByEnvironmentCrn(CRN)).thenReturn(freeipa);
 
             when(environmentClientService.getByName(envName)).thenReturn(envResponse);
 
@@ -197,21 +202,20 @@ class DistroXServiceTest {
 
     @Test
     @DisplayName("When the environment that has the given name is exist and also in the state DELETE_IN_PROGRESS then no exception should come")
-    void testWhenEnvDeleteInProgressExistsThenShouldThrowBadRequest() throws IllegalAccessException {
-        String envName = "someAwesomeEnvironment";
+    void testWhenEnvDeleteInProgressExistsThenShouldThrowBadRequest() {
         DistroXV1Request r = new DistroXV1Request();
-        r.setEnvironmentName(envName);
+        r.setEnvironmentName(ENV_NAME);
 
         DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
         envResponse.setEnvironmentStatus(EnvironmentStatus.DELETE_INITIATED);
-        envResponse.setName(envName);
-        envResponse.setCrn("crn");
+        envResponse.setName(ENV_NAME);
+        envResponse.setCrn(CRN);
         DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
         freeipa.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
         freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
 
-        lenient().when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
-        lenient().when(environmentClientService.getByName(envName)).thenReturn(envResponse);
+        lenient().when(freeipaClientService.getByEnvironmentCrn(CRN)).thenReturn(freeipa);
+        lenient().when(environmentClientService.getByName(ENV_NAME)).thenReturn(envResponse);
 
         StackV4Request converted = new StackV4Request();
         CloudbreakUser cloudbreakUser = mock(CloudbreakUser.class);
@@ -221,26 +225,24 @@ class DistroXServiceTest {
 
         BadRequestException err = assertThrows(BadRequestException.class, () -> doAs(ACTOR, () -> underTest.post(r, NOT_INTERNAL_REQUEST)));
 
-        assertEquals(String.format("'someAwesomeEnvironment' Environment can not be delete in progress state."),
-                err.getMessage());
+        assertEquals("'someAwesomeEnvironment' Environment can not be delete in progress state.", err.getMessage());
     }
 
     @Test
     @DisplayName("When the environment that has the given name is exist and also in the state AVAILABLE then no exception should come")
-    void testWhenEnvExistsAndItIsAvailable() throws IllegalAccessException {
-        String envName = "someAwesomeEnvironment";
+    void testWhenEnvExistsAndItIsAvailable() {
         DistroXV1Request r = new DistroXV1Request();
-        r.setEnvironmentName(envName);
+        r.setEnvironmentName(ENV_NAME);
 
         DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
         envResponse.setEnvironmentStatus(AVAILABLE);
-        envResponse.setCrn("crn");
+        envResponse.setCrn(CRN);
         DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
         freeipa.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
         freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
         doNothing().when(fedRampModificationService).prepare(any(), any());
-        when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
-        when(environmentClientService.getByName(envName)).thenReturn(envResponse);
+        when(freeipaClientService.getByEnvironmentCrn(CRN)).thenReturn(freeipa);
+        when(environmentClientService.getByName(ENV_NAME)).thenReturn(envResponse);
 
         StackV4Request converted = new StackV4Request();
         CloudbreakUser cloudbreakUser = mock(CloudbreakUser.class);
@@ -251,7 +253,7 @@ class DistroXServiceTest {
         doAs(ACTOR, () -> underTest.post(r, NOT_INTERNAL_REQUEST));
 
         verify(environmentClientService, calledOnce()).getByName(any());
-        verify(environmentClientService, calledOnce()).getByName(envName);
+        verify(environmentClientService, calledOnce()).getByName(ENV_NAME);
         verify(stackOperations, calledOnce()).post(any(), any(), any(), anyBoolean());
         verify(stackOperations, calledOnce()).post(eq(USER_ID), eq(cloudbreakUser), eq(converted), eq(true));
         verify(workspaceService, calledOnce()).getForCurrentUser();
@@ -345,40 +347,38 @@ class DistroXServiceTest {
 
     @Test
     public void testIfDlIsNotExists() {
-        String envName = "someAwesomeEnvironment";
         DistroXV1Request request = new DistroXV1Request();
-        request.setEnvironmentName(envName);
+        request.setEnvironmentName(ENV_NAME);
         DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
         envResponse.setEnvironmentStatus(AVAILABLE);
-        envResponse.setCrn("crn");
-        envResponse.setName(envName);
+        envResponse.setCrn(CRN);
+        envResponse.setName(ENV_NAME);
         DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
         freeipa.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
         freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
-        when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
-        when(environmentClientService.getByName(envName)).thenReturn(envResponse);
+        when(freeipaClientService.getByEnvironmentCrn(CRN)).thenReturn(freeipa);
+        when(environmentClientService.getByName(ENV_NAME)).thenReturn(envResponse);
         when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any())).thenReturn(Set.of());
 
         assertThatThrownBy(() -> underTest.post(request, NOT_INTERNAL_REQUEST))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("Data Lake stack cannot be found for environment: %s (%s)", envName, envResponse.getCrn());
+                .hasMessage("Data Lake stack cannot be found for environment: %s (%s)", ENV_NAME, envResponse.getCrn());
 
         verifyNoMoreInteractions(platformAwareSdxConnector);
     }
 
     @Test
     public void testIfDlIsNotRunning() {
-        String envName = "someAwesomeEnvironment";
         DistroXV1Request request = new DistroXV1Request();
-        request.setEnvironmentName(envName);
+        request.setEnvironmentName(ENV_NAME);
         DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
         envResponse.setEnvironmentStatus(AVAILABLE);
-        envResponse.setCrn("crn");
+        envResponse.setCrn(CRN);
         DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
         freeipa.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
         freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
-        when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
-        when(environmentClientService.getByName(envName)).thenReturn(envResponse);
+        when(freeipaClientService.getByEnvironmentCrn(CRN)).thenReturn(freeipa);
+        when(environmentClientService.getByName(ENV_NAME)).thenReturn(envResponse);
         when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any()))
                 .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.NOT_AVAILABLE)));
 
@@ -391,12 +391,11 @@ class DistroXServiceTest {
 
     @Test
     public void testIfDlIsRunning() {
-        String envName = "someAwesomeEnvironment";
         DistroXV1Request request = new DistroXV1Request();
-        request.setEnvironmentName(envName);
+        request.setEnvironmentName(ENV_NAME);
         DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
         envResponse.setEnvironmentStatus(AVAILABLE);
-        envResponse.setCrn("crn");
+        envResponse.setCrn(CRN);
         DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
         freeipa.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
         freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
@@ -406,8 +405,8 @@ class DistroXServiceTest {
         workspace.setTenant(tenant);
         doNothing().when(fedRampModificationService).prepare(any(), any());
         when(workspaceService.getForCurrentUser()).thenReturn(workspace);
-        when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
-        when(environmentClientService.getByName(envName)).thenReturn(envResponse);
+        when(freeipaClientService.getByEnvironmentCrn(CRN)).thenReturn(freeipa);
+        when(environmentClientService.getByName(ENV_NAME)).thenReturn(envResponse);
         when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any()))
                 .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
 
@@ -418,12 +417,11 @@ class DistroXServiceTest {
 
     @Test
     public void testIfDlRollingUpgradeInProgress() {
-        String envName = "someAwesomeEnvironment";
         DistroXV1Request request = new DistroXV1Request();
-        request.setEnvironmentName(envName);
+        request.setEnvironmentName(ENV_NAME);
         DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
         envResponse.setEnvironmentStatus(AVAILABLE);
-        envResponse.setCrn("crn");
+        envResponse.setCrn(CRN);
         DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
         freeipa.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
         freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
@@ -433,8 +431,8 @@ class DistroXServiceTest {
         workspace.setTenant(tenant);
         doNothing().when(fedRampModificationService).prepare(any(), any());
         when(workspaceService.getForCurrentUser()).thenReturn(workspace);
-        when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
-        when(environmentClientService.getByName(envName)).thenReturn(envResponse);
+        when(freeipaClientService.getByEnvironmentCrn(CRN)).thenReturn(freeipa);
+        when(environmentClientService.getByName(ENV_NAME)).thenReturn(envResponse);
         when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any()))
                 .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.ROLLING_UPGRADE_IN_PROGRESS)));
 
@@ -445,16 +443,15 @@ class DistroXServiceTest {
 
     @Test
     void testIfImageIdAndOsBothSet() {
-        String envName = "someAwesomeEnvironment";
         DistroXV1Request request = new DistroXV1Request();
-        request.setEnvironmentName(envName);
+        request.setEnvironmentName(ENV_NAME);
         DistroXImageV1Request imageRequest = new DistroXImageV1Request();
         imageRequest.setId("id");
         imageRequest.setOs("os");
         request.setImage(imageRequest);
         DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
         envResponse.setEnvironmentStatus(AVAILABLE);
-        envResponse.setCrn("crn");
+        envResponse.setCrn(CRN);
         DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
         freeipa.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
         freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
@@ -463,8 +460,8 @@ class DistroXServiceTest {
         tenant.setName("test");
         workspace.setTenant(tenant);
         when(workspaceService.getForCurrentUser()).thenReturn(workspace);
-        when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
-        when(environmentClientService.getByName(envName)).thenReturn(envResponse);
+        when(freeipaClientService.getByEnvironmentCrn(CRN)).thenReturn(freeipa);
+        when(environmentClientService.getByName(ENV_NAME)).thenReturn(envResponse);
         when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any()))
                 .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
 
@@ -477,15 +474,14 @@ class DistroXServiceTest {
 
     @Test
     void testIfImageOsIsNotSupported() {
-        String envName = "someAwesomeEnvironment";
         DistroXV1Request request = new DistroXV1Request();
-        request.setEnvironmentName(envName);
+        request.setEnvironmentName(ENV_NAME);
         DistroXImageV1Request imageRequest = new DistroXImageV1Request();
         imageRequest.setOs("os");
         request.setImage(imageRequest);
         DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
         envResponse.setEnvironmentStatus(AVAILABLE);
-        envResponse.setCrn("crn");
+        envResponse.setCrn(CRN);
         DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
         freeipa.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
         freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
@@ -494,8 +490,8 @@ class DistroXServiceTest {
         tenant.setName("test");
         workspace.setTenant(tenant);
         when(workspaceService.getForCurrentUser()).thenReturn(workspace);
-        when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
-        when(environmentClientService.getByName(envName)).thenReturn(envResponse);
+        when(freeipaClientService.getByEnvironmentCrn(CRN)).thenReturn(freeipa);
+        when(environmentClientService.getByName(ENV_NAME)).thenReturn(envResponse);
         when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any()))
                 .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
         when(imageOsService.isSupported(any())).thenReturn(false);
@@ -541,14 +537,35 @@ class DistroXServiceTest {
 
     }
 
+    @Test
+    void testShouldThrowExceptionWhenAzureRequestContainsBasicLoadBalancerSku() {
+        DistroXV1Request request = createDistroXV1RequestForAzureSingleServerRejectionTest(AzureDatabaseType.FLEXIBLE_SERVER, true);
+        AzureDistroXV1Parameters azureDistroXV1Parameters = new AzureDistroXV1Parameters();
+        azureDistroXV1Parameters.setLoadBalancerSku(LoadBalancerSku.BASIC);
+        request.setAzure(azureDistroXV1Parameters);
+
+        assertThatThrownBy(() -> doAs(ACTOR, () -> underTest.post(request, NOT_INTERNAL_REQUEST)))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("The Basic SKU type is no longer supported for Load Balancers. Please use the Standard SKU to provision a Load Balancer. "
+                        + "Check documentation for more information: https://azure.microsoft.com/en-gb/updates?id="
+                        + "azure-basic-load-balancer-will-be-retired-on-30-september-2025-upgrade-to-standard-load-balancer");
+    }
+
+    @Test
+    void testShouldNotThrowExceptionWhenTheAzureLoadBalancerSkuIsNull() {
+        DistroXV1Request request = createDistroXV1RequestForAzureSingleServerRejectionTest(AzureDatabaseType.FLEXIBLE_SERVER, true);
+        request.setAzure(new AzureDistroXV1Parameters());
+
+        doAs(ACTOR, () -> underTest.post(request, NOT_INTERNAL_REQUEST));
+    }
+
     private DistroXV1Request createDistroXV1RequestForAzureSingleServerRejectionTest(
             AzureDatabaseType azureDatabaseType, boolean singleServerRejectEnabled) {
-        String envName = "someAwesomeEnvironment";
         DistroXV1Request request = new DistroXV1Request();
-        request.setEnvironmentName(envName);
+        request.setEnvironmentName(ENV_NAME);
         DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
         envResponse.setEnvironmentStatus(AVAILABLE);
-        envResponse.setCrn("crn");
+        envResponse.setCrn(CRN);
         DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
         freeipa.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
         freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
@@ -559,8 +576,8 @@ class DistroXServiceTest {
         databaseRequest.setDatabaseAzureRequest(databaseAzureRequest);
         request.setExternalDatabase(databaseRequest);
 
-        when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
-        when(environmentClientService.getByName(envName)).thenReturn(envResponse);
+        when(freeipaClientService.getByEnvironmentCrn(CRN)).thenReturn(freeipa);
+        when(environmentClientService.getByName(ENV_NAME)).thenReturn(envResponse);
         when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any()))
                 .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
         when(entitlementService.isSingleServerRejectEnabled(any())).thenReturn(singleServerRejectEnabled);
