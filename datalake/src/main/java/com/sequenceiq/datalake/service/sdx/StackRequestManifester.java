@@ -1,6 +1,7 @@
 package com.sequenceiq.datalake.service.sdx;
 
 import static com.sequenceiq.datalake.service.sdx.SdxService.DATABASE_SSL_ENABLED;
+import static java.lang.Boolean.TRUE;
 
 import java.io.IOException;
 import java.util.Comparator;
@@ -12,8 +13,10 @@ import java.util.Set;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -91,6 +94,9 @@ public class StackRequestManifester {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackRequestManifester.class);
 
     private static final String MIN_RUNTIME_VERSION_FOR_DEFAULT_AWS_NATIVE = "7.3.1";
+
+    @Value("${cb.cm.telemetrypublisher.enabled:false}")
+    private boolean telemetryPublisherEnabled;
 
     @Inject
     private GatewayManifester gatewayManifester;
@@ -335,14 +341,12 @@ public class StackRequestManifester {
             }
             telemetryRequest.setMonitoring(monitoringRequest);
             if (envTelemetry.getFeatures() != null) {
-                FeaturesRequest featuresRequest = new FeaturesRequest();
-                featuresRequest.setMonitoring(envTelemetry.getFeatures().getMonitoring());
-                if (envTelemetry.getFeatures().getCloudStorageLogging() != null) {
-                    featuresRequest.setCloudStorageLogging(envTelemetry.getFeatures().getCloudStorageLogging());
+                telemetryRequest.setFeatures(setupFeaturesRequest(envTelemetry));
+                if (telemetryPublisherEnabled) {
+                    telemetryRequest.setWorkloadAnalytics(setupWorkloadAnalytics(envTelemetry));
                 } else {
-                    featuresRequest.addCloudStorageLogging(true);
+                    LOGGER.debug("Workload analytics feature is disabled (globally).");
                 }
-                telemetryRequest.setFeatures(featuresRequest);
             }
             if (envTelemetry.getFluentAttributes() != null) {
                 Map<String, Object> fluentAttributes = envTelemetry.getFluentAttributes();
@@ -352,15 +356,41 @@ public class StackRequestManifester {
                 addAzureIdbrokerMsiToTelemetry(fluentAttributes, stackV4Request);
                 telemetryRequest.setFluentAttributes(fluentAttributes);
             }
-            LOGGER.info("Environment {} workload analytics: {}, features: {}",
-                    environment.getCrn(), envTelemetry.getWorkloadAnalytics(), envTelemetry.getFeatures());
-            if (envTelemetry.getWorkloadAnalytics() != null && envTelemetry.getWorkloadAnalytics().getAttributes() != null) {
-                WorkloadAnalyticsRequest workloadAnalyticsRequest = new WorkloadAnalyticsRequest();
-                workloadAnalyticsRequest.setAttributes(envTelemetry.getWorkloadAnalytics().getAttributes());
-                telemetryRequest.setWorkloadAnalytics(workloadAnalyticsRequest);
-            }
             stackV4Request.setTelemetry(telemetryRequest);
         }
+    }
+
+    private FeaturesRequest setupFeaturesRequest(TelemetryResponse envTelemetry) {
+        FeaturesRequest featuresRequest = new FeaturesRequest();
+        featuresRequest.setMonitoring(envTelemetry.getFeatures().getMonitoring());
+        if (telemetryPublisherEnabled && envTelemetry.getFeatures().getWorkloadAnalytics() != null &&
+                TRUE.equals(envTelemetry.getFeatures().getWorkloadAnalytics().getEnabled())) {
+            featuresRequest.setWorkloadAnalytics(envTelemetry.getFeatures().getWorkloadAnalytics());
+        }
+        if (envTelemetry.getFeatures().getCloudStorageLogging() != null) {
+            featuresRequest.setCloudStorageLogging(envTelemetry.getFeatures().getCloudStorageLogging());
+        } else {
+            featuresRequest.addCloudStorageLogging(true);
+        }
+
+        return featuresRequest;
+    }
+
+    private WorkloadAnalyticsRequest setupWorkloadAnalytics(TelemetryResponse envTelemetry) {
+        LOGGER.info("Setting up workload analytics with workload analytics feature = {}",
+                envTelemetry.getFeatures().getWorkloadAnalytics());
+        if (envTelemetry.getFeatures().getWorkloadAnalytics() != null &&
+                TRUE.equals(envTelemetry.getFeatures().getWorkloadAnalytics().getEnabled())) {
+            WorkloadAnalyticsRequest workloadAnalyticsRequest = new WorkloadAnalyticsRequest();
+
+            Map<String, Object> waAttributes = new HashMap<>();
+            if (envTelemetry.getWorkloadAnalytics() != null && MapUtils.isNotEmpty(envTelemetry.getWorkloadAnalytics().getAttributes())) {
+                waAttributes.putAll(envTelemetry.getWorkloadAnalytics().getAttributes());
+            }
+            workloadAnalyticsRequest.setAttributes(waAttributes);
+            return workloadAnalyticsRequest;
+        }
+        return null;
     }
 
     void addAzureIdbrokerMsiToTelemetry(Map<String, Object> fluentAttributes, StackV4Request stackRequest) {
