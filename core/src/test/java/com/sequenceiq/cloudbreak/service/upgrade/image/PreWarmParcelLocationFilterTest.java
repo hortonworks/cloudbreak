@@ -14,6 +14,7 @@ import org.junit.Test;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.common.model.Architecture;
 
 public class PreWarmParcelLocationFilterTest {
 
@@ -38,6 +39,12 @@ public class PreWarmParcelLocationFilterTest {
     @Test
     public void testFilterImageShouldReturnFalseWhenTheImageIsNull() {
         assertFalse(underTest.filterImage(null, createImageFilterParams(null)));
+    }
+
+    @Test
+    public void testFilterImageShouldReturnTrueWhenImageIsArm64WithoutPrewarmedParcels() {
+        Image image = createArmImage(List.of());
+        assertTrue(underTest.filterImage(image, createImageFilterParams(null)));
     }
 
     @Test
@@ -138,6 +145,10 @@ public class PreWarmParcelLocationFilterTest {
 
     private Image createImage(List<List<String>> preWarmParcels) {
         return Image.builder().withPreWarmParcels(preWarmParcels).build();
+    }
+
+    private Image createArmImage(List<List<String>> preWarmParcels) {
+        return Image.builder().withPreWarmParcels(preWarmParcels).withArchitecture(Architecture.ARM64.getName()).build();
     }
 
     private ImageFilterParams createImageFilterParams(Map<String, String> stackRelatedParcels) {

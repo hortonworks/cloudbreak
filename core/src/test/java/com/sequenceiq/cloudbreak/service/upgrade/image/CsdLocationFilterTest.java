@@ -13,6 +13,7 @@ import org.junit.Test;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.common.model.Architecture;
 
 public class CsdLocationFilterTest {
 
@@ -37,6 +38,12 @@ public class CsdLocationFilterTest {
     @Test
     public void testFilterImageShouldReturnFalseWhenTheImageIsNull() {
         assertFalse(underTest.filterImage(null, createImageFilterParams(null)));
+    }
+
+    @Test
+    public void testFilterImageShouldReturnTrueWhenImageIsArm64WithoutPrewarmedParcels() {
+        Image image = createArmImage(List.of());
+        assertTrue(underTest.filterImage(image, createImageFilterParams(null)));
     }
 
     @Test
@@ -109,6 +116,10 @@ public class CsdLocationFilterTest {
 
     private Image createImage(List<String> preWarmCsd) {
         return Image.builder().withPreWarmCsd(preWarmCsd).build();
+    }
+
+    private Image createArmImage(List<String> preWarmCsd) {
+        return Image.builder().withPreWarmCsd(preWarmCsd).withArchitecture(Architecture.ARM64.getName()).build();
     }
 
     private ImageFilterParams createImageFilterParams(Map<String, String> stackRelatedParcels) {
