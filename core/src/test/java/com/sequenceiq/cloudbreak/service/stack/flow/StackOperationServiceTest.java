@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStat
 import static com.sequenceiq.cloudbreak.domain.stack.ManualClusterRepairMode.NODE_ID;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_START_IGNORED;
 import static com.sequenceiq.cloudbreak.util.TestConstants.ACCOUNT_ID;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -25,6 +26,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collection;
@@ -49,18 +51,20 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.base.ScalingStrategy;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.requests.StackDatabaseServerCertificateStatusV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabaseServerCertificateStatusV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.domain.SslCertStatus;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -75,7 +79,6 @@ import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
@@ -87,7 +90,6 @@ import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordTriggerService;
 import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordValidator;
 import com.sequenceiq.cloudbreak.service.salt.SaltPasswordStatusService;
 import com.sequenceiq.cloudbreak.service.spot.SpotInstanceUsageCondition;
-import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
@@ -96,13 +98,18 @@ import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.ClusterDatabaseServerCertificateStatusV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.ClusterDatabaseServerCertificateStatusV4Response;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.ClusterDatabaseServerCertificateStatusV4Responses;
 
 @ExtendWith(MockitoExtension.class)
-public class StackOperationServiceTest {
+class StackOperationServiceTest {
 
     private static final RotateSaltPasswordReason REASON = RotateSaltPasswordReason.MANUAL;
 
     private static final long STACK_ID = 9876L;
+
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1234";
 
     @InjectMocks
     private StackOperationService underTest;
@@ -114,9 +121,6 @@ public class StackOperationServiceTest {
     private ReactorFlowManager flowManager;
 
     @Mock
-    private CommonPermissionCheckingUtils permissionCheckingUtils;
-
-    @Mock
     private StackUpdater stackUpdater;
 
     @Mock
@@ -124,9 +128,6 @@ public class StackOperationServiceTest {
 
     @Mock
     private StackDtoService stackDtoService;
-
-    @Mock
-    private ClusterService clusterService;
 
     @Mock
     private EnvironmentService environmentService;
@@ -150,9 +151,6 @@ public class StackOperationServiceTest {
     private UpdateNodeCountValidator updateNodeCountValidator;
 
     @Mock
-    private InstanceMetaDataService instanceMetaDataService;
-
-    @Mock
     private SaltPasswordStatusService saltPasswordStatusService;
 
     @Mock
@@ -173,14 +171,17 @@ public class StackOperationServiceTest {
     @Mock
     private ClusterRepairService clusterRepairService;
 
-    @Captor
-    private ArgumentCaptor<Map<String, Set<Long>>> capturedInstances;
-
     @Mock
     private RootDiskValidationService rootDiskValidationService;
 
+    @Captor
+    private ArgumentCaptor<Map<String, Set<Long>>> capturedInstances;
+
+    @Captor
+    private ArgumentCaptor<ClusterDatabaseServerCertificateStatusV4Request> clusterDatabaseServerCertificateStatusV4RequestCaptor;
+
     @Test
-    public void testStartWhenStackAvailable() {
+    void testStartWhenStackAvailable() {
         Stack stack = new Stack();
         stack.setStackStatus(new StackStatus(stack, AVAILABLE));
         stack.setId(1L);
@@ -192,7 +193,7 @@ public class StackOperationServiceTest {
 
     @ParameterizedTest(name = "{0}: With stackStatus={1}")
     @MethodSource("stackStatusForStop")
-    public void testStop(String methodName, DetailedStackStatus stackStatus) {
+    void testStop(String methodName, DetailedStackStatus stackStatus) {
         StackDto stackDto = mock(StackDto.class);
         when(stackDto.getId()).thenReturn(STACK_ID);
         Stack stack = new Stack();
@@ -216,7 +217,7 @@ public class StackOperationServiceTest {
     }
 
     @Test
-    public void testStartWhenStackStopped() {
+    void testStartWhenStackStopped() {
         Stack stack = new Stack();
         stack.setStackStatus(new StackStatus(stack, STOPPED));
         stack.setId(1L);
@@ -227,7 +228,7 @@ public class StackOperationServiceTest {
     }
 
     @Test
-    public void testStartWhenStackStartFailed() {
+    void testStartWhenStackStartFailed() {
         Stack stack = new Stack();
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.START_FAILED));
         stack.setId(1L);
@@ -238,7 +239,7 @@ public class StackOperationServiceTest {
     }
 
     @Test
-    public void testStartWhenStackStopFailed() {
+    void testStartWhenStackStopFailed() {
         Stack stack = new Stack();
         stack.setStackStatus(new StackStatus(stack, STOP_FAILED));
         stack.setId(1L);
@@ -250,7 +251,7 @@ public class StackOperationServiceTest {
     }
 
     @Test
-    public void testStartWhenClusterStopFailed() {
+    void testStartWhenClusterStopFailed() {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
         stack.setStackStatus(new StackStatus(stack, Status.STOPPED, "", STOPPED));
@@ -261,7 +262,7 @@ public class StackOperationServiceTest {
     }
 
     @Test
-    public void shouldNotTriggerStopWhenStackRunsOnSpotInstances() {
+    void shouldNotTriggerStopWhenStackRunsOnSpotInstances() {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
         stack.setStackStatus(new StackStatus(stack, AVAILABLE));
@@ -278,7 +279,7 @@ public class StackOperationServiceTest {
     }
 
     @Test
-    public void testStartWhenCheckCallEnvironmentCheck() {
+    void testStartWhenCheckCallEnvironmentCheck() {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
         stack.setStackStatus(new StackStatus(stack, STOPPED));
@@ -289,7 +290,7 @@ public class StackOperationServiceTest {
     }
 
     @Test
-    public void testTriggerStackStopIfNeededWhenCheckCallEnvironmentCheck() {
+    void testTriggerStackStopIfNeededWhenCheckCallEnvironmentCheck() {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
         stack.setStackStatus(new StackStatus(stack, AVAILABLE));
@@ -304,7 +305,7 @@ public class StackOperationServiceTest {
     }
 
     @Test
-    public void testUpdateNodeCountWhenCheckCallEnvironmentCheck() throws TransactionService.TransactionExecutionException {
+    void testUpdateNodeCountWhenCheckCallEnvironmentCheck() throws TransactionService.TransactionExecutionException {
         StackDto stackDto = mock(StackDto.class);
         Stack stack = new Stack();
         stack.setId(STACK_ID);
@@ -319,7 +320,7 @@ public class StackOperationServiceTest {
     }
 
     @Test
-    public void testUpdateNodeCountAndCheckDownscaleAndUpscaleStatusChange() throws TransactionService.TransactionExecutionException {
+    void testUpdateNodeCountAndCheckDownscaleAndUpscaleStatusChange() throws TransactionService.TransactionExecutionException {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
         stack.setStackStatus(new StackStatus(stack, AVAILABLE));
@@ -363,7 +364,7 @@ public class StackOperationServiceTest {
 
     @ParameterizedTest(name = "{0}: With stackStatus={1}")
     @MethodSource("stackStatusForUpdateNodeCount")
-    public void testUpdateNodeCountStartInstances(String methodName, DetailedStackStatus stackStatus) throws TransactionService.TransactionExecutionException {
+    void testUpdateNodeCountStartInstances(String methodName, DetailedStackStatus stackStatus) throws TransactionService.TransactionExecutionException {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
         stack.setStackStatus(new StackStatus(stack, stackStatus));
@@ -423,7 +424,7 @@ public class StackOperationServiceTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    public void testRemoveInstances(boolean forced) {
+    void testRemoveInstances(boolean forced) {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
         stack.setStackStatus(new StackStatus(stack, AVAILABLE));
@@ -531,7 +532,7 @@ public class StackOperationServiceTest {
     }
 
     @Test
-    public void testRotateSaltPassword() {
+    void testRotateSaltPassword() {
         NameOrCrn nameOrCrn = NameOrCrn.ofCrn("crn");
         StackDto stackDto = mock(StackDto.class);
         when(stackDtoService.getByNameOrCrn(nameOrCrn, ACCOUNT_ID)).thenReturn(stackDto);
@@ -547,7 +548,7 @@ public class StackOperationServiceTest {
     }
 
     @Test
-    public void testGetSaltPasswordStatus() {
+    void testGetSaltPasswordStatus() {
         NameOrCrn nameOrCrn = NameOrCrn.ofCrn("crn");
         StackDto stackDto = mock(StackDto.class);
         when(stackDtoService.getByNameOrCrn(nameOrCrn, ACCOUNT_ID)).thenReturn(stackDto);
@@ -589,7 +590,7 @@ public class StackOperationServiceTest {
     }
 
     @Test
-    public void testStackUpdateDisks() {
+    void testStackUpdateDisks() {
         StackDto stack = mock(StackDto.class);
         when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
         NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
@@ -600,7 +601,40 @@ public class StackOperationServiceTest {
     }
 
     @Test
-    public void testListDatabaseServersCertificateStatusWebApplicationException() {
+    void testListDatabaseServersCertificateStatus() {
+        StackDatabaseServerCertificateStatusV4Request request = new StackDatabaseServerCertificateStatusV4Request();
+        request.setCrns(Set.of("crn1", "crn2"));
+        ClusterDatabaseServerCertificateStatusV4Response response1 = new ClusterDatabaseServerCertificateStatusV4Response();
+        response1.setCrn("crn1");
+        response1.setSslStatus(SslCertStatus.UP_TO_DATE);
+        ClusterDatabaseServerCertificateStatusV4Response response2 = new ClusterDatabaseServerCertificateStatusV4Response();
+        response2.setCrn("crn2");
+        response2.setSslStatus(SslCertStatus.OUTDATED);
+        ClusterDatabaseServerCertificateStatusV4Responses responses = new ClusterDatabaseServerCertificateStatusV4Responses(Set.of(response1, response2));
+        when(redbeamsClient.listDatabaseServersCertificateStatusByStackCrns(any(), eq(USER_CRN))).thenReturn(responses);
+
+        StackDatabaseServerCertificateStatusV4Responses result = underTest.listDatabaseServersCertificateStatus(request, USER_CRN);
+
+        verify(redbeamsClient).listDatabaseServersCertificateStatusByStackCrns(clusterDatabaseServerCertificateStatusV4RequestCaptor.capture(), eq(USER_CRN));
+        assertThat(clusterDatabaseServerCertificateStatusV4RequestCaptor.getValue().getCrns()).containsExactlyInAnyOrder("crn1", "crn2");
+        assertThat(result.getResponses()).extracting(StackDatabaseServerCertificateStatusV4Response::getCrn).containsExactlyInAnyOrder("crn1", "crn2");
+        assertThat(result.getResponses()).extracting(StackDatabaseServerCertificateStatusV4Response::getSslStatus)
+                .containsExactlyInAnyOrder(SslCertStatus.UP_TO_DATE, SslCertStatus.OUTDATED);
+    }
+
+    @Test
+    void testListDatabaseServersCertificateStatusWhenNoCrns() {
+        StackDatabaseServerCertificateStatusV4Request request = new StackDatabaseServerCertificateStatusV4Request();
+        request.setCrns(Set.of());
+
+        StackDatabaseServerCertificateStatusV4Responses result = underTest.listDatabaseServersCertificateStatus(request, USER_CRN);
+
+        verifyNoInteractions(redbeamsClient);
+        assertThat(result.getResponses()).isEmpty();
+    }
+
+    @Test
+    void testListDatabaseServersCertificateStatusWebApplicationException() {
         StackDatabaseServerCertificateStatusV4Request request = new StackDatabaseServerCertificateStatusV4Request();
         request.setCrns(Set.of("crn1", "crn2"));
 
@@ -612,7 +646,7 @@ public class StackOperationServiceTest {
         when(redbeamsClient.listDatabaseServersCertificateStatusByStackCrns(any(), anyString())).thenThrow(mockException);
 
         BadRequestException thrownException = assertThrows(BadRequestException.class, () -> {
-            underTest.listDatabaseServersCertificateStatus(request, "usercrn");
+            underTest.listDatabaseServersCertificateStatus(request, USER_CRN);
         });
 
         assertTrue(thrownException.getMessage().contains("Could not query database certificate status for clusters"));
@@ -623,7 +657,7 @@ public class StackOperationServiceTest {
     }
 
     @Test
-    public void testRootVolumeDiskUpdate() throws Exception {
+    void testRootVolumeDiskUpdate() throws Exception {
         StackDto stack = mock(StackDto.class);
         when(stack.getId()).thenReturn(STACK_ID);
         InstanceGroupDto instanceGroupDto = mock(InstanceGroupDto.class);
@@ -646,7 +680,7 @@ public class StackOperationServiceTest {
     }
 
     @Test
-    public void testRootVolumeDiskUpdateThrowsBadRequestForValidation() throws Exception {
+    void testRootVolumeDiskUpdateThrowsBadRequestForValidation() throws Exception {
         StackDto stack = mock(StackDto.class);
         when(stack.getId()).thenReturn(STACK_ID);
         when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);

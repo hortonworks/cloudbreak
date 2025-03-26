@@ -9,6 +9,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_STOP_IGNORED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_STOP_REQUESTED;
 import static java.lang.Math.abs;
 import static java.lang.String.format;
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -549,18 +550,22 @@ public class StackOperationService {
     listDatabaseServersCertificateStatus(StackDatabaseServerCertificateStatusV4Request request, String userCrn) {
         try {
             StackDatabaseServerCertificateStatusV4Responses responses = new StackDatabaseServerCertificateStatusV4Responses();
-            ClusterDatabaseServerCertificateStatusV4Request databaseServerCertificateStatusV4Request = new ClusterDatabaseServerCertificateStatusV4Request();
-            databaseServerCertificateStatusV4Request.setCrns(request.getCrns());
+            if (!isEmpty(request.getCrns())) {
+                ClusterDatabaseServerCertificateStatusV4Request databaseServerCertificateStatusV4Request = new ClusterDatabaseServerCertificateStatusV4Request();
+                databaseServerCertificateStatusV4Request.setCrns(request.getCrns());
 
-            ClusterDatabaseServerCertificateStatusV4Responses clusterDatabaseServerCertificateStatusV4Responses =
-                    redbeamsClient.listDatabaseServersCertificateStatusByStackCrns(databaseServerCertificateStatusV4Request, userCrn);
+                ClusterDatabaseServerCertificateStatusV4Responses clusterDatabaseServerCertificateStatusV4Responses =
+                        redbeamsClient.listDatabaseServersCertificateStatusByStackCrns(databaseServerCertificateStatusV4Request, userCrn);
 
-            for (ClusterDatabaseServerCertificateStatusV4Response response : clusterDatabaseServerCertificateStatusV4Responses.getResponses()) {
-                StackDatabaseServerCertificateStatusV4Response databaseServerCertificateStatusV4Response
-                        = new StackDatabaseServerCertificateStatusV4Response();
-                databaseServerCertificateStatusV4Response.setSslStatus(response.getSslStatus());
-                databaseServerCertificateStatusV4Response.setCrn(response.getCrn());
-                responses.getResponses().add(databaseServerCertificateStatusV4Response);
+                for (ClusterDatabaseServerCertificateStatusV4Response response : clusterDatabaseServerCertificateStatusV4Responses.getResponses()) {
+                    StackDatabaseServerCertificateStatusV4Response databaseServerCertificateStatusV4Response
+                            = new StackDatabaseServerCertificateStatusV4Response();
+                    databaseServerCertificateStatusV4Response.setSslStatus(response.getSslStatus());
+                    databaseServerCertificateStatusV4Response.setCrn(response.getCrn());
+                    responses.getResponses().add(databaseServerCertificateStatusV4Response);
+                }
+            } else {
+                LOGGER.info("No Database Server CRNs provided, returning empty response.");
             }
             return responses;
         } catch (WebApplicationException e) {
