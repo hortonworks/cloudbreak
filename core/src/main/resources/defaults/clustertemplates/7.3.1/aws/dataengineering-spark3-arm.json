@@ -1,0 +1,99 @@
+{
+  "name": "7.3.1 - Data Engineering Spark3 (ARM) for AWS",
+  "description": "",
+  "type": "DATAENGINEERING",
+  "featureState": "INTERNAL",
+  "cloudPlatform": "AWS",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.3.1 - Data Engineering: Apache Spark3, Apache Hive, Apache Oozie"
+    },
+    "architecture": "arm64",
+    "instanceGroups": [
+      {
+        "name": "master",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "gp3"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "r7gd.2xlarge"
+        },
+        "nodeCount": 1,
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "compute",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 474,
+              "type": "ephemeral"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "r7gd.2xlarge"
+        },
+        "nodeCount": 1,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "worker",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "gp3"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "r7gd.2xlarge"
+        },
+        "nodeCount": 3,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "gateway",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "gp3"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "r7gd.2xlarge"
+        },
+        "nodeCount": 0,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      }
+    ]
+  }
+}
