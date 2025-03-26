@@ -76,6 +76,10 @@ public class CMRepositoryVersionUtil {
 
     public static final Versioned CLOUDERAMANAGER_VERSION_7_12_0_500 = () -> "7.12.0.500";
 
+    public static final Versioned CLOUDERAMANAGER_VERSION_7_13_1 = () -> "7.13.1";
+
+    public static final Versioned CLOUDERAMANAGER_VERSION_7_13_1_300 = () -> "7.13.1.300";
+
     public static final Versioned CLOUDERA_STACK_VERSION_7_2_7 = () -> "7.2.7";
 
     public static final Versioned CLOUDERA_STACK_VERSION_7_2_9 = () -> "7.2.9";
@@ -262,6 +266,11 @@ public class CMRepositoryVersionUtil {
                 cloudPlatform, platformVariant, cdhVersion);
         return cloudPlatform == CloudPlatform.AWS && !AWS_NATIVE_GOV.equalsIgnoreCase(platformVariant)
                 && isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_2_16);
+    }
+
+    public static boolean isDataSharingConfigurationSupported(String cmVersion, String cdhVersion) {
+        return isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_13_1_300) &&
+                isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_3_1);
     }
 
     public static boolean isVersionNewerOrEqualThanLimited(Versioned currentVersion, Versioned limitedAPIVersion) {
