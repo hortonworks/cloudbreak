@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.diagnostics;
 
+import java.util.Optional;
+
 import jakarta.ws.rs.ServiceUnavailableException;
 
 import org.springframework.stereotype.Component;
@@ -37,7 +39,8 @@ public class DiagnosticsCollectionValidator extends AbstractDiagnosticsCollectio
     public void validate(BaseDiagnosticsCollectionRequest request, Stack stack) {
         checkMaintenance(stack.getResourceCrn());
         ImageEntity image = imageService.getByStackId(stack.getId());
-        validate(stack.getTelemetry(), request.getDestination(), stack.getStackStatus().getStatus(), stack.getName(), image.getDate());
+        validate(stack.getTelemetry(), request.getDestination(), stack.getStackStatus().getStatus(), stack.getName(), image.getDate(),
+                Optional.ofNullable(request.getIssue()));
     }
 
     @Override

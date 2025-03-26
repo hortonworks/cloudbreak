@@ -3,6 +3,8 @@ package com.sequenceiq.datalake.service.validation.diagnostics;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,10 +34,13 @@ class DiagnosticsCollectionValidatorTest {
     @Mock
     private EntitlementService entitlementService;
 
+    @Mock
+    private SupportBundleConfiguration supportBundleConfiguration;
+
     @BeforeEach
     public void setUp() {
-        underTest = new DiagnosticsCollectionValidator(
-                        new SupportBundleConfiguration(false, null, null, false), entitlementService);
+        underTest = new DiagnosticsCollectionValidator(supportBundleConfiguration, entitlementService);
+        lenient().when(supportBundleConfiguration.isEnabled()).thenReturn(Boolean.FALSE);
         given(entitlementService.isDiagnosticsEnabled("acc1")).willReturn(true);
     }
 
@@ -106,5 +111,34 @@ class DiagnosticsCollectionValidatorTest {
         BadRequestException thrown = assertThrows(BadRequestException.class, () -> underTest.validate(request, stackV4Response));
 
         assertTrue(thrown.getMessage().contains("Destination SUPPORT is not supported yet."));
+    }
+
+    @Test
+    void testValidateWithSupportDestinationWithoutCaseNumber() {
+        when(supportBundleConfiguration.isEnabled()).thenReturn(Boolean.TRUE);
+        BaseDiagnosticsCollectionRequest request = new BaseDiagnosticsCollectionRequest();
+        request.setDestination(DiagnosticsDestination.SUPPORT);
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setCrn(DATALAKE_CRN);
+        TelemetryResponse telemetry = new TelemetryResponse();
+        stackV4Response.setTelemetry(telemetry);
+
+        BadRequestException thrown = assertThrows(BadRequestException.class, () -> underTest.validate(request, stackV4Response));
+
+        assertTrue(thrown.getMessage().contains("Case number is missing from the request, it is required for SUPPORT destination."));
+    }
+
+    @Test
+    void testValidateWithSupportDestinationWithCaseNumber() {
+        when(supportBundleConfiguration.isEnabled()).thenReturn(Boolean.TRUE);
+        BaseDiagnosticsCollectionRequest request = new BaseDiagnosticsCollectionRequest();
+        request.setDestination(DiagnosticsDestination.SUPPORT);
+        request.setIssue("1234");
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setCrn(DATALAKE_CRN);
+        TelemetryResponse telemetry = new TelemetryResponse();
+        stackV4Response.setTelemetry(telemetry);
+
+        underTest.validate(request, stackV4Response);
     }
 }

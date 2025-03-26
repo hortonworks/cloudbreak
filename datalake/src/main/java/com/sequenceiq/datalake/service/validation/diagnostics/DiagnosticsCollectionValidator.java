@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.service.validation.diagnostics;
 
+import java.util.Optional;
+
 import jakarta.ws.rs.ServiceUnavailableException;
 
 import org.springframework.stereotype.Component;
@@ -26,16 +28,16 @@ public class DiagnosticsCollectionValidator extends AbstractCMDiagnosticsCollect
     }
 
     public void validate(BaseCmDiagnosticsCollectionRequest request, StackV4Response stackV4Response) {
-        validate(request.getDestination(), stackV4Response, true);
+        validate(request.getDestination(), stackV4Response, true, Optional.ofNullable(request.getTicket()));
     }
 
     public void validate(BaseDiagnosticsCollectionRequest request, StackV4Response stackV4Response) {
-        validate(request.getDestination(), stackV4Response, false);
+        validate(request.getDestination(), stackV4Response, false, Optional.ofNullable(request.getIssue()));
     }
 
-    public void validate(DiagnosticsDestination destination, StackV4Response stackV4Response, boolean cmBundle) {
+    public void validate(DiagnosticsDestination destination, StackV4Response stackV4Response, boolean cmBundle, Optional<String> issue) {
         checkMaintenance(stackV4Response.getCrn());
-        validate(stackV4Response.getTelemetry(), destination, stackV4Response.getStatus(), stackV4Response.getName(), null, cmBundle);
+        validate(stackV4Response.getTelemetry(), destination, stackV4Response.getStatus(), stackV4Response.getName(), null, cmBundle, issue);
     }
 
     @Override

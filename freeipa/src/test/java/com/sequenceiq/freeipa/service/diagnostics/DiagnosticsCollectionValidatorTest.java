@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -43,11 +44,13 @@ public class DiagnosticsCollectionValidatorTest {
     @Mock
     private ImageEntity imageEntity;
 
+    @Mock
+    private SupportBundleConfiguration supportBundleConfiguration;
+
     @BeforeEach
     public void setUp() {
-        underTest = new DiagnosticsCollectionValidator(
-                new SupportBundleConfiguration(false, null, null, false),
-                entitlementService, imageService);
+        underTest = new DiagnosticsCollectionValidator(supportBundleConfiguration, entitlementService, imageService);
+        lenient().when(supportBundleConfiguration.isEnabled()).thenReturn(Boolean.FALSE);
         when(imageService.getByStackId(any())).thenReturn(imageEntity);
         when(imageEntity.getDate()).thenReturn("2022-08-03");
     }
@@ -99,6 +102,30 @@ public class DiagnosticsCollectionValidatorTest {
                 underTest.validate(request, createStackWithTelemetry(telemetry)));
 
         assertTrue(thrown.getMessage().contains("Destination SUPPORT is not supported yet."));
+    }
+
+    @Test
+    void testValidateWithSupportDestinationWithoutCaseNumber() {
+        when(supportBundleConfiguration.isEnabled()).thenReturn(Boolean.TRUE);
+        BaseDiagnosticsCollectionRequest request = new BaseDiagnosticsCollectionRequest();
+        request.setDestination(DiagnosticsDestination.SUPPORT);
+        Telemetry telemetry = new Telemetry();
+
+        BadRequestException thrown = assertThrows(BadRequestException.class, () ->
+                underTest.validate(request, createStackWithTelemetry(telemetry)));
+
+        assertTrue(thrown.getMessage().contains("Case number is missing from the request, it is required for SUPPORT destination."));
+    }
+
+    @Test
+    void testValidateWithSupportDestinationWithCaseNumber() {
+        when(supportBundleConfiguration.isEnabled()).thenReturn(Boolean.TRUE);
+        BaseDiagnosticsCollectionRequest request = new BaseDiagnosticsCollectionRequest();
+        request.setDestination(DiagnosticsDestination.SUPPORT);
+        request.setIssue("1234");
+        Telemetry telemetry = new Telemetry();
+
+        underTest.validate(request, createStackWithTelemetry(telemetry));
     }
 
     @Test

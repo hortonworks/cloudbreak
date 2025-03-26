@@ -1,6 +1,11 @@
 package com.sequenceiq.cloudbreak.validation;
 
+import static com.sequenceiq.common.api.telemetry.model.DiagnosticsDestination.SUPPORT;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
+
 import java.util.Optional;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.telemetry.support.SupportBundleConfiguration;
@@ -19,12 +24,12 @@ public abstract class AbstractDiagnosticsCollectionValidator<T, S> {
     }
 
     public void validate(T telemetry, DiagnosticsDestination destination, S stackStatus,
-            String stackName, String version) {
-        validate(telemetry, destination, stackStatus, stackName, version, false);
+            String stackName, String version, Optional<String> caseNumber) {
+        validate(telemetry, destination, stackStatus, stackName, version, false, caseNumber);
     }
 
     public void validate(T telemetry, DiagnosticsDestination destination, S stackStatus,
-            String stackName, String version, boolean cmBundle) {
+            String stackName, String version, boolean cmBundle, Optional<String> caseNumber) {
         ValidationResult.ValidationResultBuilder validationBuilder = new ValidationResult.ValidationResultBuilder();
         validateStackStatus(stackStatus, stackName);
         ImageDateChecker imageDateChecker = getImageDateChecker();
@@ -39,7 +44,10 @@ public abstract class AbstractDiagnosticsCollectionValidator<T, S> {
             validationBuilder.error("Cluster log collection is deprecated, please disable it!");
         } else if (isSupportDestinationDisabled(destination, cmBundle)) {
             validationBuilder.error(
-                    String.format("Destination %s is not supported yet.", DiagnosticsDestination.SUPPORT.name()));
+                    String.format("Destination %s is not supported yet.", SUPPORT.name()));
+        } else if (isCaseNumberMissingForSupportDestination(destination, caseNumber)) {
+            validationBuilder.error(
+                    String.format("Case number is missing from the request, it is required for %s destination.", SUPPORT.name()));
         }
         ValidationResult validationResult = validationBuilder.build();
         if (validationResult.hasError()) {
@@ -73,6 +81,10 @@ public abstract class AbstractDiagnosticsCollectionValidator<T, S> {
     }
 
     private boolean isSupportDestinationDisabled(DiagnosticsDestination destination, boolean cmBundle) {
-        return DiagnosticsDestination.SUPPORT.equals(destination) && !isSupportBundleEnabled(cmBundle);
+        return SUPPORT.equals(destination) && !isSupportBundleEnabled(cmBundle);
+    }
+
+    private boolean isCaseNumberMissingForSupportDestination(DiagnosticsDestination destination, Optional<String> caseNumber) {
+        return SUPPORT.equals(destination) && StringUtils.isEmpty(caseNumber.orElse(EMPTY));
     }
 }

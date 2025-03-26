@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.validation.diagnostics;
 
+import java.util.Optional;
+
 import jakarta.ws.rs.ServiceUnavailableException;
 
 import org.springframework.stereotype.Component;
@@ -26,16 +28,16 @@ public class DiagnosticsCollectionValidator extends AbstractCMDiagnosticsCollect
     }
 
     public void validate(BaseDiagnosticsCollectionRequest request, Stack stack, Telemetry telemetry) {
-        validate(request.getDestination(), stack, telemetry, false);
+        validate(request.getDestination(), stack, telemetry, false, Optional.ofNullable(request.getIssue()));
     }
 
     public void validate(BaseCmDiagnosticsCollectionRequest request, Stack stack, Telemetry telemetry) {
-        validate(request.getDestination(), stack, telemetry, true);
+        validate(request.getDestination(), stack, telemetry, true, Optional.ofNullable(request.getTicket()));
     }
 
-    public void validate(DiagnosticsDestination destination, Stack stack, Telemetry telemetry, Boolean cmBundle) {
+    public void validate(DiagnosticsDestination destination, Stack stack, Telemetry telemetry, Boolean cmBundle, Optional<String> issue) {
         checkMaintenance(stack.getResourceCrn());
-        validate(telemetry, destination, stack.getStatus(), stack.getName(), null, cmBundle);
+        validate(telemetry, destination, stack.getStatus(), stack.getName(), null, cmBundle, issue);
     }
 
     @Override
