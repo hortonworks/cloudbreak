@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType.DATALAKE;
 import static com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails.CLUSTER_CRN_KEY;
 
 import java.io.IOException;
@@ -166,7 +165,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
         if (dbusCredential != null && dbusCredential.isValid()) {
             builder.withCredential(dbusCredential);
         }
-        boolean datalakeCluster = DATALAKE.equals(stack.getType());
+        boolean datalakeCluster = StackType.DATALAKE.equals(stack.getType());
         if (!datalakeCluster && entitlementService.isDatahubDatabusEndpointValidationEnabled(accountId)) {
             builder.withValidation();
         }
@@ -223,7 +222,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
 
     private MeteringContext createMeteringContext(StackView stack, Telemetry telemetry) {
         MeteringContext.Builder builder = MeteringContext.builder();
-        boolean datahub = !DATALAKE.equals(stack.getType());
+        boolean datahub = !StackType.DATALAKE.equals(stack.getType());
         boolean meteringFeatureEnabled = telemetry.isMeteringFeatureEnabled();
         boolean meteringEnabled = meteringFeatureEnabled && datahub;
         if (meteringEnabled) {
@@ -259,7 +258,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
     }
 
     private TelemetryClusterDetails createTelemetryClusterDetails(StackView stack, Telemetry telemetry, DatabusContext databusContext) {
-        String clusterCrn = DATALAKE.equals(stack.getType()) ? getDatalakeCrn(telemetry, stack.getResourceCrn()) : stack.getResourceCrn();
+        String clusterCrn = StackType.DATALAKE.equals(stack.getType()) ? getDatalakeCrn(telemetry, stack.getResourceCrn()) : stack.getResourceCrn();
         return TelemetryClusterDetails.Builder.builder()
                 .withOwner(stack.getCreator().getUserCrn())
                 .withName(stack.getName())
@@ -276,11 +275,9 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
 
     private DataBusCredential getOrRefreshDataBusCredential(StackView stack, String accountId, Telemetry telemetry, DataBusCredential dataBusCredential,
             CdpAccessKeyType cdpAccessKeyType) {
-        return getAltusCredential(accountId, telemetry, dataBusCredential, "DataBus", (stack.getType().equals(DATALAKE)) ? (t -> true) :
-                        altusMachineUserService::isAnyDataBusBasedFeatureSupported,
+        return getAltusCredential(accountId, telemetry, dataBusCredential, "DataBus", altusMachineUserService::isAnyDataBusBasedFeatureSupported,
                 () -> {
-                    Optional<AltusCredential> altusCredential = altusMachineUserService.generateDatabusMachineUserForFluent(stack, telemetry,
-                            stack.getType().equals(DATALAKE), cdpAccessKeyType);
+                    Optional<AltusCredential> altusCredential = altusMachineUserService.generateDatabusMachineUserForFluent(stack, telemetry, cdpAccessKeyType);
                     return altusMachineUserService.storeDataBusCredential(altusCredential, stack, cdpAccessKeyType);
                 });
     }
@@ -357,7 +354,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
     }
 
     private FluentClusterType mapToFluentClusterType(StackType stackType) {
-        return DATALAKE.equals(stackType) ? FluentClusterType.DATALAKE : FluentClusterType.DATAHUB;
+        return StackType.DATALAKE.equals(stackType) ? FluentClusterType.DATALAKE : FluentClusterType.DATAHUB;
     }
 
     private <T> T convertOrReturnNull(String value, Class<T> type) {

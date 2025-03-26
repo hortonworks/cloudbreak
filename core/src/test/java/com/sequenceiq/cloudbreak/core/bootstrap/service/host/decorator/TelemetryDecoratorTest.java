@@ -9,7 +9,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -135,28 +134,6 @@ public class TelemetryDecoratorTest {
         assertEquals(FluentClusterType.DATALAKE, result.getClusterType());
         assertTrue(result.getDatabusContext().isEnabled());
         assertFalse(result.getMeteringContext().isEnabled());
-    }
-
-    @Test
-    public void testCreateTelemetryContextWithDatalakeForcesCreateOfDatabusCredential() {
-        // GIVEN
-        given(telemetry.isMeteringFeatureEnabled()).willReturn(true);
-        // WHEN
-        TelemetryContext result = underTest.createTelemetryContext(createStack(StackType.DATALAKE));
-        // THEN
-        assertEquals(FluentClusterType.DATALAKE, result.getClusterType());
-        verify(altusMachineUserService, times(1)).generateDatabusMachineUserForFluent(any(), any(), eq(true), any());
-    }
-
-    @Test
-    public void testCreateTelemetryContextWithDatahubDoesntForceCreateOfDatabusCredential() {
-        // GIVEN
-        given(telemetry.isMeteringFeatureEnabled()).willReturn(true);
-        // WHEN
-        TelemetryContext result = underTest.createTelemetryContext(createStack(StackType.WORKLOAD));
-        // THEN
-        assertEquals(FluentClusterType.DATAHUB, result.getClusterType());
-        verify(altusMachineUserService, times(1)).generateDatabusMachineUserForFluent(any(), any(), eq(false), any());
     }
 
     @Test
@@ -328,7 +305,7 @@ public class TelemetryDecoratorTest {
         given(altusMachineUserService.isAnyMonitoringFeatureSupported(any(Telemetry.class))).willReturn(true);
         given(altusMachineUserService.storeDataBusCredential(any(Optional.class), any(Stack.class), any(CdpAccessKeyType.class)))
                 .willReturn(dataBusCredential);
-        given(altusMachineUserService.generateDatabusMachineUserForFluent(any(Stack.class), any(Telemetry.class), anyBoolean(), any(CdpAccessKeyType.class)))
+        given(altusMachineUserService.generateDatabusMachineUserForFluent(any(Stack.class), any(Telemetry.class), any(CdpAccessKeyType.class)))
                 .willReturn(Optional.of(altusCredential));
         given(altusMachineUserService.generateMonitoringMachineUser(any(Stack.class), any(Telemetry.class), any(CdpAccessKeyType.class)))
                 .willReturn(Optional.of(altusCredential));
