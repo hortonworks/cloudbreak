@@ -10,12 +10,12 @@ authorization-common-api/                                                       
 grpc-common/                                                                    @cloudbreak/cloudbreak-raven
 
 # Raven and Armadillo teams should review datalake and datalake-api modules
-datalake/                                                                       @cloudbreak/cloudbreak-raven @cloudbreak/cloudbreak-armadillo
-datalake-api/                                                                   @cloudbreak/cloudbreak-raven @cloudbreak/cloudbreak-armadillo
+datalake/                                                                       @cloudbreak/cloudbreak-raven
+datalake-api/                                                                   @cloudbreak/cloudbreak-raven
 sdx-connector/                                                                  @cloudbreak/cloudbreak-raven
 
 # Raven and Armadillo team should review datalake blueprint changes
-core/src/main/resources/defaults/blueprints/*/cdp-sdx*.bp                       @cloudbreak/cloudbreak-raven @cloudbreak/cloudbreak-armadillo
+core/src/main/resources/defaults/blueprints/*/cdp-sdx*.bp                       @cloudbreak/cloudbreak-raven
 
 # Raven team should review quartz and sync job related PRs
 common/src/java/com/sequenceiq/cloudbreak/quartz/*StatusCheckerJob.java         @cloudbreak/cloudbreak-raven
@@ -24,18 +24,25 @@ common/src/java/com/sequenceiq/cloudbreak/quartz/*StatusCheckerJob.java         
 *Controller.java                                                                @cloudbreak/cloudbreak-raven
 
 # Wolf team should review environment and environment-api modules
-environment/                                                                    @cloudbreak/cloudbreak-wolf
-environment-api/                                                                @cloudbreak/cloudbreak-wolf
-environment-common/                                                             @cloudbreak/cloudbreak-wolf
-environment-remote/                                                             @cloudbreak/cloudbreak-wolf
-environment-remote-api/                                                         @cloudbreak/cloudbreak-wolf
+environment/                                                                    @cloudbreak/cloudbreak-wolf-backend
+environment-api/                                                                @cloudbreak/cloudbreak-wolf-backend
+environment-common/                                                             @cloudbreak/cloudbreak-wolf-backend
+environment-remote/                                                             @cloudbreak/cloudbreak-wolf-backend
+environment-remote-api/                                                         @cloudbreak/cloudbreak-wolf-backend
+
+# Wolf team should review template modules
+template-manager-blueprint/                                                     @cloudbreak/cloudbreak-wolf-backend
+template-manager-cmteplate/                                                     @cloudbreak/cloudbreak-wolf-backend
+template-manager-core/                                                          @cloudbreak/cloudbreak-wolf-backend
+template-manager-recipe/                                                        @cloudbreak/cloudbreak-wolf-backend
+template-manager-tag/                                                           @cloudbreak/cloudbreak-wolf-backend
 
 # By default, unless overridden later,
 # Wolf should review every policy change:
-cloud-aws-cloudformation/src/main/resources/definitions/                        @cloudbreak/cloudbreak-wolf
-cloud-aws-common/src/main/resources/definitions/                                @cloudbreak/cloudbreak-wolf
-cloud-azure/src/main/resources/definitions/                                     @cloudbreak/cloudbreak-wolf
-cloud-gcp/src/main/resources/definitions/                                       @cloudbreak/cloudbreak-wolf
+cloud-aws-cloudformation/src/main/resources/definitions/                        @cloudbreak/cloudbreak-wolf-backend
+cloud-aws-common/src/main/resources/definitions/                                @cloudbreak/cloudbreak-wolf-backend
+cloud-azure/src/main/resources/definitions/                                     @cloudbreak/cloudbreak-wolf-backend
+cloud-gcp/src/main/resources/definitions/                                       @cloudbreak/cloudbreak-wolf-backend
 
 
 # DB SSL related changes in core shall be assigned to lrodek
@@ -47,38 +54,27 @@ core-model/**/DatabaseSslDetails*.java                                          
 core-model/**/RdsSslMode.java                                                   @lrodek
 
 # Wolf team should review data hub blueprint changes
-core/src/main/resources/defaults/blueprints/*/cdp-cod*.bp                       @cloudbreak/cloudbreak-wolf
-core/src/main/resources/defaults/blueprints/*/cdp-data*.bp                      @cloudbreak/cloudbreak-wolf
-core/src/main/resources/defaults/blueprints/*/cdp-dde*.bp                       @cloudbreak/cloudbreak-wolf
-core/src/main/resources/defaults/blueprints/*/cdp-flink*.bp                     @cloudbreak/cloudbreak-wolf
-core/src/main/resources/defaults/blueprints/*/cdp-flow*.bp                      @cloudbreak/cloudbreak-wolf
-core/src/main/resources/defaults/blueprints/*/cdp-opdb*.bp                      @cloudbreak/cloudbreak-wolf
-core/src/main/resources/defaults/blueprints/*/cdp-rt*.bp                        @cloudbreak/cloudbreak-wolf
-core/src/main/resources/defaults/blueprints/*/cdp-streaming*.bp                 @cloudbreak/cloudbreak-wolf
+core/src/main/resources/defaults/blueprints/                                    @cloudbreak/cloudbreak-wolf-backend
 
 # Wolf team should review data hub template changes
-core/src/main/resources/defaults/clustertemplates/                              @cloudbreak/cloudbreak-wolf
+core/src/main/resources/defaults/clustertemplates/                              @cloudbreak/cloudbreak-wolf-backend
 
 # Wolf team should review the network usage in IT
-integration-test/scripts/check-results.sh                                       @cloudbreak/cloudbreak-wolf
+integration-test/scripts/check-results.sh                                       @cloudbreak/cloudbreak-wolf-backend
 
 # Wolf team should review template generation related changes
-template-manager-blueprint/                                                     @cloudbreak/cloudbreak-wolf
-template-manager-cmtemplate/                                                    @cloudbreak/cloudbreak-wolf
-template-manager-tag/                                                           @cloudbreak/cloudbreak-wolf
-template-manager-recipe/                                                        @cloudbreak/cloudbreak-wolf
-template-manager-core/                                                          @cloudbreak/cloudbreak-wolf
+template-manager-blueprint/                                                     @cloudbreak/cloudbreak-wolf-backend
+template-manager-cmtemplate/                                                    @cloudbreak/cloudbreak-wolf-backend
+template-manager-tag/                                                           @cloudbreak/cloudbreak-wolf-backend
+template-manager-recipe/                                                        @cloudbreak/cloudbreak-wolf-backend
+template-manager-core/                                                          @cloudbreak/cloudbreak-wolf-backend
+
+# Wolf team should review autoscale changes
+autoscale/                                                                      @cloudbreak/cloudbreak-wolf-backend
+autoscale-api/                                                                  @cloudbreak/cloudbreak-wolf-backend
 
 # Wolf team should review audit related changes
-audit-connector/                                                                @cloudbreak/cloudbreak-wolf
-
-# Bobcat team should review dataengineering related changes
-core/src/main/resources/defaults/blueprints/*/cdp-data-engineering*.bp          @cloudbreak/cloudbreak-lion
-core/src/main/resources/defaults/clustertemplates/*/*/dataengineering*.json     @cloudbreak/cloudbreak-lion
-
-# Bobcat team should review autoscale related changes
-autoscale/                                                                      @cloudbreak/cloudbreak-lion
-autoscale-api/                                                                  @cloudbreak/cloudbreak-lion
+audit-connector/                                                                @cloudbreak/cloudbreak-wolf-backend
 
 # Duck team should review freeipa related changes
 freeipa/                                                                        @cloudbreak/cloudbreak-duck
