@@ -48,6 +48,8 @@ As a prerequisite, you need to have Java 21 installed. You can choose from many 
 
 You'll need Docker. For Mac, use [Docker Desktop for Mac](https://docs.docker.com/docker-for-mac/install/). Please allocate at least 6 CPU and 12 GB Memory to the process. (Depends on that how many service running in your IntelliJ and in Docker containers)
 
+> INFO: For quick setup instruction refer to [README-devnotes.md](README-devnotes.md)
+
 ## Cloudbreak Deployer
 
 The simplest way to set up the working environment to be able to start Cloudbreak on your local machine is to use the [Cloudbreak Deployer](https://github.infra.cloudera.com/cloudbreak/cloudbreak-deployer).
@@ -196,6 +198,21 @@ If everything went well then Cloudbreak will be available on https://localhost. 
 The deployer has generated a `certs` directory under `cbd-local` directory which will be needed later on to set up IDEA properly.
 
 If not already present, you shall create an `etc` directory under `cbd-local` directory and place your Cloudera Manager license file `license.txt` there. This is essential for Thunderhead Mock to start successfully. (Request a licence from us)
+
+### Update Latest From Source
+CBD CLI supports update-to-dev (`cbd update-to-dev`) parameter which can be used to upgrade prebuild and published copy of CBD from build repo. However this will allow building from the Source Directly.
+
+After successfully completing the CloudBreak Deployer instructions to successfully install CloudBreak this instruction can help build the latest Cloud Break Deployer from the Source code.
+This activity may be recommended to pick the latest changes that are not published to the build repository.
+
+pull the latest cloudbreak-deployer from github	https://github.infra.cloudera.com/cloudbreak/cloudbreak-deployer.git
+change directory to the local workspace of the pulled source usually `cd cloudbreak-deployer` and following commands to build and copy the build output
+```shell
+make release-docker
+cp build/Darwin/cbd `which cbd`
+cbd --version   # to test the latest development version is installed. 
+```
+NOTE: release-docker will build the cloudbreak-deployer in a preconfigured docker container and hence this requires docker daemon to be running.
 
 ### Cloudbreak Service Ports
 
