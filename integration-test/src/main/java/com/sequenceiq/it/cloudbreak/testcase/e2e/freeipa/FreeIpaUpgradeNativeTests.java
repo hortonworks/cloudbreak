@@ -11,6 +11,8 @@ import jakarta.inject.Inject;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupNetworkRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.InstanceGroupAwsNetworkParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.AwsNetworkParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.NetworkRequest;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
@@ -47,7 +49,7 @@ public class FreeIpaUpgradeNativeTests extends AbstractE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running cloudbreak, and freeipa with cloudformation",
-            when = "upgrade ",
+            when = "upgrade",
             then = "migration happens into native")
     public void testSingleFreeIpaNativeUpgrade(TestContext testContext) {
         String freeIpa = resourcePropertyProvider().getName();
@@ -62,10 +64,16 @@ public class FreeIpaUpgradeNativeTests extends AbstractE2ETest {
                 .withTelemetry("telemetry")
                 .withVariant("AWS")
                 .withUpgradeCatalogAndImage();
-        freeipa.getRequest().getInstanceGroups().stream().forEach(igr -> igr.getNetwork().getAws().setSubnetIds(List.of(subnet)));
+        freeipa.getRequest().getInstanceGroups().stream().forEach(igr -> {
+            InstanceGroupNetworkRequest instanceGroupNetworkRequest = new InstanceGroupNetworkRequest();
+            instanceGroupNetworkRequest.setAws(new InstanceGroupAwsNetworkParameters());
+            igr.setNetwork(instanceGroupNetworkRequest);
+            igr.getNetwork().getAws().setSubnetIds(List.of(subnet));
+        });
         freeipa.when(freeIpaTestClient.create(), key(freeIpa))
                 .await(FREEIPA_AVAILABLE)
                 .then(freeIpaCloudFormationStackDoesExist())
+                .when(freeIpaTestClient.checkVariant("AWS"))
                 .when(freeIpaTestClient.upgrade())
                 .await(Status.UPDATE_IN_PROGRESS, waitForFlow().withWaitForFlow(Boolean.FALSE))
                 .given(FreeIpaOperationStatusTestDto.class)
@@ -74,6 +82,7 @@ public class FreeIpaUpgradeNativeTests extends AbstractE2ETest {
                 .given(freeIpa, FreeIpaTestDto.class)
                 .await(FREEIPA_AVAILABLE, waitForFlow().withWaitForFlow(Boolean.FALSE))
                 .then(freeIpaCloudFromationStackDoesNotExist())
+                .when(freeIpaTestClient.checkVariant("AWS_NATIVE"))
                 .validate();
     }
 

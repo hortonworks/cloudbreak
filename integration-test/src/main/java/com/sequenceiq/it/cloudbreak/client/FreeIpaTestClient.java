@@ -10,6 +10,7 @@ import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaAttachChildEnvironmentAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaAttachRecipeAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaChangeImageCatalogAction;
+import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaCheckVariantAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaCollectDiagnosticsAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaCreateAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaDeleteAction;
@@ -84,6 +85,10 @@ public class FreeIpaTestClient {
 
     public Action<FreeIpaTestDto, FreeIpaClient> stop() {
         return new FreeIpaStopAction();
+    }
+
+    public Action<FreeIpaTestDto, FreeIpaClient> checkVariant(String variant) {
+        return new FreeIpaCheckVariantAction(variant);
     }
 
     public Action<FreeIpaUserSyncTestDto, FreeIpaClient> syncAllInternal() {
