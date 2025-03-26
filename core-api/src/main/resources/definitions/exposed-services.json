@@ -893,7 +893,8 @@
       "apiIncluded": true,
       "visibleForDatalake": false,
       "visibleForDatahub": true,
-      "minVersion": "7.2.18"
+      "minVersion": "7.2.18",
+      "maxVersion": "7.3.0"
     },
     {
       "name": "LAKEHOUSE_OPTIMIZER",
@@ -908,7 +909,7 @@
       "apiIncluded": true,
       "visibleForDatalake": false,
       "visibleForDatahub": true,
-      "minVersion": "7.3.2"
+      "minVersion": "7.3.1"
     }
   ]
 }
