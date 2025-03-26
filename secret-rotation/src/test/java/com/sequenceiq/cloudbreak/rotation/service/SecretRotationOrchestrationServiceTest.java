@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
+import com.sequenceiq.cloudbreak.rotation.service.history.SecretRotationHistoryService;
 import com.sequenceiq.cloudbreak.rotation.service.phase.SecretRotationFinalizeService;
 import com.sequenceiq.cloudbreak.rotation.service.phase.SecretRotationPreValidateService;
 import com.sequenceiq.cloudbreak.rotation.service.phase.SecretRotationRollbackService;
@@ -37,13 +38,13 @@ public class SecretRotationOrchestrationServiceTest {
     private RotationContextProvider contextProvider;
 
     @Mock
-    private SecretRotationStepProgressService secretRotationStepProgressService;
+    private SecretRotationStepProgressService stepProgressService;
 
     @Mock
-    private SecretRotationStatusService secretRotationStatusService;
+    private SecretRotationStatusService statusService;
 
     @Mock
-    private SecretRotationUsageService secretRotationUsageService;
+    private SecretRotationUsageService usageService;
 
     @Mock
     private SecretRotationExecutionDecisionProvider decisionProvider;
@@ -60,6 +61,9 @@ public class SecretRotationOrchestrationServiceTest {
     @Mock
     private SecretRotationFinalizeService finalizeService;
 
+    @Mock
+    private SecretRotationHistoryService historyService;
+
     @InjectMocks
     private SecretRotationOrchestrationService underTest;
 
@@ -68,7 +72,7 @@ public class SecretRotationOrchestrationServiceTest {
         when(decisionProvider.executionRequired(any())).thenReturn(Boolean.FALSE);
         underTest.rotateIfNeeded(TEST, RESOURCE, null, null);
 
-        verifyNoInteractions(contextProvider, rotationService, secretRotationStatusService, secretRotationUsageService);
+        verifyNoInteractions(contextProvider, rotationService, statusService, usageService);
     }
 
     @Test
@@ -76,7 +80,7 @@ public class SecretRotationOrchestrationServiceTest {
         when(decisionProvider.executionRequired(any())).thenReturn(Boolean.FALSE);
         underTest.preValidateIfNeeded(TEST, RESOURCE, null, null);
 
-        verifyNoInteractions(contextProvider, preValidateService, secretRotationStatusService, secretRotationUsageService);
+        verifyNoInteractions(contextProvider, preValidateService, statusService, usageService);
     }
 
     @Test
@@ -84,7 +88,7 @@ public class SecretRotationOrchestrationServiceTest {
         when(decisionProvider.executionRequired(any())).thenReturn(Boolean.FALSE);
         underTest.finalizeIfNeeded(TEST, RESOURCE, null, null);
 
-        verifyNoInteractions(contextProvider, finalizeService, secretRotationStatusService, secretRotationUsageService);
+        verifyNoInteractions(contextProvider, finalizeService, statusService, usageService);
     }
 
     @Test
@@ -92,7 +96,7 @@ public class SecretRotationOrchestrationServiceTest {
         when(decisionProvider.executionRequired(any())).thenReturn(Boolean.FALSE);
         underTest.rollbackIfNeeded(TEST, RESOURCE, null, null, new SecretRotationException(ROLLBACK_REASON));
 
-        verifyNoInteractions(contextProvider, rollbackService, secretRotationStatusService, secretRotationUsageService);
+        verifyNoInteractions(contextProvider, rollbackService, statusService, usageService);
     }
 
     @Test
@@ -102,9 +106,9 @@ public class SecretRotationOrchestrationServiceTest {
         underTest.rotateIfNeeded(TEST, RESOURCE, null, null);
 
         verify(rotationService).rotate(any());
-        verify(secretRotationStatusService, times(1)).rotationStarted(eq(RESOURCE), eq(TEST));
-        verify(secretRotationUsageService, times(1)).rotationStarted(eq(TEST), eq(RESOURCE), isNull());
-        verify(secretRotationStatusService, times(1)).rotationFinished(eq(RESOURCE), eq(TEST));
+        verify(statusService, times(1)).rotationStarted(eq(RESOURCE), eq(TEST));
+        verify(usageService, times(1)).rotationStarted(eq(TEST), eq(RESOURCE), isNull());
+        verify(statusService, times(1)).rotationFinished(eq(RESOURCE), eq(TEST));
     }
 
     @Test
@@ -114,21 +118,23 @@ public class SecretRotationOrchestrationServiceTest {
         underTest.preValidateIfNeeded(TEST, RESOURCE, null, null);
 
         verify(preValidateService).preValidate(any());
-        verifyNoInteractions(secretRotationUsageService, secretRotationStatusService);
+        verifyNoInteractions(usageService, statusService);
     }
 
     @Test
     public void testFinalize() {
         when(decisionProvider.executionRequired(any())).thenReturn(Boolean.TRUE);
         doNothing().when(finalizeService).finalize(any());
-        doNothing().when(secretRotationStepProgressService).deleteCurrentRotation(any());
+        doNothing().when(stepProgressService).deleteCurrentRotation(any());
+        doNothing().when(historyService).addHistoryItem(any());
 
         underTest.finalizeIfNeeded(TEST, RESOURCE, null, null);
 
         verify(finalizeService).finalize(any());
-        verify(secretRotationStatusService, times(1)).finalizeStarted(eq(RESOURCE), eq(TEST));
-        verify(secretRotationStatusService, times(1)).finalizeFinished(eq(RESOURCE), eq(TEST));
-        verify(secretRotationUsageService, times(1)).rotationFinished(eq(TEST), eq(RESOURCE), isNull());
+        verify(statusService, times(1)).finalizeStarted(eq(RESOURCE), eq(TEST));
+        verify(statusService, times(1)).finalizeFinished(eq(RESOURCE), eq(TEST));
+        verify(usageService, times(1)).rotationFinished(eq(TEST), eq(RESOURCE), isNull());
+        verify(historyService, times(1)).addHistoryItem(any());
     }
 
     @Test
@@ -139,10 +145,10 @@ public class SecretRotationOrchestrationServiceTest {
         underTest.rollbackIfNeeded(TEST, RESOURCE, null, null, new SecretRotationException(ROLLBACK_REASON));
 
         verify(rollbackService).rollback(any());
-        verify(secretRotationStatusService, times(1)).rollbackStarted(eq(RESOURCE), eq(TEST), eq(ROLLBACK_REASON));
-        verify(secretRotationUsageService, times(1)).rollbackStarted(eq(TEST), eq(RESOURCE), isNull());
-        verify(secretRotationStatusService, times(1)).rollbackFinished(eq(RESOURCE), eq(TEST));
-        verify(secretRotationUsageService, times(1)).rollbackFinished(eq(TEST), eq(RESOURCE), isNull());
-        verify(secretRotationUsageService, times(1)).rotationFailed(eq(TEST), eq(RESOURCE), eq(ROLLBACK_REASON), isNull());
+        verify(statusService, times(1)).rollbackStarted(eq(RESOURCE), eq(TEST), eq(ROLLBACK_REASON));
+        verify(usageService, times(1)).rollbackStarted(eq(TEST), eq(RESOURCE), isNull());
+        verify(statusService, times(1)).rollbackFinished(eq(RESOURCE), eq(TEST));
+        verify(usageService, times(1)).rollbackFinished(eq(TEST), eq(RESOURCE), isNull());
+        verify(usageService, times(1)).rotationFailed(eq(TEST), eq(RESOURCE), eq(ROLLBACK_REASON), isNull());
     }
 }

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
+import com.sequenceiq.cloudbreak.rotation.service.history.SecretRotationHistoryService;
 import com.sequenceiq.cloudbreak.rotation.service.phase.SecretRotationFinalizeService;
 import com.sequenceiq.cloudbreak.rotation.service.phase.SecretRotationPreValidateService;
 import com.sequenceiq.cloudbreak.rotation.service.phase.SecretRotationRollbackService;
@@ -29,13 +30,13 @@ public class SecretRotationOrchestrationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SecretRotationOrchestrationService.class);
 
     @Inject
-    private SecretRotationStepProgressService secretRotationProgressService;
+    private SecretRotationStepProgressService progressService;
 
     @Inject
-    private SecretRotationStatusService secretRotationStatusService;
+    private SecretRotationStatusService statusService;
 
     @Inject
-    private SecretRotationUsageService secretRotationUsageService;
+    private SecretRotationUsageService usageService;
 
     @Inject
     private SecretRotationExecutionDecisionProvider executionDecisionProvider;
@@ -52,6 +53,9 @@ public class SecretRotationOrchestrationService {
     @Inject
     private SecretRotationFinalizeService finalizeService;
 
+    @Inject
+    private SecretRotationHistoryService historyService;
+
     public void preValidateIfNeeded(SecretType secretType, String resourceCrn, RotationFlowExecutionType executionType,
             Map<String, String> additionalProperties) {
         RotationMetadata rotationMetadata = getRotationMetadata(secretType, resourceCrn, executionType, PREVALIDATE, additionalProperties);
@@ -60,7 +64,7 @@ public class SecretRotationOrchestrationService {
                 preValidateService.preValidate(rotationMetadata);
             } catch (Exception e) {
                 // for prevalidation we do not need to store failed progress in DB
-                secretRotationProgressService.deleteCurrentRotation(rotationMetadata);
+                progressService.deleteCurrentRotation(rotationMetadata);
                 throw e;
             }
         }
@@ -69,10 +73,10 @@ public class SecretRotationOrchestrationService {
     public void rotateIfNeeded(SecretType secretType, String resourceCrn, RotationFlowExecutionType executionType, Map<String, String> additionalProperties) {
         RotationMetadata rotationMetadata = getRotationMetadata(secretType, resourceCrn, executionType, ROTATE, additionalProperties);
         if (executionDecisionProvider.executionRequired(rotationMetadata)) {
-            secretRotationStatusService.rotationStarted(resourceCrn, secretType);
-            secretRotationUsageService.rotationStarted(secretType, resourceCrn, executionType);
+            statusService.rotationStarted(resourceCrn, secretType);
+            usageService.rotationStarted(secretType, resourceCrn, executionType);
             rotationService.rotate(rotationMetadata);
-            secretRotationStatusService.rotationFinished(resourceCrn, secretType);
+            statusService.rotationFinished(resourceCrn, secretType);
         }
     }
 
@@ -81,16 +85,16 @@ public class SecretRotationOrchestrationService {
         RotationMetadata rotationMetadata = getRotationMetadata(secretType, resourceCrn, executionType, ROLLBACK, additionalProperties);
         if (executionDecisionProvider.executionRequired(rotationMetadata)) {
             try {
-                secretRotationStatusService.rollbackStarted(resourceCrn, secretType, rollbackReason.getMessage());
-                secretRotationUsageService.rollbackStarted(secretType, resourceCrn, executionType);
+                statusService.rollbackStarted(resourceCrn, secretType, rollbackReason.getMessage());
+                usageService.rollbackStarted(secretType, resourceCrn, executionType);
                 rollbackService.rollback(rotationMetadata);
-                secretRotationProgressService.deleteCurrentRotation(rotationMetadata);
-                secretRotationStatusService.rollbackFinished(resourceCrn, secretType);
-                secretRotationUsageService.rollbackFinished(secretType, resourceCrn, executionType);
-                secretRotationUsageService.rotationFailed(secretType, resourceCrn, rollbackReason.getMessage(), executionType);
+                progressService.deleteCurrentRotation(rotationMetadata);
+                statusService.rollbackFinished(resourceCrn, secretType);
+                usageService.rollbackFinished(secretType, resourceCrn, executionType);
+                usageService.rotationFailed(secretType, resourceCrn, rollbackReason.getMessage(), executionType);
             } catch (Exception e) {
-                secretRotationStatusService.rollbackFailed(resourceCrn, secretType, e.getMessage());
-                secretRotationUsageService.rollbackFailed(secretType, resourceCrn, e.getMessage(), executionType);
+                statusService.rollbackFailed(resourceCrn, secretType, e.getMessage());
+                usageService.rollbackFailed(secretType, resourceCrn, e.getMessage(), executionType);
                 throw e;
             }
         }
@@ -100,13 +104,14 @@ public class SecretRotationOrchestrationService {
         RotationMetadata rotationMetadata = getRotationMetadata(secretType, resourceCrn, executionType, FINALIZE, additionalProperties);
         if (executionDecisionProvider.executionRequired(rotationMetadata)) {
             try {
-                secretRotationStatusService.finalizeStarted(resourceCrn, secretType);
+                statusService.finalizeStarted(resourceCrn, secretType);
                 finalizeService.finalize(rotationMetadata);
-                secretRotationProgressService.deleteCurrentRotation(rotationMetadata);
-                secretRotationStatusService.finalizeFinished(resourceCrn, secretType);
-                secretRotationUsageService.rotationFinished(secretType, resourceCrn, executionType);
+                progressService.deleteCurrentRotation(rotationMetadata);
+                historyService.addHistoryItem(rotationMetadata);
+                statusService.finalizeFinished(resourceCrn, secretType);
+                usageService.rotationFinished(secretType, resourceCrn, executionType);
             } catch (Exception e) {
-                secretRotationStatusService.finalizeFailed(resourceCrn, secretType, e.getMessage());
+                statusService.finalizeFailed(resourceCrn, secretType, e.getMessage());
                 throw e;
             }
         }

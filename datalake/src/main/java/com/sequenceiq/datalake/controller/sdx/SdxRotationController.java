@@ -5,7 +5,6 @@ import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CR
 import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.VM_DATALAKE;
 
 import java.util.List;
-import java.util.function.Predicate;
 
 import jakarta.inject.Inject;
 import jakarta.validation.constraints.NotEmpty;
@@ -16,9 +15,7 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
-import com.sequenceiq.cloudbreak.rotation.SecretType;
-import com.sequenceiq.cloudbreak.rotation.service.notification.SecretListField;
-import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
+import com.sequenceiq.cloudbreak.rotation.service.SecretTypeListService;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -36,10 +33,7 @@ public class SdxRotationController implements SdxRotationEndpoint {
     private SdxRotationService sdxRotationService;
 
     @Inject
-    private SecretRotationNotificationService notificationService;
-
-    @Inject
-    private List<SecretType> enabledSecretTypes;
+    private SecretTypeListService<SdxSecretTypeResponse> listService;
 
     @Override
     @CheckPermissionByRequestProperty(type = CRN, path = "crn", action = ROTATE_DL_SECRETS)
@@ -49,14 +43,7 @@ public class SdxRotationController implements SdxRotationEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = ROTATE_DL_SECRETS)
-    public List<SdxSecretTypeResponse> listRotatableSdxSecretType(
-            @ValidCrn(resource = VM_DATALAKE) @ResourceCrn @NotEmpty String datalakeCrn) {
-        // further improvement needed to query secret types for resource
-        return enabledSecretTypes.stream()
-                .filter(Predicate.not(SecretType::internal))
-                .map(type -> new SdxSecretTypeResponse(type.value(),
-                        notificationService.getMessage(type, SecretListField.DISPLAY_NAME),
-                        notificationService.getMessage(type, SecretListField.DESCRIPTION)))
-                .toList();
+    public List<SdxSecretTypeResponse> listRotatableSdxSecretType(@ValidCrn(resource = VM_DATALAKE) @ResourceCrn @NotEmpty String datalakeCrn) {
+        return listService.listRotatableSecretType(datalakeCrn, SdxSecretTypeResponse.converter());
     }
 }

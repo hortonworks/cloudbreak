@@ -1,66 +1,37 @@
 package com.sequenceiq.sdx.api.model;
 
-import jakarta.validation.constraints.NotNull;
+import java.util.function.Function;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sequenceiq.cloudbreak.rotation.response.BaseSecretTypeResponse;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class SdxSecretTypeResponse {
-
-    @NotNull
-    @Schema(description = "Secret type")
-    private String secretType;
-
-    @Schema(description = "Description")
-    private String description;
-
-    @Schema(description = "Display name")
-    private String displayName;
+public class SdxSecretTypeResponse extends BaseSecretTypeResponse {
 
     public SdxSecretTypeResponse() {
     }
 
-    public SdxSecretTypeResponse(String secretType, String displayName, String description) {
-        this.secretType = secretType;
-        this.displayName = displayName;
-        this.description = description;
+    public SdxSecretTypeResponse(String secretType, String displayName, String description, Long lastUpdated) {
+        super(secretType, displayName, description, lastUpdated);
     }
 
-    public String getSecretType() {
-        return secretType;
-    }
-
-    public void setSecretType(String secretType) {
-        this.secretType = secretType;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
+    public static Function<BaseSecretTypeResponse, SdxSecretTypeResponse> converter() {
+        return secretTypeResponse ->  new SdxSecretTypeResponse(secretTypeResponse.getSecretType(),
+                secretTypeResponse.getDisplayName(), secretTypeResponse.getDescription(), secretTypeResponse.getLastUpdated());
     }
 
     @Override
     public String toString() {
         return "SdxSecretTypeResponse{" +
-                "secretType='" + secretType + '\'' +
-                ", displayName='" + displayName + '\'' +
-                ", description='" + description + '\'' +
+                "secretType='" + getSecretType() + '\'' +
+                ", displayName='" + getDisplayName() + '\'' +
+                ", description='" + getDescription() + '\'' +
+                ", lastUpdated='" + getLastUpdated() + '\'' +
                 '}';
     }
 }

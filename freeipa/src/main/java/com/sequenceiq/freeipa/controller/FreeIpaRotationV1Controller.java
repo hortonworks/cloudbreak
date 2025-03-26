@@ -4,7 +4,6 @@ import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.
 import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.ENVIRONMENT;
 
 import java.util.List;
-import java.util.function.Predicate;
 
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -18,9 +17,7 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
-import com.sequenceiq.cloudbreak.rotation.SecretType;
-import com.sequenceiq.cloudbreak.rotation.service.notification.SecretListField;
-import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
+import com.sequenceiq.cloudbreak.rotation.service.SecretTypeListService;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -40,10 +37,7 @@ public class FreeIpaRotationV1Controller implements FreeIpaRotationV1Endpoint {
     private FreeIpaSecretRotationService freeIpaSecretRotationService;
 
     @Inject
-    private SecretRotationNotificationService notificationService;
-
-    @Inject
-    private List<SecretType> enabledSecretTypes;
+    private SecretTypeListService<FreeipaSecretTypeResponse> listService;
 
     @Override
     @CheckPermissionByResourceCrn(action = ROTATE_FREEIPA_SECRETS)
@@ -56,14 +50,7 @@ public class FreeIpaRotationV1Controller implements FreeIpaRotationV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = ROTATE_FREEIPA_SECRETS)
-    public List<FreeipaSecretTypeResponse> listRotatableFreeipaSecretType(
-            @ValidCrn(resource = ENVIRONMENT) @ResourceCrn @NotEmpty String environmentCrn) {
-        // further improvement needed to query secret types for resource
-        return enabledSecretTypes.stream()
-                .filter(Predicate.not(SecretType::internal))
-                .map(type -> new FreeipaSecretTypeResponse(type.value(),
-                        notificationService.getMessage(type, SecretListField.DISPLAY_NAME),
-                        notificationService.getMessage(type, SecretListField.DESCRIPTION)))
-                .toList();
+    public List<FreeipaSecretTypeResponse> listRotatableFreeipaSecretType(@ValidCrn(resource = ENVIRONMENT) @ResourceCrn @NotEmpty String environmentCrn) {
+        return listService.listRotatableSecretType(environmentCrn, FreeipaSecretTypeResponse.converter());
     }
 }
