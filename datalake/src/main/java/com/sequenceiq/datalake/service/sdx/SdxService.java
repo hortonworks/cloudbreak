@@ -567,7 +567,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             if (internalStackV4Request.getArchitecture() == null) {
                 internalStackV4Request.setArchitecture(architecture.getName());
             } else if (!architecture.getName().equals(internalStackV4Request.getArchitecture())) {
-                throw new BadRequestException("The request contains %s cpu architecture but the internal stack request contains %s architecture.");
+                throw new BadRequestException(
+                        String.format("The request contains %s cpu architecture but the internal stack request contains %s architecture.",
+                                architecture, internalStackV4Request.getArchitecture()));
             }
         }
     }
