@@ -28,7 +28,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
@@ -45,9 +44,6 @@ class SecretRotationValidationServiceTest {
     private static final SecretType TEST_SECRET = TestSecretType.TEST;
 
     private static final TestSecretRotationStep TEST_STEP = TestSecretRotationStep.STEP;
-
-    @Mock
-    private EntitlementService entitlementService;
 
     @Mock
     private SecretRotationStepProgressService secretRotationStepProgressService;
@@ -83,13 +79,6 @@ class SecretRotationValidationServiceTest {
                 Arguments.of(FINALIZE, Optional.of(ROLLBACK), true),
                 Arguments.of(FINALIZE, Optional.of(FINALIZE), true)
         );
-    }
-
-    @Test
-    void testSecretRotationEntitlementIsDisabled() {
-        when(entitlementService.isSecretRotationEnabled(any())).thenReturn(false);
-        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.validateSecretRotationEntitlement(DATAHUB_CRN));
-        assertEquals("Account is not entitled to execute secret rotation.", exception.getMessage());
     }
 
     @Test

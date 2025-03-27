@@ -49,7 +49,6 @@ public class FreeIpaSecretRotationService implements SecretRotationFlowEventProv
 
     public FlowIdentifier rotateSecretsByCrn(String accountId, String environmentCrn, FreeIpaSecretRotationRequest request) {
         LOGGER.info("Requested secret rotation. Account id: {}, environment crn: {}, request: {}", accountId, environmentCrn, request);
-        secretRotationValidationService.validateSecretRotationEntitlement(environmentCrn);
         List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(request.getSecrets(),
                 enabledSecretTypes.stream().map(SecretType::getClass).collect(Collectors.toSet()));
         secretRotationValidationService.validateEnabledSecretTypes(secretTypes, null);

@@ -19,8 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
@@ -37,16 +35,7 @@ public class SecretRotationValidationService {
     private List<SecretType> enabledSecretTypes;
 
     @Inject
-    private EntitlementService entitlementService;
-
-    @Inject
     private SecretRotationStepProgressService secretRotationStepProgressService;
-
-    public void validateSecretRotationEntitlement(String resourceCrn) {
-        if (!entitlementService.isSecretRotationEnabled(Crn.safeFromString(resourceCrn).getAccountId())) {
-            throwBadRequest("Account is not entitled to execute secret rotation.");
-        }
-    }
 
     public void validateEnabledSecretTypes(Collection<SecretType> secretTypes, RotationFlowExecutionType requestedExecutionType) {
         if (requestedExecutionType == null && CollectionUtils.isNotEmpty(enabledSecretTypes) && CollectionUtils.isNotEmpty(secretTypes)) {

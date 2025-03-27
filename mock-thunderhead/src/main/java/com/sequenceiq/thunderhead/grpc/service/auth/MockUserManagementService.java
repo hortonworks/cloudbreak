@@ -30,7 +30,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFO
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_MULTIAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_SECURE_BOOT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SECRET_ENCRYPTION;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SECRET_ROTATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_TLS_1_3;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_USE_DEV_TELEMETRY_YUM_REPO;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CENTRAL_COMPUTE_MONITORING;
@@ -525,9 +524,6 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.azure.database.flexibleserver.upgrade.enabled}")
     private boolean azureDatabaseFlexibleServerUpgradeEnabled;
 
-    @Value("${auth.mock.secret.rotation.enabled}")
-    private boolean secretRotationEnabled;
-
     @Value("${auth.mock.secret.encryption.enabled}")
     private boolean secretEncryptionEnabled;
 
@@ -1014,9 +1010,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (dlBackupCompressionEnable) {
             builder.addEntitlements(createEntitlement(CDP_DATALAKE_DB_BACKUP_ENABLE_COMPRESSION));
-        }
-        if (secretRotationEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_CB_SECRET_ROTATION));
         }
         if (secretEncryptionEnabled) {
             builder.addEntitlements(createEntitlement(CDP_CB_SECRET_ENCRYPTION));

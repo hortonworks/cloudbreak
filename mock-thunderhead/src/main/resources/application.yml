@@ -93,7 +93,6 @@ auth:
     azure.database.flexibleserver.upgrade.enabled: true
     azure.database.flexibleserver.upgrade.longpolling.enabled: false
     azure.database.singleserver.reject.enabled: false
-    secret.rotation.enabled: true
     secret.encryption.enabled: false
     container.ready.env.enabled: true
     cdl:

@@ -149,7 +149,6 @@ public class SdxRotationService {
 
     public FlowIdentifier triggerSecretRotation(String datalakeCrn, List<String> secrets, RotationFlowExecutionType requestedExecutionType,
             Map<String, String> additionalProperties) {
-        secretRotationValidationService.validateSecretRotationEntitlement(datalakeCrn);
         List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(secrets,
                 enabledSecretTypes.stream().map(SecretType::getClass).collect(Collectors.toSet()));
         secretRotationValidationService.validateEnabledSecretTypes(secretTypes, requestedExecutionType);

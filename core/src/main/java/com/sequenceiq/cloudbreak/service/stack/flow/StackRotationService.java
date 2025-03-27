@@ -50,7 +50,6 @@ public class StackRotationService {
 
     public FlowIdentifier rotateSecrets(String crn, List<String> secrets, RotationFlowExecutionType requestedExecutionType,
             Map<String, String> additionalProperties) {
-        secretRotationValidationService.validateSecretRotationEntitlement(crn);
         List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(secrets,
                 enabledSecretTypes.stream().map(SecretType::getClass).collect(Collectors.toSet()));
         secretRotationValidationService.validateEnabledSecretTypes(secretTypes, requestedExecutionType);
