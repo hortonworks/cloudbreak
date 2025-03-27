@@ -1,5 +1,5 @@
 {
-  "name": "7.3.2 - Lakehouse Optimizer",
+  "name": "7.3.2 - Lakehouse Optimizer for AWS",
   "description": "",
   "type": "LAKEHOUSE_OPTIMIZER",
   "featureState": "RELEASED",

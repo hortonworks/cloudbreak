@@ -18,5 +18,6 @@ public enum ClusterTemplateV4Type {
     OPERATIONALDATABASE,
     DISCOVERY_DATA_AND_EXPLORATION,
     OTHER,
-    DLM
+    DLM,
+    LAKEHOUSE_OPTIMIZER
 }
