@@ -5,9 +5,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.Clus
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_UPGRADE;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_UPGRADE_NOT_NEEDED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -17,7 +15,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -38,7 +35,6 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeRequest;
-import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.hms.HmsDbUserUpgradeWorkaroundService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -78,21 +74,12 @@ class ClusterUpgradeHandlerTest {
     @Mock
     private ClusterApi connector;
 
-    @Mock
-    private HmsDbUserUpgradeWorkaroundService hmsDbUserUpgradeWorkaroundService;
-
     private Set<ClusterComponentView> components = Collections.singleton(new ClusterComponentView());
 
     private Set<ClouderaManagerProduct> upgradeCandidateProducts = Collections.singleton(new ClouderaManagerProduct());
 
     @InjectMocks
     private ClusterUpgradeHandler underTest;
-
-    @BeforeEach
-    void setup() {
-        lenient().doNothing().when(hmsDbUserUpgradeWorkaroundService).switchToSdxHmsDbUserBeforeUpgradeIfNeeded(any(), any(), any());
-        lenient().doNothing().when(hmsDbUserUpgradeWorkaroundService).switchBackToOriginalHmsDbUserIfNeeded(any(), any());
-    }
 
     @Test
     void testDoAcceptShouldReturnSuccessResponseWhenThereAreUpgradeCandidatesAndTheStackIsDataLake() throws CloudbreakException {
