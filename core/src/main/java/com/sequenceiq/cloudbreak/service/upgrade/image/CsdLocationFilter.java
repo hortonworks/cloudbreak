@@ -17,6 +17,7 @@ import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.common.model.Architecture;
 
 @Component
 public class CsdLocationFilter implements PackageLocationFilter {
@@ -30,7 +31,7 @@ public class CsdLocationFilter implements PackageLocationFilter {
         if (StackType.WORKLOAD.equals(imageFilterParams.getStackType())) {
             if (isInvalidImage(image)) {
                 LOGGER.debug("Image or CSD parcels are not present. Image: {}", image);
-                return false;
+                return image != null && Architecture.ARM64.getName().equalsIgnoreCase(image.getArchitecture());
             } else {
                 Set<String> requiredParcels = getRequiredParcels(imageFilterParams);
                 LOGGER.debug("Stack related required parcels: {}", requiredParcels);
