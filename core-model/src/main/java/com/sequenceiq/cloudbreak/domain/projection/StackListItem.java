@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.domain.projection;
 
+import java.util.Set;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -8,6 +10,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption;
 import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.common.model.ProviderSyncState;
 
 public interface StackListItem {
     Long getId();
@@ -77,4 +80,6 @@ public interface StackListItem {
     Long getLastUpdated();
 
     boolean isMultiAz();
+
+    Set<ProviderSyncState> getProviderSyncStates();
 }

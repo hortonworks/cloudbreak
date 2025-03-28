@@ -58,6 +58,7 @@ public class SdxClusterConverter {
         sdxDatabaseResponse.setDatabaseEngineVersion(sdxCluster.getDatabaseEngineVersion());
         sdxDatabaseResponse.setDatabaseServerCrn(sdxCluster.getDatabaseCrn());
         sdxClusterResponse.setSdxDatabaseResponse(sdxDatabaseResponse);
+        sdxClusterResponse.setProviderSyncStates(sdxCluster.getProviderSyncStates());
         return sdxClusterResponse;
     }
 }

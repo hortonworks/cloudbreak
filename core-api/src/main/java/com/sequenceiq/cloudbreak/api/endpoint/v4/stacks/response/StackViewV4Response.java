@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -10,6 +13,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.UserViewV4Response
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.common.model.JsonEntity;
+import com.sequenceiq.common.model.ProviderSyncState;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -74,6 +78,9 @@ public class StackViewV4Response implements JsonEntity {
 
     @Schema(description = StackModelDescription.SECURITY)
     private SecurityV4Response security;
+
+    @Schema(description = StackModelDescription.PROVIDER_SYNC_STATES)
+    private Set<ProviderSyncState> providerSyncStates = new HashSet<>();
 
     public String getCrn() {
         return crn;
@@ -235,6 +242,14 @@ public class StackViewV4Response implements JsonEntity {
         this.security = security;
     }
 
+    public Set<ProviderSyncState> getProviderSyncStates() {
+        return providerSyncStates;
+    }
+
+    public void setProviderSyncStates(Set<ProviderSyncState> providerSyncStates) {
+        this.providerSyncStates = providerSyncStates;
+    }
+
     @Override
     public String toString() {
         return "StackViewV4Response{" +
@@ -258,6 +273,7 @@ public class StackViewV4Response implements JsonEntity {
                 ", upgradeable=" + upgradeable +
                 ", externalDatabase=" + externalDatabase +
                 ", security=" + security +
+                ", providerSyncStates=" + providerSyncStates +
                 '}';
     }
 }

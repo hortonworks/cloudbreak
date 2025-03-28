@@ -89,6 +89,10 @@ public class StackApiViewService {
                 .collect(Collectors.toMap(StackInstanceCount::getStackId, StackInstanceCount::getInstanceCount));
 
         Set<StackListItem> stackList = stackService.getByWorkspaceId(workspaceId, environmentCrn, stackTypes);
+        return getStackApiViews(instanceCounts, stackList);
+    }
+
+    private Set<StackApiView> getStackApiViews(Map<Long, Integer> instanceCounts, Set<StackListItem> stackList) {
         Set<Long> clusterIds = stackList.stream().map(StackListItem::getClusterId).collect(Collectors.toSet());
         Map<Long, List<HostGroupView>> clusterHgMap = getClusterHostGroupMap(clusterIds);
         return stackList.stream()
@@ -104,11 +108,7 @@ public class StackApiViewService {
                 .collect(Collectors.toMap(StackInstanceCount::getStackId, StackInstanceCount::getInstanceCount));
 
         Set<StackListItem> stackList = stackService.getByWorkspaceIdAndStackIds(workspaceId, stackIds, stackTypes);
-        Set<Long> clusterIds = stackList.stream().map(StackListItem::getClusterId).collect(Collectors.toSet());
-        Map<Long, List<HostGroupView>> clusterHgMap = getClusterHostGroupMap(clusterIds);
-        return stackList.stream()
-                .map(item -> stackListItemToStackApiViewConverter.convert(item, instanceCounts, clusterHgMap.get(item.getClusterId())))
-                .collect(Collectors.toSet());
+        return getStackApiViews(instanceCounts, stackList);
     }
 
     private Map<Long, List<HostGroupView>> getClusterHostGroupMap(Set<Long> clusterIds) {

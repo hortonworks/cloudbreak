@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.controller.sdx;
 
+import static com.sequenceiq.common.model.ProviderSyncState.BASIC_SKU_MIGRATION_NEEDED;
+import static com.sequenceiq.common.model.ProviderSyncState.VALID;
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -8,6 +10,7 @@ import static org.springframework.util.Assert.notNull;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -70,6 +73,7 @@ class SdxClusterConverterTest {
         sdxCluster.setEnableMultiAz(true);
         sdxCluster.getSdxDatabase().setDatabaseEngineVersion("9.6.20");
         sdxCluster.getSdxDatabase().setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.HA);
+        sdxCluster.setProviderSyncStates(Set.of(VALID, BASIC_SKU_MIGRATION_NEEDED));
 
         Map<String, String> tags = new HashMap<>();
         tags.put("key1", "value1");
@@ -105,6 +109,7 @@ class SdxClusterConverterTest {
         expectedTags.put("key1", "value1");
         expectedTags.put("key2", "value2");
         assertEquals(expectedTags, response.getTags());
+        assertEquals(Set.of(VALID, BASIC_SKU_MIGRATION_NEEDED), response.getProviderSyncStates());
 
         SdxDatabaseResponse databaseResponse = response.getSdxDatabaseResponse();
 

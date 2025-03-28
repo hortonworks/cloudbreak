@@ -1,6 +1,8 @@
 package com.sequenceiq.datalake.entity;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -30,6 +32,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.converter.ArchitectureConverter;
 import com.sequenceiq.cloudbreak.converter.CertExpirationStateConverter;
 import com.sequenceiq.cloudbreak.converter.FileSystemTypeConverter;
+import com.sequenceiq.cloudbreak.converter.ProviderSyncSetToStringConverter;
 import com.sequenceiq.cloudbreak.converter.SeLinuxConverter;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
@@ -38,6 +41,7 @@ import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.common.model.ProviderSyncState;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.datalake.converter.SdxClusterShapeConverter;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
@@ -157,6 +161,9 @@ public class SdxCluster implements AccountAwareResource {
     private Architecture architecture;
 
     private String certExpirationDetails;
+
+    @Convert(converter = ProviderSyncSetToStringConverter.class)
+    private Set<ProviderSyncState> providerSyncStates = new HashSet<>();
 
     public Long getId() {
         return id;
@@ -469,6 +476,14 @@ public class SdxCluster implements AccountAwareResource {
         this.certExpirationDetails = certExpirationDetails;
     }
 
+    public Set<ProviderSyncState> getProviderSyncStates() {
+        return providerSyncStates;
+    }
+
+    public void setProviderSyncStates(Set<ProviderSyncState> providerSyncStates) {
+        this.providerSyncStates = providerSyncStates;
+    }
+
     //CHECKSTYLE:OFF
     @Override
     public boolean equals(Object o) {
@@ -498,14 +513,15 @@ public class SdxCluster implements AccountAwareResource {
                 certExpirationState == that.certExpirationState &&
                 Objects.equals(sdxClusterServiceVersion, that.sdxClusterServiceVersion) &&
                 seLinux == that.seLinux &&
-                Objects.equals(sdxDatabase, that.sdxDatabase);
+                Objects.equals(sdxDatabase, that.sdxDatabase) &&
+                Objects.equals(providerSyncStates, that.providerSyncStates);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id, accountId, crn, clusterName, envName, envCrn, stackCrn, clusterShape, tags, stackId, stackRequest,
                 stackRequestToCloudbreak, deleted, created, cloudStorageBaseLocation, cloudStorageFileSystemType, seLinux,
-                rangerRazEnabled, rangerRmsEnabled, certExpirationState, sdxClusterServiceVersion, enableMultiAz);
+                rangerRazEnabled, rangerRmsEnabled, certExpirationState, sdxClusterServiceVersion, enableMultiAz, providerSyncStates);
     }
 
     @Override
@@ -543,6 +559,7 @@ public class SdxCluster implements AccountAwareResource {
                 ", detached=" + detached +
                 ", sdxDatabase=" + sdxDatabase +
                 ", certExpirationDetails='" + certExpirationDetails +
+                ", providerSyncStates=" + providerSyncStates +
                 '}';
     }
 

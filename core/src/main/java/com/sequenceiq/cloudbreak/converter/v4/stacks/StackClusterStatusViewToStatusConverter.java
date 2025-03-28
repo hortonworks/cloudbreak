@@ -22,6 +22,7 @@ public class StackClusterStatusViewToStatusConverter {
         response.setClusterStatusReason(source.getClusterStatusReason());
         response.setCertExpirationState(source.getCertExpirationState());
         response.setCertExpirationDetails(source.getCertExpirationDetails());
+        response.setProviderSyncStates(source.getProviderSyncStates());
         return response;
     }
 

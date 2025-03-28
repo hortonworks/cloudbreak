@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
@@ -75,6 +76,7 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
             } else {
                 StackStatusV4Response stack = cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint().getStatusByCrn(getRemoteResourceCrn());
                 updateCertExpirationStateIfDifferent(sdx, stack);
+                updateProviderSyncStateIfDifferent(sdx, stack);
                 DatalakeStatusEnum originalStatus = sdxStatus.getStatus();
                 DatalakeStatusEnum updatedStatus = updateStatusIfNecessary(stack, sdx, sdxStatus);
                 if (!Objects.equals(originalStatus, updatedStatus)) {
@@ -117,6 +119,15 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
             LOGGER.info("Updating CertExpirationState from [{}] to [{}] with details [{}]",
                     sdx.getCertExpirationState(), stack.getCertExpirationState(), stack.getCertExpirationDetails());
             sdxClusterRepository.updateCertExpirationState(sdx.getId(), stack.getCertExpirationState(), stack.getCertExpirationDetails());
+        }
+    }
+
+    private void updateProviderSyncStateIfDifferent(SdxCluster sdx, StackStatusV4Response stack) {
+        if (!CollectionUtils.isEqualCollection(
+                CollectionUtils.emptyIfNull(sdx.getProviderSyncStates()),
+                CollectionUtils.emptyIfNull(stack.getProviderSyncStates()))) {
+            LOGGER.info("Updating ProviderSyncStates from [{}] to [{}]", sdx.getProviderSyncStates(), stack.getProviderSyncStates());
+            sdxClusterRepository.updateProviderSyncStates(sdx.getId(), stack.getProviderSyncStates());
         }
     }
 

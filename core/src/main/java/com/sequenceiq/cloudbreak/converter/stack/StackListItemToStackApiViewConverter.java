@@ -42,6 +42,7 @@ public class StackListItemToStackApiViewConverter {
         response.getCluster().setStack(response);
         response.setExternalDatabaseCreationType(item.getExternalDatabaseCreationType());
         response.setExternalDatabaseEngineVersion(item.getExternalDatabaseEngineVersion());
+        response.setProviderSyncStates(item.getProviderSyncStates());
         return response;
     }
 

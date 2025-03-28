@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.common.model.ProviderSyncState;
 
 @EntityType(entityClass = Stack.class)
 @Transactional(TxType.REQUIRED)
@@ -161,7 +162,8 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "c.status as clusterStatus, "
             + "c.statusReason as clusterStatusReason, "
             + "c.certExpirationState as certExpirationState, "
-            + "c.certExpirationDetails as certExpirationDetails "
+            + "c.certExpirationDetails as certExpirationDetails, "
+            + "s.providerSyncStates as providerSyncStates "
             + "FROM Stack s "
             + "LEFT JOIN s.cluster c "
             + "LEFT JOIN s.stackStatus ss "
@@ -364,6 +366,7 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "u.userName as username, "
             + "u.userCrn as usercrn, "
             + "c.certExpirationState as certExpirationState, "
+            + "s.providerSyncStates as providerSyncStates, "
             + "db.externalDatabaseAvailabilityType as externalDatabaseCreationType, "
             + "db.externalDatabaseEngineVersion as externalDatabaseEngineVersion "
             + "FROM Stack s "
@@ -549,6 +552,10 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     @Modifying
     @Query("UPDATE Stack s SET s.javaVersion = :javaVersion WHERE s.id = :stackId")
     void updateJavaVersion(@Param("stackId") Long stackId, @Param("javaVersion") String javaVersion);
+
+    @Modifying
+    @Query("UPDATE Stack s SET s.providerSyncStates = :providerSyncStates WHERE s.id = :stackId")
+    void updateProviderSyncStates(@Param("stackId") Long stackId, @Param("providerSyncStates") Set<ProviderSyncState> providerSyncStates);
 
     @Query("SELECT s.environmentCrn FROM Stack s WHERE s.id = :stackId")
     Optional<String> findEnvironmentCrnByStackId(@Param("stackId") Long stackId);

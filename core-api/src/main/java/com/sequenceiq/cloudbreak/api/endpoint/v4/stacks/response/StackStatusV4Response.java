@@ -1,8 +1,13 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.common.api.type.CertExpirationState;
+import com.sequenceiq.common.model.ProviderSyncState;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -31,6 +36,9 @@ public class StackStatusV4Response {
 
     @Schema(description = ClusterModelDescription.CERT_EXPIRATION_DETAILS)
     private String certExpirationDetails;
+
+    @Schema(description = ModelDescriptions.StackModelDescription.PROVIDER_SYNC_STATES)
+    private Set<ProviderSyncState> providerSyncStates = new HashSet<>();
 
     public Long getId() {
         return id;
@@ -96,6 +104,14 @@ public class StackStatusV4Response {
         this.certExpirationDetails = certExpirationDetails;
     }
 
+    public Set<ProviderSyncState> getProviderSyncStates() {
+        return providerSyncStates;
+    }
+
+    public void setProviderSyncStates(Set<ProviderSyncState> providerSyncStates) {
+        this.providerSyncStates = providerSyncStates;
+    }
+
     @Override
     public String toString() {
         return "StackStatusV4Response{" +
@@ -107,6 +123,7 @@ public class StackStatusV4Response {
                 ", crn='" + crn + '\'' +
                 ", certExpirationState=" + certExpirationState + '\'' +
                 ", certExpirationDetails='" + certExpirationDetails +
+                ", providerSyncStates=" + providerSyncStates +
                 '}';
     }
 }

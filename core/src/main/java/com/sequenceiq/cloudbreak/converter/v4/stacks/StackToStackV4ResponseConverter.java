@@ -188,6 +188,7 @@ public class StackToStackV4ResponseConverter {
         response.setSupportedImdsVersion(stack.getSupportedImdsVersion());
         response.setArchitecture(stack.getStack().getArchitecture().getName());
         response.setRegion(stack.getRegion());
+        response.setProviderSyncStates(stack.getStack().getProviderSyncStates());
         return response;
     }
 

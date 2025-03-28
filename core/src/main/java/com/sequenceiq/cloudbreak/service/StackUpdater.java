@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
 import java.util.Map;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -26,6 +27,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.UsageLoggingUtil;
+import com.sequenceiq.common.model.ProviderSyncState;
 
 @Component
 public class StackUpdater {
@@ -77,6 +79,10 @@ public class StackUpdater {
 
     public void updateJavaVersion(Long stackId, String javaVersion) {
         stackService.updateJavaVersion(stackId, javaVersion);
+    }
+
+    public void updateProviderState(Long stackId, Set<ProviderSyncState> syncStates) {
+        stackService.updateProviderSyncStates(stackId, syncStates);
     }
 
     public void updateExternalDatabaseEngineVersion(Long stackId, String databaseVersion) {

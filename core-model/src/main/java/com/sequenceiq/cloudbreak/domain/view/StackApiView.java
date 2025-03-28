@@ -17,10 +17,12 @@ import jakarta.persistence.Transient;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
+import com.sequenceiq.cloudbreak.converter.ProviderSyncSetToStringConverter;
 import com.sequenceiq.cloudbreak.converter.TunnelConverter;
 import com.sequenceiq.cloudbreak.domain.converter.DatabaseAvailabilityTypeConverter;
 import com.sequenceiq.cloudbreak.domain.converter.StackTypeConverter;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.common.model.ProviderSyncState;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -75,6 +77,9 @@ public class StackApiView extends CompactView {
     private DatabaseAvailabilityType externalDatabaseCreationType;
 
     private String externalDatabaseEngineVersion;
+
+    @Convert(converter = ProviderSyncSetToStringConverter.class)
+    private Set<ProviderSyncState> providerSyncStates = new HashSet<>();
 
     public String getResourceCrn() {
         return resourceCrn;
@@ -221,6 +226,14 @@ public class StackApiView extends CompactView {
         this.externalDatabaseEngineVersion = externalDatabaseEngineVersion;
     }
 
+    public Set<ProviderSyncState> getProviderSyncStates() {
+        return providerSyncStates;
+    }
+
+    public void setProviderSyncStates(Set<ProviderSyncState> providerSyncStates) {
+        this.providerSyncStates = providerSyncStates;
+    }
+
     @Override
     public String toString() {
         return "StackApiView{" +
@@ -241,6 +254,7 @@ public class StackApiView extends CompactView {
                 ", tunnel=" + tunnel +
                 ", externalDatabaseCreationType=" + externalDatabaseCreationType +
                 ", externalDatabaseEngineVersion='" + externalDatabaseEngineVersion + '\'' +
+                ", providerSyncStates=" + providerSyncStates +
                 "} " + super.toString();
     }
 }

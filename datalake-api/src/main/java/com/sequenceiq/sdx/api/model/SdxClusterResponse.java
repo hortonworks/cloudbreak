@@ -1,13 +1,16 @@
 package com.sequenceiq.sdx.api.model;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.common.model.ProviderSyncState;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -91,6 +94,9 @@ public class SdxClusterResponse {
 
     @Schema(description = ModelDescriptions.SECURITY)
     private String seLinuxPolicy;
+
+    @Schema(description = ModelDescriptions.PROVIDER_SYNC_STATES)
+    private Set<ProviderSyncState> providerSyncStates = new HashSet<>();
 
     public String getCrn() {
         return crn;
@@ -296,6 +302,14 @@ public class SdxClusterResponse {
         this.seLinuxPolicy = seLinuxPolicy;
     }
 
+    public Set<ProviderSyncState> getProviderSyncStates() {
+        return providerSyncStates;
+    }
+
+    public void setProviderSyncStates(Set<ProviderSyncState> providerSyncStates) {
+        this.providerSyncStates = providerSyncStates;
+    }
+
     @Override
     public String toString() {
         return "SdxClusterResponse{" +
@@ -324,6 +338,8 @@ public class SdxClusterResponse {
                 ", detached=" + detached +
                 ", databaseEngineVersion='" + databaseEngineVersion + '\'' +
                 ", sdxDatabaseResponse=" + sdxDatabaseResponse +
+                ", seLinuxPolicy='" + seLinuxPolicy + '\'' +
+                ", providerSyncStates=" + providerSyncStates +
                 '}';
     }
 }

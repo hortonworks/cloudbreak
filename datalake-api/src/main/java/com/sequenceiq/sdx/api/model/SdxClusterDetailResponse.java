@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -11,6 +12,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.common.api.tag.response.TaggedResponse;
 import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.common.model.ProviderSyncState;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -49,7 +51,8 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
                     .withDatabaseServerCrn(sdxClusterResponse.getDatabaseServerCrn())
                     .withDatabaseAvailabilityType(Optional.ofNullable(sdxClusterResponse.getSdxDatabaseResponse()).map(SdxDatabaseResponse::getAvailabilityType)
                             .orElse(SdxDatabaseAvailabilityType.NONE))
-                    .withCreated(sdxClusterResponse.getCreated());
+                    .withCreated(sdxClusterResponse.getCreated())
+                    .withProviderSyncStates(sdxClusterResponse.getProviderSyncStates());
         }
         return builder.withStackV4Response(stackV4Response).build();
     }
@@ -123,6 +126,8 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
         private SdxDatabaseAvailabilityType databaseAvailabilityType;
 
         private String seLinux;
+
+        private Set<ProviderSyncState> providerSyncStates;
 
         private Builder() {
         }
@@ -236,6 +241,11 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
             return this;
         }
 
+        public Builder withProviderSyncStates(Set<ProviderSyncState> providerSyncStates) {
+            this.providerSyncStates = providerSyncStates;
+            return this;
+        }
+
         public Builder withSdxClusterServiceVersion(String sdxClusterServiceVersion) {
             this.sdxClusterServiceVersion = sdxClusterServiceVersion;
             return this;
@@ -281,6 +291,7 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
             sdxClusterDetailResponse.setDetached(detached);
             sdxClusterDetailResponse.setSeLinuxPolicy(seLinux);
             sdxClusterDetailResponse.setDatabaseEngineVersion(databaseEngineVersion);
+            sdxClusterDetailResponse.setProviderSyncStates(providerSyncStates);
             SdxDatabaseResponse sdxDatabaseResponse = new SdxDatabaseResponse();
             sdxDatabaseResponse.setAvailabilityType(databaseAvailabilityType);
             sdxDatabaseResponse.setDatabaseEngineVersion(databaseEngineVersion);

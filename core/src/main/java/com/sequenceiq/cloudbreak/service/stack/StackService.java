@@ -150,6 +150,7 @@ import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.AzureDatabaseType;
+import com.sequenceiq.common.model.ProviderSyncState;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 
@@ -1154,6 +1155,10 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
 
     public void updateJavaVersion(Long stackId, String javaVersion) {
         stackRepository.updateJavaVersion(stackId, javaVersion);
+    }
+
+    public void updateProviderSyncStates(Long stackId, Set<ProviderSyncState> statuses) {
+        stackRepository.updateProviderSyncStates(stackId, statuses);
     }
 
     public void updateExternalDatabaseEngineVersion(Long stackId, String databaseVersion) {

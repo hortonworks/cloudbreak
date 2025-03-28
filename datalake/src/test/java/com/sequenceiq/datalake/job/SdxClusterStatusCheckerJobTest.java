@@ -10,12 +10,15 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.quartz.JobDataMap;
@@ -34,6 +37,8 @@ import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceCrnEndpoints;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
+import com.sequenceiq.common.api.type.CertExpirationState;
+import com.sequenceiq.common.model.ProviderSyncState;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
@@ -241,6 +246,43 @@ class SdxClusterStatusCheckerJobTest {
         verify(sdxStatusService, times(1)).getActualStatusForSdx(eq(sdxCluster));
         verify(jobService, times(1)).unschedule(eq(String.valueOf(SDX_ID)));
         verify(autoscaleV4Endpoint, never()).getStatusByCrn(anyString());
+    }
+
+    @ParameterizedTest
+    @EnumSource(ProviderSyncState.class)
+    void testUpdateProviderSyncStateIfDifferent(ProviderSyncState newState) {
+        setUpSdxStatus(DatalakeStatusEnum.RUNNING);
+        stack.setProviderSyncStates(Set.of(newState));
+        stack.setStatus(Status.AVAILABLE);
+        sdxCluster.setProviderSyncStates(Set.of(ProviderSyncState.VALID));
+
+        underTest.executeJob(jobExecutionContext);
+        if (newState == ProviderSyncState.VALID) {
+            verify(sdxClusterRepository, never()).updateProviderSyncStates(sdxCluster.getId(), stack.getProviderSyncStates());
+        } else {
+            verify(sdxClusterRepository, times(1)).updateProviderSyncStates(sdxCluster.getId(), stack.getProviderSyncStates());
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(CertExpirationState.class)
+    void testUpdateCertExpirationStateIfDifferent(CertExpirationState newState) {
+        setUpSdxStatus(DatalakeStatusEnum.RUNNING);
+        stack.setCertExpirationState(newState);
+        stack.setStatus(Status.AVAILABLE);
+        sdxCluster.setCertExpirationState(CertExpirationState.VALID);
+
+        underTest.executeJob(jobExecutionContext);
+
+        if (newState == CertExpirationState.VALID) {
+            verify(sdxClusterRepository, never()).updateCertExpirationState(sdxCluster.getId(),
+                    stack.getCertExpirationState(),
+                    stack.getCertExpirationDetails());
+        } else {
+            verify(sdxClusterRepository, times(1)).updateCertExpirationState(sdxCluster.getId(),
+                    stack.getCertExpirationState(),
+                    stack.getCertExpirationDetails());
+        }
     }
 
     private void setUpSdxStatus(DatalakeStatusEnum status) {

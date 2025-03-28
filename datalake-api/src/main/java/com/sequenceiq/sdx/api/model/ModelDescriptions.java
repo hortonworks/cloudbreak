@@ -244,6 +244,8 @@ public class ModelDescriptions {
 
     public static final String BACKUP_END_TIMESTAMP = "When backup was completed (end of the backup procedure)";
 
+    public static final String PROVIDER_SYNC_STATES = "Contains information about provider issues. No issues found if empty or 'VALID'.";
+
     private ModelDescriptions() {
     }
 

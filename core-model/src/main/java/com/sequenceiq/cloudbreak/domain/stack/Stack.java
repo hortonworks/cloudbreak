@@ -70,6 +70,7 @@ import com.sequenceiq.cloudbreak.common.orchestration.OrchestrationNode;
 import com.sequenceiq.cloudbreak.common.orchestration.OrchestratorAware;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.converter.ArchitectureConverter;
+import com.sequenceiq.cloudbreak.converter.ProviderSyncSetToStringConverter;
 import com.sequenceiq.cloudbreak.converter.TunnelConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
@@ -101,6 +102,7 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.common.model.Architecture;
+import com.sequenceiq.common.model.ProviderSyncState;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name", "resourceCrn"}))
@@ -264,6 +266,9 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
 
     @Convert(converter = ArchitectureConverter.class)
     private Architecture architecture;
+
+    @Convert(converter = ProviderSyncSetToStringConverter.class)
+    private Set<ProviderSyncState> providerSyncStates = new HashSet<>();
 
     public String getResourceCrn() {
         return resourceCrn;
@@ -1148,6 +1153,14 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.architecture = architecture;
     }
 
+    public Set<ProviderSyncState> getProviderSyncStates() {
+        return providerSyncStates;
+    }
+
+    public void setProviderSyncStates(Set<ProviderSyncState> providerSyncStates) {
+        this.providerSyncStates = providerSyncStates;
+    }
+
     @Override
     public String toString() {
         return "Stack{" +
@@ -1199,6 +1212,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
                 ", multiAz=" + multiAz +
                 ", supportedImdsVersion=" + supportedImdsVersion +
                 ", architecture=" + architecture +
+                ", providerSyncStates=" + providerSyncStates +
                 '}';
     }
 

@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.common.api.tag.response.TaggedResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.common.model.ProviderSyncState;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -164,6 +165,9 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
 
     @Schema(description = StackModelDescription.SECURITY)
     private SecurityV4Response security;
+
+    @Schema(description = StackModelDescription.PROVIDER_SYNC_STATES)
+    private Set<ProviderSyncState> providerSyncStates = new HashSet<>();
 
     public Long getId() {
         return id;
@@ -500,6 +504,14 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
         this.security = security;
     }
 
+    public Set<ProviderSyncState> getProviderSyncStates() {
+        return providerSyncStates;
+    }
+
+    public void setProviderSyncStates(Set<ProviderSyncState> providerSyncStates) {
+        this.providerSyncStates = providerSyncStates;
+    }
+
     @Override
     public String toString() {
         return "StackV4Response{ " +
@@ -543,6 +555,7 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
                 ", supportedImdsVersion=" + supportedImdsVersion +
                 ", architecture=" + architecture +
                 ", security=" + security +
+                ", providerSyncStates=" + providerSyncStates +
                 '}';
     }
 }

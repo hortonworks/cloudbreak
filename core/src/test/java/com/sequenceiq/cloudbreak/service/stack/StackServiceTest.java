@@ -127,6 +127,7 @@ import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.AzureDatabaseType;
+import com.sequenceiq.common.model.ProviderSyncState;
 import com.sequenceiq.flow.core.FlowLogService;
 
 @ExtendWith(MockitoExtension.class)
@@ -721,6 +722,9 @@ class StackServiceTest {
                 return "Certificate of Cloudera Manager Agent will expire within 364 days. Warning threshold: 366.";
             }
 
+            public Set<ProviderSyncState> getProviderSyncStates() {
+                return Set.of(ProviderSyncState.VALID);
+            }
         }));
 
         List<StackClusterStatusView> statuses = underTest.getStatusesByCrnsInternal(List.of("crn1"), StackType.WORKLOAD);

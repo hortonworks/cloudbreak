@@ -23,6 +23,8 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_IN_PR
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 
+import java.util.Set;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -39,6 +41,7 @@ import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.common.model.Architecture;
+import com.sequenceiq.common.model.ProviderSyncState;
 
 public interface StackView extends MdcContextInfoProvider {
 
@@ -276,5 +279,7 @@ public interface StackView extends MdcContextInfoProvider {
     default String getResourceName() {
         return getName();
     }
+
+    Set<ProviderSyncState> getProviderSyncStates();
 
 }
