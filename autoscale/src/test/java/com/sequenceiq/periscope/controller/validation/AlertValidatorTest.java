@@ -1,5 +1,6 @@
 package com.sequenceiq.periscope.controller.validation;
 
+import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALE_CLUSTER_NOT_AVAILABLE;
 import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_CLUSTER_LIMIT_EXCEEDED;
 import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_ENTITLEMENT_NOT_ENABLED;
 import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_STOP_START_ENTITLEMENT_NOT_ENABLED;
@@ -36,6 +37,7 @@ import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.periscope.api.model.AdjustmentType;
 import com.sequenceiq.periscope.api.model.AlertType;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
+import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterRequest;
 import com.sequenceiq.periscope.api.model.LoadAlertConfigurationRequest;
 import com.sequenceiq.periscope.api.model.LoadAlertRequest;
@@ -130,6 +132,28 @@ public class AlertValidatorTest {
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validateEntitlementAndDisableIfNotEntitled(aCluster));
         verify(asClusterCommonService, never()).setAutoscaleState(aCluster.getId(), false);
+    }
+
+    @Test
+    public void testValidateIfStackIsNotAvailable() {
+        aCluster = getACluster();
+        aCluster.setState(ClusterState.SUSPENDED);
+
+        when(messagesService.getMessage(AUTOSCALE_CLUSTER_NOT_AVAILABLE,
+                List.of("teststack"))).thenReturn("autoscale.cluster.not.available");
+
+        expectedException.expect(BadRequestException.class);
+        expectedException.expectMessage("autoscale.cluster.not.available");
+
+        underTest.validateIfStackIsAvailable(aCluster);
+    }
+
+    @Test
+    public void testValidateIfStackIsAvailable() {
+        aCluster = getACluster();
+        aCluster.setState(ClusterState.RUNNING);
+
+        assertDoesNotThrow(() -> underTest.validateIfStackIsAvailable(aCluster));
     }
 
     @Test

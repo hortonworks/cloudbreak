@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.quartz.configuration.QuartzJobInitializer;
 import com.sequenceiq.cloudbreak.vm.VirtualMachineConfiguration;
 import com.sequenceiq.periscope.api.endpoint.v1.DistroXAutoScaleClusterV1Endpoint;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
+import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterRequest;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterResponse;
 import com.sequenceiq.periscope.api.model.LoadAlertConfigurationRequest;
@@ -208,6 +209,7 @@ class DistroXAutoScaleClusterV1EndpointTest {
         testCluster.setStackName(clusterName);
         testCluster.setCloudPlatform("AWS");
         testCluster.setBluePrintText(bluePrintText);
+        testCluster.setState(ClusterState.RUNNING);
 
         ClusterPertain clusterPertain = new ClusterPertain();
         clusterPertain.setTenant(accountId);

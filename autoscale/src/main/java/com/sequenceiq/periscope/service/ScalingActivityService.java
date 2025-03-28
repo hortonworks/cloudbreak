@@ -34,6 +34,7 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.AuthorizationEnvironmentCrnProvider;
 import com.sequenceiq.authorization.service.AuthorizationResourceCrnProvider;
+import com.sequenceiq.cloudbreak.api.model.StatusKind;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.periscope.api.model.ActivityStatus;
 import com.sequenceiq.periscope.domain.Cluster;
@@ -79,7 +80,7 @@ public class ScalingActivityService implements AuthorizationResourceCrnProvider,
     protected Cluster fetchClusterFromCBUsingName(String stackName) {
         String accountId = restRequestThreadLocalService.getCloudbreakTenant();
         return Optional.ofNullable(cloudbreakCommunicator.getAutoscaleClusterByName(stackName, accountId))
-                .filter(stack -> WORKLOAD.equals(stack.getStackType()))
+                .filter(stack -> WORKLOAD.equals(stack.getStackType()) && stack.getClusterStatus().getStatusKind().equals(StatusKind.FINAL))
                 .map(stack -> clusterService.create(stack))
                 .orElseThrow(NotFoundException.notFound("cluster", stackName));
     }

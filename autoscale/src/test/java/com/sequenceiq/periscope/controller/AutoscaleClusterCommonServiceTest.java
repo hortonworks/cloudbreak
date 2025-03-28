@@ -21,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -93,6 +94,7 @@ public class AutoscaleClusterCommonServiceTest {
         when(clusterService.findOneByStackCrnAndTenant(TEST_CLUSTER_CRN, tenant)).thenReturn(Optional.empty());
         when(cloudbreakCommunicator.getAutoscaleClusterByCrn(TEST_CLUSTER_CRN)).thenReturn(autoscaleStackV4Response);
         when(autoscaleStackV4Response.getStackType()).thenReturn(StackType.WORKLOAD);
+        when(autoscaleStackV4Response.getClusterStatus()).thenReturn(Status.AVAILABLE);
         when(clusterService.create(autoscaleStackV4Response)).thenReturn(getACluster().get());
 
         Cluster cluster = underTest.getClusterByCrnOrName(NameOrCrn.ofCrn(TEST_CLUSTER_CRN));
@@ -106,6 +108,7 @@ public class AutoscaleClusterCommonServiceTest {
         when(clusterService.findOneByStackNameAndTenant(TEST_CLUSTER_NAME, tenant)).thenReturn(Optional.empty());
         when(cloudbreakCommunicator.getAutoscaleClusterByName(TEST_CLUSTER_NAME, tenant)).thenReturn(autoscaleStackV4Response);
         when(autoscaleStackV4Response.getStackType()).thenReturn(StackType.WORKLOAD);
+        when(autoscaleStackV4Response.getClusterStatus()).thenReturn(Status.AVAILABLE);
         when(clusterService.create(autoscaleStackV4Response)).thenReturn(getACluster().get());
 
         Cluster cluster = underTest.getClusterByCrnOrName(NameOrCrn.ofName(TEST_CLUSTER_NAME));

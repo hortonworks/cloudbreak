@@ -24,6 +24,8 @@ public class MessageCode {
 
     public static final String AUTOSCALING_ENTITLEMENT_NOT_ENABLED = "autoscale.entitlement.not.enabled";
 
+    public static final String AUTOSCALE_CLUSTER_NOT_AVAILABLE = "autoscale.cluster.not.available";
+
     public static final String AUTOSCALING_STOP_START_ENTITLEMENT_NOT_ENABLED = "autoscale.stopstart.entitlement.not.enabled";
 
     public static final String IMPALA_SCHEDULE_BASED_SCALING_ENTITLEMENT_NOT_ENABLED = "impala.schedule.based.scaling.entitlement.not.enabled";

@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.api.model.AdjustmentType;
 import com.sequenceiq.periscope.api.model.AlertType;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
+import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterRequest;
 import com.sequenceiq.periscope.api.model.LoadAlertRequest;
 import com.sequenceiq.periscope.api.model.ScalingPolicyBase;
@@ -58,6 +59,13 @@ public class AlertValidator {
             }
             throw new BadRequestException(messagesService.getMessage(MessageCode.AUTOSCALING_ENTITLEMENT_NOT_ENABLED,
                     List.of(cluster.getCloudPlatform(), cluster.getStackName())));
+        }
+    }
+
+    public void validateIfStackIsAvailable(Cluster cluster) {
+        if (cluster.getState() == ClusterState.SUSPENDED || cluster.getState() == ClusterState.DELETED) {
+            throw new BadRequestException(messagesService.getMessage(MessageCode.AUTOSCALE_CLUSTER_NOT_AVAILABLE,
+                    List.of(cluster.getStackName())));
         }
     }
 

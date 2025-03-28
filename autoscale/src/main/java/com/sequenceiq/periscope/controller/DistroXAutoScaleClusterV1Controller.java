@@ -152,6 +152,7 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
     private DistroXAutoscaleClusterResponse updateClusterAutoScaleConfig(Cluster cluster,
             DistroXAutoscaleClusterRequest autoscaleClusterRequest) {
 
+        alertValidator.validateIfStackIsAvailable(cluster);
         alertValidator.validateEntitlementAndDisableIfNotEntitled(cluster);
         alertValidator.validateDistroXAutoscaleClusterRequest(cluster, autoscaleClusterRequest);
         alertValidator.validateScheduleWithStopStart(autoscaleClusterRequest);
