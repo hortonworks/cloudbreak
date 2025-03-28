@@ -739,8 +739,6 @@ public enum ResourceEvent {
     DISK_RESIZE_STARTED("cluster.disk.resize.started"),
     DISK_RESIZE_COMPLETE("cluster.disk.resize.complete"),
     DATALAKE_IMAGE_VALIDATION_WARNING("datalake.image.validation.warning"),
-    DATALAKE_SKU_MIGRATION_CHANGE_IN_PROGRESS("datalake.sku.migration.in.progress"),
-    DATALAKE_SKU_MIGRATION_CHANGE_FAILED("datalake.sku.migration.failed"),
 
     ROTATE_RDS_CERTIFICATE_CHECK_PREREQUISITES("cluster.externaldatabase.certificate.rotation.prerequisites"),
     ROTATE_RDS_CERTIFICATE_GET_LATEST("cluster.externaldatabase.certificate.rotation.getlatest"),

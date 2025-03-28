@@ -864,7 +864,7 @@ public interface StackV4Endpoint {
     @Operation(summary = "Triggering SKU migration", operationId = "triggerSkuMigration",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier triggerSkuMigration(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("force") @DefaultValue("false") boolean force, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("force") @DefaultValue("false") boolean force);
 
     @PUT
     @Path("imd_update")
