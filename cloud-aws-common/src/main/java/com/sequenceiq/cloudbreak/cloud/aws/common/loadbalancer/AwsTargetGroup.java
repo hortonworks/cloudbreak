@@ -27,19 +27,13 @@ public class AwsTargetGroup {
 
     private boolean stickySessionEnabled;
 
-    private final Integer healthCheckIntervalSeconds;
-
-    private final Integer healthCheckThresholdCount;
-
     public AwsTargetGroup(AwsLoadBalancerScheme scheme, int port, ProtocolEnum protocol, String healthCheckPath, int healthCheckPort,
-            ProtocolEnum healthCheckProtocol, boolean stickySessionEnabled, Integer healthCheckIntervalSeconds, Integer healthCheckThresholdCount) {
+            ProtocolEnum healthCheckProtocol, boolean stickySessionEnabled) {
         this.port = port;
         this.protocol = protocol;
         this.healthCheckPath = healthCheckPath;
         this.healthCheckPort = String.valueOf(healthCheckPort);
         this.healthCheckProtocol = healthCheckProtocol;
-        this.healthCheckIntervalSeconds = healthCheckIntervalSeconds;
-        this.healthCheckThresholdCount = healthCheckThresholdCount;
         name = getTargetGroupName(port, scheme);
         this.stickySessionEnabled = stickySessionEnabled;
     }
@@ -96,11 +90,4 @@ public class AwsTargetGroup {
         this.stickySessionEnabled = stickySessionEnabled;
     }
 
-    public Integer getHealthCheckIntervalSeconds() {
-        return healthCheckIntervalSeconds;
-    }
-
-    public Integer getHealthCheckThresholdCount() {
-        return healthCheckThresholdCount;
-    }
 }

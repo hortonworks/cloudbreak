@@ -3,10 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
-
-import com.sequenceiq.cloudbreak.cloud.model.HealthProbeParameters;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
 
@@ -45,16 +42,14 @@ public class AwsLoadBalancer {
         return listeners;
     }
 
-    public AwsListener getOrCreateListener(int port, ProtocolEnum protocol, HealthProbeParameters healthProbe) {
+    public AwsListener getOrCreateListener(int port, ProtocolEnum protocol, String healthCheckPath, int healthCheckPort, ProtocolEnum healthCheckProtocol) {
         return listeners.stream()
             .filter(l -> l.getPort() == port)
-            .findFirst().orElseGet(() -> createListener(port, protocol, healthProbe));
+            .findFirst().orElseGet(() -> createListener(port, protocol, healthCheckPath, healthCheckPort, healthCheckProtocol));
     }
 
-    private AwsListener createListener(int port, ProtocolEnum protocol, HealthProbeParameters healthProbe) {
-        ProtocolEnum healthCheckProtocol = Optional.ofNullable(healthProbe.getProtocol()).map(p -> ProtocolEnum.fromValue(p.name())).orElse(null);
-        AwsListener listener = new AwsListener(scheme, port, protocol, healthProbe.getPath(), healthProbe.getPort(), healthCheckProtocol,
-                useStickySessionForTargetGroup, healthProbe.getInterval(), healthProbe.getProbeDownThreshold());
+    private AwsListener createListener(int port, ProtocolEnum protocol, String healthCheckPath, int healthCheckPort, ProtocolEnum healthCheckProtocol) {
+        AwsListener listener = new AwsListener(scheme, port, protocol, healthCheckPath, healthCheckPort, healthCheckProtocol, useStickySessionForTargetGroup);
         listeners.add(listener);
         return listener;
     }

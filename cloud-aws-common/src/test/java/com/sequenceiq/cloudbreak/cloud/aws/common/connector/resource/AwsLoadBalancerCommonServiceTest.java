@@ -55,7 +55,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.GroupSubnet;
-import com.sequenceiq.cloudbreak.cloud.model.HealthProbeParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
@@ -549,9 +548,8 @@ class AwsLoadBalancerCommonServiceTest {
                 .withName(INSTANCE_NAME)
                 .withNetwork(createGroupNetwork(instanceGroupNetworkSubnetIds))
                 .build();
-        HealthProbeParameters probeParams = new HealthProbeParameters(HEALTH_CHECK_PATH, HEALTH_CHECK_PORT, HTTPS, 10, 2);
         CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(type, LoadBalancerSku.getDefault(), targetGroupStickyness);
-        cloudLoadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(PORT, TCP_UDP, probeParams), Set.of(group));
+        cloudLoadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(PORT, TCP_UDP, HEALTH_CHECK_PORT, HEALTH_CHECK_PATH, HTTPS), Set.of(group));
         return cloudLoadBalancer;
     }
 

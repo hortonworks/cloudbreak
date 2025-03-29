@@ -17,13 +17,11 @@ public class AwsListener {
     private final String name;
 
     public AwsListener(AwsLoadBalancerScheme scheme, int port, ProtocolEnum protocol, String healthCheckPath, int healthCheckPort,
-            ProtocolEnum healthCheckProtocol, boolean stickySessionEnabledForTargetGroup, Integer healthCheckIntervalSeconds,
-            Integer healthCheckThresholdCount) {
+            ProtocolEnum healthCheckProtocol, boolean stickySessionEnabledForTargetGroup) {
         this.port = port;
         this.protocol = protocol;
         this.name = getListenerName(port, scheme);
-        this.targetGroup = new AwsTargetGroup(scheme, port, protocol, healthCheckPath, healthCheckPort, healthCheckProtocol,
-                stickySessionEnabledForTargetGroup, healthCheckIntervalSeconds, healthCheckThresholdCount);
+        this.targetGroup = new AwsTargetGroup(scheme, port, protocol, healthCheckPath, healthCheckPort, healthCheckProtocol, stickySessionEnabledForTargetGroup);
     }
 
     public int getPort() {

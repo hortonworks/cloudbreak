@@ -601,8 +601,8 @@
                       {
                         "name": "${probe.name}",
                         "properties": {
-                          "intervalInSeconds": "${probe.interval}",
-                          "probeThreshold": "${probe.threshold}",
+                          "intervalInSeconds": 5,
+                          "numberOfProbes": 2,
                           "port": ${probe.port},
                           "protocol": "Tcp"
                         }
