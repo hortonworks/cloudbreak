@@ -9,8 +9,9 @@ import java.util.function.Predicate;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
@@ -20,22 +21,27 @@ import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
+import com.sequenceiq.cloudbreak.rotation.service.DatahubSharedServiceRotationService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
 @Component
 public class DatalakeCMServiceSharedDBRotationContextProvider extends CMServiceDBPasswordRotationContextProvider {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatalakeCMServiceSharedDBRotationContextProvider.class);
+
     @Inject
     private StackDtoService stackService;
+
+    @Inject
+    private DatahubSharedServiceRotationService datahubSharedServiceRotationService;
 
     @Override
     public Map<SecretRotationStep, RotationContext> getContexts(String resourceCrn) {
         Map<SecretRotationStep, RotationContext> contexts = new HashMap<>(super.getContexts(resourceCrn));
-        StackDto stackDto = stackService.getByCrn(resourceCrn);
+        StackDto datalake = stackService.getByCrn(resourceCrn);
         CustomJobRotationContext customJobRotationContext = CustomJobRotationContext.builder()
-                .withPreValidateJob(() -> {
-                    throw new NotImplementedException("This rotation will be reworked soon...");
-                })
+                .withPreValidateJob(() -> datahubSharedServiceRotationService.validateAllDatahubAvailable(datalake))
+                .withRotationJob(() -> datahubSharedServiceRotationService.updateAllRelevantDatahub(datalake))
                 .withResourceCrn(resourceCrn)
                 .build();
         contexts.put(CUSTOM_JOB, customJobRotationContext);

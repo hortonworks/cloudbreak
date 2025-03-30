@@ -1325,7 +1325,7 @@ class SdxServiceTest {
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString()))
                 .thenReturn(Optional.of(sdxCluster));
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.refreshDataHub(CLUSTER_NAME, null));
-        verify(distroxService, times(1)).restartAttachedDistroxClusters(sdxCluster.getEnvCrn());
+        verify(distroxService, times(1)).restartAttachedDistroxClustersServices(sdxCluster.getEnvCrn());
         verify(distroxService, times(1)).getAttachedDistroXClusters(sdxCluster.getEnvCrn());
     }
 
@@ -1339,7 +1339,7 @@ class SdxServiceTest {
         when(distroXV1Endpoint.getByName(anyString(), eq(null))).thenReturn(stackV4Response);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.refreshDataHub(CLUSTER_NAME, "datahubName"));
         verify(distroXV1Endpoint, times(1)).getByName(anyString(), eq(null));
-        verify(distroxService, times(1)).restartDistroxByCrns(any());
+        verify(distroxService, times(1)).restartDistroxServicesByCrns(any());
     }
 
     @Test

@@ -67,7 +67,7 @@ public class DatahubRefreshActions {
                 variables.put(SDX, sdxCluster);
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING, ResourceEvent.ENVIRONMENT_RESTART_DATAHUB_STARTED,
                         "Data Hub refresh in progress", payload.getResourceId());
-                sdxRefreshService.refreshAllDatahub(payload.getResourceId());
+                sdxRefreshService.refreshAllDatahubsServices(payload.getResourceId());
                 sendEvent(context, DatahubRefreshFlowEvent.DATAHUB_REFRESH_IN_PROGRESS_EVENT.selector(), payload);
             }
 
@@ -116,7 +116,7 @@ public class DatahubRefreshActions {
                         DatalakeStatusEnum.RUNNING, ResourceEvent.ENVIRONMENT_RESTART_DATAHUB_FINISHED,
                         "Datahub refresh finished", payload.getResourceId()
                 );
-                sdxRefreshService.refreshAllDatahub(payload.getResourceId());
+                sdxRefreshService.refreshAllDatahubsServices(payload.getResourceId());
                 sendEvent(context, DatahubRefreshFlowEvent.DATAHUB_REFRESH_FINALIZED_EVENT.selector(), payload);
 
             }

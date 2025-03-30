@@ -48,6 +48,7 @@ import com.sequenceiq.it.cloudbreak.util.VolumeUtils;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
+import com.sequenceiq.sdx.rotation.DatalakeSecretType;
 
 public class DistroXRepairTests extends AbstractE2ETest {
     private static final Logger LOGGER = LoggerFactory.getLogger(DistroXRepairTests.class);
@@ -192,10 +193,15 @@ public class DistroXRepairTests extends AbstractE2ETest {
     }
 
     private void secretRotation(TestContext testContext, String cloudProvider) {
+        testContext.given(SdxInternalTestDto.class)
+                .when(sdxTestClient.rotateSecret(Set.of(DatalakeSecretType.CM_SERVICE_SHARED_DB)))
+                .awaitForFlow()
+                .validate();
         String clusterName = testContext.given(DistroXTestDto.class).getResponse().getName();
         Set<CloudbreakSecretType> secretTypes = getAvailableSecretTypes(cloudProvider);
         DistroXTestDto distroXTestDto = testContext
                 .given(DistroXTestDto.class)
+                .await(STACK_AVAILABLE)
                 .when(distroXTestClient.rotateSecret(secretTypes))
                 .awaitForFlow()
                 .when(distroXTestClient.rotateSecret(Set.of(LDAP_BIND_PASSWORD)))

@@ -54,7 +54,7 @@ public class DistroxService {
         }
     }
 
-    public void restartAttachedDistroxClusters(String envCrn) {
+    public void restartAttachedDistroxClustersServices(String envCrn) {
         Collection<StackViewV4Response> attachedDistroXClusters = getAttachedDistroXClusters(envCrn);
 
         // We allow the refresh of DHs in NODE_FAILURE states to "fix" clusters that end up in this state due to their
@@ -68,7 +68,7 @@ public class DistroxService {
                         return false;
                     }
                 })
-                .collect(Collectors.toList());
+                .toList();
         ArrayList<String> pollingCrnList = availableClusters.stream().map(StackViewV4Response::getCrn).collect(Collectors.toCollection(ArrayList::new));
         if (!pollingCrnList.isEmpty()) {
             distroXV1Endpoint.restartClusterServicesByCrns(pollingCrnList, true);
@@ -79,7 +79,7 @@ public class DistroxService {
         }
     }
 
-    public void restartDistroxByCrns(List<String> crns) {
+    public void restartDistroxServicesByCrns(List<String> crns) {
         distroXV1Endpoint.restartClusterServicesByCrns(crns, true);
     }
 

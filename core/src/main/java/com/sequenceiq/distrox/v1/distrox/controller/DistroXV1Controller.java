@@ -14,6 +14,7 @@ import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CR
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME_LIST;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -391,10 +392,12 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrnList(action = AuthorizationResourceAction.START_DATAHUB)
-    public void restartClusterServicesByCrns(@ResourceCrnList List<String> crns, Boolean refreshRemoteDataContext) {
+    public List<FlowIdentifier> restartClusterServicesByCrns(@ResourceCrnList List<String> crns, Boolean refreshRemoteDataContext) {
+        List<FlowIdentifier> flowIds = new ArrayList<>();
         for (String crn : crns) {
-            restartClusterServicesByCrn(crn, refreshRemoteDataContext);
+            flowIds.add(restartClusterServicesByCrn(crn, refreshRemoteDataContext));
         }
+        return flowIds;
     }
 
     @Override

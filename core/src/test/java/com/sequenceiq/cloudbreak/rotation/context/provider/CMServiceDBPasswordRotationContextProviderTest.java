@@ -85,7 +85,6 @@ public class CMServiceDBPasswordRotationContextProviderTest {
         when(rdsRoleConfigProvider.dbPasswordKey()).thenReturn("passwordconfig");
         when(rdsRoleConfigProvider.getServiceType()).thenReturn(TEST_DB_TYPE.name());
         when(rdsConfigService.findByClusterId(any())).thenReturn(Set.of(rdsConfig));
-        when(rdsConfigService.getClustersUsingResource(any())).thenReturn(Set.of(cluster));
         when(stackService.getByCrn(anyString())).thenReturn(stackDto);
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         when(uncachedSecretServiceForRotation.getRotation(any())).thenReturn(new RotationSecret("new", "old"));

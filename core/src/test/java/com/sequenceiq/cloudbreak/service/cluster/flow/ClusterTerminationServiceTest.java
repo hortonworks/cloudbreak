@@ -37,8 +37,6 @@ class ClusterTerminationServiceTest {
 
     private static final long STACK_ID = 1L;
 
-    private static final String DATABASE_SERVER_CRN = "crn:cdp:redbeams:us-west-1:default:databaseServer:e63520c8-aaf0-4bf3-b872-5613ce496ac3";
-
     @Mock
     private ClusterService clusterService;
 

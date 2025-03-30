@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.core.cluster.ClusterBuilderService;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
@@ -92,7 +93,7 @@ public class ClusterServicesRestartService {
         if (shouldReloadDatabaseConfig(blueprintProcessor)) {
             //Update Hive service database configuration
             LOGGER.info("Trying to refreshing the database configuration.");
-            updateDatabaseConfiguration(sdxBasicView, stack, HIVE_SERVICE);
+            updateDatabaseConfiguration(sdxBasicView, stack);
             updateHmsRdsConfig(stack, sdxBasicView);
         } else {
             LOGGER.info("Database configuration is not refreshed");
@@ -134,13 +135,36 @@ public class ClusterServicesRestartService {
         }
     }
 
-    private void updateDatabaseConfiguration(SdxBasicView sdxBasicView, Stack dataHubStack, String service) {
+    public void refreshCluster(StackDto stack) throws CloudbreakException {
+        LOGGER.info("Triggering update of remote data context for {}", stack.getResourceCrn());
+        clusterBuilderService.configureManagementServices(stack.getId());
+        LOGGER.info("Trying to refreshing the database configuration.");
+        updateDatabaseConfiguration(stack);
+        apiConnectors.getConnector(stack).restartClusterServices(false);
+    }
+
+    public boolean isHmsPresent(StackDto stackDto) {
+        return apiConnectors.getConnector(stackDto).clusterModificationService().isServicePresent(stackDto.getResourceName(), HIVE_SERVICE);
+    }
+
+    private void updateDatabaseConfiguration(SdxBasicView sdxBasicView, Stack dataHubStack) {
         Map<String, String> hmsServiceConfig = platformAwareSdxConnector.getHmsServiceConfig(sdxBasicView.crn());
         try {
             LOGGER.info("Refreshing the database configuration.");
-            apiConnectors.getConnector(dataHubStack).updateServiceConfig(service, getHmsDbConfigMap(hmsServiceConfig));
+            apiConnectors.getConnector(dataHubStack).updateServiceConfig(HIVE_SERVICE, getHmsDbConfigMap(hmsServiceConfig));
         } catch (CloudbreakException e) {
-            LOGGER.info("Exception while updating the Data-Hub configuration", e);
+            LOGGER.warn("Exception while updating the Data-Hub configuration", e);
+        }
+    }
+
+    private void updateDatabaseConfiguration(StackDto dataHubStack) {
+        SdxBasicView sdxBasicView = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(dataHubStack.getEnvironmentCrn()).orElseThrow();
+        Map<String, String> hmsServiceConfig = platformAwareSdxConnector.getHmsServiceConfig(sdxBasicView.crn());
+        try {
+            LOGGER.info("Refreshing the database configuration.");
+            apiConnectors.getConnector(dataHubStack).updateServiceConfig(HIVE_SERVICE, getHmsDbConfigMap(hmsServiceConfig));
+        } catch (CloudbreakException e) {
+            LOGGER.warn("Exception while updating the Data-Hub configuration", e);
         }
     }
 

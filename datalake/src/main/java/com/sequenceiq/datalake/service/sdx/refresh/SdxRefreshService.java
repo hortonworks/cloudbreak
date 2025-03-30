@@ -31,11 +31,11 @@ public class SdxRefreshService {
     @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
-    public void refreshAllDatahub(Long sdxId) {
+    public void refreshAllDatahubsServices(Long sdxId) {
         SdxCluster sdxCluster = sdxService.getById(sdxId);
 
         try {
-            distroxService.restartAttachedDistroxClusters(sdxCluster.getEnvCrn());
+            distroxService.restartAttachedDistroxClustersServices(sdxCluster.getEnvCrn());
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.info("Can not restart datahubs {} from cloudbreak: {}", sdxCluster.getStackId(), errorMessage, e);

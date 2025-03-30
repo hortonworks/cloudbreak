@@ -978,13 +978,13 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         SdxCluster sdxCluster = sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(accountIdFromCrn, clusterName)
                 .orElseThrow(() -> notFound(SDX_CLUSTER, clusterName).get());
         if (Strings.isNullOrEmpty(datahubName)) {
-            distroxService.restartAttachedDistroxClusters(sdxCluster.getEnvCrn());
+            distroxService.restartAttachedDistroxClustersServices(sdxCluster.getEnvCrn());
             distroxService.getAttachedDistroXClusters(sdxCluster.getEnvCrn())
                     .forEach(response::addStack);
             return response;
         }
         StackV4Response stackV4Response = distroXV1Endpoint.getByName(datahubName, null);
-        distroxService.restartDistroxByCrns(List.of(stackV4Response.getCrn()));
+        distroxService.restartDistroxServicesByCrns(List.of(stackV4Response.getCrn()));
         response.addStack(stackV4Response);
         return response;
     }

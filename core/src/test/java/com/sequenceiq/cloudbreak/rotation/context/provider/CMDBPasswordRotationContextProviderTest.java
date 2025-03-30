@@ -104,7 +104,6 @@ public class CMDBPasswordRotationContextProviderTest {
         RDSConfig rdsConfig = mockRdsConfig(TEST_DB_TYPE);
         GatewayConfig gatewayConfig = mockGwConfig();
         when(rdsConfigService.findByClusterId(any())).thenReturn(Set.of(rdsConfig));
-        when(rdsConfigService.getClustersUsingResource(any())).thenReturn(Set.of(cluster));
         when(stackService.getByCrn(anyString())).thenReturn(stackDto);
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         when(uncachedSecretServiceForRotation.getRotation(any())).thenReturn(new RotationSecret("new", "old"));

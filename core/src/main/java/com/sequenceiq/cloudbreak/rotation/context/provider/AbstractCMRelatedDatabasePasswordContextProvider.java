@@ -120,7 +120,6 @@ public abstract class AbstractCMRelatedDatabasePasswordContextProvider {
         return rdsConfigService.findByClusterId(cluster.getId())
                 .stream()
                 .filter(getRDSConfigTypePredicate())
-                .filter(rdsConfig -> rdsConfigService.getClustersUsingResource(rdsConfig).size() == 1)
                 .filter(rdsConfig -> rdsConfigProviders.stream().anyMatch(configProvider -> matchRdsTypeWithString(configProvider.getRdsType(), rdsConfig)))
                 .collect(Collectors.toMap(rdsConfig -> rdsConfig, this::getUserPassPairs));
     }

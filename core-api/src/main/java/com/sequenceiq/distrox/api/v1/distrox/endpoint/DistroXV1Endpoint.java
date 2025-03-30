@@ -308,7 +308,7 @@ public interface DistroXV1Endpoint {
     @Operation(summary = RESTART_CLUSTER_BY_CRN, description = Notes.STACK_NOTES,
             operationId = "restartDistroXClusterByCrns",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    void restartClusterServicesByCrns(@QueryParam("crns") List<String> crns,
+    List<FlowIdentifier> restartClusterServicesByCrns(@QueryParam("crns") List<String> crns,
             @QueryParam("refreshRemoteDataContext") @DefaultValue("false") Boolean refreshRemoteDataContext);
 
     /**

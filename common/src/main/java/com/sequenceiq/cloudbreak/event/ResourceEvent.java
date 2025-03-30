@@ -782,7 +782,15 @@ public enum ResourceEvent {
     STACK_VALIDATING_SELINUX("stack.validating.selinux.mode"),
     STACK_CHANGING_SELINUX("stack.changing.selinux.mode"),
     STACK_CHANGED_SELINUX("stack.changed.selinux.mode"),
-    STACK_FAILED_SELINUX("stack.failed.selinux.mode");
+    STACK_FAILED_SELINUX("stack.failed.selinux.mode"),
+    SHARED_SERVICE_DB_SECRET_ROTATION_PILLAR_CONFIG_UPDATE_DH("shared.service.db.rotation.dh.pillar.update.notification"),
+    SHARED_SERVICE_DB_SECRET_ROTATION_PILLAR_CONFIG_UPDATE_DL("shared.service.db.rotation.dl.pillar.update.notification"),
+    SHARED_SERVICE_DB_SECRET_ROTATION_CM_CONFIG_UPDATE_DH("shared.service.db.rotation.dh.cm.update.notification"),
+    SHARED_SERVICE_DB_SECRET_ROTATION_CM_CONFIG_UPDATE_DL("shared.service.db.rotation.dl.cm.update.notification"),
+    SHARED_SERVICE_DB_SECRET_ROTATION_CONFIG_UPDATE_FINISHED_DH("shared.service.db.rotation.dh.config.update.finished.notification"),
+    SHARED_SERVICE_DB_SECRET_ROTATION_CONFIG_UPDATE_FINISHED_DL("shared.service.db.rotation.dl.config.update.finished.notification"),
+    SHARED_SERVICE_DB_SECRET_ROTATION_CONFIG_UPDATE_FAILED_DH("shared.service.db.rotation.dh.config.update.failed.notification"),
+    SHARED_SERVICE_DB_SECRET_ROTATION_CONFIG_UPDATE_FAILED_DL("shared.service.db.rotation.dl.config.update.failed.notification");
 
     private final String message;
 
