@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.LoadBalancerResponse;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
@@ -42,7 +43,8 @@ public class SdxAssertion {
                         .orElseThrow(() -> new RuntimeException("Loadbalancer not found"));
 
         try {
-            String cmd = String.format(VALIDATE_LOAD_BALANCER_CMD, loadBalancerResponse.getFqdn(), loadBalancerResponse.getCloudDns());
+            String resolveTo = sdxTestDto.getCloudPlatform().equals(CloudPlatform.AWS) ? loadBalancerResponse.getCloudDns() : loadBalancerResponse.getIp();
+            String cmd = String.format(VALIDATE_LOAD_BALANCER_CMD, loadBalancerResponse.getFqdn(), resolveTo);
             Map<String, Pair<Integer, String>> results = sshJClientActions.executeSshCommandOnAllHosts(
                     sdxTestDto.getResponse().getStackV4Response().getInstanceGroups(), cmd, false, commonCloudProperties.getDefaultPrivateKeyFile());
 
