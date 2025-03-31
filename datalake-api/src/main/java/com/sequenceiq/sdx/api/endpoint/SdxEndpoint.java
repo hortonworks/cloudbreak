@@ -588,5 +588,20 @@ public interface SdxEndpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier enableSeLinuxByCrn(@ValidCrn(resource = VM_DATALAKE) @PathParam("crn") String crn);
 
+    @PUT
+    @Path("name/{name}/trigger_sku_migration")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Triggering SKU migration on the Data Lake by its name", operationId = "triggerDataLakeSkuMigrationByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier triggerSkuMigrationByName(@PathParam("name") String name,
+            @QueryParam("force") @DefaultValue("false") boolean force);
+
+    @PUT
+    @Path("crn/{crn}/trigger_sku_migration")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Triggering SKU migration on the Data Lake by its crn", operationId = "triggerDataLakeSkuMigrationByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier triggerSkuMigrationByCrn(@NotEmpty @ValidCrn(resource = VM_DATALAKE) @PathParam("crn") String crn,
+            @QueryParam("force") @DefaultValue("false") boolean force);
 }
 

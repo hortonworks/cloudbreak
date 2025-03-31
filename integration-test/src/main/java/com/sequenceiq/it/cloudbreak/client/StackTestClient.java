@@ -14,7 +14,6 @@ import com.sequenceiq.it.cloudbreak.action.v4.stack.StackGetWithResourcesAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackRefreshAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackRefreshEntitlementParamInternalAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackRequestAction;
-import com.sequenceiq.it.cloudbreak.action.v4.stack.StackSkuMigrationAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackStartAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackStopAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackSyncAction;
@@ -71,10 +70,6 @@ public class StackTestClient {
 
     public Action<StackTestDto, CloudbreakClient> attachRecipeV4() {
         return new StackAttachRecipeAction();
-    }
-
-    public Action<StackTestDto, CloudbreakClient> skuMigration() {
-        return new StackSkuMigrationAction();
     }
 
     public Action<StackTestDto, CloudbreakClient> refreshEntitlementParamsV4() {
