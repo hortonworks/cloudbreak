@@ -127,4 +127,18 @@ public class CloudbreakStackService {
             throw new CloudbreakApiException(message, e);
         }
     }
+
+    public void migrateDatalakeSkus(SdxCluster sdxCluster, boolean force) {
+        try {
+            String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
+            FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> stackV4Endpoint.triggerSkuMigration(WORKSPACE_ID, sdxCluster.getClusterName(), force, initiatorUserCrn));
+            cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
+        } catch (WebApplicationException e) {
+            String message = String.format("Could not migrate Skus in core, reason: %s", exceptionMessageExtractor.getErrorMessage(e));
+            LOGGER.warn(message, e);
+            throw new CloudbreakApiException(message, e);
+        }
+    }
 }

@@ -19,6 +19,7 @@ import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATAL
 import static com.sequenceiq.datalake.flow.imdupdate.SdxInstanceMetadataUpdateStateSelectors.SDX_IMD_UPDATE_EVENT;
 import static com.sequenceiq.datalake.flow.java.SetDatalakeDefaultJavaVersionFlowEvent.SET_DATALAKE_DEFAULT_JAVA_VERSION_EVENT;
 import static com.sequenceiq.datalake.flow.repair.SdxRepairEvent.SDX_REPAIR_EVENT;
+import static com.sequenceiq.datalake.flow.sku.DataLakeSkuMigrationFlowEvent.DATALAKE_SKU_MIGRATION_EVENT;
 import static com.sequenceiq.datalake.flow.start.SdxStartEvent.SDX_START_EVENT;
 import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_EVENT;
 import static com.sequenceiq.datalake.flow.upgrade.ccm.UpgradeCcmStateSelectors.UPGRADE_CCM_UPGRADE_STACK_EVENT;
@@ -84,6 +85,7 @@ import com.sequenceiq.datalake.flow.modifyproxy.ModifyProxyConfigTrackerEvent;
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairStartEvent;
 import com.sequenceiq.datalake.flow.salt.update.SaltUpdateEvent;
 import com.sequenceiq.datalake.flow.salt.update.event.SaltUpdateTriggerEvent;
+import com.sequenceiq.datalake.flow.sku.DataLakeSkuMigrationTriggerEvent;
 import com.sequenceiq.datalake.flow.start.event.SdxStartStartEvent;
 import com.sequenceiq.datalake.flow.stop.event.SdxStartStopEvent;
 import com.sequenceiq.datalake.flow.upgrade.ccm.event.UpgradeCcmStackEvent;
@@ -453,5 +455,14 @@ public class SdxReactorFlowManager {
                 .build();
         LOGGER.debug("Root volume update flow trigger event sent for datalake {}", sdxCluster.getName());
         return notify(DATALAKE_ROOT_VOLUME_UPDATE_EVENT.selector(), datalakeRootVolumeUpdateEvent, sdxCluster.getClusterName(), userCrn);
+    }
+
+    public FlowIdentifier triggerSkuMigration(SdxCluster cluster, boolean force) {
+        LOGGER.info("Trigger Sku migration to STANDARD on Datalake for: {}, force: {}",
+                cluster, force);
+        String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        DataLakeSkuMigrationTriggerEvent dataLakeSkuMigrationTriggerEvent =
+                new DataLakeSkuMigrationTriggerEvent(DATALAKE_SKU_MIGRATION_EVENT.event(), cluster.getId(), initiatorUserCrn, force);
+        return notify(dataLakeSkuMigrationTriggerEvent.selector(), dataLakeSkuMigrationTriggerEvent, cluster.getClusterName());
     }
 }

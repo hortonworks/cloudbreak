@@ -39,6 +39,7 @@ import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXScaleStartInstances
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXScaleStopInstancesAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXSetDefaultJavaVersionAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXShowBlueprintAction;
+import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXSkuMigrationAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXStartAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXStopAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXUpgradeAction;
@@ -200,4 +201,7 @@ public class DistroXTestClient {
         return new DistroXSetDefaultJavaVersionAction(javaVersion, restartServices, restartCM, rollingRestart);
     }
 
+    public Action<DistroXTestDto, CloudbreakClient> skuMigration() {
+        return new DistroXSkuMigrationAction();
+    }
 }

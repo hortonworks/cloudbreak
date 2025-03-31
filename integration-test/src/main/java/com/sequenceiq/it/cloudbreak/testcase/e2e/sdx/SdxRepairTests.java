@@ -34,7 +34,6 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
-import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.VolumeUtils;
@@ -100,11 +99,8 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances();
         if (CloudPlatform.AZURE.equals(cloudPlatform)) {
-            testContext
-                    .given(StackTestDto.class)
-                    .withName(sdx)
-                    .when(stackTestClient.refreshV4())
-                    .when(stackTestClient.skuMigration())
+            sdxTestDto
+                    .when(sdxTestClient.skuMigration())
                     .awaitForFlow();
         }
         sdxTestDto
