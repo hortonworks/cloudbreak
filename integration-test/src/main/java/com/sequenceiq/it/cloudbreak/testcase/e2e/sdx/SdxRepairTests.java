@@ -51,8 +51,6 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
 
     private static final String MINIMAL_ENTERPRISE_RUNTIME = "7.2.17";
 
-    private static final String ENTERPRISE_BLUEPRINT_NAME = "%s - SDX Enterprise: Apache Hive Metastore, Apache Ranger, Apache Atlas";
-
     @Inject
     private SdxTestClient sdxTestClient;
 
@@ -159,11 +157,8 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances();
         if (CloudPlatform.AZURE.equals(cloudPlatform)) {
-            testContext
-                    .given(StackTestDto.class)
-                    .withName(sdx)
-                    .when(stackTestClient.refreshV4())
-                    .when(stackTestClient.skuMigration())
+            sdxTestDto
+                    .when(sdxTestClient.skuMigrationInternal())
                     .awaitForFlow();
         }
         sdxTestDto
@@ -217,11 +212,8 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances();
         if (CloudPlatform.AZURE.equals(cloudPlatform)) {
-            testContext
-                    .given(StackTestDto.class)
-                    .withName(sdx)
-                    .when(stackTestClient.refreshV4())
-                    .when(stackTestClient.skuMigration())
+            sdxTestDto
+                    .when(sdxTestClient.skuMigrationInternal())
                     .awaitForFlow();
         }
         sdxTestDto

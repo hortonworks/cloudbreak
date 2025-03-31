@@ -35,6 +35,7 @@ import com.sequenceiq.it.cloudbreak.action.sdx.SdxGetDatalakeEventsZipAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxInstanceMetadataUpdateAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxInternalOsUpgradeAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxInternalResizeRecoveryAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxInternalSkuMigrationAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxInternalUpgradeAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxListAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxOsUpgradeAction;
@@ -310,5 +311,9 @@ public class SdxTestClient {
 
     public Action<SdxTestDto, SdxClient> skuMigration() {
         return new SdxSkuMigrationAction();
+    }
+
+    public Action<SdxInternalTestDto, SdxClient> skuMigrationInternal() {
+        return new SdxInternalSkuMigrationAction();
     }
 }
