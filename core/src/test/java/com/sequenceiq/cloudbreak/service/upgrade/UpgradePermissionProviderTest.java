@@ -87,7 +87,7 @@ public class UpgradePermissionProviderTest {
     }
 
     private ImageFilterParams createImageFilterParams(com.sequenceiq.cloudbreak.cloud.model.Image currentImage, StackType datalakeStackType) {
-        return new ImageFilterParams(null, currentImage, null, true, Map.of(), datalakeStackType, null, STACK_ID,
+        return new ImageFilterParams(null, currentImage, null, true, false, Map.of(), datalakeStackType, null, STACK_ID,
                 new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM),
                 CLOUD_PLATFORM, REGION, false);
     }

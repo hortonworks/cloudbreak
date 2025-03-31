@@ -61,7 +61,7 @@ class CloudPlatformBasedUpgradeImageFilterTest {
     }
 
     private ImageFilterParams createImageFilterParams() {
-        return new ImageFilterParams(null, null, null, false, null, null, null, null, null, imageCatalogPlatform(AWS.name()), null, null, false);
+        return new ImageFilterParams(null, null, null, false, false, null, null, null, null, null, imageCatalogPlatform(AWS.name()), null, null, false);
     }
 
     private Image createImage(String imageId, String cloudPlatform) {

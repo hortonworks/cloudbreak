@@ -15,14 +15,21 @@ public class BlueprintUpgradeOptionCondition {
     private EntitlementService entitlementService;
 
     public BlueprintValidationResult validate(ImageFilterParams imageFilterParams, BlueprintUpgradeOption upgradeOption) {
-        if (imageFilterParams.isLockComponents()) {
-            return createResult(upgradeOption.isOsUpgradeEnabled(), "The OS upgrade is not enabled for this blueprint.");
-        } else if (imageFilterParams.isRollingUpgradeEnabled()) {
-            return createResult(validateForRollingUpgrade(upgradeOption), "Rolling upgrade is not supported for this cluster. For details please see the rolling"
-                    + " upgrade documentation. To check whether rolling upgrade could be enabled for this cluster please reach out to Cloudera Support.");
-        } else {
-            return new BlueprintValidationResult(true);
+        if (imageFilterParams.isLockComponents() || imageFilterParams.isReplaceVms()) {
+            boolean osUpgradeEnabled = upgradeOption.isOsUpgradeEnabled();
+            if (!osUpgradeEnabled) {
+                return new BlueprintValidationResult(osUpgradeEnabled, osUpgradeEnabled ? null : "The OS upgrade is not enabled for this blueprint.");
+            }
         }
+        if (!imageFilterParams.isLockComponents() && imageFilterParams.isRollingUpgradeEnabled()) {
+            boolean rollingUpgradeEnabled = validateForRollingUpgrade(upgradeOption);
+            if (!rollingUpgradeEnabled) {
+                return new BlueprintValidationResult(rollingUpgradeEnabled, rollingUpgradeEnabled ? null : "Rolling upgrade is not supported for " +
+                        "this cluster. For details please see the rolling upgrade documentation. To check whether rolling upgrade could be enabled for " +
+                        "this cluster please reach out to Cloudera Support.");
+            }
+        }
+        return new BlueprintValidationResult(true);
     }
 
     private boolean validateForRollingUpgrade(BlueprintUpgradeOption upgradeOption) {
@@ -30,7 +37,4 @@ public class BlueprintUpgradeOptionCondition {
                 || entitlementService.isSkipRollingUpgradeValidationEnabled(ThreadBasedUserCrnProvider.getAccountId());
     }
 
-    private BlueprintValidationResult createResult(boolean validationResult, String errorMessage) {
-        return new BlueprintValidationResult(validationResult, validationResult ? null : errorMessage);
-    }
 }

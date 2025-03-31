@@ -37,22 +37,29 @@ class BlueprintUpgradeOptionConditionTest {
 
     private static Object[][] testScenariosProvider() {
         return new Object[][] {
-                { ENABLED, false, false, false, true, null},
-                { ENABLED, true, false, false, true, null },
-                { OS_UPGRADE_DISABLED, true, false, false, false, OS_UPGRADE_ERROR_MESSAGE },
-                { ENABLED, false, false, false, true, null},
-                { ENABLED, false, true, true, true, null },
-                { ENABLED, false, true, false, false, ROLLING_UPGRADE_ERROR_MESSAGE },
-                { ROLLING_UPGRADE_ENABLED, false, true, false, true, null },
+                { ENABLED, false, false, false, false, true, null},
+                { ENABLED, false, true, false, false, true, null},
+                { ENABLED, true, false, false, false, true, null },
+                { ENABLED, true, true, false, false, true, null },
+                { OS_UPGRADE_DISABLED, true, false, false, false, false, OS_UPGRADE_ERROR_MESSAGE },
+                { OS_UPGRADE_DISABLED, true, true, false, false, false, OS_UPGRADE_ERROR_MESSAGE },
+                { ENABLED, false, false, false, false, true, null},
+                { ENABLED, false, true, false, false, true, null},
+                { ENABLED, false, false, true, true, true, null },
+                { ENABLED, false, true, true, true, true, null },
+                { ENABLED, false, false, true, false, false, ROLLING_UPGRADE_ERROR_MESSAGE },
+                { ENABLED, false, true, true, false, false, ROLLING_UPGRADE_ERROR_MESSAGE },
+                { ROLLING_UPGRADE_ENABLED, false, false, true, false, true, null },
+                { ROLLING_UPGRADE_ENABLED, false, true, true, false, true, null },
         };
     }
 
-    @ParameterizedTest(name = "BlueprintUpgradeOption: {0}, osUpgrade: {1}, skipValidations: {2}, dataHubUpgradeEntitled: {3}, expected: {4}, "
-            + "expected message: {5}")
+    @ParameterizedTest(name = "BlueprintUpgradeOption: {0}, osUpgrade: {1}, forceOsUpgrade: {2}, rollingUpgrade: {3}, skipRollingUpgradeValidation: {4}, " +
+            "expected: {5}, expected message: {6}")
     @MethodSource("testScenariosProvider")
-    public void test(BlueprintUpgradeOption blueprintUpgradeOption, boolean osUpgrade, boolean rollingUpgrade, boolean skipRollingUpgradeValidation,
-            boolean expectedValue, String expectedErrorMessage) {
-        ImageFilterParams imageFilterParams = createImageFilterParams(osUpgrade, rollingUpgrade);
+    public void test(BlueprintUpgradeOption blueprintUpgradeOption, boolean osUpgrade, boolean forceOsUpgrade, boolean rollingUpgrade,
+            boolean skipRollingUpgradeValidation, boolean expectedValue, String expectedErrorMessage) {
+        ImageFilterParams imageFilterParams = createImageFilterParams(osUpgrade, forceOsUpgrade, rollingUpgrade);
         lenient().when(entitlementService.isSkipRollingUpgradeValidationEnabled(any())).thenReturn(skipRollingUpgradeValidation);
 
         BlueprintValidationResult actual = ThreadBasedUserCrnProvider.doAs(ACTOR, () -> underTest.validate(imageFilterParams, blueprintUpgradeOption));
@@ -60,8 +67,8 @@ class BlueprintUpgradeOptionConditionTest {
         assertEquals(expectedErrorMessage, actual.getReason());
     }
 
-    private ImageFilterParams createImageFilterParams(boolean osUpgrade, boolean rollingUpgrade) {
-        return new ImageFilterParams(null, null, null, osUpgrade, null, null, null, null,
+    private ImageFilterParams createImageFilterParams(boolean osUpgrade, boolean forceOsUpgrade, boolean rollingUpgrade) {
+        return new ImageFilterParams(null, null, null, osUpgrade, forceOsUpgrade, null, null, null, null,
                 new InternalUpgradeSettings(false, false, rollingUpgrade), null, null, null, false);
     }
 

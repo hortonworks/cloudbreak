@@ -19,6 +19,8 @@ public class ImageFilterParams {
 
     private final boolean lockComponents;
 
+    private final boolean replaceVms;
+
     private final Map<String, String> stackRelatedParcels;
 
     private final StackType stackType;
@@ -37,13 +39,14 @@ public class ImageFilterParams {
 
     private final boolean getAllImages;
 
-    public ImageFilterParams(String targetImageId, Image currentImage, String imageCatalogName, boolean lockComponents, Map<String, String> stackRelatedParcels,
-            StackType stackType, Blueprint blueprint, Long stackId, InternalUpgradeSettings internalUpgradeSettings, ImageCatalogPlatform imageCatalogPlatform,
-            String cloudPlatform, String region, boolean getAllImages) {
+    public ImageFilterParams(String targetImageId, Image currentImage, String imageCatalogName, boolean lockComponents, boolean replaceVms,
+            Map<String, String> stackRelatedParcels, StackType stackType, Blueprint blueprint, Long stackId, InternalUpgradeSettings internalUpgradeSettings,
+            ImageCatalogPlatform imageCatalogPlatform, String cloudPlatform, String region, boolean getAllImages) {
         this.targetImageId = targetImageId;
         this.currentImage = currentImage;
         this.imageCatalogName = imageCatalogName;
         this.lockComponents = lockComponents;
+        this.replaceVms = replaceVms;
         this.stackRelatedParcels = stackRelatedParcels;
         this.stackType = stackType;
         this.blueprint = blueprint;
@@ -69,6 +72,10 @@ public class ImageFilterParams {
 
     public boolean isLockComponents() {
         return lockComponents;
+    }
+
+    public boolean isReplaceVms() {
+        return replaceVms;
     }
 
     public Map<String, String> getStackRelatedParcels() {
@@ -122,6 +129,7 @@ public class ImageFilterParams {
         }
         ImageFilterParams that = (ImageFilterParams) o;
         return lockComponents == that.lockComponents &&
+                replaceVms == that.replaceVms &&
                 Objects.equals(internalUpgradeSettings, that.internalUpgradeSettings) &&
                 Objects.equals(currentImage, that.currentImage) &&
                 Objects.equals(stackRelatedParcels, that.stackRelatedParcels) &&
@@ -137,7 +145,7 @@ public class ImageFilterParams {
 
     @Override
     public int hashCode() {
-        return Objects.hash(currentImage, lockComponents, stackRelatedParcels, stackType, blueprint, stackId, internalUpgradeSettings,
+        return Objects.hash(currentImage, lockComponents, replaceVms, stackRelatedParcels, stackType, blueprint, stackId, internalUpgradeSettings,
                 imageCatalogPlatform, cloudPlatform, region, getAllImages, targetImageId);
     }
 }

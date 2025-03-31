@@ -42,6 +42,8 @@ public class ClusterUpgradeImageFilterTest {
 
     private static final String INTERNAL_ERROR = "Failed to retrieve eligible images due to an internal error.";
 
+    private final ImageFilterParams imageFilterParams = createImageFilterParams();
+
     @InjectMocks
     private ClusterUpgradeImageFilter underTest;
 
@@ -59,8 +61,6 @@ public class ClusterUpgradeImageFilterTest {
 
     @Mock
     private Image otherImage;
-
-    private final ImageFilterParams imageFilterParams = createImageFilterParams();
 
     @Test
     void testFilterWithImageCatalogShouldReturnErrorMessageWhenTheBlueprintIsNotEligible() {
@@ -137,7 +137,7 @@ public class ClusterUpgradeImageFilterTest {
 
     private ImageFilterParams createImageFilterParams() {
         return new ImageFilterParams(null, com.sequenceiq.cloudbreak.cloud.model.Image.builder().withImageId("current-image-id").build(),
-                null, false, Collections.emptyMap(), StackType.DATALAKE, new Blueprint(), STACK_ID, new InternalUpgradeSettings(false, true, true),
+                null, false, false, Collections.emptyMap(), StackType.DATALAKE, new Blueprint(), STACK_ID, new InternalUpgradeSettings(false, true, true),
                 imageCatalogPlatform(CLOUD_PLATFORM), CLOUD_PLATFORM, REGION, false);
     }
 

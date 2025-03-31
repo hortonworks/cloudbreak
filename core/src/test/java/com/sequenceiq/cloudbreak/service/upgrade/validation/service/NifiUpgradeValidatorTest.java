@@ -65,18 +65,27 @@ public class NifiUpgradeValidatorTest {
     }
 
     @Test
-    public void testValidateShouldNotThrowExceptionWhenLockComponentsIsFalse() {
-        underTest.validate(createRequest(false));
+    public void testValidateShouldNotThrowExceptionWhenLockComponentsAndReplaceVmsAreFalse() {
+        underTest.validate(createRequest(false, false));
 
         verifyNoInteractions(cmTemplateService);
         verifyNoInteractions(clusterApiConnectors);
     }
 
     @Test
-    public void testValidateShouldNotThrowExceptionWhenLockComponentsTrueAndTheNifiServiceIsNotPresent() {
+    public void testValidateShouldNotThrowExceptionWhenLockComponentsTrueAndReplaceVmsFalseAndTheNifiServiceIsNotPresent() {
         when(cmTemplateService.isServiceTypePresent(SERVICE_TYPE, BLUEPRINT_TEXT)).thenReturn(false);
 
-        underTest.validate(createRequest(true));
+        underTest.validate(createRequest(true, false));
+
+        verifyNoInteractions(clusterApiConnectors);
+    }
+
+    @Test
+    public void testValidateShouldNotThrowExceptionWhenLockComponentsFalseAndReplaceVmsTrueAndTheNifiServiceIsNotPresent() {
+        when(cmTemplateService.isServiceTypePresent(SERVICE_TYPE, BLUEPRINT_TEXT)).thenReturn(false);
+
+        underTest.validate(createRequest(false, true));
 
         verifyNoInteractions(clusterApiConnectors);
     }
@@ -87,7 +96,7 @@ public class NifiUpgradeValidatorTest {
         when(clusterApiConnectors.getConnector(stack)).thenReturn(connector);
         when(connector.getRoleConfigValueByServiceType(CLUSTER_NAME, ROLE_TYPE, SERVICE_TYPE, CONFIG)).thenReturn(Optional.of(VolumeUtils.VOLUME_PREFIX));
 
-        underTest.validate(createRequest(true));
+        underTest.validate(createRequest(true, false));
         verify(cmTemplateService).isServiceTypePresent(SERVICE_TYPE, BLUEPRINT_TEXT);
         verify(clusterApiConnectors).getConnector(stack);
         verify(connector).getRoleConfigValueByServiceType(CLUSTER_NAME, ROLE_TYPE, SERVICE_TYPE, CONFIG);
@@ -99,7 +108,7 @@ public class NifiUpgradeValidatorTest {
         when(clusterApiConnectors.getConnector(stack)).thenReturn(connector);
         when(connector.getRoleConfigValueByServiceType(CLUSTER_NAME, ROLE_TYPE, SERVICE_TYPE, CONFIG)).thenReturn(Optional.of("/var/etc"));
 
-        Exception actual = assertThrows(UpgradeValidationFailedException.class, () -> underTest.validate(createRequest(true)));
+        Exception actual = assertThrows(UpgradeValidationFailedException.class, () -> underTest.validate(createRequest(true, false)));
 
         assertEquals("Nifi working directory validation failed. The current directory /var/etc is not eligible for upgrade because it is located on the "
                 + "root disk. The Nifi working directory should be under the /hadoopfs/fs path. During upgrade or repair the Nifi directory would get deleted "
@@ -109,8 +118,8 @@ public class NifiUpgradeValidatorTest {
         verify(connector).getRoleConfigValueByServiceType(CLUSTER_NAME, ROLE_TYPE, SERVICE_TYPE, CONFIG);
     }
 
-    private ServiceUpgradeValidationRequest createRequest(boolean lockComponents) {
-        return new ServiceUpgradeValidationRequest(stack, lockComponents, true, null, false);
+    private ServiceUpgradeValidationRequest createRequest(boolean lockComponents, boolean replaceVms) {
+        return new ServiceUpgradeValidationRequest(stack, lockComponents, true, null, replaceVms);
     }
 
 }

@@ -68,7 +68,7 @@ public class ImageFilterParamsFactoryTest {
         when(parcelService.getParcelComponentsByBlueprint(stack)).thenReturn(clusterComponents);
         when(clouderaManagerProductsProvider.findCdhProduct(clusterComponents)).thenReturn(Optional.of(createCMProduct(cdhName, cdhVersion)));
 
-        ImageFilterParams actual = underTest.create(null, currentImage, true, stack, new InternalUpgradeSettings(false, true, true), false);
+        ImageFilterParams actual = underTest.create(null, currentImage, true, false, stack, new InternalUpgradeSettings(false, true, true), false);
 
         assertEquals(currentImage, actual.getCurrentImage());
         assertEquals(IMAGE_CATALOG_NAME, actual.getImageCatalogName());
@@ -98,7 +98,7 @@ public class ImageFilterParamsFactoryTest {
         when(parcelService.getParcelComponentsByBlueprint(stack)).thenReturn(cdhClusterComponent);
         when(clouderaManagerProductsProvider.getProducts(cdhClusterComponent)).thenReturn(Set.of(spark, nifi));
 
-        ImageFilterParams actual = underTest.create(null, currentImage, true, stack, new InternalUpgradeSettings(true, true, true), false);
+        ImageFilterParams actual = underTest.create(null, currentImage, true, false, stack, new InternalUpgradeSettings(true, true, true), false);
 
         assertEquals(currentImage, actual.getCurrentImage());
         assertEquals(IMAGE_CATALOG_NAME, actual.getImageCatalogName());
@@ -124,7 +124,8 @@ public class ImageFilterParamsFactoryTest {
 
         when(parcelService.getParcelComponentsByBlueprint(stack)).thenReturn(Collections.singleton(clusterComponent));
 
-        assertThrows(NotFoundException.class, () -> underTest.create(null, currentImage, true, stack, new InternalUpgradeSettings(false, true, true), false));
+        assertThrows(NotFoundException.class, () -> underTest.create(null, currentImage, true, false, stack,
+                new InternalUpgradeSettings(false, true, true), false));
 
         verify(parcelService).getParcelComponentsByBlueprint(stack);
     }

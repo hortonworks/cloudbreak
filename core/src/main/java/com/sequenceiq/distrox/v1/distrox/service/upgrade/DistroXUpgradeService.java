@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
@@ -33,18 +32,14 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterDBValidationService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
-import com.sequenceiq.cloudbreak.service.upgrade.UpgradePreconditionService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeService;
-import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.util.VersionNormalizer;
 import com.sequenceiq.distrox.v1.distrox.service.upgrade.dto.DistroXUpgradeDto;
@@ -86,9 +81,6 @@ public class DistroXUpgradeService {
     private ClouderaManagerLicenseProvider clouderaManagerLicenseProvider;
 
     @Inject
-    private LockedComponentService lockedComponentService;
-
-    @Inject
     private UpgradeService upgradeService;
 
     @Inject
@@ -101,12 +93,6 @@ public class DistroXUpgradeService {
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Inject
-    private UpgradePreconditionService upgradePreconditionService;
-
-    @Inject
-    private ClusterDBValidationService clusterDBValidationService;
-
-    @Inject
     private CloudbreakEventService cloudbreakEventService;
 
     public FlowIdentifier triggerOsUpgradeByUpgradeSets(NameOrCrn nameOrCrn, Long workspaceId, String imageId, List<OrderedOSUpgradeSet> upgradeSets) {
@@ -117,7 +103,7 @@ public class DistroXUpgradeService {
 
     private ImageChangeDto determineImageChangeDto(NameOrCrn nameOrCrn, String imageId, Stack stack) {
         boolean getAllImages = imageId != null;
-        UpgradeV4Response upgradeOptions = clusterUpgradeAvailabilityService.checkForUpgrades(stack, true,
+        UpgradeV4Response upgradeOptions = clusterUpgradeAvailabilityService.checkForUpgrades(stack, true, true,
                 new InternalUpgradeSettings(false), getAllImages, imageId);
         if (upgradeOptions.getUpgradeCandidates().isEmpty()) {
             throw new BadRequestException("There is no available image for upgrade.");
@@ -135,8 +121,8 @@ public class DistroXUpgradeService {
         ImageInfoV4Response targetImage = imageSelector.determineImageId(request, upgradeV4Response);
         StackDto stack = stackDtoService.getByNameOrCrn(cluster, ThreadBasedUserCrnProvider.getAccountId());
         MDCBuilder.buildMdcContext(stack);
-        boolean lockComponents = determineLockComponentsParam(request, targetImage, stack);
-        boolean replaceVms = determineReplaceVmsParameter(stack, request.getReplaceVms(), lockComponents);
+        boolean lockComponents = clusterUpgradeAvailabilityService.determineLockComponentsParam(request, targetImage, stack);
+        boolean replaceVms = clusterUpgradeAvailabilityService.determineReplaceVmsParameter(stack, request.getReplaceVms(), lockComponents, false);
         upgradeV4Response.setReplaceVms(replaceVms);
         ImageChangeDto imageChangeDto = createImageChangeDto(cluster, workspaceId, targetImage);
         return upgradePreparation ?
@@ -189,39 +175,6 @@ public class DistroXUpgradeService {
         }
     }
 
-    private boolean determineLockComponentsParam(UpgradeV4Request request, ImageInfoV4Response targetImage, StackDto stack) {
-        return request.getLockComponents() != null ? request.getLockComponents() : isComponentsLocked(stack, targetImage);
-    }
-
-    private boolean determineReplaceVmsParameter(StackDto stack, Boolean replaceVms, boolean lockComponents) {
-        if (stack.getStack().isDatalake()) {
-            LOGGER.debug("ReplaceVms is always true for datalakes.");
-            return true;
-        } else if (!upgradePreconditionService.notUsingEphemeralVolume(stack)) {
-            LOGGER.debug("Cluster uses ephemeral volume, replaceVms should be false.");
-            return false;
-        } else if (!clusterDBValidationService.isGatewayRepairEnabled(stack.getCluster())) {
-            LOGGER.debug("Gateway repair is not enabled, replaceVms should be false.");
-            return false;
-        } else if (replaceVms != null) {
-            LOGGER.debug("ReplaceVms is specified in the request: {}", replaceVms);
-            if (Boolean.TRUE.equals(replaceVms)) {
-                cloudbreakEventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_FORCE_OS_UPGRADE_REQUESTED);
-            }
-            return replaceVms;
-        } else if (entitlementService.isDatahubForceOsUpgradeEnabled(Crn.safeFromString(stack.getResourceCrn()).getAccountId())) {
-            LOGGER.debug("Force OS upgrade entitlement is enabled, replaceVms should be true.");
-            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_FORCE_OS_UPGRADE_ENABLED);
-            return true;
-        } else if (!lockComponents) {
-            LOGGER.info("ReplaceVms parameter has been overridden to false for stack {} in case of distrox runtime upgrade.", stack.getName());
-            return false;
-        } else {
-            LOGGER.debug("Default value for replaceVms param is true");
-            return true;
-        }
-    }
-
     private ImageChangeDto createImageChangeDto(NameOrCrn cluster, Long workspaceId, ImageInfoV4Response image) {
         StackImageChangeV4Request stackImageChangeRequest = new StackImageChangeV4Request();
         stackImageChangeRequest.setImageId(image.getImageId());
@@ -259,7 +212,4 @@ public class DistroXUpgradeService {
         paywallAccessChecker.checkPaywallAccess(license, paywallUrl);
     }
 
-    private boolean isComponentsLocked(StackDto stack, ImageInfoV4Response targetImage) {
-        return lockedComponentService.isComponentsLocked(stack, targetImage.getImageId());
-    }
 }

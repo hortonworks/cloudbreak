@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -30,7 +31,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
@@ -49,17 +49,13 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterDBValidationService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
-import com.sequenceiq.cloudbreak.service.upgrade.UpgradePreconditionService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeService;
-import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -114,9 +110,6 @@ class DistroXUpgradeServiceTest {
     private ClouderaManagerLicenseProvider clouderaManagerLicenseProvider;
 
     @Mock
-    private LockedComponentService lockedComponentService;
-
-    @Mock
     private StackUpgradeService stackUpgradeService;
 
     @Mock
@@ -127,12 +120,6 @@ class DistroXUpgradeServiceTest {
 
     @Mock
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
-
-    @Mock
-    private UpgradePreconditionService upgradePreconditionService;
-
-    @Mock
-    private ClusterDBValidationService clusterDBValidationService;
 
     @Mock
     private CloudbreakEventService cloudbreakEventService;
@@ -210,7 +197,7 @@ class DistroXUpgradeServiceTest {
                 .thenReturn(imageChangeDto);
         when(stackDtoService.getByNameOrCrn(CLUSTER, ACCOUNT_ID)).thenReturn(stack);
         when(stackUpgradeService.calculateUpgradeVariant(stackView, USER_CRN, DO_NOT_KEEP_VARIANT)).thenReturn("variant");
-        when(lockedComponentService.isComponentsLocked(stack, imageInfoV4Response.getImageId())).thenReturn(LOCK_COMPONENTS);
+        when(clusterUpgradeAvailabilityService.determineLockComponentsParam(any(), any(), eq(stack))).thenReturn(LOCK_COMPONENTS);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "asdf");
         when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS), anyString(),
                 eq(ROLLING_UPGRADE_ENABLED), eq("aRuntime"))).thenReturn(flowIdentifier);
@@ -239,7 +226,7 @@ class DistroXUpgradeServiceTest {
         when(stackCommonService.createImageChangeDto(eq(CLUSTER), eq(WS_ID), imageChangeRequestArgumentCaptor.capture()))
                 .thenReturn(imageChangeDto);
         when(stackDtoService.getByNameOrCrn(CLUSTER, ACCOUNT_ID)).thenReturn(stack);
-        when(lockedComponentService.isComponentsLocked(stack, imageInfoV4Response.getImageId())).thenReturn(LOCK_COMPONENTS);
+        when(clusterUpgradeAvailabilityService.determineLockComponentsParam(any(), any(), eq(stack))).thenReturn(LOCK_COMPONENTS);
         when(stackUpgradeService.calculateUpgradeVariant(stackView, USER_CRN, DO_NOT_KEEP_VARIANT)).thenReturn("variant");
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "asdf");
         when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS), anyString(), eq(false),
@@ -271,7 +258,7 @@ class DistroXUpgradeServiceTest {
         ImageChangeDto imageChangeDto = new ImageChangeDto(STACK_ID, imageInfoV4Response.getImageId());
         when(stackCommonService.createImageChangeDto(eq(CLUSTER), eq(WS_ID), imageChangeRequestArgumentCaptor.capture())).thenReturn(imageChangeDto);
         when(stackDtoService.getByNameOrCrn(CLUSTER, ACCOUNT_ID)).thenReturn(stack);
-        when(lockedComponentService.isComponentsLocked(stack, imageInfoV4Response.getImageId())).thenReturn(LOCK_COMPONENTS);
+        when(clusterUpgradeAvailabilityService.determineLockComponentsParam(any(), any(), eq(stack))).thenReturn(LOCK_COMPONENTS);
         when(stackUpgradeService.calculateUpgradeVariant(stackView, USER_CRN, DO_NOT_KEEP_VARIANT)).thenReturn("variant");
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "asdf");
         when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS), anyString(),
@@ -284,25 +271,23 @@ class DistroXUpgradeServiceTest {
     }
 
     @Test
-    public void testTriggerFlowWhenOsUpgradeFalseAndForceOsUpgradeEntitlementEnabledShouldNotTurnOffVmsParam() {
+    public void testTriggerFlowWhenOsUpgradeFalseReplaceVmsParamTrue() {
         // GIVEN
         UpgradeV4Request request = createRequest(false, ROLLING_UPGRADE_ENABLED);
         UpgradeV4Response response = new UpgradeV4Response();
         response.setReplaceVms(true);
         response.setUpgradeCandidates(List.of(mock(ImageInfoV4Response.class)));
-        when(upgradePreconditionService.notUsingEphemeralVolume(eq(stack))).thenReturn(Boolean.TRUE);
-        when(clusterDBValidationService.isGatewayRepairEnabled(eq(clusterView))).thenReturn(Boolean.TRUE);
-        when(entitlementService.isDatahubForceOsUpgradeEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
         when(upgradeAvailabilityService.checkForUpgrade(CLUSTER, WS_ID, request, USER_CRN)).thenReturn(response);
         when(entitlementService.isInternalRepositoryForUpgradeAllowed(ACCOUNT_ID)).thenReturn(Boolean.FALSE);
         when(clouderaManagerLicenseProvider.getLicense(any())).thenReturn(new JsonCMLicense());
+        when(clusterUpgradeAvailabilityService.determineLockComponentsParam(eq(request), any(), eq(stack))).thenReturn(LOCK_COMPONENTS);
+        when(clusterUpgradeAvailabilityService.determineReplaceVmsParameter(eq(stack), isNull(), eq(false), eq(false))).thenReturn(Boolean.TRUE);
         ImageInfoV4Response imageInfoV4Response = getImage();
         when(imageSelector.determineImageId(request, response)).thenReturn(imageInfoV4Response);
         ArgumentCaptor<StackImageChangeV4Request> imageChangeRequestArgumentCaptor = ArgumentCaptor.forClass(StackImageChangeV4Request.class);
         ImageChangeDto imageChangeDto = new ImageChangeDto(STACK_ID, imageInfoV4Response.getImageId());
         when(stackCommonService.createImageChangeDto(eq(CLUSTER), eq(WS_ID), imageChangeRequestArgumentCaptor.capture())).thenReturn(imageChangeDto);
         when(stackDtoService.getByNameOrCrn(CLUSTER, ACCOUNT_ID)).thenReturn(stack);
-        when(lockedComponentService.isComponentsLocked(stack, imageInfoV4Response.getImageId())).thenReturn(LOCK_COMPONENTS);
         when(stackUpgradeService.calculateUpgradeVariant(stackView, USER_CRN, DO_NOT_KEEP_VARIANT)).thenReturn("variant");
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "asdf");
         when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS), anyString(),
@@ -310,44 +295,12 @@ class DistroXUpgradeServiceTest {
         // WHEN
         UpgradeV4Response result = doAs(USER_CRN, () -> underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request, false));
         // THEN
-        verify(cloudbreakEventService).fireCloudbreakEvent(eq(STACK_ID), eq(Status.UPDATE_IN_PROGRESS.name()),
-                eq(ResourceEvent.CLUSTER_FORCE_OS_UPGRADE_ENABLED));
         verify(reactorFlowManager).triggerDistroXUpgrade(STACK_ID, imageChangeDto, true, LOCK_COMPONENTS, "variant", ROLLING_UPGRADE_ENABLED, "aRuntime");
         assertTrue(result.isReplaceVms());
     }
 
     @Test
-    public void testTriggerFlowWithoutTurnOffReplaceVmsParam() {
-        // GIVEN
-        UpgradeV4Request request = createRequest(true, false);
-        UpgradeV4Response response = new UpgradeV4Response();
-        response.setReplaceVms(true);
-        response.setUpgradeCandidates(List.of(mock(ImageInfoV4Response.class)));
-        when(upgradeAvailabilityService.checkForUpgrade(CLUSTER, WS_ID, request, USER_CRN)).thenReturn(response);
-        when(upgradePreconditionService.notUsingEphemeralVolume(eq(stack))).thenReturn(Boolean.TRUE);
-        when(clusterDBValidationService.isGatewayRepairEnabled(eq(clusterView))).thenReturn(Boolean.TRUE);
-        when(entitlementService.isInternalRepositoryForUpgradeAllowed(ACCOUNT_ID)).thenReturn(Boolean.FALSE);
-        when(clouderaManagerLicenseProvider.getLicense(any())).thenReturn(new JsonCMLicense());
-        ImageInfoV4Response imageInfoV4Response = getImage();
-        when(imageSelector.determineImageId(request, response)).thenReturn(imageInfoV4Response);
-        ArgumentCaptor<StackImageChangeV4Request> imageChangeRequestArgumentCaptor = ArgumentCaptor.forClass(StackImageChangeV4Request.class);
-        ImageChangeDto imageChangeDto = new ImageChangeDto(STACK_ID, imageInfoV4Response.getImageId());
-        when(stackCommonService.createImageChangeDto(eq(CLUSTER), eq(WS_ID), imageChangeRequestArgumentCaptor.capture())).thenReturn(imageChangeDto);
-        when(stackDtoService.getByNameOrCrn(CLUSTER, ACCOUNT_ID)).thenReturn(stack);
-        when(stackUpgradeService.calculateUpgradeVariant(stackView, USER_CRN, DO_NOT_KEEP_VARIANT)).thenReturn("variant");
-        when(lockedComponentService.isComponentsLocked(stack, imageInfoV4Response.getImageId())).thenReturn(true);
-        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "asdf");
-        when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), anyBoolean(), anyString(), eq(false), eq("aRuntime")))
-                .thenReturn(flowIdentifier);
-        // WHEN
-        UpgradeV4Response result = doAs(USER_CRN, () -> underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request, false));
-        // THEN
-        verify(reactorFlowManager).triggerDistroXUpgrade(STACK_ID, imageChangeDto, true, true, "variant", false, "aRuntime");
-        assertTrue(result.isReplaceVms());
-    }
-
-    @Test
-    public void testTriggerFlowWithExplicitReplaceVmsParamEnabled() {
+    public void testTriggerFlowWhenReplaceVmsParamAndLockComponentsEnabled() {
         // GIVEN
         UpgradeV4Request request = createRequest(true, false);
         request.setReplaceVms(Boolean.TRUE);
@@ -355,8 +308,6 @@ class DistroXUpgradeServiceTest {
         response.setReplaceVms(true);
         response.setUpgradeCandidates(List.of(mock(ImageInfoV4Response.class)));
         when(upgradeAvailabilityService.checkForUpgrade(CLUSTER, WS_ID, request, USER_CRN)).thenReturn(response);
-        when(upgradePreconditionService.notUsingEphemeralVolume(eq(stack))).thenReturn(Boolean.TRUE);
-        when(clusterDBValidationService.isGatewayRepairEnabled(eq(clusterView))).thenReturn(Boolean.TRUE);
         when(entitlementService.isInternalRepositoryForUpgradeAllowed(ACCOUNT_ID)).thenReturn(Boolean.FALSE);
         when(clouderaManagerLicenseProvider.getLicense(any())).thenReturn(new JsonCMLicense());
         ImageInfoV4Response imageInfoV4Response = getImage();
@@ -366,15 +317,14 @@ class DistroXUpgradeServiceTest {
         when(stackCommonService.createImageChangeDto(eq(CLUSTER), eq(WS_ID), imageChangeRequestArgumentCaptor.capture())).thenReturn(imageChangeDto);
         when(stackDtoService.getByNameOrCrn(CLUSTER, ACCOUNT_ID)).thenReturn(stack);
         when(stackUpgradeService.calculateUpgradeVariant(stackView, USER_CRN, DO_NOT_KEEP_VARIANT)).thenReturn("variant");
-        when(lockedComponentService.isComponentsLocked(stack, imageInfoV4Response.getImageId())).thenReturn(true);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "asdf");
         when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), anyBoolean(), anyString(), eq(false), eq("aRuntime")))
                 .thenReturn(flowIdentifier);
+        when(clusterUpgradeAvailabilityService.determineLockComponentsParam(eq(request), any(), eq(stack))).thenReturn(Boolean.TRUE);
+        when(clusterUpgradeAvailabilityService.determineReplaceVmsParameter(eq(stack), eq(true), eq(true), eq(false))).thenReturn(Boolean.TRUE);
         // WHEN
         UpgradeV4Response result = doAs(USER_CRN, () -> underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request, false));
         // THEN
-        verify(cloudbreakEventService).fireCloudbreakEvent(eq(STACK_ID), eq(Status.UPDATE_IN_PROGRESS.name()),
-                eq(ResourceEvent.CLUSTER_FORCE_OS_UPGRADE_REQUESTED));
         verify(reactorFlowManager).triggerDistroXUpgrade(STACK_ID, imageChangeDto, true, true, "variant", false, "aRuntime");
         assertTrue(result.isReplaceVms());
     }
@@ -396,7 +346,6 @@ class DistroXUpgradeServiceTest {
         when(stackCommonService.createImageChangeDto(eq(CLUSTER), eq(WS_ID), imageChangeRequestArgumentCaptor.capture())).thenReturn(imageChangeDto);
         when(stackDtoService.getByNameOrCrn(CLUSTER, ACCOUNT_ID)).thenReturn(stack);
         when(stackUpgradeService.calculateUpgradeVariant(stackView, USER_CRN, DO_NOT_KEEP_VARIANT)).thenReturn("variant");
-        when(lockedComponentService.isComponentsLocked(stack, imageInfoV4Response.getImageId())).thenReturn(LOCK_COMPONENTS);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "asdf");
         when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS), anyString(),
                 eq(ROLLING_UPGRADE_ENABLED), eq("aRuntime"))).thenReturn(flowIdentifier);
@@ -418,7 +367,7 @@ class DistroXUpgradeServiceTest {
         UpgradeV4Response response = new UpgradeV4Response();
         response.setReplaceVms(true);
         response.setUpgradeCandidates(List.of(mock(ImageInfoV4Response.class)));
-        when(clusterUpgradeAvailabilityService.checkForUpgrades(eq(stack), eq(true), any(), eq(true), any())).thenReturn(response);
+        when(clusterUpgradeAvailabilityService.checkForUpgrades(eq(stack), eq(true), eq(true), any(), eq(true), any())).thenReturn(response);
         ImageInfoV4Response imageInfoV4Response = new ImageInfoV4Response();
         imageInfoV4Response.setImageId("imageID");
         imageInfoV4Response.setImageCatalogName("catalogName");
@@ -430,7 +379,7 @@ class DistroXUpgradeServiceTest {
         when(stackCommonService.createImageChangeDto(eq(CLUSTER), eq(WS_ID), imageChangeRequestArgumentCaptor.capture())).thenReturn(imageChangeDto);
         underTest.triggerOsUpgradeByUpgradeSets(CLUSTER, WS_ID, "imageID", upgradeSets);
         ArgumentCaptor<InternalUpgradeSettings> internalUpgradeSettingsArgumentCaptor = ArgumentCaptor.forClass(InternalUpgradeSettings.class);
-        verify(clusterUpgradeAvailabilityService, times(1)).checkForUpgrades(eq(stack), eq(true),
+        verify(clusterUpgradeAvailabilityService, times(1)).checkForUpgrades(eq(stack), eq(true), eq(true),
                 internalUpgradeSettingsArgumentCaptor.capture(), eq(true), eq("imageID"));
         assertFalse(internalUpgradeSettingsArgumentCaptor.getValue().isSkipValidations());
         ArgumentCaptor<ImageChangeDto> imageChangeDtoCaptor = ArgumentCaptor.forClass(ImageChangeDto.class);

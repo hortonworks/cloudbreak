@@ -143,7 +143,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         saltVersionUpgradeService.getSaltSecretRotationTriggerEvent(event.getResourceId()).ifPresent(flowEventChain::add);
         flowEventChain.add(getSaltUpdateTriggerEvent(eventForRuntimeUpgrade));
         getClusterUpgradeTriggerEvent(eventForRuntimeUpgrade).ifPresent(flowEventChain::add);
-        flowEventChain.add(getImageUpdateTriggerEvent(event));
+        getImageUpdateTriggerEvent(event).ifPresent(flowEventChain::add);
         flowEventChain.addAll(embeddedDbUpgradeFlowTriggersFactory.createFlowTriggers(event.getResourceId(), true));
         getClusterRepairTriggerEvent(event).ifPresent(flowEventChain::add);
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
@@ -213,8 +213,13 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         }
     }
 
-    private StackImageUpdateTriggerEvent getImageUpdateTriggerEvent(DistroXUpgradeTriggerEvent event) {
-        return new StackImageUpdateTriggerEvent(STACK_IMAGE_UPDATE_TRIGGER_EVENT, event.getImageChangeDto());
+    private Optional<StackImageUpdateTriggerEvent> getImageUpdateTriggerEvent(DistroXUpgradeTriggerEvent event) {
+        if (event.isLockComponents() && !event.isReplaceVms()) {
+            LOGGER.warn("OS upgrade without replacing the instances (lockComponents=true, replaceVms=false) is invalid, do not update image.");
+            return Optional.empty();
+        } else {
+            return Optional.of(new StackImageUpdateTriggerEvent(STACK_IMAGE_UPDATE_TRIGGER_EVENT, event.getImageChangeDto()));
+        }
     }
 
     private Optional<ClusterRepairTriggerEvent> getClusterRepairTriggerEvent(DistroXUpgradeTriggerEvent event) {

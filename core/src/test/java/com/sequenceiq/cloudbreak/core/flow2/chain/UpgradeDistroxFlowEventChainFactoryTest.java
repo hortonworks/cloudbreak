@@ -350,6 +350,20 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         assertImageUpdateEvent(flowChainQueue);
     }
 
+    @Test
+    void testChainQueueForOsUpgradeWhenReplaceVmsIsFalse() {
+        when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
+        when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
+        ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
+
+        DistroXUpgradeTriggerEvent event = new DistroXUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
+                new Promise<>(), imageChangeDto, false, true, "variant", false, "runtime");
+        FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
+        assertEquals(2, flowChainQueue.getQueue().size());
+        assertUpdateValidationEvent(flowChainQueue, IMAGE_ID, event.isReplaceVms(), event.isLockComponents(), event.isRollingUpgradeEnabled());
+        assertSaltUpdateEvent(flowChainQueue);
+    }
+
     private void assertUpdateValidationEvent(FlowTriggerEventQueue flowChainQueue, String imageId, boolean replaceVms, boolean lockComponents,
             boolean rollingUpgradeEnabled) {
         Selectable upgradeValidationEvent = flowChainQueue.getQueue().remove();

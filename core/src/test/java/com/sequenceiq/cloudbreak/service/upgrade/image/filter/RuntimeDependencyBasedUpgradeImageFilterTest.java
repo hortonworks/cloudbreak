@@ -105,7 +105,7 @@ class RuntimeDependencyBasedUpgradeImageFilterTest {
     }
 
     private ImageFilterParams createImageFilterParams() {
-        return new ImageFilterParams(null, currentImage, IMAGE_CATALOG_NAME, false, null, null, null, STACK_ID, null,
+        return new ImageFilterParams(null, currentImage, IMAGE_CATALOG_NAME, false, false, null, null, null, STACK_ID, null,
                 new ImageCatalogPlatform(CloudPlatform.AWS.name()), null, null, false);
     }
 }

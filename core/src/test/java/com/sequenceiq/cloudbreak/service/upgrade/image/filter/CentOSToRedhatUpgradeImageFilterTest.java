@@ -94,7 +94,7 @@ class CentosToRedHatUpgradeImageFilterTest {
         //CHECKSTYLE:ON
         //ImageFilterParams imageFilterParams = centosImageFilterParams(VERSION_7_2_16);
         ImageFilterParams imageFilterParams = new ImageFilterParams("target-image-id", image(OsType.CENTOS7.getOs(), OsType.CENTOS7.getOsType(), VERSION_7_2_16),
-                "image-catalog-name", false, Map.of(CDH.name(), "7.2.17"), null, null, STACK_ID, null, null, null, null, false);
+                "image-catalog-name", false, false, Map.of(CDH.name(), "7.2.17"), null, null, STACK_ID, null, null, null, null, false);
         Image redhatImage = redhatCatalogImage(VERSION_7_2_17);
         Image centosImage = centOSCatalogImage(VERSION_7_2_17);
         when(currentImageUsageCondition.isCurrentOsUsedOnInstances(STACK_ID, OsType.RHEL8.getOs())).thenReturn(false);
@@ -169,7 +169,7 @@ class CentosToRedHatUpgradeImageFilterTest {
     }
 
     private ImageFilterParams imageFilterParams(com.sequenceiq.cloudbreak.cloud.model.Image image) {
-        return new ImageFilterParams(null, image, null, false, Map.of(CDH.name(), "7.2.17"), null, null, STACK_ID, null, null, null, null, false);
+        return new ImageFilterParams(null, image, null, false, false, Map.of(CDH.name(), "7.2.17"), null, null, STACK_ID, null, null, null, null, false);
     }
 
     private com.sequenceiq.cloudbreak.cloud.model.Image image(String os, String osType, String version) {

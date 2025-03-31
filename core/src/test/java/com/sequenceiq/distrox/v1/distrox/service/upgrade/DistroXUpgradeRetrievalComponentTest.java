@@ -142,6 +142,7 @@ import com.sequenceiq.cloudbreak.service.upgrade.sync.component.ImageReaderServi
 import com.sequenceiq.cloudbreak.service.upgrade.validation.PythonVersionBasedRuntimeVersionValidator;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.util.CdhPatchVersionProvider;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -261,6 +262,9 @@ public class DistroXUpgradeRetrievalComponentTest {
 
     @MockBean
     private StackCcmUpgradeService stackCcmUpgradeService;
+
+    @MockBean
+    private CloudbreakEventService cloudbreakEventService;
 
     @BeforeEach
     public void before() throws CloudbreakImageCatalogException {

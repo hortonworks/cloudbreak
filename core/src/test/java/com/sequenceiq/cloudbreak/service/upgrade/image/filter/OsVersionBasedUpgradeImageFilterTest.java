@@ -89,7 +89,7 @@ class OsVersionBasedUpgradeImageFilterTest {
     }
 
     private ImageFilterParams createImageFilterParams() {
-        return new ImageFilterParams(null, createCurrentImage(), null, false, null, null, null, STACK_ID, null, null, null, null, false);
+        return new ImageFilterParams(null, createCurrentImage(), null, false, false, null, null, null, STACK_ID, null, null, null, null, false);
     }
 
     private Image createImage(String imageId, String os, String osType) {

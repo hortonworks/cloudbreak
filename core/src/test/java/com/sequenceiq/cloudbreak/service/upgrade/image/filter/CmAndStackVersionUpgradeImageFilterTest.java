@@ -35,6 +35,8 @@ class CmAndStackVersionUpgradeImageFilterTest {
 
     private static final String BUILD_NUMBER = "12345";
 
+    private final Map<String, String> activatedParcels = Map.of("stack", V_7_0_3);
+
     @Mock
     private LockedComponentChecker lockedComponentChecker;
 
@@ -49,8 +51,6 @@ class CmAndStackVersionUpgradeImageFilterTest {
 
     @Mock
     private Image candidateImage;
-
-    private final Map<String, String> activatedParcels = Map.of("stack", V_7_0_3);
 
     @BeforeEach
     public void setUp() {
@@ -129,7 +129,7 @@ class CmAndStackVersionUpgradeImageFilterTest {
                 .withOs("centos7")
                 .withOsType("redhat7")
                 .withPackageVersions(Map.of(ImagePackageVersion.CM_BUILD_NUMBER.getKey(), BUILD_NUMBER)).build();
-        return new ImageFilterParams(null, currentImage1, null, lockComponents, activatedParcels, StackType.DATALAKE, null, 1L,
+        return new ImageFilterParams(null, currentImage1, null, lockComponents, false, activatedParcels, StackType.DATALAKE, null, 1L,
                 new InternalUpgradeSettings(false, true, true), imageCatalogPlatform("AWS"), null, null, false);
     }
 
