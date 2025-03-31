@@ -30,6 +30,8 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.altus.AltusDatabusConfiguration;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -125,11 +127,25 @@ public class MeteringV2ConfigProvider extends AbstractRoleConfigProvider {
 
     @Override
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
-        // If DLM || CLO is present, return true.
-        return (cmTemplateProcessor.isRoleTypePresentInService(DLM_SERVICE, Lists.newArrayList(DLM_SERVER))
-                || cmTemplateProcessor.isRoleTypePresentInService(CLO_SERVICE, Lists.newArrayList(CLO_SERVER)))
+        return (isSupportedForDatalake(source) || isSupportedForDatahub(cmTemplateProcessor, source))
                 && StringUtils.isNotBlank(dbusAppName)
                 && StringUtils.isNotBlank(dbusStreamName);
     }
 
+    private boolean isSupportedForDatalake(TemplatePreparationObject source) {
+        if (StackType.DATALAKE.equals(source.getStackType())) {
+            String cmVersion = source.getProductDetailsView().getCm().getVersion().split("-")[0];
+            String cdhVersion = source.getBlueprintView().getProcessor().getVersion().orElse("");
+            return CMRepositoryVersionUtil.isDataSharingConfigurationSupported(cmVersion, cdhVersion);
+        }
+        return false;
+    }
+
+    private boolean isSupportedForDatahub(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
+        if (StackType.WORKLOAD.equals(source.getStackType())) {
+            return cmTemplateProcessor.isRoleTypePresentInService(DLM_SERVICE, Lists.newArrayList(DLM_SERVER))
+                    || cmTemplateProcessor.isRoleTypePresentInService(CLO_SERVICE, Lists.newArrayList(CLO_SERVER));
+        }
+        return false;
+    }
 }
