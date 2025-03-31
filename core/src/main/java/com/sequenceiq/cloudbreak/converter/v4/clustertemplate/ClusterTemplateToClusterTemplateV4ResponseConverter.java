@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.converter.v4.stacks.cli.StackToStackV4RequestCo
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.service.stack.StackTemplateService;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4RequestConverter;
@@ -54,12 +55,17 @@ public class ClusterTemplateToClusterTemplateV4ResponseConverter {
                 }
                 clusterTemplateV4Response.setDistroXTemplate(getIfNotNull(stackV4Request, stackV4RequestConverter::convert));
                 clusterTemplateV4Response.setNodeCount(stack.get().getFullNodeCount().intValue());
+                clusterTemplateV4Response.setArchitecture(Optional.ofNullable(stack.get().getArchitecture()).orElse(Architecture.X86_64));
             }
         } else {
             try {
                 DefaultClusterTemplateV4Request clusterTemplateV4Request = new Json(getTemplateString(source))
                         .get(DefaultClusterTemplateV4Request.class);
                 clusterTemplateV4Response.setDistroXTemplate(clusterTemplateV4Request.getDistroXTemplate());
+                clusterTemplateV4Response.setArchitecture(Optional.ofNullable(clusterTemplateV4Request.getDistroXTemplate())
+                        .map(DistroXV1Request::getArchitecture)
+                        .map(Architecture::fromStringWithFallback)
+                        .orElse(Architecture.X86_64));
                 clusterTemplateV4Response.setNodeCount(getFullNodeCount(clusterTemplateV4Request.getDistroXTemplate()));
             } catch (IOException e) {
                 LOGGER.info("There is no Data Hub template (stack entity missing) for cluster defintion {}", source.getName());
@@ -83,6 +89,7 @@ public class ClusterTemplateToClusterTemplateV4ResponseConverter {
                 clusterTemplateV4Response.setStackType(source.getStackTemplate().getCluster().getBlueprint().getStackType());
                 clusterTemplateV4Response.setStackVersion(source.getStackTemplate().getCluster().getBlueprint().getStackVersion());
             }
+            clusterTemplateV4Response.setArchitecture(Optional.ofNullable(stackTemplate.getArchitecture()).orElse(Architecture.X86_64));
         } else {
             clusterTemplateV4Response.setStackType("CDH");
             clusterTemplateV4Response.setStackVersion(source.getClouderaRuntimeVersion());

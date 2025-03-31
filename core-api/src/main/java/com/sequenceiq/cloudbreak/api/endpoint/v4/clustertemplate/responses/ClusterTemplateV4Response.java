@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.FeatureState;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterTemplateModelDescription;
+import com.sequenceiq.common.model.Architecture;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -49,6 +50,8 @@ public class ClusterTemplateV4Response extends ClusterTemplateV4Base {
     @NotNull
     @Schema(description = ModelDescriptions.CRN, requiredMode = Schema.RequiredMode.REQUIRED)
     private String crn;
+
+    private Architecture architecture;
 
     public FeatureState getFeatureState() {
         return featureState;
@@ -144,5 +147,13 @@ public class ClusterTemplateV4Response extends ClusterTemplateV4Base {
 
     public void setLastUpdated(Long lastUpdated) {
         this.lastUpdated = lastUpdated;
+    }
+
+    public Architecture getArchitecture() {
+        return architecture;
+    }
+
+    public void setArchitecture(Architecture architecture) {
+        this.architecture = architecture;
     }
 }
