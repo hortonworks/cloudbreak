@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 import com.sequenceiq.cloudbreak.domain.Network;
+import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -125,6 +126,13 @@ class InstanceMetaDataServiceTest {
         };
     }
 
+    static Stream<Arguments> supportedProvidersWithVolumeResource() {
+        return Stream.of(
+                arguments(CloudPlatform.AWS, ResourceType.AWS_VOLUMESET),
+                arguments(CloudPlatform.AZURE, ResourceType.AZURE_VOLUMESET)
+        );
+    }
+
     @ParameterizedTest(name = "{0}")
     @MethodSource("saveInstanceAndGetUpdatedStackTestWhenSubnetAndAvailabilityZoneAndRackIdAndRoundRobinDataProvider")
     void saveInstanceAndGetUpdatedStackTestWhenSubnetAndAvailabilityZoneAndRackIdAndRoundRobin(String testCaseName, boolean save, List<String> hostnames,
@@ -184,6 +192,7 @@ class InstanceMetaDataServiceTest {
                     assertThat(instance.getSubnetId()).isEqualTo(expectedSubnetId);
                     assertThat(instance.getAvailabilityZone()).isEqualTo(expectedAvailabilityZone);
                     assertThat(instance.getRackId()).isEqualTo(expectedRackId);
+                    assertThat(instance.getProviderInstanceType()).isEqualTo("large");
                 }
             });
         });
@@ -355,13 +364,6 @@ class InstanceMetaDataServiceTest {
         verifyRepositorySave(resultInstanceGroups, false);
     }
 
-    static Stream<Arguments> supportedProvidersWithVolumeResource() {
-        return Stream.of(
-                arguments(CloudPlatform.AWS, ResourceType.AWS_VOLUMESET),
-                arguments(CloudPlatform.AZURE, ResourceType.AZURE_VOLUMESET)
-        );
-    }
-
     @ParameterizedTest
     @MethodSource("supportedProvidersWithVolumeResource")
     void testGetAzFromDiskOrNullIfRepairWhenRepairAndCloudPlatformSupported(CloudPlatform cloudPlatform, ResourceType supportedVolumeResourceType) {
@@ -457,6 +459,9 @@ class InstanceMetaDataServiceTest {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setGroupName(groupName(idx));
         instanceGroup.setId((long) idx);
+        Template template = new Template();
+        template.setInstanceType("large");
+        instanceGroup.setTemplate(template);
         return instanceGroup;
     }
 

@@ -23,11 +23,12 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
-import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 
 @Service
 public class CoreVerticalScaleService {
@@ -45,6 +46,9 @@ public class CoreVerticalScaleService {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private InstanceMetaDataService instanceMetaDataService;
 
     public void verticalScale(Long stackId, StackVerticalScaleV4Request payload, String previousInstanceType) {
         if (payload.getTemplate().getInstanceType() != null) {
@@ -86,15 +90,19 @@ public class CoreVerticalScaleService {
     public void updateTemplateWithVerticalScaleInformation(Long stackId, StackVerticalScaleV4Request stackVerticalScaleV4Request,
             int instanceStorageCount, int instanceStorageSize) {
         Stack stack = stackService.getById(stackId);
-        Optional<InstanceGroupView> optionalGroup = instanceGroupService
-                .findInstanceGroupViewByStackIdAndGroupName(stackId, stackVerticalScaleV4Request.getGroup());
+        Optional<InstanceGroup> optionalGroup = instanceGroupService.getInstanceGroupWithTemplateAndInstancesByGroupNameInStack(stackId,
+                stackVerticalScaleV4Request.getGroup());
         if (optionalGroup.isPresent() && stackVerticalScaleV4Request.getTemplate() != null) {
-            InstanceGroupView group = optionalGroup.get();
+            InstanceGroup group = optionalGroup.get();
             Template template = templateService.get(group.getTemplate().getId());
             InstanceTemplateV4Request requestedTemplate = stackVerticalScaleV4Request.getTemplate();
             String instanceType = requestedTemplate.getInstanceType();
             if (!Strings.isNullOrEmpty(instanceType)) {
                 template.setInstanceType(instanceType);
+                group.getNotDeletedAndNotZombieInstanceMetaDataSet().stream().forEach(instanceMetaData -> {
+                    instanceMetaData.setProviderInstanceType(instanceType);
+                    instanceMetaDataService.save(instanceMetaData);
+                });
                 template.setInstanceStorageCount(instanceStorageCount);
                 template.setInstanceStorageSize(instanceStorageSize);
             }

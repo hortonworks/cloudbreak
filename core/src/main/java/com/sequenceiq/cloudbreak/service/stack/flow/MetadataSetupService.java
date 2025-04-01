@@ -189,7 +189,7 @@ public class MetadataSetupService {
             Set<InstanceMetaData> allInstanceMetadata = instanceMetaDataService.findNotTerminatedForStack(stack.getId());
             boolean primaryIgSelected = allInstanceMetadata.stream().anyMatch(imd -> imd.getInstanceMetadataType() == InstanceMetadataType.GATEWAY_PRIMARY);
 
-            Map<String, InstanceGroup> instanceGroups = instanceGroupService.findByStackId(stack.getId())
+            Map<String, InstanceGroup> instanceGroups = instanceGroupService.getByStackAndFetchTemplates(stack.getId())
                     .stream()
                     .collect(Collectors.toMap(InstanceGroup::getGroupName, Function.identity()));
 
@@ -200,44 +200,12 @@ public class MetadataSetupService {
             }
 
             for (CloudVmMetaDataStatus cloudVmMetaDataStatus : cloudVmMetaDataStatusList) {
-                CloudInstance cloudInstance = cloudVmMetaDataStatus.getCloudVmInstanceStatus().getCloudInstance();
-                CloudInstanceMetaData md = cloudVmMetaDataStatus.getMetaData();
-                InstanceTemplate template = cloudInstance.getTemplate();
-                Long privateId = template.getPrivateId();
-                String instanceId = cloudInstance.getInstanceId();
-                InstanceMetaData instanceMetaDataEntry = createInstanceMetadataIfAbsent(allInstanceMetadata, privateId, instanceId);
                 if (cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus() == CREATED ||
                         cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus() == STARTED) {
                     newInstances++;
                 }
-                // CB 1.0.x clusters do not have private id thus we cannot correlate them with instance groups thus keep the original one
-                InstanceGroup ig = instanceMetaDataEntry.getInstanceGroup();
-                String group = ig == null ? template.getGroupName() : ig.getGroupName();
-                InstanceGroup instanceGroup = instanceGroups.get(group);
-                setupFromCloudInstanceMetadata(md, instanceMetaDataEntry);
-                setupFromCloudInstance(cloudInstance, instanceMetaDataEntry);
-                instanceMetaDataEntry.setInstanceGroup(instanceGroup);
-                instanceMetaDataEntry.setInstanceId(instanceId);
-                instanceMetaDataEntry.setPrivateId(privateId);
-                instanceMetaDataEntry.setStartDate(clock.getCurrentTimeMillis());
-                if (instanceMetaDataEntry.getClusterManagerServer() == null) {
-                    instanceMetaDataEntry.setServer(Boolean.FALSE);
-                }
-                instanceMetaDataEntry.setLifeCycle(InstanceLifeCycle.fromCloudInstanceLifeCycle(md.getLifeCycle()));
-                primaryIgSelected = setupInstanceMetaDataType(primaryIgSelected, terminatedPrimaryGwWhichShouldBeRestored, instanceMetaDataEntry, ig);
-                if (status != null && instanceMetaDataEntry.getInstanceStatus() != InstanceStatus.ZOMBIE) {
-                    if (cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus() == TERMINATED) {
-                        instanceMetaDataEntry.setInstanceStatus(InstanceStatus.TERMINATED);
-                    } else {
-                        instanceMetaDataEntry.setInstanceStatus(status);
-                        if (instanceMetaDataEntry.getImage() == null || !StringUtils.hasText(instanceMetaDataEntry.getImage().getValue())) {
-                            Image image = imageService.getImage(stack.getId());
-                            LOGGER.debug("Add image {} for instance metadata: {}", image.getImageId(), instanceMetaDataEntry);
-                            instanceMetaDataEntry.setImage(new Json(image));
-                        }
-                    }
-                }
-                instanceMetaDataService.save(instanceMetaDataEntry);
+                primaryIgSelected = saveInstanceMetaData(stack, status, cloudVmMetaDataStatus, allInstanceMetadata, instanceGroups,
+                        primaryIgSelected, terminatedPrimaryGwWhichShouldBeRestored);
             }
             primaryGWSelectionFallbackIfNecessary(primaryIgSelected, instanceGroups);
 
@@ -245,6 +213,49 @@ public class MetadataSetupService {
         } catch (CloudbreakImageNotFoundException | IllegalArgumentException ex) {
             throw new CloudbreakServiceException("Instance metadata collection failed", ex);
         }
+    }
+
+    private boolean saveInstanceMetaData(StackView stack, InstanceStatus status, CloudVmMetaDataStatus cloudVmMetaDataStatus,
+            Set<InstanceMetaData> allInstanceMetadata, Map<String, InstanceGroup> instanceGroups, boolean primaryIgSelected,
+            Optional<InstanceMetaData> terminatedPrimaryGwWhichShouldBeRestored) throws CloudbreakImageNotFoundException {
+        CloudInstance cloudInstance = cloudVmMetaDataStatus.getCloudVmInstanceStatus().getCloudInstance();
+        CloudInstanceMetaData md = cloudVmMetaDataStatus.getMetaData();
+        InstanceTemplate template = cloudInstance.getTemplate();
+        Long privateId = template.getPrivateId();
+        String instanceId = cloudInstance.getInstanceId();
+        InstanceMetaData instanceMetaDataEntry = createInstanceMetadataIfAbsent(allInstanceMetadata, privateId, instanceId);
+        // CB 1.0.x clusters do not have private id thus we cannot correlate them with instance groups thus keep the original one
+        InstanceGroup ig = instanceMetaDataEntry.getInstanceGroup();
+        String group = ig == null ? template.getGroupName() : ig.getGroupName();
+        InstanceGroup instanceGroup = instanceGroups.get(group);
+        setupFromCloudInstanceMetadata(md, instanceMetaDataEntry);
+        setupFromCloudInstance(cloudInstance, instanceMetaDataEntry);
+        instanceMetaDataEntry.setInstanceGroup(instanceGroup);
+        if (!StringUtils.hasText(instanceMetaDataEntry.getProviderInstanceType())) {
+            instanceMetaDataEntry.setProviderInstanceType(instanceGroup.getTemplate() != null ? instanceGroup.getTemplate().getInstanceType() : null);
+        }
+        instanceMetaDataEntry.setInstanceId(instanceId);
+        instanceMetaDataEntry.setPrivateId(privateId);
+        instanceMetaDataEntry.setStartDate(clock.getCurrentTimeMillis());
+        if (instanceMetaDataEntry.getClusterManagerServer() == null) {
+            instanceMetaDataEntry.setServer(Boolean.FALSE);
+        }
+        instanceMetaDataEntry.setLifeCycle(InstanceLifeCycle.fromCloudInstanceLifeCycle(md.getLifeCycle()));
+        primaryIgSelected = setupInstanceMetaDataType(primaryIgSelected, terminatedPrimaryGwWhichShouldBeRestored, instanceMetaDataEntry, ig);
+        if (status != null && instanceMetaDataEntry.getInstanceStatus() != InstanceStatus.ZOMBIE) {
+            if (cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus() == TERMINATED) {
+                instanceMetaDataEntry.setInstanceStatus(InstanceStatus.TERMINATED);
+            } else {
+                instanceMetaDataEntry.setInstanceStatus(status);
+                if (instanceMetaDataEntry.getImage() == null || !StringUtils.hasText(instanceMetaDataEntry.getImage().getValue())) {
+                    Image image = imageService.getImage(stack.getId());
+                    LOGGER.debug("Add image {} for instance metadata: {}", image.getImageId(), instanceMetaDataEntry);
+                    instanceMetaDataEntry.setImage(new Json(image));
+                }
+            }
+        }
+        instanceMetaDataService.save(instanceMetaDataEntry);
+        return primaryIgSelected;
     }
 
     private boolean setupInstanceMetaDataType(boolean primaryIgSelectedYet, Optional<InstanceMetaData> terminatedPrimaryGwWhichShouldBeRestored,

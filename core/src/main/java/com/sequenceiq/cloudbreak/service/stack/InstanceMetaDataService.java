@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 import com.sequenceiq.cloudbreak.domain.Network;
+import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.projection.StackInstanceCount;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -292,6 +293,8 @@ public class InstanceMetaDataService {
                     instanceMetaData.setInstanceStatus(com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.REQUESTED);
                     instanceMetaData.setInstanceGroupId(instanceGroup.getInstanceGroup().getId());
                     instanceMetaData.setVariant(stack.getPlatformVariant());
+                    Template template = instanceGroup.getInstanceGroup().getTemplate();
+                    instanceMetaData.setProviderInstanceType(template != null ? template.getInstanceType() : null);
                     repository.save(instanceMetaData);
                 }
             }
