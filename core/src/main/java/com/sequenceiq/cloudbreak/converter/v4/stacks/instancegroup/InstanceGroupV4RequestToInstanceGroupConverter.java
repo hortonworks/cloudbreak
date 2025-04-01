@@ -83,6 +83,7 @@ public class InstanceGroupV4RequestToInstanceGroupConverter {
             InstanceMetaData instanceMetaData = new InstanceMetaData();
             instanceMetaData.setInstanceGroup(instanceGroup);
             instanceMetaData.setVariant(variant);
+            instanceMetaData.setProviderInstanceType(instanceGroup.getTemplate() != null ? instanceGroup.getTemplate().getInstanceType() : null);
             instanceMetaDataSet.add(instanceMetaData);
         }
         instanceGroup.setInstanceMetaData(instanceMetaDataSet);
