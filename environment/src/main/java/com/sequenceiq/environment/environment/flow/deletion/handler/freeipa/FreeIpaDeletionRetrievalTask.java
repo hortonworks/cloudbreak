@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.flow.deletion.handler.freeipa;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -9,6 +10,8 @@ import com.sequenceiq.cloudbreak.polling.SimpleStatusCheckerTask;
 import com.sequenceiq.environment.environment.flow.creation.handler.freeipa.FreeIpaPollerObject;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
+import com.sequenceiq.flow.core.FlowLogService;
+import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
@@ -24,8 +27,11 @@ public class FreeIpaDeletionRetrievalTask extends SimpleStatusCheckerTask<FreeIp
 
     private final FreeIpaService freeIpaService;
 
-    public FreeIpaDeletionRetrievalTask(FreeIpaService freeIpaService) {
+    private final FlowLogService flowLogService;
+
+    public FreeIpaDeletionRetrievalTask(FreeIpaService freeIpaService, FlowLogService flowLogService) {
         this.freeIpaService = freeIpaService;
+        this.flowLogService = flowLogService;
     }
 
     @Override
@@ -33,13 +39,19 @@ public class FreeIpaDeletionRetrievalTask extends SimpleStatusCheckerTask<FreeIp
         String environmentCrn = freeIpaPollerObject.getEnvironmentCrn();
         try {
             LOGGER.info("Checking the state of FreeIpa termination progress for environment: '{}'", environmentCrn);
-            Optional<DescribeFreeIpaResponse> freeIpaResponse = freeIpaService.describe(environmentCrn);
-            if (freeIpaResponse.isPresent()) {
-                if (freeIpaResponse.get().getStatus() == Status.DELETE_FAILED) {
-                    throw new FreeIpaOperationFailedException("FreeIpa deletion operation failed: " + freeIpaResponse.get().getStatusReason());
+            Optional<DescribeFreeIpaResponse> freeIpaResponseOptional = freeIpaService.describe(environmentCrn);
+            if (freeIpaResponseOptional.isPresent()) {
+                DescribeFreeIpaResponse freeIpaResponse = freeIpaResponseOptional.get();
+                if (freeIpaResponse.getStatus() == Status.DELETE_FAILED) {
+                    throw new FreeIpaOperationFailedException("FreeIpa deletion operation failed: " + freeIpaResponse.getStatusReason());
                 }
-                if (!freeIpaResponse.get().getStatus().isSuccessfullyDeleted()) {
-                    return false;
+                if (!freeIpaResponse.getStatus().isSuccessfullyDeleted()) {
+                    if (!isFlowRunning(freeIpaPollerObject.getFlowId(), freeIpaPollerObject.getResourceId())) {
+                        throw new FreeIpaOperationFailedException("FreeIpa deletion operation failed. Termination flow is finished but FreeIpa is not deleted");
+                    } else {
+                        return false;
+
+                    }
                 }
             } else {
                 LOGGER.info("FreeIpa was not found.");
@@ -76,4 +88,16 @@ public class FreeIpaDeletionRetrievalTask extends SimpleStatusCheckerTask<FreeIp
     public boolean exitPolling(FreeIpaPollerObject freeIpaPollerObject) {
         return false;
     }
+
+    private boolean isFlowRunning(String flowId, Long resourceId) {
+        if (flowId == null) {
+            return false;
+        }
+
+        List<FlowLog> flowLogs = flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(resourceId);
+        return flowLogs
+                .stream()
+                .anyMatch(flowLog -> flowLog.getFlowId().equals(flowId));
+    }
+
 }

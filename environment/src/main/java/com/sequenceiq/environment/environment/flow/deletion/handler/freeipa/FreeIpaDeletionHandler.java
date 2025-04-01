@@ -27,6 +27,8 @@ import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.environment.service.recipe.EnvironmentRecipeService;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
+import com.sequenceiq.flow.core.FlowConstants;
+import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
@@ -48,25 +50,30 @@ public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentD
 
     private final EnvironmentRecipeService environmentRecipeService;
 
+    private final FlowLogService flowLogService;
+
     protected FreeIpaDeletionHandler(
             EventSender eventSender,
             EnvironmentService environmentService,
             FreeIpaService freeIpaService,
             PollingService<FreeIpaPollerObject> freeIpaPollingService,
             DnsV1Endpoint dnsV1Endpoint,
-            EnvironmentRecipeService environmentRecipeService) {
+            EnvironmentRecipeService environmentRecipeService,
+            FlowLogService flowLogService) {
         super(eventSender);
         this.environmentService = environmentService;
         this.freeIpaService = freeIpaService;
         this.freeIpaPollingService = freeIpaPollingService;
         this.dnsV1Endpoint = dnsV1Endpoint;
         this.environmentRecipeService = environmentRecipeService;
+        this.flowLogService = flowLogService;
     }
 
     @Override
     public void accept(Event<EnvironmentDeletionDto> environmentDtoEvent) {
         LOGGER.debug("FreeIPA deletion flow step started.");
         EnvironmentDeletionDto environmentDeletionDto = environmentDtoEvent.getData();
+        String flowId = environmentDtoEvent.getHeaders().get(FlowConstants.FLOW_ID);
         EnvironmentDto environmentDto = environmentDeletionDto.getEnvironmentDto();
         Environment environment = environmentService.findEnvironmentById(environmentDto.getId()).orElse(null);
         try {
@@ -75,7 +82,7 @@ public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentD
                 if (Objects.nonNull(environment.getParentEnvironment())) {
                     detachChildEnvironmentFromFreeIpa(environment);
                 } else {
-                    deleteFreeIpa(environment, environmentDeletionDto.isForceDelete());
+                    deleteFreeIpa(environment, environmentDeletionDto.isForceDelete(), flowId, environmentDeletionDto.getResourceId());
                 }
             }
             eventSender().sendEvent(getNextStepEvent(environmentDeletionDto), environmentDtoEvent.getHeaders());
@@ -151,11 +158,11 @@ public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentD
         }
     }
 
-    private void deleteFreeIpa(Environment environment, boolean forced) {
+    private void deleteFreeIpa(Environment environment, boolean forced, String flowId, Long resourceId) {
         freeIpaService.delete(environment.getResourceCrn(), forced);
         ExtendedPollingResult result = freeIpaPollingService.pollWithTimeout(
-                new FreeIpaDeletionRetrievalTask(freeIpaService),
-                new FreeIpaPollerObject(environment.getId(), environment.getResourceCrn()),
+                new FreeIpaDeletionRetrievalTask(freeIpaService, flowLogService),
+                new FreeIpaPollerObject(environment.getId(), environment.getResourceCrn(), flowId, resourceId),
                 FreeIpaDeletionRetrievalTask.FREEIPA_RETRYING_INTERVAL,
                 FreeIpaDeletionRetrievalTask.FREEIPA_RETRYING_COUNT,
                 FreeIpaDeletionRetrievalTask.FREEIPA_FAILURE_COUNT);
