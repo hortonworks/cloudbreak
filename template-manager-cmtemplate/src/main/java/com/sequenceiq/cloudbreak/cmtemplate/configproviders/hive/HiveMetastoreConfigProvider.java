@@ -140,7 +140,7 @@ public class HiveMetastoreConfigProvider extends AbstractRdsRoleConfigProvider {
     }
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         return List.of(
                 config(METASTORE_CANARY_HEALTH_ENABLED, Boolean.FALSE.toString())
         );

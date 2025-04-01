@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.sdx.paas;
 
-import static com.sequenceiq.cloudbreak.sdx.RdcConstants.HiveMetastoreDatabase.HIVE_METASTORE_DATABASE_HOST;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -13,7 +12,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -29,11 +27,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.cloudera.api.swagger.model.ApiEndPoint;
-import com.cloudera.api.swagger.model.ApiMapEntry;
-import com.cloudera.api.swagger.model.ApiRemoteDataContext;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
@@ -107,44 +100,6 @@ public class PaasSdxDescribeServiceTest {
         underTest.getSdxByEnvironmentCrn("envCrn");
 
         verify(sdxEndpoint).getByEnvCrn(anyString(), eq(false));
-    }
-
-    @Test
-    void testGetHmsConfigIfEmpty() throws IllegalAccessException, JsonProcessingException {
-        LocalPaasRemoteDataContextSupplier rdcSupplier = mock(LocalPaasRemoteDataContextSupplier.class);
-        FieldUtils.writeField(underTest, "localRdcSupplier", Optional.of(rdcSupplier), true);
-        when(rdcSupplier.getPaasSdxRemoteDataContext(any())).thenReturn(Optional.empty());
-
-        assertEquals(Map.of(), underTest.getHmsServiceConfig(PAAS_CRN));
-
-        when(rdcSupplier.getPaasSdxRemoteDataContext(any())).thenReturn(Optional.of(new ObjectMapper().writeValueAsString(new ApiRemoteDataContext())));
-
-        assertEquals(Map.of(), underTest.getHmsServiceConfig(PAAS_CRN));
-
-        ApiRemoteDataContext apiRemoteDataContext = new ApiRemoteDataContext();
-        ApiEndPoint apiEndPoint = new ApiEndPoint();
-        apiEndPoint.setName("hive");
-        apiRemoteDataContext.setEndPoints(List.of(apiEndPoint));
-        when(rdcSupplier.getPaasSdxRemoteDataContext(any())).thenReturn(Optional.of(new ObjectMapper().writeValueAsString(apiRemoteDataContext)));
-
-        assertEquals(Map.of(), underTest.getHmsServiceConfig(PAAS_CRN));
-    }
-
-    @Test
-    void testGetHmsConfig() throws IllegalAccessException, JsonProcessingException {
-        LocalPaasRemoteDataContextSupplier rdcSupplier = mock(LocalPaasRemoteDataContextSupplier.class);
-        FieldUtils.writeField(underTest, "localRdcSupplier", Optional.of(rdcSupplier), true);
-        ApiRemoteDataContext apiRemoteDataContext = new ApiRemoteDataContext();
-        ApiEndPoint apiEndPoint = new ApiEndPoint();
-        apiEndPoint.setName("hive");
-        ApiMapEntry apiMapEntry = new ApiMapEntry();
-        apiMapEntry.setKey(HIVE_METASTORE_DATABASE_HOST);
-        apiMapEntry.setValue("host");
-        apiEndPoint.setServiceConfigs(List.of(apiMapEntry));
-        apiRemoteDataContext.setEndPoints(List.of(apiEndPoint));
-        when(rdcSupplier.getPaasSdxRemoteDataContext(any())).thenReturn(Optional.of(new ObjectMapper().writeValueAsString(apiRemoteDataContext)));
-
-        assertEquals(Map.of(HIVE_METASTORE_DATABASE_HOST, "host"), underTest.getHmsServiceConfig(PAAS_CRN));
     }
 
     @ParameterizedTest

@@ -13,10 +13,12 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.sdx.RdcView;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxAccessView;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDescribeService;
+import com.sequenceiq.cloudbreak.sdx.paas.LocalPaasRdcViewExtender;
 import com.sequenceiq.cloudbreak.sdx.paas.LocalPaasRemoteDataContextSupplier;
 import com.sequenceiq.cloudbreak.sdx.paas.LocalPaasSdxService;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
@@ -36,10 +38,21 @@ public class PaasSdxDescribeService extends AbstractPaasSdxService implements Pl
     @Inject
     private Optional<LocalPaasSdxService> localPaasSdxService;
 
+    @Inject
+    private Optional<LocalPaasRdcViewExtender> localPaasSdxContextExtender;
+
     @Override
     public Optional<String> getRemoteDataContext(String crn) {
         return localRdcSupplier.map(rdcSupplier -> rdcSupplier.getPaasSdxRemoteDataContext(crn))
                 .orElseThrow(() -> new CloudbreakServiceException(String.format("Cannot provide remote data context for CRN [%s]!", crn)));
+    }
+
+    @Override
+    public RdcView extendRdcView(RdcView rdcView) {
+        if (localPaasSdxContextExtender.isEmpty()) {
+            throw new CloudbreakServiceException(String.format("Cannot extend context for CRN [%s]!", rdcView.getStackCrn()));
+        }
+        return localPaasSdxContextExtender.get().extendRdcView(rdcView);
     }
 
     @Override
@@ -83,5 +96,4 @@ public class PaasSdxDescribeService extends AbstractPaasSdxService implements Pl
         return ThreadBasedUserCrnProvider.doAsInternalActor(
                 () -> sdxEndpoint.getByEnvCrn(environmentCrn, true)).stream().map(SdxClusterResponse::getCrn).collect(Collectors.toSet());
     }
-
 }

@@ -17,6 +17,7 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.identitymapping.AccountMappingSubject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -46,9 +47,9 @@ public abstract class RangerRazBaseConfigProvider extends AbstractRoleConfigProv
     }
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         List<ApiClusterTemplateConfig> roleConfigs = new ArrayList<>();
-        String cdhVersion = source.getBlueprintView().getProcessor().getVersion().orElse("");
+        String cdhVersion = ConfigUtils.getCdhVersion(source);
         CloudPlatform cloudPlatform = source.getCloudPlatform();
         StringBuffer safetyValveValue = new StringBuffer();
         if (!Strings.isNullOrEmpty(cdhVersion) && isRazConfigurationForServiceTypeSupported(cdhVersion, cloudPlatform, source.getStackType())) {

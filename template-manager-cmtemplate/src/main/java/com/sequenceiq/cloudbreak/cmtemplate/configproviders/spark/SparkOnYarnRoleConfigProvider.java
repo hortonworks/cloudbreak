@@ -26,7 +26,7 @@ public class SparkOnYarnRoleConfigProvider extends AbstractRoleConfigProvider {
     private static final String SPARK_HADOOP_S3_SSL_CHANNEL_MODE = "spark.hadoop.fs.s3a.ssl.channel.mode=openssl";
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         switch (roleType) {
             case SparkRoles.GATEWAY:
                 StringBuilder confClientConfigSafetyValveValue = new StringBuilder();
@@ -35,8 +35,8 @@ public class SparkOnYarnRoleConfigProvider extends AbstractRoleConfigProvider {
                     confClientConfigSafetyValveValue.append(SPARK_YARN_ACCESS_DIR_PARAM +
                             ConfigUtils.getBasePathFromStorageLocation(storageLocationView.get().getValue()));
                 }
-                if (CMRepositoryVersionUtil.isS3SslChannelModeSupported(source.getBlueprintView()
-                        .getProcessor().getVersion().orElse(""), source.getCloudPlatform(), source.getPlatformVariant())) {
+                if (CMRepositoryVersionUtil.isS3SslChannelModeSupported(ConfigUtils.getCdhVersion(source),
+                        source.getCloudPlatform(), source.getPlatformVariant())) {
                     if (!confClientConfigSafetyValveValue.toString().isEmpty()) {
                         confClientConfigSafetyValveValue.append('\n');
                     }

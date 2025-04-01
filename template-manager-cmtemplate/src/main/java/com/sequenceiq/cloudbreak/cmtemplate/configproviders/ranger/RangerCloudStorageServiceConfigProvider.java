@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import jakarta.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
@@ -18,7 +20,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
-import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsRoleConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsConfigHelper;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsRoles;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -41,6 +43,9 @@ public class RangerCloudStorageServiceConfigProvider implements CmTemplateCompon
     private static final String HBASE_ROOT_DIR = "hbase.rootdir";
 
     private static final String BACKUP_LOCATION = "BACKUP_LOCATION";
+
+    @Inject
+    private HdfsConfigHelper hdfsConfigHelper;
 
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject templatePreparationObject) {
@@ -96,14 +101,14 @@ public class RangerCloudStorageServiceConfigProvider implements CmTemplateCompon
     }
 
     private String getDefaultRangerAuditUrl(CmTemplateProcessor templateProcessor, TemplatePreparationObject templatePreparationObject) {
-        if (HdfsRoleConfigProvider.isNamenodeHA(templatePreparationObject)) {
+        if (hdfsConfigHelper.isNamenodeHA(templatePreparationObject)) {
             String nameService = templateProcessor.getRoleConfig(HdfsRoles.HDFS, HdfsRoles.NAMENODE, "dfs_federation_namenode_nameservice")
                     .map(ApiClusterTemplateConfig::getValue)
-                    .orElse(HdfsRoleConfigProvider.DEFAULT_NAME_SERVICE);
+                    .orElse(hdfsConfigHelper.getNameService(templateProcessor, templatePreparationObject));
             return "hdfs://" + nameService;
         }
 
-        Set<String> namenodeHosts = HdfsRoleConfigProvider.nameNodeFQDNs(templatePreparationObject);
+        Set<String> namenodeHosts = hdfsConfigHelper.nameNodeFQDNs(templatePreparationObject);
         if (namenodeHosts.size() == 1) {
             return "hdfs://" + namenodeHosts.iterator().next();
         }

@@ -39,7 +39,7 @@ public abstract class AbstractRoleConfigProvider implements CmTemplateComponentC
         for (ApiClusterTemplateRoleConfigGroup rcg : ofNullable(service.get().getRoleConfigGroups()).orElse(new ArrayList<>())) {
             String roleType = rcg.getRoleType();
             if (roleType != null && getRoleTypes().contains(roleType)) {
-                configs.put(rcg.getRefName(), getRoleConfigs(roleType, source));
+                configs.put(rcg.getRefName(), getRoleConfigs(roleType, cmTemplate, source));
             }
         }
 
@@ -51,7 +51,7 @@ public abstract class AbstractRoleConfigProvider implements CmTemplateComponentC
         return cmTemplateProcessor.isRoleTypePresentInService(getServiceType(), getRoleTypes());
     }
 
-    protected abstract List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source);
+    protected abstract List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source);
 
     protected Optional<Integer> getCdhPatchVersion(TemplatePreparationObject source) {
         if (source.getProductDetailsView() != null && source.getProductDetailsView().getProducts() != null) {

@@ -208,7 +208,7 @@ public class KnoxGatewayConfigProviderTest {
                         config("idbroker_gateway_signing_key_alias", "signing-identity"),
                         config("idbroker_security_dir", IDBROKER_SECURITY_DIR)
                 ),
-                underTest.getRoleConfigs(KnoxRoles.IDBROKER, source)
+                underTest.getRoleConfigs(KnoxRoles.IDBROKER, cmTemplateProcessor, source)
         );
         assertEquals(
                 List.of(
@@ -225,9 +225,9 @@ public class KnoxGatewayConfigProviderTest {
                         config("gateway_service_tokenstate_impl", "org.apache.knox.gateway.services.token.impl.JDBCTokenStateService"),
                         config("gateway_security_dir", GATEWAY_SECURITY_DIR)
                 ),
-                ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, source))
+                ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, cmTemplateProcessor, source))
         );
-        assertEquals(List.of(), underTest.getRoleConfigs("NAMENODE", source));
+        assertEquals(List.of(), underTest.getRoleConfigs("NAMENODE", cmTemplateProcessor, source));
     }
 
     @Test
@@ -278,7 +278,7 @@ public class KnoxGatewayConfigProviderTest {
                         config("idbroker_gateway_signing_key_alias", "signing-identity"),
                         config("idbroker_security_dir", IDBROKER_SECURITY_DIR)
                 ),
-                underTest.getRoleConfigs(KnoxRoles.IDBROKER, source)
+                underTest.getRoleConfigs(KnoxRoles.IDBROKER, cmTemplateProcessor, source)
         );
         assertEquals(
                 List.of(
@@ -297,9 +297,9 @@ public class KnoxGatewayConfigProviderTest {
                         config("conf/gateway-site.xml_role_safety_valve",
                                 "<property><name>gateway.servlet.async.supported</name><value>true</value></property>")
                 ),
-                ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, source))
+                ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, cmTemplateProcessor, source))
         );
-        assertEquals(List.of(), underTest.getRoleConfigs("NAMENODE", source));
+        assertEquals(List.of(), underTest.getRoleConfigs("NAMENODE", cmTemplateProcessor, source));
     }
 
     @Test
@@ -346,7 +346,7 @@ public class KnoxGatewayConfigProviderTest {
                         config("idbroker_gateway_signing_keystore_type", "JKS"),
                         config("idbroker_gateway_signing_key_alias", "signing-identity")
                 ),
-                underTest.getRoleConfigs(KnoxRoles.IDBROKER, source)
+                underTest.getRoleConfigs(KnoxRoles.IDBROKER, cmTemplateProcessor, source)
         );
         assertEquals(
                 List.of(
@@ -364,9 +364,9 @@ public class KnoxGatewayConfigProviderTest {
                         config("gateway_token_generation_knox_token_ttl", "86400000"),
                         config("gateway_service_tokenstate_impl", "org.apache.knox.gateway.services.token.impl.JDBCTokenStateService")
                 ),
-                ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, source))
+                ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, cmTemplateProcessor, source))
         );
-        assertEquals(List.of(), underTest.getRoleConfigs("NAMENODE", source));
+        assertEquals(List.of(), underTest.getRoleConfigs("NAMENODE", cmTemplateProcessor, source));
     }
 
     @Test
@@ -399,7 +399,7 @@ public class KnoxGatewayConfigProviderTest {
                         config("idbroker_gateway_signing_keystore_type", "JKS"),
                         config("idbroker_gateway_signing_key_alias", "signing-identity")
                 ),
-                underTest.getRoleConfigs(KnoxRoles.IDBROKER, source)
+                underTest.getRoleConfigs(KnoxRoles.IDBROKER, cmTemplateProcessor, source)
         );
         assertEquals(
                 List.of(
@@ -409,9 +409,9 @@ public class KnoxGatewayConfigProviderTest {
                         config("gateway_auto_discovery_enabled", "false"),
                         config("gateway_service_tokenstate_impl", "org.apache.knox.gateway.services.token.impl.JDBCTokenStateService")
                 ),
-                underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, source)
+                underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, cmTemplateProcessor, source)
         );
-        assertEquals(List.of(), underTest.getRoleConfigs("NAMENODE", source));
+        assertEquals(List.of(), underTest.getRoleConfigs("NAMENODE", cmTemplateProcessor, source));
     }
 
     @Test
@@ -453,7 +453,7 @@ public class KnoxGatewayConfigProviderTest {
                     config("idbroker_gateway_signing_keystore_type", "JKS"),
                     config("idbroker_gateway_signing_key_alias", "signing-identity")
             ),
-            underTest.getRoleConfigs(KnoxRoles.IDBROKER, source)
+            underTest.getRoleConfigs(KnoxRoles.IDBROKER, cmTemplateProcessor, source)
         );
         assertEquals(
             List.of(
@@ -468,9 +468,9 @@ public class KnoxGatewayConfigProviderTest {
                 config("gateway_dispatch_whitelist", "^*.*$"),
                 config("gateway_service_tokenstate_impl", "org.apache.knox.gateway.services.token.impl.JDBCTokenStateService")
             ),
-            ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, source))
+            ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, cmTemplateProcessor, source))
         );
-        assertEquals(List.of(), underTest.getRoleConfigs("NAMENODE", source));
+        assertEquals(List.of(), underTest.getRoleConfigs("NAMENODE", cmTemplateProcessor, source));
     }
 
     @Test
@@ -512,7 +512,7 @@ public class KnoxGatewayConfigProviderTest {
                         config("idbroker_gateway_signing_keystore_type", "JKS"),
                         config("idbroker_gateway_signing_key_alias", "signing-identity")
                 ),
-                underTest.getRoleConfigs(KnoxRoles.IDBROKER, source)
+                underTest.getRoleConfigs(KnoxRoles.IDBROKER, cmTemplateProcessor, source)
         );
         assertEquals(
                 List.of(
@@ -529,9 +529,9 @@ public class KnoxGatewayConfigProviderTest {
                         config("gateway_token_generation_knox_token_ttl", "86400000"),
                         config("gateway_service_tokenstate_impl", "org.apache.knox.gateway.services.token.impl.JDBCTokenStateService")
                 ),
-                ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, source))
+                ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, cmTemplateProcessor, source))
         );
-        assertEquals(List.of(), underTest.getRoleConfigs("NAMENODE", source));
+        assertEquals(List.of(), underTest.getRoleConfigs("NAMENODE", cmTemplateProcessor, source));
     }
 
     @Test
@@ -574,7 +574,7 @@ public class KnoxGatewayConfigProviderTest {
                         config("idbroker_gateway_signing_keystore_type", "BCFKS"),
                         config("idbroker_gateway_signing_key_alias", "signing-identity")
                 ),
-                underTest.getRoleConfigs(KnoxRoles.IDBROKER, source)
+                underTest.getRoleConfigs(KnoxRoles.IDBROKER, cmTemplateProcessor, source)
         );
         assertEquals(
                 List.of(
@@ -591,9 +591,9 @@ public class KnoxGatewayConfigProviderTest {
                         config("gateway_token_generation_knox_token_ttl", "86400000"),
                         config("gateway_service_tokenstate_impl", "org.apache.knox.gateway.services.token.impl.JDBCTokenStateService")
                 ),
-                ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, source))
+                ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, cmTemplateProcessor, source))
         );
-        assertEquals(List.of(), underTest.getRoleConfigs("NAMENODE", source));
+        assertEquals(List.of(), underTest.getRoleConfigs("NAMENODE", cmTemplateProcessor, source));
     }
 
     @Test

@@ -91,7 +91,13 @@ fi
 
 WEBHDFS_HTTP_POLICY=$(hdfs getconf -confkey dfs.http.policy)
 
-if ! hdfs haadmin -getAllServiceState
+NAMESERVICE=$(hdfs getconf -confKey dfs.internal.nameservices)
+if [ -n "${NAMESERVICE}" ]; then
+  echo "Using nameservice $NAMESERVICE"
+  NS_FLAG="-ns ${NAMESERVICE}"
+fi
+
+if ! hdfs haadmin $NS_FLAG -getAllServiceState
 then
   echo "Single node configuration"
   if [ "$WEBHDFS_HTTP_POLICY" == "HTTP_ONLY" ]; then
@@ -103,7 +109,7 @@ then
   fi
 else
   echo "HA configuration"
-  NN_HOST=$(hdfs haadmin -getAllServiceState | grep active | cut -d':' -f 1)
+  NN_HOST=$(hdfs haadmin $NS_FLAG -getAllServiceState | grep active | cut -d':' -f 1)
   echo "Active NAMENODE host: $NN_HOST"
   if [ "$NN_HOST" != "$(hostname -f)" ]; then
     echo "This is not the active host. Script will run on the active one"
@@ -128,6 +134,12 @@ case "{{ ldap.directoryType }}" in
  LDAP)              mapfile -t users < <((ipa user-find --pkey-only --sizelimit=0 --timelimit=0) | grep 'User login:' | awk '{ print $3}');;
  ACTIVE_DIRECTORY)  mapfile -t users < <((ldapsearch -x -D "{{ ldap.bindDn }}" -w "{{ ldap.bindPassword }}" -H {{ ldap.connectionURL }} -b "{{ ldap.userSearchBase }}" "(&(objectClass=user)(|(memberOf=CN={{ ldap.adminGroup }},{{ ldap.groupSearchBase }})(memberOf=CN={{ ldap.userGroup }},{{ ldap.groupSearchBase }})))") | grep sAMAccountName | awk '{ print $2}');;
 esac
+
+# Hive with remote HMS workaround - TODO remove after OPSAPS-73356
+# NOTE: due to */5 cron and initial delay of this script, Hive service may fail with unexpected exits for a few minutes after cluster provision
+{% if hiveWithRemoteHiveMetastore %}
+users+=('hive')
+{% endif %}
 
 declare -a existingusers
 if test -f "$EXISTING_USERS_FILE"; then

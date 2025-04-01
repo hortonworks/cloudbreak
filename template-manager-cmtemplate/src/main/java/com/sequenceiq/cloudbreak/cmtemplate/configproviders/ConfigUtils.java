@@ -90,4 +90,8 @@ public class ConfigUtils {
         return source.getProductDetailsView().getCm().getVersion();
     }
 
+    public static String getCdhVersion(TemplatePreparationObject source) {
+        return source.getBlueprintView().getProcessor().getVersion().orElse("");
+    }
+
 }

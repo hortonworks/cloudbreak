@@ -13,12 +13,15 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsConfigHelper;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsRoles;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
@@ -39,7 +42,11 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 @ExtendWith(MockitoExtension.class)
 public class RangerCloudStorageServiceConfigProviderTest {
 
-    private final RangerCloudStorageServiceConfigProvider underTest = new RangerCloudStorageServiceConfigProvider();
+    @Spy
+    private HdfsConfigHelper hdfsConfigHelper;
+
+    @InjectMocks
+    private RangerCloudStorageServiceConfigProvider underTest;
 
     @Test
     public void testGetRangerAwsCloudStorageServiceConfigsForDataLake() {

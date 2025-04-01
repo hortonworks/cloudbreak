@@ -4,17 +4,23 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUD
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
+import com.google.common.base.Joiner;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.views.DatalakeView;
 
 @Component
 public class HiveKnoxConfigProvider implements CmTemplateComponentConfigProvider {
@@ -23,6 +29,7 @@ public class HiveKnoxConfigProvider implements CmTemplateComponentConfigProvider
 
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject templatePreparationObject) {
+        List<ApiClusterTemplateConfig> serviceConfigs = new ArrayList<>();
         String filePerEvent = ConfigUtils.getSafetyValveProperty("hive.hook.proto.file.per.event", "true");
         StringBuilder hiveServiceConfigSafetyValveValue = new StringBuilder();
         String cdhVersion = templateProcessor.getVersion().orElse("");
@@ -40,10 +47,28 @@ public class HiveKnoxConfigProvider implements CmTemplateComponentConfigProvider
             String sslChannelMode = ConfigUtils.getSafetyValveProperty("fs.s3a.ssl.channel.mode", "openssl");
             hiveServiceConfigSafetyValveValue.append(sslChannelMode);
         }
+        setupRemoteHmsIfNeeded(templateProcessor, templatePreparationObject, hiveServiceConfigSafetyValveValue);
         if (!hiveServiceConfigSafetyValveValue.toString().isEmpty()) {
-            return List.of(config(HIVE_SERVICE_CONFIG_SAFETY_VALVE, hiveServiceConfigSafetyValveValue.toString()));
+            serviceConfigs.add(config(HIVE_SERVICE_CONFIG_SAFETY_VALVE, hiveServiceConfigSafetyValveValue.toString()));
         }
-        return List.of();
+        return serviceConfigs;
+    }
+
+    /**
+     * If there is no DH HMS, point to DL HMS - TODO remove after OPSAPS-73356
+     */
+    private void setupRemoteHmsIfNeeded(CmTemplateProcessor templateProcessor, TemplatePreparationObject templatePreparationObject,
+            StringBuilder hiveServiceConfigSafetyValveValue) {
+        Optional<DatalakeView> datalakeView = templatePreparationObject.getDatalakeView();
+        if (StackType.WORKLOAD.equals(templatePreparationObject.getStackType())
+                && datalakeView.isPresent()
+                && !templateProcessor.isRoleTypePresentInService(HiveRoles.HIVE, List.of(HiveRoles.HIVEMETASTORE))) {
+
+            Set<String> hmsUris = datalakeView.get().getRdcView().getEndpoints(HiveRoles.HIVE, HiveRoles.HIVEMETASTORE);
+            if (!hmsUris.isEmpty()) {
+                hiveServiceConfigSafetyValveValue.append(ConfigUtils.getSafetyValveProperty("hive.metastore.uris", Joiner.on(',').join(hmsUris)));
+            }
+        }
     }
 
     @Override

@@ -1,0 +1,450 @@
+{
+  "endPointId": "pub-ak-aws3-dl",
+  "clusterVersion": "CDH 7.3.1",
+  "endPoints": [
+    {
+      "version": "CDH 7.3.1",
+      "serviceConfigs": [
+        {
+          "key": "zookeeper_tls_enabled",
+          "value": "true"
+        }
+      ],
+      "name": "zookeeper",
+      "serviceType": "ZOOKEEPER",
+      "endPointHostList": [
+        {
+          "uri": "https://pub-ak-aws3-dl-master0.pub-ak-a.xcu2-8y8x.wl.cloudera.site:2182",
+          "type": "SERVER",
+          "endPointConfigs": [
+            {
+              "key": "clientPort",
+              "value": "2181"
+            },
+            {
+              "key": "zookeeper_secure_client_port",
+              "value": "2182"
+            }
+          ]
+        },
+        {
+          "uri": "https://pub-ak-aws3-dl-auxiliary0.pub-ak-a.xcu2-8y8x.wl.cloudera.site:2182",
+          "type": "SERVER",
+          "endPointConfigs": [
+            {
+              "key": "clientPort",
+              "value": "2181"
+            },
+            {
+              "key": "zookeeper_secure_client_port",
+              "value": "2182"
+            }
+          ]
+        },
+        {
+          "uri": "https://pub-ak-aws3-dl-master1.pub-ak-a.xcu2-8y8x.wl.cloudera.site:2182",
+          "type": "SERVER",
+          "endPointConfigs": [
+            {
+              "key": "clientPort",
+              "value": "2181"
+            },
+            {
+              "key": "zookeeper_secure_client_port",
+              "value": "2182"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "CDH 7.3.1",
+      "serviceConfigs": [
+        {
+          "key": "ranger_service",
+          "value": "ranger"
+        },
+        {
+          "key": "zookeeper_service",
+          "value": "zookeeper"
+        },
+        {
+          "key": "kerberos.auth.enable",
+          "value": "true"
+        }
+      ],
+      "name": "kafka",
+      "serviceType": "KAFKA",
+      "endPointHostList": [
+        {
+          "uri": "https://pub-ak-aws3-dl-core2.pub-ak-a.xcu2-8y8x.wl.cloudera.site:9093",
+          "type": "KAFKA_BROKER",
+          "endPointConfigs": [
+            {
+              "key": "port",
+              "value": "9092"
+            },
+            {
+              "key": "ssl_port",
+              "value": "9093"
+            },
+            {
+              "key": "ssl_enabled",
+              "value": "true"
+            }
+          ]
+        },
+        {
+          "uri": "https://pub-ak-aws3-dl-core0.pub-ak-a.xcu2-8y8x.wl.cloudera.site:9093",
+          "type": "KAFKA_BROKER",
+          "endPointConfigs": [
+            {
+              "key": "port",
+              "value": "9092"
+            },
+            {
+              "key": "ssl_port",
+              "value": "9093"
+            },
+            {
+              "key": "ssl_enabled",
+              "value": "true"
+            }
+          ]
+        },
+        {
+          "uri": "https://pub-ak-aws3-dl-core1.pub-ak-a.xcu2-8y8x.wl.cloudera.site:9093",
+          "type": "KAFKA_BROKER",
+          "endPointConfigs": [
+            {
+              "key": "port",
+              "value": "9092"
+            },
+            {
+              "key": "ssl_port",
+              "value": "9093"
+            },
+            {
+              "key": "ssl_enabled",
+              "value": "true"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "CDH 7.3.1",
+      "serviceConfigs": [
+        {
+          "key": "zookeeper_service",
+          "value": "zookeeper"
+        },
+        {
+          "key": "zookeeper_znode",
+          "value": "/solr-infra"
+        }
+      ],
+      "name": "solr",
+      "serviceType": "SOLR",
+      "endPointHostList": [
+        {
+          "uri": "https://pub-ak-aws3-dl-core1.pub-ak-a.xcu2-8y8x.wl.cloudera.site:8985",
+          "type": "SOLR_SERVER",
+          "endPointConfigs": []
+        },
+        {
+          "uri": "https://pub-ak-aws3-dl-core2.pub-ak-a.xcu2-8y8x.wl.cloudera.site:8985",
+          "type": "SOLR_SERVER",
+          "endPointConfigs": []
+        },
+        {
+          "uri": "https://pub-ak-aws3-dl-core0.pub-ak-a.xcu2-8y8x.wl.cloudera.site:8985",
+          "type": "SOLR_SERVER",
+          "endPointConfigs": []
+        }
+      ]
+    },
+    {
+      "version": "CDH 7.3.1",
+      "serviceConfigs": [
+        {
+          "key": "solr_service",
+          "value": "solr"
+        },
+        {
+          "key": "ranger_plugin_hdfs_audit_url",
+          "value": "s3a://cb-group/akanto/data/ranger/audit"
+        },
+        {
+          "key": "load_balancer_url",
+          "value": ""
+        },
+        {
+          "key": "ranger_plugin_hdfs_audit_enabled",
+          "value": "true"
+        },
+        {
+          "key": "ranger_service_http_port",
+          "value": "6080"
+        },
+        {
+          "key": "ranger_service_https_port",
+          "value": "6182"
+        },
+        {
+          "key": "xasecure.audit.destination.solr.zookeepers",
+          "value": "pub-ak-aws3-dl-auxiliary0.pub-ak-a.xcu2-8y8x.wl.cloudera.site:2182,pub-ak-aws3-dl-master0.pub-ak-a.xcu2-8y8x.wl.cloudera.site:2182,pub-ak-aws3-dl-master1.pub-ak-a.xcu2-8y8x.wl.cloudera.site:2182/solr-infra"
+        }
+      ],
+      "name": "ranger",
+      "serviceType": "RANGER",
+      "endPointHostList": [
+        {
+          "uri": "https://pub-ak-aws3-dl-master1.pub-ak-a.xcu2-8y8x.wl.cloudera.site:6182",
+          "type": "RANGER_ADMIN",
+          "endPointConfigs": [
+            {
+              "key": "ssl_enabled",
+              "value": "true"
+            }
+          ]
+        },
+        {
+          "uri": "https://pub-ak-aws3-dl-master0.pub-ak-a.xcu2-8y8x.wl.cloudera.site:6182",
+          "type": "RANGER_ADMIN",
+          "endPointConfigs": [
+            {
+              "key": "ssl_enabled",
+              "value": "true"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "CDH 7.3.1",
+      "serviceConfigs": [
+        {
+          "key": "kafka_service",
+          "value": "kafka"
+        },
+        {
+          "key": "ranger_service",
+          "value": "ranger"
+        },
+        {
+          "key": "solr_service",
+          "value": "solr"
+        },
+        {
+          "key": "kerberos.auth.enable",
+          "value": "true"
+        },
+        {
+          "key": "kerberos.auth.enable",
+          "value": "true"
+        },
+        {
+          "key": "atlas.kafka.security.protocol",
+          "value": "SASL_SSL"
+        },
+        {
+          "key": "atlas.kafka.bootstrap.servers",
+          "value": "pub-ak-aws3-dl-core0.pub-ak-a.xcu2-8y8x.wl.cloudera.site:9093,pub-ak-aws3-dl-core1.pub-ak-a.xcu2-8y8x.wl.cloudera.site:9093,pub-ak-aws3-dl-core2.pub-ak-a.xcu2-8y8x.wl.cloudera.site:9093"
+        },
+        {
+          "key": "atlas.jaas.KafkaClient.option.serviceName",
+          "value": "kafka"
+        },
+        {
+          "key": "atlas.kafka.sasl.kerberos.service.name",
+          "value": "kafka"
+        },
+        {
+          "key": "atlas.kafka.zookeeper.connect",
+          "value": "pub-ak-aws3-dl-auxiliary0.pub-ak-a.xcu2-8y8x.wl.cloudera.site:2181,pub-ak-aws3-dl-master0.pub-ak-a.xcu2-8y8x.wl.cloudera.site:2181,pub-ak-aws3-dl-master1.pub-ak-a.xcu2-8y8x.wl.cloudera.site:2181/kafka"
+        }
+      ],
+      "name": "atlas",
+      "serviceType": "ATLAS",
+      "endPointHostList": [
+        {
+          "uri": "https://pub-ak-aws3-dl-gateway0.pub-ak-a.xcu2-8y8x.wl.cloudera.site:31443/",
+          "type": "ATLAS_SERVER",
+          "endPointConfigs": [
+            {
+              "key": "atlas_server_http_port",
+              "value": "31000"
+            },
+            {
+              "key": "atlas_server_https_port",
+              "value": "31443"
+            },
+            {
+              "key": "ssl_enabled",
+              "value": "true"
+            }
+          ]
+        },
+        {
+          "uri": "https://pub-ak-aws3-dl-gateway1.pub-ak-a.xcu2-8y8x.wl.cloudera.site:31443/",
+          "type": "ATLAS_SERVER",
+          "endPointConfigs": [
+            {
+              "key": "atlas_server_http_port",
+              "value": "31000"
+            },
+            {
+              "key": "atlas_server_https_port",
+              "value": "31443"
+            },
+            {
+              "key": "ssl_enabled",
+              "value": "true"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "CDH 7.3.1",
+      "serviceConfigs": [
+        {
+          "key": "ranger_service",
+          "value": "ranger"
+        }
+      ],
+      "name": "knox",
+      "serviceType": "KNOX",
+      "endPointHostList": [
+        {
+          "uri": "https://pub-ak-aws3-dl-gateway1.pub-ak-a.xcu2-8y8x.wl.cloudera.site:8443",
+          "type": "KNOX_GATEWAY",
+          "endPointConfigs": [
+            {
+              "key": "ssl_enabled",
+              "value": "true"
+            },
+            {
+              "key": "gateway_port",
+              "value": "8443"
+            }
+          ]
+        },
+        {
+          "uri": "https://pub-ak-aws3-dl-gateway0.pub-ak-a.xcu2-8y8x.wl.cloudera.site:8443",
+          "type": "KNOX_GATEWAY",
+          "endPointConfigs": [
+            {
+              "key": "ssl_enabled",
+              "value": "true"
+            },
+            {
+              "key": "gateway_port",
+              "value": "8443"
+            }
+          ]
+        },
+        {
+          "uri": "https://pub-ak-aws3-dl-idbroker1.pub-ak-a.xcu2-8y8x.wl.cloudera.site:8444",
+          "type": "IDBROKER",
+          "endPointConfigs": [
+            {
+              "key": "ssl_enabled",
+              "value": "true"
+            },
+            {
+              "key": "idbroker_gateway_port",
+              "value": "8444"
+            }
+          ]
+        },
+        {
+          "uri": "https://pub-ak-aws3-dl-idbroker0.pub-ak-a.xcu2-8y8x.wl.cloudera.site:8444",
+          "type": "IDBROKER",
+          "endPointConfigs": [
+            {
+              "key": "ssl_enabled",
+              "value": "true"
+            },
+            {
+              "key": "idbroker_gateway_port",
+              "value": "8444"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "CDH 7.3.1",
+      "serviceConfigs": [
+        {
+          "key": "atlas_service",
+          "value": "atlas"
+        },
+        {
+          "key": "ranger_service",
+          "value": "ranger"
+        },
+        {
+          "key": "zookeeper_service",
+          "value": "zookeeper"
+        },
+        {
+          "key": "hive_metastore_database_type",
+          "value": "postgresql"
+        },
+        {
+          "key": "hive_metastore_database_host",
+          "value": "dbsvr-86ae9632-9d0d-4321-909c-16b038ba0c09.cwuvxwrz4ivx.eu-central-1.rds.amazonaws.com"
+        },
+        {
+          "key": "hive_metastore_database_port",
+          "value": "5432"
+        },
+        {
+          "key": "hive_metastore_database_name",
+          "value": "hive"
+        },
+        {
+          "key": "hive_metastore_database_user",
+          "value": "hive"
+        },
+        {
+          "key": "hive_metastore_database_password",
+          "value": "TKXHgOoYo--REDACTED--"
+        },
+        {
+          "key": "hive_warehouse_external_directory",
+          "value": "s3a://cb-group/akanto/data/warehouse/tablespace/external/hive"
+        },
+        {
+          "key": "hive_warehouse_directory",
+          "value": "s3a://cb-group/akanto/data/warehouse/tablespace/managed/hive"
+        },
+        {
+          "key": "kerberos_princ_name",
+          "value": "hive"
+        },
+        {
+          "key": "hadoop_rpc_protection",
+          "value": "authentication"
+        }
+      ],
+      "name": "hive",
+      "serviceType": "HIVE",
+      "endPointHostList": [
+        {
+          "uri": "thrift://pub-ak-aws3-dl-gateway0.pub-ak-a.xcu2-8y8x.wl.cloudera.site:9083",
+          "type": "HIVEMETASTORE",
+          "endPointConfigs": []
+        },
+        {
+          "uri": "thrift://pub-ak-aws3-dl-gateway1.pub-ak-a.xcu2-8y8x.wl.cloudera.site:9083",
+          "type": "HIVEMETASTORE",
+          "endPointConfigs": []
+        }
+      ]
+    }
+  ]
+}

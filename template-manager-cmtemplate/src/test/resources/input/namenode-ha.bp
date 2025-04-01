@@ -51,6 +51,11 @@
           "refName": "hdfs-BALANCER-BASE",
           "roleType": "BALANCER",
           "base": true
+        },
+        {
+          "refName": "hdfs-GATEWAY-BASE",
+          "roleType": "GATEWAY",
+          "base": true
         }
       ]
     }
@@ -74,7 +79,8 @@
       "refName": "gateway",
       "cardinality": 1,
       "roleConfigGroupsRefNames": [
-        "hdfs-BALANCER-BASE"
+        "hdfs-BALANCER-BASE",
+        "hdfs-GATEWAY-BASE"
       ]
     },
     {

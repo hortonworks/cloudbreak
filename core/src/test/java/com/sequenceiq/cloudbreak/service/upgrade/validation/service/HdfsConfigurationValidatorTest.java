@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.upgrade.validation.service;
 
 import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.doAs;
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsRoleConfigProvider.HDFS_CLIENT_CONFIG_SAFETY_VALVE;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsConfigHelper.HDFS_CLIENT_CONFIG_SAFETY_VALVE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;

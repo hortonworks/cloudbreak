@@ -22,6 +22,7 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRdsRoleConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.cmtemplate.inifile.IniFile;
 import com.sequenceiq.cloudbreak.cmtemplate.inifile.IniFileFactory;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -104,7 +105,7 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
     }
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         return List.of();
     }
 
@@ -114,7 +115,7 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
 
     private void configureKnoxProxyHostsServiceConfig(TemplatePreparationObject source, List<ApiClusterTemplateConfig> result, IniFile safetyValve) {
         GatewayView gateway = source.getGatewayView();
-        String cdhVersion = getCdhVersionString(source);
+        String cdhVersion = ConfigUtils.getCdhVersion(source);
         GeneralClusterConfigs generalClusterConfigs = source.getGeneralClusterConfigs();
         if (externalFqdnShouldBeConfigured(gateway, generalClusterConfigs)) {
             Set<String> proxyHosts = new LinkedHashSet<>();
@@ -140,10 +141,6 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
                 }
             }
         }
-    }
-
-    private String getCdhVersionString(TemplatePreparationObject source) {
-        return source.getBlueprintView().getProcessor().getVersion().orElse("");
     }
 
     private boolean externalFqdnShouldBeConfigured(GatewayView gateway, GeneralClusterConfigs generalClusterConfigs) {

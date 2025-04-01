@@ -56,7 +56,7 @@ public class MeteringV2ConfigProvider extends AbstractRoleConfigProvider {
     private String region;
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         DatabusCredentialView databusCredentialView = source.getDatabusCredentialView();
         return List.of(
                 config(MeteringV2ServiceRoles.METERINGV2_DATABUS_ACCESS_KEY_ID, databusCredentialView.getAccessKey()),

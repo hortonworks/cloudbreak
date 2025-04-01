@@ -61,9 +61,9 @@ class StreamsReplicationManagerConfigProviderTest {
 
     @Test
     void getRoleConfigs() {
-        assertThat(underTest.getRoleConfigs("STREAMS_REPLICATION_MANAGER_DRIVER", null)).hasSameElementsAs(
+        assertThat(underTest.getRoleConfigs("STREAMS_REPLICATION_MANAGER_DRIVER", cmTemplateProcessor, null)).hasSameElementsAs(
                 List.of(config("streams.replication.manager.driver.target.cluster", "primary")));
-        assertThat(underTest.getRoleConfigs("STREAMS_REPLICATION_MANAGER_SERVICE", null)).isEqualTo(
+        assertThat(underTest.getRoleConfigs("STREAMS_REPLICATION_MANAGER_SERVICE", cmTemplateProcessor, null)).isEqualTo(
                 List.of(config("streams.replication.manager.service.target.cluster", "primary")));
     }
 

@@ -29,10 +29,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.util.ReflectionUtils;
 
 import com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.sdx.cdl.grpc.GrpcSdxCdlClient;
 import com.sequenceiq.cloudbreak.sdx.cdl.service.CdlSdxDescribeService;
 import com.sequenceiq.cloudbreak.sdx.cdl.service.CdlSdxStatusService;
+import com.sequenceiq.cloudbreak.sdx.common.grpc.GrpcServiceDiscoveryClient;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxAccessView;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxFileSystemView;
@@ -74,6 +77,9 @@ public class CdlSdxDescribeServiceTest {
 
     @Mock
     private GrpcSdxCdlClient sdxClient;
+
+    @Mock
+    private GrpcServiceDiscoveryClient grpcServiceDiscoveryClient;
 
     @InjectMocks
     private CdlSdxDescribeService underTest;
@@ -162,9 +168,12 @@ public class CdlSdxDescribeServiceTest {
     }
 
     @Test
-    void testGetHmsServiceConfigThrowsError() {
-        RuntimeException e = assertThrows(RuntimeException.class, () -> underTest.getHmsServiceConfig(Optional.of("")));
-        assertEquals("Failed to obtain HMS config via remote data context for the CDL. Can't continue with HMS config setup.", e.getMessage());
+    void getRemoteDataContextThrowsError() throws InvalidProtocolBufferException, JsonProcessingException {
+        setEnabled();
+        when(grpcServiceDiscoveryClient.getRemoteDataContext(CDL_CRN)).thenThrow(new RuntimeException());
+
+        RuntimeException e = assertThrows(RuntimeException.class, () -> underTest.getRemoteDataContext(CDL_CRN));
+        assertEquals("Not able to fetch the RDC for CDL from Service Discovery", e.getMessage());
     }
 
     private CdlCrudProto.ListDatalakesResponse getDatalakeList() {

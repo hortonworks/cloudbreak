@@ -29,7 +29,7 @@ class KuduMasterConfigProviderTest {
         templateProcessor.setCdhVersion("7.2.10");
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(templateProcessor, "7.2.10");
 
-        List<ApiClusterTemplateConfig> roleConfigs = subject.getRoleConfigs("KUDU_MASTER", preparationObject);
+        List<ApiClusterTemplateConfig> roleConfigs = subject.getRoleConfigs("KUDU_MASTER", templateProcessor, preparationObject);
 
         assertEquals(0, roleConfigs.size());
         assertTrue(subject.isConfigurationNeeded(templateProcessor, preparationObject));
@@ -41,7 +41,7 @@ class KuduMasterConfigProviderTest {
         templateProcessor.setCdhVersion("7.2.11");
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(templateProcessor, "7.2.11");
 
-        List<ApiClusterTemplateConfig> roleConfigs = subject.getRoleConfigs("KUDU_MASTER", preparationObject);
+        List<ApiClusterTemplateConfig> roleConfigs = subject.getRoleConfigs("KUDU_MASTER", templateProcessor, preparationObject);
 
         assertEquals(1, roleConfigs.size());
         assertTrue(roleConfigs.contains(config(RANGER_KUDU_PLUGIN_SERVICE_NAME, GENERATED_RANGER_SERVICE_NAME)));

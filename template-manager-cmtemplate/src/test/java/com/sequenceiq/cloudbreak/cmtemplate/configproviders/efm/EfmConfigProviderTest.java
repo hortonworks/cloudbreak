@@ -47,6 +47,9 @@ public class EfmConfigProviderTest {
     private static final String CLUSTER_DEFINITION_CRN = "crn:cdp:cloudbreak:us-west-1:accountId-3:clusterdefinition:resource";
 
     @Mock
+    private CmTemplateProcessor cmTemplate;
+
+    @Mock
     private GrpcUmsClient umsClient;
 
     @Mock
@@ -62,7 +65,7 @@ public class EfmConfigProviderTest {
         when(umsClient.getUserDetails(eq(USER_CRN))).thenReturn(user);
 
         List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(
-            EfmRoles.EFM_SERVER, templatePreparationObject(CLOUDERA_STACK_VERSION_7_2_17, USER_CRN));
+            EfmRoles.EFM_SERVER, cmTemplate, templatePreparationObject(CLOUDERA_STACK_VERSION_7_2_17, USER_CRN));
 
         Map<String, String> configToValue = ConfigTestUtil.getConfigNameToValueMap(result);
 
@@ -73,7 +76,7 @@ public class EfmConfigProviderTest {
     @Test
     public void testInitialAdminConfig7217NonUserCrn() {
         List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(
-            EfmRoles.EFM_SERVER, templatePreparationObject(CLOUDERA_STACK_VERSION_7_2_17, CLUSTER_DEFINITION_CRN));
+            EfmRoles.EFM_SERVER, cmTemplate, templatePreparationObject(CLOUDERA_STACK_VERSION_7_2_17, CLUSTER_DEFINITION_CRN));
 
         Map<String, String> configToValue = ConfigTestUtil.getConfigNameToValueMap(result);
 
@@ -91,7 +94,7 @@ public class EfmConfigProviderTest {
         when(virtualGroupService.createOrGetVirtualGroup(any(), eq(UmsVirtualGroupRight.EFM_ADMIN))).thenReturn(ADMIN_GROUP);
 
         List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(
-            EfmRoles.EFM_SERVER, templatePreparationObject(CLOUDERA_STACK_VERSION_7_2_18, USER_CRN));
+            EfmRoles.EFM_SERVER, cmTemplate, templatePreparationObject(CLOUDERA_STACK_VERSION_7_2_18, USER_CRN));
 
         Map<String, String> configToValue = ConfigTestUtil.getConfigNameToValueMap(result);
 
@@ -105,7 +108,7 @@ public class EfmConfigProviderTest {
         when(virtualGroupService.createOrGetVirtualGroup(any(), eq(UmsVirtualGroupRight.EFM_ADMIN))).thenReturn(ADMIN_GROUP);
 
         List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(
-            EfmRoles.EFM_SERVER, templatePreparationObject(CLOUDERA_STACK_VERSION_7_2_18, CLUSTER_DEFINITION_CRN));
+            EfmRoles.EFM_SERVER, cmTemplate, templatePreparationObject(CLOUDERA_STACK_VERSION_7_2_18, CLUSTER_DEFINITION_CRN));
 
         Map<String, String> configToValue = ConfigTestUtil.getConfigNameToValueMap(result);
 

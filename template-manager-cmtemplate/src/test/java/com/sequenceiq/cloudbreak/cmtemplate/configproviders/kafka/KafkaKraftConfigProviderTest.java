@@ -37,7 +37,8 @@ public class KafkaKraftConfigProviderTest {
     public void testKraftConfigPresent() {
         cdpMainVersionIs("7.2.17");
         List<ApiClusterTemplateConfig> expectedConfig = List.of(config(KafkaConfigs.METADATA_STORE, "KRaft"));
-        List<ApiClusterTemplateConfig> actualConfig = kraftConfigProvider.getRoleConfigs(KafkaRoles.KAFKA_BROKER, sourceWithKraft(StackType.WORKLOAD));
+        List<ApiClusterTemplateConfig> actualConfig =
+                kraftConfigProvider.getRoleConfigs(KafkaRoles.KAFKA_BROKER, processor, sourceWithKraft(StackType.WORKLOAD));
 
         assertEquals(expectedConfig, actualConfig);
     }
@@ -45,7 +46,8 @@ public class KafkaKraftConfigProviderTest {
     @Test
     public void testKraftConfigDefaultWithoutKRaft() {
         cdpMainVersionIs("7.2.17");
-        List<ApiClusterTemplateConfig> actualConfig = kraftConfigProvider.getRoleConfigs(KafkaRoles.KAFKA_BROKER, sourceWithoutKraft(StackType.WORKLOAD));
+        List<ApiClusterTemplateConfig> actualConfig =
+                kraftConfigProvider.getRoleConfigs(KafkaRoles.KAFKA_BROKER, processor, sourceWithoutKraft(StackType.WORKLOAD));
 
         assertEquals(List.of(), actualConfig);
     }
@@ -53,7 +55,8 @@ public class KafkaKraftConfigProviderTest {
     @Test
     public void testConfigDefaultWithOldVersion() {
         cdpMainVersionIs("7.2.16");
-        List<ApiClusterTemplateConfig> actualConfig = kraftConfigProvider.getRoleConfigs(KafkaRoles.KAFKA_BROKER, sourceWithKraft(StackType.WORKLOAD));
+        List<ApiClusterTemplateConfig> actualConfig =
+                kraftConfigProvider.getRoleConfigs(KafkaRoles.KAFKA_BROKER, processor, sourceWithKraft(StackType.WORKLOAD));
 
         assertEquals(List.of(), actualConfig);
     }
@@ -61,7 +64,8 @@ public class KafkaKraftConfigProviderTest {
     @Test
     public void testConfigDefaultOnDatalakeCluster() {
         cdpMainVersionIs("7.2.16");
-        List<ApiClusterTemplateConfig> actualConfig = kraftConfigProvider.getRoleConfigs(KafkaRoles.KAFKA_BROKER, sourceWithKraft(StackType.DATALAKE));
+        List<ApiClusterTemplateConfig> actualConfig =
+                kraftConfigProvider.getRoleConfigs(KafkaRoles.KAFKA_BROKER, processor, sourceWithKraft(StackType.DATALAKE));
 
         assertEquals(List.of(), actualConfig);
     }

@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.views.ClusterExposedServiceView;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.GatewayView;
 
@@ -81,6 +82,9 @@ public class ServiceEndpointCollector {
 
     @Inject
     private ClouderaManagerProductsProvider clouderaManagerProductsProvider;
+
+    @Inject
+    private StackUtil stackUtil;
 
     public Collection<ExposedServiceV4Response> getKnoxServices(Long workspaceId, String blueprintName) {
         Blueprint blueprint = blueprintService.getByNameForWorkspaceId(blueprintName, workspaceId);
@@ -205,9 +209,10 @@ public class ServiceEndpointCollector {
         return blueprintText;
     }
 
-    public Map<String, Collection<ClusterExposedServiceView>> prepareClusterExposedServicesViews(StackDtoDelegate stackDto, String managerIp) {
+    public Map<String, Collection<ClusterExposedServiceView>> prepareClusterExposedServicesViews(StackDtoDelegate stackDto) {
         Map<String, Collection<ClusterExposedServiceView>> result = new HashMap<>();
 
+        String managerIp = stackUtil.extractClusterManagerIp(stackDto);
         for (Map.Entry<String, Collection<ClusterExposedServiceV4Response>> entry : prepareClusterExposedServices(stackDto, managerIp).entrySet()) {
             Set<ClusterExposedServiceView> views = new HashSet<>();
             for (ClusterExposedServiceV4Response response : entry.getValue()) {

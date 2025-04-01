@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -32,6 +33,9 @@ import com.sequenceiq.cloudbreak.util.CdhPatchVersionProvider;
 
 @ExtendWith(MockitoExtension.class)
 public class KnoxServiceConfigProviderTest {
+
+    @Mock
+    private CmTemplateProcessor cmTemplate;
 
     @InjectMocks
     private KnoxServiceConfigProvider underTest;
@@ -63,7 +67,7 @@ public class KnoxServiceConfigProviderTest {
                                 .withVersion(cdhVersion)
                                 .withName("CDH")))
                 .build();
-        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", source);
+        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", cmTemplate, source);
 
         Optional<ApiClusterTemplateConfig> sslOptional = roleConfigs
                 .stream()

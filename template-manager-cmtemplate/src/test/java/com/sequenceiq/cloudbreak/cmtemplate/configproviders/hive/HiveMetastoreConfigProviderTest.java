@@ -91,7 +91,7 @@ class HiveMetastoreConfigProviderTest {
         TemplatePreparationObject tpo = new TemplatePreparationObject.Builder()
                 .build();
 
-        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(HiveRoles.HIVEMETASTORE, tpo);
+        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(HiveRoles.HIVEMETASTORE, templateProcessor, tpo);
 
         Map<String, String> configNameToValueMap = getConfigNameToValueMap(result);
         assertThat(configNameToValueMap).containsOnly(

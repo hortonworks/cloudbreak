@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
@@ -41,7 +42,7 @@ public class EfmConfigProvider extends AbstractRoleConfigProvider {
     private VirtualGroupService virtualGroupService;
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         LOGGER.info("Adding initial admin and initial admin group properties value via EfmConfigProvider");
         List<ApiClusterTemplateConfig> configs = new ArrayList<>();
 

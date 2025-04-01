@@ -59,6 +59,7 @@ import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
+import com.sequenceiq.cloudbreak.sdx.RdcView;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
@@ -78,6 +79,7 @@ import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerFqdnUtil;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.tag.AccountTagValidationFailed;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -95,7 +97,6 @@ import com.sequenceiq.cloudbreak.template.views.DatalakeView;
 import com.sequenceiq.cloudbreak.template.views.PlacementView;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.template.views.provider.RdsViewProvider;
-import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.GatewayView;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
@@ -165,13 +166,13 @@ public class StackToTemplatePreparationObjectConverter {
     private ServiceEndpointCollector serviceEndpointCollector;
 
     @Inject
-    private StackUtil stackUtil;
-
-    @Inject
     private VirtualGroupService virtualGroupService;
 
     @Inject
     private EntitlementService entitlementService;
+
+    @Inject
+    private StackDtoService stackDtoService;
 
     @Inject
     private ExposedServiceCollector exposedServiceCollector;
@@ -211,8 +212,7 @@ public class StackToTemplatePreparationObjectConverter {
 
     public TemplatePreparationObject convert(StackDtoDelegate source) {
         try {
-            Map<String, Collection<ClusterExposedServiceView>> views = serviceEndpointCollector
-                    .prepareClusterExposedServicesViews(source, stackUtil.extractClusterManagerAddress(source));
+            Map<String, Collection<ClusterExposedServiceView>> views = serviceEndpointCollector.prepareClusterExposedServicesViews(source);
             DetailedEnvironmentResponse environment = environmentClientService.getByCrn(source.getEnvironmentCrn());
             Credential credential = credentialConverter.convert(environment.getCredential());
             ClusterView cluster = source.getCluster();
@@ -282,7 +282,7 @@ public class StackToTemplatePreparationObjectConverter {
             decorateBuilderWithPlacement(source.getStack(), builder);
             decorateBuilderWithAccountMapping(source, environment, credential, builder, virtualGroupRequest);
             decorateBuilderWithServicePrincipals(source, builder, servicePrincipalCloudIdentities);
-            decorateDatalakeView(source.getStack(), builder);
+            decorateDatalakeView(source, builder);
 
             return builder.build();
         } catch (AccountTagValidationFailed aTVF) {
@@ -402,13 +402,15 @@ public class StackToTemplatePreparationObjectConverter {
         }
     }
 
-    private void decorateDatalakeView(StackView source, TemplatePreparationObject.Builder builder) {
+    private void decorateDatalakeView(StackDtoDelegate source, Builder builder) {
         DatalakeView datalakeView = null;
         if (StringUtils.isNotEmpty(source.getEnvironmentCrn()) && StackType.WORKLOAD.equals(source.getType())) {
-            Optional<SdxBasicView> datalake = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(source.getEnvironmentCrn());
-            if (datalake.isPresent()) {
-                boolean externalDatabaseForDL = RedbeamsDbServerConfigurer.isRemoteDatabaseRequested(datalake.get().dbServerCrn());
-                datalakeView = new DatalakeView(datalake.get().razEnabled(), datalake.get().crn(), externalDatabaseForDL);
+            Optional<SdxBasicView> datalakeOpt = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(source.getEnvironmentCrn());
+            if (datalakeOpt.isPresent()) {
+                SdxBasicView datalake = datalakeOpt.get();
+                boolean externalDatabaseForDL = RedbeamsDbServerConfigurer.isRemoteDatabaseRequested(datalake.dbServerCrn());
+                RdcView rdcView = platformAwareSdxConnector.getRdcView(datalake.crn());
+                datalakeView = new DatalakeView(datalake.razEnabled(), datalake.crn(), externalDatabaseForDL, rdcView);
             }
         }
         builder.withDataLakeView(datalakeView);

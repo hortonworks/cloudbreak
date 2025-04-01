@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.sdx.common.model.SdxAccessView;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxFileSystemView;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDescribeService;
+import com.sequenceiq.cloudbreak.sdx.common.service.RdcViewFactory;
 import com.sequenceiq.common.model.FileSystemType;
 
 @Service
@@ -50,6 +51,9 @@ public class CdlSdxDescribeService extends AbstractCdlSdxService implements Plat
     private static final String HIVE_REPLICA_WAREHOUSE_SERVICE_CONFIG = "hive_repl_replica_functions_root_dir";
 
     @Inject
+    private RdcViewFactory commonSdxDescribeService;
+
+    @Inject
     private GrpcSdxCdlClient grpcClient;
 
     @Inject
@@ -66,7 +70,7 @@ public class CdlSdxDescribeService extends AbstractCdlSdxService implements Plat
                 LOGGER.error(String.format("Not able to fetch the RDC for CDL from Service Discovery. CRN: %s.", crn), exception);
             }
         }
-        return Optional.empty();
+        throw new RuntimeException("Not able to fetch the RDC for CDL from Service Discovery");
     }
 
     @Override
@@ -139,16 +143,6 @@ public class CdlSdxDescribeService extends AbstractCdlSdxService implements Plat
     @Override
     public Set<String> listSdxCrnsDetachedIncluded(String environmentCrn) {
         return listSdxCrns(environmentCrn);
-    }
-
-    @Override
-    public Map<String, String> getHmsServiceConfig(Optional<String> remoteDataContext) {
-        Map<String, String> serviceConfig = PlatformAwareSdxDescribeService.super.getHmsServiceConfig(remoteDataContext);
-        if (serviceConfig.isEmpty()) {
-            throw new RuntimeException("Failed to obtain HMS config via remote data context for the CDL. Can't continue with HMS config setup.");
-        }
-
-        return serviceConfig;
     }
 
     private SdxFileSystemView describeServicesResponseToFileSystem(CdlCrudProto.DescribeServicesResponse servicesResponse, String cloudStorageLocation) {

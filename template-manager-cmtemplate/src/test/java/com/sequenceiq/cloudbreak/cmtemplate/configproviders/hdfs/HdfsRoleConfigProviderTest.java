@@ -13,19 +13,25 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.domain.BlueprintHybridOption;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
+import com.sequenceiq.cloudbreak.template.views.DatalakeView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
+@ExtendWith(MockitoExtension.class)
 class HdfsRoleConfigProviderTest {
 
     private static final Set<String> NN_HA_PROPERTIES =
@@ -35,7 +41,12 @@ class HdfsRoleConfigProviderTest {
 
     private final EntitlementService entitlementService = mock(EntitlementService.class);
 
-    private final HdfsRoleConfigProvider subject = new HdfsRoleConfigProvider(entitlementService);
+    private final HdfsConfigHelper hdfsConfigHelper = new HdfsConfigHelper();
+
+    private final HdfsRoleConfigProvider subject = new HdfsRoleConfigProvider(entitlementService, hdfsConfigHelper);
+
+    @Mock
+    private DatalakeView datalakeView;
 
     @Test
     void nameNodeHA() {
@@ -289,6 +300,32 @@ class HdfsRoleConfigProviderTest {
             Map<String, ApiClusterTemplateConfig> configMap = cmTemplateProcessor.mapByName(namenodeConfigs);
 
             assertThat(configMap).doesNotContainKey("datanode_config_safety_valve");
+        });
+    }
+
+    @Test
+    void hybridWithHa() {
+        HostgroupView gateway = new HostgroupView("gateway", 1, InstanceGroupType.GATEWAY, 1);
+        HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.CORE, 2);
+        HostgroupView quorum = new HostgroupView("quorum", 0, InstanceGroupType.CORE, 3);
+        HostgroupView worker = new HostgroupView("worker", 0, InstanceGroupType.CORE, 3);
+        String inputJson = FileReaderUtils.readFileFromClasspathQuietly("input/namenode-ha.bp");
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+        TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
+                .withStackType(StackType.WORKLOAD)
+                .withHostgroupViews(Set.of(gateway, master, quorum, worker))
+                .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", BlueprintHybridOption.BURST_TO_CLOUD, cmTemplateProcessor))
+                .withDataLakeView(datalakeView)
+                .build();
+
+        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
+            Map<String, List<ApiClusterTemplateConfig>> roleConfigs = subject.getRoleConfigs(cmTemplateProcessor, preparationObject);
+
+            assertEquals(List.of(
+                            config("autofailover_enabled", "true"),
+                            config("dfs_federation_namenode_nameservice", "nshybrid"),
+                            config("dfs_namenode_quorum_journal_name", "nshybrid")),
+                    roleConfigs.get("hdfs-NAMENODE-BASE"));
         });
     }
 }

@@ -29,7 +29,7 @@ public class YarnResourceManagerRoleConfigProvider extends AbstractRoleConfigPro
     private static final String RESOURCE_MANAGER_YARN_SITE_SAFETY_VALVE = "resourcemanager_config_safety_valve";
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         switch (roleType) {
             case YarnRoles.RESOURCEMANAGER:
                 List<ApiClusterTemplateConfig> configs = new LinkedList<>();

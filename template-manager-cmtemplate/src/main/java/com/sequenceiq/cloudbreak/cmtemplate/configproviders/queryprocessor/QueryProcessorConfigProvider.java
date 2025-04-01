@@ -79,7 +79,7 @@ public class QueryProcessorConfigProvider extends AbstractRdsRoleConfigProvider 
     }
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         return List.of();
     }
 

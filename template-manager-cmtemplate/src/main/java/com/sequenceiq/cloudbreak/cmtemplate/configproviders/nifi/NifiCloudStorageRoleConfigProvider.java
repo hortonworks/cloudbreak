@@ -21,7 +21,8 @@ public class NifiCloudStorageRoleConfigProvider extends AbstractRoleConfigProvid
     private static final String NIFI_LOG_DIR_COPY_TO_OBJECT_STORAGE = "nifi.log.dir.copy.to.cloud.object.storage";
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject templatePreparationObject) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor,
+            TemplatePreparationObject templatePreparationObject) {
         switch (roleType) {
 
             case NIFI_NODE:

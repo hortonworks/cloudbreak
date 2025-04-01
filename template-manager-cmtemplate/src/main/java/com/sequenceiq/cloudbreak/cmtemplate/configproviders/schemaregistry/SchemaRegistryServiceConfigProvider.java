@@ -69,7 +69,7 @@ public class SchemaRegistryServiceConfigProvider extends AbstractRdsRoleConfigPr
     }
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         String cdhVersion = source.getBlueprintView().getProcessor().getStackVersion() == null ?
                 "" : source.getBlueprintView().getProcessor().getStackVersion();
         if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_2_0)) {

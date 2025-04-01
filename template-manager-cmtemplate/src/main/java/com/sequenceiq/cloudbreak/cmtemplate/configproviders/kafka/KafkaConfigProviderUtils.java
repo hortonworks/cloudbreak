@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
 public class KafkaConfigProviderUtils {
@@ -36,7 +37,7 @@ public class KafkaConfigProviderUtils {
     config doesn't use the SSL port, causing problems for Ranger connecting to Zookeeper.
      */
     public static CdhVersionForStreaming getCdhVersionForStreaming(TemplatePreparationObject source) {
-        String cdhVersion = source.getBlueprintView().getProcessor().getVersion().orElse("");
+        String cdhVersion = ConfigUtils.getCdhVersion(source);
         if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_2_0)) {
             return CdhVersionForStreaming.VERSION_7_X_X;
         } else if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_1_0)) {

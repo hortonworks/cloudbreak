@@ -41,7 +41,7 @@ public class YarnResourceManagerRoleConfigProviderTest {
     @Test
     public void testGetConfigsWhenRoleIsResourceManager() {
         setupMocks(true, true, "7.2.10");
-        List<ApiClusterTemplateConfig> serviceConfigs = underTest.getRoleConfigs(YarnRoles.RESOURCEMANAGER, source);
+        List<ApiClusterTemplateConfig> serviceConfigs = underTest.getRoleConfigs(YarnRoles.RESOURCEMANAGER, cmTemplateProcessor, source);
         assertEquals(2, serviceConfigs.size());
         assertTrue(serviceConfigs.stream().anyMatch(sc -> StringUtils.equals(sc.getName(), "resourcemanager_capacity_scheduler_configuration")));
         assertTrue(serviceConfigs.stream().anyMatch(sc -> StringUtils.equals(sc.getName(), "yarn_resourcemanager_scheduler_class")));
@@ -50,7 +50,7 @@ public class YarnResourceManagerRoleConfigProviderTest {
     @Test
     public void testGetConfigsWhenRoleIsResourceManagerPlacementVersionPasses() {
         setupMocks(true, true, "7.2.11");
-        List<ApiClusterTemplateConfig> serviceConfigs = underTest.getRoleConfigs(YarnRoles.RESOURCEMANAGER, source);
+        List<ApiClusterTemplateConfig> serviceConfigs = underTest.getRoleConfigs(YarnRoles.RESOURCEMANAGER, cmTemplateProcessor, source);
         assertEquals(3, serviceConfigs.size());
         assertTrue(serviceConfigs.stream().anyMatch(sc -> StringUtils.equals(sc.getName(), "resourcemanager_capacity_scheduler_configuration")));
         assertTrue(serviceConfigs.stream().anyMatch(sc -> StringUtils.equals(sc.getName(), "yarn_resourcemanager_scheduler_class")));
@@ -71,7 +71,7 @@ public class YarnResourceManagerRoleConfigProviderTest {
     @Test
     public void testGetConfigsWhenRoleIsNotResourceManager() {
         setupMocks(false, false, null);
-        List<ApiClusterTemplateConfig> serviceConfigs = underTest.getRoleConfigs(YarnRoles.NODEMANAGER, source);
+        List<ApiClusterTemplateConfig> serviceConfigs = underTest.getRoleConfigs(YarnRoles.NODEMANAGER, cmTemplateProcessor, source);
         assertEquals(0, serviceConfigs.size());
         assertFalse(serviceConfigs.stream().anyMatch(sc -> StringUtils.equals(sc.getName(), "resourcemanager_capacity_scheduler_configuration")));
         assertFalse(serviceConfigs.stream().anyMatch(sc -> StringUtils.equals(sc.getName(), "yarn_resourcemanager_scheduler_class")));

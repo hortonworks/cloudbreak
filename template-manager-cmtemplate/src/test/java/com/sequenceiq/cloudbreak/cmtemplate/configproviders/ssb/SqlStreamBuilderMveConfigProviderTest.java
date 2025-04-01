@@ -50,7 +50,8 @@ public class SqlStreamBuilderMveConfigProviderTest {
         CmTemplateProcessor cmTemplateProcessor = initTemplateProcessor("7.2.11");
         TemplatePreparationObject preparationObject = initTemplatePreparationObject(cmTemplateProcessor);
 
-        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(SqlStreamBuilderRoles.MATERIALIZED_VIEW_ENGINE, preparationObject);
+        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(SqlStreamBuilderRoles.MATERIALIZED_VIEW_ENGINE,
+                cmTemplateProcessor, preparationObject);
 
         assertThat(roleConfigs).hasSameElementsAs(
                 List.of(

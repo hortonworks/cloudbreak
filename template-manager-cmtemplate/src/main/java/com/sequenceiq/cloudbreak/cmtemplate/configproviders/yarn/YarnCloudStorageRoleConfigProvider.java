@@ -20,7 +20,7 @@ public class YarnCloudStorageRoleConfigProvider extends AbstractRoleConfigProvid
     private static final String NODEMANAGER_REMOTE_APP_LOG_DIR = "yarn.nodemanager.remote-app-log-dir";
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         switch (roleType) {
             case YarnRoles.NODEMANAGER:
                 return ConfigUtils.getStorageLocationForServiceProperty(source, NODEMANAGER_REMOTE_APP_LOG_DIR)

@@ -66,6 +66,7 @@ import com.sequenceiq.cloudbreak.cluster.model.ServiceLocationMap;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveRoles;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.raz.RangerRazDatahubConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.raz.RangerRazDatalakeConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -525,6 +526,11 @@ public class ClusterHostServiceRunner {
         String seLinux = stackDto.getSecurityConfig() != null && stackDto.getSecurityConfig().getSeLinux() != null ?
                 stackDto.getSecurityConfig().getSeLinux().toString().toLowerCase(Locale.ROOT) : SeLinux.PERMISSIVE.toString().toLowerCase(Locale.ROOT);
         boolean hybridEnabled = stack.isDatalake() && EnvironmentType.HYBRID_BASE.toString().equals(detailedEnvironmentResponse.getEnvironmentType());
+        // Hive with remote HMS workaround - TODO remove after OPSAPS-73356
+        String blueprintJsonText = stackDto.getBlueprint().getBlueprintJsonText();
+        boolean hiveWithRemoteHiveMetastore = blueprintJsonText != null
+                && blueprintJsonText.contains(HiveRoles.HIVESERVER2)
+                && !blueprintJsonText.contains(HiveRoles.HIVEMETASTORE);
         Map<String, ? extends Serializable> clusterProperties = Map.of(
                 "name", stackDto.getCluster().getName(),
                 "deployedInChildEnvironment", deployedInChildEnvironment,
@@ -532,7 +538,8 @@ public class ClusterHostServiceRunner {
                 "secretEncryptionEnabled", detailedEnvironmentResponse.isEnableSecretEncryption(),
                 "selinux_mode", seLinux,
                 "tlsv13Enabled", entitlementService.isTlsv13Enabled(stackDto.getAccountId()),
-                "hybridEnabled", hybridEnabled);
+                "hybridEnabled", hybridEnabled,
+                "hiveWithRemoteHiveMetastore", hiveWithRemoteHiveMetastore);
         servicePillar.put("metadata", new SaltPillarProperties("/metadata/init.sls", singletonMap("cluster", clusterProperties)));
         ClusterPreCreationApi connector = clusterApiConnectors.getConnector(cluster);
         Map<String, List<String>> serviceLocations = getServiceLocations(stackDto);

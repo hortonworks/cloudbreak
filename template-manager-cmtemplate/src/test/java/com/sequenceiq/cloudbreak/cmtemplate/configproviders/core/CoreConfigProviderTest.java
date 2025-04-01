@@ -279,7 +279,7 @@ class CoreConfigProviderTest {
                 .build();
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
-            List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(CORE_SETTINGS, preparationObject);
+            List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(CORE_SETTINGS, cmTemplateProcessor, preparationObject);
             assertFalse(roleConfigs.size() != 0);
         });
 

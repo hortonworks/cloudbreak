@@ -68,7 +68,7 @@ class NifiRegistryRoleConfigProviderTest {
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(cmTemplateProcessor, cfmVersion);
 
-        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(NifiRegistryRoles.NIFI_REGISTRY_SERVER, preparationObject);
+        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(NifiRegistryRoles.NIFI_REGISTRY_SERVER, cmTemplateProcessor, preparationObject);
 
         Builder<ApiClusterTemplateConfig> expectedRoleConfigs =
                 ImmutableList
@@ -117,7 +117,7 @@ class NifiRegistryRoleConfigProviderTest {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(cmTemplateProcessor, cfmVersion, sslMode, cloudPlatform,
                 externalDBRequested);
 
-        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(NifiRegistryRoles.NIFI_REGISTRY_SERVER, preparationObject);
+        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(NifiRegistryRoles.NIFI_REGISTRY_SERVER, cmTemplateProcessor, preparationObject);
 
         Optional<String> dbUrlOptional = roleConfigs.stream()
                 .filter(c -> "nifi.registry.db.url".equals(c.getName()))

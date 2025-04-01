@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRdsRoleConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -42,7 +43,7 @@ public class ProfilerAdminRoleConfigProvider extends AbstractRdsRoleConfigProvid
     }
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         List<ApiClusterTemplateConfig> configs = new ArrayList<>();
         if (ProfilerManagerRoles.PROFILER_ADMIN_AGENT.equals(roleType)) {
             String cmVersion = ConfigUtils.getCmVersion(source);

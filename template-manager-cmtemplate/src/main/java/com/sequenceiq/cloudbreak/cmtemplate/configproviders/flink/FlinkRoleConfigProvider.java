@@ -36,7 +36,7 @@ public class FlinkRoleConfigProvider extends AbstractRoleConfigProvider {
     private FlinkConfigProviderUtils utils;
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         if (FlinkConstants.FLINK_HISTORY_SERVER.equals(roleType)) {
             return ConfigUtils.getStorageLocationForServiceProperty(source, HISTORY_SERVER_ARCHIVE_FS_DIR)
                     .map(location -> List.of(config(HISTORY_SERVER_ARCHIVE_FS_DIR, location.getValue())))

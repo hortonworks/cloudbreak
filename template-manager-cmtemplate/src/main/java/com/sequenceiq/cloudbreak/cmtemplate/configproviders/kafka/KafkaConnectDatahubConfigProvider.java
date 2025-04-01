@@ -22,7 +22,7 @@ public class KafkaConnectDatahubConfigProvider extends AbstractRoleConfigProvide
     public static final String RANGER_PLUGIN_KAFKA_CONNECT_SERVICE_NAME_CONFIG = "ranger_plugin_kafka_connect_service_name";
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         ArrayList<ApiClusterTemplateConfig> configs = Lists.newArrayList();
         String cdpVersion = source.getBlueprintView().getProcessor().getStackVersion() == null ?
                 "" : source.getBlueprintView().getProcessor().getStackVersion();

@@ -86,7 +86,7 @@ public class SchemaRegistryServiceConfigProviderTest {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(cmTemplateProcessor, true);
 
         List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(SchemaRegistryRoles.SCHEMA_REGISTRY_SERVER,
-                preparationObject);
+                cmTemplateProcessor, preparationObject);
 
         assertThat(roleConfigs).hasSameElementsAs(
                 List.of(config("schema.registry.storage.connector.connectURI", "jdbc:postgresql://testhost:5432/schema_registry?sslmode=true"),
@@ -101,7 +101,7 @@ public class SchemaRegistryServiceConfigProviderTest {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(cmTemplateProcessor, false);
 
         List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(SchemaRegistryRoles.SCHEMA_REGISTRY_SERVER,
-                preparationObject);
+                cmTemplateProcessor, preparationObject);
 
         assertThat(roleConfigs).hasSameElementsAs(List.of(
                 config(RANGER_PLUGIN_SR_SERVICE_NAME, GENERATED_RANGER_SERVICE_NAME)));

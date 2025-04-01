@@ -35,7 +35,7 @@ public class StubDfsConfigProvider extends AbstractRoleConfigProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(StubDfsConfigProvider.class);
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         return List.of();
     }
 

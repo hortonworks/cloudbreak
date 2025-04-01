@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRdsRoleConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -61,7 +62,7 @@ public class OozieRoleConfigProvider extends AbstractRdsRoleConfigProvider {
     }
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         switch (roleType) {
             case OozieRoles.OOZIE_SERVER:
                 RdsView oozieRdsView = getRdsView(source);

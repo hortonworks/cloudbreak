@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -72,6 +73,8 @@ import com.sequenceiq.cloudbreak.dto.DatabaseSslDetails;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
+import com.sequenceiq.cloudbreak.sdx.RdcView;
+import com.sequenceiq.cloudbreak.sdx.paas.LocalPaasRdcViewExtender;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
@@ -84,6 +87,9 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.template.TemplateEndpoint;
+import com.sequenceiq.cloudbreak.template.TemplateRoleConfig;
+import com.sequenceiq.cloudbreak.template.TemplateServiceConfig;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
@@ -92,7 +98,7 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 @Service
-public class ClusterService {
+public class ClusterService implements LocalPaasRdcViewExtender {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterService.class);
 
@@ -434,6 +440,19 @@ public class ClusterService {
     public Cluster getClusterByStackResourceCrn(String stackResourceCrn) {
         return repository.findByStackResourceCrn(stackResourceCrn).orElseThrow(notFound("Cluster by stack resource CRN",
                 stackResourceCrn));
+    }
+
+    @Override
+    public RdcView extendRdcView(RdcView rdcView) {
+        Cluster cluster = getClusterByStackResourceCrn(rdcView.getStackCrn());
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(cluster.getExtendedBlueprintText());
+        Set<TemplateEndpoint> endpoints = cmTemplateProcessor.calculateEndpoints();
+        rdcView.extendEndpoints(endpoints);
+        Set<TemplateServiceConfig> serviceConfigs = cmTemplateProcessor.calculateServiceConfigs();
+        rdcView.extendServiceConfigs(serviceConfigs);
+        Set<TemplateRoleConfig> roleConfigs = cmTemplateProcessor.calculateRoleConfigs();
+        rdcView.extendRoleConfigs(roleConfigs);
+        return rdcView;
     }
 
     public Cluster getCluster(Long clusterId) {

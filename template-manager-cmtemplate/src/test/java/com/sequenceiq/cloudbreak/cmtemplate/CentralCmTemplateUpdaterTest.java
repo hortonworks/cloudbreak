@@ -250,6 +250,7 @@ public class CentralCmTemplateUpdaterTest {
                 new CustomConfigurationPropertyView("role_config_name", "role_config_value", "server", "zookeeper"),
                 new CustomConfigurationPropertyView("role_config_name", "role_config_value", "namenode", "hdfs"),
                 new CustomConfigurationPropertyView("role_config_name", "role_config_value", "datanode", "hdfs"),
+                new CustomConfigurationPropertyView("role_config_name", "role_config_value", "gateway", "hdfs"),
                 new CustomConfigurationPropertyView("role_config_name", "role_config_value", "journalnode", "hdfs"),
                 new CustomConfigurationPropertyView("role_config_name", "role_config_value", "failovercontroller", "hdfs"),
                 new CustomConfigurationPropertyView("role_config_name", "role_config_value", "balancer", "hdfs")

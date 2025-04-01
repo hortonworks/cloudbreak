@@ -46,6 +46,9 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 @RunWith(MockitoJUnitRunner.class)
 public class HdfsConfigProviderTest {
 
+    @Mock
+    private CmTemplateProcessor cmTemplate;
+
     @InjectMocks
     private HdfsConfigProvider underTest;
 
@@ -98,7 +101,7 @@ public class HdfsConfigProviderTest {
 
     @Test
     public void testGetRoleConfigsForGatewayRole() {
-        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(HdfsRoles.GATEWAY, null);
+        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(HdfsRoles.GATEWAY, cmTemplate, null);
         assertEquals(1, roleConfigs.size());
         assertEquals("hdfs_client_env_safety_valve", roleConfigs.get(0).getName());
         assertEquals("HADOOP_OPTS=\"-Dorg.wildfly.openssl.path=/usr/lib64 ${HADOOP_OPTS}\"", roleConfigs.get(0).getValue());
@@ -106,7 +109,7 @@ public class HdfsConfigProviderTest {
 
     @Test
     public void testGetRoleConfigsForNonGatewayRole() {
-        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(HdfsRoles.BALANCER, null);
+        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(HdfsRoles.BALANCER, cmTemplate, null);
         assertEquals(0, roleConfigs.size());
     }
 

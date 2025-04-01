@@ -30,12 +30,13 @@ public class CustomCmController {
             @PathVariable("clusterName") String clusterName) {
         ApiRemoteDataContext apiRemoteDataContext = new ApiRemoteDataContext();
         ApiEndPoint hmsApiEndpoint = new ApiEndPoint();
+        hmsApiEndpoint.setName("hive");
+        hmsApiEndpoint.setServiceType(RdcConstants.HIVE_SERVICE);
         hmsApiEndpoint.addServiceConfigsItem(apiMapEntry(RdcConstants.HiveMetastoreDatabase.HIVE_METASTORE_DATABASE_HOST, "mock_database"));
         hmsApiEndpoint.addServiceConfigsItem(apiMapEntry(RdcConstants.HiveMetastoreDatabase.HIVE_METASTORE_DATABASE_PORT, "5432"));
         hmsApiEndpoint.addServiceConfigsItem(apiMapEntry(RdcConstants.HiveMetastoreDatabase.HIVE_METASTORE_DATABASE_NAME, "hive"));
         hmsApiEndpoint.addServiceConfigsItem(apiMapEntry(RdcConstants.HiveMetastoreDatabase.HIVE_METASTORE_DATABASE_USER, "hive"));
         hmsApiEndpoint.addServiceConfigsItem(apiMapEntry(RdcConstants.HiveMetastoreDatabase.HIVE_METASTORE_DATABASE_PASSWORD, "pass"));
-        hmsApiEndpoint.setName("hive");
         apiRemoteDataContext.addEndPointsItem(hmsApiEndpoint);
         return responseCreatorComponent.exec(apiRemoteDataContext);
     }

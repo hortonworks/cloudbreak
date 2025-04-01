@@ -68,7 +68,7 @@ public class KafkaMultiAzConfigProviderTest {
         when(blueprintView.getProcessor()).thenReturn(cmTemplateProcessor);
         when(cmTemplateProcessor.getStackVersion()).thenReturn(cdhMainVersion);
         TemplatePreparationObject tpo = templatePreparationObject(StackType.DATALAKE, cdhParcelVersion);
-        List<ApiClusterTemplateConfig> serviceConfigs = configProviderUnderTest.getRoleConfigs(KafkaRoles.KAFKA_BROKER, tpo);
+        List<ApiClusterTemplateConfig> serviceConfigs = configProviderUnderTest.getRoleConfigs(KafkaRoles.KAFKA_BROKER, cmTemplateProcessor, tpo);
         assertThat(serviceConfigs).as("Expected configs for cdh version: %s / %s", cdhMainVersion, cdhParcelVersion).hasSameElementsAs(expectedConfigs);
     }
 

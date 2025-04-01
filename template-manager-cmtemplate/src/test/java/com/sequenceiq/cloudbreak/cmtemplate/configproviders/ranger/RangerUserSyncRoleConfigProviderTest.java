@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -41,6 +42,9 @@ import com.sequenceiq.cloudbreak.template.views.ProductDetailsView;
 
 @ExtendWith(MockitoExtension.class)
 public class RangerUserSyncRoleConfigProviderTest {
+
+    @Mock
+    private CmTemplateProcessor cmTemplate;
 
     @Mock
     private VirtualGroupService virtualGroupService;
@@ -65,7 +69,7 @@ public class RangerUserSyncRoleConfigProviderTest {
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
                 .build();
 
-        List<ApiClusterTemplateConfig> serviceConfigs = underTest.getRoleConfigs(RANGER_USERSYNC, preparationObject);
+        List<ApiClusterTemplateConfig> serviceConfigs = underTest.getRoleConfigs(RANGER_USERSYNC, cmTemplate, preparationObject);
 
         assertEquals(2, serviceConfigs.size());
         assertEquals("conf/ranger-ugsync-site.xml_role_safety_valve", serviceConfigs.get(0).getName());
@@ -84,7 +88,7 @@ public class RangerUserSyncRoleConfigProviderTest {
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
                 .build();
 
-        List<ApiClusterTemplateConfig> serviceConfigs = underTest.getRoleConfigs(RANGER_USERSYNC, preparationObject);
+        List<ApiClusterTemplateConfig> serviceConfigs = underTest.getRoleConfigs(RANGER_USERSYNC, cmTemplate, preparationObject);
 
         assertEquals(2, serviceConfigs.size());
         assertEquals("conf/ranger-ugsync-site.xml_role_safety_valve", serviceConfigs.get(0).getName());
@@ -105,7 +109,7 @@ public class RangerUserSyncRoleConfigProviderTest {
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .build();
 
-        List<ApiClusterTemplateConfig> serviceConfigs = underTest.getRoleConfigs(RANGER_USERSYNC, preparationObject);
+        List<ApiClusterTemplateConfig> serviceConfigs = underTest.getRoleConfigs(RANGER_USERSYNC, cmTemplate, preparationObject);
 
         assertEquals(2, serviceConfigs.size());
         assertEquals("conf/ranger-ugsync-site.xml_role_safety_valve", serviceConfigs.get(0).getName());
@@ -126,7 +130,7 @@ public class RangerUserSyncRoleConfigProviderTest {
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .build();
 
-        List<ApiClusterTemplateConfig> serviceConfigs = underTest.getRoleConfigs(RANGER_USERSYNC, preparationObject);
+        List<ApiClusterTemplateConfig> serviceConfigs = underTest.getRoleConfigs(RANGER_USERSYNC, cmTemplate, preparationObject);
 
         assertEquals(2, serviceConfigs.size());
         assertEquals("conf/ranger-ugsync-site.xml_role_safety_valve", serviceConfigs.get(0).getName());
@@ -147,7 +151,7 @@ public class RangerUserSyncRoleConfigProviderTest {
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .build();
 
-        List<ApiClusterTemplateConfig> serviceConfigs = underTest.getRoleConfigs(RANGER_USERSYNC, preparationObject);
+        List<ApiClusterTemplateConfig> serviceConfigs = underTest.getRoleConfigs(RANGER_USERSYNC, cmTemplate, preparationObject);
 
         assertEquals(3, serviceConfigs.size());
 
@@ -173,7 +177,7 @@ public class RangerUserSyncRoleConfigProviderTest {
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .build();
 
-        List<ApiClusterTemplateConfig> serviceConfigs = underTest.getRoleConfigs(RANGER_USERSYNC, preparationObject);
+        List<ApiClusterTemplateConfig> serviceConfigs = underTest.getRoleConfigs(RANGER_USERSYNC, cmTemplate, preparationObject);
 
         assertEquals(3, serviceConfigs.size());
 
@@ -222,7 +226,7 @@ public class RangerUserSyncRoleConfigProviderTest {
         when(virtualGroupService.createOrGetVirtualGroup(any(), eq(UmsVirtualGroupRight.RANGER_ADMIN))).thenReturn("test-admin-group");
 
         List<ApiClusterTemplateConfig> configs = ThreadBasedUserCrnProvider.doAs("crn:cdp:iam:us-west-1:tenantName:user:userName",
-                () -> underTest.getRoleConfigs("test-role-type", source));
+                () -> underTest.getRoleConfigs("test-role-type", cmTemplate, source));
 
         assertNotNull(configs);
         assertTrue(configs.size() >= 14);
@@ -260,7 +264,7 @@ public class RangerUserSyncRoleConfigProviderTest {
         when(source.getLdapConfig()).thenReturn(Optional.empty());
         when(virtualGroupService.createOrGetVirtualGroup(any(), eq(UmsVirtualGroupRight.RANGER_ADMIN))).thenReturn("test-admin-group");
 
-        List<ApiClusterTemplateConfig> configs = underTest.getRoleConfigs("test-role-type", source);
+        List<ApiClusterTemplateConfig> configs = underTest.getRoleConfigs("test-role-type", cmTemplate, source);
 
         assertNotNull(configs);
         assertFalse(configs.isEmpty());
@@ -293,7 +297,7 @@ public class RangerUserSyncRoleConfigProviderTest {
         when(virtualGroupService.createOrGetVirtualGroup(any(), eq(UmsVirtualGroupRight.RANGER_ADMIN))).thenReturn("test-admin-group");
 
         List<ApiClusterTemplateConfig> configs = ThreadBasedUserCrnProvider.doAs("crn:cdp:iam:us-west-1:tenantName:user:userName",
-                () -> underTest.getRoleConfigs("test-role-type", source));
+                () -> underTest.getRoleConfigs("test-role-type", cmTemplate, source));
 
         assertNotNull(configs);
         assertFalse(configs.isEmpty());
@@ -324,7 +328,7 @@ public class RangerUserSyncRoleConfigProviderTest {
         when(blueprintTextProcessor.getStackVersion()).thenReturn("7.1.0");
         when(virtualGroupService.createOrGetVirtualGroup(any(), eq(UmsVirtualGroupRight.RANGER_ADMIN))).thenReturn("test-admin-group");
 
-        List<ApiClusterTemplateConfig> configs = underTest.getRoleConfigs("test-role-type", source);
+        List<ApiClusterTemplateConfig> configs = underTest.getRoleConfigs("test-role-type", cmTemplate, source);
 
         assertNotNull(configs);
         assertFalse(configs.isEmpty());

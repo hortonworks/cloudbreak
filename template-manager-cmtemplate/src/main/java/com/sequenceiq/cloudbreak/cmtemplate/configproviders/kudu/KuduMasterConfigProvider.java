@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.google.api.client.util.Lists;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
@@ -18,7 +19,7 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 public class KuduMasterConfigProvider extends AbstractRoleConfigProvider {
 
     @Override
-    public List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+    public List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         ArrayList<ApiClusterTemplateConfig> configs = Lists.newArrayList();
 
         String cdhVersion = source.getBlueprintView().getProcessor().getStackVersion() == null ?

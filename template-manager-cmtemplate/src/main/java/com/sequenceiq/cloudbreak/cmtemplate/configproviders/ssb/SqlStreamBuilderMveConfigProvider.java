@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 
@@ -42,7 +43,7 @@ public class SqlStreamBuilderMveConfigProvider extends SqlStreamBuilderConfigPro
     }
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         RdsView ssbRdsView = getRdsView(source);
 
         if (SqlStreamBuilderRoles.MATERIALIZED_VIEW_ENGINE.equals(roleType)) {

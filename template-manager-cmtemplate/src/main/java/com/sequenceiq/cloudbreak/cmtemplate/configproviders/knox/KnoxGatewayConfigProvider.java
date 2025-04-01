@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
@@ -116,7 +117,7 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider implem
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         VirtualGroupRequest virtualGroupRequest = source.getVirtualGroupRequest();
         String adminGroup = virtualGroupService.createOrGetVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.KNOX_ADMIN);
 
@@ -249,7 +250,7 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider implem
     }
 
     private boolean isSecretEncryptionSupported(TemplatePreparationObject source) {
-        String cdhVersion = source.getBlueprintView().getProcessor().getVersion().orElse("");
+        String cdhVersion = ConfigUtils.getCdhVersion(source);
         if (source.isEnableSecretEncryption() && isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_2_16)) {
             LOGGER.info("Secret Encryption is supported");
             return true;

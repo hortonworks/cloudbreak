@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.upgrade.validation.service;
 
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsRoleConfigProvider.HDFS_CLIENT_CONFIG_SAFETY_VALVE;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsConfigHelper.HDFS_CLIENT_CONFIG_SAFETY_VALVE;
 
 import java.util.ArrayList;
 import java.util.List;

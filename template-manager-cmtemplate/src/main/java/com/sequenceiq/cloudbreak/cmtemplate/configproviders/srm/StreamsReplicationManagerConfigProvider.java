@@ -64,7 +64,7 @@ public class StreamsReplicationManagerConfigProvider extends AbstractRoleConfigP
     }
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         switch (roleType) {
             case StreamsReplicationManagerRoles.STREAMS_REPLICATION_MANAGER_DRIVER:
                 return List.of(ConfigUtils.config(DRIVER_TARGET_CONFIG, "primary"));

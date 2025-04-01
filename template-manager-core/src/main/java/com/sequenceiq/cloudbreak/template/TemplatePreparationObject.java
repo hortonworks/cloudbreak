@@ -299,7 +299,7 @@ public class TemplatePreparationObject {
 
         private VirtualGroupRequest virtualGroupRequest;
 
-        private Optional<DatalakeView> datalakeView;
+        private Optional<DatalakeView> datalakeView = Optional.empty();
 
         private IdBroker idBroker;
 

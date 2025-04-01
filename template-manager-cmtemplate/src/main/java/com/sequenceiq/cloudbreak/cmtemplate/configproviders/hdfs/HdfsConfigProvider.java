@@ -43,7 +43,7 @@ public class HdfsConfigProvider extends AbstractRoleConfigProvider {
     }
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         switch (roleType) {
             case HdfsRoles.GATEWAY:
                 return List.of(config(HDFS_CLIENT_ENV_SAFETY_VALVE, HADOOP_OPTS));

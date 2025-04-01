@@ -18,6 +18,7 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRdsRoleConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.SSLModeProviderService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -47,7 +48,7 @@ public class NifiRegistryRoleConfigProvider extends AbstractRdsRoleConfigProvide
     }
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         String cdhVersion = source.getBlueprintView().getProcessor().getStackVersion() == null ?
                 "" : source.getBlueprintView().getProcessor().getStackVersion();
         if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_0_1)) {

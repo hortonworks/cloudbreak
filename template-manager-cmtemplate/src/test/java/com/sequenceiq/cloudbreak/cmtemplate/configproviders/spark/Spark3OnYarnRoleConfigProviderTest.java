@@ -9,10 +9,14 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsConfigHelper;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -28,7 +32,11 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 @ExtendWith(MockitoExtension.class)
 public class Spark3OnYarnRoleConfigProviderTest {
 
-    private final Spark3OnYarnRoleConfigProvider underTest = new Spark3OnYarnRoleConfigProvider();
+    @Spy
+    private HdfsConfigHelper hdfsConfigHelper;
+
+    @InjectMocks
+    private Spark3OnYarnRoleConfigProvider underTest;
 
     @Test
     public void testGetSpark3OnYarnRoleConfigs() {
@@ -57,10 +65,9 @@ public class Spark3OnYarnRoleConfigProviderTest {
 
     @Test
     public void testGetSparkOnYarnRoleConfigsForAwsWhenNoStorageConfigured() {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(CloudPlatform.AWS, "AWS", new String[0]);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(CloudPlatform.AWS, "AWS");
         String inputJson = getBlueprintText("input/clouderamanager-ds.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
-
 
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
         List<ApiClusterTemplateConfig> sparkOnYarnConfigs = roleConfigs.get("spark3_on_yarn-GATEWAY-BASE");
@@ -81,6 +88,22 @@ public class Spark3OnYarnRoleConfigProviderTest {
         assertEquals("spark3-conf/spark-defaults.conf_client_config_safety_valve", sparkOnYarnConfigs.get(0).getName());
         assertEquals("spark.kerberos.access.hadoopFileSystems=" + clientConfigDirLocation
                 + "\nspark.hadoop.fs.s3a.ssl.channel.mode=openssl", sparkOnYarnConfigs.get(0).getValue());
+    }
+
+    @Test
+    void testGetSpark3OnYarnRoleConfigsForNewerCm() {
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(CloudPlatform.AWS, "AWS", "s3a://bucket/hive/warehouse/external");
+        preparationObject.getProductDetailsView().getCm().setVersion("7.12.0.400");
+        String inputJson = getBlueprintText("input/clouderamanager-ds.bp");
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+
+        Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
+        List<ApiClusterTemplateConfig> sparkOnYarnConfigs = roleConfigs.get("spark3_on_yarn-GATEWAY-BASE");
+        assertEquals(2, sparkOnYarnConfigs.size());
+        assertEquals("spark_kerberos_access_hadoopfilesystems", sparkOnYarnConfigs.getFirst().getName());
+        assertEquals("s3a://bucket", sparkOnYarnConfigs.getFirst().getValue());
+        assertEquals("spark3-conf/spark-defaults.conf_client_config_safety_valve", sparkOnYarnConfigs.getLast().getName());
+        assertEquals("spark.hadoop.fs.s3a.ssl.channel.mode=openssl", sparkOnYarnConfigs.getLast().getValue());
     }
 
     @Test
@@ -114,12 +137,16 @@ public class Spark3OnYarnRoleConfigProviderTest {
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         cmTemplateProcessor.setCdhVersion("7.2.16");
 
+        ClouderaManagerRepo cm = new ClouderaManagerRepo();
+        cm.setVersion("7.11.2");
+
         return Builder.builder()
                 .withFileSystemConfigurationView(fileSystemConfigurationsView)
                 .withHostgroupViews(Set.of(master, worker))
                 .withBlueprintView(new BlueprintView(null, null, null, null, cmTemplateProcessor))
                 .withCloudPlatform(cloudPlatform)
                 .withPlatformVariant(platformVariant)
+                .withProductDetails(cm, List.of())
                 .build();
     }
 

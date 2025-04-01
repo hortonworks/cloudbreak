@@ -27,7 +27,7 @@ public class HbaseRestKnoxRoleConfigProvider extends AbstractRoleConfigProvider 
     private ExposedServiceCollector exposedServiceCollector;
 
     @Override
-    public List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+    public List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         return List.of(
                 config(CONFIG_SAFETY_VALVE,
                         ConfigUtils.getSafetyValveProperty(SUPPORT_PROXYUSER, "true")));

@@ -376,10 +376,11 @@ public class StackV4RequestToTemplatePreparationObjectConverter {
     private void decorateDatalakeView(StackV4Request source, TemplatePreparationObject.Builder builder) {
         DatalakeView datalakeView = null;
         if (StringUtils.isNotEmpty(source.getEnvironmentCrn()) && StackType.WORKLOAD.equals(source.getType())) {
-            Optional<SdxBasicView> datalake = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(source.getEnvironmentCrn());
-            if (datalake.isPresent()) {
-                boolean externalDatabaseForDL = RedbeamsDbServerConfigurer.isRemoteDatabaseRequested(datalake.get().dbServerCrn());
-                datalakeView = new DatalakeView(datalake.get().razEnabled(), datalake.get().crn(), externalDatabaseForDL);
+            Optional<SdxBasicView> datalakeOpt = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(source.getEnvironmentCrn());
+            if (datalakeOpt.isPresent()) {
+                SdxBasicView datalake = datalakeOpt.get();
+                boolean externalDatabaseForDL = RedbeamsDbServerConfigurer.isRemoteDatabaseRequested(datalake.dbServerCrn());
+                datalakeView = new DatalakeView(datalake.razEnabled(), datalake.crn(), externalDatabaseForDL);
             }
         }
         builder.withDataLakeView(datalakeView);

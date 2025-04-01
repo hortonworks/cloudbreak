@@ -54,6 +54,7 @@ import com.cloudera.api.swagger.model.ApiEntityTag;
 import com.cloudera.api.swagger.model.ApiProductVersion;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Enums;
+import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
@@ -63,18 +64,24 @@ import com.sequenceiq.cloudbreak.cloud.model.GatewayRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceCount;
 import com.sequenceiq.cloudbreak.cloud.model.ResizeRecommendation;
 import com.sequenceiq.cloudbreak.cluster.model.ClusterHostAttributes;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsConfigHelper;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsRoles;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hue.HueConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox.KnoxRoles;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnConstants;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnRoles;
 import com.sequenceiq.cloudbreak.cmtemplate.inifile.IniFile;
 import com.sequenceiq.cloudbreak.cmtemplate.inifile.IniFileFactory;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
+import com.sequenceiq.cloudbreak.template.TemplateEndpoint;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.TemplateRoleConfig;
+import com.sequenceiq.cloudbreak.template.TemplateServiceConfig;
 import com.sequenceiq.cloudbreak.template.model.ServiceAttributes;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
@@ -1105,5 +1112,66 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
                 .map(ApiClusterTemplateHostTemplate::getRoleConfigGroupsRefNames)
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
+    }
+
+    public List<String> getHostNamesInGroup(String group) {
+        return Optional.ofNullable(cmTemplate.getInstantiator())
+                .stream()
+                .map(ApiClusterTemplateInstantiator::getHosts)
+                .flatMap(Collection::stream)
+                .filter(host -> Objects.equals(host.getHostTemplateRefName(), group))
+                .map(ApiClusterTemplateHostInfo::getHostName)
+                .toList();
+    }
+
+    public List<String> getHostsWithComponent(String component) {
+        return getHostGroupsWithComponent(component).stream()
+                .flatMap(hostGroup -> getHostNamesInGroup(hostGroup).stream())
+                .toList();
+    }
+
+    public Set<TemplateEndpoint> calculateEndpoints() {
+        return getHostsWithComponent(HdfsRoles.NAMENODE).stream()
+                .map(nameNode -> String.format("hdfs://%s:%s", nameNode, HdfsConfigHelper.DEFAULT_NAMENODE_PORT))
+                .map(endpoint -> new TemplateEndpoint(HdfsRoles.HDFS, HdfsRoles.NAMENODE, endpoint))
+                .collect(toSet());
+    }
+
+    public Set<TemplateServiceConfig> calculateServiceConfigs() {
+        return Set.of();
+    }
+
+    public Set<TemplateRoleConfig> calculateRoleConfigs() {
+        Set<TemplateRoleConfig> roleConfigs = new HashSet<>();
+        List<String> nameNodes = getHostsWithComponent(HdfsRoles.NAMENODE);
+        if (nameNodes.size() > 1) {
+            TemplateRoleConfig nameServiceConfig = getTemplateRoleConfig(HdfsRoles.HDFS, HdfsRoles.NAMENODE, "dfs_federation_namenode_nameservice")
+                    .orElseThrow(() -> new CloudbreakServiceException("Failed to determine HDFS namenode nameservice"));
+            roleConfigs.add(nameServiceConfig);
+            String nameService = nameServiceConfig.value();
+            Set<String> nameNodeNames = new HashSet<>();
+            for (int i = 0; i < nameNodes.size(); i++) {
+                String nameNodeName = "namenode" + (i + 1);
+                nameNodeNames.add(nameNodeName);
+                String nameNodeNameReference = nameService + '.' + nameNodeName;
+                String nameNodeUrl = nameNodes.get(i);
+                roleConfigs.add(new TemplateRoleConfig(HdfsRoles.HDFS, HdfsRoles.NAMENODE,
+                        "dfs.namenode.rpc-address." + nameNodeNameReference, nameNodeUrl + ":" + HdfsConfigHelper.DEFAULT_NAMENODE_PORT));
+                roleConfigs.add(new TemplateRoleConfig(HdfsRoles.HDFS, HdfsRoles.NAMENODE,
+                        "dfs.namenode.servicerpc-address." + nameNodeNameReference, nameNodeUrl + ":8022"));
+                roleConfigs.add(new TemplateRoleConfig(HdfsRoles.HDFS, HdfsRoles.NAMENODE,
+                        "dfs.namenode.http-address." + nameNodeNameReference, nameNodeUrl + ":9870"));
+                roleConfigs.add(new TemplateRoleConfig(HdfsRoles.HDFS, HdfsRoles.NAMENODE,
+                        "dfs.namenode.https-address." + nameNodeNameReference, nameNodeUrl + ":9871"));
+            }
+            roleConfigs.add(new TemplateRoleConfig(HdfsRoles.HDFS, HdfsRoles.NAMENODE,
+                    "dfs.ha.namenodes." + nameService, Joiner.on(',').join(nameNodeNames)));
+        }
+        return roleConfigs;
+    }
+
+    private Optional<TemplateRoleConfig> getTemplateRoleConfig(String service, String role, String configKey) {
+        return getRoleConfig(service, role, configKey).map(ApiClusterTemplateConfig::getValue)
+            .map(configValue -> new TemplateRoleConfig(service, role, configKey, configValue));
     }
 }

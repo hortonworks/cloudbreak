@@ -18,11 +18,13 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -68,6 +70,9 @@ public class KnoxIdBrokerConfigProviderTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
+    @Mock
+    private CmTemplateProcessor cmTemplate;
+
     @InjectMocks
     private KnoxIdBrokerConfigProvider underTest;
 
@@ -87,7 +92,7 @@ public class KnoxIdBrokerConfigProviderTest {
         TemplatePreparationObject tpo = new Builder()
                 .build();
 
-        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs("DUMMY", tpo);
+        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs("DUMMY", cmTemplate, tpo);
 
         Map<String, String> configNameToValueMap = getConfigNameToValueMap(result);
         assertThat(configNameToValueMap).isEmpty();
@@ -101,7 +106,7 @@ public class KnoxIdBrokerConfigProviderTest {
                 .withCloudPlatform(CloudPlatform.AWS)
                 .build();
 
-        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, tpo);
+        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, cmTemplate, tpo);
 
         Map<String, String> configNameToValueMap = getConfigNameToValueMap(result);
         assertThat(configNameToValueMap).containsOnly(
@@ -119,7 +124,7 @@ public class KnoxIdBrokerConfigProviderTest {
                 .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS))
                 .build();
 
-        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, tpo);
+        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, cmTemplate, tpo);
 
         Map<String, String> configNameToValueMap = getConfigNameToValueMap(result);
         assertThat(configNameToValueMap).containsOnly(
@@ -138,7 +143,7 @@ public class KnoxIdBrokerConfigProviderTest {
                 .withProductDetails(generateCMRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0), null)
                 .build();
 
-        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, tpo);
+        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, cmTemplate, tpo);
 
         Map<String, String> configNameToValueMap = getConfigNameToValueMap(result);
         assertThat(configNameToValueMap).containsOnly(
@@ -156,7 +161,7 @@ public class KnoxIdBrokerConfigProviderTest {
                 .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS))
                 .build();
 
-        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, tpo);
+        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, cmTemplate, tpo);
 
         Map<String, String> configNameToValueMap = getConfigNameToValueMap(result);
         assertThat(configNameToValueMap).containsOnly(
@@ -174,7 +179,7 @@ public class KnoxIdBrokerConfigProviderTest {
                 .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS))
                 .build();
 
-        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, tpo);
+        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, cmTemplate, tpo);
 
         Map<String, String> configNameToValueMap = getConfigNameToValueMap(result);
         assertThat(configNameToValueMap).isEmpty();
@@ -195,7 +200,7 @@ public class KnoxIdBrokerConfigProviderTest {
         thrown.expect(IllegalStateException.class);
         thrown.expectMessage("Unknown file system type:");
 
-        underTest.getRoleConfigs(IDBROKER, tpo);
+        underTest.getRoleConfigs(IDBROKER, cmTemplate, tpo);
     }
 
     @Test
@@ -209,7 +214,7 @@ public class KnoxIdBrokerConfigProviderTest {
                 .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS))
                 .build();
 
-        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, tpo);
+        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, cmTemplate, tpo);
 
         Map<String, String> configNameToValueMap = getConfigNameToValueMap(result);
         assertThat(configNameToValueMap).containsOnly(
@@ -232,7 +237,7 @@ public class KnoxIdBrokerConfigProviderTest {
                 .withProductDetails(generateCMRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0), null)
                 .build();
 
-        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, tpo);
+        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, cmTemplate, tpo);
 
         Map<String, String> configNameToValueMap = getConfigNameToValueMap(result);
         assertThat(configNameToValueMap).containsOnly(
@@ -257,7 +262,7 @@ public class KnoxIdBrokerConfigProviderTest {
                 .withProductDetails(generateCMRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0), null)
                 .build();
 
-        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, tpo);
+        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, cmTemplate, tpo);
 
         Map<String, String> configNameToValueMap = getConfigNameToValueMap(result);
         assertThat(configNameToValueMap).containsOnly(
@@ -281,7 +286,7 @@ public class KnoxIdBrokerConfigProviderTest {
                 .withProductDetails(generateCMRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_6_3_0), null)
                 .build();
 
-        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, tpo);
+        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, cmTemplate, tpo);
 
         Map<String, String> configNameToValueMap = getConfigNameToValueMap(result);
         assertThat(configNameToValueMap).containsOnly(
@@ -304,7 +309,7 @@ public class KnoxIdBrokerConfigProviderTest {
                 .withProductDetails(generateCMRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0), null)
                 .build();
 
-        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, tpo);
+        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, cmTemplate, tpo);
 
         Map<String, String> configNameToValueMap = getConfigNameToValueMap(result);
         assertThat(configNameToValueMap).containsOnly(
@@ -327,7 +332,7 @@ public class KnoxIdBrokerConfigProviderTest {
                 .withProductDetails(generateCMRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0), null)
                 .build();
 
-        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, tpo);
+        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, cmTemplate, tpo);
 
         Map<String, String> configNameToValueMap = getConfigNameToValueMap(result);
         assertThat(configNameToValueMap).containsOnly(
@@ -350,7 +355,7 @@ public class KnoxIdBrokerConfigProviderTest {
                 .withProductDetails(generateCMRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0), null)
                 .build();
 
-        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, tpo);
+        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, cmTemplate, tpo);
 
         Map<String, String> configNameToValueMap = getConfigNameToValueMap(result);
         assertThat(configNameToValueMap).containsOnly(
@@ -372,7 +377,7 @@ public class KnoxIdBrokerConfigProviderTest {
                 .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS))
                 .build();
 
-        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, tpo);
+        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, cmTemplate, tpo);
 
         Map<String, String> configNameToValueMap = getConfigNameToValueMap(result);
         assertThat(configNameToValueMap).containsOnly(

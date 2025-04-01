@@ -61,6 +61,9 @@ public class RangerRoleConfigProviderTest {
     private static final String HBASE_ADMIN_GROUP = "hbase_test";
 
     @Mock
+    private CmTemplateProcessor cmTemplate;
+
+    @Mock
     private VirtualGroupService virtualGroupService;
 
     @InjectMocks
@@ -282,7 +285,7 @@ public class RangerRoleConfigProviderTest {
 
         when(virtualGroupService.createOrGetVirtualGroup(tpo.getVirtualGroupRequest(), RANGER_ADMIN)).thenReturn(ADMIN_GROUP);
 
-        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(RangerRoles.RANGER_ADMIN, tpo);
+        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(RangerRoles.RANGER_ADMIN, cmTemplate, tpo);
 
         Map<String, String> configNameToValueMap = getConfigNameToValueMap(result);
         assertThat(configNameToValueMap).containsOnly(

@@ -2,6 +2,9 @@ package com.sequenceiq.cloudbreak.template.views;
 
 import java.util.Objects;
 
+import com.sequenceiq.cloudbreak.sdx.RdcView;
+import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
+
 public class DatalakeView {
 
     private final boolean razEnabled;
@@ -10,10 +13,17 @@ public class DatalakeView {
 
     private final DatabaseType databaseType;
 
+    private final RdcView rdcView;
+
     public DatalakeView(boolean razEnabled, String crn, boolean externalDb) {
+        this(razEnabled, crn, externalDb, null);
+    }
+
+    public DatalakeView(boolean razEnabled, String crn, boolean externalDb, RdcView rdcView) {
         this.razEnabled = razEnabled;
         this.crn = crn;
         this.databaseType = externalDb ? DatabaseType.EXTERNAL_DATABASE : DatabaseType.EMBEDDED_DATABASE;
+        this.rdcView = rdcView;
     }
 
     @Override
@@ -38,11 +48,15 @@ public class DatalakeView {
         return razEnabled;
     }
 
-    public String getCrn() {
-        return crn;
+    public TargetPlatform getTargetPlatform() {
+        return TargetPlatform.getByCrn(crn);
     }
 
     public DatabaseType getDatabaseType() {
         return databaseType;
+    }
+
+    public RdcView getRdcView() {
+        return rdcView;
     }
 }

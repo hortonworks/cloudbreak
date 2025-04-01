@@ -328,6 +328,7 @@ class ClusterHostServiceRunnerTest {
         lenient().when(stackView.getName()).thenReturn(STACK_NAME);
         lenient().when(environmentConfigProvider.getParentEnvironmentCrn(any())).thenReturn(ENV_CRN);
         lenient().when(cluster.getExtendedBlueprintText()).thenReturn(EXTENDED_BLUEPRINT_TEXT);
+        lenient().when(blueprint.getBlueprintJsonText()).thenReturn(EXTENDED_BLUEPRINT_TEXT);
         lenient().when(environmentConfigProvider.getEnvironmentByCrn(ENV_CRN)).thenReturn(environmentResponse);
         lenient().when(stack.getStack().getResourceCrn()).thenReturn(TEST_CLUSTER_CRN);
     }

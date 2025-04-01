@@ -73,7 +73,7 @@ public class RangerRmsDatalakeConfigProvider extends AbstractRoleConfigProvider 
     }
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         List<ApiClusterTemplateConfig> configs = new ArrayList<>();
         configs.add(config(HMS_MAP_MANAGED_TABLES, Boolean.TRUE.toString()));
         configs.add(config(HMS_SOURCE_SERVICE_NAME, HMS_SOURCE_SERVICE_NAME_VALUE));

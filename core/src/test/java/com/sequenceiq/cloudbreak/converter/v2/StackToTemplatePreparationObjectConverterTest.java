@@ -71,10 +71,12 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.IdBroker;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.LdapView;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
+import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
@@ -94,6 +96,7 @@ import com.sequenceiq.cloudbreak.service.identitymapping.AzureMockAccountMapping
 import com.sequenceiq.cloudbreak.service.identitymapping.GcpMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerFqdnUtil;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -106,8 +109,8 @@ import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.CustomConfigurationsView;
 import com.sequenceiq.cloudbreak.template.views.DatabaseType;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
-import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.util.TestConstants;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.backup.response.BackupResponse;
@@ -239,7 +242,7 @@ public class StackToTemplatePreparationObjectConverterTest {
     private ServiceEndpointCollector serviceEndpointCollector;
 
     @Mock
-    private StackUtil stackUtil;
+    private StackDtoService stackDtoService;
 
     @Mock
     private CustomConfigurations customConfigurations;
@@ -588,15 +591,19 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(stackMock.getStack()).thenReturn(stackMock);
         SdxBasicView mockSdx = mock(SdxBasicView.class);
         when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(anyString())).thenReturn(Optional.of(mockSdx));
-        when(mockSdx.crn()).thenReturn("sdxcrn");
+        when(mockSdx.crn()).thenReturn("crn:cdp:sdxsvc:us-west-1:cloudera:instance:f22e7f31-a98d-424d-917a-a62a36cb3c9e");
         when(mockSdx.dbServerCrn()).thenReturn(DB_SERVER_CRN);
         when(mockSdx.razEnabled()).thenReturn(false);
+        StackDto datalakeStack = mock();
+        ClusterView cluster = mock();
+        when(datalakeStack.getCluster()).thenReturn(cluster);
+        when(stackDtoService.getByCrn(any())).thenReturn(datalakeStack);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertThat(result.getCustomConfigurationsView()).isPresent();
         assertThat(result.getCustomConfigurationsView()).isEqualTo(Optional.of(expected));
-        assertEquals(result.getDatalakeView().get().getCrn(), "sdxcrn");
+        assertEquals(result.getDatalakeView().get().getTargetPlatform(), TargetPlatform.CDL);
         assertEquals(result.getDatalakeView().get().isRazEnabled(), false);
         assertEquals(result.getDatalakeView().get().getDatabaseType(), DatabaseType.EXTERNAL_DATABASE);
         verify(customConfigurationsViewProvider, times(1)).getCustomConfigurationsView(customConfigurations);

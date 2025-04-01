@@ -50,7 +50,7 @@ public class RangerUserSyncRoleConfigProvider extends AbstractRoleConfigProvider
     private EntitlementService entitlementService;
 
     @Override
-    public List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+    public List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         String adminGroup = virtualGroupService.createOrGetVirtualGroup(source.getVirtualGroupRequest(), UmsVirtualGroupRight.RANGER_ADMIN);
         String rangerAdminAsSysAdminConfigProvider = rangerAdminAsSysAdminConfigProvider(source);
         List<ApiClusterTemplateConfig> configs = new ArrayList<>(

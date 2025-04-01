@@ -69,7 +69,7 @@ public class DasConfigProvider extends AbstractRdsRoleConfigProvider {
     }
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         switch (roleType) {
             case DasRoles.WEBAPP:
                 return List.of(config("data_analytics_studio_user_authentication", "KNOX_PROXY"));

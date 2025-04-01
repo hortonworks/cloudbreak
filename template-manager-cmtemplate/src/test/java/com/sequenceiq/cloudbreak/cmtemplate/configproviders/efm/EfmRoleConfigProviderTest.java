@@ -43,7 +43,7 @@ public class EfmRoleConfigProviderTest {
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(cmTemplateProcessor);
 
-        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(EfmRoles.EFM_SERVER, preparationObject);
+        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(EfmRoles.EFM_SERVER, cmTemplateProcessor, preparationObject);
 
         assertThat(roleConfigs).hasSameElementsAs(
             List.of(config("efm.db.url", CONNECTION_URL),

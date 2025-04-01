@@ -32,7 +32,7 @@ public class KafkaMultiAzConfigProvider extends AbstractRoleConfigProvider {
     }
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         ArrayList<ApiClusterTemplateConfig> configs = Lists.newArrayList();
         String cdhVersion = getCdhVersion(source);
         if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_2_14)) {

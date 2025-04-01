@@ -17,7 +17,8 @@ public class ProfilerSchedulerCloudStorageRoleConfigProvider extends AbstractRol
     private static final String FILE_SYSTEM_URI = "file_system_uri";
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject templatePreparationObject) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor,
+            TemplatePreparationObject templatePreparationObject) {
         switch (roleType) {
             case ProfilerSchedulerRoles.PROFILER_SCHEDULER_AGENT:
                 return ConfigUtils.getStorageLocationForServiceProperty(templatePreparationObject, FILE_SYSTEM_URI)

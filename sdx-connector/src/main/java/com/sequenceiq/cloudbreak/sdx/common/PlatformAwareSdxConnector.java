@@ -21,6 +21,8 @@ import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.sdx.RdcConstants;
+import com.sequenceiq.cloudbreak.sdx.RdcView;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxAccessView;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
@@ -30,12 +32,16 @@ import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDescribeServ
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDhTearDownService;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxStartStopService;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxStatusService;
+import com.sequenceiq.cloudbreak.sdx.common.service.RdcViewFactory;
 import com.sequenceiq.cloudbreak.sdx.common.status.StatusCheckResult;
 
 @Service
 public class PlatformAwareSdxConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PlatformAwareSdxConnector.class);
+
+    @Inject
+    private RdcViewFactory datalakeContextViewFactory;
 
     @Inject
     private Map<TargetPlatform, PlatformAwareSdxStatusService<?>> platformDependentSdxStatusServicesMap;
@@ -52,17 +58,22 @@ public class PlatformAwareSdxConnector {
     @Inject
     private Map<TargetPlatform, PlatformAwareSdxDhTearDownService> platformDependentSdxDhTearDownServices;
 
+    @Deprecated
     public Optional<String> getRemoteDataContext(String sdxCrn) {
         LOGGER.info("Getting remote data context for SDX {}", sdxCrn);
-        return platformDependentSdxDescribeServices.get(TargetPlatform.getByCrn(sdxCrn)).getRemoteDataContext(sdxCrn);
+        return getRdcView(sdxCrn).getRemoteDataContext();
     }
 
+    @Deprecated
     public Map<String, String> getHmsServiceConfig(String sdxCrn) {
-        return platformDependentSdxDescribeServices.get(TargetPlatform.getByCrn(sdxCrn)).getHmsServiceConfig(sdxCrn);
+        return getRdcView(sdxCrn).getServiceConfigs(RdcConstants.HIVE_SERVICE);
     }
 
-    public Map<String, String> getHmsServiceConfig(String sdxCrn, Optional<String> rdc) {
-        return platformDependentSdxDescribeServices.get(TargetPlatform.getByCrn(sdxCrn)).getHmsServiceConfig(rdc);
+    public RdcView getRdcView(String sdxCrn) {
+        PlatformAwareSdxDescribeService sdxDescribeService = platformDependentSdxDescribeServices.get(TargetPlatform.getByCrn(sdxCrn));
+        Optional<String> remoteDataContext = sdxDescribeService.getRemoteDataContext(sdxCrn);
+        RdcView rdcView = datalakeContextViewFactory.create(sdxCrn, remoteDataContext);
+        return sdxDescribeService.extendRdcView(rdcView);
     }
 
     public void tearDownDatahub(String sdxCrn, String datahubCrn) {

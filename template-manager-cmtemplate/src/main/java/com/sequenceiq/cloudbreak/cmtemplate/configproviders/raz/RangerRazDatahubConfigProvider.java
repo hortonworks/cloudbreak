@@ -33,8 +33,7 @@ public class RangerRazDatahubConfigProvider extends RangerRazBaseConfigProvider 
                         source.getProductDetailsView().getCm().getVersion(), source.getCloudPlatform(), source.getStackType())
                 && source.getDatalakeView().isPresent()
                 && source.getDatalakeView().get().isRazEnabled()
-                && TargetPlatform.PAAS.equals(TargetPlatform.getByCrn(source.getDatalakeView().get().getCrn()));
-
+                && TargetPlatform.PAAS.equals(source.getDatalakeView().get().getTargetPlatform());
     }
 
     @Override

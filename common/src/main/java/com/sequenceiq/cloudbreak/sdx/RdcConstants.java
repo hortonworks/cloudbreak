@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.sdx;
 
 public class RdcConstants {
 
+    public static final String HIVE_SERVICE = "HIVE";
+
     private RdcConstants() {
 
     }

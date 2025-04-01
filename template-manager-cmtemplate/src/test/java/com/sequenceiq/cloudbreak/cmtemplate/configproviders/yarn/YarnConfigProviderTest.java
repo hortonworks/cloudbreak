@@ -46,7 +46,7 @@ public class YarnConfigProviderTest {
 
     @Test
     public void testGetRoleConfigsForGatewayRole() {
-        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(YarnRoles.GATEWAY, null);
+        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(YarnRoles.GATEWAY, cmTemplateProcessor, null);
         assertEquals(1, roleConfigs.size());
         assertEquals("mapreduce_client_env_safety_valve", roleConfigs.get(0).getName());
         assertEquals("HADOOP_OPTS=\"-Dorg.wildfly.openssl.path=/usr/lib64 ${HADOOP_OPTS}\"", roleConfigs.get(0).getValue());
@@ -54,7 +54,7 @@ public class YarnConfigProviderTest {
 
     @Test
     public void testGetRoleConfigsForNonGatewayRole() {
-        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(YarnRoles.JOBHISTORY, null);
+        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(YarnRoles.JOBHISTORY, cmTemplateProcessor, null);
         assertEquals(0, roleConfigs.size());
     }
 

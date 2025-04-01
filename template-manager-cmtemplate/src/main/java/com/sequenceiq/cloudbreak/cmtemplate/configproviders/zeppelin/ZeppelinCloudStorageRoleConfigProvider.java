@@ -19,7 +19,8 @@ public class ZeppelinCloudStorageRoleConfigProvider extends AbstractRoleConfigPr
     private static final String ZEPPELIN_NOTEBOOK_DIR = "zeppelin.notebook.dir";
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject templatePreparationObject) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor,
+            TemplatePreparationObject templatePreparationObject) {
         switch (roleType) {
 
             case ZEPPELIN_SERVER:

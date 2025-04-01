@@ -23,7 +23,7 @@ public class TezRoleConfigProvider extends AbstractRoleConfigProvider {
     private static final String TEZ_LOGGING_PROTO_BASE_DIR_SUFFIX = "/sys.db";
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         switch (roleType) {
             case TezRoles.GATEWAY:
                 return ConfigUtils.getStorageLocationForServiceProperty(source, HMS_METASTORE_EXTERNAL_DIR)

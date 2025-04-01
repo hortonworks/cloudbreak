@@ -88,7 +88,7 @@ public class RangerRoleConfigProvider extends AbstractRdsRoleConfigProvider {
     }
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         switch (roleType) {
             case RangerRoles.RANGER_ADMIN:
                 String cmVersion = getCmVersion(source);

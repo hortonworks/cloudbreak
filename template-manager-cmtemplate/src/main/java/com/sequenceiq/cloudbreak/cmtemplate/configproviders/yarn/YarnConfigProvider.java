@@ -40,7 +40,7 @@ public class YarnConfigProvider extends AbstractRoleConfigProvider {
     }
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         switch (roleType) {
             case YarnRoles.GATEWAY:
                 return List.of(config(MAPREDUCE_CLIENT_ENV_SAFETY_VALVE, HADOOP_OPTS));

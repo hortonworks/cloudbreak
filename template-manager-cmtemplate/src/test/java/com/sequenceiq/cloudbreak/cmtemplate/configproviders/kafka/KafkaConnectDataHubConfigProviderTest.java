@@ -41,7 +41,7 @@ public class KafkaConnectDataHubConfigProviderTest {
         cdpMainVersionIs(cdhVersion);
         HostgroupView hostGroup = new HostgroupView("test");
         assertEquals(expectedConfigWithConnectAndCdhAtLeast7214(),
-                provider.getRoleConfigs(roleType, getTemplatePreparationObject(hostGroup)));
+                provider.getRoleConfigs(roleType, processor, getTemplatePreparationObject(hostGroup)));
     }
 
     @ParameterizedTest
@@ -50,7 +50,7 @@ public class KafkaConnectDataHubConfigProviderTest {
         cdpMainVersionIs(cdhVersion);
         HostgroupView hostGroup = new HostgroupView("test");
         assertEquals(List.of(),
-                provider.getRoleConfigs(roleType, getTemplatePreparationObject(hostGroup)));
+                provider.getRoleConfigs(roleType, processor, getTemplatePreparationObject(hostGroup)));
     }
 
     @ParameterizedTest

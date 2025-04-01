@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.sdx.pdl.service;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -100,8 +99,4 @@ public class PdlSdxDescribeService extends AbstractPdlSdxService implements Plat
         return listSdxCrns(environmentCrn);
     }
 
-    @Override
-    public Map<String, String> getHmsServiceConfig(Optional<String> remoteDataContext) {
-        return Map.of();
-    }
 }

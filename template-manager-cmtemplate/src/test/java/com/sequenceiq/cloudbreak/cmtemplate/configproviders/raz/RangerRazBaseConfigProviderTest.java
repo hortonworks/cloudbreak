@@ -12,11 +12,13 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
@@ -29,6 +31,9 @@ import com.sequenceiq.cloudbreak.template.views.DatalakeView;
 public class RangerRazBaseConfigProviderTest {
 
     private static final String DATALAKE_CRN = "crn:cdp:datalake:us-west-1:default:datalake:e438a2db-d650-4132-ae62-242c5ba2f784";
+
+    @Mock
+    private CmTemplateProcessor cmTemplate;
 
     @InjectMocks
     private TestRangerRazBaseConfigProvider underTest;
@@ -49,7 +54,7 @@ public class RangerRazBaseConfigProviderTest {
                 .withDataLakeView(new DatalakeView(false, DATALAKE_CRN, false))
                 .withAccountMappingView(getAccountMappingView())
                 .build();
-        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", preparationObject);
+        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", cmTemplate, preparationObject);
 
         assertEquals(1, roleConfigs.size());
         assertEquals("ranger-raz-conf/ranger-raz-site.xml_role_safety_valve", roleConfigs.get(0).getName());
@@ -72,7 +77,7 @@ public class RangerRazBaseConfigProviderTest {
                 .withDataLakeView(new DatalakeView(false, DATALAKE_CRN, false))
                 .withAccountMappingView(getAccountMappingView())
                 .build();
-        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", preparationObject);
+        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", cmTemplate, preparationObject);
 
         assertEquals(1, roleConfigs.size());
         assertEquals("ranger-raz-conf/ranger-raz-site.xml_role_safety_valve", roleConfigs.get(0).getName());
@@ -95,7 +100,7 @@ public class RangerRazBaseConfigProviderTest {
                 .withDataLakeView(new DatalakeView(false, DATALAKE_CRN, false))
                 .withAccountMappingView(getAccountMappingView())
                 .build();
-        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", preparationObject);
+        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", cmTemplate, preparationObject);
 
         assertEquals(1, roleConfigs.size());
         assertEquals("ranger-raz-conf/ranger-raz-site.xml_role_safety_valve", roleConfigs.get(0).getName());
@@ -119,7 +124,7 @@ public class RangerRazBaseConfigProviderTest {
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
                 .withDataLakeView(new DatalakeView(false, DATALAKE_CRN, false))
                 .build();
-        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", preparationObject);
+        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", cmTemplate, preparationObject);
 
         assertEquals(1, roleConfigs.size());
         assertEquals("ranger-raz-conf/ranger-raz-site.xml_role_safety_valve", roleConfigs.get(0).getName());
@@ -142,7 +147,7 @@ public class RangerRazBaseConfigProviderTest {
                 .withDataLakeView(new DatalakeView(false, DATALAKE_CRN, false))
                 .withAccountMappingView(getAccountMappingView())
                 .build();
-        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", preparationObject);
+        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", cmTemplate, preparationObject);
 
         assertEquals(0, roleConfigs.size());
     }
@@ -163,7 +168,7 @@ public class RangerRazBaseConfigProviderTest {
                 .withDataLakeView(new DatalakeView(false, DATALAKE_CRN, false))
                 .withAccountMappingView(getAccountMappingView())
                 .build();
-        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", preparationObject);
+        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", cmTemplate, preparationObject);
 
         assertEquals(0, roleConfigs.size());
     }
@@ -184,7 +189,7 @@ public class RangerRazBaseConfigProviderTest {
                 .withDataLakeView(new DatalakeView(false, DATALAKE_CRN, false))
                 .withAccountMappingView(getAccountMappingView())
                 .build();
-        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", preparationObject);
+        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", cmTemplate, preparationObject);
 
         assertEquals(0, roleConfigs.size());
     }
@@ -205,7 +210,7 @@ public class RangerRazBaseConfigProviderTest {
                 .withDataLakeView(new DatalakeView(false, DATALAKE_CRN, false))
                 .withAccountMappingView(getAccountMappingView())
                 .build();
-        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", preparationObject);
+        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", cmTemplate, preparationObject);
 
         assertEquals(0, roleConfigs.size());
     }
@@ -226,7 +231,7 @@ public class RangerRazBaseConfigProviderTest {
                 .withDataLakeView(new DatalakeView(false, DATALAKE_CRN, false))
                 .withAccountMappingView(getAccountMappingView())
                 .build();
-        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", preparationObject);
+        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", cmTemplate, preparationObject);
 
         assertEquals(0, roleConfigs.size());
     }

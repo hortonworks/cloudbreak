@@ -14,6 +14,9 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
@@ -27,6 +30,7 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.filesystem.TemplateCoreTestUtil;
 
+@ExtendWith(MockitoExtension.class)
 public class DasConfigProviderTest {
 
     private static final String HIVE_DAS = "HIVE_DAS";
@@ -44,6 +48,9 @@ public class DasConfigProviderTest {
     private static final String PASSWORD = "password";
 
     private DasConfigProvider underTest;
+
+    @Mock
+    private CmTemplateProcessor mockTemplateProcessor;
 
     @BeforeEach
     public void setUp() {
@@ -183,13 +190,13 @@ public class DasConfigProviderTest {
     public void getRoleConfigs() {
         TemplatePreparationObject tpo = new Builder().build();
 
-        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(DasRoles.WEBAPP, tpo);
+        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(DasRoles.WEBAPP, mockTemplateProcessor, tpo);
 
         Map<String, String> configToValue = ConfigTestUtil.getConfigNameToValueMap(result);
         assertThat(configToValue).containsOnly(
                 entry("data_analytics_studio_user_authentication", "KNOX_PROXY"));
 
-        result = underTest.getRoleConfigs(DasRoles.EVENTPROCESSOR, tpo);
+        result = underTest.getRoleConfigs(DasRoles.EVENTPROCESSOR, mockTemplateProcessor, tpo);
 
         assertThat(result.isEmpty()).isTrue();
     }
@@ -207,7 +214,6 @@ public class DasConfigProviderTest {
     @Test
     @SuppressWarnings("unchecked")
     public void isConfigurationNeededTrue() {
-        CmTemplateProcessor mockTemplateProcessor = mock(CmTemplateProcessor.class);
         when(mockTemplateProcessor.isRoleTypePresentInService(anyString(), any(List.class))).thenReturn(true);
 
         RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
@@ -230,7 +236,6 @@ public class DasConfigProviderTest {
     @Test
     @SuppressWarnings("unchecked")
     public void isConfigurationNeededFalseWhenNoDasOnCluster() {
-        CmTemplateProcessor mockTemplateProcessor = mock(CmTemplateProcessor.class);
         when(mockTemplateProcessor.isRoleTypePresentInService(anyString(), any(List.class))).thenReturn(false);
 
         RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
@@ -253,9 +258,6 @@ public class DasConfigProviderTest {
     @Test
     @SuppressWarnings("unchecked")
     public void isConfigurationNeededFalseWhenNoDBRegistered() {
-        CmTemplateProcessor mockTemplateProcessor = mock(CmTemplateProcessor.class);
-        when(mockTemplateProcessor.isRoleTypePresentInService(anyString(), any(List.class))).thenReturn(true);
-
         TemplatePreparationObject tpo = new Builder().build();
 
         boolean result = underTest.isConfigurationNeeded(mockTemplateProcessor, tpo);

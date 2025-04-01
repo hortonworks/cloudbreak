@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 public class KafkaKraftConfigProvider extends AbstractRoleConfigProvider {
 
     @Override
-    public List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+    public List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         ArrayList<ApiClusterTemplateConfig> configs = Lists.newArrayList();
         String cdhVersion = getCdhVersion(source);
 

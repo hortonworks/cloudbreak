@@ -8,6 +8,7 @@
         - salt://cloudera/scripts/createuserhome.sh
     - context:
         ldap: {{ salt['pillar.get']('ldap') }}
+        hiveWithRemoteHiveMetastore: {{ salt['pillar.get']('cluster:hiveWithRemoteHiveMetastore', False) }}
     - makedirs: True
     - mode: 755
 

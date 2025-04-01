@@ -3,11 +3,9 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.getSafetyValveProperty;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.HADOOP_RPC_PROTECTION;
-import static java.util.stream.Collectors.toSet;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
@@ -19,14 +17,9 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 @Component
 public class HdfsRoleConfigProvider extends AbstractRoleConfigProvider {
-
-    public static final String DEFAULT_NAME_SERVICE = "ns1";
-
-    public static final String HDFS_CLIENT_CONFIG_SAFETY_VALVE = "hdfs_client_config_safety_valve";
 
     private static final String FAILED_VOLUMES_TOLERATED = "dfs_datanode_failed_volumes_tolerated";
 
@@ -48,30 +41,15 @@ public class HdfsRoleConfigProvider extends AbstractRoleConfigProvider {
 
     private final EntitlementService entitlementService;
 
-    public HdfsRoleConfigProvider(EntitlementService entitlementService) {
+    private final HdfsConfigHelper hdfsConfigHelper;
+
+    public HdfsRoleConfigProvider(EntitlementService entitlementService, HdfsConfigHelper hdfsConfigHelper) {
         this.entitlementService = entitlementService;
-    }
-
-    public static boolean isNamenodeHA(TemplatePreparationObject source) {
-        return source.getHostGroupsWithComponent(HdfsRoles.NAMENODE)
-                .mapToInt(HostgroupView::getNodeCount)
-                .sum() > 1;
-    }
-
-    public static Set<String> nameNodeFQDNs(TemplatePreparationObject source) {
-        return source.getHostGroupsWithComponent(HdfsRoles.NAMENODE)
-                .flatMap(hostGroup -> hostGroup.getHosts().stream())
-                .collect(toSet());
-    }
-
-    public static boolean isDataNodeHA(TemplatePreparationObject source) {
-        return source.getHostGroupsWithComponent(HdfsRoles.DATANODE)
-                .mapToInt(HostgroupView::getNodeCount)
-                .sum() > 1;
+        this.hdfsConfigHelper = hdfsConfigHelper;
     }
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         switch (roleType) {
             case HdfsRoles.DATANODE:
                 List<ApiClusterTemplateConfig> configs = new ArrayList<>();
@@ -83,7 +61,7 @@ public class HdfsRoleConfigProvider extends AbstractRoleConfigProvider {
                             config(DFS_ENCRYPT_DATA_TRANSFER, "true")
                     );
                 }
-                if (StackType.DATALAKE.equals(source.getStackType()) && isDataNodeHA(source)) {
+                if (StackType.DATALAKE.equals(source.getStackType()) && hdfsConfigHelper.isDataNodeHA(source)) {
                     StringBuilder safetyValveValue = new StringBuilder();
                     safetyValveValue.append(getSafetyValveProperty(CONNECT_MAX_RETRIES_ON_TIMEOUTS, MAX_RETRIES));
                     safetyValveValue.append(getSafetyValveProperty(CLIENT_CONNECT_TIMEOUT, CONNECTION_TIMEOUT));
@@ -91,22 +69,22 @@ public class HdfsRoleConfigProvider extends AbstractRoleConfigProvider {
                 }
                 return configs;
             case HdfsRoles.NAMENODE:
-                if (isNamenodeHA(source)) {
+                if (hdfsConfigHelper.isNamenodeHA(source)) {
+                    String nameService = hdfsConfigHelper.getNameService(templateProcessor, source);
                     return List.of(
                             config("autofailover_enabled", "true"),
-                            config("dfs_federation_namenode_nameservice", DEFAULT_NAME_SERVICE),
-                            config("dfs_namenode_quorum_journal_name", DEFAULT_NAME_SERVICE)
+                            config("dfs_federation_namenode_nameservice", nameService),
+                            config("dfs_namenode_quorum_journal_name", nameService)
                     );
                 }
                 return List.of();
             case HdfsRoles.GATEWAY:
-                if (isNamenodeHA(source) && StackType.DATALAKE.equals(source.getStackType())) {
-                    //CHECKSTYLE:OFF
+                if (hdfsConfigHelper.isNamenodeHA(source) && StackType.DATALAKE.equals(source.getStackType())) {
                     return List.of(config(
-                            HDFS_CLIENT_CONFIG_SAFETY_VALVE,
-                            "<property><name>dfs.client.block.write.replace-datanode-on-failure.policy</name><value>NEVER</value></property><property><name>dfs.client.block.write.replace-datanode-on-failure.enable</name><value>false</value></property>")
-                    );
-                    //CHECKSTYLE:ON
+                            HdfsConfigHelper.HDFS_CLIENT_CONFIG_SAFETY_VALVE,
+                            getSafetyValveProperty("dfs.client.block.write.replace-datanode-on-failure.policy", "NEVER")
+                                    + getSafetyValveProperty("dfs.client.block.write.replace-datanode-on-failure.enable", "false")
+                    ));
                 }
                 return List.of();
             default:
