@@ -80,8 +80,8 @@ public interface ClusterApi {
         clusterModificationService().startClusterManagerAndAgents();
     }
 
-    default void startClusterServices() throws CloudbreakException {
-        clusterModificationService().deployConfigAndStartClusterServices();
+    default void restartClusterServices(boolean rollingRestart) throws CloudbreakException {
+        clusterModificationService().deployConfigAndRestartClusterServices(rollingRestart);
     }
 
     default Set<ParcelInfo> gatherInstalledParcels(String stackName) {

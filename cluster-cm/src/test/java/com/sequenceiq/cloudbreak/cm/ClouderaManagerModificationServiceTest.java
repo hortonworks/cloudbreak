@@ -1230,12 +1230,12 @@ class ClouderaManagerModificationServiceTest {
     }
 
     @Test
-    public void testDeployConfigAndStartClusterServices() throws Exception {
+    public void testDeployConfigAndRestartClusterServices() throws Exception {
         // GIVEN
         when(clustersResourceApi.deployClientConfig(stack.getName())).thenReturn(new ApiCommand().id(new BigDecimal(100)));
         when(clouderaManagerApiFactory.getClustersResourceApi(eq(v31Client))).thenReturn(clustersResourceApi);
         // WHEN
-        underTest.deployConfigAndStartClusterServices();
+        underTest.deployConfigAndRestartClusterServices(false);
         // THEN
         verify(configService, times(1)).modifyKnoxAutoRestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, v31Client, stack.getName(), true);
     }
