@@ -201,6 +201,9 @@ public class Environment implements AuthResource, AccountAwareResource {
     @Column(name = "environmentType")
     private EnvironmentType environmentType;
 
+    @Column(name = "remoteenvironmentcrn")
+    private String remoteEnvironmentCrn;
+
     @Embedded
     private DefaultComputeCluster defaultComputeCluster;
 
@@ -677,6 +680,14 @@ public class Environment implements AuthResource, AccountAwareResource {
         this.environmentType = environmentType;
     }
 
+    public String getRemoteEnvironmentCrn() {
+        return remoteEnvironmentCrn;
+    }
+
+    public void setRemoteEnvironmentCrn(String remoteEnvironmentCrn) {
+        this.remoteEnvironmentCrn = remoteEnvironmentCrn;
+    }
+
     @Override
     public String toString() {
         return "Environment{" +
@@ -694,6 +705,7 @@ public class Environment implements AuthResource, AccountAwareResource {
                 ", enableSecretEncryption=" + enableSecretEncryption +
                 ", seLinux=" + seLinux +
                 ", environmentType=" + environmentType +
+                ", remoteEnvironmentCrn=" + remoteEnvironmentCrn +
                 '}';
     }
 

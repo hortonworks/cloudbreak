@@ -197,6 +197,8 @@ public class EnvironmentModelDescription {
     public static final String FREEIPA_LOADBALANCER = "FreeIpa load balancer type to be created. " +
             "Possible values: NONE, INTERNAL_NLB. Default is INTERNAL_NLB.";
 
+    public static final String REMOTE_ENV_CRN = "CRN of remote Environment for hybrid environment";
+
     private EnvironmentModelDescription() {
     }
 }

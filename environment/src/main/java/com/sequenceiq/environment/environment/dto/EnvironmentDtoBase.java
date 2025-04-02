@@ -102,6 +102,8 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
 
     private EnvironmentType environmentType;
 
+    private String remoteEnvironmentCrn;
+
     @Override
     public Long getResourceId() {
         return id;
@@ -448,6 +450,14 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
         this.environmentType = environmentType;
     }
 
+    public String getRemoteEnvironmentCrn() {
+        return remoteEnvironmentCrn;
+    }
+
+    public void setRemoteEnvironmentCrn(String remoteEnvironmentCrn) {
+        this.remoteEnvironmentCrn = remoteEnvironmentCrn;
+    }
+
     public EnvironmentTelemetryDetails getTelemetryDetails() {
         return telemetry == null ? null : EnvironmentTelemetryDetails.builder()
                 .withStorageLocationBase(Optional.of(telemetry.getLogging()).map(EnvironmentLogging::getStorageLocation).orElse(null))
@@ -467,6 +477,7 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
                 ", domain='" + domain + '\'' +
                 ", enableSecretEncryption=" + enableSecretEncryption +
                 ", environmentType=" + environmentType +
+                ", remoteEnvironmentCrn=" + remoteEnvironmentCrn +
                 '}';
     }
 
@@ -547,6 +558,8 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
         private boolean enableComputeCluster;
 
         private EnvironmentType environmentType;
+
+        private String remoteEnvironmentCrn;
 
         protected EnvironmentDtoBaseBuilder() {
         }
@@ -736,6 +749,11 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
             return (B) this;
         }
 
+        public B withRemoteEnvironmentCrn(String remoteEnvironmentCrn) {
+            this.remoteEnvironmentCrn = remoteEnvironmentCrn;
+            return (B) this;
+        }
+
         protected void build(T environmentDto) {
             environmentDto.setId(id);
             environmentDto.setLocation(locationDto);
@@ -773,6 +791,7 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
             environmentDto.setCreatorClient(creatorClient);
             environmentDto.setEnableComputeCluster(enableComputeCluster);
             environmentDto.setEnvironmentType(environmentType);
+            environmentDto.setRemoteEnvironmentCrn(remoteEnvironmentCrn);
         }
 
         public abstract T build();

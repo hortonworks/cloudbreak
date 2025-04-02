@@ -39,6 +39,7 @@ class DetailedEnvironmentResponseTest {
         GcpEnvironmentParameters gcp = new GcpEnvironmentParameters();
         DataServicesResponse dataServices = new DataServicesResponse();
         String environmentType = EnvironmentType.HYBRID.toString();
+        String remoteEnvironmentCrn = "remoteEnvironmentCrn";
 
         DetailedEnvironmentResponse response = DetailedEnvironmentResponse.builder()
                 .withCrn("crn")
@@ -81,6 +82,7 @@ class DetailedEnvironmentResponseTest {
                 .withEnableSecretEncryption(true)
                 .withEnableComputeCluster(true)
                 .withEnvironmentType(environmentType)
+                .withRemoteEnvironmentCrn(remoteEnvironmentCrn)
                 .build();
 
         assertThat(response).isNotNull();
@@ -124,6 +126,8 @@ class DetailedEnvironmentResponseTest {
         assertThat(response.isEnableSecretEncryption()).isTrue();
         assertThat(response.isEnableComputeCluster()).isTrue();
         assertThat(response.getEnvironmentType()).isEqualTo(environmentType);
+        assertThat(response.getRemoteEnvironmentCrn()).isEqualTo(remoteEnvironmentCrn);
+
     }
 
 }

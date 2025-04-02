@@ -95,7 +95,8 @@ public class EnvironmentDtoConverter {
                 .withEnvironmentDomain(environmentView.getDomain())
                 .withEnableSecretEncryption(environmentView.isEnableSecretEncryption())
                 .withEnableComputeCluster(isComputeClusterEnabled(environmentView.getDefaultComputeCluster()))
-                .withEnvironmentType(environmentView.getEnvironmentType());
+                .withEnvironmentType(environmentView.getEnvironmentType())
+                .withRemoteEnvironmentCrn(environmentView.getRemoteEnvironmentCrn());
 
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environmentView.getCloudPlatform());
         doIfNotNull(environmentView.getParameters(), parameters -> builder.withParameters(
@@ -144,7 +145,8 @@ public class EnvironmentDtoConverter {
                 .withEnableSecretEncryption(environment.isEnableSecretEncryption())
                 .withCreatorClient(environment.getCreatorClient())
                 .withEnableComputeCluster(isComputeClusterEnabled(environment.getDefaultComputeCluster()))
-                .withEnvironmentType(environment.getEnvironmentType());
+                .withEnvironmentType(environment.getEnvironmentType())
+                .withRemoteEnvironmentCrn(environment.getRemoteEnvironmentCrn());
 
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
         builder.withCredentialDetails(credentialDetailsConverter.credentialToCredentialDetails(cloudPlatform, environment.getCredential()));

@@ -170,6 +170,9 @@ public class EnvironmentView extends CompactView implements AuthResource {
     @Column(name = "environmentType")
     private EnvironmentType environmentType;
 
+    @Column(name = "remoteenvironmentcrn")
+    private String remoteEnvironmentCrn;
+
     @Embedded
     private DefaultComputeCluster defaultComputeCluster;
 
@@ -554,6 +557,14 @@ public class EnvironmentView extends CompactView implements AuthResource {
         this.environmentType = environmentType;
     }
 
+    public String getRemoteEnvironmentCrn() {
+        return remoteEnvironmentCrn;
+    }
+
+    public void setRemoteEnvironmentCrn(String remoteEnvironmentCrn) {
+        this.remoteEnvironmentCrn = remoteEnvironmentCrn;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -591,6 +602,7 @@ public class EnvironmentView extends CompactView implements AuthResource {
                 ", deletionType=" + deletionType +
                 ", enableSecretEncryption=" + enableSecretEncryption +
                 ", environmentType=" + environmentType +
+                ", remoteEnvironmentCrn=" + remoteEnvironmentCrn +
                 '}';
     }
 

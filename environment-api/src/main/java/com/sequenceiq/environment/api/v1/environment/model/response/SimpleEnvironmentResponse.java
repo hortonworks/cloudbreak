@@ -124,6 +124,8 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
 
         private String environmentType;
 
+        private String remoteEnvironmentCrn;
+
         private Builder() {
         }
 
@@ -302,6 +304,11 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withRemoteEnvironmentCrn(String remoteEnvironmentCrn) {
+            this.remoteEnvironmentCrn = remoteEnvironmentCrn;
+            return this;
+        }
+
         public SimpleEnvironmentResponse build() {
             SimpleEnvironmentResponse simpleEnvironmentResponse = new SimpleEnvironmentResponse();
             simpleEnvironmentResponse.setCrn(crn);
@@ -338,6 +345,7 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             simpleEnvironmentResponse.setEnableSecretEncryption(enableSecretEncryption);
             simpleEnvironmentResponse.setEnableComputeCluster(enableComputeCluster);
             simpleEnvironmentResponse.setEnvironmentType(environmentType);
+            simpleEnvironmentResponse.setRemoteEnvironmentCrn(remoteEnvironmentCrn);
             return simpleEnvironmentResponse;
         }
     }

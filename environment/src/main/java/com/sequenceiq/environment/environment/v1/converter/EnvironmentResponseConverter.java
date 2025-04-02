@@ -133,7 +133,8 @@ public class EnvironmentResponseConverter {
                 .withDataServices(dataServicesConverter.convertToResponse(environmentDto.getDataServices()))
                 .withEnableSecretEncryption(environmentDto.isEnableSecretEncryption())
                 .withEnableComputeCluster(environmentDto.isEnableComputeCluster())
-                .withEnvironmentType(environmentDto.getEnvironmentType() != null ? environmentDto.getEnvironmentType().toString() :  null);
+                .withEnvironmentType(environmentDto.getEnvironmentType() != null ? environmentDto.getEnvironmentType().toString() :  null)
+                .withRemoteEnvironmentCrn(environmentDto.getRemoteEnvironmentCrn());
 
         NullUtil.doIfNotNull(environmentDto.getProxyConfig(),
                 proxyConfig -> builder.withProxyConfig(proxyConfigToProxyResponseConverter.convert(environmentDto.getProxyConfig())));
@@ -208,7 +209,8 @@ public class EnvironmentResponseConverter {
                 .withDataServices(dataServicesConverter.convertToResponse(environmentViewDto.getDataServices()))
                 .withEnableSecretEncryption(environmentViewDto.isEnableSecretEncryption())
                 .withEnableComputeCluster(environmentViewDto.isEnableComputeCluster())
-                .withEnvironmentType(environmentViewDto.getEnvironmentType() != null ? environmentViewDto.getEnvironmentType().toString() : null);
+                .withEnvironmentType(environmentViewDto.getEnvironmentType() != null ? environmentViewDto.getEnvironmentType().toString() : null)
+                .withRemoteEnvironmentCrn(environmentViewDto.getRemoteEnvironmentCrn());
 
         NullUtil.doIfNotNull(environmentViewDto.getProxyConfig(),
                 proxyConfig -> builder.withProxyConfig(proxyConfigToProxyResponseConverter.convertToView(environmentViewDto.getProxyConfig())));
@@ -248,7 +250,8 @@ public class EnvironmentResponseConverter {
                 .withDataServices(dataServicesConverter.convertToResponse(environmentDto.getDataServices()))
                 .withEnableSecretEncryption(environmentDto.isEnableSecretEncryption())
                 .withEnableComputeCluster(environmentDto.isEnableComputeCluster())
-                .withEnvironmentType(environmentDto.getEnvironmentType() != null ? environmentDto.getEnvironmentType().toString() : null);
+                .withEnvironmentType(environmentDto.getEnvironmentType() != null ? environmentDto.getEnvironmentType().toString() : null)
+                .withRemoteEnvironmentCrn(environmentDto.getRemoteEnvironmentCrn());
 
         NullUtil.doIfNotNull(environmentDto.getProxyConfig(),
                 proxyConfig -> builder.withProxyConfig(proxyConfigToProxyResponseConverter.convertToView(environmentDto.getProxyConfig())));

@@ -33,6 +33,7 @@ class SimpleEnvironmentResponseTest {
         ProxyViewResponse proxyConfig = new ProxyViewResponse();
         GcpEnvironmentParameters gcp = new GcpEnvironmentParameters();
         DataServicesResponse dataServices = new DataServicesResponse();
+        String remoteEnvironmentCrn = "remoteEnvironmentCrn";
 
         SimpleEnvironmentResponse response = SimpleEnvironmentResponse.builder()
                 .withCrn("crn")
@@ -67,6 +68,7 @@ class SimpleEnvironmentResponseTest {
                 .withDataServices(dataServices)
                 .withEnableSecretEncryption(true)
                 .withEnableComputeCluster(true)
+                .withRemoteEnvironmentCrn(remoteEnvironmentCrn)
                 .build();
 
         assertThat(response).isNotNull();
@@ -106,6 +108,7 @@ class SimpleEnvironmentResponseTest {
         assertThat(response.getCcmV2TlsType()).isEqualTo(CcmV2TlsType.TWO_WAY_TLS);
         assertThat(response.getDeletionType()).isEqualTo(EnvironmentDeletionType.NONE);
         assertThat(response.getEnvironmentDomain()).isEqualTo("environmentDomain");
+        assertThat(response.getRemoteEnvironmentCrn()).isEqualTo(remoteEnvironmentCrn);
         assertThat(response.getDataServices()).isSameAs(dataServices);
         assertThat(response.isEnableSecretEncryption()).isTrue();
         assertThat(response.isEnableComputeCluster()).isTrue();
