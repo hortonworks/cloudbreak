@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -28,11 +29,15 @@ import com.sequenceiq.cloudbreak.cloud.AvailabilityZoneConnector;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.AvailabilityZone;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
@@ -115,6 +120,50 @@ class ProviderBasedMultiAzSetupValidatorTest {
 
         underTest.validate(resultBuilder, stack);
 
+        verifyNoInteractions(resultBuilder);
+    }
+
+    @Test
+    void testValidateWhenAwsStackHasMultipleSubnetsForInstanceGroupAndMultiAzDisabledForStack() {
+        Stack stack = TestUtil.stack();
+        CloudConnector cloudConnector = mock(CloudConnector.class);
+        stack.setCloudPlatform(CloudPlatform.AWS.name());
+        stack.setMultiAz(Boolean.FALSE);
+        stack.getInstanceGroups().forEach(ig -> {
+            InstanceGroupNetwork ign = new InstanceGroupNetwork();
+            ign.setAttributes(new Json("{\"subnetIds\": [\"subnet1\", \"subnet2\"]}"));
+            if (InstanceGroupType.GATEWAY.equals(ig.getInstanceGroupType())) {
+                ig.setInstanceGroupNetwork(ign);
+            }
+        });
+
+        AvailabilityZoneConnector zoneConnector = mock(AvailabilityZoneConnector.class);
+        when(cloudConnector.availabilityZoneConnector()).thenReturn(zoneConnector);
+        when(zoneConnector.getAvailabilityZones(any(), any(), any(), any())).thenReturn(Set.of("az1", "az2"));
+        when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
+        LocationResponse locationResponse = new LocationResponse();
+        locationResponse.setName("aRegion");
+
+        CloudSubnet cloudSubnet1 = new CloudSubnet();
+        cloudSubnet1.setAvailabilityZone("az1");
+        cloudSubnet1.setId("subnet1");
+        CloudSubnet cloudSubnet2 = new CloudSubnet();
+        cloudSubnet2.setAvailabilityZone("az2");
+        cloudSubnet2.setId("subnet2");
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setNetwork(EnvironmentNetworkResponse.builder()
+                .withSubnetMetas(Map.of("subnet1", cloudSubnet1, "subnet2", cloudSubnet2))
+                .build());
+        detailedEnvironmentResponse.setCredential(new CredentialResponse());
+        detailedEnvironmentResponse.setLocation(locationResponse);
+        when(environmentClientService.getByCrn(any())).thenReturn(detailedEnvironmentResponse);
+        when(credentialConverter.convert(any(CredentialResponse.class))).thenReturn(Credential.builder().build());
+        when(extendedCloudCredentialConverter.convert(any()))
+                .thenReturn(new ExtendedCloudCredential(new CloudCredential(), null, null, null, null));
+
+        underTest.validate(resultBuilder, stack);
+
+        verify(stackService).updateMultiAzFlag(stack.getId(), Boolean.TRUE);
         verifyNoInteractions(resultBuilder);
     }
 
