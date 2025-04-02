@@ -72,6 +72,12 @@ public interface InstanceGroupRepository extends CrudRepository<InstanceGroup, L
             "WHERE i.instanceMetadataType = 'GATEWAY_PRIMARY' AND i.instanceStatus <> 'TERMINATED' AND i.instanceGroup.stack.id= :stackId")
     Optional<InstanceGroup> getPrimaryGatewayInstanceGroupWithTemplateByStackId(@Param("stackId") Long stackId);
 
+    @EntityGraph(value = "InstanceGroup.instanceMetaData", type = EntityGraphType.LOAD)
+    @Query("SELECT ig from InstanceGroup ig " +
+            "LEFT JOIN ig.template t " +
+            "WHERE ig.stack.id = :stackId AND ig.groupName = :groupName")
+    Optional<InstanceGroup> getInstanceGroupWithTemplateAndInstancesByGroupNameInStack(@Param("stackId") Long stackId, @Param("groupName") String groupName);
+
     @Query("SELECT i FROM InstanceGroup i JOIN FETCH i.template WHERE i.stack.id = :stackId")
     Set<InstanceGroup> getByStackAndFetchTemplates(@Param("stackId") Long stackId);
 

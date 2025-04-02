@@ -57,6 +57,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
+import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
@@ -174,6 +175,15 @@ class MetadataSetupServiceTest {
 
     private Image image;
 
+    static Object[][] saveInstanceMetaDataTestServerFlagIsAlreadySetDataProvider() {
+        return new Object[][]{
+                // testCaseName subnetId availabilityZone rackId
+                {"subnetId=null, availabilityZone=null, rackId=null", null, null, null},
+                {"subnetId=\"\", availabilityZone=\"\", rackId=\"\"", "", "", ""},
+                {"subnetId=SUBNET_ID, availabilityZone=AVAILABILITY_ZONE, rackId=RACK_ID", SUBNET_ID, AVAILABILITY_ZONE, RACK_ID},
+        };
+    }
+
     @BeforeEach
     void before() {
         stack = new Stack();
@@ -188,7 +198,7 @@ class MetadataSetupServiceTest {
         instanceGroup.setGroupName(GROUP_NAME);
         Set<InstanceGroup> instanceGroupSet = new TreeSet<>();
         instanceGroupSet.add(instanceGroup);
-        when(instanceGroupService.findByStackId(STACK_ID)).thenReturn(instanceGroupSet);
+        when(instanceGroupService.getByStackAndFetchTemplates(STACK_ID)).thenReturn(instanceGroupSet);
         Iterable<CloudVmMetaDataStatus> cloudVmMetaDataStatuses = getCloudVmMetaDataStatuses(InstanceStatus.CREATED);
         CloudbreakImageNotFoundException exception = new CloudbreakImageNotFoundException("Image does not exist");
         doThrow(exception).when(imageService).getImage(STACK_ID);
@@ -209,7 +219,7 @@ class MetadataSetupServiceTest {
         instanceGroup.setGroupName(GROUP_NAME);
         Set<InstanceGroup> instanceGroupSet = new TreeSet<>();
         instanceGroupSet.add(instanceGroup);
-        when(instanceGroupService.findByStackId(STACK_ID)).thenReturn(instanceGroupSet);
+        when(instanceGroupService.getByStackAndFetchTemplates(STACK_ID)).thenReturn(instanceGroupSet);
         when(clock.getCurrentTimeMillis()).thenReturn(CURRENT_TIME);
         Iterable<CloudVmMetaDataStatus> cloudVmMetaDataStatuses = getCloudVmMetaDataStatuses(InstanceStatus.CREATED);
 
@@ -234,9 +244,12 @@ class MetadataSetupServiceTest {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setId(INSTANCE_GROUP_ID);
         instanceGroup.setGroupName(GROUP_NAME);
+        Template template = new Template();
+        template.setInstanceType("large");
+        instanceGroup.setTemplate(template);
         Set<InstanceGroup> instanceGroupSet = new TreeSet<>();
         instanceGroupSet.add(instanceGroup);
-        when(instanceGroupService.findByStackId(STACK_ID)).thenReturn(instanceGroupSet);
+        when(instanceGroupService.getByStackAndFetchTemplates(STACK_ID)).thenReturn(instanceGroupSet);
         when(clock.getCurrentTimeMillis()).thenReturn(CURRENT_TIME);
         Iterable<CloudVmMetaDataStatus> cloudVmMetaDataStatuses = getCloudVmMetaDataStatuses(InstanceStatus.CREATED);
 
@@ -257,6 +270,7 @@ class MetadataSetupServiceTest {
         assertEquals(CREATED, instanceMetaData.getInstanceStatus());
         assertNotNull(instanceMetaData.getImage());
         assertEquals(imageJson, instanceMetaData.getImage());
+        assertEquals("large", instanceMetaData.getProviderInstanceType());
     }
 
     @Test
@@ -371,7 +385,7 @@ class MetadataSetupServiceTest {
         instanceGroup.setGroupName(GROUP_NAME);
         Set<InstanceGroup> instanceGroupSet = new TreeSet<>();
         instanceGroupSet.add(instanceGroup);
-        when(instanceGroupService.findByStackId(STACK_ID)).thenReturn(instanceGroupSet);
+        when(instanceGroupService.getByStackAndFetchTemplates(STACK_ID)).thenReturn(instanceGroupSet);
         when(clock.getCurrentTimeMillis()).thenReturn(CURRENT_TIME);
         Iterable<CloudVmMetaDataStatus> cloudVmMetaDataStatuses = getCloudVmMetaDataStatuses(InstanceStatus.TERMINATED);
 
@@ -401,7 +415,7 @@ class MetadataSetupServiceTest {
         instanceGroup.setGroupName(GROUP_NAME);
         Set<InstanceGroup> instanceGroupSet = new TreeSet<>();
         instanceGroupSet.add(instanceGroup);
-        when(instanceGroupService.findByStackId(STACK_ID)).thenReturn(instanceGroupSet);
+        when(instanceGroupService.getByStackAndFetchTemplates(STACK_ID)).thenReturn(instanceGroupSet);
         when(clock.getCurrentTimeMillis()).thenReturn(CURRENT_TIME);
         Iterable<CloudVmMetaDataStatus> cloudVmMetaDataStatuses = getCloudVmMetaDataStatuses(InstanceStatus.CREATED);
 
@@ -425,15 +439,6 @@ class MetadataSetupServiceTest {
         assertFalse(instanceMetaData.getClusterManagerServer());
     }
 
-    static Object[][] saveInstanceMetaDataTestServerFlagIsAlreadySetDataProvider() {
-        return new Object[][]{
-                // testCaseName subnetId availabilityZone rackId
-                {"subnetId=null, availabilityZone=null, rackId=null", null, null, null},
-                {"subnetId=\"\", availabilityZone=\"\", rackId=\"\"", "", "", ""},
-                {"subnetId=SUBNET_ID, availabilityZone=AVAILABILITY_ZONE, rackId=RACK_ID", SUBNET_ID, AVAILABILITY_ZONE, RACK_ID},
-        };
-    }
-
     @ParameterizedTest(name = "{0}")
     @MethodSource("saveInstanceMetaDataTestServerFlagIsAlreadySetDataProvider")
     void saveInstanceMetaDataTestServerFlagIsAlreadySet(String testCaseName, String subnetId, String availabilityZone, String rackId)
@@ -444,7 +449,7 @@ class MetadataSetupServiceTest {
         instanceGroup.setGroupName(GROUP_NAME);
         Set<InstanceGroup> instanceGroupSet = new TreeSet<>();
         instanceGroupSet.add(instanceGroup);
-        when(instanceGroupService.findByStackId(STACK_ID)).thenReturn(instanceGroupSet);
+        when(instanceGroupService.getByStackAndFetchTemplates(STACK_ID)).thenReturn(instanceGroupSet);
         when(clock.getCurrentTimeMillis()).thenReturn(CURRENT_TIME);
         Iterable<CloudVmMetaDataStatus> cloudVmMetaDataStatuses = getCloudVmMetaDataStatuses(InstanceStatus.STOPPED);
         InstanceMetaData originalInstanceMetadata = new InstanceMetaData();
@@ -520,7 +525,7 @@ class MetadataSetupServiceTest {
         instanceGroupSet.add(gwInstanceGroup);
         instanceGroupSet.add(workerInstanceGroup);
 
-        when(instanceGroupService.findByStackId(STACK_ID)).thenReturn(instanceGroupSet);
+        when(instanceGroupService.getByStackAndFetchTemplates(STACK_ID)).thenReturn(instanceGroupSet);
         when(imageService.getImage(STACK_ID)).thenReturn(image);
         when(instanceMetaDataService.findNotTerminatedForStack(1L))
                 .thenReturn(Set.of(gwInstanceMetadata1, gwInstanceMetadata2, gwInstanceMetadata3));
@@ -589,7 +594,7 @@ class MetadataSetupServiceTest {
 
         workerInstanceGroup.setInstanceMetaData(Set.of(workerInstanceMetadata3));
         when(imageService.getImage(STACK_ID)).thenReturn(image);
-        when(instanceGroupService.findByStackId(1L)).thenReturn(Set.of(gwInstanceGroup, workerInstanceGroup));
+        when(instanceGroupService.getByStackAndFetchTemplates(1L)).thenReturn(Set.of(gwInstanceGroup, workerInstanceGroup));
         when(instanceMetaDataService.findAllByInstanceGroupAndInstanceStatusOrdered(gwInstanceGroup,
                 com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.CREATED))
                 .thenReturn(List.of(gwInstanceMetadata1, gwInstanceMetadata2));
