@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.json.TypedJsonUtil;
+import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
@@ -47,7 +48,8 @@ public class FlowLogUtil {
 
     public static Optional<FlowLog> getMostRecentFailedLog(List<FlowLog> flowLogs) {
         return flowLogs.stream()
-                .filter(log -> StateStatus.FAILED.equals(log.getStateStatus())).max(Comparator.comparing(FlowLog::getCreated));
+                .filter(log -> StateStatus.FAILED.equals(log.getStateStatus()) || FlowConstants.CANCELLED_STATE.equals(log.getCurrentState()))
+                .max(Comparator.comparing(FlowLog::getCreated));
     }
 
     public static Optional<FlowLog> getPendingFlowLog(List<FlowLog> flowLogs) {
@@ -67,6 +69,10 @@ public class FlowLogUtil {
         return false;
     }
 
+    public static boolean isFlowCancelled(List<FlowLog> flowLogs) {
+        return  !flowLogs.isEmpty() && FlowConstants.CANCELLED_STATE.equals(flowLogs.getFirst().getCurrentState());
+    }
+
     public static boolean isFlowInFailedState(List<FlowLogWithoutPayload> flowLogs, Set<String> failHandledEvents) {
         if (flowLogs.size() > 2) {
             FlowLogWithoutPayload lastFlowLog = flowLogs.get(0);
@@ -77,7 +83,7 @@ public class FlowLogUtil {
                     || StateStatus.FAILED.equals(secondLastFlowLog.getStateStatus())
                     || StateStatus.FAILED.equals(lastFlowLog.getStateStatus()));
         }
-        return false;
+        return !flowLogs.isEmpty() && FlowConstants.CANCELLED_STATE.equals(flowLogs.getFirst().getCurrentState());
     }
 
     public static Payload tryDeserializeTriggerEvent(FlowChainLog flowChainLog) {

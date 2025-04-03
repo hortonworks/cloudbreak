@@ -20,6 +20,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.support.ConversionServiceFactoryBean;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -33,6 +34,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.common.dbmigration.SchemaLocationProvider;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
+import com.sequenceiq.cloudbreak.service.ha.HaApplication;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.EventParameterFactory;
 import com.sequenceiq.flow.core.PayloadContextProvider;
@@ -147,6 +149,12 @@ public class ComponentTestConfig {
         HibernateJpaVendorAdapter hibernateJpaVendorAdapter = new HibernateJpaVendorAdapter();
         hibernateJpaVendorAdapter.setDatabase(Database.POSTGRESQL);
         return hibernateJpaVendorAdapter;
+    }
+
+    @Bean
+    @Primary
+    public HaApplication testHaApplication() {
+        return new TestHaApplication();
     }
 
     static class TestEnvironmentInitializer implements ApplicationContextInitializer<GenericApplicationContext> {

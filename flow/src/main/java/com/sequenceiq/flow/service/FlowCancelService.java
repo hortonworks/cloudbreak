@@ -1,6 +1,7 @@
 package com.sequenceiq.flow.service;
 
 import java.util.Date;
+import java.util.List;
 
 import jakarta.inject.Inject;
 
@@ -10,14 +11,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.flow.core.EventParameterFactory;
 import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.FlowLogService;
+import com.sequenceiq.flow.domain.FlowCancel;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
+import com.sequenceiq.flow.repository.FlowCancelRepository;
 
 @Service
 public class FlowCancelService {
@@ -40,6 +44,9 @@ public class FlowCancelService {
 
     @Inject
     private Flow2Handler flow2Handler;
+
+    @Inject
+    private FlowCancelRepository flowCancelRepository;
 
     @Value("${cb.termination.retry.allowed.in.minute:60}")
     private long terminationRetryAllowedInMinute;
@@ -71,5 +78,22 @@ public class FlowCancelService {
         } catch (Exception e) {
             LOGGER.warn("Can't cancel old termination flows for stack {}", stackName, e);
         }
+    }
+
+    public void createCancellation(Long resourceId) {
+        if (!flowLogService.isOtherFlowRunning(resourceId)) {
+            throw new BadRequestException("Not found any flow in running state.");
+        }
+        FlowCancel flowCancel = new FlowCancel();
+        flowCancel.setResourceId(resourceId);
+        flowCancelRepository.save(flowCancel);
+    }
+
+    public List<FlowCancel> findAllCancellation() {
+        return flowCancelRepository.findAll();
+    }
+
+    public void deleteFlowCancellation(FlowCancel flowCancel) {
+        flowCancelRepository.delete(flowCancel);
     }
 }

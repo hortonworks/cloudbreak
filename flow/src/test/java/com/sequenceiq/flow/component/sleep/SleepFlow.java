@@ -37,7 +37,7 @@ public class SleepFlow {
             }
 
             @Override
-            protected void doExecute(CommonContext context, SleepStartEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(CommonContext context, SleepStartEvent payload, Map<Object, Object> variables) {
                 sendEvent(context, new SleepWaitRequest(payload.getResourceId(), payload.getSleepDuration(), payload.getFailUntil()));
             }
 

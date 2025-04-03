@@ -32,7 +32,8 @@ public class StackStatusFinalizer extends FlowFinalizerCallback {
                     LOGGER.error("Flow completed with stack in {} status which is an in progress status. Mapping it to {} final state.",
                             stackStatus.getStatus(), finalStatus);
                     stackUpdater.updateStackStatusAndSetDetailedStatusToUnknown(resourceId, finalStatus,
-                            "Flow completed with stack is in progress status");
+                            String.format("Operation completed and the stack is in '%s' state which is an in progress state. It is mapped to failed state. " +
+                                    "This usually happens during an application error or when the operation is cancelled.", stackStatus.getStatus()));
                 });
     }
 }

@@ -75,6 +75,7 @@ import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.repository.FlowLogRepository;
+import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
@@ -195,6 +196,9 @@ class StackProvisionFlowIntegrationTest {
 
     @MockBean
     private NodeValidator nodeValidator;
+
+    @MockBean
+    private FlowCancelService flowCancelService;
 
     private ResourceConnector resourceConnector = mock(ResourceConnector.class);
 

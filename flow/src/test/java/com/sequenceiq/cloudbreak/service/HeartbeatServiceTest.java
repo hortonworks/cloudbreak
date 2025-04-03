@@ -66,6 +66,7 @@ import com.sequenceiq.flow.core.helloworld.config.HelloWorldFlowConfig;
 import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
+import com.sequenceiq.flow.service.FlowCancelService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HeartbeatServiceTest {
@@ -113,6 +114,9 @@ public class HeartbeatServiceTest {
 
     @Mock
     private InMemoryCleanup inMemoryCleanup;
+
+    @Mock
+    private FlowCancelService flowCancelService;
 
     @Captor
     private ArgumentCaptor<String> stringCaptor;

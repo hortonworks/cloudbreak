@@ -79,6 +79,7 @@ import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.repository.FlowLogRepository;
+import com.sequenceiq.flow.service.FlowCancelService;
 
 import io.micrometer.core.instrument.MeterRegistry;
 
@@ -149,6 +150,9 @@ class UpdateUserDataFlowIntegrationTest {
 
     @MockBean
     private NodeValidator nodeValidator;
+
+    @MockBean
+    private FlowCancelService flowCancelService;
 
     @Mock
     private ResourceConnector resourcesApi;

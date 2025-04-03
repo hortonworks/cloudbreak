@@ -83,6 +83,7 @@ import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.repository.FlowLogRepository;
+import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
@@ -266,6 +267,9 @@ class FreeIpaUpscaleFlowIntegrationTest {
 
     @MockBean
     private FreeIpaLoadBalancerService loadBalancerService;
+
+    @MockBean
+    private FlowCancelService flowCancelService;
 
     private ResourceConnector resourceConnector = mock(ResourceConnector.class);
 

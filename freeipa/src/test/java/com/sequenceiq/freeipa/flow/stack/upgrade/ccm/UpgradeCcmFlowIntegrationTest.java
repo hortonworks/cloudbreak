@@ -47,6 +47,7 @@ import com.sequenceiq.flow.core.metrics.FlowMetricSender;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.repository.FlowLogRepository;
+import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.FlowIntegrationTestConfig;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.action.UpgradeCcmActions;
@@ -131,6 +132,9 @@ class UpgradeCcmFlowIntegrationTest {
 
     @MockBean
     private NodeValidator nodeValidator;
+
+    @MockBean
+    private FlowCancelService flowCancelService;
 
     @BeforeEach
     public void setup() {

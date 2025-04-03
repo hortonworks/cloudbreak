@@ -50,6 +50,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.event.Payload;
@@ -80,7 +81,9 @@ import com.sequenceiq.flow.core.chain.FlowChains;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
 import com.sequenceiq.flow.core.model.ResultType;
 import com.sequenceiq.flow.domain.ClassValue;
+import com.sequenceiq.flow.domain.FlowCancel;
 import com.sequenceiq.flow.domain.FlowLog;
+import com.sequenceiq.flow.repository.FlowCancelRepository;
 import com.sequenceiq.flow.repository.FlowLogRepository;
 import com.sequenceiq.flow.service.FlowService;
 import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
@@ -151,6 +154,9 @@ public class FlowComponentTest {
 
     @Inject
     private FlowChainLogService flowChainLogService;
+
+    @Inject
+    private FlowCancelRepository flowCancelRepository;
 
     @AfterAll
     public static void afterAll() throws IOException, InterruptedException {
@@ -585,6 +591,43 @@ public class FlowComponentTest {
         ClassValue payloadType = flowLogs.get(0).getPayloadType();
         assertFalse(flowType.isOnClassPath());
         assertFalse(payloadType.isOnClassPath());
+    }
+
+    @Test
+    public void testFlowCancelWithPolling() throws InterruptedException {
+        long resourceId = getNextResourceId();
+        TestStateStore.put(resourceId, PollGroup.POLLABLE);
+        FlowAcceptResult acceptResult = startSleepFlow(SleepStartEvent.neverFail(resourceId, Duration.ofMillis(200)));
+
+        TimeUnit.SECONDS.sleep(3);
+
+        FlowCancel flowCancel = new FlowCancel();
+        flowCancel.setResourceId(resourceId);
+        flowCancelRepository.save(flowCancel);
+
+        waitFlowToFail(SLEEP_TIME.multipliedBy(WAIT_FACTOR * 5), acceptResult);
+
+        List<FlowLog> flowLogs = flowLogService.findAllByResourceIdOrderByCreatedDesc(resourceId);
+        assertEquals(2, flowLogs.size());
+        assertEquals("CANCELLED", flowLogs.get(0).getCurrentState());
+        assertEquals("INIT_STATE", flowLogs.get(1).getCurrentState());
+
+        TimeUnit.SECONDS.sleep(3);
+
+        FlowIdentifier flowIdentifier = flow2Handler.retryLastFailedFlow(resourceId, noOp());
+
+        assertEquals(FlowType.FLOW, flowIdentifier.getType());
+        assertEquals(acceptResult.getAsFlowId(), flowIdentifier.getPollableId());
+        waitFlowToComplete(SLEEP_TIME.multipliedBy(WAIT_FACTOR), acceptResult);
+
+        flowLogs = flowLogService.findAllByResourceIdOrderByCreatedDesc(resourceId);
+        assertEquals(6, flowLogs.size());
+        assertEquals("FINISHED", flowLogs.get(0).getCurrentState());
+        assertEquals("SLEEP_FINISHED_STATE", flowLogs.get(1).getCurrentState());
+        assertEquals("SLEEP_STARTED_STATE", flowLogs.get(2).getCurrentState());
+        assertEquals("INIT_STATE", flowLogs.get(3).getCurrentState());
+        assertEquals("CANCELLED", flowLogs.get(4).getCurrentState());
+        assertEquals("INIT_STATE", flowLogs.get(5).getCurrentState());
     }
 
     private long getNextResourceId() {

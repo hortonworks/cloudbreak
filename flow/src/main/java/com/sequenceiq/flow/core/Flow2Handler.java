@@ -169,6 +169,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         if (flow != null) {
             flow.stop();
             flowLogService.cancel(stackId, flowId);
+            createFinalizerCallback(flow).ifPresent(finalizerCallback -> finalizerCallback.onFinalize(stackId));
         }
     }
 
@@ -651,7 +652,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
             LOGGER.info("Retry cannot be performed, because there is already an active flow: {}", pendingFlowLog.get());
             throw new BadRequestException("Retry cannot be performed, because there is already an active flow.");
         }
-        if (!FlowLogUtil.isFlowFailHandled(flowLogs, failHandledEvents)) {
+        if (!(FlowLogUtil.isFlowFailHandled(flowLogs, failHandledEvents) || FlowLogUtil.isFlowCancelled(flowLogs))) {
             throw new BadRequestException("Retry cannot be performed, because the last action was successful.");
         }
         if (flowLogs.isEmpty()) {

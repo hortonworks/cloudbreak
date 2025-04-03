@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -115,4 +116,12 @@ public interface FlowEndpoint {
     List<FlowCheckResponse> getFlowChainsStatusesByChainIds(@NotNull @Size(max = 50, message = "Input size should not be over 50")
         @QueryParam("chainIds") List<String> chainIds,
         @Min(value = 1, message = "Page size should be greater than 0") @QueryParam("size") int size, @QueryParam("page") int page);
+
+    @POST
+    @Path("/resource/crn/{resourceCrn}/cancel")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Cancel execution of the given flow by flow id", description = "Flow log operations",
+            operationId = "cancelFlowsByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    List<FlowLogResponse> cancelFlowsByCrn(@PathParam("resourceCrn") String resourceCrn);
 }

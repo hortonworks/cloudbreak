@@ -35,8 +35,10 @@ import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowRegister;
+import com.sequenceiq.flow.domain.FlowCancel;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
+import com.sequenceiq.flow.service.FlowCancelService;
 
 @Service
 public class HeartbeatService {
@@ -87,6 +89,9 @@ public class HeartbeatService {
 
     @Inject
     private InMemoryCleanup inMemoryCleanup;
+
+    @Inject
+    private FlowCancelService flowCancelService;
 
     @Scheduled(cron = "${cb.ha.heartbeat.rate:0/30 * * * * *}")
     public void heartbeat() {
@@ -231,6 +236,21 @@ public class HeartbeatService {
                 }
             }
         }
+        List<FlowCancel> flowCancellations = getFlowCancellations();
+        for (FlowCancel flowCancel : flowCancellations) {
+            if (!deletingResourceIds.contains(flowCancel.getResourceId())) {
+                Set<String> runningFlowIds = flowLogService.findAllRunningNonTerminationFlowIdsByStackId(flowCancel.getResourceId());
+                if (haApplication.isRunningOnThisNode(runningFlowIds)) {
+                    LOGGER.info("Found flow cancellation for resource: {}", flowCancel.getResourceId());
+                    cancelRunningFlow(flowCancel.getResourceId());
+                    flowCancelService.deleteFlowCancellation(flowCancel);
+                }
+            }
+        }
+    }
+
+    private List<FlowCancel> getFlowCancellations() {
+        return flowCancelService.findAllCancellation();
     }
 
     private boolean isStackTerminationExecutedByAnotherNode(Long stackId, Set<Long> terminatingStacksByCurrentNode) {

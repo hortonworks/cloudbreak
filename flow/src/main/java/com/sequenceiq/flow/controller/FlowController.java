@@ -11,13 +11,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 
+import com.google.common.base.Preconditions;
 import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import com.sequenceiq.authorization.annotation.InternalOnly;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
+import com.sequenceiq.flow.core.ResourceIdProvider;
+import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.flow.service.FlowService;
 
 @Controller
@@ -26,6 +30,12 @@ public class FlowController implements FlowEndpoint {
 
     @Inject
     private FlowService flowService;
+
+    @Inject
+    private FlowCancelService flowCancelService;
+
+    @Inject
+    private ResourceIdProvider resourceIdProvider;
 
     @Override
     @AccountIdNotNeeded
@@ -83,5 +93,13 @@ public class FlowController implements FlowEndpoint {
     public List<FlowCheckResponse> getFlowChainsStatusesByChainIds(List<String> chainIds, int size, int page) {
         Page<FlowCheckResponse> response = flowService.getFlowChainsByChainIds(chainIds, PageRequest.of(page, size));
         return isNull(response) ? newArrayList() : response.getContent();
+    }
+
+    @Override
+    public List<FlowLogResponse> cancelFlowsByCrn(@ResourceCrn String resourceCrn) {
+        Preconditions.checkArgument(Crn.isCrn(resourceCrn), "Please provide a valid crn.");
+        Long resourceId = resourceIdProvider.getResourceIdByResourceCrn(resourceCrn);
+        flowCancelService.createCancellation(resourceId);
+        return flowService.getFlowLogsByFlowId(flowService.getLastFlowByResourceCrn(resourceCrn).getFlowId());
     }
 }

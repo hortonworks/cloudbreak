@@ -95,6 +95,7 @@ import com.sequenceiq.flow.core.metrics.FlowEventMetricListener;
 import com.sequenceiq.flow.core.metrics.FlowMetricSender;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsService;
+import com.sequenceiq.flow.repository.FlowCancelRepository;
 import com.sequenceiq.flow.repository.FlowChainLogRepository;
 import com.sequenceiq.flow.repository.FlowLogRepository;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
@@ -162,6 +163,9 @@ public class CredentialExperienceTest {
 
     @MockBean
     private ObjectMapper objectMapper;
+
+    @MockBean
+    private FlowCancelRepository flowCancelRepository;
 
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;

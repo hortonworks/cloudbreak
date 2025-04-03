@@ -15,6 +15,8 @@ public class FlowRestUrlParser extends LegacyRestUrlParser {
 
     public static final int RESOURCE_CRN_GROUP_NUMBER = 5;
 
+    public static final int CANCEL_RESOURCE_CRN_GROUP_NUMBER = 16;
+
     public static final int RESOURCE_NAME_GROUP_NUMBER = 4;
 
     public static final int FLOW_ID_GROUP_NUMBER = 6;
@@ -25,7 +27,7 @@ public class FlowRestUrlParser extends LegacyRestUrlParser {
 
     private static final Pattern PATTERN = Pattern.compile("flow/" +
             "((logs/(flowIds|resource/name/([^/]+)|resource/crn/([^/]+)|([^/]+))(/last)?)|" +
-            "(check/((flowId/([^/]+))|(chainId/([^/]+))))|(check/chainIds))");
+            "(check/((flowId/([^/]+))|(chainId/([^/]+))))|(check/chainIds)|(resource/crn/([^/]+)/cancel))");
 
     @Override
     public Pattern getPattern() {
@@ -40,12 +42,13 @@ public class FlowRestUrlParser extends LegacyRestUrlParser {
     @Override
     protected String getResourceName(Matcher matcher) {
         return getResourceNameRecursively(matcher, Lists.newArrayList(RESOURCE_NAME_GROUP_NUMBER, FLOW_ID_GROUP_NUMBER,
-                RESOURCE_CRN_GROUP_NUMBER, CHECK_FLOW_ID_GROUP_NUMBER, CHECK_CHAIN_ID_GROUP_NUMBER).iterator());
+                RESOURCE_CRN_GROUP_NUMBER, CANCEL_RESOURCE_CRN_GROUP_NUMBER, CHECK_FLOW_ID_GROUP_NUMBER, CHECK_CHAIN_ID_GROUP_NUMBER).iterator());
     }
 
     @Override
     protected String getResourceCrn(Matcher matcher) {
-        return StringUtils.isNotBlank(matcher.group(RESOURCE_CRN_GROUP_NUMBER)) ? matcher.group(RESOURCE_CRN_GROUP_NUMBER) : null;
+        return StringUtils.isNotBlank(matcher.group(RESOURCE_CRN_GROUP_NUMBER)) ? matcher.group(RESOURCE_CRN_GROUP_NUMBER) :
+                (StringUtils.isNotBlank(matcher.group(CANCEL_RESOURCE_CRN_GROUP_NUMBER)) ? matcher.group(CANCEL_RESOURCE_CRN_GROUP_NUMBER) : null);
     }
 
     @Override

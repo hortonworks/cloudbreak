@@ -41,7 +41,8 @@ public class StackStatusFinalizerTest {
         underTest.onFinalize(RESOURCE_ID);
 
         verify(stackUpdater).updateStackStatusAndSetDetailedStatusToUnknown(RESOURCE_ID, Status.UPDATE_FAILED,
-                "Flow completed with stack is in progress status");
+                "Operation completed and the stack is in 'UPDATE_IN_PROGRESS' state which is an in progress state. It is mapped to failed state. " +
+                        "This usually happens during an application error or when the operation is cancelled.");
     }
 
     @Test

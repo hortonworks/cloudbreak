@@ -58,6 +58,7 @@ import com.sequenceiq.flow.core.chain.FlowChains;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.repository.FlowLogRepository;
+import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
@@ -161,6 +162,9 @@ class UpgradeCcmFlowChainIntegrationTest {
 
     @MockBean
     private NodeValidator nodeValidator;
+
+    @MockBean
+    private FlowCancelService flowCancelService;
 
     @Mock
     private ResourceConnector resourcesApi;
