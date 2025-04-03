@@ -43,6 +43,12 @@ build-environment-remote:
 build-externalized-compute:
 	 ./externalized-compute/scripts/build-dev.sh
 
+build-mock-thunderhead:
+	 ./mock-thunderhead/scripts/build-dev.sh
+
+build-mock-infrastructure:
+	 ./mock-infrastructure/scripts/build-dev.sh
+
 build:
 	 ./scripts/build.sh
 
