@@ -19,6 +19,30 @@ build-rc-patch:
 build-dev:
 	 ./scripts/build-dev.sh
 
+build-autoscale:
+	 ./autoscale/scripts/build-dev.sh
+
+build-core:
+	 ./core/scripts/build-dev.sh
+
+build-datalake:
+	 ./datalake/scripts/build-dev.sh
+
+build-environment:
+	 ./environment/scripts/build-dev.sh
+
+build-freeipa:
+	 ./freeipa/scripts/build-dev.sh
+
+build-redbeams:
+	 ./redbeams/scripts/build-dev.sh
+
+build-environment-remote:
+	 ./environment-remote/scripts/build-dev.sh
+
+build-externalized-compute:
+	 ./externalized-compute/scripts/build-dev.sh
+
 build:
 	 ./scripts/build.sh
 
