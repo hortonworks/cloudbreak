@@ -52,6 +52,7 @@ import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.DistroxService;
+import com.sequenceiq.datalake.service.sdx.SELinuxService;
 import com.sequenceiq.datalake.service.sdx.SdxImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.StorageValidationService;
@@ -116,6 +117,9 @@ class SdxControllerTest {
 
     @Mock
     private DataLakeFiltering dataLakeFiltering;
+
+    @Mock
+    private SELinuxService seLinuxService;
 
     @InjectMocks
     private SdxController sdxController;
@@ -577,5 +581,31 @@ class SdxControllerTest {
 
         assertEquals(numberOfDatalakes, sdxClusters.size());
         assertTrue(sdxClusters.stream().map(SdxClusterResponse::getName).anyMatch("new-sdx-cluster"::equals));
+    }
+
+    @Test
+    void testEnableSeLinuxByName() {
+        SdxCluster sdxCluster = getValidSdxCluster();
+        when(sdxService.getByNameInAccount(USER_CRN, "TEST")).thenReturn(sdxCluster);
+        when(seLinuxService.enableSeLinuxOnDatalake(sdxCluster, USER_CRN))
+                .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+        FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.enableSeLinuxByName("TEST"));
+        verify(sdxService).getByNameInAccount(USER_CRN, "TEST");
+        verify(seLinuxService).enableSeLinuxOnDatalake(sdxCluster, USER_CRN);
+        assertEquals(FlowType.FLOW, flowIdentifier.getType());
+        assertEquals("FLOW_ID", flowIdentifier.getPollableId());
+    }
+
+    @Test
+    void testEnableSeLinuxByCrn() {
+        SdxCluster sdxCluster = getValidSdxCluster();
+        when(sdxService.getByCrn(USER_CRN, sdxCluster.getCrn())).thenReturn(sdxCluster);
+        when(seLinuxService.enableSeLinuxOnDatalake(sdxCluster, USER_CRN))
+                .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+        FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.enableSeLinuxByCrn(sdxCluster.getCrn()));
+        verify(sdxService).getByCrn(USER_CRN, sdxCluster.getCrn());
+        verify(seLinuxService).enableSeLinuxOnDatalake(sdxCluster, USER_CRN);
+        assertEquals(FlowType.FLOW, flowIdentifier.getType());
+        assertEquals("FLOW_ID", flowIdentifier.getPollableId());
     }
 }

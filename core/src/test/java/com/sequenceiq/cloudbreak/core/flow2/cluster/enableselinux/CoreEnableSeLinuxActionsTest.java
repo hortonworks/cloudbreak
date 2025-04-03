@@ -140,6 +140,7 @@ class CoreEnableSeLinuxActionsTest {
         doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), any());
         when(stack.getId()).thenReturn(1L);
         when(stack.getDisplayName()).thenReturn("test");
+        when(stack.getResourceCrn()).thenReturn("testCrn");
         AbstractCoreEnableSeLinuxAction<CoreEnableSeLinuxEvent> action =
                 (AbstractCoreEnableSeLinuxAction<CoreEnableSeLinuxEvent>) underTest.finishedAction();
         initActionPrivateFields(action);
@@ -149,7 +150,7 @@ class CoreEnableSeLinuxActionsTest {
                 eq("Updated SELinux mode to 'ENFORCING'."));
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
         verify(eventBus).notify(captor.capture(), eventCaptor.capture());
-        verify(metricService).incrementMetricCounter(eq(MetricType.ENABLE_SELINUX_SUCCESSFUL), eq("test"));
+        verify(metricService).incrementMetricCounter(eq(MetricType.ENABLE_SELINUX_SUCCESSFUL), eq("test"), eq("testCrn"));
         String selector = FINALIZE_ENABLE_SELINUX_CORE_EVENT.event();
         assertEquals(selector, captor.getValue());
         assertEquals(1L, ReflectionTestUtils.getField(eventCaptor.getValue().getData(), "stackId"));
@@ -159,6 +160,7 @@ class CoreEnableSeLinuxActionsTest {
     void testFailedAction() throws Exception {
         when(stack.getId()).thenReturn(1L);
         when(stack.getDisplayName()).thenReturn("test");
+        when(stack.getResourceCrn()).thenReturn("test-crn");
         CoreEnableSeLinuxFailedEvent event = new CoreEnableSeLinuxFailedEvent(1L, "test-op", new CloudbreakException("test"));
         doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), any());
         AbstractCoreEnableSeLinuxAction<CoreEnableSeLinuxFailedEvent> action =
@@ -169,7 +171,8 @@ class CoreEnableSeLinuxActionsTest {
         verify(stackUpdater).updateStackStatus(eq(1L), eq(DetailedStackStatus.SELINUX_MODE_UPDATE_FAILED), eq("test"));
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
         verify(eventBus).notify(captor.capture(), eventCaptor.capture());
-        verify(metricService).incrementMetricCounter(eq(MetricType.ENABLE_SELINUX_FAILED), eq("test Exception: test"));
+        verify(metricService).incrementMetricCounter(eq(MetricType.ENABLE_SELINUX_FAILED), eq("test-crn"), eq("test"), eq("1"),
+                eq("Exception: test"));
         String selector = HANDLED_FAILED_ENABLE_SELINUX_CORE_EVENT.event();
         assertEquals(selector, captor.getValue());
         assertEquals(1L, ReflectionTestUtils.getField(eventCaptor.getValue().getData(), "stackId"));

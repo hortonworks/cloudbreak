@@ -18,7 +18,7 @@ public class DatalakeEnableSeLinuxFailedEvent extends BaseFailedFlowEvent implem
             @JsonProperty("enableSeLinuxEvent") DatalakeEnableSeLinuxEvent enableSeLinuxEvent,
             @JsonProperty("exception") Exception exception,
             @JsonProperty("status") DatalakeStatusEnum status) {
-        super(DatalakeEnableSeLinuxStateSelectors.FAILED_ENABLE_SELINUX_DATALAKE_EVENT.name(), enableSeLinuxEvent.getResourceId(),
+        super(enableSeLinuxEvent.getSelector(), enableSeLinuxEvent.getResourceId(),
                 enableSeLinuxEvent.getResourceName(), enableSeLinuxEvent.getResourceCrn(), exception);
         this.status = status;
     }

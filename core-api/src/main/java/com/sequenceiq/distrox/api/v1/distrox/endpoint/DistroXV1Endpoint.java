@@ -842,7 +842,7 @@ public interface DistroXV1Endpoint {
     @Operation(
             summary = "Enables SELinux on on a specific DH", operationId = "enableSelinuxByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    FlowIdentifier enableSeLinuxByCrn(@NotEmpty @ValidCrn(resource = DATAHUB) @PathParam("crn") String crn);
+    FlowIdentifier enableSeLinuxByCrn(@NotEmpty @ValidCrn(resource = {CrnResourceDescriptor.VM_DATALAKE, DATAHUB}) @PathParam("crn") String crn);
 
     @PUT
     @Path("name/{name}/trigger_sku_migration")

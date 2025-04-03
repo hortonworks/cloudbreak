@@ -29,14 +29,14 @@ public class SELinuxService {
     public FlowIdentifier enableSeLinuxOnDatalake(SdxCluster sdxCluster, String userCrn) {
         MDCBuilder.buildMdcContext(sdxCluster);
         LOGGER.info("Data Lake Cluster Enable SELinux flow triggered for DL {}", sdxCluster.getName());
-        DatalakeEnableSeLinuxEvent environmentVerticalScaleEvent = DatalakeEnableSeLinuxEvent.builder()
+        DatalakeEnableSeLinuxEvent datalakeEnableSeLinuxEvent = DatalakeEnableSeLinuxEvent.builder()
                 .withAccepted(new Promise<>())
                 .withResourceCrn(sdxCluster.getResourceCrn())
                 .withResourceId(sdxCluster.getId())
                 .withResourceName(sdxCluster.getName())
-                .withSelector(DatalakeEnableSeLinuxStateSelectors.ENABLE_SELINUX_DATALAKE_VALIDATION_EVENT.selector())
+                .withSelector(DatalakeEnableSeLinuxStateSelectors.ENABLE_SELINUX_DATALAKE_EVENT.selector())
                 .build();
-        FlowIdentifier flowIdentifier = eventSender.sendEvent(environmentVerticalScaleEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
+        FlowIdentifier flowIdentifier = eventSender.sendEvent(datalakeEnableSeLinuxEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
         LOGGER.debug("Data Lake Cluster Vertical Scale flow trigger event sent for environment {}", sdxCluster.getName());
         return flowIdentifier;
     }

@@ -1,19 +1,16 @@
 package com.sequenceiq.datalake.flow.enableselinux;
 
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_ENABLE_SELINUX_FAILED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_ENABLE_SELINUX_VALIDATION_FAILED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_ENABLE_SELINUX_ON_DATALAKE_FAILED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_ENABLE_SELINUX_ON_DATALAKE_IN_PROGRESS;
-import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_ENABLE_SELINUX_VALIDATION_IN_PROGRESS;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.RUNNING;
-import static com.sequenceiq.datalake.flow.enableselinux.event.DatalakeEnableSeLinuxHandlerSelectors.ENABLE_SELINUX_DATALAKE_HANDLER;
-import static com.sequenceiq.datalake.flow.enableselinux.event.DatalakeEnableSeLinuxHandlerSelectors.ENABLE_SELINUX_DATALAKE_VALIDATION_HANDLER;
 import static com.sequenceiq.datalake.flow.enableselinux.event.DatalakeEnableSeLinuxStateSelectors.FINALIZE_ENABLE_SELINUX_DATALAKE_EVENT;
 import static com.sequenceiq.datalake.flow.enableselinux.event.DatalakeEnableSeLinuxStateSelectors.HANDLED_FAILED_ENABLE_SELINUX_DATALAKE_EVENT;
 import static com.sequenceiq.datalake.metric.MetricType.SDX_ENABLE_SELINUX_FAILED;
 import static com.sequenceiq.datalake.metric.MetricType.SDX_ENABLE_SELINUX_FINISHED;
 
 import java.util.Map;
+
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,11 +19,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.enableselinux.event.DatalakeEnableSeLinuxEvent;
 import com.sequenceiq.datalake.flow.enableselinux.event.DatalakeEnableSeLinuxFailedEvent;
+import com.sequenceiq.datalake.flow.enableselinux.event.DatalakeEnableSeLinuxHandlerEvent;
 import com.sequenceiq.datalake.flow.enableselinux.event.DatalakeEnableSeLinuxStateSelectors;
 import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
@@ -39,40 +35,22 @@ public class DatalakeEnableSeLinuxActions {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatalakeEnableSeLinuxActions.class);
 
-    private final SdxStatusService sdxStatusService;
+    @Inject
+    private SdxStatusService sdxStatusService;
 
+    @Inject
     private SdxMetricService metricService;
-
-    public DatalakeEnableSeLinuxActions(SdxStatusService sdxStatusService, SdxMetricService metricService) {
-        this.sdxStatusService = sdxStatusService;
-        this.metricService = metricService;
-    }
-
-    @Bean(name = "ENABLE_SELINUX_DATALAKE_VALIDATION_STATE")
-    public Action<?, ?> enableSeLinuxValidationAction() {
-        return new AbstractDatalakeEnableSeLinuxAction<>(DatalakeEnableSeLinuxEvent.class) {
-            @Override
-            protected void doExecute(CommonContext context, DatalakeEnableSeLinuxEvent payload, Map<Object, Object> variables) {
-                sdxStatusService.setStatusForDatalakeAndNotifyWithStatusReason(
-                        DATALAKE_ENABLE_SELINUX_VALIDATION_IN_PROGRESS,
-                        String.format("Validation of enable selinux is in progress of %s on the Data Lake.",
-                                payload.getResourceName()),
-                        payload.getResourceId());
-                sendEvent(context, ENABLE_SELINUX_DATALAKE_VALIDATION_HANDLER.selector(), payload);
-            }
-        };
-    }
 
     @Bean(name = "ENABLE_SELINUX_DATALAKE_STATE")
     public Action<?, ?> enableSeLinuxInDatalakeAction() {
         return new AbstractDatalakeEnableSeLinuxAction<>(DatalakeEnableSeLinuxEvent.class) {
             @Override
             protected void doExecute(CommonContext context, DatalakeEnableSeLinuxEvent payload, Map<Object, Object> variables) {
-                sdxStatusService.setStatusForDatalakeAndNotifyWithStatusReason(
-                        DATALAKE_ENABLE_SELINUX_ON_DATALAKE_IN_PROGRESS,
-                        "Enable SeLinux on the Data Lake.",
-                        payload.getResourceId());
-                sendEvent(context, ENABLE_SELINUX_DATALAKE_HANDLER.selector(), payload);
+                sdxStatusService.setStatusForDatalakeAndNotifyWithStatusReason(DATALAKE_ENABLE_SELINUX_ON_DATALAKE_IN_PROGRESS,
+                        "Enable SELinux on Data Lake.", payload.getResourceId());
+                DatalakeEnableSeLinuxHandlerEvent event = new DatalakeEnableSeLinuxHandlerEvent(payload.getResourceId(), payload.getResourceName(),
+                        payload.getResourceCrn());
+                sendEvent(context, event);
             }
         };
     }
@@ -83,11 +61,11 @@ public class DatalakeEnableSeLinuxActions {
             @Override
             protected void doExecute(CommonContext context, DatalakeEnableSeLinuxEvent payload, Map<Object, Object> variables) {
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(
-                        RUNNING,
-                        "Datalake is running",
-                        payload.getResourceId());
+                        RUNNING, "Data Lake SELinux set to 'ENFORCING' complete.", payload.getResourceId());
                 metricService.incrementMetricCounter(SDX_ENABLE_SELINUX_FINISHED, sdxCluster);
-                sendEvent(context, FINALIZE_ENABLE_SELINUX_DATALAKE_EVENT.event(), payload);
+                DatalakeEnableSeLinuxEvent event = DatalakeEnableSeLinuxEvent.builder().withSelector(FINALIZE_ENABLE_SELINUX_DATALAKE_EVENT.event())
+                        .withResourceId(payload.getResourceId()).withResourceCrn(payload.getResourceCrn()).withResourceName(payload.getResourceName()).build();
+                sendEvent(context, event);
             }
         };
     }
@@ -106,27 +84,18 @@ public class DatalakeEnableSeLinuxActions {
 
             @Override
             protected void doExecute(CommonContext context, DatalakeEnableSeLinuxFailedEvent payload, Map<Object, Object> variables) {
-                LOGGER.error(String.format("Failed to Enable SeLinux in datalake '%s'. Status: '%s'.",
+                LOGGER.error(String.format("Failed to Enable SELinux in data lake '%s'. Status: '%s'.",
                         payload.getResourceCrn(), payload.getStatus()), payload.getException());
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotifyWithStatusReason(
                         DATALAKE_ENABLE_SELINUX_ON_DATALAKE_FAILED,
-                        "Enable SeLinux failed on the Data Lake.",
+                        "Enable SELinux failed on the Data Lake.",
                         payload.getResourceId());
                 metricService.incrementMetricCounter(SDX_ENABLE_SELINUX_FAILED, sdxCluster);
-                sendEvent(context, HANDLED_FAILED_ENABLE_SELINUX_DATALAKE_EVENT.event(), payload);
-            }
-
-            private ResourceEvent convertStatus(DatalakeStatusEnum status) {
-                switch (status) {
-                    case DATALAKE_ENABLE_SELINUX_VALIDATION_FAILED:
-                        return DATALAKE_ENABLE_SELINUX_VALIDATION_FAILED;
-                    case DATALAKE_ENABLE_SELINUX_ON_DATALAKE_FAILED:
-                        return ResourceEvent.DATALAKE_ENABLE_SELINUX_ON_DATALAKE_FAILED;
-                    default:
-                        return DATALAKE_ENABLE_SELINUX_FAILED;
-                }
+                DatalakeEnableSeLinuxEvent event = DatalakeEnableSeLinuxEvent.builder().withSelector(HANDLED_FAILED_ENABLE_SELINUX_DATALAKE_EVENT.event())
+                        .withResourceId(payload.getResourceId()).withResourceCrn(payload.getResourceCrn()).withResourceName(payload.getResourceName()).build();
+                DatalakeEnableSeLinuxFailedEvent failHandledEvent = new DatalakeEnableSeLinuxFailedEvent(event, payload.getException(), payload.getStatus());
+                sendEvent(context, failHandledEvent);
             }
         };
     }
-
 }

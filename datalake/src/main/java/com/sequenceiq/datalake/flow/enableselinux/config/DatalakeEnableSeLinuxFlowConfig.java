@@ -3,11 +3,9 @@ package com.sequenceiq.datalake.flow.enableselinux.config;
 import static com.sequenceiq.datalake.flow.enableselinux.DatalakeEnableSeLinuxState.ENABLE_SELINUX_DATALAKE_FAILED_STATE;
 import static com.sequenceiq.datalake.flow.enableselinux.DatalakeEnableSeLinuxState.ENABLE_SELINUX_DATALAKE_FINISHED_STATE;
 import static com.sequenceiq.datalake.flow.enableselinux.DatalakeEnableSeLinuxState.ENABLE_SELINUX_DATALAKE_STATE;
-import static com.sequenceiq.datalake.flow.enableselinux.DatalakeEnableSeLinuxState.ENABLE_SELINUX_DATALAKE_VALIDATION_STATE;
 import static com.sequenceiq.datalake.flow.enableselinux.DatalakeEnableSeLinuxState.FINAL_STATE;
 import static com.sequenceiq.datalake.flow.enableselinux.DatalakeEnableSeLinuxState.INIT_STATE;
 import static com.sequenceiq.datalake.flow.enableselinux.event.DatalakeEnableSeLinuxStateSelectors.ENABLE_SELINUX_DATALAKE_EVENT;
-import static com.sequenceiq.datalake.flow.enableselinux.event.DatalakeEnableSeLinuxStateSelectors.ENABLE_SELINUX_DATALAKE_VALIDATION_EVENT;
 import static com.sequenceiq.datalake.flow.enableselinux.event.DatalakeEnableSeLinuxStateSelectors.FAILED_ENABLE_SELINUX_DATALAKE_EVENT;
 import static com.sequenceiq.datalake.flow.enableselinux.event.DatalakeEnableSeLinuxStateSelectors.FINALIZE_ENABLE_SELINUX_DATALAKE_EVENT;
 import static com.sequenceiq.datalake.flow.enableselinux.event.DatalakeEnableSeLinuxStateSelectors.FINISH_ENABLE_SELINUX_DATALAKE_EVENT;
@@ -30,12 +28,7 @@ public class DatalakeEnableSeLinuxFlowConfig extends AbstractFlowConfiguration<D
             new Transition.Builder<DatalakeEnableSeLinuxState, DatalakeEnableSeLinuxStateSelectors>()
             .defaultFailureEvent(FAILED_ENABLE_SELINUX_DATALAKE_EVENT)
 
-            .from(DatalakeEnableSeLinuxState.INIT_STATE)
-            .to(ENABLE_SELINUX_DATALAKE_VALIDATION_STATE)
-            .event(ENABLE_SELINUX_DATALAKE_VALIDATION_EVENT)
-            .defaultFailureEvent()
-
-            .from(ENABLE_SELINUX_DATALAKE_VALIDATION_STATE)
+            .from(INIT_STATE)
             .to(ENABLE_SELINUX_DATALAKE_STATE)
             .event(ENABLE_SELINUX_DATALAKE_EVENT)
             .defaultFailureEvent()
@@ -77,7 +70,7 @@ public class DatalakeEnableSeLinuxFlowConfig extends AbstractFlowConfiguration<D
 
     @Override
     public DatalakeEnableSeLinuxStateSelectors[] getInitEvents() {
-        return new DatalakeEnableSeLinuxStateSelectors[] {ENABLE_SELINUX_DATALAKE_VALIDATION_EVENT};
+        return new DatalakeEnableSeLinuxStateSelectors[] {ENABLE_SELINUX_DATALAKE_EVENT};
     }
 
     @Override

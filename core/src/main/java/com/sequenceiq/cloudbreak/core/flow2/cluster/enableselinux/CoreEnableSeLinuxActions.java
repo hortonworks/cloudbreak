@@ -85,7 +85,7 @@ public class CoreEnableSeLinuxActions {
             protected void doExecute(StackContext context, CoreEnableSeLinuxEvent payload, Map<Object, Object> variables) {
                 StackDtoDelegate stack = context.getStack();
                 LOGGER.debug("Updated SELinux Mode to 'ENFORCING' for stack - {}", payload);
-                getMetricService().incrementMetricCounter(MetricType.ENABLE_SELINUX_SUCCESSFUL, stack.getDisplayName());
+                getMetricService().incrementMetricCounter(MetricType.ENABLE_SELINUX_SUCCESSFUL, stack.getDisplayName(), stack.getResourceCrn());
                 stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.SELINUX_MODE_UPDATE_COMPLETE, "Updated SELinux mode to 'ENFORCING'.");
                 flowMessageService.fireEventAndLog(payload.getResourceId(),
                         STACK_CHANGED_SELINUX.name(),
@@ -114,8 +114,8 @@ public class CoreEnableSeLinuxActions {
             protected void doExecute(StackContext context, CoreEnableSeLinuxFailedEvent payload, Map<Object, Object> variables) {
                 LOGGER.error(String.format("Failed to Enable SELinux on Stack '%s'.", payload.getResourceId()), payload.getException());
                 StackDtoDelegate stack = context.getStack();
-                getMetricService().incrementMetricCounter(MetricType.ENABLE_SELINUX_FAILED, stack.getDisplayName() + " Exception: " +
-                        payload.getException().getMessage());
+                getMetricService().incrementMetricCounter(MetricType.ENABLE_SELINUX_FAILED, stack.getResourceCrn(), stack.getDisplayName(),
+                        "" + stack.getId(), "Exception: " + payload.getException().getMessage());
                 String errorReason = getErrorReason(payload.getException());
                 stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.SELINUX_MODE_UPDATE_FAILED, errorReason);
                 flowMessageService.fireEventAndLog(payload.getResourceId(),

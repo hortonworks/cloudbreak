@@ -705,6 +705,7 @@ public enum ResourceEvent {
     DATALAKE_ENABLE_SELINUX_ON_DATALAKE_IN_PROGRESS("datalake.enableselinux.datalake.in.progress"),
     DATALAKE_ENABLE_SELINUX_ON_DATALAKE_FAILED("datalake.enableselinux.datalake.failed"),
     DATALAKE_ENABLE_SELINUX_FAILED("datalake.enableselinux.failed"),
+    DATALAKE_ENABLE_SELINUX_FINISHED("datalake.enableselinux.finished"),
     DATALAKE_HORIZONTAL_SCALE_VALIDATION_IN_PROGRESS("datalake.horizontalscale.validation.in.progress"),
     DATALAKE_HORIZONTAL_SCALE_VALIDATION_FAILED("datalake.horizontalscale.validation.failed"),
     DATALAKE_HORIZONTAL_SCALE_SERVICES_RESTART_IN_PROGRESS("datalake.horizontalscale.services.restart.in.progress"),
