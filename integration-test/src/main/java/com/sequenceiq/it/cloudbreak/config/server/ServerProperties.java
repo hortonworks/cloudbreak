@@ -286,16 +286,32 @@ public class ServerProperties {
         } else {
             target = client.target(cbServerAddress + "/info");
         }
+        LOGGER.info("CloudBreak Info endpoint: {}", target.getUri());
         Invocation.Builder request = target.request();
-        try (Response response = request.get()) {
+        Response response = null;
+        try {
+            response = request.get();
+            if (response.getStatus() != 200) {
+                response.bufferEntity();
+                String responseBody = response.readEntity(String.class);
+                LOGGER.info("HTTP response: Status code: {}, Reason: {}, Body: {}, Headers: {}",
+                        response.getStatus(),
+                        response.getStatusInfo().getReasonPhrase(),
+                        responseBody != null ? responseBody : "No body content.",
+                        response.getHeaders());
+            }
             CBVersion cbVersion = response.readEntity(CBVersion.class);
             String appVersion = cbVersion.getApp().getVersion();
             LOGGER.info("CB version: Appname: {}, version: {}", cbVersion.getApp().getName(), appVersion);
             MDC.put("cbversion", appVersion);
             return appVersion;
         } catch (Exception e) {
-            LOGGER.error(String.format("Cannot fetch the CB version at '%s'", cbServerAddress), e);
+            LOGGER.error("Cannot fetch the CB version at '{}'", target.getUri(), e);
             throw e;
+        } finally {
+            if (response != null) {
+                response.close();
+            }
         }
     }
 
