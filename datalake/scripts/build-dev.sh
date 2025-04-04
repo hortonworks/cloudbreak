@@ -14,6 +14,6 @@ set -x
   -x spotbugsMain \
   -x spotbugsTest
 
-./gradlew -Phttps.socketTimeout=720000 -Phttps.connectionTimeout=720000 datalake:test --tests=com.sequenceiq.periscope.openapi.OpenApiGenerator
+./gradlew -Phttps.socketTimeout=720000 -Phttps.connectionTimeout=720000 datalake:test --tests=com.sequenceiq.datalake.openapi.OpenApiGenerator
 
 aws s3 cp ./datalake/build/openapi/datalake.json "s3://datalake-swagger/openapi-${VERSION}.json" --acl public-read
