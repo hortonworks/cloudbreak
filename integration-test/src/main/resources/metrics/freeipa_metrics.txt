@@ -1,3 +1,4 @@
+activeflow
 application_ready_time_seconds
 application_started_time_seconds
 cache_eviction_weight_total
@@ -7,7 +8,6 @@ cache_puts_total
 cache_size
 disk_free_bytes
 disk_total_bytes
-freeipa_activeflow
 freeipa_db_transaction_seconds_count
 freeipa_db_transaction_seconds_max
 freeipa_db_transaction_seconds_sum

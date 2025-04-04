@@ -1,3 +1,4 @@
+activeflow
 application_ready_time_seconds
 application_started_time_seconds
 cache_eviction_weight_total
@@ -58,7 +59,6 @@ process_memory_vss_bytes
 process_start_time_seconds
 process_uptime_seconds
 quartz_job_count
-sdx_activeflow
 sdx_db_transaction_seconds_count
 sdx_db_transaction_seconds_max
 sdx_db_transaction_seconds_sum

@@ -8,8 +8,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.cloudbreak.auth.CrnFilter;
-import com.sequenceiq.cloudbreak.common.metrics.MetricService;
-import com.sequenceiq.cloudbreak.common.metrics.RequestHeaderMetricFilter;
 import com.sequenceiq.cloudbreak.exception.ErrorResponseHandler;
 import com.sequenceiq.cloudbreak.exception.ExceptionHandlerFilter;
 import com.sequenceiq.cloudbreak.logger.MDCContextFilter;
@@ -76,14 +74,6 @@ public class CommonFilterConfiguration {
         RestLoggerFilter filter = new RestLoggerFilter(restLoggerEnabled);
         registrationBean.setFilter(filter);
         registrationBean.setOrder(FilterOrderConstants.REQUEST_RESPONSE_LOGGER_FILTER_ORDER);
-        return registrationBean;
-    }
-
-    @Bean
-    public FilterRegistrationBean<RequestHeaderMetricFilter> requestHeaderMetricFilter(MetricService metricService) {
-        FilterRegistrationBean<RequestHeaderMetricFilter> registrationBean = new FilterRegistrationBean<>();
-        RequestHeaderMetricFilter filter = new RequestHeaderMetricFilter(metricService);
-        registrationBean.setFilter(filter);
         return registrationBean;
     }
 }

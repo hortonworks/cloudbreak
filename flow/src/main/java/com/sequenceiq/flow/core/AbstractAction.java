@@ -12,6 +12,7 @@ import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 import org.springframework.util.CollectionUtils;
@@ -38,8 +39,14 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
 
     private static final int MS_PER_SEC = 1000;
 
+    private final Class<P> payloadClass;
+
     @Inject
     private MetricService metricService;
+
+    @Qualifier("CommonMetricService")
+    @Inject
+    private MetricService commonMetricsService;
 
     @Inject
     private EventBus eventBus;
@@ -52,8 +59,6 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
 
     @Inject
     private FlowLogDBService flowLogDBService;
-
-    private final Class<P> payloadClass;
 
     private List<PayloadConverter<P>> payloadConverters;
 
@@ -120,7 +125,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
             String resourceId = getResourceId(payload, flowStateName);
             LOGGER.debug("Resource ID: {}, flow state: {}, phase: {}, execution time {} sec", resourceId,
                     flowStateName, execElapsed > flowElapsed ? "doExec" : "service", executionTime);
-            metricService.gauge(FlowMetricType.FLOW_STEP, executionTime, Map.of("name", flowStateName.toLowerCase(Locale.ROOT)));
+            commonMetricsService.recordTimer(executionTime, FlowMetricType.FLOW_STEP, "name", flowStateName.toLowerCase(Locale.ROOT));
         }
         variables.put(FLOW_STATE_NAME, context.getStateMachine().getState().getId());
         variables.put(FLOW_START_EXEC_TIME, System.currentTimeMillis());

@@ -12,6 +12,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
@@ -21,6 +22,7 @@ public class FlowRegister {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FlowRegister.class);
 
+    @Qualifier("CommonMetricService")
     @Inject
     private MetricService metricService;
 

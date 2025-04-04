@@ -1,3 +1,4 @@
+activeflow
 application_ready_time_seconds
 application_started_time_seconds
 cache_eviction_weight_total
@@ -5,7 +6,6 @@ cache_evictions_total
 cache_gets_total
 cache_puts_total
 cache_size
-cloudbreak_activeflow
 cloudbreak_db_transaction_seconds_count
 cloudbreak_db_transaction_seconds_max
 cloudbreak_db_transaction_seconds_sum
