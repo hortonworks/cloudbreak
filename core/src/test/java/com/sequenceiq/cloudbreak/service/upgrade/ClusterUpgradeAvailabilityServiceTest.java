@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfo
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
@@ -91,7 +92,11 @@ class ClusterUpgradeAvailabilityServiceTest {
 
     private static final long STACK_ID = 2L;
 
+    private static final String BUILD_NUMBER = "64507825";
+
     private static final InternalUpgradeSettings INTERNAL_UPGRADE_SETTINGS = new InternalUpgradeSettings(false, true, true);
+
+    private static final String BASE_IMAGE_ERROR = "Cannot upgrade cluster with a base image.";
 
     private final Map<String, String> activatedParcels = new HashMap<>();
 
@@ -473,6 +478,29 @@ class ClusterUpgradeAvailabilityServiceTest {
         verifyNoInteractions(cloudbreakEventService);
     }
 
+    @Test
+    public void testCheckForUpgradesByNameAndCurrentImageIsBaseImage() throws CloudbreakImageNotFoundException {
+        Stack stack = createStack(createStackStatus(Status.AVAILABLE), StackType.DATALAKE);
+        com.sequenceiq.cloudbreak.cloud.model.Image currentImage = createCurrentImage();
+        Image properImage = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
+        ImageFilterParams imageFilterParams = createImageFilterParams(stack, currentImage);
+        UpgradeV4Response response = new UpgradeV4Response();
+        response.setReason(BASE_IMAGE_ERROR);
+
+        when(currentImageRetrieverService.retrieveCurrentModelImage(stack)).thenReturn(currentImage);
+        when(imageFilterParamsFactory.create(null, currentImage, lockComponents, true, stack, INTERNAL_UPGRADE_SETTINGS, false)).thenReturn(imageFilterParams);
+        when(currentImageRetrieverService.retrieveCurrentModelImage(stack)).thenReturn(currentImage);
+        ImageFilterResult filteredImages = new ImageFilterResult(List.of(), BASE_IMAGE_ERROR);
+        when(clusterUpgradeImageFilter.getAvailableImagesForUpgrade(WORKSPACE_ID, CATALOG_NAME, imageFilterParams)).thenReturn(filteredImages);
+        when(upgradeOptionsResponseFactory.createV4Response(currentImage, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
+                currentImage.getImageCatalogName())).thenReturn(response);
+
+
+        UpgradeV4Response actual = underTest.checkForUpgradesByName(stack, lockComponents, true, INTERNAL_UPGRADE_SETTINGS, false, null);
+
+        assertEquals(response, actual);
+    }
+
     private StackStatus createStackStatus(Status status) {
         StackStatus stackStatus = new StackStatus();
         stackStatus.setStatus(status);
@@ -514,6 +542,13 @@ class ClusterUpgradeAvailabilityServiceTest {
                 .withImageId(CURRENT_IMAGE_ID)
                 .withImageCatalogName(CATALOG_NAME)
                 .build();
+    }
+
+    private static Map<String, String> getPackageVersions() {
+        Map<String, String> packageVersions = new HashMap<>();
+        packageVersions.put(ImagePackageVersion.CM.getKey(), V_7_0_3);
+        packageVersions.put(ImagePackageVersion.CDH_BUILD_NUMBER.getKey(), BUILD_NUMBER);
+        return packageVersions;
     }
 
     private ImageFilterResult createFilteredImages(com.sequenceiq.cloudbreak.cloud.model.catalog.Image image) {
