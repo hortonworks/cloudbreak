@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -49,6 +50,21 @@ public class ImageValidatorE2ETestUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageValidatorE2ETestUtil.class);
 
+    private static final Map<String, Class<?>> ALL_TESTS_FOR_FREEIPA = Map.of(
+            "testCcmV1Upgrade", DatalakeCcmUpgradeAndRotationTest.class,
+            "testAddUsersToEnvironment", BasicEnvironmentVirtualGroupTest.class,
+            "testAddGroupsToEnvironment", BasicEnvironmentVirtualGroupTest.class,
+            "testHAFreeIpaInstanceUpgrade", FreeIpaUpgradeTests.class,
+            "testMonitoringOnEnvironment", MonitoringTests.class
+    );
+
+    private static final Map<String, Class<?>> ALL_TESTS_FOR_RUNTIME = Map.of(
+            "testCcmV1Upgrade", DatalakeCcmUpgradeAndRotationTest.class,
+            "testClusterProvisionWithForcedJavaVersion", ForceJavaVersionE2ETest.class,
+            "testSDXUpgrade", SdxUpgradeTests.class,
+            "testMonitoringOnFreeIpaSdxDistrox", MonitoringTests.class
+    );
+
     @Inject
     private CommonCloudProperties commonCloudProperties;
 
@@ -68,7 +84,7 @@ public class ImageValidatorE2ETestUtil {
     private ImageValidationType imageValidationType;
 
     @Value("${integrationtest.imageValidation.runAdditionalTests:false}")
-    private boolean runAdditionalTests;
+    private String runAdditionalTests;
 
     public void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
@@ -220,26 +236,21 @@ public class ImageValidatorE2ETestUtil {
                 }
             }
             case FREEIPA -> {
-                addTestCaseIfNotAlreadyPassed(basicTests, PrewarmImageValidatorE2ETest.class, "testCreateInternalSdxAndDistrox");
-
-                if (runAdditionalTests) {
+                addTestCase(basicTests);
+                if (!"none".equalsIgnoreCase(runAdditionalTests)) {
                     XmlTest additionalTests = testNGUtil.createTest(suite, "Additional FreeIPA tests", false);
-                    addTestCaseIfNotAlreadyPassed(additionalTests, DatalakeCcmUpgradeAndRotationTest.class, "testCcmV1Upgrade");
-                    addTestCaseIfNotAlreadyPassed(additionalTests, BasicEnvironmentVirtualGroupTest.class, "testAddUsersToEnvironment");
-                    addTestCaseIfNotAlreadyPassed(additionalTests, BasicEnvironmentVirtualGroupTest.class, "testAddGroupsToEnvironment");
-                    addTestCaseIfNotAlreadyPassed(additionalTests, FreeIpaUpgradeTests.class, "testHAFreeIpaInstanceUpgrade");
-                    addTestCaseIfNotAlreadyPassed(additionalTests, MonitoringTests.class, "testMonitoringOnEnvironment");
+                    ALL_TESTS_FOR_FREEIPA.forEach((k, v) -> {
+                        addTestCaseIfNotPassedOrSkipped(additionalTests, v, k, runAdditionalTests);
+                    });
                 }
             }
             case PREWARM -> {
-                addTestCaseIfNotAlreadyPassed(basicTests, PrewarmImageValidatorE2ETest.class, "testCreateInternalSdxAndDistrox");
-
-                if (runAdditionalTests) {
-                    XmlTest additionalTests = testNGUtil.createTest(suite, "Additional runtime tests", false);
-                    addTestCaseIfNotAlreadyPassed(additionalTests, DatalakeCcmUpgradeAndRotationTest.class, "testCcmV1Upgrade");
-                    addTestCaseIfNotAlreadyPassed(additionalTests, ForceJavaVersionE2ETest.class, "testClusterProvisionWithForcedJavaVersion");
-                    addTestCaseIfNotAlreadyPassed(additionalTests, SdxUpgradeTests.class, "testSDXUpgrade");
-                    addTestCaseIfNotAlreadyPassed(additionalTests, MonitoringTests.class, "testMonitoringOnFreeIpaSdxDistrox");
+                addTestCase(basicTests);
+                if (!"none".equalsIgnoreCase(runAdditionalTests)) {
+                    XmlTest additionalTests = testNGUtil.createTest(suite, "Additional Runtime tests", false);
+                    ALL_TESTS_FOR_RUNTIME.forEach((k, v) -> {
+                        addTestCaseIfNotPassedOrSkipped(additionalTests, v, k, runAdditionalTests);
+                    });
                 }
             }
             default -> throw new IllegalStateException("Unknown image validation type: " + imageValidationType);
@@ -247,7 +258,15 @@ public class ImageValidatorE2ETestUtil {
         return List.of(suite);
     }
 
-    private void addTestCaseIfNotAlreadyPassed(XmlTest xmlTest, Class<?> testClass, String methodName) {
+    private void addTestCase(XmlTest xmlTest) {
+        addTestCaseIfNotPassedOrSkipped(xmlTest, PrewarmImageValidatorE2ETest.class, "testCreateInternalSdxAndDistrox", null);
+    }
+
+    private void addTestCaseIfNotPassedOrSkipped(XmlTest xmlTest, Class<?> testClass, String methodName, String runAdditionalTests) {
+        if (runAdditionalTests != null && (runAdditionalTests.contains("-" + methodName) || "none".equalsIgnoreCase(runAdditionalTests))) {
+            LOGGER.debug("Skipping ignored test case {}::{}", testClass.getSimpleName(), methodName);
+            return;
+        }
         if (!PassedTestsReporter.isAlreadyPassedTest(testClass, methodName)) {
             LOGGER.info("Adding test case {}::{}", testClass.getSimpleName(), methodName);
             testNGUtil.addTestCase(xmlTest, testClass, methodName);

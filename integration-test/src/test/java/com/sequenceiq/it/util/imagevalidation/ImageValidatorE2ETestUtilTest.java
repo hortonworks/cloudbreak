@@ -48,7 +48,7 @@ class ImageValidatorE2ETestUtilTest {
     @ParameterizedTest
     @MethodSource("imageValidationTypeAndCloudPlatform")
     void getSuitesTestMethodsExist(ImageValidationType imageValidationType, CloudPlatform cloudPlatform) throws NoSuchMethodException {
-        ReflectionTestUtils.setField(underTest, "runAdditionalTests", true);
+        ReflectionTestUtils.setField(underTest, "runAdditionalTests", "all");
         ReflectionTestUtils.setField(underTest, "imageValidationType", imageValidationType);
         lenient().when(commonCloudProperties.getCloudProvider()).thenReturn(cloudPlatform.getDislayName());
         when(testNGUtil.createSuite(any())).thenReturn(new XmlSuite());
