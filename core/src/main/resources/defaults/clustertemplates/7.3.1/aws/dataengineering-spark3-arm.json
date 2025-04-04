@@ -2,7 +2,7 @@
   "name": "7.3.1 - Data Engineering Spark3 (ARM) for AWS",
   "description": "",
   "type": "DATAENGINEERING",
-  "featureState": "INTERNAL",
+  "featureState": "RELEASED",
   "cloudPlatform": "AWS",
   "distroXTemplate": {
     "cluster": {

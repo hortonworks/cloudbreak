@@ -18,6 +18,7 @@ import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -151,11 +152,7 @@ public class InstanceMetadataAvailabilityZoneCalculator {
                 .map(InstanceGroup::getInstanceGroupNetwork)
                 .map(InstanceGroupNetwork::getCloudPlatform);
         if (optCloudPlatform.isPresent() && ZONAL_SUBNET_CLOUD_PLATFORMS.contains(optCloudPlatform.get())) {
-            DetailedEnvironmentResponse detailedEnvironmentResponse = getDetailedEnvironmentResponse(instanceGroup.getStack().getEnvironmentCrn());
-            List<String> subnetIds = (List<String>) instanceGroup.getInstanceGroupNetwork().getAttributes().getMap().get(SUBNET_IDS);
-            Map<String, String> subnetAzMap = subnetIds.stream()
-                    .collect(Collectors.toMap(subnetId -> subnetId,
-                            subnetId -> detailedEnvironmentResponse.getNetwork().getSubnetMetas().get(subnetId).getAvailabilityZone()));
+            Map<String, String> subnetAzMap = getSubnetAzMapFromEnvironment(instanceGroup);
             populateSubnetUsageGroupedByAzMap(subnetUsageGroupedByAzMap, subnetAzMap);
         }
         for (InstanceMetaData instance : instanceMetaDataSet) {
@@ -183,6 +180,15 @@ public class InstanceMetadataAvailabilityZoneCalculator {
             }
         }
         return updatedInstances;
+    }
+
+    private @NotNull Map<String, String> getSubnetAzMapFromEnvironment(InstanceGroup instanceGroup) {
+        DetailedEnvironmentResponse detailedEnvironmentResponse = getDetailedEnvironmentResponse(instanceGroup.getStack().getEnvironmentCrn());
+        List<String> subnetIds = (List<String>) instanceGroup.getInstanceGroupNetwork().getAttributes().getMap().get(SUBNET_IDS);
+        Map<String, String> subnetAzMap = subnetIds.stream()
+                .collect(Collectors.toMap(subnetId -> subnetId,
+                        subnetId -> detailedEnvironmentResponse.getNetwork().getSubnetMetas().get(subnetId).getAvailabilityZone()));
+        return subnetAzMap;
     }
 
     private void populateSubnetUsageGroupedByAzMap(Map<String, Map<String, Long>> subnetUsageGroupedByAzMap, Map<String, String> subnetAzMap) {
@@ -281,6 +287,7 @@ public class InstanceMetadataAvailabilityZoneCalculator {
             if (StringUtils.isNotEmpty(zoneFromDisk)) {
                 LOGGER.info("Setting availability zone to '{}' for instance with FQDN '{}' in group '{}' during repair", zoneFromDisk, discoveryFQDN,
                         hostGroupName);
+                setSubnet(im, stackView, zoneFromDisk);
                 im.setAvailabilityZone(zoneFromDisk);
                 im.setRackId("/" +
                         (isNullOrEmpty(zoneFromDisk) ?
@@ -302,6 +309,18 @@ public class InstanceMetadataAvailabilityZoneCalculator {
             updatedInstances.addAll(populateAvailabilityZoneOfInstances(zonesOfInstanceGroup, notDeletedInstancesForGroup, hostGroupName, instanceGroup));
         }
         return updatedInstances;
+    }
+
+    private void setSubnet(InstanceMetaData im, StackView stackView, String zoneFromDisk) {
+        if (ZONAL_SUBNET_CLOUD_PLATFORMS.contains(stackView.getCloudPlatform())) {
+            Map<String, String> subnetAzMap = getSubnetAzMapFromEnvironment(im.getInstanceGroup());
+            String subnetId = subnetAzMap.entrySet().stream()
+                    .filter(e -> e.getValue().equals(zoneFromDisk))
+                    .map(Map.Entry::getKey)
+                    .findFirst()
+                    .orElseThrow(() -> new CloudbreakServiceException(String.format("The zone %s has no assigned subnet on environment.", zoneFromDisk)));
+            im.setSubnetId(subnetId);
+        }
     }
 
     private Set<InstanceMetaData> populateOnInstancesOfGroupForScaling(StackDtoDelegate stack, String hostGroupName, Long instanceGroupId,

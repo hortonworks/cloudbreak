@@ -1,7 +1,10 @@
 package com.sequenceiq.cloudbreak.service.multiaz;
 
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -24,10 +27,13 @@ import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
@@ -81,8 +87,10 @@ public class ProviderBasedMultiAzSetupValidator {
         boolean atLeastOneZoneDefinedForAllTheGroups = stack.getInstanceGroups().stream()
                 .allMatch(group -> CollectionUtils.isNotEmpty(group.getAvailabilityZones()));
         boolean anyZoneConfiguredOnGroupLevel = stack.getInstanceGroups().stream().anyMatch(group -> CollectionUtils.isNotEmpty(group.getAvailabilityZones()));
+        boolean multipleSubnetsConfiguredOnAnyGroupLevel = stack.getInstanceGroups().stream().anyMatch(this::isInstanceGroupHasMultipleSubnets);
         if (!stack.isMultiAz()) {
-            if (atLeastOneZoneDefinedForAllTheGroups) {
+            if (atLeastOneZoneDefinedForAllTheGroups
+                    || (AWS.name().equals(stack.getCloudPlatform()) && multipleSubnetsConfiguredOnAnyGroupLevel)) {
                 LOGGER.debug("Enabling the multi-AZ flag on the stack, because the instance group level network settings indicate that.");
                 stackService.updateMultiAzFlag(stack.getId(), Boolean.TRUE);
                 stack.setMultiAz(Boolean.TRUE);
@@ -93,6 +101,21 @@ public class ProviderBasedMultiAzSetupValidator {
                 validationBuilder.error(msg);
             }
         }
+    }
+
+    private boolean isInstanceGroupHasMultipleSubnets(InstanceGroup instanceGroup) {
+        InstanceGroupNetwork instanceGroupNetwork = instanceGroup.getInstanceGroupNetwork();
+        if (instanceGroupNetwork != null) {
+            Json attributes = instanceGroupNetwork.getAttributes();
+            if (attributes != null) {
+                List<String> subnetIds = (List<String>) attributes
+                        .getMap()
+                        .getOrDefault(NetworkConstants.SUBNET_IDS, new ArrayList<>());
+
+                return subnetIds.size() > 1;
+            }
+        }
+        return false;
     }
 
     public AvailabilityZoneConnector getAvailabilityZoneConnector(StackView stack) {

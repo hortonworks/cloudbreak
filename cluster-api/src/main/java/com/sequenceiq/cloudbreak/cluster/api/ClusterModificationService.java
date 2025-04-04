@@ -29,7 +29,7 @@ public interface ClusterModificationService {
 
     void startClusterManagerAndAgents() throws CloudbreakException;
 
-    void deployConfigAndStartClusterServices() throws CloudbreakException;
+    void deployConfigAndRestartClusterServices(boolean rollingRestart) throws CloudbreakException;
 
     void reconfigureCMMemory() throws CloudbreakException;
 

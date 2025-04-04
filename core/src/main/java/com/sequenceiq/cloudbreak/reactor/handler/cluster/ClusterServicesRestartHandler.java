@@ -66,7 +66,7 @@ public class ClusterServicesRestartHandler extends ExceptionCatcherEventHandler<
             if ((sdxBasicView.isPresent() && clusterServicesRestartService.isRemoteDataContextRefreshNeeded(stack, sdxBasicView.get()))
                     || request.isDatahubRefreshNeeded()) {
                 LOGGER.info("Deploying client config and restarting services");
-                clusterServicesRestartService.refreshClusterOnRestart(stack, sdxBasicView.get(), blueprintProcessor);
+                clusterServicesRestartService.refreshClusterOnRestart(stack, sdxBasicView.get(), blueprintProcessor, request.isRollingRestart());
             } else {
                 LOGGER.info("Restarting services");
                 if (request.isRollingRestart()) {

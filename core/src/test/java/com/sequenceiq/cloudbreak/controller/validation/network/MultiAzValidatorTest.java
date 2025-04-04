@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.cloudbreak.service.multiaz.ProviderBasedMultiAzSetupValidator;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,6 +41,9 @@ public class MultiAzValidatorTest {
 
     @Mock
     private ProviderBasedMultiAzSetupValidator providerBasedMultiAzSetupValidator;
+
+    @Mock
+    private StackService stackService;
 
     @Mock
     private AvailabilityZoneConnector availabilityZoneConnector;

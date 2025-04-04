@@ -66,10 +66,11 @@ public class ClusterServicesRestartService {
     public void refreshClusterOnStart(Stack stack, SdxBasicView sdxBasicView, CmTemplateProcessor blueprintProcessor) throws CloudbreakException {
         LOGGER.info("Triggering update of remote data context");
         apiConnectors.getConnector(stack).startClusterManagerAndAgents();
-        refreshClusterOnRestart(stack, sdxBasicView, blueprintProcessor);
+        refreshClusterOnRestart(stack, sdxBasicView, blueprintProcessor, false);
     }
 
-    public void refreshClusterOnRestart(Stack stack, SdxBasicView sdxBasicView, CmTemplateProcessor blueprintProcessor) throws CloudbreakException {
+    public void refreshClusterOnRestart(Stack stack, SdxBasicView sdxBasicView, CmTemplateProcessor blueprintProcessor, boolean rollingRestart)
+            throws CloudbreakException {
         LOGGER.info("Triggering update of remote data context for {}", stack.getResourceCrn());
         clusterBuilderService.configureManagementServices(stack.getId());
         if (shouldReloadDatabaseConfig(blueprintProcessor)) {
@@ -79,7 +80,7 @@ public class ClusterServicesRestartService {
         } else {
             LOGGER.info("Database configuration is not refreshed");
         }
-        apiConnectors.getConnector(stack).startClusterServices();
+        apiConnectors.getConnector(stack).restartClusterServices(rollingRestart);
     }
 
     private void updateDatabaseConfiguration(SdxBasicView sdxBasicView, Stack dataHubStack, String service) {
