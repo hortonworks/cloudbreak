@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.reactor.handler.cluster;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -92,7 +93,7 @@ public class ClusterServicesRestartHandlerTest {
         when(clusterServicesRestartService.isRemoteDataContextRefreshNeeded(any(), any())).thenReturn(true);
         underTest.accept(new Event(new ClusterServicesRestartRequest(stack.getId(), false, false)));
 
-        verify(clusterServicesRestartService).refreshClusterOnRestart(any(), any(), any());
+        verify(clusterServicesRestartService).refreshClusterOnRestart(any(), any(), any(), eq(false));
         verifyNoInteractions(apiConnectors);
     }
 
@@ -103,7 +104,7 @@ public class ClusterServicesRestartHandlerTest {
         when(clusterServicesRestartService.isRemoteDataContextRefreshNeeded(any(), any())).thenReturn(false);
         underTest.accept(new Event(new ClusterServicesRestartRequest(stack.getId(), false, false)));
 
-        verify(clusterServicesRestartService, times(0)).refreshClusterOnRestart(any(), any(), any());
+        verify(clusterServicesRestartService, times(0)).refreshClusterOnRestart(any(), any(), any(), eq(false));
         verify(clusterModificationService).restartClusterServices();
 
     }

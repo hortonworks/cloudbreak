@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.cloudbreak.service.multiaz.ProviderBasedMultiAzSetupValidator;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 
@@ -38,6 +39,9 @@ public class MultiAzValidator {
     @Inject
     private ProviderBasedMultiAzSetupValidator providerBasedMultiAzSetupValidator;
 
+    @Inject
+    private StackService stackService;
+
     @PostConstruct
     public void initSupportedVariants() {
         if (supportedInstanceMetadataPlatforms.isEmpty()) {
@@ -48,7 +52,6 @@ public class MultiAzValidator {
 
     public void validateMultiAzForStack(Stack stack, ValidationResult.ValidationResultBuilder validationBuilder) {
         Set<String> allSubnetIds = collectSubnetIds(new ArrayList<>(stack.getInstanceGroups()));
-        String platformVariant = stack.getPlatformVariant();
         if (allSubnetIds.size() > 1 && !supportedVariant(stack)) {
             String variantIsNotSupportedMsg = String.format("Multiple subnets are not supported for this %s platform and %s variant", stack.getCloudPlatform(),
                     stack.getPlatformVariant());
@@ -57,6 +60,7 @@ public class MultiAzValidator {
         } else if (allSubnetIds.size() > 1 && supportedVariant(stack)) {
             LOGGER.info("Multiple subnets are supported for this {} platform and configured in the request. Setting the multi-AZ flag to true",
                     stack.getCloudPlatform());
+            stackService.updateMultiAzFlag(stack.getId(), Boolean.TRUE);
             stack.setMultiAz(Boolean.TRUE);
         }
         providerBasedMultiAzSetupValidator.validate(validationBuilder, stack);

@@ -894,12 +894,12 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
      * Deploy the client configuration and then start the cluster services.
      */
     @Override
-    public void deployConfigAndStartClusterServices() throws CloudbreakException {
+    public void deployConfigAndRestartClusterServices(boolean rollingRestart) throws CloudbreakException {
         try {
             LOGGER.info("Deploying configuration and restarting services");
             enableKnoxAutoRestart();
             deployConfig();
-            restartServices(false, false);
+            restartServices(rollingRestart, false);
         } catch (ApiException e) {
             LOGGER.info("Couldn't start Cloudera Manager services", e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
