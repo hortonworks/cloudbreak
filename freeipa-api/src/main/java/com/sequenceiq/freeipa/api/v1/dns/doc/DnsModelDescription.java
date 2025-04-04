@@ -16,6 +16,8 @@ public final class DnsModelDescription {
 
     public static final String CREATE_REVERSE = "Tries to create a reverse pointer for the record (PTR). Only if reverse zone already exists";
 
+    public static final String FORCE = "Replaces the current value regardless of whether it already exists";
+
     private DnsModelDescription() {
     }
 }

@@ -43,9 +43,9 @@ public class FreeIPAEndpointManagementService extends BasePublicEndpointManageme
             LoadBalancer loadBalancer = loadBalancerOptional.get();
             try {
                 if (StringUtils.isNotEmpty(loadBalancer.getDns())) {
-                    sendAddDnsCnameRecordRequest(stack, loadBalancer);
+                    sendAddDnsCnameRecordRequest(stack, loadBalancer, true);
                 } else if (StringUtils.isNotEmpty(loadBalancer.getIp())) {
-                    sendAddDnsARecordRequest(stack, loadBalancer);
+                    sendAddDnsARecordRequest(stack, loadBalancer, true);
                 } else {
                     LOGGER.error("Unable to find DNS or IP for load balancer. Load balancer will not be registered with FreeIPA.");
                 }
@@ -57,7 +57,7 @@ public class FreeIPAEndpointManagementService extends BasePublicEndpointManageme
         }
     }
 
-    private void sendAddDnsCnameRecordRequest(StackView stack, LoadBalancer loadBalancer) {
+    private void sendAddDnsCnameRecordRequest(StackView stack, LoadBalancer loadBalancer, boolean force) {
         String targetFQDN = StringUtils.appendIfMissing(loadBalancer.getDns(), DOMAIN_PART_DELIMITER);
         String endpoint = loadBalancer.getEndpoint();
 
@@ -65,13 +65,15 @@ public class FreeIPAEndpointManagementService extends BasePublicEndpointManageme
         request.setCname(endpoint);
         request.setTargetFqdn(targetFQDN);
         request.setEnvironmentCrn(stack.getEnvironmentCrn());
-        LOGGER.debug("Registering load balancer with target FQDN {} in FreeIPA with CNAME {}", targetFQDN, endpoint);
+        request.setForce(force);
+
+        LOGGER.info("Registering load balancer with target FQDN {} in FreeIPA with CNAME {}", targetFQDN, endpoint);
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         ThreadBasedUserCrnProvider.doAsInternalActor(
                 () -> dnsV1Endpoint.addDnsCnameRecordInternal(accountId, request));
     }
 
-    private void sendAddDnsARecordRequest(StackView stack, LoadBalancer loadBalancer) {
+    private void sendAddDnsARecordRequest(StackView stack, LoadBalancer loadBalancer, boolean force) {
         String ip = loadBalancer.getIp();
         String endpoint = loadBalancer.getEndpoint();
 
@@ -80,7 +82,9 @@ public class FreeIPAEndpointManagementService extends BasePublicEndpointManageme
         request.setIp(ip);
         request.setEnvironmentCrn(stack.getEnvironmentCrn());
         request.setCreateReverse(true);
-        LOGGER.debug("Registering load balancer with target IP {} in FreeIPA with A record {}", ip, endpoint);
+        request.setForce(force);
+
+        LOGGER.info("Registering load balancer with target IP {} in FreeIPA with A record {}", ip, endpoint);
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         ThreadBasedUserCrnProvider.doAsInternalActor(
                 () -> dnsV1Endpoint.addDnsARecordInternal(accountId, request));

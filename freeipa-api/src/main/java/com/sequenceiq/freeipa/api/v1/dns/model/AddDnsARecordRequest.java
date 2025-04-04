@@ -43,6 +43,9 @@ public class AddDnsARecordRequest {
     @Schema(description = DnsModelDescription.CREATE_REVERSE)
     private boolean createReverse;
 
+    @Schema(description = DnsModelDescription.FORCE)
+    private boolean force;
+
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
@@ -83,6 +86,14 @@ public class AddDnsARecordRequest {
         this.ip = ip;
     }
 
+    public boolean isForce() {
+        return force;
+    }
+
+    public void setForce(boolean force) {
+        this.force = force;
+    }
+
     @Override
     public String toString() {
         return "AddDnsARecordRequest{" +
@@ -91,6 +102,7 @@ public class AddDnsARecordRequest {
                 ", ip='" + ip + '\'' +
                 ", dnsZone='" + dnsZone + '\'' +
                 ", createReverse=" + createReverse +
+                ", force=" + force +
                 '}';
     }
 }

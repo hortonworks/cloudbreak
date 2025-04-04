@@ -111,10 +111,21 @@ public class DnsRecordService {
         LOGGER.info("Processing AddDnsARecordRequest: {}", request);
         String zone = calculateZone(request.getDnsZone(), freeIpaAndClient);
         Optional<DnsRecord> dnsRecord = ignoreNotFoundExceptionWithValue(() -> freeIpaAndClient.getClient().showDnsRecord(zone, request.getHostname()), null);
-        if (dnsRecord.isEmpty()) {
-            createDnsARecord(freeIpaAndClient.getClient(), zone, request.getHostname(), request.getIp(), request.isCreateReverse());
+        if (dnsRecord.isPresent()) {
+            handleExistingARecord(freeIpaAndClient.getClient(), accountId, request, dnsRecord.get(), zone);
         } else {
-            validateExistingARecordMatchesRequested(request.getIp(), dnsRecord.get());
+            createDnsARecord(freeIpaAndClient.getClient(), zone, request.getHostname(), request.getIp(), request.isCreateReverse());
+        }
+    }
+
+    private void handleExistingARecord(FreeIpaClient freeIpaClient, String accountId, AddDnsARecordRequest request, DnsRecord dnsRecord, String zone)
+            throws FreeIpaClientException {
+        if (request.isForce() && !dnsRecord.getArecord().contains(request.getIp())) {
+            LOGGER.info("Record already exists and the target doesn't match. A Record {}, IP: {}. Deleting record", dnsRecord.getArecord(), request.getIp());
+            deleteDnsRecord(accountId, request.getEnvironmentCrn(), null, request.getHostname());
+            createDnsARecord(freeIpaClient, zone, request.getHostname(), request.getIp(), request.isCreateReverse());
+        } else {
+            validateExistingARecordMatchesRequested(request.getIp(), dnsRecord);
         }
     }
 
@@ -182,10 +193,21 @@ public class DnsRecordService {
         String zone = calculateZone(request.getDnsZone(), freeIpaAndClient);
         Optional<DnsRecord> dnsRecord = ignoreNotFoundExceptionWithValue(() -> freeIpaAndClient.getClient().showDnsRecord(zone, request.getCname()), null);
         String targetFqdn = StringUtils.appendIfMissing(request.getTargetFqdn(), ".");
-        if (dnsRecord.isEmpty()) {
-            createDnsCnameRecord(freeIpaAndClient.getClient(), zone, request.getCname(), targetFqdn);
+        if (dnsRecord.isPresent()) {
+            handleExistingCname(freeIpaAndClient.getClient(), accountId, request, dnsRecord.get(), targetFqdn, zone);
         } else {
-            validateExistingCnameRecordMatches(dnsRecord.get(), targetFqdn);
+            createDnsCnameRecord(freeIpaAndClient.getClient(), zone, request.getCname(), targetFqdn);
+        }
+    }
+
+    private void handleExistingCname(FreeIpaClient freeIpaClient, String accountId, AddDnsCnameRecordRequest request, DnsRecord dnsRecord, String targetFqdn,
+            String zone) throws FreeIpaClientException {
+        if (request.isForce() && !dnsRecord.getCnamerecord().contains(targetFqdn)) {
+            LOGGER.info("Record already exists and the target doesn't match. CNAME {}, FQDN: {}. Deleting record", dnsRecord.getCnamerecord(), targetFqdn);
+            deleteDnsRecord(accountId, request.getEnvironmentCrn(), null, request.getCname());
+            createDnsCnameRecord(freeIpaClient, zone, request.getCname(), targetFqdn);
+        } else {
+            validateExistingCnameRecordMatches(dnsRecord, targetFqdn);
         }
     }
 

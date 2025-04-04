@@ -320,6 +320,31 @@ public class DnsRecordServiceTest {
     }
 
     @Test
+    public void testARecordExistsWithDifferentValueAndForceIsTrue() throws FreeIpaClientException {
+        AddDnsARecordRequest request = new AddDnsARecordRequest();
+        request.setEnvironmentCrn(ENV_CRN);
+        request.setHostname("cloudera-master");
+        request.setIp("8.8.8.8");
+        request.setCreateReverse(true);
+        request.setForce(true);
+        Stack stack = createStack();
+        FreeIpa freeIpa = createFreeIpa();
+        DnsRecord dnsRecord = new DnsRecord();
+        dnsRecord.setArecord(List.of("1.1.1.1"));
+        dnsRecord.setIdnsname(request.getHostname());
+
+        when(stackService.getByEnvironmentCrnAndAccountId(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
+        when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
+        when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(freeIpaClient);
+        when(freeIpaClient.showDnsRecord(DOMAIN, request.getHostname())).thenReturn(dnsRecord);
+
+        underTest.addDnsARecord(ACCOUNT_ID, request);
+
+        verify(freeIpaClient).deleteDnsRecord(eq(request.getHostname()), anyString());
+        verify(freeIpaClient).addDnsARecord(DOMAIN, request.getHostname(), request.getIp(), request.isCreateReverse());
+    }
+
+    @Test
     public void testCnameRecordAdd() throws FreeIpaClientException {
         AddDnsCnameRecordRequest request = new AddDnsCnameRecordRequest();
         request.setEnvironmentCrn(ENV_CRN);
@@ -514,6 +539,30 @@ public class DnsRecordServiceTest {
         when(freeIpaClient.showDnsRecord(DOMAIN, request.getCname())).thenReturn(dnsRecord);
 
         Assertions.assertThrows(DnsRecordConflictException.class, () -> underTest.addDnsCnameRecord(ACCOUNT_ID, request));
+    }
+
+    @Test
+    public void testCnameRecordExistsWithDifferentValueAndForceIsTrue() throws FreeIpaClientException {
+        AddDnsCnameRecordRequest request = new AddDnsCnameRecordRequest();
+        request.setEnvironmentCrn(ENV_CRN);
+        request.setCname("cloudera-gateway");
+        request.setTargetFqdn(TARGET_FQDN);
+        request.setForce(true);
+        Stack stack = createStack();
+        FreeIpa freeIpa = createFreeIpa();
+        DnsRecord dnsRecord = new DnsRecord();
+        dnsRecord.setCnamerecord(List.of("loadbalancer.com"));
+        dnsRecord.setIdnsname(request.getCname());
+
+        when(stackService.getByEnvironmentCrnAndAccountId(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
+        when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
+        when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(freeIpaClient);
+        when(freeIpaClient.showDnsRecord(DOMAIN, request.getCname())).thenReturn(dnsRecord);
+
+        underTest.addDnsCnameRecord(ACCOUNT_ID, request);
+
+        verify(freeIpaClient).deleteDnsRecord(eq(request.getCname()), anyString());
+        verify(freeIpaClient).addDnsCnameRecord(DOMAIN, request.getCname(), request.getTargetFqdn());
     }
 
     @Test

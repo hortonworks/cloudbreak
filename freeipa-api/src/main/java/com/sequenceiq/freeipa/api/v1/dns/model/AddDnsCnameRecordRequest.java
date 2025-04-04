@@ -41,6 +41,9 @@ public class AddDnsCnameRecordRequest {
             message = "Target FQDN must be valid. Might start with '*.' and can contain alphanumeric characters, dash and dot.")
     private String targetFqdn;
 
+    @Schema(description = DnsModelDescription.FORCE)
+    private boolean force;
+
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
@@ -73,6 +76,14 @@ public class AddDnsCnameRecordRequest {
         this.targetFqdn = targetFqdn;
     }
 
+    public boolean isForce() {
+        return force;
+    }
+
+    public void setForce(boolean force) {
+        this.force = force;
+    }
+
     @Override
     public String toString() {
         return "AddDnsCnameRecordRequest{" +
@@ -80,6 +91,7 @@ public class AddDnsCnameRecordRequest {
                 ", cname='" + cname + '\'' +
                 ", dnsZone='" + dnsZone + '\'' +
                 ", targetFqdn='" + targetFqdn + '\'' +
+                ", force=" + force +
                 '}';
     }
 }
