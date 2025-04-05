@@ -40,6 +40,9 @@ build-redbeams:
 build-environment-remote:
 	 ./environment-remote/scripts/build-dev.sh
 
+build-integration-test:
+	 ./integration-test/scripts/build-dev.sh
+
 build-externalized-compute:
 	 ./externalized-compute/scripts/build-dev.sh
 
