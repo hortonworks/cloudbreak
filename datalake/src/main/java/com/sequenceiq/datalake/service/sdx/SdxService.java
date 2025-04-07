@@ -797,9 +797,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             } else if (stackResponse.getCloudPlatform().equals(GCP)) {
                 subnetsByAz = collectSubnetsByAzFromGcp(stackResponse);
             }
-            multiAzDecorator.decorateStackRequestWithPreviousNetwork(stackRequest, environmentResponse, clusterShape, subnetsByAz);
-        } else {
-            multiAzDecorator.decorateStackRequestWithMultiAz(stackRequest, environmentResponse, clusterShape);
+            if (subnetsByAz != null && subnetsByAz.size() > 1) {
+                multiAzDecorator.decorateStackRequestWithPreviousNetwork(stackRequest, environmentResponse, clusterShape, subnetsByAz);
+            }
         }
     }
 
