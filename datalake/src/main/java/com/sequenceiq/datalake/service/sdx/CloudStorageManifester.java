@@ -81,6 +81,9 @@ public class CloudStorageManifester {
             CloudStorageResponse cloudStorageResponse = clusterV4Response.getCloudStorage();
             cloudStorageRequest.copy(cloudStorageResponse);
             cloudStorageRequest.setAccountMapping(null);
+            if (cloudStorageRequest.getAws() != null) {
+                cloudStorageRequest.getAws().setS3Guard(null);
+            }
         }
         return cloudStorageRequest;
     }

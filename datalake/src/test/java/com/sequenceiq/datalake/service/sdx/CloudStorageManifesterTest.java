@@ -28,8 +28,10 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
+import com.sequenceiq.common.api.cloudstorage.AwsStorageParameters;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageResponse;
+import com.sequenceiq.common.api.cloudstorage.S3Guard;
 import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
@@ -320,7 +322,7 @@ public class CloudStorageManifesterTest {
     }
 
     @Test
-    public void initCloudStorageRequestFromExistingSdxClusterShouldNotCopyAccountMapping() {
+    public void initCloudStorageRequestFromExistingSdxClusterShouldNotCopyAccountMappingAndS3Guard() {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setCloudStorageBaseLocation("s3a://cloudbreak");
         ClusterV4Response clusterV4Response = new ClusterV4Response();
@@ -332,8 +334,17 @@ public class CloudStorageManifesterTest {
         storageLocationBase.setType(CloudStorageCdpService.RANGER_AUDIT);
         storageLocationBase.setValue("s3a://ranger-audit");
         cloudStorageResponse.setLocations(List.of(storageLocationBase));
+        AwsStorageParameters awsStorageParameters = new AwsStorageParameters();
+        S3Guard s3Guard = new S3Guard();
+        s3Guard.setDynamoTableName("s3guard");
+        awsStorageParameters.setS3Guard(s3Guard);
+        cloudStorageResponse.setAws(awsStorageParameters);
         clusterV4Response.setCloudStorage(cloudStorageResponse);
+
         CloudStorageRequest storageRequest = underTest.initCloudStorageRequestFromExistingSdxCluster(clusterV4Response, sdxCluster);
+
         assertNull(storageRequest.getAccountMapping());
+        assertNull(storageRequest.getAws().getS3Guard());
+
     }
 }
