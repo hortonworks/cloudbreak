@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.resource.ResourceV4Response;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -63,7 +64,8 @@ public class DatalakeDiskUpdateValidationHandler extends EventSenderAwareHandler
         LOGGER.debug("In DatalakeDiskUpdateValidationHandler.accept");
         DatalakeDiskUpdateEvent payload = datalakeDiskUpdateEvent.getData();
         try {
-            StackV4Response stackV4Response = stackV4Endpoint.getWithResources(WORKSPACE_ID, payload.getClusterName(), Set.of(), payload.getAccountId());
+            StackV4Response stackV4Response = ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> stackV4Endpoint.getWithResources(WORKSPACE_ID, payload.getClusterName(), Set.of(), payload.getAccountId()));
             DiskUpdateRequest diskUpdateRequest = payload.getDatalakeDiskUpdateRequest();
             List<ResourceV4Response> resources = stackV4Response.getResources().stream()
                     .filter(res -> null != res.getInstanceId() && null != res.getInstanceGroup() && res.getInstanceGroup().equals(diskUpdateRequest.getGroup())
