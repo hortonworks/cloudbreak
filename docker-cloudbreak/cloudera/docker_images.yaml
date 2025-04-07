@@ -1,0 +1,11 @@
+docker_images:
+  cloudbreak:
+    image: hortonworks/cloudbreak
+    env:
+      govcloud: exclude
+  cloudbreak-govcloud:
+    image: hortonworks/cloudbreak-govcloud
+    env:
+      govcloud: exclusive
+external_images:
+  java-init-container: docker-private.infra.cloudera.com/cloudera/thunderhead-java-init-container-17:1.0.1-b1027
