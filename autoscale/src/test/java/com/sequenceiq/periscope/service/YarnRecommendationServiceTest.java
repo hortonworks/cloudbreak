@@ -1,6 +1,8 @@
 package com.sequenceiq.periscope.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
@@ -17,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.periscope.config.YarnConfig;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ClusterPertain;
@@ -38,6 +41,8 @@ class YarnRecommendationServiceTest {
     private static final String TEST_HOSTGROUP_WORKER = "worker";
 
     private static final String TEST_CLUSTERCRN = "testCrn";
+
+    private static final String TEST_CLUSTER_NAME = "testName";
 
     private static final String TEST_MACHINE_USER_CRN = "testMachineUserCrn";
 
@@ -80,6 +85,19 @@ class YarnRecommendationServiceTest {
 
     @Mock
     private YarnResponseUtils yarnResponseUtils;
+
+    @Test
+    void testGetResourceCrnByResourceName() {
+        when(restRequestThreadLocalService.getCloudbreakTenant()).thenReturn(tenant);
+        when(clusterService.findOneByStackNameAndTenant(TEST_CLUSTER_NAME, tenant)).thenReturn(Optional.empty());
+        assertThrows(com.sequenceiq.periscope.service.NotFoundException.class, () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () ->
+                underTest.getResourceCrnByResourceName(TEST_CLUSTER_NAME)));
+
+        Cluster cluster = getACluster();
+        when(clusterService.findOneByStackNameAndTenant(TEST_CLUSTER_NAME, tenant)).thenReturn(Optional.of(cluster));
+        assertEquals(TEST_CLUSTERCRN, ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () ->
+                underTest.getResourceCrnByResourceName(TEST_CLUSTER_NAME)));
+    }
 
     @Test
     void testGetRecommendationFromYarnWithOnlyComputeNodes() throws Exception {

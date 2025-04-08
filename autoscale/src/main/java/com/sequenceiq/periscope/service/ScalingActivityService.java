@@ -1,7 +1,6 @@
 package com.sequenceiq.periscope.service;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType.WORKLOAD;
 import static com.sequenceiq.periscope.api.model.ActivityStatus.DOWNSCALE_TRIGGER_SUCCESS;
 import static com.sequenceiq.periscope.api.model.ActivityStatus.SCALING_FLOW_IN_PROGRESS;
 import static com.sequenceiq.periscope.api.model.ActivityStatus.UPSCALE_TRIGGER_SUCCESS;
@@ -34,7 +33,6 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.AuthorizationEnvironmentCrnProvider;
 import com.sequenceiq.authorization.service.AuthorizationResourceCrnProvider;
-import com.sequenceiq.cloudbreak.api.model.StatusKind;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.periscope.api.model.ActivityStatus;
 import com.sequenceiq.periscope.domain.Cluster;
@@ -69,20 +67,12 @@ public class ScalingActivityService implements AuthorizationResourceCrnProvider,
     @Retryable(value = NotFoundException.class, maxAttempts = 3, backoff = @Backoff(delay = 5000))
     public String getResourceCrnByResourceName(String clusterName) {
         return clusterService.findOneByStackNameAndTenant(clusterName, restRequestThreadLocalService.getCloudbreakTenant())
-                .orElseGet(() -> fetchClusterFromCBUsingName(clusterName)).getStackCrn();
+                .orElseThrow(NotFoundException.notFound("Cluster", clusterName)).getStackCrn();
     }
 
     @Override
     public Optional<String> getEnvironmentCrnByResourceCrn(String resourceCrn) {
         return clusterService.findOneByStackCrnAndTenant(resourceCrn, restRequestThreadLocalService.getCloudbreakTenant()).map(Cluster::getEnvironmentCrn);
-    }
-
-    protected Cluster fetchClusterFromCBUsingName(String stackName) {
-        String accountId = restRequestThreadLocalService.getCloudbreakTenant();
-        return Optional.ofNullable(cloudbreakCommunicator.getAutoscaleClusterByName(stackName, accountId))
-                .filter(stack -> WORKLOAD.equals(stack.getStackType()) && stack.getClusterStatus().getStatusKind().equals(StatusKind.FINAL))
-                .map(stack -> clusterService.create(stack))
-                .orElseThrow(NotFoundException.notFound("cluster", stackName));
     }
 
     public ScalingActivity create(Cluster cluster, ActivityStatus activityStatus, String reason, long creationTimestamp, long yarnRecommendationTime,

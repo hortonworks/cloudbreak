@@ -6,11 +6,14 @@ import static com.sequenceiq.periscope.api.model.ActivityStatus.SCALING_FLOW_SUC
 import static com.sequenceiq.periscope.api.model.ActivityStatus.UPSCALE_TRIGGER_SUCCESS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.time.Instant;
 import java.util.Date;
@@ -24,6 +27,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -53,8 +57,13 @@ class ScalingActivityServiceTest {
 
     private static final String CLOUDBREAK_STACK_NAME = "testCluster";
 
+    private static final String TEST_TENANT = "tenant";
+
     @InjectMocks
     private ScalingActivityService underTest;
+
+    @Mock
+    private ClusterService clusterService;
 
     @Mock
     private ScalingActivityRepository scalingActivityRepository;
@@ -65,8 +74,25 @@ class ScalingActivityServiceTest {
     @Mock
     private PeriscopeMetricService metricService;
 
+    @Mock
+    private AutoscaleRestRequestThreadLocalService restRequestThreadLocalService;
+
     @Captor
     private ArgumentCaptor<ScalingActivity> captor;
+
+    @Test
+    void testGetResourceCrnByResourceName() {
+        when(restRequestThreadLocalService.getCloudbreakTenant()).thenReturn(TEST_TENANT);
+        when(clusterService.findOneByStackNameAndTenant(CLOUDBREAK_STACK_NAME, TEST_TENANT)).thenReturn(Optional.empty());
+        assertThrows(com.sequenceiq.periscope.service.NotFoundException.class, () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () ->
+                underTest.getResourceCrnByResourceName(CLOUDBREAK_STACK_NAME)));
+
+        Cluster cluster = getCluster();
+        cluster.setStackCrn(CLOUDBREAK_STACK_CRN);
+        when(clusterService.findOneByStackNameAndTenant(CLOUDBREAK_STACK_NAME, TEST_TENANT)).thenReturn(Optional.of(cluster));
+        assertEquals(CLOUDBREAK_STACK_CRN, ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () ->
+                underTest.getResourceCrnByResourceName(CLOUDBREAK_STACK_NAME)));
+    }
 
     @Test
     void testCreate() {
