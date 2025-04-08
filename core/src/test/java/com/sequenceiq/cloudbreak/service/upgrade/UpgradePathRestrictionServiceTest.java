@@ -28,45 +28,67 @@ class UpgradePathRestrictionServiceTest {
     @Mock
     private EntitlementService entitlementService;
 
-    @ParameterizedTest(name = "[{index}] Upgrade from {0}.{1} to {2}.{3}, internal account enabled: {4} should be allowed: {5}")
+    @ParameterizedTest(name = "[{index}] Upgrade from {0}.{1} to {2}.{3}, should be allowed: {4}")
     @MethodSource("provideTestParameters")
     public void testPermitUpgrade(String currentVersion, Integer currentPatchVersion,
-            String candidateVersion, Integer candidatePatchVersion, boolean internalAccount,  boolean expectedResult) {
+            String candidateVersion, Integer candidatePatchVersion, boolean expectedResult) {
         VersionComparisonContext currentVersionContext = createVersionComparisonContext(currentVersion, currentPatchVersion);
         VersionComparisonContext candidateVersionContext = createVersionComparisonContext(candidateVersion, candidatePatchVersion);
-        lenient().when(entitlementService.internalTenant(any())).thenReturn(internalAccount);
+        lenient().when(entitlementService.internalTenant(any())).thenReturn(false);
 
         assertEquals(expectedResult, doAs(USER_CRN, () -> underTest.permitUpgrade(currentVersionContext, candidateVersionContext)));
     }
 
     private static Stream<Arguments> provideTestParameters() {
         return Stream.of(
-                Arguments.of("7.2.16", null, "7.3.1", 0, false, false),
-                Arguments.of("7.2.16",  200, "7.3.1", 0, false, false),
-                Arguments.of("7.2.17", null, "7.3.1", 0, false, false),
-                Arguments.of("7.2.17",    0, "7.3.1", 0, false, false),
-                Arguments.of("7.2.17",  100, "7.3.1", 0, false, false),
+                Arguments.of("7.2.16", 0, "7.3.1", 0, false),
+                Arguments.of("7.2.16", 0, "7.3.1", 100, false),
+                Arguments.of("7.2.16", 0, "7.3.1", 200, false),
+                Arguments.of("7.2.16", 0, "7.3.1", 300, false),
 
-                Arguments.of("7.2.17",  100, "7.3.1", 0, true, true),
-                Arguments.of("7.2.17",  101, "7.3.1", 0, false, true),
-                Arguments.of("7.2.17",  200, "7.3.1", 0, false, true),
-                Arguments.of("7.2.17",  500, "7.3.1", 0, false, true),
+                Arguments.of("7.2.17", 100, "7.3.1", 0, false),
+                Arguments.of("7.2.17", 100, "7.3.1", 100, false),
+                Arguments.of("7.2.17", 100, "7.3.1", 200, false),
+                Arguments.of("7.2.17", 100, "7.3.1", 300, false),
 
-                Arguments.of("7.2.17",  600, "7.3.1", 0, false, false),
-                Arguments.of("7.2.17",  700, "7.3.1", 0, false, false),
-                Arguments.of("7.2.17",  700, "7.3.1", null, false, false),
+                Arguments.of("7.2.17", 200, "7.3.1", 0, true),
+                Arguments.of("7.2.17", 200, "7.3.1", 100, true),
+                Arguments.of("7.2.17", 200, "7.3.1", 200, false),
+                Arguments.of("7.2.17", 200, "7.3.1", 300, false),
 
-                Arguments.of("7.2.17",  700, "7.3.1", 100, false, true),
-                Arguments.of("7.2.18", null, "7.3.1", 0, false, true),
-                Arguments.of("7.2.18",    0, "7.3.1", 0, false, true),
-                Arguments.of("7.2.18",  100, "7.3.1", 0, false, true),
-                Arguments.of("7.2.18",  200, "7.3.1", 0, false, true),
-                Arguments.of("7.2.18",  200, "7.3.1", 0, true, true),
+                Arguments.of("7.2.17", 300, "7.3.1", 0, true),
+                Arguments.of("7.2.17", 300, "7.3.1", 100, true),
+                Arguments.of("7.2.17", 300, "7.3.1", 200, true),
+                Arguments.of("7.2.17", 300, "7.3.1", 300, true),
 
-                Arguments.of("7.2.18",  300, "7.3.1", 0, false, false),
-                Arguments.of("7.2.18",  500, "7.3.1", 0, false, false),
+                Arguments.of("7.2.17", 500, "7.3.1", 0, true),
+                Arguments.of("7.2.17", 500, "7.3.1", 100, true),
+                Arguments.of("7.2.17", 500, "7.3.1", 200, true),
+                Arguments.of("7.2.17", 500, "7.3.1", 300, true),
 
-                Arguments.of("7.3.1",     0, "7.3.1", 100, false, true)
+                Arguments.of("7.2.17", 600, "7.3.1", 0, false),
+                Arguments.of("7.2.17", 600, "7.3.1", 100, false),
+                Arguments.of("7.2.17", 600, "7.3.1", 200, true),
+                Arguments.of("7.2.17", 600, "7.3.1", 300, true),
+
+                Arguments.of("7.2.18", 0, "7.3.1", 0, true),
+                Arguments.of("7.2.18", 0, "7.3.1", 100, true),
+                Arguments.of("7.2.18", 0, "7.3.1", 200, true),
+                Arguments.of("7.2.18", 0, "7.3.1", 300, true),
+
+                Arguments.of("7.2.18", 200, "7.3.1", 0, true),
+                Arguments.of("7.2.18", 200, "7.3.1", 100, true),
+                Arguments.of("7.2.18", 200, "7.3.1", 200, true),
+                Arguments.of("7.2.18", 200, "7.3.1", 300, true),
+
+                Arguments.of("7.2.18", 300, "7.3.1", 0, false),
+                Arguments.of("7.2.18", 300, "7.3.1", 100, false),
+                Arguments.of("7.2.18", 300, "7.3.1", 200, true),
+                Arguments.of("7.2.18", 300, "7.3.1", 300, true),
+
+                Arguments.of("7.2.17", 100, "7.3.2", 0, true),
+                Arguments.of("7.3.1", 0, "7.3.1", 100, true)
+
         );
     }
 
