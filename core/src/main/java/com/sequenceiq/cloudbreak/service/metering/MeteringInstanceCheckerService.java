@@ -149,7 +149,7 @@ public class MeteringInstanceCheckerService {
                         }
                         if (!instanceGroup.getTemplate().getInstanceType().equals(providerInstanceType)) {
                             LOGGER.warn("Instance {} instance type {} does not match template {}",
-                                    instanceMetadata.getInstanceId(), providerInstanceType, instanceMetadata.getProviderInstanceType());
+                                    instanceMetadata.getInstanceId(), providerInstanceType, instanceGroup.getTemplate().getInstanceType());
                             mismatchingInstanceIds.add(instanceMetadata.getInstanceId());
                         }
                     } else {
