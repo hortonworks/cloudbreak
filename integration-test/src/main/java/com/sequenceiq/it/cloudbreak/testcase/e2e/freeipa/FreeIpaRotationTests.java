@@ -3,7 +3,11 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa;
 import static com.sequenceiq.common.model.OsType.RHEL8;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.FREEIPA_ADMIN_PASSWORD;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.FREEIPA_USERSYNC_USER_PASSWORD;
+import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.SALT_BOOT_SECRETS;
+import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.SALT_MASTER_KEY_PAIR;
+import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.SALT_PASSWORD;
+import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.SALT_SIGN_KEY_PAIR;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.util.HashMap;
@@ -18,7 +22,6 @@ import jakarta.inject.Inject;
 import org.apache.commons.lang3.tuple.Pair;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
@@ -90,14 +93,16 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
                 .then((tc, testDto, client) -> {
                     checkDirectoryManagerPasswordAfterRotation(originalPasswordLastChangedMap, originalPasswordsFromPillarMap, testDto, client);
                     return testDto;
-                });
-        if (CloudPlatform.AWS.equalsIgnoreCase(cloudProvider)) {
-            freeIpaRotationTestDto = testContext
-                    .given(FreeIpaRotationTestDto.class)
-                    .withSecrets(List.of(SALT_BOOT_SECRETS, FREEIPA_USERSYNC_USER_PASSWORD))
-                    .when(freeIpaTestClient.rotateSecret())
-                    .awaitForFlow();
-        }
+                })
+                .given(FreeIpaRotationTestDto.class)
+                .withSecrets(List.of(SALT_BOOT_SECRETS,
+                        SALT_SIGN_KEY_PAIR,
+                        SALT_MASTER_KEY_PAIR,
+                        FREEIPA_USERSYNC_USER_PASSWORD,
+                        SALT_PASSWORD,
+                        NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY))
+                .when(freeIpaTestClient.rotateSecret())
+                .awaitForFlow();
         freeIpaRotationTestDto.validate();
     }
 

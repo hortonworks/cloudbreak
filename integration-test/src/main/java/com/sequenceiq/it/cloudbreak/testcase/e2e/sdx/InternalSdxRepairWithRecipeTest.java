@@ -10,10 +10,15 @@ import static com.sequenceiq.sdx.rotation.DatalakeSecretType.CM_DB_PASSWORD;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.CM_INTERMEDIATE_CA_CERT;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.CM_SERVICES_DB_PASSWORD;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.EXTERNAL_DATABASE_ROOT_PASSWORD;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.GATEWAY_CERT;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.IDBROKER_CERT;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.LDAP_BIND_PASSWORD;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.SALT_BOOT_SECRETS;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.SALT_MASTER_KEY_PAIR;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.SALT_PASSWORD;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.SALT_SIGN_KEY_PAIR;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.SSSD_IPA_PASSWORD;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.USER_KEYPAIR;
 
 import java.util.List;
@@ -170,24 +175,22 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
     }
 
     private Set<DatalakeSecretType> getAvailableSecretTypes(String cloudProvider) {
-        if (CloudPlatform.AWS.equalsIgnoreCase(cloudProvider)) {
-            return Set.of(
-                    // CB-24849 and CB-25311
-                    //DATALAKE_GATEWAY_CERT,
-                    USER_KEYPAIR,
-                    IDBROKER_CERT,
-                    SALT_BOOT_SECRETS,
-                    CM_ADMIN_PASSWORD,
-                    EXTERNAL_DATABASE_ROOT_PASSWORD,
-                    CM_DB_PASSWORD,
-                    CM_SERVICES_DB_PASSWORD,
-                    CM_INTERMEDIATE_CA_CERT,
-                    NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY);
-        } else {
-            return Set.of(
-                    EXTERNAL_DATABASE_ROOT_PASSWORD,
-                    CM_DB_PASSWORD);
-        }
+        return Set.of(
+                GATEWAY_CERT,
+                USER_KEYPAIR,
+                IDBROKER_CERT,
+                SALT_BOOT_SECRETS,
+                CM_ADMIN_PASSWORD,
+                EXTERNAL_DATABASE_ROOT_PASSWORD,
+                CM_DB_PASSWORD,
+                CM_SERVICES_DB_PASSWORD,
+                CM_INTERMEDIATE_CA_CERT,
+                NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY,
+                SALT_PASSWORD,
+                SALT_SIGN_KEY_PAIR,
+                SALT_MASTER_KEY_PAIR,
+                LDAP_BIND_PASSWORD,
+                SSSD_IPA_PASSWORD);
     }
 
     private void multiRepairThenValidate(TestContext testContext) {

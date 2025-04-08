@@ -91,14 +91,14 @@ public class DistroXSecretRotationTests extends AbstractE2ETest {
                     .given(FreeIpaTestDto.class)
                     .then((testContext1, testDto, client) -> secretRotationCheckUtil.preSaltPasswordRotation(testDto))
                     .given(FreeIpaRotationTestDto.class)
-                        .withSecrets(List.of(FreeIpaSecretType.USER_KEYPAIR, FreeIpaSecretType.SALT_PASSWORD))
+                        .withSecrets(List.of(FreeIpaSecretType.USER_KEYPAIR))
                     .when(freeIpaTestClient.rotateSecret())
                     .awaitForFlow()
                     .given(FreeIpaTestDto.class)
                     .then((tc, testDto, client) -> secretRotationCheckUtil.validateSaltPasswordRotation(testDto))
                     .given(SdxInternalTestDto.class)
                     .then((testContext1, testDto, client) -> secretRotationCheckUtil.preSaltPasswordRotation(testDto))
-                    .when(sdxTestClient.rotateSecret(Set.of(DatalakeSecretType.USER_KEYPAIR, DatalakeSecretType.SALT_PASSWORD)))
+                    .when(sdxTestClient.rotateSecret(Set.of(DatalakeSecretType.USER_KEYPAIR)))
                     .awaitForFlow()
                     .then((tc, testDto, client) -> {
                         secretRotationCheckUtil.checkSSHLoginWithNewKeys(testDto.getCrn(), client);
@@ -107,7 +107,7 @@ public class DistroXSecretRotationTests extends AbstractE2ETest {
                     })
                     .given(DistroXTestDto.class)
                     .then((tc, testDto, client) -> secretRotationCheckUtil.preSaltPasswordRotation(testDto))
-                    .when(distroXTestClient.rotateSecret(Set.of(CloudbreakSecretType.USER_KEYPAIR, CloudbreakSecretType.SALT_PASSWORD)))
+                    .when(distroXTestClient.rotateSecret(Set.of(CloudbreakSecretType.USER_KEYPAIR)))
                     .awaitForFlow()
                     .then((tc, testDto, client) -> {
                         secretRotationCheckUtil.checkSSHLoginWithNewKeys(tc, testDto, client);

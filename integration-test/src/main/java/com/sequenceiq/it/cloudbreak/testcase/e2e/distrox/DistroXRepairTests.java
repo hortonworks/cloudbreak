@@ -5,10 +5,12 @@ import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CM_DB_PASS
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CM_INTERMEDIATE_CA_CERT;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CM_SERVICES_DB_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.EXTERNAL_DATABASE_ROOT_PASSWORD;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.GATEWAY_CERT;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.LDAP_BIND_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.SALT_BOOT_SECRETS;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.SALT_MASTER_KEY_PAIR;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.SALT_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.SALT_SIGN_KEY_PAIR;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.USER_KEYPAIR;
 import static com.sequenceiq.freeipa.rotation.FreeIpaRotationAdditionalParameters.CLUSTER_NAME;
@@ -211,25 +213,19 @@ public class DistroXRepairTests extends AbstractE2ETest {
     }
 
     private Set<CloudbreakSecretType> getAvailableSecretTypes(String cloudProvider) {
-        if (CloudPlatform.AWS.equalsIgnoreCase(cloudProvider)) {
-            return Set.of(
-                    USER_KEYPAIR,
-                    SALT_BOOT_SECRETS,
-                    SALT_MASTER_KEY_PAIR,
-                    SALT_SIGN_KEY_PAIR,
-                    CM_ADMIN_PASSWORD,
-                    CM_DB_PASSWORD,
-                    // CB-24849 and CB-25311
-                    //GATEWAY_CERT
-                    EXTERNAL_DATABASE_ROOT_PASSWORD,
-                    CM_INTERMEDIATE_CA_CERT,
-                    NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY,
-                    CM_SERVICES_DB_PASSWORD);
-        } else {
-            return Set.of(
-                    EXTERNAL_DATABASE_ROOT_PASSWORD,
-                    CM_DB_PASSWORD);
-        }
+        return Set.of(
+                USER_KEYPAIR,
+                SALT_BOOT_SECRETS,
+                SALT_MASTER_KEY_PAIR,
+                SALT_SIGN_KEY_PAIR,
+                CM_ADMIN_PASSWORD,
+                CM_DB_PASSWORD,
+                GATEWAY_CERT,
+                EXTERNAL_DATABASE_ROOT_PASSWORD,
+                CM_INTERMEDIATE_CA_CERT,
+                NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY,
+                CM_SERVICES_DB_PASSWORD,
+                SALT_PASSWORD);
     }
 
     private void masterRepairValidate(TestContext testContext) {
