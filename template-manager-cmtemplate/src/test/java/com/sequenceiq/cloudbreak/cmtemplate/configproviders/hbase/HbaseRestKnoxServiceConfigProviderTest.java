@@ -46,7 +46,7 @@ class HbaseRestKnoxServiceConfigProviderTest extends AbstractHbaseConfigProvider
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
                 .withHostgroupViews(Set.of(gateway, master, quorum, worker))
-                .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", cmTemplateProcessor))
+                .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", null, cmTemplateProcessor))
                 .withStackType(StackType.DATALAKE)
                 .build();
 
@@ -70,7 +70,7 @@ class HbaseRestKnoxServiceConfigProviderTest extends AbstractHbaseConfigProvider
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
                 .withHostgroupViews(Set.of(gateway, master, quorum, worker))
-                .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", cmTemplateProcessor))
+                .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", null, cmTemplateProcessor))
                 .withStackType(StackType.DATALAKE)
                 .build();
 

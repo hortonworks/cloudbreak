@@ -48,7 +48,7 @@ class HdfsRoleConfigProviderTest {
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
                 .withHostgroupViews(Set.of(gateway, master, quorum, worker))
-                .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", cmTemplateProcessor))
+                .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", null, cmTemplateProcessor))
                 .build();
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
@@ -71,7 +71,7 @@ class HdfsRoleConfigProviderTest {
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
                 .withHostgroupViews(Set.of(master, worker))
-                .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", cmTemplateProcessor))
+                .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", null, cmTemplateProcessor))
                 .build();
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
@@ -95,7 +95,7 @@ class HdfsRoleConfigProviderTest {
         TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
                 .withStackType(StackType.DATALAKE)
                 .withHostgroupViews(Set.of(gateway, master, quorum, worker))
-                .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", cmTemplateProcessor))
+                .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", null, cmTemplateProcessor))
                 .build();
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
@@ -130,7 +130,7 @@ class HdfsRoleConfigProviderTest {
         TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
                 .withStackType(StackType.DATALAKE)
                 .withHostgroupViews(Set.of(gateway, master, quorum, worker))
-                .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", cmTemplateProcessor))
+                .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", null, cmTemplateProcessor))
                 .build();
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
@@ -160,7 +160,7 @@ class HdfsRoleConfigProviderTest {
                 .withStackType(StackType.DATALAKE)
                 .withHostgroupViews(Set.of(gateway, master, quorum, worker))
                 .withGeneralClusterConfigs(generalClusterConfigs)
-                .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", cmTemplateProcessor))
+                .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", null, cmTemplateProcessor))
                 .build();
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
@@ -183,7 +183,7 @@ class HdfsRoleConfigProviderTest {
         TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
                 .withStackType(StackType.DATALAKE)
                 .withHostgroupViews(Set.of(gateway, master, quorum, worker))
-                .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", cmTemplateProcessor))
+                .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", null, cmTemplateProcessor))
                 .build();
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
@@ -218,7 +218,7 @@ class HdfsRoleConfigProviderTest {
         TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
                 .withStackType(StackType.DATALAKE)
                 .withHostgroupViews(Set.of(gateway, master, quorum, worker))
-                .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", cmTemplateProcessor))
+                .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", null, cmTemplateProcessor))
                 .build();
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
@@ -250,7 +250,7 @@ class HdfsRoleConfigProviderTest {
         TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
                 .withStackType(StackType.DATALAKE)
                 .withHostgroupViews(Set.of(gateway, master, quorum, worker))
-                .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", cmTemplateProcessor))
+                .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", null, cmTemplateProcessor))
                 .build();
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
@@ -280,7 +280,7 @@ class HdfsRoleConfigProviderTest {
         TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
                 .withStackType(StackType.WORKLOAD)
                 .withHostgroupViews(Set.of(gateway, master, quorum, worker))
-                .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", cmTemplateProcessor))
+                .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", null, cmTemplateProcessor))
                 .build();
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {

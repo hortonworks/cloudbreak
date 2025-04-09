@@ -59,7 +59,7 @@ class KuduMasterConfigProviderTest {
 
     private TemplatePreparationObject getTemplatePreparationObject(CmTemplateProcessor processor, String version) {
         TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
-            .withBlueprintView(new BlueprintView("text", version, "CDH", processor))
+            .withBlueprintView(new BlueprintView("text", version, "CDH", null, processor))
             .build();
         return preparationObject;
     }

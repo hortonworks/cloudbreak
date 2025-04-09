@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 
 import jakarta.inject.Inject;
 
@@ -15,6 +16,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.BlueprintHybridOption;
 import com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
@@ -134,6 +136,22 @@ public class BlueprintUtils {
 
     public BlueprintUpgradeOption getBlueprintUpgradeOptionForEnabled() {
         return BlueprintUpgradeOption.ENABLED;
+    }
+
+    public BlueprintUpgradeOption getBlueprintUpgradeOptionForEnabled(JsonNode blueprintJson) {
+        return Optional.ofNullable(blueprintJson)
+                .map(json -> json.get("blueprintUpgradeOption"))
+                .map(JsonNode::asText)
+                .map(BlueprintUpgradeOption::valueOf)
+                .orElse(BlueprintUpgradeOption.ENABLED);
+    }
+
+    public BlueprintHybridOption getHybridOption(JsonNode blueprintJson) {
+        return Optional.ofNullable(blueprintJson)
+                .map(json -> json.get("hybridOption"))
+                .map(JsonNode::asText)
+                .map(BlueprintHybridOption::valueOf)
+                .orElse(BlueprintHybridOption.NONE);
     }
 
     public boolean isEnterpriseDatalake(Stack stack) {

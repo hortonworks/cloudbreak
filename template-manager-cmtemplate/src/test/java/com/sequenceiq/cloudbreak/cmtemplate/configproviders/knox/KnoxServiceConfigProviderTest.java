@@ -49,7 +49,7 @@ public class KnoxServiceConfigProviderTest {
     public void testGetRoleConfigsShouldReturnEmptyList(String cdhVersion, String cmVersion, boolean ssl,
         int numberOfProperties, boolean sslPresented) {
         BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
-        BlueprintView blueprintView = new BlueprintView("text", cdhVersion, "CDH", blueprintTextProcessor);
+        BlueprintView blueprintView = new BlueprintView("text", cdhVersion, "CDH", null, blueprintTextProcessor);
         RdsView rdsConfig = mock(RdsView.class);
         lenient().when(rdsConfig.isUseSsl()).thenReturn(ssl);
         when(rdsConfig.getType()).thenReturn(DatabaseType.KNOX_GATEWAY.name());
@@ -95,7 +95,7 @@ public class KnoxServiceConfigProviderTest {
             int numberOfProperties) {
         CmTemplateProcessor templateProcessor = mock(CmTemplateProcessor.class);
         BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
-        BlueprintView blueprintView = new BlueprintView("text", cdhVersion, "CDH", blueprintTextProcessor);
+        BlueprintView blueprintView = new BlueprintView("text", cdhVersion, "CDH", null, blueprintTextProcessor);
         RdsView rdsConfig = mock(RdsView.class);
         when(rdsConfig.getType()).thenReturn(DatabaseType.KNOX_GATEWAY.name());
         TemplatePreparationObject source = TemplatePreparationObject.Builder.builder()

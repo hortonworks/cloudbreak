@@ -139,7 +139,7 @@ class NifiRegistryRoleConfigProviderTest {
             String cloudPlatform, boolean externalDBRequested) {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 3);
-        BlueprintView blueprintView = new BlueprintView(null, null, null, cmTemplateProcessor);
+        BlueprintView blueprintView = new BlueprintView(null, null, null, null, cmTemplateProcessor);
         ClouderaManagerRepo repo = new ClouderaManagerRepo();
         List<ClouderaManagerProduct> products = singletonList(createCfmProduct(cfmVersion));
 

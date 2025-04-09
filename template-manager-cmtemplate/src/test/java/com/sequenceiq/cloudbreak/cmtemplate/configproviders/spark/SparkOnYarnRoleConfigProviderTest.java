@@ -120,7 +120,7 @@ public class SparkOnYarnRoleConfigProviderTest {
         return Builder.builder()
                 .withFileSystemConfigurationView(fileSystemConfigurationsView)
                 .withHostgroupViews(Set.of(master, worker))
-                .withBlueprintView(new BlueprintView(null, null, null, cmTemplateProcessor))
+                .withBlueprintView(new BlueprintView(null, null, null, null, cmTemplateProcessor))
                 .withCloudPlatform(cloudPlatform)
                 .withPlatformVariant(platformVariant)
                 .build();

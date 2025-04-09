@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.init.blueprint;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -27,7 +26,6 @@ import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
 import com.sequenceiq.cloudbreak.converter.v4.blueprint.BlueprintV4RequestToBlueprintConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintFile;
-import com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption;
 
 @Component
 @Scope("prototype")
@@ -80,8 +78,6 @@ public class DefaultBlueprintCache {
                         bp.setTags(new Json(tagParameters));
                         JsonNode description = jsonNode.get("description");
                         bp.setDescription(description == null ? split[0] : description.asText(split[0]));
-                        JsonNode blueprintUpgradeOption = blueprintNode.isMissingNode() ? null : blueprintNode.get("blueprintUpgradeOption");
-                        bp.setBlueprintUpgradeOption(getBlueprintUpgradeOption(blueprintUpgradeOption));
                         BlueprintFile bpf = new BlueprintFile.Builder()
                                 .name(bp.getName())
                                 .blueprintText(bp.getBlueprintText())
@@ -90,6 +86,7 @@ public class DefaultBlueprintCache {
                                 .stackVersion(bp.getStackVersion())
                                 .stackType(bp.getStackType())
                                 .blueprintUpgradeOption(bp.getBlueprintUpgradeOption())
+                                .hybridOption(bp.getHybridOption())
                                 .hostGroupCount(bp.getHostGroupCount())
                                 .description(bp.getDescription())
                                 .tags(bp.getTags())
@@ -121,12 +118,5 @@ public class DefaultBlueprintCache {
                 .stream()
                 .filter(e -> StringUtils.isNoneBlank(e.getValue()))
                 .collect(Collectors.toMap(e -> e.getKey(), e -> Sets.newHashSet(e.getValue().split(";"))));
-    }
-
-    private BlueprintUpgradeOption getBlueprintUpgradeOption(JsonNode blueprintUpgradeOption) {
-        return Optional.ofNullable(blueprintUpgradeOption)
-                .map(JsonNode::asText)
-                .map(BlueprintUpgradeOption::valueOf)
-                .orElse(BlueprintUpgradeOption.ENABLED);
     }
 }

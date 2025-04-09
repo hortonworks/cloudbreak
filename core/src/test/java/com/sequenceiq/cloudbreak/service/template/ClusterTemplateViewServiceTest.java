@@ -1,11 +1,13 @@
 package com.sequenceiq.cloudbreak.service.template;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -13,21 +15,25 @@ import static org.mockito.Mockito.when;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.verification.VerificationMode;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.view.ClusterTemplateView;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterTemplateViewRepository;
 import com.sequenceiq.distrox.v1.distrox.service.InternalClusterTemplateValidator;
 
+@ExtendWith(MockitoExtension.class)
 public class ClusterTemplateViewServiceTest {
 
     private static final VerificationMode ONCE = times(1);
@@ -46,11 +52,6 @@ public class ClusterTemplateViewServiceTest {
 
     @InjectMocks
     private ClusterTemplateViewService underTest;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.initMocks(this);
-    }
 
     @Test
     public void testPrepareCreation() {
@@ -103,7 +104,7 @@ public class ClusterTemplateViewServiceTest {
         when(repository.findAllUserManagedAndDefaultByEnvironmentCrn(any(), any(), any(), any())).thenReturn(expectedEmptyResultSet);
 
         Set<ClusterTemplateView> result = underTest.findAllUserManagedAndDefaultByEnvironmentCrn(WORKSPACE_ID, TEST_ENV_CRN, cloudPlatform.name(),
-                TEST_RUNTIME, false);
+                TEST_RUNTIME, false, null);
 
         assertEquals(expectedEmptyResultSet, result);
 
@@ -115,12 +116,13 @@ public class ClusterTemplateViewServiceTest {
     @EnumSource(CloudPlatform.class)
     public void testFindAllUserManagedAndDefaultByEnvironmentCrnWhenRepositoryCanFindClusterTemplatesThenNonEmptySetShouldReturn(CloudPlatform cloudPlatform) {
         ClusterTemplateView match = new ClusterTemplateView();
+        match.setType(ClusterTemplateV4Type.DATAENGINEERING);
         Set<ClusterTemplateView> expectedNonEmptyResultSet = Set.of(match);
         when(repository.findAllUserManagedAndDefaultByEnvironmentCrn(any(), any(), any(), any())).thenReturn(expectedNonEmptyResultSet);
         when(internalClusterTemplateValidator.shouldPopulate(match, false)).thenReturn(true);
 
         Set<ClusterTemplateView> result = underTest.findAllUserManagedAndDefaultByEnvironmentCrn(WORKSPACE_ID, TEST_ENV_CRN, cloudPlatform.name(),
-                TEST_RUNTIME, false);
+                TEST_RUNTIME, false, null);
 
         assertEquals(expectedNonEmptyResultSet, result);
         assertEquals(expectedNonEmptyResultSet.size(), result.size());
@@ -128,6 +130,25 @@ public class ClusterTemplateViewServiceTest {
 
         verify(repository, ONCE).findAllUserManagedAndDefaultByEnvironmentCrn(any(), any(), any(), any());
         verify(repository, ONCE).findAllUserManagedAndDefaultByEnvironmentCrn(WORKSPACE_ID, TEST_ENV_CRN, cloudPlatform.name(), TEST_RUNTIME);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testHybridFiltering(boolean hybridEnv) {
+        ClusterTemplateView hybridTemplate = mock();
+        when(hybridTemplate.getType()).thenReturn(ClusterTemplateV4Type.HYBRID_DATAENGINEERING_HA);
+        ClusterTemplateView nonHybridTemplate = mock();
+        when(nonHybridTemplate.getType()).thenReturn(ClusterTemplateV4Type.DATAENGINEERING_HA);
+        Set<ClusterTemplateView> clusterTemplateViews = Set.of(hybridTemplate, nonHybridTemplate);
+        when(repository.findAllUserManagedAndDefaultByEnvironmentCrn(WORKSPACE_ID, TEST_ENV_CRN, "AWS", TEST_RUNTIME)).thenReturn(clusterTemplateViews);
+        when(internalClusterTemplateValidator.shouldPopulate(any(ClusterTemplateView.class), anyBoolean())).thenReturn(true);
+
+        Set<ClusterTemplateView> result = underTest.findAllUserManagedAndDefaultByEnvironmentCrn(WORKSPACE_ID, TEST_ENV_CRN, "AWS",
+                TEST_RUNTIME, false, hybridEnv);
+
+        Assertions.assertThat(result)
+                .hasSize(1)
+                .allMatch(t -> t.getType().isHybrid() == hybridEnv);
     }
 
 }

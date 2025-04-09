@@ -24,7 +24,7 @@ public class BlueprintViewProvider {
         String blueprintText = blueprint.getBlueprintJsonText();
         BlueprintStackInfo blueprintStackInfo = stackInfoService.blueprintStackInfo(blueprintText);
         BlueprintTextProcessor processor = blueprintTextProcessorFactory.createBlueprintTextProcessor(blueprintText);
-        return new BlueprintView(blueprintText, blueprintStackInfo.getVersion(), blueprintStackInfo.getType(), processor);
+        return new BlueprintView(blueprintText, blueprintStackInfo.getVersion(), blueprintStackInfo.getType(), blueprint.getHybridOption(), processor);
     }
 
 }

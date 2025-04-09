@@ -1,0 +1,112 @@
+{
+  "name": "7.3.1 - Hybrid Data Engineering HA - Spark3 for YCloud",
+  "description": "",
+  "type": "HYBRID_DATAENGINEERING_HA",
+  "featureState": "PREVIEW",
+  "cloudPlatform": "YARN",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.3.1 - Hybrid Data Engineering: HA: Apache Spark3, Apache Hive, Apache Oozie"
+    },
+    "externalDatabase": {
+      "availabilityType": "HA"
+    },
+    "instanceGroups": [
+      {
+        "nodeCount": 1,
+        "name": "manager",
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL",
+        "template": {
+          "rootVolume": {
+            "size": 50
+          },
+          "yarn": {
+            "cpus": 4,
+            "memory": 8192
+          }
+        },
+        "recipeNames": []
+      },
+      {
+        "nodeCount": 0,
+        "name": "compute",
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "template": {
+          "rootVolume": {
+            "size": 50
+          },
+          "yarn": {
+            "cpus": 4,
+            "memory": 8192
+          }
+        },
+        "recipeNames": []
+      },
+      {
+        "nodeCount": 3,
+        "name": "worker",
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "template": {
+          "rootVolume": {
+            "size": 50
+          },
+          "yarn": {
+            "cpus": 4,
+            "memory": 8192
+          }
+        },
+        "recipeNames": []
+      },
+      {
+        "nodeCount": 2,
+        "name": "master",
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "template": {
+          "rootVolume": {
+            "size": 50
+          },
+          "yarn": {
+            "cpus": 4,
+            "memory": 32768
+          }
+        },
+        "recipeNames": []
+      },
+      {
+        "nodeCount": 0,
+        "name": "gateway",
+        "type": "CORE",
+        "template": {
+          "rootVolume": {
+            "size": 50
+          },
+          "yarn": {
+            "cpus": 4,
+            "memory": 8192
+          }
+        },
+        "recipeNames": []
+      },
+      {
+        "nodeCount": 1,
+        "name": "masterx",
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "template": {
+          "rootVolume": {
+            "size": 50
+          },
+          "yarn": {
+            "cpus": 4,
+            "memory": 32768
+          }
+        },
+        "recipeNames": []
+      }
+    ]
+  }
+}

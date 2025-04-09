@@ -1,0 +1,134 @@
+{
+  "name": "7.3.1 - Hybrid Data Engineering HA - Spark3 for Google Cloud",
+  "description": "",
+  "type": "HYBRID_DATAENGINEERING_HA",
+  "featureState": "PREVIEW",
+  "cloudPlatform": "GCP",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.3.1 - Hybrid Data Engineering: HA: Apache Spark3, Apache Hive, Apache Oozie"
+    },
+    "externalDatabase": {
+      "availabilityType": "HA"
+    },
+    "enableLoadBalancer": true,
+    "instanceGroups": [
+      {
+        "name": "manager",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 150,
+              "type": "pd-ssd"
+            }
+          ],
+          "rootVolume": {
+            "size": 150
+          },
+          "instanceType": "e2-standard-16"
+        },
+        "nodeCount": 2,
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "master",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 150,
+              "type": "pd-ssd"
+            }
+          ],
+          "rootVolume": {
+            "size": 150
+          },
+          "instanceType": "e2-standard-16"
+        },
+        "nodeCount": 2,
+        "minimumNodeCount": 2,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "compute",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 500,
+              "type": "pd-ssd"
+            }
+          ],
+          "rootVolume": {
+            "size": 150
+          },
+          "instanceType": "e2-standard-16"
+        },
+        "nodeCount": 1,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "worker",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 500,
+              "type": "pd-ssd"
+            }
+          ],
+          "rootVolume": {
+            "size": 150
+          },
+          "instanceType": "e2-standard-16"
+        },
+        "nodeCount": 3,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "gateway",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 150,
+              "type": "pd-ssd"
+            }
+          ],
+          "rootVolume": {
+            "size": 150
+          },
+          "instanceType": "e2-standard-16"
+        },
+        "nodeCount": 0,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "masterx",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 150,
+              "type": "pd-ssd"
+            }
+          ],
+          "rootVolume": {
+            "size": 150
+          },
+          "instanceType": "e2-standard-16"
+        },
+        "nodeCount": 1,
+        "minimumNodeCount": 1,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      }
+    ]
+  }
+}

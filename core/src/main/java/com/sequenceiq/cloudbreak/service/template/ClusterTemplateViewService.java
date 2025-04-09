@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.domain.projection.ClusterTemplateStatusView;
 import com.sequenceiq.cloudbreak.domain.view.ClusterTemplateView;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterTemplateViewRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.distrox.v1.distrox.service.InternalClusterTemplateValidator;
 
@@ -24,6 +25,9 @@ public class ClusterTemplateViewService extends AbstractWorkspaceAwareResourceSe
 
     @Inject
     private InternalClusterTemplateValidator internalClusterTemplateValidator;
+
+    @Inject
+    private EnvironmentClientService environmentClientService;
 
     @Override
     protected WorkspaceResourceRepository<ClusterTemplateView, Long> repository() {
@@ -56,10 +60,11 @@ public class ClusterTemplateViewService extends AbstractWorkspaceAwareResourceSe
     }
 
     public Set<ClusterTemplateView> findAllUserManagedAndDefaultByEnvironmentCrn(Long workspaceId, String environmentCrn,
-        String cloudPlatform, String runtime, boolean internalTenant) {
+        String cloudPlatform, String runtime, boolean internalTenant, Boolean hybridEnv) {
         Set<ClusterTemplateView> allActive = repository.findAllUserManagedAndDefaultByEnvironmentCrn(workspaceId, environmentCrn, cloudPlatform, runtime);
         return allActive.stream()
                 .filter(e -> internalClusterTemplateValidator.shouldPopulate(e, internalTenant))
+                .filter(e -> hybridEnv == null || hybridEnv == e.getType().isHybrid())
                 .collect(Collectors.toSet());
     }
 }

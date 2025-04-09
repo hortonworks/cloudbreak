@@ -2,6 +2,7 @@
     "cdhVersion": "7.2.15",
     "displayName": "dataengineering-with-impala",
     "blueprintUpgradeOption": "GA",
+    "hybridOption": "BURST_TO_CLOUD",
     "services": [
         {
             "refName": "zookeeper",

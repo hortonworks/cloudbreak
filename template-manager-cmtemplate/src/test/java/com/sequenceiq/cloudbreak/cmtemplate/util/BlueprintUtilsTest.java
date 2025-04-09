@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate.util;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -7,7 +9,6 @@ import java.io.IOException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -55,7 +56,7 @@ public class BlueprintUtilsTest {
                     FileReaderUtils.readFileFromPath(Path.of(
                             String.format("../core/src/main/resources/defaults/blueprints/%s/%s.bp", version, template))));
             JsonNode description = jsonNode.get("description");
-            Assert.assertTrue(description.asText().contains(descriptionSubStr));
+            assertTrue(description.asText().contains(descriptionSubStr));
         } catch (NoSuchFileException noSuchFileException) {
 
         }
@@ -70,16 +71,16 @@ public class BlueprintUtilsTest {
                 .withBlueprintView(blueprintView)
                 .build();
 
-        Assert.assertTrue(underTest.isEnterpriseDatalake(tpo));
+        assertTrue(underTest.isEnterpriseDatalake(tpo));
 
 
         Stack stack = new Stack();
         stack.setType(StackType.DATALAKE);
         stack.setCluster(createSdxCluster("ENTERPRISE"));
-        Assert.assertTrue(underTest.isEnterpriseDatalake(stack));
+        assertTrue(underTest.isEnterpriseDatalake(stack));
 
         stack.setCluster(createSdxCluster("MEDIUM_DUTY_HA"));
-        Assert.assertFalse(underTest.isEnterpriseDatalake(stack));
+        assertFalse(underTest.isEnterpriseDatalake(stack));
     }
 
     @Test
@@ -87,10 +88,10 @@ public class BlueprintUtilsTest {
         Stack stack = new Stack();
         stack.setType(StackType.DATALAKE);
         stack.setCluster(createSdxCluster("ENTERPRISE"));
-        Assert.assertTrue(underTest.isEnterpriseDatalake(stack));
+        assertTrue(underTest.isEnterpriseDatalake(stack));
 
         stack.setCluster(createSdxCluster("MEDIUM_DUTY_HA"));
-        Assert.assertFalse(underTest.isEnterpriseDatalake(stack));
+        assertFalse(underTest.isEnterpriseDatalake(stack));
     }
 
     @Test
@@ -102,7 +103,7 @@ public class BlueprintUtilsTest {
                 .withBlueprintView(blueprintView)
                 .build();
 
-        Assert.assertFalse(underTest.isEnterpriseDatalake(tpo));
+        assertFalse(underTest.isEnterpriseDatalake(tpo));
     }
 
     private Cluster createSdxCluster(String shape) throws IOException {

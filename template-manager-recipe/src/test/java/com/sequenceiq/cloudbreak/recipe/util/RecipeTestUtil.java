@@ -49,6 +49,6 @@ public class RecipeTestUtil {
     }
 
     public static BlueprintView generalBlueprintView(String blueprintText, String version, String type) {
-        return new BlueprintView(blueprintText, version, type, mock(BlueprintTextProcessor.class));
+        return new BlueprintView(blueprintText, version, type, null, mock(BlueprintTextProcessor.class));
     }
 }

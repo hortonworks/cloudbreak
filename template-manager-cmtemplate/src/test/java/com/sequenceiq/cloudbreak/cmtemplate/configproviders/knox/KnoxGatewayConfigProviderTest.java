@@ -182,7 +182,7 @@ public class KnoxGatewayConfigProviderTest {
         idBroker.setMasterSecret("supersecret");
         BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
         when(blueprintTextProcessor.getVersion()).thenReturn(Optional.of("7.2.16"));
-        BlueprintView blueprintView = new BlueprintView("text", "7.2.11", "CDH", blueprintTextProcessor);
+        BlueprintView blueprintView = new BlueprintView("text", "7.2.11", "CDH", null, blueprintTextProcessor);
         TemplatePreparationObject source = Builder.builder()
                 .withGateway(gateway, "key", new HashSet<>())
                 .withGeneralClusterConfigs(generalClusterConfigs)
@@ -251,7 +251,7 @@ public class KnoxGatewayConfigProviderTest {
         idBroker.setMasterSecret("supersecret");
         BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
         when(blueprintTextProcessor.getVersion()).thenReturn(Optional.of("7.3.1"));
-        BlueprintView blueprintView = new BlueprintView("text", "7.3.1", "CDH", blueprintTextProcessor);
+        BlueprintView blueprintView = new BlueprintView("text", "7.3.1", "CDH", null, blueprintTextProcessor);
         TemplatePreparationObject source = Builder.builder()
                 .withGateway(gateway, "key", new HashSet<>())
                 .withGeneralClusterConfigs(generalClusterConfigs)
@@ -317,7 +317,7 @@ public class KnoxGatewayConfigProviderTest {
         idBroker.setMasterSecret("supersecret");
         BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
         when(blueprintTextProcessor.getVersion()).thenReturn(Optional.of("7.2.15"));
-        BlueprintView blueprintView = new BlueprintView("text", "7.2.11", "CDH", blueprintTextProcessor);
+        BlueprintView blueprintView = new BlueprintView("text", "7.2.11", "CDH", null, blueprintTextProcessor);
 
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
         generalClusterConfigs.setAccountId(Optional.of("1234"));
@@ -380,7 +380,7 @@ public class KnoxGatewayConfigProviderTest {
         when(cmTemplateProcessor.getServiceByType(anyString())).thenReturn(Optional.of(new ApiClusterTemplateService()));
         when(cmTemplateProcessorFactory.get(anyString())).thenReturn(cmTemplateProcessor);
         BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
-        BlueprintView blueprintView = new BlueprintView("text", "7.2.11", "CDH", blueprintTextProcessor);
+        BlueprintView blueprintView = new BlueprintView("text", "7.2.11", "CDH", null, blueprintTextProcessor);
         TemplatePreparationObject source = Builder.builder()
                 .withGeneralClusterConfigs(gcc)
                 .withVirtualGroupView(new VirtualGroupRequest(TestConstants.CRN, ""))
@@ -424,7 +424,7 @@ public class KnoxGatewayConfigProviderTest {
         BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
 
         LdapView ldapConfig = LdapViewBuilder.aLdapView().build();
-        BlueprintView blueprintView = new BlueprintView("text", "7.2.11", "CDH", blueprintTextProcessor);
+        BlueprintView blueprintView = new BlueprintView("text", "7.2.11", "CDH", null, blueprintTextProcessor);
 
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
         generalClusterConfigs.setAccountId(Optional.of("1234"));
@@ -483,7 +483,7 @@ public class KnoxGatewayConfigProviderTest {
         BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
 
         LdapView ldapConfig = LdapViewBuilder.aLdapView().build();
-        BlueprintView blueprintView = new BlueprintView("text", "7.2.11", "CDH", blueprintTextProcessor);
+        BlueprintView blueprintView = new BlueprintView("text", "7.2.11", "CDH", null, blueprintTextProcessor);
 
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
         generalClusterConfigs.setAccountId(Optional.of("1234"));
@@ -544,7 +544,7 @@ public class KnoxGatewayConfigProviderTest {
         BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
 
         LdapView ldapConfig = LdapViewBuilder.aLdapView().build();
-        BlueprintView blueprintView = new BlueprintView("text", "7.2.11", "CDH", blueprintTextProcessor);
+        BlueprintView blueprintView = new BlueprintView("text", "7.2.11", "CDH", null, blueprintTextProcessor);
 
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
         generalClusterConfigs.setGovCloud(true);

@@ -42,7 +42,7 @@ public class RangerRazBaseConfigProviderTest {
 
         TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
                 .withStackType(StackType.WORKLOAD)
-                .withBlueprintView(new BlueprintView("", "7.2.10", "CDH", blueprintTextProcessor))
+                .withBlueprintView(new BlueprintView("", "7.2.10", "CDH", null, blueprintTextProcessor))
                 .withCloudPlatform(CloudPlatform.AWS)
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
@@ -65,7 +65,7 @@ public class RangerRazBaseConfigProviderTest {
 
         TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
                 .withStackType(StackType.WORKLOAD)
-                .withBlueprintView(new BlueprintView("", "7.2.10", "CDH", blueprintTextProcessor))
+                .withBlueprintView(new BlueprintView("", "7.2.10", "CDH", null, blueprintTextProcessor))
                 .withCloudPlatform(CloudPlatform.AZURE)
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
@@ -88,7 +88,7 @@ public class RangerRazBaseConfigProviderTest {
 
         TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
                 .withStackType(StackType.DATALAKE)
-                .withBlueprintView(new BlueprintView("", "7.2.10", "CDH", blueprintTextProcessor))
+                .withBlueprintView(new BlueprintView("", "7.2.10", "CDH", null, blueprintTextProcessor))
                 .withCloudPlatform(CloudPlatform.GCP)
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
@@ -113,7 +113,7 @@ public class RangerRazBaseConfigProviderTest {
 
         TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
                 .withStackType(StackType.DATALAKE)
-                .withBlueprintView(new BlueprintView("", "7.2.10", "CDH", blueprintTextProcessor))
+                .withBlueprintView(new BlueprintView("", "7.2.10", "CDH", null, blueprintTextProcessor))
                 .withCloudPlatform(CloudPlatform.GCP)
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
@@ -135,7 +135,7 @@ public class RangerRazBaseConfigProviderTest {
 
         TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
                 .withStackType(StackType.WORKLOAD)
-                .withBlueprintView(new BlueprintView("", "7.2.10", "CDH", blueprintTextProcessor))
+                .withBlueprintView(new BlueprintView("", "7.2.10", "CDH", null, blueprintTextProcessor))
                 .withCloudPlatform(CloudPlatform.GCP)
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
@@ -156,7 +156,7 @@ public class RangerRazBaseConfigProviderTest {
 
         TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
                 .withStackType(StackType.WORKLOAD)
-                .withBlueprintView(new BlueprintView("", "7.2.9", "CDH", blueprintTextProcessor))
+                .withBlueprintView(new BlueprintView("", "7.2.9", "CDH", null, blueprintTextProcessor))
                 .withCloudPlatform(CloudPlatform.AZURE)
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
@@ -177,7 +177,7 @@ public class RangerRazBaseConfigProviderTest {
 
         TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
                 .withStackType(StackType.WORKLOAD)
-                .withBlueprintView(new BlueprintView("", "7.2.9", "CDH", blueprintTextProcessor))
+                .withBlueprintView(new BlueprintView("", "7.2.9", "CDH", null, blueprintTextProcessor))
                 .withCloudPlatform(CloudPlatform.AWS)
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
@@ -198,7 +198,7 @@ public class RangerRazBaseConfigProviderTest {
 
         TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
                 .withStackType(StackType.DATALAKE)
-                .withBlueprintView(new BlueprintView("", "7.2.9", "CDH", blueprintTextProcessor))
+                .withBlueprintView(new BlueprintView("", "7.2.9", "CDH", null, blueprintTextProcessor))
                 .withCloudPlatform(CloudPlatform.GCP)
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
@@ -219,7 +219,7 @@ public class RangerRazBaseConfigProviderTest {
 
         TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
                 .withStackType(StackType.WORKLOAD)
-                .withBlueprintView(new BlueprintView("", "7.2.10", "CDH", blueprintTextProcessor))
+                .withBlueprintView(new BlueprintView("", "7.2.10", "CDH", null, blueprintTextProcessor))
                 .withCloudPlatform(CloudPlatform.YARN)
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())

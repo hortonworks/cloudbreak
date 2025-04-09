@@ -184,7 +184,7 @@ public class OozieRoleConfigProviderTest {
                         .stream()
                         .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", true))
                         .collect(Collectors.toSet()))
-                .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", cmTemplateProcessor))
+                .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", null, cmTemplateProcessor))
                 .withProductDetails(new ClouderaManagerRepo()
                         .withVersion(version)
                         .withBaseUrl("url"), new ArrayList<>())

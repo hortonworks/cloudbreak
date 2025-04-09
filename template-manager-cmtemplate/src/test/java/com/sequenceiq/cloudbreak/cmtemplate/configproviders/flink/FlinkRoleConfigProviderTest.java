@@ -150,7 +150,7 @@ public class FlinkRoleConfigProviderTest {
             Versioned flinkVersion) {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
-        BlueprintView bp = new BlueprintView(null, null, null, cmTemplateProcessor);
+        BlueprintView bp = new BlueprintView(null, null, null, null, cmTemplateProcessor);
 
         List<StorageLocationView> locations = new ArrayList<>();
 

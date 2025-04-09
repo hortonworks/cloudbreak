@@ -1,16 +1,17 @@
 package com.sequenceiq.cloudbreak.converter.v4.blueprint;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateGeneratorService;
@@ -19,11 +20,12 @@ import com.sequenceiq.cloudbreak.common.converter.ResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.AbstractJsonConverterTest;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.BlueprintHybridOption;
 import com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption;
-import com.sequenceiq.cloudbreak.json.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
+@ExtendWith(MockitoExtension.class)
 public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConverterTest<BlueprintV4Request> {
 
     @InjectMocks
@@ -43,9 +45,8 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.openMocks(this);
-        doReturn(2).when(blueprintUtils).countHostGroups(any());
-        doReturn("bpname").when(blueprintUtils).getBlueprintName(any());
+        lenient().doReturn(2).when(blueprintUtils).countHostGroups(any());
+        lenient().doReturn("bpname").when(blueprintUtils).getBlueprintName(any());
     }
 
     @Test
@@ -53,7 +54,6 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
         BlueprintV4Request request = new BlueprintV4Request();
         String blueprint = "{}";
         request.setBlueprint(blueprint);
-        when(jsonHelper.createJsonFromString(blueprint)).thenThrow(new CloudbreakApiException("Invalid Json"));
         Assertions.assertThrows(BadRequestException.class, () -> underTest.convert(request));
     }
 
@@ -64,7 +64,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
         request.setUrl(wrongUrl);
 
         BadRequestException badRequestException = Assertions.assertThrows(BadRequestException.class, () -> underTest.convert(request));
-        Assertions.assertEquals(String.format("Cannot download cluster template from: %s", wrongUrl), badRequestException.getMessage());
+        assertEquals(String.format("Cannot download cluster template from: %s", wrongUrl), badRequestException.getMessage());
     }
 
     @Test
@@ -78,9 +78,9 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
         request.setBlueprint(FileReaderUtils.readFileFromClasspathQuietly("defaults/blueprints/7.2.12/cdp-sdx.bp"));
         Blueprint result = underTest.convert(request);
         Assertions.assertNotNull(result);
-        Assertions.assertEquals("CDH", result.getStackType());
-        Assertions.assertEquals("7.2.12", result.getStackVersion());
-        Assertions.assertEquals(2, result.getHostGroupCount());
+        assertEquals("CDH", result.getStackType());
+        assertEquals("7.2.12", result.getStackVersion());
+        assertEquals(2, result.getHostGroupCount());
         Assertions.assertNotNull(result.getBlueprintJsonText());
         Assertions.assertNotEquals("", result.getBlueprintJsonText());
     }
@@ -91,7 +91,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
         request.setBlueprint("{ \"blueprint\": {}");
 
         BadRequestException badRequestException = Assertions.assertThrows(BadRequestException.class, () -> underTest.convert(request));
-        Assertions.assertEquals("Invalid cluster template: Failed to parse JSON.", badRequestException.getMessage());
+        assertEquals("Invalid cluster template: Failed to parse JSON.", badRequestException.getMessage());
     }
 
     @Test
@@ -100,7 +100,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
         request.setBlueprint("{ \"blueprint\": { \"cdhVersion\": \"7.0.0\", { } }");
 
         BadRequestException badRequestException = Assertions.assertThrows(BadRequestException.class, () -> underTest.convert(request));
-        Assertions.assertEquals("Invalid cluster template: Failed to parse JSON.", badRequestException.getMessage());
+        assertEquals("Invalid cluster template: Failed to parse JSON.", badRequestException.getMessage());
     }
 
     @Override
@@ -109,20 +109,22 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
     }
 
     @Test
-    public void testConvertValidBlueprintUpgradeOption() {
+    public void testConvertValidEnums() {
         BlueprintV4Request request = new BlueprintV4Request();
         String blueprint = FileReaderUtils.readFileFromClasspathQuietly("test/defaults/blueprints/blueprint-with-upgrade-option.bp");
         request.setBlueprint(blueprint);
         Blueprint bp = underTest.convert(request);
-        Assertions.assertEquals(BlueprintUpgradeOption.ENABLED, bp.getBlueprintUpgradeOption());
+        assertEquals(BlueprintUpgradeOption.GA, bp.getBlueprintUpgradeOption());
+        assertEquals(BlueprintHybridOption.BURST_TO_CLOUD, bp.getHybridOption());
     }
 
     @Test
-    public void testConvertNullBlueprintUpgradeOptionSetToENABLED() {
+    public void testConvertEnumFallbacks() {
         BlueprintV4Request request = new BlueprintV4Request();
         String blueprint = FileReaderUtils.readFileFromClasspathQuietly("test/defaults/blueprints/blueprint-with-repositories.bp");
         request.setBlueprint(blueprint);
         Blueprint bp = underTest.convert(request);
-        Assertions.assertEquals(BlueprintUpgradeOption.ENABLED, bp.getBlueprintUpgradeOption());
+        assertEquals(BlueprintUpgradeOption.ENABLED, bp.getBlueprintUpgradeOption());
+        assertEquals(BlueprintHybridOption.NONE, bp.getHybridOption());
     }
 }

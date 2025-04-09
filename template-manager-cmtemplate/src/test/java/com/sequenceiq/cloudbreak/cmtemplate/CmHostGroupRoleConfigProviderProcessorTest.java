@@ -319,7 +319,7 @@ public class CmHostGroupRoleConfigProviderProcessorTest {
         String blueprintText = getBlueprintText(path);
         templateProcessor = new CmTemplateProcessor(blueprintText);
         templatePreparator = builder
-                .withBlueprintView(new BlueprintView(blueprintText, "CDP", "1.0", templateProcessor))
+                .withBlueprintView(new BlueprintView(blueprintText, "CDP", "1.0", null, templateProcessor))
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
                 .build();
         templateProcessor.addInstantiator(null, templatePreparator, "sdx");

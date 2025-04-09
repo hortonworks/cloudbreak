@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.domain.BlueprintHybridOption;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 
@@ -17,17 +18,20 @@ public class BlueprintView {
 
     private String type;
 
+    private BlueprintHybridOption hybridOption;
+
     private Set<String> components;
 
     private final BlueprintTextProcessor processor;
 
     private final Map<String, Set<String>> componentsByHostGroup;
 
-    public BlueprintView(String blueprintText, String version, String type, BlueprintTextProcessor processor) {
+    public BlueprintView(String blueprintText, String version, String type, BlueprintHybridOption hybridOption, BlueprintTextProcessor processor) {
         this.blueprintText = blueprintText;
         this.type = type;
         this.version = version;
         this.processor = processor;
+        this.hybridOption = hybridOption;
         componentsByHostGroup = processor.getComponentsByHostGroup();
         components = prepareComponents();
     }
@@ -71,6 +75,10 @@ public class BlueprintView {
 
     public boolean isHdf() {
         return "HDF".equalsIgnoreCase(type);
+    }
+
+    public BlueprintHybridOption getHybridOption() {
+        return hybridOption;
     }
 
     public String getBlueprintText() {

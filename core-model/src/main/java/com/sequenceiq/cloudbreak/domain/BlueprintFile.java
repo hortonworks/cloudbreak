@@ -23,10 +23,12 @@ public class BlueprintFile {
 
     private BlueprintUpgradeOption blueprintUpgradeOption;
 
+    private BlueprintHybridOption hybridOption;
+
     private Json tags;
 
     private BlueprintFile(String name, String blueprintText, String defaultBlueprintText, String stackName, String description, int hostGroupCount,
-            String stackType, String stackVersion, BlueprintUpgradeOption blueprintUpgradeOption, Json tags) {
+            String stackType, String stackVersion, BlueprintUpgradeOption blueprintUpgradeOption, BlueprintHybridOption hybridOption, Json tags) {
         this.name = name;
         this.blueprintText = blueprintText;
         this.defaultBlueprintText = defaultBlueprintText;
@@ -36,6 +38,7 @@ public class BlueprintFile {
         this.stackType = stackType;
         this.stackVersion = stackVersion;
         this.blueprintUpgradeOption = blueprintUpgradeOption;
+        this.hybridOption = hybridOption;
         this.tags = tags;
     }
 
@@ -75,6 +78,10 @@ public class BlueprintFile {
         return blueprintUpgradeOption;
     }
 
+    public BlueprintHybridOption getHybridOption() {
+        return hybridOption;
+    }
+
     public Json getTags() {
         return tags;
     }
@@ -89,6 +96,7 @@ public class BlueprintFile {
                 ", stackType='" + stackType + '\'' +
                 ", stackVersion='" + stackVersion + '\'' +
                 ", blueprintUpgradeOption=" + blueprintUpgradeOption +
+                ", hybridOption=" + hybridOption +
                 ", tags=" + tags +
                 '}';
     }
@@ -111,6 +119,8 @@ public class BlueprintFile {
         private String stackVersion;
 
         private BlueprintUpgradeOption blueprintUpgradeOption;
+
+        private BlueprintHybridOption hybridOption;
 
         private Json tags;
 
@@ -164,6 +174,11 @@ public class BlueprintFile {
             return this;
         }
 
+        public Builder hybridOption(BlueprintHybridOption hybridOption) {
+            this.hybridOption = hybridOption;
+            return this;
+        }
+
         public BlueprintFile build() {
             Preconditions.checkNotNull(name);
             Preconditions.checkNotNull(blueprintText);
@@ -171,7 +186,7 @@ public class BlueprintFile {
             Preconditions.checkNotNull(stackVersion);
             Preconditions.checkNotNull(stackType);
             return new BlueprintFile(name, blueprintText, defaultBlueprintText, stackName, description, hostGroupCount, stackType, stackVersion,
-                    blueprintUpgradeOption, tags);
+                    blueprintUpgradeOption, hybridOption, tags);
         }
     }
 }

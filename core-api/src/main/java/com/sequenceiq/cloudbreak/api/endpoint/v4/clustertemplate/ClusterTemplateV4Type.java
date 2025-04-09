@@ -19,5 +19,10 @@ public enum ClusterTemplateV4Type {
     DISCOVERY_DATA_AND_EXPLORATION,
     OTHER,
     DLM,
-    LAKEHOUSE_OPTIMIZER
+    LAKEHOUSE_OPTIMIZER,
+    HYBRID_DATAENGINEERING_HA;
+
+    public boolean isHybrid() {
+        return name().startsWith("HYBRID_");
+    }
 }

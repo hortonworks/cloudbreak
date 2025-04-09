@@ -57,7 +57,7 @@ public class AbstractHbaseConfigProviderTest {
         generalClusterConfigs.setAccountId(Optional.of("1234"));
 
         return TemplatePreparationObject.Builder.builder().withFileSystemConfigurationView(fileSystemConfigurationsView)
-                .withBlueprintView(new BlueprintView(inputJson, "", "", cmTemplateProcessor))
+                .withBlueprintView(new BlueprintView(inputJson, "", "", null, cmTemplateProcessor))
                 .withSharedServiceConfigs(sharedServicesConfigsView)
                 .withHostgroupViews(Set.of(master, worker))
                 .withGeneralClusterConfigs(generalClusterConfigs)

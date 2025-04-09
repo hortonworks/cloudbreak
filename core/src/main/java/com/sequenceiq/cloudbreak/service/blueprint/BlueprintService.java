@@ -299,14 +299,11 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         User user = getLoggedInUser();
         Workspace workspace = getWorkspaceService().get(workspaceId, user);
         updateDefaultBlueprintCollection(workspace);
-        Set<BlueprintView> allByNotDeletedInWorkspace = blueprintViewRepository.findAllByNotDeletedInWorkspace(workspaceId);
-        allByNotDeletedInWorkspace = allByNotDeletedInWorkspace.stream()
-                .filter(b -> blueprintListFilters.isDistroXDisplayed(b)).collect(Collectors.toSet());
-        if (withSdx) {
-            return allByNotDeletedInWorkspace;
-        }
-        return allByNotDeletedInWorkspace.stream()
-                .filter(it -> !blueprintListFilters.isDatalakeBlueprint(it)).collect(Collectors.toSet());
+        Set<BlueprintView> blueprintViews = blueprintViewRepository.findAllByNotDeletedInWorkspace(workspaceId);
+        return blueprintViews.stream()
+                .filter(blueprintListFilters::isDistroXDisplayed)
+                .filter(bp -> withSdx || !blueprintListFilters.isDatalakeBlueprint(bp))
+                .collect(Collectors.toSet());
     }
 
     @Measure(BlueprintService.class)

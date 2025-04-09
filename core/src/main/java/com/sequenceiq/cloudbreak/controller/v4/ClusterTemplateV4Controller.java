@@ -53,7 +53,10 @@ import com.sequenceiq.cloudbreak.service.template.ClusterTemplateService;
 import com.sequenceiq.cloudbreak.service.template.ClusterTemplateViewService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentBaseResponse;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -131,7 +134,9 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
         measure(() -> clusterTemplateService.updateDefaultClusterTemplates(threadLocalService.getRequestedWorkspaceId()),
                 LOGGER, "Cluster definitions fetched in {}ms");
         Optional<SdxBasicView> sdxBasicView = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(environmentCrn);
-        Optional<String> cloudPlatformByCrn = environmentClientService.getCloudPlatformByCrn(environmentCrn);
+        Optional<DetailedEnvironmentResponse> environment = getEnvironment(environmentCrn);
+        Optional<String> cloudPlatformByCrn = environment.map(EnvironmentBaseResponse::getCloudPlatform);
+        Boolean hybridEnv = environment.map(env -> EnvironmentType.HYBRID.name().equalsIgnoreCase(env.getEnvironmentType())).orElse(null);
         Optional<String> runtimeVersion = sdxBasicView.stream()
                 .map(SdxBasicView::runtime)
                 .filter(e -> !Strings.isNullOrEmpty(e))
@@ -141,7 +146,8 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
                 environmentCrn,
                 cloudPlatformByCrn.orElse(null),
                 runtimeVersion.orElse(null),
-                internalTenant);
+                internalTenant,
+                hybridEnv);
         Set<ClusterTemplateViewV4Response> result = clusterTemplateViews.stream()
                 .map(s -> clusterTemplateViewToClusterTemplateViewV4ResponseConverter.convert(s))
                 .collect(Collectors.toSet());
@@ -207,10 +213,11 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
         if (Objects.nonNull(names) && !names.isEmpty()) {
             clusterTemplates = clusterTemplateService.deleteMultiple(names, threadLocalService.getRequestedWorkspaceId());
         } else {
-            Optional<String> cloudPlatformByCrn = environmentClientService.getCloudPlatformByCrn(environmentCrn);
+            Optional<String> cloudPlatformByCrn = getEnvironment(environmentCrn).map(EnvironmentBaseResponse::getCloudPlatform);
+
             Set<String> namesByEnv = clusterTemplateService
                     .findAllByEnvironment(threadLocalService.getRequestedWorkspaceId(), environmentCrn,
-                            cloudPlatformByCrn.orElse(null), null, true)
+                            cloudPlatformByCrn.orElse(null), null, true, null)
                     .stream()
                     .filter(e -> !ResourceStatus.DEFAULT.equals(e.getStatus()))
                     .map(ClusterTemplateView::getName)
@@ -226,6 +233,14 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     private boolean isInternalTenant() {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return entitlementService.internalTenant(accountId);
+    }
+
+    private Optional<DetailedEnvironmentResponse> getEnvironment(String crn) {
+        try {
+            return Optional.ofNullable(environmentClientService.getByCrn(crn));
+        } catch (CloudbreakServiceException e) {
+            return Optional.empty();
+        }
     }
 
 }

@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
 import com.sequenceiq.cloudbreak.converter.v4.blueprint.BlueprintV4RequestToBlueprintConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintFile;
+import com.sequenceiq.cloudbreak.domain.BlueprintHybridOption;
 import com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -113,7 +114,7 @@ public class DefaulBlueprintCacheTest {
     }
 
     @Test
-    public void testLoadBlueprintsFromFileWithUpgradeOptions() throws IOException {
+    public void testLoadBlueprintsFromFileWithEnums() throws IOException {
 
         // GIVEN
         Blueprint bp1 = new Blueprint();
@@ -122,8 +123,10 @@ public class DefaulBlueprintCacheTest {
         bp1.setStackName("stckn");
         bp1.setStackType("stckt");
         bp1.setStackVersion("7.2.10");
+        bp1.setBlueprintUpgradeOption(BlueprintUpgradeOption.DISABLED);
+        bp1.setHybridOption(BlueprintHybridOption.BURST_TO_CLOUD);
         String bp1JsonString = "{\"description\":\"7.2.10 - Data Engineering\",\"blueprint\":{\"cdhVersion\":\"7.2.10\",\"displayName\":\"dataengineering\","
-                + "\"blueprintUpgradeOption\":\"DISABLED\"}}";
+                + "\"blueprintUpgradeOption\":\"DISABLED\", \"hybridOption\": \"BURST_TO_CLOUD\"}}";
         JsonNode bpText1 = JsonUtil.readTree(bp1JsonString);
         when(blueprintUtils.convertStringToJsonNode(any())).thenReturn(bpText1);
         when(blueprintEntities.getDefaults()).thenReturn(Map.of("7.2.10", "Description1=bp1"));
@@ -138,8 +141,10 @@ public class DefaulBlueprintCacheTest {
 
         Map<String, BlueprintFile> defaultBlueprints = underTest.defaultBlueprints();
         assertEquals(1L, defaultBlueprints.size());
-        assertEquals("7.2.10 - Data Engineering", defaultBlueprints.get("bp1").getDescription());
-        assertEquals(BlueprintUpgradeOption.DISABLED, defaultBlueprints.get("bp1").getBlueprintUpgradeOption());
+        BlueprintFile blueprintFile = defaultBlueprints.get("bp1");
+        assertEquals("7.2.10 - Data Engineering", blueprintFile.getDescription());
+        assertEquals(BlueprintUpgradeOption.DISABLED, blueprintFile.getBlueprintUpgradeOption());
+        assertEquals(BlueprintHybridOption.BURST_TO_CLOUD, blueprintFile.getHybridOption());
     }
 
 }

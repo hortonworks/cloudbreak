@@ -71,7 +71,7 @@ public class SqlStreamBuilderMveConfigProviderTest {
         HostgroupView manager = new HostgroupView("manager", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.CORE, 2);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 3);
-        BlueprintView blueprintView = new BlueprintView(null, null, null, cmTemplateProcessor);
+        BlueprintView blueprintView = new BlueprintView(null, null, null, null, cmTemplateProcessor);
 
         RdsView rdsConfig = mock(RdsView.class);
         when(rdsConfig.getType()).thenReturn(DatabaseType.SQL_STREAM_BUILDER_SNAPPER.toString());

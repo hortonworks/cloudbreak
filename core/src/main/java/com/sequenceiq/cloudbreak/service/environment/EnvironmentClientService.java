@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.service.environment;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 import java.util.Objects;
-import java.util.Optional;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.ProcessingException;
@@ -60,14 +59,6 @@ public class EnvironmentClientService implements EnvironmentPropertyProvider, Au
             String message = String.format("Failed to GET Environment by crn: %s, due to: '%s' ", crn, e.getMessage());
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
-        }
-    }
-
-    public Optional<String> getCloudPlatformByCrn(String crn) {
-        try {
-            return Optional.ofNullable(getByCrn(crn).getCloudPlatform());
-        } catch (CloudbreakServiceException e) {
-            return Optional.empty();
         }
     }
 

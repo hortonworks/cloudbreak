@@ -53,7 +53,7 @@ public class EfmRoleConfigProviderTest {
     }
 
     private TemplatePreparationObject getTemplatePreparationObject(CmTemplateProcessor cmTemplateProcessor) {
-        BlueprintView blueprintView = new BlueprintView(null, null, null, cmTemplateProcessor);
+        BlueprintView blueprintView = new BlueprintView(null, null, null, null, cmTemplateProcessor);
 
         RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
         when(rdsConfig.getType()).thenReturn(DatabaseType.EFM.toString());

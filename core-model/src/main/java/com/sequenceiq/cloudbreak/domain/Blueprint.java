@@ -14,6 +14,7 @@ import jakarta.persistence.UniqueConstraint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.cloudbreak.domain.converter.BlueprintHybridOptionConverter;
 import com.sequenceiq.cloudbreak.domain.converter.BlueprintUpgradeOptionConverter;
 import com.sequenceiq.cloudbreak.domain.converter.ResourceStatusConverter;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
@@ -71,6 +72,9 @@ public class Blueprint implements ProvisionEntity, WorkspaceAwareResource {
 
     @Convert(converter = BlueprintUpgradeOptionConverter.class)
     private BlueprintUpgradeOption blueprintUpgradeOption;
+
+    @Convert(converter = BlueprintHybridOptionConverter.class)
+    private BlueprintHybridOption hybridOption;
 
     public String getResourceCrn() {
         return resourceCrn;
@@ -205,6 +209,14 @@ public class Blueprint implements ProvisionEntity, WorkspaceAwareResource {
         this.blueprintUpgradeOption = blueprintUpgradeOption;
     }
 
+    public BlueprintHybridOption getHybridOption() {
+        return hybridOption;
+    }
+
+    public void setHybridOption(BlueprintHybridOption hybridOption) {
+        this.hybridOption = hybridOption;
+    }
+
     public Long getLastUpdated() {
         return lastUpdated;
     }
@@ -237,6 +249,7 @@ public class Blueprint implements ProvisionEntity, WorkspaceAwareResource {
                 ", stackVersion='" + stackVersion + '\'' +
                 ", created=" + created +
                 ", blueprintUpgradeOption=" + blueprintUpgradeOption +
+                ", hybridOption=" + hybridOption +
                 ", lastUpdated=" + lastUpdated +
                 '}';
     }

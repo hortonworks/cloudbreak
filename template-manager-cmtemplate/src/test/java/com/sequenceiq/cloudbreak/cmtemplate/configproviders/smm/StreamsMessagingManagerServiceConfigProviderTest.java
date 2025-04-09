@@ -78,7 +78,7 @@ public class StreamsMessagingManagerServiceConfigProviderTest {
             CmTemplateProcessor cmTemplateProcessor) {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 3);
-        BlueprintView blueprintView = new BlueprintView(null, null, null, cmTemplateProcessor);
+        BlueprintView blueprintView = new BlueprintView(null, null, null, null, cmTemplateProcessor);
 
         RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
         when(rdsConfig.getType()).thenReturn(DatabaseType.STREAMS_MESSAGING_MANAGER.toString());

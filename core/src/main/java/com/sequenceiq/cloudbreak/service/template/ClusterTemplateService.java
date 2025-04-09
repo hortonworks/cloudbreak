@@ -261,11 +261,11 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     }
 
     public Set<ClusterTemplateView> findAllByEnvironment(Long workspaceId, String environmentCrn, String cloudPlatform, String runtime,
-            boolean internalTenant) {
+            boolean internalTenant, Boolean hybridEnv) {
         LOGGER.debug("About to collect cluster definitions by environment: [crn: {}, cloudPlatform: {}, runtime: {}]",
                 environmentCrn, cloudPlatform, runtime);
         return clusterTemplateViewService
-                .findAllUserManagedAndDefaultByEnvironmentCrn(workspaceId, environmentCrn, cloudPlatform, runtime, internalTenant);
+                .findAllUserManagedAndDefaultByEnvironmentCrn(workspaceId, environmentCrn, cloudPlatform, runtime, internalTenant, hybridEnv);
     }
 
     @Override

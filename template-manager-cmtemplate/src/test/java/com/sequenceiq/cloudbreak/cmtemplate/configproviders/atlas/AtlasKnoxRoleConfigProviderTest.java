@@ -53,7 +53,7 @@ class AtlasKnoxRoleConfigProviderTest {
         HostgroupView worker = new HostgroupView("worker", 0, InstanceGroupType.CORE, 3);
         TemplatePreparationObject source = new Builder()
                 .withHostgroupViews(Set.of(gateway, master, quorum, worker))
-                .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", cmTemplateProcessor))
+                .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", null, cmTemplateProcessor))
                 .withStackType(StackType.DATALAKE)
                 .build();
 
@@ -76,7 +76,7 @@ class AtlasKnoxRoleConfigProviderTest {
         HostgroupView worker = new HostgroupView("worker", 0, InstanceGroupType.CORE, 3);
         TemplatePreparationObject source = new Builder()
                 .withHostgroupViews(Set.of(gateway, master, quorum, worker))
-                .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", cmTemplateProcessor))
+                .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", null, cmTemplateProcessor))
                 .withStackType(StackType.DATALAKE)
                 .build();
 
@@ -98,7 +98,7 @@ class AtlasKnoxRoleConfigProviderTest {
         HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.CORE, 2);
         HostgroupView quorum = new HostgroupView("quorum", 0, InstanceGroupType.CORE, 3);
         HostgroupView worker = new HostgroupView("worker", 0, InstanceGroupType.CORE, 3);
-        BlueprintView blueprintView = new BlueprintView(inputJson, "7.2.17", "1.0", cmTemplateProcessor);
+        BlueprintView blueprintView = new BlueprintView(inputJson, "7.2.17", "1.0", null, cmTemplateProcessor);
         TemplatePreparationObject source = new Builder()
                 .withHostgroupViews(Set.of(gateway, master, quorum, worker))
                 .withBlueprintView(blueprintView)
@@ -124,7 +124,7 @@ class AtlasKnoxRoleConfigProviderTest {
         HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.CORE, 2);
         HostgroupView quorum = new HostgroupView("quorum", 0, InstanceGroupType.CORE, 3);
         HostgroupView worker = new HostgroupView("worker", 0, InstanceGroupType.CORE, 3);
-        BlueprintView blueprintView = new BlueprintView(inputJson, "7.2.15", "1.0", cmTemplateProcessor);
+        BlueprintView blueprintView = new BlueprintView(inputJson, "7.2.15", "1.0", null, cmTemplateProcessor);
         TemplatePreparationObject source = new Builder()
                 .withHostgroupViews(Set.of(gateway, master, quorum, worker))
                 .withBlueprintView(blueprintView)

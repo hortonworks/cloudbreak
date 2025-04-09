@@ -216,8 +216,9 @@ public class DefaultClusterTemplateCache {
         User user = userService.getOrCreate(cloudbreakUser);
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         boolean arm64Enabled = entitlementService.isDataHubArmEnabled(workspace.getTenant().getName());
+        boolean hybridEnabled = entitlementService.hybridCloudEnabled(workspace.getTenant().getName());
         return defaultClusterTemplates.entrySet().stream()
-                .filter(e -> notArm64TemplateOrArm64Enabled(e.getValue().getKey(), arm64Enabled))
+                .filter(e -> isEntitled(e.getValue().getKey(), arm64Enabled, hybridEnabled))
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getValue()));
     }
 
@@ -239,11 +240,12 @@ public class DefaultClusterTemplateCache {
         String accountId = workspace.getTenant().getName();
         boolean internalTenant = entitlementService.internalTenant(accountId);
         boolean arm64Enabled = entitlementService.isDataHubArmEnabled(accountId);
+        boolean hybridEnabled = entitlementService.hybridCloudEnabled(accountId);
         defaultClusterTemplateRequests().forEach((key, value) -> {
             if (templateNamesMissingFromDb.contains(key)) {
                 DefaultClusterTemplateV4Request defaultClusterTemplate = value.getKey();
                 if (internalClusterTemplateValidator.shouldPopulate(defaultClusterTemplate, internalTenant) &&
-                        notArm64TemplateOrArm64Enabled(defaultClusterTemplate, arm64Enabled)) {
+                        isEntitled(defaultClusterTemplate, arm64Enabled, hybridEnabled)) {
                     ClusterTemplate clusterTemplate = defaultClusterTemplateV4RequestToClusterTemplateConverter.convert(defaultClusterTemplate);
                     clusterTemplate.setWorkspace(workspace);
                     Optional<Blueprint> blueprint = blueprints.stream()
@@ -259,11 +261,20 @@ public class DefaultClusterTemplateCache {
         return defaultTemplates;
     }
 
+    private boolean isEntitled(DefaultClusterTemplateV4Request defaultClusterTemplate, boolean arm64Enabled, boolean hybridEnabled) {
+        return notArm64TemplateOrArm64Enabled(defaultClusterTemplate, arm64Enabled)
+                && notHybridOrHybridEnabled(defaultClusterTemplate, hybridEnabled);
+    }
+
     private boolean notArm64TemplateOrArm64Enabled(DefaultClusterTemplateV4Request defaultClusterTemplate, boolean arm64Enabled) {
         boolean hasArm64InstanceType = defaultClusterTemplate.getDistroXTemplate().getInstanceGroups().stream()
                 .anyMatch(group -> StringUtils.isNotEmpty(group.getTemplate().getInstanceType()) &&
                         DistroxEnabledInstanceTypes.AWS_ENABLED_ARM64_TYPES_LIST.contains(group.getTemplate().getInstanceType()));
         return !hasArm64InstanceType || arm64Enabled;
+    }
+
+    private boolean notHybridOrHybridEnabled(DefaultClusterTemplateV4Request defaultClusterTemplate, boolean hybridEnabled) {
+        return !defaultClusterTemplate.getType().isHybrid() || hybridEnabled;
     }
 
     public Collection<String> defaultClusterTemplateNames() {

@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintFile;
+import com.sequenceiq.cloudbreak.domain.BlueprintHybridOption;
 import com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintListFilters;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
@@ -134,6 +135,11 @@ public class BlueprintLoaderService {
                         workspace.getId(), diffBlueprint.getKey());
                 continue;
             }
+            if (!BlueprintHybridOption.isNone(diffBlueprint.getValue().getHybridOption()) && !entitlementService.hybridCloudEnabled(accountId)) {
+                LOGGER.info("Hybrid cloud blueprints are not enabled for workspace '{}', therefore not adding blueprint '{}' to the database.",
+                        workspace.getId(), diffBlueprint.getKey());
+                continue;
+            }
             LOGGER.debug("Default blueprint '{}' needs to be added for the '{}' workspace because the default validation missing.",
                     diffBlueprint.getKey(), workspace.getId());
             Blueprint bp = new Blueprint();
@@ -170,7 +176,12 @@ public class BlueprintLoaderService {
                 && (defaultBlueprintsDefaultBlueprintTextNotSameAsNew(blueprintInDatabase, defaultBlueprint.getDefaultBlueprintText())
                         || defaultBlueprintContainsNewDescription(blueprintInDatabase, defaultBlueprint)
                         || isBlueprintInDBSameNameButUserManaged(blueprintInDatabase, defaultBlueprint)
-                        || isUpgradeOptionModified(blueprintInDatabase, defaultBlueprint));
+                        || isUpgradeOptionModified(blueprintInDatabase, defaultBlueprint)
+                        || isHybridOptionModified(blueprintInDatabase, defaultBlueprint));
+    }
+
+    private boolean isHybridOptionModified(Blueprint blueprintInDatabase, BlueprintFile defaultBlueprint) {
+        return blueprintInDatabase.getHybridOption() != defaultBlueprint.getHybridOption();
     }
 
     private boolean isUpgradeOptionModified(Blueprint blueprintInDatabase, BlueprintFile defaultBlueprint) {
@@ -192,6 +203,7 @@ public class BlueprintLoaderService {
         blueprintFromDatabase.setStackType(newBlueprint.getStackType());
         blueprintFromDatabase.setStackVersion(newBlueprint.getStackVersion());
         blueprintFromDatabase.setBlueprintUpgradeOption(getBlueprintUpgradeOption(newBlueprint));
+        blueprintFromDatabase.setHybridOption(newBlueprint.getHybridOption());
         blueprintFromDatabase.setLastUpdated(Instant.now().toEpochMilli());
         blueprintFromDatabase.setTags(newBlueprint.getTags());
         return blueprintFromDatabase;
@@ -226,9 +238,7 @@ public class BlueprintLoaderService {
         LOGGER.debug("Collecting blueprints which are missing from the cache.");
         Set<Blueprint> diff = new HashSet<>();
         for (Blueprint blueprint : blueprintsInDatabase) {
-            if (blueprint.getStatus().equals(DEFAULT) && defaultBlueprintCache.defaultBlueprints().entrySet()
-                    .stream()
-                    .noneMatch(bp -> bp.getKey().equals(blueprint.getName()))) {
+            if (blueprint.getStatus().equals(DEFAULT) && !defaultBlueprintCache.defaultBlueprints().containsKey(blueprint.getName())) {
                 diff.add(blueprint);
             }
         }
@@ -275,7 +285,8 @@ public class BlueprintLoaderService {
                 && isBlueprintInTheDefaultCache(defaultBlueprint)
                 && (defaultBlueprintsDefaultBlueprintTextNotSameAsNew(blueprintFromDatabase, defaultBlueprint.getDefaultBlueprintText())
                         || defaultBlueprintContainsNewDescription(blueprintFromDatabase, defaultBlueprint)
-                        || isUpgradeOptionModified(blueprintFromDatabase, defaultBlueprint));
+                        || isUpgradeOptionModified(blueprintFromDatabase, defaultBlueprint)
+                        || isHybridOptionModified(blueprintFromDatabase, defaultBlueprint));
     }
 
     private boolean defaultBlueprintDoesNotExistInTheDatabase(Collection<Blueprint> blueprints) {

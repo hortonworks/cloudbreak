@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.blueprint;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DEFAULT;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DEFAULT_DELETED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.USER_MANAGED;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -38,6 +39,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintFile;
+import com.sequenceiq.cloudbreak.domain.BlueprintHybridOption;
 import com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
@@ -346,6 +348,32 @@ class BlueprintLoaderServiceTest {
                 () -> underTest.loadBlueprintsForTheWorkspace(new HashSet<>(), workspace, this::mockSave));
 
         assertEquals(lakehouseOptimizerEnabled ? 4 : 3, result.size());
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testLoadBlueprintsForTheWorkspaceWhenHybridDefaultBlueprintsAreMissing(boolean hybridEnabled) {
+        Map<String, BlueprintFile> defaultBlueprints = generateCacheData(3, BlueprintUpgradeOption.ENABLED);
+        defaultBlueprints.put("7.3.1 - Hybrid", new BlueprintFile.Builder()
+                .stackName("hybrid")
+                .hybridOption(BlueprintHybridOption.BURST_TO_CLOUD)
+                .blueprintText("blueprintText")
+                .stackVersion("stackVersion")
+                .stackType("CDH")
+                .name("7.3.1 - Hybrid")
+                .build());
+        setupMock(defaultBlueprints);
+        when(entitlementService.hybridCloudEnabled("1234")).thenReturn(hybridEnabled);
+
+        Set<Blueprint> result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.loadBlueprintsForTheWorkspace(new HashSet<>(), workspace, this::mockSave));
+
+        assertEquals(hybridEnabled ? 4 : 3, result.size());
+        if (hybridEnabled) {
+            assertThat(result).anyMatch(bp -> BlueprintHybridOption.BURST_TO_CLOUD.equals(bp.getHybridOption()));
+        } else {
+            assertThat(result).noneMatch(bp -> BlueprintHybridOption.BURST_TO_CLOUD.equals(bp.getHybridOption()));
+        }
     }
 
     @Test

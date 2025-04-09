@@ -74,7 +74,7 @@ class KuduVolumeConfigProviderTest {
         String inputJson = FileReaderUtils.readFileFromClasspathQuietly("input/cdp-data-mart.bp");
         TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
                 .withHostgroupViews(Set.of(hostGroup))
-                .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", new CmTemplateProcessor(inputJson)))
+                .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", null, new CmTemplateProcessor(inputJson)))
                 .build();
         return preparationObject;
     }

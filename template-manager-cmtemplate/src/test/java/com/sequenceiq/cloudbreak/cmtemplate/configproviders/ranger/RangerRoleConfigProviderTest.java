@@ -116,7 +116,7 @@ public class RangerRoleConfigProviderTest {
 
         TemplatePreparationObject preparationObject = Builder.builder()
                 .withHostgroupViews(Set.of(master, worker))
-                .withBlueprintView(new BlueprintView(inputJson, "", "", cmTemplateProcessor))
+                .withBlueprintView(new BlueprintView(inputJson, "", "", null, cmTemplateProcessor))
                 .withRdsViews(Set.of(rdsConfigWithoutCluster(DatabaseType.RANGER, RdsSslMode.DISABLED))
                         .stream()
                         .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", true))
@@ -161,7 +161,7 @@ public class RangerRoleConfigProviderTest {
 
         TemplatePreparationObject preparationObject = Builder.builder()
                 .withHostgroupViews(Set.of(master, worker))
-                .withBlueprintView(new BlueprintView(inputJson, "", "", cmTemplateProcessor))
+                .withBlueprintView(new BlueprintView(inputJson, "", "", null, cmTemplateProcessor))
                 .withRdsViews(Set.of(rdsConfigWithoutCluster(DatabaseType.RANGER, RdsSslMode.DISABLED))
                         .stream()
                         .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", true))
@@ -203,7 +203,7 @@ public class RangerRoleConfigProviderTest {
 
         TemplatePreparationObject preparationObject = Builder.builder()
                 .withHostgroupViews(Set.of(master))
-                .withBlueprintView(new BlueprintView(inputJson, "", "", cmTemplateProcessor))
+                .withBlueprintView(new BlueprintView(inputJson, "", "", null, cmTemplateProcessor))
                 .withRdsViews(Set.of(rdsConfigWithoutCluster(DatabaseType.RANGER, RdsSslMode.DISABLED))
                         .stream()
                         .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", true))
