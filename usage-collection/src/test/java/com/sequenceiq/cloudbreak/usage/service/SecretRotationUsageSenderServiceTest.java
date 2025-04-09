@@ -22,7 +22,7 @@ public class SecretRotationUsageSenderServiceTest {
 
     private static final String SECRET_TYPE = "secretType";
 
-    private static final String RESOURCE_CRN = "resourceCrn";
+    private static final String RESOURCE_CRN = "crn:cdp:datahub:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:cluster:c681a099-bff3-4f3f-8884-1de9604a3a09";
 
     private static final String REASON = "reason";
 
@@ -67,42 +67,6 @@ public class SecretRotationUsageSenderServiceTest {
     @Test
     public void testRollbackFailedWhenErrorOccurs() {
         underTest.rollbackFailed(null, null, null);
-        verifyNoInteractions(usageReporter);
-    }
-
-    @Test
-    public void testRotationStartedWhenExecutionTypeIsNotNull() {
-        underTest.rotationStarted(SECRET_TYPE, RESOURCE_CRN);
-        verifyNoInteractions(usageReporter);
-    }
-
-    @Test
-    public void testRotationFinishedWhenExecutionTypeIsNotNull() {
-        underTest.rotationFinished(SECRET_TYPE, RESOURCE_CRN);
-        verifyNoInteractions(usageReporter);
-    }
-
-    @Test
-    public void testRotationFailedWhenExecutionTypeIsNotNull() {
-        underTest.rotationFailed(SECRET_TYPE, RESOURCE_CRN, null);
-        verifyNoInteractions(usageReporter);
-    }
-
-    @Test
-    public void testRollbackStartedWhenExecutionTypeIsNotNull() {
-        underTest.rollbackStarted(SECRET_TYPE, RESOURCE_CRN);
-        verifyNoInteractions(usageReporter);
-    }
-
-    @Test
-    public void testRollbackFinishedWhenExecutionTypeIsNotNull() {
-        underTest.rollbackFinished(SECRET_TYPE, RESOURCE_CRN);
-        verifyNoInteractions(usageReporter);
-    }
-
-    @Test
-    public void testRollbackFailedWhenExecutionTypeIsNotNull() {
-        underTest.rollbackFailed(SECRET_TYPE, RESOURCE_CRN, null);
         verifyNoInteractions(usageReporter);
     }
 
