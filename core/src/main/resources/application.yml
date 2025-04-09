@@ -851,6 +851,11 @@ dynamic-entitlement:
   entitlements:
     cb: CDP_CENTRAL_COMPUTE_MONITORING
 
+provider-sync:
+  resourcetype-list: AZURE_PUBLIC_IP
+  enabled-providers: AZURE
+  enabled: false
+
 clusterdns:
   host: localhost
   port: 8982

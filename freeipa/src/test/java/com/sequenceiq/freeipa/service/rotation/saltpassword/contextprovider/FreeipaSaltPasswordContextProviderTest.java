@@ -50,7 +50,7 @@ class FreeipaSaltPasswordContextProviderTest {
 
     @BeforeEach
     void setUp() {
-        lenient().when(stackService.getByEnvironmentCrnAndAccountId(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
+        lenient().when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
     }
 
     @Test
@@ -68,7 +68,7 @@ class FreeipaSaltPasswordContextProviderTest {
         CustomJobRotationContext rotationContext = (CustomJobRotationContext) result.get(CUSTOM_JOB);
         rotationContext.getPreValidateJob().orElseThrow().run();
 
-        verify(stackService).getByEnvironmentCrnAndAccountId(ENV_CRN, ACCOUNT_ID);
+        verify(stackService).getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENV_CRN, ACCOUNT_ID);
         verify(rotateSaltPasswordService).validateRotateSaltPassword(stack);
         verify(secretRotationSaltService).validateSalt(any());
     }
@@ -80,7 +80,7 @@ class FreeipaSaltPasswordContextProviderTest {
         CustomJobRotationContext rotationContext = (CustomJobRotationContext) result.get(CUSTOM_JOB);
         rotationContext.getRotationJob().orElseThrow().run();
 
-        verify(stackService).getByEnvironmentCrnAndAccountId(ENV_CRN, ACCOUNT_ID);
+        verify(stackService).getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENV_CRN, ACCOUNT_ID);
         verify(rotateSaltPasswordService).rotateSaltPassword(stack);
     }
 

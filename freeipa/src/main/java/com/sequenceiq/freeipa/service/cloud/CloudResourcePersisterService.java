@@ -3,7 +3,6 @@ package com.sequenceiq.freeipa.service.cloud;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -49,7 +48,7 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
                     resourceService.save(resource);
                     return resource;
                 })
-                .collect(Collectors.toList());
+                .toList();
         if (cloudResources.size() != resources.size()) {
             LOGGER.debug("There are {} resource(s), these will not be save", cloudResources.size() - resources.size());
         }

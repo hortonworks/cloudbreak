@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.job.StackJobAdapter;
 import com.sequenceiq.cloudbreak.job.archiver.instancemetadata.ArchiveInstanceMetaDataJobService;
 import com.sequenceiq.cloudbreak.job.dynamicentitlement.DynamicEntitlementRefreshJobService;
+import com.sequenceiq.cloudbreak.job.provider.ProviderSyncJobService;
 import com.sequenceiq.cloudbreak.job.stackpatcher.ExistingStackPatcherJobService;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -137,6 +138,9 @@ public class ClusterCreationActions {
 
     @Inject
     private MeteringService meteringService;
+
+    @Inject
+    private ProviderSyncJobService providerSyncJobService;
 
     @Bean(name = "CLUSTER_PROXY_REGISTRATION_STATE")
     public Action<?, ?> clusterProxyRegistrationAction() {
@@ -697,6 +701,7 @@ public class ClusterCreationActions {
                 syncJobService.schedule(context.getStackId(), StructuredSynchronizerJobAdapter.class);
                 aimJobService.schedule(context.getStackId());
                 dynamicEntitlementRefreshJobService.schedule(context.getStackId());
+                providerSyncJobService.schedule(context.getStackId());
                 if (CloudPlatform.MOCK.equalsIgnoreCase(context.getStack().getCloudPlatform())) {
                     existingStackPatcherJobService.schedule(context.getStackId(), StackPatchType.MOCK);
                 }

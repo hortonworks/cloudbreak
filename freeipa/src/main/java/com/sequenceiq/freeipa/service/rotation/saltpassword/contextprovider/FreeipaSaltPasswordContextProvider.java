@@ -75,8 +75,7 @@ public class FreeipaSaltPasswordContextProvider implements RotationContextProvid
 
     private Stack getStack(String resourceCrn) {
         Crn environmentCrn = Crn.safeFromString(resourceCrn);
-        Stack stack = stackService.getByEnvironmentCrnAndAccountId(resourceCrn, environmentCrn.getAccountId());
-        return stack;
+        return stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(resourceCrn, environmentCrn.getAccountId());
     }
 
     @Override

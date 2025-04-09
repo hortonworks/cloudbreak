@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -39,8 +39,10 @@ public class ResourceService {
         return list;
     }
 
-    public Set<Resource> getNotInstanceRelatedByStackId(Long stackId) {
-        return repository.findAllByStackIdNotInstanceOrDisk(stackId);
+    public List<CloudResource> getAllCloudResource(Long stackId) {
+        return repository.findAllByStackId(stackId).stream()
+                .map(resource -> cloudResourceToResourceConverter.convert(resource))
+                .collect(Collectors.toList());
     }
 
     public Collection<Resource> getAllByStackId(Long stackId) {

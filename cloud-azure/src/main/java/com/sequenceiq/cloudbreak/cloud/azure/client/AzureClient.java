@@ -615,6 +615,21 @@ public class AzureClient {
         return handleException(() -> azureListResultFactory.listByResourceGroup(azure.publicIpAddresses(), resourceGroup));
     }
 
+    public List<PublicIpAddress> getPublicIpAddresses(Collection<String> ids, String resourceGroup) {
+        return getPublicIpAddresses(resourceGroup)
+                .getAll()
+                .stream()
+                .filter(publicIpAddress -> ids.contains(publicIpAddress.id()))
+                .toList();
+    }
+
+    public List<LoadBalancer> getLoadBalancers(Collection<String> ids, String resourceGroup) {
+        return azure.loadBalancers().listByResourceGroup(resourceGroup)
+                .stream()
+                .filter(lb -> ids.contains(lb.id()))
+                .toList();
+    }
+
     public Mono<Void> deleteNetworkInterfaceAsync(String resourceGroup, String networkInterfaceName) {
         return handleException(() -> azure.networkInterfaces().deleteByResourceGroupAsync(resourceGroup, networkInterfaceName));
     }
