@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.usage.UsageReporter;
 
 @Service
@@ -48,7 +48,7 @@ public class SecretRotationUsageSenderService {
         try {
             LOGGER.debug("Send secret rotation usage report for secretType: {}, status: {}, reason: {}", secretType, status, reason);
             usageReporter.cdpSecretRotationEvent(CDPSecretRotationEvent.newBuilder()
-                    .setAccountId(ThreadBasedUserCrnProvider.getAccountId())
+                    .setAccountId(Crn.safeFromString(resourceCrn).getAccountId())
                     .setSecretType(secretType.toString())
                     .setResourceCrn(resourceCrn)
                     .setReason(reason == null ? "" : reason)
