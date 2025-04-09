@@ -5,6 +5,7 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXAwsMigrationTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXVolumesModificationTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXDeleteAndAddVolumesTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXAwsMultiAzRepairTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxVolumesVerticalScaleTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxUpgradeTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxUpgradeRecoveryTests
