@@ -250,6 +250,7 @@ public class AzureTemplateBuilder {
                 .validate(armStack, cloudVmTypes.getCloudVmResponses().getOrDefault(region.value(), Set.of())));
         model.putAll(loadBalancerModelBuilder.buildModel());
         model.put("multiAz", cloudStack.isMultiAz());
+        model.put("noPublicIp", azureUtils.isPrivateIp(network));
         return model;
     }
 

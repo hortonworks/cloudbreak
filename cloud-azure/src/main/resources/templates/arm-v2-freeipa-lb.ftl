@@ -27,6 +27,10 @@
             "defaultValue" : "${stackname}"
         },
         </#if>
+        "publicIPNamePrefix" :{
+            "type": "string",
+            "defaultValue" : "${stackname}"
+        },
         "nicNamePrefix" : {
             "type": "string",
             "defaultValue" : "${stackname}"
@@ -78,38 +82,39 @@
                </#if>
            ],
            "properties": {
-               <#if acceleratedNetworkEnabled[instance.flavor]> "enableAcceleratedNetworking": "true", </#if>
-                <#if securityGroups[instance.groupName]?? && securityGroups[instance.groupName]?has_content>
-                   "networkSecurityGroup":{
-                       "id": "${securityGroups[instance.groupName]}"
-                    },
-                <#else>
-                    "networkSecurityGroup":{
-                        "id": "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('${instance.groupName?replace('_', '')}secGroupName'))]"
-                   },
-                </#if>
+            <#if acceleratedNetworkEnabled[instance.flavor]>
+                "enableAcceleratedNetworking": "true",
+            </#if>
+            <#if securityGroups[instance.groupName]?? && securityGroups[instance.groupName]?has_content>
+               "networkSecurityGroup":{
+                   "id": "${securityGroups[instance.groupName]}"
+                },
+            <#else>
+               "networkSecurityGroup":{
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('${instance.groupName?replace('_', '')}secGroupName'))]"
+               },
+            </#if>
                "ipConfigurations": [
                    {
                        "name": "ipconfig1",
                        "properties": {
-                           "privateIPAllocationMethod": "Dynamic"
-                           <#if existingVPC>
-                           ,"subnet": {
-                               "id": "[concat(variables('vnetID'),'/subnets/', '${instance.subnetId}')]"
+                           "privateIPAllocationMethod": "Dynamic",
+                       <#if !noPublicIp>
+                           "publicIPAddress": {
+                               "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(parameters('publicIPNamePrefix'), '${instance.instanceId}'))]"
+                           },
+                        </#if>
+                           "subnet": {
+                             "id": "[concat(variables('vnetID'),'/subnets/', '${instance.subnetId}')]"
                            }
-                           <#else>
-                           ,"subnet": {
-                               "id": "[concat(variables('vnetID'),'/subnets/',parameters('subnet1Name'))]"
-                           }
-                           </#if>
-                           <#if loadBalancerMapping[instance.groupName]?? && (loadBalancerMapping[instance.groupName]?size > 0)>
+                        <#if loadBalancerMapping[instance.groupName]?? && (loadBalancerMapping[instance.groupName]?size > 0)>
                            ,"loadBalancerBackendAddressPools": [
-                               <#list loadBalancerMapping[instance.groupName] as loadBalancer>
+                           <#list loadBalancerMapping[instance.groupName] as loadBalancer>
                                { "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', '${loadBalancer.name}', '${loadBalancer.name}-pool')]" }
                                <#sep>, </#sep>
-                               </#list>
+                           </#list>
                            ]
-                           </#if>
+                        </#if>
                        }
                    }
                ]
