@@ -70,7 +70,21 @@ if [[ "$REVERSE_RECORD_CREATED" -eq 0 ]]; then
 fi
 
 echo "$(date +'%Y-%m-%d %H:%M:%S') update DNS A record"
-ipa dnsrecord-mod $IPA_FDOMAIN $IPA_SHORT_HOSTNAME --a-rec=$IPA_IP
+IPA_STDERR=$(mktemp)
+retVal=0
+alreadyExists=0
+ipa dnsrecord-mod $IPA_FDOMAIN $IPA_SHORT_HOSTNAME --a-rec=$IPA_IP 2>"${IPA_STDERR}" || retVal=$?
+if grep "ERROR: no modifications to be performed" ${IPA_STDERR} &>/dev/null; then
+  alreadyExists=1
+  echo "DNS a-record already exists for ${IPA_SHORT_HOSTNAME}"
+else
+  cat "${IPA_STDERR}" >&2
+fi
+rm -f "${IPA_STDERR}"
+if [[ ! ("$retVal" -eq 0 || ( "$retVal" -eq 1 && "$alreadyExists" -eq 1 )) ]]; then
+  errcho "Failed to set DNS A-record for ${IPA_SHORT_HOSTNAME}"
+  false
+fi
 
 echo "$(date +'%Y-%m-%d %H:%M:%S') update system records"
 ipa dns-update-system-records

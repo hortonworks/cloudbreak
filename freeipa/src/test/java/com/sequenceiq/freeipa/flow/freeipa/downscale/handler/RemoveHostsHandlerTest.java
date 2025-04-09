@@ -16,9 +16,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.google.common.collect.Multimaps;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -77,7 +79,9 @@ class RemoveHostsHandlerTest {
         RemoveHostsFromOrchestrationRequest request = new RemoveHostsFromOrchestrationRequest(cleanupEvent);
         Stack stack = new Stack();
         when(stackService.getByIdWithListsInTransaction(any())).thenReturn(stack);
+
         underTest.accept(new Event<>(request));
+
         verify(eventBus, times(1)).notify(eq("REMOVEHOSTSFROMORCHESTRATIONSUCCESS"), ArgumentMatchers.<Event>any());
         verify(bootstrapService).reBootstrap(any(), any());
         verify(hostOrchestrator).tearDown(any(), any(), any(), any(), any());
@@ -89,7 +93,9 @@ class RemoveHostsHandlerTest {
                 new CleanupEvent(STACK_ID, USERS, HOSTS, ROLES, IPS, STATES_TO_SKIP, ACCOUNT_ID, OPERATION_ID, CLUSTER_NAME, ENVIRONMENT_CRN);
         RemoveHostsFromOrchestrationRequest request = new RemoveHostsFromOrchestrationRequest(cleanupEvent);
         when(stackService.getByIdWithListsInTransaction(any())).thenThrow(new RuntimeException("expected exception"));
+
         underTest.accept(new Event<>(request));
+
         verify(eventBus, times(1)).notify(eq("REMOVE_HOSTS_FROM_ORCHESTRATION_FAILED_EVENT"), ArgumentMatchers.<Event>any());
     }
 
@@ -98,7 +104,9 @@ class RemoveHostsHandlerTest {
         CleanupEvent cleanupEvent =
                 new CleanupEvent(STACK_ID, USERS, Set.of(), ROLES, IPS, STATES_TO_SKIP, ACCOUNT_ID, OPERATION_ID, CLUSTER_NAME, ENVIRONMENT_CRN);
         RemoveHostsFromOrchestrationRequest request = new RemoveHostsFromOrchestrationRequest(cleanupEvent);
+
         underTest.accept(new Event<>(request));
+
         verify(eventBus, times(1)).notify(eq("REMOVEHOSTSFROMORCHESTRATIONSUCCESS"), ArgumentMatchers.<Event>any());
     }
 
@@ -131,9 +139,63 @@ class RemoveHostsHandlerTest {
         im3.setInstanceGroup(ig);
         ig.setInstanceMetaData(Set.of(im1, im2, im3));
         stack.setInstanceGroups(Set.of(ig));
+
         underTest.accept(new Event<>(request));
+
         verify(eventBus, times(1)).notify(eq("REMOVEHOSTSFROMORCHESTRATIONSUCCESS"), ArgumentMatchers.<Event>any());
         verify(bootstrapService).reBootstrap(any(), any());
-        verify(hostOrchestrator).tearDown(any(), any(), eq(Map.of("example1.com", "192.168.0.1")), any(), any());
+        verify(hostOrchestrator).tearDown(any(), any(), eq(Multimaps.forMap(Map.of("example1.com", "192.168.0.1"))), any(), any());
+    }
+
+    @Test
+    void testSendsSuccessMessageWhenRemovingHostAndIPAddressIsReusedAfterRepairWithMultipleRecords() throws Exception {
+        CleanupEvent cleanupEvent =
+                new CleanupEvent(STACK_ID, USERS, Set.of("example1.com"), ROLES, IPS, STATES_TO_SKIP, ACCOUNT_ID, OPERATION_ID, CLUSTER_NAME, ENVIRONMENT_CRN);
+        RemoveHostsFromOrchestrationRequest request = new RemoveHostsFromOrchestrationRequest(cleanupEvent);
+        Stack stack = new Stack();
+        when(stackService.getByIdWithListsInTransaction(any())).thenReturn(stack);
+        InstanceGroup ig = new InstanceGroup();
+        ig.setGroupName("group");
+        Template t = new Template();
+        t.setInstanceType("GATEWAY");
+        ig.setTemplate(t);
+        InstanceMetaData im11 = new InstanceMetaData();
+        im11.setDiscoveryFQDN("example1.com");
+        im11.setPrivateIp("192.168.0.1");
+        im11.setInstanceId("i-11");
+        im11.setInstanceGroup(ig);
+        im11.setInstanceStatus(InstanceStatus.TERMINATED);
+        InstanceMetaData im12 = new InstanceMetaData();
+        im12.setDiscoveryFQDN("example1.com");
+        im12.setPrivateIp("192.168.0.1");
+        im12.setInstanceId("i-12");
+        im12.setInstanceGroup(ig);
+        im12.setInstanceStatus(InstanceStatus.TERMINATED);
+        InstanceMetaData im13 = new InstanceMetaData();
+        im13.setDiscoveryFQDN("example1.com");
+        im13.setPrivateIp("192.168.0.1");
+        im13.setInstanceId("i-13");
+        im13.setInstanceGroup(ig);
+        im13.setInstanceStatus(InstanceStatus.DELETE_REQUESTED);
+        InstanceMetaData im2 = new InstanceMetaData();
+        im2.setDiscoveryFQDN("example2.com");
+        im2.setPrivateIp("192.168.0.2");
+        im2.setInstanceId("i-2");
+        im2.setInstanceGroup(ig);
+        im2.setInstanceStatus(InstanceStatus.CREATED);
+        InstanceMetaData im3 = new InstanceMetaData();
+        im3.setDiscoveryFQDN("example3.com");
+        im3.setPrivateIp("192.168.0.1");
+        im3.setInstanceId("i-3");
+        im3.setInstanceGroup(ig);
+        im3.setInstanceStatus(InstanceStatus.CREATED);
+        ig.setInstanceMetaData(Set.of(im11, im12, im13, im2, im3));
+        stack.setInstanceGroups(Set.of(ig));
+
+        underTest.accept(new Event<>(request));
+
+        verify(eventBus, times(1)).notify(eq("REMOVEHOSTSFROMORCHESTRATIONSUCCESS"), ArgumentMatchers.<Event>any());
+        verify(bootstrapService).reBootstrap(any(), any());
+        verify(hostOrchestrator).tearDown(any(), any(), eq(Multimaps.forMap(Map.of("example1.com", "192.168.0.1"))), any(), any());
     }
 }

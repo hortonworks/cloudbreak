@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.common.model.PackageInfo;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.orchestration.OrchestratorAware;
@@ -81,7 +82,7 @@ public interface HostOrchestrator extends HostRecipeExecutor {
 
     NodeReachabilityResult getResponsiveNodes(Set<Node> nodes, GatewayConfig gatewayConfig, boolean targeted);
 
-    void tearDown(OrchestratorAware stack, List<GatewayConfig> allGatewayConfigs, Map<String, String> removeNodePrivateIPsByFQDN,
+    void tearDown(OrchestratorAware stack, List<GatewayConfig> allGatewayConfigs, Multimap<String, String> removeNodePrivateIPsByFQDN,
             Set<Node> remainingNodes, ExitCriteriaModel exitModel) throws CloudbreakOrchestratorException;
 
     Map<String, Map<String, String>> getPackageVersionsFromAllHosts(GatewayConfig gateway, Map<String, Optional<String>> packages)
