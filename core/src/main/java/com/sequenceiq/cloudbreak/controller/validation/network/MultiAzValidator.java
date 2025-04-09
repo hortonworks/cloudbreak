@@ -57,11 +57,6 @@ public class MultiAzValidator {
                     stack.getPlatformVariant());
             LOGGER.info(variantIsNotSupportedMsg);
             validationBuilder.error(variantIsNotSupportedMsg);
-        } else if (allSubnetIds.size() > 1 && supportedVariant(stack)) {
-            LOGGER.info("Multiple subnets are supported for this {} platform and configured in the request. Setting the multi-AZ flag to true",
-                    stack.getCloudPlatform());
-            stackService.updateMultiAzFlag(stack.getId(), Boolean.TRUE);
-            stack.setMultiAz(Boolean.TRUE);
         }
         providerBasedMultiAzSetupValidator.validate(validationBuilder, stack);
     }

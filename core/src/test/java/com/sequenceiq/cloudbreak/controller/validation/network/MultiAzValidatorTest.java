@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.validation.network;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -27,7 +26,6 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.cloudbreak.service.multiaz.ProviderBasedMultiAzSetupValidator;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,9 +39,6 @@ public class MultiAzValidatorTest {
 
     @Mock
     private ProviderBasedMultiAzSetupValidator providerBasedMultiAzSetupValidator;
-
-    @Mock
-    private StackService stackService;
 
     @Mock
     private AvailabilityZoneConnector availabilityZoneConnector;
@@ -86,7 +81,6 @@ public class MultiAzValidatorTest {
 
         underTest.validateMultiAzForStack(stack, builder);
 
-        assertTrue(stack.isMultiAz());
         Mockito.verify(builder, Mockito.times(0)).error(anyString());
     }
 

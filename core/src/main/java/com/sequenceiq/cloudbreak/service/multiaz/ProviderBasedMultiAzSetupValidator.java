@@ -95,7 +95,7 @@ public class ProviderBasedMultiAzSetupValidator {
                 stackService.updateMultiAzFlag(stack.getId(), Boolean.TRUE);
                 stack.setMultiAz(Boolean.TRUE);
             } else if (anyZoneConfiguredOnGroupLevel) {
-                String msg = "The multi-AZ flag was not enabled, but zones were provided on some the groups of the deployment. " +
+                String msg = "The multi-AZ flag was not enabled, but zones were provided on some of the groups of the deployment. " +
                         "Please use the multi-AZ flag or set explicit zone(s) for all the groups of the deployment!";
                 LOGGER.info(msg);
                 validationBuilder.error(msg);

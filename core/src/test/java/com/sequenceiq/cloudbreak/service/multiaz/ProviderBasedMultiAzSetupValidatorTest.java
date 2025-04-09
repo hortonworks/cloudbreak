@@ -62,7 +62,7 @@ class ProviderBasedMultiAzSetupValidatorTest {
             "multi/targeted availability zone could not be requested.";
 
     private static final String STACK_MULTAZ_DISABLED_SOME_GROUPS_AZ_CONFIGURED = "The multi-AZ flag was not enabled, but zones were provided " +
-            "on some the groups of the deployment. Please use the multi-AZ flag or set explicit zone(s) for all the groups of the deployment!";
+            "on some of the groups of the deployment. Please use the multi-AZ flag or set explicit zone(s) for all the groups of the deployment!";
 
     private static final String NOT_ENTITLED_FOR_MULTIAZ_AZURE = String.format("Provisioning a multi AZ cluster on Azure requires entitlement %s.",
             Entitlement.CDP_CB_AZURE_MULTIAZ.name());
