@@ -66,21 +66,25 @@ public class SecretAspectService {
         Collection<Object> entities = convertFirstArgToCollection(proceedingJoinPoint);
         for (Object entity : entities) {
             try {
-                for (Field field : entity.getClass().getDeclaredFields()) {
-                    if (field.isAnnotationPresent(SecretValue.class)) {
-                        LOGGER.debug("Found SecretValue annotation on {}", field);
-                        ReflectionUtils.makeAccessible(field);
-                        Secret value = (Secret) field.get(entity);
-                        if (value != null && value.getRaw() != null && value.getSecret() == null) {
-                            String accountId = findAccountId(entity);
-                            String path = String.format("%s/%s/%s/%s-%s", accountId,
-                                    entity.getClass().getSimpleName().toLowerCase(Locale.ROOT), field.getName().toLowerCase(Locale.ROOT),
-                                    UUID.randomUUID(), Long.toHexString(System.currentTimeMillis()));
-                            String secret = secretService.put(path, value.getRaw());
-                            LOGGER.debug("Field: '{}' is saved at path: {}", field.getName(), path);
-                            field.set(entity, new SecretProxy(secret));
+                if (entity != null) {
+                    for (Field field : entity.getClass().getDeclaredFields()) {
+                        if (field.isAnnotationPresent(SecretValue.class)) {
+                            LOGGER.debug("Found SecretValue annotation on {}", field);
+                            ReflectionUtils.makeAccessible(field);
+                            Secret value = (Secret) field.get(entity);
+                            if (value != null && value.getRaw() != null && value.getSecret() == null) {
+                                String accountId = findAccountId(entity);
+                                String path = String.format("%s/%s/%s/%s-%s", accountId,
+                                        entity.getClass().getSimpleName().toLowerCase(Locale.ROOT), field.getName().toLowerCase(Locale.ROOT),
+                                        UUID.randomUUID(), Long.toHexString(System.currentTimeMillis()));
+                                String secret = secretService.put(path, value.getRaw());
+                                LOGGER.debug("Field: '{}' is saved at path: {}", field.getName(), path);
+                                field.set(entity, new SecretProxy(secret));
+                            }
                         }
                     }
+                } else {
+                    LOGGER.warn("We have received null as entity, there is nothing to do from vault perspective.");
                 }
             } catch (IllegalArgumentException e) {
                 LOGGER.error("Given entity isn't instance of {}. Secret is not updated!",
@@ -110,18 +114,22 @@ public class SecretAspectService {
         Collection<Object> entities = convertFirstArgToCollection(proceedingJoinPoint);
         for (Object entity : entities) {
             try {
-                for (Field field : entity.getClass().getDeclaredFields()) {
-                    if (field.isAnnotationPresent(SecretValue.class)) {
-                        LOGGER.debug("Found SecretValue annotation on {}", field);
-                        ReflectionUtils.makeAccessible(field);
-                        Secret path = (Secret) field.get(entity);
-                        if (path != null && path.getSecret() != null) {
-                            secretService.deleteByVaultSecretJson(path.getSecret());
-                            LOGGER.debug("Secret deleted at path: {}", path);
-                        } else {
-                            LOGGER.debug("Secret is null for field: {}.{}", field.getDeclaringClass(), field.getName());
+                if (entity != null) {
+                    for (Field field : entity.getClass().getDeclaredFields()) {
+                        if (field.isAnnotationPresent(SecretValue.class)) {
+                            LOGGER.debug("Found SecretValue annotation on {}", field);
+                            ReflectionUtils.makeAccessible(field);
+                            Secret path = (Secret) field.get(entity);
+                            if (path != null && path.getSecret() != null) {
+                                secretService.deleteByVaultSecretJson(path.getSecret());
+                                LOGGER.debug("Secret deleted at path: {}", path);
+                            } else {
+                                LOGGER.debug("Secret is null for field: {}.{}", field.getDeclaringClass(), field.getName());
+                            }
                         }
                     }
+                } else {
+                    LOGGER.warn("We have received null as entity, there is nothing to do from vault perspective.");
                 }
             } catch (IllegalArgumentException e) {
                 LOGGER.error("Given entity isn't instance of {}. Secret is not deleted!",
