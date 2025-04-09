@@ -63,7 +63,7 @@ public class StackSyncService {
     private static final String INVALID_CREDENTIAL_REASON = "The cluster is unreachable and the credential has been invalid for at least %s days." +
             "As a result, the CDP Control Plane cannot retrieve information from the cloud provider about the current status of the cluster.";
 
-    @Value("${cb.statuschecker.stale.after.days:3000}")
+    @Value("${cb.statuschecker.stale.after.days:30}")
     private int staleAfterDays;
 
     @Inject

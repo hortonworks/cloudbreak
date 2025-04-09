@@ -72,7 +72,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     @Inject
     private StatusCheckerJobService jobService;
 
-    @Value("${freeipa.statuschecker.stale.after.days:3000}")
+    @Value("${freeipa.statuschecker.stale.after.days:30}")
     private int staleAfterDays;
 
     @Value("${freeipa.autosync.update.status:true}")
