@@ -6,7 +6,6 @@ import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.FREEIPA_USERSYNC
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.SALT_BOOT_SECRETS;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.SALT_MASTER_KEY_PAIR;
-import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.SALT_PASSWORD;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.SALT_SIGN_KEY_PAIR;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
@@ -99,7 +98,6 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
                         SALT_SIGN_KEY_PAIR,
                         SALT_MASTER_KEY_PAIR,
                         FREEIPA_USERSYNC_USER_PASSWORD,
-                        SALT_PASSWORD,
                         NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY))
                 .when(freeIpaTestClient.rotateSecret())
                 .awaitForFlow();

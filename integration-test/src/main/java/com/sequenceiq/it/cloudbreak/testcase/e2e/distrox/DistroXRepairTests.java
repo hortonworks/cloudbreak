@@ -10,7 +10,6 @@ import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.LDAP_BIND_
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.SALT_BOOT_SECRETS;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.SALT_MASTER_KEY_PAIR;
-import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.SALT_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.SALT_SIGN_KEY_PAIR;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.USER_KEYPAIR;
 import static com.sequenceiq.freeipa.rotation.FreeIpaRotationAdditionalParameters.CLUSTER_NAME;
@@ -224,8 +223,7 @@ public class DistroXRepairTests extends AbstractE2ETest {
                 EXTERNAL_DATABASE_ROOT_PASSWORD,
                 CM_INTERMEDIATE_CA_CERT,
                 NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY,
-                CM_SERVICES_DB_PASSWORD,
-                SALT_PASSWORD);
+                CM_SERVICES_DB_PASSWORD);
     }
 
     private void masterRepairValidate(TestContext testContext) {
