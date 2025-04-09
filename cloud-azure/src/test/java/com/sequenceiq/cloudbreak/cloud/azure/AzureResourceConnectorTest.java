@@ -53,6 +53,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
+import com.sequenceiq.cloudbreak.common.provider.ProviderResourceSyncer;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.AdjustmentType;
@@ -130,6 +131,9 @@ public class AzureResourceConnectorTest {
 
     @Mock
     private AzureImageTermsSignerService azureImageTermsSignerService;
+
+    @Mock
+    private List<ProviderResourceSyncer> providerResourceSyncers;
 
     private List<CloudResource> instances;
 

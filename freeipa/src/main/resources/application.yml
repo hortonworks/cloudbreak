@@ -410,6 +410,11 @@ ccmRevertJob:
 dynamic-entitlement:
   entitlements: CDP_CENTRAL_COMPUTE_MONITORING
 
+provider-sync:
+  resourcetype-list: AZURE_PUBLIC_IP
+  enabled-providers: AZURE
+  enabled: false
+
 flow.trigger.node.heartbeat.validation.enabled: true
 
 wiam:

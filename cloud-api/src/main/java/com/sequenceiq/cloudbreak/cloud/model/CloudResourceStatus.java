@@ -76,12 +76,10 @@ public class CloudResourceStatus {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("CloudResourceStatus{");
-        sb.append("cloudResource=").append(cloudResource);
-        sb.append(", status=").append(status);
-        sb.append(", statusReason='").append(statusReason).append('\'');
-        sb.append(", id=").append(privateId);
-        sb.append('}');
-        return sb.toString();
+        return "CloudResourceStatus{" + "cloudResource=" + cloudResource +
+                ", status=" + status +
+                ", statusReason='" + statusReason + '\'' +
+                ", id=" + privateId +
+                '}';
     }
 }

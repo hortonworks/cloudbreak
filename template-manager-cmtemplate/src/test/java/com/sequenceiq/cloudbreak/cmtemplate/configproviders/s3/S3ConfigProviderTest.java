@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.s3;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -64,23 +65,17 @@ public class S3ConfigProviderTest {
     }
 
     @Test
-    void testGetHdfsServiceConfigsWithS3GuardWithoutAuthoriative() {
+    void testGetHdfsServiceConfigsDoesNotContainsS3guard() {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, true, false, "", "7.2.17");
         StringBuilder sb = new StringBuilder();
 
         underTest.getServiceConfigs(preparationObject, sb);
 
-        assertEquals("<property><name>fs.s3a.metadatastore.impl</name>" +
-                "<value>org.apache.hadoop.fs.s3a.s3guard.DynamoDBMetadataStore</value></property>" +
-                "<property><name>fs.s3a.s3guard.ddb.table.tag.apple</name><value>apple1</value></property>" +
-                "<property><name>fs.s3a.s3guard.ddb.table.tag.cdp_table_role</name><value>s3guard</value></property>" +
-                "<property><name>fs.s3a.s3guard.ddb.table.create</name><value>true</value></property>" +
-                "<property><name>fs.s3a.s3guard.ddb.table</name><value>dynamoTable</value></property>" +
-                "<property><name>fs.s3a.s3guard.ddb.region</name><value>region</value></property>", sb.toString());
+        assertFalse(sb.toString().contains("s3guard"));
     }
 
     @Test
-    void testGetHdfsServiceConfigsWithS3GuardWithAuthoriativeWarehousePath() {
+    void testGetHdfsServiceConfigsWithAuthoriativeWarehousePath() {
         setUp();
         when(locationHelper.parseS3BucketName(anyString())).thenCallRealMethod();
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, true, true, "", "7.2.17");
@@ -88,39 +83,9 @@ public class S3ConfigProviderTest {
 
         underTest.getServiceConfigs(preparationObject, sb);
 
-        assertEquals("<property><name>fs.s3a.metadatastore.impl</name>" +
-                "<value>org.apache.hadoop.fs.s3a.s3guard.DynamoDBMetadataStore</value></property>" +
-                "<property><name>fs.s3a.s3guard.ddb.table.tag.apple</name><value>apple1</value></property>" +
-                "<property><name>fs.s3a.s3guard.ddb.table.tag.cdp_table_role</name><value>s3guard</value></property>" +
-                "<property><name>fs.s3a.s3guard.ddb.table.create</name><value>true</value></property>" +
-                "<property><name>fs.s3a.s3guard.ddb.table</name><value>dynamoTable</value></property>" +
-                "<property><name>fs.s3a.s3guard.ddb.region</name><value>region</value></property>" +
-                "<property><name>fs.s3a.authoritative.path</name>" +
-                "<value>s3a://bucket-first/warehouse/managed</value></property>" +
+        assertEquals(
                 "<property><name>fs.s3a.bucket.bucket-first.endpoint</name><value>s3.region.amazonaws.com</value></property>" +
-                "<property><name>fs.s3a.bucket.bucket-second.endpoint</name><value>s3.region.amazonaws.com</value></property>", sb.toString());
-    }
-
-    @Test
-    void testGetHdfsServiceConfigsWithS3ExpressGuardWithAuthoriativeWarehousePath() {
-        setUp();
-        when(locationHelper.parseS3BucketName(anyString())).thenCallRealMethod();
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, true, true, "--x-s3", "7.2.18");
-        StringBuilder sb = new StringBuilder();
-        doReturn(true).when(s3ExpressBucketValidator).validateVersionForS3ExpressBucket(any());
-        underTest.getServiceConfigs(preparationObject, sb);
-
-        assertEquals("<property><name>fs.s3a.metadatastore.impl</name>" +
-                "<value>org.apache.hadoop.fs.s3a.s3guard.DynamoDBMetadataStore</value></property>" +
-                "<property><name>fs.s3a.s3guard.ddb.table.tag.apple</name><value>apple1</value></property>" +
-                "<property><name>fs.s3a.s3guard.ddb.table.tag.cdp_table_role</name><value>s3guard</value></property>" +
-                "<property><name>fs.s3a.s3guard.ddb.table.create</name><value>true</value></property>" +
-                "<property><name>fs.s3a.s3guard.ddb.table</name><value>dynamoTable</value></property>" +
-                "<property><name>fs.s3a.s3guard.ddb.region</name><value>region</value></property>" +
-                "<property><name>fs.s3a.authoritative.path</name>" +
-                "<value>s3a://bucket-first--x-s3/warehouse/managed</value></property>" +
-                "<property><name>fs.s3a.bucket.bucket-second--x-s3.endpoint.region</name><value>region</value></property>" +
-                "<property><name>fs.s3a.bucket.bucket-first--x-s3.endpoint.region</name><value>region</value></property>", sb.toString());
+                        "<property><name>fs.s3a.bucket.bucket-second.endpoint</name><value>s3.region.amazonaws.com</value></property>", sb.toString());
     }
 
     @Test

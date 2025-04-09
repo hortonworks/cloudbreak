@@ -39,8 +39,8 @@ public abstract class AbstractRebootAction<P extends Payload>
         return (String) variables.get(OPERATION_ID);
     }
 
-    protected void addMdcOperationId(Map<Object, Object> varialbes) {
-        String operationId = getOperationId(varialbes);
+    protected void addMdcOperationId(Map<Object, Object> variables) {
+        String operationId = getOperationId(variables);
         MDCBuilder.addOperationId(operationId);
     }
 

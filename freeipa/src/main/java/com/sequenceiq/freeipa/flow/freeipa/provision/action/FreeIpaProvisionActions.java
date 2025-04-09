@@ -48,6 +48,7 @@ import com.sequenceiq.freeipa.service.config.AbstractConfigRegister;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.sync.FreeipaJobService;
 import com.sequenceiq.freeipa.sync.dynamicentitlement.DynamicEntitlementRefreshJobService;
+import com.sequenceiq.freeipa.sync.provider.ProviderSyncJobService;
 
 @Configuration
 public class FreeIpaProvisionActions {
@@ -62,6 +63,9 @@ public class FreeIpaProvisionActions {
 
     @Inject
     private DynamicEntitlementRefreshJobService dynamicEntitlementRefreshJobService;
+
+    @Inject
+    private ProviderSyncJobService providerSyncJobService;
 
     @Bean(name = "BOOTSTRAPPING_MACHINES_STATE")
     public Action<?, ?> bootstrappingMachinesAction() {
@@ -202,13 +206,16 @@ public class FreeIpaProvisionActions {
 
             @Override
             protected void doExecute(StackContext context, PostInstallFreeIpaSuccess payload, Map<Object, Object> variables) {
-                configRegisters.forEach(configProvider -> configProvider.register(context.getStack().getId()));
-                metricService.incrementMetricCounter(MetricType.FREEIPA_CREATION_FINISHED, context.getStack());
-                structuredSynchronizerJobService.schedule(context.getStack().getId(), StructuredSynchronizerJobAdapter.class, false);
-                freeipaJobService.schedule(context.getStack().getId());
-                dynamicEntitlementRefreshJobService.schedule(context.getStack().getId());
-                stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.PROVISIONED, "FreeIPA installation finished");
-                synchronizeUsersViaWiam(context.getStack());
+                Stack stack = context.getStack();
+                Long stackId = stack.getId();
+                configRegisters.forEach(configProvider -> configProvider.register(stackId));
+                metricService.incrementMetricCounter(MetricType.FREEIPA_CREATION_FINISHED, stack);
+                structuredSynchronizerJobService.schedule(stackId, StructuredSynchronizerJobAdapter.class, false);
+                freeipaJobService.schedule(stackId);
+                dynamicEntitlementRefreshJobService.schedule(stackId);
+                providerSyncJobService.schedule(stackId);
+                stackUpdater.updateStackStatus(stack, DetailedStackStatus.PROVISIONED, "FreeIPA installation finished");
+                synchronizeUsersViaWiam(stack);
                 sendEvent(context);
             }
 
