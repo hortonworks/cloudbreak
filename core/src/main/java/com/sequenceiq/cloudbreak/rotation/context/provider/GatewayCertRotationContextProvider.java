@@ -58,7 +58,7 @@ public class GatewayCertRotationContextProvider extends AbstractKnoxCertRotation
     @Override
     public Map<SecretRotationStep, RotationContext> getContexts(String resourceCrn) {
         Map<SecretRotationStep, RotationContext> result = new HashMap<>();
-        StackDto stack = stackDtoService.getByCrn(resourceCrn);
+        StackDto stack = stackDtoService.getByCrnWithResources(resourceCrn);
         ReadConfigResponse readConfigResponse = clusterProxyService.readConfig(stack.getStack());
 
         GatewayView gateway = gatewayService.getByClusterId(stack.getCluster().getId())

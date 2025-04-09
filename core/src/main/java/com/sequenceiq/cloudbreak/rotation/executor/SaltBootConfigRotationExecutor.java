@@ -16,6 +16,7 @@ import com.google.common.io.BaseEncoding;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.rotation.SecretRotationSaltService;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.context.saltboot.SaltBootConfigRotationContext;
@@ -30,6 +31,9 @@ public class SaltBootConfigRotationExecutor extends AbstractRotationExecutor<Sal
 
     @Inject
     private HostOrchestrator hostOrchestrator;
+
+    @Inject
+    private SecretRotationSaltService secretRotationSaltService;
 
     @Override
     protected void rotate(SaltBootConfigRotationContext rotationContext) throws CloudbreakOrchestratorFailedException {
@@ -54,12 +58,16 @@ public class SaltBootConfigRotationExecutor extends AbstractRotationExecutor<Sal
 
     @Override
     protected void preValidate(SaltBootConfigRotationContext rotationContext) throws Exception {
-
+        SaltBootUpdateConfiguration saltBootUpdateConfiguration = rotationContext.getServiceUpdateConfiguration();
+        GatewayConfig gatewayConfig = withOldSecrets(saltBootUpdateConfiguration.primaryGatewayConfig(), saltBootUpdateConfiguration);
+        secretRotationSaltService.validateSalt(rotationContext.getServiceUpdateConfiguration().targetFqdns(), gatewayConfig);
     }
 
     @Override
     protected void postValidate(SaltBootConfigRotationContext rotationContext) throws Exception {
-
+        SaltBootUpdateConfiguration saltBootUpdateConfiguration = rotationContext.getServiceUpdateConfiguration();
+        GatewayConfig gatewayConfig = withNewSecrets(saltBootUpdateConfiguration.primaryGatewayConfig(), saltBootUpdateConfiguration);
+        secretRotationSaltService.validateSalt(rotationContext.getServiceUpdateConfiguration().targetFqdns(), gatewayConfig);
     }
 
     @Override

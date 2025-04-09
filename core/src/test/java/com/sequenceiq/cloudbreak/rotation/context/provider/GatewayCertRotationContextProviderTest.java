@@ -84,7 +84,7 @@ class GatewayCertRotationContextProviderTest {
 
     @BeforeEach
     void setup() {
-        when(stackService.getByCrn(any())).thenReturn(stackDto);
+        when(stackService.getByCrnWithResources(any())).thenReturn(stackDto);
         when(stackDto.getCluster()).thenReturn(clusterView);
         lenient().when(stackDto.getResourceCrn()).thenReturn(RESOURCE_CRN);
         Gateway oldGateway = getGateway("Old");

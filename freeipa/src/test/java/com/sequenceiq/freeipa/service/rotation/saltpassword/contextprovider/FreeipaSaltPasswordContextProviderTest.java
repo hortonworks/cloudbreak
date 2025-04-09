@@ -2,6 +2,8 @@ package com.sequenceiq.freeipa.service.rotation.saltpassword.contextprovider;
 
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM_JOB;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 
@@ -14,12 +16,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.orchestrator.RotateSaltPasswordService;
 import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
+import com.sequenceiq.freeipa.service.rotation.SecretRotationSaltService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,6 +38,9 @@ class FreeipaSaltPasswordContextProviderTest {
 
     @Mock
     private RotateSaltPasswordService rotateSaltPasswordService;
+
+    @Mock
+    private SecretRotationSaltService secretRotationSaltService;
 
     @InjectMocks
     private FreeipaSaltPasswordContextProvider underTest;
@@ -54,14 +61,16 @@ class FreeipaSaltPasswordContextProviderTest {
     }
 
     @Test
-    void rotationJobContextPreValidateJob() {
+    void rotationJobContextPreValidateJob() throws CloudbreakOrchestratorFailedException {
         Map<SecretRotationStep, RotationContext> result = underTest.getContexts(ENV_CRN);
+        doNothing().when(secretRotationSaltService).validateSalt(any());
 
         CustomJobRotationContext rotationContext = (CustomJobRotationContext) result.get(CUSTOM_JOB);
         rotationContext.getPreValidateJob().orElseThrow().run();
 
         verify(stackService).getByEnvironmentCrnAndAccountId(ENV_CRN, ACCOUNT_ID);
         verify(rotateSaltPasswordService).validateRotateSaltPassword(stack);
+        verify(secretRotationSaltService).validateSalt(any());
     }
 
     @Test

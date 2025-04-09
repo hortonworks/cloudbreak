@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.rotation.context.provider;
 
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM_JOB;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 
@@ -17,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
+import com.sequenceiq.cloudbreak.rotation.SecretRotationSaltService;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
@@ -37,6 +40,9 @@ class SaltPasswordRotationContextProviderTest {
 
     @Mock
     private RotateSaltPasswordService rotateSaltPasswordService;
+
+    @Mock
+    private SecretRotationSaltService secretRotationSaltService;
 
     @InjectMocks
     private SaltPasswordRotationContextProvider underTest;
@@ -59,12 +65,14 @@ class SaltPasswordRotationContextProviderTest {
     @Test
     void rotationJobContextPreValidateJob() throws CloudbreakOrchestratorException {
         Map<SecretRotationStep, RotationContext> result = underTest.getContexts(CRN);
+        doNothing().when(secretRotationSaltService).validateSalt(any());
 
         CustomJobRotationContext rotationContext = (CustomJobRotationContext) result.get(CUSTOM_JOB);
         rotationContext.getPreValidateJob().orElseThrow().run();
 
         verify(stackDtoService).getByCrn(CRN);
         verify(rotateSaltPasswordValidator).validateRotateSaltPassword(stack);
+        verify(secretRotationSaltService).validateSalt(any());
     }
 
     @Test

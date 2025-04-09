@@ -4,6 +4,7 @@ import java.util.Map;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -79,7 +80,12 @@ public class UserKeyPairRotationContextProvider implements RotationContextProvid
     }
 
     private boolean customerChangedTheKeyPair(StackAuthentication old, EnvironmentAuthenticationResponse actual) {
-        return !old.getPublicKeyId().equals(actual.getPublicKeyId());
+        if (StringUtils.isNotEmpty(old.getPublicKeyId()) && StringUtils.isNotEmpty(actual.getPublicKeyId())) {
+            return !StringUtils.equals(old.getPublicKeyId(), actual.getPublicKeyId());
+        } else if (StringUtils.isNotEmpty(old.getPublicKey()) && StringUtils.isNotEmpty(actual.getPublicKey())) {
+            return !StringUtils.equals(old.getPublicKey(), actual.getPublicKey());
+        }
+        return false;
     }
 
     @Override

@@ -51,7 +51,7 @@ class ClusterLdapBindPasswordContextProviderTest {
 
     @Test
     void testGetContext() {
-        when(stackDtoService.getByCrn(any())).thenReturn(stackDto);
+        when(stackDtoService.getByCrnWithResources(any())).thenReturn(stackDto);
         when(stackDto.getResourceCrn()).thenReturn(RESOURCE_CRN);
         when(stackDto.getName()).thenReturn(RESOURCE_CRN);
         when(gatewayConfigService.getPrimaryGatewayConfig(stackDto)).thenReturn(gatewayConfig);

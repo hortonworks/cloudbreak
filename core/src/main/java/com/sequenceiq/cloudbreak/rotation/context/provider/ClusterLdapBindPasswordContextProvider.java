@@ -51,7 +51,7 @@ public class ClusterLdapBindPasswordContextProvider implements RotationContextPr
     @Override
     public Map<SecretRotationStep, RotationContext> getContexts(String resourceCrn) {
         Map<SecretRotationStep, RotationContext> result = new HashMap<>();
-        StackDto stack = stackDtoService.getByCrn(resourceCrn);
+        StackDto stack = stackDtoService.getByCrnWithResources(resourceCrn);
 
         result.put(FREEIPA_ROTATE_POLLING, new PollerRotationContext(resourceCrn, FreeIpaSecretType.FREEIPA_LDAP_BIND_PASSWORD,
                 Map.of(CLUSTER_NAME.name(), stack.getName())));

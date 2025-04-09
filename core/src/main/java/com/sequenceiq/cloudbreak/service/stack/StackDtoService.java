@@ -144,6 +144,11 @@ public class StackDtoService implements LocalPaasSdxService {
         return getStackProxy(stackView, false);
     }
 
+    public StackDto getByCrnWithResources(String crn) {
+        StackView stackView = stackDtoRepository.findByCrn(crn).orElseThrow(NotFoundException.notFound("Stack by crn", crn));
+        return getStackProxy(stackView, true);
+    }
+
     public StackDto getByCrnWithMdcContext(String crn) {
         StackDto stackDto = getByCrn(crn);
         MDCBuilder.buildMdcContext(stackDto);
