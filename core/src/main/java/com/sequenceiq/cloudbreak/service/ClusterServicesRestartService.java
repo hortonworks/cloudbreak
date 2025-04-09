@@ -10,7 +10,9 @@ import static com.sequenceiq.cloudbreak.sdx.RdcConstants.HiveMetastoreDatabase.H
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -19,14 +21,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.core.cluster.ClusterBuilderService;
+import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.validation.AllRoleTypes;
 
 @Service
@@ -48,6 +55,15 @@ public class ClusterServicesRestartService {
 
     @Inject
     private PlatformAwareSdxConnector platformAwareSdxConnector;
+
+    @Inject
+    private StackService stackService;
+
+    @Inject
+    private RdsConfigService rdsConfigService;
+
+    @Inject
+    private ClusterService clusterService;
 
     public boolean isRemoteDataContextRefreshNeeded(Stack stack, SdxBasicView sdxBasicView) {
         // Re-configuring DH using the Remote Data Context of Data lake.
@@ -77,10 +93,45 @@ public class ClusterServicesRestartService {
             //Update Hive service database configuration
             LOGGER.info("Trying to refreshing the database configuration.");
             updateDatabaseConfiguration(sdxBasicView, stack, HIVE_SERVICE);
+            updateHmsRdsConfig(stack, sdxBasicView);
         } else {
             LOGGER.info("Database configuration is not refreshed");
         }
         apiConnectors.getConnector(stack).restartClusterServices(rollingRestart);
+    }
+
+    private void updateHmsRdsConfig(Stack stack, SdxBasicView sdxBasicView) {
+        Stack dlStack = stackService.getByCrn(sdxBasicView.crn());
+        Set<RDSConfig> dlRdsConfigs = rdsConfigService.findByClusterId(dlStack.getClusterId());
+        Set<RDSConfig> dhRdsConfigs = rdsConfigService.findByClusterId(stack.getClusterId());
+
+        Optional<RDSConfig> dhRdsConfigOp =
+                dhRdsConfigs
+                        .stream()
+                        .filter(config -> DatabaseType.HIVE.name().equals(config.getType()))
+                        .findFirst();
+
+        Optional<RDSConfig> dlRdsConfigOp =
+                dlRdsConfigs
+                        .stream()
+                        .filter(config -> DatabaseType.HIVE.name().equals(config.getType()))
+                        .findFirst();
+
+        if (dhRdsConfigOp.isPresent() && dlRdsConfigOp.isPresent()) {
+            RDSConfig dhRdsConfig = dhRdsConfigOp.get();
+            RDSConfig dlRdsConfig = dlRdsConfigOp.get();
+            LOGGER.info("Datahub HmsRdsConfig {} and Datalake HmsRdsConfig {} are not the same", dhRdsConfig.getId(), dlRdsConfig.getId());
+
+            if (!Objects.equals(dhRdsConfig.getId(), dlRdsConfig.getId())) {
+                dhRdsConfigs.remove(dhRdsConfig);
+                dhRdsConfigs.add(dlRdsConfig);
+                stack.getCluster().setRdsConfigs(dhRdsConfigs);
+                clusterService.save(stack.getCluster());
+                LOGGER.info("Datahub HmsRdsConfig updated to use {}", dhRdsConfig.getId());
+            } else {
+                LOGGER.info("Datahub HmsRdsConfig is already update. HmsRdsConfig id {}", dhRdsConfig.getId());
+            }
+        }
     }
 
     private void updateDatabaseConfiguration(SdxBasicView sdxBasicView, Stack dataHubStack, String service) {
