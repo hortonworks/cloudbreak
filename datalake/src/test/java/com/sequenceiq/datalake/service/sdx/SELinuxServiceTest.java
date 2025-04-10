@@ -14,8 +14,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.datalake.entity.SdxCluster;
-import com.sequenceiq.datalake.flow.enableselinux.event.DatalakeEnableSeLinuxEvent;
+import com.sequenceiq.datalake.flow.modifyselinux.event.DatalakeModifySeLinuxEvent;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 
@@ -38,12 +39,12 @@ class SELinuxServiceTest {
         when(sdxCluster.getName()).thenReturn("test-cluster");
         FlowIdentifier flowIdentifier = mock(FlowIdentifier.class);
         when(flowIdentifier.getPollableId()).thenReturn("flow-id");
-        when(eventSender.sendEvent(any(DatalakeEnableSeLinuxEvent.class), any(Event.Headers.class))).thenReturn(flowIdentifier);
-        FlowIdentifier response = underTest.enableSeLinuxOnDatalake(sdxCluster, "userCrn");
-        ArgumentCaptor<DatalakeEnableSeLinuxEvent> eventCaptor = ArgumentCaptor.forClass(DatalakeEnableSeLinuxEvent.class);
+        when(eventSender.sendEvent(any(DatalakeModifySeLinuxEvent.class), any(Event.Headers.class))).thenReturn(flowIdentifier);
+        FlowIdentifier response = underTest.modifySeLinuxOnDatalake(sdxCluster, "userCrn", SeLinux.ENFORCING);
+        ArgumentCaptor<DatalakeModifySeLinuxEvent> eventCaptor = ArgumentCaptor.forClass(DatalakeModifySeLinuxEvent.class);
         ArgumentCaptor<Event.Headers> headerCaptor = ArgumentCaptor.forClass(Event.Headers.class);
         verify(eventSender).sendEvent(eventCaptor.capture(), headerCaptor.capture());
-        DatalakeEnableSeLinuxEvent responseEvent = eventCaptor.getValue();
+        DatalakeModifySeLinuxEvent responseEvent = eventCaptor.getValue();
         assertEquals("testCrn", responseEvent.getResourceCrn());
         assertEquals(1L, responseEvent.getResourceId());
         assertEquals("test-cluster", responseEvent.getResourceName());

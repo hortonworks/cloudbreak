@@ -916,7 +916,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     public FlowIdentifier modifySeLinuxByName(@ResourceName String name, SeLinux selinuxMode) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         NameOrCrn nameOrCrn = NameOrCrn.ofName(name);
-        return stackOperationService.triggerEnableSELinux(nameOrCrn, accountId);
+        return stackOperationService.triggerModifySELinux(nameOrCrn, accountId, selinuxMode);
     }
 
     @Override
@@ -924,7 +924,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     public FlowIdentifier modifySeLinuxByCrn(@ResourceCrn String crn, SeLinux selinuxMode) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         NameOrCrn nameOrCrn = NameOrCrn.ofCrn(crn);
-        return stackOperationService.triggerEnableSELinux(nameOrCrn, accountId);
+        return stackOperationService.triggerModifySELinux(nameOrCrn, accountId, selinuxMode);
     }
 
     @Override

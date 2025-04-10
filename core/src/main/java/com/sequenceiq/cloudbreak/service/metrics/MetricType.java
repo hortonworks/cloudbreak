@@ -49,8 +49,8 @@ public enum MetricType implements Metric {
     ROTATE_RDS_CERTIFICATE_SUCCESSFUL("externaldatabase.certificate.rotation.successful"),
     ROTATE_RDS_CERTIFICATE_FAILED("externaldatabase.certificate.rotation.failed"),
 
-    ENABLE_SELINUX_SUCCESSFUL("stack.enable.selinux.successful"),
-    ENABLE_SELINUX_FAILED("stack.enable.selinux.failed");
+    MODIFY_SELINUX_SUCCESSFUL("stack.modify.selinux.successful"),
+    MODIFY_SELINUX_FAILED("stack.modify.selinux.failed");
 
     private final String metricName;
 

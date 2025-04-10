@@ -30,13 +30,13 @@ public class SeLinuxEnablementService {
     @Inject
     private HostOrchestrator hostOrchestrator;
 
-    public void enableSeLinuxOnAllNodes(Stack stack) throws CloudbreakOrchestratorException {
-        LOGGER.debug("Setting SeLinux to 'ENFORCING' on stack for FreeIpa - {}", stack.getResourceCrn());
+    public void modifySeLinuxOnAllNodes(Stack stack) throws CloudbreakOrchestratorException {
+        LOGGER.debug("Changing SeLinux mode on stack - {}", stack.getResourceCrn());
         Set<InstanceMetaData> instanceMetaDataSet = stack.getNotDeletedInstanceMetaDataSet();
         List<GatewayConfig> allGatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
         Set<Node> allNodes = mapInstancesToNodes(instanceMetaDataSet);
         ClusterDeletionBasedExitCriteriaModel exitCriteriaModel = new ClusterDeletionBasedExitCriteriaModel(stack.getId(), stack.getClusterId());
-        LOGGER.debug("Calling hostOrchestrator for modifying SeLinux on stack for FreeIpa - {}", stack.getResourceCrn());
+        LOGGER.debug("Calling hostOrchestrator for modifying SeLinux on stack - {}", stack.getResourceCrn());
         hostOrchestrator.enableSeLinuxOnNodes(allGatewayConfigs, allNodes, exitCriteriaModel);
     }
 

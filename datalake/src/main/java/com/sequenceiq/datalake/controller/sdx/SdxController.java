@@ -656,7 +656,7 @@ public class SdxController implements SdxEndpoint {
     public FlowIdentifier modifySeLinuxByName(@ResourceName String name, SeLinux selinuxMode) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = getSdxClusterByName(name);
-        return seLinuxService.enableSeLinuxOnDatalake(sdxCluster, userCrn);
+        return seLinuxService.modifySeLinuxOnDatalake(sdxCluster, userCrn, selinuxMode);
     }
 
     @Override
@@ -664,7 +664,7 @@ public class SdxController implements SdxEndpoint {
     public FlowIdentifier modifySeLinuxByCrn(@ResourceCrn String crn, SeLinux selinuxMode) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = getSdxClusterByCrn(crn);
-        return seLinuxService.enableSeLinuxOnDatalake(sdxCluster, userCrn);
+        return seLinuxService.modifySeLinuxOnDatalake(sdxCluster, userCrn, selinuxMode);
     }
 
     private SdxCluster getSdxClusterByName(String name) {

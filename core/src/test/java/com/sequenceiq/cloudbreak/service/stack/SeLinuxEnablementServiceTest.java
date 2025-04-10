@@ -57,7 +57,7 @@ class SeLinuxEnablementServiceTest {
         Set<InstanceMetaData> instanceMetaDataSet = Set.of(instanceMetaData);
         when(stack.getId()).thenReturn(1L);
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(instanceMetaDataSet);
-        underTest.enableSeLinuxOnAllNodes(stack);
+        underTest.modifySeLinuxOnAllNodes(stack);
         verify(hostOrchestrator).enableSeLinuxOnNodes(any(), any(), any());
     }
 
@@ -65,7 +65,7 @@ class SeLinuxEnablementServiceTest {
     void testEnableSeLinuxOnAllNodesNoNodeException() {
         Set<InstanceMetaData> instanceMetaDataSet = new HashSet<>();
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(instanceMetaDataSet);
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> underTest.enableSeLinuxOnAllNodes(stack));
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> underTest.modifySeLinuxOnAllNodes(stack));
         assertEquals("There are no nodes while scanning instance metadata.", exception.getMessage());
     }
 
@@ -87,7 +87,7 @@ class SeLinuxEnablementServiceTest {
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(instanceMetaDataSet);
         doThrow(new CloudbreakOrchestratorFailedException("test")).when(hostOrchestrator).enableSeLinuxOnNodes(any(), any(), any());
         CloudbreakOrchestratorFailedException exception = assertThrows(CloudbreakOrchestratorFailedException.class,
-                () -> underTest.enableSeLinuxOnAllNodes(stack));
+                () -> underTest.modifySeLinuxOnAllNodes(stack));
         assertEquals("test", exception.getMessage());
     }
 }

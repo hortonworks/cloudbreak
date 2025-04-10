@@ -95,6 +95,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
@@ -703,8 +704,8 @@ class StackOperationServiceTest {
         when(stack.getId()).thenReturn(STACK_ID);
         NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
         when(stackDtoService.getByNameOrCrn(eq(nameOrCrn), eq("accountId"))).thenReturn(stack);
-        underTest.triggerEnableSELinux(nameOrCrn, "accountId");
+        underTest.triggerModifySELinux(nameOrCrn, "accountId", SeLinux.ENFORCING);
 
-        verify(flowManager).triggerEnableSelinux(STACK_ID);
+        verify(flowManager).triggerModifySelinux(STACK_ID, SeLinux.ENFORCING);
     }
 }

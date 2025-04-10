@@ -11,9 +11,10 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.datalake.entity.SdxCluster;
-import com.sequenceiq.datalake.flow.enableselinux.event.DatalakeEnableSeLinuxEvent;
-import com.sequenceiq.datalake.flow.enableselinux.event.DatalakeEnableSeLinuxStateSelectors;
+import com.sequenceiq.datalake.flow.modifyselinux.event.DatalakeModifySeLinuxEvent;
+import com.sequenceiq.datalake.flow.modifyselinux.event.DatalakeModifySeLinuxStateSelectors;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
@@ -26,15 +27,16 @@ public class SELinuxService {
     @Inject
     private EventSender eventSender;
 
-    public FlowIdentifier enableSeLinuxOnDatalake(SdxCluster sdxCluster, String userCrn) {
+    public FlowIdentifier modifySeLinuxOnDatalake(SdxCluster sdxCluster, String userCrn, SeLinux selinuxMode) {
         MDCBuilder.buildMdcContext(sdxCluster);
         LOGGER.info("Data Lake Cluster Enable SELinux flow triggered for DL {}", sdxCluster.getName());
-        DatalakeEnableSeLinuxEvent datalakeEnableSeLinuxEvent = DatalakeEnableSeLinuxEvent.builder()
+        DatalakeModifySeLinuxEvent datalakeEnableSeLinuxEvent = DatalakeModifySeLinuxEvent.builder()
                 .withAccepted(new Promise<>())
                 .withResourceCrn(sdxCluster.getResourceCrn())
                 .withResourceId(sdxCluster.getId())
                 .withResourceName(sdxCluster.getName())
-                .withSelector(DatalakeEnableSeLinuxStateSelectors.ENABLE_SELINUX_DATALAKE_EVENT.selector())
+                .withSelector(DatalakeModifySeLinuxStateSelectors.MODIFY_SELINUX_DATALAKE_EVENT.selector())
+                .withSelinuxMode(selinuxMode)
                 .build();
         FlowIdentifier flowIdentifier = eventSender.sendEvent(datalakeEnableSeLinuxEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
         LOGGER.debug("Data Lake Cluster Vertical Scale flow trigger event sent for environment {}", sdxCluster.getName());

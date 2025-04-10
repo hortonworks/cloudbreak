@@ -335,7 +335,7 @@ class DistroXV1ControllerTest {
             }
         });
 
-        verify(stackOperationService).triggerEnableSELinux(NameOrCrn.ofName(NAME), "accountId");
+        verify(stackOperationService).triggerModifySELinux(NameOrCrn.ofName(NAME), "accountId", SeLinux.ENFORCING);
     }
 
     @Test
@@ -347,6 +347,6 @@ class DistroXV1ControllerTest {
                 throw new RuntimeException(e);
             }
         });
-        verify(stackOperationService).triggerEnableSELinux(NameOrCrn.ofCrn(CRN), "accountId");
+        verify(stackOperationService).triggerModifySELinux(NameOrCrn.ofCrn(CRN), "accountId", SeLinux.ENFORCING);
     }
 }

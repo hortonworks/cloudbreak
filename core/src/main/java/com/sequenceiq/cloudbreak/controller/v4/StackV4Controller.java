@@ -770,9 +770,9 @@ public class StackV4Controller extends NotificationController implements StackV4
         return stackOperationService.manageDatabaseUser(rq.getCrn(), rq.getDbUser(), rq.getDbType(), rq.getOperation());
     }
 
-    @Override
     @InternalOnly
+    @Override
     public FlowIdentifier modifySeLinuxByCrn(Long workspaceId, @ResourceCrn String crn, SeLinux selinuxMode) {
-        return stackOperationService.triggerEnableSELinux(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId());
+        return stackOperationService.triggerModifySELinux(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(), selinuxMode);
     }
 }

@@ -88,6 +88,7 @@ import com.sequenceiq.cloudbreak.util.NotAllowedStatusUpdate;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.ClusterDatabaseServerCertificateStatusV4Request;
@@ -608,10 +609,10 @@ public class StackOperationService {
                 request.isRestartCM(), request.isRollingRestart());
     }
 
-    public FlowIdentifier triggerEnableSELinux(NameOrCrn nameOrCrn, String accountId) {
+    public FlowIdentifier triggerModifySELinux(NameOrCrn nameOrCrn, String accountId, SeLinux selinuxMode) {
         LOGGER.info("Triggering enable selinux update on stack ('{}')", nameOrCrn);
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
-        return flowManager.triggerEnableSelinux(stack.getId());
+        return flowManager.triggerModifySelinux(stack.getId(), selinuxMode);
     }
 
     public void validateDefaultJavaVersionUpdate(NameOrCrn nameOrCrn, String accountId, SetDefaultJavaVersionRequest request) {
