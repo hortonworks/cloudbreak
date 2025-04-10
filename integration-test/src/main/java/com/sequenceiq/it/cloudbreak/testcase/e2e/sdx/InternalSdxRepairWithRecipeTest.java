@@ -26,6 +26,7 @@ import java.util.Set;
 
 import jakarta.inject.Inject;
 
+import org.assertj.core.util.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
@@ -174,11 +175,11 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
     }
 
     private Set<DatalakeSecretType> getAvailableSecretTypes(String cloudProvider) {
-        return Set.of(
+        Set<DatalakeSecretType> secretTypes = Sets.newHashSet();
+        secretTypes.addAll(Set.of(
                 GATEWAY_CERT,
                 USER_KEYPAIR,
                 IDBROKER_CERT,
-                SALT_BOOT_SECRETS,
                 CM_ADMIN_PASSWORD,
                 EXTERNAL_DATABASE_ROOT_PASSWORD,
                 CM_DB_PASSWORD,
@@ -188,7 +189,11 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
                 SALT_SIGN_KEY_PAIR,
                 SALT_MASTER_KEY_PAIR,
                 LDAP_BIND_PASSWORD,
-                SSSD_IPA_PASSWORD);
+                SSSD_IPA_PASSWORD));
+        if (!CloudPlatform.GCP.equalsIgnoreCase(cloudProvider)) {
+            secretTypes.add(SALT_BOOT_SECRETS);
+        }
+        return secretTypes;
     }
 
     private void multiRepairThenValidate(TestContext testContext) {

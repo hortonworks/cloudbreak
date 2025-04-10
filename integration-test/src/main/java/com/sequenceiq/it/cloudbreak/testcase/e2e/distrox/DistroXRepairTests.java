@@ -22,6 +22,7 @@ import java.util.Set;
 
 import jakarta.inject.Inject;
 
+import org.assertj.core.util.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
@@ -212,9 +213,9 @@ public class DistroXRepairTests extends AbstractE2ETest {
     }
 
     private Set<CloudbreakSecretType> getAvailableSecretTypes(String cloudProvider) {
-        return Set.of(
+        Set<CloudbreakSecretType> secretTypes = Sets.newHashSet();
+        secretTypes.addAll(Set.of(
                 USER_KEYPAIR,
-                SALT_BOOT_SECRETS,
                 SALT_MASTER_KEY_PAIR,
                 SALT_SIGN_KEY_PAIR,
                 CM_ADMIN_PASSWORD,
@@ -223,7 +224,11 @@ public class DistroXRepairTests extends AbstractE2ETest {
                 EXTERNAL_DATABASE_ROOT_PASSWORD,
                 CM_INTERMEDIATE_CA_CERT,
                 NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY,
-                CM_SERVICES_DB_PASSWORD);
+                CM_SERVICES_DB_PASSWORD));
+        if (!CloudPlatform.GCP.equalsIgnoreCase(cloudProvider)) {
+            secretTypes.add(SALT_BOOT_SECRETS);
+        }
+        return secretTypes;
     }
 
     private void masterRepairValidate(TestContext testContext) {

@@ -21,10 +21,13 @@ import jakarta.inject.Inject;
 import org.apache.commons.lang3.tuple.Pair;
 import org.testng.annotations.Test;
 
+import com.google.api.client.util.Lists;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -72,6 +75,14 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
         Map<String, String> originalPasswordsFromPillarMap = new HashMap<>();
         String cloudProvider = commonCloudProperties().getCloudProvider();
 
+        List<FreeIpaSecretType> secretTypes = Lists.newArrayList();
+        secretTypes.addAll(List.of(SALT_SIGN_KEY_PAIR,
+                SALT_MASTER_KEY_PAIR,
+                FREEIPA_USERSYNC_USER_PASSWORD,
+                NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY));
+        if (!CloudPlatform.GCP.equalsIgnoreCase(cloudProvider)) {
+            secretTypes.add(SALT_BOOT_SECRETS);
+        }
         FreeIpaRotationTestDto freeIpaRotationTestDto = testContext
                 .given(freeIpa, FreeIpaTestDto.class)
                 .withTelemetry("telemetry")
@@ -94,11 +105,7 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
                     return testDto;
                 })
                 .given(FreeIpaRotationTestDto.class)
-                .withSecrets(List.of(SALT_BOOT_SECRETS,
-                        SALT_SIGN_KEY_PAIR,
-                        SALT_MASTER_KEY_PAIR,
-                        FREEIPA_USERSYNC_USER_PASSWORD,
-                        NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY))
+                .withSecrets(secretTypes)
                 .when(freeIpaTestClient.rotateSecret())
                 .awaitForFlow();
         freeIpaRotationTestDto.validate();
