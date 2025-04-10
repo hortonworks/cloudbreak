@@ -43,6 +43,7 @@ import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Joiner;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -991,7 +992,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     @Override
-    public void tearDown(OrchestratorAware stack, List<GatewayConfig> allGatewayConfigs, Map<String, String> removeNodePrivateIPsByFQDN,
+    public void tearDown(OrchestratorAware stack, List<GatewayConfig> allGatewayConfigs, Multimap<String, String> removeNodePrivateIPsByFQDN,
             Set<Node> remainingNodes, ExitCriteriaModel exitModel) throws CloudbreakOrchestratorException {
         LOGGER.debug("Tear down hosts: {},", removeNodePrivateIPsByFQDN);
         LOGGER.debug("Gateway config for tear down: {}", allGatewayConfigs);

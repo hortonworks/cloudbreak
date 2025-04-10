@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Multimaps;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -98,7 +99,7 @@ public class RemoveHostsHandler implements EventHandler<RemoveHostsRequest> {
             Set<Node> remainingNodes = stackUtil.collectNodes(stack)
                     .stream().filter(node -> !removeNodePrivateIPsByFQDN.containsValue(node.getPrivateIp())).collect(Collectors.toSet());
             ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId());
-            hostOrchestrator.tearDown(stack, allGatewayConfigs, removeNodePrivateIPsByFQDN, remainingNodes, exitCriteriaModel);
+            hostOrchestrator.tearDown(stack, allGatewayConfigs, Multimaps.forMap(removeNodePrivateIPsByFQDN), remainingNodes, exitCriteriaModel);
         } catch (CloudbreakOrchestratorException e) {
             LOGGER.error("Failed to delete orchestrator components while decommissioning: ", e);
             throw new CloudbreakException("Removing selected nodes from master node failed, " +

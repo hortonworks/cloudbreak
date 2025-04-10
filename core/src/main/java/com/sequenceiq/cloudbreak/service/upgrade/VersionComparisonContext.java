@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
 import java.util.Optional;
+import java.util.StringJoiner;
 
 public class VersionComparisonContext {
 
@@ -26,6 +27,15 @@ public class VersionComparisonContext {
 
     public Integer getBuildNumber() {
         return buildNumber;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", VersionComparisonContext.class.getSimpleName() + "[", "]")
+                .add("majorVersion='" + majorVersion + "'")
+                .add("patchVersion=" + patchVersion)
+                .add("buildNumber=" + buildNumber)
+                .toString();
     }
 
     public static class Builder {
