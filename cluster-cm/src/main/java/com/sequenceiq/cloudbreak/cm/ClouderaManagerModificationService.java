@@ -243,7 +243,10 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                     applyHostGroupRolesOnUpscaledHosts(bodyForApplyHostGroupRoles, hostGroup.getName());
                 }
             } else {
-                redistributeParcelsForRecovery();
+                Boolean prewarmed = clusterComponentProvider.getClouderaManagerRepoDetails(stack.getCluster().getId()).getPredefined();
+                if (Boolean.FALSE.equals(prewarmed)) {
+                    redistributeParcelsForRecovery();
+                }
                 activateParcels(clustersResourceApi);
             }
             deployClientConfig(clustersResourceApi, stack);

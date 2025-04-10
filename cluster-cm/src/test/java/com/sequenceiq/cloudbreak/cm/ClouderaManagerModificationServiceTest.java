@@ -283,6 +283,9 @@ class ClouderaManagerModificationServiceTest {
         when(clouderaManagerResourceApi.refreshParcelRepos()).thenReturn(new ApiCommand().id(REFRESH_PARCEL_REPOS_ID));
         when(clouderaManagerPollingServiceProvider.startPollingCmParcelRepositoryRefresh(stack, v31Client, REFRESH_PARCEL_REPOS_ID))
                 .thenReturn(success);
+        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
+        clouderaManagerRepo.setPredefined(false);
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
         setUpListClusterHosts();
         setUpReadHosts(false);
 
@@ -292,6 +295,29 @@ class ClouderaManagerModificationServiceTest {
 
         underTest.upscaleCluster(Map.of(hostGroup, new LinkedHashSet<>(instanceMetaDataList)));
 
+        verify(clouderaManagerResourceApi).refreshParcelRepos();
+        verify(clustersResourceApi, never()).addHosts(anyString(), any(ApiHostRefList.class));
+        verify(clouderaManagerRoleRefreshService).refreshClusterRoles(v31Client, stack);
+        verify(clouderaManagerApiFactory, never()).getBatchResourceApi(any(ApiClient.class));
+    }
+
+    @Test
+    void upscaleClusterNoHostToUpscaleAndPrewarmedImage() throws Exception {
+        setUpDeployClientConfigPolling(success);
+
+        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
+        clouderaManagerRepo.setPredefined(true);
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
+        setUpListClusterHosts();
+        setUpReadHosts(false);
+
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setDiscoveryFQDN("original");
+        List<InstanceMetaData> instanceMetaDataList = List.of(instanceMetaData);
+
+        underTest.upscaleCluster(Map.of(hostGroup, new LinkedHashSet<>(instanceMetaDataList)));
+
+        verify(clouderaManagerResourceApi, never()).refreshParcelRepos();
         verify(clustersResourceApi, never()).addHosts(anyString(), any(ApiHostRefList.class));
         verify(clouderaManagerRoleRefreshService).refreshClusterRoles(v31Client, stack);
         verify(clouderaManagerApiFactory, never()).getBatchResourceApi(any(ApiClient.class));
@@ -305,6 +331,9 @@ class ClouderaManagerModificationServiceTest {
         when(clouderaManagerResourceApi.refreshParcelRepos()).thenReturn(new ApiCommand().id(REFRESH_PARCEL_REPOS_ID));
         when(clouderaManagerPollingServiceProvider.startPollingCmParcelRepositoryRefresh(stack, v31Client, REFRESH_PARCEL_REPOS_ID))
                 .thenReturn(success);
+        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
+        clouderaManagerRepo.setPredefined(false);
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
         setUpListClusterHosts();
         setUpReadHosts(false);
 
@@ -334,6 +363,9 @@ class ClouderaManagerModificationServiceTest {
         when(clouderaManagerResourceApi.refreshParcelRepos()).thenReturn(new ApiCommand().id(REFRESH_PARCEL_REPOS_ID));
         when(clouderaManagerPollingServiceProvider.startPollingCmParcelRepositoryRefresh(stack, v31Client, REFRESH_PARCEL_REPOS_ID))
                 .thenReturn(success);
+        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
+        clouderaManagerRepo.setPredefined(false);
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
         setUpListClusterHosts();
         setUpReadHosts(false, "/originalRack");
 
@@ -357,6 +389,9 @@ class ClouderaManagerModificationServiceTest {
                 .thenReturn(success);
         when(clouderaManagerPollingServiceProvider.startPollingCmParcelActivation(stack, v31Client, REFRESH_PARCEL_REPOS_ID, Collections.emptyList()))
                 .thenReturn(success);
+        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
+        clouderaManagerRepo.setPredefined(false);
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
         setUpListClusterHosts();
         setUpReadHosts(false);
         setUpDeployClientConfigPolling(success);
