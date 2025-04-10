@@ -105,10 +105,10 @@ integrationtest:
   runtimeVersion: 7.3.1
   upgrade:
     matrix:
-      7.2.16: 7.2.15
       7.2.17: 7.2.16
       7.2.18: 7.2.17
       7.3.1: 7.2.18
+      7.3.2: 7.3.1
     currentHARuntimeVersion: 7.2.18
     currentGovHARuntimeVersion: 7.2.18
     currentRuntimeVersion: 7.2.18
