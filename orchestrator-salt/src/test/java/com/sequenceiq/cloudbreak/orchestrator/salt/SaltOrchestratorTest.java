@@ -56,6 +56,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimaps;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.orchestration.NodeVolumes;
@@ -342,7 +343,7 @@ class SaltOrchestratorTest {
 
         List<String> downNodes = Lists.newArrayList("10-0-0-4.example.com", "10-0-0-5.example.com");
 
-        saltOrchestrator.tearDown(null, Collections.singletonList(gatewayConfig), privateIpsByFQDN, Set.of(), null);
+        saltOrchestrator.tearDown(null, Collections.singletonList(gatewayConfig), Multimaps.forMap(privateIpsByFQDN), Set.of(), null);
 
         verify(saltConnector, never()).wheel(eq("key.delete"), eq(downNodes), eq(Object.class));
         verify(saltStateService).stopMinions(eq(saltConnector), eq(privateIps));
@@ -376,7 +377,8 @@ class SaltOrchestratorTest {
         OrchestratorAware orchestratorAware = mock(OrchestratorAware.class);
         when(orchestratorAware.getAllNotDeletedNodes()).thenReturn(Set.of());
 
-        saltOrchestrator.tearDown(orchestratorAware, Collections.singletonList(gatewayConfig), privateIpsByFQDN, Set.of(remainingNode), exitCriteriaModel);
+        saltOrchestrator.tearDown(orchestratorAware, Collections.singletonList(gatewayConfig), Multimaps.forMap(privateIpsByFQDN), Set.of(remainingNode),
+                exitCriteriaModel);
 
         verify(saltConnector, times(1)).wheel(eq("key.delete"), eq(downNodes), eq(Object.class));
 
@@ -394,7 +396,7 @@ class SaltOrchestratorTest {
         doThrow(new NullPointerException("message")).when(saltStateService).stopMinions(eq(saltConnector), eq(privateIps));
 
         assertThatThrownBy(() ->
-                saltOrchestrator.tearDown(null, Collections.singletonList(gatewayConfig), privateIpsByFQDN, Set.of(), null))
+                saltOrchestrator.tearDown(null, Collections.singletonList(gatewayConfig), Multimaps.forMap(privateIpsByFQDN), Set.of(), null))
                 .hasMessage("message")
                 .isInstanceOf(CloudbreakOrchestratorFailedException.class)
                 .hasCauseInstanceOf(NullPointerException.class);

@@ -16,6 +16,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.eventbus.Event;
@@ -96,12 +99,12 @@ public class RemoveHostsHandler implements EventHandler<RemoveHostsFromOrchestra
     private PollingResult removeHostsFromOrchestrator(Stack stack, List<String> hostNames) throws CloudbreakException {
         LOGGER.debug("Remove hosts from orchestrator: [{}]", hostNames);
         try {
-            Map<String, String> removeNodePrivateIPsByFQDN = stack.getAllInstanceMetaDataList().stream()
+            Multimap<String, String> removeNodePrivateIPsByFQDN = stack.getAllInstanceMetaDataList().stream()
                     .filter(instanceMetaData -> Objects.nonNull(instanceMetaData.getDiscoveryFQDN()))
                     .filter(instanceMetaData ->
                             hostNames.stream()
                                     .anyMatch(hn -> hn.equals(instanceMetaData.getDiscoveryFQDN())))
-                    .collect(Collectors.toMap(instanceMetaData -> instanceMetaData.getDiscoveryFQDN(), instanceMeataData -> instanceMeataData.getPrivateIp()));
+                    .collect(Multimaps.toMultimap(InstanceMetaData::getDiscoveryFQDN, InstanceMetaData::getPrivateIp, HashMultimap::create));
             Set<InstanceMetaData> remainingInstanceMetaDatas = stack.getNotDeletedInstanceMetaDataList().stream()
                     .filter(instanceMetaData -> !shouldRemove(instanceMetaData, removeNodePrivateIPsByFQDN))
                     .collect(Collectors.toSet());
@@ -127,13 +130,15 @@ public class RemoveHostsHandler implements EventHandler<RemoveHostsFromOrchestra
         return SUCCESS;
     }
 
-    private boolean shouldRemove(InstanceMetaData instanceMetaData, Map<String, String> removeNodePrivateIPsByFQDN) {
+    private boolean shouldRemove(InstanceMetaData instanceMetaData, Multimap<String, String> removeNodePrivateIPsByFQDN) {
         if (removeNodePrivateIPsByFQDN.containsValue(instanceMetaData.getPrivateIp())) {
             if (instanceMetaData.getDiscoveryFQDN() == null) {
                 return true;
+            } else {
+                return removeNodePrivateIPsByFQDN.containsKey(instanceMetaData.getDiscoveryFQDN());
             }
-            return removeNodePrivateIPsByFQDN.containsKey(instanceMetaData.getDiscoveryFQDN());
+        } else {
+            return false;
         }
-        return false;
     }
 }

@@ -2,10 +2,12 @@ package com.sequenceiq.cloudbreak.service.upgrade;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_3_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionEqualToLimited;
-import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionOlderThanLimited;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 
 import jakarta.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -14,34 +16,49 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 @Component
 public class UpgradePathRestrictionService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(UpgradePathRestrictionService.class);
+
     @Inject
     private EntitlementService entitlementService;
 
-    public boolean permitUpgrade(VersionComparisonContext currentVersion, VersionComparisonContext newVersion) {
-        return !targetRuntimeIs731p0(newVersion) || shouldAllowTheUpgrade(currentVersion) || isInternalAccount();
+    public boolean permitUpgrade(VersionComparisonContext current, VersionComparisonContext target) {
+        boolean result = permitUpgradeByVersion(current, target);
+        LOGGER.debug("Upgrade from {} to {}, permitted: {}", current, target, result);
+        return result;
     }
 
-    @SuppressWarnings("magicnumber")
-    private boolean shouldAllowTheUpgrade(VersionComparisonContext currentVersion) {
-        return !(isCurrentVersionOlderThanLimited(currentVersion, "7.2.17", 100)
-                || isCurrentVersionNewerThanLimited(currentVersion, "7.2.17", 600)
-                || isCurrentVersionNewerThanLimited(currentVersion, "7.2.18", 300));
+    @SuppressWarnings({ "checkstyle:CyclomaticComplexity", "checkstyle:MagicNumber" })
+    private boolean permitUpgradeByVersion(VersionComparisonContext current, VersionComparisonContext target) {
+        if (skipValidation(current, target)) {
+            return true;
+        }
+
+        int targetPatch = target.getPatchVersion().orElse(0);
+        int currentPatch = current.getPatchVersion().orElse(0);
+        String currentMajor = current.getMajorVersion();
+
+        if (targetPatch == 0 || targetPatch == 100) {
+            boolean from7217 = majorVersionEquals(currentMajor, "7.2.17") && currentPatch > 100 && currentPatch < 600;
+            boolean from7218 = majorVersionEquals(currentMajor, "7.2.18") && currentPatch < 300;
+            return isVersionNewerOrEqualThanLimited(currentMajor, () -> "7.2.17") && (from7217 || from7218);
+        }
+
+        if (targetPatch >= 200) {
+            boolean from7217OrNewer = majorVersionEquals(currentMajor, "7.2.17") && currentPatch >= 300;
+            boolean from7218OrNewer = isVersionNewerOrEqualThanLimited(currentMajor, () -> "7.2.18");
+            return from7217OrNewer || from7218OrNewer;
+        }
+
+        return true;
     }
 
-    private boolean targetRuntimeIs731p0(VersionComparisonContext newVersion) {
-        return isVersionEqualToLimited(newVersion.getMajorVersion(), CLOUDERA_STACK_VERSION_7_3_1)
-                && newVersion.getPatchVersion().orElse(0) == 0;
+    private boolean majorVersionEquals(String currentMajor, String limited) {
+        return isVersionEqualToLimited(currentMajor, () -> limited);
     }
 
-    private boolean isCurrentVersionNewerThanLimited(VersionComparisonContext currentVersion, String runtimeVersion, int patchVersion) {
-        return currentVersion.getMajorVersion().equals(runtimeVersion)
-                && currentVersion.getPatchVersion().isPresent() && currentVersion.getPatchVersion().get() >= patchVersion;
-    }
-
-    private boolean isCurrentVersionOlderThanLimited(VersionComparisonContext currentVersion, String runtimeVersion, int patchVersion) {
-        return isVersionOlderThanLimited(currentVersion.getMajorVersion(), () -> runtimeVersion)
-                || (currentVersion.getMajorVersion().equals(runtimeVersion)
-                && currentVersion.getPatchVersion().orElse(0) <= patchVersion);
+    private boolean skipValidation(VersionComparisonContext current, VersionComparisonContext target) {
+        return !isVersionEqualToLimited(target.getMajorVersion(), CLOUDERA_STACK_VERSION_7_3_1) ||
+                isVersionNewerOrEqualThanLimited(current.getMajorVersion(), CLOUDERA_STACK_VERSION_7_3_1) || isInternalAccount();
     }
 
     private boolean isInternalAccount() {
