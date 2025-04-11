@@ -25,6 +25,7 @@ import com.sequenceiq.authorization.service.AuthorizationEnvironmentCrnProvider;
 import com.sequenceiq.authorization.service.AuthorizationResourceCrnProvider;
 import com.sequenceiq.cloudbreak.api.model.StatusKind;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.api.model.AlertType;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
@@ -44,7 +45,6 @@ import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.EntitlementValidationService;
 import com.sequenceiq.periscope.service.HistoryService;
 import com.sequenceiq.periscope.service.NodeDeletionService;
-import com.sequenceiq.periscope.service.NotFoundException;
 import com.sequenceiq.periscope.service.UsageReportingService;
 
 @Component

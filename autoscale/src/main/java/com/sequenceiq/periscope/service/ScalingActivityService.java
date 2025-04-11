@@ -1,10 +1,10 @@
 package com.sequenceiq.periscope.service;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 import static com.sequenceiq.periscope.api.model.ActivityStatus.DOWNSCALE_TRIGGER_SUCCESS;
 import static com.sequenceiq.periscope.api.model.ActivityStatus.SCALING_FLOW_IN_PROGRESS;
 import static com.sequenceiq.periscope.api.model.ActivityStatus.UPSCALE_TRIGGER_SUCCESS;
-import static com.sequenceiq.periscope.service.NotFoundException.notFound;
 import static java.time.Instant.now;
 import static java.time.temporal.ChronoUnit.MINUTES;
 
@@ -33,6 +33,7 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.AuthorizationEnvironmentCrnProvider;
 import com.sequenceiq.authorization.service.AuthorizationResourceCrnProvider;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.periscope.api.model.ActivityStatus;
 import com.sequenceiq.periscope.domain.Cluster;
@@ -67,7 +68,7 @@ public class ScalingActivityService implements AuthorizationResourceCrnProvider,
     @Retryable(value = NotFoundException.class, maxAttempts = 3, backoff = @Backoff(delay = 5000))
     public String getResourceCrnByResourceName(String clusterName) {
         return clusterService.findOneByStackNameAndTenant(clusterName, restRequestThreadLocalService.getCloudbreakTenant())
-                .orElseThrow(NotFoundException.notFound("Cluster", clusterName)).getStackCrn();
+                .orElseThrow(notFound("Cluster", clusterName)).getStackCrn();
     }
 
     @Override
@@ -102,7 +103,7 @@ public class ScalingActivityService implements AuthorizationResourceCrnProvider,
 
     public void update(Long activityId, FlowIdentifier flowIdentifier, ActivityStatus activityStatus, String reason) {
         ScalingActivity scalingActivity = scalingActivityRepository.findById(activityId)
-                .orElseThrow(NotFoundException.notFound("ScalingActivity", activityId));
+                .orElseThrow(notFound("ScalingActivity", activityId));
         scalingActivity.setFlowId(flowIdentifier.getPollableId());
         scalingActivity.setActivityStatus(activityStatus);
         scalingActivity.setScalingActivityReason(reason);

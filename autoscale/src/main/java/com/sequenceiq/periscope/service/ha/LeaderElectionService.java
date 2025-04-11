@@ -1,6 +1,6 @@
 package com.sequenceiq.periscope.service.ha;
 
-import static com.sequenceiq.periscope.service.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;

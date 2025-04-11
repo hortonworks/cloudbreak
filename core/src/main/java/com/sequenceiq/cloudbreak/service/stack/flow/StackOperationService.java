@@ -553,8 +553,8 @@ public class StackOperationService {
         return flowManager.triggerSkuMigration(stack.getId(), force);
     }
 
-    public StackDatabaseServerCertificateStatusV4Responses
-    listDatabaseServersCertificateStatus(StackDatabaseServerCertificateStatusV4Request request, String userCrn) {
+    public StackDatabaseServerCertificateStatusV4Responses listDatabaseServersCertificateStatus(StackDatabaseServerCertificateStatusV4Request request,
+            String userCrn) {
         try {
             StackDatabaseServerCertificateStatusV4Responses responses = new StackDatabaseServerCertificateStatusV4Responses();
             if (!isEmpty(request.getCrns())) {

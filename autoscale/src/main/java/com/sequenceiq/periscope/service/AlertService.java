@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.LoadAlert;

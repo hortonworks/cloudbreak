@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.periscope.config.YarnConfig;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ClusterPertain;
@@ -90,7 +91,7 @@ class YarnRecommendationServiceTest {
     void testGetResourceCrnByResourceName() {
         when(restRequestThreadLocalService.getCloudbreakTenant()).thenReturn(tenant);
         when(clusterService.findOneByStackNameAndTenant(TEST_CLUSTER_NAME, tenant)).thenReturn(Optional.empty());
-        assertThrows(com.sequenceiq.periscope.service.NotFoundException.class, () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () ->
+        assertThrows(NotFoundException.class, () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () ->
                 underTest.getResourceCrnByResourceName(TEST_CLUSTER_NAME)));
 
         Cluster cluster = getACluster();

@@ -1,6 +1,6 @@
 package com.sequenceiq.redbeams.service.cloud;
 
-import static com.sequenceiq.redbeams.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;

@@ -16,6 +16,7 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.AuthorizationEnvironmentCrnProvider;
 import com.sequenceiq.authorization.service.AuthorizationResourceCrnProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.periscope.config.YarnConfig;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.LoadAlert;

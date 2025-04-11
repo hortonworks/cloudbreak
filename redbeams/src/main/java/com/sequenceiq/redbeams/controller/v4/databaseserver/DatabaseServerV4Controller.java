@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -68,7 +69,6 @@ import com.sequenceiq.redbeams.converter.v4.databaseserver.DatabaseServerV4Reque
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.upgrade.UpgradeDatabaseRequest;
-import com.sequenceiq.redbeams.exception.NotFoundException;
 import com.sequenceiq.redbeams.service.RedBeamsRetryService;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerSslCertificateConfigService;

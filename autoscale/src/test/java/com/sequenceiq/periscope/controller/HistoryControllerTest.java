@@ -15,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterHistoryResponse;
 import com.sequenceiq.periscope.converter.HistoryConverter;
 import com.sequenceiq.periscope.domain.Cluster;
@@ -22,7 +23,6 @@ import com.sequenceiq.periscope.domain.History;
 import com.sequenceiq.periscope.service.AutoscaleRestRequestThreadLocalService;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.HistoryService;
-import com.sequenceiq.periscope.service.NotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 public class HistoryControllerTest {

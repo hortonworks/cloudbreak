@@ -30,6 +30,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.periscope.api.model.ActivityStatus;
@@ -84,7 +85,7 @@ class ScalingActivityServiceTest {
     void testGetResourceCrnByResourceName() {
         when(restRequestThreadLocalService.getCloudbreakTenant()).thenReturn(TEST_TENANT);
         when(clusterService.findOneByStackNameAndTenant(CLOUDBREAK_STACK_NAME, TEST_TENANT)).thenReturn(Optional.empty());
-        assertThrows(com.sequenceiq.periscope.service.NotFoundException.class, () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () ->
+        assertThrows(NotFoundException.class, () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () ->
                 underTest.getResourceCrnByResourceName(CLOUDBREAK_STACK_NAME)));
 
         Cluster cluster = getCluster();

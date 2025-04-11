@@ -15,10 +15,12 @@ import java.util.Optional;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.WebApplicationException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.dyngr.Polling;
@@ -292,11 +294,17 @@ public class ExternalDatabaseService {
         if (StringUtils.isEmpty(databaseServerCrn)) {
             throw new SecretRotationException("No database server crn found, rotation is not possible.", null);
         }
-        FlowLogResponse lastFlow = redbeamsClient.getLastFlowId(databaseServerCrn);
-        if (lastFlow != null && lastFlow.getStateStatus() == StateStatus.PENDING) {
-            String message = String.format("Polling in Redbeams is not possible since last known state of flow for the database is %s",
-                    lastFlow.getCurrentState());
-            throw new SecretRotationException(message, null);
+        try {
+            FlowLogResponse lastFlow = redbeamsClient.getLastFlowId(databaseServerCrn);
+            if (lastFlow != null && lastFlow.getStateStatus() == StateStatus.PENDING) {
+                String message = String.format("Polling in Redbeams is not possible since last known state of flow for the database is %s",
+                        lastFlow.getCurrentState());
+                throw new SecretRotationException(message, null);
+            }
+        } catch (WebApplicationException e) {
+            if (e.getResponse().getStatus() != HttpStatus.NOT_FOUND.value()) {
+                throw e;
+            }
         }
     }
 

@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.repository.ScalingPolicyRepository;

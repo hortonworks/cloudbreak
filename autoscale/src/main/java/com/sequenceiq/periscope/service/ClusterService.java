@@ -1,9 +1,9 @@
 package com.sequenceiq.periscope.service;
 
+import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 import static com.sequenceiq.periscope.api.model.ClusterState.RUNNING;
 import static com.sequenceiq.periscope.api.model.ClusterState.SUSPENDED;
 import static com.sequenceiq.periscope.common.MessageCode.CLUSTER_EXISTS_FOR_CRN;
-import static com.sequenceiq.periscope.service.NotFoundException.notFound;
 import static org.springframework.util.StringUtils.isEmpty;
 
 import java.util.List;

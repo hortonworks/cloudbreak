@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.authorization.controller.AuthorizationInfoController;
 import com.sequenceiq.cloudbreak.controller.mapper.ForbiddenExceptionMapper;
+import com.sequenceiq.cloudbreak.controller.mapper.NotFoundExceptionMapper;
 import com.sequenceiq.cloudbreak.service.openapi.OpenApiController;
 import com.sequenceiq.cloudbreak.service.openapi.OpenApiProvider;
 import com.sequenceiq.periscope.api.AutoscaleApi;
@@ -31,7 +32,6 @@ import com.sequenceiq.periscope.controller.mapper.HttpMediaTypeNotSupportedExcep
 import com.sequenceiq.periscope.controller.mapper.HttpMessageNotReadableExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.HttpRequestMethodNotSupportedExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.JaxRsNotFoundExceptionMapper;
-import com.sequenceiq.periscope.controller.mapper.NotFoundExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.ParseExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.RuntimeExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.SpringAccessDeniedExceptionMapper;

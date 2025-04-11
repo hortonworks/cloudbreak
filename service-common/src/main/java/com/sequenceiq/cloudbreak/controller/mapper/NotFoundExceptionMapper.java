@@ -1,4 +1,4 @@
-package com.sequenceiq.externalizedcompute.controller.mapper;
+package com.sequenceiq.cloudbreak.controller.mapper;
 
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;

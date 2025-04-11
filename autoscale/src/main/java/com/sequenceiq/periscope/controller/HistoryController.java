@@ -11,13 +11,13 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.periscope.api.endpoint.v1.HistoryEndpoint;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterHistoryResponse;
 import com.sequenceiq.periscope.converter.HistoryConverter;
 import com.sequenceiq.periscope.service.AutoscaleRestRequestThreadLocalService;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.HistoryService;
-import com.sequenceiq.periscope.service.NotFoundException;
 
 @Controller
 public class HistoryController implements HistoryEndpoint {

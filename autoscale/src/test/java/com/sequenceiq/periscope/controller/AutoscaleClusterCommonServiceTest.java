@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
@@ -35,7 +36,6 @@ import com.sequenceiq.periscope.monitor.handler.CloudbreakCommunicator;
 import com.sequenceiq.periscope.service.AutoscaleRestRequestThreadLocalService;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.EntitlementValidationService;
-import com.sequenceiq.periscope.service.NotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 public class AutoscaleClusterCommonServiceTest {
