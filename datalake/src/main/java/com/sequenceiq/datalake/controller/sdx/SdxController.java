@@ -55,6 +55,7 @@ import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.AzureDatabaseType;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.datalake.authorization.DataLakeFiltering;
 import com.sequenceiq.datalake.cm.RangerCloudIdentityService;
 import com.sequenceiq.datalake.configuration.CDPConfigService;
@@ -653,7 +654,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByResourceName(action =  AuthorizationResourceAction.REPAIR_DATALAKE)
-    public FlowIdentifier enableSeLinuxByName(@ResourceName String name) {
+    public FlowIdentifier modifySeLinuxByName(@ResourceName String name, SeLinux selinuxMode) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = getSdxClusterByName(name);
         return seLinuxService.enableSeLinuxOnDatalake(sdxCluster, userCrn);
@@ -661,7 +662,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action =  AuthorizationResourceAction.REPAIR_DATALAKE)
-    public FlowIdentifier enableSeLinuxByCrn(@ResourceCrn @TenantAwareParam String crn) {
+    public FlowIdentifier modifySeLinuxByCrn(@ResourceCrn @TenantAwareParam String crn, SeLinux selinuxMode) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = getSdxClusterByCrn(crn);
         return seLinuxService.enableSeLinuxOnDatalake(sdxCluster, userCrn);

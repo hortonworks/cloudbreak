@@ -94,6 +94,7 @@ import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 import com.sequenceiq.common.api.UsedSubnetWithResourceResponse;
 import com.sequenceiq.common.api.UsedSubnetsByEnvironmentResponse;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 import com.sequenceiq.distrox.v1.distrox.StackUpgradeOperations;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -771,7 +772,7 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     @InternalOnly
-    public FlowIdentifier enableSeLinuxByCrn(Long workspaceId, @TenantAwareParam @ResourceCrn String crn) {
+    public FlowIdentifier modifySeLinuxByCrn(Long workspaceId, @TenantAwareParam @ResourceCrn String crn, SeLinux selinuxMode) {
         return stackOperationService.triggerEnableSELinux(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId());
     }
 }
