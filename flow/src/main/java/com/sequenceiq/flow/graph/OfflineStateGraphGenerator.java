@@ -89,7 +89,7 @@ public class OfflineStateGraphGenerator {
         }
     }
 
-    private Set<FlowConfiguration<? extends FlowEvent>> gatherFlowConfigurationsFromPackage(ImmutableSet<ClassPath.ClassInfo> classesOfFlowConfigPackage) {
+    public Set<FlowConfiguration<? extends FlowEvent>> gatherFlowConfigurationsFromPackage(ImmutableSet<ClassPath.ClassInfo> classesOfFlowConfigPackage) {
         List<? extends Class<FlowConfiguration<? extends FlowEvent>>> classes = classesOfFlowConfigPackage.stream()
                 .filter(classInfo -> !classInfo.getName().contains("Test"))
                 .map(ClassPath.ClassInfo::load)

@@ -7,6 +7,7 @@ import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAK
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_TRIGGER_RESTORE_EVENT;
 import static com.sequenceiq.datalake.flow.dr.validation.DatalakeBackupValidationEvent.DATALAKE_TRIGGER_BACKUP_VALIDATION_EVENT;
 import static com.sequenceiq.datalake.flow.dr.validation.DatalakeRestoreValidationEvent.DATALAKE_TRIGGER_RESTORE_VALIDATION_EVENT;
+import static com.sequenceiq.datalake.flow.graph.FlowOfflineStateGraphGenerator.FLOW_CONFIGS_PACKAGE_NAME;
 import static com.sequenceiq.datalake.flow.loadbalancer.dns.UpdateLoadBalancerDNSEvent.UPDATE_LOAD_BALANCER_DNS_IPA_EVENT;
 import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -14,6 +15,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -40,6 +44,7 @@ import com.sequenceiq.datalake.flow.dr.validation.event.DatalakeTriggerRestoreVa
 import com.sequenceiq.datalake.flow.loadbalancer.dns.event.StartUpdateLoadBalancerDNSEvent;
 import com.sequenceiq.datalake.flow.stop.event.SdxStartStopEvent;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
+import com.sequenceiq.flow.graph.FlowChainConfigGraphGeneratorUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @ExtendWith(MockitoExtension.class)
@@ -77,9 +82,13 @@ public class DatalakeResizeFlowEventChainFactoryTest {
         FlowTriggerEventQueue flowTriggerEventQueue = factory.createFlowTriggerEventQueue(event);
 
         assertEquals(4, flowTriggerEventQueue.getQueue().size());
+        Queue<Selectable> restrainedQueueData = new ConcurrentLinkedQueue<>(flowTriggerEventQueue.getQueue());
         flowTriggerEventQueue.getQueue().remove();
         assertTriggerBackupValidationEvent(flowTriggerEventQueue);
         assertTriggerRestoreValidationEvent(flowTriggerEventQueue);
+
+        flowTriggerEventQueue.getQueue().addAll(restrainedQueueData);
+        FlowChainConfigGraphGeneratorUtil.generateFor(factory, FLOW_CONFIGS_PACKAGE_NAME, flowTriggerEventQueue, "VALIDATION_ONLY");
     }
 
     @Test
@@ -89,6 +98,7 @@ public class DatalakeResizeFlowEventChainFactoryTest {
         FlowTriggerEventQueue flowTriggerEventQueue = factory.createFlowTriggerEventQueue(event);
 
         assertEquals(9, flowTriggerEventQueue.getQueue().size());
+        Queue<Selectable> restrainedQueueData = new ConcurrentLinkedQueue<>(flowTriggerEventQueue.getQueue());
         flowTriggerEventQueue.getQueue().remove();
         assertBackupEvent(flowTriggerEventQueue);
         assertStopEvent(flowTriggerEventQueue);
@@ -97,6 +107,9 @@ public class DatalakeResizeFlowEventChainFactoryTest {
         assertRestoreEvent(flowTriggerEventQueue);
         assertDeleteEvent(flowTriggerEventQueue);
         assertUpdateLBDNSEvent(flowTriggerEventQueue);
+
+        flowTriggerEventQueue.getQueue().addAll(restrainedQueueData);
+        FlowChainConfigGraphGeneratorUtil.generateFor(factory, FLOW_CONFIGS_PACKAGE_NAME, flowTriggerEventQueue, "WITHOUT_VALIDATION");
     }
 
     @Test
@@ -106,6 +119,7 @@ public class DatalakeResizeFlowEventChainFactoryTest {
         FlowTriggerEventQueue flowTriggerEventQueue = factory.createFlowTriggerEventQueue(event);
 
         assertEquals(10, flowTriggerEventQueue.getQueue().size());
+        Queue<Selectable> restrainedQueueData = new ConcurrentLinkedQueue<>(flowTriggerEventQueue.getQueue());
         flowTriggerEventQueue.getQueue().remove();
         assertTriggerBackupValidationEvent(flowTriggerEventQueue);
         assertTriggerRestoreValidationEvent(flowTriggerEventQueue);
@@ -115,6 +129,9 @@ public class DatalakeResizeFlowEventChainFactoryTest {
         assertRestoreEvent(flowTriggerEventQueue);
         assertDeleteEvent(flowTriggerEventQueue);
         assertUpdateLBDNSEvent(flowTriggerEventQueue);
+
+        flowTriggerEventQueue.getQueue().addAll(restrainedQueueData);
+        FlowChainConfigGraphGeneratorUtil.generateFor(factory, FLOW_CONFIGS_PACKAGE_NAME, flowTriggerEventQueue, "WITHOUT_BACKUP");
     }
 
     @Test
@@ -124,6 +141,7 @@ public class DatalakeResizeFlowEventChainFactoryTest {
         FlowTriggerEventQueue flowTriggerEventQueue = factory.createFlowTriggerEventQueue(event);
 
         assertEquals(10, flowTriggerEventQueue.getQueue().size());
+        Queue<Selectable> restrainedQueueData = new ConcurrentLinkedQueue<>(flowTriggerEventQueue.getQueue());
         flowTriggerEventQueue.getQueue().remove();
         assertTriggerBackupValidationEvent(flowTriggerEventQueue);
         assertTriggerRestoreValidationEvent(flowTriggerEventQueue);
@@ -133,6 +151,9 @@ public class DatalakeResizeFlowEventChainFactoryTest {
         assertCreateEvent(flowTriggerEventQueue);
         assertDeleteEvent(flowTriggerEventQueue);
         assertUpdateLBDNSEvent(flowTriggerEventQueue);
+
+        flowTriggerEventQueue.getQueue().addAll(restrainedQueueData);
+        FlowChainConfigGraphGeneratorUtil.generateFor(factory, FLOW_CONFIGS_PACKAGE_NAME, flowTriggerEventQueue, "WITHOUT_RESTORE");
     }
 
     @Test
@@ -142,6 +163,7 @@ public class DatalakeResizeFlowEventChainFactoryTest {
         FlowTriggerEventQueue flowTriggerEventQueue = factory.createFlowTriggerEventQueue(event);
 
         assertEquals(9, flowTriggerEventQueue.getQueue().size());
+        Queue<Selectable> restrainedQueueData = new ConcurrentLinkedQueue<>(flowTriggerEventQueue.getQueue());
         flowTriggerEventQueue.getQueue().remove();
         assertTriggerBackupValidationEvent(flowTriggerEventQueue);
         assertTriggerRestoreValidationEvent(flowTriggerEventQueue);
@@ -150,6 +172,9 @@ public class DatalakeResizeFlowEventChainFactoryTest {
         assertCreateEvent(flowTriggerEventQueue);
         assertDeleteEvent(flowTriggerEventQueue);
         assertUpdateLBDNSEvent(flowTriggerEventQueue);
+
+        flowTriggerEventQueue.getQueue().addAll(restrainedQueueData);
+        FlowChainConfigGraphGeneratorUtil.generateFor(factory, FLOW_CONFIGS_PACKAGE_NAME, flowTriggerEventQueue, "WITHOUT_BACKUP_AND_RESTORE");
     }
 
     @Test
@@ -159,6 +184,7 @@ public class DatalakeResizeFlowEventChainFactoryTest {
         FlowTriggerEventQueue flowTriggerEventQueue = factory.createFlowTriggerEventQueue(event);
 
         assertEquals(11, flowTriggerEventQueue.getQueue().size());
+        Queue<Selectable> restrainedQueueData = new ConcurrentLinkedQueue<>(flowTriggerEventQueue.getQueue());
         flowTriggerEventQueue.getQueue().remove();
         assertTriggerBackupValidationEvent(flowTriggerEventQueue);
         assertTriggerRestoreValidationEvent(flowTriggerEventQueue);
@@ -169,6 +195,9 @@ public class DatalakeResizeFlowEventChainFactoryTest {
         assertRestoreEvent(flowTriggerEventQueue);
         assertDeleteEvent(flowTriggerEventQueue);
         assertUpdateLBDNSEvent(flowTriggerEventQueue);
+
+        flowTriggerEventQueue.getQueue().addAll(restrainedQueueData);
+        FlowChainConfigGraphGeneratorUtil.generateFor(factory, FLOW_CONFIGS_PACKAGE_NAME, flowTriggerEventQueue, "FULL_CHAIN");
     }
 
     private void assertTriggerBackupValidationEvent(FlowTriggerEventQueue flowChainQueue) {

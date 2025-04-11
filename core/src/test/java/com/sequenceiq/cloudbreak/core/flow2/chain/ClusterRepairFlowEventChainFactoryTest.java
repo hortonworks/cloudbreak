@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain;
 
+import static com.sequenceiq.cloudbreak.core.flow2.generator.FlowOfflineStateGraphGenerator.FLOW_CONFIGS_PACKAGE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -77,6 +78,7 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 import com.sequenceiq.flow.core.chain.finalize.flowevents.FlowChainFinalizePayload;
 import com.sequenceiq.flow.core.chain.init.flowevents.FlowChainInitPayload;
+import com.sequenceiq.flow.graph.FlowChainConfigGraphGeneratorUtil;
 
 @ExtendWith(MockitoExtension.class)
 class ClusterRepairFlowEventChainFactoryTest {
@@ -169,6 +171,7 @@ class ClusterRepairFlowEventChainFactoryTest {
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
                 "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));
+        FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE, eventQueues, "SingleGatewayWhenItsFailed");
     }
 
     @Test
@@ -191,6 +194,7 @@ class ClusterRepairFlowEventChainFactoryTest {
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
                 "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));
+        FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE, eventQueues, "SingleGatewayWhenItsFailedWithDBUpgrade");
     }
 
     @Test
@@ -260,6 +264,7 @@ class ClusterRepairFlowEventChainFactoryTest {
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
                 "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));
+        FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE, eventQueues, "MultipleGateway");
     }
 
     @Test
@@ -310,6 +315,7 @@ class ClusterRepairFlowEventChainFactoryTest {
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
                 "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));
+        FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE, eventQueues, "CoreNodesWithStoppedNodes");
     }
 
     @Test
@@ -326,6 +332,8 @@ class ClusterRepairFlowEventChainFactoryTest {
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
                 "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));
+
+        FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE, eventQueues, "OnNotGatewayInstanceGroup");
     }
 
     @Test
@@ -355,6 +363,7 @@ class ClusterRepairFlowEventChainFactoryTest {
                 "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));
 
         assertThat(eventQueues.getQueue(), hasSize(6));
+        Queue<Selectable> restrainedQueueData = new ConcurrentLinkedDeque<>(eventQueues.getQueue());
         FlowChainInitPayload flowChainInitPayload = (FlowChainInitPayload) eventQueues.getQueue().poll();
         assertNotNull(flowChainInitPayload);
 
@@ -376,6 +385,9 @@ class ClusterRepairFlowEventChainFactoryTest {
 
         FlowChainFinalizePayload flowChainFinalizePayload = (FlowChainFinalizePayload) eventQueues.getQueue().poll();
         assertNotNull(flowChainFinalizePayload);
+
+        eventQueues.getQueue().addAll(restrainedQueueData);
+        FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE, eventQueues, "RepairAllAtOnce");
     }
 
     @Test
@@ -410,6 +422,7 @@ class ClusterRepairFlowEventChainFactoryTest {
                 "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));
 
         assertThat(eventQueues.getQueue(), hasSize(16));
+        Queue<Selectable> restrainedQueueData = new ConcurrentLinkedDeque<>(eventQueues.getQueue());
         FlowChainInitPayload flowChainInitPayload = (FlowChainInitPayload) eventQueues.getQueue().poll();
         assertNotNull(flowChainInitPayload);
 
@@ -451,6 +464,9 @@ class ClusterRepairFlowEventChainFactoryTest {
 
         FlowChainFinalizePayload flowChainFinalizePayload = (FlowChainFinalizePayload) eventQueues.getQueue().poll();
         assertNotNull(flowChainFinalizePayload);
+
+        eventQueues.getQueue().addAll(restrainedQueueData);
+        FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE, eventQueues, "OneByOne");
     }
 
     @Test
@@ -480,6 +496,7 @@ class ClusterRepairFlowEventChainFactoryTest {
                 "FULL_DOWNSCALE_TRIGGER_EVENT", "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT", "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));
 
+        Queue<Selectable> restrainedQueueData = new ConcurrentLinkedDeque<>(eventQueues.getQueue());
         eventQueues.getQueue().remove();
 
         ImageValidationTriggerEvent imageValidationTriggerEvent = (ImageValidationTriggerEvent) eventQueues.getQueue().poll();
@@ -510,6 +527,9 @@ class ClusterRepairFlowEventChainFactoryTest {
 
         upscaleEvent = (StackAndClusterUpscaleTriggerEvent) eventQueues.getQueue().poll();
         assertGroupWithHosts(upscaleEvent, HG_CORE, hosts("core-", 296, 320));
+
+        eventQueues.getQueue().addAll(restrainedQueueData);
+        FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE, eventQueues, "BatchRepair");
     }
 
     @Test
@@ -612,6 +632,7 @@ class ClusterRepairFlowEventChainFactoryTest {
         assertNotNull(imageValidationTriggerEvent);
         CoreVerticalScalingTriggerEvent coreVerticalScalingTriggerEvent = (CoreVerticalScalingTriggerEvent) eventQueues.getQueue().poll();
         assertEquals(200, coreVerticalScalingTriggerEvent.getRequest().getTemplate().getRootVolume().getSize().intValue());
+        FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE, eventQueues, "RootDiskMigration");
     }
 
     @Test
@@ -637,6 +658,7 @@ class ClusterRepairFlowEventChainFactoryTest {
         assertNotNull(imageValidationTriggerEvent);
         SkuMigrationTriggerEvent skuMigrationTriggerEvent = (SkuMigrationTriggerEvent) eventQueues.getQueue().poll();
         assertEquals(STACK_ID, skuMigrationTriggerEvent.getResourceId());
+        FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE, eventQueues, "SkuMigration");
     }
 
     @Test
@@ -656,6 +678,7 @@ class ClusterRepairFlowEventChainFactoryTest {
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
                 "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));
+        FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE, eventQueues, "SingleGatewayWithoutRollingUpgrade");
     }
 
     @Test
@@ -675,6 +698,7 @@ class ClusterRepairFlowEventChainFactoryTest {
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
                 "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));
+        FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE, eventQueues, "SingleGateway");
     }
 
     @Test

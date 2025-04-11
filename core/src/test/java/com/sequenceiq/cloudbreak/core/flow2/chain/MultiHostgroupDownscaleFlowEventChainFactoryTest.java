@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleEvent.DECOMMISSION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.generator.FlowOfflineStateGraphGenerator.FLOW_CONFIGS_PACKAGE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleEvent.STACK_DOWNSCALE_EVENT;
 import static com.sequenceiq.flow.core.chain.finalize.config.FlowChainFinalizeEvent.FLOWCHAIN_FINALIZE_TRIGGER_EVENT;
 import static com.sequenceiq.flow.core.chain.init.config.FlowChainInitEvent.FLOWCHAIN_INIT_TRIGGER_EVENT;
@@ -11,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,6 +29,8 @@ import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.MultiHostgroupClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
+import com.sequenceiq.flow.graph.FlowChainConfigGraphGeneratorUtil;
 
 @ExtendWith(MockitoExtension.class)
 public class MultiHostgroupDownscaleFlowEventChainFactoryTest {
@@ -59,12 +63,17 @@ public class MultiHostgroupDownscaleFlowEventChainFactoryTest {
         when(stackService.getPlatformVariantByStackId(STACK_ID)).thenReturn(cloudPlatformVariant);
         when(cloudPlatformVariant.getVariant()).thenReturn(Variant.variant("AWS"));
 
-        Queue<Selectable> queue = underTest.createFlowTriggerEventQueue(event).getQueue();
+        FlowTriggerEventQueue flowTriggerQueue = underTest.createFlowTriggerEventQueue(event);
+
+        Queue<Selectable> queue = flowTriggerQueue.getQueue();
+        Queue<Selectable> restrainedQueueData = new ConcurrentLinkedQueue<>(queue);
         assertEquals(4L, queue.size());
         assertEquals(FLOWCHAIN_INIT_TRIGGER_EVENT.event(), queue.poll().selector());
         assertEquals(DECOMMISSION_EVENT.event(), queue.poll().selector());
         assertEquals(STACK_DOWNSCALE_EVENT.event(), queue.poll().selector());
         assertEquals(FLOWCHAIN_FINALIZE_TRIGGER_EVENT.event(), queue.poll().selector());
+        flowTriggerQueue.getQueue().addAll(restrainedQueueData);
+        FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE, flowTriggerQueue, "FULL_DOWNSCALE");
     }
 
 }

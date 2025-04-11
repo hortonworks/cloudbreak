@@ -4,12 +4,13 @@ import com.sequenceiq.flow.graph.OfflineStateGraphGenerator;
 
 public class FlowOfflineStateGraphGenerator {
 
+    public static final String FLOW_CONFIGS_PACKAGE = "com.sequenceiq.environment.environment.flow";
+
     private FlowOfflineStateGraphGenerator() {
     }
 
     public static void main(String[] args) throws Exception {
-        String flowConfigsPackageName = "com.sequenceiq.environment.environment.flow";
         OfflineStateGraphGenerator offlineStateGraphGenerator = new OfflineStateGraphGenerator();
-        offlineStateGraphGenerator.collectFlowConfigsAndGenerateGraphs(flowConfigsPackageName);
+        offlineStateGraphGenerator.collectFlowConfigsAndGenerateGraphs(FLOW_CONFIGS_PACKAGE);
     }
 }

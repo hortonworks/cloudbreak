@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.chain;
 
+import static com.sequenceiq.freeipa.flow.graph.FlowOfflineStateGraphGenerator.FLOW_CONFIGS_PACKAGE_NAME;
 import static org.junit.Assert.assertEquals;
 
 import java.util.List;
@@ -12,6 +13,8 @@ import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
+import com.sequenceiq.flow.graph.FlowChainConfigGraphGeneratorUtil;
 import com.sequenceiq.freeipa.flow.chain.FlowChainTriggers;
 import com.sequenceiq.freeipa.flow.chain.RepairFlowEventChainFactory;
 import com.sequenceiq.freeipa.flow.freeipa.repair.event.RepairEvent;
@@ -41,9 +44,11 @@ public class RepairFlowEventChainFactoryTest {
         RepairEvent event = new RepairEvent(FlowChainTriggers.REPAIR_TRIGGER_EVENT, STACK_ID,
                 OPERATION_ID, INSTANCE_COUNT_BY_GROUP, INSTANCE_IDS_TO_REPAIR, TERMINATED_INSTANCE_IDS);
 
-        Queue<Selectable> eventQueues = underTest.createFlowTriggerEventQueue(event).getQueue();
+        FlowTriggerEventQueue flowTriggerEventQueue = underTest.createFlowTriggerEventQueue(event);
+        Queue<Selectable> eventQueues = flowTriggerEventQueue.getQueue();
 
         List<String> triggeredOperations = eventQueues.stream().map(Selectable::selector).collect(Collectors.toList());
         assertEquals(List.of("CHANGE_PRIMARY_GATEWAY_EVENT", "DOWNSCALE_EVENT", "UPSCALE_EVENT", "CHANGE_PRIMARY_GATEWAY_EVENT"), triggeredOperations);
+        FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE_NAME, flowTriggerEventQueue);
     }
 }

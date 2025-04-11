@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.flow.chain;
 
 import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleEvent.STACK_VERTICALSCALE_EVENT;
+import static com.sequenceiq.freeipa.flow.graph.FlowOfflineStateGraphGenerator.FLOW_CONFIGS_PACKAGE_NAME;
 import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.IMAGE_CHANGE_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -9,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +22,7 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 import com.sequenceiq.flow.core.chain.init.flowevents.FlowChainInitPayload;
+import com.sequenceiq.flow.graph.FlowChainConfigGraphGeneratorUtil;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent;
@@ -58,6 +61,7 @@ class UpgradeFlowEventChainFactoryTest {
 
         assertEquals("UpgradeFlowEventChainFactory", eventQueue.getFlowChainName());
         Queue<Selectable> queue = eventQueue.getQueue();
+        Queue<Selectable> restrainedQueueData = new ConcurrentLinkedQueue<>(queue);
         assertEquals(12, queue.size());
 
         FlowChainInitPayload flowChainInitPayload = (FlowChainInitPayload) queue.poll();
@@ -153,6 +157,9 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), saltUpdateTriggerEvent2.selector());
         assertTrue(saltUpdateTriggerEvent2.isChained());
         assertTrue(saltUpdateTriggerEvent2.isFinalChain());
+
+        eventQueue.getQueue().addAll(restrainedQueueData);
+        FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE_NAME, eventQueue);
     }
 
     @Test
@@ -165,6 +172,7 @@ class UpgradeFlowEventChainFactoryTest {
 
         assertEquals("UpgradeFlowEventChainFactory", eventQueue.getFlowChainName());
         Queue<Selectable> queue = eventQueue.getQueue();
+        Queue<Selectable> restrainedQueueData = new ConcurrentLinkedQueue<>(queue);
         assertEquals(7, queue.size());
 
         FlowChainInitPayload flowChainInitPayload = (FlowChainInitPayload) queue.poll();
@@ -209,6 +217,9 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), saltUpdateTriggerEvent2.selector());
         assertTrue(saltUpdateTriggerEvent2.isChained());
         assertTrue(saltUpdateTriggerEvent2.isFinalChain());
+
+        eventQueue.getQueue().addAll(restrainedQueueData);
+        FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE_NAME, eventQueue, "WITH_ONLY_ONE_REPLACEMENT");
     }
 
     @Test
@@ -221,6 +232,7 @@ class UpgradeFlowEventChainFactoryTest {
 
         assertEquals("UpgradeFlowEventChainFactory", eventQueue.getFlowChainName());
         Queue<Selectable> queue = eventQueue.getQueue();
+        Queue<Selectable> restrainedQueueData = new ConcurrentLinkedQueue<>(queue);
         assertEquals(8, queue.size());
 
         FlowChainInitPayload flowChainInitPayload = (FlowChainInitPayload) queue.poll();
@@ -272,6 +284,9 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), saltUpdateTriggerEvent2.selector());
         assertTrue(saltUpdateTriggerEvent2.isChained());
         assertTrue(saltUpdateTriggerEvent2.isFinalChain());
+
+        eventQueue.getQueue().addAll(restrainedQueueData);
+        FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE_NAME, eventQueue, "WITH_ONLY_PRIMARY_GATEWAY_REPLACEMENT");
     }
 
     @Test
@@ -284,6 +299,7 @@ class UpgradeFlowEventChainFactoryTest {
 
         assertEquals("UpgradeFlowEventChainFactory", eventQueue.getFlowChainName());
         Queue<Selectable> queue = eventQueue.getQueue();
+        Queue<Selectable> restrainedQueueData = new ConcurrentLinkedQueue<>(queue);
         assertEquals(10, queue.size());
 
         FlowChainInitPayload flowChainInitPayload = (FlowChainInitPayload) queue.poll();
@@ -356,6 +372,9 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), saltUpdateTriggerEvent2.selector());
         assertTrue(saltUpdateTriggerEvent2.isChained());
         assertTrue(saltUpdateTriggerEvent2.isFinalChain());
+
+        eventQueue.getQueue().addAll(restrainedQueueData);
+        FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE_NAME, eventQueue, "WITH_INSTANCES_ON_OLD_IMAGE");
     }
 
     @Test
@@ -368,6 +387,7 @@ class UpgradeFlowEventChainFactoryTest {
 
         assertEquals("UpgradeFlowEventChainFactory", eventQueue.getFlowChainName());
         Queue<Selectable> queue = eventQueue.getQueue();
+        Queue<Selectable> restrainedQueueData = new ConcurrentLinkedQueue<>(queue);
         assertEquals(13, queue.size());
 
         FlowChainInitPayload flowChainInitPayload = (FlowChainInitPayload) queue.poll();
@@ -468,6 +488,9 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), saltUpdateTriggerEvent2.selector());
         assertTrue(saltUpdateTriggerEvent2.isChained());
         assertTrue(saltUpdateTriggerEvent2.isFinalChain());
+
+        eventQueue.getQueue().addAll(restrainedQueueData);
+        FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE_NAME, eventQueue, "WITH_VERTICAL_SCALE");
     }
 
     @Test

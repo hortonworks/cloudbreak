@@ -346,3 +346,50 @@ Currently not supported, but spring statemachine supports fork and join states
 ## Distributed flows
 
 Flows currently are not per state distributed. Spring statemachine has distributed implementation but not released yet: https://docs.spring.io/spring-statemachine/docs/2.1.3.RELEASE/reference/#sm-distributed
+
+# Flow Chains
+
+Cloudbreak’s flow engine has a concept for executing/connecting flows and executing them in the desired order with shared context that’s called flow chain.
+Flow chains are not just able to connect different flows but also connect/execute other flow chains which makes it possible to orchestrate quite complex workflows with dynamic set up. In order to do this the `com.sequenceiq.flow.core.chain.FlowEventChainFactory` interface needs to be implemented that orchestrate the contained flows, flow chains and similarly to the flows it is also event driven, just it configures the shared context with the necessary flows and chains dynamically.
+
+## Flow and flow chain visualization
+
+As the Flows and their configuration are statically defined within the code base, those configs could be used to generate graphs as visualization of the underlying workflows for easier understanding. Unfortunately Flow Chains are the opposite, they are so dynamic that only with covering unit tests we found a way to build the underlying state machine and workflows to be able to have visualization about them. This way not all of them has a graph yet.
+[There is a drive folder that's intended to be a store of flow and flow chain graphs by Cloudbreak versions.](https://drive.google.com/drive/folders/1SGUvGccDCvg9A4stpk8h54wCyxlBoPo9?usp=drive_link)
+
+So if you were able to generate for a fresh CB version with the following mechanism, then do not hesitate to copy the generated pictures to a new folder in the Drive folder.  
+
+## Flow and Flow Chain graph generation
+
+### Generation for Flows
+A separate Make goal has been created to do this from the Cloudbreak project root. Of course if a new module/micros-service is introduced then it needs to updated after creating the generator caller class in the new module.
+```
+make generate-flow-graphs
+```
+
+### Generation for Flow Chains
+Some of the most simple flow chains covered by the previous step by the more dynamic ones the unit test of the module need to be executed which could simply be done by a gradle clean build for example.
+
+### Generate pictures from the previously generated DOT graph descriptors
+The previously mentioned steps only generate the graph descriptor files in DOT format and to have real visualization the following Make goal from the Cloudbreak project root should be executed:
+```
+make generate-flow-graph-pictures
+```
+
+### Recommended steps for generation
+As the Gradle tasks may erase the build directories of the modules the following execution order makes more sense:
+```
+./gradlew clean build
+make generate-flow-graphs
+make generate-flow-graph-pictures
+```
+
+### How to generate graph at the end of your FlowChainEventFactory’s unit tests
+A basic Util class has been introduced to do this on the easiest way. It looks like the following at the end of one of the unit tests. Example: `com.sequenceiq.cloudbreak.core.flow2.chain.MultiHostgroupDownscaleFlowEventChainFactoryTest`
+```
+FlowChainConfigGraphGeneratorUtil.generateFor(
+underTest,            //The FlowEventChainFactory instance with the built context
+FLOW_CONFIGS_PACKAGE, //The package where the relevant Flow and Flow Chain configs are
+flowTriggerQueue,     //The flow trigger queue which is orchestrated by the tested factory during the test run
+"FULL_DOWNSCALE");    //File name suffix to be able to differentiate graphs with the same factory but different context setup
+```

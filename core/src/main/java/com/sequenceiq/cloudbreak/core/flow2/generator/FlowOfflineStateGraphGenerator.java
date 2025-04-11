@@ -4,12 +4,13 @@ import com.sequenceiq.flow.graph.OfflineStateGraphGenerator;
 
 public class FlowOfflineStateGraphGenerator {
 
+    public static final String FLOW_CONFIGS_PACKAGE = "com.sequenceiq.cloudbreak.core.flow2";
+
     private FlowOfflineStateGraphGenerator() {
     }
 
     public static void main(String[] args) throws Exception {
-        String flowConfigsPackageName = "com.sequenceiq.cloudbreak.core.flow2";
         OfflineStateGraphGenerator offlineStateGraphGenerator = new OfflineStateGraphGenerator();
-        offlineStateGraphGenerator.collectFlowConfigsAndGenerateGraphs(flowConfigsPackageName);
+        offlineStateGraphGenerator.collectFlowConfigsAndGenerateGraphs(FLOW_CONFIGS_PACKAGE);
     }
 }
