@@ -589,7 +589,7 @@ class SdxControllerTest {
         when(sdxService.getByNameInAccount(USER_CRN, "TEST")).thenReturn(sdxCluster);
         when(seLinuxService.enableSeLinuxOnDatalake(sdxCluster, USER_CRN))
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
-        FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.enableSeLinuxByName("TEST"));
+        FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.modifySeLinuxByName("TEST", SeLinux.ENFORCING));
         verify(sdxService).getByNameInAccount(USER_CRN, "TEST");
         verify(seLinuxService).enableSeLinuxOnDatalake(sdxCluster, USER_CRN);
         assertEquals(FlowType.FLOW, flowIdentifier.getType());
@@ -602,7 +602,8 @@ class SdxControllerTest {
         when(sdxService.getByCrn(USER_CRN, sdxCluster.getCrn())).thenReturn(sdxCluster);
         when(seLinuxService.enableSeLinuxOnDatalake(sdxCluster, USER_CRN))
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
-        FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.enableSeLinuxByCrn(sdxCluster.getCrn()));
+        FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.modifySeLinuxByCrn(sdxCluster.getCrn(),
+                SeLinux.ENFORCING));
         verify(sdxService).getByCrn(USER_CRN, sdxCluster.getCrn());
         verify(seLinuxService).enableSeLinuxOnDatalake(sdxCluster, USER_CRN);
         assertEquals(FlowType.FLOW, flowIdentifier.getType());

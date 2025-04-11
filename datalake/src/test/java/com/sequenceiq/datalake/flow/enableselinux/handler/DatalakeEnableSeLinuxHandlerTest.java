@@ -21,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.enableselinux.event.DatalakeEnableSeLinuxEvent;
 import com.sequenceiq.datalake.flow.enableselinux.event.DatalakeEnableSeLinuxHandlerEvent;
@@ -79,7 +80,7 @@ class DatalakeEnableSeLinuxHandlerTest {
         when(sdxService.getById(1L)).thenReturn(sdxCluster);
         when(sdxCluster.getId()).thenReturn(1L);
         FlowIdentifier flowIdentifier = mock(FlowIdentifier.class);
-        when(distroXV1Endpoint.enableSeLinuxByCrn("testCrn")).thenReturn(flowIdentifier);
+        when(distroXV1Endpoint.modifySeLinuxByCrn("testCrn", SeLinux.ENFORCING)).thenReturn(flowIdentifier);
         Selectable response = underTest.doAccept(new HandlerEvent<>(new Event<>(handlerEvent)));
         DatalakeEnableSeLinuxEvent responseEvent = (DatalakeEnableSeLinuxEvent) response;
         assertEquals(1L, response.getResourceId());
@@ -87,7 +88,7 @@ class DatalakeEnableSeLinuxHandlerTest {
         assertEquals("test-resource", responseEvent.getResourceName());
         assertEquals("testCrn", responseEvent.getResourceCrn());
         assertEquals(1L, responseEvent.getResourceId());
-        verify(distroXV1Endpoint).enableSeLinuxByCrn("testCrn");
+        verify(distroXV1Endpoint).modifySeLinuxByCrn("testCrn", SeLinux.ENFORCING);
         verify(sdxService).getById(1L);
         verify(sdxWaitService).waitForCloudbreakFlow(eq(1L), any(PollingConfig.class), eq("Polling Resize flow"));
         verify(cloudbreakFlowService).saveLastCloudbreakFlowChainId(eq(sdxCluster), eq(flowIdentifier));
@@ -96,10 +97,10 @@ class DatalakeEnableSeLinuxHandlerTest {
     @Test
     void testDatalakeEnableSeLinuxHandlerCoreServiceCallFailure() {
         when(sdxService.getById(1L)).thenReturn(sdxCluster);
-        doThrow(new RuntimeException("test")).when(distroXV1Endpoint).enableSeLinuxByCrn("testCrn");
+        doThrow(new RuntimeException("test")).when(distroXV1Endpoint).modifySeLinuxByCrn("testCrn", SeLinux.ENFORCING);
         RuntimeException exception = assertThrows(RuntimeException.class, () -> underTest.doAccept(new HandlerEvent<>(new Event<>(handlerEvent))));
         assertEquals("test", exception.getMessage());
-        verify(distroXV1Endpoint).enableSeLinuxByCrn("testCrn");
+        verify(distroXV1Endpoint).modifySeLinuxByCrn("testCrn", SeLinux.ENFORCING);
         verify(sdxService).getById(1L);
         verifyNoInteractions(sdxWaitService);
         verifyNoInteractions(cloudbreakFlowService);

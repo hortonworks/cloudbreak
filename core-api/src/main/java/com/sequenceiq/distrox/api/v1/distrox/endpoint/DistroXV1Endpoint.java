@@ -114,6 +114,7 @@ import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.common.api.diagnostics.ListDiagnosticsCollectionResponse;
 import com.sequenceiq.common.api.telemetry.response.VmLogsResponse;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXGenerateImageCatalogV1Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXInstanceMetadataUpdateV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXMaintenanceModeV1Request;
@@ -827,22 +828,23 @@ public interface DistroXV1Endpoint {
             @NotNull @Valid SetDefaultJavaVersionRequest request);
 
     @PUT
-    @Path("/name/{name}/enable_selinux")
+    @Path("/name/{name}/modify_selinux/{selinuxMode}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(
-            summary = "Enables SELinux on on a specific DH", operationId = "enableSelinuxByName",
+            summary = "Modifies SELinux on a specific DH", operationId = "modifySelinuxByName",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    FlowIdentifier enableSeLinuxByName(@PathParam("name") String name);
+    FlowIdentifier modifySeLinuxByName(@PathParam("name") String name, @PathParam("selinuxMode") SeLinux selinuxMode);
 
     @PUT
-    @Path("/crn/{crn}/enable_selinux")
+    @Path("/crn/{crn}/modify_selinux/{selinuxMode}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(
-            summary = "Enables SELinux on on a specific DH", operationId = "enableSelinuxByCrn",
+            summary = "Modifies SELinux on a specific DH", operationId = "modifySelinuxByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    FlowIdentifier enableSeLinuxByCrn(@NotEmpty @ValidCrn(resource = {CrnResourceDescriptor.VM_DATALAKE, DATAHUB}) @PathParam("crn") String crn);
+    FlowIdentifier modifySeLinuxByCrn(@NotEmpty @ValidCrn(resource = {CrnResourceDescriptor.VM_DATALAKE, DATAHUB}) @PathParam("crn") String crn,
+            @PathParam("selinuxMode") SeLinux selinuxMode);
 
     @PUT
     @Path("name/{name}/trigger_sku_migration")
