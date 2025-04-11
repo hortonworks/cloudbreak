@@ -146,6 +146,7 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.common.api.UsedSubnetsByEnvironmentResponse;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.RetryableFlowResponse;
 
@@ -969,12 +970,12 @@ public interface StackV4Endpoint {
             @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @PUT
-    @Path("internal/crn/{crn}/enable_selinux")
+    @Path("internal/crn/{crn}/modify_selinux/{selinuxMode}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(
-            summary = "Enables SELinux on on a specific Stack", operationId = "enableSelinuxByCrn",
+            summary = "Modifies SELinux on a specific Stack", operationId = "modifySeLinuxByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    FlowIdentifier enableSeLinuxByCrn(@PathParam("workspaceId") Long workspaceId,
-        @NotEmpty @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn);
+    FlowIdentifier modifySeLinuxByCrn(@PathParam("workspaceId") Long workspaceId,
+        @NotEmpty @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn, @PathParam("selinuxMode") SeLinux selinuxMode);
 }
