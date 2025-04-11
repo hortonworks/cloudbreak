@@ -44,7 +44,7 @@ public class UpgradePathRestrictionService {
         }
 
         if (targetPatch >= 200) {
-            boolean from7217OrNewer = majorVersionEquals(currentMajor, "7.2.17") && currentPatch >= 300;
+            boolean from7217OrNewer = majorVersionEquals(currentMajor, "7.2.17") && currentPatch >= 200;
             boolean from7218OrNewer = isVersionNewerOrEqualThanLimited(currentMajor, () -> "7.2.18");
             return from7217OrNewer || from7218OrNewer;
         }
