@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.model.AdvertisedRuntime;
 import com.sequenceiq.sdx.api.model.DatalakeHorizontalScaleRequest;
@@ -575,18 +576,18 @@ public interface SdxEndpoint {
     SdxClusterDetailResponse getSdxDetailWithResourcesByName(@PathParam("name") String name, @QueryParam("entries") Set<String> entries);
 
     @PUT
-    @Path("/name/{name}/enable_selinux")
+    @Path("/name/{name}/modify_selinux/{selinuxMode}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Enables SELinux on on a specific DL", operationId = "enableSelinuxByName",
+    @Operation(summary = "Modifies SELinux on a specific DL", operationId = "modifySelinuxByName",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    FlowIdentifier enableSeLinuxByName(@PathParam("name") String name);
+    FlowIdentifier modifySeLinuxByName(@PathParam("name") String name, @PathParam("selinuxMode") SeLinux selinuxMode);
 
     @PUT
-    @Path("/crn/{crn}/enable_selinux")
+    @Path("/crn/{crn}/modify_selinux/{selinuxMode}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Enables SELinux on on a specific DL", operationId = "enableSelinuxByCrn",
+    @Operation(summary = "Modifies SELinux on a specific DL", operationId = "modifySelinuxByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    FlowIdentifier enableSeLinuxByCrn(@ValidCrn(resource = VM_DATALAKE) @PathParam("crn") String crn);
+    FlowIdentifier modifySeLinuxByCrn(@ValidCrn(resource = VM_DATALAKE) @PathParam("crn") String crn, @PathParam("selinuxMode") SeLinux selinuxMode);
 
     @PUT
     @Path("name/{name}/trigger_sku_migration")
