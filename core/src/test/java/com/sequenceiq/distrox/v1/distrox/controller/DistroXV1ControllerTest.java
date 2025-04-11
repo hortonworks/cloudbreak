@@ -43,6 +43,7 @@ import com.sequenceiq.cloudbreak.service.rotaterdscert.StackRotateRdsCertificate
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXGenerateImageCatalogV1Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.rotaterdscert.RotateRdsCertificateV1Response;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
@@ -328,7 +329,7 @@ class DistroXV1ControllerTest {
     void testEnableSeLinuxByName() {
         doAs(TEST_USER_CRN, () -> {
             try {
-                distroXV1Controller.enableSeLinuxByName(NAME);
+                distroXV1Controller.modifySeLinuxByName(NAME, SeLinux.ENFORCING);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -341,7 +342,7 @@ class DistroXV1ControllerTest {
     void testEnableSeLinuxByCrn() {
         doAs(TEST_USER_CRN, () -> {
             try {
-                distroXV1Controller.enableSeLinuxByCrn(CRN);
+                distroXV1Controller.modifySeLinuxByCrn(CRN, SeLinux.ENFORCING);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

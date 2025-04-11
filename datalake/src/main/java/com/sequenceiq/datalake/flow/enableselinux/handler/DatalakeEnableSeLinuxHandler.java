@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.enableselinux.event.DatalakeEnableSeLinuxEvent;
@@ -68,7 +69,7 @@ public class DatalakeEnableSeLinuxHandler extends ExceptionCatcherEventHandler<D
         SdxCluster sdxCluster = sdxService.getById(event.getResourceId());
         LOGGER.debug("Triggering flow for enabling SELinux on stack.");
         FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
-                () -> distroXV1Endpoint.enableSeLinuxByCrn(event.getResourceCrn()));
+                () -> distroXV1Endpoint.modifySeLinuxByCrn(event.getResourceCrn(), SeLinux.ENFORCING));
         cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
         LOGGER.debug("Starting polling for enabling SELinux on datalake stack - flow identifier :: {}", flowIdentifier);
         PollingConfig pollingConfig = new PollingConfig(SLEEP_INTERVAL_IN_SECONDS, TimeUnit.SECONDS, DURATION_IN_MINUTES, TimeUnit.MINUTES);
