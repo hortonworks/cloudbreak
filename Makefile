@@ -121,3 +121,6 @@ component-test-steps_component_test:
 
 integration-test-steps_integration_test:
 	 ./.github/steps/integration-test-steps_integration_test.sh
+
+config-change-int-steps_config_change:
+	 ./.github/steps/config-change-int-steps_config_change.sh

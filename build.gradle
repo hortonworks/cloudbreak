@@ -224,6 +224,7 @@ subprojects {
       showStandardStreams false
     }
     testLogging {
+      events "FAILED"
       showStandardStreams false
       events = ["failed", "skipped"]
     }
@@ -267,6 +268,7 @@ subprojects {
 
   test {
     testLogging {
+      events "FAILED"
       showStandardStreams false
       events = ["failed", "skipped"]
     }

@@ -2,13 +2,13 @@
 
 main() {
   set -ex -o pipefail
-  $(pwd)/gradlew -Penv=jenkins -b build.gradle build --quiet \
+  $(pwd)/gradlew -Penv=jenkins -b build.gradle build --quiet --warning-mode none \
     -x test \
     -x checkstyleMain \
     -x checkstyleTest \
     -x spotbugsMain \
     -x spotbugsTest \
-    --no-daemon --parallel -PintegrationTest
+    --no-daemon --parallel -PintegrationTest >> build.log
   cd $(pwd)/integration-test
 
   export PRIMARYKEY_CHECK=true

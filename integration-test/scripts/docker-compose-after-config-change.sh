@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-export DEBUG=1
 
 set -ex
 
@@ -41,20 +40,13 @@ cbd_services_sanity_check() {
 }
 
 cd $INTEGCB_LOCATION
-TRACE=1 ./cbd regenerate
+./cbd regenerate
 echo $RESTARTABLE_SERVICES | xargs ./cbd start-wait
 RESULT=$?
 cbd_services_sanity_check
 cd ..
 
-if [[ "$DOCKER_HOST" ]]; then
-    PUBLIC_IP=`echo $DOCKER_HOST | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'`
-fi
-if [[ "$PUBLIC_IP" ]]; then
-    PUBLIC_IP=$PUBLIC_IP
-else
-    PUBLIC_IP=127.0.0.1
-fi
+PUBLIC_IP=127.0.0.1
 
 date
 echo -e "\n\033[1;96m--- Env variables started with INTEGRATIONTEST :\033[0m\n"

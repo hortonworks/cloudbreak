@@ -6,8 +6,8 @@ set +x
 
 cd $INTEGCB_LOCATION
 
-sudo TRACE=1 ./cbd regenerate
-sudo TRACE=1 ./cbd start commondb
+sudo ./cbd regenerate
+sudo ./cbd start commondb
 
 echo "Revert CB database test"
 

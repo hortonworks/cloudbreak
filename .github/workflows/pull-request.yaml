@@ -490,3 +490,59 @@ jobs:
           export DOCKERHUB_PASSWORD=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_PASSWORD}}")
           export DOCKERHUB_USERNAME=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}")
           make component-test-steps_component_test
+
+  config-change-integration-test:
+    permissions: write-all
+    name: Config Change Integration Test
+    runs-on: [ cb-ubuntu22 ]
+
+    steps:
+      - name: checkout
+        id: checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: setup_secrets
+        id: build_secrets
+        uses: Kitchen/RE-thirdparty-actions/actions/vault@main
+        with:
+          tlsSkipVerify: true
+          url: https://re-vault.infra.cloudera.com/
+          method: kubernetes
+          path: rke_re_jenkins
+          role: cb
+          secrets: |
+            cb/data/CM_PRIVATE_REPO_PASSWORD CM_PRIVATE_REPO_PASSWORD | CM_PRIVATE_REPO_PASSWORD;
+            cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
+            cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
+            cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
+      - name: cache_java_libs
+        id: cache-java
+        uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
+        env:
+          cache-name: cache-java-libs
+        with:
+          path: |
+            /home/jenkins/.gradle/caches
+            /home/jenkins/.gradle/wrapper
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
+            ${{ runner.os }}-build-${{ hashFiles('**/build.gradle') }}
+            ${{ runner.os }}-${{ hashFiles('**/build.gradle') }}
+      - name: install_tools
+        run: |-
+          #!/bin/bash -x
+          sudo apt-get update
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make docker-compose-v2 uuid-runtime
+      - if: ${{ steps.cache-java.outputs.cache-hit != 'true' }}
+        name: list_the_state_of_java_libs
+        continue-on-error: true
+        run: ./gradlew dependencies
+      - name: component_test
+        run: |-
+          export CM_PRIVATE_REPO_PASSWORD=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}")
+          export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
+          export DOCKERHUB_PASSWORD=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_PASSWORD}}")
+          export DOCKERHUB_USERNAME=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}")
+          make config-change-int-steps_config_change

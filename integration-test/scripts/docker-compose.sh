@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-export DEBUG=1
-
 set -ex
 
 : ${INTEGRATIONTEST_SUITEFILES:=${INTEGRATIONTEST_SUITE_FILES}${ADDITIONAL_SUITEFILES+,$ADDITIONAL_SUITEFILES}}
@@ -62,7 +60,7 @@ cbd_services_sanity_check() {
   fi
 }
 
-TRACE=1 ./cbd regenerate
+./cbd regenerate
 ./cbd start-wait traefik dev-gateway core-gateway commondb vault cloudbreak environment remote-environment periscope freeipa redbeams datalake externalized-compute haveged mock-infrastructure idbmms cluster-proxy cadence cluster-proxy-health-check-worker thunderhead-mock
 RESULT=$?
 cbd_services_sanity_check
