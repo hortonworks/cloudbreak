@@ -47,7 +47,6 @@ import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
-import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.model.AdvertisedRuntime;
 import com.sequenceiq.sdx.api.model.DatalakeHorizontalScaleRequest;
@@ -576,18 +575,18 @@ public interface SdxEndpoint {
     SdxClusterDetailResponse getSdxDetailWithResourcesByName(@PathParam("name") String name, @QueryParam("entries") Set<String> entries);
 
     @PUT
-    @Path("/name/{name}/modify_selinux/{selinuxMode}")
+    @Path("/name/{name}/enable_selinux")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Modifies SELinux on a specific DL", operationId = "modifySelinuxByName",
+    @Operation(summary = "Enables SELinux on on a specific DL", operationId = "enableSelinuxByName",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    FlowIdentifier modifySeLinuxByName(@PathParam("name") String name, @PathParam("selinuxMode") SeLinux selinuxMode);
+    FlowIdentifier enableSeLinuxByName(@PathParam("name") String name);
 
     @PUT
-    @Path("/crn/{crn}/modify_selinux/{selinuxMode}")
+    @Path("/crn/{crn}/enable_selinux")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Modifies SELinux on a specific DL", operationId = "modifySelinuxByCrn",
+    @Operation(summary = "Enables SELinux on on a specific DL", operationId = "enableSelinuxByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    FlowIdentifier modifySeLinuxByCrn(@ValidCrn(resource = VM_DATALAKE) @PathParam("crn") String crn, @PathParam("selinuxMode") SeLinux selinuxMode);
+    FlowIdentifier enableSeLinuxByCrn(@ValidCrn(resource = VM_DATALAKE) @PathParam("crn") String crn);
 
     @PUT
     @Path("name/{name}/trigger_sku_migration")

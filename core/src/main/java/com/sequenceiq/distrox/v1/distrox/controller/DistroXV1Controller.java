@@ -99,7 +99,6 @@ import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.common.api.diagnostics.ListDiagnosticsCollectionResponse;
 import com.sequenceiq.common.api.telemetry.response.VmLogsResponse;
 import com.sequenceiq.common.api.type.InstanceGroupType;
-import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXGenerateImageCatalogV1Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXInstanceMetadataUpdateV1Request;
@@ -899,7 +898,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceName(action =  AuthorizationResourceAction.REPAIR_DATAHUB)
-    public FlowIdentifier modifySeLinuxByName(@ResourceName String name, SeLinux selinuxMode) {
+    public FlowIdentifier enableSeLinuxByName(@ResourceName String name) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         NameOrCrn nameOrCrn = NameOrCrn.ofName(name);
         return stackOperationService.triggerEnableSELinux(nameOrCrn, accountId);
@@ -907,7 +906,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action =  AuthorizationResourceAction.REPAIR_DATAHUB)
-    public FlowIdentifier modifySeLinuxByCrn(@ResourceCrn String crn, SeLinux selinuxMode) {
+    public FlowIdentifier enableSeLinuxByCrn(@TenantAwareParam @ResourceCrn String crn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         NameOrCrn nameOrCrn = NameOrCrn.ofCrn(crn);
         return stackOperationService.triggerEnableSELinux(nameOrCrn, accountId);
