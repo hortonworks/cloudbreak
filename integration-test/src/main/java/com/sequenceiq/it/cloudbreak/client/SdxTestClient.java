@@ -272,10 +272,6 @@ public class SdxTestClient {
         return new SdxRotateSecretAction(secretTypes);
     }
 
-    public Action<SdxInternalTestDto, SdxClient> rotateSecret(Set<DatalakeSecretType> secretTypes, Map<String, String> additionalProperties) {
-        return new SdxRotateSecretAction(secretTypes, additionalProperties);
-    }
-
     public Action<SdxInternalTestDto, SdxClient> rotateSecretInternal(Collection<DatalakeSecretType> secretTypes) {
         return rotateSecretInternal(secretTypes, Map.of());
     }

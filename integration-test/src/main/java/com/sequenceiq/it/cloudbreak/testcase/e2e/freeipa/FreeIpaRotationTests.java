@@ -6,6 +6,7 @@ import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.FREEIPA_USERSYNC
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.SALT_BOOT_SECRETS;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.SALT_MASTER_KEY_PAIR;
+import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.SALT_PASSWORD;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.SALT_SIGN_KEY_PAIR;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
@@ -36,6 +37,7 @@ import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
+import com.sequenceiq.it.cloudbreak.util.SecretRotationCheckUtil;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
 
 public class FreeIpaRotationTests extends AbstractE2ETest {
@@ -55,6 +57,9 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
 
     @Inject
     private SshJClientActions sshJClientActions;
+
+    @Inject
+    private SecretRotationCheckUtil secretRotationCheckUtil;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -83,7 +88,7 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
         if (!CloudPlatform.GCP.equalsIgnoreCase(cloudProvider)) {
             secretTypes.add(SALT_BOOT_SECRETS);
         }
-        FreeIpaRotationTestDto freeIpaRotationTestDto = testContext
+        testContext
                 .given(freeIpa, FreeIpaTestDto.class)
                 .withTelemetry("telemetry")
                 .withOsType(RHEL8.getOs())
@@ -100,15 +105,21 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
                 .withSecrets(List.of(FREEIPA_ADMIN_PASSWORD))
                 .when(freeIpaTestClient.rotateSecret())
                 .awaitForFlow()
-                .then((tc, testDto, client) -> {
-                    checkDirectoryManagerPasswordAfterRotation(originalPasswordLastChangedMap, originalPasswordsFromPillarMap, testDto, client);
-                    return testDto;
-                })
+                .then((tc, testDto, client) ->
+                        checkDirectoryManagerPasswordAfterRotation(originalPasswordLastChangedMap, originalPasswordsFromPillarMap, testDto, client))
                 .given(FreeIpaRotationTestDto.class)
                 .withSecrets(secretTypes)
                 .when(freeIpaTestClient.rotateSecret())
-                .awaitForFlow();
-        freeIpaRotationTestDto.validate();
+                .awaitForFlow()
+                .given(FreeIpaTestDto.class)
+                .then((testContext1, testDto, client) -> secretRotationCheckUtil.preSaltPasswordRotation(testDto))
+                .given(FreeIpaRotationTestDto.class)
+                .withSecrets(List.of(SALT_PASSWORD))
+                .when(freeIpaTestClient.rotateSecret())
+                .awaitForFlow()
+                .given(FreeIpaTestDto.class)
+                .then((tc, testDto, client) -> secretRotationCheckUtil.validateSaltPasswordRotation(testDto))
+                .validate();
     }
 
     private void getPasswordAndLastChangedFromPillar(Map<String, String> originalPasswordLastChangedMap,
@@ -120,7 +131,7 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
         }
     }
 
-    private void checkDirectoryManagerPasswordAfterRotation(Map<String, String> originalPasswordLastChangedMap,
+    private FreeIpaRotationTestDto checkDirectoryManagerPasswordAfterRotation(Map<String, String> originalPasswordLastChangedMap,
             Map<String, String> originalPasswordsFromPillarMap, FreeIpaRotationTestDto testDto, FreeIpaClient client) {
         Set<InstanceMetaDataResponse> instanceMetaDataResponses = getInstanceMetaDataResponses(testDto.getEnvironmentCrn(), client);
         Map<String, String> passwordFromPillar = getPasswordFromPillar(instanceMetaDataResponses);
@@ -141,6 +152,7 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
             }
         });
         checkDirectoryManagerPassword(instanceMetaDataResponses, passwordFromPillar);
+        return testDto;
     }
 
     private Map<String, String> getPasswordLastChanged(Set<InstanceMetaDataResponse> instanceMetaDataResponses) {

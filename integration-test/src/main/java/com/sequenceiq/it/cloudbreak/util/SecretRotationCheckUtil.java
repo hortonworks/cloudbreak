@@ -57,12 +57,14 @@ public class SecretRotationCheckUtil {
     @Inject
     private SshSaltPasswordActions sshSaltPasswordActions;
 
-    public void checkLdapLogin(String datalakeCrn, SdxClient client) {
+    public SdxInternalTestDto checkLdapLogin(String datalakeCrn, SdxInternalTestDto testDto, SdxClient client) {
         checkLdapLogin(getInstanceGroupResponses(datalakeCrn, client));
+        return testDto;
     }
 
-    public void checkLdapLogin(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) {
+    public DistroXTestDto checkLdapLogin(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) {
         checkLdapLogin(getInstanceGroupResponses(testContext, testDto, client));
+        return testDto;
     }
 
     public void checkSSHLoginWithNewKeys(String datalakeCrn, SdxClient client) {

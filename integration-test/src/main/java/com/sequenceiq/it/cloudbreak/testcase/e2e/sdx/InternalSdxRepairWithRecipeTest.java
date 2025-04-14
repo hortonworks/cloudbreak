@@ -1,7 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.sdx;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.POST_CLOUDERA_MANAGER_START;
-import static com.sequenceiq.freeipa.rotation.FreeIpaRotationAdditionalParameters.CLUSTER_NAME;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.IDBROKER;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
@@ -16,12 +15,11 @@ import static com.sequenceiq.sdx.rotation.DatalakeSecretType.LDAP_BIND_PASSWORD;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.SALT_BOOT_SECRETS;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.SALT_MASTER_KEY_PAIR;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.SALT_PASSWORD;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.SALT_SIGN_KEY_PAIR;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.SSSD_IPA_PASSWORD;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.USER_KEYPAIR;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import jakarta.inject.Inject;
@@ -160,25 +158,20 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .when(sdxTestClient.describeInternal(), key(sdxInternal))
                 .when(sdxTestClient.rotateSecret(secretTypes))
-                .awaitForFlow();
-        if (CloudPlatform.AWS.equalsIgnoreCase(cloudProvider)) {
-            sdxInternalTestDto
-                    .when(sdxTestClient.rotateSecret(Set.of(LDAP_BIND_PASSWORD),
-                            Map.of(CLUSTER_NAME.name(), clusterName)))
-                    .awaitForFlow()
-                    .then((tc, testDto, client) -> {
-                        secretRotationCheckUtil.checkLdapLogin(testDto.getCrn(), client);
-                        secretRotationCheckUtil.checkSSHLoginWithNewKeys(testDto.getCrn(), client);
-                        return testDto;
-                    });
-        }
+                .awaitForFlow()
+                .when(sdxTestClient.rotateSecret(Set.of(LDAP_BIND_PASSWORD)))
+                .awaitForFlow()
+                .then((tc, testDto, client) -> secretRotationCheckUtil.checkLdapLogin(testDto.getCrn(), testDto, client))
+                .then((tc, testDto, client) -> secretRotationCheckUtil.preSaltPasswordRotation(testDto))
+                .when(sdxTestClient.rotateSecret(Set.of(SALT_PASSWORD)))
+                .awaitForFlow()
+                .then((tc, testDto, client) -> secretRotationCheckUtil.validateSaltPasswordRotation(testDto));
     }
 
     private Set<DatalakeSecretType> getAvailableSecretTypes(String cloudProvider) {
         Set<DatalakeSecretType> secretTypes = Sets.newHashSet();
         secretTypes.addAll(Set.of(
                 GATEWAY_CERT,
-                USER_KEYPAIR,
                 IDBROKER_CERT,
                 CM_ADMIN_PASSWORD,
                 EXTERNAL_DATABASE_ROOT_PASSWORD,
@@ -188,7 +181,6 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
                 NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY,
                 SALT_SIGN_KEY_PAIR,
                 SALT_MASTER_KEY_PAIR,
-                LDAP_BIND_PASSWORD,
                 SSSD_IPA_PASSWORD));
         if (!CloudPlatform.GCP.equalsIgnoreCase(cloudProvider)) {
             secretTypes.add(SALT_BOOT_SECRETS);

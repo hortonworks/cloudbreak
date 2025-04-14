@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
-import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.CheckVariant;
@@ -155,20 +154,7 @@ public class DistroXTestClient {
     }
 
     public Action<DistroXTestDto, CloudbreakClient> rotateSecret(Set<CloudbreakSecretType> secretTypes) {
-        return rotateSecret(secretTypes, null, Collections.emptyMap());
-    }
-
-    public Action<DistroXTestDto, CloudbreakClient> rotateSecret(Set<CloudbreakSecretType> secretTypes, Map<String, String> additionalParameters) {
-        return rotateSecret(secretTypes, null, additionalParameters);
-    }
-
-    public Action<DistroXTestDto, CloudbreakClient> rotateSecret(Set<CloudbreakSecretType> secretTypes, RotationFlowExecutionType rotationFlowExecutionType) {
-        return rotateSecret(secretTypes, rotationFlowExecutionType, Collections.emptyMap());
-    }
-
-    public Action<DistroXTestDto, CloudbreakClient> rotateSecret(Set<CloudbreakSecretType> secretTypes,
-            RotationFlowExecutionType rotationFlowExecutionType, Map<String, String> additionalParameters) {
-        return new DistroXRotateSecretAction(secretTypes, rotationFlowExecutionType, additionalParameters);
+        return new DistroXRotateSecretAction(secretTypes, null, Collections.emptyMap());
     }
 
     public Action<DistroXTestDto, CloudbreakClient> rotateSecretInternal(Collection<CloudbreakSecretType> secretTypes) {

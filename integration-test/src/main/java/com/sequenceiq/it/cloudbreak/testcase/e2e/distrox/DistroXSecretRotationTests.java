@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
@@ -51,7 +50,6 @@ public class DistroXSecretRotationTests extends AbstractE2ETest {
 
     @Override
     protected void setupTest(TestContext testContext) {
-        assertSupportedCloudPlatform(CloudPlatform.AWS);
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
@@ -98,41 +96,5 @@ public class DistroXSecretRotationTests extends AbstractE2ETest {
                     })
                     .validate();
         }
-    }
-
-    @Test(dataProvider = TEST_CONTEXT)
-    @UseSpotInstances
-    @Description(
-            given = "there is an environment with DistroX in available state",
-            when = "salt password secret are getting rotated if the required test parameters are present",
-            then = "rotation should be successful, the cluster should be available"
-    )
-    public void testSaltPasswordRotation(TestContext testContext) {
-        testContext
-                .given(FreeIpaTestDto.class)
-                .then((testContext1, testDto, client) -> secretRotationCheckUtil.preSaltPasswordRotation(testDto))
-                .given(FreeIpaRotationTestDto.class)
-                .withSecrets(List.of(FreeIpaSecretType.SALT_PASSWORD))
-                .when(freeIpaTestClient.rotateSecret())
-                .awaitForFlow()
-                .given(FreeIpaTestDto.class)
-                .then((tc, testDto, client) -> secretRotationCheckUtil.validateSaltPasswordRotation(testDto))
-                .given(SdxInternalTestDto.class)
-                .then((testContext1, testDto, client) -> secretRotationCheckUtil.preSaltPasswordRotation(testDto))
-                .when(sdxTestClient.rotateSecret(Set.of(DatalakeSecretType.SALT_PASSWORD)))
-                .awaitForFlow()
-                .then((tc, testDto, client) -> {
-                    secretRotationCheckUtil.validateSaltPasswordRotation(testDto);
-                    return testDto;
-                })
-                .given(DistroXTestDto.class)
-                .then((tc, testDto, client) -> secretRotationCheckUtil.preSaltPasswordRotation(testDto))
-                .when(distroXTestClient.rotateSecret(Set.of(CloudbreakSecretType.SALT_PASSWORD)))
-                .awaitForFlow()
-                .then((tc, testDto, client) -> {
-                    secretRotationCheckUtil.validateSaltPasswordRotation(testDto);
-                    return testDto;
-                })
-                .validate();
     }
 }

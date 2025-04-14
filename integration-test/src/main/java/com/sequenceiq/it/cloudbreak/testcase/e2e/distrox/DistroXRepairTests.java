@@ -10,14 +10,12 @@ import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.LDAP_BIND_
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.SALT_BOOT_SECRETS;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.SALT_MASTER_KEY_PAIR;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.SALT_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.SALT_SIGN_KEY_PAIR;
-import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.USER_KEYPAIR;
-import static com.sequenceiq.freeipa.rotation.FreeIpaRotationAdditionalParameters.CLUSTER_NAME;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import jakarta.inject.Inject;
@@ -199,23 +197,19 @@ public class DistroXRepairTests extends AbstractE2ETest {
         DistroXTestDto distroXTestDto = testContext
                 .given(DistroXTestDto.class)
                 .when(distroXTestClient.rotateSecret(secretTypes))
-                .awaitForFlow();
-        if (CloudPlatform.AWS.equalsIgnoreCase(cloudProvider)) {
-            distroXTestDto
-                    .when(distroXTestClient.rotateSecret(Set.of(LDAP_BIND_PASSWORD), Map.of(CLUSTER_NAME.name(), clusterName)))
-                    .awaitForFlow()
-                    .then((tc, testDto, client) -> {
-                        secretRotationCheckUtil.checkLdapLogin(tc, testDto, client);
-                        secretRotationCheckUtil.checkSSHLoginWithNewKeys(tc, testDto, client);
-                        return testDto;
-                    });
-        }
+                .awaitForFlow()
+                .when(distroXTestClient.rotateSecret(Set.of(LDAP_BIND_PASSWORD)))
+                .awaitForFlow()
+                .then((tc, testDto, client) -> secretRotationCheckUtil.checkLdapLogin(tc, testDto, client))
+                .then((tc, testDto, client) -> secretRotationCheckUtil.preSaltPasswordRotation(testDto))
+                .when(distroXTestClient.rotateSecret(Set.of(SALT_PASSWORD)))
+                .awaitForFlow()
+                .then((tc, testDto, client) -> secretRotationCheckUtil.validateSaltPasswordRotation(testDto));
     }
 
     private Set<CloudbreakSecretType> getAvailableSecretTypes(String cloudProvider) {
         Set<CloudbreakSecretType> secretTypes = Sets.newHashSet();
         secretTypes.addAll(Set.of(
-                USER_KEYPAIR,
                 SALT_MASTER_KEY_PAIR,
                 SALT_SIGN_KEY_PAIR,
                 CM_ADMIN_PASSWORD,
