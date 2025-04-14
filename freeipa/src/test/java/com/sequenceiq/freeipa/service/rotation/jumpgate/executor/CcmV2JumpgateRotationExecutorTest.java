@@ -116,6 +116,7 @@ class CcmV2JumpgateRotationExecutorTest {
     @BeforeEach
     void setup() {
         lenient().when(entitlementService.isJumpgateNewRootCertEnabled(any())).thenReturn(Boolean.TRUE);
+        lenient().when(entitlementService.isJumpgateRootCertAutoRotationEnabled(any())).thenReturn(Boolean.TRUE);
     }
 
     @Test

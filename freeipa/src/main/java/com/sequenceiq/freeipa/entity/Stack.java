@@ -97,6 +97,10 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
     @JsonManagedReference
     private Set<InstanceGroup> instanceGroups = new HashSet<>();
 
+    @OneToMany(mappedBy = "stack", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private Set<DynamicEntitlement> dynamicEntitlements;
+
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private SecurityConfig securityConfig;
 
@@ -307,6 +311,14 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
         if (telemetry != null) {
             this.telemetry = new Json(telemetry);
         }
+    }
+
+    public Set<DynamicEntitlement> getDynamicEntitlements() {
+        return dynamicEntitlements;
+    }
+
+    public void setDynamicEntitlements(Set<DynamicEntitlement> dynamicEntitlements) {
+        this.dynamicEntitlements = dynamicEntitlements;
     }
 
     public Backup getBackup() {

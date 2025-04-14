@@ -58,6 +58,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_REBUILD;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_HYBRID_CLOUD;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_JUMPGATE_ROOT_CA_AUTO_ROTATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_LAKEHOUSE_OPTIMIZER_ENABLED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_DUTY_SDX;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_EXCEPTION;
@@ -585,6 +586,10 @@ public class EntitlementService {
 
     public boolean isJumpgateNewRootCertEnabled(String accountId) {
         return isEntitlementRegistered(accountId, JUMPGATE_ENABLE_NEW_ROOT_CA);
+    }
+
+    public boolean isJumpgateRootCertAutoRotationEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_JUMPGATE_ROOT_CA_AUTO_ROTATION);
     }
 
     public boolean isSingleServerRejectEnabled(String accountId) {

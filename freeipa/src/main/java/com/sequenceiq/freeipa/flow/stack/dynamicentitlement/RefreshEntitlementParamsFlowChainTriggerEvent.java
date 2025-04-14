@@ -5,9 +5,9 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sequenceiq.freeipa.flow.stack.StackEvent;
+import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 
-public class RefreshEntitlementParamsFlowChainTriggerEvent extends StackEvent {
+public class RefreshEntitlementParamsFlowChainTriggerEvent extends BaseFlowEvent {
 
     private final Map<String, Boolean> changedEntitlements;
 
@@ -20,9 +20,10 @@ public class RefreshEntitlementParamsFlowChainTriggerEvent extends StackEvent {
             @JsonProperty("selector") String selector,
             @JsonProperty("operationId") String operationId,
             @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("resourceCrn") String resourceCrn,
             @JsonProperty("changedEntitlements") Map<String, Boolean> changedEntitlements,
             @JsonProperty("saltRefreshNeeded") Boolean saltRefreshNeeded) {
-        super(selector, stackId);
+        super(selector, stackId, resourceCrn);
         this.changedEntitlements = changedEntitlements;
         this.saltRefreshNeeded = saltRefreshNeeded;
         this.operationId = operationId;
@@ -41,7 +42,7 @@ public class RefreshEntitlementParamsFlowChainTriggerEvent extends StackEvent {
     }
 
     @Override
-    public boolean equalsEvent(StackEvent other) {
+    public boolean equalsEvent(BaseFlowEvent other) {
         return isClassAndEqualsEvent(RefreshEntitlementParamsFlowChainTriggerEvent.class, other,
                 event -> Objects.equals(operationId, event.operationId) &&
                         Objects.equals(changedEntitlements, event.changedEntitlements) &&
@@ -55,6 +56,6 @@ public class RefreshEntitlementParamsFlowChainTriggerEvent extends StackEvent {
                 ", changedEntitlements=" + changedEntitlements +
                 ", saltRefreshNeeded=" + saltRefreshNeeded +
                 ", resourceId=" + getResourceId() +
-                '}';
+                "} " + super.toString();
     }
 }

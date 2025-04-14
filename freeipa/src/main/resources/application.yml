@@ -410,7 +410,7 @@ ccmRevertJob:
   activationInMinutes: 5
 
 dynamic-entitlement:
-  entitlements: CDP_CENTRAL_COMPUTE_MONITORING
+  entitlements: CDP_CENTRAL_COMPUTE_MONITORING,CDP_JUMPGATE_ROOT_CA_AUTO_ROTATION
 
 provider-sync:
   resourcetype-list: AZURE_PUBLIC_IP

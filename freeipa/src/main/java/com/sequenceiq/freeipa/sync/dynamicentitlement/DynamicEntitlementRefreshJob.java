@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -24,7 +25,7 @@ import com.sequenceiq.freeipa.util.AvailabilityChecker;
 @Component
 public class DynamicEntitlementRefreshJob extends StatusCheckerJob {
 
-    static final String OPERATION_ID = "operationId";
+    static final String FLOW_CHAIN_ID = "flowChainId";
 
     static final String ERROR_COUNT = "errorCount";
 
@@ -72,31 +73,33 @@ public class DynamicEntitlementRefreshJob extends StatusCheckerJob {
             dynamicEntitlementRefreshService.getChangedWatchedEntitlementsAndStoreNewFromUms(stack);
         } else {
             LOGGER.info("DynamicEntitlementRefreshJob will apply watched entitlement changes for FreeIPA");
-            String operationId = dynamicEntitlementRefreshService.changeClusterConfigurationIfEntitlementsChanged(stack);
-            rescheduleIfPreviousFlowChainFailed(stack, context.getJobDetail(), operationId);
+            FlowIdentifier flowIdentifier = dynamicEntitlementRefreshService.changeClusterConfigurationIfEntitlementsChanged(stack);
+            if (flowIdentifier != null && flowIdentifier.getPollableId() != null) {
+                rescheduleIfPreviousFlowChainFailed(stack, context.getJobDetail(), flowIdentifier.getPollableId());
+            }
         }
     }
 
-    private void rescheduleIfPreviousFlowChainFailed(Stack stack, JobDetail jobDetail, String operationId) {
-        if (operationId != null) {
+    private void rescheduleIfPreviousFlowChainFailed(Stack stack, JobDetail jobDetail, String flowChainId) {
+        if (flowChainId != null) {
             int errorCountFromJob = getErrorCountFromJob(jobDetail);
-            String operationIdFromJob = jobDetail.getJobDataMap().getString(OPERATION_ID);
-            boolean previousOperationFailed = dynamicEntitlementRefreshService.previousOperationFailed(stack, operationIdFromJob);
-            int errorCount = calculateNewErrorCount(errorCountFromJob, previousOperationFailed);
-            addNewParametersToJobDetail(jobDetail, operationId, errorCount);
+            String flowChainIdFromJob = jobDetail.getJobDataMap().getString(FLOW_CHAIN_ID);
+            boolean previousFlowFailed = dynamicEntitlementRefreshService.previousFlowFailed(stack, flowChainIdFromJob);
+            int errorCount = calculateNewErrorCount(errorCountFromJob, previousFlowFailed);
+            addNewParametersToJobDetail(jobDetail, flowChainId, errorCount);
             jobService.reScheduleWithBackoff(stack.getId(), jobDetail, errorCount);
         }
     }
 
-    private int calculateNewErrorCount(int errorCountFromJob, boolean previousOperationFailed) {
-        if (previousOperationFailed) {
+    private int calculateNewErrorCount(int errorCountFromJob, boolean previousFlowFailed) {
+        if (previousFlowFailed) {
             return errorCountFromJob + 1;
         }
         return 0;
     }
 
-    private void addNewParametersToJobDetail(JobDetail jobDetail, String operationId, int errorCount) {
-        jobDetail.getJobDataMap().put(OPERATION_ID, operationId);
+    private void addNewParametersToJobDetail(JobDetail jobDetail, String flowChainId, int errorCount) {
+        jobDetail.getJobDataMap().put(FLOW_CHAIN_ID, flowChainId);
         jobDetail.getJobDataMap().putAsString(ERROR_COUNT, errorCount);
     }
 

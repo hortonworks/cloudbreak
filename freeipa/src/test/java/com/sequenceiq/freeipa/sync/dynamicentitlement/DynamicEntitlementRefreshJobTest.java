@@ -24,6 +24,7 @@ import org.quartz.JobExecutionException;
 import org.quartz.JobKey;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
@@ -45,8 +46,6 @@ class DynamicEntitlementRefreshJobTest {
     private static final String MODIFIED_INTERNAL_CRN = "crn:cdp:iam:us-west-1:account-id:user:__internal__actor__";
 
     private static final String FLOW_CHAIN_ID = "flowChainId";
-
-    private static final String OPERATION_ID = "operationId";
 
     @Mock
     private StackService stackService;
@@ -81,14 +80,18 @@ class DynamicEntitlementRefreshJobTest {
     @Mock
     private Operation operation;
 
+    @Mock
+    private FlowIdentifier flowIdentifier;
+
     @BeforeEach
     public void setUp() {
         underTest.setLocalId(String.valueOf(LOCAL_ID));
         lenient().when(dynamicEntitlementRefreshConfig.isDynamicEntitlementEnabled()).thenReturn(Boolean.TRUE);
-        lenient().when(operationService.getOperationForAccountIdAndOperationId(ACCOUNT_ID, OPERATION_ID)).thenReturn(operation);
+        lenient().when(operationService.getOperationForAccountIdAndOperationId(ACCOUNT_ID, FLOW_CHAIN_ID)).thenReturn(operation);
         lenient().when(operation.getStatus()).thenReturn(OperationState.RUNNING);
         lenient().when(jobExecutionContext.getJobDetail()).thenReturn(jobDetail);
         lenient().when(jobDetail.getJobDataMap()).thenReturn(new JobDataMap());
+        lenient().when(flowIdentifier.getPollableId()).thenReturn(FLOW_CHAIN_ID);
     }
 
     @Test
@@ -123,13 +126,13 @@ class DynamicEntitlementRefreshJobTest {
     void testExecuteWhenClusterRunningAndRescheduleLastFailed() throws JobExecutionException {
         Stack stack = stack(Status.AVAILABLE);
         JobDataMap jobDataMap = new JobDataMap();
-        jobDataMap.put(DynamicEntitlementRefreshJob.OPERATION_ID, "operationId");
+        jobDataMap.put(DynamicEntitlementRefreshJob.FLOW_CHAIN_ID, "flowChainId");
         jobDataMap.putAsString(DynamicEntitlementRefreshJob.ERROR_COUNT, 4);
         JobKey jobKey = new JobKey(LOCAL_ID.toString(), "dynamic-entitlement-jobs");
         when(stackService.getByIdWithListsInTransaction(eq(LOCAL_ID))).thenReturn(stack);
-        when(dynamicEntitlementRefreshService.previousOperationFailed(stack, OPERATION_ID)).thenReturn(true);
+        when(dynamicEntitlementRefreshService.previousFlowFailed(stack, FLOW_CHAIN_ID)).thenReturn(true);
         when(jobDetail.getJobDataMap()).thenReturn(jobDataMap);
-        when(dynamicEntitlementRefreshService.changeClusterConfigurationIfEntitlementsChanged(stack)).thenReturn(OPERATION_ID);
+        when(dynamicEntitlementRefreshService.changeClusterConfigurationIfEntitlementsChanged(stack)).thenReturn(flowIdentifier);
         lenient().when(availabilityChecker.isRequiredPackagesInstalled(eq(stack), eq(Set.of(ImagePackageVersion.CDP_PROMETHEUS.getKey())))).thenReturn(true);
 
         underTest.executeJob(jobExecutionContext);
@@ -143,13 +146,13 @@ class DynamicEntitlementRefreshJobTest {
     void testExecuteWhenClusterRunningAndRescheduleLastSuccess() throws JobExecutionException {
         Stack stack = stack(Status.AVAILABLE);
         JobDataMap jobDataMap = new JobDataMap();
-        jobDataMap.put(DynamicEntitlementRefreshJob.OPERATION_ID, "operationId");
+        jobDataMap.put(DynamicEntitlementRefreshJob.FLOW_CHAIN_ID, "flowChainId");
         jobDataMap.putAsString(DynamicEntitlementRefreshJob.ERROR_COUNT, 4);
         JobKey jobKey = new JobKey(LOCAL_ID.toString(), "dynamic-entitlement-jobs");
         when(stackService.getByIdWithListsInTransaction(eq(LOCAL_ID))).thenReturn(stack);
-        when(dynamicEntitlementRefreshService.previousOperationFailed(stack, OPERATION_ID)).thenReturn(false);
+        when(dynamicEntitlementRefreshService.previousFlowFailed(stack, FLOW_CHAIN_ID)).thenReturn(false);
         when(jobDetail.getJobDataMap()).thenReturn(jobDataMap);
-        when(dynamicEntitlementRefreshService.changeClusterConfigurationIfEntitlementsChanged(stack)).thenReturn(OPERATION_ID);
+        when(dynamicEntitlementRefreshService.changeClusterConfigurationIfEntitlementsChanged(stack)).thenReturn(flowIdentifier);
         lenient().when(availabilityChecker.isRequiredPackagesInstalled(eq(stack), eq(Set.of(ImagePackageVersion.CDP_PROMETHEUS.getKey())))).thenReturn(true);
 
         underTest.executeJob(jobExecutionContext);
@@ -212,7 +215,7 @@ class DynamicEntitlementRefreshJobTest {
         Stack stack = stack(Status.AVAILABLE);
         when(stackService.getByIdWithListsInTransaction(eq(LOCAL_ID))).thenReturn(stack);
         when(dynamicEntitlementRefreshConfig.isDynamicEntitlementEnabled()).thenReturn(Boolean.TRUE);
-        when(dynamicEntitlementRefreshService.changeClusterConfigurationIfEntitlementsChanged(stack)).thenReturn(OPERATION_ID);
+        when(dynamicEntitlementRefreshService.changeClusterConfigurationIfEntitlementsChanged(stack)).thenReturn(flowIdentifier);
         lenient().when(availabilityChecker.isRequiredPackagesInstalled(eq(stack), eq(Set.of(ImagePackageVersion.CDP_PROMETHEUS.getKey())))).thenReturn(true);
 
         underTest.executeJob(jobExecutionContext);

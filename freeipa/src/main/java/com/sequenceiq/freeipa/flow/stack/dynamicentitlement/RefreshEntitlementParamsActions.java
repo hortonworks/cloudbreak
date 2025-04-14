@@ -1,7 +1,5 @@
 package com.sequenceiq.freeipa.flow.stack.dynamicentitlement;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import jakarta.inject.Inject;
@@ -20,7 +18,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
-import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.sync.dynamicentitlement.DynamicEntitlementRefreshService;
 
@@ -35,9 +32,6 @@ public class RefreshEntitlementParamsActions {
     @Inject
     private StackUpdater stackUpdater;
 
-    @Inject
-    private OperationService operationService;
-
     @Bean(name = "REFRESH_FREEIPA_ENTITLEMENT_STATE")
     public Action<?, ?> refreshFreeIPAEntitlement() {
         return new AbstractRefreshEntitlementParamsAction<>(RefreshEntitlementParamsTriggerEvent.class) {
@@ -49,15 +43,10 @@ public class RefreshEntitlementParamsActions {
 
             @Override
             protected void doExecute(RefreshEntitlementParamsContext context, RefreshEntitlementParamsTriggerEvent payload, Map<Object, Object> variables) {
-                dynamicEntitlementRefreshService.storeChangedEntitlementsInTelemetry(context.getStack(), payload.getChangedEntitlements());
+                dynamicEntitlementRefreshService.storeChangedEntitlementsAndTelemetry(context.getStack(), payload.getChangedEntitlements());
                 setChainedAction(variables, payload.isChained());
                 setFinalChain(variables, payload.isFinalChain());
                 setOperationId(variables, payload.getOperationId());
-                if (shouldCompleteOperation(variables)) {
-                    SuccessDetails successDetails = new SuccessDetails(context.getStack().getEnvironmentCrn());
-                    operationService.completeOperation(context.getStack().getAccountId(), getOperationId(variables),
-                            List.of(successDetails), Collections.emptyList());
-                }
                 sendEvent(context);
             }
         };
@@ -66,9 +55,6 @@ public class RefreshEntitlementParamsActions {
     @Bean(name = "REFRESH_ENTITLEMENT_FAILED_STATE")
     public Action<?, ?> refreshEntitlementFailedAction() {
         return new AbstractRefreshEntitlementParamsAction<>(StackFailureEvent.class) {
-
-            @Inject
-            private OperationService operationService;
 
             @Override
             protected void doExecute(RefreshEntitlementParamsContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
@@ -80,7 +66,6 @@ public class RefreshEntitlementParamsActions {
                 FailureDetails failureDetails = new FailureDetails(environmentCrn, message);
                 LOGGER.info(message, payload.getException());
                 stackUpdater.updateStackStatus(stack, DetailedStackStatus.UPGRADE_FAILED, message);
-                operationService.failOperation(stack.getAccountId(), getOperationId(variables), message, List.of(successDetails), List.of(failureDetails));
                 failFlow(context, payload);
                 sendEvent(context, RefreshEntitlementParamsEvent.REFRESH_ENTITLEMENT_FAIL_HANDLED_EVENT.event(), payload);
             }

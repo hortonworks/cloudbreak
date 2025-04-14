@@ -2,8 +2,9 @@ package com.sequenceiq.freeipa.sync.dynamicentitlement;
 
 import static java.util.function.Function.identity;
 
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -20,19 +21,19 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
 import com.sequenceiq.common.api.telemetry.model.Monitoring;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
-import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
-import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
-import com.sequenceiq.freeipa.entity.Operation;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.service.FlowService;
+import com.sequenceiq.freeipa.entity.DynamicEntitlement;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.chain.FlowChainTriggers;
 import com.sequenceiq.freeipa.flow.stack.dynamicentitlement.RefreshEntitlementParamsFlowChainTriggerEvent;
+import com.sequenceiq.freeipa.service.DynamicEntitlementService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
-import com.sequenceiq.freeipa.service.operation.OperationService;
-import com.sequenceiq.freeipa.service.telemetry.TelemetryConfigService;
+import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Service
 public class DynamicEntitlementRefreshService {
@@ -48,16 +49,22 @@ public class DynamicEntitlementRefreshService {
     private EntitlementService entitlementService;
 
     @Inject
-    private TelemetryConfigService telemetryConfigService;
-
-    @Inject
     private FreeIpaFlowManager flowManager;
 
     @Inject
-    private OperationService operationService;
+    private FlowService flowService;
 
     @Inject
     private MonitoringUrlResolver monitoringUrlResolver;
+
+    @Inject
+    private TransactionService transactionService;
+
+    @Inject
+    private StackService stackService;
+
+    @Inject
+    private DynamicEntitlementService dynamicEntitlementService;
 
     public Map<String, Boolean> getChangedWatchedEntitlementsAndStoreNewFromUms(Stack stack) {
         Map<String, Boolean> umsEntitlements = getEntitlementsFromUms(stack.getResourceCrn(), dynamicEntitlementRefreshConfig.getWatchedEntitlements());
@@ -69,22 +76,20 @@ public class DynamicEntitlementRefreshService {
         return entitlementsChanged != null && !entitlementsChanged.isEmpty();
     }
 
-    public boolean previousOperationFailed(Stack stack, String operationId) {
-        if (operationId != null) {
-            try {
-                Operation operation = operationService.getOperationForAccountIdAndOperationId(stack.getAccountId(), operationId);
-                return OperationState.FAILED == operation.getStatus();
-            } catch (NotFoundException e) {
-                LOGGER.debug("Operation {} not found.", operationId);
-            }
-        }
-        return false;
+    public boolean previousFlowFailed(Stack stack, String flowChainId) {
+        return flowService.isPreviousFlowFailed(stack.getId(), flowChainId);
     }
 
-    public void storeChangedEntitlementsInTelemetry(Stack stack, Map<String, Boolean> changedEntitlements) {
+    public void storeChangedEntitlementsAndTelemetry(Stack stack, Map<String, Boolean> changedEntitlements) {
         LOGGER.debug("Storing changed entitlements for stack {}, {}", stack.getName(), changedEntitlements);
         Telemetry telemetry = stack.getTelemetry();
-        telemetry.getDynamicEntitlements().putAll(changedEntitlements);
+        Set<DynamicEntitlement> dynamicEntitlements = new HashSet<>();
+        Set<DynamicEntitlement> storedDynamicEntitlements = dynamicEntitlementService.findByStackId(stack.getId());
+        if (storedDynamicEntitlements != null && !storedDynamicEntitlements.isEmpty()) {
+            dynamicEntitlements = mergeDynamicEntitlementSets(stack, storedDynamicEntitlements, changedEntitlements);
+        } else {
+            dynamicEntitlements = convertMapToDynamicEntitlementSet(stack, changedEntitlements);
+        }
         if (changedEntitlements.keySet().contains(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name()) &&
                 telemetry.getFeatures().getMonitoring() != null) {
             telemetry.getFeatures().getMonitoring().setEnabled(changedEntitlements.get(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name()));
@@ -94,36 +99,88 @@ public class DynamicEntitlementRefreshService {
                 telemetry.setMonitoring(monitoring);
             }
         }
-        telemetryConfigService.storeTelemetry(stack.getId(), telemetry);
+        saveDynamicEntitlementAndTelemetry(stack.getId(), telemetry, dynamicEntitlements);
+    }
+
+    private Set<DynamicEntitlement> mergeDynamicEntitlementSets(Stack stack,
+            Set<DynamicEntitlement> storedEntitlements, Map<String, Boolean> changedEntitlements) {
+        Set<DynamicEntitlement> changedSet = convertMapToDynamicEntitlementSet(stack, changedEntitlements);
+        storedEntitlements.removeAll(changedSet);
+        storedEntitlements.addAll(changedSet);
+        return storedEntitlements;
+    }
+
+    private Set<DynamicEntitlement> convertMapToDynamicEntitlementSet(Stack stack, Map<String, Boolean> entitlements) {
+        Set<DynamicEntitlement> result = new HashSet<>();
+        if (entitlements != null) {
+            for (Map.Entry<String, Boolean> entitlement : entitlements.entrySet()) {
+                result.add(new DynamicEntitlement(entitlement.getKey(), entitlement.getValue(), stack));
+            }
+        }
+        return result;
+    }
+
+    private Map<String, Boolean> convertDynamicEntitlementSetToMap(Set<DynamicEntitlement> dynamicEntitlements) {
+        Map<String, Boolean> result = new HashMap<>();
+        if (dynamicEntitlements != null) {
+            for (DynamicEntitlement dynamicEntitlement : dynamicEntitlements) {
+                result.put(dynamicEntitlement.getEntitlement(), dynamicEntitlement.getEntitlementValue());
+            }
+        }
+        return result;
+    }
+
+    private void saveDynamicEntitlementAndTelemetry(Long stackId, Telemetry telemetry, Set<DynamicEntitlement> dynamicEntitlements) {
+        try {
+            transactionService.required(() -> {
+                Stack stack = stackService.getStackById(stackId);
+                if (dynamicEntitlements != null) {
+                    dynamicEntitlementService.saveNew(stackId, dynamicEntitlements);
+                }
+                if (telemetry != null) {
+                    stack.setTelemetry(telemetry);
+                    stackService.save(stack);
+                }
+            });
+        } catch (TransactionService.TransactionExecutionException e) {
+            throw new TransactionService.TransactionRuntimeExecutionException(e);
+        }
     }
 
     private Map<String, Boolean> getOrCreateEntitlementsFromTelemetry(Stack stack, Map<String, Boolean> entitlementsFromUms) {
+        boolean storeToNewLocation = false;
+        Set<DynamicEntitlement> stackDynamicEntitlements = dynamicEntitlementService.findByStackId(stack.getId());
         Telemetry telemetry = stack.getTelemetry();
-        if (telemetry != null) {
-            if (telemetry.getDynamicEntitlements() != null && !telemetry.getDynamicEntitlements().isEmpty()) {
-                checkAndStoreMissingWatchedEntitlements(stack, entitlementsFromUms, telemetry);
-                return telemetry.getDynamicEntitlements();
-            } else {
-                LOGGER.info("Save watched dynamic entitlements to Telemetry, new values: {}", entitlementsFromUms);
-                telemetry.setDynamicEntitlements(entitlementsFromUms);
-                telemetryConfigService.storeTelemetry(stack.getId(), telemetry);
-            }
+        if ((stackDynamicEntitlements == null || stackDynamicEntitlements.isEmpty())  && telemetry != null && telemetry.getDynamicEntitlements() != null) {
+            stackDynamicEntitlements = convertMapToDynamicEntitlementSet(stack, telemetry.getDynamicEntitlements());
+            telemetry.setDynamicEntitlements(Collections.emptyMap());
+            storeToNewLocation = true;
+        }
+        if (!stackDynamicEntitlements.isEmpty()) {
+            return checkAndStoreMissingWatchedEntitlements(stack, entitlementsFromUms, telemetry,
+                    stackDynamicEntitlements, storeToNewLocation);
+        } else {
+            LOGGER.info("Save watched dynamic entitlements, new values: {}", entitlementsFromUms);
+            stackDynamicEntitlements = convertMapToDynamicEntitlementSet(stack, entitlementsFromUms);
+            saveDynamicEntitlementAndTelemetry(stack.getId(), telemetry, stackDynamicEntitlements);
         }
         return entitlementsFromUms;
     }
 
-    private void checkAndStoreMissingWatchedEntitlements(Stack stack, Map<String, Boolean> entitlementsFromUms, Telemetry telemetry) {
-        Map<String, Boolean> newEntitlementsInTelemetry = new HashMap<>();
+    private Map<String, Boolean> checkAndStoreMissingWatchedEntitlements(Stack stack, Map<String, Boolean> entitlementsFromUms, Telemetry telemetry,
+            Set<DynamicEntitlement> dynamicEntitlements, boolean storeToNewLocation) {
+        Map<String, Boolean> newEntitlements = new HashMap<>();
         for (Entry<String, Boolean> umsEntitlement : entitlementsFromUms.entrySet()) {
-            if (!telemetry.getDynamicEntitlements().containsKey(umsEntitlement.getKey())) {
-                telemetry.getDynamicEntitlements().put(umsEntitlement.getKey(), umsEntitlement.getValue());
-                newEntitlementsInTelemetry.put(umsEntitlement.getKey(), umsEntitlement.getValue());
+            if (!dynamicEntitlements.contains(new DynamicEntitlement(umsEntitlement.getKey(), null, null))) {
+                dynamicEntitlements.add(new DynamicEntitlement(umsEntitlement.getKey(), umsEntitlement.getValue(), stack));
+                newEntitlements.put(umsEntitlement.getKey(), umsEntitlement.getValue());
             }
         }
-        if (!newEntitlementsInTelemetry.isEmpty()) {
-            LOGGER.info("Save new watched dynamic entitlements to Telemetry, new values: {}", newEntitlementsInTelemetry);
-            telemetryConfigService.storeTelemetry(stack.getId(), telemetry);
+        if (!newEntitlements.isEmpty() || storeToNewLocation) {
+            LOGGER.info("Save new watched dynamic entitlements, new values: {}", newEntitlements);
+            saveDynamicEntitlementAndTelemetry(stack.getId(), telemetry, dynamicEntitlements);
         }
+        return convertDynamicEntitlementSetToMap(dynamicEntitlements);
     }
 
     private Map<String, Boolean> getEntitlementsFromUms(String resourceCrn, Set<String> entitlements) {
@@ -149,26 +206,22 @@ public class DynamicEntitlementRefreshService {
         return result;
     }
 
-    public String changeClusterConfigurationIfEntitlementsChanged(Stack stack) {
+    public FlowIdentifier changeClusterConfigurationIfEntitlementsChanged(Stack stack) {
         Map<String, Boolean> changedEntitlements = getChangedWatchedEntitlementsAndStoreNewFromUms(stack);
         if (!changedEntitlements.isEmpty()) {
-            LOGGER.info("Start '{}' operation", OperationType.CHANGE_DYNAMIC_ENTITLEMENTS.name());
-            Operation operation = operationService.startOperation(stack.getAccountId(), OperationType.CHANGE_DYNAMIC_ENTITLEMENTS,
-                    List.of(stack.getEnvironmentCrn()), List.of());
-            if (OperationState.RUNNING == operation.getStatus()) {
-                LOGGER.info("Changed entitlements for FreeIpa: {}, salt refresh needed: {}", changedEntitlements, true);
-                String selector = FlowChainTriggers.REFRESH_ENTITLEMENT_PARAM_CHAIN_TRIGGER_EVENT;
-                Acceptable triggerEvent = new RefreshEntitlementParamsFlowChainTriggerEvent(selector, operation.getOperationId(),
-                        stack.getId(), changedEntitlements, true);
-                flowManager.notify(selector, triggerEvent);
-            } else {
-                LOGGER.warn("Operation isn't in RUNNING state: {}", operation);
-            }
-            return operation.getOperationId();
+            LOGGER.info("Changed entitlements for FreeIpa: {}, salt refresh needed: {}", changedEntitlements, true);
+            String selector = FlowChainTriggers.REFRESH_ENTITLEMENT_PARAM_CHAIN_TRIGGER_EVENT;
+            Acceptable triggerEvent = new RefreshEntitlementParamsFlowChainTriggerEvent(selector, null,
+                    stack.getId(), stack.getEnvironmentCrn(), changedEntitlements, isSaltRefreshNeeded(changedEntitlements));
+            return flowManager.notify(selector, triggerEvent);
         } else {
             LOGGER.info("Couldn't start refresh entitlement params flow. Watched entitlements didn't change");
         }
         return null;
+    }
+
+    private boolean isSaltRefreshNeeded(Map<String, Boolean> changedEntitlements) {
+        return changedEntitlements.containsKey(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING);
     }
 
     public void setupDynamicEntitlementsForProvision(String resourceCrn, Telemetry telemetry) {
