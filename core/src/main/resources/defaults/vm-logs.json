@@ -458,5 +458,13 @@
   {
     "path": "/var/log/audit/audit.log",
     "label": "audit_log"
+  },
+  {
+    "path": "/var/log/ranger/raz/*.log",
+    "label": "RANGER_RAZ"
+  },
+  {
+    "path": "/var/log/ranger-raz/audit/*/spool/archive/*.log",
+    "label": "raz_audit"
   }
 ]
