@@ -84,7 +84,8 @@ class FreeIpaCloudStorageValidationServiceTest {
 
         Exception exception = assertThrows(CloudbreakOrchestratorFailedException.class, () -> underTest.validate(stack));
 
-        assertEquals("Validating FreeIPA cloud storage permission for backup failed.", exception.getMessage());
+        assertEquals("Validating FreeIPA cloud storage permission for backup failed. " +
+                "For more details please check '/var/log/ipabackup.log' on the instance.", exception.getMessage());
         verify(hostOrchestrator).validateCloudStorageBackup(eq(primaryGatewayConfig), eq(allGateways), eq(allNodes), any());
     }
 
@@ -105,7 +106,7 @@ class FreeIpaCloudStorageValidationServiceTest {
                 + "Specifically verify the logStorage.instanceProfile and logStorage.storageLocationBase. "
                 + "Refer to Cloudera documentation at "
                 + "https://docs.cloudera.com/cdp-public-cloud/cloud/requirements-aws/topics/mc-idbroker-minimum-setup.html#mc-idbroker-minimum-setup "
-                + "for the required rights.", exception.getMessage());
+                + "for the required rights. For more details please check '/var/log/ipabackup.log' on the instance.", exception.getMessage());
         verify(hostOrchestrator).validateCloudStorageBackup(eq(primaryGatewayConfig), eq(allGateways), eq(allNodes), any());
     }
 
@@ -125,7 +126,8 @@ class FreeIpaCloudStorageValidationServiceTest {
                 + "If provisioning was done using the CLI, then verify the JSON which was provided when creating the environment. "
                 + "Specifically, verify the logStorage.managedIdentity and logStorage.storageLocationBase. Refer to Cloudera documentation at "
                 + "https://docs.cloudera.com/cdp-public-cloud/cloud/requirements-azure/topics/mc-az-minimal-setup-for-cloud-storage.html"
-                + "#mc-az-minimal-setup-for-cloud-storage for the required rights.", exception.getMessage());
+                + "#mc-az-minimal-setup-for-cloud-storage for the required rights. "
+                + "For more details please check '/var/log/ipabackup.log' on the instance.", exception.getMessage());
         verify(hostOrchestrator).validateCloudStorageBackup(eq(primaryGatewayConfig), eq(allGateways), eq(allNodes), any());
     }
 
@@ -145,7 +147,8 @@ class FreeIpaCloudStorageValidationServiceTest {
                 + "If provisioning was done using the CLI, then verify the JSON which was provided when creating the environment. "
                 + "Specifically, verify the logStorage.managedIdentity and logStorage.storageLocationBase. Refer to Cloudera documentation at "
                 + "https://docs.cloudera.com/cdp-public-cloud/cloud/requirements-gcp/topics/mc-gcp_minimum_setup_for_cloud_storage.html"
-                + "#mc-gcp_minimum_setup_for_cloud_storage for the required rights.", exception.getMessage());
+                + "#mc-gcp_minimum_setup_for_cloud_storage for the required rights. "
+                + "For more details please check '/var/log/ipabackup.log' on the instance.", exception.getMessage());
         verify(hostOrchestrator).validateCloudStorageBackup(eq(primaryGatewayConfig), eq(allGateways), eq(allNodes), any());
     }
 

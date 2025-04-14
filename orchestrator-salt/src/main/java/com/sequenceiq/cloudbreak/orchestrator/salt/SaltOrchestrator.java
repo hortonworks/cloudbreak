@@ -179,7 +179,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Value("${cb.max.salt.database.dr.retry.onerror:5}")
     private int maxDatabaseDrRetryOnError;
 
-    @Value("${cb.max.salt.cloudstorage.validation.retry:3}")
+    @Value("${cb.max.salt.cloudstorage.validation.retry:6}")
     private int maxCloudStorageValidationRetry;
 
     @Value("${freeipa.delayed.scale-sec:1}")

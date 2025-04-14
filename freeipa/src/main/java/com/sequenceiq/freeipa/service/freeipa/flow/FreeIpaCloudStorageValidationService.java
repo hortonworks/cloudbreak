@@ -28,6 +28,8 @@ public class FreeIpaCloudStorageValidationService {
 
     private static final String DEFAULT_ERROR_MESSAGE = "Validating FreeIPA cloud storage permission for backup failed.";
 
+    private static final String COMMON_MSG_PART = "For more details please check '/var/log/ipabackup.log' on the instance.";
+
     @Inject
     private HostOrchestrator hostOrchestrator;
 
@@ -67,11 +69,12 @@ public class FreeIpaCloudStorageValidationService {
                                 "in the UI. " +
                                 "If provisioning was done using the CLI, then verify the JSON which was provided when creating the environment. " +
                                 "Specifically verify the logStorage.instanceProfile and logStorage.storageLocationBase. " +
-                                "Refer to Cloudera documentation at %s for the required rights.",
+                                "Refer to Cloudera documentation at %s for the required rights. %s",
                         function,
                         backup.getS3().getInstanceProfile(),
                         backup.getStorageLocation(),
-                        DocumentationLinkProvider.awsCloudStorageSetupLink());
+                        DocumentationLinkProvider.awsCloudStorageSetupLink(),
+                        COMMON_MSG_PART);
             } else if (backup.getAdlsGen2() != null) {
                 return String.format("Validating FreeIPA cloud storage permission for %s failed. " +
                                 "The managed profile %s did not have permission to write to %s. " +
@@ -79,11 +82,12 @@ public class FreeIpaCloudStorageValidationService {
                                 "in the UI. " +
                                 "If provisioning was done using the CLI, then verify the JSON which was provided when creating the environment. " +
                                 "Specifically, verify the logStorage.managedIdentity and logStorage.storageLocationBase. " +
-                                "Refer to Cloudera documentation at %s for the required rights.",
+                                "Refer to Cloudera documentation at %s for the required rights. %s",
                         function,
                         backup.getAdlsGen2().getManagedIdentity(),
                         backup.getStorageLocation(),
-                        DocumentationLinkProvider.azureCloudStorageSetupLink());
+                        DocumentationLinkProvider.azureCloudStorageSetupLink(),
+                        COMMON_MSG_PART);
             } else if (backup.getGcs() != null) {
                 return String.format("Validating FreeIPA cloud storage permission for %s failed. " +
                                 "The managed profile %s did not have permission to write to %s. " +
@@ -91,13 +95,14 @@ public class FreeIpaCloudStorageValidationService {
                                 "in the UI. " +
                                 "If provisioning was done using the CLI, then verify the JSON which was provided when creating the environment. " +
                                 "Specifically, verify the logStorage.managedIdentity and logStorage.storageLocationBase. " +
-                                "Refer to Cloudera documentation at %s for the required rights.",
+                                "Refer to Cloudera documentation at %s for the required rights. %s",
                         function,
                         backup.getGcs().getServiceAccountEmail(),
                         backup.getStorageLocation(),
-                        DocumentationLinkProvider.googleCloudStorageSetupLink());
+                        DocumentationLinkProvider.googleCloudStorageSetupLink(),
+                        COMMON_MSG_PART);
             }
         }
-        return DEFAULT_ERROR_MESSAGE;
+        return DEFAULT_ERROR_MESSAGE + " " + COMMON_MSG_PART;
     }
 }
