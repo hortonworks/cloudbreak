@@ -65,6 +65,8 @@ public class CDPConfigService {
 
     private static final String RUNTIME_SUPPORTIG_CENTOS7_AND_RHEL8 = "7.2.17";
 
+    private static final String ARM64_MIN_RUNTIME_VERSION = "7.3.2";
+
     // Defines what is the default runtime version (UI / API)
     @Value("${datalake.runtimes.default}")
     private String defaultRuntime;
@@ -198,21 +200,40 @@ public class CDPConfigService {
         return cdpStack -> StringUtils.isEmpty(cloudPlatform) || cdpStack.getCloudPlatform().equalsIgnoreCase(cloudPlatform);
     }
 
-    public List<AdvertisedRuntime> getAdvertisedRuntimes(String cloudPlatform, String os) {
+    public List<AdvertisedRuntime> getAdvertisedRuntimes(String cloudPlatform, String os, boolean armEnabled) {
         List<String> runtimeVersions = getDatalakeVersions(cloudPlatform, os).stream()
-                .filter(runtimeVersion -> advertisedRuntimes.isEmpty() || advertisedRuntimes.contains(runtimeVersion)).toList();
-        Optional<String> calculatedDefault
-                = Strings.isNullOrEmpty(this.defaultRuntime) ? runtimeVersions.stream().findFirst() : Optional.ofNullable(this.defaultRuntime);
+                .filter(runtimeVersion -> advertisedRuntimes.isEmpty() || advertisedRuntimes.contains(runtimeVersion))
+                .toList();
 
+        Optional<String> calculatedDefault =
+                Strings.isNullOrEmpty(this.defaultRuntime)
+                        ? runtimeVersions.stream().findFirst()
+                        : Optional.ofNullable(this.defaultRuntime);
+
+        VersionComparator comparator = new VersionComparator();
         List<AdvertisedRuntime> calculatedAdvertisedRuntimes = new ArrayList<>();
+
         for (String runtimeVersion : runtimeVersions) {
-            AdvertisedRuntime advertisedRuntime = new AdvertisedRuntime();
-            advertisedRuntime.setRuntimeVersion(runtimeVersion);
-            if (calculatedDefault.map(r -> r.equals(runtimeVersion)).orElse(false)) {
-                advertisedRuntime.setDefaultRuntimeVersion(true);
+            boolean defaultRuntime = calculatedDefault.map(r -> r.equals(runtimeVersion)).orElse(false);
+            int runtimeComparison = comparator.compare(() -> runtimeVersion, () -> ARM64_MIN_RUNTIME_VERSION);
+
+            if (!armEnabled || runtimeComparison < 0) {
+                AdvertisedRuntime x86Runtime = new AdvertisedRuntime();
+                x86Runtime.setRuntimeVersion(runtimeVersion);
+                x86Runtime.setArchitecture(Architecture.X86_64);
+                x86Runtime.setDefaultRuntimeVersion(defaultRuntime);
+                calculatedAdvertisedRuntimes.add(x86Runtime);
+            } else {
+                for (Architecture arch : List.of(Architecture.ARM64, Architecture.X86_64)) {
+                    AdvertisedRuntime runtime = new AdvertisedRuntime();
+                    runtime.setRuntimeVersion(runtimeVersion);
+                    runtime.setArchitecture(arch);
+                    runtime.setDefaultRuntimeVersion(defaultRuntime);
+                    calculatedAdvertisedRuntimes.add(runtime);
+                }
             }
-            calculatedAdvertisedRuntimes.add(advertisedRuntime);
         }
+
         LOGGER.debug("Advertised runtime versions for datalake: {}", calculatedAdvertisedRuntimes);
         return calculatedAdvertisedRuntimes;
     }

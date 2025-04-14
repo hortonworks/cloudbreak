@@ -276,7 +276,8 @@ public interface SdxEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "list advertised datalake versions", operationId = "advertisedruntimes",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    List<AdvertisedRuntime> advertisedRuntimes(@QueryParam("cloudPlatform") String cloudPlatform, @QueryParam("os") String os);
+    List<AdvertisedRuntime> advertisedRuntimes(@QueryParam("cloudPlatform") String cloudPlatform, @QueryParam("os") String os,
+            @QueryParam("armEnabled") boolean armEnabled);
 
     @POST
     @Path("/envcrn/{envCrn}/ranger_cloud_identity_mapping")

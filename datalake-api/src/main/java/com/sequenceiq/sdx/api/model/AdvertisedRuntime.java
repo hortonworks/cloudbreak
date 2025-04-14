@@ -4,6 +4,7 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sequenceiq.common.model.Architecture;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -17,6 +18,9 @@ public class AdvertisedRuntime {
 
     @Schema(description = ModelDescriptions.DEFAULT_RUNTIME_VERSION, requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean defaultRuntimeVersion;
+
+    @Schema(description = ModelDescriptions.ARCHITECTURE)
+    private Architecture architecture;
 
     public String getRuntimeVersion() {
         return runtimeVersion;
@@ -34,6 +38,14 @@ public class AdvertisedRuntime {
         this.defaultRuntimeVersion = defaultRuntimeVersion;
     }
 
+    public Architecture getArchitecture() {
+        return architecture;
+    }
+
+    public void setArchitecture(Architecture architecture) {
+        this.architecture = architecture;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -48,11 +60,12 @@ public class AdvertisedRuntime {
 
     @Override
     public int hashCode() {
-        return Objects.hash(runtimeVersion, defaultRuntimeVersion);
+        return Objects.hash(runtimeVersion, defaultRuntimeVersion, architecture);
     }
 
     @Override
     public String toString() {
-        return "AdvertisedRuntime{" + "runtimeVersion='" + runtimeVersion + '\'' + ", defaultRuntimeVersion=" + defaultRuntimeVersion + '}';
+        return "AdvertisedRuntime{" + "runtimeVersion='" + runtimeVersion + '\'' +
+                ", defaultRuntimeVersion=" + defaultRuntimeVersion + ", architecture=" + architecture + '}';
     }
 }

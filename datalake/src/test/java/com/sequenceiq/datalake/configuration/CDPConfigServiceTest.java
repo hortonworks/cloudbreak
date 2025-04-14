@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.common.gov.CommonGovService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.CDPConfigKey;
 import com.sequenceiq.sdx.api.model.AdvertisedRuntime;
@@ -58,6 +59,10 @@ class CDPConfigServiceTest {
     private static final String RUNTIME_7217 = "7.2.17";
 
     private static final String RUNTIME_7218 = "7.2.18";
+
+    private static final String RUNTIME_731 = "7.3.1";
+
+    private static final String RUNTIME_732 = "7.3.2";
 
     @Spy
     private Set<String> advertisedRuntimes;
@@ -155,8 +160,8 @@ class CDPConfigServiceTest {
 
         cdpConfigService.initCdpStackRequests();
 
-        List<AdvertisedRuntime> expected = List.of(rt(RUNTIME_7217, true), rt(RUNTIME_7212, false));
-        List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes(null, null);
+        List<AdvertisedRuntime> expected = List.of(rt(RUNTIME_7217, true, Architecture.X86_64), rt(RUNTIME_7212, false, Architecture.X86_64));
+        List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes(null, null, false);
 
         assertArrayEquals(expected.toArray(), actual.toArray());
     }
@@ -174,8 +179,8 @@ class CDPConfigServiceTest {
 
         cdpConfigService.initCdpStackRequests();
 
-        List<AdvertisedRuntime> expected = List.of(rt(RUNTIME_7212, true));
-        List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes(null, null);
+        List<AdvertisedRuntime> expected = List.of(rt(RUNTIME_7212, true, Architecture.X86_64));
+        List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes(null, null, false);
 
         assertArrayEquals(expected.toArray(), actual.toArray());
     }
@@ -230,8 +235,8 @@ class CDPConfigServiceTest {
 
         cdpConfigService.initCdpStackRequests();
 
-        List<AdvertisedRuntime> expected = List.of(rt(RUNTIME_7217, false));
-        List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes(null, null);
+        List<AdvertisedRuntime> expected = List.of(rt(RUNTIME_7217, false, Architecture.X86_64));
+        List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes(null, null, false);
 
         assertArrayEquals(expected.toArray(), actual.toArray());
     }
@@ -251,8 +256,8 @@ class CDPConfigServiceTest {
 
         cdpConfigService.initCdpStackRequests();
 
-        List<AdvertisedRuntime> expected = List.of(rt(RUNTIME_7212, true), rt(RUNTIME_729, false));
-        List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes(null, null);
+        List<AdvertisedRuntime> expected = List.of(rt(RUNTIME_7212, true, Architecture.X86_64), rt(RUNTIME_729, false, Architecture.X86_64));
+        List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes(null, null, false);
 
         assertArrayEquals(expected.toArray(), actual.toArray());
     }
@@ -269,8 +274,8 @@ class CDPConfigServiceTest {
 
         cdpConfigService.initCdpStackRequests();
 
-        List<AdvertisedRuntime> expected = List.of(rt(RUNTIME_7214, true));
-        List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes("GCP", null);
+        List<AdvertisedRuntime> expected = List.of(rt(RUNTIME_7214, true, Architecture.X86_64));
+        List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes("GCP", null, false);
 
         assertArrayEquals(expected.toArray(), actual.toArray());
     }
@@ -287,9 +292,9 @@ class CDPConfigServiceTest {
 
         cdpConfigService.initCdpStackRequests();
 
-        List<AdvertisedRuntime> expected = List.of(rt(RUNTIME_7217, true), rt(RUNTIME_7216, false),
-                rt(RUNTIME_7215, false));
-        List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes(null, "centos7");
+        List<AdvertisedRuntime> expected = List.of(rt(RUNTIME_7217, true, Architecture.X86_64), rt(RUNTIME_7216, false, Architecture.X86_64),
+                rt(RUNTIME_7215, false, Architecture.X86_64));
+        List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes(null, "centos7", false);
 
         assertArrayEquals(expected.toArray(), actual.toArray());
     }
@@ -306,8 +311,8 @@ class CDPConfigServiceTest {
 
         cdpConfigService.initCdpStackRequests();
 
-        List<AdvertisedRuntime> expected = List.of(rt(RUNTIME_7218, false), rt(RUNTIME_7217, true));
-        List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes(null, "redhat8");
+        List<AdvertisedRuntime> expected = List.of(rt(RUNTIME_7218, false, Architecture.X86_64), rt(RUNTIME_7217, true, Architecture.X86_64));
+        List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes(null, "redhat8", false);
 
         assertArrayEquals(expected.toArray(), actual.toArray());
     }
@@ -322,8 +327,32 @@ class CDPConfigServiceTest {
         cdpConfigService.initCdpStackRequests();
 
         List<AdvertisedRuntime> expected = new ArrayList<>();
-        List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes(null, "invalid");
+        List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes(null, "invalid", false);
 
+        assertArrayEquals(expected.toArray(), actual.toArray());
+    }
+
+    @Test
+    public void testAdvertisedRuntimesForX86AndArm() {
+        ReflectionTestUtils.setField(cdpConfigService, "defaultRuntime", RUNTIME_731);
+
+        List<String> supportedVersions = List.of(RUNTIME_732, RUNTIME_731, RUNTIME_7218, RUNTIME_7217, RUNTIME_7216, RUNTIME_7215);
+        mockSupportedRuntimes(supportedVersions);
+
+        List<String> advertisedVersions = List.of(RUNTIME_732, RUNTIME_731, RUNTIME_7218, RUNTIME_7217, RUNTIME_7216);
+        mockAdvertisedRuntimes(advertisedVersions);
+
+        cdpConfigService.initCdpStackRequests();
+
+        List<AdvertisedRuntime> expected = List.of(
+                rt(RUNTIME_732, false, Architecture.X86_64),
+                rt(RUNTIME_732, false, Architecture.X86_64),
+                rt(RUNTIME_731, true, Architecture.ARM64),
+                rt(RUNTIME_7218, false, Architecture.X86_64),
+                rt(RUNTIME_7217, false, Architecture.X86_64)
+        );
+
+        List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes(null, "redhat8", true);
         assertArrayEquals(expected.toArray(), actual.toArray());
     }
 
@@ -347,10 +376,11 @@ class CDPConfigServiceTest {
         });
     }
 
-    private AdvertisedRuntime rt(String version, boolean defaultVersion) {
+    private AdvertisedRuntime rt(String version, boolean defaultVersion, Architecture architecture) {
         AdvertisedRuntime advertisedRuntime = new AdvertisedRuntime();
         advertisedRuntime.setRuntimeVersion(version);
         advertisedRuntime.setDefaultRuntimeVersion(defaultVersion);
+        advertisedRuntime.setArchitecture(architecture);
         return advertisedRuntime;
     }
 }
