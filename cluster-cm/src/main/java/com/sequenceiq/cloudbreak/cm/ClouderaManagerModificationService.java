@@ -470,7 +470,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         if (!nonCdhServices.isEmpty()) {
             List<String> productNames = nonCdhServices.stream().map(ClouderaManagerProduct::getName).collect(Collectors.toList());
             LOGGER.debug("Starting to upgrade the following Non-CDH products: {}", productNames);
-            activateParcels(products, parcelResourceApi, parcelsResourceApi);
+            activateParcels(nonCdhServices, parcelResourceApi, parcelsResourceApi);
         } else {
             LOGGER.debug("Skipping Non-CDH products upgrade because the cluster does not contains any other products beside CDH.");
         }

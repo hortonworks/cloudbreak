@@ -58,9 +58,12 @@ public class TestUtil {
 
     public static Set<ClouderaManagerProduct> clouderaManagerProducts() {
         ClouderaManagerProduct cdhProduct = new ClouderaManagerProduct().withName(CDH).withVersion(CDH_VERSION);
-        ClouderaManagerProduct cdswProduct = new ClouderaManagerProduct().withName(CDSW).withVersion(CDSW_VERSION);
         ClouderaManagerProduct cmProduct = new ClouderaManagerProduct().withName(CM).withVersion(CM_VERSION);
-        return Set.of(cdhProduct, cdswProduct, cmProduct);
+        return Set.of(cdhProduct, nonCdhProduct(), cmProduct);
+    }
+
+    public static ClouderaManagerProduct nonCdhProduct() {
+        return new ClouderaManagerProduct().withName(CDSW).withVersion(CDSW_VERSION);
     }
 
     public static ApiParcel apiParcel(String type, String status) {
