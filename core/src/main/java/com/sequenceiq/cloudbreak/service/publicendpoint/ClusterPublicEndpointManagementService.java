@@ -47,9 +47,9 @@ public class ClusterPublicEndpointManagementService {
         freeIPAEndpointManagementService.deleteLoadBalancerDomainFromFreeIPA(stack);
     }
 
-    public void upscale(StackDtoDelegate stack, Map<String, String> newAddressesByFqdn) {
-        changeGatewayAddress(stack, newAddressesByFqdn);
-        dnsEntryServices.forEach(dnsEntryService -> dnsEntryService.createOrUpdateCandidates(stack, newAddressesByFqdn));
+    public void upscale(StackDtoDelegate stack, Map<String, String> newAddressesByHostname) {
+        changeGatewayAddress(stack, newAddressesByHostname);
+        dnsEntryServices.forEach(dnsEntryService -> dnsEntryService.createOrUpdateCandidates(stack, newAddressesByHostname));
     }
 
     public void downscale(StackDtoDelegate stack, Map<String, String> downscaledAddressesByFqdn) {
@@ -91,11 +91,11 @@ public class ClusterPublicEndpointManagementService {
         return gatewayPublicEndpointManagementService.manageCertificateAndDnsInPem(stackView);
     }
 
-    private void changeGatewayAddress(StackDtoDelegate stackDto, Map<String, String> newAddressesByFqdn) {
+    private void changeGatewayAddress(StackDtoDelegate stackDto, Map<String, String> newAddressesByHostname) {
         InstanceMetadataView gatewayInstanceMetadata = stackDto.getPrimaryGatewayInstance();
         String ipWrapper = gatewayInstanceMetadata.getPublicIpWrapper();
 
-        if (newAddressesByFqdn.containsValue(ipWrapper)) {
+        if (newAddressesByHostname.containsValue(ipWrapper)) {
             LOGGER.info("Gateway's DNS entry needs to be updated because primary gateway IP has been updated to: '{}'", ipWrapper);
             changeGateway(stackDto);
         }

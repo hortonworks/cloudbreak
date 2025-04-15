@@ -106,6 +106,19 @@ class DnsManagementServiceTest {
     }
 
     @Test
+    void testCreateOrUpdateDnsEntryWithIpShouldCreateConsoleDnsAppsDomain() throws PemDnsEntryCreateOrUpdateException {
+        PublicEndpointManagementProto.CreateDnsEntryResponse resp = PublicEndpointManagementProto.CreateDnsEntryResponse.newBuilder().build();
+        List<String> ips = List.of("10.0.1.11");
+        when(grpcClusterDnsClient.createOrUpdateDnsEntryWithIp(eq("accountId"), eq("console-cdp.apps"), eq("environmentName"),
+                eq(false), eq(ips), any())).thenReturn(resp);
+
+        underTest.createOrUpdateDnsEntryWithIp("accountId", "console-cdp.apps", "environmentName", false, ips);
+
+        verify(grpcClusterDnsClient, times(1))
+                .createOrUpdateDnsEntryWithIp(eq("accountId"), eq("console-cdp.apps"), eq("environmentName"), eq(false), eq(ips), any());
+    }
+
+    @Test
     void testCreateOrUpdateDnsEntryWithIpShouldThrowExceptionWhenOneOfTheDnsEntriesCouldNotBeRegistered() {
         PublicEndpointManagementProto.CreateDnsEntryResponse resp = PublicEndpointManagementProto.CreateDnsEntryResponse.newBuilder().build();
         List<String> ips = List.of("10.0.1.11", "10.1.1.21");

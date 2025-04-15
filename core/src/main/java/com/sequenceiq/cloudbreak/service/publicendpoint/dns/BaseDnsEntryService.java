@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
@@ -20,9 +19,12 @@ import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.publicendpoint.BasePublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 public abstract class BaseDnsEntryService extends BasePublicEndpointManagementService {
+
+    private static final String CONSOLE_CDP_APPS = "console-cdp.apps";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseDnsEntryService.class);
 
@@ -41,94 +43,105 @@ public abstract class BaseDnsEntryService extends BasePublicEndpointManagementSe
         return doActionOnStack(stack, null, this::doDeregister);
     }
 
-    public Map<String, String> createOrUpdateCandidates(StackDtoDelegate stack, Map<String, String> candidateAddressesByFqdn) {
-        return doActionOnStack(stack, candidateAddressesByFqdn, this::createOrUpdateDnsEntries);
+    public Map<String, String> createOrUpdateCandidates(StackDtoDelegate stack, Map<String, String> candidateAddressesByHostname) {
+        return doActionOnStack(stack, candidateAddressesByHostname, this::createOrUpdateDnsEntries);
     }
 
-    public Map<String, String> deregister(StackDtoDelegate stack, Map<String, String> candidateAddressesByFqdn) {
-        return doActionOnStack(stack, candidateAddressesByFqdn, this::doDeregister);
+    public Map<String, String> deregister(StackDtoDelegate stack, Map<String, String> candidateAddressesByHostname) {
+        return doActionOnStack(stack, candidateAddressesByHostname, this::doDeregister);
     }
 
     private Map<String, String> doActionOnStack(
             StackDtoDelegate stack,
-            Map<String, String> candidateAddressesByFqdn,
+            Map<String, String> candidateAddressesByHostname,
             BiFunction<Map<String, String>, String, Map<String, String>> action) {
 
         Map<String, String> result = new HashMap<>();
         if (stack.getCluster() != null && manageCertificateAndDnsInPem(stack.getStack())) {
             LOGGER.info("Modifying DNS entries for {} on stack '{}'", logName(), stack.getName());
-            Map<String, String> ipsByFqdn = getCandidateIpsByFqdn(stack);
-            if (!CollectionUtils.isEmpty(candidateAddressesByFqdn)) {
+            Map<String, String> ipsByHostname = getCandidateIpsByHostname(stack);
+            if (!CollectionUtils.isEmpty(candidateAddressesByHostname)) {
                 LOGGER.info("Modifying DNS entries for {} on stack '{}', whitelist of candidates for the update: '{}'", logName(), stack.getName(),
-                        String.join(",", candidateAddressesByFqdn.keySet()));
-                ipsByFqdn = ipsByFqdn.entrySet().stream()
-                        .filter(entry -> candidateAddressesByFqdn.containsKey(entry.getKey()))
+                        String.join(",", candidateAddressesByHostname.keySet()));
+                ipsByHostname = ipsByHostname.entrySet().stream()
+                        .filter(entry -> candidateAddressesByHostname.containsKey(entry.getKey()))
                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
             }
-            result.putAll(action.apply(ipsByFqdn, stack.getEnvironmentCrn()));
+            result.putAll(action.apply(ipsByHostname, stack.getEnvironmentCrn()));
         }
         return result;
     }
 
-    private Map<String, String> getCandidateIpsByFqdn(StackDtoDelegate stack) {
+    private Map<String, String> getCandidateIpsByHostname(StackDtoDelegate stack) {
         Map<String, List<String>> componentLocation = getComponentLocation(stack);
         final List<? extends InstanceMetadataView> runningInstanceMetaData = stack.getAllAvailableInstances();
         final InstanceMetadataView primaryGatewayInstanceMetadata = stack.getPrimaryGatewayInstance();
-        return componentLocation
+        Map<String, String> candidateIpsByHostname = componentLocation
                 .values()
                 .stream()
                 .flatMap(fqdns -> runningInstanceMetaData.stream().filter(im -> fqdns.contains(im.getDiscoveryFQDN())))
                 .filter(im -> primaryGatewayInstanceMetadata != null && !primaryGatewayInstanceMetadata.getPrivateId().equals(im.getPrivateId()))
-                .collect(Collectors.toMap(InstanceMetadataView::getDiscoveryFQDN, InstanceMetadataView::getPublicIpWrapper));
+                .collect(Collectors.toMap(InstanceMetadataView::getShortHostname, InstanceMetadataView::getPublicIpWrapper));
+
+        DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
+        candidateIpsByHostname.putAll(createCdpConsoleDomainEntry(candidateIpsByHostname, componentLocation, environment.getEnvironmentType()));
+        return candidateIpsByHostname;
     }
 
-    private Map<String, String> createOrUpdateDnsEntries(Map<String, String> ipsByFqdn, String environmentCrn) {
-        LOGGER.info("Register DNS entries for {} for FQDNs: '{}'", logName(), String.join(",", ipsByFqdn.keySet()));
+    private Map<String, String> createCdpConsoleDomainEntry(
+            Map<String, String> candidateIpsByHostname, Map<String, List<String>> componentLocation, String environmentType) {
+        Map<String, String> ipsByHostname = new HashMap<>();
+        if (EnvironmentType.HYBRID.toString().equals(environmentType)) {
+            List<String> ecsMasterHostnames = componentLocation.get("ecs_master");
+            if (ecsMasterHostnames != null && !ecsMasterHostnames.isEmpty()) {
+                String firstEcsMasterHostname = ecsMasterHostnames.getFirst();
+                String firstEcsMasterIp = candidateIpsByHostname.get(firstEcsMasterHostname);
+                ipsByHostname.put(CONSOLE_CDP_APPS, firstEcsMasterIp);
+            }
+        }
+        return ipsByHostname;
+    }
+
+    private Map<String, String> createOrUpdateDnsEntries(Map<String, String> ipsByHostname, String environmentCrn) {
+        LOGGER.info("Register DNS entries for {} for Hostnames: '{}'", logName(), String.join(",", ipsByHostname.keySet()));
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         DetailedEnvironmentResponse environment = environmentClientService.getByCrn(environmentCrn);
-        Map<String, String> finishedIpsByFqdns = new HashMap<>();
+        Map<String, String> finishedIpsByHostnames = new HashMap<>();
         try {
-            for (Map.Entry<String, String> ipsByFqdnEntry : ipsByFqdn.entrySet()) {
-                String fqdn = ipsByFqdnEntry.getKey();
-                String ip = ipsByFqdnEntry.getValue();
-                getDnsManagementService().createOrUpdateDnsEntryWithIp(accountId, getShortHostname(fqdn),
+            for (Map.Entry<String, String> ipsByHostnameEntry : ipsByHostname.entrySet()) {
+                String hostname = ipsByHostnameEntry.getKey();
+                String ip = ipsByHostnameEntry.getValue();
+                getDnsManagementService().createOrUpdateDnsEntryWithIp(accountId, hostname,
                         environment.getName(), false, List.of(ip));
-                finishedIpsByFqdns.put(fqdn, ip);
+                finishedIpsByHostnames.put(hostname, ip);
             }
-            return ipsByFqdn;
+            return ipsByHostname;
         } catch (PemDnsEntryCreateOrUpdateException e) {
             String message = String.format("Failed to create DNS entry: '%s'", e.getMessage());
             LOGGER.warn(message, e);
-            rollBackDnsEntries(finishedIpsByFqdns, accountId, environment);
+            rollBackDnsEntries(finishedIpsByHostnames, accountId, environment);
             throw new CloudbreakServiceException(message, e);
         }
     }
 
-    private void rollBackDnsEntries(Map<String, String> finishedIpsByFqdns, String accountId, DetailedEnvironmentResponse environment) {
-        LOGGER.info("Rolling back, de-registering previously created or updated DNS entries for FQDNs: '{}'",
-                String.join(",", finishedIpsByFqdns.keySet()));
-        finishedIpsByFqdns.forEach((key, value) -> getDnsManagementService().deleteDnsEntryWithIp(accountId, getShortHostname(key), environment.getName(),
+    private void rollBackDnsEntries(Map<String, String> finishedIpsByHostnames, String accountId, DetailedEnvironmentResponse environment) {
+        LOGGER.info("Rolling back, de-registering previously created or updated DNS entries for Hostnames: '{}'",
+                String.join(",", finishedIpsByHostnames.keySet()));
+        finishedIpsByHostnames.forEach((key, value) -> getDnsManagementService().deleteDnsEntryWithIp(accountId, key, environment.getName(),
                 false, List.of(value)));
     }
 
-    private Map<String, String> doDeregister(Map<String, String> ipsByFqdn, String environmentCrn) {
-        LOGGER.info("Deregister DNS entries for {} for FQDNs: '{}'", logName(), String.join(",", ipsByFqdn.keySet()));
+    private Map<String, String> doDeregister(Map<String, String> ipsByHostname, String environmentCrn) {
+        LOGGER.info("Deregister DNS entries for {} for Hostnames: '{}'", logName(), String.join(",", ipsByHostname.keySet()));
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         DetailedEnvironmentResponse environment = environmentClientService.getByCrn(environmentCrn);
 
-        return ipsByFqdn
+        return ipsByHostname
                 .entrySet()
                 .stream()
                 .filter(entry -> getDnsManagementService().deleteDnsEntryWithIp(accountId,
-                        getShortHostname(entry.getKey()), environment.getName(), false, List.of(entry.getValue())))
+                        entry.getKey(), environment.getName(), false, List.of(entry.getValue())))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-    private String getShortHostname(String fqdn) {
-        if (StringUtils.isEmpty(fqdn)) {
-            return null;
-        }
-        return fqdn.split("\\.")[0];
     }
 
     protected void setCertGenerationEnabled(boolean enabled) {

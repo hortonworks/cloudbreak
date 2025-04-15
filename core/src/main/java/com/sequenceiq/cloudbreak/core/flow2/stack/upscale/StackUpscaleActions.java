@@ -554,11 +554,11 @@ public class StackUpscaleActions {
                 final StackDtoDelegate stack = stackDtoService.getById(context.getStackId());
                 stackUpscaleService.finishExtendHostMetadata(context.getStack());
                 final Set<String> newAddresses = payload.getIps();
-                final Map<String, String> newAddressesByFqdn = stack.getAllAvailableInstances().stream()
+                final Map<String, String> newAddressesByHostname = stack.getAllAvailableInstances().stream()
                         .filter(instanceMetaData -> newAddresses.contains(instanceMetaData.getPrivateIp()))
-                        .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
-                        .collect(Collectors.toMap(InstanceMetadataView::getDiscoveryFQDN, InstanceMetadataView::getPublicIpWrapper));
-                clusterPublicEndpointManagementService.upscale(stack, newAddressesByFqdn);
+                        .filter(instanceMetaData -> instanceMetaData.getShortHostname() != null)
+                        .collect(Collectors.toMap(InstanceMetadataView::getShortHostname, InstanceMetadataView::getPublicIpWrapper));
+                clusterPublicEndpointManagementService.upscale(stack, newAddressesByHostname);
                 getMetricService().incrementMetricCounter(MetricType.STACK_UPSCALE_SUCCESSFUL, stack.getStack());
                 sendEvent(context);
             }
