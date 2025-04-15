@@ -26,7 +26,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
@@ -80,9 +79,6 @@ public class RepairInstancesService {
 
     @Inject
     private EntitlementService entitlementService;
-
-    @Inject
-    private StackUpdater stackUpdater;
 
     @Inject
     private FreeIpaCreationService freeIpaCreationService;
@@ -198,7 +194,6 @@ public class RepairInstancesService {
 
         Operation operation = operationService.startOperation(accountId, OperationType.REPAIR, Set.of(stack.getEnvironmentCrn()), Collections.emptySet());
         if (operation.getStatus() == OperationState.RUNNING) {
-            stackUpdater.updateStackStatus(stack, DetailedStackStatus.REPAIR_REQUESTED, "Repair requested");
             try {
                 flowManager.notify(FlowChainTriggers.REPAIR_TRIGGER_EVENT, new RepairEvent(FlowChainTriggers.REPAIR_TRIGGER_EVENT, stack.getId(),
                         operation.getOperationId(), nodeCount, new ArrayList<>(instancesToRepair.keySet()), additionalTerminatedInstanceIds));
@@ -275,7 +270,6 @@ public class RepairInstancesService {
 
         Operation operation = operationService.startOperation(accountId, OperationType.REBOOT, Set.of(stack.getEnvironmentCrn()), Collections.emptySet());
         if (operation.getStatus() == OperationState.RUNNING) {
-            stackUpdater.updateStackStatus(stack, DetailedStackStatus.REPAIR_REQUESTED, "Reboot requested");
             try {
                 flowManager.notify(REBOOT_EVENT.event(), new RebootInstanceEvent(REBOOT_EVENT.event(), stack.getId(),
                         new ArrayList<>(instancesToReboot.keySet()), operation.getOperationId()));
