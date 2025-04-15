@@ -171,19 +171,22 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
     private Set<DatalakeSecretType> getAvailableSecretTypes(String cloudProvider) {
         Set<DatalakeSecretType> secretTypes = Sets.newHashSet();
         secretTypes.addAll(Set.of(
-                GATEWAY_CERT,
                 IDBROKER_CERT,
-                CM_ADMIN_PASSWORD,
                 EXTERNAL_DATABASE_ROOT_PASSWORD,
                 CM_DB_PASSWORD,
-                CM_SERVICES_DB_PASSWORD,
                 CM_INTERMEDIATE_CA_CERT,
-                NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY,
-                SALT_SIGN_KEY_PAIR,
-                SALT_MASTER_KEY_PAIR,
-                SSSD_IPA_PASSWORD));
+                NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY));
         if (!CloudPlatform.GCP.equalsIgnoreCase(cloudProvider)) {
+            // this is excluded due to CB-29204 (the rotation has a bug on GCP)
             secretTypes.add(SALT_BOOT_SECRETS);
+            // these are excluded due to CB-29239 (to decrease execution time of test on GCP)
+            secretTypes.addAll(Set.of(
+                    GATEWAY_CERT,
+                    CM_ADMIN_PASSWORD,
+                    CM_SERVICES_DB_PASSWORD,
+                    SALT_SIGN_KEY_PAIR,
+                    SALT_MASTER_KEY_PAIR,
+                    SSSD_IPA_PASSWORD));
         }
         return secretTypes;
     }

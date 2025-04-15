@@ -112,6 +112,7 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
                 .when(freeIpaTestClient.rotateSecret())
                 .awaitForFlow()
                 .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.describe())
                 .then((testContext1, testDto, client) -> secretRotationCheckUtil.preSaltPasswordRotation(testDto))
                 .given(FreeIpaRotationTestDto.class)
                 .withSecrets(List.of(SALT_PASSWORD))
