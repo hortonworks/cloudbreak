@@ -117,6 +117,12 @@ systemctl-reload-on-pg-unit-change:
     - onchanges:
         - file: change-db-location
 
+{# This only necessary because the postgres_directory is created by salt, which is unconfined as of right now,
+   therefore the directory and its contents won't receive the correct labels by default. #}
+apply-selinux-labels-to-pg-data-location:
+  cmd.run:
+    - name: restorecon -Rv "$(echo '{{ postgres_directory }}' | sed -E 's#/pgsql/?$##')"
+
 start-postgresql-{{ new_postgres_version }}:
   service.running:
     - name: postgresql-{{ new_postgres_version }}
