@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.cloud.gcp.loadbalancer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute.RegionHealthChecks.Delete;
 import com.google.api.services.compute.Compute.RegionHealthChecks.Insert;
+import com.google.api.services.compute.model.HTTPSHealthCheck;
 import com.google.api.services.compute.model.HealthCheck;
 import com.google.api.services.compute.model.Operation;
 import com.google.api.services.compute.model.TCPHealthCheck;
@@ -20,6 +20,8 @@ import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.HealthProbeParameters;
+import com.sequenceiq.cloudbreak.cloud.model.NetworkProtocol;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -28,7 +30,6 @@ import com.sequenceiq.common.api.type.ResourceType;
  * Currently only regional health checks are supported.
  * Generally only one exists for each port being used in a given stack, but not a hard rule
  * Currently the health check is a graceful termination of TCP handshake, support exists for HTTP level health checks
- *
  */
 @Service
 public class GcpHealthCheckResourceBuilder extends AbstractGcpLoadBalancerBuilder {
@@ -39,19 +40,21 @@ public class GcpHealthCheckResourceBuilder extends AbstractGcpLoadBalancerBuilde
 
     @Override
     public List<CloudResource> create(GcpContext context, AuthenticatedContext auth, CloudLoadBalancer loadBalancer) {
-        List<CloudResource> resources = new ArrayList<>();
-        List<Integer> healthPorts = loadBalancer.getPortToTargetGroupMapping().keySet().stream().map(TargetGroupPortPair::getHealthCheckPort)
-                .distinct().collect(Collectors.toList());
-        for (Integer healthCheckPort : healthPorts) {
-            String resourceName = getResourceNameService().loadBalancerWithPort(context.getName(), loadBalancer.getType(), healthCheckPort);
-            Map<String, Object> parameters = Map.of(HCPORT, healthCheckPort);
-            resources.add(CloudResource.builder()
-                    .withType(resourceType())
-                    .withName(resourceName)
-                    .withParameters(parameters)
-                    .build());
-        }
-        return resources;
+        return loadBalancer.getPortToTargetGroupMapping().keySet().stream()
+                .map(TargetGroupPortPair::getHealthProbeParameters)
+                .distinct()
+                .map(lbHealthCheck -> createCloudResource(context, loadBalancer, lbHealthCheck))
+                .toList();
+    }
+
+    private CloudResource createCloudResource(GcpContext context, CloudLoadBalancer loadBalancer, HealthProbeParameters lbHealthCheck) {
+        String resourceName = getResourceNameService().loadBalancerWithPort(context.getName(), loadBalancer.getType(), lbHealthCheck.getPort());
+        Map<String, Object> parameters = Map.of(HCPORT, lbHealthCheck);
+        return CloudResource.builder()
+                .withType(resourceType())
+                .withName(resourceName)
+                .withParameters(parameters)
+                .build();
     }
 
     @Override
@@ -60,10 +63,7 @@ public class GcpHealthCheckResourceBuilder extends AbstractGcpLoadBalancerBuilde
         List<CloudResource> results = new ArrayList<>();
         for (CloudResource buildableResource : buildableResources) {
             LOGGER.debug("Building Healthcheck {} for {}", buildableResource.getName(), context.getProjectId());
-            HealthCheck healthCheck = new HealthCheck();
-            healthCheck.setTcpHealthCheck(new TCPHealthCheck().setPort(buildableResource.getParameter(HCPORT, Integer.class)));
-            healthCheck.setType("TCP");
-            healthCheck.setName(buildableResource.getName());
+            HealthCheck healthCheck = createHealthCheck(buildableResource);
             String regionName = context.getLocation().getRegion().getRegionName();
             // global health checks are also supported, but only for internal load balancers
             Insert insert = context.getCompute().regionHealthChecks().insert(context.getProjectId(), regionName, healthCheck);
@@ -94,5 +94,30 @@ public class GcpHealthCheckResourceBuilder extends AbstractGcpLoadBalancerBuilde
     @Override
     public int order() {
         return ORDER;
+    }
+
+    private HealthCheck createHealthCheck(CloudResource cloudResource) {
+        HealthProbeParameters lbHealthCheck = cloudResource.getParameter(HCPORT, HealthProbeParameters.class);
+        HealthCheck healthCheck = new HealthCheck();
+        healthCheck.setName(cloudResource.getName());
+        switch (lbHealthCheck.getProtocol()) {
+            case NetworkProtocol.HTTPS -> {
+                healthCheck.setHttpsHealthCheck(new HTTPSHealthCheck()
+                        .setPort(lbHealthCheck.getPort())
+                        .setRequestPath(lbHealthCheck.getPath()));
+                healthCheck.setType(NetworkProtocol.HTTPS.name());
+            }
+            case null, default -> {
+                healthCheck.setTcpHealthCheck(new TCPHealthCheck().setPort(lbHealthCheck.getPort()));
+                healthCheck.setType(NetworkProtocol.TCP.name());
+            }
+        }
+        if (lbHealthCheck.getInterval() > 0) {
+            healthCheck.setCheckIntervalSec(lbHealthCheck.getInterval());
+        }
+        if (lbHealthCheck.getProbeDownThreshold() > 0) {
+            healthCheck.setUnhealthyThreshold(lbHealthCheck.getProbeDownThreshold());
+        }
+        return healthCheck;
     }
 }

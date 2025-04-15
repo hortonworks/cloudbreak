@@ -20,7 +20,6 @@ import com.sequenceiq.common.api.type.ResourceType;
 /**
  * The loadbalancer version of creating a reserved IP address, where possible use {@link GcpReservedIpResourceBuilder}
  * Used to reserve an IP address to act as the destination for the load balancer forwarding rule
- *
  */
 @Service
 public class GcpLoadBalancingIpResourceBuilder extends AbstractGcpLoadBalancerBuilder {
@@ -40,14 +39,11 @@ public class GcpLoadBalancingIpResourceBuilder extends AbstractGcpLoadBalancerBu
     @Override
     public List<CloudResource> create(GcpContext context, AuthenticatedContext auth, CloudLoadBalancer loadBalancer) {
         Integer hcPort = loadBalancer.getPortToTargetGroupMapping().keySet().stream().map(TargetGroupPortPair::getHealthCheckPort).findFirst().orElse(KNOX_PORT);
-        if (!context.getNoPublicIp()) {
-            String resourceName =
-                    getResourceNameService().instance(auth.getCloudContext().getName(), loadBalancer.getType().name(), hcPort.toString());
-            return List.of(CloudResource.builder().withType(resourceType())
+        String resourceName =
+                getResourceNameService().instance(auth.getCloudContext().getName(), loadBalancer.getType().name(), hcPort.toString());
+        return List.of(CloudResource.builder().withType(resourceType())
                 .withName(resourceName)
                 .build());
-        }
-        return List.of();
     }
 
     @Override

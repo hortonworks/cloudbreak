@@ -2,10 +2,12 @@ package com.sequenceiq.cloudbreak.cloud.gcp.loadbalancer;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,8 +34,11 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.HealthProbeParameters;
+import com.sequenceiq.cloudbreak.cloud.model.NetworkProtocol;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
+import com.sequenceiq.common.api.type.LoadBalancerTypeAttribute;
 import com.sequenceiq.common.api.type.ResourceType;
 
 /**
@@ -50,6 +55,9 @@ public class GcpBackendServiceResourceBuilder extends AbstractGcpLoadBalancerBui
 
     public static final String GCP_HEALTH_CHECK_FORMAT = "https://www.googleapis.com/compute/v1/projects/%s/regions/%s/healthChecks/%s";
 
+    // For L3 load balancing the protocol have to be set as "UNSPECIFIED". https://cloud.google.com/load-balancing/docs/backend-service
+    private static final String L3 = "UNSPECIFIED";
+
     private static final int ORDER = 2;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpBackendServiceResourceBuilder.class);
@@ -59,7 +67,25 @@ public class GcpBackendServiceResourceBuilder extends AbstractGcpLoadBalancerBui
 
     @Override
     public List<CloudResource> create(GcpContext context, AuthenticatedContext auth, CloudLoadBalancer loadBalancer) {
-        return getCloudResourcesForFrontendAndBackendCreate(context, loadBalancer);
+        Map<HealthProbeParameters, List<TargetGroupPortPair>> hcPortToTrafficPorts = new HashMap<>();
+        loadBalancer.getPortToTargetGroupMapping().keySet().forEach(targetGroupPortPair -> {
+            hcPortToTrafficPorts.computeIfAbsent(targetGroupPortPair.getHealthProbeParameters(), healthParams -> new ArrayList<>()).add(targetGroupPortPair);
+        });
+        return hcPortToTrafficPorts.entrySet().stream()
+                .map(trafficByHealth -> createCloudResource(context, loadBalancer, trafficByHealth.getKey(), trafficByHealth.getValue()))
+                .toList();
+    }
+
+    private CloudResource createCloudResource(GcpContext context, CloudLoadBalancer loadBalancer, HealthProbeParameters lbHealthCheck,
+            List<TargetGroupPortPair> lbTraffics) {
+        String resourceName = getResourceNameService().loadBalancerWithPort(context.getName(), loadBalancer.getType(), lbHealthCheck.getPort());
+        Map<String, Object> parameters = Map.of(TRAFFICPORTS, lbTraffics, HCPORT, lbHealthCheck,
+                CloudResource.ATTRIBUTES, Enum.valueOf(LoadBalancerTypeAttribute.class, loadBalancer.getType().name()));
+        return CloudResource.builder()
+                .withType(resourceType())
+                .withName(resourceName)
+                .withParameters(parameters)
+                .build();
     }
 
     @Override
@@ -67,48 +93,53 @@ public class GcpBackendServiceResourceBuilder extends AbstractGcpLoadBalancerBui
             CloudLoadBalancer loadBalancer, CloudStack cloudStack) throws Exception {
         List<CloudResource> results = new ArrayList<>();
         String projectId = context.getProjectId();
+        String regionName = context.getLocation().getRegion().getRegionName();
         List<CloudResource> healthResources = filterResourcesByType(context.getLoadBalancerResources(loadBalancer.getType()), ResourceType.GCP_HEALTH_CHECK);
 
         for (CloudResource buildableResource : buildableResources) {
             LOGGER.info("Building backend service {} for {}", buildableResource.getName(), projectId);
-            Optional<String> name = healthResources.stream()
-                    .filter(healthResource -> buildableResource.getParameter(HCPORT, Integer.class).equals(healthResource.getParameter(HCPORT, Integer.class)))
-                    .findFirst()
-                    .map(CloudResource::getName);
-            if (!name.isPresent()) {
-                LOGGER.info("Health check resource not found for port {}", buildableResource.getParameter(HCPORT, Integer.class));
-            }
+            HealthProbeParameters lbHealthCheck = buildableResource.getParameter(HCPORT, HealthProbeParameters.class);
+            List<TargetGroupPortPair> lbTraffics = buildableResource.getParameter(TRAFFICPORTS, List.class);
+            Set<Group> groups = lbTraffics.stream()
+                    .map(targetGroupPortPair -> loadBalancer.getPortToTargetGroupMapping().get(targetGroupPortPair))
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toSet());
+            String backendProtocol = lbTraffics.stream()
+                    .map(lbTraffic -> convertProtocol(lbTraffic.getTrafficProtocol()))
+                    .reduce((np1, np2) -> Objects.equals(np1, np2) ? np1 : L3)
+                    .orElse(NetworkProtocol.TCP.name());
 
             BackendService backendService = new BackendService();
-            backendService.setHealthChecks(Collections.singletonList(
-                String.format(GCP_HEALTH_CHECK_FORMAT,
-                        projectId, context.getLocation().getRegion().getRegionName(), name.get())));
-
-            List<Backend> backends = new ArrayList<>();
-            Map<String, Object> portMap = buildableResource.getParameters();
-            Integer hcPort = buildableResource.getParameter(HCPORT, Integer.class);
-            Set<Group> groups = new HashSet<>();
-            if (portMap.containsKey(TRAFFICPORTS)) {
-                for (Integer trafficPort : (List<Integer>) portMap.get(TRAFFICPORTS)) {
-                    TargetGroupPortPair targetGroupPortPair = new TargetGroupPortPair(trafficPort, hcPort);
-                    groups.addAll(loadBalancer.getPortToTargetGroupMapping().get(targetGroupPortPair));
-                }
-            } else {
-                Integer trafficPort = buildableResource.getParameter(TRAFFICPORT, Integer.class);
-                TargetGroupPortPair targetGroupPortPair = new TargetGroupPortPair(trafficPort, hcPort);
-                groups.addAll(loadBalancer.getPortToTargetGroupMapping().get(targetGroupPortPair));
-            }
-            makeBackendForTargetGroup(context, auth, projectId, groups, backends);
-
-            backendService.setBackends(backends);
             backendService.setName(buildableResource.getName());
+            backendService.setBackends(makeBackendForTargetGroup(context, auth, projectId, groups));
             backendService.setLoadBalancingScheme(gcpLoadBalancerTypeConverter.getScheme(loadBalancer).getGcpType());
-            backendService.setProtocol("TCP");
-            String regionName = context.getLocation().getRegion().getRegionName();
+            backendService.setProtocol(backendProtocol);
+            setupBackendHealthCheck(backendService, projectId, regionName, lbHealthCheck, healthResources);
             Insert insert = context.getCompute().regionBackendServices().insert(projectId, regionName, backendService);
             results.add(doOperationalRequest(buildableResource, insert));
         }
         return results;
+    }
+
+    private void setupBackendHealthCheck(BackendService backendService, String projectId, String regionName, HealthProbeParameters lbHealthCheck,
+            List<CloudResource> healthResources) {
+        Optional<String> healthCheckName = healthResources.stream()
+                .filter(healthResource -> lbHealthCheck.equals(healthResource.getParameter(HCPORT, HealthProbeParameters.class)))
+                .findFirst()
+                .map(CloudResource::getName);
+        if (healthCheckName.isPresent()) {
+            backendService.setHealthChecks(List.of(String.format(GCP_HEALTH_CHECK_FORMAT, projectId, regionName, healthCheckName.get())));
+        } else {
+            LOGGER.warn("Health check resource not found for port {}, loadbalancer will be created without healthcheck", lbHealthCheck);
+        }
+    }
+
+    private String convertProtocol(NetworkProtocol protocol) {
+        return switch (protocol) {
+            case UDP -> NetworkProtocol.UDP.name();
+            case TCP_UDP -> L3;
+            case null, default -> NetworkProtocol.TCP.name();
+        };
     }
 
     @Override
@@ -131,8 +162,9 @@ public class GcpBackendServiceResourceBuilder extends AbstractGcpLoadBalancerBui
                 .collect(Collectors.toList());
     }
 
-    private void makeBackendForTargetGroup(GcpContext context, AuthenticatedContext auth, String projectId, Set<Group> groups,
-            List<Backend> backends) throws IOException {
+    private List<Backend> makeBackendForTargetGroup(GcpContext context, AuthenticatedContext auth, String projectId, Set<Group> groups)
+            throws IOException {
+        List<Backend> backends = new ArrayList<>();
         for (Group group : groups) {
             for (String availabilityZone : getAvailabilityZones(group, context)) {
                 String instanceGroupName = getResourceNameService()
@@ -148,6 +180,7 @@ public class GcpBackendServiceResourceBuilder extends AbstractGcpLoadBalancerBui
                 }
             }
         }
+        return backends;
     }
 
     private boolean isInstanceGroupEmpty(Compute compute, String projectId, String zone, String instanceGroupName) throws IOException {

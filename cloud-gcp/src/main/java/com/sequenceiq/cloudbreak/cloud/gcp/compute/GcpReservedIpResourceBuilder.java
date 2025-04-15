@@ -70,12 +70,13 @@ public class GcpReservedIpResourceBuilder extends AbstractGcpComputeBuilder {
             address.setName(resource.getName());
             address.setDescription(description());
             address.setAddressType(type.getGcpType());
-            if (type.equals(GcpLoadBalancerScheme.GATEWAY_INTERNAL)) {
+            if (type.equals(GcpLoadBalancerScheme.GATEWAY_INTERNAL) || type.equals(GcpLoadBalancerScheme.INTERNAL)) {
                 String sharedProjectId = gcpStackUtil.getSharedProjectId(cloudStack.getNetwork());
                 String subnetId = gcpStackUtil.getSubnetId(cloudStack.getNetwork());
                 String netProjectId = isNotEmpty(sharedProjectId) ? sharedProjectId : projectId;
                 String gcpSubnetSelfLink = gcpStackUtil.getSubnetUrl(netProjectId, region, subnetId);
                 address.setSubnetwork(gcpSubnetSelfLink);
+                address.setPurpose("SHARED_LOADBALANCER_VIP");
             }
             Map<String, Object> customTags = new HashMap<>();
             customTags.putAll(cloudStack.getTags());

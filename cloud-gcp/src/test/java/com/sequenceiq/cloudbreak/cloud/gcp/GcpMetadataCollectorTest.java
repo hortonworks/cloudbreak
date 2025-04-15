@@ -33,6 +33,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.AccessConfig;
+import com.google.api.services.compute.model.Backend;
+import com.google.api.services.compute.model.BackendService;
 import com.google.api.services.compute.model.ForwardingRule;
 import com.google.api.services.compute.model.ForwardingRuleList;
 import com.google.api.services.compute.model.Instance;
@@ -220,10 +222,12 @@ class GcpMetadataCollectorTest {
         fwr1.setIPAddress("ipaddr1");
         fwr1.setName(PRIVATE_LB_NAME);
         fwr1.setLoadBalancingScheme("INTERNAL");
+        fwr1.setPorts(List.of("80", "81"));
         ForwardingRule fwr2 = new ForwardingRule();
         fwr2.setIPAddress("ipaddr2");
         fwr2.setName(PUBLIC_LB_NAME);
         fwr2.setLoadBalancingScheme("EXTERNAL");
+        fwr2.setPorts(List.of("82", "83"));
         fwList.setItems(List.of(fwr1, fwr2));
         when(forwardingRulesList.execute()).thenReturn(fwList);
         when(gcpLoadBalancerTypeConverter.getScheme("INTERNAL")).thenReturn(GcpLoadBalancerScheme.INTERNAL);
@@ -255,6 +259,54 @@ class GcpMetadataCollectorTest {
         fwr2.setLoadBalancingScheme("INTERNAL");
         fwList.setItems(List.of(fwr1, fwr2));
         when(forwardingRulesList.execute()).thenReturn(fwList);
+        when(gcpLoadBalancerTypeConverter.getScheme("INTERNAL")).thenReturn(GcpLoadBalancerScheme.INTERNAL);
+
+        List<CloudLoadBalancerMetadata> result =
+                underTest.collectLoadBalancer(authenticatedContext, List.of(LoadBalancerType.GATEWAY_PRIVATE, LoadBalancerType.PRIVATE), resources);
+
+        assertThat(result).hasSize(2);
+        assertThat(result).map(CloudLoadBalancerMetadata::getType).containsExactlyInAnyOrder(LoadBalancerType.GATEWAY_PRIVATE, LoadBalancerType.PRIVATE);
+    }
+
+    @Test
+    void testCollectLoadBalancerGatewayAndMultiPrivate() throws IOException {
+        Compute compute = mock(Compute.class);
+        when(gcpComputeFactory.buildCompute(authenticatedContext.getCloudCredential())).thenReturn(compute);
+        Compute.ForwardingRules forwardingRules = mock(Compute.ForwardingRules.class);
+        when(compute.forwardingRules()).thenReturn(forwardingRules);
+        Compute.ForwardingRules.List forwardingRulesList = mock(Compute.ForwardingRules.List.class);
+        when(forwardingRules.list(PROJECT_ID, REGION)).thenReturn(forwardingRulesList);
+        ForwardingRuleList fwList = new ForwardingRuleList();
+        ForwardingRule fwr1 = new ForwardingRule();
+        fwr1.setIPAddress("ipaddr1");
+        fwr1.setName(PRIVATE_LB_NAME);
+        fwr1.setLoadBalancingScheme("INTERNAL");
+        fwr1.setBackendService("backend1");
+        fwr1.setPorts(List.of("80", "81"));
+        ForwardingRule fwr2 = new ForwardingRule();
+        fwr2.setIPAddress("ipaddr2");
+        fwr2.setName(GATEWAY_PRIVATE_LB_NAME);
+        fwr2.setLoadBalancingScheme("INTERNAL");
+        fwr2.setBackendService("backend2");
+        fwr2.setPorts(List.of("82", "83"));
+        ForwardingRule fwr3 = new ForwardingRule();
+        fwr3.setIPAddress("ipaddr1");
+        fwr3.setName(PRIVATE_LB_NAME);
+        fwr3.setLoadBalancingScheme("INTERNAL");
+        fwr3.setBackendService("backend1");
+        fwr3.setPorts(List.of("84", "85"));
+        fwList.setItems(List.of(fwr1, fwr2, fwr3));
+        when(forwardingRulesList.execute()).thenReturn(fwList);
+        Compute.RegionBackendServices  backendServices = mock(Compute.RegionBackendServices.class);
+        when(compute.regionBackendServices()).thenReturn(backendServices);
+        Compute.RegionBackendServices.Get  backendServicesGet1 = mock(Compute.RegionBackendServices.Get.class);
+        Compute.RegionBackendServices.Get  backendServicesGet2 = mock(Compute.RegionBackendServices.Get.class);
+        BackendService backendService1 = new BackendService().setName("backendservice1").setBackends(List.of(new Backend().setGroup("group1")));
+        BackendService backendService2 = new BackendService().setName("backendservice2").setBackends(List.of(new Backend().setGroup("group2")));
+        when(backendServices.get(anyString(), anyString(), eq("backend1"))).thenReturn(backendServicesGet1);
+        when(backendServices.get(anyString(), anyString(), eq("backend2"))).thenReturn(backendServicesGet2);
+        when(backendServicesGet1.execute()).thenReturn(backendService1);
+        when(backendServicesGet2.execute()).thenReturn(backendService2);
         when(gcpLoadBalancerTypeConverter.getScheme("INTERNAL")).thenReturn(GcpLoadBalancerScheme.INTERNAL);
 
         List<CloudLoadBalancerMetadata> result =

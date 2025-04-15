@@ -17,6 +17,7 @@ base:
              - rhelrepo
              - hostname
              - java
+             - loadbalancer.loadbalancer_ip
 
            'recipes:pre-cloudera-manager-start':
              - match: grain

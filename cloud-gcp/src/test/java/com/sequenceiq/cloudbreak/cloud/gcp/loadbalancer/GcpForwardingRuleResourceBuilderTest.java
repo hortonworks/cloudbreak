@@ -10,6 +10,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -40,9 +41,11 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.HealthProbeParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.cloud.model.NetworkProtocol;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.common.api.type.CommonStatus;
@@ -123,8 +126,8 @@ class GcpForwardingRuleResourceBuilderTest {
                 .network(network)
                 .build();
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("hcport", 8080);
-        parameters.put("trafficport", 8080);
+        parameters.put("hcport", new HealthProbeParameters(null, 8080, null, 0, 0));
+        parameters.put("trafficports", new GcpLBTraffics(List.of(8080), null));
         resource = CloudResource.builder()
                 .withType(ResourceType.GCP_FORWARDING_RULE)
                 .withStatus(CommonStatus.CREATED)
@@ -162,16 +165,84 @@ class GcpForwardingRuleResourceBuilderTest {
 
         List<CloudResource> cloudResources = underTest.create(gcpContext, authenticatedContext, cloudLoadBalancer);
 
-        assertTrue(cloudResources.get(0).getName().startsWith("name-public-80"));
         assertEquals(1, cloudResources.size());
-        assertEquals(8080, cloudResources.get(0).getParameter("hcport", Integer.class));
-        assertEquals(80, cloudResources.get(0).getParameter("trafficport", Integer.class));
+        assertTrue(cloudResources.get(0).getName().startsWith("name-public-tcp-80"));
+        assertEquals(8080, cloudResources.get(0).getParameter("hcport", HealthProbeParameters.class).getPort());
+        GcpLBTraffics traffics = cloudResources.get(0).getParameter("trafficports", GcpLBTraffics.class);
+        assertTrue(traffics.trafficPorts().contains(80));
+    }
+
+    @Test
+    void testCreatePrivate() {
+        when(gcpContext.getName()).thenReturn("name");
+        when(cloudLoadBalancer.getType()).thenReturn(LoadBalancerType.PRIVATE);
+        Map<TargetGroupPortPair, Set<Group>> targetGroupPortPairSetHashMap = new HashMap<>();
+        targetGroupPortPairSetHashMap.put(new TargetGroupPortPair(80, NetworkProtocol.TCP, new HealthProbeParameters(null, 8080, null, 0, 0)),
+                Collections.emptySet());
+        targetGroupPortPairSetHashMap.put(new TargetGroupPortPair(81, NetworkProtocol.TCP, new HealthProbeParameters(null, 8080, null, 0, 0)),
+                Collections.emptySet());
+        targetGroupPortPairSetHashMap.put(new TargetGroupPortPair(80, NetworkProtocol.UDP, new HealthProbeParameters(null, 8080, null, 0, 0)),
+                Collections.emptySet());
+        targetGroupPortPairSetHashMap.put(new TargetGroupPortPair(81, NetworkProtocol.UDP, new HealthProbeParameters(null, 8080, null, 0, 0)),
+                Collections.emptySet());
+        targetGroupPortPairSetHashMap.put(new TargetGroupPortPair(82, NetworkProtocol.TCP, new HealthProbeParameters(null, 8081, null, 0, 0)),
+                Collections.emptySet());
+        targetGroupPortPairSetHashMap.put(new TargetGroupPortPair(82, NetworkProtocol.UDP, new HealthProbeParameters(null, 8081, null, 0, 0)),
+                Collections.emptySet());
+        when(cloudLoadBalancer.getPortToTargetGroupMapping()).thenReturn(targetGroupPortPairSetHashMap);
+
+        List<CloudResource> cloudResources = underTest.create(gcpContext, authenticatedContext, cloudLoadBalancer);
+
+        List<CloudResource> forwardingRulesTcp8080 = cloudResources.stream()
+                .filter(cloudResource ->
+                        cloudResource.getParameter("trafficports", GcpLBTraffics.class).trafficProtocol() == NetworkProtocol.TCP &&
+                                cloudResource.getParameter("hcport", HealthProbeParameters.class).getPort() == 8080)
+                .toList();
+        assertEquals(1, forwardingRulesTcp8080.size());
+        GcpLBTraffics gcpLBTcpTraffics8080 = forwardingRulesTcp8080.get(0).getParameter("trafficports", GcpLBTraffics.class);
+        assertTrue(forwardingRulesTcp8080.get(0).getName().startsWith("name-private-tcp"));
+        assertEquals(NetworkProtocol.TCP, gcpLBTcpTraffics8080.trafficProtocol());
+        assertTrue(gcpLBTcpTraffics8080.trafficPorts().contains(80));
+        assertTrue(gcpLBTcpTraffics8080.trafficPorts().contains(81));
+
+        List<CloudResource> forwardingRulesUdp8080 = cloudResources.stream()
+                .filter(cloudResource ->
+                        cloudResource.getParameter("trafficports", GcpLBTraffics.class).trafficProtocol() == NetworkProtocol.UDP &&
+                                cloudResource.getParameter("hcport", HealthProbeParameters.class).getPort() == 8080)
+                .toList();
+        assertEquals(1, forwardingRulesUdp8080.size());
+        assertTrue(forwardingRulesUdp8080.get(0).getName().startsWith("name-private-udp"));
+        GcpLBTraffics gcpLBUdpTraffics8080 = forwardingRulesUdp8080.get(0).getParameter("trafficports", GcpLBTraffics.class);
+        assertEquals(NetworkProtocol.UDP, gcpLBUdpTraffics8080.trafficProtocol());
+        assertTrue(gcpLBUdpTraffics8080.trafficPorts().contains(80));
+        assertTrue(gcpLBUdpTraffics8080.trafficPorts().contains(81));
+
+        List<CloudResource> forwardingRulesTcp8081 = cloudResources.stream()
+                .filter(cloudResource ->
+                        cloudResource.getParameter("trafficports", GcpLBTraffics.class).trafficProtocol() == NetworkProtocol.TCP &&
+                                cloudResource.getParameter("hcport", HealthProbeParameters.class).getPort() == 8081)
+                .toList();
+        assertEquals(1, forwardingRulesTcp8081.size());
+        GcpLBTraffics gcpLBTcpTraffics8081 = forwardingRulesTcp8081.get(0).getParameter("trafficports", GcpLBTraffics.class);
+        assertTrue(forwardingRulesTcp8081.get(0).getName().startsWith("name-private-tcp"));
+        assertEquals(NetworkProtocol.TCP, gcpLBTcpTraffics8081.trafficProtocol());
+        assertTrue(gcpLBTcpTraffics8081.trafficPorts().contains(82));
+
+        List<CloudResource> forwardingRulesUdp8081 = cloudResources.stream()
+                .filter(cloudResource ->
+                        cloudResource.getParameter("trafficports", GcpLBTraffics.class).trafficProtocol() == NetworkProtocol.UDP &&
+                                cloudResource.getParameter("hcport", HealthProbeParameters.class).getPort() == 8081)
+                .toList();
+        assertEquals(1, forwardingRulesTcp8081.size());
+        assertTrue(forwardingRulesUdp8081.get(0).getName().startsWith("name-private-udp"));
+        GcpLBTraffics gcpLBUdpTraffics8081 = forwardingRulesUdp8081.get(0).getParameter("trafficports", GcpLBTraffics.class);
+        assertEquals(NetworkProtocol.UDP, gcpLBUdpTraffics8081.trafficProtocol());
+        assertTrue(gcpLBUdpTraffics8081.trafficPorts().contains(82));
     }
 
     @Test
     void testBuild() throws Exception {
         mockCalls(LoadBalancerType.PRIVATE);
-
 
         List<CloudResource> cloudResources = underTest.build(gcpContext, authenticatedContext,
                 Collections.singletonList(resource), cloudLoadBalancer, cloudStack);
@@ -180,7 +251,7 @@ class GcpForwardingRuleResourceBuilderTest {
         assertEquals("https://www.googleapis.com/compute/v1/projects/id/global/networks/default-network", arg.getNetwork());
         assertEquals("https://www.googleapis.com/compute/v1/projects/id/regions/us-west2/subnetworks/default-subnet", arg.getSubnetwork());
         assertEquals("super", cloudResources.get(0).getName());
-        assertEquals(8080, cloudResources.get(0).getParameter("hcport", Integer.class));
+        assertEquals(8080, cloudResources.get(0).getParameter("hcport", HealthProbeParameters.class).getPort());
     }
 
     @Test
@@ -193,7 +264,7 @@ class GcpForwardingRuleResourceBuilderTest {
         assertNull(arg.getNetwork());
         assertNull(arg.getSubnetwork());
         assertEquals("super", cloudResources.get(0).getName());
-        assertEquals(8080, cloudResources.get(0).getParameter("hcport", Integer.class));
+        assertEquals(8080, cloudResources.get(0).getParameter("hcport", HealthProbeParameters.class).getPort());
     }
 
     @Test
@@ -206,14 +277,14 @@ class GcpForwardingRuleResourceBuilderTest {
         assertEquals("https://www.googleapis.com/compute/v1/projects/id/global/networks/default-network", arg.getNetwork());
         assertEquals("https://www.googleapis.com/compute/v1/projects/id/regions/us-west2/subnetworks/default-gw-subnet", arg.getSubnetwork());
         assertEquals("super", cloudResources.get(0).getName());
-        assertEquals(8080, cloudResources.get(0).getParameter("hcport", Integer.class));
+        assertEquals(8080, cloudResources.get(0).getParameter("hcport", HealthProbeParameters.class).getPort());
     }
 
     @Test
     void buildforSharedVPC() throws Exception {
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("hcport", 8443);
-        parameters.put("trafficports", List.of(443, 11443));
+        parameters.put("hcport", new HealthProbeParameters(null, 8443, null, 0, 0));
+        parameters.put("trafficports", new GcpLBTraffics(List.of(443, 11443), null));
         resource = CloudResource.builder()
                 .withType(ResourceType.GCP_FORWARDING_RULE)
                 .withStatus(CommonStatus.CREATED)
@@ -242,8 +313,8 @@ class GcpForwardingRuleResourceBuilderTest {
         assertEquals("https://www.googleapis.com/compute/v1/projects/custom-project/global/networks/default-network", arg.getNetwork());
         assertEquals("https://www.googleapis.com/compute/v1/projects/custom-project/regions/us-west2/subnetworks/default-subnet", arg.getSubnetwork());
         assertEquals("super", cloudResources.get(0).getName());
-        assertEquals(8443, cloudResources.get(0).getParameter("hcport", Integer.class));
-        List<Integer> ports = (List<Integer>) cloudResources.get(0).getParameters().get("trafficports");
+        assertEquals(8443, cloudResources.get(0).getParameter("hcport", HealthProbeParameters.class).getPort());
+        Collection<Integer> ports = cloudResources.get(0).getParameter("trafficports", GcpLBTraffics.class).trafficPorts();
         assertTrue(ports.contains(443));
         assertTrue(ports.contains(11443));
     }

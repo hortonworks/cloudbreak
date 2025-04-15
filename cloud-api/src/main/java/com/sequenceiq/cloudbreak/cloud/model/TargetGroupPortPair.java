@@ -61,18 +61,16 @@ public class TargetGroupPortPair {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof TargetGroupPortPair that)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        return trafficPort == that.trafficPort && healthProbeParameters.getPort() == that.healthProbeParameters.getPort();
+        TargetGroupPortPair that = (TargetGroupPortPair) o;
+        return trafficPort == that.trafficPort && trafficProtocol == that.trafficProtocol && Objects.equals(healthProbeParameters, that.healthProbeParameters);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(trafficPort, healthProbeParameters.getPort());
+        return Objects.hash(trafficPort, trafficProtocol, healthProbeParameters);
     }
 
     @Override

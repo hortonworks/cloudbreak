@@ -135,4 +135,16 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
         name = adjustBaseLength(name, maxResourceNameLength);
         return name;
     }
+
+    public String loadBalancerWithProtocolAndPort(String stackName, LoadBalancerType loadBalancerType, String protocol, Integer port) {
+        String name;
+        name = normalize(stackName);
+        name = adjustPartLength(name);
+        name = appendPart(name, normalize(loadBalancerType.name()));
+        name = appendPart(name, normalize(protocol));
+        name = appendPart(name, port);
+        name = appendDateAsHash(name, new Date());
+        name = adjustBaseLength(name, maxResourceNameLength);
+        return name;
+    }
 }

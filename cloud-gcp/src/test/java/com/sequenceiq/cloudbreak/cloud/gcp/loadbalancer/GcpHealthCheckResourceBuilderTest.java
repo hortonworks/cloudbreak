@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -16,6 +17,7 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -23,6 +25,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.Compute.RegionHealthChecks;
+import com.google.api.services.compute.model.HealthCheck;
 import com.google.api.services.compute.model.Operation;
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -32,9 +35,11 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.HealthProbeParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.cloud.model.NetworkProtocol;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.common.api.type.CommonStatus;
@@ -101,14 +106,13 @@ class GcpHealthCheckResourceBuilderTest {
 
         assertTrue(cloudResources.get(0).getName().startsWith("name-public-8080"));
         assertEquals(1, cloudResources.size());
-        assertEquals(8080, cloudResources.get(0).getParameter("hcport", Integer.class));
+        assertEquals(8080, cloudResources.get(0).getParameter("hcport", HealthProbeParameters.class).getPort());
     }
 
     @Test
     void testBuild() throws Exception {
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("hcport", 8080);
-        parameters.put("trafficport", 8080);
+        parameters.put("hcport", new HealthProbeParameters(null, 8080, null, 0, 0));
         CloudResource resource = CloudResource.builder()
                 .withType(ResourceType.GCP_HEALTH_CHECK)
                 .withStatus(CommonStatus.CREATED)
@@ -135,8 +139,54 @@ class GcpHealthCheckResourceBuilderTest {
                 Collections.singletonList(resource), cloudLoadBalancer, cloudStack);
 
         assertEquals("super", cloudResources.get(0).getName());
-        assertEquals(8080, cloudResources.get(0).getParameter("hcport", Integer.class));
+        assertEquals(8080, cloudResources.get(0).getParameter("hcport", HealthProbeParameters.class).getPort());
 
+        ArgumentCaptor<HealthCheck> healthCheckArgumentCaptor = ArgumentCaptor.forClass(HealthCheck.class);
+        verify(regionHealthChecks).insert(anyString(), anyString(), healthCheckArgumentCaptor.capture());
+        HealthCheck healthCheckParam = healthCheckArgumentCaptor.getValue();
+        assertEquals("TCP", healthCheckParam.getType());
+        assertEquals(8080, healthCheckParam.getTcpHealthCheck().getPort());
+    }
+
+    @Test
+    void testBuildWithHttpsHealth() throws Exception {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("hcport", new HealthProbeParameters("health", 8080, NetworkProtocol.HTTPS, 0, 0));
+        CloudResource resource = CloudResource.builder()
+                .withType(ResourceType.GCP_HEALTH_CHECK)
+                .withStatus(CommonStatus.CREATED)
+                .withGroup("master")
+                .withName("super")
+                .withParameters(parameters)
+                .withPersistent(true)
+                .build();
+        Compute.RegionHealthChecks.Insert healthCheckInsert = mock(Compute.RegionHealthChecks.Insert.class);
+
+        when(gcpContext.getCompute()).thenReturn(compute);
+        when(gcpContext.getProjectId()).thenReturn("id");
+        when(gcpContext.getLocation()).thenReturn(location);
+        when(location.getRegion()).thenReturn(region);
+        when(region.getRegionName()).thenReturn("us-west2");
+
+        when(compute.regionHealthChecks()).thenReturn(regionHealthChecks);
+        when(regionHealthChecks.insert(anyString(), anyString(), any())).thenReturn(healthCheckInsert);
+        when(healthCheckInsert.execute()).thenReturn(operation);
+        when(operation.getName()).thenReturn("name");
+        when(operation.getHttpErrorStatusCode()).thenReturn(null);
+
+        List<CloudResource> cloudResources = underTest.build(gcpContext, authenticatedContext,
+                Collections.singletonList(resource), cloudLoadBalancer, cloudStack);
+
+        assertEquals("super", cloudResources.get(0).getName());
+        HealthProbeParameters healthCheck = cloudResources.get(0).getParameter("hcport", HealthProbeParameters.class);
+        assertEquals(8080, healthCheck.getPort());
+        assertEquals("health", healthCheck.getPath());
+        ArgumentCaptor<HealthCheck> healthCheckArgumentCaptor = ArgumentCaptor.forClass(HealthCheck.class);
+        verify(regionHealthChecks).insert(anyString(), anyString(), healthCheckArgumentCaptor.capture());
+        HealthCheck healthCheckParam = healthCheckArgumentCaptor.getValue();
+        assertEquals("HTTPS", healthCheckParam.getType());
+        assertEquals(8080, healthCheckParam.getHttpsHealthCheck().getPort());
+        assertEquals("health", healthCheckParam.getHttpsHealthCheck().getRequestPath());
     }
 
     @Test

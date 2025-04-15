@@ -6,6 +6,7 @@ import static com.sequenceiq.common.api.type.ResourceType.GCP_INSTANCE;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -173,7 +174,7 @@ public class GcpMetadataCollector implements MetadataCollector {
                 LOGGER.warn("Warning fetching GCP loadbalancer metadata, {}", forwardingRuleList.getWarning().getMessage());
             }
             if (!forwardingRuleList.isEmpty() && forwardingRuleList.getItems() != null) {
-                results.addAll(getLoadBalancerMetadata(loadBalancerTypes, forwardingRuleList, forwardingRules, compute, projectId));
+                results.addAll(getLoadBalancerMetadata(loadBalancerTypes, forwardingRuleList, forwardingRules, compute, projectId, region));
             } else {
                 LOGGER.info("No GCP load balancer forwarding rule has been returned for project id: '{}' in region '{}'", projectId, region);
             }
@@ -186,49 +187,69 @@ public class GcpMetadataCollector implements MetadataCollector {
     }
 
     private List<CloudLoadBalancerMetadata> getLoadBalancerMetadata(List<LoadBalancerType> loadBalancerTypes, ForwardingRuleList forwardingRuleList,
-            Set<CloudResource> forwardingRules, Compute compute, String projectId) {
-        List<CloudLoadBalancerMetadata> results = new ArrayList<>();
-        for (ForwardingRule item : forwardingRuleList.getItems()) {
-            LoadBalancerType itemType = gcpLoadBalancerTypeConverter.getScheme(item.getLoadBalancingScheme()).getCbType();
-            Optional<CloudResource> rule = forwardingRules.stream().filter(r -> r.getName().equals(item.getName())).findFirst();
-            if (rule.isPresent() && itemType == LoadBalancerType.PRIVATE &&
+            Set<CloudResource> forwardingRules, Compute compute, String projectId, String region) {
+        Map<LoadBalancerMetadataKey, CloudLoadBalancerMetadata> loadBalancerMap = new LinkedHashMap<>();
+        for (ForwardingRule forwardingRule : forwardingRuleList.getItems()) {
+            LoadBalancerType loadBalancerType = gcpLoadBalancerTypeConverter.getScheme(forwardingRule.getLoadBalancingScheme()).getCbType();
+            Optional<CloudResource> rule = forwardingRules.stream().filter(r -> r.getName().equals(forwardingRule.getName())).findFirst();
+            if (rule.isPresent() && loadBalancerType == LoadBalancerType.PRIVATE &&
                     LoadBalancerTypeAttribute.GATEWAY_PRIVATE == rule.get().getParameter(CloudResource.ATTRIBUTES, LoadBalancerTypeAttribute.class)) {
                 LOGGER.debug("GATEWAY_PRIVATE LoadBalancer selected");
-                itemType = LoadBalancerType.GATEWAY_PRIVATE;
+                loadBalancerType = LoadBalancerType.GATEWAY_PRIVATE;
             }
-            if (rule.isPresent() && loadBalancerTypes.contains(itemType)) {
-                Map<String, Object> params = getParams(compute, projectId, item);
-                CloudLoadBalancerMetadata loadBalancerMetadata = CloudLoadBalancerMetadata.builder()
-                        .withType(itemType)
-                        .withIp(item.getIPAddress())
-                        .withName(item.getName())
-                        .withParameters(params)
-                        .build();
-                results.add(loadBalancerMetadata);
+            if (rule.isPresent() && loadBalancerTypes.contains(loadBalancerType)) {
+                String backendService = forwardingRule.getBackendService();
+                BackendService service = getBackendService(compute, projectId, region, backendService);
+                LoadBalancerMetadataKey lbKey = new LoadBalancerMetadataKey(loadBalancerType, forwardingRule.getIPAddress(), backendService);
+                if (loadBalancerMap.containsKey(lbKey)) {
+                    getParams(forwardingRule, service).forEach((key, value) -> loadBalancerMap.get(lbKey).putParameter(key, value));
+                } else {
+                    CloudLoadBalancerMetadata loadBalancerMetadata = CloudLoadBalancerMetadata.builder()
+                            .withType(loadBalancerType)
+                            .withIp(forwardingRule.getIPAddress())
+                            .withName(backendService)
+                            .withParameters(getParams(forwardingRule, service))
+                            .build();
+                    loadBalancerMap.put(lbKey, loadBalancerMetadata);
+                }
             }
         }
-        return results;
+        return new ArrayList<>(loadBalancerMap.values());
     }
 
-    private Map<String, Object> getParams(Compute compute, String projectId, ForwardingRule item) {
+    private Map<String, Object> getParams(ForwardingRule item, BackendService backendService) {
         Map<String, Object> params = new HashMap<>();
         List<String> ports = item.getPorts();
-        params.put(GcpLoadBalancerMetadataView.LOADBALANCER_NAME, item.getName());
-        if (ports == null || ports.size() != 1) {
-            LOGGER.warn("Unexpected port count on {}, {}", item.getName(), ports);
-        }
-        if (ports != null && !ports.isEmpty()) {
-            try {
-                String backendService = item.getBackendService();
-                params.put(GcpLoadBalancerMetadataView.getBackendServiceParam(ports.get(0)), backendService);
-                BackendService service = compute.backendServices().get(projectId, backendService).execute();
-
-                params.put(GcpLoadBalancerMetadataView.getInstanceGroupParam(ports.get(0)), service.getBackends().get(0).getGroup());
-            } catch (RuntimeException | IOException e) {
-                LOGGER.error("Couldn't deterimine instancegroups for {}", item.getName(), e);
+        if (backendService != null) {
+            params.put(GcpLoadBalancerMetadataView.LOADBALANCER_NAME, backendService.getName());
+            if (ports != null && !ports.isEmpty()) {
+                String targetGroup = backendService.getBackends().get(0).getGroup();
+                ports.forEach(port -> {
+                    params.put(GcpLoadBalancerMetadataView.getBackendServiceParam(port), backendService.getName());
+                    params.put(GcpLoadBalancerMetadataView.getInstanceGroupParam(port), targetGroup);
+                });
+            } else {
+                LOGGER.warn("Unexpected port count on {}, {}", item.getName(), ports);
             }
+        } else {
+            LOGGER.warn("Couldn't deterimine instancegroups for {}", item.getName());
         }
         return params;
+    }
+
+    private BackendService getBackendService(Compute compute, String projectId, String region, String serviceName) {
+        try {
+            if (serviceName != null) {
+                return compute.regionBackendServices().get(projectId, region,
+                        serviceName.substring(serviceName.lastIndexOf("/") + 1)).execute();
+            } else {
+                LOGGER.warn("Cannot get backend service as service name is null");
+                return null;
+            }
+        } catch (RuntimeException | IOException ex) {
+            LOGGER.warn("Cannot get backend service for {}", serviceName, ex);
+            return null;
+        }
     }
 
     @Override
@@ -251,5 +272,8 @@ public class GcpMetadataCollector implements MetadataCollector {
             }
         }
         return new InstanceTypeMetadata(instanceTypes);
+    }
+
+    private record LoadBalancerMetadataKey(LoadBalancerType type, String ipAddress, String backend) {
     }
 }

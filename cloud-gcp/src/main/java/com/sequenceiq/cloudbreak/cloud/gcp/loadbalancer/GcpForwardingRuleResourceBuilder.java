@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -19,8 +20,6 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.ForwardingRule;
 import com.google.api.services.compute.model.Operation;
-import com.google.common.base.Functions;
-import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
@@ -28,14 +27,14 @@ import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.HealthProbeParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.common.api.type.LoadBalancerTypeAttribute;
 import com.sequenceiq.common.api.type.ResourceType;
 
 /**
  * Responsible for the CRUD operations of a GCP Forwarding Rule.
- * A Forwarding Rule maps an incoming request based on IP address, port, to a specific Backend Service
- * Only one can exist for a given IP address and port combination in a subnet
- *
+ * A Forwarding Rule maps an incoming request based on IP address, protocol and port, to a specific Backend Service
  */
 @Service
 public class GcpForwardingRuleResourceBuilder extends AbstractGcpLoadBalancerBuilder {
@@ -61,7 +60,32 @@ public class GcpForwardingRuleResourceBuilder extends AbstractGcpLoadBalancerBui
 
     @Override
     public List<CloudResource> create(GcpContext context, AuthenticatedContext auth, CloudLoadBalancer loadBalancer) {
-        return getCloudResourcesForFrontendAndBackendCreate(context, loadBalancer);
+        Map<HealthProbeParameters, GcpLBTrafficsMap> hcPortToTrafficPorts = new HashMap<>();
+        loadBalancer.getPortToTargetGroupMapping().keySet().forEach(targetGroupPortPair -> hcPortToTrafficPorts
+                .computeIfAbsent(targetGroupPortPair.getHealthProbeParameters(), lbHealthCheck -> new GcpLBTrafficsMap())
+                .addTraffic(targetGroupPortPair.getTrafficProtocol(), targetGroupPortPair.getTrafficPort()));
+        return hcPortToTrafficPorts.entrySet().stream()
+                .map(trafficMapEntry -> Pair.of(trafficMapEntry.getKey(), trafficMapEntry.getValue().getTraffics()))
+                .flatMap(trafficsEntry -> trafficsEntry.getValue().stream()
+                        .map(traffics -> Pair.of(trafficsEntry.getKey(), traffics)))
+                .map(trafficsByHealth -> createCloudResource(context, loadBalancer, trafficsByHealth))
+                .toList();
+    }
+
+    private CloudResource createCloudResource(GcpContext context, CloudLoadBalancer loadBalancer, Pair<HealthProbeParameters, GcpLBTraffics> trafficsByHealth) {
+        HealthProbeParameters lbHealthCheck = trafficsByHealth.getKey();
+        GcpLBTraffics lbTraffics = trafficsByHealth.getValue();
+        String resourceName = getResourceNameService().loadBalancerWithProtocolAndPort(context.getName(), loadBalancer.getType(),
+                lbTraffics.trafficProtocol().name(), lbHealthCheck.getPort());
+        Map<String, Object> parameters = Map.of(
+                TRAFFICPORTS, lbTraffics,
+                HCPORT, lbHealthCheck,
+                CloudResource.ATTRIBUTES, Enum.valueOf(LoadBalancerTypeAttribute.class, loadBalancer.getType().name()));
+        return CloudResource.builder()
+                .withType(resourceType())
+                .withName(resourceName)
+                .withParameters(parameters)
+                .build();
     }
 
     @Override
@@ -78,41 +102,38 @@ public class GcpForwardingRuleResourceBuilder extends AbstractGcpLoadBalancerBui
 
         for (CloudResource buildableResource : buildableResources) {
             LOGGER.debug("Building forwarding rule {} for {}", buildableResource.getName(), projectId);
-            Map<String, Object> portMap = buildableResource.getParameters();
             ForwardingRule forwardingRule = new ForwardingRule().setIPProtocol(TCP)
                     .setName(buildableResource.getName())
                     .setLoadBalancingScheme(scheme.getGcpType());
-            if (portMap.containsKey(TRAFFICPORTS)) {
-                List<String> ports = Lists.transform((List<Integer>) portMap.get(TRAFFICPORTS), Functions.toStringFunction());
-                forwardingRule.setPorts(ports);
-            } else {
-                Integer trafficPort = buildableResource.getParameter(TRAFFICPORT, Integer.class);
-                forwardingRule.setPorts(List.of(String.valueOf(trafficPort)));
-            }
+            GcpLBTraffics traffics = buildableResource.getParameter(TRAFFICPORTS, GcpLBTraffics.class);
+
+            List<String> ports = traffics.trafficPorts().stream().map(Object::toString).toList();
+            forwardingRule.setPorts(ports);
+            forwardingRule.setIPProtocol(convertProtocolWithTcpFallback(traffics.trafficProtocol()));
             if (scheme.equals(GcpLoadBalancerScheme.INTERNAL) || scheme.equals(GcpLoadBalancerScheme.GATEWAY_INTERNAL)) {
                 String sharedProjectId = gcpStackUtil.getSharedProjectId(network);
                 String networkUrl;
                 String subnetUrl;
                 if (StringUtils.isEmpty(sharedProjectId)) {
                     networkUrl = gcpStackUtil.getNetworkUrl(projectId, gcpStackUtil.getCustomNetworkId(network));
-                    subnetUrl = gcpStackUtil.getSubnetUrl(projectId, regionName, getForwardinRuleSubnet(network, scheme));
+                    subnetUrl = gcpStackUtil.getSubnetUrl(projectId, regionName, getForwardingRuleSubnet(network, scheme));
                 } else {
                     networkUrl = gcpStackUtil.getNetworkUrl(sharedProjectId, gcpStackUtil.getCustomNetworkId(network));
-                    subnetUrl = gcpStackUtil.getSubnetUrl(sharedProjectId, regionName, getForwardinRuleSubnet(network, scheme));
+                    subnetUrl = gcpStackUtil.getSubnetUrl(sharedProjectId, regionName, getForwardingRuleSubnet(network, scheme));
                 }
                 forwardingRule.setNetwork(networkUrl);
                 forwardingRule.setSubnetwork(subnetUrl);
                 LOGGER.debug("Set network to '{}' and subnet to '{}' for {} load balancer", networkUrl, subnetUrl, scheme);
             }
 
-            Integer hcPort = buildableResource.getParameter(HCPORT, Integer.class);
+            HealthProbeParameters healthCheck = buildableResource.getParameter(HCPORT, HealthProbeParameters.class);
             Optional<String> backendName = backendResources.stream()
-                    .filter(backendResource -> hcPort.equals(backendResource.getParameter(HCPORT, Integer.class)))
+                    .filter(backendResource -> healthCheck.equals(backendResource.getParameter(HCPORT, HealthProbeParameters.class)))
                     .findFirst()
                     .map(CloudResource::getName);
 
             if (!backendName.isPresent()) {
-                LOGGER.warn("backend not found for forwarding rule {}, port {}, project {}", buildableResource.getName(), hcPort, projectId);
+                LOGGER.warn("backend not found for forwarding rule {}, port {}, project {}", buildableResource.getName(), healthCheck, projectId);
                 continue;
             } else {
                 forwardingRule.setBackendService(String.format(GCP_BACKEND_SERVICE_REF_FORMAT, projectId, regionName, backendName.get()));
@@ -132,7 +153,7 @@ public class GcpForwardingRuleResourceBuilder extends AbstractGcpLoadBalancerBui
         return results;
     }
 
-    private String getForwardinRuleSubnet(Network network, GcpLoadBalancerScheme scheme) {
+    private String getForwardingRuleSubnet(Network network, GcpLoadBalancerScheme scheme) {
         if (scheme == GcpLoadBalancerScheme.GATEWAY_INTERNAL) {
             String endpointGwSubnetId = Objects.requireNonNullElse(gcpStackUtil.getEndpointGatewaySubnetId(network), gcpStackUtil.getSubnetId(network));
             LOGGER.debug("Setting {} as subnet for {} load balancer.", endpointGwSubnetId, scheme);

@@ -1,0 +1,20 @@
+{%- set ip_list = salt['pillar.get']('freeipa:loadBalancer:ips', []) -%}
+#!/bin/bash
+
+set -e
+
+LO_IFACE="lo"
+
+ip_list=({% for ip in ip_list %}{{ ip }} {% endfor %})
+
+readarray -t existing_ips < <(ip -4 addr show "$LO_IFACE" | grep -oP 'inet \K\d+\.\d+\.\d+\.\d+')
+
+for ip in "${ip_list[@]}"; do
+  if [[ " ${existing_ips[*]} " == *" $ip "* ]]; then
+    echo "$ip already exists on $LO_IFACE"
+  else
+    echo "Adding $ip to $LO_IFACE"
+    ip addr add "$ip/32" dev "$LO_IFACE"
+    existing_ips+=("$ip")
+  fi
+done

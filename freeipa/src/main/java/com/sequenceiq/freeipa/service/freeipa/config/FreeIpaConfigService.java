@@ -98,7 +98,7 @@ public class FreeIpaConfigService {
                 .withSeLinux(seLinux)
                 .withTlsv13Enabled(entitlementService.isTlsv13Enabled(stack.getAccountId()))
                 .withLbConfig(loadBalancerService.findByStackId(stack.getId())
-                        .map(lb -> new FreeIpaLbConfigView(lb.getEndpoint(), lb.getFqdn()))
+                        .map(lb -> new FreeIpaLbConfigView(lb.getEndpoint(), lb.getFqdn(), lb.getIp()))
                         .orElse(new FreeIpaLbConfigView()))
                 .build();
     }
