@@ -127,6 +127,8 @@ generate_user_facing_cert:
     - context:
       protocol: {{ cloudera_manager.communication.protocol }}
 
+{% if gateway is defined %}
+
 restart_nginx_after_ssl_reconfig_with_user_facing:
   service.running:
     - name: nginx
@@ -138,3 +140,14 @@ restart_nginx_after_ssl_reconfig_with_user_facing:
       - file: /etc/certs-user-facing/server-key.pem
       - file: /etc/certs-user-facing/server.pem
       {% endif %}
+{% else %}
+
+stop_nginx:
+  service.dead:
+    - name: nginx
+
+disable_nginx:
+  service.disabled:
+    - name: nginx
+
+{% endif %}

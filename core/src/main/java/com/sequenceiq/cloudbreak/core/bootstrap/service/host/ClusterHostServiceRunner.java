@@ -138,6 +138,7 @@ import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -523,13 +524,15 @@ public class ClusterHostServiceRunner {
         DetailedEnvironmentResponse detailedEnvironmentResponse = environmentConfigProvider.getEnvironmentByCrn(stackDto.getEnvironmentCrn());
         String seLinux = stackDto.getSecurityConfig() != null && stackDto.getSecurityConfig().getSeLinux() != null ?
                 stackDto.getSecurityConfig().getSeLinux().toString().toLowerCase(Locale.ROOT) : SeLinux.PERMISSIVE.toString().toLowerCase(Locale.ROOT);
+        boolean hybridEnabled = stack.isDatalake() && EnvironmentType.HYBRID.toString().equals(detailedEnvironmentResponse.getEnvironmentType());
         Map<String, ? extends Serializable> clusterProperties = Map.of(
                 "name", stackDto.getCluster().getName(),
                 "deployedInChildEnvironment", deployedInChildEnvironment,
                 "gov_cloud", stackDto.isOnGovPlatformVariant(),
                 "secretEncryptionEnabled", detailedEnvironmentResponse.isEnableSecretEncryption(),
                 "selinux_mode", seLinux,
-                "tlsv13Enabled", entitlementService.isTlsv13Enabled(stackDto.getAccountId()));
+                "tlsv13Enabled", entitlementService.isTlsv13Enabled(stackDto.getAccountId()),
+                "hybridEnabled", hybridEnabled);
         servicePillar.put("metadata", new SaltPillarProperties("/metadata/init.sls", singletonMap("cluster", clusterProperties)));
         ClusterPreCreationApi connector = clusterApiConnectors.getConnector(cluster);
         Map<String, List<String>> serviceLocations = getServiceLocations(stackDto);

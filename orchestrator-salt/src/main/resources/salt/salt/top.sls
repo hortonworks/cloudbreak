@@ -24,6 +24,9 @@ base:
     {% endif %}
     - hostname
     - selinux
+    {% if salt['pillar.get']('cluster:hybridEnabled', False) == True %}
+    - hybridbase
+    {% endif %}
 
   'G@roles:ad_member and G@os_family:RedHat':
     - match: compound

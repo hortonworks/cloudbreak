@@ -9,6 +9,7 @@ import static java.util.function.Predicate.not;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -158,6 +159,8 @@ public class SaltOrchestrator implements HostOrchestrator {
     private static final DateTimeFormatter CHAGE_DATE_PATTERN = DateTimeFormatter.ofPattern("MMM dd, yyyy");
 
     private static final String CHAGE_DATE_NEVER = "never";
+
+    private static final String HYBRID_ECS_GROUP = "ecs";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltOrchestrator.class);
 
@@ -497,9 +500,9 @@ public class SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
             saveHostsPillar(stack, exitModel, gatewayTargetIpAddresses, sc);
             saveCustomPillars(saltConfig, exitModel, gatewayTargetIpAddresses, sc);
-
             setAdMemberRoleIfNeeded(allNodes, saltConfig, exitModel, sc, reachableHostnames);
             setIpaMemberRoleIfNeeded(allNodes, saltConfig, exitModel, sc, reachableHostnames);
+            setEcsMemberRoleIfNeeded(allNodes, saltConfig, exitModel, sc);
 
             // knox
             if (primaryGateway.getKnoxGatewayEnabled()) {
@@ -637,6 +640,20 @@ public class SaltOrchestrator implements HostOrchestrator {
         if (saltConfig.getServicePillarConfig().containsKey("sssd-ipa")) {
             saltCommandRunner.runModifyGrainCommand(sc,
                     new GrainAddRunner(saltStateService, reachableHostnames, allNodes, "ipa_member"), exitModel, exitCriteria);
+        }
+    }
+
+    private void setEcsMemberRoleIfNeeded(Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel, SaltConnector sc) throws Exception {
+        Boolean hybridEnabled = Optional.ofNullable(saltConfig.getServicePillarConfig().get("metadata"))
+                .map(SaltPillarProperties::getProperties)
+                .map(pillarProps -> (Map<String, ? extends Serializable>) pillarProps.get("cluster"))
+                .map(clusterProps -> (Boolean) clusterProps.get("hybridEnabled")).orElse(Boolean.FALSE);
+        if (hybridEnabled) {
+            Set<String> ecsNodes = allNodes.stream()
+                    .filter(node -> node.getHostGroup().contains(HYBRID_ECS_GROUP))
+                    .map(Node::getHostname)
+                    .collect(Collectors.toSet());
+            saltCommandRunner.runModifyGrainCommand(sc, new GrainAddRunner(saltStateService, ecsNodes, allNodes, "ecs"), exitModel, exitCriteria);
         }
     }
 
