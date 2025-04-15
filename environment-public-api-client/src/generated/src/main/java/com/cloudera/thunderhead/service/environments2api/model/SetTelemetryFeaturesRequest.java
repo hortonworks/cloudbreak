@@ -41,7 +41,7 @@ public class SetTelemetryFeaturesRequest {
   private Boolean workloadAnalytics;
 
   public static final String JSON_PROPERTY_REPORT_DEPLOYMENT_LOGS = "reportDeploymentLogs";
-  private Boolean reportDeploymentLogs;
+  private Boolean reportDeploymentLogs = false;
 
   public static final String JSON_PROPERTY_CLOUD_STORAGE_LOGGING = "cloudStorageLogging";
   private Boolean cloudStorageLogging;
@@ -108,7 +108,7 @@ public class SetTelemetryFeaturesRequest {
   }
 
    /**
-   * Flag to enable environment level deployment log collection.
+   * [Deprecated] Flag to enable environment level deployment log collection.
    * @return reportDeploymentLogs
   **/
   @javax.annotation.Nullable

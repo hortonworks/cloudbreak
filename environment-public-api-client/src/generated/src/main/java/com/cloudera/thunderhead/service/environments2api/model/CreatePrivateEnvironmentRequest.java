@@ -16,6 +16,7 @@ package com.cloudera.thunderhead.service.environments2api.model;
 import java.util.Objects;
 import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.CreatePrivateEnvironmentRequestDockerUserPass;
+import com.cloudera.thunderhead.service.environments2api.model.EnvironmentQuota;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -36,6 +37,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   CreatePrivateEnvironmentRequest.JSON_PROPERTY_USER,
   CreatePrivateEnvironmentRequest.JSON_PROPERTY_AUTHENTICATION_TOKEN,
   CreatePrivateEnvironmentRequest.JSON_PROPERTY_CLUSTER_NAMES,
+  CreatePrivateEnvironmentRequest.JSON_PROPERTY_ENVIRONMENT_QUOTA,
   CreatePrivateEnvironmentRequest.JSON_PROPERTY_KUBE_CONFIG,
   CreatePrivateEnvironmentRequest.JSON_PROPERTY_AUTHENTICATION_TOKEN_TYPE,
   CreatePrivateEnvironmentRequest.JSON_PROPERTY_NAMESPACE_PREFIX,
@@ -62,6 +64,9 @@ public class CreatePrivateEnvironmentRequest {
 
   public static final String JSON_PROPERTY_CLUSTER_NAMES = "clusterNames";
   private List<String> clusterNames = new ArrayList<>();
+
+  public static final String JSON_PROPERTY_ENVIRONMENT_QUOTA = "environmentQuota";
+  private EnvironmentQuota environmentQuota;
 
   public static final String JSON_PROPERTY_KUBE_CONFIG = "kubeConfig";
   private String kubeConfig;
@@ -261,6 +266,32 @@ public class CreatePrivateEnvironmentRequest {
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
   public void setClusterNames(List<String> clusterNames) {
     this.clusterNames = clusterNames;
+  }
+
+
+  public CreatePrivateEnvironmentRequest environmentQuota(EnvironmentQuota environmentQuota) {
+    
+    this.environmentQuota = environmentQuota;
+    return this;
+  }
+
+   /**
+   * Get environmentQuota
+   * @return environmentQuota
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_ENVIRONMENT_QUOTA)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public EnvironmentQuota getEnvironmentQuota() {
+    return environmentQuota;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_ENVIRONMENT_QUOTA)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setEnvironmentQuota(EnvironmentQuota environmentQuota) {
+    this.environmentQuota = environmentQuota;
   }
 
 
@@ -511,6 +542,7 @@ public class CreatePrivateEnvironmentRequest {
         Objects.equals(this.user, createPrivateEnvironmentRequest.user) &&
         Objects.equals(this.authenticationToken, createPrivateEnvironmentRequest.authenticationToken) &&
         Objects.equals(this.clusterNames, createPrivateEnvironmentRequest.clusterNames) &&
+        Objects.equals(this.environmentQuota, createPrivateEnvironmentRequest.environmentQuota) &&
         Objects.equals(this.kubeConfig, createPrivateEnvironmentRequest.kubeConfig) &&
         Objects.equals(this.authenticationTokenType, createPrivateEnvironmentRequest.authenticationTokenType) &&
         Objects.equals(this.namespacePrefix, createPrivateEnvironmentRequest.namespacePrefix) &&
@@ -524,7 +556,7 @@ public class CreatePrivateEnvironmentRequest {
 
   @Override
   public int hashCode() {
-    return Objects.hash(environmentName, address, user, authenticationToken, clusterNames, kubeConfig, authenticationTokenType, namespacePrefix, domain, platform, dockerConfigJson, dockerUserPass, description, storageClass);
+    return Objects.hash(environmentName, address, user, authenticationToken, clusterNames, environmentQuota, kubeConfig, authenticationTokenType, namespacePrefix, domain, platform, dockerConfigJson, dockerUserPass, description, storageClass);
   }
 
   @Override
@@ -536,6 +568,7 @@ public class CreatePrivateEnvironmentRequest {
     sb.append("    user: ").append(toIndentedString(user)).append("\n");
     sb.append("    authenticationToken: ").append(toIndentedString(authenticationToken)).append("\n");
     sb.append("    clusterNames: ").append(toIndentedString(clusterNames)).append("\n");
+    sb.append("    environmentQuota: ").append(toIndentedString(environmentQuota)).append("\n");
     sb.append("    kubeConfig: ").append(toIndentedString(kubeConfig)).append("\n");
     sb.append("    authenticationTokenType: ").append(toIndentedString(authenticationTokenType)).append("\n");
     sb.append("    namespacePrefix: ").append(toIndentedString(namespacePrefix)).append("\n");

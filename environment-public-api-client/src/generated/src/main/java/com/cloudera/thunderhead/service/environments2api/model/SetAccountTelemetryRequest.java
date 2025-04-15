@@ -42,7 +42,7 @@ public class SetAccountTelemetryRequest {
   private Boolean workloadAnalytics;
 
   public static final String JSON_PROPERTY_REPORT_DEPLOYMENT_LOGS = "reportDeploymentLogs";
-  private Boolean reportDeploymentLogs;
+  private Boolean reportDeploymentLogs = false;
 
   public static final String JSON_PROPERTY_CLOUD_STORAGE_LOGGING = "cloudStorageLogging";
   private Boolean cloudStorageLogging;
@@ -86,7 +86,7 @@ public class SetAccountTelemetryRequest {
   }
 
    /**
-   * Flag to enable account level deployment log collection. (that will be used as a default for environment)
+   * [Deprecated] Flag to enable environment level deployment log collection.
    * @return reportDeploymentLogs
   **/
   @javax.annotation.Nullable

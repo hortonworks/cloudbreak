@@ -16,6 +16,7 @@ package com.cloudera.thunderhead.service.environments2api.model;
 import java.util.Objects;
 import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.FreeIpaInstance;
+import com.cloudera.thunderhead.service.environments2api.model.FreeIpaLoadBalancer;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -41,7 +42,8 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   FreeipaDetails.JSON_PROPERTY_RECIPES,
   FreeipaDetails.JSON_PROPERTY_INSTANCES,
   FreeipaDetails.JSON_PROPERTY_INSTANCE_COUNT_BY_GROUP,
-  FreeipaDetails.JSON_PROPERTY_MULTI_AZ
+  FreeipaDetails.JSON_PROPERTY_MULTI_AZ,
+  FreeipaDetails.JSON_PROPERTY_LOAD_BALANCER
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
 public class FreeipaDetails {
@@ -68,6 +70,9 @@ public class FreeipaDetails {
 
   public static final String JSON_PROPERTY_MULTI_AZ = "multiAz";
   private Boolean multiAz;
+
+  public static final String JSON_PROPERTY_LOAD_BALANCER = "loadBalancer";
+  private FreeIpaLoadBalancer loadBalancer;
 
   public FreeipaDetails() {
   }
@@ -305,6 +310,32 @@ public class FreeipaDetails {
     this.multiAz = multiAz;
   }
 
+
+  public FreeipaDetails loadBalancer(FreeIpaLoadBalancer loadBalancer) {
+    
+    this.loadBalancer = loadBalancer;
+    return this;
+  }
+
+   /**
+   * Get loadBalancer
+   * @return loadBalancer
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_LOAD_BALANCER)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public FreeIpaLoadBalancer getLoadBalancer() {
+    return loadBalancer;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_LOAD_BALANCER)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setLoadBalancer(FreeIpaLoadBalancer loadBalancer) {
+    this.loadBalancer = loadBalancer;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -321,12 +352,13 @@ public class FreeipaDetails {
         Objects.equals(this.recipes, freeipaDetails.recipes) &&
         Objects.equals(this.instances, freeipaDetails.instances) &&
         Objects.equals(this.instanceCountByGroup, freeipaDetails.instanceCountByGroup) &&
-        Objects.equals(this.multiAz, freeipaDetails.multiAz);
+        Objects.equals(this.multiAz, freeipaDetails.multiAz) &&
+        Objects.equals(this.loadBalancer, freeipaDetails.loadBalancer);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(crn, domain, hostname, serverIP, recipes, instances, instanceCountByGroup, multiAz);
+    return Objects.hash(crn, domain, hostname, serverIP, recipes, instances, instanceCountByGroup, multiAz, loadBalancer);
   }
 
   @Override
@@ -341,6 +373,7 @@ public class FreeipaDetails {
     sb.append("    instances: ").append(toIndentedString(instances)).append("\n");
     sb.append("    instanceCountByGroup: ").append(toIndentedString(instanceCountByGroup)).append("\n");
     sb.append("    multiAz: ").append(toIndentedString(multiAz)).append("\n");
+    sb.append("    loadBalancer: ").append(toIndentedString(loadBalancer)).append("\n");
     sb.append("}");
     return sb.toString();
   }

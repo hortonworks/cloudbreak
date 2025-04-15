@@ -216,7 +216,40 @@
       },
       "knoxGatewayUrl": "https://knox-testcloud-1.test-hybrid.root.comops.site:7183"
     },
-    "cdpRuntimeVersion": "7.1.9-1.cdh7.1.9.p1.53348907",
+    "privateDatalakeDetails": {
+      "datalakeName": "Cluster 1",
+      "enableRangerRaz": false,
+      "creationDate": "1743545412352",
+      "cmFQDN": "ccycloud-1.cldr-7131.root.comops.site",
+      "cmIP": "10.140.72.0",
+      "cmServerId": "a9175770-73c9-4c5b-8cba-e9a3e56ae604",
+      "status": "GOOD_HEALTH",
+      "instances": [
+        {
+          "instanceId": "6c5c06cb-e1aa-46b9-9cdb-d7f72b05b053",
+          "discoveryFQDN": "ccycloud-1.zhefei-7131.root.comops.site",
+          "privateIp": "10.140.72.0"
+        },
+        {
+          "instanceId": "d9e07685-f462-42f6-b62c-cb0a21b94256",
+          "discoveryFQDN": "ccycloud-2.cldr-7131.root.comops.site",
+          "privateIp": "10.140.81.67"
+        },
+        {
+          "instanceId": "16c3c6ef-fcd5-4d85-944c-11e426bc1453",
+          "discoveryFQDN": "ccycloud-3.cldr-7131.root.comops.site",
+          "privateIp": "10.140.190.17"
+        }
+      ],
+      "kerberosInfo": {
+        "kdcType": "MIT KDC",
+        "kerberosRealm": "ROOT.COMOPS.SITE",
+        "kdcHost": "ccycloud-1.cldr-7131.root.comops.site",
+        "kerberized": true
+      }
+    }
+  },
+  "cdpRuntimeVersion": "7.1.9-1.cdh7.1.9.p1.53348907",
     "clouderaManagerVersion": "7.13.0",
     "cdpPvcVersion": "1.6.0"
   }

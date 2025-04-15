@@ -24,42 +24,42 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
- * Request object for rotating SaltStack user password on FreeIPA instances (Deprecated).
+ * Response object for set endpoint access gateway request.
  */
 @JsonPropertyOrder({
-  RotateSaltPasswordRequest.JSON_PROPERTY_ENVIRONMENT
+  SetEndpointAccessGatewayResponse.JSON_PROPERTY_OPERATION_ID
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
-public class RotateSaltPasswordRequest {
-  public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
-  private String environment;
+public class SetEndpointAccessGatewayResponse {
+  public static final String JSON_PROPERTY_OPERATION_ID = "operationId";
+  private String operationId;
 
-  public RotateSaltPasswordRequest() {
+  public SetEndpointAccessGatewayResponse() {
   }
 
-  public RotateSaltPasswordRequest environment(String environment) {
+  public SetEndpointAccessGatewayResponse operationId(String operationId) {
     
-    this.environment = environment;
+    this.operationId = operationId;
     return this;
   }
 
    /**
-   * The name or CRN of the environment.
-   * @return environment
+   * Unique operation ID assigned to this command execution. Use this identifier with &#39;get-operation&#39; to track status and retrieve detailed results.
+   * @return operationId
   **/
-  @javax.annotation.Nonnull
-  @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_OPERATION_ID)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public String getEnvironment() {
-    return environment;
+  public String getOperationId() {
+    return operationId;
   }
 
 
-  @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(String environment) {
-    this.environment = environment;
+  @JsonProperty(JSON_PROPERTY_OPERATION_ID)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setOperationId(String operationId) {
+    this.operationId = operationId;
   }
 
   @Override
@@ -70,20 +70,20 @@ public class RotateSaltPasswordRequest {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    RotateSaltPasswordRequest rotateSaltPasswordRequest = (RotateSaltPasswordRequest) o;
-    return Objects.equals(this.environment, rotateSaltPasswordRequest.environment);
+    SetEndpointAccessGatewayResponse setEndpointAccessGatewayResponse = (SetEndpointAccessGatewayResponse) o;
+    return Objects.equals(this.operationId, setEndpointAccessGatewayResponse.operationId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(environment);
+    return Objects.hash(operationId);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class RotateSaltPasswordRequest {\n");
-    sb.append("    environment: ").append(toIndentedString(environment)).append("\n");
+    sb.append("class SetEndpointAccessGatewayResponse {\n");
+    sb.append("    operationId: ").append(toIndentedString(operationId)).append("\n");
     sb.append("}");
     return sb.toString();
   }

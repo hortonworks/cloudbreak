@@ -24,42 +24,42 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
- * Request object for rotating SaltStack user password on FreeIPA instances (Deprecated).
+ * The response object for FreeIpa root volume update.
  */
 @JsonPropertyOrder({
-  RotateSaltPasswordRequest.JSON_PROPERTY_ENVIRONMENT
+  UpdateRootVolumeFreeipaResponse.JSON_PROPERTY_RESULT
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
-public class RotateSaltPasswordRequest {
-  public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
-  private String environment;
+public class UpdateRootVolumeFreeipaResponse {
+  public static final String JSON_PROPERTY_RESULT = "result";
+  private String result;
 
-  public RotateSaltPasswordRequest() {
+  public UpdateRootVolumeFreeipaResponse() {
   }
 
-  public RotateSaltPasswordRequest environment(String environment) {
+  public UpdateRootVolumeFreeipaResponse result(String result) {
     
-    this.environment = environment;
+    this.result = result;
     return this;
   }
 
    /**
-   * The name or CRN of the environment.
-   * @return environment
+   * The result of the operation.
+   * @return result
   **/
-  @javax.annotation.Nonnull
-  @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_RESULT)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public String getEnvironment() {
-    return environment;
+  public String getResult() {
+    return result;
   }
 
 
-  @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(String environment) {
-    this.environment = environment;
+  @JsonProperty(JSON_PROPERTY_RESULT)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setResult(String result) {
+    this.result = result;
   }
 
   @Override
@@ -70,20 +70,20 @@ public class RotateSaltPasswordRequest {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    RotateSaltPasswordRequest rotateSaltPasswordRequest = (RotateSaltPasswordRequest) o;
-    return Objects.equals(this.environment, rotateSaltPasswordRequest.environment);
+    UpdateRootVolumeFreeipaResponse updateRootVolumeFreeipaResponse = (UpdateRootVolumeFreeipaResponse) o;
+    return Objects.equals(this.result, updateRootVolumeFreeipaResponse.result);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(environment);
+    return Objects.hash(result);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class RotateSaltPasswordRequest {\n");
-    sb.append("    environment: ").append(toIndentedString(environment)).append("\n");
+    sb.append("class UpdateRootVolumeFreeipaResponse {\n");
+    sb.append("    result: ").append(toIndentedString(result)).append("\n");
     sb.append("}");
     return sb.toString();
   }

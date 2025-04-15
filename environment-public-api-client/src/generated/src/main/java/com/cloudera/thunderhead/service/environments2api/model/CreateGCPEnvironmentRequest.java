@@ -103,7 +103,7 @@ public class CreateGCPEnvironmentRequest {
   private Boolean workloadAnalytics;
 
   public static final String JSON_PROPERTY_REPORT_DEPLOYMENT_LOGS = "reportDeploymentLogs";
-  private Boolean reportDeploymentLogs;
+  private Boolean reportDeploymentLogs = false;
 
   public static final String JSON_PROPERTY_TUNNEL_TYPE = "tunnelType";
   private TunnelType tunnelType;
@@ -478,7 +478,7 @@ public class CreateGCPEnvironmentRequest {
   }
 
    /**
-   * When true, this will report additional diagnostic information back to Cloudera.
+   * [Deprecated] When true, this will report additional diagnostic information back to Cloudera.
    * @return reportDeploymentLogs
   **/
   @javax.annotation.Nullable

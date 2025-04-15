@@ -15,6 +15,7 @@ package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
 import java.util.Arrays;
+import com.cloudera.thunderhead.service.environments2api.model.Environment;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -24,41 +25,41 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
- * Request object for rotating SaltStack user password on FreeIPA instances (Deprecated).
+ * Response object for a update GCP Availability Zones request.
  */
 @JsonPropertyOrder({
-  RotateSaltPasswordRequest.JSON_PROPERTY_ENVIRONMENT
+  UpdateGcpAvailabilityZonesResponse.JSON_PROPERTY_ENVIRONMENT
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
-public class RotateSaltPasswordRequest {
+public class UpdateGcpAvailabilityZonesResponse {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
-  private String environment;
+  private Environment environment;
 
-  public RotateSaltPasswordRequest() {
+  public UpdateGcpAvailabilityZonesResponse() {
   }
 
-  public RotateSaltPasswordRequest environment(String environment) {
+  public UpdateGcpAvailabilityZonesResponse environment(Environment environment) {
     
     this.environment = environment;
     return this;
   }
 
    /**
-   * The name or CRN of the environment.
+   * Get environment
    * @return environment
   **/
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public String getEnvironment() {
+  public Environment getEnvironment() {
     return environment;
   }
 
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(String environment) {
+  public void setEnvironment(Environment environment) {
     this.environment = environment;
   }
 
@@ -70,8 +71,8 @@ public class RotateSaltPasswordRequest {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    RotateSaltPasswordRequest rotateSaltPasswordRequest = (RotateSaltPasswordRequest) o;
-    return Objects.equals(this.environment, rotateSaltPasswordRequest.environment);
+    UpdateGcpAvailabilityZonesResponse updateGcpAvailabilityZonesResponse = (UpdateGcpAvailabilityZonesResponse) o;
+    return Objects.equals(this.environment, updateGcpAvailabilityZonesResponse.environment);
   }
 
   @Override
@@ -82,7 +83,7 @@ public class RotateSaltPasswordRequest {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class RotateSaltPasswordRequest {\n");
+    sb.append("class UpdateGcpAvailabilityZonesResponse {\n");
     sb.append("    environment: ").append(toIndentedString(environment)).append("\n");
     sb.append("}");
     return sb.toString();

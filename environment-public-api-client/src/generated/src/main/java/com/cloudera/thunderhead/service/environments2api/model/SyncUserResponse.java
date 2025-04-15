@@ -87,7 +87,7 @@ public class SyncUserResponse {
   }
 
    /**
-   * UUID of the request for this operation. This Id can be used for geting status on the operation.
+   * Unique operation ID assigned to this command execution. Use this identifier with &#39;get-operation&#39; to track status and retrieve detailed results.
    * @return operationId
   **/
   @javax.annotation.Nonnull

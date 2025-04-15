@@ -19,6 +19,7 @@ import com.cloudera.thunderhead.service.environments2api.model.Application;
 import com.cloudera.thunderhead.service.environments2api.model.CdeSummary;
 import com.cloudera.thunderhead.service.environments2api.model.CdwSummary;
 import com.cloudera.thunderhead.service.environments2api.model.CmlSummary;
+import com.cloudera.thunderhead.service.environments2api.model.PrivateDatalakeDetails;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -38,7 +39,8 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   PvcEnvironmentDetails.JSON_PROPERTY_CDW_SUMMARY,
   PvcEnvironmentDetails.JSON_PROPERTY_CDE_SUMMARY,
   PvcEnvironmentDetails.JSON_PROPERTY_APPLICATIONS,
-  PvcEnvironmentDetails.JSON_PROPERTY_KNOX_GATEWAY_URL
+  PvcEnvironmentDetails.JSON_PROPERTY_KNOX_GATEWAY_URL,
+  PvcEnvironmentDetails.JSON_PROPERTY_PRIVATE_DATALAKE_DETAILS
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
 public class PvcEnvironmentDetails {
@@ -59,6 +61,9 @@ public class PvcEnvironmentDetails {
 
   public static final String JSON_PROPERTY_KNOX_GATEWAY_URL = "knoxGatewayUrl";
   private String knoxGatewayUrl;
+
+  public static final String JSON_PROPERTY_PRIVATE_DATALAKE_DETAILS = "privateDatalakeDetails";
+  private PrivateDatalakeDetails privateDatalakeDetails;
 
   public PvcEnvironmentDetails() {
   }
@@ -226,6 +231,32 @@ public class PvcEnvironmentDetails {
     this.knoxGatewayUrl = knoxGatewayUrl;
   }
 
+
+  public PvcEnvironmentDetails privateDatalakeDetails(PrivateDatalakeDetails privateDatalakeDetails) {
+    
+    this.privateDatalakeDetails = privateDatalakeDetails;
+    return this;
+  }
+
+   /**
+   * Get privateDatalakeDetails
+   * @return privateDatalakeDetails
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_PRIVATE_DATALAKE_DETAILS)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public PrivateDatalakeDetails getPrivateDatalakeDetails() {
+    return privateDatalakeDetails;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_PRIVATE_DATALAKE_DETAILS)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setPrivateDatalakeDetails(PrivateDatalakeDetails privateDatalakeDetails) {
+    this.privateDatalakeDetails = privateDatalakeDetails;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -240,12 +271,13 @@ public class PvcEnvironmentDetails {
         Objects.equals(this.cdwSummary, pvcEnvironmentDetails.cdwSummary) &&
         Objects.equals(this.cdeSummary, pvcEnvironmentDetails.cdeSummary) &&
         Objects.equals(this.applications, pvcEnvironmentDetails.applications) &&
-        Objects.equals(this.knoxGatewayUrl, pvcEnvironmentDetails.knoxGatewayUrl);
+        Objects.equals(this.knoxGatewayUrl, pvcEnvironmentDetails.knoxGatewayUrl) &&
+        Objects.equals(this.privateDatalakeDetails, pvcEnvironmentDetails.privateDatalakeDetails);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(cmHost, cmlSummary, cdwSummary, cdeSummary, applications, knoxGatewayUrl);
+    return Objects.hash(cmHost, cmlSummary, cdwSummary, cdeSummary, applications, knoxGatewayUrl, privateDatalakeDetails);
   }
 
   @Override
@@ -258,6 +290,7 @@ public class PvcEnvironmentDetails {
     sb.append("    cdeSummary: ").append(toIndentedString(cdeSummary)).append("\n");
     sb.append("    applications: ").append(toIndentedString(applications)).append("\n");
     sb.append("    knoxGatewayUrl: ").append(toIndentedString(knoxGatewayUrl)).append("\n");
+    sb.append("    privateDatalakeDetails: ").append(toIndentedString(privateDatalakeDetails)).append("\n");
     sb.append("}");
     return sb.toString();
   }

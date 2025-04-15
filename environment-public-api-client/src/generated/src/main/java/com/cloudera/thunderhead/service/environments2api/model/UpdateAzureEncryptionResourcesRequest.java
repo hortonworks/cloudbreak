@@ -30,7 +30,6 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   UpdateAzureEncryptionResourcesRequest.JSON_PROPERTY_ENVIRONMENT,
   UpdateAzureEncryptionResourcesRequest.JSON_PROPERTY_ENCRYPTION_KEY_URL,
   UpdateAzureEncryptionResourcesRequest.JSON_PROPERTY_ENCRYPTION_KEY_RESOURCE_GROUP_NAME,
-  UpdateAzureEncryptionResourcesRequest.JSON_PROPERTY_USER_MANAGED_IDENTITY,
   UpdateAzureEncryptionResourcesRequest.JSON_PROPERTY_ENCRYPTION_USER_MANAGED_IDENTITY
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
@@ -43,9 +42,6 @@ public class UpdateAzureEncryptionResourcesRequest {
 
   public static final String JSON_PROPERTY_ENCRYPTION_KEY_RESOURCE_GROUP_NAME = "encryptionKeyResourceGroupName";
   private String encryptionKeyResourceGroupName;
-
-  public static final String JSON_PROPERTY_USER_MANAGED_IDENTITY = "userManagedIdentity";
-  private String userManagedIdentity;
 
   public static final String JSON_PROPERTY_ENCRYPTION_USER_MANAGED_IDENTITY = "encryptionUserManagedIdentity";
   private String encryptionUserManagedIdentity;
@@ -131,32 +127,6 @@ public class UpdateAzureEncryptionResourcesRequest {
   }
 
 
-  public UpdateAzureEncryptionResourcesRequest userManagedIdentity(String userManagedIdentity) {
-    
-    this.userManagedIdentity = userManagedIdentity;
-    return this;
-  }
-
-   /**
-   * User managed identity for encryption. (deprecated)
-   * @return userManagedIdentity
-  **/
-  @javax.annotation.Nullable
-  @JsonProperty(JSON_PROPERTY_USER_MANAGED_IDENTITY)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-
-  public String getUserManagedIdentity() {
-    return userManagedIdentity;
-  }
-
-
-  @JsonProperty(JSON_PROPERTY_USER_MANAGED_IDENTITY)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setUserManagedIdentity(String userManagedIdentity) {
-    this.userManagedIdentity = userManagedIdentity;
-  }
-
-
   public UpdateAzureEncryptionResourcesRequest encryptionUserManagedIdentity(String encryptionUserManagedIdentity) {
     
     this.encryptionUserManagedIdentity = encryptionUserManagedIdentity;
@@ -194,13 +164,12 @@ public class UpdateAzureEncryptionResourcesRequest {
     return Objects.equals(this.environment, updateAzureEncryptionResourcesRequest.environment) &&
         Objects.equals(this.encryptionKeyUrl, updateAzureEncryptionResourcesRequest.encryptionKeyUrl) &&
         Objects.equals(this.encryptionKeyResourceGroupName, updateAzureEncryptionResourcesRequest.encryptionKeyResourceGroupName) &&
-        Objects.equals(this.userManagedIdentity, updateAzureEncryptionResourcesRequest.userManagedIdentity) &&
         Objects.equals(this.encryptionUserManagedIdentity, updateAzureEncryptionResourcesRequest.encryptionUserManagedIdentity);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(environment, encryptionKeyUrl, encryptionKeyResourceGroupName, userManagedIdentity, encryptionUserManagedIdentity);
+    return Objects.hash(environment, encryptionKeyUrl, encryptionKeyResourceGroupName, encryptionUserManagedIdentity);
   }
 
   @Override
@@ -210,7 +179,6 @@ public class UpdateAzureEncryptionResourcesRequest {
     sb.append("    environment: ").append(toIndentedString(environment)).append("\n");
     sb.append("    encryptionKeyUrl: ").append(toIndentedString(encryptionKeyUrl)).append("\n");
     sb.append("    encryptionKeyResourceGroupName: ").append(toIndentedString(encryptionKeyResourceGroupName)).append("\n");
-    sb.append("    userManagedIdentity: ").append(toIndentedString(userManagedIdentity)).append("\n");
     sb.append("    encryptionUserManagedIdentity: ").append(toIndentedString(encryptionUserManagedIdentity)).append("\n");
     sb.append("}");
     return sb.toString();

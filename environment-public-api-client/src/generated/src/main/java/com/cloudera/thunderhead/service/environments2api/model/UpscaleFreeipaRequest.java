@@ -39,6 +39,8 @@ public class UpscaleFreeipaRequest {
    * The target FreeIPA availability type.
    */
   public enum TargetAvailabilityTypeEnum {
+    TWO_NODE_BASED("TWO_NODE_BASED"),
+    
     HA("HA");
 
     private String value;

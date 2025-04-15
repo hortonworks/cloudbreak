@@ -50,9 +50,9 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   CreateAWSEnvironmentRequest.JSON_PROPERTY_SECURITY_ACCESS,
   CreateAWSEnvironmentRequest.JSON_PROPERTY_AUTHENTICATION,
   CreateAWSEnvironmentRequest.JSON_PROPERTY_LOG_STORAGE,
-  CreateAWSEnvironmentRequest.JSON_PROPERTY_NETWORK_CIDR,
   CreateAWSEnvironmentRequest.JSON_PROPERTY_VPC_ID,
   CreateAWSEnvironmentRequest.JSON_PROPERTY_SUBNET_IDS,
+  CreateAWSEnvironmentRequest.JSON_PROPERTY_NETWORK_CIDR,
   CreateAWSEnvironmentRequest.JSON_PROPERTY_CREATE_PRIVATE_SUBNETS,
   CreateAWSEnvironmentRequest.JSON_PROPERTY_CREATE_SERVICE_ENDPOINTS,
   CreateAWSEnvironmentRequest.JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SCHEME,
@@ -96,14 +96,14 @@ public class CreateAWSEnvironmentRequest {
   public static final String JSON_PROPERTY_LOG_STORAGE = "logStorage";
   private AwsLogStorageRequest logStorage;
 
-  public static final String JSON_PROPERTY_NETWORK_CIDR = "networkCidr";
-  private String networkCidr;
-
   public static final String JSON_PROPERTY_VPC_ID = "vpcId";
   private String vpcId;
 
   public static final String JSON_PROPERTY_SUBNET_IDS = "subnetIds";
   private Set<String> subnetIds = new LinkedHashSet<>();
+
+  public static final String JSON_PROPERTY_NETWORK_CIDR = "networkCidr";
+  private String networkCidr;
 
   public static final String JSON_PROPERTY_CREATE_PRIVATE_SUBNETS = "createPrivateSubnets";
   private Boolean createPrivateSubnets;
@@ -165,7 +165,7 @@ public class CreateAWSEnvironmentRequest {
   private Boolean workloadAnalytics;
 
   public static final String JSON_PROPERTY_REPORT_DEPLOYMENT_LOGS = "reportDeploymentLogs";
-  private Boolean reportDeploymentLogs;
+  private Boolean reportDeploymentLogs = false;
 
   public static final String JSON_PROPERTY_TUNNEL_TYPE = "tunnelType";
   private TunnelType tunnelType;
@@ -365,32 +365,6 @@ public class CreateAWSEnvironmentRequest {
   }
 
 
-  public CreateAWSEnvironmentRequest networkCidr(String networkCidr) {
-    
-    this.networkCidr = networkCidr;
-    return this;
-  }
-
-   /**
-   * The network CIDR. This will create a VPC along with subnets in multiple Availability Zones.
-   * @return networkCidr
-  **/
-  @javax.annotation.Nullable
-  @JsonProperty(JSON_PROPERTY_NETWORK_CIDR)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-
-  public String getNetworkCidr() {
-    return networkCidr;
-  }
-
-
-  @JsonProperty(JSON_PROPERTY_NETWORK_CIDR)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setNetworkCidr(String networkCidr) {
-    this.networkCidr = networkCidr;
-  }
-
-
   public CreateAWSEnvironmentRequest vpcId(String vpcId) {
     
     this.vpcId = vpcId;
@@ -398,7 +372,7 @@ public class CreateAWSEnvironmentRequest {
   }
 
    /**
-   * The Amazon VPC ID. Mutually exclusive with networkCidr.
+   * The Amazon VPC ID.
    * @return vpcId
   **/
   @javax.annotation.Nullable
@@ -432,7 +406,7 @@ public class CreateAWSEnvironmentRequest {
   }
 
    /**
-   * One or more subnet IDs within the VPC. Mutually exclusive with networkCidr.
+   * One or more subnet IDs within the VPC.
    * @return subnetIds
   **/
   @javax.annotation.Nullable
@@ -449,6 +423,32 @@ public class CreateAWSEnvironmentRequest {
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
   public void setSubnetIds(Set<String> subnetIds) {
     this.subnetIds = subnetIds;
+  }
+
+
+  public CreateAWSEnvironmentRequest networkCidr(String networkCidr) {
+    
+    this.networkCidr = networkCidr;
+    return this;
+  }
+
+   /**
+   * [Deprecated] The network CIDR. This will create a VPC along with subnets in multiple Availability Zones.
+   * @return networkCidr
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_NETWORK_CIDR)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public String getNetworkCidr() {
+    return networkCidr;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_NETWORK_CIDR)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setNetworkCidr(String networkCidr) {
+    this.networkCidr = networkCidr;
   }
 
 
@@ -675,7 +675,7 @@ public class CreateAWSEnvironmentRequest {
   }
 
    /**
-   * When true, this will report additional diagnostic information back to Cloudera.
+   * [Deprecated] When true, this will report additional diagnostic information back to Cloudera.
    * @return reportDeploymentLogs
   **/
   @javax.annotation.Nullable
@@ -1054,9 +1054,9 @@ public class CreateAWSEnvironmentRequest {
         Objects.equals(this.securityAccess, createAWSEnvironmentRequest.securityAccess) &&
         Objects.equals(this.authentication, createAWSEnvironmentRequest.authentication) &&
         Objects.equals(this.logStorage, createAWSEnvironmentRequest.logStorage) &&
-        Objects.equals(this.networkCidr, createAWSEnvironmentRequest.networkCidr) &&
         Objects.equals(this.vpcId, createAWSEnvironmentRequest.vpcId) &&
         Objects.equals(this.subnetIds, createAWSEnvironmentRequest.subnetIds) &&
+        Objects.equals(this.networkCidr, createAWSEnvironmentRequest.networkCidr) &&
         Objects.equals(this.createPrivateSubnets, createAWSEnvironmentRequest.createPrivateSubnets) &&
         Objects.equals(this.createServiceEndpoints, createAWSEnvironmentRequest.createServiceEndpoints) &&
         Objects.equals(this.endpointAccessGatewayScheme, createAWSEnvironmentRequest.endpointAccessGatewayScheme) &&
@@ -1083,7 +1083,7 @@ public class CreateAWSEnvironmentRequest {
 
   @Override
   public int hashCode() {
-    return Objects.hash(environmentName, credentialName, region, securityAccess, authentication, logStorage, networkCidr, vpcId, subnetIds, createPrivateSubnets, createServiceEndpoints, endpointAccessGatewayScheme, endpointAccessGatewaySubnetIds, s3GuardTableName, description, enableTunnel, workloadAnalytics, reportDeploymentLogs, tunnelType, ccmV2TlsType, cloudStorageLogging, freeIpa, enableComputeCluster, computeClusterConfiguration, image, tags, proxyConfigName, encryptionKeyArn, idBrokerMappingSource, customDockerRegistry, security);
+    return Objects.hash(environmentName, credentialName, region, securityAccess, authentication, logStorage, vpcId, subnetIds, networkCidr, createPrivateSubnets, createServiceEndpoints, endpointAccessGatewayScheme, endpointAccessGatewaySubnetIds, s3GuardTableName, description, enableTunnel, workloadAnalytics, reportDeploymentLogs, tunnelType, ccmV2TlsType, cloudStorageLogging, freeIpa, enableComputeCluster, computeClusterConfiguration, image, tags, proxyConfigName, encryptionKeyArn, idBrokerMappingSource, customDockerRegistry, security);
   }
 
   @Override
@@ -1096,9 +1096,9 @@ public class CreateAWSEnvironmentRequest {
     sb.append("    securityAccess: ").append(toIndentedString(securityAccess)).append("\n");
     sb.append("    authentication: ").append(toIndentedString(authentication)).append("\n");
     sb.append("    logStorage: ").append(toIndentedString(logStorage)).append("\n");
-    sb.append("    networkCidr: ").append(toIndentedString(networkCidr)).append("\n");
     sb.append("    vpcId: ").append(toIndentedString(vpcId)).append("\n");
     sb.append("    subnetIds: ").append(toIndentedString(subnetIds)).append("\n");
+    sb.append("    networkCidr: ").append(toIndentedString(networkCidr)).append("\n");
     sb.append("    createPrivateSubnets: ").append(toIndentedString(createPrivateSubnets)).append("\n");
     sb.append("    createServiceEndpoints: ").append(toIndentedString(createServiceEndpoints)).append("\n");
     sb.append("    endpointAccessGatewayScheme: ").append(toIndentedString(endpointAccessGatewayScheme)).append("\n");

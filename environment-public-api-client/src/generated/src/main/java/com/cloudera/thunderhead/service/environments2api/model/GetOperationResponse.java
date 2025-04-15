@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.time.OffsetDateTime;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
@@ -28,17 +29,18 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
  */
 @JsonPropertyOrder({
   GetOperationResponse.JSON_PROPERTY_OPERATION_ID,
-  GetOperationResponse.JSON_PROPERTY_OPERATION_TYPE,
+  GetOperationResponse.JSON_PROPERTY_OPERATION_NAME,
   GetOperationResponse.JSON_PROPERTY_OPERATION_STATUS,
-  GetOperationResponse.JSON_PROPERTY_PROGRESS
+  GetOperationResponse.JSON_PROPERTY_STARTED,
+  GetOperationResponse.JSON_PROPERTY_ENDED
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
 public class GetOperationResponse {
   public static final String JSON_PROPERTY_OPERATION_ID = "operationId";
   private String operationId;
 
-  public static final String JSON_PROPERTY_OPERATION_TYPE = "operationType";
-  private String operationType;
+  public static final String JSON_PROPERTY_OPERATION_NAME = "operationName";
+  private String operationName;
 
   /**
    * Status of the operation.
@@ -84,8 +86,11 @@ public class GetOperationResponse {
   public static final String JSON_PROPERTY_OPERATION_STATUS = "operationStatus";
   private OperationStatusEnum operationStatus;
 
-  public static final String JSON_PROPERTY_PROGRESS = "progress";
-  private Integer progress;
+  public static final String JSON_PROPERTY_STARTED = "started";
+  private OffsetDateTime started;
+
+  public static final String JSON_PROPERTY_ENDED = "ended";
+  private OffsetDateTime ended;
 
   public GetOperationResponse() {
   }
@@ -116,29 +121,29 @@ public class GetOperationResponse {
   }
 
 
-  public GetOperationResponse operationType(String operationType) {
+  public GetOperationResponse operationName(String operationName) {
     
-    this.operationType = operationType;
+    this.operationName = operationName;
     return this;
   }
 
    /**
-   * Type of the operation.
-   * @return operationType
+   * Name of the operation.
+   * @return operationName
   **/
   @javax.annotation.Nullable
-  @JsonProperty(JSON_PROPERTY_OPERATION_TYPE)
+  @JsonProperty(JSON_PROPERTY_OPERATION_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public String getOperationType() {
-    return operationType;
+  public String getOperationName() {
+    return operationName;
   }
 
 
-  @JsonProperty(JSON_PROPERTY_OPERATION_TYPE)
+  @JsonProperty(JSON_PROPERTY_OPERATION_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOperationType(String operationType) {
-    this.operationType = operationType;
+  public void setOperationName(String operationName) {
+    this.operationName = operationName;
   }
 
 
@@ -168,29 +173,55 @@ public class GetOperationResponse {
   }
 
 
-  public GetOperationResponse progress(Integer progress) {
+  public GetOperationResponse started(OffsetDateTime started) {
     
-    this.progress = progress;
+    this.started = started;
     return this;
   }
 
    /**
-   * Progress percentage of the operation.
-   * @return progress
+   * Start time of the operation.
+   * @return started
   **/
   @javax.annotation.Nullable
-  @JsonProperty(JSON_PROPERTY_PROGRESS)
+  @JsonProperty(JSON_PROPERTY_STARTED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public Integer getProgress() {
-    return progress;
+  public OffsetDateTime getStarted() {
+    return started;
   }
 
 
-  @JsonProperty(JSON_PROPERTY_PROGRESS)
+  @JsonProperty(JSON_PROPERTY_STARTED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setProgress(Integer progress) {
-    this.progress = progress;
+  public void setStarted(OffsetDateTime started) {
+    this.started = started;
+  }
+
+
+  public GetOperationResponse ended(OffsetDateTime ended) {
+    
+    this.ended = ended;
+    return this;
+  }
+
+   /**
+   * End time of the operation.
+   * @return ended
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_ENDED)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public OffsetDateTime getEnded() {
+    return ended;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_ENDED)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setEnded(OffsetDateTime ended) {
+    this.ended = ended;
   }
 
   @Override
@@ -203,14 +234,15 @@ public class GetOperationResponse {
     }
     GetOperationResponse getOperationResponse = (GetOperationResponse) o;
     return Objects.equals(this.operationId, getOperationResponse.operationId) &&
-        Objects.equals(this.operationType, getOperationResponse.operationType) &&
+        Objects.equals(this.operationName, getOperationResponse.operationName) &&
         Objects.equals(this.operationStatus, getOperationResponse.operationStatus) &&
-        Objects.equals(this.progress, getOperationResponse.progress);
+        Objects.equals(this.started, getOperationResponse.started) &&
+        Objects.equals(this.ended, getOperationResponse.ended);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(operationId, operationType, operationStatus, progress);
+    return Objects.hash(operationId, operationName, operationStatus, started, ended);
   }
 
   @Override
@@ -218,9 +250,10 @@ public class GetOperationResponse {
     StringBuilder sb = new StringBuilder();
     sb.append("class GetOperationResponse {\n");
     sb.append("    operationId: ").append(toIndentedString(operationId)).append("\n");
-    sb.append("    operationType: ").append(toIndentedString(operationType)).append("\n");
+    sb.append("    operationName: ").append(toIndentedString(operationName)).append("\n");
     sb.append("    operationStatus: ").append(toIndentedString(operationStatus)).append("\n");
-    sb.append("    progress: ").append(toIndentedString(progress)).append("\n");
+    sb.append("    started: ").append(toIndentedString(started)).append("\n");
+    sb.append("    ended: ").append(toIndentedString(ended)).append("\n");
     sb.append("}");
     return sb.toString();
   }

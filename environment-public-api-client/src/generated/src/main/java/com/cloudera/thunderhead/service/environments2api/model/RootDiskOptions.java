@@ -15,6 +15,7 @@ package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
 import java.util.Arrays;
+import com.cloudera.thunderhead.service.environments2api.model.ModifyDisks;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -24,42 +25,42 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
- * Request object for rotating SaltStack user password on FreeIPA instances (Deprecated).
+ * Root volume properties to modify.
  */
 @JsonPropertyOrder({
-  RotateSaltPasswordRequest.JSON_PROPERTY_ENVIRONMENT
+  RootDiskOptions.JSON_PROPERTY_MODIFY_DISKS
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
-public class RotateSaltPasswordRequest {
-  public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
-  private String environment;
+public class RootDiskOptions {
+  public static final String JSON_PROPERTY_MODIFY_DISKS = "modifyDisks";
+  private ModifyDisks modifyDisks;
 
-  public RotateSaltPasswordRequest() {
+  public RootDiskOptions() {
   }
 
-  public RotateSaltPasswordRequest environment(String environment) {
+  public RootDiskOptions modifyDisks(ModifyDisks modifyDisks) {
     
-    this.environment = environment;
+    this.modifyDisks = modifyDisks;
     return this;
   }
 
    /**
-   * The name or CRN of the environment.
-   * @return environment
+   * Get modifyDisks
+   * @return modifyDisks
   **/
-  @javax.annotation.Nonnull
-  @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_MODIFY_DISKS)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public String getEnvironment() {
-    return environment;
+  public ModifyDisks getModifyDisks() {
+    return modifyDisks;
   }
 
 
-  @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(String environment) {
-    this.environment = environment;
+  @JsonProperty(JSON_PROPERTY_MODIFY_DISKS)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setModifyDisks(ModifyDisks modifyDisks) {
+    this.modifyDisks = modifyDisks;
   }
 
   @Override
@@ -70,20 +71,20 @@ public class RotateSaltPasswordRequest {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    RotateSaltPasswordRequest rotateSaltPasswordRequest = (RotateSaltPasswordRequest) o;
-    return Objects.equals(this.environment, rotateSaltPasswordRequest.environment);
+    RootDiskOptions rootDiskOptions = (RootDiskOptions) o;
+    return Objects.equals(this.modifyDisks, rootDiskOptions.modifyDisks);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(environment);
+    return Objects.hash(modifyDisks);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class RotateSaltPasswordRequest {\n");
-    sb.append("    environment: ").append(toIndentedString(environment)).append("\n");
+    sb.append("class RootDiskOptions {\n");
+    sb.append("    modifyDisks: ").append(toIndentedString(modifyDisks)).append("\n");
     sb.append("}");
     return sb.toString();
   }

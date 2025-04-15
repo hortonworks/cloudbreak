@@ -33,6 +33,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   AWSFreeIpaCreationRequest.JSON_PROPERTY_INSTANCE_COUNT_BY_GROUP,
   AWSFreeIpaCreationRequest.JSON_PROPERTY_RECIPES,
   AWSFreeIpaCreationRequest.JSON_PROPERTY_INSTANCE_TYPE,
+  AWSFreeIpaCreationRequest.JSON_PROPERTY_USE_CLOUD_FORMATION,
   AWSFreeIpaCreationRequest.JSON_PROPERTY_MULTI_AZ,
   AWSFreeIpaCreationRequest.JSON_PROPERTY_SPOT_PERCENTAGE,
   AWSFreeIpaCreationRequest.JSON_PROPERTY_SPOT_MAX_PRICE
@@ -47,6 +48,9 @@ public class AWSFreeIpaCreationRequest {
 
   public static final String JSON_PROPERTY_INSTANCE_TYPE = "instanceType";
   private String instanceType;
+
+  public static final String JSON_PROPERTY_USE_CLOUD_FORMATION = "useCloudFormation";
+  private Boolean useCloudFormation;
 
   public static final String JSON_PROPERTY_MULTI_AZ = "multiAz";
   private Boolean multiAz;
@@ -146,6 +150,32 @@ public class AWSFreeIpaCreationRequest {
   }
 
 
+  public AWSFreeIpaCreationRequest useCloudFormation(Boolean useCloudFormation) {
+    
+    this.useCloudFormation = useCloudFormation;
+    return this;
+  }
+
+   /**
+   * Flag which when enabled uses AWS as cloud platform variant and uses cloud formation.
+   * @return useCloudFormation
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_USE_CLOUD_FORMATION)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public Boolean getUseCloudFormation() {
+    return useCloudFormation;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_USE_CLOUD_FORMATION)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setUseCloudFormation(Boolean useCloudFormation) {
+    this.useCloudFormation = useCloudFormation;
+  }
+
+
   public AWSFreeIpaCreationRequest multiAz(Boolean multiAz) {
     
     this.multiAz = multiAz;
@@ -239,6 +269,7 @@ public class AWSFreeIpaCreationRequest {
     return Objects.equals(this.instanceCountByGroup, awSFreeIpaCreationRequest.instanceCountByGroup) &&
         Objects.equals(this.recipes, awSFreeIpaCreationRequest.recipes) &&
         Objects.equals(this.instanceType, awSFreeIpaCreationRequest.instanceType) &&
+        Objects.equals(this.useCloudFormation, awSFreeIpaCreationRequest.useCloudFormation) &&
         Objects.equals(this.multiAz, awSFreeIpaCreationRequest.multiAz) &&
         Objects.equals(this.spotPercentage, awSFreeIpaCreationRequest.spotPercentage) &&
         Objects.equals(this.spotMaxPrice, awSFreeIpaCreationRequest.spotMaxPrice);
@@ -246,7 +277,7 @@ public class AWSFreeIpaCreationRequest {
 
   @Override
   public int hashCode() {
-    return Objects.hash(instanceCountByGroup, recipes, instanceType, multiAz, spotPercentage, spotMaxPrice);
+    return Objects.hash(instanceCountByGroup, recipes, instanceType, useCloudFormation, multiAz, spotPercentage, spotMaxPrice);
   }
 
   @Override
@@ -256,6 +287,7 @@ public class AWSFreeIpaCreationRequest {
     sb.append("    instanceCountByGroup: ").append(toIndentedString(instanceCountByGroup)).append("\n");
     sb.append("    recipes: ").append(toIndentedString(recipes)).append("\n");
     sb.append("    instanceType: ").append(toIndentedString(instanceType)).append("\n");
+    sb.append("    useCloudFormation: ").append(toIndentedString(useCloudFormation)).append("\n");
     sb.append("    multiAz: ").append(toIndentedString(multiAz)).append("\n");
     sb.append("    spotPercentage: ").append(toIndentedString(spotPercentage)).append("\n");
     sb.append("    spotMaxPrice: ").append(toIndentedString(spotMaxPrice)).append("\n");

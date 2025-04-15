@@ -24,42 +24,72 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
- * Request object for rotating SaltStack user password on FreeIPA instances (Deprecated).
+ * Volume configuration.
  */
 @JsonPropertyOrder({
-  RotateSaltPasswordRequest.JSON_PROPERTY_ENVIRONMENT
+  ModifyDisks.JSON_PROPERTY_SIZE,
+  ModifyDisks.JSON_PROPERTY_VOLUME_TYPE
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
-public class RotateSaltPasswordRequest {
-  public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
-  private String environment;
+public class ModifyDisks {
+  public static final String JSON_PROPERTY_SIZE = "size";
+  private Integer size;
 
-  public RotateSaltPasswordRequest() {
+  public static final String JSON_PROPERTY_VOLUME_TYPE = "volumeType";
+  private String volumeType;
+
+  public ModifyDisks() {
   }
 
-  public RotateSaltPasswordRequest environment(String environment) {
+  public ModifyDisks size(Integer size) {
     
-    this.environment = environment;
+    this.size = size;
     return this;
   }
 
    /**
-   * The name or CRN of the environment.
-   * @return environment
+   * Size of disks to modify to on all the instances in GB.
+   * @return size
   **/
   @javax.annotation.Nonnull
-  @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
+  @JsonProperty(JSON_PROPERTY_SIZE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public String getEnvironment() {
-    return environment;
+  public Integer getSize() {
+    return size;
   }
 
 
-  @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
+  @JsonProperty(JSON_PROPERTY_SIZE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(String environment) {
-    this.environment = environment;
+  public void setSize(Integer size) {
+    this.size = size;
+  }
+
+
+  public ModifyDisks volumeType(String volumeType) {
+    
+    this.volumeType = volumeType;
+    return this;
+  }
+
+   /**
+   * Type of disks to modify to on all the instances.
+   * @return volumeType
+  **/
+  @javax.annotation.Nonnull
+  @JsonProperty(JSON_PROPERTY_VOLUME_TYPE)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+
+  public String getVolumeType() {
+    return volumeType;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_VOLUME_TYPE)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setVolumeType(String volumeType) {
+    this.volumeType = volumeType;
   }
 
   @Override
@@ -70,20 +100,22 @@ public class RotateSaltPasswordRequest {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    RotateSaltPasswordRequest rotateSaltPasswordRequest = (RotateSaltPasswordRequest) o;
-    return Objects.equals(this.environment, rotateSaltPasswordRequest.environment);
+    ModifyDisks modifyDisks = (ModifyDisks) o;
+    return Objects.equals(this.size, modifyDisks.size) &&
+        Objects.equals(this.volumeType, modifyDisks.volumeType);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(environment);
+    return Objects.hash(size, volumeType);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class RotateSaltPasswordRequest {\n");
-    sb.append("    environment: ").append(toIndentedString(environment)).append("\n");
+    sb.append("class ModifyDisks {\n");
+    sb.append("    size: ").append(toIndentedString(size)).append("\n");
+    sb.append("    volumeType: ").append(toIndentedString(volumeType)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -20,24 +20,31 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
- * Request object for rotating SaltStack user password on FreeIPA instances (Deprecated).
+ * Request object to update Availability Zones for GCP environment.
  */
 @JsonPropertyOrder({
-  RotateSaltPasswordRequest.JSON_PROPERTY_ENVIRONMENT
+  UpdateGcpAvailabilityZonesRequest.JSON_PROPERTY_ENVIRONMENT,
+  UpdateGcpAvailabilityZonesRequest.JSON_PROPERTY_AVAILABILITY_ZONES
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
-public class RotateSaltPasswordRequest {
+public class UpdateGcpAvailabilityZonesRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
   private String environment;
 
-  public RotateSaltPasswordRequest() {
+  public static final String JSON_PROPERTY_AVAILABILITY_ZONES = "availabilityZones";
+  private List<String> availabilityZones = new ArrayList<>();
+
+  public UpdateGcpAvailabilityZonesRequest() {
   }
 
-  public RotateSaltPasswordRequest environment(String environment) {
+  public UpdateGcpAvailabilityZonesRequest environment(String environment) {
     
     this.environment = environment;
     return this;
@@ -62,6 +69,40 @@ public class RotateSaltPasswordRequest {
     this.environment = environment;
   }
 
+
+  public UpdateGcpAvailabilityZonesRequest availabilityZones(List<String> availabilityZones) {
+    
+    this.availabilityZones = availabilityZones;
+    return this;
+  }
+
+  public UpdateGcpAvailabilityZonesRequest addAvailabilityZonesItem(String availabilityZonesItem) {
+    if (this.availabilityZones == null) {
+      this.availabilityZones = new ArrayList<>();
+    }
+    this.availabilityZones.add(availabilityZonesItem);
+    return this;
+  }
+
+   /**
+   * List of availability zones for the environment.
+   * @return availabilityZones
+  **/
+  @javax.annotation.Nonnull
+  @JsonProperty(JSON_PROPERTY_AVAILABILITY_ZONES)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+
+  public List<String> getAvailabilityZones() {
+    return availabilityZones;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_AVAILABILITY_ZONES)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setAvailabilityZones(List<String> availabilityZones) {
+    this.availabilityZones = availabilityZones;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -70,20 +111,22 @@ public class RotateSaltPasswordRequest {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    RotateSaltPasswordRequest rotateSaltPasswordRequest = (RotateSaltPasswordRequest) o;
-    return Objects.equals(this.environment, rotateSaltPasswordRequest.environment);
+    UpdateGcpAvailabilityZonesRequest updateGcpAvailabilityZonesRequest = (UpdateGcpAvailabilityZonesRequest) o;
+    return Objects.equals(this.environment, updateGcpAvailabilityZonesRequest.environment) &&
+        Objects.equals(this.availabilityZones, updateGcpAvailabilityZonesRequest.availabilityZones);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(environment);
+    return Objects.hash(environment, availabilityZones);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class RotateSaltPasswordRequest {\n");
+    sb.append("class UpdateGcpAvailabilityZonesRequest {\n");
     sb.append("    environment: ").append(toIndentedString(environment)).append("\n");
+    sb.append("    availabilityZones: ").append(toIndentedString(availabilityZones)).append("\n");
     sb.append("}");
     return sb.toString();
   }

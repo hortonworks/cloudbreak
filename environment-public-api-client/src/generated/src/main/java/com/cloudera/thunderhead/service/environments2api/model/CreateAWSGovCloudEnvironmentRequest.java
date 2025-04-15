@@ -49,9 +49,9 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   CreateAWSGovCloudEnvironmentRequest.JSON_PROPERTY_SECURITY_ACCESS,
   CreateAWSGovCloudEnvironmentRequest.JSON_PROPERTY_AUTHENTICATION,
   CreateAWSGovCloudEnvironmentRequest.JSON_PROPERTY_LOG_STORAGE,
-  CreateAWSGovCloudEnvironmentRequest.JSON_PROPERTY_NETWORK_CIDR,
   CreateAWSGovCloudEnvironmentRequest.JSON_PROPERTY_VPC_ID,
   CreateAWSGovCloudEnvironmentRequest.JSON_PROPERTY_SUBNET_IDS,
+  CreateAWSGovCloudEnvironmentRequest.JSON_PROPERTY_NETWORK_CIDR,
   CreateAWSGovCloudEnvironmentRequest.JSON_PROPERTY_CREATE_PRIVATE_SUBNETS,
   CreateAWSGovCloudEnvironmentRequest.JSON_PROPERTY_CREATE_SERVICE_ENDPOINTS,
   CreateAWSGovCloudEnvironmentRequest.JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SCHEME,
@@ -94,14 +94,14 @@ public class CreateAWSGovCloudEnvironmentRequest {
   public static final String JSON_PROPERTY_LOG_STORAGE = "logStorage";
   private AwsLogStorageRequest logStorage;
 
-  public static final String JSON_PROPERTY_NETWORK_CIDR = "networkCidr";
-  private String networkCidr;
-
   public static final String JSON_PROPERTY_VPC_ID = "vpcId";
   private String vpcId;
 
   public static final String JSON_PROPERTY_SUBNET_IDS = "subnetIds";
   private Set<String> subnetIds = new LinkedHashSet<>();
+
+  public static final String JSON_PROPERTY_NETWORK_CIDR = "networkCidr";
+  private String networkCidr;
 
   public static final String JSON_PROPERTY_CREATE_PRIVATE_SUBNETS = "createPrivateSubnets";
   private Boolean createPrivateSubnets;
@@ -166,7 +166,7 @@ public class CreateAWSGovCloudEnvironmentRequest {
   private Boolean workloadAnalytics;
 
   public static final String JSON_PROPERTY_REPORT_DEPLOYMENT_LOGS = "reportDeploymentLogs";
-  private Boolean reportDeploymentLogs;
+  private Boolean reportDeploymentLogs = false;
 
   public static final String JSON_PROPERTY_TUNNEL_TYPE = "tunnelType";
   private TunnelType tunnelType;
@@ -360,32 +360,6 @@ public class CreateAWSGovCloudEnvironmentRequest {
   }
 
 
-  public CreateAWSGovCloudEnvironmentRequest networkCidr(String networkCidr) {
-    
-    this.networkCidr = networkCidr;
-    return this;
-  }
-
-   /**
-   * The network CIDR. This will create a VPC along with subnets in multiple Availability Zones.
-   * @return networkCidr
-  **/
-  @javax.annotation.Nullable
-  @JsonProperty(JSON_PROPERTY_NETWORK_CIDR)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-
-  public String getNetworkCidr() {
-    return networkCidr;
-  }
-
-
-  @JsonProperty(JSON_PROPERTY_NETWORK_CIDR)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setNetworkCidr(String networkCidr) {
-    this.networkCidr = networkCidr;
-  }
-
-
   public CreateAWSGovCloudEnvironmentRequest vpcId(String vpcId) {
     
     this.vpcId = vpcId;
@@ -393,7 +367,7 @@ public class CreateAWSGovCloudEnvironmentRequest {
   }
 
    /**
-   * The Amazon VPC ID. Mutually exclusive with networkCidr.
+   * The Amazon VPC ID.
    * @return vpcId
   **/
   @javax.annotation.Nullable
@@ -427,7 +401,7 @@ public class CreateAWSGovCloudEnvironmentRequest {
   }
 
    /**
-   * One or more subnet IDs within the VPC. Mutually exclusive with networkCidr.
+   * One or more subnet IDs within the VPC.
    * @return subnetIds
   **/
   @javax.annotation.Nullable
@@ -444,6 +418,32 @@ public class CreateAWSGovCloudEnvironmentRequest {
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
   public void setSubnetIds(Set<String> subnetIds) {
     this.subnetIds = subnetIds;
+  }
+
+
+  public CreateAWSGovCloudEnvironmentRequest networkCidr(String networkCidr) {
+    
+    this.networkCidr = networkCidr;
+    return this;
+  }
+
+   /**
+   * [Deprecated] The network CIDR. This will create a VPC along with subnets in multiple Availability Zones.
+   * @return networkCidr
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_NETWORK_CIDR)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public String getNetworkCidr() {
+    return networkCidr;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_NETWORK_CIDR)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setNetworkCidr(String networkCidr) {
+    this.networkCidr = networkCidr;
   }
 
 
@@ -696,7 +696,7 @@ public class CreateAWSGovCloudEnvironmentRequest {
   }
 
    /**
-   * When true, this will report additional diagnostic information back to Cloudera.
+   * [Deprecated] When true, this will report additional diagnostic information back to Cloudera.
    * @return reportDeploymentLogs
   **/
   @javax.annotation.Nullable
@@ -1023,9 +1023,9 @@ public class CreateAWSGovCloudEnvironmentRequest {
         Objects.equals(this.securityAccess, createAWSGovCloudEnvironmentRequest.securityAccess) &&
         Objects.equals(this.authentication, createAWSGovCloudEnvironmentRequest.authentication) &&
         Objects.equals(this.logStorage, createAWSGovCloudEnvironmentRequest.logStorage) &&
-        Objects.equals(this.networkCidr, createAWSGovCloudEnvironmentRequest.networkCidr) &&
         Objects.equals(this.vpcId, createAWSGovCloudEnvironmentRequest.vpcId) &&
         Objects.equals(this.subnetIds, createAWSGovCloudEnvironmentRequest.subnetIds) &&
+        Objects.equals(this.networkCidr, createAWSGovCloudEnvironmentRequest.networkCidr) &&
         Objects.equals(this.createPrivateSubnets, createAWSGovCloudEnvironmentRequest.createPrivateSubnets) &&
         Objects.equals(this.createServiceEndpoints, createAWSGovCloudEnvironmentRequest.createServiceEndpoints) &&
         Objects.equals(this.endpointAccessGatewayScheme, createAWSGovCloudEnvironmentRequest.endpointAccessGatewayScheme) &&
@@ -1051,7 +1051,7 @@ public class CreateAWSGovCloudEnvironmentRequest {
 
   @Override
   public int hashCode() {
-    return Objects.hash(environmentName, credentialName, region, securityAccess, authentication, logStorage, networkCidr, vpcId, subnetIds, createPrivateSubnets, createServiceEndpoints, endpointAccessGatewayScheme, endpointAccessGatewaySubnetIds, s3GuardTableName, description, enableTunnel, enableWorkloadAnalytics, workloadAnalytics, reportDeploymentLogs, tunnelType, ccmV2TlsType, cloudStorageLogging, freeIpa, security, image, tags, proxyConfigName, encryptionKeyArn, idBrokerMappingSource, customDockerRegistry);
+    return Objects.hash(environmentName, credentialName, region, securityAccess, authentication, logStorage, vpcId, subnetIds, networkCidr, createPrivateSubnets, createServiceEndpoints, endpointAccessGatewayScheme, endpointAccessGatewaySubnetIds, s3GuardTableName, description, enableTunnel, enableWorkloadAnalytics, workloadAnalytics, reportDeploymentLogs, tunnelType, ccmV2TlsType, cloudStorageLogging, freeIpa, security, image, tags, proxyConfigName, encryptionKeyArn, idBrokerMappingSource, customDockerRegistry);
   }
 
   @Override
@@ -1064,9 +1064,9 @@ public class CreateAWSGovCloudEnvironmentRequest {
     sb.append("    securityAccess: ").append(toIndentedString(securityAccess)).append("\n");
     sb.append("    authentication: ").append(toIndentedString(authentication)).append("\n");
     sb.append("    logStorage: ").append(toIndentedString(logStorage)).append("\n");
-    sb.append("    networkCidr: ").append(toIndentedString(networkCidr)).append("\n");
     sb.append("    vpcId: ").append(toIndentedString(vpcId)).append("\n");
     sb.append("    subnetIds: ").append(toIndentedString(subnetIds)).append("\n");
+    sb.append("    networkCidr: ").append(toIndentedString(networkCidr)).append("\n");
     sb.append("    createPrivateSubnets: ").append(toIndentedString(createPrivateSubnets)).append("\n");
     sb.append("    createServiceEndpoints: ").append(toIndentedString(createServiceEndpoints)).append("\n");
     sb.append("    endpointAccessGatewayScheme: ").append(toIndentedString(endpointAccessGatewayScheme)).append("\n");

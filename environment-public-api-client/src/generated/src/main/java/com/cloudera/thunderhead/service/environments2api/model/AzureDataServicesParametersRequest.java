@@ -27,12 +27,16 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
  * Azure-specific Data Service parameters request.
  */
 @JsonPropertyOrder({
-  AzureDataServicesParametersRequest.JSON_PROPERTY_SHARED_MANAGED_IDENTITY
+  AzureDataServicesParametersRequest.JSON_PROPERTY_SHARED_MANAGED_IDENTITY,
+  AzureDataServicesParametersRequest.JSON_PROPERTY_AKS_PRIVATE_DNS_ZONE_ID
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
 public class AzureDataServicesParametersRequest {
   public static final String JSON_PROPERTY_SHARED_MANAGED_IDENTITY = "sharedManagedIdentity";
   private String sharedManagedIdentity;
+
+  public static final String JSON_PROPERTY_AKS_PRIVATE_DNS_ZONE_ID = "aksPrivateDnsZoneId";
+  private String aksPrivateDnsZoneId;
 
   public AzureDataServicesParametersRequest() {
   }
@@ -62,6 +66,32 @@ public class AzureDataServicesParametersRequest {
     this.sharedManagedIdentity = sharedManagedIdentity;
   }
 
+
+  public AzureDataServicesParametersRequest aksPrivateDnsZoneId(String aksPrivateDnsZoneId) {
+    
+    this.aksPrivateDnsZoneId = aksPrivateDnsZoneId;
+    return this;
+  }
+
+   /**
+   * The full Azure resource ID of an existing Private DNS zone used for the AKS.
+   * @return aksPrivateDnsZoneId
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_AKS_PRIVATE_DNS_ZONE_ID)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public String getAksPrivateDnsZoneId() {
+    return aksPrivateDnsZoneId;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_AKS_PRIVATE_DNS_ZONE_ID)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setAksPrivateDnsZoneId(String aksPrivateDnsZoneId) {
+    this.aksPrivateDnsZoneId = aksPrivateDnsZoneId;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -71,12 +101,13 @@ public class AzureDataServicesParametersRequest {
       return false;
     }
     AzureDataServicesParametersRequest azureDataServicesParametersRequest = (AzureDataServicesParametersRequest) o;
-    return Objects.equals(this.sharedManagedIdentity, azureDataServicesParametersRequest.sharedManagedIdentity);
+    return Objects.equals(this.sharedManagedIdentity, azureDataServicesParametersRequest.sharedManagedIdentity) &&
+        Objects.equals(this.aksPrivateDnsZoneId, azureDataServicesParametersRequest.aksPrivateDnsZoneId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(sharedManagedIdentity);
+    return Objects.hash(sharedManagedIdentity, aksPrivateDnsZoneId);
   }
 
   @Override
@@ -84,6 +115,7 @@ public class AzureDataServicesParametersRequest {
     StringBuilder sb = new StringBuilder();
     sb.append("class AzureDataServicesParametersRequest {\n");
     sb.append("    sharedManagedIdentity: ").append(toIndentedString(sharedManagedIdentity)).append("\n");
+    sb.append("    aksPrivateDnsZoneId: ").append(toIndentedString(aksPrivateDnsZoneId)).append("\n");
     sb.append("}");
     return sb.toString();
   }

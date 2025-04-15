@@ -20,6 +20,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
@@ -30,7 +33,8 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   CloudSubnet.JSON_PROPERTY_SUBNET_ID,
   CloudSubnet.JSON_PROPERTY_SUBNET_NAME,
   CloudSubnet.JSON_PROPERTY_AVAILABILITY_ZONE,
-  CloudSubnet.JSON_PROPERTY_CIDR
+  CloudSubnet.JSON_PROPERTY_CIDR,
+  CloudSubnet.JSON_PROPERTY_SECONDARY_CIDRS
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
 public class CloudSubnet {
@@ -45,6 +49,9 @@ public class CloudSubnet {
 
   public static final String JSON_PROPERTY_CIDR = "cidr";
   private String cidr;
+
+  public static final String JSON_PROPERTY_SECONDARY_CIDRS = "secondaryCidrs";
+  private List<String> secondaryCidrs = new ArrayList<>();
 
   public CloudSubnet() {
   }
@@ -152,6 +159,40 @@ public class CloudSubnet {
     this.cidr = cidr;
   }
 
+
+  public CloudSubnet secondaryCidrs(List<String> secondaryCidrs) {
+    
+    this.secondaryCidrs = secondaryCidrs;
+    return this;
+  }
+
+  public CloudSubnet addSecondaryCidrsItem(String secondaryCidrsItem) {
+    if (this.secondaryCidrs == null) {
+      this.secondaryCidrs = new ArrayList<>();
+    }
+    this.secondaryCidrs.add(secondaryCidrsItem);
+    return this;
+  }
+
+   /**
+   * The Secondary CIDR IP ranges of the subnet (currently only available on Google Cloud).
+   * @return secondaryCidrs
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_SECONDARY_CIDRS)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public List<String> getSecondaryCidrs() {
+    return secondaryCidrs;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_SECONDARY_CIDRS)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setSecondaryCidrs(List<String> secondaryCidrs) {
+    this.secondaryCidrs = secondaryCidrs;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -164,12 +205,13 @@ public class CloudSubnet {
     return Objects.equals(this.subnetId, cloudSubnet.subnetId) &&
         Objects.equals(this.subnetName, cloudSubnet.subnetName) &&
         Objects.equals(this.availabilityZone, cloudSubnet.availabilityZone) &&
-        Objects.equals(this.cidr, cloudSubnet.cidr);
+        Objects.equals(this.cidr, cloudSubnet.cidr) &&
+        Objects.equals(this.secondaryCidrs, cloudSubnet.secondaryCidrs);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(subnetId, subnetName, availabilityZone, cidr);
+    return Objects.hash(subnetId, subnetName, availabilityZone, cidr, secondaryCidrs);
   }
 
   @Override
@@ -180,6 +222,7 @@ public class CloudSubnet {
     sb.append("    subnetName: ").append(toIndentedString(subnetName)).append("\n");
     sb.append("    availabilityZone: ").append(toIndentedString(availabilityZone)).append("\n");
     sb.append("    cidr: ").append(toIndentedString(cidr)).append("\n");
+    sb.append("    secondaryCidrs: ").append(toIndentedString(secondaryCidrs)).append("\n");
     sb.append("}");
     return sb.toString();
   }

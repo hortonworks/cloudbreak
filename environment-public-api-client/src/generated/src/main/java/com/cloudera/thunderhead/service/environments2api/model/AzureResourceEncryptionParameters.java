@@ -30,7 +30,6 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   AzureResourceEncryptionParameters.JSON_PROPERTY_ENCRYPTION_KEY_URL,
   AzureResourceEncryptionParameters.JSON_PROPERTY_ENCRYPTION_KEY_RESOURCE_GROUP_NAME,
   AzureResourceEncryptionParameters.JSON_PROPERTY_DISK_ENCRYPTION_SET_ID,
-  AzureResourceEncryptionParameters.JSON_PROPERTY_USER_MANAGED_IDENTITY,
   AzureResourceEncryptionParameters.JSON_PROPERTY_ENCRYPTION_USER_MANAGED_IDENTITY
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
@@ -43,9 +42,6 @@ public class AzureResourceEncryptionParameters {
 
   public static final String JSON_PROPERTY_DISK_ENCRYPTION_SET_ID = "diskEncryptionSetId";
   private String diskEncryptionSetId;
-
-  public static final String JSON_PROPERTY_USER_MANAGED_IDENTITY = "userManagedIdentity";
-  private String userManagedIdentity;
 
   public static final String JSON_PROPERTY_ENCRYPTION_USER_MANAGED_IDENTITY = "encryptionUserManagedIdentity";
   private String encryptionUserManagedIdentity;
@@ -131,32 +127,6 @@ public class AzureResourceEncryptionParameters {
   }
 
 
-  public AzureResourceEncryptionParameters userManagedIdentity(String userManagedIdentity) {
-    
-    this.userManagedIdentity = userManagedIdentity;
-    return this;
-  }
-
-   /**
-   * User managed identity for encryption. (deprecated)
-   * @return userManagedIdentity
-  **/
-  @javax.annotation.Nullable
-  @JsonProperty(JSON_PROPERTY_USER_MANAGED_IDENTITY)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-
-  public String getUserManagedIdentity() {
-    return userManagedIdentity;
-  }
-
-
-  @JsonProperty(JSON_PROPERTY_USER_MANAGED_IDENTITY)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setUserManagedIdentity(String userManagedIdentity) {
-    this.userManagedIdentity = userManagedIdentity;
-  }
-
-
   public AzureResourceEncryptionParameters encryptionUserManagedIdentity(String encryptionUserManagedIdentity) {
     
     this.encryptionUserManagedIdentity = encryptionUserManagedIdentity;
@@ -194,13 +164,12 @@ public class AzureResourceEncryptionParameters {
     return Objects.equals(this.encryptionKeyUrl, azureResourceEncryptionParameters.encryptionKeyUrl) &&
         Objects.equals(this.encryptionKeyResourceGroupName, azureResourceEncryptionParameters.encryptionKeyResourceGroupName) &&
         Objects.equals(this.diskEncryptionSetId, azureResourceEncryptionParameters.diskEncryptionSetId) &&
-        Objects.equals(this.userManagedIdentity, azureResourceEncryptionParameters.userManagedIdentity) &&
         Objects.equals(this.encryptionUserManagedIdentity, azureResourceEncryptionParameters.encryptionUserManagedIdentity);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(encryptionKeyUrl, encryptionKeyResourceGroupName, diskEncryptionSetId, userManagedIdentity, encryptionUserManagedIdentity);
+    return Objects.hash(encryptionKeyUrl, encryptionKeyResourceGroupName, diskEncryptionSetId, encryptionUserManagedIdentity);
   }
 
   @Override
@@ -210,7 +179,6 @@ public class AzureResourceEncryptionParameters {
     sb.append("    encryptionKeyUrl: ").append(toIndentedString(encryptionKeyUrl)).append("\n");
     sb.append("    encryptionKeyResourceGroupName: ").append(toIndentedString(encryptionKeyResourceGroupName)).append("\n");
     sb.append("    diskEncryptionSetId: ").append(toIndentedString(diskEncryptionSetId)).append("\n");
-    sb.append("    userManagedIdentity: ").append(toIndentedString(userManagedIdentity)).append("\n");
     sb.append("    encryptionUserManagedIdentity: ").append(toIndentedString(encryptionUserManagedIdentity)).append("\n");
     sb.append("}");
     return sb.toString();

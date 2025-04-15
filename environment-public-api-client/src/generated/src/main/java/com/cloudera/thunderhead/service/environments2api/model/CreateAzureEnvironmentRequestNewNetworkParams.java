@@ -24,7 +24,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
- * Parameteres needed to automatically create VNet and Subnets.
+ * [Deprecated] Parameteres needed to automatically create VNet and Subnets.
  */
 @JsonPropertyOrder({
   CreateAzureEnvironmentRequestNewNetworkParams.JSON_PROPERTY_NETWORK_CIDR
