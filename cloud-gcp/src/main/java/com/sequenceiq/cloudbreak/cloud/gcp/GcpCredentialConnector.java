@@ -1,9 +1,13 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
+import static com.sequenceiq.cloudbreak.cloud.response.PolicyComponentIdentifier.ENVIRONMENT;
+
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import jakarta.annotation.Nonnull;
 import jakarta.inject.Inject;
@@ -27,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.credential.CredentialVerificationContext;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.cloud.response.GcpCredentialPrerequisites;
+import com.sequenceiq.cloudbreak.cloud.response.GranularPolicyResponse;
 import com.sequenceiq.common.model.CredentialType;
 
 @Service
@@ -76,18 +81,23 @@ public class GcpCredentialConnector implements CredentialConnector {
     public CredentialPrerequisitesResponse getPrerequisites(CloudContext cloudContext, String externalId,
         String auditExternalId, String deploymentAddress, CredentialType type) {
         Map<String, String> minimalRequiredPermissions = new HashMap<>();
+        Set<GranularPolicyResponse> granularPolicies = new HashSet<>();
 
         String minimalPrerequisitesCreationCommand = gcpPlatformParameters.getMinimalPrerequisitesCreationCommand();
         minimalRequiredPermissions.put("MinimalPrerequisitesCreationCommand",
                 Base64.encodeBase64String(minimalPrerequisitesCreationCommand.getBytes()));
+        granularPolicies.add(new GranularPolicyResponse(ENVIRONMENT.name(), "MinimalPrerequisitesCreationCommand",
+                Base64.encodeBase64String(minimalPrerequisitesCreationCommand.getBytes())));
 
         String minimalPrerequisitesCreationPermissions = gcpPlatformParameters.getMinimalPrerequisitesCreationPermissions();
         minimalRequiredPermissions.put("MinimalPrerequisitesCreationPermissions",
                 Base64.encodeBase64String(minimalPrerequisitesCreationPermissions.getBytes()));
+        granularPolicies.add(new GranularPolicyResponse(ENVIRONMENT.name(), "MinimalPrerequisitesCreationPermissions",
+                Base64.encodeBase64String(minimalPrerequisitesCreationPermissions.getBytes())));
 
         String prerequisitesCreationCommand = gcpPlatformParameters.getPrerequisitesCreationCommand(type);
         GcpCredentialPrerequisites gcpPrereqs =
-                new GcpCredentialPrerequisites(Base64.encodeBase64String(prerequisitesCreationCommand.getBytes()), minimalRequiredPermissions);
+                new GcpCredentialPrerequisites(Base64.encodeBase64String(prerequisitesCreationCommand.getBytes()), minimalRequiredPermissions, granularPolicies);
         return new CredentialPrerequisitesResponse(cloudContext.getPlatform().value(), gcpPrereqs);
     }
 

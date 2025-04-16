@@ -1,13 +1,18 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static com.sequenceiq.cloudbreak.cloud.response.PolicyComponentIdentifier.ENVIRONMENT;
+
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -25,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.credential.CredentialVerificationContext;
 import com.sequenceiq.cloudbreak.cloud.response.AzureCredentialPrerequisites;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
+import com.sequenceiq.cloudbreak.cloud.response.GranularPolicyResponse;
 import com.sequenceiq.common.api.credential.AppAuthenticationType;
 import com.sequenceiq.common.api.credential.AppCertificateStatus;
 import com.sequenceiq.common.model.CredentialType;
@@ -95,10 +101,16 @@ public class AzureCredentialConnector implements CredentialConnector {
         String encodedCommand;
         String roleDefJson;
         Map<String, String> minimalRoleDef = new HashMap<>();
+        Set<GranularPolicyResponse> granularPolicies = new HashSet<>();
         switch (type) {
             case ENVIRONMENT:
                 roleDefJson = azurePlatformParameters.getRoleDefJson();
-                minimalRoleDef.put("MinimalRoleDefinition", azurePlatformParameters.getMinimalRoleDefJson());
+                String minimalRoleDefJson = azurePlatformParameters.getMinimalRoleDefJson();
+                minimalRoleDef.put("MinimalRoleDefinition", minimalRoleDefJson);
+                if (StringUtils.isNotEmpty(minimalRoleDefJson)) {
+                    granularPolicies.add(new GranularPolicyResponse(ENVIRONMENT.name(), "MinimalRoleDefinition",
+                            azurePlatformParameters.getMinimalRoleDefJson()));
+                }
                 encodedCommand = Base64.encodeBase64String(credentialCreationCommand.getBytes());
                 break;
             case AUDIT:
@@ -106,11 +118,13 @@ public class AzureCredentialConnector implements CredentialConnector {
                 encodedCommand = Base64.encodeBase64String(auditCredentialCreationCommand.getBytes());
                 break;
             default:
+                LOGGER.debug("Unrecognized credential type: {}", type);
+                granularPolicies = null;
                 encodedCommand = null;
                 roleDefJson = null;
                 break;
         }
-        AzureCredentialPrerequisites azurePrerequisites = new AzureCredentialPrerequisites(encodedCommand, roleDefJson, minimalRoleDef);
+        AzureCredentialPrerequisites azurePrerequisites = new AzureCredentialPrerequisites(encodedCommand, roleDefJson, minimalRoleDef, granularPolicies);
         return new CredentialPrerequisitesResponse(cloudContext.getPlatform().value(), azurePrerequisites);
     }
 

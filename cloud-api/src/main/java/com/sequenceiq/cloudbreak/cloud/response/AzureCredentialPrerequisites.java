@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.cloud.doc.CredentialPrerequisiteModelDes
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -26,9 +27,11 @@ public class AzureCredentialPrerequisites extends CredentialBasePrerequisites im
         this.roleDefitionJson = roleDefitionJson;
     }
 
-    public AzureCredentialPrerequisites(String appCreationCommand, String roleDefitionJson, Map<String, String> policies) {
+    public AzureCredentialPrerequisites(String appCreationCommand, String roleDefitionJson, Map<String, String> policies,
+            Set<GranularPolicyResponse> granularPolicies) {
         this.appCreationCommand = appCreationCommand;
         this.roleDefitionJson = roleDefitionJson;
+        setGranularPolicies(granularPolicies);
         setPolicies(policies);
 
     }

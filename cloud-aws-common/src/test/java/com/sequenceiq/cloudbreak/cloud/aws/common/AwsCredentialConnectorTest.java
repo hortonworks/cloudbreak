@@ -51,6 +51,8 @@ public class AwsCredentialConnectorTest {
 
     private static final CredentialVerificationContext CREDENTIAL_VERIFICATION_CONTEXT = new CredentialVerificationContext(Boolean.FALSE);
 
+    private static final byte PRESENT_ONCE = 1;
+
     @Mock
     private AuthenticatedContext authenticatedContext;
 
@@ -400,6 +402,7 @@ public class AwsCredentialConnectorTest {
                 "auditExtenralId", "deploymentaddress", CredentialType.ENVIRONMENT);
 
         assertNotNull(result);
+        assertNotNull(result.getAws());
         assertEquals(11, result.getAws().getPolicies().size());
         assertTrue(result.getAws().getPolicies().containsKey("Audit"));
         assertTrue(result.getAws().getPolicies().containsKey("DynamoDB"));
@@ -412,6 +415,28 @@ public class AwsCredentialConnectorTest {
         assertTrue(result.getAws().getPolicies().containsKey("Idbroker_Assumer"));
         assertTrue(result.getAws().getPolicies().containsKey("Datalake_Restore"));
         assertTrue(result.getAws().getPolicies().containsKey("Log_Policy"));
+
+        assertEquals(10, result.getAws().getGranularPolicies().size());
+        assertEquals(PRESENT_ONCE, result.getAws().getGranularPolicies().stream()
+                .filter(policyResponse -> "Audit".equals(policyResponse.name())).count());
+        assertEquals(PRESENT_ONCE, result.getAws().getGranularPolicies().stream()
+                .filter(policyResponse -> "Bucket_Access".equals(policyResponse.name())).count());
+        assertEquals(PRESENT_ONCE, result.getAws().getGranularPolicies().stream()
+                .filter(policyResponse -> "Environment".equals(policyResponse.name())).count());
+        assertEquals(PRESENT_ONCE, result.getAws().getGranularPolicies().stream()
+                .filter(policyResponse -> "Ranger_Audit".equals(policyResponse.name())).count());
+        assertEquals(PRESENT_ONCE, result.getAws().getGranularPolicies().stream()
+                .filter(policyResponse -> "Ranger_Raz".equals(policyResponse.name())).count());
+        assertEquals(PRESENT_ONCE, result.getAws().getGranularPolicies().stream()
+                .filter(policyResponse -> "Datalake_Admin".equals(policyResponse.name())).count());
+        assertEquals(PRESENT_ONCE, result.getAws().getGranularPolicies().stream()
+                .filter(policyResponse -> "Datalake_Backup".equals(policyResponse.name())).count());
+        assertEquals(PRESENT_ONCE, result.getAws().getGranularPolicies().stream()
+                .filter(policyResponse -> "Idbroker_Assumer".equals(policyResponse.name())).count());
+        assertEquals(PRESENT_ONCE, result.getAws().getGranularPolicies().stream()
+                .filter(policyResponse -> "Datalake_Restore".equals(policyResponse.name())).count());
+        assertEquals(PRESENT_ONCE, result.getAws().getGranularPolicies().stream()
+                .filter(policyResponse -> "Log_Policy".equals(policyResponse.name())).count());
     }
 
 }

@@ -6,7 +6,9 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import jakarta.ws.rs.BadRequestException;
 
@@ -39,6 +41,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.credential.CredentialVerificationContext;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.cloud.response.GcpCredentialPrerequisites;
+import com.sequenceiq.cloudbreak.cloud.response.GranularPolicyResponse;
 import com.sequenceiq.common.model.CredentialType;
 
 @ExtendWith(MockitoExtension.class)
@@ -226,12 +229,17 @@ public class GcpCredentialConnectorTest {
                 "deploymentAddress",
                 CredentialType.ENVIRONMENT);
         Map<String, String> minimalRequiredPermissions = new HashMap<>();
+        Set<GranularPolicyResponse> granularPolicies = new HashSet<>();
         minimalRequiredPermissions.put("MinimalPrerequisitesCreationCommand", Base64.encodeBase64String(expectedMinimalCommands.getBytes()));
+        granularPolicies.add(new GranularPolicyResponse(CredentialType.ENVIRONMENT.name(), "MinimalPrerequisitesCreationCommand",
+                Base64.encodeBase64String(expectedMinimalCommands.getBytes())));
         minimalRequiredPermissions.put("MinimalPrerequisitesCreationPermissions", Base64.encodeBase64String(expectedMinimalPermissions.getBytes()));
+        granularPolicies.add(new GranularPolicyResponse(CredentialType.ENVIRONMENT.name(), "MinimalPrerequisitesCreationPermissions",
+                Base64.encodeBase64String(expectedMinimalPermissions.getBytes())));
 
         CredentialPrerequisitesResponse credentialPrerequisitesResponse = new CredentialPrerequisitesResponse(
                 "platform",
-                new GcpCredentialPrerequisites(Base64.encodeBase64String("prerequisites".getBytes()), minimalRequiredPermissions)
+                new GcpCredentialPrerequisites(Base64.encodeBase64String("prerequisites".getBytes()), minimalRequiredPermissions, granularPolicies)
         );
 
         Assert.assertEquals(credentialPrerequisitesResponse, prerequisites);

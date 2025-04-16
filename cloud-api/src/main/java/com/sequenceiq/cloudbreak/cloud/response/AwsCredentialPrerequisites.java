@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.cloud.doc.CredentialPrerequisiteModelDes
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -26,10 +27,11 @@ public class AwsCredentialPrerequisites extends CredentialBasePrerequisites impl
         this.policyJson = policyJson;
     }
 
-    public AwsCredentialPrerequisites(String externalId, String policyJson, Map<String, String> policies) {
+    public AwsCredentialPrerequisites(String externalId, String policyJson, Map<String, String> policies, Set<GranularPolicyResponse> granularPolicies) {
         this.externalId = externalId;
         this.policyJson = policyJson;
         setPolicies(policies);
+        setGranularPolicies(granularPolicies);
     }
 
     public String getExternalId() {
