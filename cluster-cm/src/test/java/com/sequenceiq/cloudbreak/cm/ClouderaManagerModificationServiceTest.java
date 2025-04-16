@@ -1099,6 +1099,8 @@ class ClouderaManagerModificationServiceTest {
         when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
         when(clouderaManagerRepo.getVersion()).thenReturn(CLOUDERAMANAGER_VERSION_7_5_1.getVersion());
         Set<ClouderaManagerProduct> products = TestUtil.clouderaManagerProducts();
+        Set<ClouderaManagerProduct> nonCdhProduct = Set.of(TestUtil.nonCdhProduct());
+        when(clouderaManagerProductsProvider.getNonCdhProducts(products)).thenReturn(nonCdhProduct);
 
         underTest.upgradeClusterRuntime(products, false, Optional.empty(), true);
 
@@ -1123,7 +1125,7 @@ class ClouderaManagerModificationServiceTest {
         inOrder.verify(clouderaManagerParcelManagementService).refreshParcelRepos(clouderaManagerResourceApi, stack, v31Client);
         inOrder.verify(clouderaManagerParcelManagementService).downloadParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
         inOrder.verify(clouderaManagerParcelManagementService).distributeParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
-        inOrder.verify(clouderaManagerParcelManagementService).activateParcels(any(), eq(parcelResourceApi), eq(parcelsResourceApi), eq(stack), eq(v31Client));
+        inOrder.verify(clouderaManagerParcelManagementService).activateParcels(nonCdhProduct, parcelResourceApi, parcelsResourceApi, stack, v31Client);
         inOrder.verify(clouderaManagerUpgradeService).callUpgradeCdhCommand(TestUtil.CDH_VERSION, clustersResourceApi, stack, v31Client, true);
         inOrder.verify(servicesResourceApi).readServices(stack.getName(), "SUMMARY");
         inOrder.verify(clouderaManagerCommonCommandService).getDeployClientConfigCommandId(stack, clustersResourceApi, apiCommandList.getItems());
