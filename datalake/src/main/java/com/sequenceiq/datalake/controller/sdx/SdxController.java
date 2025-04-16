@@ -734,7 +734,7 @@ public class SdxController implements SdxEndpoint {
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_DATALAKE)
     public FlowIdentifier triggerSkuMigrationByCrn(@ResourceCrn String crn, boolean force) {
-        SdxCluster sdxCluster = getSdxClusterByName(crn);
+        SdxCluster sdxCluster = getSdxClusterByCrn(crn);
         sdxService.validateSkuMigration(sdxCluster);
         return sdxReactorFlowManager.triggerSkuMigration(sdxCluster, force);
     }
