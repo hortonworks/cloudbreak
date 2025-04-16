@@ -151,6 +151,8 @@ class RotateSaltPasswordServiceTest {
     @Test
     void rotateSaltPasswordFallback() throws Exception {
         when(saltBootstrapVersionChecker.isChangeSaltuserPasswordSupported(stack)).thenReturn(false);
+        setPasswordExpiry(LocalDate.now().plusMonths(2));
+
         underTest.rotateSaltPassword(stack);
 
         verify(hostOrchestrator).runCommandOnHosts(List.of(gatewayConfig), Set.of(FQDN), SALTUSER_DELETE_COMMAND);
@@ -163,6 +165,7 @@ class RotateSaltPasswordServiceTest {
         when(saltBootstrapVersionChecker.isChangeSaltuserPasswordSupported(stack)).thenReturn(false);
         when(hostOrchestrator.runCommandOnHosts(List.of(gatewayConfig), Set.of(FQDN), SALTUSER_DELETE_COMMAND))
                 .thenThrow(CloudbreakOrchestratorFailedException.class);
+        setPasswordExpiry(LocalDate.now().plusMonths(2));
 
         underTest.rotateSaltPassword(stack);
 
@@ -208,6 +211,7 @@ class RotateSaltPasswordServiceTest {
     @Test
     void rotateSaltPasswordSuccess() throws CloudbreakOrchestratorException {
         when(saltBootstrapVersionChecker.isChangeSaltuserPasswordSupported(stack)).thenReturn(true);
+        setPasswordExpiry(LocalDate.now().plusMonths(2));
 
         underTest.rotateSaltPassword(stack);
 
@@ -255,9 +259,7 @@ class RotateSaltPasswordServiceTest {
 
     @Test
     void expiredSaltPasswordRotationNeeded() throws Exception {
-        when(clock.getCurrentLocalDateTime()).thenReturn(LocalDateTime.now());
-        when(saltStatusCheckerConfig.getPasswordExpiryThresholdInDays()).thenReturn(14);
-        when(hostOrchestrator.getPasswordExpiryDate(List.of(gatewayConfig), RotateSaltPasswordService.SALTUSER)).thenReturn(LocalDate.now().minusMonths(2));
+        setPasswordExpiry(LocalDate.now().minusMonths(2));
 
         Optional<RotateSaltPasswordReason> result = underTest.checkIfSaltPasswordRotationNeeded(stack);
 
@@ -266,9 +268,7 @@ class RotateSaltPasswordServiceTest {
 
     @Test
     void noSaltPasswordRotationNeeded() throws Exception {
-        when(clock.getCurrentLocalDateTime()).thenReturn(LocalDateTime.now());
-        when(saltStatusCheckerConfig.getPasswordExpiryThresholdInDays()).thenReturn(14);
-        when(hostOrchestrator.getPasswordExpiryDate(List.of(gatewayConfig), RotateSaltPasswordService.SALTUSER)).thenReturn(LocalDate.now().plusMonths(2));
+        setPasswordExpiry(LocalDate.now().plusMonths(2));
 
         Optional<RotateSaltPasswordReason> result = underTest.checkIfSaltPasswordRotationNeeded(stack);
 
@@ -295,6 +295,12 @@ class RotateSaltPasswordServiceTest {
         assertThatThrownBy(() -> underTest.checkIfSaltPasswordRotationNeeded(stack))
                 .isInstanceOf(CloudbreakRuntimeException.class)
                 .hasCause(exception);
+    }
+
+    private void setPasswordExpiry(LocalDate t) throws CloudbreakOrchestratorException {
+        when(clock.getCurrentLocalDateTime()).thenReturn(LocalDateTime.now());
+        when(saltStatusCheckerConfig.getPasswordExpiryThresholdInDays()).thenReturn(14);
+        when(hostOrchestrator.getPasswordExpiryDate(List.of(gatewayConfig), RotateSaltPasswordService.SALTUSER)).thenReturn(t);
     }
 
 }
