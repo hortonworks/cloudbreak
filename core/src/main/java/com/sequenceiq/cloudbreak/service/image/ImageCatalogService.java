@@ -266,7 +266,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
                     .withBaseImageEnabled(baseImageEnabled())
                     .withOperatingSystems(operatingSystems)
                     .withDefaultOnly(defaultOnly)
-                    .withArchitecture(architecture == null ? null : Architecture.fromStringWithFallback(architecture))
+                    .withArchitecture(Architecture.fromStringWithFallback(architecture))
                     .build();
             return getImages(imageFilter).getImages();
         } else if (isNotEmpty(stackName)) {
@@ -360,7 +360,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
                         .withBaseImageEnabled(baseImageEnabled(accountId))
                         .withClusterVersion(runtimeVersion)
                         .withDefaultOnly(defaultOnly)
-                        .withArchitecture(architecture == null ? null : Architecture.fromStringWithFallback(architecture))
+                        .withArchitecture(Architecture.fromStringWithFallback(architecture))
                         .build();
                 return getImages(imageFilter);
             }
