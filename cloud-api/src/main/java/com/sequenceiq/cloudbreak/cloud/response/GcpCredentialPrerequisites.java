@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.cloud.doc.CredentialPrerequisiteModelDes
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -21,8 +22,9 @@ public class GcpCredentialPrerequisites extends CredentialBasePrerequisites impl
         this.creationCommand = creationCommand;
     }
 
-    public GcpCredentialPrerequisites(String creationCommand, Map<String, String> policies) {
+    public GcpCredentialPrerequisites(String creationCommand, Map<String, String> policies, Set<GranularPolicyResponse> granularPolicies) {
         this.creationCommand = creationCommand;
+        setGranularPolicies(granularPolicies);
         setPolicies(policies);
     }
 

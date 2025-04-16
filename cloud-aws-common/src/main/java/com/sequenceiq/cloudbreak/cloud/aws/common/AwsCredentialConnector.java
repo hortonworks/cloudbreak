@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
 import static com.sequenceiq.cloudbreak.cloud.model.CredentialStatus.PERMISSIONS_MISSING;
+import static com.sequenceiq.cloudbreak.cloud.response.PolicyComponentIdentifier.DATALAKE;
+import static com.sequenceiq.cloudbreak.cloud.response.PolicyComponentIdentifier.ENVIRONMENT;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -37,6 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.credential.CredentialVerificationContext;
 import com.sequenceiq.cloudbreak.cloud.response.AwsCredentialPrerequisites;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
+import com.sequenceiq.cloudbreak.cloud.response.GranularPolicyResponse;
 import com.sequenceiq.cloudbreak.experience.PolicyServiceName;
 import com.sequenceiq.common.model.CredentialType;
 
@@ -137,25 +140,29 @@ public class AwsCredentialConnector implements CredentialConnector {
     public CredentialPrerequisitesResponse getPrerequisites(CloudContext cloudContext, String externalId,
         String auditExternalId, String deploymentAddress, CredentialType type) {
         String policyJson;
-        String actualExternalId;
         boolean govCloud = cloudContext.isGovCloud();
-        switch (type) {
-            case ENVIRONMENT:
+        String actualExternalId = switch (type) {
+            case ENVIRONMENT -> {
                 policyJson = awsPlatformParameters.getCredentialPoliciesJson().get(getPolicyType(govCloud));
-                actualExternalId = externalId;
-                break;
-            case AUDIT:
+                yield externalId;
+            }
+            case AUDIT -> {
                 policyJson = awsPlatformParameters.getAuditPoliciesJson().get(getPolicyType(govCloud));
-                actualExternalId = auditExternalId;
-                break;
-            default:
+                yield auditExternalId;
+            }
+            default -> {
+                LOGGER.debug("Unrecognized credential type: {}", type);
                 policyJson = null;
-                actualExternalId = null;
-        }
+                yield null;
+            }
+        };
         AwsCredentialPrerequisites awsPrerequisites = new AwsCredentialPrerequisites(
                 actualExternalId,
-                policyJson);
+                policyJson,
+                new HashMap<>(),
+                new HashSet<>());
         awsPrerequisites.setPolicies(collectNecessaryPolicies(govCloud));
+        awsPrerequisites.setGranularPolicies(collectNecessaryGranularPolicies(govCloud));
         return new CredentialPrerequisitesResponse(cloudContext.getPlatform().value(), getAccountId(govCloud), awsPrerequisites);
     }
 
@@ -171,6 +178,7 @@ public class AwsCredentialConnector implements CredentialConnector {
         }
     }
 
+    @Deprecated
     private Map<String, String> collectNecessaryPolicies(boolean govCloud) {
         return ImmutableMap.<String, String>builder()
                 .put("Audit", awsPlatformParameters.getAuditPoliciesJson().get(getPolicyType(govCloud)))
@@ -185,6 +193,35 @@ public class AwsCredentialConnector implements CredentialConnector {
                 .put("Datalake_Restore", awsPlatformParameters.getCdpDatalakeRestorePolicyJson().get(getPolicyType(govCloud)))
                 .put("Log_Policy", awsPlatformParameters.getCdpLogPolicyJson().get(getPolicyType(govCloud)))
                 .build();
+    }
+
+    private Set<GranularPolicyResponse> collectNecessaryGranularPolicies(boolean govCloud) {
+        Set<GranularPolicyResponse> policies = new HashSet<>();
+        policies.addAll(Set.of(
+                new GranularPolicyResponse(ENVIRONMENT.name(), "Audit",
+                        awsPlatformParameters.getAuditPoliciesJson().get(getPolicyType(govCloud))),
+                new GranularPolicyResponse(ENVIRONMENT.name(), "Idbroker_Assumer",
+                        awsPlatformParameters.getCdpIdbrokerPolicyJson().get(getPolicyType(govCloud))),
+                new GranularPolicyResponse(ENVIRONMENT.name(), "Environment",
+                        awsPlatformParameters.getEnvironmentMinimalPoliciesJson().get(getPolicyType(govCloud)))
+                ));
+        policies.addAll(Set.of(
+                new GranularPolicyResponse(DATALAKE.name(), "Ranger_Audit",
+                        awsPlatformParameters.getCdpRangerAuditS3PolicyJson().get(getPolicyType(govCloud))),
+                new GranularPolicyResponse(DATALAKE.name(), "Ranger_Raz",
+                        awsPlatformParameters.getCdpRangerRazS3PolicyJson().get(getPolicyType(govCloud))),
+                new GranularPolicyResponse(DATALAKE.name(), "Bucket_Access",
+                        awsPlatformParameters.getCdpBucketAccessPolicyJson().get(getPolicyType(govCloud))),
+                new GranularPolicyResponse(DATALAKE.name(), "Datalake_Admin",
+                        awsPlatformParameters.getCdpDatalakeAdminS3PolicyJson().get(getPolicyType(govCloud))),
+                new GranularPolicyResponse(DATALAKE.name(), "Datalake_Backup",
+                        awsPlatformParameters.getCdpDatalakeBackupPolicyJson().get(getPolicyType(govCloud))),
+                new GranularPolicyResponse(DATALAKE.name(), "Datalake_Restore",
+                        awsPlatformParameters.getCdpDatalakeRestorePolicyJson().get(getPolicyType(govCloud))),
+                new GranularPolicyResponse(DATALAKE.name(), "Log_Policy",
+                        awsPlatformParameters.getCdpLogPolicyJson().get(getPolicyType(govCloud)))
+                ));
+        return policies;
     }
 
     private CDPServicePolicyVerificationResponses verifyIamRoleIsAssumable(CloudCredential cloudCredential,

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -15,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
+import com.sequenceiq.cloudbreak.cloud.response.GranularPolicyResponse;
 import com.sequenceiq.common.model.CredentialType;
 
 @ExtendWith(MockitoExtension.class)
@@ -58,6 +60,9 @@ public class AzureCredentialConnectorTest {
         assertEquals(PLATFORM, result.getCloudPlatform());
         assertEquals(expectedCommand, new String(Base64.decodeBase64(result.getAzure().getAppCreationCommand())));
         assertEquals(expectedRoleDef, result.getAzure().getRoleDefitionJson());
+        assertNotNull(result.getAzure().getGranularPolicies());
+        assertEquals(1, result.getAzure().getGranularPolicies().size());
+        assertEquals(expectedMinimalRoleDef, ((GranularPolicyResponse) result.getAzure().getGranularPolicies().toArray()[0]).policy());
     }
 
     @Test
@@ -71,5 +76,8 @@ public class AzureCredentialConnectorTest {
         assertNull(result.getAws());
         assertNull(result.getGcp());
         assertNotNull(result.getAzure());
+        assertNotNull(result.getAzure().getGranularPolicies());
+        assertTrue(result.getAzure().getGranularPolicies().isEmpty());
     }
+
 }
