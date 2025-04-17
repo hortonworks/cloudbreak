@@ -427,6 +427,11 @@ public class AzurePlatformResources implements PlatformResources {
     }
 
     @Override
+    public boolean isEncryptionKeyUsable(ExtendedCloudCredential cloudCredential, String region, String keyArn) {
+        throw new UnsupportedOperationException("Method not implemented");
+    }
+
+    @Override
     public CloudEncryptionKeys encryptionKeys(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return new CloudEncryptionKeys(new HashSet<>());
     }

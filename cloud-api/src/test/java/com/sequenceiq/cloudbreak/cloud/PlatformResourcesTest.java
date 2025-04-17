@@ -86,6 +86,11 @@ class PlatformResourcesTest {
         }
 
         @Override
+        public boolean isEncryptionKeyUsable(ExtendedCloudCredential cloudCredential, String region, String key) {
+            return true;
+        }
+
+        @Override
         public CloudEncryptionKeys encryptionKeys(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
             return null;
         }
@@ -104,7 +109,5 @@ class PlatformResourcesTest {
         public CloudPrivateDnsZones privateDnsZones(ExtendedCloudCredential cloudCredential, Map<String, String> filters) {
             return null;
         }
-
     }
-
 }

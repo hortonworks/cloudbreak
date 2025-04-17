@@ -6,8 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -21,10 +24,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.PlatformResources;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKey;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
+import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
+import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -110,12 +117,13 @@ class EncryptionKeyArnValidatorTest {
         when(retryService.testWith2SecDelayMax15Times(any(Supplier.class))).thenReturn(cloudEncryptionKeys);
         ValidationResult validationResult = underTest.validate(environmentValidationDto);
         assertTrue(validationResult.hasWarning());
-        assertEquals(String.format("Following encryption keys are retrieved from the cloud "
-                        + cloudEncryptionKeys.getCloudEncryptionKeys().stream().map(CloudEncryptionKey::getName).collect(Collectors.toList()) +
-                        " . The provided encryption key " + invalidKey +
-                        " does not exist in the given region's encryption key list for this credential." +
-                        " This is possible if the key is present in a different AWS Account." +
-                        " Please ensure that the Key is present and have valid permissions otherwise it would result in failures with EBS volume creation."),
+
+        assertEquals(String.format("Following encryption keys are retrieved from the cloud %s ." +
+                " The provided encryption key %s does not exist in the given region's encryption key list for this credential." +
+                " This is possible if the key is present in a different AWS Account." +
+                " Please ensure that the Key is present and have valid permissions otherwise it would result in failures with EBS volume creation.",
+                cloudEncryptionKeys.getCloudEncryptionKeys().stream().map(CloudEncryptionKey::getName).collect(Collectors.toList()),
+                invalidKey),
                 validationResult.getFormattedWarnings());
     }
 
@@ -174,6 +182,126 @@ class EncryptionKeyArnValidatorTest {
     public void testWithEmptyEncryptionKeyAndSecretEncryptionEnabled() {
         ValidationResult validationResult = underTest.validateEncryptionKeyArn(null, true);
         assertEquals(NULL_ARN_WITH_SECRET_ENCRYPTION_ENABLED_ERROR_MESSAGE, validationResult.getFormattedErrors());
+    }
+
+    @Test
+    public void testInvalidEncryptionKeyArnFormatWithValideAccess() {
+        String invalidKey = "arn:aws:kms:us-east-1:012345678910";
+        EnvironmentDto environmentDto = createEnvironmentDto(invalidKey);
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
+        AwsServiceException amazonServiceException = AwsServiceException.builder()
+                .message("An unexpected error occurred while trying to fetch the KMS keys from AWS").build();
+        when(credentialToCloudCredentialConverter.convert(credential)).thenReturn(cloudCredential);
+
+        ValidationResult result = underTest.validate(environmentValidationDto, true);
+        assertEquals(String.format("The key ARN is in bad format. " +
+                        "You can specify the key ARN in the below format: " +
+                        "Key ARN: arn:partition:service:region:account-id:resource-type/resource-id. " +
+                        "For example, arn:aws:kms:us-east-1:012345678910:key/1234abcd-12ab-34cd-56ef-1234567890ab."),
+                result.getFormattedWarnings());
+    }
+
+    @Test
+    public void testInvalidEncryptionKeyArnDontValidateAccess() {
+        String validKey = "arn:aws:kms:us-east-1:012345678910:key/1234abcd-12ab-34cd-56ef-1234567890ab";
+        EnvironmentDto environmentDto = createEnvironmentDto(validKey);
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
+        AwsServiceException amazonServiceException = AwsServiceException.builder()
+                .message("An unexpected error occurred while trying to fetch the KMS keys from AWS").build();
+        when(credentialToCloudCredentialConverter.convert(credential)).thenReturn(cloudCredential);
+
+        CloudPlatformConnectors cloudPlatformConnectors = mock(CloudPlatformConnectors.class);
+        AwsConnector connector = mock(AwsConnector.class);
+        PlatformResources platformResources = mock(PlatformResources.class);
+
+        //CloudPlatformVariant cloudPlatformVariant = mock(CloudPlatformVariant.class);
+        ExtendedCloudCredential extendedCloudCredential = mock(ExtendedCloudCredential.class);
+
+        CloudEncryptionKeys encryptionKeys = mock(CloudEncryptionKeys.class);
+        when(retryService.testWith2SecDelayMax15Times(any(Supplier.class))).thenReturn(encryptionKeys);
+
+        List<CloudEncryptionKey> cloudEncryptionKeysList = new ArrayList<>();
+        when(encryptionKeys.getCloudEncryptionKeys()).thenReturn(cloudEncryptionKeysList);
+
+        ValidationResult result = underTest.validate(environmentValidationDto, false);
+
+        List<String> keyArns = new ArrayList<>();
+        keyArns.add(validKey);
+
+        assertEquals("Following encryption keys are retrieved from the cloud [] ." +
+                        " The provided encryption key arn:aws:kms:us-east-1:012345678910:key/1234abcd-12ab-34cd-56ef-1234567890ab" +
+                        " does not exist in the given region's encryption key list for this credential." +
+                        " This is possible if the key is present in a different AWS Account." +
+                        " Please ensure that the Key is present and have valid permissions otherwise it would result in failures with EBS volume creation.",
+                result.getFormattedWarnings());
+    }
+
+    @Test
+    public void testValidEncryptionKeyArnDontValidateAccess() {
+        String validKey = "arn:aws:kms:us-east-1:012345678910:key/1234abcd-12ab-34cd-56ef-1234567890ab";
+        EnvironmentDto environmentDto = createEnvironmentDto(validKey);
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
+        AwsServiceException amazonServiceException = AwsServiceException.builder()
+                .message("An unexpected error occurred while trying to fetch the KMS keys from AWS").build();
+        when(credentialToCloudCredentialConverter.convert(credential)).thenReturn(cloudCredential);
+
+        CloudPlatformConnectors cloudPlatformConnectors = mock(CloudPlatformConnectors.class);
+        AwsConnector connector = mock(AwsConnector.class);
+        PlatformResources platformResources = mock(PlatformResources.class);
+
+
+        // Define input parameters
+        CloudPlatformVariant cloudPlatformVariant = mock(CloudPlatformVariant.class);
+        ExtendedCloudCredential extendedCloudCredential = mock(ExtendedCloudCredential.class);
+
+        String region = REGION;
+
+        CloudEncryptionKeys encryptionKeys = mock(CloudEncryptionKeys.class);
+        when(retryService.testWith2SecDelayMax15Times(any(Supplier.class))).thenReturn(encryptionKeys);
+
+
+        List<CloudEncryptionKey> cloudEncryptionKeysList = new ArrayList<>();
+        CloudEncryptionKey cloudEncryptionKey = new CloudEncryptionKey(validKey, "key-id", "", "", null);
+        cloudEncryptionKeysList.add(cloudEncryptionKey);
+
+        when(encryptionKeys.getCloudEncryptionKeys()).thenReturn(cloudEncryptionKeysList);
+
+
+        ValidationResult result = underTest.validate(environmentValidationDto, false);
+
+        List<String> keyArns = new ArrayList<>();
+        keyArns.add(validKey);
+
+        assertEquals("", result.getFormattedWarnings());
+    }
+
+    @Test
+    public void testEncryptionKeyWithInValideAccess() {
+        String validKey = "arn:aws:kms:us-east-1:012345678910:key/1234abcd-12ab-34cd-56ef-1234567890ab";
+        EnvironmentDto environmentDto = createEnvironmentDto(validKey);
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
+        AwsServiceException amazonServiceException = AwsServiceException.builder()
+                .message("An unexpected error occurred while trying to fetch the KMS keys from AWS").build();
+        when(credentialToCloudCredentialConverter.convert(credential)).thenReturn(cloudCredential);
+        when(retryService.testWith2SecDelayMax15Times(any(Supplier.class))).thenReturn(false);
+        ValidationResult result = underTest.validate(environmentValidationDto, true);
+        assertEquals(String.format("The provided encryption key " + validKey + " is not usable." +
+                " This is possible if the key is present in a different AWS Account." +
+                " Please ensure that the Key is present and have valid permissions otherwise it would result in failures with EBS volume creation."),
+                result.getFormattedWarnings());
+    }
+
+    @Test
+    public void testEncryptionKeyWithValideAccess() {
+        String validKey = "arn:aws:kms:us-east-1:012345678910:key/1234abcd-12ab-34cd-56ef-1234567890ab";
+        EnvironmentDto environmentDto = createEnvironmentDto(validKey);
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
+        AwsServiceException amazonServiceException = AwsServiceException.builder()
+                .message("An unexpected error occurred while trying to fetch the KMS keys from AWS").build();
+        when(credentialToCloudCredentialConverter.convert(credential)).thenReturn(cloudCredential);
+        when(retryService.testWith2SecDelayMax15Times(any(Supplier.class))).thenReturn(true);
+        ValidationResult result = underTest.validate(environmentValidationDto, true);
+        assertEquals("", result.getFormattedWarnings());
     }
 
     private EnvironmentDto createEnvironmentDto(String encryptionKeyArn) {

@@ -100,8 +100,11 @@ import software.amazon.awssdk.services.iam.model.InstanceProfile;
 import software.amazon.awssdk.services.iam.model.ListInstanceProfilesRequest;
 import software.amazon.awssdk.services.iam.model.ListInstanceProfilesResponse;
 import software.amazon.awssdk.services.kms.model.AliasListEntry;
+import software.amazon.awssdk.services.kms.model.DescribeKeyRequest;
+import software.amazon.awssdk.services.kms.model.DescribeKeyResponse;
 import software.amazon.awssdk.services.kms.model.KeyListEntry;
 import software.amazon.awssdk.services.kms.model.KeyMetadata;
+import software.amazon.awssdk.services.kms.model.KmsException;
 import software.amazon.awssdk.services.kms.model.ListAliasesRequest;
 import software.amazon.awssdk.services.kms.model.ListAliasesResponse;
 import software.amazon.awssdk.services.rds.model.Certificate;
@@ -315,6 +318,20 @@ public class AwsPlatformResourcesTest {
         CloudEncryptionKeys cloudEncryptionKeys = underTest.encryptionKeys(cloudCredential, region("London"), new HashMap<>());
 
         assertEquals(4L, cloudEncryptionKeys.getCloudEncryptionKeys().size());
+    }
+
+    @Test
+    public void isEncryptionKeyUsable() {
+        String keyArn = "keyArn";
+        String region = "us-east-1";
+
+        when(awsClient.createAWSKMS(any(AwsCredentialView.class), anyString())).thenReturn(amazonKmsClient);
+        when(amazonKmsClient.describeKey(any(DescribeKeyRequest.class))).thenThrow(KmsException.class);
+        boolean result = underTest.isEncryptionKeyUsable(cloudCredential, region, keyArn);
+        assertFalse(result);
+        when(amazonKmsClient.describeKey(any(DescribeKeyRequest.class))).thenReturn(DescribeKeyResponse.builder().build());
+        result = underTest.isEncryptionKeyUsable(cloudCredential, region, keyArn);
+        assertTrue(result);
     }
 
     @Test

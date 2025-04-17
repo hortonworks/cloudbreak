@@ -122,6 +122,15 @@ public interface PlatformResources {
      * Return the encryptionKeys
      * @param cloudCredential credentials to connect to the cloud provider
      * @param region region of the resources (if null then the method will query every region)
+     * @param key identifier of the resource
+     * @return true if the key is accessible and usable
+     */
+    boolean isEncryptionKeyUsable(ExtendedCloudCredential cloudCredential, String region, String key);
+
+    /**
+     * Return the encryptionKeys
+     * @param cloudCredential credentials to connect to the cloud provider
+     * @param region region of the resources (if null then the method will query every region)
      * @param filters the filter statement
      * @return the {@link CloudEncryptionKeys} contains every encryption key
      */

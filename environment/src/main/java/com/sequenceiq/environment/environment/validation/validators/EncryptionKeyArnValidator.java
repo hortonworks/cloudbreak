@@ -43,6 +43,10 @@ public class EncryptionKeyArnValidator {
     private static final Pattern ENCRYPTION_KEY_ARN_PATTERN = Pattern.compile("^arn:(aws|aws-cn|aws-us-gov):kms:[a-zA-Z0-9-]+:[0-9]+:" +
             "key/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
 
+    private static final int ARN_MAX_ITEMS = 6;
+
+    private static final int ARN_REGION_INDEX = 3;
+
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
     @Qualifier("DefaultRetryService")
@@ -82,6 +86,10 @@ public class EncryptionKeyArnValidator {
     }
 
     public ValidationResult validate(EnvironmentValidationDto environmentValidationDto) {
+        return validate(environmentValidationDto, false);
+    }
+
+    public ValidationResult validate(EnvironmentValidationDto environmentValidationDto, boolean validateAccess) {
         String encryptionKeyArn = Optional.ofNullable(environmentValidationDto)
                 .map(EnvironmentValidationDto::getEnvironmentDto)
                 .map(EnvironmentDtoBase::getParameters)
@@ -106,20 +114,40 @@ public class EncryptionKeyArnValidator {
         CloudPlatformVariant cloudPlatformVariant = new CloudPlatformVariant(
                 Platform.platform(environmentDto.getCloudPlatform()), null);
 
-        try {
-            CloudEncryptionKeys encryptionKeys = retryService.testWith2SecDelayMax15Times(() -> cloudPlatformConnectors.get(cloudPlatformVariant).
-                    platformResources().encryptionKeys(extendedCloudCredential, region, Collections.emptyMap()));
-            List<String> keyArns = encryptionKeys.getCloudEncryptionKeys().stream().map(CloudEncryptionKey::getName).toList();
-            if (keyArns.stream().noneMatch(s -> s.equals(encryptionKeyArn))) {
-                validationResultBuilder.warning("Following encryption keys are retrieved from the cloud " + keyArns +
-                        " . The provided encryption key " + encryptionKeyArn +
-                        " does not exist in the given region's encryption key list for this credential." +
-                        " This is possible if the key is present in a different AWS Account." +
-                        " Please ensure that the Key is present and have valid permissions otherwise it would result in failures with EBS volume creation.");
+        if (validateAccess) {
+            String[] arnParts = encryptionKeyArn.split(":");
+            if (arnParts.length < ARN_MAX_ITEMS) {
+                validationResultBuilder.warning("The key ARN is in bad format. " +
+                        "You can specify the key ARN in the below format: " +
+                        "Key ARN: arn:partition:service:region:account-id:resource-type/resource-id. " +
+                        "For example, arn:aws:kms:us-east-1:012345678910:key/1234abcd-12ab-34cd-56ef-1234567890ab.");
+            } else {
+                String regionName = arnParts[ARN_REGION_INDEX].trim();
+                boolean keyIsUsable = retryService.testWith2SecDelayMax15Times(() -> cloudPlatformConnectors.get(cloudPlatformVariant).
+                        platformResources().isEncryptionKeyUsable(extendedCloudCredential, regionName, encryptionKeyArn));
+
+                if (!keyIsUsable) {
+                    validationResultBuilder.warning("The provided encryption key " + encryptionKeyArn + " is not usable." +
+                            " This is possible if the key is present in a different AWS Account." +
+                            " Please ensure that the Key is present and have valid permissions otherwise it would result in failures with EBS volume creation.");
+                }
             }
-        } catch (Exception e) {
-            LOGGER.error("An unexpected error occurred while trying to fetch the KMS keys from AWS");
-            throw e;
+        } else {
+            try {
+                CloudEncryptionKeys encryptionKeys = retryService.testWith2SecDelayMax15Times(() -> cloudPlatformConnectors.get(cloudPlatformVariant).
+                        platformResources().encryptionKeys(extendedCloudCredential, region, Collections.emptyMap()));
+                List<String> keyArns = encryptionKeys.getCloudEncryptionKeys().stream().map(CloudEncryptionKey::getName).toList();
+                if (keyArns.stream().noneMatch(s -> s.equals(encryptionKeyArn))) {
+                    validationResultBuilder.warning("Following encryption keys are retrieved from the cloud " + keyArns +
+                            " . The provided encryption key " + encryptionKeyArn +
+                            " does not exist in the given region's encryption key list for this credential." +
+                            " This is possible if the key is present in a different AWS Account." +
+                            " Please ensure that the Key is present and have valid permissions otherwise it would result in failures with EBS volume creation.");
+                }
+            } catch (Exception e) {
+                LOGGER.error("An unexpected error occurred while trying to fetch the KMS keys from AWS");
+                throw e;
+            }
         }
         return validationResultBuilder.build();
     }

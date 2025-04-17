@@ -158,8 +158,11 @@ import software.amazon.awssdk.services.iam.model.ListRolesRequest;
 import software.amazon.awssdk.services.iam.model.ListRolesResponse;
 import software.amazon.awssdk.services.iam.model.Role;
 import software.amazon.awssdk.services.kms.model.AliasListEntry;
+import software.amazon.awssdk.services.kms.model.DescribeKeyRequest;
+import software.amazon.awssdk.services.kms.model.DescribeKeyResponse;
 import software.amazon.awssdk.services.kms.model.KeyListEntry;
 import software.amazon.awssdk.services.kms.model.KeyMetadata;
+import software.amazon.awssdk.services.kms.model.KmsException;
 import software.amazon.awssdk.services.kms.model.ListAliasesRequest;
 import software.amazon.awssdk.services.kms.model.ListAliasesResponse;
 import software.amazon.awssdk.services.rds.model.Certificate;
@@ -1007,6 +1010,21 @@ public class AwsPlatformResources implements PlatformResources {
         }
         cloudAccessConfigs.getCloudAccessConfigs().addAll(cloudAccessConfigSet);
         return cloudAccessConfigs;
+    }
+
+    @Override
+    public boolean isEncryptionKeyUsable(ExtendedCloudCredential cloudCredential, String region, String keyArn) {
+        AwsCredentialView awsCredentialView = new AwsCredentialView(cloudCredential);
+        AmazonKmsClient client = awsClient.createAWSKMS(awsCredentialView, region);
+
+        try {
+            DescribeKeyRequest describeKeyRequest = DescribeKeyRequest.builder().keyId(keyArn).build();
+            DescribeKeyResponse response = client.describeKey(describeKeyRequest);
+        } catch (KmsException e) {
+            LOGGER.warn("Exception while attempting to describe Key {}", keyArn, e);
+            return false;
+        }
+        return true;
     }
 
     @Override

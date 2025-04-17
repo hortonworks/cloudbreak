@@ -126,7 +126,7 @@ public class EnvironmentFlowValidatorService {
         LOGGER.debug("Validate Environment AWS keys.");
         ValidationResult.ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
         if (environmentValidationDto.getEnvironmentDto().getCloudPlatform().equals(CloudPlatform.AWS.name())) {
-            return encryptionKeyArnValidator.validate(environmentValidationDto);
+            return encryptionKeyArnValidator.validate(environmentValidationDto, true);
         }
         return validationResultBuilder.build();
     }
