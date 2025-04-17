@@ -97,7 +97,7 @@ public class TerminationService {
                 if (cluster != null) {
                     try {
                         clusterService.cleanupCluster(stack);
-                        clusterTerminationService.finalizeClusterTermination(cluster.getId(), force, stack.getType(), stack.getEnvironmentCrn());
+                        clusterTerminationService.finalizeClusterTermination(cluster.getId(), force);
                     } catch (TransactionExecutionException e) {
                         throw e.getCause();
                     }
