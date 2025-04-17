@@ -21,6 +21,7 @@
   file.managed:
     - makedirs: True
     - source: salt://nginx/conf/ssl-locations.d/saltboot.conf
+    - template: jinja
 
 /etc/nginx/sites-enabled/ssl-locations.d/freeipahealthcheck.conf:
   file.managed:
