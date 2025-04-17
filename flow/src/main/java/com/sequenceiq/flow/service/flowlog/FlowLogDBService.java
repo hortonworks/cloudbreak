@@ -198,15 +198,9 @@ public class FlowLogDBService implements FlowLogService {
     }
 
     @Override
-    public Set<FlowLogIdWithTypeAndTimestamp> findAllRunningNonTerminationFlowsByResourceId(Long resourceId) {
-        Set<FlowLogIdWithTypeAndTimestamp> allRunningFlowIdsByResourceId =
-                Benchmark.measure(() -> flowLogRepository.findAllRunningFlowLogByResourceId(resourceId), LOGGER,
-                        "Fetching all running flow for resource took {}ms");
-        return allRunningFlowIdsByResourceId.stream()
-                .filter(flowLog -> applicationFlowInformation.getTerminationFlow().stream()
-                        .map(Class::getName)
-                        .noneMatch(terminationFlowClassName -> terminationFlowClassName.equals(flowLog.getFlowType().getName())))
-                .collect(Collectors.toSet());
+    public Set<FlowLogIdWithTypeAndTimestamp> findAllRunningFlowsByResourceId(Long resourceId) {
+        return Benchmark.measure(() -> flowLogRepository.findAllRunningFlowLogByResourceId(resourceId), LOGGER,
+                "Fetching all running flow for resource took {}ms");
     }
 
     private Set<String> findAllRunningNonTerminationFlowIdsByResourceId(Long resourceId) {
@@ -217,12 +211,6 @@ public class FlowLogDBService implements FlowLogService {
                         .noneMatch(terminationFlowClassName -> terminationFlowClassName.equals(flowLog.getFlowType().getName())))
                 .map(FlowLogIdWithTypeAndTimestamp::getFlowId)
                 .collect(Collectors.toSet());
-    }
-
-    @Override
-    public boolean isOtherNonTerminationFlowRunning(Long resourceId) {
-        Set<String> flowIds = findAllRunningNonTerminationFlowIdsByResourceId(resourceId);
-        return !flowIds.isEmpty();
     }
 
     private Set<String> findAllRunningFlowIdsByResourceId(Long resourceId) {

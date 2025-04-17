@@ -30,9 +30,7 @@ public interface FlowLogService {
 
     void updateLastFlowLogStatus(FlowLog lastFlowLog, boolean failureEvent, String reason);
 
-    Set<FlowLogIdWithTypeAndTimestamp> findAllRunningNonTerminationFlowsByResourceId(Long resourceId);
-
-    boolean isOtherNonTerminationFlowRunning(Long resourceId);
+    Set<FlowLogIdWithTypeAndTimestamp> findAllRunningFlowsByResourceId(Long resourceId);
 
     boolean isOtherFlowRunning(Long resourceId);
 

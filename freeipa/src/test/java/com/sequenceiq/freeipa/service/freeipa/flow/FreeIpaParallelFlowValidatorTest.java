@@ -79,14 +79,6 @@ class FreeIpaParallelFlowValidatorTest {
     @InjectMocks
     private FreeIpaParallelFlowValidator underTest;
 
-    @ParameterizedTest
-    @MethodSource
-    public void testFlowAllowed(String selector, Set<FlowLogIdWithTypeAndTimestamp> runningFlows) {
-        lenient().when(flowLogService.findAllRunningNonTerminationFlowsByResourceId(STACK_ID)).thenReturn(runningFlows);
-
-        underTest.checkFlowAllowedToStart(selector, STACK_ID);
-    }
-
     private static Stream<Arguments> testFlowAllowed() {
         Stream<Arguments> dynamicFlowConfigTest = getAllFlowConfig().stream().flatMap(flowConfig ->
                 Stream.of(Arguments.of(FreeIpaCleanupEvent.CLEANUP_EVENT.event(), createFromFlowConfig(Set.of(flowConfig))),
@@ -103,17 +95,6 @@ class FreeIpaParallelFlowValidatorTest {
                 Arguments.of(COMMON_FLOW_EVENT, createFromFlowConfig(Set.of()))
         );
         return Stream.concat(staticFlowConfigTest, dynamicFlowConfigTest);
-    }
-
-    @ParameterizedTest
-    @MethodSource
-    public void testFlowNotAllowed(String selector, Set<FlowLogIdWithTypeAndTimestamp> runningFlows) {
-        lenient().when(flowLogService.findAllRunningNonTerminationFlowsByResourceId(STACK_ID)).thenReturn(runningFlows);
-        when(flowNameFormatService.formatFlows(anySet())).thenReturn("ForbiddenFlow");
-
-        assertThrows(FlowsAlreadyRunningException.class, () -> underTest.checkFlowAllowedToStart(selector, STACK_ID));
-
-        verify(flowNameFormatService, never()).formatFlowName(any());
     }
 
     private static Stream<Arguments> testFlowNotAllowed() {
@@ -140,6 +121,25 @@ class FreeIpaParallelFlowValidatorTest {
 
     private static FlowLogIdWithTypeAndTimestamp createFromFlowConfig(Class<?> clazz) {
         return new TestFlowView(clazz);
+    }
+
+    @ParameterizedTest
+    @MethodSource
+    public void testFlowAllowed(String selector, Set<FlowLogIdWithTypeAndTimestamp> runningFlows) {
+        lenient().when(flowLogService.findAllRunningFlowsByResourceId(STACK_ID)).thenReturn(runningFlows);
+
+        underTest.checkFlowAllowedToStart(selector, STACK_ID);
+    }
+
+    @ParameterizedTest
+    @MethodSource
+    public void testFlowNotAllowed(String selector, Set<FlowLogIdWithTypeAndTimestamp> runningFlows) {
+        lenient().when(flowLogService.findAllRunningFlowsByResourceId(STACK_ID)).thenReturn(runningFlows);
+        when(flowNameFormatService.formatFlows(anySet())).thenReturn("ForbiddenFlow");
+
+        assertThrows(FlowsAlreadyRunningException.class, () -> underTest.checkFlowAllowedToStart(selector, STACK_ID));
+
+        verify(flowNameFormatService, never()).formatFlowName(any());
     }
 
     @Test

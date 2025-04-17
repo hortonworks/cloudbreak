@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.converter.stack.StackListItemToStackApiViewConverter;
 import com.sequenceiq.cloudbreak.domain.projection.StackInstanceCount;
 import com.sequenceiq.cloudbreak.domain.projection.StackListItem;
@@ -56,15 +55,6 @@ public class StackApiViewService {
     private HostGroupViewRepository hostGroupViewRepository;
 
     public StackApiViewService() {
-    }
-
-    public boolean canChangeCredential(StackApiView stackApiView) {
-        if (stackApiView.getStatus() != null) {
-            if (stackApiView.getStatus() == Status.AVAILABLE) {
-                return !flowLogService.isOtherNonTerminationFlowRunning(stackApiView.getId());
-            }
-        }
-        return false;
     }
 
     public StackApiView save(StackApiView stackApiView) {

@@ -22,6 +22,7 @@ import com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent;
 
 @Component
 public class FreeIpaParallelFlowValidator {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaParallelFlowValidator.class);
 
     private static final Set<Class<?>> IGNORED_ALREADY_RUNNING_PARALLEL_FLOWS = Set.of(
@@ -61,7 +62,7 @@ public class FreeIpaParallelFlowValidator {
     }
 
     private void checkRunningFlowsSupportParallelRun(Long stackId) {
-        Set<FlowLogIdWithTypeAndTimestamp> runningNotAllowedFlows = flowLogService.findAllRunningNonTerminationFlowsByResourceId(stackId).stream()
+        Set<FlowLogIdWithTypeAndTimestamp> runningNotAllowedFlows = flowLogService.findAllRunningFlowsByResourceId(stackId).stream()
                 .filter(flow -> !IGNORED_ALREADY_RUNNING_PARALLEL_FLOWS.contains(flow.getFlowType().getClassValue()))
                 .collect(Collectors.toSet());
         LOGGER.info("Running flows which forbids triggering new flow: {}. Starting flow is {}", flowNameFormatService.formatFlows(runningNotAllowedFlows),

@@ -229,7 +229,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
             flowConfig.getFinalizerCallBack().onFinalize(payload.getResourceId());
             throw new FlowNotTriggerableException("Trigger condition failed, skip flow.", true);
         } else {
-            Set<FlowLogIdWithTypeAndTimestamp> flowLogItems = flowLogService.findAllRunningNonTerminationFlowsByResourceId(payload.getResourceId());
+            Set<FlowLogIdWithTypeAndTimestamp> flowLogItems = flowLogService.findAllRunningFlowsByResourceId(payload.getResourceId());
             if (hasRunningAndParallelNotAllowed(key, flowLogItems)) {
                 return handleFlowConflict(key, payload, flowChainId, flowLogItems);
             } else {
