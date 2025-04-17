@@ -27,7 +27,7 @@ dependencies {
   implementation group: 'io.micrometer',                    name: 'micrometer-registry-prometheus', version: micrometerVersion
   implementation group: 'io.github.mweirauch',              name: 'micrometer-jvm-extras',          version: microMeterJvmExtrasVersion
   api group: 'commons-io',                                  name: 'commons-io',                     version: apacheCommonsIoVersion
-  api group: 'commons-net',                                 name: 'commons-net',                    version: '3.10.0'
+  api group: 'commons-net',                                 name: 'commons-net',                    version: '3.11.1'
   api group: 'org.apache.commons',                          name: 'commons-collections4',           version: commonsCollections4Version
   api group: 'com.google.guava',                            name: 'guava',                          version: guavaVersion
   api group: 'com.google.code.gson',                        name: 'gson',                           version: gsonVersion
