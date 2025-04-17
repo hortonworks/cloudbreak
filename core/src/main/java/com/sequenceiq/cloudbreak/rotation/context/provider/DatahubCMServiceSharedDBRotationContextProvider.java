@@ -9,6 +9,7 @@ import java.util.function.Predicate;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +20,6 @@ import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
-import com.sequenceiq.cloudbreak.rotation.service.DataHubCMServiceSharedDBRotationService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
 @Component
@@ -28,14 +28,13 @@ public class DatahubCMServiceSharedDBRotationContextProvider extends AbstractCMR
     @Inject
     private StackDtoService stackService;
 
-    @Inject
-    private DataHubCMServiceSharedDBRotationService rotationService;
-
     @Override
     public Map<SecretRotationStep, RotationContext> getContexts(String resourceCrn) {
         StackDto stack = stackService.getByCrn(resourceCrn);
         CustomJobRotationContext customJobRotationContext = CustomJobRotationContext.builder()
-                .withRotationJob(() -> rotationService.rotateSharedServiceDbSecretOnDataHub(stack))
+                .withPreValidateJob(() -> {
+                    throw new NotImplementedException("This rotation will be reworked soon...");
+                })
                 .withResourceCrn(resourceCrn)
                 .build();
         return Map.of(CUSTOM_JOB, customJobRotationContext);
