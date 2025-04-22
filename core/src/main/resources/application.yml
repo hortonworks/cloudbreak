@@ -838,10 +838,6 @@ existing-stack-patcher:
     disable-region-for-fluentd:
       enabled: false
       affected-version-from: 0.2.16
-    metering-azure-metadata:
-      enabled: false
-      date-before: '2022-01-18'
-      custom-rpm-url: https://archive.cloudera.com/cp_clients/thunderhead-metering-heartbeat-application-0.1-SNAPSHOT.x86_64.rpm
     metering-follow-inodes:
       enabled: false
     cluster-public-endpoint:

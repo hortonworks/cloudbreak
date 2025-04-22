@@ -37,7 +37,6 @@ import com.sequenceiq.cloudbreak.telemetry.TelemetryFeatureService;
 import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 import com.sequenceiq.cloudbreak.telemetry.context.DatabusContext;
 import com.sequenceiq.cloudbreak.telemetry.context.LogShipperContext;
-import com.sequenceiq.cloudbreak.telemetry.context.MeteringContext;
 import com.sequenceiq.cloudbreak.telemetry.context.MonitoringContext;
 import com.sequenceiq.cloudbreak.telemetry.context.NodeStatusContext;
 import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
@@ -130,7 +129,6 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
             telemetryContext.setLogShipperContext(createLogShipperContext(stack, telemetry));
             telemetryContext.setMonitoringContext(createMonitoringContext(stack, telemetry, nodeStatusContext, cdpAccessKeyType));
             telemetryContext.setPaywallConfigs(getPaywallConfigs(stack));
-            telemetryContext.setMeteringContext(MeteringContext.builder().build());
         }
         telemetryContext.setOsType(stack.getImage().getOsType());
         return telemetryContext;
@@ -201,7 +199,7 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
         List<VmLog> vmLogList = vmLogsService.getVmLogs();
         Logging logging = telemetry.getLogging();
         if (telemetry.isCloudStorageLoggingEnabled() && logging != null
-                && ObjectUtils.anyNotNull(logging.getS3(), logging.getAdlsGen2(), logging.getGcs(), logging.getCloudwatch())) {
+                && ObjectUtils.anyNotNull(logging.getS3(), logging.getAdlsGen2(), logging.getGcs())) {
             builder.enabled().cloudStorageLogging();
         }
         return builder
@@ -215,18 +213,16 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
         if (telemetry == null) {
             return builder.build();
         }
-        if (telemetry.isMeteringFeatureEnabled()) {
-            LOGGER.debug("Apply DataBus related configurations.");
-            builder.enabled();
-            if (entitlementService.isFreeIpaDatabusEndpointValidationEnabled(stack.getAccountId())) {
-                builder.withValidation();
-            }
-            try {
-                DataBusCredential credential = altusMachineUserService.getOrCreateDataBusCredentialIfNeeded(stack, cdpAccessKeyType);
-                builder.withCredential(credential);
-            } catch (IOException e) {
-                throw new CloudbreakServiceException(e);
-            }
+        LOGGER.debug("Apply DataBus related configurations.");
+        builder.enabled();
+        if (entitlementService.isFreeIpaDatabusEndpointValidationEnabled(stack.getAccountId())) {
+            builder.withValidation();
+        }
+        try {
+            DataBusCredential credential = altusMachineUserService.getOrCreateDataBusCredentialIfNeeded(stack, cdpAccessKeyType);
+            builder.withCredential(credential);
+        } catch (IOException e) {
+            throw new CloudbreakServiceException(e);
         }
         String databusEndpoint = getDatabusEndpoint(stack, telemetry);
         builder.withEndpoint(databusEndpoint)

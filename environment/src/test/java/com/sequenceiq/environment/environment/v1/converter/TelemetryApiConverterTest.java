@@ -21,7 +21,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.altus.AltusDatabusConfiguration;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
-import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
@@ -56,11 +55,10 @@ public class TelemetryApiConverterTest {
     @BeforeEach
     public void setUp() {
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration("", "", true, "****", "****");
-        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(false, null, null, false);
         MonitoringConfiguration monitoringConfig = new MonitoringConfiguration();
         monitoringConfig.setRemoteWriteUrl("http://myaddress/api/v1/receive");
         TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration(
-                altusDatabusConfiguration, meteringConfiguration, monitoringConfig, null);
+                altusDatabusConfiguration, monitoringConfig, null);
         underTest = new TelemetryApiConverter(telemetryConfiguration, new MonitoringUrlResolver(monitoringConfig), entitlementService, storageLocationDecorator);
     }
 

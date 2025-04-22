@@ -32,6 +32,7 @@ public abstract class LoggingBase implements Serializable {
     @Schema(description = TelemetryModelDescription.TELEMETRY_LOGGING_GCS_ATTRIBUTES)
     private GcsCloudStorageV1Parameters gcs;
 
+    @Deprecated
     @Schema(description = TelemetryModelDescription.TELEMETRY_LOGGING_CLOUDWATCH_ATTRIBUTES)
     private CloudwatchParams cloudwatch;
 
@@ -67,10 +68,12 @@ public abstract class LoggingBase implements Serializable {
         this.gcs = gcs;
     }
 
+    @Deprecated
     public CloudwatchParams getCloudwatch() {
         return cloudwatch;
     }
 
+    @Deprecated
     public void setCloudwatch(CloudwatchParams cloudwatch) {
         this.cloudwatch = cloudwatch;
     }
@@ -82,7 +85,6 @@ public abstract class LoggingBase implements Serializable {
                 ", s3=" + s3 +
                 ", adlsGen2=" + adlsGen2 +
                 ", gcs=" + gcs +
-                ", cloudwatch=" + cloudwatch +
                 '}';
     }
 }

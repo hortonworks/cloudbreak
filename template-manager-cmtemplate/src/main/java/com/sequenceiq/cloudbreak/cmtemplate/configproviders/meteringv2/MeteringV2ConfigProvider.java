@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.DatabusCredentialView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
@@ -55,19 +56,27 @@ public class MeteringV2ConfigProvider extends AbstractRoleConfigProvider {
     @Value("${crn.region:}")
     private String region;
 
+    @Inject
+    private DatabusCredentialProvider databusCredentialProvider;
+
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
-        DatabusCredentialView databusCredentialView = source.getDatabusCredentialView();
-        return List.of(
-                config(MeteringV2ServiceRoles.METERINGV2_DATABUS_ACCESS_KEY_ID, databusCredentialView.getAccessKey()),
-                config(MeteringV2ServiceRoles.METERINGV2_DATABUS_ACCESS_SECRET_KEY, databusCredentialView.getPrivateKey()),
-                config(MeteringV2ServiceRoles.METERINGV2_DATABUS_ACCESS_SECRET_KEY_ALGO, databusCredentialView.getAccessKeyType()),
-                config(MeteringV2ServiceRoles.METERINGV2_DBUS_HOST, extractHost(altusDatabusConfiguration.getAltusDatabusEndpoint())),
-                config(MeteringV2ServiceRoles.METERINGV2_DBUS_STREAM, dbusStreamName),
-                config(MeteringV2ServiceRoles.METERINGV2_DBUS_APPNAME, dbusAppName),
-                config(MeteringV2ServiceRoles.METERINGV2_DBUS_PARTITION_KEY, source.getGeneralClusterConfigs().getEnvironmentCrn()),
-                config(MeteringV2ServiceRoles.METERINGV2_DBUS_REGION, region)
-        );
+        try {
+            DatabusCredentialView databusCredentialView = databusCredentialProvider.getOrCreateDatabusCredential(source.getCrn());
+            return List.of(
+                    config(MeteringV2ServiceRoles.METERINGV2_DATABUS_ACCESS_KEY_ID, databusCredentialView.getAccessKey()),
+                    config(MeteringV2ServiceRoles.METERINGV2_DATABUS_ACCESS_SECRET_KEY, databusCredentialView.getPrivateKey()),
+                    config(MeteringV2ServiceRoles.METERINGV2_DATABUS_ACCESS_SECRET_KEY_ALGO, databusCredentialView.getAccessKeyType()),
+                    config(MeteringV2ServiceRoles.METERINGV2_DBUS_HOST, extractHost(altusDatabusConfiguration.getAltusDatabusEndpoint())),
+                    config(MeteringV2ServiceRoles.METERINGV2_DBUS_STREAM, dbusStreamName),
+                    config(MeteringV2ServiceRoles.METERINGV2_DBUS_APPNAME, dbusAppName),
+                    config(MeteringV2ServiceRoles.METERINGV2_DBUS_PARTITION_KEY, source.getGeneralClusterConfigs().getEnvironmentCrn()),
+                    config(MeteringV2ServiceRoles.METERINGV2_DBUS_REGION, region)
+            );
+        } catch (Exception e) {
+            LOGGER.error("Could not generate config for meteringv2: ", e);
+            throw new CloudbreakServiceException(e);
+        }
     }
 
     /**

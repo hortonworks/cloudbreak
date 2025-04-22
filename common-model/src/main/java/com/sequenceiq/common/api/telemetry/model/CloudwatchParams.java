@@ -11,6 +11,7 @@ import com.sequenceiq.common.api.telemetry.doc.TelemetryModelDescription;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+@Deprecated
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CloudwatchParams implements Serializable {

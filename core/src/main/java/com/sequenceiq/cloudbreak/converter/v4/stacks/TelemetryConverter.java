@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
 import com.sequenceiq.common.api.telemetry.base.FeaturesBase;
-import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Monitoring;
@@ -61,8 +60,6 @@ public class TelemetryConverter {
 
     private final String databusEndpoint;
 
-    private final boolean meteringEnabled;
-
     private final boolean useSharedAltusCredential;
 
     private final MonitoringUrlResolver monitoringUrlResolver;
@@ -78,7 +75,6 @@ public class TelemetryConverter {
         this.telemetryPublisherDefaultValue = telemetryPublisherDefaultValue;
         this.databusEndpoint = configuration.getAltusDatabusConfiguration().getAltusDatabusEndpoint();
         this.useSharedAltusCredential = configuration.getAltusDatabusConfiguration().isUseSharedAltusCredential();
-        this.meteringEnabled = configuration.getMeteringConfiguration().isEnabled();
         this.monitoringUrlResolver = monitoringUrlResolver;
     }
 
@@ -120,7 +116,6 @@ public class TelemetryConverter {
             LOGGER.debug("Cluster level monitoring feature is enabled");
             features.addMonitoring(true);
         }
-        setMeteringFeature(type, features);
 
         if (StringUtils.isNotEmpty(databusEndpoint)) {
             LOGGER.debug("Setting databus endpoint: {}", databusEndpoint);
@@ -269,7 +264,6 @@ public class TelemetryConverter {
             loggingRequest.setS3(logging.getS3());
             loggingRequest.setAdlsGen2(logging.getAdlsGen2());
             loggingRequest.setGcs(logging.getGcs());
-            loggingRequest.setCloudwatch(CloudwatchParams.copy(logging.getCloudwatch()));
             loggingRequest.setStorageLocation(logging.getStorageLocation());
         }
         return loggingRequest;
@@ -283,15 +277,6 @@ public class TelemetryConverter {
             monitoringRequest.setRemoteWriteUrl(monitoring.getRemoteWriteUrl());
         }
         return monitoringRequest;
-    }
-
-    private void setMeteringFeature(StackType type, Features features) {
-        if (meteringEnabled && StackType.WORKLOAD.equals(type)) {
-            LOGGER.debug("Setting metering for workload cluster (as metering is enabled)");
-            features.addMetering(true);
-        } else {
-            LOGGER.debug("Metering feature is disabled - global setting; {}, stack type: {}", meteringEnabled, type);
-        }
     }
 
     private void setWorkloadAnalyticsFeature(Telemetry telemetry, Features features) {
@@ -313,7 +298,6 @@ public class TelemetryConverter {
             logging.setS3(loggingRequest.getS3());
             logging.setAdlsGen2(loggingRequest.getAdlsGen2());
             logging.setGcs(loggingRequest.getGcs());
-            logging.setCloudwatch(CloudwatchParams.copy(loggingRequest.getCloudwatch()));
         }
         return logging;
     }
@@ -354,7 +338,6 @@ public class TelemetryConverter {
             loggingResponse.setS3(logging.getS3());
             loggingResponse.setAdlsGen2(logging.getAdlsGen2());
             loggingResponse.setGcs(logging.getGcs());
-            loggingResponse.setCloudwatch(CloudwatchParams.copy(logging.getCloudwatch()));
         }
         return loggingResponse;
     }
@@ -387,7 +370,6 @@ public class TelemetryConverter {
             FeaturesResponse featuresResponse = new FeaturesResponse();
             featuresResponse.setWorkloadAnalytics(features.getWorkloadAnalytics());
             featuresResponse.setMonitoring(features.getMonitoring());
-            featuresResponse.setMetering(features.getMetering());
             featuresResponse.setUseSharedAltusCredential(features.getUseSharedAltusCredential());
             setCloudStorageLoggingOnFeaturesModel(features, featuresResponse);
             response.setFeatures(featuresResponse);
@@ -404,7 +386,6 @@ public class TelemetryConverter {
             loggingRequest.setS3(loggingResponse.getS3());
             loggingRequest.setAdlsGen2(loggingResponse.getAdlsGen2());
             loggingRequest.setGcs(loggingResponse.getGcs());
-            loggingRequest.setCloudwatch(loggingResponse.getCloudwatch());
         }
         return loggingRequest;
     }

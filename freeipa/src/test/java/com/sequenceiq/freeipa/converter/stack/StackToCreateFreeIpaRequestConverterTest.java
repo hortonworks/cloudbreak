@@ -27,7 +27,6 @@ import com.sequenceiq.common.api.backup.request.BackupRequest;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
-import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
@@ -241,8 +240,6 @@ public class StackToCreateFreeIpaRequestConverterTest {
         logging.setAdlsGen2(adlsStorage);
         GcsCloudStorageV1Parameters gcsStorage = new GcsCloudStorageV1Parameters();
         logging.setGcs(gcsStorage);
-        CloudwatchParams cloudwatchParamsStorage = new CloudwatchParams();
-        logging.setCloudwatch(cloudwatchParamsStorage);
         telemetry.setLogging(logging);
         Features features = new Features();
         features.setMonitoring(new FeatureSetting());
@@ -359,7 +356,6 @@ public class StackToCreateFreeIpaRequestConverterTest {
         assertEquals(s3Storage, telemetryRequest.getLogging().getS3());
         assertEquals(adlsStorage, telemetryRequest.getLogging().getAdlsGen2());
         assertEquals(gcsStorage, telemetryRequest.getLogging().getGcs());
-        assertNotNull(telemetryRequest.getLogging().getCloudwatch());
         assertNotNull(telemetryRequest.getFeatures());
         assertNotNull(telemetryRequest.getFeatures().getMonitoring());
         assertNotNull(telemetryRequest.getFeatures().getCloudStorageLogging());

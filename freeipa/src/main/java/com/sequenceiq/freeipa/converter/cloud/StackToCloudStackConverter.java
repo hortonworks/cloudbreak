@@ -419,10 +419,6 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
                 CloudGcsView cloudGcsView = new CloudGcsView(CloudIdentityType.LOG);
                 cloudGcsView.setServiceAccountEmail(logging.getGcs().getServiceAccountEmail());
                 return Optional.of(cloudGcsView);
-            } else if (logging.getCloudwatch() != null) {
-                CloudS3View s3View = new CloudS3View(CloudIdentityType.LOG);
-                s3View.setInstanceProfile(logging.getCloudwatch().getInstanceProfile());
-                return Optional.of(s3View);
             }
         }
         return Optional.empty();

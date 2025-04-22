@@ -16,17 +16,12 @@ fluent:
   clusterOwner:
   clusterVersion:
   cloudStorageLoggingEnabled: false
-  cloudLoggingServiceEnabled: false
   s3LogArchiveBucketName:
-  cloudwatchStreamKey: hostname
   azureStorageAccount:
   azureContainer:
   azureInstanceMsi:
   azureIdBrokerInstanceMsi:
   azureStorageAccessKey:
-  dbusMeteringEnabled: false
-  dbusMeteringAppName:
-  dbusMeteringStreamName:
   dbusMonitoringEnabled: false
   dbusIncludeSaltLogs: false
   anonymizationRules:

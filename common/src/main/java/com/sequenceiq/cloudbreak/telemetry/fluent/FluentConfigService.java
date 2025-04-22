@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.telemetry.fluent;
 
 import java.util.HashMap;
-import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -14,7 +13,6 @@ import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryPillarConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.common.AnonymizationRuleResolver;
 import com.sequenceiq.cloudbreak.telemetry.context.LogShipperContext;
-import com.sequenceiq.cloudbreak.telemetry.context.MeteringContext;
 import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2Config;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
@@ -22,11 +20,8 @@ import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.GcsConfig;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.GcsConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3Config;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3ConfigGenerator;
-import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
-import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
-import com.sequenceiq.common.api.telemetry.model.CloudwatchStreamKey;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
@@ -53,8 +48,6 @@ public class FluentConfigService implements TelemetryPillarConfigGenerator<Fluen
 
     private final AnonymizationRuleResolver anonymizationRuleResolver;
 
-    private final MeteringConfiguration meteringConfiguration;
-
     public FluentConfigService(S3ConfigGenerator s3ConfigGenerator,
             AdlsGen2ConfigGenerator adlsGen2ConfigGenerator,
             GcsConfigGenerator gcsConfigGenerator,
@@ -64,24 +57,17 @@ public class FluentConfigService implements TelemetryPillarConfigGenerator<Fluen
         this.adlsGen2ConfigGenerator = adlsGen2ConfigGenerator;
         this.gcsConfigGenerator = gcsConfigGenerator;
         this.anonymizationRuleResolver = anonymizationRuleResolver;
-        this.meteringConfiguration = telemetryConfiguration.getMeteringConfiguration();
     }
 
     @Override
     public FluentConfigView createConfigs(TelemetryContext context) {
         final LogShipperContext logShipperContext = context.getLogShipperContext();
-        final MeteringContext meteringContext = context.getMeteringContext();
         final Telemetry telemetry = context.getTelemetry();
         final FluentConfigView.Builder builder = new FluentConfigView.Builder();
         if (telemetry.getFluentAttributes() != null) {
             builder.withOverrideAttributes(
                     telemetry.getFluentAttributes() != null ? new HashMap<>(telemetry.getFluentAttributes()) : new HashMap<>()
             );
-        }
-        if (meteringContext != null && meteringContext.isEnabled()) {
-            builder.withEnabled(true)
-                    .withMeteringEnabled(true)
-                    .withMeteringConfiguration(meteringConfiguration);
         }
         if (logShipperContext.isCloudStorageLogging()) {
             builder.withEnabled(true);
@@ -118,23 +104,15 @@ public class FluentConfigService implements TelemetryPillarConfigGenerator<Fluen
             fillGcsConfigs(builder, logging.getStorageLocation(), logging.getGcs());
             builder.withCloudStorageLoggingEnabled(true);
             LOGGER.debug("Fluent will be configured to use GCS output");
-        } else if (logging.getCloudwatch() != null) {
-            fillCloudwatchConfigs(builder, logging.getStorageLocation(), logging.getCloudwatch());
-            builder.withCloudLoggingServiceEnabled(true);
-            LOGGER.debug("Fluent will be configured to use Cloudwatch output.");
         }
     }
 
     private boolean isLoggingOrMeteringEnabled(TelemetryContext context) {
-        return  isLoggingEnabled(context.getLogShipperContext()) || isMeteringEnabled(context.getMeteringContext());
+        return  isLoggingEnabled(context.getLogShipperContext());
     }
 
     private boolean isLoggingEnabled(LogShipperContext logShipperContext) {
         return logShipperContext != null && logShipperContext.isEnabled();
-    }
-
-    private boolean isMeteringEnabled(MeteringContext meteringContext) {
-        return meteringContext != null && meteringContext.isEnabled();
     }
 
     private void fillS3Configs(FluentConfigView.Builder builder, String storageLocation) {
@@ -170,15 +148,6 @@ public class FluentConfigService implements TelemetryPillarConfigGenerator<Fluen
                 .withGcsBucket(gcsConfig.getBucket())
                 .withGcsProjectId(gcsConfig.getProjectId())
                 .withLogFolderName(gcsConfig.getFolderPrefix());
-    }
-
-    private void fillCloudwatchConfigs(FluentConfigView.Builder builder,
-            String storageLocation, CloudwatchParams cloudwatchParams) {
-        Optional<CloudwatchStreamKey> cloudwatchStreamKey = Optional.ofNullable(cloudwatchParams.getStreamKey());
-        builder.withProviderPrefix(CLOUDWATCH_PROVIDER_PREFIX)
-                .withRegion(cloudwatchParams.getRegion())
-                .withCloudwatchStreamKey(cloudwatchStreamKey.orElse(CloudwatchStreamKey.HOSTNAME).value())
-                .withLogFolderName(storageLocation);
     }
 
     private String getEnvironmentRegion(TelemetryClusterDetails clusterDetails) {

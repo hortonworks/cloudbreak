@@ -35,9 +35,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryFeatureService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
-import com.sequenceiq.common.api.type.FeatureSetting;
 
 @ExtendWith(MockitoExtension.class)
 public class AltusMachineUserServiceTest {
@@ -89,11 +87,7 @@ public class AltusMachineUserServiceTest {
         cluster.setId(1L);
         stack.setCluster(cluster);
         telemetry = new Telemetry();
-        Features features = new Features();
-        FeatureSetting metering = new FeatureSetting();
-        metering.setEnabled(Boolean.TRUE);
-        features.setMetering(metering);
-        telemetry.setFeatures(features);
+        cluster.setDatabusCredential("dbus");
         underTest = new AltusMachineUserService(altusIAMService, stackDtoService,
                 clusterService, componentConfigProviderService, entitlementService, telemetryFeatureService);
     }

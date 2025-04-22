@@ -10,7 +10,6 @@ import org.apache.commons.lang3.ObjectUtils;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfigView;
-import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
 import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 
 public class FluentConfigView implements TelemetryConfigView {
@@ -35,13 +34,7 @@ public class FluentConfigView implements TelemetryConfigView {
 
     private final boolean cloudStorageLoggingEnabled;
 
-    private final boolean cloudLoggingServiceEnabled;
-
-    private final boolean meteringEnabled;
-
     private final boolean monitoringEnabled;
-
-    private final MeteringConfiguration meteringConfiguration;
 
     private final TelemetryClusterDetails clusterDetails;
 
@@ -79,8 +72,6 @@ public class FluentConfigView implements TelemetryConfigView {
 
     private final String gcsProjectId;
 
-    private final String cloudwatchStreamKey;
-
     private final String logFolderName;
 
     private final List<AnonymizationRule> anonymizationRules;
@@ -90,10 +81,7 @@ public class FluentConfigView implements TelemetryConfigView {
     private FluentConfigView(Builder builder) {
         this.enabled = builder.enabled;
         this.cloudStorageLoggingEnabled = builder.cloudStorageLoggingEnabled;
-        this.cloudLoggingServiceEnabled = builder.cloudLoggingServiceEnabled;
-        this.meteringEnabled = builder.meteringEnabled;
         this.monitoringEnabled = builder.monitoringEnabled;
-        this.meteringConfiguration = builder.meteringConfiguration;
         this.clusterDetails = builder.clusterDetails;
         this.user = builder.user;
         this.group = builder.group;
@@ -106,7 +94,6 @@ public class FluentConfigView implements TelemetryConfigView {
         this.partitionIntervalMin = builder.partitionIntervalMin;
         this.logFolderName = builder.logFolderName;
         this.s3LogArchiveBucketName = builder.s3LogArchiveBucketName;
-        this.cloudwatchStreamKey = builder.cloudwatchStreamKey;
         this.azureContainer = builder.azureContainer;
         this.azureStorageAccount = builder.azureStorageAccount;
         this.azureInstanceMsi = builder.azureInstanceMsi;
@@ -166,10 +153,6 @@ public class FluentConfigView implements TelemetryConfigView {
         return s3LogArchiveBucketName;
     }
 
-    public String getCloudwatchStreamKey() {
-        return cloudwatchStreamKey;
-    }
-
     public String getAzureStorageAccount() {
         return azureStorageAccount;
     }
@@ -206,14 +189,6 @@ public class FluentConfigView implements TelemetryConfigView {
         return cloudStorageLoggingEnabled;
     }
 
-    public boolean isCloudLoggingServiceEnabled() {
-        return cloudLoggingServiceEnabled;
-    }
-
-    public boolean isMeteringEnabled() {
-        return meteringEnabled;
-    }
-
     public Map<String, Object> getOverrideAttributes() {
         return this.overrideAttributes;
     }
@@ -223,8 +198,6 @@ public class FluentConfigView implements TelemetryConfigView {
         Map<String, Object> map = new HashMap<>();
         map.put("enabled", this.enabled);
         map.put("cloudStorageLoggingEnabled", this.cloudStorageLoggingEnabled);
-        map.put("cloudLoggingServiceEnabled", this.cloudLoggingServiceEnabled);
-        map.put("dbusMeteringEnabled", this.meteringEnabled);
         map.put("dbusIncludeSaltLogs", DBUS_INCLUDE_SALT_LOGS_DEFAULT);
         map.put("user", ObjectUtils.defaultIfNull(this.user, TD_AGENT_USER_DEFAULT));
         map.put("group", ObjectUtils.defaultIfNull(this.group, TD_AGENT_GROUP_DEFAULT));
@@ -237,7 +210,6 @@ public class FluentConfigView implements TelemetryConfigView {
         map.put("partitionIntervalMin", ObjectUtils.defaultIfNull(this.partitionIntervalMin, PARTITION_INTERVAL_DEFAULT));
         map.put("logFolderName", ObjectUtils.defaultIfNull(this.logFolderName, EMPTY_CONFIG_DEFAULT));
         map.put("s3LogArchiveBucketName", ObjectUtils.defaultIfNull(this.s3LogArchiveBucketName, EMPTY_CONFIG_DEFAULT));
-        map.put("cloudwatchStreamKey", ObjectUtils.defaultIfNull(this.cloudwatchStreamKey, EMPTY_CONFIG_DEFAULT));
         map.put("azureContainer", ObjectUtils.defaultIfNull(this.azureContainer, EMPTY_CONFIG_DEFAULT));
         map.put("azureStorageAccount", ObjectUtils.defaultIfNull(this.azureStorageAccount, EMPTY_CONFIG_DEFAULT));
         map.put("azureStorageAccessKey", ObjectUtils.defaultIfNull(this.azureStorageAccessKey, EMPTY_CONFIG_DEFAULT));
@@ -251,9 +223,6 @@ public class FluentConfigView implements TelemetryConfigView {
         if (CollectionUtils.isNotEmpty(this.anonymizationRules)) {
             map.put("anonymizationRules", this.anonymizationRules);
         }
-        if (this.meteringConfiguration != null) {
-            map.putAll(meteringConfiguration.getDbusConfigs());
-        }
         if (this.overrideAttributes != null) {
             fillOverrideAttributes(map);
         }
@@ -263,7 +232,6 @@ public class FluentConfigView implements TelemetryConfigView {
     private void fillOverrideAttributes(Map<String, Object> map) {
         for (Map.Entry<String, Object> entry : this.overrideAttributes.entrySet()) {
             if (!"enabled".equalsIgnoreCase(entry.getKey())
-                    && !"dbusMeteringEnabled".equalsIgnoreCase(entry.getKey())
                     && map.containsKey(entry.getKey())) {
                 map.put(entry.getKey(), entry.getValue());
             }
@@ -276,13 +244,7 @@ public class FluentConfigView implements TelemetryConfigView {
 
         private boolean cloudStorageLoggingEnabled;
 
-        private boolean cloudLoggingServiceEnabled;
-
-        private boolean meteringEnabled;
-
         private boolean monitoringEnabled;
-
-        private MeteringConfiguration meteringConfiguration;
 
         private TelemetryClusterDetails clusterDetails;
 
@@ -307,8 +269,6 @@ public class FluentConfigView implements TelemetryConfigView {
         private String logFolderName;
 
         private String s3LogArchiveBucketName;
-
-        private String cloudwatchStreamKey;
 
         private String azureStorageAccount;
 
@@ -392,11 +352,6 @@ public class FluentConfigView implements TelemetryConfigView {
             return this;
         }
 
-        public Builder withCloudwatchStreamKey(String cloudwatchStreamKey) {
-            this.cloudwatchStreamKey = cloudwatchStreamKey;
-            return this;
-        }
-
         public Builder withAzureInstanceMsi(String azureInstanceMsi) {
             this.azureInstanceMsi = azureInstanceMsi;
             return this;
@@ -434,21 +389,6 @@ public class FluentConfigView implements TelemetryConfigView {
 
         public Builder withCloudStorageLoggingEnabled(boolean cloudStorageLoggingEnabled) {
             this.cloudStorageLoggingEnabled = cloudStorageLoggingEnabled;
-            return this;
-        }
-
-        public Builder withMeteringEnabled(boolean meteringEnabled) {
-            this.meteringEnabled = meteringEnabled;
-            return this;
-        }
-
-        public Builder withMeteringConfiguration(MeteringConfiguration meteringConfiguration) {
-            this.meteringConfiguration = meteringConfiguration;
-            return this;
-        }
-
-        public Builder withCloudLoggingServiceEnabled(boolean cloudLoggingServiceEnabled) {
-            this.cloudLoggingServiceEnabled = cloudLoggingServiceEnabled;
             return this;
         }
 

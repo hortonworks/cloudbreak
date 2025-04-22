@@ -112,12 +112,6 @@ public class Telemetry implements Serializable {
     }
 
     @JsonIgnore
-    public boolean isMeteringFeatureEnabled() {
-        return features != null && features.getMetering() != null
-                && features.getMetering().getEnabled();
-    }
-
-    @JsonIgnore
     public boolean isMonitoringFeatureEnabled() {
         return features == null || features.getMonitoring() != null
                 && features.getMonitoring().getEnabled();

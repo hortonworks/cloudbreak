@@ -56,7 +56,6 @@ import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Monitoring;
 import com.sequenceiq.common.api.telemetry.model.MonitoringCredential;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
-import com.sequenceiq.common.api.type.FeatureSetting;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -158,14 +157,13 @@ public class TelemetryConfigServiceTest {
                 .willReturn(Optional.of(monitoringCredential));
         given(dataBusEndpointProvider.getDatabusS3Endpoint(anyString(), anyString())).willReturn("endpoint");
         // WHEN
-        TelemetryContext result = underTest.createTelemetryContext(createStack(telemetry(true, true, true)));
+        TelemetryContext result = underTest.createTelemetryContext(createStack(telemetry(true, true)));
         // THEN
         assertEquals(FluentClusterType.FREEIPA, result.getClusterType());
         assertEquals("myuuid", result.getPaywallConfigs().get("paywall_username"));
         assertFalse(result.getLogShipperContext().isEnabled());
         assertTrue(result.getDatabusContext().isEnabled());
         assertTrue(result.getMonitoringContext().isEnabled());
-        assertFalse(result.getMeteringContext().isEnabled());
         verify(altusMachineUserService, times(1)).getOrCreateDataBusCredentialIfNeeded(any(Stack.class), any(CdpAccessKeyType.class));
         verify(altusMachineUserService, times(1)).getOrCreateMonitoringCredentialIfNeeded(any(Stack.class), any(CdpAccessKeyType.class));
     }
@@ -186,10 +184,10 @@ public class TelemetryConfigServiceTest {
         given(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).willReturn("myendpoint");
         given(dataBusEndpointProvider.getDatabusS3Endpoint(anyString(), anyString())).willReturn("endpoint");
         // WHEN
-        TelemetryContext result = underTest.createTelemetryContext(createStack(telemetry(false, true, false)));
+        TelemetryContext result = underTest.createTelemetryContext(createStack(telemetry(false, true)));
         // THEN
         assertFalse(result.getLogShipperContext().isEnabled());
-        assertFalse(result.getDatabusContext().isEnabled());
+        assertTrue(result.getDatabusContext().isEnabled());
         assertTrue(result.getMonitoringContext().isEnabled());
         verify(altusMachineUserService, times(1)).getOrCreateMonitoringCredentialIfNeeded(any(Stack.class), any(CdpAccessKeyType.class));
     }
@@ -202,7 +200,7 @@ public class TelemetryConfigServiceTest {
                 .build();
         given(umsClient.getAccountDetails(anyString())).willReturn(account);
         given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(false);
-        Stack stack = createStack(telemetry(false, true, false));
+        Stack stack = createStack(telemetry(false, true));
         given(stackService.getStackById(STACK_ID)).willReturn(stack);
         given(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).willReturn("myendpoint");
         given(dataBusEndpointProvider.getDatabusS3Endpoint(anyString(), anyString())).willReturn("endpoint");
@@ -210,7 +208,7 @@ public class TelemetryConfigServiceTest {
         TelemetryContext result = underTest.createTelemetryContext(stack);
         // THEN
         assertFalse(result.getLogShipperContext().isEnabled());
-        assertFalse(result.getDatabusContext().isEnabled());
+        assertTrue(result.getDatabusContext().isEnabled());
         assertFalse(result.getMonitoringContext().isEnabled());
         assertNull(stack.getTelemetry().getMonitoring().getRemoteWriteUrl());
         verify(altusMachineUserService, never()).getOrCreateMonitoringCredentialIfNeeded(any(Stack.class), any(CdpAccessKeyType.class));
@@ -229,7 +227,7 @@ public class TelemetryConfigServiceTest {
         monitoringCredential.setPrivateKey("privateKey");
         given(altusMachineUserService.getOrCreateMonitoringCredentialIfNeeded(any(Stack.class), any(CdpAccessKeyType.class)))
                 .willReturn(Optional.of(monitoringCredential));
-        Stack stack = createStack(telemetry(false, false, false));
+        Stack stack = createStack(telemetry(false, false));
         given(stackService.getStackById(STACK_ID)).willReturn(stack);
         given(monitoringUrlResolver.resolve(anyString(), anyBoolean())).willReturn("http://nope/receive");
         given(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).willReturn("myendpoint");
@@ -238,7 +236,7 @@ public class TelemetryConfigServiceTest {
         TelemetryContext result = underTest.createTelemetryContext(stack);
         // THEN
         assertFalse(result.getLogShipperContext().isEnabled());
-        assertFalse(result.getDatabusContext().isEnabled());
+        assertTrue(result.getDatabusContext().isEnabled());
         assertTrue(result.getMonitoringContext().isEnabled());
         assertNotNull(stack.getTelemetry().getMonitoring().getRemoteWriteUrl());
         verify(altusMachineUserService, times(1)).getOrCreateMonitoringCredentialIfNeeded(any(Stack.class), any(CdpAccessKeyType.class));
@@ -253,7 +251,7 @@ public class TelemetryConfigServiceTest {
         given(umsClient.getAccountDetails(anyString())).willReturn(account);
         given(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).willReturn("myendpoint");
         given(dataBusEndpointProvider.getDatabusS3Endpoint(anyString(), anyString())).willReturn("endpoint");
-        Telemetry telemetry = telemetry(true, false, false);
+        Telemetry telemetry = telemetry(true, false);
         telemetry.getLogging().setS3(null);
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(createStack(telemetry));
@@ -310,15 +308,10 @@ public class TelemetryConfigServiceTest {
         return stack;
     }
 
-    private Telemetry telemetry(boolean cloudLogging, boolean monitoringEnabled, boolean databusEnabled) {
+    private Telemetry telemetry(boolean cloudLogging, boolean monitoringEnabled) {
         Telemetry telemetry = new Telemetry();
         telemetry.setDatabusEndpoint("myendpoint");
         Features features = new Features();
-        if (databusEnabled) {
-            FeatureSetting metering = new FeatureSetting();
-            metering.setEnabled(Boolean.TRUE);
-            features.setMetering(metering);
-        }
         if (monitoringEnabled) {
             Monitoring monitoring = new Monitoring();
             monitoring.setRemoteWriteUrl("remoteWriteUrl");

@@ -36,7 +36,6 @@ import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.ClusterExposedServiceView;
 import com.sequenceiq.cloudbreak.template.views.CustomConfigurationsView;
-import com.sequenceiq.cloudbreak.template.views.DatabusCredentialView;
 import com.sequenceiq.cloudbreak.template.views.DatalakeView;
 import com.sequenceiq.cloudbreak.template.views.GatewayView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
@@ -46,6 +45,8 @@ import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 
 public class TemplatePreparationObject {
+
+    private final String crn;
 
     private final CloudPlatform cloudPlatform;
 
@@ -97,8 +98,6 @@ public class TemplatePreparationObject {
 
     private final Map<String, String> servicePrincipals;
 
-    private final DatabusCredentialView databusCredentialView;
-
     private final boolean enableSecretEncryption;
 
     private TemplatePreparationObject(Builder builder) {
@@ -130,8 +129,8 @@ public class TemplatePreparationObject {
         datalakeView = builder.datalakeView;
         idBroker = builder.idBroker;
         servicePrincipals = builder.servicePrincipals;
-        databusCredentialView = builder.databusCredentialView;
         enableSecretEncryption = builder.enableSecretEncryption;
+        crn = builder.crn;
     }
 
     public Stream<HostgroupView> getHostGroupsWithComponent(String component) {
@@ -249,8 +248,8 @@ public class TemplatePreparationObject {
         return enableSecretEncryption;
     }
 
-    public DatabusCredentialView getDatabusCredentialView() {
-        return databusCredentialView;
+    public String getCrn() {
+        return crn;
     }
 
     public static class Builder {
@@ -305,9 +304,9 @@ public class TemplatePreparationObject {
 
         private Map<String, String> servicePrincipals;
 
-        private DatabusCredentialView databusCredentialView;
-
         private boolean enableSecretEncryption;
+
+        private String crn;
 
         public static Builder builder() {
             return new Builder();
@@ -330,11 +329,6 @@ public class TemplatePreparationObject {
 
         public Builder withRdsSslCertificateFilePath(String rdsSslCertificateFilePath) {
             this.rdsSslCertificateFilePath = rdsSslCertificateFilePath;
-            return this;
-        }
-
-        public Builder withDatabusCredentialView(DatabusCredentialView databusCredentialView) {
-            this.databusCredentialView = databusCredentialView;
             return this;
         }
 
@@ -525,6 +519,11 @@ public class TemplatePreparationObject {
 
         public Builder withEnableSecretEncryption(boolean enableSecretEncryption) {
             this.enableSecretEncryption = enableSecretEncryption;
+            return this;
+        }
+
+        public Builder withCrn(String crn) {
+            this.crn = crn;
             return this;
         }
 

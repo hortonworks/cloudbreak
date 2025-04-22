@@ -311,7 +311,6 @@ public class StackToCreateFreeIpaRequestConverter implements Converter<Stack, Cr
             request.setS3(logging.getS3());
             request.setAdlsGen2(logging.getAdlsGen2());
             request.setGcs(logging.getGcs());
-            request.setCloudwatch(logging.getCloudwatch());
         }
         LOGGER.debug("Created logging request {} from logging {}", request, logging);
         return request;

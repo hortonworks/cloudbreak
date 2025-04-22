@@ -57,8 +57,6 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
 
     public static final String FILECOLLECTOR_CLEANUP = "filecollector.cleanup";
 
-    public static final String METERING_UPGRADE = "metering.upgrade";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltTelemetryOrchestrator.class);
 
     private static final String FILECOLLECTOR_CONFIG_NAME = "filecollector";
@@ -90,8 +88,6 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
     private static final String[] SCRIPTS_TO_UPLOAD = new String[]{"preflight_check.sh", "filecollector_minion_check.py"};
 
     private static final String FLUENT_COMPONENT = "fluent";
-
-    private static final String METERING_COMPONENT = "metering";
 
     private static final int LOGGING_DOCTOR_MAX_RETRY = 3;
 
@@ -253,41 +249,6 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
         } catch (Exception e) {
             LOGGER.info("Error occurred during updating salt state definition {} and service state apply: '{}'.", stateName, applyState);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public void updateMeteringSaltDefinition(byte[] meteringSaltState, List<GatewayConfig> allGateways, ExitCriteriaModel exitModel)
-            throws CloudbreakOrchestratorFailedException {
-        GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGateways);
-        Set<String> gatewayTargets = getGatewayPrivateIps(allGateways);
-        Set<String> gatewayHostnames = getGatewayHostnames(allGateways);
-        try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
-            saltPartialStateUpdater.uploadAndUpdateSaltStateComponent(METERING_COMPONENT, meteringSaltState, sc, gatewayTargets, gatewayHostnames, exitModel);
-        } catch (Exception e) {
-            LOGGER.info("Error occurred during metering salt definition update.", e);
-            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public void upgradeMetering(List<GatewayConfig> allGateways, Set<Node> nodes, ExitCriteriaModel exitModel, String upgradeFromDate, String customRpmUrl)
-            throws CloudbreakOrchestratorFailedException {
-        Map<String, Object> upgradeParameters = Map.of("metering", Map.of(
-                "upgradeDateFrom", upgradeFromDate,
-                "customRpmUrl", customRpmUrl,
-                "failHard", true));
-        GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGateways);
-        Set<String> targetHostnames = nodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-        try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
-            ParameterizedStateRunner stateRunner = new ParameterizedStateRunner(saltStateService, targetHostnames, METERING_UPGRADE, upgradeParameters);
-            OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, stateRunner, false);
-            Callable<Boolean> saltJobRunBootstrapRunner =
-                    saltRunner.runnerWithCalculatedErrorCount(saltJobIdTracker, exitCriteria, exitModel, telemetrySaltRetryConfig.getMeteringUpgrade());
-            saltJobRunBootstrapRunner.call();
-        } catch (Exception e) {
-            LOGGER.info("Error occurred during metering upgrade.", e);
-            throw new CloudbreakOrchestratorFailedException(e);
         }
     }
 

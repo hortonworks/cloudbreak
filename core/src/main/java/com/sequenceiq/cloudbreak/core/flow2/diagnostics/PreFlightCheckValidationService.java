@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
-import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 @Component
 public class PreFlightCheckValidationService {
@@ -18,15 +17,10 @@ public class PreFlightCheckValidationService {
     private EnvironmentClientService environmentClientService;
 
     public boolean preFlightCheckSupported(Long stackId, String environmentCrm) {
-        return anyDatabusFeatureEnabled(stackId) || !proxyConfigUsed(environmentCrm);
+        return !proxyConfigUsed(environmentCrm);
     }
 
     private boolean proxyConfigUsed(String environmentCrn) {
         return environmentClientService.getByCrn(environmentCrn).getProxyConfig() != null;
-    }
-
-    private boolean anyDatabusFeatureEnabled(Long stackId) {
-        Telemetry telemetry = componentConfigProviderService.getTelemetry(stackId);
-        return telemetry.isMeteringFeatureEnabled();
     }
 }

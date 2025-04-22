@@ -77,7 +77,6 @@ import com.sequenceiq.cloudbreak.service.identitymapping.AzureMockAccountMapping
 import com.sequenceiq.cloudbreak.service.identitymapping.GcpMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerFqdnUtil;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
-import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.tag.AccountTagValidationFailed;
@@ -92,7 +91,6 @@ import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.ClusterExposedServiceView;
 import com.sequenceiq.cloudbreak.template.views.CustomConfigurationsView;
-import com.sequenceiq.cloudbreak.template.views.DatabusCredentialView;
 import com.sequenceiq.cloudbreak.template.views.DatalakeView;
 import com.sequenceiq.cloudbreak.template.views.PlacementView;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
@@ -103,7 +101,6 @@ import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.backup.response.BackupResponse;
-import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
@@ -278,7 +275,7 @@ public class StackToTemplatePreparationObjectConverter {
                 builder.withHostgroups(hostGroupService.getByCluster(cluster.getId()), getEphemeralVolumeWhichMustBeProvisioned());
             });
 
-            decorateDatabusCredential(source.getCluster().getDatabusCredentialSecret(), builder);
+            builder.withCrn(source.getResourceCrn());
             decorateBuilderWithPlacement(source.getStack(), builder);
             decorateBuilderWithAccountMapping(source, environment, credential, builder, virtualGroupRequest);
             decorateBuilderWithServicePrincipals(source, builder, servicePrincipalCloudIdentities);
@@ -289,16 +286,6 @@ public class StackToTemplatePreparationObjectConverter {
             throw new CloudbreakServiceException(aTVF);
         } catch (BlueprintProcessingException | IOException | TransactionService.TransactionExecutionException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
-        }
-    }
-
-    private void decorateDatabusCredential(Secret databusCredentialSecret, Builder builder) {
-        DataBusCredential dataBusCredential = null;
-        if (databusCredentialSecret != null) {
-            dataBusCredential = convertOrReturnNull(databusCredentialSecret.getRaw(), DataBusCredential.class);
-        }
-        if (dataBusCredential != null) {
-            builder.withDatabusCredentialView(new DatabusCredentialView(dataBusCredential));
         }
     }
 

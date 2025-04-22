@@ -8,15 +8,5 @@
     rotate_age 3
   </log>
 </system>
-{% if fluent.cloudStorageLoggingEnabled or fluent.cloudLoggingServiceEnabled %}
 @include input.conf
-{% endif %}
-{% if cpuarch != 'aarch64' %}
-@include databus_metering.conf
-{% endif %}
-{% if fluent.cloudLoggingServiceEnabled %}
-@include filter.conf
-{% endif %}
-{% if fluent.cloudStorageLoggingEnabled or fluent.cloudLoggingServiceEnabled %}
 @include output.conf
-{% endif %}

@@ -56,7 +56,6 @@ public class DiagnosticsPreFlightCheckHandlerTest {
     public void testDoAccept() {
         // GIVEN
         doNothing().when(diagnosticsFlowService).nodeStatusNetworkReport(any());
-        doNothing().when(diagnosticsFlowService).nodeStatusMeteringReport(any());
         when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(new Stack());
         when(preFlightCheckValidationService.preFlightCheckSupported(any(), any())).thenReturn(Boolean.TRUE);
         // WHEN

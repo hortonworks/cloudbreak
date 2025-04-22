@@ -57,22 +57,22 @@ public class FreeIpaDbusUmsAccessKeyRotationContextProvider implements RotationC
     @Override
     public Map<SecretRotationStep, ? extends RotationContext> getContexts(String environmentCrnAsString) {
         Crn environmentCrn = Crn.safeFromString(environmentCrnAsString);
+        Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(environmentCrnAsString, environmentCrn.getAccountId());
+        if (stack.getDatabusCredential() == null) {
+            throw new SecretRotationException("No databus credential present for cluster, rotation is not needed!");
+        }
         RotationContext customJobRotationContext = CustomJobRotationContext.builder()
                 .withResourceCrn(environmentCrnAsString)
-                .withRotationJob(() -> updateClusterWithDatabusCredentials(environmentCrnAsString, environmentCrn.getAccountId()))
-                .withRollbackJob(() -> updateClusterWithDatabusCredentials(environmentCrnAsString, environmentCrn.getAccountId()))
+                .withRotationJob(() -> updateClusterWithDatabusCredentials(stack, environmentCrn.getAccountId()))
+                .withRollbackJob(() -> updateClusterWithDatabusCredentials(stack, environmentCrn.getAccountId()))
                 .build();
         return Map.of(FREEIPA_UMS_DATABUS_CREDENTIAL, new RotationContext(environmentCrnAsString),
                 CUSTOM_JOB, customJobRotationContext);
     }
 
-    private void updateClusterWithDatabusCredentials(String environmentCrnAsString, String accountId) {
-        Crn environmentCrn = Crn.safeFromString(environmentCrnAsString);
-        Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(environmentCrnAsString, environmentCrn.getAccountId());
-        if (stack.getDatabusCredential() != null) {
-            refreshDatabusPillars(stack, accountId);
-            executeDbusRelatedSaltStates(stack);
-        }
+    private void updateClusterWithDatabusCredentials(Stack stack, String accountId) {
+        refreshDatabusPillars(stack, accountId);
+        executeDbusRelatedSaltStates(stack);
     }
 
     private void executeDbusRelatedSaltStates(Stack stack) {
@@ -103,11 +103,10 @@ public class FreeIpaDbusUmsAccessKeyRotationContextProvider implements RotationC
             Telemetry telemetry = stack.getTelemetry();
             boolean useDbusCnameEndpoint = entitlementService.useDataBusCNameEndpointEnabled(accountId);
             String databusEndpoint = dataBusEndpointProvider.getDataBusEndpoint(telemetry.getDatabusEndpoint(), useDbusCnameEndpoint);
-            boolean enabled = telemetry.isMeteringFeatureEnabled();
             DataBusCredential dataBusCredential = JsonUtil.readValue(stack.getDatabusCredential(), DataBusCredential.class);
             String accessKeySecretAlgorithm = StringUtils.defaultIfBlank(dataBusCredential.getAccessKeyType(), DEFAULT_ACCESS_KEY_TYPE);
             return new DatabusConfigView.Builder()
-                    .withEnabled(enabled)
+                    .withEnabled()
                     .withEndpoint(databusEndpoint)
                     .withAccessKeyId(dataBusCredential.getAccessKey())
                     .withAccessKeySecret(UMSSecretKeyFormatter.formatSecretKey(accessKeySecretAlgorithm, dataBusCredential.getPrivateKey()).toCharArray())

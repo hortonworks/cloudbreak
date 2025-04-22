@@ -15,7 +15,6 @@ import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Paramete
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.base.FeaturesBase;
-import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
@@ -117,7 +116,6 @@ public class TelemetryApiConverter {
             loggingRequest.setS3(convertS3(logging.getS3()));
             loggingRequest.setAdlsGen2(convertAdlsV2(logging.getAdlsGen2()));
             loggingRequest.setGcs(convertGcs(logging.getGcs()));
-            loggingRequest.setCloudwatch(CloudwatchParams.copy(logging.getCloudwatch()));
         }
         return loggingRequest;
     }
@@ -162,7 +160,6 @@ public class TelemetryApiConverter {
             logging.setAdlsGen2(convertAdlsV2(loggingRequest.getAdlsGen2()));
             logging.setGcs(convertGcs(loggingRequest.getGcs()));
             storageLocationDecorator.setLoggingStorageLocationFromRequest(logging, loggingRequest.getStorageLocation());
-            logging.setCloudwatch(CloudwatchParams.copy(loggingRequest.getCloudwatch()));
         }
         return logging;
     }
@@ -275,7 +272,6 @@ public class TelemetryApiConverter {
             loggingResponse.setS3(convertS3(logging.getS3()));
             loggingResponse.setAdlsGen2(convertAdlsV2(logging.getAdlsGen2()));
             loggingResponse.setGcs(convertGcs(logging.getGcs()));
-            loggingResponse.setCloudwatch(CloudwatchParams.copy(logging.getCloudwatch()));
         }
         return loggingResponse;
     }

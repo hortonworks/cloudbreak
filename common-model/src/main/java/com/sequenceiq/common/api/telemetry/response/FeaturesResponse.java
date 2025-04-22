@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FeaturesResponse extends FeaturesBase {
 
+    @Deprecated
     @JsonProperty("metering")
     @Schema(description = TelemetryModelDescription.TELEMETRY_METERING)
     private FeatureSetting metering;
@@ -20,10 +21,12 @@ public class FeaturesResponse extends FeaturesBase {
     @Schema(description = TelemetryModelDescription.TELEMETRY_USE_SHARED_ALTUS_CREDENTIAL_ENABLED)
     private FeatureSetting useSharedAltusCredential;
 
+    @Deprecated
     public FeatureSetting getMetering() {
         return metering;
     }
 
+    @Deprecated
     public void setMetering(FeatureSetting metering) {
         this.metering = metering;
     }
@@ -39,7 +42,6 @@ public class FeaturesResponse extends FeaturesBase {
     @Override
     public String toString() {
         return super.toString() + ", " + "FeaturesResponse{" +
-                "metering=" + metering +
                 ", useSharedAltusCredential=" + useSharedAltusCredential +
                 '}';
     }

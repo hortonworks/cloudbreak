@@ -14,12 +14,10 @@ import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.common.AnonymizationRuleResolver;
 import com.sequenceiq.cloudbreak.telemetry.context.LogShipperContext;
-import com.sequenceiq.cloudbreak.telemetry.context.MeteringContext;
 import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.GcsConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3ConfigGenerator;
-import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
@@ -46,10 +44,8 @@ public class FluentConfigServiceTest {
 
     @BeforeEach
     public void setUp() {
-        MeteringConfiguration meteringConfiguration =
-                new MeteringConfiguration(false, "dbusApp", "dbusStream", false);
         TelemetryConfiguration telemetryConfiguration =
-                new TelemetryConfiguration(null, meteringConfiguration, null, null);
+                new TelemetryConfiguration(null, null, null);
         underTest = new FluentConfigService(new S3ConfigGenerator(), new AdlsGen2ConfigGenerator(), new GcsConfigGenerator(),
                 new AnonymizationRuleResolver(), telemetryConfiguration);
     }
@@ -67,7 +63,6 @@ public class FluentConfigServiceTest {
     public void testIsEnabledWithoutLogAndMeteringContext() {
         // GIVEN
         TelemetryContext context = telemetryContext();
-        context.setMeteringContext(null);
         context.setLogShipperContext(null);
         // WHEN
         boolean result = underTest.isEnabled(context);
@@ -95,12 +90,10 @@ public class FluentConfigServiceTest {
         // THEN
         assertEquals(true, result.get("enabled"));
         assertEquals(true, result.get("cloudStorageLoggingEnabled"));
-        assertEquals(true, result.get("dbusMeteringEnabled"));
         assertEquals("mybucket", result.get("s3LogArchiveBucketName"));
         assertEquals("cluster-logs/datahub/cl1", result.get("logFolderName"));
         assertEquals("s3", result.get("providerPrefix"));
         assertEquals("eu-1", result.get("environmentRegion"));
-        assertEquals("dbusApp", result.get("dbusMeteringAppName"));
     }
 
     @Test
@@ -211,10 +204,6 @@ public class FluentConfigServiceTest {
                 .withCloudRegion(REGION_SAMPLE)
                 .withVmLogs(new ArrayList<>())
                 .build();
-        MeteringContext meteringContext = MeteringContext
-                .builder()
-                .enabled()
-                .build();
         TelemetryClusterDetails clusterDetails = TelemetryClusterDetails.Builder.builder()
                 .withCrn(DATAHUB_CRN)
                 .build();
@@ -222,7 +211,6 @@ public class FluentConfigServiceTest {
         telemetry.setLogging(logging);
         telemetryContext.setTelemetry(telemetry);
         telemetryContext.setLogShipperContext(logShipperContext);
-        telemetryContext.setMeteringContext(meteringContext);
         telemetryContext.setClusterDetails(clusterDetails);
         telemetryContext.setClusterType(FluentClusterType.DATAHUB);
         return telemetryContext;

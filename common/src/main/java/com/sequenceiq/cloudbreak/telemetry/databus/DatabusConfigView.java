@@ -83,6 +83,11 @@ public class DatabusConfigView implements TelemetryConfigView {
             return this;
         }
 
+        public Builder withEnabled() {
+            this.enabled = true;
+            return this;
+        }
+
         public Builder withEndpoint(String endpoint) {
             this.endpoint = endpoint;
             return this;

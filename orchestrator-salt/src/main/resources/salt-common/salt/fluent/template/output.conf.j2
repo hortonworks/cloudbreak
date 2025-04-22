@@ -202,33 +202,6 @@
       format single_value
   </match>
 </worker>
-{% elif fluent.providerPrefix == "cloudwatch" %}
-<worker {{fluent.cloudStorageWorkerIndex }}>
-<match **{{fluent.providerPrefix}}**>
-  @type cloudwatch_logs
-  log_group_name {{fluent.logFolderName}}
-  log_stream_name_key {{fluent.cloudwatchStreamKey}}
-  auto_create_stream true
-  retention_in_days 7
-  put_log_events_retry_limit 20
-  concurrency 5
-  region {{ fluent.region }}
-  <buffer tag>
-     @type file
-     path /var/log/{{ fluent.binary }}/{{fluent.providerPrefix}}
-     flush_mode               "interval"
-     flush_thread_count       10
-     flush_interval           "10s"
-     flush_at_shutdown        true
-     chunk_limit_size         "2M"
-   </buffer>
-   <inject>
-      time_type         string
-      time_key          @timestamp
-      time_format       %Y-%m-%dT%H:%M:%S.%NZ
-   </inject>
-</match>
-</worker>
 {% else %}
 <worker {{fluent.cloudStorageWorkerIndex }}>
 <match {{fluent.providerPrefix}}.*>

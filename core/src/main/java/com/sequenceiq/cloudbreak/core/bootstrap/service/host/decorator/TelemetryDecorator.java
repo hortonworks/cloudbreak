@@ -37,7 +37,6 @@ import com.sequenceiq.cloudbreak.telemetry.TelemetryContextProvider;
 import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 import com.sequenceiq.cloudbreak.telemetry.context.DatabusContext;
 import com.sequenceiq.cloudbreak.telemetry.context.LogShipperContext;
-import com.sequenceiq.cloudbreak.telemetry.context.MeteringContext;
 import com.sequenceiq.cloudbreak.telemetry.context.MonitoringContext;
 import com.sequenceiq.cloudbreak.telemetry.context.NodeStatusContext;
 import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
@@ -126,7 +125,6 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
             DatabusContext databusContext = createDatabusContext(stack, telemetry, dataBusCredential, accountId, cdpAccessKeyType);
             telemetryContext.setDatabusContext(databusContext);
             telemetryContext.setClusterDetails(createTelemetryClusterDetails(stack, telemetry, databusContext));
-            telemetryContext.setMeteringContext(createMeteringContext(stack, telemetry));
             NodeStatusContext nodeStatusContext = createNodeStatusContext(cluster, accountId);
             telemetryContext.setNodeStatusContext(nodeStatusContext);
             telemetryContext.setLogShipperContext(createLogShipperContext(stack, telemetry));
@@ -160,9 +158,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
         String databusEndpoint = dataBusEndpointProvider.getDataBusEndpoint(telemetry.getDatabusEndpoint(), useDbusCnameEndpoint);
         DatabusContext.Builder builder = DatabusContext.builder();
         DataBusCredential dbusCredential = getOrRefreshDataBusCredential(stack, accountId, telemetry, dataBusCredential, cdpAccessKeyType);
-        if (telemetry.isMeteringFeatureEnabled()) {
-            builder.enabled();
-        }
+        builder.enabled();
         if (dbusCredential != null && dbusCredential.isValid()) {
             builder.withCredential(dbusCredential);
         }
@@ -221,27 +217,12 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
         }
     }
 
-    private MeteringContext createMeteringContext(StackView stack, Telemetry telemetry) {
-        MeteringContext.Builder builder = MeteringContext.builder();
-        boolean datahub = !DATALAKE.equals(stack.getType());
-        boolean meteringFeatureEnabled = telemetry.isMeteringFeatureEnabled();
-        boolean meteringEnabled = meteringFeatureEnabled && datahub;
-        if (meteringEnabled) {
-            builder.enabled();
-        }
-        String defaultServiceType = StackType.WORKLOAD.equals(stack.getType()) ? FluentClusterType.DATAHUB.value() : "";
-        return builder
-                .withServiceType(getServiceTypeForMetering(stack, defaultServiceType))
-                .withVersion(getVersionForMetering(stack, version))
-                .build();
-    }
-
     private LogShipperContext createLogShipperContext(StackView stack, Telemetry telemetry) {
         LogShipperContext.Builder builder = LogShipperContext.builder();
         List<VmLog> vmLogList = vmLogsService.getVmLogs();
         Logging logging = telemetry.getLogging();
         if (telemetry.isCloudStorageLoggingEnabled() && logging != null
-                && ObjectUtils.anyNotNull(logging.getS3(), logging.getAdlsGen2(), logging.getGcs(), logging.getCloudwatch())) {
+                && ObjectUtils.anyNotNull(logging.getS3(), logging.getAdlsGen2(), logging.getGcs())) {
             builder.enabled().cloudStorageLogging();
         }
         return builder
@@ -276,11 +257,9 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
 
     private DataBusCredential getOrRefreshDataBusCredential(StackView stack, String accountId, Telemetry telemetry, DataBusCredential dataBusCredential,
             CdpAccessKeyType cdpAccessKeyType) {
-        return getAltusCredential(accountId, telemetry, dataBusCredential, "DataBus", (DATALAKE.equals(stack.getType())) ? (t -> true) :
-                        altusMachineUserService::isAnyDataBusBasedFeatureSupported,
+        return getAltusCredential(accountId, telemetry, dataBusCredential, "DataBus", (t -> true),
                 () -> {
-                    Optional<AltusCredential> altusCredential = altusMachineUserService.generateDatabusMachineUserForFluent(stack, telemetry,
-                            DATALAKE.equals(stack.getType()), cdpAccessKeyType);
+                    Optional<AltusCredential> altusCredential = altusMachineUserService.generateDatabusMachineUserForFluent(stack, telemetry, cdpAccessKeyType);
                     return altusMachineUserService.storeDataBusCredential(altusCredential, stack, cdpAccessKeyType);
                 });
     }

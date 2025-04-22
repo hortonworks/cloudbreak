@@ -157,11 +157,10 @@ public class DbusUmsAccessKeyRotationContextProvider implements RotationContextP
             Telemetry telemetry = componentConfigProviderService.getTelemetry(stackDto.getId());
             boolean useDbusCnameEndpoint = entitlementService.useDataBusCNameEndpointEnabled(ThreadBasedUserCrnProvider.getAccountId());
             String databusEndpoint = dataBusEndpointProvider.getDataBusEndpoint(telemetry.getDatabusEndpoint(), useDbusCnameEndpoint);
-            boolean enabled = telemetry.isMeteringFeatureEnabled();
             DataBusCredential dataBusCredential = JsonUtil.readValue(stackDto.getCluster().getDatabusCredential(), DataBusCredential.class);
             String accessKeySecretAlgorithm = StringUtils.defaultIfBlank(dataBusCredential.getAccessKeyType(), DEFAULT_ACCESS_KEY_TYPE);
             return new DatabusConfigView.Builder()
-                    .withEnabled(enabled)
+                    .withEnabled()
                     .withEndpoint(databusEndpoint)
                     .withAccessKeyId(dataBusCredential.getAccessKey())
                     .withAccessKeySecret(UMSSecretKeyFormatter.formatSecretKey(accessKeySecretAlgorithm, dataBusCredential.getPrivateKey()).toCharArray())

@@ -19,6 +19,7 @@ public class Logging implements Serializable {
 
     private GcsCloudStorageV1Parameters gcs;
 
+    @Deprecated
     private CloudwatchParams cloudwatch;
 
     public String getStorageLocation() {
@@ -53,10 +54,12 @@ public class Logging implements Serializable {
         this.gcs = gcs;
     }
 
+    @Deprecated
     public CloudwatchParams getCloudwatch() {
         return cloudwatch;
     }
 
+    @Deprecated
     public void setCloudwatch(CloudwatchParams cloudwatch) {
         this.cloudwatch = cloudwatch;
     }

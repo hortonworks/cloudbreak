@@ -70,6 +70,7 @@ public class FreeIpaDbusUmsAccessKeyRotationContextProviderTest {
         lenient().when(dataBusEndpointProvider.getDataBusEndpoint(any(), anyBoolean())).thenReturn("");
         lenient().when(stackService.getByEnvironmentCrnAndAccountIdWithLists(any(), any())).thenReturn(stack);
         lenient().when(stack.getTelemetry()).thenReturn(telemetry);
+        lenient().when(stack.getDatabusCredential()).thenReturn("{\"privateKey\":\"anything\"}");
     }
 
     @Test
@@ -91,7 +92,6 @@ public class FreeIpaDbusUmsAccessKeyRotationContextProviderTest {
 
     @Test
     void testCustomJobRotateRefreshPillarFailure() throws CloudbreakOrchestratorFailedException {
-        when(stack.getDatabusCredential()).thenReturn("{\"privateKey\":\"anything\"}");
         doThrow(new CloudbreakOrchestratorFailedException("failed")).when(saltService).updateSaltPillar(any(), any());
         CustomJobRotationContext customJobRotationContext = (CustomJobRotationContext) underTest.getContexts(ENV_CRN).get(CUSTOM_JOB);
         assertTrue(customJobRotationContext.getRotationJob().isPresent());
@@ -105,7 +105,6 @@ public class FreeIpaDbusUmsAccessKeyRotationContextProviderTest {
 
     @Test
     void testCustomJobRotateExecuteSaltStateFailure() throws CloudbreakOrchestratorFailedException {
-        when(stack.getDatabusCredential()).thenReturn("{\"privateKey\":\"anything\"}");
         doNothing().when(saltService).updateSaltPillar(any(), any());
         when(stack.getAllNotDeletedNodes()).thenReturn(Set.of());
         doThrow(new CloudbreakOrchestratorFailedException("failed")).when(saltService).executeSaltState(any(), any(), any());
@@ -121,7 +120,6 @@ public class FreeIpaDbusUmsAccessKeyRotationContextProviderTest {
 
     @Test
     void testCustomJobRotateAndRollbackSuccess() throws Exception {
-        when(stack.getDatabusCredential()).thenReturn("{\"privateKey\":\"anything\"}");
         doNothing().when(saltService).updateSaltPillar(any(), any());
         when(stack.getAllNotDeletedNodes()).thenReturn(Set.of());
         doNothing().when(saltService).executeSaltState(any(), any(), any());

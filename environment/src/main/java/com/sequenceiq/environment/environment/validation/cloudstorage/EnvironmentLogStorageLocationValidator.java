@@ -27,7 +27,7 @@ public class EnvironmentLogStorageLocationValidator {
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         Optional.ofNullable(environment.getTelemetry())
                 .map(EnvironmentTelemetry::getLogging)
-                .filter(logging -> isCloudStorageEnabled(logging) && logging.getCloudwatch() == null)
+                .filter(this::isCloudStorageEnabled)
                 .map(EnvironmentLogging::getStorageLocation)
                 .ifPresent(location -> cloudStorageLocationValidator.validate(location, environment, resultBuilder));
         return resultBuilder.build();

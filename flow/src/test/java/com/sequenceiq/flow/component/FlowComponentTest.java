@@ -61,7 +61,6 @@ import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
-import com.sequenceiq.cloudbreak.usage.MeteringEventProcessor;
 import com.sequenceiq.cloudbreak.usage.UsageReportProcessor;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -165,9 +164,6 @@ public class FlowComponentTest {
 
     @MockBean
     private FlowEventListener flowEventListener;
-
-    @MockBean
-    private MeteringEventProcessor meteringEventProcessor;
 
     @MockBean
     private UsageReportProcessor usageReportProcessor;

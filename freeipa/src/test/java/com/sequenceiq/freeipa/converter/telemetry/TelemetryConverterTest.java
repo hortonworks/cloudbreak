@@ -17,7 +17,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.altus.AltusDatabusConfiguration;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
-import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
@@ -57,10 +56,9 @@ public class TelemetryConverterTest {
     @BeforeEach
     public void setUp() {
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, DATABUS_S3_BUCKET, false, "", null);
-        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(false, null, null, false);
         MonitoringConfiguration monitoringConfig = new MonitoringConfiguration();
         TelemetryConfiguration telemetryConfiguration =
-                new TelemetryConfiguration(altusDatabusConfiguration, meteringConfiguration, monitoringConfig, null);
+                new TelemetryConfiguration(altusDatabusConfiguration, monitoringConfig, null);
         MockitoAnnotations.openMocks(this);
         underTest = new TelemetryConverter(telemetryConfiguration, true, monitoringUrlResolver, entitlementService);
     }

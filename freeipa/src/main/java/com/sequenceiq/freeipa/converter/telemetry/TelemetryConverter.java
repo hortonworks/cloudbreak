@@ -12,7 +12,6 @@ import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
-import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Monitoring;
@@ -100,8 +99,6 @@ public class TelemetryConverter {
                 GcsCloudStorageV1Parameters gcsCloudStorageV1Parameters = new GcsCloudStorageV1Parameters();
                 gcsCloudStorageV1Parameters.setServiceAccountEmail(loggingRequest.getGcs().getServiceAccountEmail());
                 logging.setGcs(gcsCloudStorageV1Parameters);
-            } else if (loggingRequest.getCloudwatch() != null) {
-                logging.setCloudwatch(CloudwatchParams.copy(loggingRequest.getCloudwatch()));
             }
         }
         return logging;
@@ -140,8 +137,6 @@ public class TelemetryConverter {
                 GcsCloudStorageV1Parameters gcsCloudStorageV1Parameters = new GcsCloudStorageV1Parameters();
                 gcsCloudStorageV1Parameters.setServiceAccountEmail(logging.getGcs().getServiceAccountEmail());
                 loggingResponse.setGcs(gcsCloudStorageV1Parameters);
-            } else if (logging.getCloudwatch() != null) {
-                loggingResponse.setCloudwatch(CloudwatchParams.copy(logging.getCloudwatch()));
             }
         }
         return loggingResponse;

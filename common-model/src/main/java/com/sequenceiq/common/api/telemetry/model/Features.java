@@ -13,6 +13,7 @@ import com.sequenceiq.common.api.type.FeatureSetting;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Features extends FeaturesBase {
 
+    @Deprecated
     @JsonProperty("metering")
     private FeatureSetting metering;
 
@@ -22,10 +23,12 @@ public class Features extends FeaturesBase {
     @JsonProperty("useSharedAltusCredential")
     private FeatureSetting useSharedAltusCredential;
 
+    @Deprecated
     public FeatureSetting getMetering() {
         return metering;
     }
 
+    @Deprecated
     public void setMetering(FeatureSetting metering) {
         this.metering = metering;
     }
@@ -47,12 +50,6 @@ public class Features extends FeaturesBase {
     }
 
     @JsonIgnore
-    public void addMetering(boolean enabled) {
-        metering = new FeatureSetting();
-        metering.setEnabled(enabled);
-    }
-
-    @JsonIgnore
     public void addMonitoring(boolean enabled) {
         monitoring = new FeatureSetting();
         monitoring.setEnabled(enabled);
@@ -67,7 +64,6 @@ public class Features extends FeaturesBase {
     @Override
     public String toString() {
         return new StringJoiner(", ", Features.class.getSimpleName() + "[", "]")
-                .add("metering='" + metering + '\'')
                 .add("monitoring='" + monitoring + '\'')
                 .add("useSharedAltusCredential='" + useSharedAltusCredential + '\'')
                 .toString();

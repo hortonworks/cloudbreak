@@ -277,30 +277,6 @@ class SaltTelemetryOrchestratorTest {
     }
 
     @Test
-    void testUpdateMeteringSaltDefinition() throws CloudbreakOrchestratorFailedException {
-        underTest.updateMeteringSaltDefinition(new byte[0], gatewayConfigs, exitCriteriaModel);
-
-        verify(saltService, times(1)).getPrimaryGatewayConfig(gatewayConfigs);
-        verify(saltPartialStateUpdater, times(1)).uploadAndUpdateSaltStateComponent(
-                any(), any(), any(), eq(Set.of(gatewayConfig.getPrivateAddress())), any(), any());
-    }
-
-    @Test
-    void testUpgradeMetering() throws CloudbreakOrchestratorFailedException {
-        underTest.upgradeMetering(gatewayConfigs, targets, exitCriteriaModel, "", "");
-
-        SaltJobIdTracker saltJobIdTracker = (SaltJobIdTracker) orchestratorBootstrapArgumentCaptor.getValue();
-        StateRunner saltJobRunner = (StateRunner) saltJobIdTracker.getSaltJobRunner();
-
-        assertThat(saltJobRunner.getAllNode()).isEmpty();
-        assertThat(targets.stream().map(Node::getHostname).collect(Collectors.toSet())).containsExactlyElementsOf(saltJobRunner.getTargetHostnames());
-        assertEquals(SaltTelemetryOrchestrator.METERING_UPGRADE, saltJobRunner.getState());
-        verify(saltService, times(1)).getPrimaryGatewayConfig(gatewayConfigs);
-        verify(saltService, times(1)).createSaltConnector(gatewayConfig);
-        verify(saltRunner, times(1)).runnerWithCalculatedErrorCount(any(), any(), any(), anyInt());
-    }
-
-    @Test
     void testPreFlightDiagnosticsCheck() throws CloudbreakOrchestratorFailedException {
         Map<String, Object> parameters = getParametersMap();
         when(saltStateService.runCommandOnHosts(eq(retry), eq(saltConnector), any(), eq(""))).thenReturn(new HashMap<>() {{

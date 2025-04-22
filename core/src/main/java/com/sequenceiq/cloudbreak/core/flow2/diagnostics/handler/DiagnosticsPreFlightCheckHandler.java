@@ -42,7 +42,6 @@ public class DiagnosticsPreFlightCheckHandler extends AbstractDiagnosticsOperati
         Stack stack = stackService.getByIdWithListsInTransaction(resourceId);
         if (preFlightCheckValidationService.preFlightCheckSupported(stack.getId(), stack.getEnvironmentCrn())) {
             diagnosticsFlowService.nodeStatusNetworkReport(stack);
-            diagnosticsFlowService.nodeStatusMeteringReport(stack);
         } else {
             LOGGER.info("Preflight checks will fail based on current setup of the cluster, skipping.");
         }
