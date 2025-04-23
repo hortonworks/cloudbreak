@@ -346,9 +346,25 @@ class EnvironmentValidatorServiceTest {
         when(environmentResourceService.isPublicKeyIdExists(environment, "pub-key-id")).thenReturn(false);
         when(environmentResourceService.getPublicKeyConnector(environment.getCloudPlatform())).thenReturn(Optional.of(connector));
 
-
         ValidationResult validationResult = underTest.validateAuthenticationModification(environmentEditDto, environment);
         assertEquals("The publicKeyId with name of 'pub-key-id' does not exist on the provider.", validationResult.getFormattedErrors());
+    }
+
+    @Test
+    void testAzureGetPublicKeyConnectorNotThrowUnsupportedException() {
+        Environment environment = new Environment();
+        environment.setCloudPlatform("AZURE");
+        EnvironmentEditDto environmentEditDto = EnvironmentEditDto.builder()
+                .withAuthentication(AuthenticationDto.builder()
+                        .withPublicKeyId("pub-key-id")
+                        .build())
+                .build();
+
+        PublicKeyConnector connector = mock(PublicKeyConnector.class);
+        when(environmentResourceService.getPublicKeyConnector(environment.getCloudPlatform())).thenReturn(Optional.ofNullable(null));
+
+        ValidationResult validationResult = underTest.validateAuthenticationModification(environmentEditDto, environment);
+        assertEquals("The change of publicKeyId is not supported on AZURE", validationResult.getFormattedErrors());
     }
 
     @Test

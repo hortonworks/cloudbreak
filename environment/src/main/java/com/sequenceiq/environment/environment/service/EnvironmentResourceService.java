@@ -143,7 +143,13 @@ public class EnvironmentResourceService {
 
     public Optional<PublicKeyConnector> getPublicKeyConnector(String cloudPlatform) {
         CloudPlatformVariant cloudPlatformVariant = new CloudPlatformVariant(Platform.platform(cloudPlatform), Variant.variant(cloudPlatform));
-        return Optional.ofNullable(cloudPlatformConnectors.get(cloudPlatformVariant).publicKey());
+        Optional<PublicKeyConnector> publicKeyConnector = Optional.empty();
+        try {
+            publicKeyConnector = Optional.ofNullable(cloudPlatformConnectors.get(cloudPlatformVariant).publicKey());
+        } catch (UnsupportedOperationException ignored) {
+            LOGGER.info("Cloud platform {} does not support public key services", cloudPlatform);
+        }
+        return publicKeyConnector;
     }
 
     private PublicKeyRegisterRequest createPublicKeyRegisterRequest(Environment environment, String publicKeyId) {
