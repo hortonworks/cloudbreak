@@ -939,6 +939,6 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_DATAHUB)
     public FlowIdentifier triggerSkuMigrationByCrn(@ResourceCrn String crn, boolean force) {
-        return stackOperationService.triggerSkuMigration(NameOrCrn.ofName(crn), ThreadBasedUserCrnProvider.getAccountId(), force);
+        return stackOperationService.triggerSkuMigration(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(), force);
     }
 }

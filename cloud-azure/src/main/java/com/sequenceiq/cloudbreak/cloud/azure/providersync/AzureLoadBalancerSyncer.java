@@ -90,10 +90,9 @@ public class AzureLoadBalancerSyncer implements ProviderResourceSyncer<ResourceT
     }
 
     private Optional<LoadBalancerSkuName> getLoadBalancerSkuName(LoadBalancer loadBalancer) {
-        Optional<LoadBalancerSkuName> sku = Optional.ofNullable(loadBalancer.sku())
+        return Optional.ofNullable(loadBalancer.sku())
                 .map(LoadBalancerSkuType::sku)
                 .map(LoadBalancerSku::name);
-        return sku;
     }
 
     private void syncAttributes(Optional<LoadBalancerSkuName> sku, CloudResource loadBalancerResource) {
