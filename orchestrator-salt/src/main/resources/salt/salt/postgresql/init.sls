@@ -148,7 +148,7 @@ systemctl-reload-on-pg-unit-change:
    therefore the directory and its contents won't receive the correct labels by default. #}
 apply-selinux-labels-to-pg-data-location:
   cmd.run:
-    - name: restorecon -Rv "$(echo '{{ postgres_directory }}' | sed -E 's#/pgsql/?$##')"
+    - name: restorecon -Rvi "$(echo '{{ postgres_directory }}' | sed -E 's#/pgsql/?$##')"
 {%- endif %}
 
 start-postgresql:
