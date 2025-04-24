@@ -607,7 +607,7 @@ public class AzureClient {
         return handleException(() -> azure.publicIpAddresses().deleteByResourceGroupAsync(resourceGroup, ipName));
     }
 
-    public Flux<String> deleteSecurityGroupsAsnyc(Collection<String> ids) {
+    public Flux<String> deleteSecurityGroupsAsync(Collection<String> ids) {
         return handleException(() -> azure.networkSecurityGroups().deleteByIdsAsync(ids));
     }
 
@@ -623,8 +623,13 @@ public class AzureClient {
                 .toList();
     }
 
+    public AzureListResult<LoadBalancer> getLoadBalancers(String resourceGroup) {
+        return handleException(() -> azureListResultFactory.listByResourceGroup(azure.loadBalancers(), resourceGroup));
+    }
+
     public List<LoadBalancer> getLoadBalancers(Collection<String> ids, String resourceGroup) {
-        return azure.loadBalancers().listByResourceGroup(resourceGroup)
+        return getLoadBalancers(resourceGroup)
+                .getAll()
                 .stream()
                 .filter(lb -> ids.contains(lb.id()))
                 .toList();

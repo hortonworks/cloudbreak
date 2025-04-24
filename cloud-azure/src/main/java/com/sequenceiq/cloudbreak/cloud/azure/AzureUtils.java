@@ -577,7 +577,7 @@ public class AzureUtils {
         if (CollectionUtils.isNotEmpty(securityGroupIds)) {
             LOGGER.info("Delete security groups with id-s: {}", securityGroupIds);
 
-            Flux<String> deletionObservable = azureClient.deleteSecurityGroupsAsnyc(securityGroupIds)
+            Flux<String> deletionObservable = azureClient.deleteSecurityGroupsAsync(securityGroupIds)
                     .doOnError(throwable -> {
                         LOGGER.error("Error happened during the deletion of the security groups ", throwable);
                         throw new CloudbreakServiceException("Can't delete all security groups: ", throwable);

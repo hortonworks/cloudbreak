@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
 
 @Component
 public class AzureExceptionHandler {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureExceptionHandler.class);
 
     private static final String MGMT_ERROR_CODE_CONFLICT = "Conflict";
@@ -157,5 +158,4 @@ public class AzureExceptionHandler {
                 error.getCode().contains(expectedAzureErrorCode) &&
                 expectedAzureErrorMessage.stream().allMatch(errorMessage -> error.getMessage() != null && error.getMessage().contains(errorMessage));
     }
-
 }
