@@ -1,0 +1,25 @@
+gcloud init
+
+SERVICE_ACCOUNT_NAME=cdp-credential
+PROJECT_ID=$(gcloud config get-value project)
+ROLE_ID=gcpEnvMinimalPolicy
+
+echo "Enabling Compute and Runtimeconfig APIs"
+gcloud services enable compute.googleapis.com runtimeconfig.googleapis.com
+
+echo "Creating service account for CDP"
+gcloud iam service-accounts create $SERVICE_ACCOUNT_NAME --display-name "A CDP Service Account" --quiet
+
+echo "Creating Role with minimal permissions for CDP"
+gcloud iam roles create $ROLE_ID --project  $PROJECT_ID --title $ROLE_NAME \
+--file path/to/gcp-environment-minimal-policy.json
+
+echo "Binding Role with minimal permissions to the service account"
+gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com --role projects/$PROJECT_ID/roles/$ROLE_ID --quiet --no-user-output-enabled --condition=None
+
+echo "Creating key for the service account"
+gcloud iam service-accounts keys create --iam-account=$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com $SERVICE_ACCOUNT_NAME-gcp-cred.json
+
+if cloudshell --help > /dev/null 2>&1; then
+cloudshell download-file $SERVICE_ACCOUNT_NAME-gcp-cred.json
+fi
