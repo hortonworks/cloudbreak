@@ -53,6 +53,9 @@ class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
     @Mock
     private EnvironmentDetails environmentDetails;
 
+    @Mock
+    private NetworkDto networkDto;
+
     private static Stream<Arguments> credentialTypes() {
         return Stream.of(
                 Arguments.of(CredentialType.AWS_KEY_BASED, UsageProto.CDPCredentialType.Value.AWS_KEY_BASED),
@@ -139,6 +142,31 @@ class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
         UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
 
         assertFalse(cdpEnvironmentDetails.getAzureDetails().getSingleResourceGroup());
+    }
+
+    @Test
+    void testConversionAzureWithNetwork() {
+        ParametersDto parametersDto = ParametersDto.builder()
+                .withAzureParametersDto(AzureParametersDto.builder()
+                        .withAzureResourceGroupDto(AzureResourceGroupDto.builder()
+                                .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE)
+                                .build())
+                        .build())
+                .build();
+
+        when(environmentDetails.getParameters()).thenReturn(parametersDto);
+        when(environmentDetails.getNetwork()).thenReturn(networkDto);
+        when(networkDto.getRegistrationType()).thenReturn(RegistrationType.CREATE_NEW);
+        when(networkDto.getServiceEndpointCreation()).thenReturn(ServiceEndpointCreation.DISABLED);
+        when(environmentDetails.getCloudPlatform()).thenReturn(CloudPlatform.AZURE.toString());
+        Map<String, CloudSubnet> subnets = new HashMap<>();
+        CloudSubnet cloudSubnet = new CloudSubnet();
+        subnets.put("subnet1", cloudSubnet);
+        when(networkDto.getSubnetMetas()).thenReturn(subnets);
+
+        UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
+
+        assertEquals(1, cdpEnvironmentDetails.getNetworkDetails().getNumberPrivateSubnets());
     }
 
     @Test
