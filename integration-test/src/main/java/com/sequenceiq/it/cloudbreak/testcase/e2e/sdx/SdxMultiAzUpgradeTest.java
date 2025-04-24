@@ -5,7 +5,6 @@ import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,25 +12,23 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
-import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
-import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
+import com.sequenceiq.it.cloudbreak.util.TestUpgradeCandidateProvider;
 import com.sequenceiq.it.cloudbreak.util.VolumeUtils;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
@@ -46,13 +43,10 @@ public class SdxMultiAzUpgradeTest extends PreconditionSdxE2ETest {
     private SdxTestClient sdxTestClient;
 
     @Inject
-    private CommonClusterManagerProperties commonClusterManagerProperties;
-
-    @Inject
     private SdxUtil sdxUtil;
 
     @Inject
-    private ImageCatalogTestClient imageCatalogTestClient;
+    private TestUpgradeCandidateProvider testUpgradeCandidateProvider;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -71,59 +65,44 @@ public class SdxMultiAzUpgradeTest extends PreconditionSdxE2ETest {
             then = "the MultiAz stack should be upgraded and the cluster should be up and running"
     )
     public void testSDXMultiAzUpgrade(TestContext testContext) {
-        String runTimeVersion = commonClusterManagerProperties.getRuntimeVersion();
-        List<ImageV4Response> cdhImages = new ArrayList<>();
+        Pair<String, String> osUpgradePair = testUpgradeCandidateProvider.getOsUpgradeSourceAndCandidate(testContext);
+        createEnvironmentWithFreeIpa(testContext);
+        String sdx = resourcePropertyProvider().getName();
+        List<String> actualVolumeIds = new ArrayList<>();
+        List<String> expectedVolumeIds = new ArrayList<>();
         testContext
-                .given(ImageCatalogTestDto.class)
-                .when(imageCatalogTestClient.getV4WithAdvertisedImages())
-                .then((testContext1, entity, cloudbreakClient) -> {
-                    List<ImageV4Response> sortedImages = entity.getResponse().getImages().getCdhImages().stream()
-                            .filter(im -> im.getVersion().equals(runTimeVersion)
-                                    && im.getImageSetsByProvider().containsKey(testContext.getCloudPlatform().name().toLowerCase()))
-                            .sorted(Comparator.comparing(ImageV4Response::getCreated)).toList();
-                    cdhImages.addAll(sortedImages);
-                    return entity;
+                .given(sdx, SdxTestDto.class)
+                .withCloudStorage()
+                .withClusterShape(SdxClusterShape.ENTERPRISE)
+                .withRuntimeVersion(null)
+                .withEnableMultiAz(true)
+                .withImageId(osUpgradePair.getLeft())
+                .when(sdxTestClient.createWithImageId(), key(sdx))
+                .await(SdxClusterStatusResponse.RUNNING, key(sdx))
+                .awaitForHealthyInstances()
+                .then((tc, testDto, client) -> {
+                    validateMultiAz(testDto, tc, "provisioning");
+                    List<String> instances = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
+                    instances.addAll(sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName()));
+                    expectedVolumeIds.addAll(getCloudFunctionality(tc).listInstancesVolumeIds(testDto.getName(), instances));
+                    return testDto;
+                })
+                .when(sdxTestClient.osUpgrade(osUpgradePair.getRight()), key(sdx))
+                .await(SdxClusterStatusResponse.RUNNING, key(sdx))
+                .awaitForHealthyInstances()
+                .then((tc, testDto, client) -> {
+                    List<String> instanceIds = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
+                    instanceIds.addAll(sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName()));
+                    actualVolumeIds.addAll(getCloudFunctionality(tc).listInstancesVolumeIds(testDto.getName(), instanceIds));
+                    return testDto;
+                })
+                .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
+                .when(sdxTestClient.describe(), key(sdx))
+                .then((tc, testDto, client) -> {
+                    validateMultiAz(testDto, tc, "Upgrade");
+                    return testDto;
                 })
                 .validate();
-        if (cdhImages.size() > 1) {
-            createEnvironmentWithFreeIpa(testContext);
-            String sdx = resourcePropertyProvider().getName();
-            List<String> actualVolumeIds = new ArrayList<>();
-            List<String> expectedVolumeIds = new ArrayList<>();
-            testContext
-                    .given(sdx, SdxTestDto.class)
-                    .withCloudStorage()
-                    .withClusterShape(SdxClusterShape.ENTERPRISE)
-                    .withRuntimeVersion(null)
-                    .withEnableMultiAz(true)
-                    .withImageId(cdhImages.get(0).getUuid())
-                    .when(sdxTestClient.createWithImageId(), key(sdx))
-                    .await(SdxClusterStatusResponse.RUNNING, key(sdx))
-                    .awaitForHealthyInstances()
-                    .then((tc, testDto, client) -> {
-                        validateMultiAz(testDto, tc, "provisioning");
-                        List<String> instances = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
-                        instances.addAll(sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName()));
-                        expectedVolumeIds.addAll(getCloudFunctionality(tc).listInstancesVolumeIds(testDto.getName(), instances));
-                        return testDto;
-                    })
-                    .when(sdxTestClient.osUpgrade(cdhImages.get(cdhImages.size() - 1).getUuid()), key(sdx))
-                    .await(SdxClusterStatusResponse.RUNNING, key(sdx))
-                    .awaitForHealthyInstances()
-                    .then((tc, testDto, client) -> {
-                        List<String> instanceIds = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
-                        instanceIds.addAll(sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName()));
-                        actualVolumeIds.addAll(getCloudFunctionality(tc).listInstancesVolumeIds(testDto.getName(), instanceIds));
-                        return testDto;
-                    })
-                    .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
-                    .when(sdxTestClient.describe(), key(sdx))
-                    .then((tc, testDto, client) -> {
-                        validateMultiAz(testDto, tc, "Upgrade");
-                        return testDto;
-                    })
-                    .validate();
-        }
     }
 
     private void validateMultiAz(SdxTestDto sdxTestDto, TestContext tc, String operation) {
