@@ -22,7 +22,6 @@
   file.managed:
     - makedirs: True
     - source: salt://nginx/conf/ssl-locations.d/saltboot.conf
-    - template: jinja
 
 {% if "manager_server" in grains.get('roles', []) %}
 {%- from 'cloudera/manager/settings.sls' import cloudera_manager with context %}
