@@ -76,7 +76,8 @@ public class VerticalScalingValidatorService {
             throw new BadRequestException(String.format("%s is not supported on %s cloudplatform", message, stack.getCloudPlatform()));
         }
         if (!stack.isStopped() && checkStackStopped) {
-            throw new BadRequestException(String.format("You must stop %s to be able to vertically scale it.", stack.getName()));
+            //Instruction: You must stop Environment for Deleting Volumes of FreeIPA
+            throw new BadRequestException(String.format("You must stop Environment for %s of %s.", message, stack.getName()));
         }
     }
 
@@ -91,7 +92,8 @@ public class VerticalScalingValidatorService {
             throw new BadRequestException(String.format("%s is not supported on %s cloudplatform", message, stack.getCloudPlatform()));
         }
         if (!stack.isStopped()) {
-            throw new BadRequestException(String.format("You must stop %s to be able to vertically scale it.", stack.getName()));
+            //Instruction: You must stop Environment for Vertical scaling of FreeIPA
+            throw new BadRequestException(String.format("You must stop Environment for %s of %s.", message, stack.getName()));
         }
     }
 
