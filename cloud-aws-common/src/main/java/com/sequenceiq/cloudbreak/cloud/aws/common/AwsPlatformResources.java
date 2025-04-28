@@ -696,17 +696,15 @@ public class AwsPlatformResources implements PlatformResources {
     @Override
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName() + #filters")
     public CloudVmTypes virtualMachines(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        boolean armInstanceEnabled = entitlementService.isArmInstanceEnabled(cloudCredential.getAccountId());
-        return getCloudVmTypes(cloudCredential, armInstanceEnabled, region, filters, enabledInstanceTypeFilter, false);
+        return getCloudVmTypes(cloudCredential, true, region, filters, enabledInstanceTypeFilter, false);
     }
 
     @Override
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName() + #filters + 'distrox'")
     public CloudVmTypes virtualMachinesForDistroX(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         List<Architecture> architectures = getArchitectures(filters);
-        boolean armInstanceEnabled = entitlementService.isArmInstanceEnabled(cloudCredential.getAccountId());
         Predicate<VmType> instanceTypeFilter = getDataHubInstancePredicate(restrictInstanceTypes, architectures);
-        return getCloudVmTypes(cloudCredential, armInstanceEnabled, region, filters, instanceTypeFilter, true);
+        return getCloudVmTypes(cloudCredential, true, region, filters, instanceTypeFilter, true);
     }
 
     private List<Architecture> getArchitectures(Map<String, String> filters) {

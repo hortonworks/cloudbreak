@@ -84,7 +84,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USE_CM_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USE_DATABUS_CNAME_ENDPOINT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_VM_DIAGNOSTICS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CLOUDERA_INTERNAL_ACCOUNT;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.COD_USE_GRAVITON;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AWS_STOP_START_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AZURE_STOP_START_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_GCP_AUTOSCALING;
@@ -513,10 +512,6 @@ public class EntitlementService {
         return isEntitlementRegistered(accountId, OBSERVABILITY_DMP);
     }
 
-    public boolean isArmInstanceEnabled(String accountId) {
-        return isDataLakeArmEnabled(accountId) || isDataHubArmEnabled(accountId) || isCODUseGraviton(accountId);
-    }
-
     public boolean isDataHubArmEnabled(String accountId) {
         if (dataHubArmEnabled) {
             LOGGER.info("Data Hub arm64 is enabled by property.");
@@ -527,10 +522,6 @@ public class EntitlementService {
 
     public boolean isDataLakeArmEnabled(String accountId) {
         return isEntitledFor(accountId, CDP_AWS_ARM_DATALAKE);
-    }
-
-    public boolean isCODUseGraviton(String accountId) {
-        return isEntitlementRegistered(accountId, COD_USE_GRAVITON);
     }
 
     public List<String> getEntitlements(String accountId) {

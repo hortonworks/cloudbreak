@@ -274,8 +274,6 @@ public class StackCreatorServiceTest {
         assertEquals("The selected architecture (arm64) is not supported in this cdh version (7.3.0.).", e.getMessage());
         verify(recipeValidatorService).validateRecipeExistenceOnInstanceGroups(any(), any());
         verify(stackDtoService).getStackViewByNameOrCrnOpt(NameOrCrn.ofName(STACK_NAME), ACCOUNT_ID);
-        verify(entitlementService, never()).isCODUseGraviton(any());
-        verify(entitlementService, never()).isArmInstanceEnabled(any());
         verify(entitlementService, times(1)).isDataHubArmEnabled(any());
 
     }
@@ -296,8 +294,6 @@ public class StackCreatorServiceTest {
         verify(recipeValidatorService).validateRecipeExistenceOnInstanceGroups(any(), any());
         verify(stackDtoService).getStackViewByNameOrCrnOpt(NameOrCrn.ofName(STACK_NAME), ACCOUNT_ID);
         verify(entitlementService, times(1)).isDataLakeArmEnabled(any());
-        verify(entitlementService, never()).isCODUseGraviton(any());
-        verify(entitlementService, never()).isArmInstanceEnabled(any());
         verify(entitlementService, never()).isDataHubArmEnabled(any());
     }
 
@@ -316,51 +312,7 @@ public class StackCreatorServiceTest {
         assertEquals("The selected architecture (arm64) is not enabled in your account", e.getMessage());
         verify(recipeValidatorService).validateRecipeExistenceOnInstanceGroups(any(), any());
         verify(stackDtoService).getStackViewByNameOrCrnOpt(NameOrCrn.ofName(STACK_NAME), ACCOUNT_ID);
-        verify(entitlementService, never()).isCODUseGraviton(any());
-        verify(entitlementService, never()).isArmInstanceEnabled(any());
         verify(entitlementService, times(1)).isDataHubArmEnabled(any());
-    }
-
-    @Test
-    void testArm64ShouldNotBeUsedOnCODWhenCODArmEntitlementIsNotEnabled() {
-        User user = new User();
-        Workspace workspace = getWorkspace();
-        StackV4Request stackRequest = getStackV4Request();
-        stackRequest.setArchitecture(Architecture.ARM64.getName());
-        stackRequest.setTags(isCodClusterTag(true));
-        when(regionAwareCrnGenerator.generateCrnStringWithUuid(any(), anyString())).thenReturn(STACK_CRN);
-        when(stackDtoService.getStackViewByNameOrCrnOpt(any(), anyString())).thenReturn(Optional.empty());
-
-        BadRequestException e = assertThrows(BadRequestException.class, () ->
-                ThreadBasedUserCrnProvider.doAs(INTERNAL_USER_CRN, () -> underTest.createStack(user, workspace, stackRequest, true)));
-
-        assertEquals("The selected architecture (arm64) is not enabled in your account", e.getMessage());
-        verify(recipeValidatorService).validateRecipeExistenceOnInstanceGroups(any(), any());
-        verify(stackDtoService).getStackViewByNameOrCrnOpt(NameOrCrn.ofName(STACK_NAME), ACCOUNT_ID);
-        verify(entitlementService, times(1)).isCODUseGraviton(any());
-        verify(entitlementService, never()).isArmInstanceEnabled(any());
-        verify(entitlementService, never()).isDataHubArmEnabled(any());
-    }
-
-    @Test
-    void testArm64CODbWhenCODArmEntitlementIsEnabledAndDatahubArmNotEnabled() {
-        User user = new User();
-        Workspace workspace = getWorkspace();
-        StackV4Request stackRequest = getStackV4Request();
-        stackRequest.setArchitecture(Architecture.ARM64.getName());
-        stackRequest.setTags(isCodClusterTag(true));
-        when(regionAwareCrnGenerator.generateCrnStringWithUuid(any(), anyString())).thenReturn(STACK_CRN);
-        when(stackDtoService.getStackViewByNameOrCrnOpt(any(), anyString())).thenReturn(Optional.empty());
-        when(entitlementService.isCODUseGraviton(any())).thenReturn(Boolean.TRUE);
-
-        Exception e = assertThrows(Exception.class, () ->
-                ThreadBasedUserCrnProvider.doAs(INTERNAL_USER_CRN, () -> underTest.createStack(user, workspace, stackRequest, true)));
-
-        assertFalse(e instanceof BadRequestException);
-        verify(recipeValidatorService).validateRecipeExistenceOnInstanceGroups(any(), any());
-        verify(stackDtoService).getStackViewByNameOrCrnOpt(NameOrCrn.ofName(STACK_NAME), ACCOUNT_ID);
-        verify(entitlementService, times(1)).isCODUseGraviton(any());
-        verify(entitlementService, times(0)).isDataHubArmEnabled(any());
     }
 
     @Test
@@ -378,8 +330,6 @@ public class StackCreatorServiceTest {
         assertEquals("The selected architecture (arm64) is not enabled in your account", e.getMessage());
         verify(recipeValidatorService).validateRecipeExistenceOnInstanceGroups(any(), any());
         verify(stackDtoService).getStackViewByNameOrCrnOpt(NameOrCrn.ofName(STACK_NAME), ACCOUNT_ID);
-        verify(entitlementService, never()).isCODUseGraviton(any());
-        verify(entitlementService, never()).isArmInstanceEnabled(any());
         verify(entitlementService, times(1)).isDataHubArmEnabled(any());
     }
 
