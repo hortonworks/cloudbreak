@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.sdx.pdl.service;
 
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_HYBRID_CLOUD;
+import java.util.Optional;
 
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.util.StringUtils;
@@ -31,6 +32,7 @@ public abstract class AbstractPdlSdxService implements PlatformAwareSdxCommonSer
     private EntitlementService entitlementService;
 
     @Lazy
+    @Qualifier("environmentApiEndpoint")
     @Inject
     private EnvironmentEndpoint environmentEndpoint;
 
@@ -45,7 +47,7 @@ public abstract class AbstractPdlSdxService implements PlatformAwareSdxCommonSer
 
     @Override
     public boolean isPlatformEntitled(String accountId) {
-        return entitlementService.isEntitledFor(accountId, CDP_HYBRID_CLOUD);
+        return entitlementService.hybridCloudEnabled(accountId);
     }
 
     public boolean isEnabled(String crn) {
@@ -58,7 +60,7 @@ public abstract class AbstractPdlSdxService implements PlatformAwareSdxCommonSer
     }
 
     public Environment getPrivateEnvForPublicEnv(String publicEnvCrn) {
-        String pvcCrn = getPrivateCloudEnvCrn(publicEnvCrn);
+        String pvcCrn = getPrivateCloudEnvCrn(publicEnvCrn).orElse(null);
         if (!StringUtils.isEmpty(pvcCrn)) {
             DescribeRemoteEnvironment describeRemoteEnvironment = new DescribeRemoteEnvironment();
             describeRemoteEnvironment.setCrn(pvcCrn);
@@ -67,10 +69,8 @@ public abstract class AbstractPdlSdxService implements PlatformAwareSdxCommonSer
         return null;
     }
 
-    public String getPrivateCloudEnvCrn(String publicEnvCrn) {
+    public Optional<String> getPrivateCloudEnvCrn(String publicEnvCrn) {
         DetailedEnvironmentResponse detailedEnvironmentResponse = environmentEndpoint.getByCrn(publicEnvCrn);
-        // change it later to fetch from detailedEnvironmentResponse
-        //return "crn:altus:environments:us-west-1:69159fae-78cd-4427-b942-aec2676a4dd6:environment:test-env-1/28e35068-c9f6-4a21-b1d7-55f51ac3076d";
-        return null;
+        return Optional.ofNullable(detailedEnvironmentResponse.getRemoteEnvironmentCrn());
     }
 }

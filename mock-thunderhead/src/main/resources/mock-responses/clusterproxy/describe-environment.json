@@ -247,9 +247,8 @@
           "kerberized": true
         }
       }
-    }
-  },
-  "cdpRuntimeVersion": "7.1.9-1.cdh7.1.9.p1.53348907",
+    },
+    "cdpRuntimeVersion": "7.1.9-1.cdh7.1.9.p1.53348907",
     "clouderaManagerVersion": "7.13.0",
     "cdpPvcVersion": "1.6.0"
   }

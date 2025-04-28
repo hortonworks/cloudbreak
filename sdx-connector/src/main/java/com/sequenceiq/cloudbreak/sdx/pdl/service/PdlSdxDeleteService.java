@@ -4,11 +4,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.cloudera.thunderhead.service.environments2api.model.PrivateDatalakeDetails;
 import com.sequenceiq.cloudbreak.sdx.common.polling.PollingResult;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDeleteService;
 
 @Service
-public class PdlSdxDeleteService extends PdlSdxStatusService implements PlatformAwareSdxDeleteService<String> {
+public class PdlSdxDeleteService extends PdlSdxStatusService implements PlatformAwareSdxDeleteService<PrivateDatalakeDetails.StatusEnum> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PdlSdxDeleteService.class);
 
@@ -18,7 +19,7 @@ public class PdlSdxDeleteService extends PdlSdxStatusService implements Platform
     }
 
     @Override
-    public PollingResult getDeletePollingResultByStatus(String status) {
+    public PollingResult getDeletePollingResultByStatus(PrivateDatalakeDetails.StatusEnum status) {
         return PollingResult.COMPLETED;
     }
 }

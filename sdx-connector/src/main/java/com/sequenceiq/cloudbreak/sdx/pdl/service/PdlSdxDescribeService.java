@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.cloudera.thunderhead.service.environments2api.model.Environment;
-import com.cloudera.thunderhead.service.environments2api.model.PvcEnvironmentDetails;
+import com.cloudera.thunderhead.service.environments2api.model.PrivateDatalakeDetails;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
@@ -49,7 +49,7 @@ public class PdlSdxDescribeService extends AbstractPdlSdxService implements Plat
     @Override
     public Set<String> listSdxCrns(String environmentCrn) {
         if (isEnabled(environmentCrn)) {
-            String pvcCrn = getPrivateCloudEnvCrn(environmentCrn);
+            String pvcCrn = getPrivateCloudEnvCrn(environmentCrn).orElse(null);
             LOGGER.info("pvcCrn is {}", pvcCrn);
             if (!StringUtils.isEmpty(pvcCrn)) {
                 return Set.of(pvcCrn);
@@ -63,21 +63,20 @@ public class PdlSdxDescribeService extends AbstractPdlSdxService implements Plat
         if (isEnabled(environmentCrn)) {
             try {
                 Environment environment = getPrivateEnvForPublicEnv(environmentCrn);
-                if (environment != null && environment.getPvcEnvironmentDetails() != null) {
-                    PvcEnvironmentDetails pvcEnvironmentDetails = environment.getPvcEnvironmentDetails();
+                if (environment != null && environment.getPvcEnvironmentDetails() != null
+                        && environment.getPvcEnvironmentDetails().getPrivateDatalakeDetails() != null) {
+                    PrivateDatalakeDetails privateDatalakeDetails = environment.getPvcEnvironmentDetails().getPrivateDatalakeDetails();
                     return Optional.of(SdxBasicView.builder()
-                            .withName(environment.getEnvironmentName())
-                            .withCrn(environmentCrn)
+                            .withName(privateDatalakeDetails.getDatalakeName())
+                            .withCrn(environment.getCrn())
                             .withRuntime(environment.getCdpRuntimeVersion())
-                            //.withRazEnabled(detailedCdl.getRangerRazEnabled())
-                            //.withCreated(detailedCdl.getCreated())
+                            .withRazEnabled(privateDatalakeDetails.getEnableRangerRaz())
+                            .withCreated(privateDatalakeDetails.getCreationTimeEpochMillis())
                             .withPlatform(TargetPlatform.PDL)
                             .build());
                 }
-
             } catch (RuntimeException exception) {
                 LOGGER.error(String.format("Exception while fetching CRN for private datalake with Environment: %s.", environmentCrn), exception);
-                return Optional.empty();
             }
         }
         return Optional.empty();
@@ -87,9 +86,13 @@ public class PdlSdxDescribeService extends AbstractPdlSdxService implements Plat
     public Optional<SdxAccessView> getSdxAccessViewByEnvironmentCrn(String environmentCrn) {
         if  (isEnabled(environmentCrn)) {
             Environment environment = getPrivateEnvForPublicEnv(environmentCrn);
-            PvcEnvironmentDetails pvcEnvironmentDetails = environment.getPvcEnvironmentDetails();
-            String rangerFqdn = "";
-            return Optional.of(SdxAccessView.builder().withRangerFqdn(rangerFqdn).build());
+            if (environment != null && environment.getPvcEnvironmentDetails() != null
+                    && environment.getPvcEnvironmentDetails().getPrivateDatalakeDetails() != null) {
+                PrivateDatalakeDetails privateDatalakeDetails = environment.getPvcEnvironmentDetails().getPrivateDatalakeDetails();
+                return Optional.of(SdxAccessView.builder().withRangerFqdn(
+                        !StringUtils.isEmpty(privateDatalakeDetails.getCmFQDN()) ? privateDatalakeDetails.getCmFQDN() : privateDatalakeDetails.getCmIP())
+                        .build());
+            }
         }
         return Optional.empty();
     }
