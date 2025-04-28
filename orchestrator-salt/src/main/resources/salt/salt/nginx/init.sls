@@ -18,10 +18,18 @@
     - source: salt://nginx/conf/ssl-locations.d/saltapi.conf
     - template: jinja
 
+update_saltboot_port_in_nginx_conf:
+  file.replace:
+    - name: /etc/nginx/nginx.conf
+    - pattern: "server 127.0.0.1:7070;"
+    - repl: "server 127.0.0.1:7071;"
+    - onlyif: grep -qx "Environment='SALTBOOT_HTTPS_ENABLED=true'" /etc/systemd/system/salt-bootstrap.service
+
 /etc/nginx/sites-enabled/ssl-locations.d/saltboot.conf:
   file.managed:
     - makedirs: True
     - source: salt://nginx/conf/ssl-locations.d/saltboot.conf
+    - template: jinja
 
 {% if "manager_server" in grains.get('roles', []) %}
 {%- from 'cloudera/manager/settings.sls' import cloudera_manager with context %}
