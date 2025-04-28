@@ -10,13 +10,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class SetSeLinuxToEnforcingResponse {
+public class ModifySeLinuxResponse {
 
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private final FlowIdentifier flowIdentifier;
 
     @JsonCreator
-    public SetSeLinuxToEnforcingResponse(@JsonProperty("flowIdentifier") FlowIdentifier flowIdentifier) {
+    public ModifySeLinuxResponse(@JsonProperty("flowIdentifier") FlowIdentifier flowIdentifier) {
         this.flowIdentifier = flowIdentifier;
     }
 

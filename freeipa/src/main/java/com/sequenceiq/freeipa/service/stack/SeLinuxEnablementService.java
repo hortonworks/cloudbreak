@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorEx
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.SetSeLinuxToEnforcingResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.ModifySeLinuxResponse;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Operation;
@@ -64,7 +64,7 @@ public class SeLinuxEnablementService {
                 exitCriteriaModel, Optional.of(SELINUX_ENFORCING_RETRY_ATTEMPTS), Optional.of(SELINUX_ENFORCING_RETRY_ATTEMPTS));
     }
 
-    public SetSeLinuxToEnforcingResponse setSeLinuxToEnforcingByCrn(String environmentCrn, String accountId) {
+    public ModifySeLinuxResponse setSeLinuxToEnforcingByCrn(String environmentCrn, String accountId) {
         LOGGER.debug("Starting flow for setting SeLinux to 'ENFORCING' on stack for FreeIpa - {}", environmentCrn);
         Stack stack = stackService.getFreeIpaStackWithMdcContext(environmentCrn, accountId);
         Operation operation = operationService.startOperation(accountId, OperationType.MODIFY_SELINUX_MODE,
@@ -73,7 +73,7 @@ public class SeLinuxEnablementService {
             FlowIdentifier flowIdentifier = flowManager.notify(SET_SELINUX_TO_ENFORCING_EVENT.event(),
                     new FreeIpaEnableSeLinuxEvent(SET_SELINUX_TO_ENFORCING_EVENT.event(), stack.getId(),
                             operation.getOperationId()));
-            return new SetSeLinuxToEnforcingResponse(flowIdentifier);
+            return new ModifySeLinuxResponse(flowIdentifier);
         } catch (Exception e) {
             LOGGER.error("Couldn't start SELinux enablement flow", e);
             operationService.failOperation(accountId, operation.getOperationId(), "Couldn't start Freeipa SELinux enablement flow: " + e.getMessage());

@@ -42,12 +42,13 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.State;
 import com.sequenceiq.common.api.UsedSubnetWithResourceResponse;
 import com.sequenceiq.common.api.UsedSubnetsByEnvironmentResponse;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.common.model.SubnetIdWithResourceNameAndCrn;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.RetryableFlowResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.SetSeLinuxToEnforcingResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.ModifySeLinuxResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.binduser.BindUserCreateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageChangeRequest;
@@ -525,8 +526,9 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
-    public SetSeLinuxToEnforcingResponse setSeLinuxToEnforcingByCrn(
-            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @NotEmpty String environmentCrn) {
+    public ModifySeLinuxResponse modifySelinuxByCrn(
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @NotEmpty String environmentCrn,
+            @NotNull SeLinux selinuxMode) {
         return seLinuxEnablementService.setSeLinuxToEnforcingByCrn(environmentCrn, ThreadBasedUserCrnProvider.getAccountId());
     }
 }
