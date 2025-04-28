@@ -58,7 +58,8 @@ public class GcpCredentialFactory {
             try {
                 PrivateKey pk = SecurityUtils.loadPrivateKeyFromKeyStore(SecurityUtils.getPkcs12KeyStore(),
                         new ByteArrayInputStream(Base64.decodeBase64(getServiceAccountPrivateKey(gcpCredential))), "notasecret", "privatekey", "notasecret");
-                return new GoogleCredential.Builder().setTransport(httpTransport)
+                return new GoogleCredential.Builder()
+                        .setTransport(httpTransport)
                         .setJsonFactory(JSON_FACTORY)
                         .setServiceAccountId(gcpStackUtil.getServiceAccountId(gcpCredential))
                         .setServiceAccountScopes(SCOPES)

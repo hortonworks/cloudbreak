@@ -15,7 +15,7 @@ import_cert_with_alias_to_trust_store() {
   cert_dir=$1
   cert=$2
 
-  echo "Adding certificate from file $cert_dir/$cert to trust store"
+  echo "Adding certificate from file $cert_dir/$cert to trust store $JAVA_HOME/lib/security/cacerts"
   if keytool -import -alias "$cert" -noprompt -file "$cert_dir/$cert" -keystore "$JAVA_HOME/lib/security/cacerts" -storepass changeit; then
       echo "Certificate added to default Java trust store with alias $cert."
   else
