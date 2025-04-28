@@ -2,7 +2,9 @@ package com.sequenceiq.cloudbreak.rotation.context.provider;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -17,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -24,6 +27,7 @@ import com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.ExitCriteriaProvider;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
+import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.context.saltboot.SaltBootConfigRotationContext;
 import com.sequenceiq.cloudbreak.rotation.context.saltboot.SaltBootUpdateConfiguration;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
@@ -89,15 +93,21 @@ class SaltBootRotationContextProviderTest {
     @BeforeEach
     public void setUp() {
         when(stackService.getByCrn(anyString())).thenReturn(stack);
-        when(stack.getSecurityConfig()).thenReturn(securityConfig);
-        when(instanceMetadataView.getPrivateIp()).thenReturn("0.0.0.0");
-        when(instanceMetadataView.getDiscoveryFQDN()).thenReturn("host1");
-        when(stack.getAllAvailableInstances()).thenReturn(List.of(instanceMetadataView));
-        when(securityConfig.getSaltSecurityConfig()).thenReturn(saltSecurityConfig);
-        when(saltBootPassword.getSecret()).thenReturn(SALT_BOOT_PASSWORD_VAULT_PATH);
-        when(saltSecurityConfig.getSaltBootPasswordSecret()).thenReturn(saltBootPassword);
-        when(saltBootPrivateKey.getSecret()).thenReturn(SALT_BOOT_PRIVATE_KEY_VAULT_PATH);
-        when(saltSecurityConfig.getSaltBootSignPrivateKeySecret()).thenReturn(saltBootPrivateKey);
+        lenient().when(stack.getSecurityConfig()).thenReturn(securityConfig);
+        lenient().when(instanceMetadataView.getPrivateIp()).thenReturn("0.0.0.0");
+        lenient().when(instanceMetadataView.getDiscoveryFQDN()).thenReturn("host1");
+        lenient().when(stack.getAllAvailableInstances()).thenReturn(List.of(instanceMetadataView));
+        lenient().when(securityConfig.getSaltSecurityConfig()).thenReturn(saltSecurityConfig);
+        lenient().when(saltBootPassword.getSecret()).thenReturn(SALT_BOOT_PASSWORD_VAULT_PATH);
+        lenient().when(saltSecurityConfig.getSaltBootPasswordSecret()).thenReturn(saltBootPassword);
+        lenient().when(saltBootPrivateKey.getSecret()).thenReturn(SALT_BOOT_PRIVATE_KEY_VAULT_PATH);
+        lenient().when(saltSecurityConfig.getSaltBootSignPrivateKeySecret()).thenReturn(saltBootPrivateKey);
+    }
+
+    @Test
+    void testGcpDisabled() {
+        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.GCP.name());
+        assertThrows(SecretRotationException.class, () -> underTest.getContexts(RESOURCE_CRN));
     }
 
     @Test
