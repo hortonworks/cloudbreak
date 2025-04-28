@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOP
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StopStartDownscaleDecommissionViaCMRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StopStartDownscaleDecommissionViaCMResult;
+import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.autoscale.PeriscopeClientService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
@@ -127,19 +129,19 @@ public class StopStartDownscaleDecommissionViaCMHandler extends ExceptionCatcher
             //  timebound specified.
             Set<String> decommissionedHostNames = Collections.emptySet();
             if (!hostsToRemove.isEmpty()) {
-                try {
-                    List<String> yarnRecommendedDecommissionNodeIds = periscopeClientService.getYarnRecommendedInstanceIds(stack.getResourceCrn());
-                    LOGGER.info("Fetched yarn recommendation for decommission InstanceId(s)=[{}], Instance(s) from periscope request to decommission " +
-                            "InstanceId(s)=[{}]", yarnRecommendedDecommissionNodeIds,
-                            hostsToRemove.values().stream().map(InstanceMetadataView::getInstanceId).collect(Collectors.toList()));
-                    hostsToRemove.entrySet().removeIf(entry -> shouldRemoveHost(entry, yarnRecommendedDecommissionNodeIds, additionalHostNamesToDecommission));
-                } catch (Exception e) {
-                    LOGGER.info("Not able to fetch Recommendation from yarn in given time. Decommissioning the instance(s)=[{}] without filtering",
-                            hostsToRemove.keySet());
+                Set<String> cbRecommendedDecommissionNodes = new HashSet<>(hostsToRemove.keySet());
+                updateDecommissionCandidates(stack, hostsToRemove, additionalHostNamesToDecommission);
+                if (!hostsToRemove.isEmpty()) {
+                    decommissionedHostNames = clusterDecomissionService.decommissionClusterNodesStopStart(hostsToRemove, POLL_FOR_10_MINUTES);
+                    updateInstanceStatuses(hostsToRemove, decommissionedHostNames,
+                            InstanceStatus.DECOMMISSIONED, "decommission requested for instances");
+                } else {
+                    String message = "Failed while attempting to decommission nodes via CM";
+                    CloudbreakRuntimeException e = new CloudbreakRuntimeException(String.format("This Node(s) '%s' have jobs running on them, " +
+                            "cannot decommission them", String.join(", ", cbRecommendedDecommissionNodes)));
+                    LOGGER.error(message, e);
+                    return new StopStartDownscaleDecommissionViaCMResult(message, e, request);
                 }
-                decommissionedHostNames = clusterDecomissionService.decommissionClusterNodesStopStart(hostsToRemove, POLL_FOR_10_MINUTES);
-                updateInstanceStatuses(hostsToRemove, decommissionedHostNames,
-                        InstanceStatus.DECOMMISSIONED, "decommission requested for instances");
             }
 
             // This doesn't handle failures. It handles scenarios where CM list APIs don't have the necessary hosts available.
@@ -189,6 +191,21 @@ public class StopStartDownscaleDecommissionViaCMHandler extends ExceptionCatcher
             LOGGER.error(message, e);
             return new StopStartDownscaleDecommissionViaCMResult(message, e, request);
         }
+    }
+
+    private Map<String, InstanceMetadataView> updateDecommissionCandidates(Stack stack, Map<String, InstanceMetadataView> hostsToRemove,
+            Set<String> additionalHostNamesToDecommission) {
+        try {
+            List<String> yarnRecommendedDecommissionNodeIds = periscopeClientService.getYarnRecommendedInstanceIds(stack.getResourceCrn());
+            LOGGER.info("Fetched yarn recommendation for decommission InstanceId(s)=[{}], Instance(s) from periscope request to decommission " +
+                    "InstanceId(s)=[{}]", yarnRecommendedDecommissionNodeIds,
+                    hostsToRemove.values().stream().map(InstanceMetadataView::getInstanceId).collect(Collectors.toList()));
+            hostsToRemove.entrySet().removeIf(entry -> shouldRemoveHost(entry, yarnRecommendedDecommissionNodeIds, additionalHostNamesToDecommission));
+        } catch (Exception e) {
+            LOGGER.info("Not able to fetch Recommendation from yarn in given time. Decommissioning the instance(s)=[{}] without filtering",
+                    hostsToRemove.keySet());
+        }
+        return hostsToRemove;
     }
 
     private boolean shouldRemoveHost(Map.Entry<String, InstanceMetadataView> entry, List<String> yarnRecommendedDecommissionNodeIds,

@@ -318,7 +318,7 @@ public class StopStartDownscaleDecommissionViaCMHandlerTest {
     }
 
     @Test
-    void testErrorFromCmCommission() {
+    void testErrorFromCmCommission() throws Exception {
         int instancesToDecommissionCount = 5;
         int expcetedInstanceToCollectCount = 5;
         int expectedInstancesDecommissionedCount = 5;
@@ -337,6 +337,9 @@ public class StopStartDownscaleDecommissionViaCMHandlerTest {
                 .map(InstanceMetadataView::getDiscoveryFQDN)
                 .collect(Collectors.toUnmodifiableSet());
 
+        List<String> instanceIds = collected.values().stream().map(InstanceMetadataView::getInstanceId).toList();
+        when(periscopeClientService.getYarnRecommendedInstanceIds(RESOURCE_CRN)).thenReturn(instanceIds);
+
         setupAdditionalMocks(INSTANCE_GROUP_NAME, instancesToDecommission, collected, fqdnsDecommissioned);
         when(clusterDecomissionService.decommissionClusterNodesStopStart(eq(collected), anyLong()))
                 .thenThrow(new RuntimeException("decommissionHostsError"));
@@ -354,6 +357,51 @@ public class StopStartDownscaleDecommissionViaCMHandlerTest {
         assertThat(result.getNotDecommissionedHostFqdns()).hasSize(0);
         assertThat(result.getDecommissionedHostFqdns()).hasSize(0);
         assertThat(result.getErrorDetails().getMessage()).isEqualTo("decommissionHostsError");
+        assertThat(result.getStatus()).isEqualTo(EventStatus.FAILED);
+        assertThat(result.selector()).isEqualTo("STOPSTARTDOWNSCALEDECOMMISSIONVIACMRESULT_ERROR");
+
+        verify(instanceMetaDataService, never()).updateInstanceStatuses(anyCollection(), any(InstanceStatus.class), anyString());
+        verifyNoMoreInteractions(flowMessageService);
+        verifyNoMoreInteractions(clusterDecomissionService);
+    }
+
+    @Test
+    void testErrorAsNoInstancesToDecommission() throws Exception {
+        int instancesToDecommissionCount = 5;
+        int expcetedInstanceToCollectCount = 5;
+        int expectedInstancesDecommissionedCount = 5;
+        List<InstanceMetadataView> instancesToDecommission = getInstancesWithStatus(0, instancesToDecommissionCount, INSTANCE_ID_PREFIX, FQDN_PREFIX,
+                InstanceStatus.SERVICES_HEALTHY);
+        Map<String, InstanceMetadataView> collected =
+                instancesToDecommission.stream().limit(expcetedInstanceToCollectCount).collect(Collectors.toMap(i -> i.getDiscoveryFQDN(), i -> i));
+        List<InstanceMetadataView> decommissionedMetadataList =
+                collected.values().stream().limit(expectedInstancesDecommissionedCount).collect(Collectors.toList());
+        Set<String> fqdnsDecommissioned = decommissionedMetadataList.stream()
+                .map(InstanceMetadataView::getDiscoveryFQDN)
+                .collect(Collectors.toUnmodifiableSet());
+
+        Set<Long> instanceIdsToDecommission = instancesToDecommission.stream().map(InstanceMetadataView::getPrivateId).collect(Collectors.toUnmodifiableSet());
+        Set<String> hostnamesToDecommission = instancesToDecommission.stream()
+                .map(InstanceMetadataView::getDiscoveryFQDN)
+                .collect(Collectors.toUnmodifiableSet());
+
+        when(periscopeClientService.getYarnRecommendedInstanceIds(RESOURCE_CRN)).thenReturn(List.of());
+
+        setupAdditionalMocks(INSTANCE_GROUP_NAME, instancesToDecommission, collected, fqdnsDecommissioned);
+
+        StopStartDownscaleDecommissionViaCMRequest request =
+                new StopStartDownscaleDecommissionViaCMRequest(1L, INSTANCE_GROUP_NAME, instanceIdsToDecommission, emptyList());
+        HandlerEvent handlerEvent = new HandlerEvent(Event.wrap(request));
+        Selectable selectable = underTest.doAccept(handlerEvent);
+        verify(clusterDecomissionService).collectHostsToRemove(eq(INSTANCE_GROUP_NAME), eq(hostnamesToDecommission));
+
+        assertThat(selectable).isInstanceOf(StopStartDownscaleDecommissionViaCMResult.class);
+
+        StopStartDownscaleDecommissionViaCMResult result = (StopStartDownscaleDecommissionViaCMResult) selectable;
+        assertThat(result.getNotDecommissionedHostFqdns()).hasSize(0);
+        assertThat(result.getDecommissionedHostFqdns()).hasSize(0);
+        assertThat(result.getErrorDetails().getMessage())
+                .isEqualTo("This Node(s) 'fqdn-4, fqdn-1, fqdn-0, fqdn-3, fqdn-2' have jobs running on them, cannot decommission them");
         assertThat(result.getStatus()).isEqualTo(EventStatus.FAILED);
         assertThat(result.selector()).isEqualTo("STOPSTARTDOWNSCALEDECOMMISSIONVIACMRESULT_ERROR");
 
