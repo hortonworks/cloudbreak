@@ -157,7 +157,7 @@ dependencies {
     implementation group: 'org.springframework.boot',           name: 'spring-boot-starter-jersey'
     implementation group: 'org.glassfish.jersey.ext',           name: 'jersey-micrometer',              version: jerseyMicrometerVersion
 
-    implementation group: 'com.google.code.gson',          name: 'gson'
+    implementation group: 'com.google.code.gson',          name: 'gson',                                version: gsonVersion
     implementation group: 'org.apache.hadoop',             name: 'hadoop-yarn-api'
     implementation group: 'org.freemarker',                name: 'freemarker'
     implementation group: 'org.postgresql',                name: 'postgresql'

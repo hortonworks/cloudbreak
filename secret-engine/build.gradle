@@ -15,7 +15,7 @@ dependencies {
   implementation group: 'org.slf4j', name: 'slf4j-api', version: slf4jApiVersion
   implementation group: 'org.springframework', name: 'spring-aspects', version: springFrameworkVersion
   implementation group: 'org.springframework', name: 'spring-web', version: springFrameworkVersion
-  implementation group: 'com.google.code.gson', name: 'gson'
+  implementation group: 'com.google.code.gson', name: 'gson', version: gsonVersion
   implementation group: 'org.springframework', name: 'spring-context', version: springFrameworkVersion
   implementation group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: httpClientVersion
   implementation group: 'jakarta.persistence', name: 'jakarta.persistence-api', version: jakartaPersistenceApiVersion

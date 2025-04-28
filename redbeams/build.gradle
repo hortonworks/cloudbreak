@@ -50,7 +50,7 @@ dependencies {
   implementation            group: 'net.bytebuddy',             name: 'byte-buddy', version: byteBuddyVersion
 
   implementation     group: 'com.google.guava',          name: 'guava'
-  implementation     group: 'com.google.code.gson',      name: 'gson'
+  implementation     group: 'com.google.code.gson',      name: 'gson',              version: gsonVersion
   implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server'
   implementation     group: 'org.mybatis',               name: 'mybatis-migrations'
   implementation     group: 'org.postgresql',            name: 'postgresql'

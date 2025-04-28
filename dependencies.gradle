@@ -71,7 +71,8 @@ ext {
 
   // Serialization
   accessorSmartVersion = '2.4.7'
-  gsonVersion = '2.8.9'
+  gsonVersion = '2.12.1'
+  nimbusJoseJwt = '10.1'
   jacksonVersion = '2.18.2'
   jsonSmartVersion = '2.4.9'
   snakeYamlVersion = '2.4'
