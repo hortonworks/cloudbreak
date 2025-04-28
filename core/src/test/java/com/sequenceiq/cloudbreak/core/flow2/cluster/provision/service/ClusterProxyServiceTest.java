@@ -55,6 +55,7 @@ import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 
 @ExtendWith(MockitoExtension.class)
 class ClusterProxyServiceTest {
@@ -98,6 +99,9 @@ class ClusterProxyServiceTest {
 
     @Mock
     private StackUpdater stackUpdater;
+
+    @Mock
+    private EnvironmentEndpoint environmentEndpoint;
 
     @InjectMocks
     private ClusterProxyService underTest;
