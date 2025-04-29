@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.service.freeipa.flow;
 
-import static com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaEnableSeLinuxStateSelectors.SET_SELINUX_TO_ENFORCING_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaModifySeLinuxStateSelectors.MODIFY_SELINUX_START_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -168,7 +168,7 @@ class FreeIpaParallelFlowValidatorTest {
                         FlowChainInitEvent.FLOWCHAIN_INIT_TRIGGER_EVENT.event(),
                         FlowChainFinalizeEvent.FLOWCHAIN_FINALIZE_TRIGGER_EVENT.event(),
                         FreeIpaProviderTemplateUpdateFlowEvent.FREEIPA_PROVIDER_TEMPLATE_UPDATE_TRIGGER_EVENT.event(),
-                        SET_SELINUX_TO_ENFORCING_EVENT.event()).containsAll(allowedParallelFlows),
+                        MODIFY_SELINUX_START_EVENT.event()).containsAll(allowedParallelFlows),
                 "You have changed parallel flows for FreeIPA. Please make sure 'FreeIpaParallelFlowValidator' is adjusted if necessary");
     }
 }

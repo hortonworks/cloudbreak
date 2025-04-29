@@ -1,7 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.enableselinux.handler;
 
-import static com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaEnableSeLinuxStateSelectors.ENABLE_SELINUX_FREEIPA_EVENT;
-import static com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaEnableSeLinuxStateSelectors.FAILED_ENABLE_SELINUX_FREEIPA_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaModifySeLinuxStateSelectors.FAILED_MODIFY_SELINUX_FREEIPA_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaModifySeLinuxStateSelectors.MODIFY_SELINUX_FREEIPA_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
@@ -27,18 +27,19 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaValidateEnableSeLinuxHandlerEvent;
+import com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaValidateModifySeLinuxHandlerEvent;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @ExtendWith(MockitoExtension.class)
-public class FreeIpaValidateEnableSeLinuxHandlerTest {
+public class FreeIpaValidateModifySeLinuxHandlerTest {
 
-    private FreeIpaValidateEnableSeLinuxHandlerEvent event;
+    private FreeIpaValidateModifySeLinuxHandlerEvent event;
 
     @Mock
     private StackService stackService;
@@ -50,15 +51,15 @@ public class FreeIpaValidateEnableSeLinuxHandlerTest {
     private HostOrchestrator hostOrchestrator;
 
     @InjectMocks
-    private FreeIpaValidateEnableSeLinuxHandler underTest;
+    private FreeIpaValidateModifySeLinuxHandler underTest;
 
     @Mock
     private Stack stack;
 
     @BeforeEach
     void setUp() {
-        String selector = EventSelectorUtil.selector(FreeIpaValidateEnableSeLinuxHandler.class);
-        event = new FreeIpaValidateEnableSeLinuxHandlerEvent(1L, "test-op");
+        String selector = EventSelectorUtil.selector(FreeIpaValidateModifySeLinuxHandler.class);
+        event = new FreeIpaValidateModifySeLinuxHandlerEvent(1L, "test-op", SeLinux.ENFORCING);
     }
 
     @Test
@@ -78,7 +79,7 @@ public class FreeIpaValidateEnableSeLinuxHandlerTest {
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(Set.of(instanceMetaData));
         Selectable response = underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
         assertEquals(1L, response.getResourceId());
-        assertEquals(ENABLE_SELINUX_FREEIPA_EVENT.selector(), response.getSelector());
+        assertEquals(MODIFY_SELINUX_FREEIPA_EVENT.selector(), response.getSelector());
         verify(gatewayConfigService).getPrimaryGatewayConfigForSalt(stack);
         verify(hostOrchestrator).runCommandOnAllHosts(eq(gatewayConfig), eq("getenforce"));
     }
@@ -142,7 +143,7 @@ public class FreeIpaValidateEnableSeLinuxHandlerTest {
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(Set.of(instanceMetaData));
         CloudbreakRuntimeException exception  = assertThrows(CloudbreakRuntimeException.class, () ->
                 underTest.doAccept(new HandlerEvent<>(new Event<>(event))));
-        assertEquals("SeLinux Enforce mode for some instances are in 'disabled' mode.", exception.getMessage());
+        assertEquals("SeLinux mode for some instances are in 'disabled' mode.", exception.getMessage());
         verify(gatewayConfigService).getPrimaryGatewayConfigForSalt(stack);
         verify(hostOrchestrator).runCommandOnAllHosts(eq(gatewayConfig), eq("getenforce"));
     }
@@ -170,13 +171,13 @@ public class FreeIpaValidateEnableSeLinuxHandlerTest {
 
     @Test
     void testSelector() {
-        assertEquals(EventSelectorUtil.selector(FreeIpaValidateEnableSeLinuxHandlerEvent.class), underTest.selector());
+        assertEquals(EventSelectorUtil.selector(FreeIpaValidateModifySeLinuxHandlerEvent.class), underTest.selector());
     }
 
     @Test
     void testDefaultFailureEvent() {
         Selectable response = underTest.defaultFailureEvent(1L, new Exception("test"), new Event<>(event));
-        assertEquals(FAILED_ENABLE_SELINUX_FREEIPA_EVENT.selector(), response.getSelector());
+        assertEquals(FAILED_MODIFY_SELINUX_FREEIPA_EVENT.selector(), response.getSelector());
         assertEquals("test", response.getException().getMessage());
     }
 }

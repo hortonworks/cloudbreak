@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.service.stack;
 
-import static com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaEnableSeLinuxStateSelectors.SET_SELINUX_TO_ENFORCING_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaModifySeLinuxStateSelectors.MODIFY_SELINUX_START_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -26,19 +26,20 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.ModifySeLinuxResponse;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaEnableSeLinuxEvent;
+import com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaModifySeLinuxEvent;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 
 @ExtendWith(MockitoExtension.class)
-public class SeLinuxEnablementServiceTest {
+public class SeLinuxModificationServiceTest {
 
     private static final String ENVIRONMENT_CRN = "environment_crn";
 
@@ -62,13 +63,13 @@ public class SeLinuxEnablementServiceTest {
     private FreeIpaFlowManager flowManager;
 
     @InjectMocks
-    private SeLinuxEnablementService underTest;
+    private SeLinuxModificationService underTest;
 
     @Mock
     private Stack stack;
 
     @Captor
-    private ArgumentCaptor<FreeIpaEnableSeLinuxEvent> seLinuxEventCaptor;
+    private ArgumentCaptor<FreeIpaModifySeLinuxEvent> seLinuxEventCaptor;
 
     @Test
     void testEnableSeLinuxOnAllNodes() throws CloudbreakOrchestratorException {
@@ -76,7 +77,7 @@ public class SeLinuxEnablementServiceTest {
         Set<InstanceMetaData> instanceMetaDataSet = Set.of(instanceMetaData);
         when(stack.getId()).thenReturn(1L);
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(instanceMetaDataSet);
-        underTest.enableSeLinuxOnAllNodes(stack);
+        underTest.modifySeLinuxOnAllNodes(stack);
     }
 
     @Test
@@ -87,7 +88,7 @@ public class SeLinuxEnablementServiceTest {
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(instanceMetaDataSet);
         doThrow(new CloudbreakOrchestratorFailedException("test")).when(hostOrchestrator).executeSaltState(any(), any(), any(), any(), any(), any());
         CloudbreakOrchestratorFailedException exception = assertThrows(CloudbreakOrchestratorFailedException.class,
-                () -> underTest.enableSeLinuxOnAllNodes(stack));
+                () -> underTest.modifySeLinuxOnAllNodes(stack));
         assertEquals("test", exception.getMessage());
     }
 
@@ -100,10 +101,10 @@ public class SeLinuxEnablementServiceTest {
         when(operationService.startOperation(ACCOUNT_ID, OperationType.MODIFY_SELINUX_MODE, Set.of(stack.getEnvironmentCrn()), Collections.emptySet()))
                 .thenReturn(operation);
         FlowIdentifier flowIdentifier = mock(FlowIdentifier.class);
-        when(flowManager.notify(eq(SET_SELINUX_TO_ENFORCING_EVENT.event()), any())).thenReturn(flowIdentifier);
-        ModifySeLinuxResponse response = underTest.setSeLinuxToEnforcingByCrn(ENVIRONMENT_CRN, ACCOUNT_ID);
-        verify(flowManager).notify(eq(SET_SELINUX_TO_ENFORCING_EVENT.event()), seLinuxEventCaptor.capture());
-        assertEquals(SET_SELINUX_TO_ENFORCING_EVENT.event(), seLinuxEventCaptor.getValue().selector());
+        when(flowManager.notify(eq(MODIFY_SELINUX_START_EVENT.event()), any())).thenReturn(flowIdentifier);
+        ModifySeLinuxResponse response = underTest.modifySeLinuxByCrn(ENVIRONMENT_CRN, ACCOUNT_ID, SeLinux.ENFORCING);
+        verify(flowManager).notify(eq(MODIFY_SELINUX_START_EVENT.event()), seLinuxEventCaptor.capture());
+        assertEquals(MODIFY_SELINUX_START_EVENT.event(), seLinuxEventCaptor.getValue().selector());
         assertEquals("test-op", seLinuxEventCaptor.getValue().getOperationId());
         assertEquals(response.getFlowIdentifier(), flowIdentifier);
     }
@@ -116,9 +117,9 @@ public class SeLinuxEnablementServiceTest {
         when(operation.getOperationId()).thenReturn("test-op");
         when(operationService.startOperation(ACCOUNT_ID, OperationType.MODIFY_SELINUX_MODE, Set.of(stack.getEnvironmentCrn()), Collections.emptySet()))
                 .thenReturn(operation);
-        doThrow(new RuntimeException("test")).when(flowManager).notify(eq(SET_SELINUX_TO_ENFORCING_EVENT.event()), any());
+        doThrow(new RuntimeException("test")).when(flowManager).notify(eq(MODIFY_SELINUX_START_EVENT.event()), any());
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () ->
-                underTest.setSeLinuxToEnforcingByCrn(ENVIRONMENT_CRN, ACCOUNT_ID));
+                underTest.modifySeLinuxByCrn(ENVIRONMENT_CRN, ACCOUNT_ID, SeLinux.ENFORCING));
         assertTrue(exception.getMessage().startsWith("Couldn't start Freeipa SELinux enablement flow: test"));
         verify(operationService).failOperation(ACCOUNT_ID, "test-op", "Couldn't start Freeipa SELinux enablement flow: test");
     }
