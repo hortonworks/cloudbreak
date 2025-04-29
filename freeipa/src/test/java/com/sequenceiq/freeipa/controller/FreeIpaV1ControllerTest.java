@@ -31,10 +31,11 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerBase;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.SetSeLinuxToEnforcingResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.ModifySeLinuxResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
@@ -356,12 +357,12 @@ class FreeIpaV1ControllerTest {
     }
 
     @Test
-    void testSetSeLinuxToEnforcingByCrn() {
+    void testModifySelinuxByCrn() {
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "1");
-        SetSeLinuxToEnforcingResponse response = new SetSeLinuxToEnforcingResponse(flowIdentifier);
+        ModifySeLinuxResponse response = new ModifySeLinuxResponse(flowIdentifier);
         when(seLinuxEnablementService.setSeLinuxToEnforcingByCrn(eq(ENVIRONMENT_CRN), any())).thenReturn(response);
 
-        SetSeLinuxToEnforcingResponse result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.setSeLinuxToEnforcingByCrn(ENVIRONMENT_CRN));
+        ModifySeLinuxResponse result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.modifySelinuxByCrn(ENVIRONMENT_CRN, SeLinux.ENFORCING));
 
         verify(seLinuxEnablementService).setSeLinuxToEnforcingByCrn(eq(ENVIRONMENT_CRN), eq("hortonworks"));
         assertEquals("1", result.getFlowIdentifier().getPollableId());
