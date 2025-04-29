@@ -116,7 +116,7 @@ public class AwsUpscaleService {
         try {
             awsAutoScalingService.scheduleStatusChecks(scaledGroups, ac, cloudFormationClient, timeBeforeASUpdate, knownInstances);
         } catch (AmazonAutoscalingFailedException amazonAutoscalingFailedException) {
-            LOGGER.info("Amazon autoscaling group update failed", amazonAutoscalingFailedException);
+            LOGGER.warn("Amazon autoscaling group update failed", amazonAutoscalingFailedException);
             recoverOriginalState(ac, stack, amazonASClient, desiredAutoscalingGroupsByName, originalAutoScalingGroupsBySize, amazonAutoscalingFailedException);
             sendASGUpdateFailedMessage(amazonASClient, desiredAutoscalingGroupsByName, amazonAutoscalingFailedException);
         }

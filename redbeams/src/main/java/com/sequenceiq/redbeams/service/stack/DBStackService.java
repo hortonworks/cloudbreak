@@ -50,6 +50,11 @@ public class DBStackService implements PayloadContextProvider, ResourceIdProvide
         return getByCrn(resourceCrn).getId();
     }
 
+    @Override
+    public String getResourceCrnByResourceId(Long resourceId) {
+        return getById(resourceId).getResourceCrn();
+    }
+
     public Set<Long> findAllDeleting() {
         return dbStackRepository.findAllByStatusIn(Status.getDeletingStatuses());
     }

@@ -49,7 +49,8 @@ import com.sequenceiq.flow.core.FlowTriggerCondition;
 import com.sequenceiq.flow.core.MessageFactory;
 import com.sequenceiq.flow.core.RestartAction;
 import com.sequenceiq.flow.core.StateConverterAdapter;
-import com.sequenceiq.flow.core.metrics.FlowEventMetricListener;
+import com.sequenceiq.flow.core.listener.FlowEventCommonListener;
+import com.sequenceiq.flow.core.listener.FlowTransitionContext;
 import com.sequenceiq.flow.core.restart.DefaultRestartAction;
 import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 
@@ -90,16 +91,17 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
     }
 
     @Override
-    public Flow createFlow(String flowId, String flowChainId, Long stackId, String flowChainType) {
+    public Flow createFlow(String flowId, String flowChainId, Long resourceId, String flowChainType) {
         StateMachine<S, E> sm = stateMachineFactory.getStateMachine();
         FlowEventListener<S, E> fl = (FlowEventListener<S, E>) applicationContext.getBean(FlowEventListener.class, getEdgeConfig().initState,
-                getEdgeConfig().finalState, flowChainType, getClass().getSimpleName(), flowChainId, flowId, stackId);
+                getEdgeConfig().finalState, flowChainType, getClass().getSimpleName(), flowChainId, flowId, resourceId);
         Flow flow = new FlowAdapter<>(flowId, sm, new MessageFactory<>(), new StateConverterAdapter<>(stateType),
                 new EventConverterAdapter<>(eventType), (Class<? extends FlowConfiguration<E>>) getClass(), fl);
         sm.addStateListener(fl);
 
-        FlowEventMetricListener<S, E> flowEventMetricsListener = applicationContext.getBean(FlowEventMetricListener.class,
-                getEdgeConfig(), flowChainType, getClass().getSimpleName(), getStateType(), System.currentTimeMillis());
+        FlowTransitionContext flowTransitionContext = new FlowTransitionContext(getEdgeConfig(), flowChainType, getClass().getSimpleName(), getStateType(),
+                resourceId, flowId, flowChainId, System.currentTimeMillis());
+        FlowEventCommonListener<S, E> flowEventMetricsListener = applicationContext.getBean(FlowEventCommonListener.class, flowTransitionContext);
         sm.addStateListener(flowEventMetricsListener);
         return flow;
     }
@@ -379,7 +381,7 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
         }
     }
 
-    public static class FlowEdgeConfig<S, E> {
+    public static class FlowEdgeConfig<S extends FlowState, E extends FlowEvent> {
         private final S initState;
 
         private final S finalState;

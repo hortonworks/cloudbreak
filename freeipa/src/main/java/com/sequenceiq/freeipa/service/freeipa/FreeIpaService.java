@@ -72,6 +72,11 @@ public class FreeIpaService implements ResourceIdProvider {
         return resourceId;
     }
 
+    @Override
+    public String getResourceCrnByResourceId(Long resourceId) {
+        return findByStackId(resourceId).getStack().getResourceCrn();
+    }
+
     public List<FreeIpaListView> getAllViewByIds(List<Long> ids) {
         return repository.findAllViewByIds(ids);
     }

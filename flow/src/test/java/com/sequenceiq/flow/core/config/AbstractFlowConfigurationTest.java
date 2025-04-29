@@ -33,7 +33,8 @@ import com.sequenceiq.flow.core.RestartAction;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.FlowEdgeConfig;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
-import com.sequenceiq.flow.core.metrics.FlowEventMetricListener;
+import com.sequenceiq.flow.core.listener.FlowEventCommonListener;
+import com.sequenceiq.flow.core.listener.FlowTransitionContext;
 import com.sequenceiq.flow.core.restart.DefaultRestartAction;
 
 public class AbstractFlowConfigurationTest {
@@ -53,7 +54,7 @@ public class AbstractFlowConfigurationTest {
     private FlowEventListener<State, Event> flowEventListener;
 
     @Mock
-    private FlowEventMetricListener<State, Event> flowEventMetricListener;
+    private FlowEventCommonListener<State, Event> flowEventCommonListener;
 
     @Mock
     private StateMachineListener<State, Event> stateMachineListener;
@@ -73,9 +74,8 @@ public class AbstractFlowConfigurationTest {
                         ArgumentMatchers.eq(State.FINAL), ArgumentMatchers.anyString(), ArgumentMatchers.anyString(),
                         ArgumentMatchers.eq("flowChainId"), ArgumentMatchers.eq("flowId"), ArgumentMatchers.anyLong()))
                 .willReturn(flowEventListener);
-        BDDMockito.given(applicationContext.getBean(ArgumentMatchers.eq(FlowEventMetricListener.class), ArgumentMatchers.any(FlowEdgeConfig.class),
-                        ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.anyLong()))
-                .willReturn(flowEventMetricListener);
+        BDDMockito.given(applicationContext.getBean(ArgumentMatchers.eq(FlowEventCommonListener.class), any(FlowTransitionContext.class)))
+                .willReturn(flowEventCommonListener);
         transitions = new Builder<State, Event>()
                 .defaultFailureEvent(Event.FAILURE)
                 .from(State.INIT).to(State.DO).event(Event.START).noFailureEvent()

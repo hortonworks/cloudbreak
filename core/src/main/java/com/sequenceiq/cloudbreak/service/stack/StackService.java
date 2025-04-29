@@ -884,6 +884,11 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
     }
 
     @Override
+    public String getResourceCrnByResourceId(Long resourceId) {
+        return getById(resourceId).getResourceCrn();
+    }
+
+    @Override
     public List<Long> getResourceIdsByResourceCrn(String resourceCrn) {
         return List.of(getResourceIdByResourceCrn(resourceCrn));
     }

@@ -129,6 +129,13 @@ public class PrivateControlPlaneService extends AbstractAccountAwareResourceServ
     }
 
     @Override
+    public String getResourceCrnByResourceId(Long resourceId) {
+        return privateControlPlaneRepository.findById(resourceId)
+                .orElseThrow(notFound("Private Control Plane with resourceId:", resourceId))
+                .getResourceCrn();
+    }
+
+    @Override
     public Long getResourceIdByResourceName(String resourceName) {
         return privateControlPlaneRepository.findIdByNameAndAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId())
                 .orElseThrow(notFound("Private Control Plane with name:", resourceName));

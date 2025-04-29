@@ -91,7 +91,9 @@ import com.sequenceiq.environment.metrics.EnvironmentMetricService;
 import com.sequenceiq.environment.user.UserPreferences;
 import com.sequenceiq.environment.user.UserPreferencesRepository;
 import com.sequenceiq.environment.user.UserPreferencesService;
-import com.sequenceiq.flow.core.metrics.FlowEventMetricListener;
+import com.sequenceiq.flow.core.FlowEventListener;
+import com.sequenceiq.flow.core.edh.FlowUsageSender;
+import com.sequenceiq.flow.core.listener.FlowEventCommonListener;
 import com.sequenceiq.flow.core.metrics.FlowMetricSender;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsService;
@@ -166,6 +168,12 @@ public class CredentialExperienceTest {
 
     @MockBean
     private FlowCancelRepository flowCancelRepository;
+
+    @MockBean
+    private FlowUsageSender flowUsageSender;
+
+    @MockBean
+    private FlowEventListener flowEventListener;
 
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
@@ -274,7 +282,7 @@ public class CredentialExperienceTest {
     @Configuration
     @Import({CredentialPrerequisiteService.class,
             CredentialService.class,
-            FlowEventMetricListener.class,
+            FlowEventCommonListener.class,
             FlowMetricSender.class,
             CommonMetricService.class,
             CredentialNotificationService.class,

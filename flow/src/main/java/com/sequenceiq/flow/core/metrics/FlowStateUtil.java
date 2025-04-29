@@ -19,7 +19,7 @@ public class FlowStateUtil {
             return null;
         }
         try {
-            Enum flowStateEnum = EnumUtils.getEnum(stateClass, nextFlowState);
+            Enum<? extends FlowState> flowStateEnum = EnumUtils.getEnum(stateClass, nextFlowState);
             if (flowStateEnum == null) {
                 if ("FLOW_CANCEL".equals(flowEvent)) {
                     LOGGER.debug("Flow was cancelled.");

@@ -73,9 +73,6 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentService.class);
 
-    @Value("${environment.admin.group.default.prefix:}")
-    private String adminGroupNamePrefix;
-
     private final EnvironmentValidatorService validatorService;
 
     private final EnvironmentRepository environmentRepository;
@@ -89,6 +86,9 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
     private final RoleCrnGenerator roleCrnGenerator;
 
     private final ExperienceConnectorService experienceConnectorService;
+
+    @Value("${environment.admin.group.default.prefix:}")
+    private String adminGroupNamePrefix;
 
     public EnvironmentService(
             EnvironmentValidatorService validatorService,
@@ -357,6 +357,11 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
     public Long getResourceIdByResourceCrn(String resourceCrn) {
         return environmentRepository.findIdByResourceCrnAndAccountIdAndArchivedIsFalse(resourceCrn, ThreadBasedUserCrnProvider.getAccountId())
                 .orElseThrow(notFound("Environment with crn:", resourceCrn));
+    }
+
+    @Override
+    public String getResourceCrnByResourceId(Long resourceId) {
+        return getById(resourceId).orElseThrow(notFound("Environment with id: ", resourceId)).getResourceCrn();
     }
 
     @Override

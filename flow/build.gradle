@@ -19,6 +19,7 @@ dependencies {
   implementation project(':flow-api')
   implementation project(':authorization-common')
   implementation project(':auth-connector')
+  implementation project(':usage-collection')
 
   // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
   implementation group: 'net.bytebuddy',                         name: 'byte-buddy',                     version: byteBuddyVersion

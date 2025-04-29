@@ -95,9 +95,11 @@ import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.core.FlowEventListener;
 import com.sequenceiq.flow.core.FlowRegister;
+import com.sequenceiq.flow.core.edh.FlowUsageSender;
 import com.sequenceiq.flow.core.exception.FlowNotTriggerableException;
-import com.sequenceiq.flow.core.metrics.FlowEventMetricListener;
+import com.sequenceiq.flow.core.listener.FlowEventCommonListener;
 import com.sequenceiq.flow.core.metrics.FlowMetricSender;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsService;
@@ -167,6 +169,12 @@ class UpgradeCcmFlowIntegrationTest {
 
     @MockBean
     private FlowCancelService flowCancelService;
+
+    @MockBean
+    private FlowUsageSender flowUsageSender;
+
+    @MockBean
+    private FlowEventListener flowEventListener;
 
     private Stack stack;
 
@@ -345,7 +353,7 @@ class UpgradeCcmFlowIntegrationTest {
     @TestConfiguration
     @Import({
             TransactionService.class,
-            FlowEventMetricListener.class,
+            FlowEventCommonListener.class,
             FlowMetricSender.class,
             CommonMetricService.class,
             TransactionMetricsService.class,

@@ -71,7 +71,9 @@ import com.sequenceiq.common.api.type.ImageStatusResult;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.core.FlowEventListener;
 import com.sequenceiq.flow.core.FlowRegister;
+import com.sequenceiq.flow.core.edh.FlowUsageSender;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.repository.FlowLogRepository;
@@ -199,6 +201,12 @@ class StackProvisionFlowIntegrationTest {
 
     @MockBean
     private FlowCancelService flowCancelService;
+
+    @MockBean
+    private FlowUsageSender flowUsageSender;
+
+    @MockBean
+    private FlowEventListener flowEventListener;
 
     private ResourceConnector resourceConnector = mock(ResourceConnector.class);
 

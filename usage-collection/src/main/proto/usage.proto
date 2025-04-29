@@ -361,6 +361,10 @@ message Event {
     CDPFreeIPASync cdpFreeIPASync = 175;
     // Sync event for a CDP Environment
     CDPEnvironmentSync cdpEnvironmentSync = 176;
+    // A CDP Data Catalog DataShare was requested to create, update or delete.
+    CDPDataCatalogDataShareRequested cdpDataCatalogDataShareRequest = 177;
+    // A CDP Cloudbreak flow event
+    CDPCloudbreakFlowEvent cdpCloudbreakFlowEvent = 178;
   }
 }
 
@@ -441,6 +445,8 @@ message AltusIamAccountState {
   // The reason this event was published. This same event will be published
   // for multiple RPCs.
   string reason = 7;
+  // The creation timestamp
+  uint64 creationTime = 8;
 }
 
 // Generated when a new Altus user has been created.
@@ -2065,6 +2071,26 @@ message CDPLiftieClusterNodeStatesHeartbeatSummary {
   string clusterType = 10;
   // Summary info for all the workload nodes (should NOT be set for embedded clusters)
   repeated CDPLiftieClusterWorkloadNodesSummary workloadNodesSummary = 11;
+  // Summary info for all instance types
+  repeated CDPLiftieClusterInstanceTypeSummary instanceTypeSummary = 12;
+  // Summary info for all instance group ids
+  repeated CDPLiftieClusterInstanceGroupIdSummary instanceGroupIdSummary = 13;
+}
+
+// Summary info for all instance types
+message CDPLiftieClusterInstanceTypeSummary {
+  // Total count for this instance type
+  int32 numInstanceType = 1;
+  // The instance type
+  string instanceType = 2;
+}
+
+// Summary info for all instance Group ids
+message CDPLiftieClusterInstanceGroupIdSummary {
+  // Total count for this instance group id
+  int32 numInstanceGroupId = 1;
+  // The instance group id
+  string instanceGroupId = 2;
 }
 
 // Summary info for all the workload nodes
@@ -3637,6 +3663,10 @@ message CDPDFDeploymentStatus {
     CANCEL_FLOW_VERSION_CHANGE_COMPLETED = 56;
     // The status of a deployment that has failed to cancel the change to a flow version.
     CANCEL_FLOW_VERSION_CHANGE_FAILED = 57;
+    // The status of a test session that is not healthy.
+    TEST_SESSION_NOT_HEALTHY = 58;
+    // The status of a test session that is healthy.
+    TEST_SESSION_HEALTHY = 59;
   }
 }
 
@@ -3699,6 +3729,8 @@ message CDPDFDeploymentRequested {
   string provenanceRepoProfile = 28;
   // The flow file repository storage profile
   string flowFileRepoProfile = 29;
+  // The NiFi components used in the deployment
+  string niFiComponentsUsed = 30;
 }
 
 message CDPDFDeploymentStatusChanged {
@@ -3969,6 +4001,8 @@ message CDPDFDeploymentFlowVersionChangeRequested {
   CDPDFDeploymentFlowVersionChangeStrategy.Value strategy = 9;
   // The max time in minutes to wait for the flow to process data.
   uint32 waitForFlowToStopInMinutes = 10;
+  // The NiFi components used in the deployment
+  string niFiComponentsUsed = 11;
 }
 
 // A CDP CML Serving Endpoint Deployed Event
@@ -6997,3 +7031,66 @@ message CDPEnvironmentDeletionType {
     FORCE = 3;
   }
 }
+
+// The status of a CDP Data Catalog DataShare.
+message CDPDataCatalogDataShareStatus {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // The status when CDP Data Catalog DataShare creation has succeeded.
+    CREATE_SUCCEEDED = 1;
+    // The status when CDP Data Catalog DataShare creation has failed.
+    CREATE_FAILED = 2;
+    // The status when CDP Data Catalog DataShare deletion has succeeded.
+    DELETE_SUCCEEDED = 3;
+    // The status when CDP Data Catalog DataShare deletion has failed.
+    DELETE_FAILED = 4;
+    // The status when CDP Data Catalog DataShare update has succeeded.
+    UPDATE_SUCCEEDED = 5;
+    // The status when CDP Data Catalog DataShare update has failed.
+    UPDATE_FAILED = 6;
+  }
+}
+
+// Generated when a CDP Data Catalog DataShare was requested to create, update or delete.
+message CDPDataCatalogDataShareRequested {
+  // The name of the Data Catalaog DataShare.
+  string name = 1;
+  // The CRN of the actor.
+  string actorCrn = 2;
+  // Environment Crn
+  string environmentCrn = 3;
+  // The CRN of the Datalake.
+  string datalakeCrn = 4;
+  // Indicates if the Data Share is in a Shared state.
+  bool IsShared = 5;
+  // The status of a CDP Data Catalog DataShare.
+  CDPDataCatalogDataShareStatus.Value status = 6;
+}
+
+// Generated when a Cloudbreak-related flow event occurs
+message CDPCloudbreakFlowEvent {
+  // Resource Crn
+  string resourceCrn = 1;
+  // Root flow chain type
+  string rootFlowChainType = 2;
+  // Actual flow chain type
+  string actualFlowChainType = 3;
+  // Flow chain id
+  string flowChainId = 4;
+  // Flow type
+  string flowType = 5;
+  // Flow id
+  string flowId = 6;
+  // Flow state type
+  string stateType = 7;
+  // Flow state
+  string flowState = 8;
+  // Flow event
+  string flowEvent = 9;
+  // Edge state (init, finalize, failed)
+  bool edgeState = 10;
+  // Reason
+  string reason = 11;
+}
+

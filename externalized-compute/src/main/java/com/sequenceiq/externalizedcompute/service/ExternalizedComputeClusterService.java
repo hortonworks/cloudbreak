@@ -85,6 +85,13 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
     }
 
     @Override
+    public String getResourceCrnByResourceId(Long resourceId) {
+        return externalizedComputeClusterRepository.findById(resourceId)
+                .orElseThrow(() -> new NotFoundException("Resource not found for resource id: " + resourceId))
+                .getResourceCrn();
+    }
+
+    @Override
     public Long getResourceIdByResourceName(String resourceName) {
         return externalizedComputeClusterRepository.findByNameAndAccountIdAndDeletedIsNull(resourceName, ThreadBasedUserCrnProvider.getAccountId())
                 .map(ExternalizedComputeCluster::getId)

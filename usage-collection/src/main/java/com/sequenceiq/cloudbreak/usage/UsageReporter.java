@@ -212,4 +212,10 @@ public interface UsageReporter {
      */
     void cdpEnvironmentSync(
             UsageProto.CDPEnvironmentSync details);
+
+    /**
+     * Reports a flow event
+     * @param details the event details
+     */
+    void cdpCloudbreakFlowEvent(UsageProto.CDPCloudbreakFlowEvent details);
 }

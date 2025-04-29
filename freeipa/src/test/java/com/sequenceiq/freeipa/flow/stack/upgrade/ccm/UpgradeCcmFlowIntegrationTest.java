@@ -41,8 +41,10 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorEx
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.core.FlowEventListener;
 import com.sequenceiq.flow.core.FlowRegister;
-import com.sequenceiq.flow.core.metrics.FlowEventMetricListener;
+import com.sequenceiq.flow.core.edh.FlowUsageSender;
+import com.sequenceiq.flow.core.listener.FlowEventCommonListener;
 import com.sequenceiq.flow.core.metrics.FlowMetricSender;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
 import com.sequenceiq.flow.domain.FlowLog;
@@ -135,6 +137,12 @@ class UpgradeCcmFlowIntegrationTest {
 
     @MockBean
     private FlowCancelService flowCancelService;
+
+    @MockBean
+    private FlowUsageSender flowUsageSender;
+
+    @MockBean
+    private FlowEventListener flowEventListener;
 
     @BeforeEach
     public void setup() {
@@ -328,7 +336,7 @@ class UpgradeCcmFlowIntegrationTest {
     @TestConfiguration
     @Import({
             UpgradeCcmOperationAcceptor.class,
-            FlowEventMetricListener.class,
+            FlowEventCommonListener.class,
             FlowMetricSender.class,
             CommonMetricService.class,
             UpgradeCcmFlowConfig.class,

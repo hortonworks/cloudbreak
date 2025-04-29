@@ -344,6 +344,18 @@ public class UsageReportProcessor implements UsageReporter {
         }
     }
 
+    @Override
+    public void cdpCloudbreakFlowEvent(UsageProto.CDPCloudbreakFlowEvent details) {
+        try {
+            checkNotNull(details);
+            usageProcessingStrategy.processUsage(eventBuilder()
+                    .setCdpCloudbreakFlowEvent(details)
+                    .build(), null);
+        } catch (Exception e) {
+            LOGGER.warn("Could not send flow usage event: {}! Cause: {}", details, e.getMessage());
+        }
+    }
+
     private UsageProto.Event.Builder eventBuilder() {
         return UsageProto.Event.newBuilder()
                 .setId(UUID.randomUUID().toString())

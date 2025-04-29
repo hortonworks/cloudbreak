@@ -1316,6 +1316,11 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     @Override
+    public String getResourceCrnByResourceId(Long resourceId) {
+        return getById(resourceId).getResourceCrn();
+    }
+
+    @Override
     public List<Long> getResourceIdsByResourceCrn(String resourceCrn) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         return getSdxClustersByCrn(userCrn, resourceCrn, true).stream().map(cluster -> cluster.getId()).collect(Collectors.toList());

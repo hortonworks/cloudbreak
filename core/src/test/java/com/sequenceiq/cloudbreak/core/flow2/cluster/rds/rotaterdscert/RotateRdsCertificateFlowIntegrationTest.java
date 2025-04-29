@@ -90,9 +90,10 @@ import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.core.FlowEventListener;
 import com.sequenceiq.flow.core.FlowRegister;
-import com.sequenceiq.flow.core.metrics.FlowEventMetricListener;
-import com.sequenceiq.flow.core.metrics.FlowMetricSender;
+import com.sequenceiq.flow.core.edh.FlowUsageSender;
+import com.sequenceiq.flow.core.listener.FlowEventCommonListener;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsService;
 import com.sequenceiq.flow.domain.FlowLog;
@@ -252,8 +253,6 @@ class RotateRdsCertificateFlowIntegrationTest {
     @TestConfiguration
     @Import({
             TransactionService.class,
-            FlowEventMetricListener.class,
-            FlowMetricSender.class,
             CommonMetricService.class,
             TransactionMetricsService.class,
             CloudbreakMetricService.class,
@@ -362,6 +361,15 @@ class RotateRdsCertificateFlowIntegrationTest {
 
         @MockBean
         private MigrateRdsCertificateService migrateRdsCertificateService;
+
+        @MockBean
+        private FlowEventCommonListener flowEventCommonListener;
+
+        @MockBean
+        private FlowEventListener flowEventListener;
+
+        @MockBean
+        private FlowUsageSender flowUsageSender;
 
         @Bean
         public EventBus reactor(ExecutorService threadPoolExecutor) {

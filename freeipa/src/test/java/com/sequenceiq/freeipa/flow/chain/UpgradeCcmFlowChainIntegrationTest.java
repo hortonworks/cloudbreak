@@ -54,7 +54,9 @@ import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.core.FlowEventListener;
 import com.sequenceiq.flow.core.chain.FlowChains;
+import com.sequenceiq.flow.core.edh.FlowUsageSender;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.repository.FlowLogRepository;
@@ -165,6 +167,12 @@ class UpgradeCcmFlowChainIntegrationTest {
 
     @MockBean
     private FlowCancelService flowCancelService;
+
+    @MockBean
+    private FlowUsageSender flowUsageSender;
+
+    @MockBean
+    private FlowEventListener flowEventListener;
 
     @Mock
     private ResourceConnector resourcesApi;

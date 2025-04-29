@@ -20,4 +20,8 @@ public interface ResourceIdProvider {
         throw new NotImplementedException("You have to implement getResourceIdsByResourceCrn for your resource "
                 + "to be able to use Flow API endpoints using resource name!");
     }
+
+    default String getResourceCrnByResourceId(Long resourceId) {
+        throw new NotImplementedException("You have to implement getResourceCrnByResourceId for your resource to be able to send usage events!");
+    }
 }

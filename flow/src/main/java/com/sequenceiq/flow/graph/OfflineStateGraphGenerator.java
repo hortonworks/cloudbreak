@@ -35,7 +35,7 @@ import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.config.FlowConfiguration;
-import com.sequenceiq.flow.core.metrics.FlowEventMetricListener;
+import com.sequenceiq.flow.core.listener.FlowEventCommonListener;
 
 public class OfflineStateGraphGenerator {
     private static final Logger LOGGER = LoggerFactory.getLogger(OfflineStateGraphGenerator.class);
@@ -157,8 +157,8 @@ public class OfflineStateGraphGenerator {
             if (requiredType.equals(FlowEventListener.class)) {
 
                 return (T) new CustomCDPFlowStructuredEventHandler();
-            } else if (requiredType.equals(FlowEventMetricListener.class)) {
-                return (T) new CustomFlowEventMetricListener();
+            } else if (requiredType.equals(FlowEventCommonListener.class)) {
+                return (T) new CustomFlowEventCommonListener();
             } else {
                 return null;
             }
@@ -253,10 +253,10 @@ public class OfflineStateGraphGenerator {
         }
     }
 
-    static class CustomFlowEventMetricListener extends FlowEventMetricListener {
+    static class CustomFlowEventCommonListener extends FlowEventCommonListener {
 
-        CustomFlowEventMetricListener() {
-            super(null, null, null, null, 0);
+        CustomFlowEventCommonListener() {
+            super(null);
         }
 
         @Override

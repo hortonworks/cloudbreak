@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
-import com.sequenceiq.flow.core.metrics.FlowEventMetricListener;
+import com.sequenceiq.flow.core.listener.FlowEventCommonListener;
 import com.sequenceiq.flow.core.metrics.FlowMetricSender;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsService;
 import com.sequenceiq.flow.repository.FlowChainLogRepository;
@@ -49,7 +49,7 @@ import com.sequenceiq.notification.NotificationService;
 @Import({
         TransactionService.class,
         TransactionMetricsService.class,
-        FlowEventMetricListener.class,
+        FlowEventCommonListener.class,
         FlowMetricSender.class,
         CommonMetricService.class,
         FreeIpaMetricService.class,

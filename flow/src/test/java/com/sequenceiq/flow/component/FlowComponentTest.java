@@ -50,6 +50,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
@@ -60,6 +61,8 @@ import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
+import com.sequenceiq.cloudbreak.usage.MeteringEventProcessor;
+import com.sequenceiq.cloudbreak.usage.UsageReportProcessor;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
@@ -73,11 +76,13 @@ import com.sequenceiq.flow.component.sleep.event.SleepEvent;
 import com.sequenceiq.flow.component.sleep.event.SleepStartEvent;
 import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.FlowConstants;
+import com.sequenceiq.flow.core.FlowEventListener;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.FlowTriggerConditionResult;
 import com.sequenceiq.flow.core.cache.FlowStatCache;
 import com.sequenceiq.flow.core.chain.FlowChains;
+import com.sequenceiq.flow.core.edh.FlowUsageSender;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
 import com.sequenceiq.flow.core.model.ResultType;
 import com.sequenceiq.flow.domain.ClassValue;
@@ -154,6 +159,21 @@ public class FlowComponentTest {
 
     @Inject
     private FlowChainLogService flowChainLogService;
+
+    @MockBean
+    private FlowUsageSender flowUsageSender;
+
+    @MockBean
+    private FlowEventListener flowEventListener;
+
+    @MockBean
+    private MeteringEventProcessor meteringEventProcessor;
+
+    @MockBean
+    private UsageReportProcessor usageReportProcessor;
+
+    @MockBean
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Inject
     private FlowCancelRepository flowCancelRepository;
