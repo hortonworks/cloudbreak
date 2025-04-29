@@ -193,14 +193,6 @@
             "value": "0"
           },
           {
-            "name": "tez.am.launch.cmd-opts",
-            "value": "-XX:+PrintGCDetails -verbose:gc -XX:+UseNUMA -XX:+UseG1GC -XX:+ResizeTLAB"
-          },
-          {
-            "name": "tez.task.launch.cmd-opts",
-            "value": "-XX:+PrintGCDetails -verbose:gc -XX:+UseNUMA -XX:+UseG1GC -XX:+ResizeTLAB"
-          },
-          {
             "name": "tez.grouping.split-waves",
             "value": 1.4
           },
