@@ -51,12 +51,7 @@
       "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkNamePrefix'))]",
       </#if>
       <#list igs as group>
-        "${group.compressedName}secGroupName": "${group.compressedName}${stackname}sg",
-          <#if !multiAz && group.availabilitySetName?? && group.availabilitySetName?has_content>
-          "${group.compressedName}AsName": "${group.availabilitySetName}",
-           "${group.compressedName}AsFaultDomainCount": ${group.platformFaultDomainCount},
-          "${group.compressedName}AsUpdateDomainCount": ${group.platformUpdateDomainCount}
-          </#if>
+        "${group.compressedName}secGroupName": "${group.compressedName}${stackname}sg"
       </#list>
     },
     "resources": [
