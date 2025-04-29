@@ -257,7 +257,6 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         }
         if (platform != null && isNotEmpty(platform.name())) {
             User user = getLoggedInUser();
-            validateArchitecture(architecture, Crn.safeFromString(user.getUserCrn()).getAccountId());
             Set<ImageCatalogPlatform> platforms = Set.of(platformStringTransformer.getPlatformStringForImageCatalog(platform, govCloud));
             ImageFilter imageFilter = ImageFilter.builder()
                     .withImageCatalog(getDefaultImageCatalog(user))
@@ -273,12 +272,6 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
             return stackImageFilterService.getApplicableImages(workspaceId, stackName, defaultOnly);
         } else {
             throw new BadRequestException("Either platform or stackName should be filled in request.");
-        }
-    }
-
-    private void validateArchitecture(String architecture, String accountId) {
-        if (Architecture.ARM64.equals(Architecture.fromStringWithFallback(architecture)) && !entitlementService.isArmInstanceEnabled(accountId)) {
-            throw new BadRequestException("Not entitled to use arm64 architecture.");
         }
     }
 
@@ -352,7 +345,6 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
             if (isCustomImageCatalog(imageCatalog)) {
                 return getStatedImagesFromCustomImageCatalog(imageCatalog, providers);
             } else {
-                validateArchitecture(architecture, accountId);
                 ImageFilter imageFilter = ImageFilter.builder()
                         .withImageCatalog(imageCatalog)
                         .withPlatforms(providers)

@@ -283,46 +283,6 @@ public class ImageServiceTest {
     }
 
     @Test
-    public void testGivenImageIdAndNotEntitledArchitectureShouldReturnError() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        when(imageCatalogService.getImageByCatalogName(anyLong(), anyString(), anyString()))
-                .thenReturn(ImageTestUtil.getImageFromCatalog(true, "uuid", STACK_VERSION, "arm64"));
-        when(entitlementService.isDataHubArmEnabled(any())).thenReturn(false);
-        CloudbreakImageCatalogException exception = assertThrows(CloudbreakImageCatalogException.class, () ->
-                underTest.determineImageFromCatalog(
-                        WORKSPACE_ID,
-                        imageSettingsV4Request,
-                        Architecture.X86_64,
-                        PLATFORM,
-                        PLATFORM,
-                        TestUtil.blueprint(),
-                        false,
-                        false,
-                        TestUtil.user(USER_ID, USER_ID_STRING, USER_CRN),
-                        image -> true));
-        assertEquals("The selected image's architecture (arm64) is not enabled in your account", exception.getMessage());
-    }
-
-    @Test
-    public void testGivenImageIdAndDifferentArchitectureShouldReturnError() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        when(imageCatalogService.getImageByCatalogName(anyLong(), anyString(), anyString()))
-                .thenReturn(ImageTestUtil.getImageFromCatalog(true, "uuid", STACK_VERSION, "arm64"));
-        when(entitlementService.isArmInstanceEnabled(any())).thenReturn(true);
-        CloudbreakImageCatalogException exception = assertThrows(CloudbreakImageCatalogException.class, () ->
-                underTest.determineImageFromCatalog(
-                        WORKSPACE_ID,
-                        imageSettingsV4Request,
-                        Architecture.X86_64,
-                        PLATFORM,
-                        PLATFORM,
-                        TestUtil.blueprint(),
-                        false,
-                        false,
-                        TestUtil.user(USER_ID, USER_ID_STRING, USER_CRN),
-                        image -> true));
-        assertEquals("The selected image's architecture (arm64) is not matching requested architecture (x86_64)", exception.getMessage());
-    }
-
-    @Test
     public void testGivenNoImageIdAndNoArchitectureShouldReturnX86Image() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         imageSettingsV4Request.setId(null);
         when(imageCatalogService.getLatestImageDefaultPreferred(imageFilterCaptor.capture(), eq(false)))

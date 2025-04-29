@@ -355,20 +355,17 @@ public class StackCreatorService {
                 throw new BadRequestException(String.format("The selected architecture (%s) is not enabled in your account",
                         Architecture.ARM64.getName()));
             }
-            if (isCodRequest(stackRequest)) {
-                if (!entitlementService.isCODUseGraviton(accountId)) {
+            if (!isCodRequest(stackRequest)) {
+                if (!entitlementService.isDataHubArmEnabled(accountId)) {
                     throw new BadRequestException(String.format("The selected architecture (%s) is not enabled in your account",
                             Architecture.ARM64.getName()));
-                }
-            } else if (!entitlementService.isDataHubArmEnabled(accountId)) {
-                throw new BadRequestException(String.format("The selected architecture (%s) is not enabled in your account",
-                        Architecture.ARM64.getName()));
 
-            } else if (stackRequest.getCluster() != null) {
-                String version = blueprintService.getCdhVersion(NameOrCrn.ofName(stackRequest.getCluster().getBlueprintName()), workspaceId);
-                if (!isVersionNewerOrEqualThanLimited(version, CLOUDERA_STACK_VERSION_7_3_1)) {
-                    throw new BadRequestException(String.format("The selected architecture (%s) is not supported in this cdh version (%s).",
-                            Architecture.ARM64.getName(), version));
+                } else if (stackRequest.getCluster() != null) {
+                    String version = blueprintService.getCdhVersion(NameOrCrn.ofName(stackRequest.getCluster().getBlueprintName()), workspaceId);
+                    if (!isVersionNewerOrEqualThanLimited(version, CLOUDERA_STACK_VERSION_7_3_1)) {
+                        throw new BadRequestException(String.format("The selected architecture (%s) is not supported in this cdh version (%s).",
+                                Architecture.ARM64.getName(), version));
+                    }
                 }
             }
         }
