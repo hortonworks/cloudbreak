@@ -34,7 +34,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSetti
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
@@ -203,10 +202,6 @@ public class ImageService {
 
     private void validateArchitecture(User user, StatedImage image, Architecture requestedArchitecture) throws CloudbreakImageCatalogException {
         Architecture imageArchitecture = Architecture.fromStringWithFallback(image.getImage().getArchitecture());
-        if (imageArchitecture == Architecture.ARM64 && !entitlementService.isArmInstanceEnabled(Crn.safeFromString(user.getUserCrn()).getAccountId())) {
-            throw new CloudbreakImageCatalogException(String.format("The selected image's architecture (%s) is not enabled in your account",
-                    Architecture.ARM64.getName()));
-        }
         if (requestedArchitecture != null && imageArchitecture != requestedArchitecture) {
             throw new CloudbreakImageCatalogException(String.format("The selected image's architecture (%s) is not matching requested architecture (%s)",
                     imageArchitecture.getName(), requestedArchitecture.getName()));
@@ -234,7 +229,8 @@ public class ImageService {
         return getSupportedOperationSystems(workspaceId, clusterVersion, platform, os, architecture, imageCatalogName);
     }
 
-    private Set<String> getSupportedOperatingSystems(Long workspaceId, ImageSettingsV4Request imageSettings, String clusterVersion, ImageCatalogPlatform platform,
+    private Set<String> getSupportedOperatingSystems(Long workspaceId, ImageSettingsV4Request imageSettings, String clusterVersion,
+            ImageCatalogPlatform platform,
             Architecture architecture) throws CloudbreakImageCatalogException {
         String imageCatalogName = imageSettings != null ? imageSettings.getCatalog() : null;
         String os = imageSettings != null ? imageSettings.getOs() : null;
@@ -244,7 +240,8 @@ public class ImageService {
     private Set<String> getSupportedOperationSystems(Long workspaceId, String clusterVersion, ImageCatalogPlatform platform, String os,
             Architecture architecture, String imageCatalogName) throws CloudbreakImageCatalogException {
         try {
-            Set<String> operatingSystems = stackMatrixService.getSupportedOperatingSystems(workspaceId, clusterVersion, platform, os, architecture, imageCatalogName);
+            Set<String> operatingSystems =
+                    stackMatrixService.getSupportedOperatingSystems(workspaceId, clusterVersion, platform, os, architecture, imageCatalogName);
             if (StringUtils.isNotEmpty(os)) {
                 if (operatingSystems.isEmpty()) {
                     operatingSystems = Collections.singleton(os);

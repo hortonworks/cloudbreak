@@ -889,22 +889,6 @@ public class ImageCatalogServiceTest {
     }
 
     @Test
-    public void testGetImagesWithArchitectureThrowsExceptionWhenArmIsNotSupported() throws CloudbreakImageCatalogException, IOException {
-        setupUserProfileService();
-        setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CB_CATALOG_FILE);
-        ImageCatalog imageCatalog = new ImageCatalog();
-        imageCatalog.setImageCatalogUrl(DEFAULT_CATALOG_URL);
-        ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform("AWS");
-        when(platformStringTransformer.getPlatformStringForImageCatalog(any(String.class), anyBoolean())).thenReturn(imageCatalogPlatform);
-        when(imageCatalogRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(Optional.of(imageCatalog));
-
-        BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> underTest.getImagesByCatalogName(WORKSPACE_ID, "catalog", null, imageCatalogPlatform, null, false, false, "arm64"));
-
-        assertEquals("Not entitled to use arm64 architecture.", exception.getMessage());
-    }
-
-    @Test
     public void testGetImagesWithArchitectureWhenArmIsSupported() throws CloudbreakImageCatalogException, IOException {
         setupUserProfileService();
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CB_CATALOG_FILE);
@@ -913,7 +897,6 @@ public class ImageCatalogServiceTest {
         ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform("AWS");
         when(platformStringTransformer.getPlatformStringForImageCatalog(any(String.class), anyBoolean())).thenReturn(imageCatalogPlatform);
         when(imageCatalogRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(Optional.of(imageCatalog));
-        when(entitlementService.isArmInstanceEnabled(anyString())).thenReturn(true);
 
         Images images = underTest.getImagesByCatalogName(WORKSPACE_ID, "catalog", null, imageCatalogPlatform, null, false, false, "arm64");
 
