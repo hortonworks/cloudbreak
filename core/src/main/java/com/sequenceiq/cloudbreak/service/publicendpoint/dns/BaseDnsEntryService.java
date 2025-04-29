@@ -91,7 +91,7 @@ public abstract class BaseDnsEntryService extends BasePublicEndpointManagementSe
     private Map<String, String> createCdpConsoleDomainEntry(
             Map<String, String> candidateIpsByHostname, Map<String, List<String>> componentLocation, String environmentType) {
         Map<String, String> ipsByHostname = new HashMap<>();
-        if (EnvironmentType.HYBRID.toString().equals(environmentType)) {
+        if (EnvironmentType.HYBRID_BASE.toString().equals(environmentType)) {
             List<String> ecsMasterHostnames = componentLocation.get("ecs_master");
             if (ecsMasterHostnames != null && !ecsMasterHostnames.isEmpty()) {
                 String firstEcsMasterHostname = ecsMasterHostnames.getFirst();

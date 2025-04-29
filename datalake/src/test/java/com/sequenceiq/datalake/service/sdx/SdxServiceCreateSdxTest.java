@@ -584,7 +584,7 @@ class SdxServiceCreateSdxTest {
         detailedEnvironmentResponse.setCloudPlatform(AWS.name());
         detailedEnvironmentResponse.setCrn(getCrn());
         detailedEnvironmentResponse.setEnvironmentStatus(EnvironmentStatus.AVAILABLE);
-        detailedEnvironmentResponse.setEnvironmentType(EnvironmentType.HYBRID.toString());
+        detailedEnvironmentResponse.setEnvironmentType(EnvironmentType.HYBRID_BASE.toString());
         when(environmentClientService.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,

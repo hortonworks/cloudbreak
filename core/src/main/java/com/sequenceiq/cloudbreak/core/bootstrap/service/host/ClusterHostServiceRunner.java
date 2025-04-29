@@ -524,7 +524,7 @@ public class ClusterHostServiceRunner {
         DetailedEnvironmentResponse detailedEnvironmentResponse = environmentConfigProvider.getEnvironmentByCrn(stackDto.getEnvironmentCrn());
         String seLinux = stackDto.getSecurityConfig() != null && stackDto.getSecurityConfig().getSeLinux() != null ?
                 stackDto.getSecurityConfig().getSeLinux().toString().toLowerCase(Locale.ROOT) : SeLinux.PERMISSIVE.toString().toLowerCase(Locale.ROOT);
-        boolean hybridEnabled = stack.isDatalake() && EnvironmentType.HYBRID.toString().equals(detailedEnvironmentResponse.getEnvironmentType());
+        boolean hybridEnabled = stack.isDatalake() && EnvironmentType.HYBRID_BASE.toString().equals(detailedEnvironmentResponse.getEnvironmentType());
         Map<String, ? extends Serializable> clusterProperties = Map.of(
                 "name", stackDto.getCluster().getName(),
                 "deployedInChildEnvironment", deployedInChildEnvironment,

@@ -1087,7 +1087,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             throw new BadRequestException("The environment is in failed phase. Please fix the environment or create a new one first!");
         }
 
-        if (!entitlementService.internalTenant(environment.getAccountId()) && EnvironmentType.HYBRID.toString().equals(environment.getEnvironmentType())) {
+        if (!entitlementService.internalTenant(environment.getAccountId()) && EnvironmentType.HYBRID_BASE.toString().equals(environment.getEnvironmentType())) {
             throw new BadRequestException("Creating or Resizing datalake is not supported for Hybrid Environment");
         }
     }

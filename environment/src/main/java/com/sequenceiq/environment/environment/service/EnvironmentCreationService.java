@@ -294,7 +294,8 @@ public class EnvironmentCreationService {
 
     private ValidationResult validateEnvironmentType(EnvironmentCreationDto creationDto) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
-        if (EnvironmentType.HYBRID.equals(creationDto.getEnvironmentType()) && !entitlementService.hybridCloudEnabled(creationDto.getAccountId())) {
+        if ((EnvironmentType.HYBRID.equals(creationDto.getEnvironmentType()) ||  EnvironmentType.HYBRID_BASE.equals(creationDto.getEnvironmentType()))
+                && !entitlementService.hybridCloudEnabled(creationDto.getAccountId())) {
             resultBuilder.error("Creating Hybrid Environment requires CDP_HYBRID_CLOUD entitlement for your account");
         }
         return resultBuilder.build();

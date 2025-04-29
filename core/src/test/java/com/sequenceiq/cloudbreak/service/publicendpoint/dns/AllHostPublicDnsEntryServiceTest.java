@@ -151,7 +151,7 @@ class AllHostPublicDnsEntryServiceTest {
 
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setName(ENVIRONMENT_NAME);
-        environmentResponse.setEnvironmentType(EnvironmentType.HYBRID.toString());
+        environmentResponse.setEnvironmentType(EnvironmentType.HYBRID_BASE.toString());
 
         when(environmentClientService.getByCrn(stack.getEnvironmentCrn())).thenReturn(environmentResponse);
 
