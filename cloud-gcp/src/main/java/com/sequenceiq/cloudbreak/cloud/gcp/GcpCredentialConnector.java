@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import jakarta.annotation.Nonnull;
@@ -73,8 +75,19 @@ public class GcpCredentialConnector implements CredentialConnector {
     @Override
     public CredentialPrerequisitesResponse getPrerequisites(CloudContext cloudContext, String externalId,
         String auditExternalId, String deploymentAddress, CredentialType type) {
+        Map<String, String> minimalRequiredPermissions = new HashMap<>();
+
+        String minimalPrerequisitesCreationCommand = gcpPlatformParameters.getMinimalPrerequisitesCreationCommand();
+        minimalRequiredPermissions.put("MinimalPrerequisitesCreationCommand",
+                Base64.encodeBase64String(minimalPrerequisitesCreationCommand.getBytes()));
+
+        String minimalPrerequisitesCreationPermissions = gcpPlatformParameters.getMinimalPrerequisitesCreationPermissions();
+        minimalRequiredPermissions.put("MinimalPrerequisitesCreationPermissions",
+                Base64.encodeBase64String(minimalPrerequisitesCreationPermissions.getBytes()));
+
         String prerequisitesCreationCommand = gcpPlatformParameters.getPrerequisitesCreationCommand(type);
-        GcpCredentialPrerequisites gcpPrereqs = new GcpCredentialPrerequisites(Base64.encodeBase64String(prerequisitesCreationCommand.getBytes()));
+        GcpCredentialPrerequisites gcpPrereqs =
+                new GcpCredentialPrerequisites(Base64.encodeBase64String(prerequisitesCreationCommand.getBytes()), minimalRequiredPermissions);
         return new CredentialPrerequisitesResponse(cloudContext.getPlatform().value(), gcpPrereqs);
     }
 

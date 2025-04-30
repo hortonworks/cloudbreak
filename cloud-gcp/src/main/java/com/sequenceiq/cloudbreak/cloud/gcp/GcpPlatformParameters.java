@@ -73,11 +73,17 @@ public class GcpPlatformParameters implements PlatformParameters {
 
     private String prerequisitesAuditCreationCommand;
 
+    private String minimalPrerequisitesCreationCommand;
+
+    private String minimalPrerequisitesCreationPermissions;
+
     @PostConstruct
     public void init() {
         vmRecommendations = initVmRecommendations();
         prerequisitesCreationCommand = resourceDefinition("prerequisites-creation-command");
+        minimalPrerequisitesCreationCommand = resourceDefinition("minimal-prerequisites-creation-command");
         prerequisitesAuditCreationCommand = resourceDefinition("audit-prerequisites-creation-command");
+        minimalPrerequisitesCreationPermissions = resourceDefinition("environment-minimal-policy");
     }
 
     public SpecialParameters specialParameters() {
@@ -194,6 +200,14 @@ public class GcpPlatformParameters implements PlatformParameters {
         } else {
             return prerequisitesCreationCommand;
         }
+    }
+
+    public String getMinimalPrerequisitesCreationCommand() {
+        return minimalPrerequisitesCreationCommand;
+    }
+
+    public String getMinimalPrerequisitesCreationPermissions() {
+        return minimalPrerequisitesCreationPermissions;
     }
 
     public enum GcpDiskType {

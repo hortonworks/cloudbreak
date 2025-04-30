@@ -212,6 +212,11 @@ public class GcpCredentialConnectorTest {
     public void testPrerequisites() {
         final AuthenticatedContext authContext = createAuthContext();
 
+        String expectedMinimalCommands = "minimalCommandsJson";
+        when(gcpPlatformParameters.getMinimalPrerequisitesCreationCommand()).thenReturn(expectedMinimalCommands);
+
+        String expectedMinimalPermissions = "minimalPermissions";
+        when(gcpPlatformParameters.getMinimalPrerequisitesCreationPermissions()).thenReturn(expectedMinimalPermissions);
         when(gcpPlatformParameters.getPrerequisitesCreationCommand(CredentialType.ENVIRONMENT)).thenReturn("prerequisites");
 
         CredentialPrerequisitesResponse prerequisites = underTest.getPrerequisites(
@@ -220,13 +225,17 @@ public class GcpCredentialConnectorTest {
                 "auditExternalId",
                 "deploymentAddress",
                 CredentialType.ENVIRONMENT);
+        Map<String, String> minimalRequiredPermissions = new HashMap<>();
+        minimalRequiredPermissions.put("MinimalPrerequisitesCreationCommand", Base64.encodeBase64String(expectedMinimalCommands.getBytes()));
+        minimalRequiredPermissions.put("MinimalPrerequisitesCreationPermissions", Base64.encodeBase64String(expectedMinimalPermissions.getBytes()));
 
         CredentialPrerequisitesResponse credentialPrerequisitesResponse = new CredentialPrerequisitesResponse(
                 "platform",
-                new GcpCredentialPrerequisites(Base64.encodeBase64String("prerequisites".getBytes()))
+                new GcpCredentialPrerequisites(Base64.encodeBase64String("prerequisites".getBytes()), minimalRequiredPermissions)
         );
 
         Assert.assertEquals(credentialPrerequisitesResponse, prerequisites);
+        Assert.assertEquals(credentialPrerequisitesResponse.getGcp().getPolicies(), prerequisites.getGcp().getPolicies());
     }
 
     private AuthenticatedContext createAuthContext() {
