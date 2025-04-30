@@ -11,8 +11,6 @@ import java.util.List;
 import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
@@ -26,8 +24,8 @@ import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxUpgradeTestDto;
-import com.sequenceiq.it.cloudbreak.util.PatchUpgradeCandidateProvider;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
+import com.sequenceiq.it.cloudbreak.util.TestUpgradeCandidateProvider;
 import com.sequenceiq.it.cloudbreak.util.VolumeUtils;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETest;
@@ -38,7 +36,6 @@ import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageValidatorE2ETest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SdxUpgradeTests.class);
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -59,7 +56,7 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
     private ImageValidatorE2ETestUtil imageValidatorE2ETestUtil;
 
     @Inject
-    private PatchUpgradeCandidateProvider patchUpgradeCandidateProvider;
+    private TestUpgradeCandidateProvider testUpgradeCandidateProvider;
 
     @Inject
     private SdxAssertion sdxAssertion;
@@ -122,7 +119,7 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
     public void testSDXPatchUpgrade(TestContext testContext) {
         List<String> actualVolumeIds = new ArrayList<>();
         List<String> expectedVolumeIds = new ArrayList<>();
-        Pair<String, String> patchUpgradePair = patchUpgradeCandidateProvider.getPatchUpgradeSourceAndCandidate(testContext);
+        Pair<String, String> patchUpgradePair = testUpgradeCandidateProvider.getPatchUpgradeSourceAndCandidate(testContext);
 
         testContext.given(SdxUpgradeTestDto.class).withImageId(patchUpgradePair.getRight());
 

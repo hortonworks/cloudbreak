@@ -32,7 +32,7 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
-import com.sequenceiq.it.cloudbreak.util.PatchUpgradeCandidateProvider;
+import com.sequenceiq.it.cloudbreak.util.TestUpgradeCandidateProvider;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
@@ -58,7 +58,7 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
     private EncryptedTestUtil encryptedTestUtil;
 
     @Inject
-    private PatchUpgradeCandidateProvider patchUpgradeCandidateProvider;
+    private TestUpgradeCandidateProvider testUpgradeCandidateProvider;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -82,7 +82,7 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
         String firstDhName = resourcePropertyProvider().getName();
         String secondDhName = resourcePropertyProvider().getName();
         String thirdDhName = resourcePropertyProvider().getName();
-        Pair<String, String> patchUpgradePair = patchUpgradeCandidateProvider.getPatchUpgradeSourceAndCandidate(testContext);
+        Pair<String, String> patchUpgradePair = testUpgradeCandidateProvider.getPatchUpgradeSourceAndCandidate(testContext);
 
         encryptedTestUtil.createEnvironment(testContext);
         encryptedTestUtil.createFreeipa(testContext, commonCloudProperties());
