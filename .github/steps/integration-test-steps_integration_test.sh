@@ -8,7 +8,7 @@ main() {
     -x checkstyleTest \
     -x spotbugsMain \
     -x spotbugsTest \
-    --no-daemon --parallel -PintegrationTest >> build.log
+    --no-daemon --quiet --parallel -PintegrationTest >> build.log
   cd $(pwd)/integration-test
 
   export PRIMARYKEY_CHECK=true

@@ -8,7 +8,7 @@ main() {
     -x checkstyleTest \
     -x checkstyleMain \
     -x test \
-    --no-daemon --parallel -Dorg.gradle.jvmargs="-Xmx4096m -XX:MaxMetaspaceSize=256m -XX:+HeapDumpOnOutOfMemoryError"
+    --no-daemon --quiet --parallel -Dorg.gradle.jvmargs="-Xmx4096m -XX:MaxMetaspaceSize=256m -XX:+HeapDumpOnOutOfMemoryError"
 }
 
 source $(pwd)/.github/steps/prerequisites.sh
