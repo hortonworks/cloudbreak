@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.rotation.common.RotationPollingSvcOutageUtils.pollWithSvcOutageErrorHandling;
 import static com.sequenceiq.common.model.AzureDatabaseType.FLEXIBLE_SERVER;
 import static com.sequenceiq.common.model.DatabaseCapabilityType.DEFAULT;
+import static java.lang.String.format;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -15,12 +16,10 @@ import java.util.Optional;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
-import jakarta.ws.rs.WebApplicationException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.dyngr.Polling;
@@ -294,17 +293,10 @@ public class ExternalDatabaseService {
         if (StringUtils.isEmpty(databaseServerCrn)) {
             throw new SecretRotationException("No database server crn found, rotation is not possible.", null);
         }
-        try {
-            FlowLogResponse lastFlow = redbeamsClient.getLastFlowId(databaseServerCrn);
-            if (lastFlow != null && lastFlow.getStateStatus() == StateStatus.PENDING) {
-                String message = String.format("Polling in Redbeams is not possible since last known state of flow for the database is %s",
-                        lastFlow.getCurrentState());
-                throw new SecretRotationException(message, null);
-            }
-        } catch (WebApplicationException e) {
-            if (e.getResponse().getStatus() != HttpStatus.NOT_FOUND.value()) {
-                throw e;
-            }
+        FlowLogResponse lastFlow = redbeamsClient.getLastFlowId(databaseServerCrn);
+        if (lastFlow != null && lastFlow.getStateStatus() == StateStatus.PENDING) {
+            String message = format("Polling in Redbeams is not possible since last known state of flow for the database is %s", lastFlow.getCurrentState());
+            throw new SecretRotationException(message, null);
         }
     }
 
@@ -341,7 +333,7 @@ public class ExternalDatabaseService {
     }
 
     private void handleUnsuccessfulFlow(String databaseCrn, FlowIdentifier flowIdentifier, UserBreakException e) {
-        String message = String.format("Database flow failed in Redbeams with error: '%s'. Database crn: %s, flow: %s",
+        String message = format("Database flow failed in Redbeams with error: '%s'. Database crn: %s, flow: %s",
                 e != null ? e.getMessage() : "unknown", databaseCrn, flowIdentifier);
         LOGGER.warn(message);
         throw new CloudbreakServiceException(message, e);
@@ -350,13 +342,13 @@ public class ExternalDatabaseService {
     private AttemptResult<Boolean> pollFlowState(FlowIdentifier flowIdentifier) {
         FlowCheckResponse flowState;
         if (flowIdentifier.getType() == FlowType.NOT_TRIGGERED) {
-            return AttemptResults.breakFor(String.format("Flow %s not triggered", flowIdentifier.getPollableId()));
+            return AttemptResults.breakFor(format("Flow %s not triggered", flowIdentifier.getPollableId()));
         } else if (flowIdentifier.getType() == FlowType.FLOW) {
             flowState = redbeamsClient.hasFlowRunningByFlowId(flowIdentifier.getPollableId());
         } else if (flowIdentifier.getType() == FlowType.FLOW_CHAIN) {
             flowState = redbeamsClient.hasFlowChainRunningByFlowChainId(flowIdentifier.getPollableId());
         } else {
-            String message = String.format("Unknown flow identifier type %s for flow: %s", flowIdentifier.getType(), flowIdentifier);
+            String message = format("Unknown flow identifier type %s for flow: %s", flowIdentifier.getType(), flowIdentifier);
             LOGGER.error(message);
             throw new CloudbreakServiceException(message);
         }

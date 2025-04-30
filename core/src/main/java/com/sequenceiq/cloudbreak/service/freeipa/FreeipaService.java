@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.freeipa;
 
 import static com.sequenceiq.cloudbreak.rotation.common.RotationPollingSvcOutageUtils.pollWithSvcOutageErrorHandling;
+import static java.lang.String.format;
 
 import java.util.List;
 import java.util.Map;
@@ -65,7 +66,7 @@ public class FreeipaService {
 
     @Recover
     public boolean recoverCheckFreeipaRunning(CloudbreakServiceException e, String envCrn) {
-        String message = String.format("Freeipa availability trials exhausted for %s, defaulting to FreeIPA non-available", envCrn);
+        String message = format("Freeipa availability trials exhausted for %s, defaulting to FreeIPA non-available", envCrn);
         LOGGER.warn(message, e);
         return false;
     }
@@ -91,8 +92,7 @@ public class FreeipaService {
         }
         FlowLogResponse lastFlow = freeipaClientService.getLastFlowId(environmentCrn);
         if (lastFlow != null && lastFlow.getStateStatus() == StateStatus.PENDING) {
-            String message = String.format("Polling in FreeIpa is not possible since last known state of flow for the FreeIpa is %s",
-                    lastFlow.getCurrentState());
+            String message = format("Polling in FreeIpa is not possible since last known state of flow for the FreeIpa is %s", lastFlow.getCurrentState());
             throw new SecretRotationException(message, null);
         }
     }
@@ -120,8 +120,8 @@ public class FreeipaService {
         }
     }
 
-    private static void handleUnsuccessfulFlow(String environmentCrn, FlowIdentifier flowIdentifier, UserBreakException e) {
-        String message = String.format("FreeIpa flow failed with error: '%s'. Environment crn: %s, flow: %s",
+    private void handleUnsuccessfulFlow(String environmentCrn, FlowIdentifier flowIdentifier, UserBreakException e) {
+        String message = format("FreeIpa flow failed with error: '%s'. Environment crn: %s, flow: %s",
                 e != null ? e.getMessage() : "unknown", environmentCrn, flowIdentifier);
         LOGGER.warn(message);
         throw new CloudbreakServiceException(message, e);
@@ -130,19 +130,18 @@ public class FreeipaService {
     private AttemptResult<Boolean> pollFlowState(FlowIdentifier flowIdentifier) {
         FlowCheckResponse flowState;
         if (flowIdentifier.getType() == FlowType.NOT_TRIGGERED) {
-            return AttemptResults.breakFor(String.format("Flow %s not triggered", flowIdentifier.getPollableId()));
+            return AttemptResults.breakFor(format("Flow %s not triggered", flowIdentifier.getPollableId()));
         } else if (flowIdentifier.getType() == FlowType.FLOW) {
             flowState = freeipaClientService.hasFlowRunningByFlowId(flowIdentifier.getPollableId());
         } else if (flowIdentifier.getType() == FlowType.FLOW_CHAIN) {
             flowState = freeipaClientService.hasFlowChainRunningByFlowChainId(flowIdentifier.getPollableId());
         } else {
-            String message = String.format("Unknown flow identifier type %s for flow: %s", flowIdentifier.getType(), flowIdentifier);
+            String message = format("Unknown flow identifier type %s for flow: %s", flowIdentifier.getType(), flowIdentifier);
             LOGGER.error(message);
             throw new CloudbreakServiceException(message);
         }
 
-        LOGGER.debug("FreeIpa polling has active flow: {}, with latest fail: {}",
-                flowState.getHasActiveFlow(), flowState.getLatestFlowFinalizedAndFailed());
+        LOGGER.debug("FreeIpa polling has active flow: {}, with latest fail: {}", flowState.getHasActiveFlow(), flowState.getLatestFlowFinalizedAndFailed());
         return flowState.getHasActiveFlow()
                 ? AttemptResults.justContinue()
                 : AttemptResults.finishWith(!flowState.getLatestFlowFinalizedAndFailed());
