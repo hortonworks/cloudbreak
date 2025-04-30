@@ -15,6 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -92,6 +94,12 @@ public class HeartbeatService {
 
     @Inject
     private FlowCancelService flowCancelService;
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void onApplicationEvent() {
+        LOGGER.debug("Node {} is trying to update heartbeat timestamp on startup", nodeConfig.getId());
+        heartbeat();
+    }
 
     @Scheduled(cron = "${cb.ha.heartbeat.rate:0/30 * * * * *}")
     public void heartbeat() {
