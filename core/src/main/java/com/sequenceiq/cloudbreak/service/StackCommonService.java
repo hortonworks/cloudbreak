@@ -466,9 +466,9 @@ public class StackCommonService {
         }
         if (!instancesNotInThisStack.isEmpty()) {
             throw new BadRequestException(
-                    String.format("Instance(s) Restart Failed for %s %s. This Instance(s): %s either don't belong to this %s or they are wrong InstanceId(s).",
+                    String.format("Instance(s) Restart Failed for %s %s. Invalid instanceIds in request: %s",
                             stackDto.getStack().getDisplayName(), stackDto.getStack().getType().name(),
-                            String.join(", ", instancesNotInThisStack), stackDto.getStack().getType().name()));
+                            String.join(", ", instancesNotInThisStack)));
         }
     }
 

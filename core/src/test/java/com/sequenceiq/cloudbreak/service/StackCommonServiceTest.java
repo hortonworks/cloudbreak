@@ -481,8 +481,7 @@ class StackCommonServiceTest {
         List<String> instanceIds = List.of("i-1", "i-2", "i-3");
         BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> underTest.restartMultipleInstances(STACK_CRN, ACCOUNT_ID, instanceIds));
-        assertEquals("Instance(s) Restart Failed for stackName DATALAKE. This Instance(s): i-3 either don't belong to this DATALAKE or" +
-                " they are wrong InstanceId(s).", exception.getMessage());
+        assertEquals("Instance(s) Restart Failed for stackName DATALAKE. Invalid instanceIds in request: i-3", exception.getMessage());
         verifyNoInteractions(stackOperationService);
     }
 
