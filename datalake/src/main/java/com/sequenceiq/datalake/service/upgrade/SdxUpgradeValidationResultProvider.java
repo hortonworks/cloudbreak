@@ -20,6 +20,9 @@ public class SdxUpgradeValidationResultProvider {
 
     public boolean isValidationFailed(SdxCluster sdxCluster) {
         FlowLogResponse lastCloudbreakFlowChainId = cloudbreakFlowService.getLastFlowId(sdxCluster);
+        if (lastCloudbreakFlowChainId == null) {
+            return false;
+        }
         List<FlowLogResponse> flowLogsByFlowId = cloudbreakFlowService.getFlowLogsByFlowId(lastCloudbreakFlowChainId.getFlowId());
         return flowLogsByFlowId.stream().anyMatch(containsValidationInitState()) && flowLogsByFlowId.stream().anyMatch(containsFailedState());
     }

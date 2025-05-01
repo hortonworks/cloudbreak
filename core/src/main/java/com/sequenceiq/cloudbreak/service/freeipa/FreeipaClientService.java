@@ -10,6 +10,7 @@ import jakarta.ws.rs.WebApplicationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -167,8 +168,15 @@ public class FreeipaClientService {
     }
 
     public FlowLogResponse getLastFlowId(String resourceCrn) {
-        return ThreadBasedUserCrnProvider.doAsInternalActor(
-                () -> freeIpaV1FlowEndpoint.getLastFlowByResourceCrn(resourceCrn));
+        try {
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> freeIpaV1FlowEndpoint.getLastFlowByResourceCrn(resourceCrn));
+        } catch (WebApplicationException e) {
+            if (e.getResponse().getStatus() == HttpStatus.NOT_FOUND.value()) {
+                return null;
+            }
+            throw e;
+        }
     }
 
 }

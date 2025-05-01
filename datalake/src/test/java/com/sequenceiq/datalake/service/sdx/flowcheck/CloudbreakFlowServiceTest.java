@@ -14,6 +14,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,6 +44,8 @@ public class CloudbreakFlowServiceTest {
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:cloudera:user:bob@cloudera.com";
 
     private static final String CLUSTER_NAME = "dummyCluster";
+
+    private static final String RESOURCE_CRN = "resourceCrn";
 
     @Mock
     private FlowEndpoint flowEndpoint;
@@ -314,6 +318,13 @@ public class CloudbreakFlowServiceTest {
 
         FlowCheckResponse lastKnownFlowCheckResponseWithoutID = underTest.getLastKnownFlowCheckResponse(clusterWithoutID);
         assertEquals(null, lastKnownFlowCheckResponseWithoutID);
+    }
+
+    @Test
+    void testGetFlowIdShouldReturnNullIfLastFlowNotFound() {
+        when(flowEndpoint.getLastFlowByResourceCrn(eq(RESOURCE_CRN))).thenThrow(new WebApplicationException("error", Response.Status.NOT_FOUND));
+        FlowLogResponse lastFlow = underTest.getLastFlowId(RESOURCE_CRN);
+        assertNull(lastFlow);
     }
 
     private FlowCheckResponse createFlowCheckResponse(Boolean hasActiveFlow) {

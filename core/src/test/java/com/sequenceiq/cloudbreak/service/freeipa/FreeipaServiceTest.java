@@ -165,14 +165,6 @@ class FreeipaServiceTest {
         assertEquals(ROTATE, request.getExecutionType());
     }
 
-    private static FlowCheckResponse createFlowCheckResponse(Boolean hasActiveFlow, Boolean failed) {
-        FlowCheckResponse flowResp = new FlowCheckResponse();
-        flowResp.setFlowId(FREEIPA_FLOW_ID);
-        flowResp.setHasActiveFlow(hasActiveFlow);
-        flowResp.setLatestFlowFinalizedAndFailed(failed);
-        return flowResp;
-    }
-
     @Test
     void preValidateShouldFailIfEnvironmentCrnIsNull() {
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class, () -> underTest.preValidateFreeIpaSecretRotation(null));
@@ -202,4 +194,18 @@ class FreeipaServiceTest {
         verify(freeipaClientService, times(1)).getLastFlowId(eq(ENV_CRN));
     }
 
+    @Test
+    void preValidateShouldSucceedIfLastFlowIsMissingInRedbeams() {
+        when(freeipaClientService.getLastFlowId(eq(ENV_CRN))).thenReturn(null);
+        underTest.preValidateFreeIpaSecretRotation(ENV_CRN);
+        verify(freeipaClientService, times(1)).getLastFlowId(eq(ENV_CRN));
+    }
+
+    private FlowCheckResponse createFlowCheckResponse(Boolean hasActiveFlow, Boolean failed) {
+        FlowCheckResponse flowResp = new FlowCheckResponse();
+        flowResp.setFlowId(FREEIPA_FLOW_ID);
+        flowResp.setHasActiveFlow(hasActiveFlow);
+        flowResp.setLatestFlowFinalizedAndFailed(failed);
+        return flowResp;
+    }
 }

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -19,6 +20,8 @@ import java.util.stream.Stream;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.ProcessingException;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,7 +34,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowLogResponse;
 import com.sequenceiq.flow.api.model.FlowType;
+import com.sequenceiq.redbeams.api.endpoint.v1.RedBeamsFlowEndpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.ClusterDatabaseServerCertificateStatusV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.RotateDatabaseServerSecretV4Request;
@@ -53,6 +58,9 @@ class RedbeamsClientServiceTest {
 
     @Mock
     private DatabaseServerV4Endpoint redbeamsServerEndpoint;
+
+    @Mock
+    private RedBeamsFlowEndpoint redBeamsFlowEndpoint;
 
     @Mock
     private SupportV4Endpoint supportV4Endpoint;
@@ -242,5 +250,12 @@ class RedbeamsClientServiceTest {
         assertTrue(thrownException.getMessage().contains("Failed to clean up validate upgrade DatabaseServer with CRN"));
         assertInstanceOf(ProcessingException.class, thrownException.getCause());
         verify(redbeamsServerEndpoint).validateUpgradeCleanup(crn);
+    }
+
+    @Test
+    void testGetFlowIdShouldReturnNullIfLastFlowNotFound() {
+        when(redBeamsFlowEndpoint.getLastFlowByResourceCrn(eq(DATABASE_SERVER_CRN))).thenThrow(new WebApplicationException("error", Response.Status.NOT_FOUND));
+        FlowLogResponse lastFlow = underTest.getLastFlowId(DATABASE_SERVER_CRN);
+        assertNull(lastFlow);
     }
 }
