@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationSaltService;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
@@ -59,11 +58,6 @@ public class SaltPasswordRotationContextProvider implements RotationContextProvi
     private void preValidateJob(String resourceCrn) {
         StackDto stack = stackDtoService.getByCrn(resourceCrn);
         rotateSaltPasswordValidator.validateRotateSaltPassword(stack);
-        try {
-            secretRotationSaltService.validateSalt(stack);
-        } catch (CloudbreakOrchestratorFailedException e) {
-            throw new SecretRotationException(e);
-        }
     }
 
     private void rotationJob(String resourceCrn) {

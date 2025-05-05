@@ -79,10 +79,10 @@ public class SecretSubRotationActions {
                 LOGGER.warn("Secret sub rotation failed for secreType: {}, executionType: {}", context.getSecretType(), context.getExecutionType(), exception);
                 Flow flow = getFlow(context.getFlowId());
                 flow.setFlowFailed(exception);
-                secretRotationUsageService.rotationFailed(context.getSecretType(), resourceCrn, message, context.getExecutionType());
                 if (PREVALIDATE.equals(payload.getExecutionType())) {
                     secretRotationStatusService.preVaildationFailed(resourceCrn, payload.getSecretType(), message);
                 } else {
+                    secretRotationUsageService.rotationFailed(context.getSecretType(), resourceCrn, message, context.getExecutionType());
                     secretRotationStatusService.rotationFailed(resourceCrn, payload.getSecretType(), message);
                 }
                 sendEvent(context, SubRotationEvent.fromContext(SecretSubRotationStateSelectors.SUB_ROTATION_FAILURE_HANDLED_EVENT.event(), context));

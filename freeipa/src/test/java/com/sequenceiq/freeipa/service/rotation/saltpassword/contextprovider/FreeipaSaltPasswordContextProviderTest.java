@@ -2,8 +2,6 @@ package com.sequenceiq.freeipa.service.rotation.saltpassword.contextprovider;
 
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM_JOB;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 
@@ -63,14 +61,12 @@ class FreeipaSaltPasswordContextProviderTest {
     @Test
     void rotationJobContextPreValidateJob() throws CloudbreakOrchestratorFailedException {
         Map<SecretRotationStep, RotationContext> result = underTest.getContexts(ENV_CRN);
-        doNothing().when(secretRotationSaltService).validateSalt(any());
 
         CustomJobRotationContext rotationContext = (CustomJobRotationContext) result.get(CUSTOM_JOB);
         rotationContext.getPreValidateJob().orElseThrow().run();
 
         verify(stackService).getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENV_CRN, ACCOUNT_ID);
         verify(rotateSaltPasswordService).validateRotateSaltPassword(stack);
-        verify(secretRotationSaltService).validateSalt(any());
     }
 
     @Test
