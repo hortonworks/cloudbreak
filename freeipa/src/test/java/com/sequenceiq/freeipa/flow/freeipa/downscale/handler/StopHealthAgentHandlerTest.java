@@ -56,7 +56,7 @@ class StopHealthAgentHandlerTest {
         Selectable result = underTest.doAccept(event);
 
         verify(healthAgentService).stopHealthAgentOnHosts(eq(resourceId), eq(Set.copyOf(fqdns)));
-        verify(delayedExecutorService).runWithDelay(any(Runnable.class), eq(30L), eq(TimeUnit.SECONDS));
+        verify(delayedExecutorService).runWithDelay(any(Runnable.class), eq(60L), eq(TimeUnit.SECONDS));
         assertInstanceOf(StackEvent.class, result);
         assertEquals(DownscaleFlowEvent.STOP_HEALTH_AGENT_FINISHED.event(), result.getSelector());
         assertEquals(resourceId, ((StackEvent) result).getResourceId());

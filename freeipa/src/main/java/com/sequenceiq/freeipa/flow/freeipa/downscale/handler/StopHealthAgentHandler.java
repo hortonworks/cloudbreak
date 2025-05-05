@@ -28,7 +28,7 @@ public class StopHealthAgentHandler extends ExceptionCatcherEventHandler<StopHea
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StopHealthAgentHandler.class);
 
-    private static final long WAIT_FOR_LB_DELAY = 30L;
+    private static final long WAIT_FOR_LB_DELAY = 60L;
 
     @Inject
     private HealthAgentService healthAgentService;
