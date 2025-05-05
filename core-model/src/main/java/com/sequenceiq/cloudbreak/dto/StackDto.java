@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
-import java.io.IOException;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,7 +23,6 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.domain.IdAware;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
@@ -513,16 +511,5 @@ public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContext
     @Override
     public Json getTags() {
         return getStack().getTags();
-    }
-
-    public StackTags getStackTags() {
-        if (getStack().getTags() != null) {
-            try {
-                return stack.getTags().get(StackTags.class);
-            } catch (IOException e) {
-                LOGGER.warn("Stack related tags cannot be parsed.", e);
-            }
-        }
-        return null;
     }
 }
