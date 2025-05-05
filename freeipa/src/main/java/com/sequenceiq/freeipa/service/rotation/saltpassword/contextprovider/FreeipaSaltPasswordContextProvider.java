@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
@@ -52,11 +51,6 @@ public class FreeipaSaltPasswordContextProvider implements RotationContextProvid
     private void preValidateJob(String resourceCrn) {
         Stack stack = getStack(resourceCrn);
         rotateSaltPasswordService.validateRotateSaltPassword(stack);
-        try {
-            secretRotationSaltService.validateSalt(stack);
-        } catch (CloudbreakOrchestratorFailedException e) {
-            throw new SecretRotationException(e);
-        }
     }
 
     private void rotationJob(String resourceCrn) {
