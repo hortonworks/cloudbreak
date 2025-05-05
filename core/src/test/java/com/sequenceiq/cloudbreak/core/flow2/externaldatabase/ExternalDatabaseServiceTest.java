@@ -186,6 +186,23 @@ class ExternalDatabaseServiceTest {
 
     private DatabaseServerV4StackRequest databaseServerV4StackRequest;
 
+    private static Object[][] dbUpgradeMigrationScenarios() {
+        return new Object[][]{
+                // ExternalDB, Platform, currentVersion, targetVersion, originalDBType, migrationRequired, datalake
+                {true, "AZURE", "10", "11", SINGLE_SERVER, false, true},
+                {true, "AZURE", "10", "14", SINGLE_SERVER, true, true},
+                {true, "AZURE", "10", "14", SINGLE_SERVER, true, false},
+                {true, "AZURE", "14", "14", FLEXIBLE_SERVER, false, false},
+                {true, "AZURE", "14", "11", null, false, false},
+                {true, "AWS", "10", "11", null, false, false},
+                {true, "AWS", "10", "14", null, false, false},
+                {true, "AWS", "14", "14", null, false, false},
+                {true, "AWS", "14", "11", null, false, false},
+                {false, "AZURE", "10", "14", SINGLE_SERVER, false, true},
+                {true, "AZURE", "11", "14", FLEXIBLE_SERVER, true, true},
+        };
+    }
+
     @BeforeEach
     void setUp() {
         mockShortPollConfig();
@@ -699,23 +716,6 @@ class ExternalDatabaseServiceTest {
         }
     }
 
-    private static Object[][] dbUpgradeMigrationScenarios() {
-        return new Object[][]{
-                // ExternalDB, Platform, currentVersion, targetVersion, originalDBType, migrationRequired, datalake
-                {true, "AZURE", "10", "11", SINGLE_SERVER, false, true},
-                {true, "AZURE", "10", "14", SINGLE_SERVER, true, true},
-                {true, "AZURE", "10", "14", SINGLE_SERVER, true, false},
-                {true, "AZURE", "14", "14", FLEXIBLE_SERVER, false, false},
-                {true, "AZURE", "14", "11", null, false, false},
-                {true, "AWS", "10", "11", null, false, false},
-                {true, "AWS", "10", "14", null, false, false},
-                {true, "AWS", "14", "14", null, false, false},
-                {true, "AWS", "14", "11", null, false, false},
-                {false, "AZURE", "10", "14", SINGLE_SERVER, false, true},
-                {true, "AZURE", "11", "14", FLEXIBLE_SERVER, true, true},
-        };
-    }
-
     @Test
     void rotateDatabaseSecretsShouldFailIfRedbeamsFlowChainIsNotTriggered() {
         when(redbeamsClient.rotateSecret(any())).thenReturn(new FlowIdentifier(FlowType.NOT_TRIGGERED, null));
@@ -788,20 +788,19 @@ class ExternalDatabaseServiceTest {
     }
 
     @Test
+    void preValidateShouldSucceedIfLastFlowIsMissingInRedbeams() {
+        when(redbeamsClient.getLastFlowId(eq(RDBMS_CRN))).thenReturn(null);
+        underTest.preValidateDatabaseSecretRotation(RDBMS_CRN);
+        verify(redbeamsClient, times(1)).getLastFlowId(eq(RDBMS_CRN));
+    }
+
+    @Test
     void preValidateShouldSucceedIfLastFlowIsNotRunningInRedbeams() {
         FlowLogResponse lastFlow = new FlowLogResponse();
         lastFlow.setStateStatus(StateStatus.SUCCESSFUL);
         when(redbeamsClient.getLastFlowId(eq(RDBMS_CRN))).thenReturn(lastFlow);
         underTest.preValidateDatabaseSecretRotation(RDBMS_CRN);
         verify(redbeamsClient, times(1)).getLastFlowId(eq(RDBMS_CRN));
-    }
-
-    private static FlowCheckResponse createFlowCheckResponse(Boolean hasActiveFlow, Boolean failed) {
-        FlowCheckResponse flowResp = new FlowCheckResponse();
-        flowResp.setFlowId(RDBMS_FLOW_ID);
-        flowResp.setHasActiveFlow(hasActiveFlow);
-        flowResp.setLatestFlowFinalizedAndFailed(failed);
-        return flowResp;
     }
 
     @Test
@@ -819,6 +818,14 @@ class ExternalDatabaseServiceTest {
     @EnumSource(SdxDatabaseAvailabilityType.class)
     void testEnumConversionPossible(SdxDatabaseAvailabilityType input) {
         DatabaseAvailabilityType.valueOf(input.name());
+    }
+
+    private FlowCheckResponse createFlowCheckResponse(Boolean hasActiveFlow, Boolean failed) {
+        FlowCheckResponse flowResp = new FlowCheckResponse();
+        flowResp.setFlowId(RDBMS_FLOW_ID);
+        flowResp.setHasActiveFlow(hasActiveFlow);
+        flowResp.setLatestFlowFinalizedAndFailed(failed);
+        return flowResp;
     }
 
     private void mockShortPollConfig() {

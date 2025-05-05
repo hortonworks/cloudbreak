@@ -2,6 +2,7 @@ package com.sequenceiq.datalake.service.upgrade;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -37,7 +38,7 @@ public class SdxUpgradeValidationResultProviderTest {
     private SdxCluster sdxCluster;
 
     @Test
-    void testIsValidShouldReturnTrue() {
+    void testIsValidationFailedShouldReturnTrue() {
         FlowLogResponse flowLogResponse = createLastFlowLog();
         when(cloudbreakFlowService.getLastFlowId(sdxCluster)).thenReturn(flowLogResponse);
         when(cloudbreakFlowService.getFlowLogsByFlowId(FLOW_ID)).thenReturn(createFlowLogsWithFailedValidation());
@@ -48,7 +49,7 @@ public class SdxUpgradeValidationResultProviderTest {
     }
 
     @Test
-    void testIsValidShouldReturnFalseWhenTheFlowDoesNotContainsValidationInitState() {
+    void testIsValidationFailedShouldReturnFalseWhenTheFlowDoesNotContainsValidationInitState() {
         FlowLogResponse flowLogResponse = createLastFlowLog();
         when(cloudbreakFlowService.getLastFlowId(sdxCluster)).thenReturn(flowLogResponse);
         when(cloudbreakFlowService.getFlowLogsByFlowId(FLOW_ID)).thenReturn(createFlowLogsWithOutValidationInitState());
@@ -59,7 +60,7 @@ public class SdxUpgradeValidationResultProviderTest {
     }
 
     @Test
-    void testIsValidShouldReturnFalseWhenTheFlowDoesNotContainsFailedState() {
+    void testIsValidationFailedShouldReturnFalseWhenTheFlowDoesNotContainsFailedState() {
         FlowLogResponse flowLogResponse = createLastFlowLog();
         when(cloudbreakFlowService.getLastFlowId(sdxCluster)).thenReturn(flowLogResponse);
         when(cloudbreakFlowService.getFlowLogsByFlowId(FLOW_ID)).thenReturn(createFlowLogsWithOutFailedState());
@@ -67,6 +68,15 @@ public class SdxUpgradeValidationResultProviderTest {
         assertFalse(underTest.isValidationFailed(sdxCluster));
         verify(cloudbreakFlowService).getLastFlowId(sdxCluster);
         verify(cloudbreakFlowService).getFlowLogsByFlowId(FLOW_ID);
+    }
+
+    @Test
+    void testIsValidationFailedShouldReturnFalseWhenTheLastFlowIsMissing() {
+        when(cloudbreakFlowService.getLastFlowId(sdxCluster)).thenReturn(null);
+
+        assertFalse(underTest.isValidationFailed(sdxCluster));
+        verify(cloudbreakFlowService).getLastFlowId(sdxCluster);
+        verify(cloudbreakFlowService, never()).getFlowLogsByFlowId(FLOW_ID);
     }
 
     private List<FlowLogResponse> createFlowLogsWithFailedValidation() {

@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.service.freeipa;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -11,8 +14,8 @@ import java.util.UUID;
 
 import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,6 +25,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.flow.api.model.FlowLogResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.flow.FreeIpaV1FlowEndpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.util.UtilV1Endpoint;
 
@@ -41,6 +46,9 @@ class FreeipaClientServiceTest {
 
     @Mock
     private FreeIpaV1Endpoint freeIpaV1Endpoint;
+
+    @Mock
+    private FreeIpaV1FlowEndpoint freeIpaV1FlowEndpoint;
 
     @Mock
     private UtilV1Endpoint utilV1Endpoint;
@@ -79,7 +87,7 @@ class FreeipaClientServiceTest {
         when(freeIpaV1Endpoint.getRootCertificate(ENV_CRN)).thenThrow(e);
         when(webApplicationExceptionMessageExtractor.getErrorMessage(e)).thenReturn(EXTRACTED_ERROR_MSG);
 
-        CloudbreakServiceException cloudbreakServiceException = Assertions.assertThrows(CloudbreakServiceException.class,
+        CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.getRootCertificateByEnvironmentCrn(ENV_CRN)));
 
         assertThat(cloudbreakServiceException).hasCauseReference(e);
@@ -96,7 +104,7 @@ class FreeipaClientServiceTest {
     private void getRootCertificateByEnvironmentCrnTestExceptionWithoutExtractionInternal(Exception e) {
         when(freeIpaV1Endpoint.getRootCertificate(ENV_CRN)).thenThrow(e);
 
-        CloudbreakServiceException cloudbreakServiceException = Assertions.assertThrows(CloudbreakServiceException.class,
+        CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.getRootCertificateByEnvironmentCrn(ENV_CRN)));
 
         assertThat(cloudbreakServiceException).hasCauseReference(e);
@@ -109,6 +117,13 @@ class FreeipaClientServiceTest {
     @Test
     void getRootCertificateByEnvironmentCrnTestIllegalStateException() {
         getRootCertificateByEnvironmentCrnTestExceptionWithoutExtractionInternal(new IllegalStateException(ERROR_MSG));
+    }
+
+    @Test
+    void testGetFlowIdShouldReturnNullIfLastFlowNotFound() {
+        when(freeIpaV1FlowEndpoint.getLastFlowByResourceCrn(eq(ENV_CRN))).thenThrow(new WebApplicationException("error", Response.Status.NOT_FOUND));
+        FlowLogResponse lastFlow = underTest.getLastFlowId(ENV_CRN);
+        assertNull(lastFlow);
     }
 
 }
