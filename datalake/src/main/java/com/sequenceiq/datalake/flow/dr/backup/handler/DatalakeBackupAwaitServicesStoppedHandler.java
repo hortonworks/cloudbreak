@@ -63,6 +63,19 @@ public class DatalakeBackupAwaitServicesStoppedHandler extends ExceptionCatcherE
         String userId = request.getUserId();
         String operationId = request.getOperationId();
 
+        try {
+            SdxOperation sdxOperation = sdxOperationRepository.findSdxOperationByOperationId(operationId);
+            if (sdxOperation != null) {
+                LOGGER.info("The database entry with operation id: {}, status: {}, operation type: {}, and cluster id: {} already exists",
+                        sdxOperation.getOperationId(),
+                        sdxOperation.getStatus(),
+                        sdxOperation.getOperationType(),
+                        sdxOperation.getSdxClusterId());
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error occurred while retrieving operation with id: {}", operationId, e);
+        }
+
         Selectable response;
         try {
             sdxOperationRepository.save(request.getDrStatus());
