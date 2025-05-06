@@ -1,12 +1,16 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -14,6 +18,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -27,9 +32,16 @@ import org.springframework.util.ReflectionUtils;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.MachineType;
 import com.google.api.services.compute.model.MachineTypeList;
+import com.google.api.services.compute.model.Network;
+import com.google.api.services.compute.model.NetworkList;
 import com.google.api.services.compute.model.RegionList;
+import com.google.api.services.compute.model.Subnetwork;
+import com.google.api.services.compute.model.SubnetworkList;
+import com.google.api.services.compute.model.SubnetworkSecondaryRange;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpComputeFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
+import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
@@ -184,5 +196,82 @@ public class GcpPlatformResourcesTest {
                         vmType.getValue().equals(entry.getKey())).findFirst().orElse(null).getMetaData().getAvailabilityZones()));
             });
         }
+    }
+
+    @Test
+    void testNetworks() throws Exception {
+        Compute compute = mock(Compute.class);
+        Compute.Networks networks = mock(Compute.Networks.class);
+        Network network = mock(Network.class);
+        Compute.Networks.List list = mock(Compute.Networks.List.class);
+        NetworkList networkList = mock(NetworkList.class);
+        Compute.Networks.Get get = mock(Compute.Networks.Get.class);
+        Compute.Subnetworks subnetworks = mock(Compute.Subnetworks.class);
+        Compute.Subnetworks.List subnetworkList = mock(Compute.Subnetworks.List.class);
+        SubnetworkList subnetworkList1 = mock(SubnetworkList.class);
+        Compute.Subnetworks.Get subnetwork = mock(Compute.Subnetworks.Get.class);
+        Compute.Regions regions = mock(Compute.Regions.class);
+        Compute.Regions.Get regionsGet = mock(Compute.Regions.Get.class);
+        com.google.api.services.compute.model.Region region = mock(com.google.api.services.compute.model.Region.class);
+        Region region1 = mock(Region.class);
+        Subnetwork subnetwork1 = mock(Subnetwork.class);
+        SubnetworkSecondaryRange range1 = mock(SubnetworkSecondaryRange.class);
+        SubnetworkSecondaryRange range2 = mock(SubnetworkSecondaryRange.class);
+
+        when(region1.value()).thenReturn("region1");
+        when(network.getId()).thenReturn(new BigInteger("1"));
+        when(range1.getIpCidrRange()).thenReturn("cidr1");
+        when(range2.getIpCidrRange()).thenReturn("cidr2");
+        when(range1.getRangeName()).thenReturn("range1");
+        when(range2.getRangeName()).thenReturn("range2");
+        when(network.getGatewayIPv4()).thenReturn("10.0.0.0/16");
+        when(network.getDescription()).thenReturn("description");
+        when(network.getIPv4Range()).thenReturn("description");
+        when(network.getCreationTimestamp()).thenReturn("123");
+        when(network.getSubnetworks()).thenReturn(List.of("s1"));
+        when(subnetwork1.getSelfLink()).thenReturn("s1");
+        when(subnetwork1.getId()).thenReturn(new BigInteger("1"));
+        when(subnetwork1.getName()).thenReturn("s1name");
+        when(subnetwork1.getIpCidrRange()).thenReturn("1.1.1.1");
+        when(subnetwork1.getPrivateIpGoogleAccess()).thenReturn(true);
+        when(subnetwork1.getPrivateIpGoogleAccess()).thenReturn(true);
+        when(subnetwork1.getSecondaryIpRanges()).thenReturn(List.of(range1, range2));
+        when(subnetworkList1.getItems()).thenReturn(List.of(subnetwork1));
+        when(region.getZones()).thenReturn(List.of("zone1"));
+        when(regionsGet.execute()).thenReturn(region);
+        when(regions.get(any(), any())).thenReturn(regionsGet);
+        when(compute.regions()).thenReturn(regions);
+        when(gcpComputeFactory.buildCompute(any())).thenReturn(compute);
+        when(gcpStackUtil.getProjectId(any())).thenReturn("id");
+        when(networkList.getItems()).thenReturn(List.of(network));
+        when(networks.get(any(), any())).thenReturn(get);
+        when(list.execute()).thenReturn(networkList);
+        when(networks.list(any())).thenReturn(list);
+        when(compute.networks()).thenReturn(networks);
+        when(subnetworkList.execute()).thenReturn(subnetworkList1);
+        when(subnetworks.list(any(), any())).thenReturn(subnetworkList);
+        when(compute.subnetworks()).thenReturn(subnetworks);
+        when(subnetworks.list(any(), any())).thenReturn(subnetworkList);
+        when(subnetworks.get(any(), any(), any())).thenReturn(subnetwork);
+        when(compute.subnetworks()).thenReturn(subnetworks);
+
+        CloudNetworks result = underTest.networks(extendedCloudCredential, region1, Map.of());
+
+        assertEquals(result.getCloudNetworkResponses().keySet(), Set.of("region1"));
+        Set<CloudSubnet> cloudSubnets = result.getCloudNetworkResponses().get("region1")
+                .stream()
+                .findFirst()
+                .get()
+                .getSubnetsMeta();
+        CloudSubnet cloudSubnet = cloudSubnets
+                .stream()
+                .findFirst()
+                .get();
+
+        assertThat(cloudSubnet.getSecondaryCidrs(), contains("cidr1", "cidr2"));
+        assertThat(cloudSubnet.getSecondaryCidrsWithNames().entrySet(), contains(
+                Map.entry("cidr1", "range1"),
+                Map.entry("cidr2", "range2")
+        ));
     }
 }

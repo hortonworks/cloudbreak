@@ -240,6 +240,7 @@ public class GcpPlatformResources implements PlatformResources {
                                             .availabilityZone(zone)
                                             .cidr(subnetwork.getIpCidrRange())
                                             .secondaryCidrs(getSecondaryRanges(subnetwork))
+                                            .secondaryCidrsWithNames(getSecondaryRangesWithNames(subnetwork))
                                             .privateSubnet(subnetwork.getPrivateIpGoogleAccess())
                                             .mapPublicIpOnLaunch(!subnetwork.getPrivateIpGoogleAccess())
                                             .igwAvailable(igwAvailable)
@@ -259,7 +260,17 @@ public class GcpPlatformResources implements PlatformResources {
         return new CloudNetworks(result);
     }
 
-    private static List<String> getSecondaryRanges(Subnetwork subnetwork) {
+    private Map<String, String> getSecondaryRangesWithNames(Subnetwork subnetwork) {
+        if (subnetwork.getSecondaryIpRanges() != null) {
+            return subnetwork.getSecondaryIpRanges().stream().collect(Collectors.toMap(
+                    obj -> obj.getIpCidrRange(),
+                    obj -> obj.getRangeName()
+            ));
+        }
+        return Map.of();
+    }
+
+    private List<String> getSecondaryRanges(Subnetwork subnetwork) {
         if (subnetwork.getSecondaryIpRanges() != null) {
             return subnetwork.getSecondaryIpRanges().stream().map(s -> s.getIpCidrRange()).collect(Collectors.toList());
         }

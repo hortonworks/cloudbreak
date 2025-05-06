@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -24,6 +25,8 @@ public class CloudSubnet extends DynamicModel implements Serializable {
     private String cidr;
 
     private List<String> secondaryCidrs = List.of();
+
+    private Map<String, String> secondaryCidrsWithNames = Map.of();
 
     private SubnetType type;
 
@@ -49,6 +52,7 @@ public class CloudSubnet extends DynamicModel implements Serializable {
         this.mapPublicIpOnLaunch = builder.mapPublicIpOnLaunch;
         this.igwAvailable = builder.igwAvailable;
         this.deploymentRestrictions = builder.deploymentRestrictions;
+        this.secondaryCidrsWithNames = builder.secondaryCidrsWithNames;
     }
 
     public String getId() {
@@ -123,6 +127,14 @@ public class CloudSubnet extends DynamicModel implements Serializable {
         this.deploymentRestrictions = deploymentRestrictions;
     }
 
+    public Map<String, String> getSecondaryCidrsWithNames() {
+        return secondaryCidrsWithNames;
+    }
+
+    public void setSecondaryCidrsWithNames(Map<String, String> secondaryCidrsWithNames) {
+        this.secondaryCidrsWithNames = secondaryCidrsWithNames;
+    }
+
     public List<String> getSecondaryCidrs() {
         return secondaryCidrs;
     }
@@ -138,6 +150,7 @@ public class CloudSubnet extends DynamicModel implements Serializable {
                 .availabilityZone(availabilityZone)
                 .cidr(cidr)
                 .secondaryCidrs(secondaryCidrs)
+                .secondaryCidrsWithNames(secondaryCidrsWithNames)
                 .privateSubnet(privateSubnet)
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .igwAvailable(igwAvailable)
@@ -164,13 +177,15 @@ public class CloudSubnet extends DynamicModel implements Serializable {
                 Objects.equals(availabilityZone, that.availabilityZone) &&
                 Objects.equals(cidr, that.cidr) &&
                 Objects.equals(secondaryCidrs, that.secondaryCidrs) &&
+                Objects.equals(secondaryCidrsWithNames, that.secondaryCidrsWithNames) &&
                 Objects.equals(type, that.type) &&
                 Objects.equals(deploymentRestrictions, that.deploymentRestrictions);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, availabilityZone, cidr, secondaryCidrs, privateSubnet, mapPublicIpOnLaunch, igwAvailable, type, deploymentRestrictions);
+        return Objects.hash(id, name, availabilityZone, cidr, secondaryCidrs, secondaryCidrsWithNames,
+                privateSubnet, mapPublicIpOnLaunch, igwAvailable, type, deploymentRestrictions);
     }
 
     @Override
@@ -181,6 +196,7 @@ public class CloudSubnet extends DynamicModel implements Serializable {
                 + ", availabilityZone='" + availabilityZone + '\''
                 + ", cidr='" + cidr + '\''
                 + ", secondaryCidrs='" + secondaryCidrs + '\''
+                + ", secondaryCidrsWithNames='" + secondaryCidrsWithNames + '\''
                 + ", privateSubnet=" + privateSubnet
                 + ", mapPublicIpOnLaunch=" + mapPublicIpOnLaunch
                 + ", igwAvailable=" + igwAvailable
@@ -200,6 +216,8 @@ public class CloudSubnet extends DynamicModel implements Serializable {
         private String cidr;
 
         private List<String> secondaryCidrs = List.of();
+
+        private Map<String, String> secondaryCidrsWithNames = Map.of();
 
         private SubnetType type;
 
@@ -236,6 +254,11 @@ public class CloudSubnet extends DynamicModel implements Serializable {
 
         public Builder secondaryCidrs(List<String> secondaryCidrs) {
             this.secondaryCidrs = secondaryCidrs;
+            return this;
+        }
+
+        public Builder secondaryCidrsWithNames(Map<String, String> secondaryCidrsWithNames) {
+            this.secondaryCidrsWithNames = secondaryCidrsWithNames;
             return this;
         }
 
