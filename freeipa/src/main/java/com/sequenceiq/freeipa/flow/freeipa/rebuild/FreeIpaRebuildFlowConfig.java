@@ -40,6 +40,8 @@ import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEven
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent.TLS_SETUP_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent.UPDATE_ENVIRONMENT_STACK_CONFIG_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent.UPDATE_KERBEROS_NAMESERVERS_CONFIG_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent.UPDATE_LOAD_BALANCER_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent.UPDATE_LOAD_BALANCER_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent.UPDATE_METADATA_FOR_DELETION_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent.VALIDATE_HEALTH_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent.VALIDATE_HEALTH_FINISHED_EVENT;
@@ -70,6 +72,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildState.RE
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildState.REBUILD_UPDATE_CLUSTERPROXY_REGISTRATION_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildState.REBUILD_UPDATE_ENVIRONMENT_STACK_CONFIG_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildState.REBUILD_UPDATE_KERBEROS_NAMESERVERS_CONFIG_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildState.REBUILD_UPDATE_LOAD_BALANCER_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildState.REBUILD_UPDATE_METADATA_FOR_DELETION_REQUEST_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildState.REBUILD_VALIDATE_BACKUP_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildState.REBUILD_VALIDATE_CLOUD_STORAGE_STATE;
@@ -211,8 +214,13 @@ public class FreeIpaRebuildFlowConfig extends AbstractFlowConfiguration<FreeIpaR
                     .failureEvent(VALIDATE_HEALTH_FAILED_EVENT)
 
                     .from(REBUILD_UPDATE_KERBEROS_NAMESERVERS_CONFIG_STATE)
-                    .to(REBUILD_UPDATE_ENVIRONMENT_STACK_CONFIG_STATE)
+                    .to(REBUILD_UPDATE_LOAD_BALANCER_STATE)
                     .event(UPDATE_KERBEROS_NAMESERVERS_CONFIG_FINISHED_EVENT)
+                    .failureEvent(UPDATE_LOAD_BALANCER_FAILED_EVENT)
+
+                    .from(REBUILD_UPDATE_LOAD_BALANCER_STATE)
+                    .to(REBUILD_UPDATE_ENVIRONMENT_STACK_CONFIG_STATE)
+                    .event(UPDATE_LOAD_BALANCER_FINISHED_EVENT)
                     .defaultFailureEvent()
 
                     .from(REBUILD_UPDATE_ENVIRONMENT_STACK_CONFIG_STATE)

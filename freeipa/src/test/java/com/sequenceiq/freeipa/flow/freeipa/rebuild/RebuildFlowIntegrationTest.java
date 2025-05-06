@@ -102,6 +102,7 @@ import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.FlowIntegrationTestConfig;
+import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.handler.LoadBalancerUpdateHandler;
 import com.sequenceiq.freeipa.flow.freeipa.provision.handler.BootstrapMachineHandler;
 import com.sequenceiq.freeipa.flow.freeipa.provision.handler.InstallFreeIpaServicesHandler;
 import com.sequenceiq.freeipa.flow.freeipa.provision.handler.OrchestratorConfigHandler;
@@ -128,6 +129,7 @@ import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildStartAction;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildTlsSetupAction;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildUpdateEnvironmentStackConfigAction;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildUpdateKerberosNameServersConfigAction;
+import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildUpdateLoadBalancerAction;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildUpdateMetadataForDeletionAction;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildValidateBackupAction;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildValidateCloudStorageAction;
@@ -160,6 +162,8 @@ import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaInstallService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaOrchestrationConfigService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaPostInstallService;
+import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerService;
+import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerUpdateService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.resource.ResourceAttributeUtil;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
@@ -307,6 +311,12 @@ class RebuildFlowIntegrationTest {
     private KerberosConfigUpdateService kerberosConfigUpdateService;
 
     @MockBean
+    private FreeIpaLoadBalancerUpdateService freeIpaLoadBalancerUpdateService;
+
+    @MockBean
+    private FreeIpaLoadBalancerService freeIpaLoadBalancerService;
+
+    @MockBean
     private EnvironmentEndpoint environmentEndpoint;
 
     @MockBean
@@ -447,6 +457,7 @@ class RebuildFlowIntegrationTest {
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "FreeIPA Post Installation");
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Validate FreeIPA health");
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Updating kerberos nameserver config");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Updating FreeIPA load balancer");
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Updating clusters' configuration");
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, DetailedStackStatus.AVAILABLE, "Rebuild finished");
         stackStatusVerify.verifyNoMoreInteractions();
@@ -974,6 +985,7 @@ class RebuildFlowIntegrationTest {
             RebuildPostInstallAction.class,
             RebuildValidateHealthAction.class,
             RebuildUpdateKerberosNameServersConfigAction.class,
+            RebuildUpdateLoadBalancerAction.class,
             RebuildUpdateEnvironmentStackConfigAction.class,
             RebuildFinishedAction.class,
             RebuildFailedAction.class,
@@ -999,6 +1011,7 @@ class RebuildFlowIntegrationTest {
             RebootInstanceHandler.class,
             HealthCheckHandler.class,
             RebuildValidateHealthHandler.class,
+            LoadBalancerUpdateHandler.class,
             WebApplicationExceptionMessageExtractor.class
     })
     static class Config {

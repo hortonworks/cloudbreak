@@ -26,6 +26,7 @@ import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildStartAction;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildTlsSetupAction;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildUpdateEnvironmentStackConfigAction;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildUpdateKerberosNameServersConfigAction;
+import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildUpdateLoadBalancerAction;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildUpdateMetadataForDeletionAction;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildValidateBackupAction;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildValidateCloudStorageAction;
@@ -57,6 +58,7 @@ public enum FreeIpaRebuildState implements FlowState {
     REBUILD_FREEIPA_POST_INSTALL_STATE(RebuildPostInstallAction.class),
     REBUILD_VALIDATE_HEALTH_STATE(RebuildValidateHealthAction.class),
     REBUILD_UPDATE_KERBEROS_NAMESERVERS_CONFIG_STATE(RebuildUpdateKerberosNameServersConfigAction.class),
+    REBUILD_UPDATE_LOAD_BALANCER_STATE(RebuildUpdateLoadBalancerAction.class),
     REBUILD_UPDATE_ENVIRONMENT_STACK_CONFIG_STATE(RebuildUpdateEnvironmentStackConfigAction.class),
     REBUILD_FINISHED_STATE(RebuildFinishedAction.class),
     REBUILD_FAILED_STATE(RebuildFailedAction.class),

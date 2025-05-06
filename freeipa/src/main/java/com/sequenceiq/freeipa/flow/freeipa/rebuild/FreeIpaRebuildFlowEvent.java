@@ -7,6 +7,8 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackCollectResou
 import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackResult;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.event.EventSelectorUtil;
+import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.update.LoadBalancerUpdateFailureEvent;
+import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.update.LoadBalancerUpdateSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.bootstrap.BootstrapMachinesFailed;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.bootstrap.BootstrapMachinesSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.cloudstorage.ValidateCloudStorageFailed;
@@ -74,6 +76,8 @@ public enum FreeIpaRebuildFlowEvent implements FlowEvent {
     VALIDATE_HEALTH_FINISHED_EVENT(EventSelectorUtil.selector(RebuildValidateHealthSuccess.class)),
     VALIDATE_HEALTH_FAILED_EVENT(EventSelectorUtil.selector(RebuildValidateHealthFailed.class)),
     UPDATE_KERBEROS_NAMESERVERS_CONFIG_FINISHED_EVENT,
+    UPDATE_LOAD_BALANCER_FINISHED_EVENT(EventSelectorUtil.selector(LoadBalancerUpdateSuccess.class)),
+    UPDATE_LOAD_BALANCER_FAILED_EVENT(EventSelectorUtil.selector(LoadBalancerUpdateFailureEvent.class)),
     UPDATE_ENVIRONMENT_STACK_CONFIG_FINISHED_EVENT,
     REBUILD_FINISHED_EVENT,
     REBUILD_FAILURE_EVENT(EventSelectorUtil.selector(RebuildFailureEvent.class)),
