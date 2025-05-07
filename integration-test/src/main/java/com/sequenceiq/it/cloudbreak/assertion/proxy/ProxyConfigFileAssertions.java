@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.environment.api.v1.proxy.model.request.ProxyRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.dto.AbstractTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
@@ -91,7 +92,10 @@ class ProxyConfigFileAssertions {
     }
 
     private static Set<String> getFreeipaIpAddresses(FreeIpaTestDto testDto) {
-        return testDto.getResponse().getFreeIpa().getServerIp();
+        return testDto.getResponse().getInstanceGroups().stream()
+                .flatMap(ig -> ig.getMetaData().stream())
+                .map(InstanceMetaDataResponse::getPrivateIp)
+                .collect(Collectors.toSet());
     }
 
     private static Set<String> getSdxIpAddresses(SdxInternalTestDto testDto) {

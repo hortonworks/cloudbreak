@@ -17,7 +17,7 @@ auth:
       multiaz.enable: true
       rebuild.enable: true
       batch.call.enable: true
-      loadbalancer.enable: false
+      loadbalancer.enable: true
     cloudstoragevalidation.enable:
       global: true
       aws: true

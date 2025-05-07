@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
@@ -174,7 +175,10 @@ public class SecretRotationCheckUtil {
     }
 
     private Set<String> getFreeipaIpAddresses(FreeIpaTestDto testDto) {
-        return testDto.getResponse().getFreeIpa().getServerIp();
+        return testDto.getResponse().getInstanceGroups().stream()
+                .flatMap(ig -> ig.getMetaData().stream())
+                .map(InstanceMetaDataResponse::getPrivateIp)
+                .collect(Collectors.toSet());
     }
 
     private Set<String> getSdxIpAddresses(SdxInternalTestDto testDto) {
