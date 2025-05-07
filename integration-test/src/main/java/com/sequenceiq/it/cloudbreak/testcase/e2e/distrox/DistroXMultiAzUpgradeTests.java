@@ -2,8 +2,6 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.distrox;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +15,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
@@ -29,10 +26,8 @@ import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXUpgradeTestDto;
-import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceGroupsBuilder;
-import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
-import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.PreconditionSdxE2ETest;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
@@ -62,61 +57,44 @@ public class DistroXMultiAzUpgradeTests extends PreconditionSdxE2ETest {
             when = "upgrade called on DistroX cluster",
             then = "Upgrade should be successful,the clusters should be up and running and nodes should be distributed across multiple AZs")
     public void testDistroXMultiAzUpgrade(TestContext testContext) {
-        String runTimeVersion = commonClusterManagerProperties.getRuntimeVersion();
-        List<ImageV4Response> cdhImages = new ArrayList<>();
-        testContext
-                .given(ImageCatalogTestDto.class)
-                .when(imageCatalogTestClient.getV4WithAdvertisedImages())
-                .then((testContext1, entity, cloudbreakClient) -> {
-                    List<ImageV4Response> sortedImages = entity.getResponse().getImages().getCdhImages().stream()
-                            .filter(im -> im.getVersion().equals(runTimeVersion)
-                                    && im.getImageSetsByProvider().containsKey(testContext.getCloudPlatform().name().toLowerCase()))
-                            .sorted(Comparator.comparing(ImageV4Response::getCreated)).toList();
-                    cdhImages.addAll(sortedImages);
-                    return entity;
+        String runTimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeCurrentVersion(false);
+        String dataHubKey = "multiAzDistroxUpgrade";
+        testContext.given(SdxTestDto.class)
+                .withCloudStorage()
+                .withRuntimeVersion(runTimeVersion)
+                .withoutExternalDatabase()
+                .when(sdxTestClient.create())
+                .await(SdxClusterStatusResponse.RUNNING)
+                .awaitForHealthyInstances()
+                .given(dataHubKey, DistroXTestDto.class)
+                .withTemplate(commonClusterManagerProperties.getDataEngDistroXBlueprintName(runTimeVersion))
+                .withEnableMultiAz(true)
+                .withInstanceGroupsEntity(new DistroXInstanceGroupsBuilder(testContext)
+                        .defaultHostGroup()
+                        .withStorageOptimizedInstancetype()
+                        .build())
+                .when(distroXTestClient.create(), key(dataHubKey))
+                .await(STACK_AVAILABLE, key(dataHubKey))
+                .awaitForHealthyInstances()
+                .given(dataHubKey, DistroXTestDto.class)
+                .when(distroXTestClient.get(), key(dataHubKey))
+                .then((tc, testDto, client) -> {
+                    validateStackForMultiAz(testDto, tc, "provisioning");
+                    return testDto;
+                })
+                .given(DistroXUpgradeTestDto.class)
+                .withRuntime(commonClusterManagerProperties.getUpgrade().getDistroXUpgradeTargetVersion())
+                .given(dataHubKey, DistroXTestDto.class)
+                .when(distroXTestClient.upgrade())
+                .await(STACK_AVAILABLE, key(dataHubKey))
+                .awaitForHealthyInstances()
+                .given(dataHubKey, DistroXTestDto.class)
+                .when(distroXTestClient.get(), key(dataHubKey))
+                .then((tc, testDto, client) -> {
+                    validateStackForMultiAz(testDto, tc, "Upgrade");
+                    return testDto;
                 })
                 .validate();
-        if (cdhImages.size() > 1) {
-            String dataHubKey = "multiAzDistroxUpgrade";
-            String provisionImageKey = "provisionImageKey";
-            testContext.given(SdxInternalTestDto.class)
-                    .withCloudStorage()
-                    .when(sdxTestClient.createInternal())
-                    .await(SdxClusterStatusResponse.RUNNING)
-                    .awaitForHealthyInstances()
-                    .given(provisionImageKey, DistroXImageTestDto.class)
-                    .withImageId(cdhImages.get(0).getUuid())
-                    .given(dataHubKey, DistroXTestDto.class)
-                    .withTemplate(commonClusterManagerProperties.getDataEngDistroXBlueprintName(runTimeVersion))
-                    .withEnableMultiAz(true)
-                    .withInstanceGroupsEntity(new DistroXInstanceGroupsBuilder(testContext)
-                            .defaultHostGroup()
-                            .withStorageOptimizedInstancetype()
-                            .build())
-                    .withImageSettings(provisionImageKey)
-                    .when(distroXTestClient.create(), key(dataHubKey))
-                    .await(STACK_AVAILABLE, key(dataHubKey))
-                    .awaitForHealthyInstances()
-                    .given(dataHubKey, DistroXTestDto.class)
-                    .when(distroXTestClient.get(), key(dataHubKey))
-                    .then((tc, testDto, client) -> {
-                        validateStackForMultiAz(testDto, tc, "provisioning");
-                        return testDto;
-                    })
-                    .given(DistroXUpgradeTestDto.class)
-                    .withImageId(cdhImages.get(cdhImages.size() - 1).getUuid())
-                    .given(dataHubKey, DistroXTestDto.class)
-                    .when(distroXTestClient.upgrade())
-                    .await(STACK_AVAILABLE, key(dataHubKey))
-                    .awaitForHealthyInstances()
-                    .given(dataHubKey, DistroXTestDto.class)
-                    .when(distroXTestClient.get(), key(dataHubKey))
-                    .then((tc, testDto, client) -> {
-                        validateStackForMultiAz(testDto, tc, "Upgrade");
-                        return testDto;
-                    })
-                    .validate();
-        }
 
     }
 
