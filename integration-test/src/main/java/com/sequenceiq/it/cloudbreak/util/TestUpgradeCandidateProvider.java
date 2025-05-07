@@ -50,7 +50,8 @@ public class TestUpgradeCandidateProvider {
 
         for (int i = 0; i < advertisedCdhImages.size(); i++) {
             ImageV4Response targetImage = advertisedCdhImages.get(advertisedCdhImages.size() - i - 1);
-            for (ImageV4Response sourceImage : allCdhImage) {
+            for (int j = 0; j < allCdhImage.size(); j++) {
+                ImageV4Response sourceImage = allCdhImage.get(allCdhImage.size() - j - 1);
                 if (matchCondition.test(sourceImage, targetImage)) {
                     Pair<String, String> pair = Pair.of(sourceImage.getUuid(), targetImage.getUuid());
                     LOGGER.info("Upgrade candidates found. Source image: {}, target image: {}", pair.getLeft(), pair.getRight());
@@ -72,7 +73,7 @@ public class TestUpgradeCandidateProvider {
                     return entity;
                 })
                 .validate();
-        LOGGER.info("Found images: {}", cdhImages.stream().map(ImageBasicInfoV4Response::getUuid).toList());
+        LOGGER.info("Found images for runtime {}: {}", runtimeVersion, cdhImages.stream().map(ImageBasicInfoV4Response::getUuid).toList());
         return cdhImages;
     }
 

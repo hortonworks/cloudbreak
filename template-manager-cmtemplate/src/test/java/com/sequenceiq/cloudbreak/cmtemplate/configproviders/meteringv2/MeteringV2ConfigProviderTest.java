@@ -32,6 +32,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.google.common.collect.Lists;
+import com.sequenceiq.cloudbreak.altus.AltusDatabusConfiguration;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -47,6 +48,9 @@ class MeteringV2ConfigProviderTest {
 
     @Mock
     private CmTemplateProcessor mockTemplateProcessor;
+
+    @Mock
+    private AltusDatabusConfiguration altusDatabusConfiguration;
 
     @Mock
     private TemplatePreparationObject templatePreparationObject;
@@ -78,6 +82,7 @@ class MeteringV2ConfigProviderTest {
         // This will cause isConfigurationNeeded to return true.
         when(mockTemplateProcessor.isRoleTypePresentInService(DLM_SERVICE, List.of(DLM_SERVER))).thenReturn(true);
         when(templatePreparationObject.getStackType()).thenReturn(StackType.WORKLOAD);
+        when(altusDatabusConfiguration.getAltusDatabusEndpoint()).thenReturn("endpoint");
 
         when(templatePreparationObject.getHostgroupViews()).thenReturn(Set.of(new HostgroupView("master", 0, InstanceGroupType.GATEWAY, 1)));
         Map<String, ApiClusterTemplateService> additionalServices = underTest.getAdditionalServices(mockTemplateProcessor, templatePreparationObject);
@@ -105,6 +110,7 @@ class MeteringV2ConfigProviderTest {
         when(mockTemplateProcessor.isRoleTypePresentInService(DLM_SERVICE, Lists.newArrayList(DLM_SERVER))).thenReturn(false);
         when(mockTemplateProcessor.isRoleTypePresentInService(CLO_SERVICE, List.of(CLO_SERVER))).thenReturn(true);
         when(templatePreparationObject.getStackType()).thenReturn(StackType.WORKLOAD);
+        when(altusDatabusConfiguration.getAltusDatabusEndpoint()).thenReturn("endpoint");
 
         when(templatePreparationObject.getHostgroupViews()).thenReturn(Set.of(new HostgroupView("master", 0, InstanceGroupType.GATEWAY, 1)));
         Map<String, ApiClusterTemplateService> additionalServices = underTest.getAdditionalServices(mockTemplateProcessor, templatePreparationObject);
@@ -135,6 +141,7 @@ class MeteringV2ConfigProviderTest {
         // This will cause isConfigurationNeeded to return true.
         when(mockTemplateProcessor.isRoleTypePresentInService(DLM_SERVICE, List.of(DLM_SERVER))).thenReturn(true);
         // This will list metering as present.
+        when(altusDatabusConfiguration.getAltusDatabusEndpoint()).thenReturn("endpoint");
         when(mockTemplateProcessor.getServiceByType(METERINGV2_SERVICE)).thenReturn(Optional.of(apiClusterTemplateService));
         when(templatePreparationObject.getStackType()).thenReturn(StackType.WORKLOAD);
 
@@ -146,6 +153,7 @@ class MeteringV2ConfigProviderTest {
     @Test
     void configurationNeededIfDatalakeWithRightVersions() {
         when(templatePreparationObject.getStackType()).thenReturn(StackType.DATALAKE);
+        when(altusDatabusConfiguration.getAltusDatabusEndpoint()).thenReturn("endpoint");
 
         ClouderaManagerRepo cm = new ClouderaManagerRepo();
         cm.setVersion("7.13.1.300-64531781");
@@ -255,6 +263,7 @@ class MeteringV2ConfigProviderTest {
     void configurationNeededIfDatahubWithDLMRole() {
         when(mockTemplateProcessor.isRoleTypePresentInService(DLM_SERVICE, Lists.newArrayList(DLM_SERVER))).thenReturn(true);
         when(templatePreparationObject.getStackType()).thenReturn(StackType.WORKLOAD);
+        when(altusDatabusConfiguration.getAltusDatabusEndpoint()).thenReturn("endpoint");
 
         assertTrue(underTest.isConfigurationNeeded(mockTemplateProcessor, templatePreparationObject));
     }
@@ -264,6 +273,7 @@ class MeteringV2ConfigProviderTest {
         when(mockTemplateProcessor.isRoleTypePresentInService(DLM_SERVICE, Lists.newArrayList(DLM_SERVER))).thenReturn(false);
         when(mockTemplateProcessor.isRoleTypePresentInService(CLO_SERVICE, Lists.newArrayList(CLO_SERVER))).thenReturn(true);
         when(templatePreparationObject.getStackType()).thenReturn(StackType.WORKLOAD);
+        when(altusDatabusConfiguration.getAltusDatabusEndpoint()).thenReturn("endpoint");
 
         assertTrue(underTest.isConfigurationNeeded(mockTemplateProcessor, templatePreparationObject));
     }
