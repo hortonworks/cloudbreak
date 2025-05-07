@@ -131,7 +131,7 @@ class ClusterUpscaleFlowService {
     }
 
     void clusterUpscaleFailed(long stackId, Exception errorDetails) {
-        LOGGER.info("Error during Cluster upscale flow: " + errorDetails.getMessage(), errorDetails);
+        LOGGER.warn("Error during Cluster upscale flow: " + errorDetails.getMessage(), errorDetails);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPSCALE_FAILED,
                 String.format("New node(s) could not be added to the cluster: %s", errorDetails.getMessage()));
         flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), CLUSTER_SCALING_FAILED, "added to", errorDetails.getMessage());
