@@ -555,8 +555,8 @@ public class StackUpscaleActions {
                         .filter(im -> im.getDiscoveryFQDN() != null)
                         .map(InstanceMetadataView::getDiscoveryFQDN)
                         .collect(Collectors.toSet());
-                CleanupFreeIpaEvent cleanupFreeIpaEvent = new CleanupFreeIpaEvent(context.getStack().getId(), hostNames, ips, context.isRepair());
-                sendEvent(context, cleanupFreeIpaEvent);
+                    CleanupFreeIpaEvent cleanupFreeIpaEvent = new CleanupFreeIpaEvent(context.getStackId(), hostNames, ips, context.isRepair());
+                    sendEvent(context, cleanupFreeIpaEvent);
             }
         };
     }

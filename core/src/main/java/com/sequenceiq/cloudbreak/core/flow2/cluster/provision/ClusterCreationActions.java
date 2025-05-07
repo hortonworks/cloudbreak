@@ -2,9 +2,12 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.provision;
 
 import static com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.ClusterStatus.Value.STARTED;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -17,18 +20,21 @@ import org.springframework.statemachine.action.Action;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterCreationService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.AbstractStackCreationAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackCreationContext;
 import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
+import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.job.StackJobAdapter;
 import com.sequenceiq.cloudbreak.job.archiver.instancemetadata.ArchiveInstanceMetaDataJobService;
 import com.sequenceiq.cloudbreak.job.dynamicentitlement.DynamicEntitlementRefreshJobService;
 import com.sequenceiq.cloudbreak.job.provider.ProviderSyncJobService;
 import com.sequenceiq.cloudbreak.job.stackpatcher.ExistingStackPatcherJobService;
+import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
@@ -95,6 +101,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartClusterMan
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ValidateCloudStorageRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.CleanupAdEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.CleanupFreeIpaEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.ProvisionEvent;
 import com.sequenceiq.cloudbreak.service.freeipa.InstanceMetadataProcessor;
@@ -104,7 +111,10 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.structuredevent.job.StructuredSynchronizerJobAdapter;
 import com.sequenceiq.cloudbreak.structuredevent.job.StructuredSynchronizerJobService;
+import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.PayloadConverter;
 
 @Configuration
@@ -141,6 +151,9 @@ public class ClusterCreationActions {
 
     @Inject
     private ProviderSyncJobService providerSyncJobService;
+
+    @Inject
+    private StackUtil stackUtil;
 
     @Bean(name = "CLUSTER_PROXY_REGISTRATION_STATE")
     public Action<?, ?> clusterProxyRegistrationAction() {
@@ -248,17 +261,40 @@ public class ClusterCreationActions {
             @Inject
             private InstanceMetaDataService instanceMetaDataService;
 
+            @Inject
+            private KerberosConfigService kerberosConfigService;
+
+            @Inject
+            private KerberosDetailService kerberosDetailService;
+
             @Override
-            protected void doExecute(StackCreationContext context, SetupRecoverySuccess payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackCreationContext context, SetupRecoverySuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackCreationContext context) {
-                List<InstanceMetadataView> instanceMetaData = instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(context.getStackId());
-                Set<String> hostNames = instanceMetadataProcessor.extractFqdn(instanceMetaData);
-                Set<String> ips = instanceMetadataProcessor.extractIps(instanceMetaData);
-                return new CleanupFreeIpaEvent(context.getStackId(), hostNames, ips, false);
+                if (isAdInUse(context.getStack())) {
+                    StackDto stack = stackDtoService.getById(context.getStackId());
+                    Set<String> allNodeHostnames =
+                            stackUtil.collectNodes(stack).stream().map(Node::getHostname).collect(Collectors.toSet());
+                    return new CleanupAdEvent(context.getStackId(), allNodeHostnames, Collections.emptySet());
+                } else {
+                    List<InstanceMetadataView> instanceMetaData = instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(context.getStackId());
+                    Set<String> hostNames = instanceMetadataProcessor.extractFqdn(instanceMetaData);
+                    Set<String> ips = instanceMetadataProcessor.extractIps(instanceMetaData);
+                    return new CleanupFreeIpaEvent(context.getStackId(), hostNames, ips, false);
+                }
+            }
+
+            private boolean isAdInUse(StackView stack) {
+                Optional<KerberosConfig> kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName());
+                if (kerberosConfig.isPresent()) {
+                    return kerberosDetailService.isAdJoinable(kerberosConfig.get());
+                } else {
+                    LOGGER.info("Kerberos config not found for stack: {}", stack.getId());
+                    return false;
+                }
             }
         };
     }
@@ -330,7 +366,7 @@ public class ClusterCreationActions {
     public Action<?, ?> startingAmbariServicesAction() {
         return new AbstractClusterCreationAction<>(KeytabConfigurationSuccess.class) {
             @Override
-            protected void doExecute(ClusterCreationViewContext context, KeytabConfigurationSuccess payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterCreationViewContext context, KeytabConfigurationSuccess payload, Map<Object, Object> variables) {
                 clusterCreationService.startingClusterServices(context.getStackId());
                 sendEvent(context);
             }

@@ -1,0 +1,30 @@
+#!/bin/bash
+
+set -x
+
+date '+%Y-%m-%d %H:%M:%S'
+
+read -a leaving_node_fqdns <<< "{{ all_hostnames }}"
+
+{% raw %}
+if [ ${#leaving_node_fqdns[@]} -eq 0 ]; then
+  echo "No nodes are leaving. Exiting."
+  exit 0
+fi
+{% endraw %}
+
+echo "Clean up AD for the nodes: "
+echo "${leaving_node_fqdns[@]}"
+
+for fqdn in "${leaving_node_fqdns[@]}"; do
+    ldapsearch -x -H {{ ldap.connectionURL }} -D "{{ ldap.bindDn }}" -w "{{ ldap.bindPassword }}" \
+        -b "{{ kerberos['container-dn'] }}" \
+        "(userPrincipalName=*/$fqdn@{{ kerberos.realm }})" dn | \
+        grep "^dn:" | cut -d' ' -f2- >> /tmp/delete_principals.txt
+done
+
+while IFS= read -r dn; do
+  ldapdelete -x -H {{ ldap.connectionURL }} -D "{{ ldap.bindDn }}" -w "{{ ldap.bindPassword }}" "$dn"
+done < /tmp/delete_principals.txt
+
+rm -f /tmp/delete_principals.txt
