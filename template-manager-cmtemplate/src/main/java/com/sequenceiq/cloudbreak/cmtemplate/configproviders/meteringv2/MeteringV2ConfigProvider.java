@@ -46,10 +46,10 @@ public class MeteringV2ConfigProvider extends AbstractRoleConfigProvider {
     @Inject
     private AltusDatabusConfiguration altusDatabusConfiguration;
 
-    @Value("${meteringv2.dbus.app.name:manowar_dev-mow-MeteringV2}")
+    @Value("${meteringv2.dbus.app.name:}")
     private String dbusAppName;
 
-    @Value("${meteringv2.dbus.stream.name:manowar_dev-mow-MeteringV2}")
+    @Value("${meteringv2.dbus.stream.name:}")
     private String dbusStreamName;
 
     @Value("${crn.region:}")
@@ -129,7 +129,8 @@ public class MeteringV2ConfigProvider extends AbstractRoleConfigProvider {
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
         return (isSupportedForDatalake(source) || isSupportedForDatahub(cmTemplateProcessor, source))
                 && StringUtils.isNotBlank(dbusAppName)
-                && StringUtils.isNotBlank(dbusStreamName);
+                && StringUtils.isNotBlank(dbusStreamName)
+                && StringUtils.isNotBlank(altusDatabusConfiguration.getAltusDatabusEndpoint());
     }
 
     private boolean isSupportedForDatalake(TemplatePreparationObject source) {
