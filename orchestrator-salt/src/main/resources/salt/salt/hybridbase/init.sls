@@ -31,3 +31,13 @@ replace_dhcp_hook_nameservers:
     {%- endfor %}
     {%- endfor %}
 {%- endif %}
+
+{%- if "ecs" in grains.get('roles', []) %}
+stop_nginx:
+  service.dead:
+    - name: nginx
+
+disable_nginx:
+  service.disabled:
+    - name: nginx
+{%- endif %}
