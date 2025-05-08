@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -36,33 +37,34 @@ public interface LoadBalancerResourceBuilder<C extends ResourceBuilderContext> e
 
     /**
      * Create the reference {@link CloudResource} objects with proper resource naming to persist them into the DB. In the next phase these objects
-     * will be provided to the {@link #build(ResourceBuilderContext, AuthenticatedContext, CloudLoadBalancer, CloudStack)} method to actually create these
+     * will be provided to the {@link #build(ResourceBuilderContext, AuthenticatedContext, List, CloudLoadBalancer, CloudStack)} method to actually create these
      * resources on the cloud provider. In case the resource creation fails it will be rolled back using the resource name as a reference. To provide
-     * resource names implement the {@link com.sequenceiq.cloudbreak.cloud.service.ResourceNameService} interface and inject it to the implementation
+     * resource names implement the {@link com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceNameService} interface and inject it to the implementation
      * using {@link jakarta.inject.Inject}.
      *
      * @param context       Generic context object passed along with the flow to all methods. It is created by the {@link ResourceContextBuilder}.
      * @param auth          Authenticated context is provided to be able to send the requests to the cloud provider.
-     * @param loadbalancer  Loadbalancer object with all information required tocreate and address the Resource to be built.
-     * @return Returns the buildable cloud resources. If this resource builder is requrired to create multiple resources to satisify this load balancer
+     * @param loadBalancer  LoadBalancer object with all information required to create and address the Resource to be built.
+     * @param network       Network object which is stored network related information.
+     * @return Returns the buildable cloud resources. If this resource builder is required to create multiple resources to satisfy this load balancer
      *                      then it should return a CloudResource for each.
      */
-    List<CloudResource> create(C context, AuthenticatedContext auth, CloudLoadBalancer loadBalancer);
+    List<CloudResource> create(C context, AuthenticatedContext auth, CloudLoadBalancer loadBalancer, Network network);
+
     /**
-     * This method will be called after the {@link #create(ResourceBuilderContext, AuthenticatedContext, CloudLoadBalancer)} method with the constructed
-     * cloud resources. It's purpose to actually create these resources on the cloud provider side.
+     * This method will be called after the {@link #create(ResourceBuilderContext, AuthenticatedContext, CloudLoadBalancer, Network)} method
+     * with the constructed cloud resources. It's purpose to actually create these resources on the cloud provider side.
      *
-     * @param context           Generic context object passed along with the flow to all methods. It is created by the {@link ResourceContextBuilder}.
-     * @param auth              Authenticated context is provided to be able to send the requests to the cloud provider.
-     * @param loadbalancer      Loadbalancer object with all information required tocreate and address the Resource to be built.
-     * @param buildableResource Resources created earlier by the {@link #create(ResourceBuilderContext, AuthenticatedContext, CloudLoadBalancer)}. If this
-     *                          builder is responsible to create the instance the list will contain 1 resource.
-     * @param cloudStack        The entire cloud stack object for deployment
+     * @param context            Generic context object passed along with the flow to all methods. It is created by the {@link ResourceContextBuilder}.
+     * @param auth               Authenticated context is provided to be able to send the requests to the cloud provider.
+     * @param loadBalancer       Loadbalancer object with all information required to create and address the Resource to be built.
+     * @param buildableResources Resources created earlier by the {@link #create(ResourceBuilderContext, AuthenticatedContext, CloudLoadBalancer, Network)}.
+     *                           If this builder is responsible to create the instance the list will contain 1 resource.
+     * @param cloudStack         The entire cloud stack object for deployment
      * @return Returns the created cloud resources which can be extended with extra information since the object itself is a dynamic model. These objects
      * will be passed along with the extra information if it's provided so later it can be used to track the status of the deployment.
      * @throws Exception Exception can be thrown if the resource creation request fails for some reason and then the resources will be rolled back.
      */
-
     List<CloudResource> build(C context, AuthenticatedContext auth, List<CloudResource> buildableResources,
             CloudLoadBalancer loadBalancer, CloudStack cloudStack)
             throws Exception;

@@ -7,6 +7,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.template.LoadBalancerResourceBuilder;
@@ -25,7 +26,7 @@ public class MockLoadBalancerResourceBuilder implements LoadBalancerResourceBuil
     }
 
     @Override
-    public List<CloudResource> create(ResourceBuilderContext context, AuthenticatedContext auth, CloudLoadBalancer loadBalancer) {
+    public List<CloudResource> create(ResourceBuilderContext context, AuthenticatedContext auth, CloudLoadBalancer loadBalancer, Network network) {
         return null;
     }
 

@@ -163,7 +163,7 @@ class GcpForwardingRuleResourceBuilderTest {
         targetGroupPortPairSetHashMap.put(new TargetGroupPortPair(80, 8080), Collections.emptySet());
         when(cloudLoadBalancer.getPortToTargetGroupMapping()).thenReturn(targetGroupPortPairSetHashMap);
 
-        List<CloudResource> cloudResources = underTest.create(gcpContext, authenticatedContext, cloudLoadBalancer);
+        List<CloudResource> cloudResources = underTest.create(gcpContext, authenticatedContext, cloudLoadBalancer, cloudStack.getNetwork());
 
         assertEquals(1, cloudResources.size());
         assertTrue(cloudResources.get(0).getName().startsWith("name-public-tcp-80"));
@@ -191,7 +191,7 @@ class GcpForwardingRuleResourceBuilderTest {
                 Collections.emptySet());
         when(cloudLoadBalancer.getPortToTargetGroupMapping()).thenReturn(targetGroupPortPairSetHashMap);
 
-        List<CloudResource> cloudResources = underTest.create(gcpContext, authenticatedContext, cloudLoadBalancer);
+        List<CloudResource> cloudResources = underTest.create(gcpContext, authenticatedContext, cloudLoadBalancer, cloudStack.getNetwork());
 
         List<CloudResource> forwardingRulesTcp8080 = cloudResources.stream()
                 .filter(cloudResource ->

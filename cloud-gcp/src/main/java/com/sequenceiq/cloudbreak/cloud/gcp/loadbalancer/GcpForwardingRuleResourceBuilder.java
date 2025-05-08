@@ -59,7 +59,7 @@ public class GcpForwardingRuleResourceBuilder extends AbstractGcpLoadBalancerBui
     private GcpLoadBalancerTypeConverter gcpLoadBalancerTypeConverter;
 
     @Override
-    public List<CloudResource> create(GcpContext context, AuthenticatedContext auth, CloudLoadBalancer loadBalancer) {
+    public List<CloudResource> create(GcpContext context, AuthenticatedContext auth, CloudLoadBalancer loadBalancer, Network network) {
         Map<HealthProbeParameters, GcpLBTrafficsMap> hcPortToTrafficPorts = new HashMap<>();
         loadBalancer.getPortToTargetGroupMapping().keySet().forEach(targetGroupPortPair -> hcPortToTrafficPorts
                 .computeIfAbsent(targetGroupPortPair.getHealthProbeParameters(), lbHealthCheck -> new GcpLBTrafficsMap())

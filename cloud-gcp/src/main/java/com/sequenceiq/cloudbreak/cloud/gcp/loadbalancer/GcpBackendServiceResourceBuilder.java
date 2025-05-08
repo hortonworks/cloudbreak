@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.HealthProbeParameters;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.NetworkProtocol;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
@@ -66,7 +67,7 @@ public class GcpBackendServiceResourceBuilder extends AbstractGcpLoadBalancerBui
     private GcpLoadBalancerTypeConverter gcpLoadBalancerTypeConverter;
 
     @Override
-    public List<CloudResource> create(GcpContext context, AuthenticatedContext auth, CloudLoadBalancer loadBalancer) {
+    public List<CloudResource> create(GcpContext context, AuthenticatedContext auth, CloudLoadBalancer loadBalancer, Network network) {
         Map<HealthProbeParameters, List<TargetGroupPortPair>> hcPortToTrafficPorts = new HashMap<>();
         loadBalancer.getPortToTargetGroupMapping().keySet().forEach(targetGroupPortPair -> {
             hcPortToTrafficPorts.computeIfAbsent(targetGroupPortPair.getHealthProbeParameters(), healthParams -> new ArrayList<>()).add(targetGroupPortPair);

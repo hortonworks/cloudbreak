@@ -5,13 +5,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -100,4 +104,16 @@ class GcpStackUtilTest {
         assertEquals("bucketname", result);
     }
 
+    @Test
+    void testGetGroupClusterTag() {
+        CloudContext cloudContext = mock(CloudContext.class);
+        when(cloudContext.getId()).thenReturn(12345L);
+
+        Group group = mock(Group.class);
+        when(group.getName()).thenReturn("TestGroup");
+
+        String result = gcpStackUtil.getGroupClusterTag(cloudContext, group);
+
+        assertEquals("testgroup12345", result);
+    }
 }

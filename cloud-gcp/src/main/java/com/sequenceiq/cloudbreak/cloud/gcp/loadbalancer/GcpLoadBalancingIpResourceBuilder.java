@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -37,7 +38,7 @@ public class GcpLoadBalancingIpResourceBuilder extends AbstractGcpLoadBalancerBu
     private GcpLoadBalancerTypeConverter gcpLoadBalancerTypeConverter;
 
     @Override
-    public List<CloudResource> create(GcpContext context, AuthenticatedContext auth, CloudLoadBalancer loadBalancer) {
+    public List<CloudResource> create(GcpContext context, AuthenticatedContext auth, CloudLoadBalancer loadBalancer, Network network) {
         Integer hcPort = loadBalancer.getPortToTargetGroupMapping().keySet().stream().map(TargetGroupPortPair::getHealthCheckPort).findFirst().orElse(KNOX_PORT);
         String resourceName =
                 getResourceNameService().instance(auth.getCloudContext().getName(), loadBalancer.getType().name(), hcPort.toString());

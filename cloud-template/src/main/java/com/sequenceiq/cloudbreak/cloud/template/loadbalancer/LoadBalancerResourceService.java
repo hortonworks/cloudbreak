@@ -59,7 +59,7 @@ public class LoadBalancerResourceService {
                     break;
                 }
                 try {
-                    List<CloudResource> buildableResources = builder.create(context, auth, loadBalancer);
+                    List<CloudResource> buildableResources = builder.create(context, auth, loadBalancer, stack.getNetwork());
                     createResource(auth, buildableResources);
                     LOGGER.debug("Building resources [{}], with {} for {}",
                             buildableResources.stream().map(CloudResource::getName).collect(Collectors.joining(",")),

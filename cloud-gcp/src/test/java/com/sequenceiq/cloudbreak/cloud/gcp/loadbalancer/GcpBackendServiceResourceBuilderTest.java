@@ -133,7 +133,7 @@ class GcpBackendServiceResourceBuilderTest {
         targetGroupPortPairSetHashMap.put(new TargetGroupPortPair(80, 8080), Collections.emptySet());
         when(cloudLoadBalancer.getPortToTargetGroupMapping()).thenReturn(targetGroupPortPairSetHashMap);
 
-        List<CloudResource> cloudResources = underTest.create(gcpContext, authenticatedContext, cloudLoadBalancer);
+        List<CloudResource> cloudResources = underTest.create(gcpContext, authenticatedContext, cloudLoadBalancer, cloudStack.getNetwork());
 
         assertTrue(cloudResources.get(0).getName().startsWith("name-public-8080"));
         assertEquals(1, cloudResources.size());
@@ -155,7 +155,7 @@ class GcpBackendServiceResourceBuilderTest {
         targetGroupPortPairSetHashMap.put(new TargetGroupPortPair(83, NetworkProtocol.UDP, httpsHealth), Collections.emptySet());
         when(cloudLoadBalancer.getPortToTargetGroupMapping()).thenReturn(targetGroupPortPairSetHashMap);
 
-        List<CloudResource> cloudResources = underTest.create(gcpContext, authenticatedContext, cloudLoadBalancer);
+        List<CloudResource> cloudResources = underTest.create(gcpContext, authenticatedContext, cloudLoadBalancer, cloudStack.getNetwork());
 
         List<CloudResource> hc8080Resources = cloudResources.stream()
                 .filter(cloudResource -> cloudResource.getParameter("hcport", HealthProbeParameters.class).getPort() == 8080)

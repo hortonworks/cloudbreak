@@ -361,7 +361,11 @@ public class GcpStackUtil {
     }
 
     public String getGroupClusterTag(CloudContext cloudContext, Group group) {
-        return group.getName().toLowerCase(Locale.ROOT).replaceAll("[^A-Za-z0-9 ]", "") + cloudContext.getId();
+        return getGroupClusterTag(cloudContext, group.getName());
+    }
+
+    public String getGroupClusterTag(CloudContext cloudContext, String groupName) {
+        return groupName.toLowerCase(Locale.ROOT).replaceAll("[^A-Za-z0-9 ]", "") + cloudContext.getId();
     }
 
     public String getGroupTypeTag(InstanceGroupType type) {

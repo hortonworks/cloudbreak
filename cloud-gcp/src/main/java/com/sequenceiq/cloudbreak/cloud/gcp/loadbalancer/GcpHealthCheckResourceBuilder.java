@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.HealthProbeParameters;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.NetworkProtocol;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -39,7 +40,7 @@ public class GcpHealthCheckResourceBuilder extends AbstractGcpLoadBalancerBuilde
     private static final int ORDER = 1;
 
     @Override
-    public List<CloudResource> create(GcpContext context, AuthenticatedContext auth, CloudLoadBalancer loadBalancer) {
+    public List<CloudResource> create(GcpContext context, AuthenticatedContext auth, CloudLoadBalancer loadBalancer, Network network) {
         return loadBalancer.getPortToTargetGroupMapping().keySet().stream()
                 .map(TargetGroupPortPair::getHealthProbeParameters)
                 .distinct()

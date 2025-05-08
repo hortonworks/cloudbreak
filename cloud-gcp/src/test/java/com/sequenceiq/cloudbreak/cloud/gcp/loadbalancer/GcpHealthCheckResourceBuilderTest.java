@@ -102,7 +102,7 @@ class GcpHealthCheckResourceBuilderTest {
         targetGroupPortPairSetHashMap.put(new TargetGroupPortPair(80, 8080), Collections.emptySet());
         when(cloudLoadBalancer.getPortToTargetGroupMapping()).thenReturn(targetGroupPortPairSetHashMap);
 
-        List<CloudResource> cloudResources = underTest.create(gcpContext, authenticatedContext, cloudLoadBalancer);
+        List<CloudResource> cloudResources = underTest.create(gcpContext, authenticatedContext, cloudLoadBalancer, cloudStack.getNetwork());
 
         assertTrue(cloudResources.get(0).getName().startsWith("name-public-8080"));
         assertEquals(1, cloudResources.size());
