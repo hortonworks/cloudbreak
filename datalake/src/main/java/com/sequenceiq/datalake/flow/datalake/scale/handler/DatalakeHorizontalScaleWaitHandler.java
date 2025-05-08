@@ -41,8 +41,10 @@ public class DatalakeHorizontalScaleWaitHandler extends EventSenderAwareHandler<
     @Inject
     private SdxService sdxService;
 
-    protected DatalakeHorizontalScaleWaitHandler(EventSender eventSender) {
+    protected DatalakeHorizontalScaleWaitHandler(CloudbreakPoller cloudbreakPoller, SdxService sdxService, EventSender eventSender) {
         super(eventSender);
+        this.cloudbreakPoller = cloudbreakPoller;
+        this.sdxService = sdxService;
     }
 
     @Override

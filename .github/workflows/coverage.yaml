@@ -67,9 +67,9 @@ jobs:
           export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
           export SONAR_TOKEN=$(echo "${{ steps.build_secrets.outputs.SONAR_TOKEN}}")
           export SONAR_URL=https://sonarqube.infra.cloudera.com
-          export SONAR_COVERAGE_EXCLUSION_COMMON="**/proto/**,**/generated/**,**/flow/**/*State.java,**/flow/**/event/*Event.java,**/flow*/**/*Configs.java,**/*Repository.java,**/configuration/*Properties.java,**/configuration/**/*Config.java,**/domain/**"
+          export SONAR_COVERAGE_EXCLUSION_COMMON="**/proto/**,**/generated/**,**/flow/**/*State.java,**/flow/**/event/*Event.java,**/flow/**/event/**/*Event.java,**/flow*/**/*Config.java,**/*Repository.java,**/configuration/*Properties.java,**/configuration/**/*Config.java,**/domain/**,**/Aspects/**"
           export CORE_SONAR_COVERAGE_EXCLUSION="${SONAR_COVERAGE_EXCLUSION_COMMON},**/reactor/api/event/**,**/flow2/**/*Config.java,**/flow2/**/*State.java,**/flow2/**/*Event.java"
-          export DL_SONAR_COVERAGE_EXCLUSION="${SONAR_COVERAGE_EXCLUSION_COMMON},**datalake/configuration/**"
+          export DL_SONAR_COVERAGE_EXCLUSION="${SONAR_COVERAGE_EXCLUSION_COMMON},**/datalake/configuration/**"
           export ENV_SONAR_COVERAGE_EXCLUSION="${SONAR_COVERAGE_EXCLUSION_COMMON}"
           export FREEIPA_SONAR_COVERAGE_EXCLUSION="${SONAR_COVERAGE_EXCLUSION_COMMON}"
           export REMOTE_ENV_SONAR_COVERAGE_EXCLUSION="${SONAR_COVERAGE_EXCLUSION_COMMON},**/config/**,**/flow/**"
