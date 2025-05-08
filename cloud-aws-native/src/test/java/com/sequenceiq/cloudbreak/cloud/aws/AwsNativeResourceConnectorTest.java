@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -32,7 +33,6 @@ import com.sequenceiq.cloudbreak.cloud.aws.resource.loadbalancer.AwsNativeLoadBa
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
-import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -42,8 +42,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
-import com.sequenceiq.cloudbreak.cloud.model.Location;
-import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
@@ -148,8 +146,6 @@ public class AwsNativeResourceConnectorTest {
         when(contextBuilders.get(any())).thenReturn(resourceContextBuilder);
         when(resourceContextBuilder.contextInit(any(), any(), any(), anyBoolean())).thenReturn(awsContext);
         when(networkResourceService.getNetworkResources(any(), any())).thenReturn(Collections.emptyList());
-        when(commonAwsClient.createElasticLoadBalancingClient(any(), any())).thenReturn(elasticLoadBalancingClient);
-        when(cloudContext.getLocation()).thenReturn(Location.location(Region.region(REGION_NAME), AvailabilityZone.availabilityZone(AZ)));
         ArrayList<Group> groups = new ArrayList<>();
         Group group1 = mock(Group.class);
         List<CloudInstance> greoup1Instances = new ArrayList<>();
@@ -170,7 +166,7 @@ public class AwsNativeResourceConnectorTest {
 
         underTest.upscale(ac, cloudStack, resources, adjustmentTypeWithThreshold);
 
-        verify(loadBalancerLaunchService).launchLoadBalancerResources(ac, cloudStack, persistenceNotifier, elasticLoadBalancingClient, true);
+        verifyNoInteractions(loadBalancerLaunchService);
         InOrder inOrder = Mockito.inOrder(cloudResourceHelper);
         ArgumentCaptor<List> listArgumentCaptor = ArgumentCaptor.forClass(List.class);
         inOrder.verify(cloudResourceHelper, times(1)).updateDeleteOnTerminationFlag(listArgumentCaptor.capture(), eq(false), eq(cloudContext));

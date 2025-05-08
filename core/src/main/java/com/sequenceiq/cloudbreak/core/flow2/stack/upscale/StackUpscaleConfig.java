@@ -33,6 +33,8 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEve
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPSCALE_INVALID_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPSCALE_SALT_INVALID_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPSCALE_SALT_VALID_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPSCALE_UPDATE_LOAD_BALANCERS_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPSCALE_UPDATE_LOAD_BALANCERS_FAILURE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPSCALE_UPDATE_USERDATA_SECRETS_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPSCALE_UPDATE_USERDATA_SECRETS_FAILURE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPSCALE_UPDATE_USERDATA_SECRETS_FINISHED_EVENT;
@@ -56,6 +58,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleSta
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.UPSCALE_IMAGE_FALLBACK_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.UPSCALE_PREVALIDATION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.UPSCALE_SALT_PREVALIDATION_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.UPSCALE_UPDATE_LOAD_BALANCERS_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.UPSCALE_UPDATE_USERDATA_SECRETS_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.UPSCALE_UPDATE_USERDATA_SECRETS_STATE;
 
@@ -91,8 +94,10 @@ public class StackUpscaleConfig extends StackStatusFinalizerAbstractFlowConfig<S
                     .failureEvent(ADD_INSTANCES_FINISHED_FAILURE_EVENT)
                     .from(EXTEND_METADATA_STATE).to(EXTEND_METADATA_FINISHED_STATE).event(EXTEND_METADATA_FINISHED_EVENT)
                     .failureEvent(EXTEND_METADATA_FAILURE_EVENT)
-                    .from(EXTEND_METADATA_FINISHED_STATE).to(UPSCALE_UPDATE_USERDATA_SECRETS_STATE).event(UPSCALE_UPDATE_USERDATA_SECRETS_EVENT)
+                    .from(EXTEND_METADATA_FINISHED_STATE).to(UPSCALE_UPDATE_LOAD_BALANCERS_STATE).event(UPSCALE_UPDATE_LOAD_BALANCERS_EVENT)
                     .failureEvent(EXTEND_METADATA_FINISHED_FAILURE_EVENT)
+                    .from(UPSCALE_UPDATE_LOAD_BALANCERS_STATE).to(UPSCALE_UPDATE_USERDATA_SECRETS_STATE).event(UPSCALE_UPDATE_USERDATA_SECRETS_EVENT)
+                    .failureEvent(UPSCALE_UPDATE_LOAD_BALANCERS_FAILURE_EVENT)
                     .from(UPSCALE_UPDATE_USERDATA_SECRETS_STATE).to(UPSCALE_UPDATE_USERDATA_SECRETS_FINISHED_STATE)
                     .event(UPSCALE_UPDATE_USERDATA_SECRETS_FINISHED_EVENT).failureEvent(UPSCALE_UPDATE_USERDATA_SECRETS_FAILURE_EVENT)
                     .from(UPSCALE_UPDATE_USERDATA_SECRETS_FINISHED_STATE).to(RE_REGISTER_WITH_CLUSTER_PROXY_STATE).event(BOOTSTRAP_NEW_NODES_EVENT)

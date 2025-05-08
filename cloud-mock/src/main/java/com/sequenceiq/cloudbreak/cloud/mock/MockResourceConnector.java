@@ -359,4 +359,9 @@ public class MockResourceConnector implements ResourceConnector {
     @Override
     public void updateDatabaseRootPassword(AuthenticatedContext authenticatedContext, DatabaseStack databaseStack, String newPassword) {
     }
+
+    @Override
+    public ResourceType getInstanceResourceType() {
+        return ResourceType.MOCK_INSTANCE;
+    }
 }
