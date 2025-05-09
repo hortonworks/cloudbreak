@@ -1,7 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.enableselinux.handler;
 
-import static com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaEnableSeLinuxStateSelectors.FAILED_ENABLE_SELINUX_FREEIPA_EVENT;
-import static com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaEnableSeLinuxStateSelectors.FINISH_ENABLE_SELINUX_FREEIPA_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaModifySeLinuxStateSelectors.FAILED_MODIFY_SELINUX_FREEIPA_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaModifySeLinuxStateSelectors.FINISH_MODIFY_SELINUX_FREEIPA_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -24,16 +24,16 @@ import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaEnableSeLinuxHandlerEvent;
+import com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaModifySeLinuxHandlerEvent;
 import com.sequenceiq.freeipa.service.SecurityConfigService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaOrchestrationConfigService;
-import com.sequenceiq.freeipa.service.stack.SeLinuxEnablementService;
+import com.sequenceiq.freeipa.service.stack.SeLinuxModificationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @ExtendWith(MockitoExtension.class)
-public class FreeIpaEnableSeLinuxHandlerTest {
+public class FreeIpaModifySeLinuxHandlerTest {
 
-    private FreeIpaEnableSeLinuxHandlerEvent event;
+    private FreeIpaModifySeLinuxHandlerEvent event;
 
     @Mock
     private StackService stackService;
@@ -45,29 +45,29 @@ public class FreeIpaEnableSeLinuxHandlerTest {
     private FreeIpaOrchestrationConfigService freeIpaOrchestrationConfigService;
 
     @Mock
-    private SeLinuxEnablementService seLinuxEnablementService;
+    private SeLinuxModificationService seLinuxModificationService;
 
     @InjectMocks
-    private FreeIpaEnableSeLinuxHandler underTest;
+    private FreeIpaModifySeLinuxHandler underTest;
 
     @Mock
     private Stack stack;
 
     @BeforeEach
     void setUp() {
-        String selector = EventSelectorUtil.selector(FreeIpaEnableSeLinuxHandler.class);
-        event = new FreeIpaEnableSeLinuxHandlerEvent(1L, "test-op");
+        String selector = EventSelectorUtil.selector(FreeIpaModifySeLinuxHandler.class);
+        event = new FreeIpaModifySeLinuxHandlerEvent(1L, "test-op", SeLinux.ENFORCING);
     }
 
     @Test
     void testSelector() {
-        assertEquals(EventSelectorUtil.selector(FreeIpaEnableSeLinuxHandlerEvent.class), underTest.selector());
+        assertEquals(EventSelectorUtil.selector(FreeIpaModifySeLinuxHandlerEvent.class), underTest.selector());
     }
 
     @Test
     void testDefaultFailureEvent() {
         Selectable response = underTest.defaultFailureEvent(1L, new Exception("test"), new Event<>(event));
-        assertEquals(FAILED_ENABLE_SELINUX_FREEIPA_EVENT.selector(), response.getSelector());
+        assertEquals(FAILED_MODIFY_SELINUX_FREEIPA_EVENT.selector(), response.getSelector());
         assertEquals("test", response.getException().getMessage());
     }
 
@@ -80,10 +80,10 @@ public class FreeIpaEnableSeLinuxHandlerTest {
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
         Selectable response = underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
         assertEquals(1L, response.getResourceId());
-        assertEquals(FINISH_ENABLE_SELINUX_FREEIPA_EVENT.selector(), response.getSelector());
+        assertEquals(FINISH_MODIFY_SELINUX_FREEIPA_EVENT.selector(), response.getSelector());
         verify(securityConfigService).updateSeLinuxSecurityConfig(11L, SeLinux.ENFORCING);
         verify(freeIpaOrchestrationConfigService).configureOrchestrator(1L);
-        verify(seLinuxEnablementService).enableSeLinuxOnAllNodes(stack);
+        verify(seLinuxModificationService).modifySeLinuxOnAllNodes(stack);
     }
 
     @Test
@@ -96,10 +96,10 @@ public class FreeIpaEnableSeLinuxHandlerTest {
         doThrow(new CloudbreakOrchestratorFailedException("test")).when(freeIpaOrchestrationConfigService).configureOrchestrator(1L);
         Selectable response = underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
         assertEquals(1L, response.getResourceId());
-        assertEquals(FAILED_ENABLE_SELINUX_FREEIPA_EVENT.selector(), response.getSelector());
+        assertEquals(FAILED_MODIFY_SELINUX_FREEIPA_EVENT.selector(), response.getSelector());
         assertEquals("test", response.getException().getMessage());
         verify(securityConfigService).updateSeLinuxSecurityConfig(11L, SeLinux.ENFORCING);
         verify(freeIpaOrchestrationConfigService).configureOrchestrator(1L);
-        verifyNoInteractions(seLinuxEnablementService);
+        verifyNoInteractions(seLinuxModificationService);
     }
 }

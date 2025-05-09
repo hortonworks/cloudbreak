@@ -106,7 +106,7 @@ import com.sequenceiq.freeipa.service.stack.FreeipaInstanceMetadataUpdateService
 import com.sequenceiq.freeipa.service.stack.FreeipaModifyProxyConfigService;
 import com.sequenceiq.freeipa.service.stack.RepairInstancesService;
 import com.sequenceiq.freeipa.service.stack.RootVolumeUpdateService;
-import com.sequenceiq.freeipa.service.stack.SeLinuxEnablementService;
+import com.sequenceiq.freeipa.service.stack.SeLinuxModificationService;
 import com.sequenceiq.freeipa.util.CrnService;
 
 @Controller
@@ -206,7 +206,7 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     private RootVolumeUpdateService rootVolumeUpdateService;
 
     @Inject
-    private SeLinuxEnablementService seLinuxEnablementService;
+    private SeLinuxModificationService seLinuxModificationService;
 
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
@@ -529,6 +529,9 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     public ModifySeLinuxResponse modifySelinuxByCrn(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @NotEmpty String environmentCrn,
             @NotNull SeLinux selinuxMode) {
-        return seLinuxEnablementService.setSeLinuxToEnforcingByCrn(environmentCrn, ThreadBasedUserCrnProvider.getAccountId());
+        if (selinuxMode.equals(SeLinux.DISABLED)) {
+            throw new BadRequestException("Cannot set SELinux mode value to DISABLED.");
+        }
+        return seLinuxModificationService.modifySeLinuxByCrn(environmentCrn, ThreadBasedUserCrnProvider.getAccountId(), selinuxMode);
     }
 }
