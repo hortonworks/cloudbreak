@@ -555,7 +555,6 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
     public StackV4Request getStackRequestByNameOrCrnInWorkspaceId(NameOrCrn nameOrCrn, Long workspaceId) {
         try {
             return transactionService.required(() -> {
-                ShowTerminatedClustersAfterConfig showTerminatedClustersAfterConfig = showTerminatedClusterConfigService.get();
                 Optional<Stack> stack = findByNameOrCrnAndWorkspaceIdWithLists(nameOrCrn, workspaceId);
                 if (stack.isEmpty()) {
                     throw new NotFoundException(format(STACK_NOT_FOUND_BY_NAME_OR_CRN_EXCEPTION_MESSAGE, nameOrCrn));

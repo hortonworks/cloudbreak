@@ -13,18 +13,25 @@ import static com.sequenceiq.common.api.type.ResourceType.AZURE_NETWORK_INTERFAC
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_PRIVATE_DNS_ZONE;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_PRIVATE_ENDPOINT;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_PUBLIC_IP;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_RESOURCE_GROUP;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_SECURITY_GROUP;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_STORAGE;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_SUBNET;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_VIRTUAL_NETWORK_LINK;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -42,6 +49,7 @@ import com.azure.resourcemanager.compute.models.OSDisk;
 import com.azure.resourcemanager.compute.models.StorageAccountTypes;
 import com.azure.resourcemanager.compute.models.StorageProfile;
 import com.azure.resourcemanager.compute.models.VirtualMachine;
+import com.azure.resourcemanager.network.models.Subnet;
 import com.azure.resourcemanager.resources.models.Deployment;
 import com.azure.resourcemanager.resources.models.DeploymentOperation;
 import com.azure.resourcemanager.resources.models.DeploymentOperations;
@@ -51,13 +59,17 @@ import com.sequenceiq.cloudbreak.cloud.azure.client.AzureListResult;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureListResultFactory;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -297,4 +309,83 @@ public class AzureCloudResourceServiceTest {
                 .build();
     }
 
+    @Test
+    public void testCollectAndSaveNetworkAndSubnetNoSubnetsProvided() {
+        String resourceGroupName = "testResourceGroup";
+        String virtualNetwork = "testVNet";
+        List<String> subnetNameList = new ArrayList<>();
+        PersistenceNotifier notifier = mock(PersistenceNotifier.class);
+        CloudContext cloudContext = mock(CloudContext.class);
+        when(cloudContext.getPlatform()).thenReturn(Platform.platform("AZURE"));
+        Network network = mock(Network.class);
+        AzureClient client = mock(AzureClient.class);
+
+        Subnet mockedSubnet = mock(Subnet.class);
+        when(mockedSubnet.name()).thenReturn("defaultSubnet");
+        com.azure.resourcemanager.network.models.Network mockedNetwork = mock(com.azure.resourcemanager.network.models.Network.class);
+        when(mockedSubnet.parent()).thenReturn(mockedNetwork);
+        when(mockedNetwork.name()).thenReturn(virtualNetwork);
+        Map subnets = mock(HashMap.class);
+        when(client.getSubnets(resourceGroupName, virtualNetwork)).thenReturn(subnets);
+        when(subnets.values()).thenReturn(List.of(mockedSubnet));
+
+        List<CloudResource> resources = underTest.collectAndSaveNetworkAndSubnet(
+                resourceGroupName, virtualNetwork, notifier, cloudContext, subnetNameList, network, client);
+
+        assertEquals(3, resources.size());
+        assertEquals("testResourceGroup", resources.get(0).getName());
+        assertEquals(AZURE_RESOURCE_GROUP, resources.get(0).getType());
+        assertEquals("testVNet", resources.get(1).getName());
+        assertEquals(AZURE_NETWORK, resources.get(1).getType());
+        assertEquals("defaultSubnet", resources.get(2).getName());
+        assertEquals(AZURE_SUBNET, resources.get(2).getType());
+    }
+
+    @Test
+    public void testCollectAndSaveNetworkAndSubnetWithProvidedSubnets() {
+        String resourceGroupName = "testResourceGroup";
+        String virtualNetwork = "testVNet";
+        List<String> subnetNameList = List.of("subnet1", "subnet2");
+        PersistenceNotifier notifier = mock(PersistenceNotifier.class);
+        CloudContext cloudContext = mock(CloudContext.class);
+        when(cloudContext.getPlatform()).thenReturn(Platform.platform("AZURE"));
+        Network network = mock(Network.class);
+        AzureClient client = mock(AzureClient.class);
+
+        when(azureUtils.getCustomNetworkId(network)).thenReturn(virtualNetwork);
+        when(azureUtils.getCustomResourceGroupName(network)).thenReturn(resourceGroupName);
+
+        List<CloudResource> resources = underTest.collectAndSaveNetworkAndSubnet(
+                resourceGroupName, virtualNetwork, notifier, cloudContext, subnetNameList, network, client);
+
+        assertEquals(4, resources.size());
+        assertEquals("testResourceGroup", resources.get(0).getName());
+        assertEquals(AZURE_RESOURCE_GROUP, resources.get(0).getType());
+        assertEquals("testVNet", resources.get(1).getName());
+        assertEquals(AZURE_NETWORK, resources.get(1).getType());
+        assertEquals("subnet1", resources.get(2).getName());
+        assertEquals(AZURE_SUBNET, resources.get(2).getType());
+        assertEquals("subnet2", resources.get(3).getName());
+        assertEquals(AZURE_SUBNET, resources.get(3).getType());
+    }
+
+    @Test
+    public void testCollectAndSaveNetworkAndSubnetVerifyNotifierCalls() {
+        String resourceGroupName = "testResourceGroup";
+        String virtualNetwork = "testVNet";
+        List<String> subnetNameList = List.of("subnet1");
+        PersistenceNotifier notifier = mock(PersistenceNotifier.class);
+        CloudContext cloudContext = mock(CloudContext.class);
+        when(cloudContext.getPlatform()).thenReturn(Platform.platform("AZURE"));
+        Network network = mock(Network.class);
+        AzureClient client = mock(AzureClient.class);
+
+        when(azureUtils.getCustomNetworkId(network)).thenReturn(virtualNetwork);
+        when(azureUtils.getCustomResourceGroupName(network)).thenReturn(resourceGroupName);
+
+        underTest.collectAndSaveNetworkAndSubnet(
+                resourceGroupName, virtualNetwork, notifier, cloudContext, subnetNameList, network, client);
+
+        verify(notifier, times(3)).notifyAllocation(any(CloudResource.class), eq(cloudContext));
+    }
 }
