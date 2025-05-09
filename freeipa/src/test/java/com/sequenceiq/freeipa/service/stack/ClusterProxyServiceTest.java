@@ -6,8 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,7 +32,6 @@ import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationRequest;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationResponse;
 import com.sequenceiq.cloudbreak.clusterproxy.TunnelEntry;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
@@ -42,9 +39,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.SecurityConfigService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
-import com.sequenceiq.freeipa.service.polling.clusterproxy.ServiceEndpointHealthPollerObject;
 import com.sequenceiq.freeipa.util.ClusterProxyServiceAvailabilityChecker;
-import com.sequenceiq.freeipa.util.HealthCheckAvailabilityChecker;
 
 @ExtendWith(MockitoExtension.class)
 public class ClusterProxyServiceTest {
@@ -95,12 +90,6 @@ public class ClusterProxyServiceTest {
 
     @Mock
     private FreeIpaService freeIpaService;
-
-    @Mock
-    private PollingService<ServiceEndpointHealthPollerObject> serviceEndpointHealthPollingService;
-
-    @Mock
-    private HealthCheckAvailabilityChecker healthCheckAvailabilityChecker;
 
     @Mock
     private ClusterProxyConfiguration clusterProxyConfiguration;
@@ -173,9 +162,7 @@ public class ClusterProxyServiceTest {
         when(gatewayConfigService.getNotDeletedGatewayConfigs(aStack)).thenReturn(List.of(gatewayConfig1, gatewayConfig2));
         when(clusterProxyRegistrationClient.registerConfig(any())).thenReturn(configRegResponse);
         when(clusterProxyServiceAvailabilityChecker.isDnsBasedServiceNameAvailable(aStack)).thenReturn(true);
-        when(serviceEndpointHealthPollingService.pollWithTimeout(any(), any(), anyLong(), anyInt(), anyInt())).thenReturn(null);
         when(stackUpdater.updateClusterProxyRegisteredFlag(aStack, true)).thenReturn(aStack);
-        when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(aStack)).thenReturn(true);
 
         ReflectionTestUtils.setField(underTest, "intervalInSecV2", INTERVAL_IN_SEC_V_2);
 

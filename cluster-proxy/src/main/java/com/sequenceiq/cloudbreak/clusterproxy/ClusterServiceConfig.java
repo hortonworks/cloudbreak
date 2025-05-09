@@ -27,23 +27,19 @@ public class ClusterServiceConfig {
     @JsonProperty
     private final ClientCertificate clientCertificate;
 
-    @JsonProperty
-    private final ClusterServiceHealthCheck healthCheck;
-
     @JsonCreator
     public ClusterServiceConfig(String serviceName, List<String> endpoints, AuthenticationType authenticationType, boolean removeProxyContentType,
-            List<ClusterServiceCredential> credentials, ClientCertificate clientCertificate, ClusterServiceHealthCheck healthCheck) {
+            List<ClusterServiceCredential> credentials, ClientCertificate clientCertificate) {
         this.name = serviceName;
         this.endpoints = endpoints;
         this.authenticationType = authenticationType;
         this.removeProxyContentType = removeProxyContentType;
         this.credentials = credentials;
         this.clientCertificate = clientCertificate;
-        this.healthCheck = healthCheck;
     }
 
     public ClusterServiceConfig(String serviceName, List<String> endpoints, List<ClusterServiceCredential> credentials, ClientCertificate clientCertificate) {
-        this(serviceName, endpoints, null, false, credentials, clientCertificate, null);
+        this(serviceName, endpoints, null, false, credentials, clientCertificate);
     }
 
     //CHECKSTYLE:OFF: CyclomaticComplexity
@@ -61,14 +57,13 @@ public class ClusterServiceConfig {
                 Objects.equals(endpoints, that.endpoints) &&
                 Objects.equals(authenticationType, that.authenticationType) &&
                 Objects.equals(credentials, that.credentials) &&
-                Objects.equals(clientCertificate, that.clientCertificate) &&
-                Objects.equals(healthCheck, that.healthCheck);
+                Objects.equals(clientCertificate, that.clientCertificate);
     }
     //CHECKSTYLE:ON
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, endpoints, authenticationType, removeProxyContentType, credentials, clientCertificate, healthCheck);
+        return Objects.hash(name, endpoints, authenticationType, removeProxyContentType, credentials, clientCertificate);
     }
 
     @Override
@@ -80,7 +75,6 @@ public class ClusterServiceConfig {
                 .add("removeProxyContentType=" + removeProxyContentType)
                 .add("credentials=" + credentials)
                 .add("clientCertificate=" + clientCertificate)
-                .add("healthCheck=" + healthCheck)
                 .toString();
     }
 }

@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.clusterproxy;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class ReadConfigResponse {
 
@@ -86,13 +85,5 @@ public class ReadConfigResponse {
                 ", knoxSecretRef='" + knoxSecretRef + '\'' +
                 ", services=" + services +
                 '}';
-    }
-
-    public String toHumanReadableString() {
-        return "ClusterProxy for crn: [" + crn + "], " +
-                "services: [" + services.stream().map(ReadConfigService::toHumanReadableString).collect(Collectors.joining(", ")) + "], " +
-                "aliases: [" + aliases + "], " +
-                "Knox secret location: [" + knoxSecretRef + "]" +
-                "Knox URI: [" + uriOfKnox + "]";
     }
 }

@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.clusterproxy.TunnelEntry;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultConfigException;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultSecret;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -40,8 +39,6 @@ import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.SecurityConfigService;
-import com.sequenceiq.freeipa.service.polling.clusterproxy.ServiceEndpointHealthListenerTask;
-import com.sequenceiq.freeipa.service.polling.clusterproxy.ServiceEndpointHealthPollerObject;
 import com.sequenceiq.freeipa.util.ClusterProxyServiceAvailabilityChecker;
 import com.sequenceiq.freeipa.util.HealthCheckAvailabilityChecker;
 import com.sequenceiq.freeipa.vault.FreeIpaCertVaultComponent;
@@ -57,19 +54,11 @@ public class ClusterProxyService {
 
     private static final String NGINX_PROTOCOL = "https";
 
-    private static final int MILLIS_PER_SEC = 1000;
-
     @Value("${clusterProxy.healthCheckV1.intervalInSec}")
     private int intervalInSecV1;
 
     @Value("${clusterProxy.healthCheckV2.intervalInSec}")
     private int intervalInSecV2;
-
-    @Value("${clusterProxy.maxAttempts}")
-    private int maxAttempts;
-
-    @Value("${clusterProxy.maxFailure}")
-    private int maxFailure;
 
     @Inject
     private StackService stackService;
@@ -96,43 +85,36 @@ public class ClusterProxyService {
     private SecurityConfigService securityConfigService;
 
     @Inject
-    private PollingService<ServiceEndpointHealthPollerObject> serviceEndpointHealthPollingService;
-
-    @Inject
-    private ServiceEndpointHealthListenerTask serviceEndpointHealthListenerTask;
-
-    @Inject
     private HealthCheckAvailabilityChecker healthCheckAvailabilityChecker;
 
     @Inject
     private ClusterProxyServiceAvailabilityChecker clusterProxyServiceAvailabilityChecker;
 
     public Optional<ConfigRegistrationResponse> registerFreeIpa(String accountId, String environmentCrn) {
-        return registerFreeIpa(stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId), null, false, false);
+        return registerFreeIpa(stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId), null, false);
     }
 
     public Optional<ConfigRegistrationResponse> registerFreeIpa(Long stackId) {
-        return registerFreeIpa(stackService.getStackById(stackId), null, false, false);
+        return registerFreeIpa(stackService.getStackById(stackId), null, false);
     }
 
     public Optional<ConfigRegistrationResponse> updateFreeIpaRegistrationAndWait(Long stackId, List<String> instanceIdsToRegister) {
-        return registerFreeIpa(stackService.getStackById(stackId), instanceIdsToRegister, false, true);
+        return registerFreeIpa(stackService.getStackById(stackId), instanceIdsToRegister, false);
     }
 
     public Optional<ConfigRegistrationResponse> registerFreeIpaForBootstrap(Long stackId) {
-        return registerFreeIpa(stackService.getStackById(stackId), null, true, false);
+        return registerFreeIpa(stackService.getStackById(stackId), null, true);
     }
 
-    private Optional<ConfigRegistrationResponse> registerFreeIpa(Stack stack, List<String> instanceIdsToRegister, boolean bootstrap,
-            boolean waitForGoodHealth) {
+    private Optional<ConfigRegistrationResponse> registerFreeIpa(Stack stack, List<String> instanceIdsToRegister, boolean bootstrap) {
         MDCBuilder.buildMdcContext(stack);
         if (!clusterProxyEnablementService.isClusterProxyApplicable(stack.getCloudPlatform())) {
             LOGGER.debug("Cluster Proxy integration disabled. Skipping registering FreeIpa [{}]", stack);
             return Optional.empty();
         }
 
-        LOGGER.debug("Registering freeipa with cluster-proxy: Environment CRN = [{}], Stack CRN = [{}], bootstrap: [{}], waitForGoodHealth: [{}]",
-                stack.getEnvironmentCrn(), stack.getResourceCrn(), bootstrap, waitForGoodHealth);
+        LOGGER.debug("Registering freeipa with cluster-proxy: Environment CRN = [{}], Stack CRN = [{}], bootstrap: [{}]",
+                stack.getEnvironmentCrn(), stack.getResourceCrn(), bootstrap);
 
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getNotDeletedGatewayConfigs(stack);
@@ -168,10 +150,6 @@ public class ClusterProxyService {
         ConfigRegistrationRequest request = requestBuilder.build();
         LOGGER.debug("Registering cluster proxy configuration [{}]", request);
         ConfigRegistrationResponse response = clusterProxyRegistrationClient.registerConfig(request);
-
-        if (waitForGoodHealth) {
-            pollForGoodHealth(stack);
-        }
 
         stackUpdater.updateClusterProxyRegisteredFlag(stack, true);
 
@@ -316,12 +294,6 @@ public class ClusterProxyService {
 
     private int getNginxPort(Stack stack) {
         return Optional.ofNullable(stack.getGatewayport()).orElse(ServiceFamilies.GATEWAY.getDefaultPort());
-    }
-
-    public void pollForGoodHealth(Stack stack) {
-        serviceEndpointHealthPollingService.pollWithTimeout(
-                serviceEndpointHealthListenerTask, new ServiceEndpointHealthPollerObject(stack.getResourceCrn(), clusterProxyRegistrationClient),
-                (long) getIntervalInSec(stack) * MILLIS_PER_SEC, maxAttempts, maxFailure);
     }
 
 }
