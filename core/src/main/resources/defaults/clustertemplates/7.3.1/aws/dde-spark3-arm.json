@@ -1,0 +1,125 @@
+{
+  "name": "7.3.1 - Data Discovery and Exploration (ARM) - Spark3 for AWS",
+  "description": "",
+  "type": "DISCOVERY_DATA_AND_EXPLORATION",
+  "featureState": "INTERNAL",
+  "cloudPlatform": "AWS",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.3.1 - Data Discovery and Exploration for Spark3"
+    },
+    "architecture": "arm64",
+    "instanceGroups": [
+      {
+        "name": "master",
+        "nodeCount": 2,
+        "recoveryMode": "MANUAL",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "standard"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "r7gd.2xlarge",
+          "cloudPlatform": "AWS"
+        },
+        "type": "CORE"
+      },
+      {
+        "name": "gateway",
+        "nodeCount": 1,
+        "recoveryMode": "MANUAL",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "standard"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "r7gd.2xlarge",
+          "cloudPlatform": "AWS"
+        },
+        "type": "CORE"
+      },
+      {
+        "name": "leader",
+        "nodeCount": 1,
+        "recoveryMode": "MANUAL",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "standard"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "r7gd.2xlarge",
+          "cloudPlatform": "AWS"
+        },
+        "type": "GATEWAY"
+      },
+      {
+        "name": "worker",
+        "nodeCount": 3,
+        "recoveryMode": "MANUAL",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "standard"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "r7gd.2xlarge",
+          "cloudPlatform": "AWS"
+        },
+        "type": "CORE"
+      },
+      {
+        "name": "yarnworker",
+        "nodeCount": 1,
+        "recoveryMode": "MANUAL",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "standard"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "r7gd.2xlarge",
+          "cloudPlatform": "AWS"
+        },
+        "type": "CORE"
+      }
+    ]
+  }
+}
