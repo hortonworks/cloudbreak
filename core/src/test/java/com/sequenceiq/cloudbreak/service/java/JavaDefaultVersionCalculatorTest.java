@@ -1,10 +1,12 @@
 package com.sequenceiq.cloudbreak.service.java;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -12,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.java.vm.DefaultJavaConfigurations;
 import com.sequenceiq.cloudbreak.service.java.vm.JavaConfiguration;
 
@@ -74,5 +77,21 @@ class JavaDefaultVersionCalculatorTest {
         int result = underTest.calculate(javaVersion, runtime);
 
         assertEquals(expectedVersion, result);
+    }
+
+    @Test
+    void testNotSupportedVersion() {
+        JavaConfiguration java8 = new JavaConfiguration();
+        java8.setVersion(8);
+        java8.setMinRuntimeVersion("7.1.0");
+        java8.setMaxRuntimeVersion("7.2.18");
+
+        JavaConfiguration java17 = new JavaConfiguration();
+        java17.setVersion(17);
+        java17.setMinRuntimeVersion("7.3.1");
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.calculate(null, "7.0.0"));
+        assertEquals("The runtimeVersion 7.0.0 is not supported in CDP. Please change the runtime version.", exception.getMessage());
     }
 }
