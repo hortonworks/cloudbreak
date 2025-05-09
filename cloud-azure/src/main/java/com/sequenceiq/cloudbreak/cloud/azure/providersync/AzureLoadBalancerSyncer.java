@@ -65,6 +65,9 @@ public class AzureLoadBalancerSyncer implements ProviderResourceSyncer<ResourceT
                 List<LoadBalancer> loadBalancerAddresses = getLoadBalancersFromProvider(client, loadBalancerResourceId, loadBalancerList);
                 loadBalancerAddresses.forEach(loadBalancer -> syncLoadBalancerMetadata(resources, loadBalancer, result));
             }, () -> LOGGER.debug("No load balancer resource reference found for load balancers: {}", loadBalancerList));
+        } else {
+            LOGGER.debug("No existing load balancer resources found");
+
         }
         LOGGER.debug("Load balancer resources checked: {}", result);
         return result;

@@ -93,7 +93,7 @@ public class SdxExternalDatabaseConfigurer {
                 return SdxDatabaseAvailabilityType.NONE;
             }
         } else {
-            return createDatabase.map(createDb -> Boolean.TRUE.equals(createDb) ? SdxDatabaseAvailabilityType.HA : SdxDatabaseAvailabilityType.NONE)
+            return createDatabase.map(createDb -> createDb ? SdxDatabaseAvailabilityType.HA : SdxDatabaseAvailabilityType.NONE)
                     .orElseGet(availabilityType::get);
         }
     }
