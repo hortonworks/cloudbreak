@@ -24,7 +24,7 @@
               "type": "NONE"
             }
           },
-          "instanceType": "m5.2xlarge"
+          "instanceType": "m5.4xlarge"
         },
         "nodeCount": 1,
         "type": "GATEWAY",
@@ -36,7 +36,7 @@
           "attachedVolumes": [
             {
               "count": 1,
-              "size": 300,
+              "size": 150,
               "type": "ephemeral"
             }
           ],
