@@ -37,6 +37,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
+import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractFreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.AbstractSdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
@@ -57,6 +59,9 @@ public class SshJClientActions {
 
     @Inject
     private SshJClient sshJClient;
+
+    @Inject
+    private CommonCloudProperties commonCloudProperties;
 
     private List<String> getInstanceMetadataIps(Set<InstanceMetaDataResponse> instanceMetaDatas, boolean publicIp) {
         return instanceMetaDatas.stream().map(instanceMetaDataResponse -> {
@@ -708,4 +713,25 @@ public class SshJClientActions {
         return StringUtils.isNotEmpty(instanceMetaData.getPublicIp()) && !NOT_AVAILABLE.equals(instanceMetaData.getPublicIp());
     }
 
+    public void validateDnsZoneAndCnameEntryInFreeIpa(FreeIpaTestDto freeIpaTestDto, TestContext tc, FreeIpaClient freeipaClient, String dnsZone,
+            String cName) {
+
+        String kinitCmd = String.format("echo '%s' | kinit %s && klist -fea", tc.getWorkloadPassword(), tc.getWorkloadUserName());
+        String findDnsRecordCmd = String.format("ipa dnsrecord-find %s %s", dnsZone, cName);
+
+        String[] cmds = {kinitCmd, findDnsRecordCmd};
+        String environmentCrn = freeIpaTestDto.getEnvironmentCrn();
+        List<String> instanceIps = getFreeIpaInstanceGroupIps(InstanceMetadataType.GATEWAY_PRIMARY, environmentCrn, freeipaClient, false);
+
+        for (String ip: instanceIps) {
+            for (String cmd: cmds) {
+                Pair<Integer, String> results = executeSshCommand(ip, "cloudbreak", null, commonCloudProperties.getDefaultPrivateKeyFile(), cmd);
+                LOGGER.info("Result of ssh: {}", results);
+                if (results.getKey() != 0) {
+                    throw new TestFailException(String.format("[%s] Failure after 'ipa dnsrecord-find %s %s' command:\n%s", ip, dnsZone, cName,
+                            results.getValue()));
+                }
+            }
+        }
+    }
 }
