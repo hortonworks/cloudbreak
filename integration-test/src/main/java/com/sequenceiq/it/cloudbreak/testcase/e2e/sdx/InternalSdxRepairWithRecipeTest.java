@@ -174,9 +174,8 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
         secretTypes.addAll(Set.of(
                 IDBROKER_CERT,
                 EXTERNAL_DATABASE_ROOT_PASSWORD,
-                CM_DB_PASSWORD,
-                CM_INTERMEDIATE_CA_CERT,
-                NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY));
+                CM_DB_PASSWORD
+                ));
         if (!CloudPlatform.GCP.equalsIgnoreCase(cloudProvider)) {
             // this is excluded due to CB-29204 (the rotation has a bug on GCP)
             secretTypes.add(SALT_BOOT_SECRETS);
@@ -188,7 +187,10 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
                     SALT_SIGN_KEY_PAIR,
                     SALT_MASTER_KEY_PAIR,
                     SSSD_IPA_PASSWORD,
-                    CM_SERVICE_SHARED_DB));
+                    CM_SERVICE_SHARED_DB,
+                    CM_INTERMEDIATE_CA_CERT,
+                    NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY
+            ));
         }
         return secretTypes;
     }
