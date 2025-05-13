@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Test Plan">
+      <boolProp name="TestPlan.serialize_threadgroups">true</boolProp>
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+        <collectionProp name="Arguments.arguments">
+          <elementProp name="LB_ADDRESS" elementType="Argument">
+            <stringProp name="Argument.name">LB_ADDRESS</stringProp>
+            <stringProp name="Argument.value">10.84.199.245</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="LDAP_PW" elementType="Argument">
+            <stringProp name="Argument.name">LDAP_PW</stringProp>
+            <stringProp name="Argument.value">qBQ6-U7fkyRDq37.CjIiG+Ns1_?4q63V</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="INSTANCE_ID_0" elementType="Argument">
+            <stringProp name="Argument.name">INSTANCE_ID_0</stringProp>
+            <stringProp name="Argument.value">i-05a13c12ccf97d9c6</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="INSTANCE_ID_1" elementType="Argument">
+            <stringProp name="Argument.name">INSTANCE_ID_1</stringProp>
+            <stringProp name="Argument.value">i-08dfe132e30ab1035</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+        </collectionProp>
+      </elementProp>
+    </TestPlan>
+    <hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Requests with 3 instances">
+        <intProp name="ThreadGroup.num_threads">2</intProp>
+        <intProp name="ThreadGroup.ramp_time">1</intProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">10</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <LDAPSampler guiclass="LdapTestSamplerGui" testclass="LDAPSampler" testname="LDAP Request">
+          <stringProp name="servername">${LB_ADDRESS}</stringProp>
+          <stringProp name="port">389</stringProp>
+          <stringProp name="rootdn"></stringProp>
+          <boolProp name="user_defined">true</boolProp>
+          <stringProp name="test">search</stringProp>
+          <stringProp name="search"></stringProp>
+          <stringProp name="searchfilter">(uid=fakeMockUser0)</stringProp>
+          <stringProp name="ConfigTestElement.username">cn=Directory Manager</stringProp>
+          <stringProp name="ConfigTestElement.password">${LDAP_PW}</stringProp>
+        </LDAPSampler>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Stop instance 0" enabled="true">
+        <intProp name="ThreadGroup.num_threads">1</intProp>
+        <intProp name="ThreadGroup.ramp_time">1</intProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">1</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <SystemSampler guiclass="SystemSamplerGui" testclass="SystemSampler" testname="Stop instance 0" enabled="true">
+          <boolProp name="SystemSampler.checkReturnCode">false</boolProp>
+          <stringProp name="SystemSampler.expectedReturnCode">0</stringProp>
+          <stringProp name="SystemSampler.command">aws</stringProp>
+          <elementProp name="SystemSampler.arguments" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="Argument">
+                <stringProp name="Argument.name"></stringProp>
+                <stringProp name="Argument.value">ec2</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Argument">
+                <stringProp name="Argument.name"></stringProp>
+                <stringProp name="Argument.value">stop-instances</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Argument">
+                <stringProp name="Argument.name"></stringProp>
+                <stringProp name="Argument.value">--instance-ids</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Argument">
+                <stringProp name="Argument.name"></stringProp>
+                <stringProp name="Argument.value">${INSTANCE_ID_0}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <elementProp name="SystemSampler.environment" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="SystemSampler.directory"></stringProp>
+        </SystemSampler>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Requests with 2 instances" enabled="true">
+        <intProp name="ThreadGroup.num_threads">2</intProp>
+        <intProp name="ThreadGroup.ramp_time">1</intProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">60</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <LDAPSampler guiclass="LdapTestSamplerGui" testclass="LDAPSampler" testname="LDAP Request">
+          <stringProp name="servername">${LB_ADDRESS}</stringProp>
+          <stringProp name="port">389</stringProp>
+          <stringProp name="rootdn"></stringProp>
+          <boolProp name="user_defined">true</boolProp>
+          <stringProp name="test">search</stringProp>
+          <stringProp name="search"></stringProp>
+          <stringProp name="searchfilter">(uid=fakeMockUser0)</stringProp>
+          <stringProp name="ConfigTestElement.username">cn=Directory Manager</stringProp>
+          <stringProp name="ConfigTestElement.password">${LDAP_PW}</stringProp>
+        </LDAPSampler>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Stop instance 1" enabled="true">
+        <intProp name="ThreadGroup.num_threads">1</intProp>
+        <intProp name="ThreadGroup.ramp_time">1</intProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">1</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <SystemSampler guiclass="SystemSamplerGui" testclass="SystemSampler" testname="Stop instance 1" enabled="true">
+          <boolProp name="SystemSampler.checkReturnCode">false</boolProp>
+          <stringProp name="SystemSampler.expectedReturnCode">0</stringProp>
+          <stringProp name="SystemSampler.command">aws</stringProp>
+          <elementProp name="SystemSampler.arguments" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="Argument">
+                <stringProp name="Argument.name"></stringProp>
+                <stringProp name="Argument.value">ec2</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Argument">
+                <stringProp name="Argument.name"></stringProp>
+                <stringProp name="Argument.value">stop-instances</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Argument">
+                <stringProp name="Argument.name"></stringProp>
+                <stringProp name="Argument.value">--instance-ids</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Argument">
+                <stringProp name="Argument.name"></stringProp>
+                <stringProp name="Argument.value">${INSTANCE_ID_1}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <elementProp name="SystemSampler.environment" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="SystemSampler.directory"></stringProp>
+        </SystemSampler>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Requests with 1 instances" enabled="true">
+        <intProp name="ThreadGroup.num_threads">2</intProp>
+        <intProp name="ThreadGroup.ramp_time">1</intProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">60</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <LDAPSampler guiclass="LdapTestSamplerGui" testclass="LDAPSampler" testname="LDAP Request" enabled="true">
+          <stringProp name="servername">${LB_ADDRESS}</stringProp>
+          <stringProp name="port">389</stringProp>
+          <stringProp name="rootdn"></stringProp>
+          <boolProp name="user_defined">true</boolProp>
+          <stringProp name="test">search</stringProp>
+          <stringProp name="search"></stringProp>
+          <stringProp name="searchfilter">(uid=fakeMockUser0)</stringProp>
+          <stringProp name="ConfigTestElement.username">cn=Directory Manager</stringProp>
+          <stringProp name="ConfigTestElement.password">${LDAP_PW}</stringProp>
+        </LDAPSampler>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Start instances" enabled="true">
+        <intProp name="ThreadGroup.num_threads">1</intProp>
+        <intProp name="ThreadGroup.ramp_time">1</intProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">1</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <SystemSampler guiclass="SystemSamplerGui" testclass="SystemSampler" testname="Start instance 0" enabled="true">
+          <boolProp name="SystemSampler.checkReturnCode">false</boolProp>
+          <stringProp name="SystemSampler.expectedReturnCode">0</stringProp>
+          <stringProp name="SystemSampler.command">aws</stringProp>
+          <elementProp name="SystemSampler.arguments" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="Argument">
+                <stringProp name="Argument.name"></stringProp>
+                <stringProp name="Argument.value">ec2</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Argument">
+                <stringProp name="Argument.name"></stringProp>
+                <stringProp name="Argument.value">start-instances</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Argument">
+                <stringProp name="Argument.name"></stringProp>
+                <stringProp name="Argument.value">--instance-ids</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Argument">
+                <stringProp name="Argument.name"></stringProp>
+                <stringProp name="Argument.value">${INSTANCE_ID_0}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <elementProp name="SystemSampler.environment" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="SystemSampler.directory"></stringProp>
+        </SystemSampler>
+        <hashTree/>
+        <SystemSampler guiclass="SystemSamplerGui" testclass="SystemSampler" testname="Start instance 1" enabled="true">
+          <boolProp name="SystemSampler.checkReturnCode">false</boolProp>
+          <stringProp name="SystemSampler.expectedReturnCode">0</stringProp>
+          <stringProp name="SystemSampler.command">aws</stringProp>
+          <elementProp name="SystemSampler.arguments" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="Argument">
+                <stringProp name="Argument.name"></stringProp>
+                <stringProp name="Argument.value">ec2</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Argument">
+                <stringProp name="Argument.name"></stringProp>
+                <stringProp name="Argument.value">start-instances</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Argument">
+                <stringProp name="Argument.name"></stringProp>
+                <stringProp name="Argument.value">--instance-ids</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Argument">
+                <stringProp name="Argument.name"></stringProp>
+                <stringProp name="Argument.value">${INSTANCE_ID_1}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <elementProp name="SystemSampler.environment" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="SystemSampler.directory"></stringProp>
+        </SystemSampler>
+        <hashTree/>
+      </hashTree>
+      <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+        <boolProp name="ResultCollector.error_logging">false</boolProp>
+        <objProp>
+          <name>saveConfig</name>
+          <value class="SampleSaveConfiguration">
+            <time>true</time>
+            <latency>true</latency>
+            <timestamp>true</timestamp>
+            <success>true</success>
+            <label>true</label>
+            <code>true</code>
+            <message>true</message>
+            <threadName>true</threadName>
+            <dataType>true</dataType>
+            <encoding>false</encoding>
+            <assertions>true</assertions>
+            <subresults>true</subresults>
+            <responseData>false</responseData>
+            <samplerData>false</samplerData>
+            <xml>false</xml>
+            <fieldNames>true</fieldNames>
+            <responseHeaders>false</responseHeaders>
+            <requestHeaders>false</requestHeaders>
+            <responseDataOnError>false</responseDataOnError>
+            <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+            <assertionsResultsToSave>0</assertionsResultsToSave>
+            <bytes>true</bytes>
+            <sentBytes>true</sentBytes>
+            <url>true</url>
+            <threadCounts>true</threadCounts>
+            <idleTime>true</idleTime>
+            <connectTime>true</connectTime>
+          </value>
+        </objProp>
+        <stringProp name="filename">ldap-result1.csv</stringProp>
+      </ResultCollector>
+      <hashTree/>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>
