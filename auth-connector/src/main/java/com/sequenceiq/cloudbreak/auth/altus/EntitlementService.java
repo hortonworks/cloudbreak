@@ -29,6 +29,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SECR
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_TLS_1_3;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_USE_DEV_TELEMETRY_YUM_REPO;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_WIRE_ENCRYPTION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_XFS_FOR_EPHEMERAL_DISK_SUPPORTED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CENTRAL_COMPUTE_MONITORING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_IDENTITY_MAPPING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION;
@@ -608,4 +609,7 @@ public class EntitlementService {
         return isEntitlementRegistered(accountId, CDP_LAKEHOUSE_OPTIMIZER_ENABLED);
     }
 
+    public boolean isXfsForEphemeralDisksSupported(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CB_XFS_FOR_EPHEMERAL_DISK_SUPPORTED);
+    }
 }

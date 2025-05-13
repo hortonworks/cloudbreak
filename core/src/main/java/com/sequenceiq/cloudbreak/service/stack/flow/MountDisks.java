@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_3_1;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
 
 import java.util.HashSet;
@@ -16,9 +18,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -33,6 +39,7 @@ import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.diskvalidator.DiskValidator;
+import com.sequenceiq.cloudbreak.util.CodUtil;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -61,6 +68,9 @@ public class MountDisks {
 
     @Inject
     private DiskValidator diskValidator;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     public void mountAllDisks(Long stackId) throws CloudbreakException {
         LOGGER.debug("Mount all disks for stack.");
@@ -93,8 +103,14 @@ public class MountDisks {
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
             ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
 
+            boolean xfsForEphemeralDisksSupported =
+                    entitlementService.isXfsForEphemeralDisksSupported(Crn.safeFromString(stack.getResourceCrn()).getAccountId()) &&
+                            StackType.WORKLOAD.equals(stack.getType()) &&
+                            CloudPlatform.AWS.equals(CloudPlatform.fromName(stack.getCloudPlatform())) &&
+                            CodUtil.isCodCluster(stack) &&
+                            isVersionNewerOrEqualThanLimited(stack.getStackVersion(), CLOUDERA_STACK_VERSION_7_3_1);
             hostOrchestrator.updateMountDiskPillar(stack, gatewayConfigs, stackUtil.collectNodesWithDiskData(stack), exitCriteriaModel,
-                    stack.getPlatformVariant());
+                    stack.getPlatformVariant(), xfsForEphemeralDisksSupported);
             LOGGER.debug("Execute format and mount states.");
             Map<String, Map<String, String>> mountInfo =
                     hostOrchestrator.formatAndMountDisksOnNodes(stack, gatewayConfigs, nodesWithDiskData, allNodes, exitCriteriaModel);

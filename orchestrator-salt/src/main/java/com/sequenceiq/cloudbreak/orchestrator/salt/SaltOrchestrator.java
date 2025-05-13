@@ -323,12 +323,12 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Override
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public void updateMountDiskPillar(OrchestratorAware stack, List<GatewayConfig> allGateway, Set<Node> allNodesWithDiskData, ExitCriteriaModel exitModel,
-            String platformVariant) throws CloudbreakOrchestratorFailedException {
+            String platformVariant, boolean xfsForEphemeralSupported) throws CloudbreakOrchestratorFailedException {
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGateway);
         Set<String> gatewayTargetIpAddresses = getGatewayPrivateIps(allGateway);
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
             saveHostsPillar(stack, exitModel, gatewayTargetIpAddresses, sc);
-            updateMountDataPillar(allNodesWithDiskData, exitModel, platformVariant, gatewayTargetIpAddresses, sc);
+            updateMountDataPillar(allNodesWithDiskData, exitModel, platformVariant, gatewayTargetIpAddresses, sc, xfsForEphemeralSupported);
         } catch (Exception e) {
             LOGGER.info("Error occurred during the salt bootstrap", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
@@ -374,9 +374,9 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     private void updateMountDataPillar(Set<Node> allNodesWithDiskData, ExitCriteriaModel exitModel, String platformVariant,
-            Set<String> gatewayTargetIpAddresses, SaltConnector sc) throws Exception {
+            Set<String> gatewayTargetIpAddresses, SaltConnector sc, boolean xfsForEphemeralSupported) throws Exception {
         Map<String, Object> hostnameDiskMountMap = allNodesWithDiskData.stream().collect(Collectors.toMap(Node::getHostname,
-                node -> getMountDiskPillarMapForNode(platformVariant, node.getNodeVolumes(), node.getTemporaryStorage())));
+                node -> getMountDiskPillarMapForNode(platformVariant, node.getNodeVolumes(), node.getTemporaryStorage(), xfsForEphemeralSupported)));
         LOGGER.debug("Built disk pillar map: {}", hostnameDiskMountMap);
         SaltPillarProperties mountDiskProperties =
                 new SaltPillarProperties("/mount/disk.sls", Collections.singletonMap("mount_data", hostnameDiskMountMap));
@@ -385,7 +385,8 @@ public class SaltOrchestrator implements HostOrchestrator {
         saltRunner.runnerWithConfiguredErrorCount(pillarSave, exitCriteria, exitModel).call();
     }
 
-    private Map<String, Object> getMountDiskPillarMapForNode(String platformVariant, NodeVolumes nodeVolumes, TemporaryStorage temporaryStorage) {
+    private Map<String, Object> getMountDiskPillarMapForNode(String platformVariant, NodeVolumes nodeVolumes, TemporaryStorage temporaryStorage,
+            boolean xfsForEphemeralSupported) {
         checkNotNull(nodeVolumes, "There is no data about volumes of the node.");
         return Map.of(
                 "attached_volume_name_list", defaultString(nodeVolumes.getDataVolumes()),
@@ -395,7 +396,8 @@ public class SaltOrchestrator implements HostOrchestrator {
                 "cloud_platform", platformVariant,
                 "previous_fstab", defaultString(nodeVolumes.getFstab()),
                 "database_volume_index", nodeVolumes.getDatabaseVolumeIndex(),
-                "temporary_storage", Optional.ofNullable(temporaryStorage).orElse(TemporaryStorage.ATTACHED_VOLUMES).name()
+                "temporary_storage", Optional.ofNullable(temporaryStorage).orElse(TemporaryStorage.ATTACHED_VOLUMES).name(),
+                "xfs_for_ephemeral_supported", xfsForEphemeralSupported
         );
     }
 
