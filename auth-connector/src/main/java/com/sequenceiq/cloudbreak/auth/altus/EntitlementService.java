@@ -7,7 +7,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AWS_ARM
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AWS_ARM_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AWS_RESTRICTED_POLICY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_CERTIFICATE_AUTH;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_DATABASE_FLEXIBLE_SERVER_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_DATABASE_FLEXIBLE_SERVER_UPGRADE_LONG_POLLING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_DATABASE_SINGLE_SERVER_REJECT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_IMAGE_MARKETPLACE_ONLY;
@@ -455,10 +454,6 @@ public class EntitlementService {
 
     public boolean isFedRampExternalDatabaseForceDisabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_FEDRAMP_EXTERNAL_DATABASE_FORCE_DISABLED);
-    }
-
-    public boolean isAzureDatabaseFlexibleServerUpgradeEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, CDP_AZURE_DATABASE_FLEXIBLE_SERVER_UPGRADE);
     }
 
     public boolean isDatalakeDatabaseBackupCompressionEnabled(String accountId) {

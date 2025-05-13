@@ -2,7 +2,6 @@ package com.sequenceiq.datalake.service.validation.resize;
 
 import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.doAs;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
@@ -15,7 +14,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -45,7 +43,6 @@ class SdxResizeValidatorTest {
         SdxDatabase sdxDatabase = new SdxDatabase();
         sdxDatabase.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.HA);
 
-        when(entitlementService.isAzureDatabaseFlexibleServerUpgradeEnabled(any())).thenReturn(true);
         when(azureDatabaseAttributesService.getAzureDatabaseType(sdxDatabase)).thenReturn(AzureDatabaseType.SINGLE_SERVER);
 
         assertThrows(BadRequestException.class, () -> doAs(USER_CRN, () -> underTest.validateDatabaseTypeForResize(sdxDatabase, CloudPlatform.AZURE)));
@@ -58,7 +55,6 @@ class SdxResizeValidatorTest {
         SdxDatabase sdxDatabase = new SdxDatabase();
         sdxDatabase.setDatabaseAvailabilityType(databaseAvailabilityType);
 
-        lenient().when(entitlementService.isAzureDatabaseFlexibleServerUpgradeEnabled(Mockito.any())).thenReturn(flexibleServerUpgradeEntitlementEnabled);
         lenient().when(azureDatabaseAttributesService.getAzureDatabaseType(sdxDatabase)).thenReturn(azureDatabaseType);
 
         doAs(USER_CRN, () -> underTest.validateDatabaseTypeForResize(sdxDatabase, cloudPlatform));

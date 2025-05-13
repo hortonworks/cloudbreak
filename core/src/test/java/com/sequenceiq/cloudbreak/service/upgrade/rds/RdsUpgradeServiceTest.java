@@ -220,8 +220,7 @@ class RdsUpgradeServiceTest {
     @ValueSource(booleans = {false, true})
     void testUpgradeRdsWithMissingTargetVersionThenSuccess(boolean onAzure) {
         ReflectionTestUtils.setField(underTest, "defaultTargetMajorVersion", VERSION_14);
-        ReflectionTestUtils.setField(underTest, "defaultAzureTargetMajorVersion", VERSION_11);
-        TargetMajorVersion desiredVersion = onAzure ? VERSION_11 : VERSION_14;
+        TargetMajorVersion desiredVersion = VERSION_14;
         Stack stack = createStack(Status.AVAILABLE);
         StackDto stackDto = createStackDto(stack, DatabaseAvailabilityType.HA);
         when(stackDto.getCloudPlatform()).thenReturn(onAzure ? "AZURE" : "AWS");
@@ -229,7 +228,8 @@ class RdsUpgradeServiceTest {
         when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stackDto);
         when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, ACCOUNT_ID)).thenReturn(Optional.empty());
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_ID);
-        when(reactorFlowManager.triggerRdsUpgrade(eq(STACK_ID), eq(desiredVersion), eq(BACKUP_LOCATION), eq(BACKUP_INSTANCE_PROFILE))).thenReturn(flowId);
+        lenient().when(reactorFlowManager.triggerRdsUpgrade(eq(STACK_ID), eq(desiredVersion), eq(BACKUP_LOCATION), eq(BACKUP_INSTANCE_PROFILE)))
+                .thenReturn(flowId);
         when(entitlementService.isPostgresUpgradeAttachedDatahubsCheckSkipped(ACCOUNT_ID)).thenReturn(false);
 
         RdsUpgradeV4Response response =

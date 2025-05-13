@@ -74,9 +74,6 @@ public class RdsUpgradeService {
     @Value("${cb.db.env.upgrade.rds.targetversion}")
     private TargetMajorVersion defaultTargetMajorVersion;
 
-    @Value("${cb.db.env.upgrade.rds.azure.targetversion}")
-    private TargetMajorVersion defaultAzureTargetMajorVersion;
-
     @Inject
     private DatabaseUpgradeRuntimeValidator databaseUpgradeRuntimeValidator;
 
@@ -117,18 +114,11 @@ public class RdsUpgradeService {
     }
 
     private TargetMajorVersion getTargetMajorVersion(TargetMajorVersion requestedTargetVersion, String cloudPlatform) {
-        boolean onAzure = CloudPlatform.AZURE.equalsIgnoreCase(cloudPlatform);
-        TargetMajorVersion calculatedVersion = ObjectUtils.defaultIfNull(requestedTargetVersion, onAzure ?
-                defaultAzureTargetMajorVersion : defaultTargetMajorVersion);
-        if (onAzure && entitlementService.isAzureDatabaseFlexibleServerUpgradeEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
-            calculatedVersion = defaultTargetMajorVersion;
-            LOGGER.info("Azure Flexible Server upgrade is enabled, setting the target Pg version to: {}", calculatedVersion);
-        }
-        LOGGER.debug("Calculated upgrade target is {}, based on requested {}, general default {} and Azure default {}",
+        TargetMajorVersion calculatedVersion = ObjectUtils.defaultIfNull(requestedTargetVersion, defaultTargetMajorVersion);
+        LOGGER.debug("Calculated upgrade target is {}, based on requested {}, general default {}",
                 calculatedVersion,
                 requestedTargetVersion,
-                defaultTargetMajorVersion,
-                defaultAzureTargetMajorVersion);
+                defaultTargetMajorVersion);
         return calculatedVersion;
     }
 

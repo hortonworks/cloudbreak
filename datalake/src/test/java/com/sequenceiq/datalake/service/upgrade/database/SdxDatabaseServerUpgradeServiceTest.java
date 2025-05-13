@@ -161,9 +161,8 @@ public class SdxDatabaseServerUpgradeServiceTest {
     void testUpgradeWhenNoTargetMajorIsDefinedThenUpgradeToCorrectVersion(boolean onAzure) {
         SdxCluster sdxCluster = getSdxCluster();
         sdxCluster.setCloudStorageFileSystemType(onAzure ? FileSystemType.ADLS_GEN_2 : FileSystemType.S3);
-        TargetMajorVersion desiredVersion = onAzure ? VERSION_11 : VERSION_14;
+        TargetMajorVersion desiredVersion = VERSION_14;
         ReflectionTestUtils.setField(underTest, "defaultTargetMajorVersion", VERSION_14);
-        ReflectionTestUtils.setField(underTest, "defaultAzureTargetMajorVersion", VERSION_11);
         when(sdxService.getByNameOrCrn(any(), eq(NAME_OR_CRN))).thenReturn(sdxCluster);
         SdxStatusEntity status = getDatalakeStatus(DatalakeStatusEnum.RUNNING);
         when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(status);

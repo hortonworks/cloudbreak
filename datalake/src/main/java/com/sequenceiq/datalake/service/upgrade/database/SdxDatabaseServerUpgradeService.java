@@ -31,7 +31,6 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
-import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxDatabase;
@@ -56,9 +55,6 @@ public class SdxDatabaseServerUpgradeService {
 
     @Value("${sdx.db.env.upgrade.database.targetversion}")
     private TargetMajorVersion defaultTargetMajorVersion;
-
-    @Value("${sdx.db.env.upgrade.database.azure.targetversion}")
-    private TargetMajorVersion defaultAzureTargetMajorVersion;
 
     @Inject
     private SdxService sdxService;
@@ -136,19 +132,12 @@ public class SdxDatabaseServerUpgradeService {
     }
 
     private TargetMajorVersion getTargetMajorVersion(TargetMajorVersion requestedTargetMajorVersion, SdxCluster cluster) {
-        // Workaround to determine Cloud Provider instead of querying env service in request time
-        boolean onAzure = cluster.getCloudStorageFileSystemType() == FileSystemType.ADLS_GEN_2;
         TargetMajorVersion targetMajorVersion = ObjectUtils.defaultIfNull(
-                requestedTargetMajorVersion, onAzure ? defaultAzureTargetMajorVersion : defaultTargetMajorVersion);
-        if (onAzure && entitlementService.isAzureDatabaseFlexibleServerUpgradeEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
-            targetMajorVersion = defaultTargetMajorVersion;
-            LOGGER.info("Azure Flexible Server upgrade is enabled, setting the target Pg version to: {}", targetMajorVersion);
-        }
-        LOGGER.debug("Calculated upgrade target is {}, based on requested {}, general default {} and Azure default {}",
+                requestedTargetMajorVersion, defaultTargetMajorVersion);
+        LOGGER.debug("Calculated upgrade target is {}, based on requested {}, general default {}",
                 targetMajorVersion,
                 requestedTargetMajorVersion,
-                defaultTargetMajorVersion,
-                defaultAzureTargetMajorVersion);
+                defaultTargetMajorVersion);
         return targetMajorVersion;
     }
 

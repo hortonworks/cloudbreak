@@ -9,7 +9,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_I
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AWS_ARM_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AWS_ARM_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_CERTIFICATE_AUTH;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_DATABASE_FLEXIBLE_SERVER_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_DATABASE_FLEXIBLE_SERVER_UPGRADE_LONG_POLLING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_DATABASE_SINGLE_SERVER_REJECT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_IMAGE_MARKETPLACE;
@@ -522,9 +521,6 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.enforce.aws.native.single.az.enabled}")
     private boolean enforceAwsNativeForSingleAzEnabled;
 
-    @Value("${auth.mock.azure.database.flexibleserver.upgrade.enabled}")
-    private boolean azureDatabaseFlexibleServerUpgradeEnabled;
-
     @Value("${auth.mock.secret.encryption.enabled}")
     private boolean secretEncryptionEnabled;
 
@@ -1008,9 +1004,6 @@ public class MockUserManagementService extends UserManagementImplBase {
             builder.addEntitlements(createEntitlement(CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_FREEIPA));
             builder.addEntitlements(createEntitlement(CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATALAKE));
             builder.addEntitlements(createEntitlement(CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATAHUB));
-        }
-        if (azureDatabaseFlexibleServerUpgradeEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_AZURE_DATABASE_FLEXIBLE_SERVER_UPGRADE));
         }
         if (dlBackupCompressionEnable) {
             builder.addEntitlements(createEntitlement(CDP_DATALAKE_DB_BACKUP_ENABLE_COMPRESSION));

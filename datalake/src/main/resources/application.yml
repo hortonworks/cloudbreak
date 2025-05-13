@@ -78,7 +78,6 @@ sdx:
         backupretentionperiod: 7
     env.upgrade.database:
       targetversion: VERSION_14
-      azure.targetversion: VERSION_11
   stack:
     cmsync:
       sleeptime_sec: 10
