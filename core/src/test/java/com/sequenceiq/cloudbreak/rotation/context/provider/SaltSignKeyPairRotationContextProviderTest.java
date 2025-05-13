@@ -151,7 +151,7 @@ class SaltSignKeyPairRotationContextProviderTest {
         saltSecurityConfig.setSaltSignPrivateKey(OLD_PRIVATE_KEY);
         when(saltSecurityConfig.getSaltSignPrivateKeySecret()).thenReturn(new Secret(OLD_PRIVATE_KEY, PRIVATE_KEY_VAULT_PATH));
         GatewayConfig primaryGatewayConfig = new GatewayConfig("conn", "public", "private", 1234, "instance1", Boolean.FALSE);
-        doThrow(new CloudbreakOrchestratorFailedException("Salt ping failed")).when(secretRotationSaltService).validateSalt(eq(stack));
+        doThrow(new SecretRotationException("Salt ping failed")).when(secretRotationSaltService).validateSalt(eq(stack));
 
         Map<SecretRotationStep, RotationContext> contexts = underTest.getContexts(RESOURCE_CRN);
         CustomJobRotationContext customJobRotationContext = (CustomJobRotationContext) contexts.get(CommonSecretRotationStep.CUSTOM_JOB);
@@ -168,7 +168,7 @@ class SaltSignKeyPairRotationContextProviderTest {
         saltSecurityConfig.setSaltSignPrivateKey(OLD_PRIVATE_KEY);
         when(saltSecurityConfig.getSaltSignPrivateKeySecret()).thenReturn(new Secret(OLD_PRIVATE_KEY, PRIVATE_KEY_VAULT_PATH));
         GatewayConfig primaryGatewayConfig = new GatewayConfig("conn", "public", "private", 1234, "instance1", Boolean.FALSE);
-        doThrow(new CloudbreakOrchestratorFailedException("Salt ping failed")).when(secretRotationSaltService).validateSalt(eq(stack));
+        doThrow(new SecretRotationException("Salt ping failed")).when(secretRotationSaltService).validateSalt(eq(stack));
 
         Map<SecretRotationStep, RotationContext> contexts = underTest.getContexts(RESOURCE_CRN);
         CustomJobRotationContext customJobRotationContext = (CustomJobRotationContext) contexts.get(CommonSecretRotationStep.CUSTOM_JOB);

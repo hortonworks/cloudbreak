@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.rotation.context.provider;
 
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM_JOB;
+import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
 
 import java.util.Map;
 
@@ -20,9 +21,11 @@ import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
+import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordService;
 import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordValidator;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.util.PasswordUtil;
 
 @Component
 public class SaltPasswordRotationContextProvider implements RotationContextProvider {
@@ -43,39 +46,31 @@ public class SaltPasswordRotationContextProvider implements RotationContextProvi
 
     @Override
     public Map<SecretRotationStep, RotationContext> getContexts(String resourceCrn) {
-        return Map.of(CUSTOM_JOB, getCustomJobRotationContext(resourceCrn));
+        StackDto stack = stackDtoService.getByCrn(resourceCrn);
+        return Map.of(VAULT, VaultRotationContext.builder()
+                        .withResourceCrn(resourceCrn)
+                        .withVaultPathSecretMap(
+                                Map.of(stack.getSecurityConfig().getSaltSecurityConfig().getSaltPasswordSecret(), PasswordUtil.generatePassword()))
+                        .build(),
+                CUSTOM_JOB, getCustomJobRotationContext(stack));
     }
 
-    private CustomJobRotationContext getCustomJobRotationContext(String resourceCrn) {
+    private CustomJobRotationContext getCustomJobRotationContext(StackDto stack) {
         return CustomJobRotationContext.builder()
-                .withResourceCrn(resourceCrn)
-                .withPreValidateJob(() -> preValidateJob(resourceCrn))
-                .withRotationJob(() -> rotationJob(resourceCrn))
-                .withPostValidateJob(() -> postValidateJob(resourceCrn))
+                .withResourceCrn(stack.getResourceCrn())
+                .withPreValidateJob(() -> rotateSaltPasswordValidator.validateRotateSaltPassword(stack))
+                .withRotationJob(() -> {
+                    try {
+                        rotateSaltPasswordService.rotateSaltPassword(stack);
+                    } catch (CloudbreakOrchestratorException e) {
+                        throw new SecretRotationException(e);
+                    }
+                })
+                .withPostValidateJob(() -> {
+                    rotateSaltPasswordService.validatePasswordAfterRotation(stack);
+                    secretRotationSaltService.validateSalt(stack);
+                })
                 .build();
-    }
-
-    private void preValidateJob(String resourceCrn) {
-        StackDto stack = stackDtoService.getByCrn(resourceCrn);
-        rotateSaltPasswordValidator.validateRotateSaltPassword(stack);
-    }
-
-    private void rotationJob(String resourceCrn) {
-        StackDto stack = stackDtoService.getByCrn(resourceCrn);
-        try {
-            rotateSaltPasswordService.rotateSaltPassword(stack);
-        } catch (CloudbreakOrchestratorException e) {
-            throw new SecretRotationException(e);
-        }
-    }
-
-    private void postValidateJob(String resourceCrn) {
-        StackDto stack = stackDtoService.getByCrn(resourceCrn);
-        try {
-            secretRotationSaltService.validateSalt(stack);
-        } catch (CloudbreakOrchestratorException e) {
-            throw new SecretRotationException(e);
-        }
     }
 
     @Override

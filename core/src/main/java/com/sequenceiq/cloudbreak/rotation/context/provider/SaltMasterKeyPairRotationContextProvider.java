@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
 import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.dto.StackDto;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationSaltService;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
@@ -98,11 +97,7 @@ public class SaltMasterKeyPairRotationContextProvider implements RotationContext
 
     private void validateAllInstancesAreReachable(String resourceCrn) {
         StackDto stack = stackDtoService.getByCrn(resourceCrn);
-        try {
-            secretRotationSaltService.validateSalt(stack);
-        } catch (CloudbreakOrchestratorFailedException e) {
-            throw new SecretRotationException(e.getMessage(), e);
-        }
+        secretRotationSaltService.validateSalt(stack);
     }
 
     private void deletePublicKeyFromDatabaseIfExists(String resourceCrn) {

@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
+import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.salt.SaltStateParamsService;
 
@@ -52,20 +53,28 @@ public class SecretRotationSaltService {
         hostOrchestrator.saveCustomPillars(new SaltConfig(servicePillar), exitCriteriaModel, stateParams);
     }
 
-    public void validateSaltPrimaryGateway(StackDto stackDto) throws CloudbreakOrchestratorFailedException {
+    public void validateSaltPrimaryGateway(StackDto stackDto) {
         OrchestratorStateParams stateParams = saltStateParamsService.createStateParams(stackDto, null, true, MAX_RETRY, MAX_RETRY_ON_ERROR);
         validateSalt(stateParams.getTargetHostNames(), stateParams.getPrimaryGatewayConfig());
     }
 
-    public void validateSalt(StackDto stackDto) throws CloudbreakOrchestratorFailedException {
+    public void validateSalt(StackDto stackDto) {
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stackDto);
-        Map<String, Boolean> result = hostOrchestrator.ping(primaryGatewayConfig);
-        checkPingResponse(result);
+        try {
+            Map<String, Boolean> result = hostOrchestrator.ping(primaryGatewayConfig);
+            checkPingResponse(result);
+        } catch (CloudbreakOrchestratorFailedException e) {
+            throw new SecretRotationException(e.getMessage(), e);
+        }
     }
 
-    public void validateSalt(Set<String> targets, GatewayConfig gatewayConfig) throws CloudbreakOrchestratorFailedException {
-        Map<String, Boolean> result = hostOrchestrator.ping(targets, gatewayConfig);
-        checkPingResponse(result);
+    public void validateSalt(Set<String> targets, GatewayConfig gatewayConfig) {
+        try {
+            Map<String, Boolean> result = hostOrchestrator.ping(targets, gatewayConfig);
+            checkPingResponse(result);
+        } catch (CloudbreakOrchestratorFailedException e) {
+            throw new SecretRotationException(e);
+        }
     }
 
     private void checkPingResponse(Map<String, Boolean> result) throws CloudbreakOrchestratorFailedException {

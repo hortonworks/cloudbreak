@@ -203,7 +203,6 @@ class StackSaltStatusCheckerJobTest {
 
         @Test
         void error() throws JobExecutionException {
-            when(stackDto.getResourceCrn()).thenReturn("crn");
             RuntimeException cause = new RuntimeException("cause");
             doThrow(cause).when(saltPasswordStatusService).getSaltPasswordStatus(stackDto);
 
@@ -211,8 +210,6 @@ class StackSaltStatusCheckerJobTest {
 
             verify(saltPasswordStatusService).getSaltPasswordStatus(stackDto);
             verify(rotateSaltPasswordValidator).validateRotateSaltPassword(stackDto);
-            verify(rotateSaltPasswordService).sendFailureUsageReport(stackDto.getResourceCrn(), RotateSaltPasswordReason.UNSET,
-                    "Failed to get salt password status: " + cause.getMessage());
         }
 
     }

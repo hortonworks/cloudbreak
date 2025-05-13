@@ -57,8 +57,8 @@ class SaltRunOrchestratorStateRotationExecutorTest {
     }
 
     @Test
-    public void testPreValidationIfvalidateSaltFails() throws CloudbreakOrchestratorFailedException {
-        doThrow(new CloudbreakOrchestratorFailedException("validateSaltpong")).when(saltService).validateSalt(any(), any());
+    public void testPreValidationIfvalidateSaltFails() {
+        doThrow(new SecretRotationException("validateSaltpong")).when(saltService).validateSalt(any(), any());
 
         assertThrows(SecretRotationException.class, () ->
                 underTest.executePreValidation(createContext(List.of("state"), Optional.empty(), Optional.empty()), null));

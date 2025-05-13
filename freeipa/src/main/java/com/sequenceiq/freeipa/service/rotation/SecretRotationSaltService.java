@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
+import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.orchestrator.FreeIpaSaltPingService;
@@ -55,16 +56,16 @@ public class SecretRotationSaltService {
         hostOrchestrator.saveCustomPillars(new SaltConfig(servicePillar), exitCriteriaModel, stateParams);
     }
 
-    public void validateSalt(Stack stack) throws CloudbreakOrchestratorFailedException {
+    public void validateSalt(Stack stack) {
         OrchestratorStateParams stateParams = saltStateParamsService.createStateParams(stack, null, true, MAX_RETRY, MAX_RETRY_ON_ERROR);
         validateSalt(stateParams.getTargetHostNames(), stateParams.getPrimaryGatewayConfig());
     }
 
-    public void validateSalt(Set<String> targets, GatewayConfig gatewayConfig) throws CloudbreakOrchestratorFailedException {
+    public void validateSalt(Set<String> targets, GatewayConfig gatewayConfig) {
         try {
             freeIpaSaltPingService.saltPing(targets, gatewayConfig);
-        } catch (SaltPingFailedException e) {
-            throw new CloudbreakOrchestratorFailedException(e);
+        } catch (SaltPingFailedException | CloudbreakOrchestratorFailedException e) {
+            throw new SecretRotationException(e);
         }
     }
 

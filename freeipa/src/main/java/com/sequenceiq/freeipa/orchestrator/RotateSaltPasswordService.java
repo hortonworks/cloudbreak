@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -15,30 +14,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.cloudera.thunderhead.service.common.usage.UsageProto;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.service.Clock;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.quartz.saltstatuschecker.SaltStatusCheckerConfig;
+import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
-import com.sequenceiq.cloudbreak.usage.UsageReporter;
-import com.sequenceiq.cloudbreak.util.PasswordUtil;
+import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
+import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRotationRequest;
 import com.sequenceiq.freeipa.dto.RotateSaltPasswordReason;
-import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 import com.sequenceiq.freeipa.service.BootstrapService;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
-import com.sequenceiq.freeipa.service.SecurityConfigService;
 import com.sequenceiq.freeipa.service.rotation.FreeIpaSecretRotationService;
 import com.sequenceiq.freeipa.util.SaltBootstrapVersionChecker;
 
@@ -60,16 +52,10 @@ public class RotateSaltPasswordService {
     private Clock clock;
 
     @Inject
-    private EntitlementService entitlementService;
-
-    @Inject
     private HostOrchestrator hostOrchestrator;
 
     @Inject
     private GatewayConfigService gatewayConfigService;
-
-    @Inject
-    private SecurityConfigService securityConfigService;
 
     @Inject
     private SaltBootstrapVersionChecker saltBootstrapVersionChecker;
@@ -81,7 +67,7 @@ public class RotateSaltPasswordService {
     private FreeIpaSecretRotationService freeIpaSecretRotationService;
 
     @Inject
-    private UsageReporter usageReporter;
+    private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
 
     public FlowIdentifier triggerRotateSaltPassword(String environmentCrn, String accountId, RotateSaltPasswordReason reason) {
         FreeIpaSecretRotationRequest request = new FreeIpaSecretRotationRequest();
@@ -90,7 +76,6 @@ public class RotateSaltPasswordService {
     }
 
     public void rotateSaltPassword(Stack stack) {
-        validateRotateSaltPassword(stack);
         if (saltBootstrapVersionChecker.isChangeSaltuserPasswordSupported(stack)) {
             rotateSaltPasswordChangePassword(stack);
         } else {
@@ -98,40 +83,31 @@ public class RotateSaltPasswordService {
         }
     }
 
-    private void rotateSaltPasswordChangePassword(Stack stack) {
-        try {
-            SecurityConfig securityConfig = stack.getSecurityConfig();
-            String oldPassword = securityConfig.getSaltSecurityConfig().getSaltPasswordVault();
-            String newPassword = PasswordUtil.generatePassword();
-            List<GatewayConfig> gatewayConfigs = gatewayConfigService.getNotDeletedGatewayConfigs(stack);
-            hostOrchestrator.changePassword(gatewayConfigs, newPassword, oldPassword);
-            securityConfig.getSaltSecurityConfig().setSaltPasswordVault(newPassword);
-            validateAndSavePassword(stack, newPassword);
-        } catch (CloudbreakOrchestratorException e) {
-            LOGGER.error("Failed to rotate salt password", e);
-            throw new CloudbreakServiceException(e.getMessage(), e);
-        }
-    }
-
-    private void validateAndSavePassword(Stack stack, String newPassword) throws CloudbreakOrchestratorFailedException {
+    public void validatePasswordAfterRotation(Stack stack) {
         Optional<RotateSaltPasswordReason> rotateSaltPasswordReason = checkIfSaltPasswordRotationNeeded(stack);
         if (rotateSaltPasswordReason.isPresent()) {
             String message = String.format("Salt password status check failed with status %s, please try the operation again", rotateSaltPasswordReason.get());
-            throw new CloudbreakOrchestratorFailedException(message);
+            throw new SecretRotationException(message);
         }
-        securityConfigService.changeSaltPassword(stack, newPassword);
+    }
+
+    private void rotateSaltPasswordChangePassword(Stack stack) {
+        try {
+            List<GatewayConfig> gatewayConfigs = gatewayConfigService.getNotDeletedGatewayConfigs(stack);
+            RotationSecret password =
+                    uncachedSecretServiceForRotation.getRotation(stack.getSecurityConfig().getSaltSecurityConfig().getSaltPasswordVaultSecret());
+            hostOrchestrator.changePassword(gatewayConfigs, password.getSecret(), password.getBackupSecret());
+        } catch (CloudbreakOrchestratorException e) {
+            LOGGER.error("Failed to rotate salt password", e);
+            throw new SecretRotationException(e.getMessage(), e);
+        }
     }
 
     private void rotateSaltPasswordFallback(Stack stack) {
         List<GatewayConfig> allGatewayConfig = gatewayConfigService.getNotDeletedGatewayConfigs(stack);
         tryRemoveSaltuserFromGateways(stack, allGatewayConfig);
-
-        String newPassword = PasswordUtil.generatePassword();
-        SecurityConfig securityConfig = stack.getSecurityConfig();
-        securityConfig.getSaltSecurityConfig().setSaltPasswordVault(newPassword);
         try {
             bootstrapService.reBootstrap(stack);
-            validateAndSavePassword(stack, newPassword);
         } catch (CloudbreakOrchestratorException e) {
             Set<String> gatewayConfigAddresses = allGatewayConfig.stream()
                     .map(GatewayConfig::getPrivateAddress)
@@ -142,7 +118,7 @@ public class RotateSaltPasswordService {
                             "If the saltuser password was changed manually, " +
                             "please remove the user manually with the command '%s' on node(s) %s and retry the operation.",
                     gatewayConfigAddresses, SALTUSER_DELETE_COMMAND, gatewayConfigAddresses);
-            throw new CloudbreakServiceException(message, e);
+            throw new SecretRotationException(message, e);
         }
     }
 
@@ -153,39 +129,6 @@ public class RotateSaltPasswordService {
             LOGGER.debug("Saltuser delete command response: {}", response);
         } catch (CloudbreakOrchestratorException e) {
             LOGGER.warn("Failed to run saltuser delete command, assuming it is already deleted", e);
-        }
-    }
-
-    public void validateRotateSaltPassword(Stack stack) {
-        MDCBuilder.buildMdcContext(stack);
-        if (stack.isStopped()) {
-            throw new BadRequestException("Rotating SaltStack user password is not supported for stopped clusters");
-        }
-    }
-
-    public void sendSuccessUsageReport(String resourceCrn, RotateSaltPasswordReason reason) {
-        sendUsageReport(resourceCrn, reason, UsageProto.CDPSaltPasswordRotationEventResult.Value.SUCCESS, "");
-    }
-
-    public void sendFailureUsageReport(String resourceCrn, RotateSaltPasswordReason reason, String message) {
-        sendUsageReport(resourceCrn, reason, UsageProto.CDPSaltPasswordRotationEventResult.Value.FAILURE, message);
-    }
-
-    private void sendUsageReport(String resourceCrn, RotateSaltPasswordReason reason, UsageProto.CDPSaltPasswordRotationEventResult.Value result,
-            String message) {
-        try {
-            LOGGER.info("Reporting rotate salt password event with resource crn {}, reason {}, result {} and message {}",
-                    resourceCrn, reason, result, message);
-            UsageProto.CDPSaltPasswordRotationEvent event = UsageProto.CDPSaltPasswordRotationEvent.newBuilder()
-                    .setResourceCrn(Objects.requireNonNull(resourceCrn))
-                    .setReason(UsageProto.CDPSaltPasswordRotationEventReason.Value.valueOf(Objects.requireNonNull(reason).name()))
-                    .setEventResult(Objects.requireNonNull(result))
-                    .setMessage(Objects.requireNonNullElse(message, ""))
-                    .build();
-            usageReporter.cdpSaltPasswordRotationEvent(event);
-        } catch (Exception e) {
-            LOGGER.error("Failed to report rotate salt password event with resource crn {}, reason {}, result {} and message {}",
-                    resourceCrn, reason, result, message, e);
         }
     }
 

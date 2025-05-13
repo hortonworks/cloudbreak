@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordReq
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordSuccessResponse;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordType;
 import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordService;
+import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordValidator;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -29,6 +30,9 @@ public class RotateSaltPasswordHandler extends ExceptionCatcherEventHandler<Rota
 
     @Inject
     private StackDtoService stackDtoService;
+
+    @Inject
+    private RotateSaltPasswordValidator rotateSaltPasswordValidator;
 
     @Override
     public String selector() {
@@ -48,6 +52,7 @@ public class RotateSaltPasswordHandler extends ExceptionCatcherEventHandler<Rota
             StackDto stack = stackDtoService.getById(stackId);
             RotateSaltPasswordType rotateSaltPasswordType = event.getData().getType();
             LOGGER.info("Starting to rotate salt password for stack {} with type {}", stackId, rotateSaltPasswordType);
+            rotateSaltPasswordValidator.validateRotateSaltPassword(stack);
             rotateSaltPasswordService.rotateSaltPassword(stack);
             return new RotateSaltPasswordSuccessResponse(stackId);
         } catch (Exception e) {

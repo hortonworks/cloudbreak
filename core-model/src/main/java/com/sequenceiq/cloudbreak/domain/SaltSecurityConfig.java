@@ -140,6 +140,10 @@ public class SaltSecurityConfig implements ProvisionEntity, WorkspaceAwareResour
         return saltPassword.getRaw();
     }
 
+    public String getSaltPasswordSecret() {
+        return saltPassword.getSecret();
+    }
+
     public void setSaltPassword(String saltPassword) {
         this.saltPassword = new Secret(saltPassword);
     }

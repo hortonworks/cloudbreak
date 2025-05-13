@@ -9,7 +9,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -29,10 +28,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.cloudera.thunderhead.service.common.usage.UsageProto;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
@@ -40,8 +35,10 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.quartz.saltstatuschecker.SaltStatusCheckerConfig;
+import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
-import com.sequenceiq.cloudbreak.usage.UsageReporter;
+import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
+import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRotationRequest;
@@ -49,11 +46,9 @@ import com.sequenceiq.freeipa.dto.RotateSaltPasswordReason;
 import com.sequenceiq.freeipa.entity.SaltSecurityConfig;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 import com.sequenceiq.freeipa.service.BootstrapService;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
-import com.sequenceiq.freeipa.service.SecurityConfigService;
 import com.sequenceiq.freeipa.service.rotation.FreeIpaSecretRotationService;
 import com.sequenceiq.freeipa.util.SaltBootstrapVersionChecker;
 
@@ -71,16 +66,10 @@ class RotateSaltPasswordServiceTest {
     private static final String FQDN = "fqdn";
 
     @Mock
-    private EntitlementService entitlementService;
-
-    @Mock
     private HostOrchestrator hostOrchestrator;
 
     @Mock
     private GatewayConfigService gatewayConfigService;
-
-    @Mock
-    private SecurityConfigService securityConfigService;
 
     @Mock
     private SaltBootstrapVersionChecker saltBootstrapVersionChecker;
@@ -90,9 +79,6 @@ class RotateSaltPasswordServiceTest {
 
     @Mock
     private FreeIpaSecretRotationService freeIpaSecretRotationService;
-
-    @Mock
-    private UsageReporter usageReporter;
 
     @Mock
     private Clock clock;
@@ -106,14 +92,11 @@ class RotateSaltPasswordServiceTest {
     @Mock
     private GatewayConfig gatewayConfig;
 
+    @Mock
+    private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
+
     @InjectMocks
     private RotateSaltPasswordService underTest;
-
-    @Captor
-    private ArgumentCaptor<StackEvent> stackEventArgumentCaptor;
-
-    @Captor
-    private ArgumentCaptor<UsageProto.CDPSaltPasswordRotationEvent> eventArgumentCaptor;
 
     @Captor
     private ArgumentCaptor<FreeIpaSecretRotationRequest> requestCaptor;
@@ -137,15 +120,7 @@ class RotateSaltPasswordServiceTest {
         SecurityConfig securityConfig = new SecurityConfig();
         securityConfig.setSaltSecurityConfig(saltSecurityConfig);
         lenient().when(stack.getSecurityConfig()).thenReturn(securityConfig);
-    }
-
-    @Test
-    void  rotateSaltPasswordForStoppedStack() {
-        lenient().when(stack.isStopped()).thenReturn(true);
-
-        Assertions.assertThatThrownBy(() -> underTest.rotateSaltPassword(stack))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("Rotating SaltStack user password is not supported for stopped clusters");
+        lenient().when(uncachedSecretServiceForRotation.getRotation(any())).thenReturn(new RotationSecret("new-password", OLD_PASSWORD));
     }
 
     @Test
@@ -157,7 +132,6 @@ class RotateSaltPasswordServiceTest {
 
         verify(hostOrchestrator).runCommandOnHosts(List.of(gatewayConfig), Set.of(FQDN), SALTUSER_DELETE_COMMAND);
         verify(bootstrapService).reBootstrap(stack);
-        verify(securityConfigService).changeSaltPassword(eq(stack), anyString());
     }
 
     @Test
@@ -171,7 +145,6 @@ class RotateSaltPasswordServiceTest {
 
         verify(hostOrchestrator).runCommandOnHosts(List.of(gatewayConfig), Set.of(FQDN), SALTUSER_DELETE_COMMAND);
         verify(bootstrapService).reBootstrap(stack);
-        verify(securityConfigService).changeSaltPassword(eq(stack), anyString());
     }
 
     @Test
@@ -181,7 +154,7 @@ class RotateSaltPasswordServiceTest {
         doThrow(cause).when(bootstrapService).reBootstrap(stack);
 
         assertThatThrownBy(() -> underTest.rotateSaltPassword(stack))
-                .isInstanceOf(CloudbreakServiceException.class)
+                .isInstanceOf(SecretRotationException.class)
                 .hasCause(cause)
                 .hasMessage("Failed to re-bootstrap gateway nodes after saltuser password delete. " +
                         "Please check the salt-bootstrap service status on node(s) %s. " +
@@ -191,7 +164,6 @@ class RotateSaltPasswordServiceTest {
 
         verify(hostOrchestrator).runCommandOnHosts(List.of(gatewayConfig), Set.of(FQDN), SALTUSER_DELETE_COMMAND);
         verify(bootstrapService).reBootstrap(stack);
-        verify(securityConfigService, never()).changeSaltPassword(eq(stack), anyString());
     }
 
     @Test
@@ -201,11 +173,9 @@ class RotateSaltPasswordServiceTest {
         doThrow(orchestratorFailedException).when(hostOrchestrator).changePassword(any(), any(), any());
 
         Assertions.assertThatThrownBy(() -> underTest.rotateSaltPassword(stack))
-                .isInstanceOf(CloudbreakServiceException.class)
+                .isInstanceOf(SecretRotationException.class)
                 .hasCause(orchestratorFailedException)
                 .hasMessage(orchestratorFailedException.getMessage());
-
-        verify(securityConfigService, never()).changeSaltPassword(eq(stack), anyString());
     }
 
     @Test
@@ -216,7 +186,6 @@ class RotateSaltPasswordServiceTest {
         underTest.rotateSaltPassword(stack);
 
         verify(hostOrchestrator).changePassword(eq(List.of(gatewayConfig)), anyString(), eq(OLD_PASSWORD));
-        verify(securityConfigService).changeSaltPassword(eq(stack), anyString());
     }
 
     @Test
@@ -228,33 +197,6 @@ class RotateSaltPasswordServiceTest {
         verify(freeIpaSecretRotationService).rotateSecretsByCrn(eq(ACCOUNT_ID), eq(ENVIRONMENT_CRN), requestCaptor.capture());
         FreeIpaSecretRotationRequest request = requestCaptor.getValue();
         assertThat(request.getSecrets()).containsOnly(FreeIpaSecretType.SALT_PASSWORD.value());
-    }
-
-    @Test
-    void sendSuccessUsageReport() {
-        underTest.sendSuccessUsageReport(ENVIRONMENT_CRN, RotateSaltPasswordReason.MANUAL);
-
-        verify(usageReporter).cdpSaltPasswordRotationEvent(eventArgumentCaptor.capture());
-        UsageProto.CDPSaltPasswordRotationEvent event = eventArgumentCaptor.getValue();
-        assertThat(event)
-                .returns(ENVIRONMENT_CRN, UsageProto.CDPSaltPasswordRotationEvent::getResourceCrn)
-                .returns(UsageProto.CDPSaltPasswordRotationEventReason.Value.MANUAL, UsageProto.CDPSaltPasswordRotationEvent::getReason)
-                .returns(UsageProto.CDPSaltPasswordRotationEventResult.Value.SUCCESS, UsageProto.CDPSaltPasswordRotationEvent::getEventResult)
-                .returns("", UsageProto.CDPSaltPasswordRotationEvent::getMessage);
-    }
-
-    @Test
-    void sendFailureUsageReport() {
-        String message = "failure message";
-        underTest.sendFailureUsageReport(ENVIRONMENT_CRN, RotateSaltPasswordReason.EXPIRED, message);
-
-        verify(usageReporter).cdpSaltPasswordRotationEvent(eventArgumentCaptor.capture());
-        UsageProto.CDPSaltPasswordRotationEvent event = eventArgumentCaptor.getValue();
-        assertThat(event)
-                .returns(ENVIRONMENT_CRN, UsageProto.CDPSaltPasswordRotationEvent::getResourceCrn)
-                .returns(UsageProto.CDPSaltPasswordRotationEventReason.Value.EXPIRED, UsageProto.CDPSaltPasswordRotationEvent::getReason)
-                .returns(UsageProto.CDPSaltPasswordRotationEventResult.Value.FAILURE, UsageProto.CDPSaltPasswordRotationEvent::getEventResult)
-                .returns(message, UsageProto.CDPSaltPasswordRotationEvent::getMessage);
     }
 
     @Test
@@ -298,9 +240,9 @@ class RotateSaltPasswordServiceTest {
     }
 
     private void setPasswordExpiry(LocalDate t) throws CloudbreakOrchestratorException {
-        when(clock.getCurrentLocalDateTime()).thenReturn(LocalDateTime.now());
-        when(saltStatusCheckerConfig.getPasswordExpiryThresholdInDays()).thenReturn(14);
-        when(hostOrchestrator.getPasswordExpiryDate(List.of(gatewayConfig), RotateSaltPasswordService.SALTUSER)).thenReturn(t);
+        lenient().when(clock.getCurrentLocalDateTime()).thenReturn(LocalDateTime.now());
+        lenient().when(saltStatusCheckerConfig.getPasswordExpiryThresholdInDays()).thenReturn(14);
+        lenient().when(hostOrchestrator.getPasswordExpiryDate(List.of(gatewayConfig), RotateSaltPasswordService.SALTUSER)).thenReturn(t);
     }
 
 }

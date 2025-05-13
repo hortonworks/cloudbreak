@@ -56,7 +56,6 @@ public class StackSaltStatusCheckerJob extends StatusCheckerJob {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         MDCBuilder.buildMdcContext(stack);
         try {
-            rotateSaltPasswordService.validateRotateSaltPassword(stack);
             Status status = stack.getStackStatus().getStatus();
             if (status.isDeletionInProgress() || status.isSuccessfullyDeleted() || status.isDeletedOnProviderSide()) {
                 LOGGER.debug("Stack {} is deleted, unscheduling", stack.getResourceCrn());
@@ -85,7 +84,6 @@ public class StackSaltStatusCheckerJob extends StatusCheckerJob {
                         rotateSaltPasswordService.triggerRotateSaltPassword(stack.getEnvironmentCrn(), stack.getAccountId(), reason));
             }, LOGGER, ":::Auto sync::: freeipa stack salt sync in {}ms");
         } catch (Exception e) {
-            rotateSaltPasswordService.sendFailureUsageReport(stack.getResourceCrn(), RotateSaltPasswordReason.UNSET, e.getMessage());
             LOGGER.warn(":::Auto sync::: Error occurred during freeipa salt sync: {}", e.getMessage(), e);
         }
     }

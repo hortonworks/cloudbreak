@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,6 +30,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordReq
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordSuccessResponse;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordType;
 import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordService;
+import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordValidator;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
@@ -41,6 +44,9 @@ class RotateSaltPasswordHandlerTest {
 
     @Mock
     private RotateSaltPasswordService rotateSaltPasswordService;
+
+    @Mock
+    private RotateSaltPasswordValidator rotateSaltPasswordValidator;
 
     @Mock
     private StackDtoService stackDtoService;
@@ -65,6 +71,7 @@ class RotateSaltPasswordHandlerTest {
 
     @Test
     void testFailure() throws CloudbreakOrchestratorException {
+        doNothing().when(rotateSaltPasswordValidator).validateRotateSaltPassword(any());
         CloudbreakOrchestratorFailedException exception = new CloudbreakOrchestratorFailedException("error");
         doThrow(exception).when(rotateSaltPasswordService).rotateSaltPassword(stack);
 
@@ -80,6 +87,7 @@ class RotateSaltPasswordHandlerTest {
 
     @Test
     void testSuccess() throws CloudbreakOrchestratorException {
+        doNothing().when(rotateSaltPasswordValidator).validateRotateSaltPassword(any());
         Selectable result = underTest.doAccept(event);
 
         assertThat(result)

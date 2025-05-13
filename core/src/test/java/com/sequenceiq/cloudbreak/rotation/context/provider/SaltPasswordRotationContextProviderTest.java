@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 
 import java.util.Map;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,6 +15,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
+import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
@@ -23,6 +26,7 @@ import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
 import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordService;
 import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordValidator;
+import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
 @ExtendWith(MockitoExtension.class)
@@ -49,7 +53,13 @@ class SaltPasswordRotationContextProviderTest {
     private StackDto stack;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws IllegalAccessException {
+        SecurityConfig securityConfig = new SecurityConfig();
+        SaltSecurityConfig saltSecurityConfig = new SaltSecurityConfig();
+        securityConfig.setSaltSecurityConfig(saltSecurityConfig);
+        FieldUtils.writeField(saltSecurityConfig, "saltPassword", new Secret("", ""), true);
+        lenient().when(stack.getSecurityConfig()).thenReturn(securityConfig);
+        lenient().when(stack.getResourceCrn()).thenReturn(CRN);
         lenient().when(stackDtoService.getByCrn(CRN)).thenReturn(stack);
     }
 

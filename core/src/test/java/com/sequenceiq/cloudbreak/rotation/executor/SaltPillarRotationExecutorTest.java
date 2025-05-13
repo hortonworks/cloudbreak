@@ -53,7 +53,7 @@ class SaltPillarRotationExecutorTest {
     private SaltPillarRotationExecutor underTest;
 
     @Test
-    void validationShouldSucceed() throws CloudbreakOrchestratorFailedException {
+    void validationShouldSucceed() {
         mockStackDto();
         doNothing().when(saltService).validateSaltPrimaryGateway(any());
 
@@ -63,9 +63,9 @@ class SaltPillarRotationExecutorTest {
     }
 
     @Test
-    void validationShouldFailIfSaltPingFails() throws CloudbreakOrchestratorFailedException {
+    void validationShouldFailIfSaltPingFails() {
         mockStackDto();
-        doThrow(new CloudbreakOrchestratorFailedException("pingpong")).when(saltService).validateSaltPrimaryGateway(any());
+        doThrow(new SecretRotationException("pingpong")).when(saltService).validateSaltPrimaryGateway(any());
 
         assertThrows(SecretRotationException.class, () ->
                 underTest.executePreValidation(new SaltPillarRotationContext(RESOURCE_CRN, getSaltPillarGenerator()), null));

@@ -145,7 +145,6 @@ public class StackSaltStatusCheckerJob extends StatusCheckerJob {
             }
         } catch (Exception e) {
             String message = "Failed to get salt password status: " + e.getMessage();
-            rotateSaltPasswordService.sendFailureUsageReport(stack.getResourceCrn(), RotateSaltPasswordReason.UNSET, message);
             throw e;
         }
     }
