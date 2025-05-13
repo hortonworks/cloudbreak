@@ -43,6 +43,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.RetryService;
 import com.sequenceiq.common.api.type.CdpResourceType;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.datalake.configuration.CDPConfigService;
 import com.sequenceiq.datalake.converter.VmTypeConverter;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -174,6 +175,20 @@ class SdxRecommendationServiceTest {
     }
 
     @Test
+    public void validateVmTypeOverrideWhenArchitectureIsSpecified() {
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(createStackRequest());
+        when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any(), any()))
+                .thenReturn(createPlatformVmtypesResponse());
+        StackV4Request stackRequest = createStackRequest();
+        SdxCluster sdxCluster = createSdxCluster(stackRequest, LIGHT_DUTY);
+        sdxCluster.setArchitecture(Architecture.ARM64);
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.validateVmTypeOverride(createEnvironment("AWS"), sdxCluster));
+
+        assertEquals("large instance type has x86_64 cpu architecture which doesn't match the cluster architecture arm64", badRequestException.getMessage());
+    }
+
+    @Test
     public void validateVmTypeOverrideWhenDefaultVmTypeIsMissingFromAvailableVmTypes() {
         StackV4Request defaultTemplate = createStackRequest();
         defaultTemplate.getInstanceGroups().get(0).getTemplate().setInstanceType("unknown");
@@ -251,7 +266,7 @@ class SdxRecommendationServiceTest {
         virtualMachines.add(new VmTypeResponse("large", createVmTypeMetaJson(10, 1000.0F)));
         virtualMachines.add(new VmTypeResponse("medium", createVmTypeMetaJson(8, 800.0F)));
         virtualMachines.add(new VmTypeResponse("mediumv2", createVmTypeMetaJson(8, 1000.0F)));
-        virtualMachines.add(new VmTypeResponse("small", createVmTypeMetaJson(2, 200.0F)));
+        virtualMachines.add(new VmTypeResponse("small", createVmTypeMetaJsonWithArm(2, 200.0F)));
         virtualMachinesResponse.setVirtualMachines(virtualMachines);
         vmTypes.put("eu-central-1", virtualMachinesResponse);
         return new PlatformVmtypesResponse(vmTypes);
@@ -262,6 +277,17 @@ class SdxRecommendationServiceTest {
         Map<String, Object> properties = new HashMap<>();
         properties.put("Cpu", cpu);
         properties.put("Memory", memory);
+        properties.put("Architecture", "x86_64");
+        vmTypeMetaJson.setProperties(properties);
+        return vmTypeMetaJson;
+    }
+
+    private VmTypeMetaJson createVmTypeMetaJsonWithArm(Integer cpu, Float memory) {
+        VmTypeMetaJson vmTypeMetaJson = new VmTypeMetaJson();
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("Cpu", cpu);
+        properties.put("Memory", memory);
+        properties.put("Architecture", "arm64");
         vmTypeMetaJson.setProperties(properties);
         return vmTypeMetaJson;
     }

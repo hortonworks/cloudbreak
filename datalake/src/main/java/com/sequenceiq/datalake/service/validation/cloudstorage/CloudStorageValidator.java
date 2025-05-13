@@ -19,7 +19,6 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.BackupOperationType;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
@@ -56,8 +55,7 @@ public class CloudStorageValidator {
 
     public CloudStorageValidator(CredentialResponseToCloudCredentialConverter credentialResponseToCloudCredentialConverter,
             EntitlementService entitlementService,
-            CloudProviderServicesV4Endopint cloudProviderServicesV4Endpoint,
-            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+            CloudProviderServicesV4Endopint cloudProviderServicesV4Endpoint) {
         this.credentialResponseToCloudCredentialConverter = credentialResponseToCloudCredentialConverter;
         this.entitlementService = entitlementService;
         this.cloudProviderServicesV4Endpoint = cloudProviderServicesV4Endpoint;

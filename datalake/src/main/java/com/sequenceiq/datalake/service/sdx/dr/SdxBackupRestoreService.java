@@ -216,7 +216,7 @@ public class SdxBackupRestoreService {
     public Optional<datalakeDRProto.DatalakeBackupInfo> getLastSuccessfulBackupInfoWithRuntime(String datalakeName, String userCrn, String runtime) {
         datalakeDRProto.DatalakeBackupInfo lastSuccessfulBackupInfo = datalakeDrClient.getLastSuccessfulBackup(datalakeName, userCrn, Optional.of(runtime));
         if (lastSuccessfulBackupInfo == null) {
-            LOGGER.error("No successful backup found for data lake: {}", datalakeName);
+            LOGGER.error("No successful backup found for data lake {} for runtime {}", datalakeName, runtime);
             return Optional.empty();
         }
         return Optional.of(lastSuccessfulBackupInfo);

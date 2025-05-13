@@ -574,7 +574,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         }
     }
 
-    private Architecture validateAndGetArchitecture(SdxClusterRequest sdxClusterRequest, ImageV4Response imageV4Response, CloudPlatform cloudPlatform,
+    @VisibleForTesting
+    protected Architecture validateAndGetArchitecture(SdxClusterRequest sdxClusterRequest, ImageV4Response imageV4Response, CloudPlatform cloudPlatform,
             String accountId) {
         Architecture requestedArchitecture = Optional.ofNullable(sdxClusterRequest.getArchitecture()).map(Architecture::fromStringWithValidation).orElse(null);
         Architecture imageArchitecture =
@@ -798,14 +799,13 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                 subnetsByAz = collectSubnetsByAzFromGcp(stackResponse);
             }
             if (subnetsByAz != null && subnetsByAz.size() > 1) {
-                multiAzDecorator.decorateStackRequestWithPreviousNetwork(stackRequest, environmentResponse, clusterShape, subnetsByAz);
+                multiAzDecorator.decorateStackRequestWithPreviousNetwork(stackRequest, environmentResponse, subnetsByAz);
             }
         }
     }
 
     private Map<String, Set<String>> collectSubnetsByAzFromMetadata(StackV4Response stackV4Response) {
         LOGGER.info("Collecting subnets by avaliability zone from instance metadata");
-        Map<String, Set<String>> subnetsByAZ = new HashMap<>();
         return stackV4Response
                 .getInstanceGroups()
                 .stream()

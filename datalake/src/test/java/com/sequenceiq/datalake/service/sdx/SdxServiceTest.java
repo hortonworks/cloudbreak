@@ -123,6 +123,7 @@ import com.sequenceiq.cloudbreak.vm.VirtualMachineConfiguration;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.EnvironmentType;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
 import com.sequenceiq.common.model.SeLinux;
@@ -349,6 +350,75 @@ class SdxServiceTest {
                 .thenReturn(Optional.of(sdxCluser));
         SdxCluster returnedSdxCluster = underTest.getByNameOrCrn(USER_CRN, NameOrCrn.ofName(CLUSTER_NAME));
         assertEquals(sdxCluser, returnedSdxCluster);
+    }
+
+    @Test
+    void testGetSdxClustersByCrnWhenCrnProvidedShouldReturnSdxClusters() {
+        SdxCluster sdxClusterOriginal = new SdxCluster();
+        SdxCluster sdxCluster = new SdxCluster();
+        List<SdxCluster> sdxClusterOriginals = new ArrayList<>();
+        Optional<SdxCluster> sdxClusterOptional = Optional.of(sdxCluster);
+        sdxClusterOriginals.add(sdxClusterOriginal);
+        when(sdxClusterRepository.findByAccountIdAndOriginalCrn(any(), any())).thenReturn(sdxClusterOriginals);
+        when(sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(any(), any())).thenReturn(sdxClusterOptional);
+        List<SdxCluster> result = underTest.getSdxClustersByCrn(USER_CRN, SDX_CRN, true);
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    void testValidateAndGetArchitectureWhenArmRequestedAndImageIsArm() {
+        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
+        sdxClusterRequest.setArchitecture("arm64");
+        ImageV4Response imageV4Response = new ImageV4Response();
+        imageV4Response.setArchitecture("arm64");
+        when(entitlementService.isDataLakeArmEnabled(any())).thenReturn(true);
+        Architecture architecture = underTest.validateAndGetArchitecture(sdxClusterRequest, imageV4Response, AWS, "1");
+        assertEquals(Architecture.ARM64, architecture);
+    }
+
+    @Test
+    void testValidateAndGetArchitectureWhenArmRequestedButNotEntitled() {
+        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
+        sdxClusterRequest.setArchitecture("arm64");
+        ImageV4Response imageV4Response = new ImageV4Response();
+        imageV4Response.setArchitecture("arm64");
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.validateAndGetArchitecture(sdxClusterRequest, imageV4Response, AWS, "1"));
+        assertEquals("The current account is not entitled to use arm64 instances.", exception.getMessage());
+    }
+
+    @Test
+    void testValidateAndGetArchitectureWhenArmRequestedButAzureBadRequest() {
+        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
+        sdxClusterRequest.setArchitecture("arm64");
+        ImageV4Response imageV4Response = new ImageV4Response();
+        imageV4Response.setArchitecture("arm64");
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.validateAndGetArchitecture(sdxClusterRequest, imageV4Response, AZURE, "1"));
+        assertEquals("Arm64 is only supported on AWS cloud provider.", exception.getMessage());
+    }
+
+    @Test
+    void testValidateAndGetArchitectureWhenArmRequestedButIncorrectImage() {
+        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
+        sdxClusterRequest.setArchitecture("arm64");
+        ImageV4Response imageV4Response = new ImageV4Response();
+        imageV4Response.setUuid("abcdef-12345");
+        imageV4Response.setArchitecture("x86_64");
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.validateAndGetArchitecture(sdxClusterRequest, imageV4Response, AZURE, "1"));
+        assertEquals("The selected cpu architecture arm64 doesn't match the cpu architecture x86_64 of the image 'abcdef-12345'.", exception.getMessage());
+    }
+
+    @Test
+    void testGetSdxClustersByCrnNotFound() {
+        SdxCluster sdxClusterOriginal = new SdxCluster();
+        SdxCluster sdxCluster = new SdxCluster();
+        List<SdxCluster> sdxClusterOriginals = new ArrayList<>();
+        Optional<SdxCluster> sdxClusterOptional = Optional.empty();
+        sdxClusterOriginals.add(sdxClusterOriginal);
+        when(sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(any(), any())).thenReturn(sdxClusterOptional);
+        assertThrows(NotFoundException.class, () -> underTest.getSdxClustersByCrn(USER_CRN, SDX_CRN, false));
     }
 
     @Test
@@ -1471,6 +1541,32 @@ class SdxServiceTest {
     }
 
     @Test
+    void testSyncComponentVersionsFromCmThenTriggerSync() {
+        NameOrCrn crn = NameOrCrn.ofCrn(SDX_CRN);
+        SdxCluster sdxCluster = new SdxCluster();
+        SdxStatusEntity sdxStatus = new SdxStatusEntity();
+        sdxStatus.setStatus(DatalakeStatusEnum.RUNNING);
+        Optional<SdxCluster> sdxClusterOptional = Optional.of(sdxCluster);
+        when(sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(any(), any())).thenReturn(sdxClusterOptional);
+        when(sdxStatusService.getActualStatusForSdx(any(SdxCluster.class))).thenReturn(sdxStatus);
+        underTest.syncComponentVersionsFromCm(USER_CRN, crn);
+        verify(sdxReactorFlowManager, times(1)).triggerDatalakeSyncComponentVersionsFromCmFlow(sdxCluster);
+    }
+
+    @Test
+    void testSyncComponentVersionsFromCmWhenInStoppedState() {
+        NameOrCrn crn = NameOrCrn.ofCrn(SDX_CRN);
+        SdxCluster sdxCluster = new SdxCluster();
+        SdxStatusEntity sdxStatus = new SdxStatusEntity();
+        sdxStatus.setStatus(DatalakeStatusEnum.STOPPED);
+        Optional<SdxCluster> sdxClusterOptional = Optional.of(sdxCluster);
+        when(sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(any(), any())).thenReturn(sdxClusterOptional);
+        when(sdxStatusService.getActualStatusForSdx(any(SdxCluster.class))).thenReturn(sdxStatus);
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.syncComponentVersionsFromCm(USER_CRN, crn));
+        assertEquals("Reading CM and parcel versions from CM cannot be initiated as the datalake is in STOPPED state", exception.getMessage());
+    }
+
+    @Test
     void testSdxResizeCustomDatabaseProperties() throws IOException {
         SdxClusterResizeRequest resizeRequest = new SdxClusterResizeRequest();
         resizeRequest.setEnvironment(ENVIRONMENT_NAME);
@@ -2283,7 +2379,7 @@ class SdxServiceTest {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, CLUSTER_NAME, resizeRequest));
 
         Map<String, Set<String>> subnetsByAz = Map.of("az1", Set.of("subnet1"), "az2", Set.of("subnet2"), "az3", Set.of("subnet3"));
-        verify(multiAzDecorator, times(1)).decorateStackRequestWithPreviousNetwork(any(), any(), any(), eq(subnetsByAz));
+        verify(multiAzDecorator, times(1)).decorateStackRequestWithPreviousNetwork(any(), any(), eq(subnetsByAz));
     }
 
     @ParameterizedTest(name = "{0}")
@@ -2335,7 +2431,7 @@ class SdxServiceTest {
         Map<String, Set<String>> subnetsByAz = Map.of("1", Set.of("subnet1", "subnet2"), "2", Set.of("subnet1", "subnet2"),
                 "3", Set.of("subnet1", "subnet2"));
 
-        verify(multiAzDecorator, times(1)).decorateStackRequestWithPreviousNetwork(any(), any(), any(), eq(subnetsByAz));
+        verify(multiAzDecorator, times(1)).decorateStackRequestWithPreviousNetwork(any(), any(), eq(subnetsByAz));
     }
 
     @Test
@@ -2401,7 +2497,7 @@ class SdxServiceTest {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, CLUSTER_NAME, resizeRequest));
 
         Map<String, Set<String>> subnetsByAz = Map.of("az1", Set.of("subnet1", "subnet2", "subnet3"));
-        verify(multiAzDecorator, never()).decorateStackRequestWithPreviousNetwork(any(), any(), any(), eq(subnetsByAz));
+        verify(multiAzDecorator, never()).decorateStackRequestWithPreviousNetwork(any(), any(), eq(subnetsByAz));
     }
 
     private List<InstanceGroupV4Response> getInstanceGroups(CloudPlatform cloudPlatform) {

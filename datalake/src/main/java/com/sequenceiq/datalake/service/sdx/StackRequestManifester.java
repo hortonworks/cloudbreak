@@ -236,7 +236,7 @@ public class StackRequestManifester {
         validateCloudStorageAndHandleTimeout(sdxCluster, environment, stackRequest);
     }
 
-    private void validateCloudStorageAndHandleTimeout(SdxCluster sdxCluster, DetailedEnvironmentResponse environment, StackV4Request stackRequest) {
+    protected void validateCloudStorageAndHandleTimeout(SdxCluster sdxCluster, DetailedEnvironmentResponse environment, StackV4Request stackRequest) {
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
         try {
             CloudStorageRequest cloudStorage = getCloudStorage(stackRequest);
@@ -273,7 +273,7 @@ public class StackRequestManifester {
         }
     }
 
-    private void setupYarnDetails(DetailedEnvironmentResponse environment, StackV4Request stackRequest) {
+    protected void setupYarnDetails(DetailedEnvironmentResponse environment, StackV4Request stackRequest) {
         if (stackRequest.getYarn() == null || stackRequest.getYarn().getYarnQueue() == null) {
             if (environment.getNetwork() == null
                     || environment.getNetwork().getYarn() == null

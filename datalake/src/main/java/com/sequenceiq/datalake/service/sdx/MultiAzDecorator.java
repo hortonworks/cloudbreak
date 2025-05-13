@@ -145,7 +145,7 @@ public class MultiAzDecorator {
         return new ArrayList<>(distinctedSubnetByAz.values());
     }
 
-    public void decorateStackRequestWithPreviousNetwork(StackV4Request stackV4Request, DetailedEnvironmentResponse environment, SdxClusterShape clusterShape,
+    public void decorateStackRequestWithPreviousNetwork(StackV4Request stackV4Request, DetailedEnvironmentResponse environment,
             Map<String, Set<String>> subnetsByAz) {
         LOGGER.info("Decorate stackRequest with previous network configuration");
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());

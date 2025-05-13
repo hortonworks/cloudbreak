@@ -344,7 +344,7 @@ class MultiAzDecoratorTest {
         DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
         environment.setCloudPlatform(String.valueOf(AWS));
 
-        underTest.decorateStackRequestWithPreviousNetwork(stackV4Request, environment, SdxClusterShape.ENTERPRISE, subnetsByAz);
+        underTest.decorateStackRequestWithPreviousNetwork(stackV4Request, environment, subnetsByAz);
 
         assertTrue(stackV4Request
                 .getInstanceGroups()
@@ -370,7 +370,7 @@ class MultiAzDecoratorTest {
         DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
         environment.setCloudPlatform(String.valueOf(AZURE));
 
-        underTest.decorateStackRequestWithPreviousNetwork(stackV4Request, environment, SdxClusterShape.ENTERPRISE, subnetsByAz);
+        underTest.decorateStackRequestWithPreviousNetwork(stackV4Request, environment, subnetsByAz);
 
         assertTrue(stackV4Request
                 .getInstanceGroups()
@@ -394,7 +394,7 @@ class MultiAzDecoratorTest {
         DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
         environment.setCloudPlatform(String.valueOf(GCP));
 
-        underTest.decorateStackRequestWithPreviousNetwork(stackV4Request, environment, SdxClusterShape.ENTERPRISE, subnetsByAz);
+        underTest.decorateStackRequestWithPreviousNetwork(stackV4Request, environment, subnetsByAz);
 
         assertTrue(stackV4Request
                 .getInstanceGroups()

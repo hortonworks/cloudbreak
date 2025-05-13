@@ -214,21 +214,21 @@ public class CDPConfigService {
         List<AdvertisedRuntime> calculatedAdvertisedRuntimes = new ArrayList<>();
 
         for (String runtimeVersion : runtimeVersions) {
-            boolean defaultRuntime = calculatedDefault.map(r -> r.equals(runtimeVersion)).orElse(false);
+            boolean defaultRuntimeCalculated = calculatedDefault.map(r -> r.equals(runtimeVersion)).orElse(false);
             int runtimeComparison = comparator.compare(() -> runtimeVersion, () -> ARM64_MIN_RUNTIME_VERSION);
 
             if (!armEnabled || runtimeComparison < 0) {
                 AdvertisedRuntime x86Runtime = new AdvertisedRuntime();
                 x86Runtime.setRuntimeVersion(runtimeVersion);
                 x86Runtime.setArchitecture(Architecture.X86_64);
-                x86Runtime.setDefaultRuntimeVersion(defaultRuntime);
+                x86Runtime.setDefaultRuntimeVersion(defaultRuntimeCalculated);
                 calculatedAdvertisedRuntimes.add(x86Runtime);
             } else {
                 for (Architecture arch : List.of(Architecture.ARM64, Architecture.X86_64)) {
                     AdvertisedRuntime runtime = new AdvertisedRuntime();
                     runtime.setRuntimeVersion(runtimeVersion);
                     runtime.setArchitecture(arch);
-                    runtime.setDefaultRuntimeVersion(defaultRuntime);
+                    runtime.setDefaultRuntimeVersion(defaultRuntimeCalculated);
                     calculatedAdvertisedRuntimes.add(runtime);
                 }
             }

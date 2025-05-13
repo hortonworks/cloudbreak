@@ -1,13 +1,20 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.SDX_VALIDATION_FAILED_AND_SKIPPED;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -18,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,6 +57,7 @@ import com.sequenceiq.cloudbreak.idbmms.GrpcIdbmmsClient;
 import com.sequenceiq.cloudbreak.idbmms.exception.IdbmmsOperationException;
 import com.sequenceiq.cloudbreak.idbmms.model.MappingsConfig;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigView;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.cloudstorage.StorageIdentityBase;
@@ -66,9 +73,11 @@ import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.datalake.converter.DatabaseRequestConverter;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageValidator;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.endpoint.service.azure.HostEncryptionCalculator;
+import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsDiskEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
@@ -78,6 +87,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnviro
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentAuthenticationResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.TagResponse;
 
 @ExtendWith(MockitoExtension.class)
@@ -155,6 +165,12 @@ public class StackRequestManifesterTest {
 
     @Mock
     private HostEncryptionCalculator hostEncryptionCalculator;
+
+    @Mock
+    private SdxNotificationService sdxNotificationService;
+
+    @Mock
+    private EventSenderService eventSenderService;
 
     @InjectMocks
     private StackRequestManifester underTest;
@@ -488,7 +504,7 @@ public class StackRequestManifesterTest {
 
         clusterV4Request.setCloudStorage(cloudStorage);
 
-        Assertions.assertThrows(
+        assertThrows(
                 BadRequestException.class,
                 () -> underTest.setupCloudStorageAccountMapping(stackV4Request, BAD_ENVIRONMENT_CRN, IdBrokerMappingSource.IDBMMS, CLOUD_PLATFORM_AWS));
     }
@@ -558,7 +574,7 @@ public class StackRequestManifesterTest {
         // Enable RAZ without mapping which should throw an error.
         clusterV4Request.setRangerRazEnabled(true);
         when(mappingsConfig.getActorMappings()).thenReturn(Map.of());
-        Assertions.assertThrows(
+        assertThrows(
                 BadRequestException.class,
                 () -> underTest.setupCloudStorageAccountMapping(stackV4Request, ENVIRONMENT_CRN, IdBrokerMappingSource.IDBMMS, CLOUD_PLATFORM_AWS));
     }
@@ -628,6 +644,76 @@ public class StackRequestManifesterTest {
         underTest.setupInstanceVolumeEncryption(stackV4Request, envResponse);
 
         verifyAzureEncryption(instanceGroupV4Request.getTemplate(), EncryptionType.CUSTOM, DISK_ENCRYPTION_SET_ID, ENCRYPTION_KEY);
+    }
+
+    @Test
+    void setupYarnDetailsShouldFailWhenEnvIsMissingData() {
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        StackV4Request stackV4Request = new StackV4Request();
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.setupYarnDetails(envResponse, stackV4Request));
+        assertEquals("There is no queue defined in your environment, please create a new yarn environment with queue", exception.getMessage());
+    }
+
+    @Test
+    void setupYarnDetailsShouldPassWithCorrectData() {
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        EnvironmentNetworkResponse environmentNetworkResponse = new EnvironmentNetworkResponse();
+        EnvironmentNetworkYarnParams environmentNetworkYarnParams = new EnvironmentNetworkYarnParams();
+        environmentNetworkYarnParams.setQueue("myqueue");
+        environmentNetworkYarnParams.setLifetime(1);
+        environmentNetworkResponse.setYarn(environmentNetworkYarnParams);
+        envResponse.setNetwork(environmentNetworkResponse);
+        StackV4Request stackV4Request = new StackV4Request();
+        underTest.setupYarnDetails(envResponse, stackV4Request);
+        assertEquals("myqueue", stackV4Request.getYarn().getYarnQueue());
+        assertEquals(1, stackV4Request.getYarn().getLifetime());
+    }
+
+    @Test
+    void whenValidateCloudStorageAndHandleTimeoutShouldNotThrowException() {
+        SdxCluster sdxCluster = new SdxCluster();
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        StackV4Request stackV4Request = new StackV4Request();
+        doThrow(new RuntimeException("")).when(cloudStorageValidator).validate(any(), any(), any());
+        assertDoesNotThrow(() -> underTest.validateCloudStorageAndHandleTimeout(sdxCluster, envResponse, stackV4Request));
+        verify(sdxNotificationService, times(1)).send(eq(SDX_VALIDATION_FAILED_AND_SKIPPED), any(), any(SdxCluster.class));
+    }
+
+    @Test
+    void whenValidateCloudStorageShouldThrowExceptionOnValidationError() {
+        SdxCluster sdxCluster = new SdxCluster();
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        StackV4Request stackV4Request = new StackV4Request();
+        ClusterV4Request cluster = new ClusterV4Request();
+        CloudStorageRequest cloudStorageRequest = new CloudStorageRequest();
+        cluster.setCloudStorage(cloudStorageRequest);
+        stackV4Request.setCluster(cluster);
+        doAnswer(invocation -> {
+            ValidationResult.ValidationResultBuilder builder = invocation.getArgument(2);
+            builder.error("Invalid storage configuration");
+            return null;
+        }).when(cloudStorageValidator).validate(any(CloudStorageRequest.class), any(), any(ValidationResult.ValidationResultBuilder.class));
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.validateCloudStorageAndHandleTimeout(sdxCluster, envResponse, stackV4Request));
+        assertEquals("Invalid storage configuration", exception.getMessage());
+    }
+
+    @Test
+    void whenValidateCloudStorageShouldWarnValidationWarning() {
+        SdxCluster sdxCluster = new SdxCluster();
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        StackV4Request stackV4Request = new StackV4Request();
+        ClusterV4Request cluster = new ClusterV4Request();
+        CloudStorageRequest cloudStorageRequest = new CloudStorageRequest();
+        cluster.setCloudStorage(cloudStorageRequest);
+        stackV4Request.setCluster(cluster);
+        doAnswer(invocation -> {
+            ValidationResult.ValidationResultBuilder builder = invocation.getArgument(2);
+            builder.warning("Storage might not be configured properly");
+            return null;
+        }).when(cloudStorageValidator).validate(any(CloudStorageRequest.class), any(), any(ValidationResult.ValidationResultBuilder.class));
+        assertDoesNotThrow(() -> underTest.validateCloudStorageAndHandleTimeout(sdxCluster, envResponse, stackV4Request));
+        verify(sdxNotificationService, times(1)).send(eq(SDX_VALIDATION_FAILED_AND_SKIPPED), any(), any(SdxCluster.class));
     }
 
     @Test
