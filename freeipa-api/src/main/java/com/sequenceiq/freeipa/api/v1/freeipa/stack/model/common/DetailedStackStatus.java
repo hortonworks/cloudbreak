@@ -108,7 +108,10 @@ public enum DetailedStackStatus {
     UPGRADE_FAILED(Status.UPGRADE_FAILED, AvailabilityStatus.AVAILABLE),
     REBUILD_IN_PROGRESS(Status.REBUILD_IN_PROGRESS, AvailabilityStatus.UNAVAILABLE),
     REBUILD_FAILED(Status.REBUILD_FAILED, AvailabilityStatus.UNAVAILABLE),
-    STALE(Status.STALE, AvailabilityStatus.UNAVAILABLE);
+    STALE(Status.STALE, AvailabilityStatus.UNAVAILABLE),
+    PREPARE_CROSS_REALM_TRUST_IN_PROGRESS(Status.PREPARE_CROSS_REALM_TRUST_IN_PROGRESS, AvailabilityStatus.UNAVAILABLE),
+    PREPARE_CROSS_REALM_TRUST_PENDING(Status.PREPARE_CROSS_REALM_TRUST_IN_PROGRESS, AvailabilityStatus.UNAVAILABLE),
+    PREPARE_CROSS_REALM_TRUST_FAILED(Status.PREPARE_CROSS_REALM_TRUST_FAILED, AvailabilityStatus.UNAVAILABLE);
 
     public static final Collection<DetailedStackStatus> AVAILABLE_STATUSES = Stream.of(DetailedStackStatus.values())
             .filter(s -> s.getAvailabilityStatus().isAvailable())

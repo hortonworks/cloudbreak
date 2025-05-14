@@ -146,6 +146,11 @@ public enum EnvironmentStatus {
     FREEIPA_REBUILD_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.FREEIPA_REBUILD_IN_PROGRESS),
     FREEIPA_REBUILD_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.FREEIPA_REBUILD_FAILED),
     FREEIPA_STALE(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.FREEIPA_STALE),
+    FREEIPA_PREPARE_CROSS_REALM_TRUST_IN_PROGRESS(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.FREEIPA_PREPARE_CROSS_REALM_TRUST_IN_PROGRESS
+    ),
+    FREEIPA_PREPARE_CROSS_REALM_TRUST_FAILED(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.FREEIPA_PREPARE_CROSS_REALM_TRUST_FAILED),
 
     // Start updating the LoadBalancer on Data Lake in an Environment
     LOAD_BALANCER_ENV_UPDATE_STARTED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.LOAD_BALANCER_ENV_UPDATE_STARTED),

@@ -2430,6 +2430,13 @@ message CDPFreeIPAStatus {
     ENABLE_SELINUX_FINISHED = 38;
     // The status when CDP FreeIPA enable SeLinux has failed.
     ENABLE_SELINUX_FAILED = 39;
+
+    // The status when building cross-realm trust for CDP FreeIPA is started
+    PREPARE_CROSS_REALM_TRUST_STARTED = 40;
+    // The status when building cross-realm trust for CDP FreeIPA is finished
+    PREPARE_CROSS_REALM_TRUST_FINISHED = 41;
+    // The status when building cross-realm trust for CDP FreeIPA is failed
+    PREPARE_CROSS_REALM_TRUST_FAILED = 42;
   }
 }
 

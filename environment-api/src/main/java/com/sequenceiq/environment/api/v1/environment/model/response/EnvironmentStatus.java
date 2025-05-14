@@ -125,7 +125,9 @@ public enum EnvironmentStatus {
     PROXY_CONFIG_MODIFICATION_ON_DATALAKE_FAILED("Failed to modify proxy configuration on DataLake"),
     PROXY_CONFIG_MODIFICATION_ON_DATAHUBS_IN_PROGRESS("Modifying proxy configuration on DataHubs"),
     PROXY_CONFIG_MODIFICATION_ON_DATAHUBS_FAILED("Failed to modify proxy configuration on DataHubs"),
-    PROXY_CONFIG_MODIFICATION_FAILED("Proxy configuration modification failed");
+    PROXY_CONFIG_MODIFICATION_FAILED("Proxy configuration modification failed"),
+    FREEIPA_PREPARE_CROSS_REALM_TRUST_IN_PROGRESS("Preparing cross-realm trust on FreeIPA"),
+    FREEIPA_PREPARE_CROSS_REALM_TRUST_FAILED("Failed to prepare cross-realm trust on FreeIPA");
 
     private static final Set<EnvironmentStatus> STARTABLE_STATUSES = Set.of(
             AVAILABLE,

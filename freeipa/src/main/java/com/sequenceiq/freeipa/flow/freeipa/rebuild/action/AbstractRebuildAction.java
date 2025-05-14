@@ -31,7 +31,8 @@ import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 
-public abstract class AbstractRebuildAction<P extends Payload> extends AbstractStackAction<FreeIpaRebuildState, FreeIpaRebuildFlowEvent, StackContext, P>
+public abstract class AbstractRebuildAction<P extends Payload>
+        extends AbstractStackAction<FreeIpaRebuildState, FreeIpaRebuildFlowEvent, StackContext, P>
         implements OperationAwareAction {
 
     private static final String INSTANCE_TO_RESTORE = "INSTANCE_TO_RESTORE";
