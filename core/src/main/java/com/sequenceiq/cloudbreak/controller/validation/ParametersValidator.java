@@ -53,6 +53,7 @@ public class ParametersValidator {
                     validationBuilder.error(result.getStatusReason());
                 }
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 LOGGER.error("Error while sending the parameters validation request", e);
                 validationBuilder.error(e.getMessage());
             }

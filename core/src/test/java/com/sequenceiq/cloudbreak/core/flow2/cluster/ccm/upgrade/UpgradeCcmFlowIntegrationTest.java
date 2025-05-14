@@ -303,7 +303,7 @@ class UpgradeCcmFlowIntegrationTest {
         if (calledOnceCount == i) {
             return inOrder;
         }
-        inOrder.verify(upgradeCcmService, times(expected[i++])).finalize(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(expected[i++])).finalizeUpgrade(STACK_ID);
 
         return inOrder;
     }

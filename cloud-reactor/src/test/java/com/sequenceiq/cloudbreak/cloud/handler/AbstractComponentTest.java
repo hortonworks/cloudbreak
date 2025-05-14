@@ -32,6 +32,7 @@ public abstract class AbstractComponentTest<T> {
         try {
             return request.await();
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
     }

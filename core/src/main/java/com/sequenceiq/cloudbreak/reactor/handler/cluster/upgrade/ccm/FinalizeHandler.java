@@ -43,7 +43,7 @@ public class FinalizeHandler extends ExceptionCatcherEventHandler<UpgradeCcmFina
         Long stackId = request.getResourceId();
         LOGGER.info("Finalize CCM upgrade...");
         try {
-            upgradeCcmService.finalize(stackId);
+            upgradeCcmService.finalizeUpgrade(stackId);
         } catch (CloudbreakOrchestratorException e) {
             LOGGER.error("Failed finalizing CCM upgrade with a salt state", e);
             upgradeCcmService.removeAgentFailed(stackId);

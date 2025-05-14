@@ -319,7 +319,7 @@ public class StackUpscaleService {
         int removableCpuCount = additionalRequired + quotaExceededException.getCurrentUsage() - quotaExceededException.getCurrentLimit();
         int removableNodeCount = (int) Math.ceil((double) removableCpuCount / cpuCountPerNode);
 
-        long provisionableNodeCount = originalRequestedNodeCount - removableNodeCount;
+        long provisionableNodeCount = (long) originalRequestedNodeCount - removableNodeCount;
         switch (adjustmentTypeWithThreshold.getAdjustmentType()) {
             case EXACT:
                 if (adjustmentTypeWithThreshold.getThreshold() > provisionableNodeCount) {

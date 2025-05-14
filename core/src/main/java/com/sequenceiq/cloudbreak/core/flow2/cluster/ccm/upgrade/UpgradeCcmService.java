@@ -186,8 +186,8 @@ public class UpgradeCcmService {
         healthCheck(stackId);
     }
 
-    public void finalize(Long stackId) throws CloudbreakOrchestratorException {
-        upgradeCcmOrchestratorService.finalize(stackId);
+    public void finalizeUpgrade(Long stackId) throws CloudbreakOrchestratorException {
+        upgradeCcmOrchestratorService.finalizeCcmOperation(stackId);
     }
 
     public void registerClusterProxy(Long stackId) {

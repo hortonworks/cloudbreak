@@ -217,6 +217,7 @@ public class StackCreationService {
             return result;
         } catch (InterruptedException e) {
             LOGGER.error("Error while executing check image", e);
+            Thread.currentThread().interrupt();
             throw new OperationException(e);
         } catch (CloudbreakImageNotFoundException e) {
             throw new CloudbreakServiceException(e);

@@ -65,7 +65,7 @@ public class PrivateControlPlaneQueryJob extends MdcQuartzJob {
                         .map(PvcControlPlaneConfiguration::getPvcCrn)
                         .collect(toSet());
 
-                allOurCrn = cleanupRecordsWhichAreNotRegisteredAnymore(controlPlanesInOurDatabase, allOurCrn, allCPCrn);
+                allOurCrn = cleanupRecordsWhichAreNotRegisteredAnymore(allOurCrn, allCPCrn);
                 registerWhichAreNewRegisteredOnRemoteClusterSide(remoteControlPlanes, allOurCrn, allCPCrn);
                 updateDataInOurDatabase(remoteControlPlanes, controlPlanesInOurDatabase);
             }
@@ -98,13 +98,12 @@ public class PrivateControlPlaneQueryJob extends MdcQuartzJob {
         }
     }
 
-    private Set<String> cleanupRecordsWhichAreNotRegisteredAnymore(List<PrivateControlPlane> controlPlanesInOurDatabase,
-        Set<String> allOurCrn, Set<String> allCPCrn) {
+    private Set<String> cleanupRecordsWhichAreNotRegisteredAnymore(Set<String> allOurCrn, Set<String> allCPCrn) {
         Set<String> actualOnlyInOurDb = new HashSet<>(CollectionUtils.removeAll(allOurCrn, allCPCrn));
         if (!actualOnlyInOurDb.isEmpty()) {
             LOGGER.debug("delete {} crns because those are not presented in remote cluster service.", actualOnlyInOurDb);
             privateControlPlaneService.deleteByResourceCrns(actualOnlyInOurDb);
-            controlPlanesInOurDatabase = privateControlPlaneService.findAll();
+            List<PrivateControlPlane> controlPlanesInOurDatabase = privateControlPlaneService.findAll();
             return controlPlanesInOurDatabase.stream()
                     .map(PrivateControlPlane::getResourceCrn)
                     .collect(toSet());

@@ -11,7 +11,7 @@ public class CmUrlCache extends AbstractCacheDefinition {
 
     private static final long MAX_ENTRIES = 1000L;
 
-    private static final long TTL = 15 * 60;
+    private static final long TTL = 15L * 60L;
 
     @Override
     protected String getName() {

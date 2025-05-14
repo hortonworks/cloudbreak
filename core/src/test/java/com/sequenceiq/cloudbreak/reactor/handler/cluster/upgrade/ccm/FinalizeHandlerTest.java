@@ -54,7 +54,7 @@ class FinalizeHandlerTest {
         when(event.getData()).thenReturn(request);
 
         Selectable result = underTest.doAccept(event);
-        verify(upgradeCcmService).finalize(STACK_ID);
+        verify(upgradeCcmService).finalizeUpgrade(STACK_ID);
         assertThat(result.selector()).isEqualTo("UPGRADECCMFINALIZERESULT");
         assertThat(((UpgradeCcmFinalizeResult) result).getAgentDeletionSucceed().equals(Boolean.FALSE));
     }
@@ -63,10 +63,10 @@ class FinalizeHandlerTest {
     void orchestrationException() throws CloudbreakOrchestratorException {
         UpgradeCcmFinalizeRequest request = new UpgradeCcmFinalizeRequest(STACK_ID, CLUSTER_ID, Tunnel.CCM, null, Boolean.FALSE);
         when(event.getData()).thenReturn(request);
-        doThrow(new CloudbreakOrchestratorFailedException("salt error")).when(upgradeCcmService).finalize(any());
+        doThrow(new CloudbreakOrchestratorFailedException("salt error")).when(upgradeCcmService).finalizeUpgrade(any());
 
         Selectable result = underTest.doAccept(event);
-        verify(upgradeCcmService).finalize(STACK_ID);
+        verify(upgradeCcmService).finalizeUpgrade(STACK_ID);
         assertThat(result.selector()).isEqualTo("UPGRADECCMFAILEDEVENT");
         assertThat(result).isInstanceOf(UpgradeCcmFailedEvent.class);
         UpgradeCcmFailedEvent failedEvent = (UpgradeCcmFailedEvent) result;

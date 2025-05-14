@@ -35,7 +35,7 @@ public class TlsSetupService {
 
     private static final int POLLING_INTERVAL = 5000;
 
-    private static final long TEN_MIN = 10 * 60;
+    private static final long TEN_MIN = 10L * 60L;
 
     private static final int MAX_FAILURE = 1;
 

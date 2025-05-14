@@ -102,7 +102,7 @@ public class CmUrlProvider {
     private String constructManifestUrl(String cmRepoUrlForOs) {
         String[] splitBySlash = StringUtils.splitPreserveAllTokens(cmRepoUrlForOs, "/");
         int indexOfCmPublicPart = Arrays.asList(splitBySlash).indexOf(CM_PUBLIC);
-        String cmRepoUrlWithVersion = Arrays.stream(splitBySlash).limit(indexOfCmPublicPart + 2).collect(Collectors.joining("/"));
+        String cmRepoUrlWithVersion = Arrays.stream(splitBySlash).limit(indexOfCmPublicPart + 2L).collect(Collectors.joining("/"));
         String manifestUrl = StringUtils.appendIfMissing(cmRepoUrlWithVersion, "/") + RELEASE_MANIFEST_JSON;
         LOGGER.debug("Manifest URL: {} from {}", manifestUrl, cmRepoUrlForOs);
         return manifestUrl;

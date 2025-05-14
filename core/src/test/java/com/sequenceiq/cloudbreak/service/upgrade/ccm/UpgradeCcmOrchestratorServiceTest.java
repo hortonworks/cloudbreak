@@ -59,8 +59,8 @@ class UpgradeCcmOrchestratorServiceTest {
     }
 
     @Test
-    void testFinalize() throws CloudbreakOrchestratorException {
-        underTest.finalize(STACK_ID);
+    void testFinalizeCcmOperation() throws CloudbreakOrchestratorException {
+        underTest.finalizeCcmOperation(STACK_ID);
         verifyOrchestratorState("nginx/finalize");
     }
 

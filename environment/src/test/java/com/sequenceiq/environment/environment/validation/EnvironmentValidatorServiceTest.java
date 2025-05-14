@@ -114,18 +114,23 @@ class EnvironmentValidatorServiceTest {
 
     private static Stream<Arguments> storageValidationArguments() {
         return Stream.of(
-                Arguments.of("location with whitespace", false),
                 Arguments.of("   /path", true),
                 Arguments.of("/path    ", true),
                 Arguments.of("    /path/path   ", true),
-                Arguments.of("/path  /  path", false),
-                Arguments.of("/pa th/", false),
                 Arguments.of("\t/path/path", true),
                 Arguments.of("/path/path\t", true),
-                Arguments.of("/path/\tpath", false),
                 Arguments.of("\n/path/path", true),
                 Arguments.of("/path/path\n", true),
+                Arguments.of("wasb://asdf/asdf-v/apps/hive/warehouse", true),
+                Arguments.of("s3a://asdf/asdf-v/apps/hive-something/", true),
+                Arguments.of("https://mystorageaccount.blob.core.windows.net/data/", true),
+                Arguments.of("gs://asdf/asdf-v/apps/hive-something/", true),
+                Arguments.of("location with whitespace", false),
+                Arguments.of("/path  /  path", false),
+                Arguments.of("/pa th/", false),
+                Arguments.of("/path/\tpath", false),
                 Arguments.of("/path/\npath", false)
+
         );
     }
 
@@ -436,7 +441,7 @@ class EnvironmentValidatorServiceTest {
     @MethodSource("storageValidationArguments")
     void testStorageLocation(String storageLocation, boolean valid) {
         ValidationResult actual = underTest.validateStorageLocation(storageLocation, "any");
-        assertEquals(!valid, actual.hasError());
+        assertEquals(!valid, actual.hasError(), "Storage location used: " + storageLocation);
     }
 
     @Test

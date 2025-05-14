@@ -36,7 +36,7 @@ public class UpgradeCcmOrchestratorService {
         hostOrchestrator.runOrchestratorState(stateParams);
     }
 
-    public void finalize(Long stackId) throws CloudbreakOrchestratorException {
+    public void finalizeCcmOperation(Long stackId) throws CloudbreakOrchestratorException {
         OrchestratorStateParams stateParams = orchestratorStateParamsProvider.createStateParams(stackId, FINALIZE);
         LOGGER.debug("Calling finalize with state params '{}'", stateParams);
         hostOrchestrator.runOrchestratorState(stateParams);

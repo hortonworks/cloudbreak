@@ -167,9 +167,6 @@ public class FileSystemConverter {
             } else if (source.getType().isAdlsGen2()) {
                 AdlsGen2FileSystem adlsGen2FileSystem = source.getConfigurations().get(AdlsGen2FileSystem.class);
                 fileSystemView = convertAdlsGen2Legacy(adlsGen2FileSystem);
-            } else if (source.getType().isGcs()) {
-                GcsFileSystem gcsFileSystem = source.getConfigurations().get(GcsFileSystem.class);
-                fileSystemView = convertGcsLegacy(gcsFileSystem);
             } else {
                 return Collections.emptyList();
             }

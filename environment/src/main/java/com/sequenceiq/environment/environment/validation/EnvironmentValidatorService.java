@@ -297,10 +297,10 @@ public class EnvironmentValidatorService {
     public ValidationResult validateStorageLocation(String storageLocation, String storageType) {
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         if (storageLocation != null) {
-            Pattern pattern = Pattern.compile(".*\\s.*");
+            Pattern pattern = Pattern.compile("^[a-zA-Z0-9_/@:\\-.]+$");
             Matcher matcher = pattern.matcher(storageLocation.trim());
-            if (matcher.find()) {
-                resultBuilder.error("You have added some whitespace to the storage location: " + storageLocation);
+            if (!matcher.find()) {
+                resultBuilder.error("You have added invalid characters to the storage location: " + storageLocation);
             }
         } else {
             String message = "You don't add a(n) %s storage location, please provide a valid storage location.";
