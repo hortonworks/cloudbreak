@@ -56,7 +56,7 @@ mount_remaining() {
                 mount_one "UUID=$uuid /hadoopfs/fs${hadoop_fs_dir_counter} $EPHEMERAL_FS_TYPE defaults,noatime,nofail 0 2"
                 return_value=$(($? || return_value ))
                 log $LOG_FILE result of all mounting: $return_value
-                ((hadoop_ephfs_dir_counter++))
+                ((hadoop_fs_dir_counter++))
             else
                 mount_one "UUID=$uuid /hadoopfs/fs${hadoop_fs_dir_counter} $FS_TYPE defaults,noatime,nofail 0 2"
                 return_value=$(($? || return_value ))
