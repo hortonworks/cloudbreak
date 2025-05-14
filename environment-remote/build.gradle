@@ -71,6 +71,7 @@ dependencies {
     implementation project(":common")
     implementation project(':environment-remote-api')
     implementation project(":environment-public-api-client")
+    implementation project(":servicediscovery-api-client")
     implementation project(':cluster-proxy')
     implementation project(':service-common')
     implementation project(':remote-cluster-connector')
@@ -91,6 +92,7 @@ dependencies {
     testImplementation project(path: ':common', configuration: 'tests')
     testImplementation project(path: ':flow', configuration: 'tests')
     testImplementation project(':environment-public-api-client')
+    testImplementation project(":servicediscovery-api-client")
     testImplementation group: "org.mockito",               name: "mockito-core",                             version: mockitoVersion
     testImplementation(group: "org.springframework.boot",  name: "spring-boot-starter-test",                 version: springBootVersion) {
         exclude group: "junit"

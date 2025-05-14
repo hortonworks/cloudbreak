@@ -23,6 +23,7 @@ dependencies {
   implementation     project(':environment-api')
   implementation     project(':environment-remote-api')
   implementation     project(":environment-public-api-client")
+  implementation     project(":servicediscovery-api-client")
   implementation     project(':service-common')
 
   implementation     group: 'org.springframework.boot',          name: 'spring-boot-starter-jersey',     version: springBootVersion

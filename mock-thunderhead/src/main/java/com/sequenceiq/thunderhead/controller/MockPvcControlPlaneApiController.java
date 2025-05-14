@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cloudera.cdp.servicediscovery.model.ApiRemoteDataContext;
+import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataContextRequest;
+import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataContextResponse;
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentRequest;
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
 import com.cloudera.thunderhead.service.environments2api.model.EnvironmentSummary;
@@ -83,6 +86,28 @@ public class MockPvcControlPlaneApiController {
             mockRemoteEnvironmentResponse.getEnvironment().setCrn(environmentRequest.getEnvironmentName());
             return new ResponseEntity<>(
                     mockRemoteEnvironmentResponse,
+                    HttpStatus.OK);
+        } catch (Exception ex) {
+            String msg = "UH-OH something went wrong!";
+            LOGGER.warn(msg, ex);
+            return new ResponseEntity(msg, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/{crn}/PvcControlPlane/api/v1/servicediscovery/describeDatalakeAsApiRemoteDataContext")
+    public ResponseEntity<DescribeDatalakeAsApiRemoteDataContextResponse> fetchRemoteDataContext(@PathVariable("crn") String crn,
+            @RequestBody DescribeDatalakeAsApiRemoteDataContextRequest describeDatalakeAsApiRemoteDataContextRequest) {
+        LOGGER.info("Describe remote environments for crn: '{}'", crn);
+        try {
+            String pdlResponse = FileReaderUtils.readFileFromClasspathQuietly("mock-responses/pdl/pdl-rdc.json");
+            LOGGER.info("PDL Response is {}", pdlResponse);
+            ApiRemoteDataContext apiRemoteDataContext = JsonUtil.readValue(pdlResponse, ApiRemoteDataContext.class);
+            DescribeDatalakeAsApiRemoteDataContextResponse describeDatalakeAsApiRemoteDataContextResponse =
+                    new DescribeDatalakeAsApiRemoteDataContextResponse();
+            describeDatalakeAsApiRemoteDataContextResponse.setDatalake(describeDatalakeAsApiRemoteDataContextRequest.getDatalake());
+            describeDatalakeAsApiRemoteDataContextResponse.setContext(apiRemoteDataContext);
+            return new ResponseEntity<>(
+                    describeDatalakeAsApiRemoteDataContextResponse,
                     HttpStatus.OK);
         } catch (Exception ex) {
             String msg = "UH-OH something went wrong!";

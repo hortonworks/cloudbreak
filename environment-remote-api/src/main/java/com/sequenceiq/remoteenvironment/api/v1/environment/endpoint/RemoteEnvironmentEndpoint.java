@@ -14,6 +14,7 @@ import jakarta.ws.rs.core.MediaType;
 
 import org.springframework.validation.annotation.Validated;
 
+import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataContextResponse;
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.DescribeRemoteEnvironment;
@@ -43,5 +44,12 @@ public interface RemoteEnvironmentEndpoint {
     @Operation(summary = POST_BY_CRN, description = ENVIRONMENT_NOTES, operationId = "getRemoteEnvironmentV1ByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DescribeEnvironmentResponse getByCrn(@Valid DescribeRemoteEnvironment request);
+
+    @POST
+    @Path("/rdc")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = POST_BY_CRN, description = ENVIRONMENT_NOTES, operationId = "getRdcV1ByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    DescribeDatalakeAsApiRemoteDataContextResponse getRdcByCrn(@Valid DescribeRemoteEnvironment request);
 
 }

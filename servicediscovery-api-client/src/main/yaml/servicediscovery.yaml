@@ -1,0 +1,966 @@
+swagger: '2.0'
+x-endpoint-name: servicediscovery
+x-products: CDP
+x-form-factors: public,private
+info:
+  version: __API_VERSION__
+  title: CDP Service Discovery
+  license:
+    name: Apache 2.0
+  description: CDP Service Discovery is a web service that provides information to a workload service
+schemes:
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+tags:
+  - name: ServiceDiscovery
+    description: Service Discovery APIs
+  - name: Warehouses
+    description: Warehouse Discovery
+  - name: OpDBs
+    description: Operational Databases Discovery
+paths:
+  /api/v1/servicediscovery/describeDatalakeServices:
+    post:
+      description: Get the services provided by the Service Discovery cluster.
+      summary: Get the services provided by the Service Discovery cluster.
+      tags:
+        - ServiceDiscovery
+      operationId: describeDatalakeServices
+      produces:
+        - application/json
+      parameters:
+        - name: input
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/DescribeDatalakeServicesRequest'
+      responses:
+        default:
+          description: The default response on an error.
+          schema:
+            $ref: '#/definitions/Error'
+        200:
+          description: search results matching criteria
+          schema:
+            $ref: '#/definitions/DescribeDatalakeServicesResponse'
+  /api/v1/servicediscovery/describeEnvironmentServices:
+    post:
+      description: Get the services provided by for a specific environment.
+      summary: Get the services provided for a specific environment.
+      tags:
+        - ServiceDiscovery
+      operationId: describeEnvironmentServices
+      produces:
+        - application/json
+      x-form-factors: public
+      parameters:
+        - name: input
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/DescribeEnvironmentServicesRequest'
+      responses:
+        default:
+          description: The default response on an error.
+          schema:
+            $ref: '#/definitions/Error'
+        200:
+          description: search results matching criteria
+          schema:
+            $ref: '#/definitions/DescribeEnvironmentServicesResponse'
+  /api/v1/servicediscovery/listDatalakesForEnv:
+    post:
+      description: Get the list of Datalakes for an Environment.
+      summary: Get the list of Datalakes for an Environment.
+      tags:
+        - ServiceDiscovery
+      operationId: listDatalakesForEnv
+      produces:
+        - application/json
+      parameters:
+        - name: input
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ListDatalakesForEnvRequest'
+      responses:
+        default:
+          description: The default response on an error.
+          schema:
+            $ref: '#/definitions/Error'
+        200:
+          description: search results matching criteria
+          schema:
+            $ref: '#/definitions/ListDatalakesForEnvResponse'
+  /api/v1/servicediscovery/listWarehousesForEnv:
+    post:
+      description: Get the list of Warehouses for an Environment. Deprecated, please use ListVirtualWarehousesForEnv as replacement.
+      summary: Get the list of Warehouses for an Environment. Deprecated, please use ListVirtualWarehousesForEnv as replacement.
+      tags:
+        - Warehouses
+      operationId: listWarehousesForEnv
+      produces:
+        - application/json
+      x-deprecated: true
+      x-form-factors: public
+      parameters:
+        - name: input
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ListWarehousesForEnvRequest'
+      responses:
+        default:
+          description: The default response on an error.
+          schema:
+            $ref: '#/definitions/Error'
+        200:
+          description: search results matching criteria
+          schema:
+            $ref: '#/definitions/ListWarehousesForEnvResponse'
+        404:
+          description: Unable to find Environment
+          schema:
+            $ref: '#/definitions/Error'
+  /api/v1/servicediscovery/describeWarehouse:
+    post:
+      description: Get the details of a Warehouse. Deprecated, please use ListVirtualWarehousesForEnv as replacement.
+      summary: Get the details of a Warehouse. Deprecated, please use ListVirtualWarehousesForEnv as replacement.
+      tags:
+        - Warehouses
+      operationId: describeWarehouse
+      produces:
+        - application/json
+      x-deprecated: true
+      x-form-factors: public
+      parameters:
+        - name: input
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/DescribeWarehouseRequest'
+      responses:
+        default:
+          description: The default response on an error.
+          schema:
+            $ref: '#/definitions/Error'
+        200:
+          description: search results matching criteria
+          schema:
+            $ref: '#/definitions/DescribeWarehouseResponse'
+        404:
+          description: Unable to find Environment
+          schema:
+            $ref: '#/definitions/Error'
+  /api/v1/servicediscovery/listVirtualWarehousesForEnv:
+    post:
+      description: List the Virtual Warehouses for a specific Environment.
+      summary: List the Virtual Warehouses for a specific Environment.
+      tags:
+        - Warehouses
+      operationId: listVirtualWarehousesForEnv
+      produces:
+        - application/json
+      parameters:
+        - name: input
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ListVirtualWarehousesForEnvRequest'
+      responses:
+        default:
+          description: The default response on an error.
+          schema:
+            $ref: '#/definitions/Error'
+        200:
+          description: search results matching criteria
+          schema:
+            $ref: '#/definitions/ListVirtualWarehousesForEnvResponse'
+        404:
+          description: Unable to find the environment
+          schema:
+            $ref: '#/definitions/Error'
+  /api/v1/servicediscovery/describeVirtualWarehouseServices:
+    post:
+      description: Describe services for a specific Virtual Warehouse.
+      summary: Describe services for a specific Virtual Warehouse.
+      tags:
+        - Warehouses
+      operationId: describeVirtualWarehouseServices
+      produces:
+        - application/json
+      parameters:
+        - name: input
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/DescribeVirtualWarehouseServicesRequest'
+      responses:
+        default:
+          description: The default response on an error.
+          schema:
+            $ref: '#/definitions/Error'
+        200:
+          description: search results matching criteria
+          schema:
+            $ref: '#/definitions/DescribeVirtualWarehouseServicesResponse'
+        404:
+          description: Unable to find virtual warehouse
+          schema:
+            $ref: '#/definitions/Error'
+  /api/v1/servicediscovery/listOpdbsForEnv:
+    post:
+      description: List the Operational Databases (OpDBs) for a specific environment.
+      summary: List the Operational Databases (OpDBs) for a specific environment.
+      tags:
+        - OpDBs
+      operationId: listOpdbsForEnv
+      produces:
+        - application/json
+      x-form-factors: public
+      parameters:
+        - name: input
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ListOpdbsForEnvRequest'
+      responses:
+        default:
+          description: The default response on an error.
+          schema:
+            $ref: '#/definitions/Error'
+        200:
+          description: search results matching criteria
+          schema:
+            $ref: '#/definitions/ListOpdbsForEnvResponse'
+        404:
+          description: Unable to find the environment
+          schema:
+            $ref: '#/definitions/Error'
+  /api/v1/servicediscovery/describeOpdbServices:
+    post:
+      description: Describe the services for an Operational Database (OpDBs) in a specific environment.
+      summary: Describe the services for an Operational Database (OpDBs) in a specific Environment.
+      tags:
+        - OpDBs
+      operationId: describeOpdbServices
+      produces:
+        - application/json
+      x-form-factors: public
+      parameters:
+        - name: input
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/DescribeOpdbServicesRequest'
+      responses:
+        default:
+          description: The default response on an error.
+          schema:
+            $ref: '#/definitions/Error'
+        200:
+          description: search results matching criteria
+          schema:
+            $ref: '#/definitions/DescribeOpdbServicesResponse'
+  /api/v1/servicediscovery/describeDatalakeAsApiRemoteDataContext:
+    post:
+      description: Get the RemoteDataContext for a specific datalake in an environment.
+      summary: Get the RemoteDataContext for a specific datalake in an environment.
+      tags:
+        - ServiceDiscovery
+      operationId: describeDatalakeAsApiRemoteDataContext
+      produces:
+        - application/json
+      x-form-factors: public
+      parameters:
+        - name: input
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/DescribeDatalakeAsApiRemoteDataContextRequest'
+      responses:
+        default:
+          description: The default response on an error.
+          schema:
+            $ref: '#/definitions/Error'
+        200:
+          description: search results matching criteria
+          schema:
+            $ref: '#/definitions/DescribeDatalakeAsApiRemoteDataContextResponse'
+definitions:
+  Error:
+    type: object
+    description: An object returned on an error.
+    properties:
+      code:
+        type: string
+        description: The error code.
+      message:
+        type: string
+        description: The error message.
+  ServiceEndPoint:
+    type: object
+    description: Endpoint of an Service Discovery Service
+    properties:
+      host:
+        type: string
+        description: The endpoints hostname or ip address.
+      port:
+        type: integer
+        format: int32
+        description: The endpoints port.
+      uri:
+        type: string
+        description: The connection uri for the endpoint.
+  Service:
+    type: object
+    description: A Service Discovery Service definition
+    properties:
+      type:
+        type: string
+        description: The type the service represents
+      endpoints:
+        type: array
+        description: The endpoints that the service presents
+        items:
+          $ref: '#/definitions/ServiceEndPoint'
+      config:
+        type: object
+        description: Configuration key values for a service
+        x-sensitive: true
+        additionalProperties:
+          type: string
+          description: The configuration value.
+  Application:
+    type: object
+    description: A Service Discovery Application grouping
+    properties:
+      name:
+        type: string
+        description: The name of the service
+      services:
+        type: object
+        description: The services provided by the application
+        additionalProperties:
+          $ref: '#/definitions/Service'
+          description: The service information.
+      config:
+        type: object
+        description: Configuration key values for an application
+        x-sensitive: true
+        additionalProperties:
+          type: string
+          description: The configuration value.
+  DeploymentType:
+    type: string
+    description: Models a datalake deployment type.
+    enum:
+      - INPAAS
+      - SDXSVC
+  Metadata:
+    type: object
+    description: Metadata details of the datalake.
+    properties:
+      shape:
+        type: string
+        description: The shape of the datalake.
+      baseVersion:
+        type: string
+        description: The version of CDH deployed.
+      servicePack:
+        type: string
+        description: The service pack of CDH deployed.
+      deploymentVersion:
+        type: string
+        description: The complete deployment version.
+  DescribeDatalakeServicesRequest:
+    type: object
+    description: Request object for a Service Discovery Services descrition
+    required:
+      - clusterid
+    properties:
+      clusterid:
+        type: string
+        description: The cluster CRN for the request
+  DescribeDatalakeServicesResponse:
+    description: Response object for a Service Discovery Services descrition
+    example:
+      id: crn:cdp:sdx:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:sdxcluster:226c5ba3-bcc2-40e1-82ac-35b8289965c9
+      last_update: 1556210053241
+      metadata:
+        shape: ENTERPRISE
+        baseVersion: 7.3.1
+        servicePack: 100
+        deploymentVersion: 7.3.1-1.cdh7.3.1.p100.62690029
+      endpoints:
+        FREEIPA:
+          services:
+            dns:
+              endpoints:
+                - host: 192.168.0.1
+                  port: 53
+                - host: 192.168.0.2
+                  port: 53
+              config:
+                search_domain: subdomain.for.adomain.com
+            ldap:
+              endpoints:
+                - host: freeipa.some.subdomain.for.adomain.com
+                  port: 636
+                  uri: ldaps://freeipa.subdomain.for.adomain.com:636/
+              config:
+                bind_dn: cn=something,ou=service,dc=subdomain,dc=for,dc=adomain,dc=com
+                bind_password: something secure
+            kerberos_kdc:
+              endpoints:
+                - host: kdc.subdomain.for.adomain.com
+                  port: 88
+              config:
+                realm: somerealm
+            kerberos_admin:
+              endpoints:
+                - host: kdc.subdomain.for.adomain.com
+                  port: 749
+        RANGER:
+          services:
+            ranger_usersync:
+              endpoints:
+                - host: ranger.subdomain.for.adomain.com
+                  port: 5151
+              config:
+                repo: default
+            ranger_kms:
+              endpoints:
+                - host: ranger.subdomain.for.adomain.com
+                  port: 9292
+            ranger_admin:
+              endpoints:
+                - host: ranger.subdomain.for.adomain.com
+                  port: 6182
+        IDBROKER:
+          services:
+            idbroker:
+              endpoints:
+                - host: idbroker.subdomain.for.adomain.com
+                  port: 9080
+        HMS:
+          services:
+            hms:
+              endpoints:
+                - host: hms.subdomain.for.adomain.com
+                  port: 9083
+                  uri: thrift://hms.subdomain.for.adomain.com:9083
+                - host: hms2.subdomain.for.adomain.com
+                  port: 9083
+                  uri: thrift://hms.subdomain.for.adomain.com:9083
+              config:
+                db_host: some.rds.servers.hostname.aws.com
+                db_port: 3306
+                db_username: someusername
+                db_password: somepassword
+                db_database: metastore_db
+                db_jdbc_url: jdbc:mysql://some.rds.servers.hostname.aws.com:3306/
+        ATLAS:
+          services:
+            atlas_admin:
+              endpoints:
+                - host: atlas.subdomain.for.adomain.com
+                  port: 21443
+            atlas_kafka:
+              endpoints:
+                - host: atlas_kafka.subdomain.for.adomain.com
+                  port: 9092
+    type: object
+    properties:
+      clusterid:
+        type: string
+        description: The Service Discovery cluster CRN for the services described
+      lastupdated:
+        type: integer
+        format: int64
+        description: The number of milliseconds since the last update
+        example: 1556210053241
+      deploymentType:
+        description: The deployment type of datalake
+        $ref: '#/definitions/DeploymentType'
+      applications:
+        type: object
+        description: A map of applications that provide services for the Service Discovery
+        additionalProperties:
+          $ref: '#/definitions/Application'
+          description: The application details.
+      metadata:
+        $ref: '#/definitions/Metadata'
+        description: Metadata of the datalake like product version, service pack version, shape, etc
+  DescribeEnvironmentServicesRequest:
+    type: object
+    description: Request services for a specific environment
+    required:
+      - environment
+    properties:
+      environment:
+        type: string
+        description: The environment CRN for the request
+  DescribeEnvironmentServicesResponse:
+    description: Response object for an Environment Services discovery request
+    example:
+      id: crn:cdp:sdx:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:environment:226c5ba3-bcc2-40e1-82ac-35b8289965c9
+      last_update: 1556210053241
+      endpoints:
+        FREEIPA:
+          services:
+            dns:
+              endpoints:
+                - host: 192.168.0.1
+                  port: 53
+                - host: 192.168.0.2
+                  port: 53
+              config:
+                search_domain: subdomain.for.adomain.com
+            ldap:
+              endpoints:
+                - host: freeipa.some.subdomain.for.adomain.com
+                  port: 636
+                  uri: ldaps://freeipa.subdomain.for.adomain.com:636/
+              config:
+                bind_dn: cn=something,ou=service,dc=subdomain,dc=for,dc=adomain,dc=com
+                bind_password: something secure
+            kerberos_kdc:
+              endpoints:
+                - host: kdc.subdomain.for.adomain.com
+                  port: 88
+              config:
+                realm: somerealm
+            kerberos_admin:
+              endpoints:
+                - host: kdc.subdomain.for.adomain.com
+                  port: 749
+    type: object
+    properties:
+      environmentCrn:
+        type: string
+        description: The environment CRN for the services described
+      lastupdated:
+        type: integer
+        format: int64
+        description: The number of milliseconds since the last update
+        example: 1556210053241
+      applications:
+        type: object
+        description: A map of applications that provide services for the Environment
+        additionalProperties:
+          $ref: '#/definitions/Application'
+          description: The application details.
+  DatalakeInfo:
+    description: Information about a Datalake cluster
+    type: object
+    properties:
+      datalakeCrn:
+        type: string
+        description: The CRN of the Datalake
+      datalakeName:
+        type: string
+        description: The human readable name of the Datalake
+      environmentCrn:
+        type: string
+        description: The CRN of the environment the Datalake resides in
+      envrionmentName:
+        type: string
+        description: The human readable name of the environment the Datalake resides in
+      runtime:
+        type: string
+        description: An advertised Datalake runtime version
+      deploymentType:
+        description: The deployment type of datalake
+        $ref: '#/definitions/DeploymentType'
+  ListDatalakesForEnvRequest:
+    type: object
+    description: Request the Datalakes for a specific environment
+    required:
+      - environment
+    properties:
+      environment:
+        type: string
+        description: The environment CRN for the request
+  ListDatalakesForEnvResponse:
+    type: object
+    description: The list of Datalakes for an Environment
+    properties:
+      environmentCrn:
+        type: string
+        description: The environment CRN
+      datalakes:
+        type: array
+        description: The list of Datalakes in the environment
+        items:
+          $ref: '#/definitions/DatalakeInfo'
+  ListWarehousesForEnvRequest:
+    type: object
+    description: Request for the warehouses for a specific envrionment, deprecated.
+    x-deprecated: true
+    properties:
+      environment:
+        type: string
+        description: The environment Id to get the warehouses for.
+  ListWarehousesForEnvResponse:
+    type: object
+    description: The list of Datalakes for an Environment, deprecated.
+    x-deprecated: true
+    properties:
+      environmentId:
+        type: string
+        description: The environment Id the warehouses are in.
+      warehouses:
+        type: object
+        description: The map of warehouses for the environment.
+        additionalProperties:
+          $ref: '#/definitions/Warehouse'
+          description: A Warehouse info
+  DescribeWarehouseRequest:
+    type: object
+    description: Request for the details of a warehouse, deprecated.
+    x-deprecated: true
+    properties:
+      environment:
+        type: string
+        description: The id of the environment the warehouse is part of.
+      warehouse:
+        type: string
+        description: The id of the warehouse to get details for.
+  DescribeWarehouseResponse:
+    type: object
+    description: The details of the warehouse requested, deprecated.
+    x-deprecated: true
+    properties:
+      warehouseId:
+        type: string
+        description: The id of the warehouse.
+      environmentId:
+        type: string
+        description: The of the environment the warehouse is in.
+      details:
+        $ref: '#/definitions/Warehouse'
+        description: The details of the warehouse requested.
+  Endpoint:
+    type: object
+    description: Endpoint
+    properties:
+      id:
+        type: string
+        description: The endpoint Identifier
+      displayName:
+        type: string
+        description: Display name for the endpoint
+      default:
+        type: boolean
+        description: Is the default endpoint
+      uri:
+        type: string
+        description: The URI of the endpoint
+      config:
+        type: object
+        description: The config options for the endpoint
+        x-sensitive: true
+        additionalProperties:
+          type: string
+          description: The config value for the endpoint config option
+      hasError:
+        type: boolean
+        description: Does this endpoint have an error
+      status:
+        type: string
+        description: Status of this endpoint
+  WarehouseService:
+    type: object
+    description: Endpoint Entry
+    properties:
+      type:
+        type: string
+        description: The service type
+      endpoints:
+        type: array
+        description: The endpoints for service
+        items:
+          $ref: '#/definitions/Endpoint'
+  Warehouse:
+    type: object
+    description: Entity
+    properties:
+      id:
+        type: string
+        description: id
+      displayName:
+        type: string
+        description: displayName
+      services:
+        description: The services that make up the warehouse
+        type: object
+        additionalProperties:
+          $ref: '#/definitions/WarehouseService'
+          description: Warehouse service definition
+      default:
+        type: boolean
+        description: Is this the default warehouse.
+  ListVirtualWarehousesForEnvRequest:
+    type: object
+    description: Request for virtual warehouses in a specific environment.
+    required:
+      - environment
+    properties:
+      environment:
+        type: string
+        description: The name or CRN of the environment.
+  ListVirtualWarehousesForEnvResponse:
+    type: object
+    description: Response for virtual warehouses in a specific environment.
+    properties:
+      environment:
+        type: string
+        description: The CRN of the environment.
+      lastUpdated:
+        type: integer
+        format: int64
+        description: The RFC3339 timestamp of the last change to the Virtual Warehouse info. (millis)
+      warehouses:
+        type: array
+        description: The virtual warehouses for the environment.
+        items:
+          $ref: '#/definitions/VirtualWarehouse'
+  DescribeVirtualWarehouseServicesRequest:
+    type: object
+    description: Request for services for a specific virtual warehouse.
+    required:
+      - environment
+      - clusterId
+      - vwId
+    properties:
+      environment:
+        type: string
+        description: The name or CRN of the environment.
+      clusterId:
+        type: string
+        description: The id of the CDW cluster.
+      vwId:
+        type: string
+        description: The id of the virtual warehouse.
+  DescribeVirtualWarehouseServicesResponse:
+    type: object
+    description: Response for services for a specific virtual warehouse.
+    properties:
+      environment:
+        type: string
+        description: The CRN of the environment.
+      clusterId:
+        type: string
+        description: The id of the CDW cluster.
+      vwId:
+        type: string
+        description: The id of the virtual warehouse.
+      lastUpdated:
+        type: integer
+        format: int64
+        description: The RFC3339 timestamp of the last change to the Virtual Warehouse config. (millis)
+      details:
+        $ref: '#/definitions/VirtualWarehouse'
+        description: The details for the virtual warehouse.
+  VirtualWarehouse:
+    type: object
+    description: Information on a virtual warehouse.
+    properties:
+      crn:
+        type: string
+        description: crn
+      id:
+        type: string
+        description: id
+      name:
+        type: string
+        description: name
+      type:
+        type: string
+        description: type
+      clusterId:
+        type: string
+        description: clusterId
+      dbcId:
+        type: string
+        description: dbcId
+      status:
+        type: string
+        description: status
+      services:
+        description: The services that make up the warehouse
+        type: object
+        additionalProperties:
+          $ref: '#/definitions/WarehouseService'
+          description: Warehouse service definition
+  ListOpdbsForEnvRequest:
+    type: object
+    description: Request to list the Operational Databases (OpDBs) for a specific environment.
+    required:
+      - environment
+    properties:
+      environment:
+        type: string
+        description: The name or CRN of the environment.
+  ListOpdbsForEnvResponse:
+    type: object
+    description: Response for Operational Databaes (OpDBs) in a specific environment.
+    properties:
+      environment:
+        type: string
+        description: The CRN of the environment.
+      lastUpdated:
+        type: integer
+        format: int64
+        description: The RFC3339 timestamp of the last change to the OpDB config.
+      opDBs:
+        type: array
+        description: The list of OpDBs in the environment.
+        items:
+          $ref: '#/definitions/OpDB'
+  DescribeOpdbServicesRequest:
+    type: object
+    description: Request to describe the services for an Operational Database (OpDB).
+    required:
+      - environment
+      - database
+    properties:
+      environment:
+        type: string
+        description: The name or CRN of the environment.
+      database:
+        type: string
+        description: The name or CRN of the Operational Database (OpDB).
+  DescribeOpdbServicesResponse:
+    type: object
+    description: Response for the services in an Operational Database (OpDB).
+    properties:
+      environment:
+        type: string
+        description: The CRN of the environment.
+      database:
+        type: string
+        description: The CRN of the Operational Database (OpDB).
+      lastUpdated:
+        type: integer
+        format: int64
+        description: The RFC3339 timestamp of the last change to the OpDB config.
+      details:
+        $ref: '#/definitions/OpDB'
+        description: The details for the Operational Database (OpDB).
+      services:
+        description: The services that make up the Operational Database.
+        type: object
+        additionalProperties:
+          $ref: '#/definitions/Service'
+          description: Service definition.
+  OpDB:
+    type: object
+    description: Information on an Operational Database (OpDB).
+    properties:
+      name:
+        type: string
+        description: The database name
+      crn:
+        type: string
+        description: The database crn
+      status:
+        type: string
+        description: The database status
+      hueEndpoint:
+        type: string
+        description: The HUE endpoint
+  DescribeDatalakeAsApiRemoteDataContextRequest:
+    type: object
+    description: Request for RemoteDataContext for a specific datalake in an environment.
+    required:
+      - datalake
+    properties:
+      datalake:
+        type: string
+        description: The name or CRN of the datalake.
+  DescribeDatalakeAsApiRemoteDataContextResponse:
+    type: object
+    description: Response for RemoteDataContext for a specific datalake in an environment
+    properties:
+      datalake:
+        type: string
+        description: The CRN of the datalake.
+      context:
+        $ref: '#/definitions/ApiRemoteDataContext'
+        description: The remote data context.
+  ApiRemoteDataContext:
+    type: object
+    description: This object contains enough information for a Workload cluster to connect to an SDX cluster.
+    properties:
+      endPointId:
+        type: string
+        description: A string to uniquely identify the SDX cluster.
+      endPoints:
+        type: array
+        description: List of endPoints exported by this SDX cluster.
+        items:
+          $ref: '#/definitions/ApiEndPoint'
+      configs:
+        type: array
+        description: SDX cluster specifc options.
+        x-sensitive: true
+        items:
+          $ref: '#/definitions/ApiMapEntry'
+      clusterVersion:
+        type: string
+        description: Cluster version
+  ApiEndPoint:
+    type: object
+    description: This defines a single logical service in the SDX cluster.
+    properties:
+      name:
+        type: string
+        description: Name for the endPoint.
+      version:
+        type: string
+        description: Endpoint specific version
+      serviceConfigs:
+        type: array
+        description: Additional configs for the endPoint.
+        x-sensitive: true
+        items:
+          $ref: '#/definitions/ApiMapEntry'
+      endPointHostList:
+        type: array
+        description: List hosts (uris) for this endPoint.
+        items:
+          $ref: '#/definitions/ApiEndPointHost'
+      serviceType:
+        type: string
+        description: Endpoint service type.
+  ApiEndPointHost:
+    type: object
+    description: A host endPoint for a service.
+    properties:
+      uri:
+        type: string
+        description: Uri for the endPoint.
+      endPointConfigs:
+        type: array
+        description: EndPointHost specific configs.
+        x-sensitive: true
+        items:
+          $ref: '#/definitions/ApiMapEntry'
+      type:
+        type: string
+        description: EndPointHost type.
+  ApiMapEntry:
+    type: object
+    description: Models a map entry, with a key and a value.
+    properties:
+      key:
+        type: string
+        description: key
+      value:
+        type: string
+        description: value

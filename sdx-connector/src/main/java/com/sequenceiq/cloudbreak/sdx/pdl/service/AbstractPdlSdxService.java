@@ -62,8 +62,7 @@ public abstract class AbstractPdlSdxService implements PlatformAwareSdxCommonSer
     public Environment getPrivateEnvForPublicEnv(String publicEnvCrn) {
         String pvcCrn = getPrivateCloudEnvCrn(publicEnvCrn).orElse(null);
         if (!StringUtils.isEmpty(pvcCrn)) {
-            DescribeRemoteEnvironment describeRemoteEnvironment = new DescribeRemoteEnvironment();
-            describeRemoteEnvironment.setCrn(pvcCrn);
+            DescribeRemoteEnvironment describeRemoteEnvironment = getRemoteEnvironmentRequest(pvcCrn);
             return remoteEnvironmentEndpoint.getByCrn(describeRemoteEnvironment).getEnvironment();
         }
         return null;
@@ -72,5 +71,15 @@ public abstract class AbstractPdlSdxService implements PlatformAwareSdxCommonSer
     public Optional<String> getPrivateCloudEnvCrn(String publicEnvCrn) {
         DetailedEnvironmentResponse detailedEnvironmentResponse = environmentEndpoint.getByCrn(publicEnvCrn);
         return Optional.ofNullable(detailedEnvironmentResponse.getRemoteEnvironmentCrn());
+    }
+
+    protected DescribeRemoteEnvironment getRemoteEnvironmentRequest(String remoteEnvCrn) {
+        DescribeRemoteEnvironment describeRemoteEnvironment = new DescribeRemoteEnvironment();
+        describeRemoteEnvironment.setCrn(remoteEnvCrn);
+        return describeRemoteEnvironment;
+    }
+
+    protected RemoteEnvironmentEndpoint getRemoteEnvironmentEndPoint() {
+        return remoteEnvironmentEndpoint;
     }
 }

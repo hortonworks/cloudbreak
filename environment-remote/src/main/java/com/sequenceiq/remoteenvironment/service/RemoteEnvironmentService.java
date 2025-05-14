@@ -1,5 +1,6 @@
 package com.sequenceiq.remoteenvironment.service;
 
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_HYBRID_CLOUD;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataContextResponse;
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -82,6 +84,8 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
                 LOGGER.info(message);
                 throw new BadRequestException(message, crnParseException);
             }
+        } else {
+            throw new BadRequestException(String.format("Unable to fetch remote environment since entitlement %s is not assigned", CDP_HYBRID_CLOUD));
         }
         return response;
     }
@@ -94,6 +98,30 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
     public DescribeEnvironmentResponse describeRemoteEnvironmentInternal(PrivateControlPlane controlPlane, String environmentCrn) {
         MachineUser actor = umsClient.getOrCreateMachineUserWithoutAccessKey(Crn.Service.REMOTECLUSTER.getName(), controlPlane.getAccountId());
         return describeRemoteEnvironmentWithActor(controlPlane, environmentCrn, actor.getCrn());
+    }
+
+    public DescribeDatalakeAsApiRemoteDataContextResponse getRdcForEnvironment(String publicCloudAccountId, String environmentCrn) {
+        DescribeDatalakeAsApiRemoteDataContextResponse response = null;
+        if (entitlementService.hybridCloudEnabled(publicCloudAccountId)) {
+            try {
+                String privateCloudAccountId = Crn.safeFromString(environmentCrn).getAccountId();
+                Optional<PrivateControlPlane> privateControlPlane =
+                        privateControlPlaneService.getByPrivateCloudAccountIdAndPublicCloudAccountId(privateCloudAccountId, publicCloudAccountId);
+                if (privateControlPlane.isPresent()) {
+                    String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+                    response = getRdcForEnvironmentWithActor(privateControlPlane.get(), environmentCrn, userCrn);
+                } else {
+                    throw new BadRequestException(String.format("There is no control plane for this account with account id %s.", privateCloudAccountId));
+                }
+            } catch (CrnParseException crnParseException) {
+                String message = String.format("The provided environment CRN('%s') is invalid", environmentCrn);
+                LOGGER.info(message);
+                throw new BadRequestException(message, crnParseException);
+            }
+        } else {
+            throw new BadRequestException(String.format("Unable to fetch remote data context since entitlement %s is not assigned", CDP_HYBRID_CLOUD));
+        }
+        return response;
     }
 
     private List<SimpleRemoteEnvironmentResponse> listEnvironmentsFromPrivateControlPlaneWithActor(PrivateControlPlane controlPlane, String actorCrn) {
@@ -134,6 +162,27 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
                     "Cluster proxy call took us {} ms for pvc {}", controlPlane.getResourceCrn());
         } catch (Exception e) {
             LOGGER.warn("Failed to query environment for crn {}", environmentCrn);
+            throw new RuntimeException(String.format("Unable to fetch environment for crn %s", environmentCrn));
+        }
+        return response;
+    }
+
+    private DescribeDatalakeAsApiRemoteDataContextResponse getRdcForEnvironmentWithActor(PrivateControlPlane controlPlane, String environmentCrn,
+            String actorCrn) {
+        LOGGER.debug("The getRdcForEnvironmentWithActor of remote environment('{}') with actor('{}') is executed by thread: {}", environmentCrn, actorCrn,
+                Thread.currentThread().getName());
+        DescribeDatalakeAsApiRemoteDataContextResponse response = null;
+        try {
+            response = measure(() ->
+                            clusterProxyHybridClient.getRemoteDataContext(
+                                    controlPlane.getResourceCrn(),
+                                    actorCrn,
+                                    environmentCrn),
+                    LOGGER,
+                    "Cluster proxy call took us {} ms for pvc {}", controlPlane.getResourceCrn());
+        } catch (Exception e) {
+            LOGGER.warn("Failed to query environment for crn {}", environmentCrn);
+            throw new RuntimeException(String.format("Unable to fetch remote data context for crn %s", environmentCrn));
         }
         return response;
     }

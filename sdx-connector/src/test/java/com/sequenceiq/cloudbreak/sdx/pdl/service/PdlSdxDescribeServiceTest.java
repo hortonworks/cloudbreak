@@ -1,12 +1,14 @@
 package com.sequenceiq.cloudbreak.sdx.pdl.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Optional;
 import java.util.Set;
@@ -22,14 +24,18 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.util.ReflectionUtils;
 
+import com.cloudera.cdp.servicediscovery.model.ApiRemoteDataContext;
+import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataContextResponse;
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
 import com.cloudera.thunderhead.service.environments2api.model.Environment;
 import com.cloudera.thunderhead.service.environments2api.model.PrivateDatalakeDetails;
 import com.cloudera.thunderhead.service.environments2api.model.PvcEnvironmentDetails;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxAccessView;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentEndpoint;
@@ -93,6 +99,55 @@ public class PdlSdxDescribeServiceTest {
         when(environment.getPvcEnvironmentDetails()).thenReturn(pvcEnvironmentDetails);
         when(describeEnvironmentResponse.getEnvironment()).thenReturn(environment);
         when(remoteEnvironmentEndpoint.getByCrn(any())).thenReturn(describeEnvironmentResponse);
+    }
+
+    @Test
+    public void testGetRemoteDataContextEmptyString() throws IOException {
+        setEnabled(false);
+        Optional<String> expectedRdc = underTest.getRemoteDataContext(PDL_CRN);
+        assertTrue(expectedRdc.isEmpty());
+        verify(remoteEnvironmentEndpoint, never()).getRdcByCrn(any());
+    }
+
+    @Test
+    public void testGetRemoteDataContextRunTimeException() throws IOException {
+        when(remoteEnvironmentEndpoint.getRdcByCrn(any())).thenThrow(new RuntimeException());
+        RuntimeException e = assertThrows(RuntimeException.class, () -> underTest.getRemoteDataContext(PDL_CRN));
+        assertEquals("Not able to fetch the RDC for PDL from Service Discovery", e.getMessage());
+    }
+
+    @Test
+    public void testGetRemoteDataContext() throws IOException {
+        String rdc = FileReaderUtils.readFileFromClasspath("com/sequenceiq/cloudbreak/sdx/common/service/rdc.json");
+        ObjectMapper objectMapper = new ObjectMapper();
+        ApiRemoteDataContext apiRemoteDataContext =  objectMapper.readValue(rdc, ApiRemoteDataContext.class);
+        DescribeDatalakeAsApiRemoteDataContextResponse remoteDataContextResponse = new DescribeDatalakeAsApiRemoteDataContextResponse();
+        remoteDataContextResponse.setContext(apiRemoteDataContext);
+        when(remoteEnvironmentEndpoint.getRdcByCrn(any())).thenReturn(remoteDataContextResponse);
+        Optional<String> expectedRdc = underTest.getRemoteDataContext(PDL_CRN);
+        ArgumentCaptor<DescribeRemoteEnvironment> captor = ArgumentCaptor.forClass(DescribeRemoteEnvironment.class);
+        verify(remoteEnvironmentEndpoint).getRdcByCrn(captor.capture());
+        DescribeRemoteEnvironment describeRemoteEnvironment = captor.getValue();
+        assertEquals(PDL_CRN, describeRemoteEnvironment.getCrn());
+        assertTrue(expectedRdc.isPresent());
+        com.cloudera.api.swagger.model.ApiRemoteDataContext cmApiRemoteDataContext =  objectMapper.readValue(rdc,
+                com.cloudera.api.swagger.model.ApiRemoteDataContext.class);
+        assertEquals("pub-ak-aws3-dl", cmApiRemoteDataContext.getEndPointId());
+        assertEquals("CDH 7.3.1", cmApiRemoteDataContext.getClusterVersion());
+        assertEquals(7, cmApiRemoteDataContext.getEndPoints().size());
+        assertEquals(1, cmApiRemoteDataContext.getEndPoints().stream().filter(apiEndPoint -> apiEndPoint.getName().equals("zookeeper")).count());
+        assertEquals(1, cmApiRemoteDataContext.getEndPoints().stream().filter(apiEndPoint -> apiEndPoint.getName().equals("kafka")).count());
+        assertEquals(1, cmApiRemoteDataContext.getEndPoints().stream().filter(apiEndPoint -> apiEndPoint.getName().equals("solr")).count());
+        assertEquals(1, cmApiRemoteDataContext.getEndPoints().stream().filter(apiEndPoint -> apiEndPoint.getName().equals("ranger")).count());
+        assertEquals(1, cmApiRemoteDataContext.getEndPoints().stream().filter(apiEndPoint -> apiEndPoint.getName().equals("atlas")).count());
+        assertEquals(1, cmApiRemoteDataContext.getEndPoints().stream().filter(apiEndPoint -> apiEndPoint.getName().equals("knox")).count());
+        assertEquals(1, cmApiRemoteDataContext.getEndPoints().stream().filter(apiEndPoint -> apiEndPoint.getName().equals("hive")).count());
+        com.cloudera.api.swagger.model.ApiEndPoint zooKeeperApiEndPoint = cmApiRemoteDataContext.getEndPoints().stream()
+                .filter(apiEndPoint -> apiEndPoint.getName().equals("zookeeper"))
+                .findFirst().get();
+        assertEquals("ZOOKEEPER", zooKeeperApiEndPoint.getServiceType());
+        assertEquals(1, zooKeeperApiEndPoint.getServiceConfigs().size());
+        assertEquals(3, zooKeeperApiEndPoint.getEndPointHostList().size());
     }
 
     @Test

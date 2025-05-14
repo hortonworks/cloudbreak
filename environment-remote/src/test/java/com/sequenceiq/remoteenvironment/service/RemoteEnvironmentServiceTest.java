@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
@@ -22,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataContextResponse;
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
 import com.cloudera.thunderhead.service.environments2api.model.EnvironmentSummary;
 import com.cloudera.thunderhead.service.environments2api.model.ListEnvironmentsResponse;
@@ -35,6 +37,15 @@ import com.sequenceiq.remoteenvironment.domain.PrivateControlPlane;
 
 @ExtendWith(MockitoExtension.class)
 class RemoteEnvironmentServiceTest {
+
+    private static final String TENANT = "5abe6882-ff63-4ad2-af86-a5582872a9cd";
+
+    private static final String ENV_CRN =
+            String.format("crn:altus:environments:us-west-1:%s:environment:test-hybrid-1/06533e78-b2bd-41c9-8ac4-c4109af7797b", TENANT);
+
+    private static final String PUBLIC_CLOUD_ACCOUNT_ID = "publicCloudAccountId";
+
+    private static final String CONTROL_PLANE = "controlPlane";
 
     @Mock
     private PrivateControlPlaneEnvironmentToRemoteEnvironmentConverter converterMock;
@@ -166,7 +177,7 @@ class RemoteEnvironmentServiceTest {
 
         BadRequestException ex = assertThrows(BadRequestException.class, () -> remoteEnvironmentService
                 .getRemoteEnvironment(
-                        "publicCloudAccountId",
+                        PUBLIC_CLOUD_ACCOUNT_ID,
                         "crn:altus:us-west-1:5abe6882-ff63:environment:test-hybrid-1/06533e78-b2bd"));
 
         assertEquals("The provided environment CRN('crn:altus:us-west-1:5abe6882-ff63:environment:test-hybrid-1/06533e78-b2bd') is invalid",
@@ -194,8 +205,8 @@ class RemoteEnvironmentServiceTest {
 
         DescribeEnvironmentResponse result = remoteEnvironmentService
                 .getRemoteEnvironment(
-                        "publicCloudAccountId",
-                        "crn:altus:environments:us-west-1:5abe6882-ff63-4ad2-af86-a5582872a9cd:environment:test-hybrid-1/06533e78-b2bd-41c9-8ac4-c4109af7797b");
+                        PUBLIC_CLOUD_ACCOUNT_ID, ENV_CRN
+                        );
 
         assertEquals(describeEnvironmentResponse, result);
     }
@@ -208,10 +219,95 @@ class RemoteEnvironmentServiceTest {
 
         BadRequestException ex = assertThrows(BadRequestException.class, () -> remoteEnvironmentService
                 .getRemoteEnvironment(
-                        "publicCloudAccountId",
-                        "crn:altus:environments:us-west-1:5abe6882-ff63-4ad2-af86-a5582872a9cd:environment:test-hybrid-1/06533e78-b2bd-41c9-8ac4-c4109af7797b"));
+                        PUBLIC_CLOUD_ACCOUNT_ID,
+                        ENV_CRN));
 
         assertEquals("There is no control plane for this account with account id 5abe6882-ff63-4ad2-af86-a5582872a9cd.",
                 ex.getMessage());
+    }
+
+    @Test
+    public void testGetRemoteEnvironmentWhenEntitlementNotAssigned() {
+        when(entitlementService.hybridCloudEnabled(anyString())).thenReturn(false);
+        BadRequestException ex = assertThrows(BadRequestException.class, () -> remoteEnvironmentService
+                .getRemoteEnvironment(
+                        PUBLIC_CLOUD_ACCOUNT_ID,
+                        ENV_CRN));
+        assertEquals("Unable to fetch remote environment since entitlement CDP_HYBRID_CLOUD is not assigned", ex.getMessage());
+    }
+
+    @Test
+    public void testGetRemoteEnvironmentThrowsExceptionWhenClusterProxyFails() {
+        when(entitlementService.hybridCloudEnabled(PUBLIC_CLOUD_ACCOUNT_ID)).thenReturn(true);
+        PrivateControlPlane privateControlPlane = mock(PrivateControlPlane.class);
+        when(privateControlPlane.getResourceCrn()).thenReturn(CONTROL_PLANE);
+        when(privateControlPlaneServiceMock.getByPrivateCloudAccountIdAndPublicCloudAccountId(TENANT, PUBLIC_CLOUD_ACCOUNT_ID))
+                .thenReturn(Optional.of(privateControlPlane));
+        when(clusterProxyHybridClientMock.getEnvironment(eq(CONTROL_PLANE), any(), eq(ENV_CRN)))
+                .thenThrow(new RuntimeException());
+
+        RuntimeException runtimeException = assertThrows(RuntimeException.class,
+                () -> remoteEnvironmentService.getRemoteEnvironment(PUBLIC_CLOUD_ACCOUNT_ID, ENV_CRN));
+        assertEquals(String.format(String.format("Unable to fetch environment for crn %s", ENV_CRN)), runtimeException.getMessage());
+    }
+
+    @Test
+    public void testGetRdcForEnvironment() {
+        PrivateControlPlane privateControlPlane = mock(PrivateControlPlane.class);
+        when(privateControlPlane.getResourceCrn()).thenReturn(CONTROL_PLANE);
+        DescribeDatalakeAsApiRemoteDataContextResponse describeDatalakeAsApiRemoteDataContextResponse
+                = mock(DescribeDatalakeAsApiRemoteDataContextResponse.class);
+
+        when(entitlementService.hybridCloudEnabled(PUBLIC_CLOUD_ACCOUNT_ID)).thenReturn(true);
+        when(privateControlPlaneServiceMock.getByPrivateCloudAccountIdAndPublicCloudAccountId(TENANT, PUBLIC_CLOUD_ACCOUNT_ID))
+                .thenReturn(Optional.of(privateControlPlane));
+        when(clusterProxyHybridClientMock.getRemoteDataContext(eq(CONTROL_PLANE), any(), eq(ENV_CRN)))
+                .thenReturn(describeDatalakeAsApiRemoteDataContextResponse);
+
+        DescribeDatalakeAsApiRemoteDataContextResponse result = remoteEnvironmentService.getRdcForEnvironment(PUBLIC_CLOUD_ACCOUNT_ID, ENV_CRN);
+        assertEquals(describeDatalakeAsApiRemoteDataContextResponse, result);
+    }
+
+    @Test
+    public void testGetRdcForEnvironmentEntitlementNotAssigned() {
+        when(entitlementService.hybridCloudEnabled(PUBLIC_CLOUD_ACCOUNT_ID)).thenReturn(false);
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> remoteEnvironmentService.getRdcForEnvironment(PUBLIC_CLOUD_ACCOUNT_ID, ENV_CRN));
+        assertEquals("Unable to fetch remote data context since entitlement CDP_HYBRID_CLOUD is not assigned", badRequestException.getMessage());
+    }
+
+    @Test
+    public void testGetRdcForEnvironmentThrowsBadRequestExceptionInvalidCrn() {
+        String invalidCrn = "test";
+        when(entitlementService.hybridCloudEnabled(PUBLIC_CLOUD_ACCOUNT_ID)).thenReturn(true);
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> remoteEnvironmentService.getRdcForEnvironment(PUBLIC_CLOUD_ACCOUNT_ID, invalidCrn));
+        assertEquals(String.format("The provided environment CRN('%s') is invalid", invalidCrn), badRequestException.getMessage());
+    }
+
+    @Test
+    public void testGetRdcForEnvironmentThrowsBadRequestExceptionControlPlaneDoesNotExist() {
+        when(entitlementService.hybridCloudEnabled(PUBLIC_CLOUD_ACCOUNT_ID)).thenReturn(true);
+        when(privateControlPlaneServiceMock.getByPrivateCloudAccountIdAndPublicCloudAccountId(TENANT, PUBLIC_CLOUD_ACCOUNT_ID))
+                .thenReturn(Optional.empty());
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> remoteEnvironmentService.getRdcForEnvironment(PUBLIC_CLOUD_ACCOUNT_ID, ENV_CRN));
+        assertEquals(String.format("There is no control plane for this account with account id %s.", TENANT), badRequestException.getMessage());
+    }
+
+    @Test
+    public void testGetRdcForEnvironmentThrowsExceptionWhenClusterProxyFails() {
+        when(entitlementService.hybridCloudEnabled(PUBLIC_CLOUD_ACCOUNT_ID)).thenReturn(true);
+        PrivateControlPlane privateControlPlane = mock(PrivateControlPlane.class);
+        when(privateControlPlane.getResourceCrn()).thenReturn(CONTROL_PLANE);
+        when(privateControlPlaneServiceMock.getByPrivateCloudAccountIdAndPublicCloudAccountId(TENANT, PUBLIC_CLOUD_ACCOUNT_ID))
+                .thenReturn(Optional.of(privateControlPlane));
+        when(clusterProxyHybridClientMock.getRemoteDataContext(eq(CONTROL_PLANE), any(), eq(ENV_CRN)))
+                .thenThrow(new RuntimeException());
+
+        RuntimeException runtimeException = assertThrows(RuntimeException.class,
+                () -> remoteEnvironmentService.getRdcForEnvironment(PUBLIC_CLOUD_ACCOUNT_ID, ENV_CRN));
+        assertEquals(String.format(String.format("Unable to fetch remote data context for crn %s", ENV_CRN)), runtimeException.getMessage());
     }
 }

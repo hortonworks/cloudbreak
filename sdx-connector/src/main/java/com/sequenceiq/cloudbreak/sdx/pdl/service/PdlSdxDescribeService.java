@@ -3,45 +3,50 @@ package com.sequenceiq.cloudbreak.sdx.pdl.service;
 import java.util.Optional;
 import java.util.Set;
 
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.cloudera.api.swagger.model.ApiRemoteDataContext;
+import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataContextResponse;
 import com.cloudera.thunderhead.service.environments2api.model.Environment;
 import com.cloudera.thunderhead.service.environments2api.model.PrivateDatalakeDetails;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.protobuf.InvalidProtocolBufferException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
-import com.sequenceiq.cloudbreak.sdx.cdl.grpc.GrpcSdxCdlClient;
-import com.sequenceiq.cloudbreak.sdx.common.grpc.GrpcServiceDiscoveryClient;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxAccessView;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDescribeService;
+import com.sequenceiq.remoteenvironment.api.v1.environment.model.DescribeRemoteEnvironment;
 
 @Service
 public class PdlSdxDescribeService extends AbstractPdlSdxService implements PlatformAwareSdxDescribeService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PdlSdxDescribeService.class);
 
-    @Inject
-    private GrpcSdxCdlClient grpcClient;
-
-    @Inject
-    private GrpcServiceDiscoveryClient grpcServiceDiscoveryClient;
+    private static final ObjectMapper OBJECT_MAPPER = JsonMapper.builder().
+            defaultSetterInfo(JsonSetter.Value.construct(Nulls.AS_EMPTY, Nulls.AS_EMPTY)).build();
 
     @Override
     public Optional<String> getRemoteDataContext(String crn) {
         if (isEnabled(crn)) {
             try {
-                return Optional.of(grpcServiceDiscoveryClient.getRemoteDataContext(crn));
-            } catch (JsonProcessingException | InvalidProtocolBufferException e) {
+                DescribeRemoteEnvironment describeRemoteEnvironment = getRemoteEnvironmentRequest(crn);
+                DescribeDatalakeAsApiRemoteDataContextResponse remoteDataContext = getRemoteEnvironmentEndPoint().getRdcByCrn(describeRemoteEnvironment);
+                String parsedJson = JsonUtil.writeValueAsString(remoteDataContext.getContext());
+                ApiRemoteDataContext apiRemoteDataContext = OBJECT_MAPPER.readValue(parsedJson, ApiRemoteDataContext.class);
+                return Optional.of(OBJECT_MAPPER.writeValueAsString(apiRemoteDataContext));
+            } catch (JsonProcessingException e) {
                 LOGGER.error(String.format("Json processing failed, thus we cannot query remote data context. CRN: %s.", crn), e);
             } catch (RuntimeException exception) {
                 LOGGER.error(String.format("Not able to fetch the RDC for CDL from Service Discovery. CRN: %s.", crn), exception);
             }
+            throw new RuntimeException("Not able to fetch the RDC for PDL from Service Discovery");
         }
         return Optional.empty();
     }

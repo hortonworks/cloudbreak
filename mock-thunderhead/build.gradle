@@ -99,6 +99,7 @@ dependencies {
     implementation project(':auth-distributor-connector')
     implementation project(':metering-connector')
     implementation project(':environment-public-api-client')
+    implementation project(':servicediscovery-api-client')
 }
 
 sourceSets {

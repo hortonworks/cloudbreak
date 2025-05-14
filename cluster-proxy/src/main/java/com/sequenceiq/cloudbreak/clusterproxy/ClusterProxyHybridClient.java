@@ -17,6 +17,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
+import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataContextRequest;
+import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataContextResponse;
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentRequest;
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
 import com.cloudera.thunderhead.service.environments2api.model.ListEnvironmentsResponse;
@@ -29,6 +31,9 @@ public class ClusterProxyHybridClient {
     private static final String REMOTE_CLUSTER_LIST_ENVIRONMENT_CONFIG_PATH = "/proxy/%s/PvcControlPlane/api/v1/environments2/listEnvironments";
 
     private static final String REMOTE_CLUSTER_GET_ENVIRONMENT_CONFIG_PATH = "/proxy/%s/PvcControlPlane/api/v1/environments2/describeEnvironment";
+
+    private static final String REMOTE_CLUSTER_GET_REMOTE_DATA_CONTEXT_CONFIG_PATH =
+            "/proxy/%s/PvcControlPlane/api/v1/servicediscovery/describeDatalakeAsApiRemoteDataContext";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterProxyHybridClient.class);
 
@@ -89,6 +94,30 @@ public class ClusterProxyHybridClient {
         }
     }
 
+    public DescribeDatalakeAsApiRemoteDataContextResponse getRemoteDataContext(String clusterIdentifier, String userCrn, String environmentCrn) {
+        String getConfigUrl = String.format(clusterProxyConfiguration.getClusterProxyUrl() + REMOTE_CLUSTER_GET_REMOTE_DATA_CONTEXT_CONFIG_PATH,
+                clusterIdentifier);
+        try {
+            LOGGER.info("Reading Remote Data Context with cluster proxy configuration for cluster Identifier: {}", clusterIdentifier);
+            Optional<ResponseEntity<DescribeDatalakeAsApiRemoteDataContextResponse>> response = measure(() ->
+                            getRemoteDataContextFromUrl(getConfigUrl, userCrn, environmentCrn),
+                    LOGGER,
+                    "Query Remote Data Context from {} with crn {} ms took {}.", clusterIdentifier, environmentCrn);
+            LOGGER.info("Cluster proxy with remote cluster get Remote Data Context response: {}", response);
+            return response.isEmpty() ? new DescribeDatalakeAsApiRemoteDataContextResponse() : response.get().getBody();
+        } catch (RestClientResponseException e) {
+            String message = String.format("Error getting Remote Data Context for environment '%s' with cluster proxy configuration for " +
+                    "cluster identifier '%s', " + "Error Response Body '%s'", environmentCrn, clusterIdentifier, e.getResponseBodyAsString());
+            LOGGER.warn(message + " URL: " + getConfigUrl, e);
+            throw new ClusterProxyException(message, e);
+        } catch (Exception e) {
+            String message = String.format("Error reading Remote Data Context for cluster identifier '%s' and " +
+                    "environment crn '%s'", clusterIdentifier, environmentCrn);
+            LOGGER.warn(message + " URL: " + getConfigUrl, e);
+            throw new ClusterProxyException(message, e);
+        }
+    }
+
     private Optional<ResponseEntity<DescribeEnvironmentResponse>> getEnvironmentsFromUrl(String readConfigUrl, String userCrn, String environment) {
         try {
             DescribeEnvironmentRequest postRequest = new DescribeEnvironmentRequest();
@@ -97,6 +126,19 @@ public class ClusterProxyHybridClient {
 
             return Optional.of(
                     hybridRestTemplate.postForEntity(readConfigUrl, requestEntity(postRequest, userCrn), DescribeEnvironmentResponse.class));
+        } catch (JsonProcessingException e) {
+            LOGGER.warn("Error occurred when tried to parse the response json.", e);
+            return Optional.empty();
+        }
+    }
+
+    private Optional<ResponseEntity<DescribeDatalakeAsApiRemoteDataContextResponse>> getRemoteDataContextFromUrl(String readConfigUrl, String userCrn,
+            String environment) {
+        try {
+            DescribeDatalakeAsApiRemoteDataContextRequest postRequest = new DescribeDatalakeAsApiRemoteDataContextRequest();
+            postRequest.setDatalake(environment);
+            return Optional.of(
+                    hybridRestTemplate.postForEntity(readConfigUrl, requestEntity(postRequest, userCrn), DescribeDatalakeAsApiRemoteDataContextResponse.class));
         } catch (JsonProcessingException e) {
             LOGGER.warn("Error occurred when tried to parse the response json.", e);
             return Optional.empty();

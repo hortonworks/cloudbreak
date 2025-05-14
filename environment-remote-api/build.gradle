@@ -20,6 +20,7 @@ dependencies {
   implementation project(":structuredevent-api-cdp")
   implementation project(":structuredevent-model")
   implementation project(":environment-public-api-client")
+  implementation project(":servicediscovery-api-client")
 
   implementation     group: 'org.glassfish.jersey.media',  name: 'jersey-media-multipart',         version: jerseyCoreVersion
   implementation     group: 'org.openapitools',            name: 'jackson-databind-nullable',      version: "$jacksonDatabindNullable"

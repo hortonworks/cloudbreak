@@ -26,6 +26,7 @@ dependencyManagement {
 dependencies {
   implementation project(":common")
   implementation project(":environment-public-api-client")
+  implementation project(":servicediscovery-api-client")
   implementation group: 'org.springframework.boot',              name: 'spring-boot-starter-web'
   testImplementation group: 'org.mockito',                       name: 'mockito-core',                 version: mockitoVersion
   testImplementation(group: "org.springframework.boot",   name: "spring-boot-starter-test",     version: springBootVersion) {
