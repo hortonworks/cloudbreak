@@ -32,6 +32,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SECRET_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_TLS_1_3;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_USE_DEV_TELEMETRY_YUM_REPO;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_XFS_FOR_EPHEMERAL_DISK_SUPPORTED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CENTRAL_COMPUTE_MONITORING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_IDENTITY_MAPPING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION;
@@ -575,6 +576,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.lakehouse.optimizer.enabled}")
     private boolean lakehouseOptimizerEnabled;
 
+    @Value("${auth.mock.ephemeral.xfs.support.enabled}")
+    private boolean ephemeralXfsSupportEnabled;
+
     @Inject
     private MockEnvironmentUserResourceRole mockEnvironmentUserResourceRole;
 
@@ -1066,6 +1070,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (lakehouseOptimizerEnabled) {
             builder.addEntitlements(createEntitlement(CDP_LAKEHOUSE_OPTIMIZER_ENABLED));
+        }
+        if (ephemeralXfsSupportEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_CB_XFS_FOR_EPHEMERAL_DISK_SUPPORTED));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

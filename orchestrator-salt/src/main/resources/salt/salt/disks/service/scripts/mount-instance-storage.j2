@@ -5,8 +5,13 @@ source /opt/salt/scripts/format-and-mount-common.sh
 MOUNT_PATH="{{ (salt['pillar.get']('mount')[salt['grains.get']('fqdn')])['mount_path'] }}"
 TEMPORARY_STORAGE="{{ (salt['pillar.get']('mount')[salt['grains.get']('fqdn')])['temporary_storage'] }}"
 CLOUD_PLATFORM="{{ (salt['pillar.get']('mount')[salt['grains.get']('fqdn')])['cloud_platform'] }}"
+XFS_FOR_EPHEMERAL_SUPPORTED="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['xfs_for_ephemeral_supported'] }}"
 LOG_FILE="/var/log/mount-instance-storage.log"
 FS_TYPE=ext4
+
+if [ "$XFS_FOR_EPHEMERAL_SUPPORTED" = "True" ]; then
+  FS_TYPE=xfs
+fi
 
 format_disks_if_unformatted() {
     local device_name_list=("$@")
@@ -21,7 +26,11 @@ format_disks_if_unformatted() {
               iter=$(expr $iter + 1)
             fi
             log $LOG_FILE "formatting: $devicename"
-            $(mkfs -E lazy_itable_init=1 -O uninit_bg -F -t $FS_TYPE $devicename >> $LOG_FILE 2>&1)
+            if [ "$FS_TYPE" = "xfs" ]; then
+              $(mkfs.xfs -f $devicename >> $LOG_FILE 2>&1)
+            else
+              $(mkfs -E lazy_itable_init=1 -O uninit_bg -F -t $FS_TYPE $devicename >> $LOG_FILE 2>&1)
+            fi;
             if [ ! $? -eq 0 ]; then
             log $LOG_FILE "formatting of device $devicename failed"
             return_value=1
@@ -136,7 +145,11 @@ find_format_and_mount_tempstorage_azure() {
       else
         log $LOG_FILE "Temporary disk $device is not mounted"
         log $LOG_FILE "formatting temporary disk: $device"
-        $(mkfs -E lazy_itable_init=1 -O uninit_bg -F -t $FS_TYPE $device >> $LOG_FILE 2>&1)
+        if [ "$FS_TYPE" = "xfs" ]; then
+          $(mkfs.xfs -f $devicename >> $LOG_FILE 2>&1)
+        else
+          $(mkfs -E lazy_itable_init=1 -O uninit_bg -F -t $FS_TYPE $devicename >> $LOG_FILE 2>&1)
+        fi;
         if [ ! $? -eq 0 ]; then
           log $LOG_FILE "formatting of temporary disk device $device failed"
           return_value=1
