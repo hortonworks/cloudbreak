@@ -143,13 +143,13 @@ public class AwsNativeLoadBalancerLaunchService {
     private void createLoadBalancer(ResourceCreationContext context, AwsLoadBalancer awsLoadBalancer, CloudStack stack) {
         CloudResource loadBalancerResource;
         AwsLoadBalancerScheme scheme = awsLoadBalancer.getScheme();
-        String loadBalancerResourceTypeAndSchemePart = resourceNameService.loadBalancerResourceTypeAndSchemeNamePart(scheme.resourceName());
-        LOGGER.info("Looking for elastic load balancer resource for stack with '{}' in it's name", loadBalancerResourceTypeAndSchemePart);
+        String loadBalancerSchemePart = scheme.resourceName();
+        LOGGER.info("Looking for elastic load balancer resource for stack with '{}' in it's name", loadBalancerSchemePart);
         List<CloudResource> existingLoadBalancers = resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, context.getStackId());
         LOGGER.info("Existing elastic load balancer resources for stack: {}", existingLoadBalancers);
         Optional<CloudResource> existingLoadBalancer = existingLoadBalancers.stream()
-                .filter(cloudResource -> cloudResource.getName().contains(loadBalancerResourceTypeAndSchemePart))
+                .filter(cloudResource -> cloudResource.getName().contains(loadBalancerSchemePart))
                 .findFirst();
         String loadBalancerArn;
         if (existingLoadBalancer.isPresent()) {
@@ -158,7 +158,7 @@ public class AwsNativeLoadBalancerLaunchService {
             LOGGER.info("Elastic load balancer resource has already been created for stack, proceeding forward with existing resource '{}'",
                     loadBalancerArn);
         } else {
-            String loadBalancerName = resourceNameService.loadBalancer(context.getStackName(), scheme.resourceName());
+            String loadBalancerName = resourceNameService.loadBalancer(context.getStackName(), scheme.resourceName(), context.cloudContext);
             Set<String> subnetIds = awsLoadBalancer.getSubnetIds();
             LOGGER.info("Creating load balancer with name '{}', subnet ids: '{}' and scheme: '{}'", loadBalancerName, String.join(",", subnetIds), scheme);
             CreateLoadBalancerRequest request = CreateLoadBalancerRequest.builder()
@@ -373,7 +373,7 @@ public class AwsNativeLoadBalancerLaunchService {
             List<String> cloudResourceReferences = cloudResources.stream()
                     .filter(cr -> cr.getReference() != null)
                     .map(CloudResource::getReference)
-                    .collect(toList());
+                    .toList();
             Set<String> missingPrivateIds = new HashSet<>(privateIds);
             cloudResourceReferences.forEach(missingPrivateIds::remove);
             LOGGER.debug("The following resources are missing from DB: {}", missingPrivateIds);

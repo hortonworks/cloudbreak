@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.CaseFormat;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceNameService;
 
 @Service("AwsResourceNameServiceV2")
@@ -82,17 +84,17 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
         return "LB" + scheme;
     }
 
-    public String loadBalancer(String stackName, String scheme) {
+    public String loadBalancer(String stackName, String scheme, CloudContext context) {
         String name;
-        String resourceNameWithScheme = loadBalancerResourceTypeAndSchemeNamePart(scheme);
         int numberOfAppends = 2;
         int stackNameLength = stackName.length();
-        int maxLengthOfStackName = maxLoadBalancerResourceNameLength - getDefaultHashLength() - resourceNameWithScheme.length() - numberOfAppends;
+        int maxLengthOfStackName = maxLoadBalancerResourceNameLength - getDefaultHashLength() - scheme.length() - numberOfAppends;
         String reducedStackName = stackName.substring(0, Math.min(stackNameLength, maxLengthOfStackName));
         name = normalize(reducedStackName);
         name = adjustPartLength(name);
-        name = appendPart(name, resourceNameWithScheme);
-        name = appendDateAsHash(name, new Date());
+        name = appendPart(name, scheme);
+        String crnPart = Crn.safeFromString(context.getCrn()).getResource().substring(0, getDefaultHashLength() - 1);
+        name = appendPart(name, StringUtils.removeEnd(crnPart, "-"));
         name = adjustBaseLength(name, maxLoadBalancerResourceNameLength);
         return name;
     }

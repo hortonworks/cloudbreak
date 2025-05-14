@@ -12,6 +12,8 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+
 @ExtendWith(MockitoExtension.class)
 class AwsResourceNameServiceTest {
 
@@ -28,6 +30,11 @@ class AwsResourceNameServiceTest {
     private static final Long PRIVATE_ID = 0L;
 
     private static final Integer PORT = 8080;
+
+    private static final CloudContext CLOUD_CONTEXT = CloudContext.Builder.builder()
+            .withCrn("crn:cdp:freeipa:us-west-1:cloudera:freeipa:e5ad92a0-148e-4681-8afa-030c8b4912a2").build();
+
+    private static final String CRN_PART = "e5ad92a0-148e";
 
     @InjectMocks
     private AwsResourceNameService underTest;
@@ -70,21 +77,20 @@ class AwsResourceNameServiceTest {
 
     @Test
     void testLoadBalancer() {
-        String resourceName = underTest.loadBalancer(STACK_NAME_LONG, SCHEME);
-        assertTrue(resourceName.matches("stacknam-LBscheme-\\d{13}"));
+        String resourceName = underTest.loadBalancer(STACK_NAME_LONG, SCHEME, CLOUD_CONTEXT);
+        assertEquals("stacknamel-scheme-" + CRN_PART, resourceName);
     }
 
     @Test
     void testLoadBalancerBackwardCompatibleWithNewHash() {
-        //satori-LBGwayPriv-20240521151654
-        String resourceName = underTest.loadBalancer("satori-dev", "GwayPriv");
-        assertTrue(resourceName.matches("satori-LBGwayPriv-\\d{13}"));
+        String resourceName = underTest.loadBalancer("satori-dev", "GwayPriv", CLOUD_CONTEXT);
+        assertEquals("satorid-GwayPriv-" + CRN_PART, resourceName);
     }
 
     @Test
     void testLoadBalancerShorterThanSevenCharacter() {
-        String resourceName = underTest.loadBalancer("sdfsda", SCHEME);
-        assertTrue(resourceName.matches("sdfsda-LBscheme-\\d{13}"));
+        String resourceName = underTest.loadBalancer("sdfsda", SCHEME, CLOUD_CONTEXT);
+        assertEquals("sdfsda-scheme-" + CRN_PART, resourceName);
     }
 
     @Test
