@@ -1,6 +1,6 @@
 package com.sequenceiq.environment.environment.validation.cloudstorage;
 
-import static com.sequenceiq.environment.environment.validation.validators.EncryptionRoleValidator.USER_MANAGED_IDENTITY;
+import static com.sequenceiq.environment.environment.validation.validators.ManagedIdentityRoleValidator.USER_MANAGED_IDENTITY;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

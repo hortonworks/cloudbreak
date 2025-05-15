@@ -45,7 +45,7 @@ import com.sequenceiq.environment.environment.service.recipe.EnvironmentRecipeSe
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyArnValidator;
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyUrlValidator;
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyValidator;
-import com.sequenceiq.environment.environment.validation.validators.EncryptionRoleValidator;
+import com.sequenceiq.environment.environment.validation.validators.ManagedIdentityRoleValidator;
 import com.sequenceiq.environment.environment.validation.validators.NetworkValidator;
 import com.sequenceiq.environment.environment.validation.validators.PublicKeyValidator;
 import com.sequenceiq.environment.environment.validation.validators.TagValidator;
@@ -84,7 +84,7 @@ public class EnvironmentValidatorService {
 
     private final EncryptionKeyUrlValidator encryptionKeyUrlValidator;
 
-    private final EncryptionRoleValidator encryptionRoleValidator;
+    private final ManagedIdentityRoleValidator encryptionRoleValidator;
 
     private final EntitlementService entitlementService;
 
@@ -107,7 +107,7 @@ public class EnvironmentValidatorService {
             EntitlementService entitlementService,
             EncryptionKeyValidator encryptionKeyValidator,
             EnvironmentRecipeService recipeService,
-            EncryptionRoleValidator encryptionRoleValidator,
+            ManagedIdentityRoleValidator encryptionRoleValidator,
             @Value("${environment.freeipa.groupInstanceCount.minimum}") Integer ipaMinimumInstanceCountByGroup) {
         this.networkValidator = networkValidator;
         this.platformParameterService = platformParameterService;

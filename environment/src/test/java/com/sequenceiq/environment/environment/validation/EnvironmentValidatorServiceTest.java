@@ -48,7 +48,7 @@ import com.sequenceiq.environment.environment.service.recipe.EnvironmentRecipeSe
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyArnValidator;
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyUrlValidator;
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyValidator;
-import com.sequenceiq.environment.environment.validation.validators.EncryptionRoleValidator;
+import com.sequenceiq.environment.environment.validation.validators.ManagedIdentityRoleValidator;
 import com.sequenceiq.environment.environment.validation.validators.NetworkValidator;
 import com.sequenceiq.environment.environment.validation.validators.PublicKeyValidator;
 import com.sequenceiq.environment.environment.validation.validators.TagValidator;
@@ -94,7 +94,7 @@ class EnvironmentValidatorServiceTest {
     private EncryptionKeyValidator encryptionKeyValidator;
 
     @Mock
-    private EncryptionRoleValidator encryptionRoleValidator;
+    private ManagedIdentityRoleValidator encryptionRoleValidator;
 
     @Mock
     private EnvironmentRecipeService recipeService;

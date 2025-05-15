@@ -3,6 +3,7 @@ package com.sequenceiq.environment.environment.validation.validators;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -17,7 +18,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.client.thunderhead.computeapi.ThunderheadComputeApiService;
 import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
+import com.sequenceiq.environment.environment.dto.dataservices.AzureDataServiceParameters;
 import com.sequenceiq.environment.environment.dto.dataservices.CustomDockerRegistryParameters;
+import com.sequenceiq.environment.environment.dto.dataservices.EnvironmentDataServices;
 
 @ExtendWith(MockitoExtension.class)
 class EnvironmentDataServicesValidatorTest {
@@ -27,6 +30,9 @@ class EnvironmentDataServicesValidatorTest {
 
     @Mock
     private ThunderheadComputeApiService thunderheadComputeApiService;
+
+    @Mock
+    private ManagedIdentityRoleValidator managedIdentityRoleValidator;
 
     @InjectMocks
     private EnvironmentDataServicesValidator underTest;
@@ -44,6 +50,43 @@ class EnvironmentDataServicesValidatorTest {
     @Test
     void validateWhenNoCustomDockerRegistrySpecifiedOnDataServicesOnTheEnvironment() {
         when(environmentValidationDto.getEnvironmentDto().getDataServices().customDockerRegistry()).thenReturn(null);
+
+        ValidationResult validationResult = underTest.validate(environmentValidationDto);
+
+        assertFalse(validationResult.hasError());
+        verifyNoInteractions(thunderheadComputeApiService);
+    }
+
+    @Test
+    void validateWhenManagedIdentityDefinedAndWrongFormatOfIdentity() {
+        AzureDataServiceParameters azureDataServiceParameters = new AzureDataServiceParameters("test");
+        EnvironmentDataServices environmentDataServices = EnvironmentDataServices.builder()
+                .withAzure(azureDataServiceParameters)
+                .build();
+
+        when(environmentValidationDto.getEnvironmentDto().getDataServices()).thenReturn(environmentDataServices);
+        when(managedIdentityRoleValidator.validateEncryptionRole(anyString())).thenReturn(
+                ValidationResult.builder()
+                        .error("Error")
+                        .build());
+
+        ValidationResult validationResult = underTest.validate(environmentValidationDto);
+
+        assertTrue(validationResult.hasError());
+        verifyNoInteractions(thunderheadComputeApiService);
+    }
+
+    @Test
+    void validateWhenManagedIdentityDefinedAndRightFormatOfIdentity() {
+        AzureDataServiceParameters azureDataServiceParameters = new AzureDataServiceParameters("test");
+        EnvironmentDataServices environmentDataServices = EnvironmentDataServices.builder()
+                .withAzure(azureDataServiceParameters)
+                .build();
+
+        when(environmentValidationDto.getEnvironmentDto().getDataServices()).thenReturn(environmentDataServices);
+        when(managedIdentityRoleValidator.validateEncryptionRole(anyString())).thenReturn(
+                ValidationResult.builder()
+                        .build());
 
         ValidationResult validationResult = underTest.validate(environmentValidationDto);
 

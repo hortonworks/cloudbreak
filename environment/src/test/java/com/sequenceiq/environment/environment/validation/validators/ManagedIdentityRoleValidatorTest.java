@@ -9,16 +9,16 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 
-class EncryptionRoleValidatorTest {
+class ManagedIdentityRoleValidatorTest {
 
     private static final String DOC_LINK = " Refer to Cloudera documentation at https://docs.cloudera.com/cdp-public-cloud/cloud/requirements-azure/topics/" +
             "mc-az-minimal-setup-for-cloud-storage.html#mc-az-minimal-setup-for-cloud-storage for the required setup.";
 
-    private EncryptionRoleValidator underTest;
+    private ManagedIdentityRoleValidator underTest;
 
     @BeforeEach
     void setUp() {
-        underTest = new EncryptionRoleValidator();
+        underTest = new ManagedIdentityRoleValidator();
     }
 
     @Test

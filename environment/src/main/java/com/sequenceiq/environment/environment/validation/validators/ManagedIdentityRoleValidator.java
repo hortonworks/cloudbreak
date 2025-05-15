@@ -9,12 +9,12 @@ import com.sequenceiq.cloudbreak.util.DocumentationLinkProvider;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 
 @Component
-public class EncryptionRoleValidator {
+public class ManagedIdentityRoleValidator {
 
     public static final String USER_MANAGED_IDENTITY = "^/subscriptions/[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}/"
             + "(resourceGroups|resourcegroups)/[-\\w._()]+/providers/Microsoft.ManagedIdentity/userAssignedIdentities/[A-Za-z0-9-_]*$";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EncryptionRoleValidator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ManagedIdentityRoleValidator.class);
 
     public ValidationResult validateEncryptionRole(String encryptionRole) {
         ValidationResult.ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
