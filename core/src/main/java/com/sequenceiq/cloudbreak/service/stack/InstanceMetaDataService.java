@@ -554,4 +554,8 @@ public class InstanceMetaDataService {
     public void updatePublicIp(String instanceId, String publicIp) {
         repository.updatePublicIp(instanceId, publicIp);
     }
+
+    public List<InstanceMetaData> findAllByStackIdAndStatus(Long stackId, InstanceStatus status) {
+        return repository.findAllByStackIdAndStatus(stackId, status);
+    }
 }

@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.handler.AbstractComponentTest;
 import com.sequenceiq.cloudbreak.cloud.handler.testcontext.TestApplicationContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.reactor.UpscaleStackHandler;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackResult;
@@ -38,7 +39,7 @@ public class UpscaleStackComponentTest extends AbstractComponentTest<UpscaleStac
     private CloudFormationStackUtil cfStackUtil;
 
     @Test
-    public void testUpscaleStack() throws QuotaExceededException {
+    public void testUpscaleStack() throws QuotaExceededException, TransactionExecutionException {
         when(stackUpscaleService.upscale(any(), any(), any())).thenReturn(Collections.singletonList(new CloudResourceStatus(null, ResourceStatus.UPDATED)));
         UpscaleStackResult result = sendCloudRequest();
 
