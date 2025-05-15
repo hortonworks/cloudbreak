@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.tag.ClusterTemplateApplicationTag;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -25,7 +26,7 @@ public class CodUtil {
         return isCodCluster(stackTags);
     }
 
-    public static boolean isCodCluster(StackView stack) {
+    public static boolean isCodCluster(Stack stack) {
         StackTags stackTags = getStackTags(stack);
         return isCodCluster(stackTags);
     }

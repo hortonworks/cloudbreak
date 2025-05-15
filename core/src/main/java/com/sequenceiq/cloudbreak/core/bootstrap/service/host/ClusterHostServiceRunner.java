@@ -131,7 +131,6 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.template.views.provider.RdsViewProvider;
-import com.sequenceiq.cloudbreak.util.EphemeralVolumeUtil;
 import com.sequenceiq.cloudbreak.util.NodesUnreachableException;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.ClusterView;
@@ -619,13 +618,9 @@ public class ClusterHostServiceRunner {
     }
 
     private Map<String, String> getMountPath(StackView stack, InstanceGroupView group) {
-        String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
-        boolean xfsSupportForEphemeralDisksEntitled = entitlementService.isXfsForEphemeralDisksSupported(accountId);
-        boolean xfsForEphemeralDisksSupported = EphemeralVolumeUtil.xfsForEphemeralSupported(xfsSupportForEphemeralDisksEntitled, stack);
         return Map.of("mount_path", getMountPath(group),
                 "cloud_platform", stack.getCloudPlatform(),
-                "temporary_storage", group.getTemplate().getTemporaryStorage().name(),
-                "xfs_for_ephemeral_supported", String.valueOf(xfsForEphemeralDisksSupported));
+                "temporary_storage", group.getTemplate().getTemporaryStorage().name());
     }
 
     private String getMountPath(InstanceGroupView group) {

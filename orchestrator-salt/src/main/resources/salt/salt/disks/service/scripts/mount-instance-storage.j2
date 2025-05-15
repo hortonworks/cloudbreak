@@ -5,11 +5,11 @@ source /opt/salt/scripts/format-and-mount-common.sh
 MOUNT_PATH="{{ (salt['pillar.get']('mount')[salt['grains.get']('fqdn')])['mount_path'] }}"
 TEMPORARY_STORAGE="{{ (salt['pillar.get']('mount')[salt['grains.get']('fqdn')])['temporary_storage'] }}"
 CLOUD_PLATFORM="{{ (salt['pillar.get']('mount')[salt['grains.get']('fqdn')])['cloud_platform'] }}"
-XFS_FOR_EPHEMERAL_SUPPORTED="{{ (salt['pillar.get']('mount')[salt['grains.get']('fqdn')])['xfs_for_ephemeral_supported'] }}"
+XFS_FOR_EPHEMERAL_SUPPORTED="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['xfs_for_ephemeral_supported'] }}"
 LOG_FILE="/var/log/mount-instance-storage.log"
 FS_TYPE=ext4
 
-if [ "$XFS_FOR_EPHEMERAL_SUPPORTED" = "true" ]; then
+if [ "$XFS_FOR_EPHEMERAL_SUPPORTED" = "True" ]; then
   FS_TYPE=xfs
 fi
 

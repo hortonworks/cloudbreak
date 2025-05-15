@@ -1,19 +1,13 @@
 package com.sequenceiq.cloudbreak.util;
 
-import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_3_1;
-import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
-
 import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpPlatformParameters.GcpDiskType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
-import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.model.AwsDiskType;
 
 public class EphemeralVolumeUtil {
@@ -54,13 +48,5 @@ public class EphemeralVolumeUtil {
         return getEphemeralVolumeWhichMustBeProvisioned()
                 .stream()
                 .anyMatch(e -> e.equalsIgnoreCase(type));
-    }
-
-    public static boolean xfsForEphemeralSupported(boolean entitled, StackView stack) {
-        return entitled &&
-                StackType.WORKLOAD.equals(stack.getType()) &&
-                CloudPlatform.AWS.equals(CloudPlatform.fromName(stack.getCloudPlatform())) &&
-                CodUtil.isCodCluster(stack) &&
-                isVersionNewerOrEqualThanLimited(stack.getStackVersion(), CLOUDERA_STACK_VERSION_7_3_1);
     }
 }
