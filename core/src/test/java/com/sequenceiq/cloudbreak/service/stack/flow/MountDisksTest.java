@@ -18,8 +18,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
@@ -63,9 +61,6 @@ public class MountDisksTest {
     @Mock
     private DiskValidator diskValidator;
 
-    @Mock
-    private EntitlementService entitlementService;
-
     @InjectMocks
     private MountDisks underTest;
 
@@ -80,13 +75,11 @@ public class MountDisksTest {
 
     @Test
     public void mountDisksOnNewNodesShouldUseReachableNodes() throws CloudbreakException, CloudbreakOrchestratorFailedException {
-        when(entitlementService.isXfsForEphemeralDisksSupported(any())).thenReturn(Boolean.FALSE);
         Set<String> newNodeAddresses = Set.of("node-1");
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
         when(stack.getPlatformVariant()).thenReturn(CloudConstants.MOCK);
         when(stack.getCluster()).thenReturn(new Cluster());
         when(stack.getDiskResourceType()).thenReturn(ResourceType.MOCK_VOLUME);
-        when(stack.getResourceCrn()).thenReturn(TestUtil.STACK_CRN);
         Node node1 = new Node("1.1.1.1", "1.1.1.1", "id1", "m5.xlarge", "node-1", "worker");
         Node node2 = new Node("1.1.1.2", "1.1.1.2", "id2", "m5.xlarge", "node-2", "worker");
         Set<Node> reachableNodes = new HashSet<>();

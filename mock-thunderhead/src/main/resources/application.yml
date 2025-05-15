@@ -104,7 +104,6 @@ auth:
     tlsv13.enable: false
     dev.telemetry.yum.repo.enabled: false
     lakehouse.optimizer.enabled: true
-    ephemeral.xfs.support.enabled: false
 crn:
   partition: cdp
   region: us-west-1

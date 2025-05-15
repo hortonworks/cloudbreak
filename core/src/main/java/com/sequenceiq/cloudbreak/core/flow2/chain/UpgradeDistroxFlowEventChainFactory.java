@@ -37,6 +37,7 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -68,7 +69,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeAvailabilityService;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.service.ClusterSizeUpgradeValidator;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterUseCaseAware;
-import com.sequenceiq.cloudbreak.util.CodUtil;
+import com.sequenceiq.cloudbreak.tag.ClusterTemplateApplicationTag;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
@@ -77,6 +78,8 @@ import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactory<DistroXUpgradeTriggerEvent>, ClusterUseCaseAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeDistroxFlowEventChainFactory.class);
+
+    private static final String OPERATIONAL_DB = "OPERATIONAL_DB";
 
     @Value("${cb.upgrade.batch.repair.enabled:true}")
     private boolean batchRepairEnabled;
@@ -268,7 +271,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         if (event.isReplaceVms() && !event.isLockComponents()) {
             LOGGER.info("Force OS upgrade is enabled by entitlement or requested by explicitly specifying replaceVms as true and lockComponents as false.");
             if ((clusterSizeUpgradeValidator.isClusterSizeLargerThanAllowedForRollingUpgrade(stack.getFullNodeCount())) && event.isRollingUpgradeEnabled()
-                    || CodUtil.isCodCluster(stack)) {
+                    || isCodCluster(stack)) {
                 LOGGER.info("Cluster size is larger than allowed for rolling upgrade or its a COD cluster. Replace only the Salt master nodes.");
                 Set<String> gatewayInstanceIds = stack.getAllAvailableGatewayInstances().stream()
                         .map(InstanceMetadataView::getInstanceId)
@@ -281,6 +284,17 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> validationResult = clusterRepairService.validateRepair(ALL,
                 event.getResourceId(), Set.of(), false);
         return Pair.of(Boolean.TRUE, filterBasedOnImageAndConvertToFqdn(validationResult.getSuccess(), event.getImageChangeDto().getImageId()));
+    }
+
+    private boolean isCodCluster(StackDto stack) {
+        StackTags stackTags = stack.getStackTags();
+        if (stackTags != null) {
+            String serviceType = stackTags.getApplicationTags().get(ClusterTemplateApplicationTag.SERVICE_TYPE.key());
+            if (OPERATIONAL_DB.equals(serviceType)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private Map<String, List<String>> filterBasedOnImageAndConvertToFqdn(Map<HostGroupName, Set<InstanceMetaData>> repairableNodes, String stackImageId) {
