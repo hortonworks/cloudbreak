@@ -23,16 +23,16 @@ import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConvert
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.chain.AbstractCommonChainAction;
-import com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaModifySeLinuxFailedEvent;
-import com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaModifySeLinuxStateSelectors;
+import com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaEnableSeLinuxFailedEvent;
+import com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaEnableSeLinuxStateSelectors;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
-abstract class AbstractFreeIpaModifySeLinuxAction<P extends Payload>
-        extends AbstractCommonChainAction<FreeIpaModifySeLinuxState, FreeIpaModifySeLinuxStateSelectors, StackContext, P> {
+abstract class AbstractFreeIpaEnableSeLinuxAction<P extends Payload>
+        extends AbstractCommonChainAction<FreeIpaEnableSeLinuxState, FreeIpaEnableSeLinuxStateSelectors, StackContext, P> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFreeIpaModifySeLinuxAction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFreeIpaEnableSeLinuxAction.class);
 
     @Inject
     private StackService stackService;
@@ -46,13 +46,13 @@ abstract class AbstractFreeIpaModifySeLinuxAction<P extends Payload>
     @Inject
     private CredentialService credentialService;
 
-    protected AbstractFreeIpaModifySeLinuxAction(Class<P> payloadClass) {
+    protected AbstractFreeIpaEnableSeLinuxAction(Class<P> payloadClass) {
         super(payloadClass);
     }
 
     @Override
     protected StackContext createFlowContext(FlowParameters flowParameters,
-            StateContext<FreeIpaModifySeLinuxState, FreeIpaModifySeLinuxStateSelectors> stateContext, P payload) {
+            StateContext<FreeIpaEnableSeLinuxState, FreeIpaEnableSeLinuxStateSelectors> stateContext, P payload) {
         Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);
         addMdcOperationIdIfPresent(stateContext.getExtendedState().getVariables());
@@ -75,6 +75,6 @@ abstract class AbstractFreeIpaModifySeLinuxAction<P extends Payload>
 
     @Override
     protected Object getFailurePayload(P payload, Optional<StackContext> flowContext, Exception ex) {
-        return new FreeIpaModifySeLinuxFailedEvent(payload.getResourceId(), "Unexpected error during action", ex);
+        return new FreeIpaEnableSeLinuxFailedEvent(payload.getResourceId(), "Unexpected error during action", ex);
     }
 }

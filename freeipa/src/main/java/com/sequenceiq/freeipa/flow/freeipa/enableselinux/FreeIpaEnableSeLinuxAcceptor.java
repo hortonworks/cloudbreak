@@ -9,10 +9,10 @@ import com.sequenceiq.freeipa.repository.OperationRepository;
 import com.sequenceiq.freeipa.service.operation.OperationAcceptor;
 
 @Component
-public class FreeIpaModifySeLinuxAcceptor extends OperationAcceptor {
+public class FreeIpaEnableSeLinuxAcceptor extends OperationAcceptor {
 
     @Inject
-    public FreeIpaModifySeLinuxAcceptor(OperationRepository operationRepository) {
+    public FreeIpaEnableSeLinuxAcceptor(OperationRepository operationRepository) {
         super(operationRepository);
     }
 

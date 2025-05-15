@@ -1,11 +1,11 @@
 package com.sequenceiq.freeipa.flow.freeipa.enableselinux;
 
 import static com.sequenceiq.freeipa.flow.OperationAwareAction.OPERATION_ID;
-import static com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaModifySeLinuxStateSelectors.FINALIZE_MODIFY_SELINUX_FREEIPA_EVENT;
-import static com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaModifySeLinuxStateSelectors.FINISH_MODIFY_SELINUX_FREEIPA_EVENT;
-import static com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaModifySeLinuxStateSelectors.HANDLED_FAILED_MODIFY_SELINUX_FREEIPA_EVENT;
-import static com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaModifySeLinuxStateSelectors.MODIFY_SELINUX_FREEIPA_EVENT;
-import static com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaModifySeLinuxStateSelectors.MODIFY_SELINUX_START_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaEnableSeLinuxStateSelectors.ENABLE_SELINUX_FREEIPA_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaEnableSeLinuxStateSelectors.FINALIZE_ENABLE_SELINUX_FREEIPA_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaEnableSeLinuxStateSelectors.FINISH_ENABLE_SELINUX_FREEIPA_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaEnableSeLinuxStateSelectors.HANDLED_FAILED_ENABLE_SELINUX_FREEIPA_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaEnableSeLinuxStateSelectors.SET_SELINUX_TO_ENFORCING_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
@@ -35,7 +35,6 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
-import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.flow.core.AbstractActionTestSupport;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowRegister;
@@ -43,17 +42,17 @@ import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaModifySeLinuxEvent;
-import com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaModifySeLinuxFailedEvent;
-import com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaModifySeLinuxHandlerEvent;
-import com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaValidateModifySeLinuxHandlerEvent;
+import com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaEnableSeLinuxEvent;
+import com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaEnableSeLinuxFailedEvent;
+import com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaEnableSeLinuxHandlerEvent;
+import com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaValidateEnableSeLinuxHandlerEvent;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.sync.FreeipaJobService;
 
 @ExtendWith(MockitoExtension.class)
-public class FreeIpaModifySeLinuxActionsTest {
+public class FreeIpaEnableSeLinuxActionsTest {
 
     private Map<Object, Object> variables;
 
@@ -67,7 +66,7 @@ public class FreeIpaModifySeLinuxActionsTest {
     private OperationService operationService;
 
     @InjectMocks
-    private FreeIpaModifySeLinuxActions underTest;
+    private FreeIpaEnableSeLinuxActions underTest;
 
     @Mock
     private FlowRegister runningFlows;
@@ -105,75 +104,75 @@ public class FreeIpaModifySeLinuxActionsTest {
     }
 
     @Test
-    void testModifySeLinuxValidationAction() throws Exception {
-        FreeIpaModifySeLinuxEvent event = new FreeIpaModifySeLinuxEvent(MODIFY_SELINUX_START_EVENT.event(), 1L, "test-op", SeLinux.ENFORCING);
+    void testEnableSeLinuxValidationAction() throws Exception {
+        FreeIpaEnableSeLinuxEvent event = new FreeIpaEnableSeLinuxEvent(SET_SELINUX_TO_ENFORCING_EVENT.event(), 1L, "test-op");
         doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), any());
-        AbstractFreeIpaModifySeLinuxAction<FreeIpaModifySeLinuxEvent> action =
-                (AbstractFreeIpaModifySeLinuxAction<FreeIpaModifySeLinuxEvent>) underTest.modifySeLinuxValidationAction();
+        AbstractFreeIpaEnableSeLinuxAction<FreeIpaEnableSeLinuxEvent> action =
+                (AbstractFreeIpaEnableSeLinuxAction<FreeIpaEnableSeLinuxEvent>) underTest.enableSeLinuxValidationAction();
         initActionPrivateFields(action);
         new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
         verify(stackUpdater).updateStackStatus(eq(stack), eq(DetailedStackStatus.UPDATE_IN_PROGRESS), eq("Starting to validate SELinux mode change."));
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
         verify(eventBus).notify(captor.capture(), eventCaptor.capture());
-        String selector = EventSelectorUtil.selector(FreeIpaValidateModifySeLinuxHandlerEvent.class);
+        String selector = EventSelectorUtil.selector(FreeIpaValidateEnableSeLinuxHandlerEvent.class);
         assertEquals(selector, captor.getValue());
         assertEquals(1L, ReflectionTestUtils.getField(eventCaptor.getValue().getData(), "stackId"));
     }
 
     @Test
-    void testModifySeLinuxInFreeIpaAction() throws Exception {
-        FreeIpaModifySeLinuxEvent event = new FreeIpaModifySeLinuxEvent(MODIFY_SELINUX_FREEIPA_EVENT.event(), 1L, "test-op", SeLinux.ENFORCING);
+    void testEnableSeLinuxInFreeIpaAction() throws Exception {
+        FreeIpaEnableSeLinuxEvent event = new FreeIpaEnableSeLinuxEvent(ENABLE_SELINUX_FREEIPA_EVENT.event(), 1L, "test-op");
         doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), any());
-        AbstractFreeIpaModifySeLinuxAction<FreeIpaModifySeLinuxEvent> action =
-                (AbstractFreeIpaModifySeLinuxAction<FreeIpaModifySeLinuxEvent>) underTest.modifySeLinuxInFreeIpaAction();
+        AbstractFreeIpaEnableSeLinuxAction<FreeIpaEnableSeLinuxEvent> action =
+                (AbstractFreeIpaEnableSeLinuxAction<FreeIpaEnableSeLinuxEvent>) underTest.enableSeLinuxInFreeIpaAction();
         initActionPrivateFields(action);
         new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
         verify(stackUpdater).updateStackStatus(eq(stack), eq(DetailedStackStatus.UPDATE_IN_PROGRESS), eq("Starting to modify SELinux mode change."));
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
         verify(eventBus).notify(captor.capture(), eventCaptor.capture());
-        String selector = EventSelectorUtil.selector(FreeIpaModifySeLinuxHandlerEvent.class);
+        String selector = EventSelectorUtil.selector(FreeIpaEnableSeLinuxHandlerEvent.class);
         assertEquals(selector, captor.getValue());
         assertEquals(1L, ReflectionTestUtils.getField(eventCaptor.getValue().getData(), "stackId"));
     }
 
     @Test
     void testFinishedAction() throws Exception {
-        FreeIpaModifySeLinuxEvent event = new FreeIpaModifySeLinuxEvent(FINISH_MODIFY_SELINUX_FREEIPA_EVENT.event(), 1L, "test-op", SeLinux.ENFORCING);
+        FreeIpaEnableSeLinuxEvent event = new FreeIpaEnableSeLinuxEvent(FINISH_ENABLE_SELINUX_FREEIPA_EVENT.event(), 1L, "test-op");
         doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), any());
         doReturn("test-crn").when(stack).getResourceCrn();
         doReturn("test-env-crn").when(stack).getEnvironmentCrn();
         doReturn("test-account").when(stack).getAccountId();
-        AbstractFreeIpaModifySeLinuxAction<FreeIpaModifySeLinuxEvent> action =
-                (AbstractFreeIpaModifySeLinuxAction<FreeIpaModifySeLinuxEvent>) underTest.finishedAction();
+        AbstractFreeIpaEnableSeLinuxAction<FreeIpaEnableSeLinuxEvent> action =
+                (AbstractFreeIpaEnableSeLinuxAction<FreeIpaEnableSeLinuxEvent>) underTest.finishedAction();
         initActionPrivateFields(action);
         new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
         verify(stackUpdater).updateStackStatus(eq(stack), eq(DetailedStackStatus.UPDATE_COMPLETE), eq("Finished setting SELinux mode to " +
-                "ENFORCING for stack test-crn"));
+                "'ENFORCING' for stack test-crn"));
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
         verify(eventBus).notify(captor.capture(), eventCaptor.capture());
         verify(operationService).completeOperation(eq("test-account"), eq("test-op"), anySet(), anySet());
-        String selector = FINALIZE_MODIFY_SELINUX_FREEIPA_EVENT.event();
+        String selector = FINALIZE_ENABLE_SELINUX_FREEIPA_EVENT.event();
         assertEquals(selector, captor.getValue());
         assertEquals(1L, ReflectionTestUtils.getField(eventCaptor.getValue().getData(), "stackId"));
     }
 
     @Test
     void testFailedAction() throws Exception {
-        FreeIpaModifySeLinuxFailedEvent event = new FreeIpaModifySeLinuxFailedEvent(1L, "test-op", new CloudbreakException("test"));
+        FreeIpaEnableSeLinuxFailedEvent event = new FreeIpaEnableSeLinuxFailedEvent(1L, "test-op", new CloudbreakException("test"));
         doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), any());
-        AbstractFreeIpaModifySeLinuxAction<FreeIpaModifySeLinuxFailedEvent> action =
-                (AbstractFreeIpaModifySeLinuxAction<FreeIpaModifySeLinuxFailedEvent>) underTest.failedAction();
+        AbstractFreeIpaEnableSeLinuxAction<FreeIpaEnableSeLinuxFailedEvent> action =
+                (AbstractFreeIpaEnableSeLinuxAction<FreeIpaEnableSeLinuxFailedEvent>) underTest.failedAction();
         initActionPrivateFields(action);
         ReflectionTestUtils.setField(action, "jobService", mock(FreeipaJobService.class), FreeipaJobService.class);
         variables.put(OPERATION_ID, "test-op");
         doReturn("test-account").when(stack).getAccountId();
         new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
         verify(stackUpdater).updateStackStatus(eq(stack), eq(DetailedStackStatus.UPDATE_FAILED), eq("test"));
-        verify(operationService).failOperation(eq("test-account"), eq("test-op"), eq("Updating SELinux failed during test-op"),
+        verify(operationService).failOperation(eq("test-account"), eq("test-op"), eq("Setting SELinux to 'ENFORCING' failed during test-op"),
                 any(), any());
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
         verify(eventBus).notify(captor.capture(), eventCaptor.capture());
-        String selector = HANDLED_FAILED_MODIFY_SELINUX_FREEIPA_EVENT.event();
+        String selector = HANDLED_FAILED_ENABLE_SELINUX_FREEIPA_EVENT.event();
         assertEquals(selector, captor.getValue());
         assertEquals(1L, ReflectionTestUtils.getField(eventCaptor.getValue().getData(), "stackId"));
     }

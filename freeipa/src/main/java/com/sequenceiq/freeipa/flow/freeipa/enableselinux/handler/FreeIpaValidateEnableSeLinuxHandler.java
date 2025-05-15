@@ -25,17 +25,17 @@ import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaModifySeLinuxEvent;
-import com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaModifySeLinuxFailedEvent;
-import com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaModifySeLinuxStateSelectors;
-import com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaValidateModifySeLinuxHandlerEvent;
+import com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaEnableSeLinuxEvent;
+import com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaEnableSeLinuxFailedEvent;
+import com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaEnableSeLinuxStateSelectors;
+import com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaValidateEnableSeLinuxHandlerEvent;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Component
-public class FreeIpaValidateModifySeLinuxHandler extends ExceptionCatcherEventHandler<FreeIpaValidateModifySeLinuxHandlerEvent> {
+public class FreeIpaValidateEnableSeLinuxHandler extends ExceptionCatcherEventHandler<FreeIpaValidateEnableSeLinuxHandlerEvent> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaValidateModifySeLinuxHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaValidateEnableSeLinuxHandler.class);
 
     private static final String GETENFORCE_COMMAND = "getenforce";
 
@@ -50,24 +50,24 @@ public class FreeIpaValidateModifySeLinuxHandler extends ExceptionCatcherEventHa
 
     @Override
     public String selector() {
-        return EventSelectorUtil.selector(FreeIpaValidateModifySeLinuxHandlerEvent.class);
+        return EventSelectorUtil.selector(FreeIpaValidateEnableSeLinuxHandlerEvent.class);
     }
 
     @Override
-    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<FreeIpaValidateModifySeLinuxHandlerEvent> event) {
-        LOGGER.warn("Exception while trying to validate stack for updating SELinux to {}, exception: ", event.getData().getSeLinuxMode(), e);
-        return new FreeIpaModifySeLinuxFailedEvent(resourceId, "VALIDATION_FAILED", e);
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<FreeIpaValidateEnableSeLinuxHandlerEvent> event) {
+        LOGGER.warn("Exception while trying to validate stack for setting SELinux to 'ENFORCING', exception: ", e);
+        return new FreeIpaEnableSeLinuxFailedEvent(resourceId, "VALIDATION_FAILED", e);
     }
 
     @Override
-    public Selectable doAccept(HandlerEvent<FreeIpaValidateModifySeLinuxHandlerEvent> enableSeLinuxEventEvent) {
-        FreeIpaValidateModifySeLinuxHandlerEvent eventData = enableSeLinuxEventEvent.getData();
+    public Selectable doAccept(HandlerEvent<FreeIpaValidateEnableSeLinuxHandlerEvent> enableSeLinuxEventEvent) {
+        FreeIpaValidateEnableSeLinuxHandlerEvent eventData = enableSeLinuxEventEvent.getData();
         LOGGER.debug("Validating if the SeLinux on instances are set to PERMISSIVE mode.");
         Stack stack = stackService.getByIdWithListsInTransaction(eventData.getResourceId());
         validateImageOnFreeIpa(stack);
         validateSeLinuxMode(stack);
-        return new FreeIpaModifySeLinuxEvent(FreeIpaModifySeLinuxStateSelectors.MODIFY_SELINUX_FREEIPA_EVENT.selector(),
-                eventData.getResourceId(), eventData.getOperationId(), eventData.getSeLinuxMode());
+        return new FreeIpaEnableSeLinuxEvent(FreeIpaEnableSeLinuxStateSelectors.ENABLE_SELINUX_FREEIPA_EVENT.selector(),
+                eventData.getResourceId(), eventData.getOperationId());
     }
 
     private void validateSeLinuxMode(Stack stack) {
@@ -77,7 +77,7 @@ public class FreeIpaValidateModifySeLinuxHandler extends ExceptionCatcherEventHa
             Map<String, String> seLinuxModesMap = hostOrchestrator.runCommandOnAllHosts(primaryGatewayConfig, GETENFORCE_COMMAND);
             List<String> selinuxModes = seLinuxModesMap.values().stream().map(s -> s.toLowerCase(Locale.ROOT)).toList();
             if (selinuxModes.contains(SeLinux.DISABLED.name().toLowerCase(Locale.ROOT))) {
-                throw new CloudbreakRuntimeException("SeLinux mode for some instances are in 'disabled' mode.");
+                throw new CloudbreakRuntimeException("SeLinux Enforce mode for some instances are in 'disabled' mode.");
             }
         } catch (CloudbreakOrchestratorFailedException exception) {
             LOGGER.warn("Exception while trying to validate SeLinux mode - exception: ", exception);

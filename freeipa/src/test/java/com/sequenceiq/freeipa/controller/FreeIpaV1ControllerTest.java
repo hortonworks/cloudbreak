@@ -12,7 +12,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -64,7 +63,7 @@ import com.sequenceiq.freeipa.service.stack.FreeIpaUpgradeCcmService;
 import com.sequenceiq.freeipa.service.stack.FreeipaModifyProxyConfigService;
 import com.sequenceiq.freeipa.service.stack.RepairInstancesService;
 import com.sequenceiq.freeipa.service.stack.RootVolumeUpdateService;
-import com.sequenceiq.freeipa.service.stack.SeLinuxModificationService;
+import com.sequenceiq.freeipa.service.stack.SeLinuxEnablementService;
 import com.sequenceiq.freeipa.util.CrnService;
 
 @ExtendWith(MockitoExtension.class)
@@ -102,7 +101,7 @@ class FreeIpaV1ControllerTest {
     private FreeIpaRootCertificateService rootCertificateService;
 
     @Mock
-    private SeLinuxModificationService seLinuxEnablementService;
+    private SeLinuxEnablementService seLinuxEnablementService;
 
     @Mock
     private CrnService crnService;
@@ -361,20 +360,11 @@ class FreeIpaV1ControllerTest {
     void testModifySelinuxByCrn() {
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "1");
         ModifySeLinuxResponse response = new ModifySeLinuxResponse(flowIdentifier);
-        when(seLinuxEnablementService.modifySeLinuxByCrn(eq(ENVIRONMENT_CRN), any(), eq(SeLinux.ENFORCING))).thenReturn(response);
+        when(seLinuxEnablementService.setSeLinuxToEnforcingByCrn(eq(ENVIRONMENT_CRN), any())).thenReturn(response);
 
         ModifySeLinuxResponse result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.modifySelinuxByCrn(ENVIRONMENT_CRN, SeLinux.ENFORCING));
 
-        verify(seLinuxEnablementService).modifySeLinuxByCrn(eq(ENVIRONMENT_CRN), eq("hortonworks"), eq(SeLinux.ENFORCING));
+        verify(seLinuxEnablementService).setSeLinuxToEnforcingByCrn(eq(ENVIRONMENT_CRN), eq("hortonworks"));
         assertEquals("1", result.getFlowIdentifier().getPollableId());
-    }
-
-    @Test
-    void testModifySelinuxByCrnBadRequestException() {
-        BadRequestException exception = assertThrows(BadRequestException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.modifySelinuxByCrn(ENVIRONMENT_CRN, SeLinux.DISABLED)));
-
-        verifyNoInteractions(seLinuxEnablementService);
-        assertEquals("Cannot set SELinux mode value to DISABLED.", exception.getMessage());
     }
 }

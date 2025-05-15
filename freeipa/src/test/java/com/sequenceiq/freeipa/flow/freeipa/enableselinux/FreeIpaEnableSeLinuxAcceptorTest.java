@@ -10,10 +10,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 
 @ExtendWith(MockitoExtension.class)
-public class FreeIpaModifySeLinuxAcceptorTest {
+public class FreeIpaEnableSeLinuxAcceptorTest {
 
     @InjectMocks
-    private FreeIpaModifySeLinuxAcceptor underTest;
+    private FreeIpaEnableSeLinuxAcceptor underTest;
 
     @Test
     void testSelector() {
