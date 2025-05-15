@@ -1,0 +1,97 @@
+{
+  "cluster": {
+    "blueprintName": "7.3.1 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas",
+    "validateBlueprint": false
+  },
+  "customDomain": {
+    "domainName": "cloudera.site",
+    "hostgroupNameAsHostname": true
+  },
+  "architecture": "ARM64",
+  "instanceGroups": [
+    {
+      "name": "master",
+      "template": {
+        "instanceType": "m7g.xlarge",
+        "attachedVolumes": [
+          {
+            "count": 1,
+            "size": 128,
+            "type": "standard"
+          }
+        ]
+      },
+      "nodeCount": 2,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    },
+    {
+      "name": "gateway",
+      "template": {
+        "instanceType": "m7g.2xlarge",
+        "attachedVolumes": [
+          {
+            "count": 1,
+            "size": 128,
+            "type": "standard"
+          }
+        ]
+      },
+      "nodeCount": 2,
+      "type": "GATEWAY",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    },
+    {
+      "name": "core",
+      "template": {
+        "instanceType": "m7g.2xlarge",
+        "attachedVolumes": [
+          {
+            "count": 1,
+            "size": 512,
+            "type": "gp3"
+          }
+        ]
+      },
+      "nodeCount": 3,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    },
+    {
+      "name": "auxiliary",
+      "template": {
+        "instanceType": "m7g.xlarge",
+        "attachedVolumes": [
+          {
+            "count": 1,
+            "size": 128,
+            "type": "standard"
+          }
+        ]
+      },
+      "nodeCount": 1,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    },
+    {
+      "name": "idbroker",
+      "template": {
+        "instanceType": "c7g.large",
+        "attachedVolumes": [
+          {
+            "count": 0,
+            "type": "standard"
+          }
+        ]
+      },
+      "nodeCount": 2,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    }
+  ]
+}
