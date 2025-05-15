@@ -48,7 +48,7 @@ auth:
     differentdatahubversionthandatalake.enabled: true
     datahub:
       instancetypes.enable: false
-      force.os.upgrade: false
+      force.os.upgrade: true
     environment.experience.deletion.enable: true
     endpointgateway.enable.azure: false
     endpointgateway.enable.gcp: false
