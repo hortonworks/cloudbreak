@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -32,7 +33,12 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto;
+import com.dyngr.core.AttemptResult;
+import com.dyngr.core.AttemptState;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.BackupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.RestoreV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -50,6 +56,7 @@ import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.entity.operation.SdxOperation;
+import com.sequenceiq.datalake.entity.operation.SdxOperationStatus;
 import com.sequenceiq.datalake.entity.operation.SdxOperationType;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupStartEvent;
@@ -59,14 +66,18 @@ import com.sequenceiq.datalake.repository.SdxOperationRepository;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
+import com.sequenceiq.datalake.service.sdx.flowcheck.FlowState;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
+import com.sequenceiq.sdx.api.model.DatalakeDatabaseDrStatus;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxDatabaseBackupRequest;
 import com.sequenceiq.sdx.api.model.SdxDatabaseBackupResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseBackupStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreStatusResponse;
 
 @ExtendWith(MockitoExtension.class)
 public class SdxBackupRestoreServiceTest {
@@ -656,12 +667,154 @@ public class SdxBackupRestoreServiceTest {
         assertEquals(0, underTest.getTotalDurationInMin(startTimeStamp, endTimeStamp));
     }
 
+    @Test
+    public void getStackResponseAttemptResultWhenStackIsAvailable() {
+        SdxCluster sdxCluster = getValidSdxCluster();
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setStatus(Status.AVAILABLE);
+        ClusterV4Response clusterV4Response = new ClusterV4Response();
+        clusterV4Response.setStatus(Status.AVAILABLE);
+        stackV4Response.setCluster(clusterV4Response);
+        when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getName()), any(), any())).thenReturn(stackV4Response);
+        AttemptResult<StackV4Response> response = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.getStackResponseAttemptResult(sdxCluster, "Polling", FlowState.FINISHED));
+        assertTrue(response.getState().equals(AttemptState.FINISH));
+    }
+
+    @Test
+    public void getStackResponseAttemptResultWhenStackAndClusterFailure() {
+        SdxCluster sdxCluster = getValidSdxCluster();
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setStatus(Status.UPDATE_FAILED);
+        ClusterV4Response clusterV4Response = new ClusterV4Response();
+        clusterV4Response.setStatus(Status.UPDATE_FAILED);
+        stackV4Response.setCluster(clusterV4Response);
+        when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getName()), any(), any())).thenReturn(stackV4Response);
+        AttemptResult<StackV4Response> response = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.getStackResponseAttemptResult(sdxCluster, "Polling", FlowState.FINISHED));
+        assertTrue(response.getState().equals(AttemptState.BREAK));
+    }
+
+    @Test
+    public void getStackResponseAttemptResultWhenClusterFailure() {
+        SdxCluster sdxCluster = getValidSdxCluster();
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setStatus(Status.AVAILABLE);
+        ClusterV4Response clusterV4Response = new ClusterV4Response();
+        clusterV4Response.setStatus(Status.UPDATE_FAILED);
+        stackV4Response.setCluster(clusterV4Response);
+        when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getName()), any(), any())).thenReturn(stackV4Response);
+        AttemptResult<StackV4Response> response = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.getStackResponseAttemptResult(sdxCluster, "Polling", FlowState.FINISHED));
+        assertTrue(response.getState().equals(AttemptState.BREAK));
+    }
+
+    @Test
+    public void getStackResponseResultWhenBackupInProgressButStackAvailable() {
+        SdxCluster sdxCluster = getValidSdxCluster();
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setStatus(Status.AVAILABLE);
+        ClusterV4Response clusterV4Response = new ClusterV4Response();
+        clusterV4Response.setStatus(Status.BACKUP_IN_PROGRESS);
+        stackV4Response.setCluster(clusterV4Response);
+        when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getName()), any(), any())).thenReturn(stackV4Response);
+        AttemptResult<StackV4Response> response = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.getStackResponseAttemptResult(sdxCluster, "Polling", FlowState.FINISHED));
+        assertTrue(response.getState().equals(AttemptState.BREAK));
+    }
+
+    @Test
+    public void getStackBackupRestoreErrorStage() {
+        SdxCluster sdxCluster = getValidSdxCluster();
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setStatus(Status.AVAILABLE);
+        ClusterV4Response clusterV4Response = new ClusterV4Response();
+        clusterV4Response.setStatus(Status.BACKUP_IN_PROGRESS);
+        stackV4Response.setCluster(clusterV4Response);
+        when(sdxService.getById(any())).thenReturn(sdxCluster);
+        FlowCheckResponse lastKnownFlowCheckResponse = new FlowCheckResponse();
+        lastKnownFlowCheckResponse.setCurrentState("finished");
+        lastKnownFlowCheckResponse.setFlowType("polling");
+        lastKnownFlowCheckResponse.setNextEvent("nextevent");
+        when(cloudbreakFlowService.getLastKnownFlowCheckResponse(sdxCluster)).thenReturn(lastKnownFlowCheckResponse);
+        String response = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.createDatabaseBackupRestoreErrorStage(sdxCluster.getId()));
+        assertEquals(" during the transition from finished to its next state, set up in polling, triggered by nextevent", response);
+    }
+
+    @Test
+    public void testSdxDatabaseBackupStatusConversion() {
+        SdxCluster sdxCluster = getValidSdxCluster();
+        SdxOperation sdxOperation = new SdxOperation();
+        sdxOperation.setSdxClusterId(sdxCluster.getId());
+        sdxOperation.setOperationType(SdxOperationType.BACKUP);
+        sdxOperation.setStatus(SdxOperationStatus.SUCCEEDED);
+        when(sdxOperationRepository.findSdxOperationByOperationId("0")).thenReturn(sdxOperation);
+        SdxDatabaseBackupStatusResponse response = underTest.getDatabaseBackupStatus(sdxCluster, "0");
+        assertEquals(DatalakeDatabaseDrStatus.SUCCEEDED, response.getStatus());
+    }
+
+    @Test
+    public void testSdxDatabaseRestoreStatusConversion() {
+        SdxCluster sdxCluster = getValidSdxCluster();
+        SdxOperation sdxOperation = new SdxOperation();
+        sdxOperation.setSdxClusterId(sdxCluster.getId());
+        sdxOperation.setOperationType(SdxOperationType.RESTORE);
+        sdxOperation.setStatus(SdxOperationStatus.SUCCEEDED);
+        when(sdxOperationRepository.findSdxOperationByOperationId("0")).thenReturn(sdxOperation);
+        SdxDatabaseRestoreStatusResponse response = underTest.getDatabaseRestoreStatus(sdxCluster, "0");
+        assertEquals(DatalakeDatabaseDrStatus.SUCCEEDED, response.getStatus());
+    }
+
+    @Test
+    public void testSdxDatabaseRestoreStatusConversionFromTriggeredToInProgress() {
+        SdxCluster sdxCluster = getValidSdxCluster();
+        SdxOperation sdxOperation = new SdxOperation();
+        sdxOperation.setSdxClusterId(sdxCluster.getId());
+        sdxOperation.setOperationType(SdxOperationType.RESTORE);
+        sdxOperation.setStatus(SdxOperationStatus.TRIGGERRED);
+        when(sdxOperationRepository.findSdxOperationByOperationId("0")).thenReturn(sdxOperation);
+        SdxDatabaseRestoreStatusResponse response = underTest.getDatabaseRestoreStatus(sdxCluster, "0");
+        assertEquals(DatalakeDatabaseDrStatus.TRIGGERRED, response.getStatus());
+    }
+
+    @Test
+    public void testSdxDatabaseRestoreStatusConversionFromInProgressToInProgress() {
+        SdxCluster sdxCluster = getValidSdxCluster();
+        SdxOperation sdxOperation = new SdxOperation();
+        sdxOperation.setSdxClusterId(sdxCluster.getId());
+        sdxOperation.setOperationType(SdxOperationType.RESTORE);
+        sdxOperation.setStatus(SdxOperationStatus.INPROGRESS);
+        when(sdxOperationRepository.findSdxOperationByOperationId("0")).thenReturn(sdxOperation);
+        SdxDatabaseRestoreStatusResponse response = underTest.getDatabaseRestoreStatus(sdxCluster, "0");
+        assertEquals(DatalakeDatabaseDrStatus.INPROGRESS, response.getStatus());
+    }
+
+    @Test
+    public void testSdxDatabaseRestoreWhenOperationNotFound() {
+        SdxCluster sdxCluster = getValidSdxCluster();
+        when(sdxOperationRepository.findSdxOperationByOperationId("0")).thenReturn(null);
+        assertThrows(NotFoundException.class, () -> underTest.getDatabaseRestoreStatus(sdxCluster, "0"));
+    }
+
+    @Test
+    public void testSdxDatabaseRestoreWhenOperationIdDoesNotMatch() {
+        SdxCluster sdxCluster = getValidSdxCluster();
+        SdxOperation sdxOperation = new SdxOperation();
+        sdxOperation.setSdxClusterId(2L);
+        sdxOperation.setOperationType(SdxOperationType.RESTORE);
+        sdxOperation.setStatus(SdxOperationStatus.SUCCEEDED);
+        when(sdxOperationRepository.findSdxOperationByOperationId("0")).thenReturn(sdxOperation);
+        assertThrows(CloudbreakApiException.class, () -> underTest.getDatabaseRestoreStatus(sdxCluster, "0"));
+    }
+
     private SdxCluster getValidSdxCluster() {
         sdxCluster = new SdxCluster();
         sdxCluster.setClusterName(CLUSTER_NAME);
         sdxCluster.setClusterShape(SdxClusterShape.LIGHT_DUTY);
         sdxCluster.setEnvName("test-env");
         sdxCluster.setCrn("crn:sdxcluster");
+        sdxCluster.setAccountId("accountId");
         SdxDatabase sdxDatabase = new SdxDatabase();
         sdxDatabase.setDatabaseCrn("crn:sdxcluster");
         sdxCluster.setSdxDatabase(sdxDatabase);

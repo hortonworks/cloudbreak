@@ -11,6 +11,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -18,6 +19,7 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -61,13 +63,14 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateD
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslConfigV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabasePropertiesV4Response;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
-import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsDatabaseServerV4Parameters;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.azure.AzureDatabaseServerV4Parameters;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.client.RedbeamsServiceCrnClient;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 
 @ExtendWith(MockitoExtension.class)
 public class DatabaseServiceTest {
@@ -137,6 +140,13 @@ public class DatabaseServiceTest {
     @InjectMocks
     private DatabaseService underTest;
 
+    private SdxCluster defaultSdxCluster;
+
+    @BeforeEach
+    public void init() {
+        defaultSdxCluster = getSdxCluster();
+    }
+
     static Object[][] sslEnforcementDataProvider() {
         return new Object[][] {
                 // testCaseName supportedPlatform runtime sslEnforcementAppliedExpected
@@ -160,7 +170,9 @@ public class DatabaseServiceTest {
         cluster.setClusterShape(SdxClusterShape.LIGHT_DUTY);
         cluster.setCrn(CLUSTER_CRN);
         cluster.setRuntime(runtime);
-        cluster.setSdxDatabase(new SdxDatabase());
+        SdxDatabase database = new SdxDatabase();
+        database.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
+        cluster.setSdxDatabase(database);
         DetailedEnvironmentResponse env = new DetailedEnvironmentResponse();
         env.setName("ENV");
         env.setCloudPlatform("aws");
@@ -268,6 +280,46 @@ public class DatabaseServiceTest {
     }
 
     @Test
+    public void testShouldWaitAndGetDatabase() {
+        defaultSdxCluster.setClusterShape(SdxClusterShape.LIGHT_DUTY);
+        SdxDatabase database = new SdxDatabase();
+        database.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
+        defaultSdxCluster.setSdxDatabase(database);
+        DetailedEnvironmentResponse env = new DetailedEnvironmentResponse();
+        env.setName("ENV");
+        env.setCloudPlatform("aws");
+        LocationResponse locationResponse = new LocationResponse();
+        locationResponse.setName("asdf");
+        env.setLocation(locationResponse);
+        DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
+        databaseServerV4Response.setCrn(DATABASE_CRN);
+        databaseServerV4Response.setClusterCrn(CLUSTER_CRN);
+        databaseServerV4Response.setStatus(Status.AVAILABLE);
+        when(databaseServerV4Endpoint.getByCrn(DATABASE_CRN)).thenReturn(databaseServerV4Response);
+        SdxStatusEntity status = new SdxStatusEntity();
+        status.setStatus(DatalakeStatusEnum.ENVIRONMENT_CREATED);
+        when(sdxStatusService.getActualStatusForSdx(any(SdxCluster.class))).thenReturn(status);
+        DatabaseServerStatusV4Response databaseServerStatusV4Response = new DatabaseServerStatusV4Response();
+        databaseServerStatusV4Response.setResourceCrn(DATABASE_CRN);
+        databaseServerStatusV4Response.setStatus(Status.AVAILABLE);
+        when(databaseServerV4Endpoint.createInternal(any(), any())).thenReturn(databaseServerStatusV4Response);
+        DatabaseServerParameterSetter databaseServerParameterSetter = new AwsDatabaseServerParameterSetter();
+        when(databaseParameterSetterMap.get(CloudPlatform.AWS)).thenReturn(databaseServerParameterSetter);
+        DatabaseConfig databaseConfig = getDatabaseConfig();
+        DatabaseConfigKey dbConfigKey = new DatabaseConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY);
+        when(dbConfigs.get(dbConfigKey)).thenReturn(databaseConfig);
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), anyString(), anyString(), any(), any(), any()))
+                .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instanceType")));
+
+        DatabaseServerStatusV4Response response =  ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(defaultSdxCluster, env));
+
+        verify(sdxDatabaseRepository, times(1)).save(any());
+        verify(sdxClusterRepository, times(1)).save(any());
+        verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotify(eq(DatalakeStatusEnum.EXTERNAL_DATABASE_CREATION_IN_PROGRESS),
+                eq("External database creation in progress"), eq(defaultSdxCluster));
+    }
+
+    @Test
     public void testGetDatabaseServerWhenNoDatabaseCrnShouldThrowNotFoundException() {
         SdxCluster cluster = new SdxCluster();
         cluster.setSdxDatabase(new SdxDatabase());
@@ -291,6 +343,7 @@ public class DatabaseServiceTest {
         attributes.put("instancetype", "customInstancetype");
         attributes.put("storage", 128L);
         sdxDatabase.setAttributes(new Json(attributes));
+        sdxDatabase.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
         cluster.setSdxDatabase(sdxDatabase);
         DetailedEnvironmentResponse env = new DetailedEnvironmentResponse();
         env.setName("ENV");
@@ -325,6 +378,7 @@ public class DatabaseServiceTest {
         cluster.setCrn(CLUSTER_CRN);
         SdxDatabase sdxDatabase = new SdxDatabase();
         sdxDatabase.setAttributes(new Json(new HashMap<>()));
+        sdxDatabase.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
         cluster.setSdxDatabase(sdxDatabase);
         DetailedEnvironmentResponse env = new DetailedEnvironmentResponse();
         env.setName("ENV");
@@ -358,6 +412,7 @@ public class DatabaseServiceTest {
         cluster.setClusterShape(SdxClusterShape.LIGHT_DUTY);
         cluster.setCrn(CLUSTER_CRN);
         SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxDatabase.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("previousDatabaseCrn", DATABASE_CRN);
         attributes.put("previousClusterShape", SdxClusterShape.LIGHT_DUTY.toString());
@@ -371,10 +426,10 @@ public class DatabaseServiceTest {
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
         databaseServerV4Response.setStorageSize(1024L);
         databaseServerV4Response.setInstanceType("m5.8xlarge");
-
         DatabaseConfigKey dbConfigKeyLight = new DatabaseConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY);
         when(dbConfigs.get(dbConfigKeyLight)).thenReturn(databaseConfig);
-        when(databaseParameterSetterMap.get(CloudPlatform.AWS)).thenReturn(getDatabaseParameterSetter());
+        DatabaseServerParameterSetter parameterSetter = new AwsDatabaseServerParameterSetter();
+        when(databaseParameterSetterMap.get(any(CloudPlatform.class))).thenReturn(parameterSetter);
         when(databaseServerV4Endpoint.getByCrn(DATABASE_CRN)).thenReturn(databaseServerV4Response);
 
         DatabaseServerV4StackRequest databaseServerV4StackRequest = underTest.getDatabaseServerRequest(CloudPlatform.AWS, cluster, env,
@@ -432,6 +487,7 @@ public class DatabaseServiceTest {
         Map<String, Object> attributes = new HashMap<>();
         attributes.put(DATABASE_SSL_ENABLED, true);
         sdxDatabase.setAttributes(new Json(attributes));
+        sdxDatabase.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
         cluster.setSdxDatabase(sdxDatabase);
 
         DetailedEnvironmentResponse env = new DetailedEnvironmentResponse();
@@ -490,6 +546,7 @@ public class DatabaseServiceTest {
         Map<String, Object> attributes = new HashMap<>();
         attributes.put(DATABASE_SSL_ENABLED, false);
         sdxDatabase.setAttributes(new Json(attributes));
+        sdxDatabase.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
         cluster.setSdxDatabase(sdxDatabase);
 
         DetailedEnvironmentResponse env = new DetailedEnvironmentResponse();
@@ -540,6 +597,7 @@ public class DatabaseServiceTest {
         cluster.setRuntime(runtime);
         SdxDatabase sdxDatabase = new SdxDatabase();
         sdxDatabase.setAttributes(null);
+        sdxDatabase.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
         cluster.setSdxDatabase(sdxDatabase);
 
         DetailedEnvironmentResponse env = new DetailedEnvironmentResponse();
@@ -609,22 +667,12 @@ public class DatabaseServiceTest {
     }
 
     private DatabaseServerParameterSetter getDatabaseParameterSetter() {
-        return new DatabaseServerParameterSetter() {
-            @Override
-            public void setParameters(DatabaseServerV4StackRequest request, SdxCluster sdxCluster,
-                    DetailedEnvironmentResponse environmentResponse, String userCrn) {
-                request.setAws(new AwsDatabaseServerV4Parameters());
-            }
-
-            @Override
-            public CloudPlatform getCloudPlatform() {
-                return CloudPlatform.AWS;
-            }
-        };
+        return new AwsDatabaseServerParameterSetter();
     }
 
     private SdxCluster getSdxCluster() {
         SdxCluster cluster = new SdxCluster();
+        cluster.setId(999L);
         SdxDatabase sdxDatabase = new SdxDatabase();
         sdxDatabase.setDatabaseCrn(DATABASE_CRN);
         cluster.setSdxDatabase(sdxDatabase);
