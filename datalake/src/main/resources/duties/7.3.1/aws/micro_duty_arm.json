@@ -1,0 +1,46 @@
+{
+  "cluster": {
+    "blueprintName": "7.3.1 - SDX Micro Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas",
+    "validateBlueprint": false
+  },
+  "customDomain": {
+    "domainName": "cloudera.site",
+    "hostgroupNameAsHostname": true
+  },
+  "architecture": "ARM64",
+  "instanceGroups": [
+    {
+      "name": "idbroker",
+      "template": {
+        "instanceType": "c7g.large",
+        "attachedVolumes": [
+          {
+            "count": 0,
+            "type": "standard"
+          }
+        ]
+      },
+      "nodeCount": 1,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    },
+    {
+      "name": "master",
+      "template": {
+        "instanceType": "m7g.2xlarge",
+        "attachedVolumes": [
+          {
+            "count": 1,
+            "size": 250,
+            "type": "standard"
+          }
+        ]
+      },
+      "nodeCount": 1,
+      "type": "GATEWAY",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    }
+  ]
+}
