@@ -82,6 +82,7 @@ import com.sequenceiq.cloudbreak.service.multiaz.DataLakeAwareInstanceMetadataAv
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.stack.flow.InstanceMetadataInstanceIdUpdater;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
@@ -126,6 +127,9 @@ public class StackCreationActions {
 
     @Inject
     private DataLakeAwareInstanceMetadataAvailabilityZoneCalculator instanceMetadataAvailabilityZoneCalculator;
+
+    @Inject
+    private InstanceMetadataInstanceIdUpdater instanceMetadataInstanceIdUpdater;
 
     @Bean(name = "VALIDATION_STATE")
     public Action<?, ?> provisioningValidationAction() {
@@ -306,6 +310,7 @@ public class StackCreationActions {
         return new AbstractStackCreationAction<>(LaunchStackResult.class) {
             @Override
             protected void doExecute(StackCreationContext context, LaunchStackResult payload, Map<Object, Object> variables) {
+                instanceMetadataInstanceIdUpdater.updateWithInstanceIdAndStatus(context, payload.getResults());
                 sendEvent(context);
             }
 
