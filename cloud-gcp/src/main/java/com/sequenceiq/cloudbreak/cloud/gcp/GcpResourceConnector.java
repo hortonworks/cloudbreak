@@ -145,4 +145,9 @@ public class GcpResourceConnector extends AbstractResourceConnector {
             throws Exception {
         return gcpDatabaseServerCertificateService.getActiveSslRootCertificate(authenticatedContext, stack);
     }
+
+    @Override
+    public ResourceType getInstanceResourceType() {
+        return ResourceType.GCP_INSTANCE;
+    }
 }

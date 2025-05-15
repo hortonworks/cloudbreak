@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.CREATED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.REQUESTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_ADDING_INSTANCES;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE_UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_METADATA_EXTEND_WITH_COUNT;
@@ -35,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
@@ -217,11 +219,11 @@ public class StackUpscaleService {
     }
 
     public List<CloudResourceStatus> upscale(AuthenticatedContext ac, UpscaleStackRequest<UpscaleStackResult> request, CloudConnector connector)
-            throws QuotaExceededException {
+            throws QuotaExceededException, TransactionExecutionException {
         CloudStack cloudStack = request.getCloudStack();
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = request.getAdjustmentWithThreshold();
         try {
-            return connector.resources().upscale(ac, cloudStack, request.getResourceList(), adjustmentTypeWithThreshold);
+            return upscaleAndSyncStatusesToInstanceMetadata(ac, request, connector, cloudStack, adjustmentTypeWithThreshold);
         } catch (QuotaExceededException quotaExceededException) {
             return handleQuotaExceptionAndRetryUpscale(request, connector, ac, cloudStack, adjustmentTypeWithThreshold, quotaExceededException);
         }
@@ -237,6 +239,53 @@ public class StackUpscaleService {
         return verticalScale(ac, request, connector, group, UpdateType.VERTICAL_SCALE_WITHOUT_INSTANCES);
     }
 
+    private List<CloudResourceStatus> upscaleAndSyncStatusesToInstanceMetadata(AuthenticatedContext ac, UpscaleStackRequest<UpscaleStackResult> request,
+            CloudConnector connector, CloudStack cloudStack, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold)
+            throws QuotaExceededException, TransactionExecutionException {
+        List<CloudResourceStatus> cloudResourceStatuses = connector.resources()
+                .upscale(ac, cloudStack, request.getResourceList(), adjustmentTypeWithThreshold);
+        syncStatusAndInstanceIdToInstanceMetadata(ac, connector, cloudResourceStatuses);
+        return cloudResourceStatuses;
+    }
+
+    private List<CloudResourceStatus> handleQuotaExceptionAndRetryUpscale(UpscaleStackRequest<UpscaleStackResult> request, CloudConnector connector,
+            AuthenticatedContext ac, CloudStack cloudStack, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold,
+            QuotaExceededException quotaExceededException) throws QuotaExceededException, TransactionExecutionException {
+        flowMessageService.fireEventAndLog(request.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_QUOTA_ISSUE,
+                quotaExceededException.getQuotaErrorMessage());
+        List<Group> groups = cloudStack.getGroups();
+        int removableNodeCount = getRemovableNodeCount(adjustmentTypeWithThreshold, quotaExceededException, groups);
+        decreaseInstances(groups, removableNodeCount);
+        return upscaleAndSyncStatusesToInstanceMetadata(ac, request, connector, cloudStack, adjustmentTypeWithThreshold);
+    }
+
+    private void syncStatusAndInstanceIdToInstanceMetadata(AuthenticatedContext ac, CloudConnector connector, List<CloudResourceStatus> cloudResourceStatuses)
+            throws TransactionExecutionException {
+        LOGGER.info("Syncing the status and instanceId of the created instances to the 'instancemetadata' table...");
+        transactionService.required(() -> {
+            List<CloudResource> instanceCloudResources = cloudResourceStatuses.stream()
+                    .map(CloudResourceStatus::getCloudResource)
+                    .filter(cloudResource -> connector.resources().getInstanceResourceType().equals(cloudResource.getType()))
+                    .toList();
+            List<InstanceMetaData> requestedInstanceMetadatas = instanceMetaDataService.findAllByStackIdAndStatus(ac.getCloudContext().getId(), REQUESTED);
+            LOGGER.debug("Requested instance metadata entries with private ids: {}",
+                    requestedInstanceMetadatas.stream().map(InstanceMetaData::getPrivateId).collect(Collectors.toSet()));
+            for (InstanceMetaData instanceMetaData : requestedInstanceMetadatas) {
+                Optional<CloudResource> cloudResource = instanceCloudResources.stream()
+                        .filter(cr -> instanceMetaData.getPrivateId().equals(cr.getPrivateId())
+                                && instanceMetaData.getInstanceGroup().getGroupName().equals(cr.getGroup()))
+                        .findFirst();
+                cloudResource.ifPresentOrElse(cr -> {
+                    instanceMetaData.setInstanceId(cr.getInstanceId());
+                    instanceMetaData.setInstanceStatus(CREATED);
+                }, () -> LOGGER.warn("The instanceId and instanceStatus for instance {} was not set, " +
+                        "because the corresponding resource was not found int the 'resource' table", instanceMetaData.getInstanceName()));
+            }
+            LOGGER.info("Updated instance metadatas with instance id to '{}' status: {}", CREATED, requestedInstanceMetadatas);
+            instanceMetaDataService.saveAll(requestedInstanceMetadatas);
+        });
+    }
+
     private List<CloudResourceStatus> verticalScale(AuthenticatedContext ac, CoreVerticalScaleRequest<CoreVerticalScaleResult> request,
             CloudConnector connector, String group, UpdateType updateType) throws Exception {
         CloudStack cloudStack = request.getCloudStack();
@@ -246,18 +295,6 @@ public class StackUpscaleService {
         } catch (Exception e) {
             return handleExceptionAndRetryUpdate(request, connector, ac, cloudStack, e, updateType, group);
         }
-    }
-
-    private List<CloudResourceStatus> handleQuotaExceptionAndRetryUpscale(UpscaleStackRequest<UpscaleStackResult> request, CloudConnector connector,
-            AuthenticatedContext ac, CloudStack cloudStack, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold,
-            QuotaExceededException quotaExceededException) throws QuotaExceededException {
-        flowMessageService.fireEventAndLog(request.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_QUOTA_ISSUE,
-                quotaExceededException.getQuotaErrorMessage());
-        List<Group> groups = cloudStack.getGroups();
-        int removableNodeCount = getRemovableNodeCount(adjustmentTypeWithThreshold, quotaExceededException, groups);
-        decreaseInstances(groups, removableNodeCount);
-        return connector.resources().upscale(ac, cloudStack, request.getResourceList(),
-                adjustmentTypeWithThreshold);
     }
 
     private List<CloudResourceStatus> handleExceptionAndRetryUpdate(CoreVerticalScaleRequest<CoreVerticalScaleResult> request,

@@ -24,6 +24,7 @@ public class CloudResourceToResourceConverter {
         domainResource.setInstanceGroup(source.getGroup());
         domainResource.setInstanceId(source.getInstanceId());
         domainResource.setAvailabilityZone(source.getAvailabilityZone());
+        domainResource.setPrivateId(source.getPrivateId());
         Optional.ofNullable(source.getParameters().get(CloudResource.ATTRIBUTES)).ifPresent(attributes -> {
             try {
                 Json attributesJson = new Json(attributes);

@@ -383,4 +383,12 @@ public interface InstanceMetaDataRepository extends JpaRepository<InstanceMetaDa
     @Modifying
     @Query("UPDATE InstanceMetaData SET publicIp = :publicIp WHERE instanceId = :instanceId")
     void updatePublicIp(@Param("instanceId") String instanceId, @Param("publicIp") String publicIp);
+
+    @Query("SELECT i " +
+            "FROM InstanceMetaData i " +
+            "LEFT JOIN i.instanceGroup ig " +
+            "LEFT JOIN ig.stack s " +
+            "WHERE s.id= :stackId " +
+            "AND i.instanceStatus in :status ")
+    List<InstanceMetaData> findAllByStackIdAndStatus(@Param("stackId") Long stackId, @Param("status") InstanceStatus status);
 }

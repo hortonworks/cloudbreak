@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.domain;
 
-import java.util.StringJoiner;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -55,16 +53,18 @@ public class Resource implements ProvisionEntity {
 
     private String availabilityZone;
 
+    private Long privateId;
+
     public Resource() {
 
     }
 
     public Resource(ResourceType resourceType, String resourceName, Stack stack, String availabilityZone) {
-        this(resourceType, resourceName, null, CommonStatus.CREATED, stack, null, availabilityZone);
+        this(resourceType, resourceName, null, CommonStatus.CREATED, stack, null, availabilityZone, null);
     }
 
     public Resource(ResourceType resourceType, String resourceName, Stack stack, String instanceGroup, String availabilityZone) {
-        this(resourceType, resourceName, null, CommonStatus.CREATED, stack, instanceGroup, availabilityZone);
+        this(resourceType, resourceName, null, CommonStatus.CREATED, stack, instanceGroup, availabilityZone, null);
     }
 
     // CHECKSTYLE:OFF
@@ -75,7 +75,8 @@ public class Resource implements ProvisionEntity {
             CommonStatus status,
             Stack stack,
             String instanceGroup,
-            String availabilityZone) {
+            String availabilityZone,
+            Long privateId) {
         this.resourceType = resourceType;
         this.resourceName = resourceName;
         this.resourceReference = resourceReference;
@@ -83,6 +84,7 @@ public class Resource implements ProvisionEntity {
         this.instanceGroup = instanceGroup;
         this.stack = stack;
         this.availabilityZone = availabilityZone;
+        this.privateId = privateId;
     }
     // CHECKSTYLE:ON
 
@@ -166,14 +168,27 @@ public class Resource implements ProvisionEntity {
         this.availabilityZone = availabilityZone;
     }
 
+    public Long getPrivateId() {
+        return privateId;
+    }
+
+    public void setPrivateId(Long privateId) {
+        this.privateId = privateId;
+    }
+
+    @Override
     public String toString() {
-        return new StringJoiner(", ", Resource.class.getSimpleName() + "[", "]")
-                .add("id=" + id)
-                .add("instanceGroup=" + instanceGroup)
-                .add("resourceType=" + resourceType)
-                .add("resourceName=" + resourceName)
-                .add("instanceId=" + instanceId)
-                .add("attributes=" + attributes.toString())
-                .toString();
+        return "Resource{" +
+                "id=" + id +
+                ", instanceGroup='" + instanceGroup + '\'' +
+                ", resourceType=" + resourceType +
+                ", resourceStatus=" + resourceStatus +
+                ", resourceName='" + resourceName + '\'' +
+                ", resourceReference='" + resourceReference + '\'' +
+                ", instanceId='" + instanceId + '\'' +
+                ", attributes=" + attributes +
+                ", availabilityZone='" + availabilityZone + '\'' +
+                ", privateId=" + privateId +
+                '}';
     }
 }
