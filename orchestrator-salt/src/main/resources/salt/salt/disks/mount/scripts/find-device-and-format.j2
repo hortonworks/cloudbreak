@@ -4,12 +4,17 @@ ATTACHED_VOLUME_NAME_LIST="{{ (salt['pillar.get']('mount_data')[salt['grains.get
 ATTACHED_VOLUME_NAME_WITH_DATALOSS_LIST="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['attached_volume_name_with_dataloss_list'] }}"
 ATTACHED_VOLUME_SERIAL_LIST="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['attached_volume_serial_list'] }}"
 ATTACHED_VOLUME_SERIAL_WITH_DATALOSS_LIST="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['attached_volume_serial_with_dataloss_list'] }}"
+XFS_FOR_EPHEMERAL_SUPPORTED="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['xfs_for_ephemeral_supported'] }}"
 CLOUD_PLATFORM={{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['cloud_platform'] }}
 
 source /opt/salt/scripts/format-and-mount-common.sh
 
 LOG_FILE=/var/log/find_device_and_format.log
 VERSION="V1.0"
+
+if [ "$XFS_FOR_EPHEMERAL_SUPPORTED" = "True" ]; then
+  EPHEMERAL_FS_TYPE=xfs
+fi
 
 # INPUT - expected lists
 #   ATTACHED_VOLUME_NAME_LIST - contains a list of volume device names attached to the instance, format: space separated list
@@ -50,26 +55,33 @@ unmount_device_if_mounted() {
 
 format_disks_if_unformatted() {
   local device_name_list=$1
+  local fs_type=$2
   log $LOG_FILE format disk arguments: $device_name_list
   local return_value=0
   for devicename in $device_name_list; do
       log $LOG_FILE device: $devicename
       if [ -z "$(blkid $devicename)" ]; then
           log $LOG_FILE "formatting: $devicename"
-          $(mkfs -E lazy_itable_init=1 -O uninit_bg -F -t $FS_TYPE $devicename >> $LOG_FILE 2>&1)
+          if [ "$fs_type" = "xfs" ]; then
+            $(mkfs.xfs -f $devicename >> $LOG_FILE 2>&1)
+          else
+            $(mkfs -E lazy_itable_init=1 -O uninit_bg -F -t $fs_type $devicename >> $LOG_FILE 2>&1)
+          fi;
           if [ ! $? -eq 0 ]; then
             log $LOG_FILE "formatting of device $devicename failed"
             return_value=1
           fi
           log $LOG_FILE $format_result
 
-          log $LOG_FILE "Reducing reserved storage for root to 0 on device: $devicename"
-          $(tune2fs -m 0 $devicename >> $LOG_FILE 2>&1)
-          if [ ! $? -eq 0 ]; then
-            log $LOG_FILE "Reducing reserved storage on $devicename failed"
-          fi
-          tunefs_result=$(tune2fs -l $devicename | egrep "Block size:|Reserved block count")
-          log $LOG_FILE "Reserved storage on $devicename: $tunefs_result"
+          if [ "$fs_type" != "xfs" ]; then
+            log $LOG_FILE "Reducing reserved storage for root to 0 on device: $devicename"
+            $(tune2fs -m 0 $devicename >> $LOG_FILE 2>&1)
+            if [ ! $? -eq 0 ]; then
+              log $LOG_FILE "Reducing reserved storage on $devicename failed"
+            fi
+            tunefs_result=$(tune2fs -l $devicename | egrep "Block size:|Reserved block count")
+            log $LOG_FILE "Reserved storage on $devicename: $tunefs_result"
+          fi;
       fi
   done
   return $((return_value))
@@ -131,7 +143,8 @@ main() {
         exit_with_code $LOG_FILE $EXIT_CODE_OK "no devices to format"
     fi
 
-    format_disks_if_unformatted "$device_name_list $ephemeral_device_name_list"
+    format_disks_if_unformatted "$device_name_list" $FS_TYPE
+    format_disks_if_unformatted "$ephemeral_device_name_list" $EPHEMERAL_FS_TYPE
     if [ ! $? -eq 0 ]; then
         exit_with_code $LOG_FILE $EXIT_CODE_ERROR "could not format all devices"
     fi
