@@ -2,7 +2,6 @@
 
 SEMAPHORE_FILE=/var/cb-mount-executed
 FS_TYPE=ext4
-EPHEMERAL_FS_TYPE=ext4
 EXIT_CODE_ERROR=1
 EXIT_CODE_OK=0
 

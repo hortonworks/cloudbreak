@@ -9,16 +9,11 @@ ATTACHED_VOLUME_SERIAL_WITH_DATALOSS_LIST="{{ (salt['pillar.get']('mount_data')[
 TEMPORARY_STORAGE="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['temporary_storage'] }}"
 CLOUD_PLATFORM="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['cloud_platform'] }}"
 PREVIOUS_FSTAB="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['previous_fstab'] }}"
-XFS_FOR_EPHEMERAL_SUPPORTED="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['xfs_for_ephemeral_supported'] }}"
 
 source /opt/salt/scripts/format-and-mount-common.sh
 
 LOG_FILE=/var/log/mount-disks.log
 VERSION="V1.0"
-
-if [ "$XFS_FOR_EPHEMERAL_SUPPORTED" = "True" ]; then
-  EPHEMERAL_FS_TYPE=xfs
-fi
 
 # INPUT
 #   ATTACHED_VOLUME_UUID_LIST - contains a list of uuids of volumes attached to the instance, format: space separated list
@@ -48,15 +43,10 @@ mount_remaining() {
           uuid=$(get_disk_uuid "/dev/$volume")
           if [[ $root_disk != "/dev/$volume" && "$uuid" != ""  ]] && not_elastic_block_store "/dev/$volume" $LOG_FILE; then
             if [[ "$TEMPORARY_STORAGE" == "EPHEMERAL_VOLUMES" ]]; then
-                mount_one "UUID=$uuid /hadoopfs/ephfs${hadoop_ephfs_dir_counter} $EPHEMERAL_FS_TYPE defaults,noatime,nofail 0 2"
+                mount_one "UUID=$uuid /hadoopfs/ephfs${hadoop_ephfs_dir_counter} $FS_TYPE defaults,noatime,nofail 0 2"
                 return_value=$(($? || return_value ))
                 log $LOG_FILE result of all mounting: $return_value
                 ((hadoop_ephfs_dir_counter++))
-            elif [[ "$TEMPORARY_STORAGE" == "EPHEMERAL_VOLUMES_ONLY" ]]; then
-                mount_one "UUID=$uuid /hadoopfs/fs${hadoop_fs_dir_counter} $EPHEMERAL_FS_TYPE defaults,noatime,nofail 0 2"
-                return_value=$(($? || return_value ))
-                log $LOG_FILE result of all mounting: $return_value
-                ((hadoop_fs_dir_counter++))
             else
                 mount_one "UUID=$uuid /hadoopfs/fs${hadoop_fs_dir_counter} $FS_TYPE defaults,noatime,nofail 0 2"
                 return_value=$(($? || return_value ))
@@ -98,7 +88,6 @@ mount_all_sequential() {
       local return_value=0
       log $LOG_FILE mounting for first time, no previous fstab information present $DATABASE_VOLUME_UUID
       local hadoop_fs_dir_counter=1
-      # ATTACHED_VOLUME_UUID_LIST should not contain any ephemeral volume
       for uuid in $ATTACHED_VOLUME_UUID_LIST; do
           if [[ $uuid == $DATABASE_VOLUME_UUID ]]; then
               mount_one "UUID=$uuid /dbfs $FS_TYPE defaults,noatime,nofail 0 2"

@@ -120,7 +120,7 @@ public interface HostOrchestrator extends HostRecipeExecutor {
     byte[] getStateConfigZip() throws IOException;
 
     void updateMountDiskPillar(OrchestratorAware stack, List<GatewayConfig> allGateway, Set<Node> nodesWithDiskData,
-            ExitCriteriaModel exitModel, String platformVariant, boolean xfsForEphemeralSupported) throws CloudbreakOrchestratorFailedException;
+            ExitCriteriaModel exitModel, String platformVariant) throws CloudbreakOrchestratorFailedException;
 
     Map<String, Map<String, String>> formatAndMountDisksOnNodes(OrchestratorAware stack, List<GatewayConfig> allGateway, Set<Node> targets, Set<Node> allNodes,
             ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException;
