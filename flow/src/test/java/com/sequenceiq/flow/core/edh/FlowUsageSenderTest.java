@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.usage.UsageReporter;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 import com.sequenceiq.flow.core.config.TestFlowConfig.TestFlowState;
@@ -68,6 +69,7 @@ class FlowUsageSenderTest {
 
     @Test
     void testSendForFlowChainWhenResourceCrnIsNotEmptyWithoutReason() {
+        String generatedRequestId = MDCBuilder.getOrGenerateRequestId();
         when(resourceIdProvider.getResourceCrnByResourceId(eq(1L))).thenReturn("resourceCrn");
         underTest.send(flowTransitionContext("rootFlowChainType/actualFlowChainType"), INIT_STATE.name(), "flowEvent");
         verify(resourceIdProvider).getResourceCrnByResourceId(eq(1L));
@@ -85,6 +87,7 @@ class FlowUsageSenderTest {
         assertEquals("flowId", event.getFlowId());
         assertEquals("flowChainId", event.getFlowChainId());
         assertEquals("", event.getReason());
+        assertEquals(generatedRequestId, event.getRequestId());
     }
 
     @Test

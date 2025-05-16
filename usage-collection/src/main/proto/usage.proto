@@ -16,7 +16,7 @@ option go_package = "com/cloudera/cdp/protobuf";
 // A usage event.
 message Event {
   // Deprecated event types
-  reserved 8, 9, 10, 11, 12, 13, 14, 15, 20, 21;
+  reserved 8, 9, 10, 11, 12, 13, 14, 15, 20, 21, 152;
   // The event's ID.
   string id = 1;
   // The event timestamp in ms from the Java epoch of 1970-01-01T00:00:00Z.
@@ -311,8 +311,6 @@ message Event {
     CDPDFDeploymentFlowVersionChangeRequested cdpDFDeploymentFlowVersionChangeRequested = 150;
     // A CDP Operational Database AutoScalingConfig Event
     CDPCODAutoScalingConfig cdpCODAutoScalingConfig = 151;
-    // A CDP CML Serving Endpoint Deployed Event
-    CDPCMLServingEndpointDeployedEvent cdpCMLServingEndpointDeployedEvent = 152;
     // A CDP Operational Database StorageDetailsForWorker event
     CDPCODStorageDetailsForWorker cdpCODStorageDetailsForWorker = 153;
     // A CDP DataEngineering service was requested to be suspended or resumed.
@@ -365,6 +363,14 @@ message Event {
     CDPDataCatalogDataShareRequested cdpDataCatalogDataShareRequest = 177;
     // A CDP Cloudbreak flow event
     CDPCloudbreakFlowEvent cdpCloudbreakFlowEvent = 178;
+    // A CDP CAI Inference endpoint deployment or updation event
+    CDPCMLServingEndpointDeployedOrUpdatedEvent cdpCMLServingEndpointDeployedOrUpdatedEvent = 179;
+    // A CDP CAI Inferenc endpoint deletion event
+    CDPCMLServingEndpointDeletedEvent cdpCMLServingEndpointDeletedEvent = 180;
+    // A CDP CAI Application deployment event
+    CDPCMLServingApplicationDeployedEvent cdpCMLServingApplicationDeployedEvent = 181;
+    // A CDP CAI Application deletion event
+    CDPCMLServingApplicationDeletedEvent cdpCMLServingApplicationDeletedEvent = 182;
   }
 }
 
@@ -7092,5 +7098,322 @@ message CDPCloudbreakFlowEvent {
   bool edgeState = 10;
   // Reason
   string reason = 11;
+  // Request id
+  string requestId = 12;
 }
 
+// CDP CAI Inference Model Format
+enum ModelFormat {
+  // Unknown format (default)
+  FORMAT_UNKNOWN = 0;
+  // ONNX Format
+  ONNX = 1;
+  // Tensorrt Format
+  TENSORRT = 2;
+  // Transformer Format
+  TRANSFORMER = 3;
+}
+
+// CDP CAI Inference Model Container Type
+enum ModelContainer {
+  // Unknown container type (default)
+  CONTAINER_UNKNOWN = 0;
+  // The artifact is an MLFLOW archive
+  MLFLOW = 1;
+  // The artifact is a Triton model repository
+  TRITON = 2;
+  // The artifact is an archive of the model binaries
+  RAW = 3;
+}
+
+// CDP CAI Inference Model Task
+enum ModelTask {
+  // Task is unknown (default)
+  TASK_UNKNOWN = 0;
+  // Model is deployed for inference
+  INFERENCE = 1;
+  // Model is deployed for text generation
+  TEXT_GENERATION = 2;
+  // Model is deployed for embedding
+  EMBED = 3;
+  // Model is deployed for text to text generation
+  TEXT_TO_TEXT_GENERATION = 4;
+  // Model is deployed for classification
+  CLASSIFICATION = 5;
+  // Model is deployed for classification
+  FILL_MASK = 6;
+  // Model is deployed for ranking
+  RANK = 7;
+}
+
+// CDP CAI Inference Model Metadata
+message ModelMeta {
+  // CAI Inference Model Format
+  ModelFormat format = 1;
+  // CAI Inference Model Container Type
+  ModelContainer container = 2;
+  // CAI Inference Model Task
+  ModelTask task = 3;
+  // Taransformer architecture such as GemmaForCausalLM, Starcoder2ForCausalLM
+  string transformer_architecture = 4;
+  // True if the model is an llm and the endpoint can be used with completions/chat
+  bool chat = 5;
+}
+
+// CDP CAI Inference URL Source
+message URLSource {
+  // The URL of the source
+  string url = 1;
+  // CAI Inference model metadata
+  ModelMeta metadata = 2;
+}
+
+// CDP CAI Inference HF Source
+message HFSource {
+  // ID of the CAI Inference Model
+  string model_id = 1;
+  // CAI Inference model metadata
+  ModelMeta metadata = 2;
+  // API token of the model
+  string api_token  = 3;
+}
+
+// CDP CAI Inference NGC Source
+message NGCSource {
+  // ID of the CAI Inference Model
+  string model_id = 1;
+  // NGC Model Profile
+  string ngc_model_profile = 2;
+  // CAI Inference model metadata
+  ModelMeta metadata = 3;
+  // API token of the model
+  string api_token = 4;
+  // Release of the model
+  string release = 5;
+}
+
+// CDP CAI Inference Registry Source (only source available for production deployments)
+message RegistrySource {
+  // ID of the CAI Inference Model
+  string model_id = 1;
+  // Version of the model
+  int32 version  = 2;
+}
+
+// CDP CAI Inference Model Source Type
+message ModelSource {
+  oneof source {
+    // CDP CAI Inference URL Source
+    URLSource url_source = 1;
+    // CDP CAI Inference HF Source
+    HFSource hf_source = 2;
+    // CDP CAI Inference NGC Source
+    NGCSource ngc_source = 3;
+    // CDP CAI Inference Registry Source (only source available for production deployments)
+    RegistrySource registry_source = 4;
+  }
+}
+
+// CDP CAI Inference Model Resource
+message Resources {
+  // Requested quantity of CPUs as K8s resources
+  string req_cpu = 1;
+  // Requested quantity of memory as K8s resources
+  string req_memory = 2;
+  // Requested number of GPUs as K8s resources
+  string num_gpus = 3;
+}
+
+// CDP CAI Inference Model Autoscaling Config
+message AutoscalingConfig {
+  // RPS or Concurrency
+  string metric = 1;
+  // The limit for the metric of each replica (200 by default)
+  string target = 2;
+  // A tuning of the target field to specify how "hot" each replica runs
+  string target_utilization = 3;
+  // Tuning of how long after a scale to zero decision has been made that the pod should remain available before scaling down
+  string scale_to_zero_retention = 4;
+  // Number of replicas that should be created when scaling up from zero
+  string activation_scale = 5;
+  // How long to wait before a scale down decision is made
+  string scale_down_delay = 6;
+  // The size of the panic window as a percentage of the stable window
+  string panic_window_percentage = 7;
+  // The amount of traffic that each replica must be receiving before entering into panic mode
+  string panic_threshold = 8;
+  // The interval in which metrics are being scraped and processed to determine autoscaling decisions
+  string stable_window = 9;
+}
+
+// CDP CAI Inference Model Autoscaling Information
+message Autoscaling {
+  // Minimum number of replicas, set to 0 for scale to zero
+  string min_replicas = 1;
+  // Maximum number of replicas
+  string max_replicas = 2;
+  // Advanced autoscaling config to tune scaling sensitivity
+  AutoscalingConfig autoscaling_config = 5;
+}
+
+// Arguments passed to the VLLM engine for transformer models
+message VLLMEngineArgs {
+  // Datatype
+  string dtype = 1;
+  // Whether to enable prefix caching
+  bool enable_prefix_caching = 2;
+  // GPU memory utilization by the model
+  float gpu_memory_utilization = 3;
+  // Load format
+  string load_format = 4;
+  // Maximum model length
+  int32 max_model_length = 5;
+  // Maximum number of batched tokens
+  int32 max_num_batched_tokens = 6;
+  // Maximum number of sequences
+  int32 max_num_seqs = 7;
+  // Quantization
+  string quantization = 8;
+  // Whether to enforce eager
+  bool enforce_eager = 9;
+  // Whether to trust remote code
+  bool trust_remote_code = 10;
+  // KV Cache datatype
+  string kv_cache_dtype = 11;
+  // Block size
+  int32 block_size = 12;
+  // CPU Offload in GBs
+  int32 cpu_offload_gb = 13;
+}
+
+// CDP CAI Environment Variable
+message EnvironmentVariable {
+  // Name of the environment variable
+  string name = 1;
+  // Value of the environment variable
+  string value = 2;
+}
+
+// CDP CAI Inference Container Source for Application
+message ApplicationContainerSource {
+  // URL of the container source
+  string url = 1;
+  // Environment variables
+  repeated EnvironmentVariable environment_variables = 2;
+}
+
+// CDP CAI Inference Directory Source for Application
+message ApplicationDirectorySource {
+  // URL of the directory source
+  string url = 1;
+  // Entry point of the directory source
+  string entry_point = 2;
+  // Runtime image
+  string runtime_image = 3;
+  // Environment variables
+  repeated EnvironmentVariable environment_variables = 4;
+}
+
+// CDP CAI Inference Application Source Type
+message ApplicationSource {
+  oneof source {
+    // CAI Inference Container Source for Application
+    ApplicationContainerSource container_source = 1;
+    // CAI Inference Directory Source for Application
+    ApplicationDirectorySource directory_source = 2;
+  }
+}
+
+// A CDP CAI Inference endpoint deployment or updation event
+message CDPCMLServingEndpointDeployedOrUpdatedEvent {
+  // CAI Inference Resource CRN
+  string resource_crn = 1;
+  // Resource type (Serving in this case)
+  string resource_type = 2;
+  // CAI Inference version
+  string resource_version = 3;
+  // Username hash
+  string username_hash = 4;
+  // Namespace
+  string namespace = 5;
+  // Endpoint name hash
+  string endpoint_name_hash = 6;
+  // Model name hash
+  string model_name_hash = 7;
+  // Source of the model
+  ModelSource source = 8;
+  // Resources requested by the model
+  Resources resources = 9;
+  // Autscaling information configured
+  Autoscaling autoscaling = 10;
+  // Traffic information
+  string traffic = 11;
+  // VLLM engine arguments
+  VLLMEngineArgs vllm_engine_args = 12;
+  // Instance type deployed
+  string instance_type = 13;
+  // Whether CAI Inference is up to date
+  bool is_update = 14;
+}
+
+// A CDP CAI Inferenc endpoint deletion event
+message CDPCMLServingEndpointDeletedEvent {
+  // CAI Inference Resource CRN
+  string resource_crn = 1;
+  // Resource type (Serving in this case)
+  string resource_type = 2;
+  // CAI Inference version
+  string resource_version = 3;
+  // Username hash
+  string username_hash = 4;
+  // Namespace
+  string namespace = 5;
+  // Endpoint name hash
+  string endpoint_name_hash = 6;
+}
+
+// A CDP CAI Application deployment event
+message CDPCMLServingApplicationDeployedEvent {
+  reserved 7, 12;
+
+  // CAI Inference Resource CRN
+  string resource_crn = 1;
+  // Resource type (Serving in this case)
+  string resource_type = 2;
+  // CAI Inference version
+  string resource_version = 3;
+  // Username hash
+  string username_hash = 4;
+  // Namespace
+  string namespace = 5;
+  // Application name hash
+  string application_name_hash = 6;
+  // Source of the application
+  ApplicationSource source = 8;
+  // Resources requested by the application
+  Resources resources = 9;
+  // Autscaling information configured
+  Autoscaling autoscaling = 10;
+  // Traffic information
+  string traffic = 11;
+  // Instance type deployed
+  string instance_type = 13;
+  // Whether CAI Inference is up to date
+  bool is_update = 14;
+}
+
+// A CDP CAI Application deletion event
+message CDPCMLServingApplicationDeletedEvent {
+  // CAI Inference Resource CRN
+  string resource_crn = 1;
+  // Resource type (Serving in this case)
+  string resource_type = 2;
+  // CAI Inference version
+  string resource_version = 3;
+  // Username hash
+  string username_hash = 4;
+  // Namespace
+  string namespace = 5;
+  // Application name hash
+  string application_name_hash = 6;
+}

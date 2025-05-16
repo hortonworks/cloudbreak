@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPCloudbreakFlowEvent;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.usage.UsageReporter;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.ResourceIdProvider;
@@ -62,6 +63,7 @@ public class FlowUsageSender {
                         .setFlowEvent(flowEvent != null ? flowEvent : "")
                         .setEdgeState(edgeState)
                         .setReason(reason)
+                        .setRequestId(MDCBuilder.getOrGenerateRequestId())
                         .build();
                 usageReporter.cdpCloudbreakFlowEvent(event);
             } else {
