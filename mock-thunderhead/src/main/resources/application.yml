@@ -119,3 +119,24 @@ spring:
     hibernate.ddl-auto: update
   h2:
     console.enabled: true
+
+vault:
+  addr: localhost
+  port: 8200
+  ssl.enabled: false
+  kv.engine.v2.path: secret
+  config.enabled: true
+secret:
+  application: mock/shared
+  engine: "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine"
+
+clusterProxy:
+  url: http://localhost:10180/cluster-proxy
+  enabled: true
+  disabledPlatforms: MOCK
+  readConfigPath: /rpc/readConfig
+  registerConfigPath: /rpc/forceRegisterConfig
+  updateConfigPath: /rpc/updateConfig
+  removeConfigPath: /rpc/removeConfig
+  maxAttempts: 20
+  maxFailure: 1

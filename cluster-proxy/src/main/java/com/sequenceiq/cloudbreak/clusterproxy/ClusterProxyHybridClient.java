@@ -49,7 +49,7 @@ public class ClusterProxyHybridClient {
             Optional<ResponseEntity<ListEnvironmentsResponse>> response = measure(() ->
                             listEnvironmentsFromUrl(readConfigUrl, userCrn),
                     LOGGER,
-                    "Query environments from {} ms took {}.", clusterIdentifier);
+                    "Query environments took {} ms from {}.", clusterIdentifier);
             LOGGER.info("Cluster proxy with remote cluster read configuration response: {}", response);
             return response.isEmpty() ? new ListEnvironmentsResponse() : response.get().getBody();
         } catch (RestClientResponseException e) {
@@ -73,7 +73,7 @@ public class ClusterProxyHybridClient {
             Optional<ResponseEntity<DescribeEnvironmentResponse>> response = measure(() ->
                             getEnvironmentsFromUrl(getConfigUrl, userCrn, environmentCrn),
                     LOGGER,
-                    "Query environment from {} with crn {} ms took {}.", clusterIdentifier, environmentCrn);
+                    "Query environment took {} ms from {} with crn {}.", clusterIdentifier, environmentCrn);
             LOGGER.info("Cluster proxy with remote cluster get environment configuration response: {}", response);
             return response.isEmpty() ? new DescribeEnvironmentResponse() : response.get().getBody();
         } catch (RestClientResponseException e) {

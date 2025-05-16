@@ -67,7 +67,7 @@ remotecluster:
   port: 8982
 
 clusterProxy:
-  url: https://localhost:8080/cluster-proxy
+  url: http://localhost:10180/cluster-proxy
   enabled: true
   disabledPlatforms: MOCK
   readConfigPath: /rpc/readConfig

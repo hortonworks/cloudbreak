@@ -420,7 +420,7 @@ class ClusterProxyServiceTest {
         ClientCertificate clientCertificate = new ClientCertificate("/cb/test-data/secret/clientKey:secret:base64",
                 "/cb/test-data/secret/clientCert:secret:base64");
         return new ClusterServiceConfig("cb-internal-" + instanceId,
-                List.of("https://" + ipAddress + ":9443"), null, false, asList(cloudbreakUser, dpUser), clientCertificate);
+                List.of("https://" + ipAddress + ":9443"), null, false, asList(cloudbreakUser, dpUser), clientCertificate, null);
     }
 
     private ClusterServiceConfig cmServiceConfig() {
@@ -429,7 +429,7 @@ class ClusterProxyServiceTest {
         ClientCertificate clientCertificate = new ClientCertificate("/cb/test-data/secret/clientKey:secret:base64",
                 "/cb/test-data/secret/clientCert:secret:base64");
         return new ClusterServiceConfig(CLOUDERA_MANAGER_SERVICE,
-                List.of("https://10.10.10.10:9443"), null, false, asList(cloudbreakUser, dpUser), clientCertificate);
+                List.of("https://10.10.10.10:9443"), null, false, asList(cloudbreakUser, dpUser), clientCertificate, null);
     }
 
     private ClusterServiceConfig cmInternalServiceConfig(boolean withPrivateIp) {
@@ -438,7 +438,8 @@ class ClusterProxyServiceTest {
         ClientCertificate clientCertificate = new ClientCertificate("/cb/test-data/secret/clientKey:secret:base64",
                 "/cb/test-data/secret/clientCert:secret:base64");
         return new ClusterServiceConfig("cb-internal",
-                List.of(withPrivateIp ? "https://10.10.10.10:9443" : "https://1.2.3.4:9443"), null, false, asList(cloudbreakUser, dpUser), clientCertificate);
+                List.of(withPrivateIp ? "https://10.10.10.10:9443" : "https://1.2.3.4:9443"),
+                null, false, asList(cloudbreakUser, dpUser), clientCertificate, null);
     }
 
     private SecurityConfig gatewaySecurityConfig() {

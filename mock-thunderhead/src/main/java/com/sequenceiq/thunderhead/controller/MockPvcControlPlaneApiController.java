@@ -1,4 +1,4 @@
-package com.sequenceiq.thunderhead.controller.remotecluster;
+package com.sequenceiq.thunderhead.controller;
 
 import java.io.IOException;
 
@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentRequest;
@@ -25,9 +26,12 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @RestController
-public class MockClusterProxyPvcControlPlaneApiController {
+@RequestMapping(MockPvcControlPlaneApiController.PATH)
+public class MockPvcControlPlaneApiController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MockClusterProxyPvcControlPlaneApiController.class);
+    public static final String PATH = "PvcControlPlane";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MockPvcControlPlaneApiController.class);
 
     private DescribeEnvironmentResponse mockRemoteEnvironmentResponse;
 
@@ -40,7 +44,7 @@ public class MockClusterProxyPvcControlPlaneApiController {
         mockRemoteEnvironmentResponse = JsonUtil.readValue(describeEnvironment, DescribeEnvironmentResponse.class);
     }
 
-    @PostMapping("/cluster-proxy/proxy/{crn}/PvcControlPlane/api/v1/environments2/listEnvironments")
+    @PostMapping("/{crn}/api/v1/environments2/listEnvironments")
     public ResponseEntity<ListEnvironmentsResponse> listEnvironments(@PathVariable("crn") String crn) {
         LOGGER.info("List remote environments for crn: '{}'", crn);
         try {
@@ -71,7 +75,7 @@ public class MockClusterProxyPvcControlPlaneApiController {
         }
     }
 
-    @PostMapping("/cluster-proxy/proxy/{crn}/PvcControlPlane/api/v1/environments2/describeEnvironment")
+    @PostMapping("/{crn}/api/v1/environments2/describeEnvironment")
     public ResponseEntity<DescribeEnvironmentResponse> describeEnvironments(@PathVariable("crn") String crn,
             @RequestBody DescribeEnvironmentRequest environmentRequest) {
         LOGGER.info("Describe remote environments for crn: '{}'", crn);

@@ -1,0 +1,13 @@
+[
+  {
+    "name": "telemati",
+    "type": "REAL",
+    "url": "https://console-cdp.apps.telemati.xcu2-8y8x.dev.cldr.work",
+    "pvcTenantId": "8b19876d-c8bf-473e-8acc-12c337b0b39c",
+    "auth": "dadcce77-0a77-484c-82f6-e01c587292a8:XGDG90aO6gyahGu7DsWDoK4YJR+/p/mx71f2XL6IpKw="
+  },
+  {
+    "name": "mock",
+    "type": "MOCK"
+  }
+]

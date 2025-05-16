@@ -72,6 +72,7 @@ dependencies {
     implementation group: 'org.springframework.data', name: 'spring-data-jpa', version: springDataJpaFrameworkVersion
     implementation group: 'org.springframework', name: 'spring-context-support', version: springFrameworkVersion
     implementation group: 'org.springframework.security', name: 'spring-security-jwt', version: springSecurityJwtVersion
+    implementation group: 'org.springframework', name: 'spring-aspects', version: springFrameworkVersion
     implementation group: 'javax.annotation', name: 'javax.annotation-api', version: javaxAnnotationApiVersion
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: jacksonVersion
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
@@ -85,6 +86,8 @@ dependencies {
     testImplementation group: 'org.assertj', name: 'assertj-core', version: assertjVersion
     testImplementation project(path: ':common', configuration: 'tests')
 
+    implementation project(':cluster-proxy')
+    implementation project(':secret-engine')
     implementation project(':auth-connector')
     implementation(project(':audit-connector')) {
         transitive = false;

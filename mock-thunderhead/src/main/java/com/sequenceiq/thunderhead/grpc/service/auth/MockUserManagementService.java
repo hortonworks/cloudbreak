@@ -252,6 +252,7 @@ import com.sequenceiq.cloudbreak.util.SanitizerUtil;
 import com.sequenceiq.thunderhead.grpc.GrpcActorContext;
 import com.sequenceiq.thunderhead.grpc.service.auth.roles.MockEnvironmentUserResourceRole;
 import com.sequenceiq.thunderhead.model.AltusToken;
+import com.sequenceiq.thunderhead.service.LoadResourcesForAccountIdService;
 import com.sequenceiq.thunderhead.service.MockUmsService;
 import com.sequenceiq.thunderhead.util.CrnHelper;
 import com.sequenceiq.thunderhead.util.IniUtil;
@@ -574,6 +575,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Inject
     private MockEnvironmentUserResourceRole mockEnvironmentUserResourceRole;
 
+    @Inject
+    private Set<LoadResourcesForAccountIdService> loadResourcesForAccountIdServices;
+
     @PostConstruct
     public void init() {
         cbLicense = getLicense();
@@ -639,12 +643,26 @@ public class MockUserManagementService extends UserManagementImplBase {
         String[] splitCrn = userIdOrCrn.split(CRN_COMPONENT_SEPARATOR_REGEX);
         String userName = splitCrn[6];
         String accountId = splitCrn[4];
-        accountUsers.computeIfAbsent(accountId, key -> newSetFromMap(new ConcurrentHashMap<>())).add(userName);
+        addUserAndCreateAccountIfNeeded(accountId, userName);
         responseObserver.onNext(
                 GetUserResponse.newBuilder()
                         .setUser(createUser(accountId, userName))
                         .build());
         responseObserver.onCompleted();
+    }
+
+    private void addUserAndCreateAccountIfNeeded(String accountId, String userName) {
+        accountUsers.computeIfAbsent(accountId, key -> {
+            loadResourcesForAccountIdServices.forEach(service -> {
+                try {
+                    LOGGER.debug("Loading resources with service {} for account id {}", service.getClass(), accountId);
+                    service.load(accountId);
+                } catch (Exception e) {
+                    LOGGER.error("Failed to load resources with service {} for account id {}", service.getClass(), accountId);
+                }
+            });
+            return newSetFromMap(new ConcurrentHashMap<>());
+        }).add(userName);
     }
 
     @Override
