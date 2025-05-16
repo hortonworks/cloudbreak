@@ -47,12 +47,16 @@ public class CmSyncImageFinderService {
 
     private Optional<Image> findTargetImage(CmSyncOperationSummary cmSyncResult, Set<Image> candidateImages, String currentImageId, boolean datalake) {
         Image currentImage = findCurrentImageFromImageCatalog(currentImageId, candidateImages);
-        return candidateImages.stream()
+        Set<Image> targetImages = candidateImages.stream()
                 .filter(candidateImage ->
                         cmVersionMatches(candidateImage, cmSyncResult) &&
                                 cdhVersionsMatches(candidateImage, cmSyncResult) &&
                                 (datalake || allParcelVersionMatches(candidateImage, cmSyncResult, currentImage)))
-                .max(Comparator.comparing(Image::getCreated));
+                .collect(Collectors.toSet());
+        return targetImages.stream()
+                .filter(image -> image.getUuid().equals(currentImageId))
+                .findFirst()
+                .or(() -> targetImages.stream().max(Comparator.comparing(Image::getCreated)));
     }
 
     private boolean cmVersionMatches(Image candidateImage, CmSyncOperationSummary cmSyncOperationSummary) {

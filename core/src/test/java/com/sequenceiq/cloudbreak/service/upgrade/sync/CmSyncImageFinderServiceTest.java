@@ -136,13 +136,30 @@ class CmSyncImageFinderServiceTest {
     }
 
     @Test
-    void testFindTargetImageForImageSyncShouldReturnImageWhenTheClusterIsDatalake() {
+    void testFindTargetImageForImageSyncShouldReturnCurrentImageImageWhenTheClusterIsDatalake() {
         Set<ParcelInfo> activeParcels = createActiveParcels(Map.of("CDH", CDH_VERSION, "FLINK", "1.2.3"));
         CmSyncOperationSummary cmSyncResult = createCmSyncResult(CM_VERSION, activeParcels);
 
         Image image1 = createImage("image-1", CM_VERSION, CDH_VERSION, 1L, Map.of("FLINK", "1.2.4"));
         Image image2 = createImage("image-2", CM_VERSION, CDH_VERSION, 2L, Map.of("SPARK", "2.2.3"));
         Image image3 = createImage(CURRENT_IMAGE_ID, CM_VERSION, CDH_VERSION, 1L, Map.of("FLINK", "1.2.2"));
+        Set<Image> candidateImages = Set.of(image1, image2, image3);
+
+        Optional<Image> actual = underTest.findTargetImageForImageSync(cmSyncResult, candidateImages, CURRENT_IMAGE_ID, true);
+
+        assertTrue(actual.isPresent());
+        assertEquals(CURRENT_IMAGE_ID, actual.get().getUuid());
+        verifyNoInteractions(clouderaManagerProductTransformer);
+    }
+
+    @Test
+    void testFindTargetImageForImageSyncShouldReturnLatestImageWhenTheClusterIsDatalake() {
+        Set<ParcelInfo> activeParcels = createActiveParcels(Map.of("CDH", CDH_VERSION, "FLINK", "1.2.3"));
+        CmSyncOperationSummary cmSyncResult = createCmSyncResult(CM_VERSION, activeParcels);
+
+        Image image1 = createImage("image-1", CM_VERSION, CDH_VERSION, 1L, Map.of("FLINK", "1.2.4"));
+        Image image2 = createImage("image-2", CM_VERSION, CDH_VERSION, 2L, Map.of("SPARK", "2.2.3"));
+        Image image3 = createImage(CURRENT_IMAGE_ID, "7.5.1", CDH_VERSION, 1L, Map.of("FLINK", "1.2.2"));
         Set<Image> candidateImages = Set.of(image1, image2, image3);
 
         Optional<Image> actual = underTest.findTargetImageForImageSync(cmSyncResult, candidateImages, CURRENT_IMAGE_ID, true);
