@@ -122,6 +122,7 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
                 .withName(resourceName)
                 .withPersistent(true)
                 .withReference(String.valueOf(privateId))
+                .withPrivateId(privateId)
                 .build());
     }
 

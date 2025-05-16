@@ -71,6 +71,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackSaltValidationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackSaltValidationResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.UpscaleUpdateLoadBalancersRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpscaleCreateUserdataSecretsRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpscaleCreateUserdataSecretsSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpscaleUpdateUserdataSecretsRequest;
@@ -396,7 +397,21 @@ public class StackUpscaleActions {
                 Integer adjustment = context.getHostGroupWithAdjustment().values().stream().reduce(0, Integer::sum);
                 Set<String> upscaleCandidateAddresses = stackUpscaleService.finishExtendMetadata(context.getStack(), adjustment, payload);
                 variables.put(UPSCALE_CANDIDATE_ADDRESSES, upscaleCandidateAddresses);
-                sendEvent(context, StackUpscaleEvent.UPSCALE_UPDATE_USERDATA_SECRETS_EVENT.event(), new StackEvent(context.getStackId()));
+                sendEvent(context, StackUpscaleEvent.UPSCALE_UPDATE_LOAD_BALANCERS_EVENT.event(), new StackEvent(context.getStackId()));
+            }
+        };
+    }
+
+    @Bean("UPSCALE_UPDATE_LOAD_BALANCERS_STATE")
+    public Action<?, ?> upscaleUpdateLoadBalancersAction() {
+        return new AbstractStackCreationAction<>(StackEvent.class) {
+            @Override
+            protected void doExecute(StackCreationContext context, StackEvent payload, Map<Object, Object> variables) {
+                StackDto stack = stackDtoService.getById(context.getStackId());
+                CloudStack cloudStack = cloudStackConverter.convert(stack);
+                UpscaleUpdateLoadBalancersRequest request =
+                        new UpscaleUpdateLoadBalancersRequest(context.getStackId(), cloudStack, context.getCloudContext(), context.getCloudCredential());
+                sendEvent(context, request.selector(), request);
             }
         };
     }
