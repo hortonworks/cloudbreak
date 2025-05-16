@@ -94,7 +94,6 @@ auth:
     azure.database.flexibleserver.upgrade.longpolling.enabled: false
     azure.database.singleserver.reject.enabled: false
     secret.encryption.enabled: false
-    container.ready.env.enabled: true
     cdl:
       enabled: true
     compute:

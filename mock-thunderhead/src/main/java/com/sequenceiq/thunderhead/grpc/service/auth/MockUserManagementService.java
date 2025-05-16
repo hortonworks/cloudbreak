@@ -40,7 +40,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_S
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_BULK_HOSTS_REMOVAL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CONCLUSION_CHECKER_SEND_USER_EVENT;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CONTAINER_READY_ENV;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_EXPERIMENTAL_SCALE_LIMITS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_FORCE_OS_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_LONG_TIMEOUT;
@@ -523,9 +522,6 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.secret.encryption.enabled}")
     private boolean secretEncryptionEnabled;
-
-    @Value("${auth.mock.container.ready.env.enabled}")
-    private boolean containerReadyEnvEnabled;
 
     @Value("${auth.mock.cm.observability.saas.premium}")
     private boolean cmObservabilitySaasPremium;
@@ -1010,9 +1006,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (secretEncryptionEnabled) {
             builder.addEntitlements(createEntitlement(CDP_CB_SECRET_ENCRYPTION));
-        }
-        if (containerReadyEnvEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_CONTAINER_READY_ENV));
         }
         if (cmObservabilitySaasPremium) {
             builder.addEntitlements(createEntitlement(OBSERVABILITY_SAAS_PREMIUM));

@@ -126,9 +126,6 @@ public class ExternalizedComputeService {
         if (!externalizedComputeEnabled) {
             throw new BadRequestException("Externalized compute not enabled");
         }
-        if (!entitlementService.isContainerReadyEnvEnabled(accountId)) {
-            throw new BadRequestException("CDP_CONTAINER_READY_ENV entitlement is not enabled for this account");
-        }
     }
 
     public void credentialValidation(Environment environment) {

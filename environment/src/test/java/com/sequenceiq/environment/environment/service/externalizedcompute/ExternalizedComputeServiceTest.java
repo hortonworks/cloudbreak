@@ -73,7 +73,6 @@ class ExternalizedComputeServiceTest {
 
     @Test
     void createComputeClusterWhenEnvironmentRequestContainsRequestCallToExtShouldHappen() {
-        when(entitlementService.isContainerReadyEnvEnabled(any())).thenReturn(true);
         when(validatorService.validateCredentialForExternalizedComputeCluster(any())).thenReturn(ValidationResult.builder().build());
         ReflectionTestUtils.setField(underTest, "externalizedComputeEnabled", true);
         Environment environment = new Environment();
@@ -86,7 +85,6 @@ class ExternalizedComputeServiceTest {
 
     @Test
     void createComputeClusterWhenClusterExists() {
-        when(entitlementService.isContainerReadyEnvEnabled(any())).thenReturn(true);
         ReflectionTestUtils.setField(underTest, "externalizedComputeEnabled", true);
         Environment environment = new Environment();
         environment.setName("environmentName");
@@ -103,7 +101,6 @@ class ExternalizedComputeServiceTest {
 
     @Test
     void createComputeClusterWhenExtComputeThrowErrorShouldThrowException() {
-        when(entitlementService.isContainerReadyEnvEnabled(any())).thenReturn(true);
         when(validatorService.validateCredentialForExternalizedComputeCluster(any())).thenReturn(ValidationResult.builder().build());
         ReflectionTestUtils.setField(underTest, "externalizedComputeEnabled", true);
         when(externalizedComputeClientService.createComputeCluster(any())).thenThrow(new NotFoundException("HTTP 404 Not Found localhost:1111/faultyurl"));
@@ -269,7 +266,6 @@ class ExternalizedComputeServiceTest {
     @Test
     public void testReInitializeComputeCluster() {
         ReflectionTestUtils.setField(underTest, "externalizedComputeEnabled", true);
-        when(entitlementService.isContainerReadyEnvEnabled(any())).thenReturn(true);
         Environment environment = new Environment();
         String environmentName = "environmentName";
         environment.setName(environmentName);
@@ -304,7 +300,6 @@ class ExternalizedComputeServiceTest {
     @Test
     public void testReInitializeComputeClusterCreationInProgress() {
         ReflectionTestUtils.setField(underTest, "externalizedComputeEnabled", true);
-        when(entitlementService.isContainerReadyEnvEnabled(any())).thenReturn(true);
         Environment environment = new Environment();
         String environmentName = "environmentName";
         environment.setName(environmentName);
