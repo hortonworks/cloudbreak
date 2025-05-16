@@ -12,9 +12,11 @@ echo -e "\n\033[1;96m--- Stop cbd containers"
 cd $INTEGCB_LOCATION;
 docker compose --compatibility stop;
 
-echo -e "\n\033[1;96m--- Save Cluster Proxy log to cluster-proxy.log file"
+echo -e "\n\033[1;96m--- Save Cluster Proxy logs to file"
 docker logs cbreak_cluster-proxy_1 &> ../cluster-proxy.log;
-docker logs cbreak_cluster-proxy-health-check-worker_1 &> ../cluster-proxy-health.log;
+docker logs cbreak_jumpgate-interop_1 &> ../jumpgate-interop-health.log;
+docker logs cbreak_jumpgate-admin_1 &> ../jumpgate-admin-health.log;
+docker logs cbreak_jumpgate-proxy_1 &> ../jumpgate-proxy-health.log;
 
 echo -e "\n\033[1;96m--- Save gateway and thunderhead-mock logs"
 docker logs cbreak_dev-gateway_1 &> ../dev-gateway.log;
