@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.ResourceType;
 
 /**
  * Cloudbreak handles the entities on the Cloud provider side as generic resources and supports CRUD operations on them.
@@ -70,7 +71,7 @@ public interface ResourceConnector {
             AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) throws Exception;
 
     /**
-     * Updates an existing stack with one or more load balancers, if the load balances do not already exist. This method will initiate the
+     * Updates an existing stack with one or more load balancers, if the load balancers do not already exist. This method will initiate the
      * creation of load balancers on the Cloud platform, and will configure the load balancer routing in accordance with the specified
      * target group configuration. It returns a list of CloudResourceStatus for any created load balancers.
      *
@@ -83,6 +84,16 @@ public interface ResourceConnector {
     List<CloudResourceStatus> launchLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier)
             throws Exception;
 
+    /**
+     * Updates the load balancers routing in accordance with the specified target group configuration.
+     * If the load balancers do not already exist, then creating them with their dependencies.
+     *
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param stack                contains the full description of infrastructure
+     * @param persistenceNotifier  Cloud platform notifies the Cloudbreak over this interface if a resource is allocated on the Cloud platform
+     * @return the status of load balancers allocated on Cloud platform
+     * @throws Exception in case of any error
+     */
     default List<CloudResourceStatus> updateLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier)
             throws Exception {
         return List.of();
@@ -462,4 +473,8 @@ public interface ResourceConnector {
      * @throws Exception in case of any error
      */
     void updateDiskVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size) throws Exception;
+
+    default ResourceType getInstanceResourceType() {
+        throw new UnsupportedOperationException("Getting instance resource type is not supported for this provider.");
+    }
 }

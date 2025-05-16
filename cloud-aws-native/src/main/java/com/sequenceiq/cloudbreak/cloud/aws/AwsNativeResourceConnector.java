@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.aws.resource.loadbalancer.AwsNativeLoadBalancerLaunchService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -33,7 +32,6 @@ import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.cloud.template.AbstractResourceConnector;
-import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -73,6 +71,13 @@ public class AwsNativeResourceConnector extends AbstractResourceConnector {
         AwsCredentialView awsCredentialView = new AwsCredentialView(cloudCredential);
         AmazonElasticLoadBalancingClient elasticLoadBalancingClient = commonAwsClient.createElasticLoadBalancingClient(awsCredentialView, region);
         return loadBalancerLaunchService.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, elasticLoadBalancingClient, true);
+    }
+
+    @Override
+    public List<CloudResourceStatus> updateLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier)
+            throws Exception {
+        LOGGER.debug("Updating loadbalancer");
+        return launchLoadBalancers(authenticatedContext, stack, persistenceNotifier);
     }
 
     @Override
@@ -121,19 +126,6 @@ public class AwsNativeResourceConnector extends AbstractResourceConnector {
     }
 
     @Override
-    public List<CloudResourceStatus> upscale(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources,
-            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) throws QuotaExceededException {
-        List<CloudResourceStatus> upscale = super.upscale(auth, stack, resources, adjustmentTypeWithThreshold);
-        LOGGER.info("Launching elastic load balancers");
-        CloudCredential cloudCredential = auth.getCloudCredential();
-        String region = auth.getCloudContext().getLocation().getRegion().value();
-        AwsCredentialView awsCredentialView = new AwsCredentialView(cloudCredential);
-        AmazonElasticLoadBalancingClient elasticLoadBalancingClient = commonAwsClient.createElasticLoadBalancingClient(awsCredentialView, region);
-        loadBalancerLaunchService.launchLoadBalancerResources(auth, stack, persistenceNotifier, elasticLoadBalancingClient, true);
-        return upscale;
-    }
-
-    @Override
     public List<CloudResourceStatus> downscale(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources, List<CloudInstance> vms,
             List<CloudResource> resourcesToRemove) {
         List<CloudResourceStatus> downscale = super.downscale(auth, stack, resources, vms, resourcesToRemove);
@@ -148,5 +140,10 @@ public class AwsNativeResourceConnector extends AbstractResourceConnector {
     @Override
     public void updateDatabaseRootPassword(AuthenticatedContext authenticatedContext, DatabaseStack databaseStack, String newPassword) {
         LOGGER.info("Update master user password is not implemented on AWS Native!");
+    }
+
+    @Override
+    public ResourceType getInstanceResourceType() {
+        return ResourceType.AWS_INSTANCE;
     }
 }

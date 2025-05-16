@@ -591,4 +591,9 @@ public class AzureResourceConnector extends AbstractResourceConnector {
     public void updateDatabaseRootPassword(AuthenticatedContext authenticatedContext, DatabaseStack databaseStack, String newPassword) {
         azureDatabaseResourceService.updateAdministratorLoginPassword(authenticatedContext, databaseStack, newPassword);
     }
+
+    @Override
+    public ResourceType getInstanceResourceType() {
+        return ResourceType.AZURE_INSTANCE;
+    }
 }

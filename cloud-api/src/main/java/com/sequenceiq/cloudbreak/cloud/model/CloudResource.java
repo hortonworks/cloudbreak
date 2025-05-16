@@ -48,10 +48,12 @@ public class CloudResource extends DynamicModel {
 
     private final boolean stackAware;
 
+    private final Long privateId;
+
     private String instanceId;
 
     private CloudResource(ResourceType type, CommonStatus status, String name, String reference, String group, boolean persistent, Map<String, Object> params,
-            String instanceId, boolean stackAware, String availabilityZone) {
+            String instanceId, boolean stackAware, String availabilityZone, Long privateId) {
         super(params);
         this.type = type;
         this.status = status;
@@ -62,6 +64,7 @@ public class CloudResource extends DynamicModel {
         this.instanceId = instanceId;
         this.stackAware = stackAware;
         this.availabilityZone = availabilityZone;
+        this.privateId = privateId;
     }
 
     public ResourceType getType() {
@@ -112,6 +115,10 @@ public class CloudResource extends DynamicModel {
         return availabilityZone;
     }
 
+    public Long getPrivateId() {
+        return privateId;
+    }
+
     public String getDetailedInfo() {
         if (instanceId != null && !name.equals(instanceId)) {
             return getType() + " - " + getName() + " (" + instanceId + ")";
@@ -155,15 +162,15 @@ public class CloudResource extends DynamicModel {
             return false;
         }
         CloudResource that = (CloudResource) o;
-        return persistent == that.persistent && stackAware == that.stackAware && type == that.type && status == that.status &&
-                Objects.equals(name, that.name) && Objects.equals(reference, that.reference) && Objects.equals(group, that.group) &&
-                Objects.equals(availabilityZone, that.availabilityZone) && Objects.equals(instanceId, that.instanceId) &&
-                Objects.equals(getParameters(), that.getParameters());
+        return persistent == that.persistent && stackAware == that.stackAware && type == that.type && status == that.status && Objects.equals(name, that.name)
+                && Objects.equals(reference, that.reference) && Objects.equals(group, that.group) && Objects.equals(availabilityZone, that.availabilityZone)
+                && Objects.equals(instanceId, that.instanceId) && Objects.equals(getParameters(), that.getParameters())
+                && Objects.equals(privateId, that.privateId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, status, name, reference, group, availabilityZone, persistent, stackAware, instanceId, getParameters());
+        return Objects.hash(type, status, name, reference, group, availabilityZone, persistent, stackAware, instanceId, privateId, getParameters());
     }
 
     @JsonPOJOBuilder
@@ -188,6 +195,8 @@ public class CloudResource extends DynamicModel {
 
         private String availabilityZone;
 
+        private Long privateId;
+
         private Builder() {
         }
 
@@ -201,6 +210,7 @@ public class CloudResource extends DynamicModel {
             instanceId = cloudResource.getInstanceId();
             stackAware = cloudResource.isStackAware();
             availabilityZone = cloudResource.getAvailabilityZone();
+            privateId = cloudResource.getPrivateId();
             return this;
         }
 
@@ -255,15 +265,20 @@ public class CloudResource extends DynamicModel {
             return this;
         }
 
+        public Builder withPrivateId(Long privateId) {
+            this.privateId = privateId;
+            return this;
+        }
+
         public CloudResource build() {
             Preconditions.checkNotNull(type);
             Preconditions.checkNotNull(status);
             Preconditions.checkNotNull(name);
             Preconditions.checkNotNull(parameters);
             if (Objects.isNull(stackAware)) {
-                return new CloudResource(type, status, name, reference, group, persistent, parameters, instanceId, true, availabilityZone);
+                return new CloudResource(type, status, name, reference, group, persistent, parameters, instanceId, true, availabilityZone, privateId);
             } else {
-                return new CloudResource(type, status, name, reference, group, persistent, parameters, instanceId, stackAware, availabilityZone);
+                return new CloudResource(type, status, name, reference, group, persistent, parameters, instanceId, stackAware, availabilityZone, privateId);
             }
         }
     }

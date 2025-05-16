@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.ResourceType;
 
 import freemarker.template.Configuration;
 import software.amazon.awssdk.services.rds.model.DescribeDbInstancesResponse;
@@ -276,5 +277,10 @@ public class AwsResourceConnector implements ResourceConnector {
     @Override
     public void updateDiskVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size) throws Exception {
         awsCommonDiskUpdateService.modifyVolumes(authenticatedContext, volumeIds, diskType, size);
+    }
+
+    @Override
+    public ResourceType getInstanceResourceType() {
+        return ResourceType.AWS_INSTANCE;
     }
 }
