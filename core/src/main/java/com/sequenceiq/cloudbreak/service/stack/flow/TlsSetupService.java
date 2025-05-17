@@ -74,6 +74,7 @@ public class TlsSetupService {
             throw new CloudbreakException("Failed to retrieve the server's certificate from Nginx."
                     + " Please check your security group is open enough and the Management Console can access your VPC and subnet."
                     + " Please also Make sure your Subnets can route to the internet and you have public DNS and IP options enabled."
+                    + " Please also consider enabling Cluster Connectivity Manager(CCM)."
                     + " Refer to Cloudera documentation at"
                     + " https://docs.cloudera.com/management-console/cloud/proxy/topics/mc-outbound-internet-access-and-proxy.html", e);
         }
