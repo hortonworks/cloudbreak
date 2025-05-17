@@ -50,7 +50,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceCheckMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTypeMetadata;
@@ -103,6 +105,8 @@ class GcpMetadataCollectorTest {
     private static final String REGION = "region";
 
     private static final Long STACK_ID = 1L;
+
+    private static final String RESOURCE_CRN = "resourceCrn";
 
     @InjectMocks
     private GcpMetadataCollector underTest;
@@ -343,6 +347,20 @@ class GcpMetadataCollectorTest {
         instances.entrySet().stream().filter(entry -> !"NA".equals(entry.getValue())).forEach(entry -> {
             assertThat(instanceTypes).containsEntry(entry.getKey(), StringUtils.substringAfterLast(entry.getValue(), "/"));
         });
+    }
+
+    @Test
+    void testCollectCdpInstances() {
+        InstanceCheckMetadata instanceCheckMetadata1 = mock(InstanceCheckMetadata.class);
+        InstanceCheckMetadata instanceCheckMetadata2 = mock(InstanceCheckMetadata.class);
+        CloudStack cloudStack = mock(CloudStack.class);
+        List<String> knownInstanceIds = mock(List.class);
+        when(gcpInstanceProvider.collectCdpInstances(authenticatedContext, RESOURCE_CRN, cloudStack, knownInstanceIds))
+                .thenReturn(List.of(instanceCheckMetadata1, instanceCheckMetadata2));
+
+        List<InstanceCheckMetadata> result = underTest.collectCdpInstances(authenticatedContext, RESOURCE_CRN, cloudStack, knownInstanceIds);
+
+        assertThat(result).containsExactlyInAnyOrder(instanceCheckMetadata1, instanceCheckMetadata2);
     }
 
     private Instance instance(String instanceId, String instanceType) {

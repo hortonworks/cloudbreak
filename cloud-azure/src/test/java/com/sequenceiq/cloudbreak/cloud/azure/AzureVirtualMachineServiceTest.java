@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -14,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,6 +28,7 @@ import com.azure.resourcemanager.compute.models.ApiError;
 import com.azure.resourcemanager.compute.models.ApiErrorException;
 import com.azure.resourcemanager.compute.models.PowerState;
 import com.azure.resourcemanager.compute.models.VirtualMachine;
+import com.azure.resourcemanager.compute.models.VirtualMachineSizeTypes;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureListResult;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
@@ -36,14 +37,17 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceCheckMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.common.model.DefaultApplicationTag;
 
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 @ExtendWith(MockitoExtension.class)
-public class AzureVirtualMachineServiceTest {
+class AzureVirtualMachineServiceTest {
 
     private static final String INSTANCE_1 = "instance-1";
 
@@ -53,11 +57,10 @@ public class AzureVirtualMachineServiceTest {
 
     private static final String RESOURCE_GROUP = "resource-group";
 
+    private static final String RESOURCE_CRN = "resource-crn";
+
     @Mock
     private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
-
-    @InjectMocks
-    private AzureVirtualMachineService underTest;
 
     @Mock
     private AzureClient azureClient;
@@ -74,15 +77,22 @@ public class AzureVirtualMachineServiceTest {
     @Mock
     private AzureExceptionHandler azureExceptionHandler;
 
+    @InjectMocks
+    private AzureVirtualMachineService underTest;
+
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         lenient().when(schedulerProvider.io()).thenReturn(Schedulers.immediate());
     }
 
     @Test
-    public void testGetVirtualMachinesByIdShouldReturnTheVirtualMachines() {
+    void testGetVirtualMachinesByIdShouldReturnTheVirtualMachines() {
         Set<String> privateInstanceIds = createPrivateInstanceIds();
-        AzureListResult<VirtualMachine> virtualMachines = createPagedList();
+        AzureListResult<VirtualMachine> virtualMachines = createPagedList(List.of(
+                createVirtualMachine(INSTANCE_1),
+                createVirtualMachine(INSTANCE_2),
+                createVirtualMachine(INSTANCE_3)
+        ));
 
         when(azureClient.getVirtualMachines(RESOURCE_GROUP)).thenReturn(virtualMachines);
 
@@ -94,9 +104,9 @@ public class AzureVirtualMachineServiceTest {
     }
 
     @Test
-    public void testGetVirtualMachinesByIdShouldReturnOneVirtualMachinesWhenOnlyTheFirstPageAvailable() {
+    void testGetVirtualMachinesByIdShouldReturnOneVirtualMachinesWhenOnlyTheFirstPageAvailable() {
         Set<String> privateInstanceIds = createPrivateInstanceIds();
-        AzureListResult<VirtualMachine> virtualMachinesWithOnePage = createPagedListWithOnePage();
+        AzureListResult<VirtualMachine> virtualMachinesWithOnePage = createPagedList(List.of(createVirtualMachine(INSTANCE_1)));
 
         when(azureClient.getVirtualMachines(RESOURCE_GROUP)).thenReturn(virtualMachinesWithOnePage);
 
@@ -107,9 +117,9 @@ public class AzureVirtualMachineServiceTest {
     }
 
     @Test
-    public void testGetVirtualMachinesByResourceGroupShouldThrowExceptionWhenListIsEmpty() {
+    void testGetVirtualMachinesByResourceGroupShouldThrowExceptionWhenListIsEmpty() {
         Set<String> privateInstanceIds = createPrivateInstanceIds();
-        AzureListResult<VirtualMachine> virtualMachinesEmpty = createEmptyPagedList();
+        AzureListResult<VirtualMachine> virtualMachinesEmpty = createPagedList(List.of());
 
         when(azureClient.getVirtualMachines(RESOURCE_GROUP)).thenReturn(virtualMachinesEmpty);
         when(azureClient.getVirtualMachineByResourceGroup(any(), any())).thenReturn(null);
@@ -122,12 +132,12 @@ public class AzureVirtualMachineServiceTest {
     }
 
     @Test
-    public void testGetVmStatuses() {
+    void testGetVmStatuses() {
         when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
         when(ac.getCloudContext()).thenReturn(cloudContext);
         CloudInstance cloudInstance = cloudInstance(INSTANCE_1);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudInstance)).thenReturn(RESOURCE_GROUP);
-        AzureListResult<VirtualMachine> virtualMachines = createPagedListWithOnePage();
+        AzureListResult<VirtualMachine> virtualMachines = createPagedList(List.of(createVirtualMachine(INSTANCE_1)));
         when(azureClient.getVirtualMachines(RESOURCE_GROUP)).thenReturn(virtualMachines);
 
         AzureVirtualMachinesWithStatuses result = underTest.getVmsAndVmStatusesFromAzure(ac, List.of(cloudInstance));
@@ -135,18 +145,18 @@ public class AzureVirtualMachineServiceTest {
         verify(azureClient, times(0)).getVirtualMachineByResourceGroup(any(), any());
         assertNotNull(result);
         assertEquals(1, result.getStatuses().size());
-        CloudVmInstanceStatus vmStatus = result.getStatuses().get(0);
+        CloudVmInstanceStatus vmStatus = result.getStatuses().getFirst();
         assertEquals(cloudInstance, vmStatus.getCloudInstance());
         assertEquals(InstanceStatus.STARTED, vmStatus.getStatus());
     }
 
     @Test
-    public void testGetVmStatusesIfVmsByResourceGroupReturnsWithEmptyList() {
+    void testGetVmStatusesIfVmsByResourceGroupReturnsWithEmptyList() {
         when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
         when(ac.getCloudContext()).thenReturn(cloudContext);
         CloudInstance cloudInstance = cloudInstance(INSTANCE_1);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudInstance)).thenReturn(RESOURCE_GROUP);
-        AzureListResult<VirtualMachine> virtualMachines = createEmptyPagedList();
+        AzureListResult<VirtualMachine> virtualMachines = createPagedList(new ArrayList<>());
         when(azureClient.getVirtualMachines(RESOURCE_GROUP)).thenReturn(virtualMachines);
         VirtualMachine virtualMachine = createVirtualMachine(INSTANCE_1);
         when(azureClient.getVirtualMachineByResourceGroup(RESOURCE_GROUP, INSTANCE_1)).thenReturn(virtualMachine);
@@ -156,13 +166,13 @@ public class AzureVirtualMachineServiceTest {
         verify(azureClient, times(1)).getVirtualMachineByResourceGroup(RESOURCE_GROUP, INSTANCE_1);
         assertNotNull(result);
         assertEquals(1, result.getStatuses().size());
-        CloudVmInstanceStatus vmStatus = result.getStatuses().get(0);
+        CloudVmInstanceStatus vmStatus = result.getStatuses().getFirst();
         assertEquals(cloudInstance, vmStatus.getCloudInstance());
         assertEquals(InstanceStatus.STARTED, vmStatus.getStatus());
     }
 
     @Test
-    public void testGetVmStatusesWhenVmIsNotFoundOnProvider() {
+    void testGetVmStatusesWhenVmIsNotFoundOnProvider() {
         when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
         when(ac.getCloudContext()).thenReturn(cloudContext);
         CloudInstance cloudInstance = cloudInstance(INSTANCE_1);
@@ -178,13 +188,13 @@ public class AzureVirtualMachineServiceTest {
 
         assertNotNull(result);
         assertEquals(1, result.getStatuses().size());
-        CloudVmInstanceStatus vmStatus = result.getStatuses().get(0);
+        CloudVmInstanceStatus vmStatus = result.getStatuses().getFirst();
         assertEquals(cloudInstance, vmStatus.getCloudInstance());
         assertEquals(InstanceStatus.TERMINATED, vmStatus.getStatus());
     }
 
     @Test
-    public void testGetVmStatusesWhenProviderThrowsUnknownErrorAboutTheInstance() {
+    void testGetVmStatusesWhenProviderThrowsUnknownErrorAboutTheInstance() {
         when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
         when(ac.getCloudContext()).thenReturn(cloudContext);
         CloudInstance cloudInstance = cloudInstance(INSTANCE_1);
@@ -198,7 +208,7 @@ public class AzureVirtualMachineServiceTest {
 
         assertNotNull(result);
         assertEquals(1, result.getStatuses().size());
-        CloudVmInstanceStatus vmStatus = result.getStatuses().get(0);
+        CloudVmInstanceStatus vmStatus = result.getStatuses().getFirst();
         assertEquals(cloudInstance, vmStatus.getCloudInstance());
         assertEquals(InstanceStatus.UNKNOWN, vmStatus.getStatus());
         assertEquals("Failed to get VM's state from Azure: com.azure.resourcemanager.compute.models.ApiErrorException: instance-1 is bad.",
@@ -206,30 +216,30 @@ public class AzureVirtualMachineServiceTest {
     }
 
     @Test
-    public void testGetVmStatusesWhenProviderReturnsEmptyVmList() {
+    void testGetVmStatusesWhenProviderReturnsEmptyVmList() {
         when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
         when(ac.getCloudContext()).thenReturn(cloudContext);
         CloudInstance cloudInstance = cloudInstance(INSTANCE_1);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudInstance)).thenReturn(RESOURCE_GROUP);
-        AzureListResult<VirtualMachine> virtualMachines = createEmptyPagedList();
+        AzureListResult<VirtualMachine> virtualMachines = createPagedList(List.of());
         when(azureClient.getVirtualMachines(RESOURCE_GROUP)).thenReturn(virtualMachines);
 
         AzureVirtualMachinesWithStatuses result = underTest.getVmsAndVmStatusesFromAzure(ac, List.of(cloudInstance));
 
         assertNotNull(result);
         assertEquals(1, result.getStatuses().size());
-        CloudVmInstanceStatus vmStatus = result.getStatuses().get(0);
+        CloudVmInstanceStatus vmStatus = result.getStatuses().getFirst();
         assertEquals(cloudInstance, vmStatus.getCloudInstance());
         assertEquals(InstanceStatus.TERMINATED, vmStatus.getStatus());
     }
 
     @Test
-    public void testGetVmStatusesWhenProviderReturnsNullInstanceIds() {
+    void testGetVmStatusesWhenProviderReturnsNullInstanceIds() {
         when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
         when(ac.getCloudContext()).thenReturn(cloudContext);
         CloudInstance cloudInstance = cloudInstance(null);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudInstance)).thenReturn(RESOURCE_GROUP);
-        AzureListResult<VirtualMachine> virtualMachines = createEmptyPagedList();
+        AzureListResult<VirtualMachine> virtualMachines = createPagedList(List.of());
         ApiError apiError = new ApiError();
         AzureTestUtils.setField(apiError, "code", "ResourceGroupNotFound");
         HttpResponse httpResponse = mock(HttpResponse.class);
@@ -241,35 +251,60 @@ public class AzureVirtualMachineServiceTest {
 
         assertNotNull(result);
         assertEquals(1, result.getStatuses().size());
-        CloudVmInstanceStatus vmStatus = result.getStatuses().get(0);
+        CloudVmInstanceStatus vmStatus = result.getStatuses().getFirst();
         assertEquals(cloudInstance, vmStatus.getCloudInstance());
         assertEquals(InstanceStatus.TERMINATED, vmStatus.getStatus());
     }
 
-    private AzureListResult<VirtualMachine> createPagedList() {
-        List<VirtualMachine> list = new ArrayList<>();
-        list.add(createVirtualMachine(INSTANCE_1));
-        list.add(createVirtualMachine(INSTANCE_2));
-        list.add(createVirtualMachine(INSTANCE_3));
-        AzureListResult<VirtualMachine> azureListResult = mock(AzureListResult.class);
-        lenient().when(azureListResult.getAll()).thenReturn(list);
-        lenient().when(azureListResult.getStream()).thenReturn(list.stream());
-        lenient().when(azureListResult.getWhile(any())).thenReturn(list);
-        return azureListResult;
+    @Test
+    void testCollectCdpInstances() {
+        AzureListResult<VirtualMachine> vms = createPagedList(List.of(
+                createVirtualMachine(INSTANCE_1, "Standard_D2_v2", "PowerState/running", Map.of(DefaultApplicationTag.RESOURCE_CRN.key(), RESOURCE_CRN)),
+                createVirtualMachine(INSTANCE_2, "Standard_D1_v2", "PowerState/running", Map.of()),
+                createVirtualMachine(INSTANCE_3, "Standard_D3_v2", "PowerState/starting", Map.of(DefaultApplicationTag.RESOURCE_CRN.key(), RESOURCE_CRN))
+        ));
+        CloudStack cloudStack = mock(CloudStack.class);
+        when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
+        when(ac.getCloudContext()).thenReturn(cloudContext);
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudStack)).thenReturn(RESOURCE_GROUP);
+        when(azureClient.getVirtualMachines(RESOURCE_GROUP)).thenReturn(vms);
+
+        List<InstanceCheckMetadata> result = underTest.collectCdpInstances(ac, RESOURCE_CRN, cloudStack, List.of());
+
+        assertThat(result).hasSize(2);
+        assertThat(result).extracting(InstanceCheckMetadata::instanceId).containsExactlyInAnyOrder(INSTANCE_1, INSTANCE_3);
+        assertThat(result).extracting(InstanceCheckMetadata::instanceType).containsExactlyInAnyOrder("Standard_D2_v2", "Standard_D3_v2");
+        assertThat(result).extracting(InstanceCheckMetadata::status).containsExactlyInAnyOrder(InstanceStatus.STARTED, InstanceStatus.IN_PROGRESS);
     }
 
-    private AzureListResult<VirtualMachine> createEmptyPagedList() {
-        AzureListResult<VirtualMachine> azureListResult = mock(AzureListResult.class);
-        lenient().when(azureListResult.getAll()).thenReturn(new ArrayList<>());
-        lenient().when(azureListResult.getStream()).thenAnswer(i -> Stream.empty());
-        lenient().when(azureListResult.getWhile(any())).thenReturn(new ArrayList<>());
-        return azureListResult;
+    @Test
+    void testCollectCdpInstancesWhenThereIsAKnownInstanceIdMissing() {
+        AzureListResult<VirtualMachine> vms1 = createPagedList(List.of(
+                createVirtualMachine(INSTANCE_1, "Standard_D2_v2", "PowerState/running", Map.of(DefaultApplicationTag.RESOURCE_CRN.key(), RESOURCE_CRN)),
+                createVirtualMachine(INSTANCE_2, "Standard_D1_v2", "PowerState/running", Map.of())
+        ));
+        AzureListResult<VirtualMachine> vms2 = createPagedList(List.of(
+                createVirtualMachine(INSTANCE_3, "Standard_D3_v2", "PowerState/starting", Map.of(DefaultApplicationTag.RESOURCE_CRN.key(), RESOURCE_CRN))
+        ));
+        CloudStack cloudStack = mock(CloudStack.class);
+        when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
+        when(ac.getCloudContext()).thenReturn(cloudContext);
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudStack)).thenReturn(RESOURCE_GROUP);
+        when(azureClient.getVirtualMachines(RESOURCE_GROUP))
+                .thenReturn(vms1)
+                .thenReturn(vms2);
+
+        List<InstanceCheckMetadata> result = underTest.collectCdpInstances(ac, RESOURCE_CRN, cloudStack, List.of(INSTANCE_3));
+
+        verify(azureClient, times(2)).getVirtualMachines(RESOURCE_GROUP);
+        assertThat(result).hasSize(2);
+        assertThat(result).extracting(InstanceCheckMetadata::instanceId).containsExactlyInAnyOrder(INSTANCE_1, INSTANCE_3);
+        assertThat(result).extracting(InstanceCheckMetadata::instanceType).containsExactlyInAnyOrder("Standard_D2_v2", "Standard_D3_v2");
+        assertThat(result).extracting(InstanceCheckMetadata::status).containsExactlyInAnyOrder(InstanceStatus.STARTED, InstanceStatus.IN_PROGRESS);
     }
 
-    private AzureListResult<VirtualMachine> createPagedListWithOnePage() {
-        List<VirtualMachine> list = new ArrayList<>();
-        list.add(createVirtualMachine(INSTANCE_1));
-        AzureListResult<VirtualMachine> azureListResult = mock(AzureListResult.class);
+    private <T> AzureListResult<T> createPagedList(List<T> list) {
+        AzureListResult<T> azureListResult = mock(AzureListResult.class);
         lenient().when(azureListResult.getAll()).thenReturn(list);
         lenient().when(azureListResult.getStream()).thenReturn(list.stream());
         lenient().when(azureListResult.getWhile(any())).thenReturn(list);
@@ -281,6 +316,15 @@ public class AzureVirtualMachineServiceTest {
         when(virtualMachine.name()).thenReturn(vmId);
         lenient().when(virtualMachine.powerState()).thenReturn(PowerState.RUNNING);
         lenient().when(virtualMachine.refreshInstanceViewAsync()).thenReturn(Mono.empty());
+        return virtualMachine;
+    }
+
+    private VirtualMachine createVirtualMachine(String name, String size, String powerState, Map<String, String> tags) {
+        VirtualMachine virtualMachine = mock(VirtualMachine.class);
+        lenient().when(virtualMachine.name()).thenReturn(name);
+        lenient().when(virtualMachine.size()).thenReturn(VirtualMachineSizeTypes.fromString(size));
+        lenient().when(virtualMachine.powerState()).thenReturn(PowerState.fromString(powerState));
+        lenient().when(virtualMachine.tags()).thenReturn(tags);
         return virtualMachine;
     }
 

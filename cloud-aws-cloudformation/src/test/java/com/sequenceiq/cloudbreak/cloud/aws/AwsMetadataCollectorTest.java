@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -48,9 +49,11 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceLifeCycle;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceCheckMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTypeMetadata;
@@ -76,7 +79,7 @@ import software.amazon.awssdk.services.ec2.model.Subnet;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
 
 @ExtendWith(MockitoExtension.class)
-public class AwsMetadataCollectorTest {
+class AwsMetadataCollectorTest {
 
     private static final Long WORKSPACE_ID = 1L;
 
@@ -101,6 +104,8 @@ public class AwsMetadataCollectorTest {
     private static final String AVAILABILITY_ZONE_1 = "availabilityZone1";
 
     private static final String AVAILABILITY_ZONE_2 = "availabilityZone2";
+
+    private static final String RESOURCE_CRN = "resourceCrn";
 
     private final DescribeInstancesRequest describeInstancesRequestGw = DescribeInstancesRequest.builder().build();
 
@@ -673,5 +678,20 @@ public class AwsMetadataCollectorTest {
         assertThat(instanceTypes).hasSize(2);
         assertThat(instanceTypes).containsEntry("instance1", "large");
         assertThat(instanceTypes).containsEntry("instance2", "large");
+    }
+
+    @Test
+    void testCollectCdpInstances() {
+        InstanceCheckMetadata instanceCheckMetadata1 = mock(InstanceCheckMetadata.class);
+        InstanceCheckMetadata instanceCheckMetadata2 = mock(InstanceCheckMetadata.class);
+        AuthenticatedContext ac = authenticatedContext();
+        CloudStack cloudStack = mock(CloudStack.class);
+        List<String> knownInstanceIds = mock(List.class);
+        when(awsInstanceCommonService.collectCdpInstances(ac, RESOURCE_CRN, knownInstanceIds))
+                .thenReturn(List.of(instanceCheckMetadata1, instanceCheckMetadata2));
+
+        List<InstanceCheckMetadata> result = underTest.collectCdpInstances(ac, RESOURCE_CRN, cloudStack, knownInstanceIds);
+
+        assertThat(result).containsExactlyInAnyOrder(instanceCheckMetadata1, instanceCheckMetadata2);
     }
 }

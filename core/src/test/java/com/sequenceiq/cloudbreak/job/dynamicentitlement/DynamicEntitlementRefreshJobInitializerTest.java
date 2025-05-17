@@ -38,7 +38,7 @@ class DynamicEntitlementRefreshJobInitializerTest {
         when(dynamicEntitlementRefreshConfig.isDynamicEntitlementEnabled()).thenReturn(Boolean.TRUE);
         JobResource jobResource1 = mock(JobResource.class);
         JobResource jobResource2 = mock(JobResource.class);
-        when(stackService.getAllAliveForAutoSync(anySet())).thenReturn(List.of(jobResource1, jobResource2));
+        when(stackService.getAllWhereStatusNotIn(anySet())).thenReturn(List.of(jobResource1, jobResource2));
         underTest.initJobs();
         verify(dynamicEntitlementRefreshJobService, times(2)).schedule((DynamicEntitlementRefreshJobAdapter) any());
     }
@@ -46,7 +46,7 @@ class DynamicEntitlementRefreshJobInitializerTest {
     @Test
     void testInitJobsWithoutAliveDatahubs() {
         when(dynamicEntitlementRefreshConfig.isDynamicEntitlementEnabled()).thenReturn(Boolean.TRUE);
-        when(stackService.getAllAliveForAutoSync(anySet())).thenReturn(List.of());
+        when(stackService.getAllWhereStatusNotIn(anySet())).thenReturn(List.of());
         underTest.initJobs();
         verify(dynamicEntitlementRefreshJobService, never()).schedule((DynamicEntitlementRefreshJobAdapter) any());
     }

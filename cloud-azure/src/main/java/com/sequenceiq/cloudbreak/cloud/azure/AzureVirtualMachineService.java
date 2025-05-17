@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static com.sequenceiq.cloudbreak.cloud.model.CloudInstance.INSTANCE_NAME;
+import static com.sequenceiq.common.model.DefaultApplicationTag.RESOURCE_CRN;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -34,7 +37,9 @@ import com.sequenceiq.cloudbreak.cloud.azure.util.SchedulerProvider;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceCheckMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 
 import reactor.core.publisher.Mono;
@@ -171,13 +176,13 @@ public class AzureVirtualMachineService {
                             .filter(cloudInstance -> instance != null && instance.equals(cloudInstance.getInstanceId()))
                             .findFirst()
                             .ifPresent(cloudInstance -> {
-                        if (azureExceptionHandler.isNotFound(e)) {
-                            statuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.TERMINATED));
-                        } else {
-                            String msg = String.format("Failed to get VM's state from Azure: %s", e.toString());
-                            statuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.UNKNOWN, msg));
-                        }
-                    });
+                                if (azureExceptionHandler.isNotFound(e)) {
+                                    statuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.TERMINATED));
+                                } else {
+                                    String msg = String.format("Failed to get VM's state from Azure: %s", e.toString());
+                                    statuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.UNKNOWN, msg));
+                                }
+                            });
                 }
             }
         }
@@ -209,5 +214,35 @@ public class AzureVirtualMachineService {
     private void logTheStatusOfTheCloudInstance(CloudVmInstanceStatus cloudInstanceWithStatus) {
         LOGGER.info("Cloud instance '{}' could not be found in the response from Azure, but it's status already requested to be updated to '{}'",
                 cloudInstanceWithStatus.getCloudInstance().getInstanceId(), cloudInstanceWithStatus.getStatus().name());
+    }
+
+    public List<InstanceCheckMetadata> collectCdpInstances(AuthenticatedContext ac, String resourceCrn, CloudStack cloudStack, List<String> knownInstanceIds) {
+        LOGGER.info("Collecting CDP instances for stack with resource crn: '{}'", resourceCrn);
+        AzureClient client = ac.getParameter(AzureClient.class);
+        String resourceGroup = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), cloudStack);
+        Map<String, VirtualMachine> vms = client.getVirtualMachines(resourceGroup).getStream()
+                .filter(vm -> vm.tags().containsKey(RESOURCE_CRN.key()) && vm.tags().get(RESOURCE_CRN.key()).equals(resourceCrn))
+                .collect(Collectors.toMap(VirtualMachine::name, Function.identity()));
+        vms.putAll(retrieveKnownInstancesFromProviderIfAnyMissing(knownInstanceIds, vms, client, resourceGroup));
+
+        LOGGER.info("Collected the following instances for stack with resource crn: '{}': {}", resourceCrn, vms.keySet());
+        return vms.values().stream()
+                .map(vm -> InstanceCheckMetadata.builder()
+                        .withInstanceId(vm.name())
+                        .withInstanceType(vm.size().getValue())
+                        .withStatus(AzureInstanceStatus.get(vm.powerState()))
+                        .build())
+                .toList();
+    }
+
+    private Map<String, VirtualMachine> retrieveKnownInstancesFromProviderIfAnyMissing(List<String> knownInstanceIds,
+            Map<String, VirtualMachine> instancesRetrievedByTag, AzureClient client, String resourceGroup) {
+        Set<String> instanceIdsRetrievedByTag = instancesRetrievedByTag.keySet();
+        List<String> knownInstanceIdsNotRetrievedByTag = knownInstanceIds.stream().filter(Predicate.not(instanceIdsRetrievedByTag::contains)).toList();
+        if (!knownInstanceIdsNotRetrievedByTag.isEmpty()) {
+            return getVirtualMachinesByPrivateInstanceIds(client, resourceGroup, knownInstanceIdsNotRetrievedByTag).stream()
+                    .collect(Collectors.toMap(VirtualMachine::name, Function.identity()));
+        }
+        return Map.of();
     }
 }

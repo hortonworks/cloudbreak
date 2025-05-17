@@ -17,19 +17,14 @@ public class AwsInstanceStatusMapper {
     }
 
     public static InstanceStatus getInstanceStatusByAwsStateAndReason(InstanceState state, StateReason stateReason) {
-        switch (state.nameAsString().toLowerCase(Locale.ROOT)) {
-            case "stopped":
-                return InstanceStatus.STOPPED;
-            case "running":
-                return InstanceStatus.STARTED;
-            case "shutting-down" :
-                return InstanceStatus.SHUTTING_DOWN;
-            case "terminated":
-                return stateReason != null && "Server.SpotInstanceTermination".equals(stateReason.code())
-                        ? InstanceStatus.TERMINATED_BY_PROVIDER
-                        : InstanceStatus.TERMINATED;
-            default:
-                return InstanceStatus.IN_PROGRESS;
-        }
+        return switch (state.nameAsString().toLowerCase(Locale.ROOT)) {
+            case "stopped" -> InstanceStatus.STOPPED;
+            case "running" -> InstanceStatus.STARTED;
+            case "shutting-down" -> InstanceStatus.SHUTTING_DOWN;
+            case "terminated" -> stateReason != null && "Server.SpotInstanceTermination".equals(stateReason.code())
+                    ? InstanceStatus.TERMINATED_BY_PROVIDER
+                    : InstanceStatus.TERMINATED;
+            default -> InstanceStatus.IN_PROGRESS;
+        };
     }
 }

@@ -1126,7 +1126,7 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         return new CloudPlatformVariant(variantView.getCloudPlatform(), variantView.getPlatformVariant());
     }
 
-    public List<JobResource> getAllAliveForAutoSync(Set<Status> statusesNotIn) {
+    public List<JobResource> getAllWhereStatusNotIn(Set<Status> statusesNotIn) {
         return stackRepository.getJobResourcesNotIn(statusesNotIn);
     }
 

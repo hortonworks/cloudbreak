@@ -1,6 +1,6 @@
-package com.sequenceiq.cloudbreak.job.metering.scheduler;
+package com.sequenceiq.cloudbreak.job.instancechecker.scheduler;
 
-import static com.sequenceiq.cloudbreak.job.metering.scheduler.MeteringSchedulerFactoryConfig.QUARTZ_METERING_SCHEDULER;
+import static com.sequenceiq.cloudbreak.job.instancechecker.scheduler.InstanceCheckerSchedulerFactoryConfig.QUARTZ_INSTANCE_CHECKER_SCHEDULER;
 
 import jakarta.inject.Inject;
 
@@ -10,10 +10,10 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
 
-@Component("MeteringTransactionalScheduler")
-public class MeteringTransactionalScheduler extends TransactionalScheduler {
+@Component("InstanceCheckerTransactionalScheduler")
+public class InstanceCheckerTransactionalScheduler extends TransactionalScheduler {
 
-    @Qualifier(QUARTZ_METERING_SCHEDULER)
+    @Qualifier(QUARTZ_INSTANCE_CHECKER_SCHEDULER)
     @Inject
     private Scheduler scheduler;
 

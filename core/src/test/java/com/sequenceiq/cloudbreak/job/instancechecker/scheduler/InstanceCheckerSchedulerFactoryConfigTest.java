@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.job.metering.scheduler;
+package com.sequenceiq.cloudbreak.job.instancechecker.scheduler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -19,19 +19,13 @@ import org.springframework.boot.autoconfigure.quartz.QuartzProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
-import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.quartz.metric.JobMetricsListener;
 import com.sequenceiq.cloudbreak.quartz.metric.SchedulerMetricsListener;
 import com.sequenceiq.cloudbreak.quartz.metric.TriggerMetricsListener;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.ResourceCheckerJobListener;
 
-import io.micrometer.core.instrument.MeterRegistry;
-
 @ExtendWith(MockitoExtension.class)
-class MeteringSchedulerFactoryConfigTest {
-
-    @Mock
-    private MeterRegistry meterRegistry;
+class InstanceCheckerSchedulerFactoryConfigTest {
 
     @Mock
     private ApplicationContext applicationContext;
@@ -42,21 +36,18 @@ class MeteringSchedulerFactoryConfigTest {
     @Mock
     private DataSource dataSource;
 
-    @Mock
-    private MetricService metricService;
-
     @Spy
     private ResourceCheckerJobListener resourceCheckerJobListener;
 
     @InjectMocks
-    private MeteringSchedulerFactoryConfig underTest;
+    private InstanceCheckerSchedulerFactoryConfig underTest;
 
     @Test
     void testMeteringSchedulerShouldHaveProperConfiguration() throws Exception {
         SchedulerFactoryBean meteringScheduler = underTest.quartzMeteringScheduler(new QuartzProperties(), objectProvider, applicationContext, dataSource);
         meteringScheduler.afterPropertiesSet();
         Scheduler scheduler = meteringScheduler.getScheduler();
-        assertEquals("quartzMeteringScheduler", scheduler.getSchedulerName());
+        assertEquals("quartzInstanceCheckerScheduler", scheduler.getSchedulerName());
         ListenerManager listenerManager = scheduler.getListenerManager();
         assertThat(listenerManager.getSchedulerListeners()).hasSize(1);
         assertEquals(SchedulerMetricsListener.class, listenerManager.getSchedulerListeners().getFirst().getClass());
@@ -66,5 +57,4 @@ class MeteringSchedulerFactoryConfigTest {
         assertThat(listenerManager.getTriggerListeners()).hasSize(1);
         assertNotNull(listenerManager.getTriggerListener(TriggerMetricsListener.class.getSimpleName()));
     }
-
 }

@@ -17,6 +17,7 @@ import com.google.api.services.compute.model.Instance;
 import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpInstanceStatusMapper;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
@@ -100,7 +101,7 @@ public class GcpInstanceStateChecker {
         try {
             LOGGER.debug("Query instance('{}') details from GCP in availability zone: '{}'", instanceId, availabilityZone);
             Instance gcpInstance = gcpStackUtil.getComputeInstanceWithId(context.getCompute(), projectId, availabilityZone, instanceId);
-            status = getInstanceStatusFromGcpInstance(gcpInstance);
+            status = GcpInstanceStatusMapper.getInstanceStatusFromGcpStatus(gcpInstance.getStatus());
         } catch (GoogleJsonResponseException jsonExc) {
             if (resourceNotFoundException(jsonExc)) {
                 LOGGER.info("Instance wit id '{}' could not be found", instanceId);
@@ -123,20 +124,5 @@ public class GcpInstanceStateChecker {
         return ex.getDetails() != null
                 && ex.getDetails().containsKey(ERROR_CODE)
                 && (ex.getDetails().get(ERROR_CODE).equals(HttpStatus.SC_NOT_FOUND) || ex.getDetails().get(ERROR_CODE).equals(HttpStatus.SC_FORBIDDEN));
-    }
-
-    private InstanceStatus getInstanceStatusFromGcpInstance(Instance gcpInstance) {
-        InstanceStatus status;
-        switch (gcpInstance.getStatus()) {
-            case "RUNNING":
-                status = InstanceStatus.STARTED;
-                break;
-            case "TERMINATED":
-                status = InstanceStatus.STOPPED;
-                break;
-            default:
-                status = InstanceStatus.IN_PROGRESS;
-        }
-        return status;
     }
 }

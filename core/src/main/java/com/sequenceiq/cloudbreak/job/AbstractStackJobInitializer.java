@@ -20,6 +20,6 @@ public abstract class AbstractStackJobInitializer implements JobInitializer {
     }
 
     protected List<JobResource> getJobResourcesNotIn(Set<Status> statusesNotIn) {
-        return stackService.getAllAliveForAutoSync(statusesNotIn);
+        return stackService.getAllWhereStatusNotIn(statusesNotIn);
     }
 }

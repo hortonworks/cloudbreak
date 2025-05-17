@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.converter.StackDtoToMeteringEventConverter;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
-import com.sequenceiq.cloudbreak.job.metering.instancechecker.MeteringInstanceCheckerJobService;
+import com.sequenceiq.cloudbreak.job.instancechecker.InstanceCheckerJobService;
 import com.sequenceiq.cloudbreak.job.metering.sync.MeteringSyncJobService;
 import com.sequenceiq.cloudbreak.metering.GrpcMeteringClient;
 import com.sequenceiq.cloudbreak.service.metrics.MeteringMetricTag;
@@ -43,7 +43,7 @@ public class MeteringService {
     private MeteringSyncJobService meteringSyncJobService;
 
     @Inject
-    private MeteringInstanceCheckerJobService meteringInstanceCheckerJobService;
+    private InstanceCheckerJobService instanceCheckerJobService;
 
     @Qualifier("CommonMetricService")
     @Inject
@@ -73,7 +73,9 @@ public class MeteringService {
         StackView stack = stackDtoService.getStackViewById(stackId);
         if (shouldSendMeteringEventForStack(stack)) {
             meteringSyncJobService.schedule(stackId);
-            meteringInstanceCheckerJobService.schedule(stackId);
+        }
+        if (shouldScheduleInstanceCheckerJobForStack(stack)) {
+            instanceCheckerJobService.schedule(stackId);
         }
     }
 
@@ -81,7 +83,9 @@ public class MeteringService {
         StackView stack = stackDtoService.getStackViewById(stackId);
         if (shouldSendMeteringEventForStack(stack)) {
             meteringSyncJobService.scheduleIfNotScheduled(stackId);
-            meteringInstanceCheckerJobService.scheduleIfNotScheduled(stackId);
+        }
+        if (shouldScheduleInstanceCheckerJobForStack(stack)) {
+            instanceCheckerJobService.scheduleIfNotScheduled(stackId);
         }
     }
 
@@ -89,7 +93,9 @@ public class MeteringService {
         StackView stack = stackDtoService.getStackViewById(stackId);
         if (shouldSendMeteringEventForStack(stack)) {
             meteringSyncJobService.unschedule(String.valueOf(stackId));
-            meteringInstanceCheckerJobService.unschedule(String.valueOf(stackId));
+        }
+        if (shouldScheduleInstanceCheckerJobForStack(stack)) {
+            instanceCheckerJobService.unschedule(String.valueOf(stackId));
         }
     }
 
@@ -119,5 +125,10 @@ public class MeteringService {
 
     private boolean shouldSendMeteringEventForStack(StackView stack) {
         return StackType.WORKLOAD == stack.getType() && !CloudPlatform.YARN.equalsIgnoreCase(stack.getCloudPlatform());
+    }
+
+    private boolean shouldScheduleInstanceCheckerJobForStack(StackView stack) {
+        return (StackType.WORKLOAD == stack.getType() || StackType.DATALAKE == stack.getType())
+                && !CloudPlatform.YARN.equalsIgnoreCase(stack.getCloudPlatform());
     }
 }

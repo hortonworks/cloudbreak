@@ -43,7 +43,7 @@ class ProviderSyncJobInitializerTest {
         JobResource jobResource2 = mock(JobResource.class);
         JobResource jobResource3 = mock(JobResource.class);
         when(providerSyncConfig.getEnabledProviders()).thenReturn(Set.of("AWS", "AZURE"));
-        when(stackService.getAllAliveForAutoSync(anySet())).thenReturn(List.of(jobResource1, jobResource2, jobResource3));
+        when(stackService.getAllWhereStatusNotIn(anySet())).thenReturn(List.of(jobResource1, jobResource2, jobResource3));
         when(jobResource1.getProvider()).thenReturn(Optional.of("AZURE"));
         when(jobResource2.getProvider()).thenReturn(Optional.of("AWS"));
         when(jobResource3.getProvider()).thenReturn(Optional.of("GCP"));
@@ -56,7 +56,7 @@ class ProviderSyncJobInitializerTest {
     @Test
     void testInitJobsWithoutAliveDatahubs() {
         when(providerSyncConfig.isProviderSyncEnabled()).thenReturn(Boolean.TRUE);
-        when(stackService.getAllAliveForAutoSync(anySet())).thenReturn(List.of());
+        when(stackService.getAllWhereStatusNotIn(anySet())).thenReturn(List.of());
 
         underTest.initJobs();
 
@@ -69,7 +69,7 @@ class ProviderSyncJobInitializerTest {
 
         underTest.initJobs();
 
-        verify(stackService, never()).getAllAliveForAutoSync(anySet());
+        verify(stackService, never()).getAllWhereStatusNotIn(anySet());
         verify(providerSyncJobService, never()).schedule((ProviderSyncJobAdapter) any());
     }
 }

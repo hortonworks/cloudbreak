@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.converter.StackDtoToMeteringEventConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.job.metering.instancechecker.MeteringInstanceCheckerJobService;
+import com.sequenceiq.cloudbreak.job.instancechecker.InstanceCheckerJobService;
 import com.sequenceiq.cloudbreak.job.metering.sync.MeteringSyncJobService;
 import com.sequenceiq.cloudbreak.metering.GrpcMeteringClient;
 import com.sequenceiq.cloudbreak.service.metrics.MeteringMetricTag;
@@ -53,7 +53,7 @@ class MeteringServiceTest {
     private MetricService metricService;
 
     @Mock
-    private MeteringInstanceCheckerJobService meteringInstanceCheckerJobService;
+    private InstanceCheckerJobService instanceCheckerJobService;
 
     @InjectMocks
     private MeteringService underTest;
@@ -130,84 +130,84 @@ class MeteringServiceTest {
     }
 
     @Test
-    void scheduleSyncShouldScheduleJobWhenDatahub() {
+    void scheduleSyncShouldScheduleJobsWhenDatahub() {
         StackView stack = getStack(WORKLOAD, "AWS");
         when(stackDtoService.getStackViewById(eq(STACK_ID))).thenReturn(stack);
         underTest.scheduleSync(STACK_ID);
         verify(meteringSyncJobService, times(1)).schedule(eq(STACK_ID));
-        verify(meteringInstanceCheckerJobService, times(1)).schedule(eq(STACK_ID));
+        verify(instanceCheckerJobService, times(1)).schedule(eq(STACK_ID));
     }
 
     @Test
-    void scheduleSyncShouldNotScheduleJobWhenNotDatahub() {
+    void scheduleSyncShouldOnlyScheduleInstanceCheckerJobWhenNotDatahub() {
         StackView stack = getStack(DATALAKE, "AWS");
         when(stackDtoService.getStackViewById(eq(STACK_ID))).thenReturn(stack);
         underTest.scheduleSync(STACK_ID);
         verify(meteringSyncJobService, never()).schedule(eq(STACK_ID));
-        verify(meteringInstanceCheckerJobService, never()).schedule(eq(STACK_ID));
+        verify(instanceCheckerJobService).schedule(eq(STACK_ID));
     }
 
     @Test
-    void scheduleSyncShouldNotScheduleJobWhenDatahubButYarn() {
+    void scheduleSyncShouldNotScheduleJobsWhenDatahubButYarn() {
         StackView stack = getStack(WORKLOAD, "YARN");
         when(stackDtoService.getStackViewById(eq(STACK_ID))).thenReturn(stack);
         underTest.scheduleSync(STACK_ID);
         verify(meteringSyncJobService, never()).schedule(eq(STACK_ID));
-        verify(meteringInstanceCheckerJobService, never()).schedule(eq(STACK_ID));
+        verify(instanceCheckerJobService, never()).schedule(eq(STACK_ID));
     }
 
     @Test
-    void scheduleSyncIfNotScheduledShouldScheduleJobWhenDatahub() {
+    void scheduleSyncIfNotScheduledShouldScheduleJobsWhenDatahub() {
         StackView stack = getStack(WORKLOAD, "AWS");
         when(stackDtoService.getStackViewById(eq(STACK_ID))).thenReturn(stack);
         underTest.scheduleSyncIfNotScheduled(STACK_ID);
         verify(meteringSyncJobService, times(1)).scheduleIfNotScheduled(eq(STACK_ID));
-        verify(meteringInstanceCheckerJobService, times(1)).scheduleIfNotScheduled(eq(STACK_ID));
+        verify(instanceCheckerJobService, times(1)).scheduleIfNotScheduled(eq(STACK_ID));
     }
 
     @Test
-    void scheduleSyncIfNotScheduledShouldNotScheduleJobWhenNotDatahub() {
+    void scheduleSyncIfNotScheduledShouldOnlyScheduleInstanceCheckerJobWhenNotDatahub() {
         StackView stack = getStack(DATALAKE, "AWS");
         when(stackDtoService.getStackViewById(eq(STACK_ID))).thenReturn(stack);
         underTest.scheduleSyncIfNotScheduled(STACK_ID);
         verify(meteringSyncJobService, never()).scheduleIfNotScheduled(eq(STACK_ID));
-        verify(meteringInstanceCheckerJobService, never()).scheduleIfNotScheduled(eq(STACK_ID));
+        verify(instanceCheckerJobService).scheduleIfNotScheduled(eq(STACK_ID));
     }
 
     @Test
-    void scheduleSyncIfNotScheduledShouldNotScheduleJobWhenDatahubButYarn() {
+    void scheduleSyncIfNotScheduledShouldNotScheduleJobsWhenDatahubButYarn() {
         StackView stack = getStack(WORKLOAD, "YARN");
         when(stackDtoService.getStackViewById(eq(STACK_ID))).thenReturn(stack);
         underTest.scheduleSyncIfNotScheduled(STACK_ID);
         verify(meteringSyncJobService, never()).scheduleIfNotScheduled(eq(STACK_ID));
-        verify(meteringInstanceCheckerJobService, never()).scheduleIfNotScheduled(eq(STACK_ID));
+        verify(instanceCheckerJobService, never()).scheduleIfNotScheduled(eq(STACK_ID));
     }
 
     @Test
-    void unscheduleSyncShouldScheduleJobWhenDatahub() {
+    void unscheduleSyncShouldUnscheduleJobsWhenDatahub() {
         StackView stack = getStack(WORKLOAD, "AWS");
         when(stackDtoService.getStackViewById(eq(STACK_ID))).thenReturn(stack);
         underTest.unscheduleSync(STACK_ID);
         verify(meteringSyncJobService, times(1)).unschedule(eq(String.valueOf(STACK_ID)));
-        verify(meteringInstanceCheckerJobService, times(1)).unschedule(eq(String.valueOf(STACK_ID)));
+        verify(instanceCheckerJobService, times(1)).unschedule(eq(String.valueOf(STACK_ID)));
     }
 
     @Test
-    void unscheduleSyncShouldNotScheduleJobWhenNotDatahub() {
+    void unscheduleSyncShouldOnlyUnscheduleInstanceCheckerJobWhenNotDatahub() {
         StackView stack = getStack(DATALAKE, "AWS");
         when(stackDtoService.getStackViewById(eq(STACK_ID))).thenReturn(stack);
         underTest.unscheduleSync(STACK_ID);
         verify(meteringSyncJobService, never()).unschedule(eq(String.valueOf(STACK_ID)));
-        verify(meteringInstanceCheckerJobService, never()).unschedule(eq(String.valueOf(STACK_ID)));
+        verify(instanceCheckerJobService).unschedule(eq(String.valueOf(STACK_ID)));
     }
 
     @Test
-    void unscheduleSyncShouldNotScheduleJobWhenDatahubButYarn() {
+    void unscheduleSyncShouldNotUnscheduleJobsWhenDatahubButYarn() {
         StackView stack = getStack(DATALAKE, "YARN");
         when(stackDtoService.getStackViewById(eq(STACK_ID))).thenReturn(stack);
         underTest.unscheduleSync(STACK_ID);
         verify(meteringSyncJobService, never()).unschedule(eq(String.valueOf(STACK_ID)));
-        verify(meteringInstanceCheckerJobService, never()).unschedule(eq(String.valueOf(STACK_ID)));
+        verify(instanceCheckerJobService, never()).unschedule(eq(String.valueOf(STACK_ID)));
     }
 
     private Stack getStack(StackType stackType, String cloudPlatform) {

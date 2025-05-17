@@ -41,7 +41,9 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceCheckMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTypeMetadata;
@@ -104,6 +106,8 @@ class AzureMetadataCollectorTest {
     private static final String PRIVATE_FRONTEND = "PrivateFrontend";
 
     private static final String GATEWAY_PRIVATE_FRONTEND = "GatewayPrivateFrontend";
+
+    private static final String RESOURCE_CRN = "resource-crn";
 
     @InjectMocks
     private AzureMetadataCollector underTest;
@@ -458,5 +462,19 @@ class AzureMetadataCollectorTest {
         assertThat(instanceTypes).containsEntry(INSTANCE_1, VirtualMachineSizeTypes.BASIC_A1.toString());
         assertThat(instanceTypes).containsEntry(INSTANCE_2, VirtualMachineSizeTypes.BASIC_A1.toString());
         assertThat(instanceTypes).containsEntry(INSTANCE_3, VirtualMachineSizeTypes.BASIC_A1.toString());
+    }
+
+    @Test
+    void testCollectCdpInstances() {
+        InstanceCheckMetadata instanceCheckMetadata1 = mock(InstanceCheckMetadata.class);
+        InstanceCheckMetadata instanceCheckMetadata2 = mock(InstanceCheckMetadata.class);
+        CloudStack cloudStack = mock(CloudStack.class);
+        List<String> knownInstanceIds = mock(List.class);
+        when(azureVirtualMachineService.collectCdpInstances(authenticatedContext, RESOURCE_CRN, cloudStack, knownInstanceIds))
+                .thenReturn(List.of(instanceCheckMetadata1, instanceCheckMetadata2));
+
+        List<InstanceCheckMetadata> result = underTest.collectCdpInstances(authenticatedContext, RESOURCE_CRN, cloudStack, knownInstanceIds);
+
+        assertThat(result).containsExactlyInAnyOrder(instanceCheckMetadata1, instanceCheckMetadata2);
     }
 }

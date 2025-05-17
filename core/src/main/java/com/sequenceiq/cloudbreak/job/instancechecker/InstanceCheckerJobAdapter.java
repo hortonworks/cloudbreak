@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.job.metering.instancechecker;
+package com.sequenceiq.cloudbreak.job.instancechecker;
 
 import org.quartz.Job;
 import org.springframework.context.ApplicationContext;
@@ -8,19 +8,19 @@ import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 
-public class MeteringInstanceCheckerJobAdapter extends JobResourceAdapter<Stack> {
+public class InstanceCheckerJobAdapter extends JobResourceAdapter<Stack> {
 
-    public MeteringInstanceCheckerJobAdapter(Long id, ApplicationContext context) {
+    public InstanceCheckerJobAdapter(Long id, ApplicationContext context) {
         super(id, context);
     }
 
-    public MeteringInstanceCheckerJobAdapter(JobResource jobResource) {
+    public InstanceCheckerJobAdapter(JobResource jobResource) {
         super(jobResource);
     }
 
     @Override
     public Class<? extends Job> getJobClassForResource() {
-        return MeteringInstanceCheckerJob.class;
+        return InstanceCheckerJob.class;
     }
 
     @Override

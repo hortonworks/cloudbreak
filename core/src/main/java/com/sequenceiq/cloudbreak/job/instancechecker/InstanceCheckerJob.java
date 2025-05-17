@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.job.metering.instancechecker;
+package com.sequenceiq.cloudbreak.job.instancechecker;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.job.StackStatusCheckerJob.LONG_SYNCABLE_STATES;
@@ -20,15 +20,15 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
-import com.sequenceiq.cloudbreak.service.metering.MeteringInstanceCheckerService;
+import com.sequenceiq.cloudbreak.service.instancechecker.InstanceCheckerService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
 
 @DisallowConcurrentExecution
 @Component
-public class MeteringInstanceCheckerJob extends StatusCheckerJob {
+public class InstanceCheckerJob extends StatusCheckerJob {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MeteringInstanceCheckerJob.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(InstanceCheckerJob.class);
 
     @Inject
     private StackDtoService stackDtoService;
@@ -37,10 +37,10 @@ public class MeteringInstanceCheckerJob extends StatusCheckerJob {
     private StackStatusService stackStatusService;
 
     @Inject
-    private MeteringInstanceCheckerService meteringInstanceCheckerService;
+    private InstanceCheckerService instanceCheckerService;
 
     @Inject
-    private MeteringInstanceCheckerJobService meteringInstanceCheckerJobService;
+    private InstanceCheckerJobService instanceCheckerJobService;
 
     @Override
     protected Optional<MdcContextInfoProvider> getMdcContextConfigProvider() {
@@ -52,12 +52,12 @@ public class MeteringInstanceCheckerJob extends StatusCheckerJob {
         StackStatus stackStatus = stackStatusService.findFirstByStackIdOrderByCreatedDesc(getLocalIdAsLong())
                 .orElseThrow(NotFoundException.notFound("stack", getLocalIdAsLong()));
         if (Sets.union(Status.getUnschedulableStatuses(), Set.of(STOPPED)).contains(stackStatus.getStatus())) {
-            LOGGER.info("Metering instance checker job will be unscheduled, stack state is {}", stackStatus.getStatus());
-            meteringInstanceCheckerJobService.unschedule(getLocalId());
+            LOGGER.info("Instance checker job will be unscheduled, stack state is {}", stackStatus.getStatus());
+            instanceCheckerJobService.unschedule(getLocalId());
         } else if (LONG_SYNCABLE_STATES.contains(stackStatus.getStatus())) {
-            LOGGER.info("Metering instance checker job will be skipped, stack state is {}", stackStatus.getStatus());
+            LOGGER.info("Instance checker job will be skipped, stack state is {}", stackStatus.getStatus());
         } else {
-            meteringInstanceCheckerService.checkInstanceTypes(getLocalIdAsLong());
+            instanceCheckerService.checkInstances(getLocalIdAsLong());
         }
     }
 }

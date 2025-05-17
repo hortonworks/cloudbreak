@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.job.metering.instancechecker;
+package com.sequenceiq.cloudbreak.job.instancechecker;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.DELETED_ON_PROVIDER_SIDE;
@@ -20,23 +20,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.JobExecutionContext;
 
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
-import com.sequenceiq.cloudbreak.service.metering.MeteringInstanceCheckerService;
-import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.instancechecker.InstanceCheckerService;
 import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
 
 @ExtendWith(MockitoExtension.class)
-class MeteringInstanceCheckerJobTest {
+class InstanceCheckerJobTest {
 
     private static final Long STACK_ID = 1L;
 
     @Mock
-    private StackDtoService stackDtoService;
+    private InstanceCheckerService instanceCheckerService;
 
     @Mock
-    private MeteringInstanceCheckerService meteringInstanceCheckerService;
-
-    @Mock
-    private MeteringInstanceCheckerJobService meteringInstanceCheckerJobService;
+    private InstanceCheckerJobService instanceCheckerJobService;
 
     @Mock
     private JobExecutionContext jobExecutionContext;
@@ -45,7 +41,7 @@ class MeteringInstanceCheckerJobTest {
     private StackStatusService stackStatusService;
 
     @InjectMocks
-    private MeteringInstanceCheckerJob underTest;
+    private InstanceCheckerJob underTest;
 
     @BeforeEach
     public void setUp() {
@@ -56,16 +52,16 @@ class MeteringInstanceCheckerJobTest {
     void testExecuteWhenClusterRunning() {
         when(stackStatusService.findFirstByStackIdOrderByCreatedDesc(eq(STACK_ID))).thenReturn(Optional.of(new StackStatus(null, AVAILABLE)));
         underTest.executeJob(jobExecutionContext);
-        verify(meteringInstanceCheckerJobService, never()).unschedule(eq(String.valueOf(STACK_ID)));
-        verify(meteringInstanceCheckerService, times(1)).checkInstanceTypes(eq(STACK_ID));
+        verify(instanceCheckerJobService, never()).unschedule(eq(String.valueOf(STACK_ID)));
+        verify(instanceCheckerService, times(1)).checkInstances(eq(STACK_ID));
     }
 
     @Test
     void testExecuteWhenClusterStopped() {
         when(stackStatusService.findFirstByStackIdOrderByCreatedDesc(eq(STACK_ID))).thenReturn(Optional.of(new StackStatus(null, STOPPED)));
         underTest.executeJob(jobExecutionContext);
-        verify(meteringInstanceCheckerJobService, times(1)).unschedule(eq(String.valueOf(STACK_ID)));
-        verify(meteringInstanceCheckerService, never()).checkInstanceTypes(eq(STACK_ID));
+        verify(instanceCheckerJobService, times(1)).unschedule(eq(String.valueOf(STACK_ID)));
+        verify(instanceCheckerService, never()).checkInstances(eq(STACK_ID));
     }
 
     @Test
@@ -73,7 +69,7 @@ class MeteringInstanceCheckerJobTest {
         when(stackStatusService.findFirstByStackIdOrderByCreatedDesc(eq(STACK_ID)))
                 .thenReturn(Optional.of(new StackStatus(null, DELETED_ON_PROVIDER_SIDE)));
         underTest.executeJob(jobExecutionContext);
-        verify(meteringInstanceCheckerJobService, never()).unschedule(eq(String.valueOf(STACK_ID)));
-        verify(meteringInstanceCheckerService, never()).checkInstanceTypes(eq(STACK_ID));
+        verify(instanceCheckerJobService, never()).unschedule(eq(String.valueOf(STACK_ID)));
+        verify(instanceCheckerService, never()).checkInstances(eq(STACK_ID));
     }
 }

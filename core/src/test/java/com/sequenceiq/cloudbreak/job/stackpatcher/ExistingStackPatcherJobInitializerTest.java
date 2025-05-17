@@ -73,7 +73,7 @@ class ExistingStackPatcherJobInitializerTest {
     void setUp() {
         lenient().when(stack1.getLocalId()).thenReturn(ID_1);
         lenient().when(stack2.getLocalId()).thenReturn(ID_2);
-        lenient().when(stackService.getAllAliveForAutoSync(Status.getUnschedulableStatuses()))
+        lenient().when(stackService.getAllWhereStatusNotIn(Status.getUnschedulableStatuses()))
                 .thenReturn(List.of(stack1, stack2));
 
         lenient().when(stackPatchService.findAllByTypeForStackIds(any(), any())).thenReturn(List.of());

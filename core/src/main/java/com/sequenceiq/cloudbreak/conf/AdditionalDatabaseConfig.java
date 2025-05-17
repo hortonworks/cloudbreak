@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.conf;
 
 import static com.sequenceiq.cloudbreak.database.DatabaseConfig.DATA_SOURCE_POSTFIX;
 import static com.sequenceiq.cloudbreak.job.dynamicentitlement.scheduler.DynamicEntitlementRefreshSchedulerFactoryConfig.QUARTZ_DYNAMIC_ENTITLEMENT_REFRESH_PREFIX;
-import static com.sequenceiq.cloudbreak.job.metering.scheduler.MeteringSchedulerFactoryConfig.QUARTZ_METERING_PREFIX;
+import static com.sequenceiq.cloudbreak.job.instancechecker.scheduler.InstanceCheckerSchedulerFactoryConfig.QUARTZ_INSTANCE_CHECKER_PREFIX;
 import static com.sequenceiq.cloudbreak.job.metering.scheduler.MeteringSyncSchedulerFactoryConfig.QUARTZ_METERING_SYNC_PREFIX;
 
 import java.sql.SQLException;
@@ -49,7 +49,7 @@ public class AdditionalDatabaseConfig {
     @Inject
     private RdsIamAuthenticationTokenProvider rdsIamAuthenticationTokenProvider;
 
-    @Bean(name = QUARTZ_METERING_PREFIX + DATA_SOURCE_POSTFIX)
+    @Bean(name = QUARTZ_INSTANCE_CHECKER_PREFIX + DATA_SOURCE_POSTFIX)
     public DataSource quartzMeteringDataSource() throws SQLException {
         return DatabaseUtil.getDataSource("hikari-quartz-metering-pool", databaseProperties, databaseAddress, nodeConfig,
                 Optional.of(meteringCommonThreadpoolSize), rdsIamAuthenticationTokenProvider);

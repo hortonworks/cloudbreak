@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.job.metering.scheduler;
+package com.sequenceiq.cloudbreak.job.instancechecker.scheduler;
 
 import static com.sequenceiq.cloudbreak.quartz.configuration.scheduler.SchedulerFactoryConfig.EXECUTOR_THREAD_NAME_POSTFIX;
 import static com.sequenceiq.cloudbreak.quartz.configuration.scheduler.SchedulerFactoryConfig.METRIC_PREFIX;
@@ -36,28 +36,28 @@ import com.sequenceiq.cloudbreak.quartz.statuschecker.ResourceCheckerJobListener
 
 import io.micrometer.core.instrument.MeterRegistry;
 
-@ConditionalOnProperty(value = "quartz.metering.common.scheduler.enabled", matchIfMissing = true)
+@ConditionalOnProperty(value = "quartz.instancechecker.scheduler.enabled", matchIfMissing = true)
 @Configuration
-public class MeteringSchedulerFactoryConfig {
+public class InstanceCheckerSchedulerFactoryConfig {
 
-    public static final String QUARTZ_METERING_PREFIX = "quartzMetering";
+    public static final String QUARTZ_INSTANCE_CHECKER_PREFIX = "quartzInstanceChecker";
 
-    public static final String QUARTZ_METERING_SCHEDULER = QUARTZ_METERING_PREFIX + SCHEDULER_POSTFIX;
+    public static final String QUARTZ_INSTANCE_CHECKER_SCHEDULER = QUARTZ_INSTANCE_CHECKER_PREFIX + SCHEDULER_POSTFIX;
 
-    private static final String QUARTZ_METERING_EXECUTOR_THREAD_NAME_PREFIX = QUARTZ_METERING_PREFIX + EXECUTOR_THREAD_NAME_POSTFIX;
+    private static final String QUARTZ_INSTANCE_CHECKER_EXECUTOR_THREAD_NAME_PREFIX = QUARTZ_INSTANCE_CHECKER_PREFIX + EXECUTOR_THREAD_NAME_POSTFIX;
 
-    private static final String QUARTZ_METERING_TASK_EXECUTOR = QUARTZ_METERING_PREFIX + TASK_EXECUTOR_POSTFIX;
+    private static final String QUARTZ_INSTANCE_CHECKER_TASK_EXECUTOR = QUARTZ_INSTANCE_CHECKER_PREFIX + TASK_EXECUTOR_POSTFIX;
 
-    @Value("${quartz.metering.common.threadpool.size:15}")
+    @Value("${quartz.instancechecker.threadpool.size:15}")
     private int threadpoolSize;
 
-    @Value("${quartz.metering.common.virtual-threadpool.size:200}")
+    @Value("${quartz.instancechecker.virtual-threadpool.size:200}")
     private int virtualThreadpoolSize;
 
-    @Value("${quartz.metering.common.threadpool.priority:5}")
+    @Value("${quartz.instancechecker.threadpool.priority:5}")
     private int threadpoolPriority;
 
-    @Value("${quartz.metering.common.threadpool.custom.executor:true}")
+    @Value("${quartz.instancechecker.threadpool.custom.executor:true}")
     private boolean customExecutorEnabled;
 
     @Inject
@@ -73,38 +73,38 @@ public class MeteringSchedulerFactoryConfig {
     @Value("${spring.threads.virtual.enabled:false}")
     private boolean virtualThreadsAvailable;
 
-    @Bean(name = QUARTZ_METERING_SCHEDULER)
+    @Bean(name = QUARTZ_INSTANCE_CHECKER_SCHEDULER)
     public SchedulerFactoryBean quartzMeteringScheduler(QuartzProperties quartzProperties, ObjectProvider<SchedulerFactoryBeanCustomizer> customizers,
             ApplicationContext applicationContext, DataSource dataSource) {
         SchedulerFactoryBean schedulerFactoryBean = SchedulerFactoryBeanUtil.createSchedulerFactoryBean(quartzProperties, customizers, applicationContext);
-        meteringSchedulerFactoryBeanCustomizer().customize(schedulerFactoryBean);
+        instanceCheckerSchedulerFactoryBeanCustomizer().customize(schedulerFactoryBean);
         return schedulerFactoryBean;
     }
 
-    private SchedulerFactoryBeanCustomizer meteringSchedulerFactoryBeanCustomizer() {
+    private SchedulerFactoryBeanCustomizer instanceCheckerSchedulerFactoryBeanCustomizer() {
         return bean -> {
-            bean.setSchedulerName(QUARTZ_METERING_SCHEDULER);
+            bean.setSchedulerName(QUARTZ_INSTANCE_CHECKER_SCHEDULER);
             if (customExecutorEnabled) {
-                bean.setTaskExecutor(quartzMeteringTaskExecutor());
+                bean.setTaskExecutor(quartzInstanceCheckerTaskExecutor());
             }
-            bean.setGlobalJobListeners(resourceCheckerJobListener, new JobMetricsListener(metricService, QUARTZ_METERING_SCHEDULER));
-            bean.setGlobalTriggerListeners(new TriggerMetricsListener(metricService, QUARTZ_METERING_SCHEDULER));
-            bean.setSchedulerListeners(new SchedulerMetricsListener(metricService, QUARTZ_METERING_SCHEDULER));
+            bean.setGlobalJobListeners(resourceCheckerJobListener, new JobMetricsListener(metricService, QUARTZ_INSTANCE_CHECKER_SCHEDULER));
+            bean.setGlobalTriggerListeners(new TriggerMetricsListener(metricService, QUARTZ_INSTANCE_CHECKER_SCHEDULER));
+            bean.setSchedulerListeners(new SchedulerMetricsListener(metricService, QUARTZ_INSTANCE_CHECKER_SCHEDULER));
         };
     }
 
-    @Bean(name = QUARTZ_METERING_TASK_EXECUTOR)
-    public Executor quartzMeteringTaskExecutor() {
+    @Bean(name = QUARTZ_INSTANCE_CHECKER_TASK_EXECUTOR)
+    public Executor quartzInstanceCheckerTaskExecutor() {
         ThreadPool executor;
         if (virtualThreadsAvailable) {
-            executor = new VirtualThreadPoolTaskExecutor(QUARTZ_METERING_EXECUTOR_THREAD_NAME_PREFIX, virtualThreadpoolSize, true);
+            executor = new VirtualThreadPoolTaskExecutor(QUARTZ_INSTANCE_CHECKER_EXECUTOR_THREAD_NAME_PREFIX, virtualThreadpoolSize, true);
         } else {
             SimpleThreadPoolTaskExecutor simpleThreadPoolTaskExecutor = new SimpleThreadPoolTaskExecutor();
             simpleThreadPoolTaskExecutor.setThreadPriority(threadpoolPriority);
             simpleThreadPoolTaskExecutor.setThreadCount(threadpoolSize);
-            simpleThreadPoolTaskExecutor.setThreadNamePrefix(QUARTZ_METERING_EXECUTOR_THREAD_NAME_PREFIX);
+            simpleThreadPoolTaskExecutor.setThreadNamePrefix(QUARTZ_INSTANCE_CHECKER_EXECUTOR_THREAD_NAME_PREFIX);
             executor = simpleThreadPoolTaskExecutor;
         }
-        return new TimedSimpleThreadPoolTaskExecutor(meterRegistry, executor, QUARTZ_METERING_TASK_EXECUTOR, METRIC_PREFIX, Set.of());
+        return new TimedSimpleThreadPoolTaskExecutor(meterRegistry, executor, QUARTZ_INSTANCE_CHECKER_TASK_EXECUTOR, METRIC_PREFIX, Set.of());
     }
 }
