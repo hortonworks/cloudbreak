@@ -18,7 +18,7 @@ public class LdapUrlParserTest {
     @ParameterizedTest(name
             = "{index}: testMatch(url: {0}, should match {1}, resourceType: {2}, resourceEvent: {3}")
     @MethodSource
-    public void testMatch(String url, boolean match, String resourceType, String resourceEvent) {
+    void testMatch(String url, boolean match, String resourceType, String resourceEvent) {
         Matcher matcher = underTest.getPattern().matcher(url);
         if (match) {
             assertTrue(matcher.matches());

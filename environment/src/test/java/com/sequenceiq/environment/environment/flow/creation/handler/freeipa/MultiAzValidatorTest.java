@@ -39,6 +39,7 @@ public class MultiAzValidatorTest {
 
     @BeforeEach
     void setUp() {
+        underTest.init();
         ReflectionTestUtils.setField(underTest, "supportedMultiAzPlatforms", Set.of("AWS", "AZURE", "GCP"));
     }
 

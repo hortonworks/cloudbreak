@@ -11,9 +11,9 @@ import com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.CDPRestUrlParser
 @Component
 public class KerberosConfigUrlParser extends CDPRestUrlParser {
 
-    private static final Pattern PATTERN = Pattern.compile("v1/kerberos(/?([^/]+)?/?(.*))?");
+    private static final Pattern PATTERN = Pattern.compile("v1/kerberos/?([^/]+)?/?(.*)");
 
-    private static final int MIN_GROUP_COUNT_FOR_EVENT = 2;
+    private static final int MIN_GROUP_COUNT_FOR_EVENT = 1;
 
     @Override
     protected Pattern getPattern() {
@@ -43,7 +43,7 @@ public class KerberosConfigUrlParser extends CDPRestUrlParser {
     @Override
     protected String getResourceEvent(Matcher matcher) {
         if (matcher.groupCount() > MIN_GROUP_COUNT_FOR_EVENT) {
-            return matcher.group(2);
+            return matcher.group(1);
         }
         return null;
     }

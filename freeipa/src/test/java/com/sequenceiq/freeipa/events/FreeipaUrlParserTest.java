@@ -11,7 +11,7 @@ import java.util.regex.Matcher;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-public class FeeipaUrlParserTest {
+public class FreeipaUrlParserTest {
 
     private final FreeipaUrlParser underTest = new FreeipaUrlParser();
 

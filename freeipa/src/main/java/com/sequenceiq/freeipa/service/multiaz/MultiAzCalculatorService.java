@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -177,12 +178,15 @@ public class MultiAzCalculatorService {
     }
 
     private String searchTheSmallestUsedID(Map<String, Integer> usage, Integer currentNumber) {
-        return usage.entrySet()
+        Optional<Map.Entry<String, Integer>> usageFound = usage.entrySet()
                 .stream()
                 .filter(e -> e.getValue().equals(currentNumber))
-                .findFirst()
-                .get()
-                .getKey();
+                .findFirst();
+        if (usageFound.isPresent()) {
+            return usageFound.get().getKey();
+        } else {
+            throw new BadRequestException(String.format("Could not find least used subnet id", usage.keySet()));
+        }
     }
 
     private Map<String, Integer> initializeSubnetUsage(Map<String, String> subnetAzPairs, Collection<String> subnetIds) {

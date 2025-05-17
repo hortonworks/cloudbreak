@@ -51,13 +51,8 @@ public class DefaultSubnetCidrProvider implements SubnetCidrProvider {
         if (netmaskBits <= 0) {
             throw new CloudConnectorException("The selected VPC has to be in a bigger CIDR range than /24");
         }
-        int numberOfSubnets = Double.valueOf(Math.pow(2, netmaskBits)).intValue();
-        int targetSubnet = 0;
-        targetSubnet = Long.valueOf(targetSubnet % numberOfSubnets).intValue();
-        String cidr = getSubnetCidrInRange(networkCidr, subnetCidrs, targetSubnet, numberOfSubnets);
-        if (cidr == null) {
-            cidr = getSubnetCidrInRange(networkCidr, subnetCidrs, 0, targetSubnet);
-        }
+        int numberOfSubnets = (int) Math.pow(2, netmaskBits);
+        String cidr = getSubnetCidrInRange(networkCidr, subnetCidrs, 0, numberOfSubnets);
         if (cidr == null) {
             throw new CloudConnectorException("Cannot find non-overlapping CIDR range");
         }

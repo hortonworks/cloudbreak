@@ -67,7 +67,8 @@ public class FreeIpaClientBuilder {
 
     private static final int TEST_CONNECTION_READ_TIMEOUT_MILLIS = 5 * 1000;
 
-    private static final HostnameVerifier HOSTNAME_VERIFIER = (s, sslSession) -> true;
+    @SuppressWarnings("java:S5527")
+    private static final HostnameVerifier HOSTNAME_VERIFIER_FOR_TEST = (s, sslSession) -> true;
 
     private final PoolingHttpClientConnectionManager connectionManager;
 
@@ -102,7 +103,7 @@ public class FreeIpaClientBuilder {
             this.sslContext =
                     setupSSLContext(clientConfig.getClientCert(), clientConfig.getClientKey(), clientConfig.getServerCert());
             RegistryBuilder<ConnectionSocketFactory> registryBuilder = RegistryBuilder.create();
-            SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(sslContext, HOSTNAME_VERIFIER);
+            SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(sslContext, HOSTNAME_VERIFIER_FOR_TEST);
             registryBuilder.register("https", socketFactory);
             Registry<ConnectionSocketFactory> registry = registryBuilder.build();
             connectionManager = new PoolingHttpClientConnectionManager(registry);
@@ -169,7 +170,7 @@ public class FreeIpaClientBuilder {
                 jsonRpcHttpClient.setSslContext(sslContext);
             }
 
-            jsonRpcHttpClient.setHostNameVerifier(HOSTNAME_VERIFIER);
+            jsonRpcHttpClient.setHostNameVerifier(HOSTNAME_VERIFIER_FOR_TEST);
             jsonRpcHttpClient.setReadTimeoutMillis(READ_TIMEOUT_MILLIS);
             jsonRpcHttpClient.setRequestListener(rpcRequestListener);
             return new FreeIpaClient(jsonRpcHttpClient, clientConfig.getApiAddress(), hostname);
