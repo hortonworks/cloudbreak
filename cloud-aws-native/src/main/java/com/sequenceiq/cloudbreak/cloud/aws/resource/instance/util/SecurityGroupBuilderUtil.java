@@ -55,6 +55,10 @@ public class SecurityGroupBuilderUtil {
 
     private static final Logger LOGGER = getLogger(SecurityGroupBuilderUtil.class);
 
+    private static final String AWS_CLIENT_DUPLICATE_ERROR_CODE = "InvalidPermission.Duplicate";
+
+    private static final String AWS_CLIENT_NOT_FOUND_ERROR_CODE = "InvalidPermission.NotFound";
+
     @Inject
     private AwsResourceNameService awsResourceNameService;
 
@@ -201,13 +205,7 @@ public class SecurityGroupBuilderUtil {
                 }
             }
             if (!permissions.isEmpty()) {
-                LOGGER.debug("Adding egress rules to security group ({}): {}", securityGroupId, permissions);
-                AuthorizeSecurityGroupEgressRequest request = AuthorizeSecurityGroupEgressRequest.builder()
-                        .groupId(securityGroupId)
-                        .ipPermissions(permissions)
-                        .build();
-                amazonEc2Client.addEgress(request);
-                LOGGER.info("Egress added to {}", securityGroupId);
+                addEgressRules(amazonEc2Client, securityGroupId, permissions);
                 revokeDefaultOutboundEgressRule(amazonEc2Client, securityGroupId);
             } else {
                 LOGGER.debug("No permission for egress request, skip it");
@@ -215,6 +213,25 @@ public class SecurityGroupBuilderUtil {
         } else {
             LOGGER.debug("Egress creation skipped: {}, prefix list size: {}, vpc cidrs size: {}",
                     outboundInternetTraffic, prefixListIds.size(), vpcCidrs.size());
+        }
+    }
+
+    private void addEgressRules(AmazonEc2Client amazonEc2Client, String securityGroupId, List<IpPermission> permissions) {
+        LOGGER.debug("Adding egress rules to security group ({}): {}", securityGroupId, permissions);
+        AuthorizeSecurityGroupEgressRequest request = AuthorizeSecurityGroupEgressRequest.builder()
+                .groupId(securityGroupId)
+                .ipPermissions(permissions)
+                .build();
+        try {
+            amazonEc2Client.addEgress(request);
+            LOGGER.info("Egress added to {}", securityGroupId);
+        } catch (Ec2Exception ex) {
+            if (AWS_CLIENT_DUPLICATE_ERROR_CODE.equals(ex.awsErrorDetails().errorCode())) {
+                LOGGER.info("Security egress already exists for security group: '{}' with request: {}", securityGroupId, request);
+            } else {
+                LOGGER.error("Failed to create security egress for security group: '{}' with request: {}", securityGroupId, request, ex);
+                throw ex;
+            }
         }
     }
 
@@ -228,8 +245,18 @@ public class SecurityGroupBuilderUtil {
                         .ipRanges(IpRange.builder().cidrIp("0.0.0.0/0").build())
                         .build())
                 .build();
-        amazonEc2Client.revokeEgress(revokeRequest);
-        LOGGER.info("Default allow all outbound traffic egress rule has been revoked for security group ({}).", securityGroupId);
+        try {
+            LOGGER.debug("Adding default security egress rule to security group: '{}' with request: {}", securityGroupId, revokeRequest);
+            amazonEc2Client.revokeEgress(revokeRequest);
+            LOGGER.info("Default allow all outbound traffic egress rule has been revoked for security group ({}).", securityGroupId);
+        } catch (Ec2Exception ex) {
+            if (AWS_CLIENT_NOT_FOUND_ERROR_CODE.equals(ex.awsErrorDetails().errorCode())) {
+                LOGGER.info("Default security egress rule has already been revoked on security group: '{}' failed request: {}", securityGroupId, revokeRequest);
+            } else {
+                LOGGER.error("Failed to revoke the default security egress rule for security group: '{}' with request: {}", securityGroupId, revokeRequest, ex);
+                throw ex;
+            }
+        }
     }
 
     public List<String> getSecurityGroupIds(AwsContext context, Group group) {

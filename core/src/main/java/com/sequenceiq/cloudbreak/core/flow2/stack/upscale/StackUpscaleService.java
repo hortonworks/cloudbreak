@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.CREATED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.REQUESTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_ADDING_INSTANCES;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE_UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_METADATA_EXTEND_WITH_COUNT;
@@ -36,7 +35,6 @@ import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
@@ -60,6 +58,7 @@ import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.flow.InstanceMetadataInstanceIdUpdater;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TlsSetupService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
@@ -97,6 +96,9 @@ public class StackUpscaleService {
 
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
+
+    @Inject
+    private InstanceMetadataInstanceIdUpdater instanceMetadataInstanceIdUpdater;
 
     public void startAddInstances(StackView stack, Map<String, Integer> hostGroupWithAdjustment) {
         Integer scalingAdjustment = hostGroupWithAdjustment.values().stream().reduce(0, Integer::sum);
@@ -244,7 +246,7 @@ public class StackUpscaleService {
             throws QuotaExceededException, TransactionExecutionException {
         List<CloudResourceStatus> cloudResourceStatuses = connector.resources()
                 .upscale(ac, cloudStack, request.getResourceList(), adjustmentTypeWithThreshold);
-        syncStatusAndInstanceIdToInstanceMetadata(ac, connector, cloudResourceStatuses);
+        instanceMetadataInstanceIdUpdater.updateWithInstanceIdAndStatus(ac, connector, cloudResourceStatuses);
         return cloudResourceStatuses;
     }
 
@@ -257,33 +259,6 @@ public class StackUpscaleService {
         int removableNodeCount = getRemovableNodeCount(adjustmentTypeWithThreshold, quotaExceededException, groups);
         decreaseInstances(groups, removableNodeCount);
         return upscaleAndSyncStatusesToInstanceMetadata(ac, request, connector, cloudStack, adjustmentTypeWithThreshold);
-    }
-
-    private void syncStatusAndInstanceIdToInstanceMetadata(AuthenticatedContext ac, CloudConnector connector, List<CloudResourceStatus> cloudResourceStatuses)
-            throws TransactionExecutionException {
-        LOGGER.info("Syncing the status and instanceId of the created instances to the 'instancemetadata' table...");
-        transactionService.required(() -> {
-            List<CloudResource> instanceCloudResources = cloudResourceStatuses.stream()
-                    .map(CloudResourceStatus::getCloudResource)
-                    .filter(cloudResource -> connector.resources().getInstanceResourceType().equals(cloudResource.getType()))
-                    .toList();
-            List<InstanceMetaData> requestedInstanceMetadatas = instanceMetaDataService.findAllByStackIdAndStatus(ac.getCloudContext().getId(), REQUESTED);
-            LOGGER.debug("Requested instance metadata entries with private ids: {}",
-                    requestedInstanceMetadatas.stream().map(InstanceMetaData::getPrivateId).collect(Collectors.toSet()));
-            for (InstanceMetaData instanceMetaData : requestedInstanceMetadatas) {
-                Optional<CloudResource> cloudResource = instanceCloudResources.stream()
-                        .filter(cr -> instanceMetaData.getPrivateId().equals(cr.getPrivateId())
-                                && instanceMetaData.getInstanceGroup().getGroupName().equals(cr.getGroup()))
-                        .findFirst();
-                cloudResource.ifPresentOrElse(cr -> {
-                    instanceMetaData.setInstanceId(cr.getInstanceId());
-                    instanceMetaData.setInstanceStatus(CREATED);
-                }, () -> LOGGER.warn("The instanceId and instanceStatus for instance {} was not set, " +
-                        "because the corresponding resource was not found int the 'resource' table", instanceMetaData.getInstanceName()));
-            }
-            LOGGER.info("Updated instance metadatas with instance id to '{}' status: {}", CREATED, requestedInstanceMetadatas);
-            instanceMetaDataService.saveAll(requestedInstanceMetadatas);
-        });
     }
 
     private List<CloudResourceStatus> verticalScale(AuthenticatedContext ac, CoreVerticalScaleRequest<CoreVerticalScaleResult> request,
