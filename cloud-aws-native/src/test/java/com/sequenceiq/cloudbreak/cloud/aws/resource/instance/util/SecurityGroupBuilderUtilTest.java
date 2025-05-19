@@ -465,6 +465,42 @@ class SecurityGroupBuilderUtilTest {
         assertThat(actual).containsExactly("sg1", "sg2", "sg3");
     }
 
+    @Test
+    void testEgressWhenOutboundInternetTrafficDisabledAndPrefixListNotEmptyButVpcCidrsEmptyShouldIdempotentWhenEgressRuleExistAndDefaultRevoked() {
+        stubRegionName();
+        when(awsNetworkView.getOutboundInternetTraffic()).thenReturn(OutboundInternetTraffic.DISABLED);
+        when(awsNetworkService.getPrefixListIds(amazonEc2Client, REGION_NAME, OutboundInternetTraffic.DISABLED)).thenReturn(List.of("id1", "id2"));
+        when(awsNetworkService.getVpcCidrs(ac, awsNetworkView)).thenReturn(emptyList());
+        Ec2Exception egressAlreadyExists = (Ec2Exception) Ec2Exception.builder()
+                .message("Duplicate error")
+                .awsErrorDetails(AwsErrorDetails.builder()
+                        .errorCode("InvalidPermission.Duplicate")
+                        .build())
+                .build();
+        when(amazonEc2Client.addEgress(any())).thenThrow(egressAlreadyExists);
+        Ec2Exception defaultEgressRuleAlreadyRevoked = (Ec2Exception) Ec2Exception.builder()
+                .message("Not found error")
+                .awsErrorDetails(AwsErrorDetails.builder()
+                        .errorCode("InvalidPermission.NotFound")
+                        .build())
+                .build();
+        when(amazonEc2Client.revokeEgress(any())).thenThrow(defaultEgressRuleAlreadyRevoked);
+
+        underTest.egress(amazonEc2Client, ac, awsNetworkView, "id", emptyList());
+
+        ArgumentCaptor<AuthorizeSecurityGroupEgressRequest> egressCaptor = ArgumentCaptor.forClass(AuthorizeSecurityGroupEgressRequest.class);
+        verify(amazonEc2Client).addEgress(egressCaptor.capture());
+        verify(amazonEc2Client, times(1)).addEgress(any());
+        verify(amazonEc2Client, times(1)).revokeEgress(any());
+
+        Assertions.assertEquals("id", egressCaptor.getValue().groupId());
+        Assertions.assertEquals("-1", egressCaptor.getValue().ipPermissions().get(0).ipProtocol());
+        Assertions.assertEquals(0, egressCaptor.getValue().ipPermissions().get(0).fromPort());
+        Assertions.assertEquals(TO_PORT, egressCaptor.getValue().ipPermissions().get(0).toPort());
+        Assertions.assertEquals("id1", egressCaptor.getValue().ipPermissions().get(0).prefixListIds().get(0).prefixListId());
+        Assertions.assertEquals("id2", egressCaptor.getValue().ipPermissions().get(1).prefixListIds().get(0).prefixListId());
+    }
+
     private void stubRegionName() {
         when(ac.getCloudContext()).thenReturn(context);
         when(context.getLocation()).thenReturn(Location.location(Region.region(REGION_NAME)));
