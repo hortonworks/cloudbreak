@@ -1079,11 +1079,43 @@ class ClusterHostServiceRunnerTest {
 
         verifySecretEncryption(true, saltConfig.getValue());
         verifyEncryptionProfile(saltConfig.getValue());
-
+        verifyCmVersionSupportsTlsSetup(saltConfig.getValue(), false);
         verify(backUpDecorator).decoratePillarWithBackup(eq(stack), eq(environmentResponse), any());
     }
 
+    @Test
+    void testCmVersionSupportsTlsSetup() throws CloudbreakOrchestratorException, IOException {
+        setupMocksForRunClusterServices("7.13.2.0");
+        GatewayView clusterGateway = mock(GatewayView.class);
+        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
+
+        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
+        when(cluster.getId()).thenReturn(CLUSTER_ID);
+        when(gatewayService.getByClusterId(CLUSTER_ID)).thenReturn(Optional.of(clusterGateway));
+        when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AWS_DEFAULT_VARIANT.value());
+        when(environmentResponse.isEnableSecretEncryption()).thenReturn(true);
+        when(idBrokerService.getByCluster(CLUSTER_ID)).thenReturn(mock(IdBroker.class));
+        KerberosConfig kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig().withVerifyKdcTrust(true).build();
+        when(kerberosConfigService.get(ENV_CRN, STACK_NAME)).thenReturn(Optional.of(kerberosConfig));
+        when(kerberosDetailService.areClusterManagerManagedKerberosPackages(kerberosConfig)).thenReturn(true);
+        when(defaultEncryptionProfileProvider.getTlsVersions(any(), any())).thenReturn("TLSv1.2,TLSv1.3");
+        when(defaultEncryptionProfileProvider.getTlsCipherSuites(any(), any(), any(), anyBoolean()))
+                .thenReturn("cipher1,cipher2,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384");
+
+        underTest.runClusterServices(stack, Collections.emptyMap(), false);
+
+        ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
+
+        verify(hostOrchestrator).runService(any(), any(), saltConfig.capture(), any());
+        verifyEncryptionProfile(saltConfig.getValue());
+        verifyCmVersionSupportsTlsSetup(saltConfig.getValue(), true);
+    }
+
     private void setupMocksForRunClusterServices() {
+        setupMocksForRunClusterServices("7.2.2");
+    }
+
+    private void setupMocksForRunClusterServices(String cmVersion) {
         when(umsClient.getAccountDetails(any())).thenReturn(UserManagementProto.Account.getDefaultInstance());
         when(stackView.getTunnel()).thenReturn(Tunnel.DIRECT);
         when(stackView.getCloudPlatform()).thenReturn(CloudPlatform.AWS.name());
@@ -1093,7 +1125,7 @@ class ClusterHostServiceRunnerTest {
         when(exposedServiceCollector.getImpalaService()).thenReturn(mock(ExposedService.class));
         when(environmentConfigProvider.getParentEnvironmentCrn(any())).thenReturn("crn:cdp:iam:us-west-1:accid:user:mockuser@cloudera.com");
         ClouderaManagerRepo clouderaManagerRepo = mock(ClouderaManagerRepo.class);
-        when(clouderaManagerRepo.getVersion()).thenReturn("7.2.2");
+        when(clouderaManagerRepo.getVersion()).thenReturn(cmVersion);
         GatewayConfig gatewayConfig = mock(GatewayConfig.class);
         when(gatewayConfig.getPrivateAddress()).thenReturn("1.2.3.4");
         when(gatewayConfig.getHostname()).thenReturn("hostname");
@@ -1195,6 +1227,11 @@ class ClusterHostServiceRunnerTest {
     private void verifyEncryptionProfile(SaltConfig saltConfig) {
         String tlsChipherSuites = (String) getClusterProperties(saltConfig).get("tlsCipherSuitesJavaIntermediate");
         assertTrue(tlsChipherSuites.contains("TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"));
+    }
+
+    private void verifyCmVersionSupportsTlsSetup(SaltConfig saltConfig, Boolean cmSupported) {
+        Boolean cmVersionSupportsTlsSetup = (Boolean) getClusterProperties(saltConfig).get("cmVersionSupportsTlsSetup");
+        assertEquals(cmSupported, cmVersionSupportsTlsSetup);
     }
 
     private void verifyDefaultKerberosCcacheSecretStorage(String expectedValue, SaltConfig saltConfig) {

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.host;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_0_2;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_13_2_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_6_2;
@@ -534,7 +535,8 @@ public class ClusterHostServiceRunner {
         servicePillar.putAll(hostAttributeDecorator.createHostAttributePillars(stackDto));
         servicePillar.put("discovery", new SaltPillarProperties("/discovery/init.sls", singletonMap("platform", stack.getCloudPlatform())));
         String virtualGroupsEnvironmentCrn = environmentConfigProvider.getParentEnvironmentCrn(stack.getEnvironmentCrn());
-        servicePillar.putAll(createMetadataPillars(stackDto, stack, detailedEnvironmentResponse, virtualGroupsEnvironmentCrn));
+        servicePillar.putAll(createMetadataPillars(stackDto, stack, detailedEnvironmentResponse, virtualGroupsEnvironmentCrn,
+                clouderaManagerRepo.getVersion()));
         ClusterPreCreationApi connector = clusterApiConnectors.getConnector(cluster);
         Map<String, List<String>> serviceLocations = getServiceLocations(stackDto);
         Optional<LdapView> ldapView = ldapConfigService.get(stack.getEnvironmentCrn(), stack.getName());
@@ -576,7 +578,7 @@ public class ClusterHostServiceRunner {
     }
 
     private Map<String, SaltPillarProperties> createMetadataPillars(StackDto stackDto, StackView stack, DetailedEnvironmentResponse detailedEnvironmentResponse,
-            String virtualGroupsEnvironmentCrn) {
+            String virtualGroupsEnvironmentCrn, String cmVersion) {
         boolean deployedInChildEnvironment = !virtualGroupsEnvironmentCrn.equals(stack.getEnvironmentCrn());
         String seLinux = stackDto.getSecurityConfig() != null && stackDto.getSecurityConfig().getSeLinux() != null ?
                 stackDto.getSecurityConfig().getSeLinux().toString().toLowerCase(Locale.ROOT) : SeLinux.PERMISSIVE.toString().toLowerCase(Locale.ROOT);
@@ -610,6 +612,7 @@ public class ClusterHostServiceRunner {
                 Map.entry("tlsv13Enabled", Boolean.FALSE),
                 Map.entry("tlsVersionsSpaceSeparated", defaultEncryptionProfileProvider.getTlsVersions(usetTlsVersions, " ")),
                 Map.entry("tlsVersionsCommaSeparated", defaultEncryptionProfileProvider.getTlsVersions(usetTlsVersions, ",")),
+                Map.entry("cmVersionSupportsTlsSetup", isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_13_2_0)),
                 Map.entry("tlsCipherSuites", defaultEncryptionProfileProvider.getTlsCipherSuites(
                         userCipherSuits,
                         DEFAULT,

@@ -1,4 +1,3 @@
-{%- set tlsVersions = salt['pillar.get']('freeipa:encryptionConfig:tlsVersionsCommaSeparated') %}
 /opt/salt/scripts/set_default_java_version.sh:
   file.managed:
     - source:
