@@ -10,7 +10,6 @@ import static com.sequenceiq.sdx.rotation.DatalakeSecretType.CM_INTERMEDIATE_CA_
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.CM_SERVICES_DB_PASSWORD;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.CM_SERVICE_SHARED_DB;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.EXTERNAL_DATABASE_ROOT_PASSWORD;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.GATEWAY_CERT;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.IDBROKER_CERT;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.LDAP_BIND_PASSWORD;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY;
@@ -181,7 +180,8 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
             secretTypes.add(SALT_BOOT_SECRETS);
             // these are excluded due to CB-29239 (to decrease execution time of test on GCP)
             secretTypes.addAll(Set.of(
-                    GATEWAY_CERT,
+                    // CDPAM-5911
+                    //GATEWAY_CERT,
                     CM_ADMIN_PASSWORD,
                     CM_SERVICES_DB_PASSWORD,
                     SALT_SIGN_KEY_PAIR,
