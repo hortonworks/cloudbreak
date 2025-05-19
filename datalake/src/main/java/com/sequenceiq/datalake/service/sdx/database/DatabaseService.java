@@ -7,6 +7,7 @@ import static com.sequenceiq.datalake.service.sdx.SdxService.DATABASE_SSL_ENABLE
 
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -281,7 +282,7 @@ public class DatabaseService {
                     sdxCluster.getArchitecture());
             instanceType = databaseCapabilities.getRegionDefaultInstances().get(env.getLocation().getName());
             if (instanceType == null && Architecture.ARM64.equals(sdxCluster.getArchitecture())) {
-                sendArmDatabaseNotAvailableNotification(sdxCluster, initiatorUserCrn);
+                sendArmDatabaseNotAvailableNotification(sdxCluster, initiatorUserCrn, env.getLocation().getName());
                 databaseCapabilities = getDatabaseCapabilities(env, initiatorUserCrn, databaseCapabilityType, Architecture.X86_64);
                 instanceType = databaseCapabilities.getRegionDefaultInstances().get(env.getLocation().getName());
             }
@@ -300,12 +301,12 @@ public class DatabaseService {
         return req;
     }
 
-    private void sendArmDatabaseNotAvailableNotification(SdxCluster sdxCluster, String initiatorUserCrn) {
+    private void sendArmDatabaseNotAvailableNotification(SdxCluster sdxCluster, String initiatorUserCrn, String region) {
         LOGGER.info("Arm64 database is not available in current region. Defaulting to x86.");
         ThreadBasedUserCrnProvider.doAs(initiatorUserCrn,
                 () -> {
-                    sdxNotificationService.send(ResourceEvent.DATALAKE_DATABASE_ARM_RDS_NOT_AVAILABLE, sdxCluster, initiatorUserCrn);
-                    eventSenderService.sendEventAndNotification(sdxCluster, ResourceEvent.DATALAKE_DATABASE_ARM_RDS_NOT_AVAILABLE);
+                    sdxNotificationService.send(ResourceEvent.DATABASE_ARM_NOT_AVAILABLE, List.of(region), sdxCluster, initiatorUserCrn);
+                    eventSenderService.sendEventAndNotification(sdxCluster, ResourceEvent.DATABASE_ARM_NOT_AVAILABLE, List.of(region));
                 });
     }
 

@@ -8,6 +8,7 @@ import static java.lang.String.format;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -28,8 +29,8 @@ import com.dyngr.core.AttemptResults;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -46,6 +47,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
@@ -59,8 +61,10 @@ import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseServerPa
 import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseStackConfig;
 import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseStackConfigKey;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.common.model.DatabaseCapabilityType;
 import com.sequenceiq.common.model.DatabaseType;
@@ -124,6 +128,9 @@ public class ExternalDatabaseService {
 
     @Inject
     private EnvironmentClientService environmentClientService;
+
+    @Inject
+    private CloudbreakEventService cloudbreakEventService;
 
     public void provisionDatabase(Stack stack, DetailedEnvironmentResponse environment) {
         String databaseCrn;
@@ -397,8 +404,8 @@ public class ExternalDatabaseService {
         req.setEnvironmentCrn(environment.getCrn());
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform().toUpperCase(Locale.ROOT));
         String databaseEngineVersion = stack.getExternalDatabaseEngineVersion();
-        req.setDatabaseServer(getDatabaseServerStackRequest(cloudPlatform, stack.getExternalDatabaseCreationType(), databaseEngineVersion,
-                getAttributes(stack.getDatabase()), environment, stack.isMultiAz()));
+        req.setDatabaseServer(getDatabaseServerStackRequest(stack.getId(), cloudPlatform, stack.getExternalDatabaseCreationType(), databaseEngineVersion,
+                getAttributes(stack.getDatabase()), environment, stack.isMultiAz(), stack.getArchitecture()));
         req.setClusterCrn(stack.getResourceCrn());
         req.setTags(getUserDefinedTags(stack));
         configureSslEnforcement(req, cloudPlatform, stack.getCluster());
@@ -461,48 +468,60 @@ public class ExternalDatabaseService {
         return Objects.requireNonNullElse(userDefinedTags, new HashMap<>());
     }
 
-    private DatabaseServerV4StackRequest getDatabaseServerStackRequest(CloudPlatform cloudPlatform, DatabaseAvailabilityType externalDatabase,
-            String databaseEngineVersion, Map<String, Object> attributes, DetailedEnvironmentResponse environment, boolean multiAz) {
+    //CHECKSTYLE:OFF
+    private DatabaseServerV4StackRequest getDatabaseServerStackRequest(Long stackId, CloudPlatform cloudPlatform, DatabaseAvailabilityType externalDatabase,
+            String databaseEngineVersion, Map<String, Object> attributes, DetailedEnvironmentResponse environment, boolean multiAz, Architecture architecture) {
+        //CHECKSTYLE:ON
         DatabaseServerParameterDecorator databaseServerParameterDecorator = parameterDecoratorMap.get(cloudPlatform);
         DatabaseType databaseType = databaseServerParameterDecorator.getDatabaseType(attributes).orElse(null);
         DatabaseStackConfig databaseStackConfig = dbConfigs.get(new DatabaseStackConfigKey(cloudPlatform, databaseType));
-        DatabaseCapabilityType databaseCapabilityType = AZURE.equals(cloudPlatform) ? getAzureDatabaseCapability(databaseType) : DEFAULT;
-        PlatformDatabaseCapabilitiesResponse databaseCapabilities = getDatabaseCapabilities(environment, databaseCapabilityType);
         if (databaseStackConfig == null) {
             throw new BadRequestException("Database config for cloud platform " + cloudPlatform + " not found");
-        } else {
-            DatabaseServerV4StackRequest request = new DatabaseServerV4StackRequest();
-            request.setInstanceType(databaseCapabilities.getRegionDefaultInstances().get(environment.getLocation().getName()));
-            request.setDatabaseVendor(databaseStackConfig.getVendor());
-            request.setStorageSize(databaseStackConfig.getVolumeSize());
-            DatabaseServerParameter serverParameter = DatabaseServerParameter.builder()
-                    .withAvailabilityType(externalDatabase)
-                    .withEngineVersion(databaseEngineVersion)
-                    .withAttributes(attributes)
-                    .build();
-            databaseServerParameterDecorator.setParameters(request, serverParameter, environment, multiAz);
-            databaseServerParameterDecorator.validate(request, serverParameter, environment, multiAz);
-            if (Objects.isNull(request.getCloudPlatform())) {
-                request.setCloudPlatform(cloudPlatform);
-            }
-            return request;
         }
+        DatabaseCapabilityType databaseCapabilityType = AZURE.equals(cloudPlatform) ? getAzureDatabaseCapability(databaseType) : DEFAULT;
+        PlatformDatabaseCapabilitiesResponse databaseCapabilities = getDatabaseCapabilities(environment, databaseCapabilityType,
+                Optional.ofNullable(architecture).orElse(Architecture.X86_64));
+        String instanceType = databaseCapabilities.getRegionDefaultInstances().get(environment.getLocation().getName());
+        if (instanceType == null && Architecture.ARM64.equals(architecture)) {
+            sendArmDatabaseNotAvailableNotification(stackId, environment.getLocation().getName());
+            databaseCapabilities = getDatabaseCapabilities(environment, databaseCapabilityType, Architecture.X86_64);
+            instanceType = databaseCapabilities.getRegionDefaultInstances().get(environment.getLocation().getName());
+        }
+        DatabaseServerV4StackRequest request = new DatabaseServerV4StackRequest();
+        request.setInstanceType(instanceType);
+        request.setDatabaseVendor(databaseStackConfig.getVendor());
+        request.setStorageSize(databaseStackConfig.getVolumeSize());
+        DatabaseServerParameter serverParameter = DatabaseServerParameter.builder()
+                .withAvailabilityType(externalDatabase)
+                .withEngineVersion(databaseEngineVersion)
+                .withAttributes(attributes)
+                .build();
+        databaseServerParameterDecorator.setParameters(request, serverParameter, environment, multiAz);
+        databaseServerParameterDecorator.validate(request, serverParameter, environment, multiAz);
+        if (Objects.isNull(request.getCloudPlatform())) {
+            request.setCloudPlatform(cloudPlatform);
+        }
+        return request;
+    }
+
+    private void sendArmDatabaseNotAvailableNotification(Long stackId, String region) {
+        LOGGER.info("Arm64 database is not available in current region. Defaulting to x86.");
+        cloudbreakEventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(), ResourceEvent.DATABASE_ARM_NOT_AVAILABLE, List.of(region));
     }
 
     private DatabaseCapabilityType getAzureDatabaseCapability(DatabaseType databaseType) {
         return FLEXIBLE_SERVER.equals(databaseType) ? DatabaseCapabilityType.AZURE_FLEXIBLE : DatabaseCapabilityType.AZURE_SINGLE_SERVER;
     }
 
-    private PlatformDatabaseCapabilitiesResponse getDatabaseCapabilities(DetailedEnvironmentResponse env, DatabaseCapabilityType databaseType) {
-        String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        return ThreadBasedUserCrnProvider.doAs(initiatorUserCrn, () ->
-                environmentPlatformResourceEndpoint.getDatabaseCapabilities(
-                        env.getCrn(),
-                        env.getLocation().getName(),
-                        env.getCloudPlatform(),
-                        null,
-                        databaseType,
-                        null));
+    private PlatformDatabaseCapabilitiesResponse getDatabaseCapabilities(DetailedEnvironmentResponse env, DatabaseCapabilityType databaseType,
+            Architecture architecture) {
+        return environmentPlatformResourceEndpoint.getDatabaseCapabilities(
+                env.getCrn(),
+                env.getLocation().getName(),
+                env.getCloudPlatform(),
+                null,
+                databaseType,
+                architecture.getName());
     }
 
     private void waitAndGetDatabase(ClusterView cluster, String databaseCrn,
@@ -557,10 +576,11 @@ public class ExternalDatabaseService {
             Map<String, Object> attributes = getAttributes(stack.getDatabase());
             attributes.put(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.FLEXIBLE_SERVER.name());
             DatabaseServerV4StackRequest modifiedRequest = getDatabaseServerStackRequest(
+                    stack.getId(),
                     cloudPlatform,
                     databaseAvailabilityType,
                     majorVersion.getMajorVersion(),
-                    attributes, environment, stack.getStack().isMultiAz());
+                    attributes, environment, stack.getStack().isMultiAz(), stack.getArchitecture());
             LOGGER.debug("Migration resulted in request: {}", modifiedRequest);
             return modifiedRequest;
         }

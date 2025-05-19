@@ -26,6 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -50,6 +51,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.dyngr.core.AttemptResults;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
@@ -66,6 +68,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
@@ -77,8 +80,10 @@ import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseServerPa
 import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseStackConfig;
 import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseStackConfigKey;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.common.model.DatabaseType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -179,6 +184,9 @@ class ExternalDatabaseServiceTest {
     @Mock
     private EnvironmentClientService environmentClientService;
 
+    @Mock
+    private CloudbreakEventService cloudbreakEventService;
+
     @InjectMocks
     private ExternalDatabaseService underTest;
 
@@ -187,7 +195,7 @@ class ExternalDatabaseServiceTest {
     private DatabaseServerV4StackRequest databaseServerV4StackRequest;
 
     private static Object[][] dbUpgradeMigrationScenarios() {
-        return new Object[][]{
+        return new Object[][] {
                 // ExternalDB, Platform, currentVersion, targetVersion, originalDBType, migrationRequired, datalake
                 {true, "AZURE", "10", "11", SINGLE_SERVER, false, true},
                 {true, "AZURE", "10", "14", SINGLE_SERVER, true, true},
@@ -260,6 +268,70 @@ class ExternalDatabaseServiceTest {
         verify(clusterService).save(cluster);
         DatabaseServerParameter paramValue = serverParameterCaptor.getValue();
         assertThat(paramValue.getAvailabilityType()).isEqualTo(availability);
+    }
+
+    @Test
+    void provisionArmDatabase() throws JsonProcessingException {
+        DatabaseServerStatusV4Response createResponse = new DatabaseServerStatusV4Response();
+        createResponse.setResourceCrn(RDBMS_CRN);
+        Cluster cluster = spy(new Cluster());
+        Stack stack = new Stack();
+        stack.setResourceCrn(CLUSTER_CRN);
+        stack.setDatabase(createDatabase(DatabaseAvailabilityType.HA));
+        stack.setCluster(cluster);
+        stack.setMultiAz(true);
+        stack.setArchitecture(Architecture.ARM64);
+        when(redbeamsClient.getByClusterCrn(nullable(String.class), nullable(String.class))).thenReturn(null);
+        when(redbeamsClient.create(any())).thenReturn(createResponse);
+        when(databaseObtainerService.obtainAttemptResult(eq(cluster), eq(DatabaseOperation.CREATION), eq(RDBMS_CRN), eq(true)))
+                .thenReturn(AttemptResults.finishWith(new DatabaseServerV4Response()));
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), eq("arm64")))
+                .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "armInstanceType")));
+        underTest.provisionDatabase(stack, environmentResponse);
+
+        ArgumentCaptor<DatabaseServerParameter> serverParameterCaptor = ArgumentCaptor.forClass(DatabaseServerParameter.class);
+        verify(redbeamsClient).getByClusterCrn(ENV_CRN, CLUSTER_CRN);
+        verify(redbeamsClient).create(any(AllocateDatabaseServerV4Request.class));
+        verify(cluster).setDatabaseServerCrn(RDBMS_CRN);
+        verify(dbServerParameterDecorator).setParameters(any(), serverParameterCaptor.capture(), eq(environmentResponse), eq(true));
+        verify(clusterService).save(cluster);
+        DatabaseServerParameter paramValue = serverParameterCaptor.getValue();
+        assertThat(paramValue.getAvailabilityType()).isEqualTo(DatabaseAvailabilityType.HA);
+    }
+
+    @Test
+    void provisionArmDatabaseFallbackToX86() throws JsonProcessingException {
+        DatabaseServerStatusV4Response createResponse = new DatabaseServerStatusV4Response();
+        createResponse.setResourceCrn(RDBMS_CRN);
+        Cluster cluster = spy(new Cluster());
+        Stack stack = new Stack();
+        stack.setId(1L);
+        stack.setResourceCrn(CLUSTER_CRN);
+        stack.setDatabase(createDatabase(DatabaseAvailabilityType.HA));
+        stack.setCluster(cluster);
+        stack.setMultiAz(true);
+        stack.setArchitecture(Architecture.ARM64);
+        when(redbeamsClient.getByClusterCrn(nullable(String.class), nullable(String.class))).thenReturn(null);
+        when(redbeamsClient.create(any())).thenReturn(createResponse);
+        when(databaseObtainerService.obtainAttemptResult(eq(cluster), eq(DatabaseOperation.CREATION), eq(RDBMS_CRN), eq(true)))
+                .thenReturn(AttemptResults.finishWith(new DatabaseServerV4Response()));
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), eq("arm64")))
+                .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), new HashMap<>()));
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), eq("x86_64")))
+                .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "armInstanceType")));
+        underTest.provisionDatabase(stack, environmentResponse);
+
+        ArgumentCaptor<DatabaseServerParameter> serverParameterCaptor = ArgumentCaptor.forClass(DatabaseServerParameter.class);
+        verify(redbeamsClient).getByClusterCrn(ENV_CRN, CLUSTER_CRN);
+        verify(redbeamsClient).create(any(AllocateDatabaseServerV4Request.class));
+        verify(cluster).setDatabaseServerCrn(RDBMS_CRN);
+        verify(dbServerParameterDecorator).setParameters(any(), serverParameterCaptor.capture(), eq(environmentResponse), eq(true));
+        verify(clusterService).save(cluster);
+        verify(cloudbreakEventService).fireCloudbreakEvent(1L, Status.UPDATE_IN_PROGRESS.name(),
+                ResourceEvent.DATABASE_ARM_NOT_AVAILABLE, List.of("test"));
+
+        DatabaseServerParameter paramValue = serverParameterCaptor.getValue();
+        assertThat(paramValue.getAvailabilityType()).isEqualTo(DatabaseAvailabilityType.HA);
     }
 
     @ParameterizedTest
