@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.service;
 
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -25,8 +24,6 @@ public abstract class CloudbreakResourceNameService {
     // The length of Epoch milliseconds is 13 characters, until Nov 20 2286
     // We need 14 as hash length to keep backward compatibility with the legacy "yyyyMMddHHmmss" date format based hashed names
     private static final int DATE_LENGTH = 14;
-
-    private static final int TEN_FOR_MODULO = 10;
 
     public String trimHash(String part) {
         if (part == null) {
@@ -148,10 +145,5 @@ public abstract class CloudbreakResourceNameService {
 
     protected String appendHash(String name, String toBeHashed, int length) {
         return Joiner.on("").join(name, DELIMITER, DigestUtils.md5DigestAsHex(String.valueOf(toBeHashed).getBytes()).substring(0, length));
-    }
-
-    protected String appendDateAsHashWithAdditionalNano(String name, Date timestamp) {
-        int nanoSecondsFromTheStartOfTheSecond = Instant.now().getNano();
-        return Joiner.on("").join(name, DELIMITER, Long.toString(timestamp.getTime()), nanoSecondsFromTheStartOfTheSecond % TEN_FOR_MODULO);
     }
 }

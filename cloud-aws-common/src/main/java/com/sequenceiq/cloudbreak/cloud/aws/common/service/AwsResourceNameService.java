@@ -80,10 +80,6 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
         return name;
     }
 
-    public String loadBalancerResourceTypeAndSchemeNamePart(String scheme) {
-        return "LB" + scheme;
-    }
-
     public String loadBalancer(String stackName, String scheme, CloudContext context) {
         String name;
         int numberOfAppends = 2;
@@ -93,17 +89,21 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
         name = normalize(reducedStackName);
         name = adjustPartLength(name);
         name = appendPart(name, scheme);
-        String crnPart = Crn.safeFromString(context.getCrn()).getResource().substring(0, getDefaultHashLength() - 1);
-        name = appendPart(name, StringUtils.removeEnd(crnPart, "-"));
+        String crnPart = getCrnPart(context);
+        name = appendPart(name, crnPart);
         name = adjustBaseLength(name, maxLoadBalancerResourceNameLength);
         return name;
     }
 
-    public String loadBalancerTargetGroupResourceTypeSchemeAndPortNamePart(String scheme, int port) {
-        return TG_PART_NAME + port + scheme;
+    private String getCrnPart(CloudContext context) {
+        return StringUtils.removeEnd(Crn.safeFromString(context.getCrn()).getResource().substring(0, getDefaultHashLength() - 1), "-");
     }
 
-    public String loadBalancerTargetGroup(String stackName, String scheme, int port) {
+    public String loadBalancerTargetGroupResourceTypeSchemeAndPortNamePart(String scheme, int port) {
+        return port + scheme;
+    }
+
+    public String loadBalancerTargetGroup(String stackName, String scheme, int port, CloudContext context) {
         String name;
         String resourceNameWithScheme = loadBalancerTargetGroupResourceTypeSchemeAndPortNamePart(scheme, port);
         int numberOfAppends = 2;
@@ -112,7 +112,7 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
         name = normalize(reducedStackName);
         name = adjustPartLength(name);
         name = appendPart(name, resourceNameWithScheme);
-        name = appendDateAsHashWithAdditionalNano(name, new Date());
+        name = appendPart(name, getCrnPart(context));
         name = adjustBaseLength(name, maxLoadBalancerResourceNameLength);
         return name;
     }
