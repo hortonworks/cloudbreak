@@ -7,16 +7,28 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.common.collect.Sets;
@@ -31,6 +43,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 
 @ExtendWith(MockitoExtension.class)
 class FreeIpaStackHealthDetailsServiceTest {
+
     private static final String ENVIRONMENT_ID = "crn:cdp:environments:us-west-1:f39af961-e0ce-4f79-826c-45502efb9ca3:environment:12345-6789";
 
     private static final String ACCOUNT_ID = "accountId";
@@ -49,41 +62,38 @@ class FreeIpaStackHealthDetailsServiceTest {
     @Mock
     private FreeIpaSafeInstanceHealthDetailsService freeIpaInstanceHealthDetailsService;
 
+    @Mock
+    private ExecutorService executorService;
+
     @InjectMocks
     private FreeIpaStackHealthDetailsService underTest;
 
-    private NodeHealthDetails getGoodDetails1() {
+    private NodeHealthDetails createNodeHealthDetails(String instanceId, String name,
+            InstanceStatus status, List<String> issues) {
         NodeHealthDetails nodeHealthDetails = new NodeHealthDetails();
-        nodeHealthDetails.setInstanceId(INSTANCE_ID1);
-        nodeHealthDetails.setName(HOST1);
-        nodeHealthDetails.setStatus(InstanceStatus.CREATED);
+        nodeHealthDetails.setInstanceId(instanceId);
+        nodeHealthDetails.setName(name);
+        nodeHealthDetails.setStatus(status);
+        if (issues != null && !issues.isEmpty()) {
+            nodeHealthDetails.setIssues(issues);
+        }
         return nodeHealthDetails;
+    }
+
+    private NodeHealthDetails getGoodDetails1() {
+        return createNodeHealthDetails(INSTANCE_ID1, HOST1, InstanceStatus.CREATED, null);
     }
 
     private NodeHealthDetails getGoodDetails2() {
-        NodeHealthDetails nodeHealthDetails = new NodeHealthDetails();
-        nodeHealthDetails.setInstanceId(INSTANCE_ID2);
-        nodeHealthDetails.setName(HOST2);
-        nodeHealthDetails.setStatus(InstanceStatus.CREATED);
-        return nodeHealthDetails;
+        return createNodeHealthDetails(INSTANCE_ID2, HOST2, InstanceStatus.CREATED, null);
     }
 
     private NodeHealthDetails getUnhealthyDetails1() {
-        NodeHealthDetails nodeHealthDetails = new NodeHealthDetails();
-        nodeHealthDetails.setInstanceId(INSTANCE_ID1);
-        nodeHealthDetails.setName(HOST1);
-        nodeHealthDetails.setStatus(InstanceStatus.UNHEALTHY);
-        nodeHealthDetails.setIssues(List.of("failed"));
-        return nodeHealthDetails;
+        return createNodeHealthDetails(INSTANCE_ID1, HOST1, InstanceStatus.UNHEALTHY, List.of("failed"));
     }
 
     private NodeHealthDetails getUnhealthyDetails2() {
-        NodeHealthDetails nodeHealthDetails = new NodeHealthDetails();
-        nodeHealthDetails.setInstanceId(INSTANCE_ID2);
-        nodeHealthDetails.setName(HOST2);
-        nodeHealthDetails.setStatus(InstanceStatus.UNHEALTHY);
-        nodeHealthDetails.setIssues(List.of("failed"));
-        return nodeHealthDetails;
+        return createNodeHealthDetails(INSTANCE_ID2, HOST2, InstanceStatus.UNHEALTHY, List.of("failed"));
     }
 
     private Stack getStack() {
@@ -141,79 +151,153 @@ class FreeIpaStackHealthDetailsServiceTest {
     }
 
     @BeforeEach
-    void setUp() {
-        Mockito.lenient().when(freeIpaInstanceHealthDetailsService.createNodeResponseWithStatusAndIssue(any(), any(), anyString())).thenCallRealMethod();
+    void setUp() throws InterruptedException {
+        lenient().when(freeIpaInstanceHealthDetailsService.createNodeResponseWithStatusAndIssue(any(), any(), anyString())).thenCallRealMethod();
+        // Setup the default behavior for executorService.invokeAll
+        setupMockExecutorService();
+    }
+
+    private void setupMockExecutorService() throws InterruptedException {
+        Future<NodeHealthDetails> mockFuture = mock(Future.class);
+        List<Future<NodeHealthDetails>> mockFutures = List.of(mockFuture);
+        lenient().doReturn(mockFutures).when(executorService).invokeAll(any());
+    }
+
+    private void setupMockExecutorServiceWithTwoFutures(NodeHealthDetails details1, NodeHealthDetails details2) throws Exception {
+        Future<NodeHealthDetails> mockFuture1 = mock(Future.class);
+        Future<NodeHealthDetails> mockFuture2 = mock(Future.class);
+        when(mockFuture1.get(eq(15L), eq(TimeUnit.SECONDS))).thenReturn(details1);
+        when(mockFuture2.get(eq(15L), eq(TimeUnit.SECONDS))).thenReturn(details2);
+        List<Future<NodeHealthDetails>> mockFutures = List.of(mockFuture1, mockFuture2);
+        doReturn(mockFutures).when(executorService).invokeAll(any());
+    }
+
+    private void setupMockExecutorServiceWithSingleFuture(NodeHealthDetails details) throws Exception {
+        Future<NodeHealthDetails> mockFuture = mock(Future.class);
+        when(mockFuture.get(eq(15L), eq(TimeUnit.SECONDS))).thenReturn(details);
+        List<Future<NodeHealthDetails>> mockFutures = List.of(mockFuture);
+        doReturn(mockFutures).when(executorService).invokeAll(any());
+    }
+
+    private void verifyBasicMockInteractions() {
+        verify(stackService).getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_ID, ACCOUNT_ID);
+    }
+
+    private void verifyExecutorServiceInvocation(int expectedTaskCount) throws InterruptedException {
+        ArgumentCaptor<List<Callable<NodeHealthDetails>>> taskCaptor = ArgumentCaptor.forClass(List.class);
+        verify(executorService).invokeAll(taskCaptor.capture());
+
+        List<Callable<NodeHealthDetails>> capturedTasks = taskCaptor.getValue();
+        assertEquals(expectedTaskCount, capturedTasks.size());
+    }
+
+    private void verifyNoFurtherInteractions() {
+        verifyNoMoreInteractions(stackService, executorService);
     }
 
     @Test
     void testNodeDeletedOnProvider() throws Exception {
-        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(getDeletedStack());
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(getDeletedStack());
+        setupMockExecutorServiceWithSingleFuture(createNodeHealthDetails(INSTANCE_ID1, HOST1, InstanceStatus.TERMINATED, List.of()));
+
         HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
+
         assertEquals(Status.UNHEALTHY, response.getStatus());
         assertFalse(response.getNodeHealthDetails().isEmpty());
-        assertSame(response.getNodeHealthDetails().stream().findFirst().get().getStatus(), InstanceStatus.TERMINATED);
+        assertSame(InstanceStatus.TERMINATED, response.getNodeHealthDetails().stream().findFirst().get().getStatus());
+
+        verifyBasicMockInteractions();
+        verifyExecutorServiceInvocation(1);
+        verifyNoFurtherInteractions();
     }
 
     @Test
     void testHealthySingleNode() throws Exception {
-        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(getStack());
-        Mockito.when(freeIpaInstanceHealthDetailsService.getInstanceHealthDetails(any(), any())).thenReturn(getGoodDetails1());
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(getStack());
+        setupMockExecutorServiceWithSingleFuture(getGoodDetails1());
+
         HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
+
         assertEquals(Status.AVAILABLE, response.getStatus());
         assertFalse(response.getNodeHealthDetails().isEmpty());
         for (NodeHealthDetails nodeHealth:response.getNodeHealthDetails()) {
             assertTrue(nodeHealth.getIssues().isEmpty());
             assertEquals(InstanceStatus.CREATED, nodeHealth.getStatus());
         }
+
+        verifyBasicMockInteractions();
+        verifyExecutorServiceInvocation(1);
+        verifyNoFurtherInteractions();
     }
 
     @Test
     void testUnhealthySingleNode() throws Exception {
-        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(getStack());
-        Mockito.when(freeIpaInstanceHealthDetailsService.getInstanceHealthDetails(any(), any())).thenReturn(getUnhealthyDetails1());
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(getStack());
+        setupMockExecutorServiceWithSingleFuture(getUnhealthyDetails1());
+
         HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
+
         assertEquals(Status.UNHEALTHY, response.getStatus());
         assertFalse(response.getNodeHealthDetails().isEmpty());
         for (NodeHealthDetails nodeHealth:response.getNodeHealthDetails()) {
             assertFalse(nodeHealth.getIssues().isEmpty());
             assertEquals(InstanceStatus.UNHEALTHY, nodeHealth.getStatus());
         }
+
+        verifyBasicMockInteractions();
+        verifyExecutorServiceInvocation(1);
+        verifyNoFurtherInteractions();
     }
 
     @Test
     void testTwoGoodNodes() throws Exception {
         InstanceMetaData im1 = getInstance1();
         InstanceMetaData im2 = getInstance2();
-        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(getStackTwoInstances(im1, im2));
-        Mockito.when(freeIpaInstanceHealthDetailsService.getInstanceHealthDetails(any(), eq(im1))).thenReturn(getGoodDetails1());
-        Mockito.when(freeIpaInstanceHealthDetailsService.getInstanceHealthDetails(any(), eq(im2))).thenReturn(getGoodDetails2());
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(getStackTwoInstances(im1, im2));
+        setupMockExecutorServiceWithTwoFutures(getGoodDetails1(), getGoodDetails2());
+
         HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
+
         assertEquals(Status.AVAILABLE, response.getStatus());
         assertEquals(2, response.getNodeHealthDetails().size());
+
+        verifyBasicMockInteractions();
+        verifyExecutorServiceInvocation(2);
+        verifyNoFurtherInteractions();
     }
 
     @Test
     void testOneGoodOneUnhealthyNode() throws Exception {
         InstanceMetaData im1 = getInstance1();
         InstanceMetaData im2 = getInstance2();
-        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(getStackTwoInstances(im1, im2));
-        Mockito.when(freeIpaInstanceHealthDetailsService.getInstanceHealthDetails(any(), eq(im1))).thenReturn(getGoodDetails1());
-        Mockito.when(freeIpaInstanceHealthDetailsService.getInstanceHealthDetails(any(), eq(im2))).thenReturn(getUnhealthyDetails2());
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(getStackTwoInstances(im1, im2));
+        setupMockExecutorServiceWithTwoFutures(getGoodDetails1(), getUnhealthyDetails2());
+
         HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
+
         assertEquals(Status.UNHEALTHY, response.getStatus());
         assertEquals(2, response.getNodeHealthDetails().size());
+
+        verifyBasicMockInteractions();
+        verifyExecutorServiceInvocation(2);
+        verifyNoFurtherInteractions();
     }
 
     @Test
     void testTwoUnhealthyNodes() throws Exception {
         InstanceMetaData im1 = getInstance1();
         InstanceMetaData im2 = getInstance2();
-        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(getStackTwoInstances(im1, im2));
-        Mockito.when(freeIpaInstanceHealthDetailsService.getInstanceHealthDetails(any(), eq(im1))).thenReturn(getUnhealthyDetails1());
-        Mockito.when(freeIpaInstanceHealthDetailsService.getInstanceHealthDetails(any(), eq(im2))).thenReturn(getUnhealthyDetails2());
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(getStackTwoInstances(im1, im2));
+        setupMockExecutorServiceWithTwoFutures(getUnhealthyDetails1(), getUnhealthyDetails2());
+
         HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
+
         assertEquals(Status.UNHEALTHY, response.getStatus());
         assertEquals(2, response.getNodeHealthDetails().size());
+
+        verifyBasicMockInteractions();
+        verifyExecutorServiceInvocation(2);
+        verifyNoFurtherInteractions();
     }
 
     @Test
@@ -221,11 +305,17 @@ class FreeIpaStackHealthDetailsServiceTest {
         InstanceMetaData im1 = getInstance1();
         im1.setInstanceStatus(InstanceStatus.STOPPED);
         InstanceMetaData im2 = getInstance2();
-        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(getStackTwoInstances(im1, im2));
-        Mockito.when(freeIpaInstanceHealthDetailsService.getInstanceHealthDetails(any(), eq(im2))).thenReturn(getUnhealthyDetails2());
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(getStackTwoInstances(im1, im2));
+        setupMockExecutorServiceWithTwoFutures(getGoodDetails1(), getUnhealthyDetails2());
+
         HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
+
         assertEquals(Status.UNHEALTHY, response.getStatus());
         assertEquals(2, response.getNodeHealthDetails().size());
+
+        verifyBasicMockInteractions();
+        verifyExecutorServiceInvocation(2);
+        verifyNoFurtherInteractions();
     }
 
     @Test
@@ -234,10 +324,19 @@ class FreeIpaStackHealthDetailsServiceTest {
         im1.setInstanceStatus(InstanceStatus.STOPPED);
         InstanceMetaData im2 = getInstance2();
         im2.setInstanceStatus(InstanceStatus.STOPPED);
-        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(getStackTwoInstances(im1, im2));
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(getStackTwoInstances(im1, im2));
+        setupMockExecutorServiceWithTwoFutures(
+                createNodeHealthDetails(INSTANCE_ID1, HOST1, InstanceStatus.STOPPED, List.of()),
+                createNodeHealthDetails(INSTANCE_ID2, HOST2, InstanceStatus.STOPPED, List.of()));
+
         HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
+
         assertEquals(Status.STOPPED, response.getStatus());
         assertEquals(2, response.getNodeHealthDetails().size());
+
+        verifyBasicMockInteractions();
+        verifyExecutorServiceInvocation(2);
+        verifyNoFurtherInteractions();
     }
 
     @Test
@@ -246,10 +345,86 @@ class FreeIpaStackHealthDetailsServiceTest {
         im1.setInstanceStatus(InstanceStatus.FAILED);
         InstanceMetaData im2 = getInstance2();
         im2.setInstanceStatus(InstanceStatus.FAILED);
-        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(getStackTwoInstances(im1, im2));
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(getStackTwoInstances(im1, im2));
+        setupMockExecutorServiceWithTwoFutures(
+                createNodeHealthDetails(INSTANCE_ID1, HOST1, InstanceStatus.FAILED, List.of()),
+                createNodeHealthDetails(INSTANCE_ID2, HOST2, InstanceStatus.FAILED, List.of()));
+
         HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
+
         assertEquals(Status.UNHEALTHY, response.getStatus());
         assertEquals(2, response.getNodeHealthDetails().size());
+
+        verifyBasicMockInteractions();
+        verifyExecutorServiceInvocation(2);
+        verifyNoFurtherInteractions();
     }
 
+    @Test
+    void testAllInstancesDeletedOnProviderSide() throws Exception {
+        InstanceMetaData im1 = getInstance1();
+        im1.setInstanceStatus(InstanceStatus.DELETED_ON_PROVIDER_SIDE);
+        InstanceMetaData im2 = getInstance2();
+        im2.setInstanceStatus(InstanceStatus.DELETED_ON_PROVIDER_SIDE);
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(getStackTwoInstances(im1, im2));
+        setupMockExecutorServiceWithTwoFutures(
+                createNodeHealthDetails(INSTANCE_ID1, HOST1, InstanceStatus.DELETED_ON_PROVIDER_SIDE, List.of()),
+                createNodeHealthDetails(INSTANCE_ID2, HOST2, InstanceStatus.DELETED_ON_PROVIDER_SIDE, List.of()));
+
+        HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
+
+        assertEquals(Status.DELETED_ON_PROVIDER_SIDE, response.getStatus());
+        assertEquals(2, response.getNodeHealthDetails().size());
+        response.getNodeHealthDetails().forEach(node ->
+                assertEquals(InstanceStatus.DELETED_ON_PROVIDER_SIDE, node.getStatus()));
+
+        verifyBasicMockInteractions();
+        verifyExecutorServiceInvocation(2);
+        verifyNoFurtherInteractions();
+    }
+
+    @Test
+    void testInterruptedExceptionDuringHealthCheck() throws InterruptedException {
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(getStack());
+        doThrow(new InterruptedException("Interrupted during health check")).when(executorService).invokeAll(any());
+
+        HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
+
+        assertTrue(Thread.currentThread().isInterrupted());
+        assertEquals(Status.UNHEALTHY, response.getStatus());
+
+        verifyBasicMockInteractions();
+        verify(executorService).invokeAll(any());
+        verifyNoMoreInteractions(stackService, executorService);
+
+        // Clear interrupt status for subsequent tests
+        Thread.interrupted();
+    }
+
+    @Test
+    void testExecutionExceptionDuringHealthCheck() throws Exception {
+        InstanceMetaData im1 = getInstance1();
+        InstanceMetaData im2 = getInstance2();
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(getStackTwoInstances(im1, im2));
+
+        Future<NodeHealthDetails> futureMock1 = mock(Future.class);
+        Future<NodeHealthDetails> futureMock2 = mock(Future.class);
+        when(futureMock1.get(eq(15L), eq(TimeUnit.SECONDS))).thenReturn(getGoodDetails1());
+        when(futureMock2.get(eq(15L), eq(TimeUnit.SECONDS))).thenThrow(new ExecutionException("Exception during future execution", new RuntimeException()));
+        List<Future<NodeHealthDetails>> futures = List.of(futureMock1, futureMock2);
+        doReturn(futures).when(executorService).invokeAll(any());
+
+        HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
+
+        assertEquals(Status.UNHEALTHY, response.getStatus());
+        assertEquals(2, response.getNodeHealthDetails().size());
+        assertTrue(response.getNodeHealthDetails().stream().anyMatch(node -> node.getStatus() == InstanceStatus.CREATED));
+        assertTrue(response.getNodeHealthDetails().stream().anyMatch(node -> node.getStatus() == InstanceStatus.UNREACHABLE));
+
+        verifyBasicMockInteractions();
+        verifyExecutorServiceInvocation(2);
+        verify(futureMock1).get(eq(15L), eq(TimeUnit.SECONDS));
+        verify(futureMock2).get(eq(15L), eq(TimeUnit.SECONDS));
+        verifyNoMoreInteractions(stackService, executorService, futureMock1, futureMock2);
+    }
 }

@@ -71,7 +71,7 @@ public class AzureConfig {
         } else {
             return commonExecutorServiceFactory.newThreadPoolExecutorService(AZURE_CLIENT_THREAD_POOL, AZURE_CLIENT_THREAD_POOL, 0, Integer.MAX_VALUE,
                     azureClientThreadKeepAliveTimeInSeconds, TimeUnit.SECONDS, new SynchronousQueue<>(),
-                    (r, executor) -> LOGGER.error("Task has been rejected from 'azure-worker' threadpool. Executor state: " + executor),
+                    (r, executor) -> LOGGER.error("Task has been rejected from 'azure-worker' threadpool. Executor state: {}", executor),
                     List.of(new MDCCopyDecorator()));
         }
     }
@@ -80,6 +80,6 @@ public class AzureConfig {
     public Map<AzureDatabaseType, AzureDatabaseTemplateModelBuilder> azureDatabaseTemplateModelBuilderMap(
             List<AzureDatabaseTemplateModelBuilder> templateModelBuilders) {
         return templateModelBuilders.stream().collect(
-                Collectors.toMap(AzureDatabaseTemplateModelBuilder::azureDatabaseType, modelBuiler -> modelBuiler));
+                Collectors.toMap(AzureDatabaseTemplateModelBuilder::azureDatabaseType, modelBuilder -> modelBuilder));
     }
 }

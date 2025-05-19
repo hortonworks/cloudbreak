@@ -134,15 +134,13 @@ public class UpgradeCcmService {
     }
 
     public void checkPrerequisitesState(Long stackId) {
-        DetailedStackStatus detailedStatus = UPGRADE_CCM_IN_PROGRESS;
         String statusReason = "Checking prerequisites";
-        stackUpdater.updateStackStatus(stackId, detailedStatus, statusReason);
+        stackUpdater.updateStackStatus(stackId, UPGRADE_CCM_IN_PROGRESS, statusReason);
     }
 
     public void changeTunnelState(Long stackId) {
-        DetailedStackStatus detailedStatus = UPGRADE_CCM_IN_PROGRESS;
         String statusReason = "Changing tunnel type in database";
-        stackUpdater.updateStackStatus(stackId, detailedStatus, statusReason);
+        stackUpdater.updateStackStatus(stackId, UPGRADE_CCM_IN_PROGRESS, statusReason);
     }
 
     public void changeTunnel(Long stackId, Tunnel tunnel) {
@@ -151,9 +149,8 @@ public class UpgradeCcmService {
     }
 
     public void obtainAgentDataState(Long stackId) {
-        DetailedStackStatus detailedStatus = UPGRADE_CCM_IN_PROGRESS;
         String statusReason = "Provisioning connectivity agent";
-        stackUpdater.updateStackStatus(stackId, detailedStatus, statusReason);
+        stackUpdater.updateStackStatus(stackId, UPGRADE_CCM_IN_PROGRESS, statusReason);
     }
 
     public void obtainAgentData(Long stackId) {
@@ -165,9 +162,8 @@ public class UpgradeCcmService {
     }
 
     public void pushSaltStatesState(Long stackId) {
-        DetailedStackStatus detailedStatus = UPGRADE_CCM_IN_PROGRESS;
         String statusReason = "Pushing Salt states";
-        stackUpdater.updateStackStatus(stackId, detailedStatus, statusReason);
+        stackUpdater.updateStackStatus(stackId, UPGRADE_CCM_IN_PROGRESS, statusReason);
     }
 
     public void pushSaltStates(Long stackId) throws CloudbreakOrchestratorException {
@@ -177,9 +173,8 @@ public class UpgradeCcmService {
     }
 
     public void upgradeState(Long stackId) {
-        DetailedStackStatus detailedStatus = UPGRADE_CCM_IN_PROGRESS;
         String statusReason = "Applying upgrade on nodes";
-        stackUpdater.updateStackStatus(stackId, detailedStatus, statusReason);
+        stackUpdater.updateStackStatus(stackId, UPGRADE_CCM_IN_PROGRESS, statusReason);
     }
 
     public void upgrade(Long stackId) throws CloudbreakOrchestratorException {
@@ -187,9 +182,8 @@ public class UpgradeCcmService {
     }
 
     public void reconfigureNginxState(Long stackId) {
-        DetailedStackStatus detailedStatus = UPGRADE_CCM_IN_PROGRESS;
         String statusReason = "Reconfiguring NGINX on nodes";
-        stackUpdater.updateStackStatus(stackId, detailedStatus, statusReason);
+        stackUpdater.updateStackStatus(stackId, UPGRADE_CCM_IN_PROGRESS, statusReason);
     }
 
     public void reconfigureNginx(Long stackId) throws CloudbreakOrchestratorException {
@@ -197,9 +191,8 @@ public class UpgradeCcmService {
     }
 
     public void registerClusterProxyState(Long stackId) {
-        DetailedStackStatus detailedStatus = UPGRADE_CCM_IN_PROGRESS;
         String statusReason = "Registering into Cluster Proxy";
-        stackUpdater.updateStackStatus(stackId, detailedStatus, statusReason);
+        stackUpdater.updateStackStatus(stackId, UPGRADE_CCM_IN_PROGRESS, statusReason);
     }
 
     public void registerClusterProxyAndCheckHealth(Long stackId) {
@@ -210,12 +203,6 @@ public class UpgradeCcmService {
     private void registerClusterProxy(Long stackId) {
         Optional<ConfigRegistrationResponse> configRegistrationResponse = clusterProxyService.registerFreeIpa(stackId);
         configRegistrationResponse.ifPresentOrElse(c -> LOGGER.debug(c.toString()), () -> LOGGER.debug("No clusterproxy register response for {}", stackId));
-    }
-
-    public void healthCheckState(Long stackId) {
-        DetailedStackStatus detailedStatus = UPGRADE_CCM_IN_PROGRESS;
-        String statusReason = "Running health check";
-        stackUpdater.updateStackStatus(stackId, detailedStatus, statusReason);
     }
 
     private void healthCheck(Long stackId) {
@@ -229,9 +216,8 @@ public class UpgradeCcmService {
     }
 
     public void removeMinaState(Long stackId) {
-        DetailedStackStatus detailedStatus = UPGRADE_CCM_IN_PROGRESS;
         String statusReason = "Removing Mina agent from nodes";
-        stackUpdater.updateStackStatus(stackId, detailedStatus, statusReason);
+        stackUpdater.updateStackStatus(stackId, UPGRADE_CCM_IN_PROGRESS, statusReason);
     }
 
     public void removeMina(Long stackId) throws CloudbreakOrchestratorException {
@@ -239,9 +225,8 @@ public class UpgradeCcmService {
     }
 
     public void deregisterMinaState(Long stackId) {
-        DetailedStackStatus detailedStatus = UPGRADE_CCM_IN_PROGRESS;
         String statusReason = "Deregistering Mina agent";
-        stackUpdater.updateStackStatus(stackId, detailedStatus, statusReason);
+        stackUpdater.updateStackStatus(stackId, UPGRADE_CCM_IN_PROGRESS, statusReason);
     }
 
     public void deregisterMina(Long stackId) {
@@ -258,12 +243,11 @@ public class UpgradeCcmService {
 
     public void finishedState(Long stackId, Boolean minaRemoved) {
         InMemoryStateStore.deleteStack(stackId);
-        DetailedStackStatus detailedStatus = AVAILABLE;
         String statusReason = "Upgrade CCM completed";
         if (!minaRemoved) {
             statusReason += ", but removing MINA was unsuccessful.";
         }
-        stackUpdater.updateStackStatus(stackId, detailedStatus, statusReason);
+        stackUpdater.updateStackStatus(stackId, AVAILABLE, statusReason);
     }
 
     public void failedState(UpgradeCcmContext context, UpgradeCcmFailureEvent payload) {

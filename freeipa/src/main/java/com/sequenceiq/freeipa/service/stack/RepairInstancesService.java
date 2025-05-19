@@ -53,7 +53,7 @@ public class RepairInstancesService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RepairInstancesService.class);
 
-    private static final String DELETED_NAME_DELIMETER = "_";
+    private static final String DELETED_NAME_DELIMITER = "_";
 
     private static final Set<InstanceStatus> INVALID_REPAIR_STATUSES = Set.of(
             InstanceStatus.DECOMMISSIONED,
@@ -136,10 +136,10 @@ public class RepairInstancesService {
 
         Map<String, InstanceMetaData> instancesToRepair = validInstanceIds.stream()
                 .filter(instanceId -> force || healthMap.get(instanceId) != null && !healthMap.get(instanceId).isAvailable())
-                .collect(Collectors.toMap(Function.identity(), instanceId -> allInstances.get(instanceId)));
-        if (instancesToRepair.keySet().size() != validInstanceIds.size()) {
+                .collect(Collectors.toMap(Function.identity(), allInstances::get));
+        if (instancesToRepair.size() != validInstanceIds.size()) {
             LOGGER.info("Not {} instances {} because force was not selected.", reboot ? "repairing" : "rebooting", validInstanceIds.stream()
-                    .filter(instance -> !instancesToRepair.keySet().contains(instance)).collect(Collectors.joining(",")));
+                    .filter(instance -> !instancesToRepair.containsKey(instance)).collect(Collectors.joining(",")));
         }
 
         return instancesToRepair;
@@ -264,7 +264,7 @@ public class RepairInstancesService {
         Map<String, InstanceMetaData> instancesToReboot =
                 getInstancesToRepair(healthMap, allInstancesByInstanceId, request.getInstanceIds(), request.isForceReboot(), true);
 
-        if (instancesToReboot.keySet().isEmpty()) {
+        if (instancesToReboot.isEmpty()) {
             throwNotFoundException("No unhealthy instances to reboot. You can try to use the force option to enforce the repair process.");
         }
 
@@ -305,9 +305,9 @@ public class RepairInstancesService {
         }
         Long terminated = stack.getTerminated();
         String originalName = stack.getName();
-        String deletionTime = StringUtils.substringAfterLast(originalName, DELETED_NAME_DELIMETER);
+        String deletionTime = StringUtils.substringAfterLast(originalName, DELETED_NAME_DELIMITER);
         if (terminated == -1 || !deletionTime.equals(terminated.toString())) {
-            LOGGER.info("Updating terminated stack name from {}, prior termianted time {}", originalName, terminated);
+            LOGGER.info("Updating terminated stack name from {}, prior terminated time {}", originalName, terminated);
             terminationService.finalizeTermination(stack.getId());
         }
     }

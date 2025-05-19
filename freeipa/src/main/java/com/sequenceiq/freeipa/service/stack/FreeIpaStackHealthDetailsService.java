@@ -1,12 +1,18 @@
 package com.sequenceiq.freeipa.service.stack;
 
+import static java.util.function.Predicate.isEqual;
 import static java.util.function.Predicate.not;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Predicate;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -14,12 +20,14 @@ import jakarta.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.NodeHealthDetails;
+import com.sequenceiq.freeipa.configuration.HealthCheckConfig;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 
@@ -30,28 +38,56 @@ public class FreeIpaStackHealthDetailsService {
 
     private static final Set<InstanceStatus> CACHEABLE_INSTANCE_STATUS = Set.of(InstanceStatus.STOPPED, InstanceStatus.FAILED);
 
+    private static final long TIMEOUT_SECONDS = 15L;
+
     @Inject
     private StackService stackService;
 
     @Inject
     private FreeIpaSafeInstanceHealthDetailsService healthDetailsService;
 
+    @Inject
+    @Qualifier(HealthCheckConfig.HEALTH_CHECK_TASK_EXECUTOR)
+    private ExecutorService taskExecutorService;
+
     public HealthDetailsFreeIpaResponse getHealthDetails(String environmentCrn, String accountId) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(environmentCrn, accountId);
         List<InstanceMetaData> instances = stack.getAllInstanceMetaDataList();
 
         HealthDetailsFreeIpaResponse response = new HealthDetailsFreeIpaResponse();
-        for (InstanceMetaData instance : instances) {
-            NodeHealthDetails nodeResponse;
-            if (shouldRunHealthCheck(instance)) {
-                nodeResponse = healthDetailsService.getInstanceHealthDetails(stack, instance);
-            } else {
-                String issue = "Unable to check health as instance is " + instance.getInstanceStatus().name();
-                nodeResponse = healthDetailsService.createNodeResponseWithStatusAndIssue(instance, instance.getInstanceStatus(), issue);
+
+        List<Callable<NodeHealthDetails>> callables = instances.stream()
+                .map(instance -> (Callable<NodeHealthDetails>) () -> getNodeHealthDetails(instance, stack))
+                .collect(Collectors.toList());
+        try {
+            List<Future<NodeHealthDetails>> futures = taskExecutorService.invokeAll(callables);
+            for (Future<NodeHealthDetails> future : futures) {
+                try {
+                    NodeHealthDetails nodeHealthDetails = future.get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                    response.addNodeHealthDetailsFreeIpaResponses((nodeHealthDetails));
+                } catch (ExecutionException | TimeoutException e) {
+                    LOGGER.warn("Error while getting health details for stack: {}", stack.getName(), e);
+                    NodeHealthDetails nodeHealthDetails = healthDetailsService.createNodeResponseWithStatusAndIssue(
+                            new InstanceMetaData(), InstanceStatus.UNREACHABLE, e.getMessage());
+                    response.addNodeHealthDetailsFreeIpaResponses(nodeHealthDetails);
+                }
             }
-            response.addNodeHealthDetailsFreeIpaResponses(nodeResponse);
+        } catch (InterruptedException e) {
+            LOGGER.warn("Error while getting health details for stack: {}", stack.getName(), e);
+            Thread.currentThread().interrupt();
         }
         return updateResponse(stack, response);
+    }
+
+    private NodeHealthDetails getNodeHealthDetails(InstanceMetaData instance, Stack stack) {
+        NodeHealthDetails nodeResponse;
+        if (shouldRunHealthCheck(instance)) {
+            nodeResponse = healthDetailsService.getInstanceHealthDetails(stack, instance);
+        } else {
+            String issue = "Unable to check health as instance is " + instance.getInstanceStatus().name();
+            nodeResponse = healthDetailsService.createNodeResponseWithStatusAndIssue(instance, instance.getInstanceStatus(), issue);
+        }
+        return nodeResponse;
     }
 
     private boolean shouldRunHealthCheck(InstanceMetaData instance) {
@@ -65,13 +101,13 @@ public class FreeIpaStackHealthDetailsService {
         response.setCrn(stack.getResourceCrn());
         response.setName(stack.getName());
 
-        Set<String> notTermiatedStackInstanceIds = stack.getAllInstanceMetaDataList().stream()
+        Set<String> notTerminatedStackInstanceIds = stack.getAllInstanceMetaDataList().stream()
                 .filter(not(InstanceMetaData::isTerminated))
                 .map(InstanceMetaData::getInstanceId)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
         List<InstanceStatus> nonTerminatedStatuses = response.getNodeHealthDetails().stream()
-                .filter(nodeHealthDetails -> notTermiatedStackInstanceIds.contains(nodeHealthDetails.getInstanceId()))
+                .filter(nodeHealthDetails -> notTerminatedStackInstanceIds.contains(nodeHealthDetails.getInstanceId()))
                 .map(NodeHealthDetails::getStatus)
                 .collect(Collectors.toList());
         if (nonTerminatedStatuses.isEmpty()) {
@@ -80,11 +116,11 @@ public class FreeIpaStackHealthDetailsService {
         } else if (!areAllStatusTheSame(nonTerminatedStatuses)) {
             LOGGER.debug("There are different health statuses for FreeIPA so the the overall health is unhealthy");
             response.setStatus(Status.UNHEALTHY);
-        } else if (hasMissingStatus(nonTerminatedStatuses, notTermiatedStackInstanceIds)) {
+        } else if (hasMissingStatus(nonTerminatedStatuses, notTerminatedStackInstanceIds)) {
             LOGGER.debug("There are missing health checks for some instances of FreeIPA so the overall health is unhealthy");
             response.setStatus(Status.UNHEALTHY);
         } else {
-            response.setStatus(toStatus(nonTerminatedStatuses.get(0)));
+            response.setStatus(toStatus(nonTerminatedStatuses.getFirst()));
         }
         updateResponseWithInstanceIds(response, stack);
         return response;
@@ -106,32 +142,22 @@ public class FreeIpaStackHealthDetailsService {
     }
 
     private Status toStatus(InstanceStatus instanceStatus) {
-        switch (instanceStatus) {
-            case REQUESTED:
-                return Status.REQUESTED;
-            case CREATED:
-                return Status.AVAILABLE;
-            case TERMINATED:
-                return Status.DELETE_COMPLETED;
-            case DELETED_ON_PROVIDER_SIDE:
-            case DELETED_BY_PROVIDER:
-                return Status.DELETED_ON_PROVIDER_SIDE;
-            case STOPPED:
-                return Status.STOPPED;
-            case REBOOTING:
-                return Status.UPDATE_IN_PROGRESS;
-            case UNREACHABLE:
-                return Status.UNREACHABLE;
-            case DELETE_REQUESTED:
-                return Status.DELETE_IN_PROGRESS;
-            default:
-                return Status.UNHEALTHY;
-        }
+        return switch (instanceStatus) {
+            case REQUESTED -> Status.REQUESTED;
+            case CREATED -> Status.AVAILABLE;
+            case TERMINATED -> Status.DELETE_COMPLETED;
+            case DELETED_ON_PROVIDER_SIDE, DELETED_BY_PROVIDER -> Status.DELETED_ON_PROVIDER_SIDE;
+            case STOPPED -> Status.STOPPED;
+            case REBOOTING -> Status.UPDATE_IN_PROGRESS;
+            case UNREACHABLE -> Status.UNREACHABLE;
+            case DELETE_REQUESTED -> Status.DELETE_IN_PROGRESS;
+            default -> Status.UNHEALTHY;
+        };
     }
 
     private boolean areAllStatusTheSame(List<InstanceStatus> response) {
-        InstanceStatus first = response.get(0);
-        return response.stream().allMatch(Predicate.isEqual(first));
+        InstanceStatus first = response.getFirst();
+        return response.stream().allMatch(isEqual(first));
     }
 
     private boolean hasMissingStatus(List<InstanceStatus> response, Set<String> notTermiatedStackInstanceIds) {

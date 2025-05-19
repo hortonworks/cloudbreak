@@ -24,7 +24,7 @@ public class FreeIpaSafeInstanceHealthDetailsService {
         try {
             nodeHealthDetails = healthDetailsService.getInstanceHealthDetails(stack, instance);
         } catch (Exception e) {
-            LOGGER.error(String.format("Unable to check the health of FreeIPA instance: %s", instance.getInstanceId()), e);
+            LOGGER.error("Unable to check the health of FreeIPA instance: {}", instance.getInstanceId(), e);
             nodeHealthDetails = createNodeResponseWithStatusAndIssue(instance, InstanceStatus.UNREACHABLE, e.getLocalizedMessage());
         }
         return nodeHealthDetails;
