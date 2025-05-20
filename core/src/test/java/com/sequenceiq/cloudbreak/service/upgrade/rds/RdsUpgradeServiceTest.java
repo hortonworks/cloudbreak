@@ -150,7 +150,8 @@ class RdsUpgradeServiceTest {
         when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN), any())).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_10));
         when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stackDto);
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_ID);
-        when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, ACCOUNT_ID)).thenReturn(Optional.empty());
+        when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, TARGET_VERSION.getMajorVersion(), ACCOUNT_ID))
+                .thenReturn(Optional.empty());
         when(reactorFlowManager.triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION), eq(BACKUP_LOCATION), eq(BACKUP_INSTANCE_PROFILE))).thenReturn(flowId);
         when(entitlementService.isPostgresUpgradeAttachedDatahubsCheckSkipped(ACCOUNT_ID)).thenReturn(false);
 
@@ -168,7 +169,8 @@ class RdsUpgradeServiceTest {
         stack.setCloudPlatform("AZURE");
         when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN), any())).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_10));
         when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stackDto);
-        when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, ACCOUNT_ID)).thenReturn(Optional.empty());
+        when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, TARGET_VERSION.getMajorVersion(), ACCOUNT_ID))
+                .thenReturn(Optional.empty());
         when(entitlementService.isPostgresUpgradeAttachedDatahubsCheckSkipped(ACCOUNT_ID)).thenReturn(false);
         when(entitlementService.isPostgresUpgradeSkipServicesAndCmStopEnabled(ACCOUNT_ID)).thenReturn(true);
 
@@ -203,7 +205,8 @@ class RdsUpgradeServiceTest {
         when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN), any())).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_10));
         when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stackDto);
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_ID);
-        when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, ACCOUNT_ID)).thenReturn(Optional.empty());
+        when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, TARGET_VERSION.getMajorVersion(), ACCOUNT_ID))
+                .thenReturn(Optional.empty());
         when(reactorFlowManager.triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION), eq(null), eq(null))).thenReturn(flowId);
         when(entitlementService.isPostgresUpgradeAttachedDatahubsCheckSkipped(ACCOUNT_ID)).thenReturn(false);
 
@@ -226,7 +229,8 @@ class RdsUpgradeServiceTest {
         when(stackDto.getCloudPlatform()).thenReturn(onAzure ? "AZURE" : "AWS");
         when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN), any())).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_10));
         when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stackDto);
-        when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, ACCOUNT_ID)).thenReturn(Optional.empty());
+        when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, desiredVersion.getMajorVersion(), ACCOUNT_ID))
+                .thenReturn(Optional.empty());
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_ID);
         lenient().when(reactorFlowManager.triggerRdsUpgrade(eq(STACK_ID), eq(desiredVersion), eq(BACKUP_LOCATION), eq(BACKUP_INSTANCE_PROFILE)))
                 .thenReturn(flowId);
@@ -248,7 +252,8 @@ class RdsUpgradeServiceTest {
         when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN), any())).thenReturn(createDatabaseServerResponse(null));
         when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stackDto);
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_ID);
-        when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, ACCOUNT_ID)).thenReturn(Optional.empty());
+        when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, TARGET_VERSION.getMajorVersion(), ACCOUNT_ID))
+                .thenReturn(Optional.empty());
         when(reactorFlowManager.triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION), eq(BACKUP_LOCATION), eq(BACKUP_INSTANCE_PROFILE))).thenReturn(flowId);
         when(entitlementService.isPostgresUpgradeAttachedDatahubsCheckSkipped(ACCOUNT_ID)).thenReturn(false);
 
@@ -303,7 +308,8 @@ class RdsUpgradeServiceTest {
         when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN), any())).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_10));
         when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stackDto);
         String errorMessage = "Runtime version is not valid.";
-        when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, ACCOUNT_ID)).thenReturn(Optional.of(errorMessage));
+        when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, TARGET_VERSION.getMajorVersion(), ACCOUNT_ID))
+                .thenReturn(Optional.of(errorMessage));
 
         Assertions.assertThatCode(() -> doAs(
                         USER_CRN, () -> underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION, false)))
@@ -393,7 +399,8 @@ class RdsUpgradeServiceTest {
         when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN), any())).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_10, status));
         when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stackDto);
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_ID);
-        when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, ACCOUNT_ID)).thenReturn(Optional.empty());
+        when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, TARGET_VERSION.getMajorVersion(), ACCOUNT_ID))
+                .thenReturn(Optional.empty());
         when(reactorFlowManager.triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION), eq(BACKUP_LOCATION), eq(BACKUP_INSTANCE_PROFILE))).thenReturn(flowId);
         when(entitlementService.isPostgresUpgradeAttachedDatahubsCheckSkipped(ACCOUNT_ID)).thenReturn(false);
 
@@ -410,7 +417,8 @@ class RdsUpgradeServiceTest {
         StackDto stackDto = createStackDto(stack, DatabaseAvailabilityType.HA);
         when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN), any())).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_10, null));
         when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stackDto);
-        when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, ACCOUNT_ID)).thenReturn(Optional.empty());
+        when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, TARGET_VERSION.getMajorVersion(), ACCOUNT_ID))
+                .thenReturn(Optional.empty());
         when(entitlementService.isPostgresUpgradeAttachedDatahubsCheckSkipped(ACCOUNT_ID)).thenReturn(false);
 
         Assertions.assertThatCode(() -> doAs(USER_CRN, () -> underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION, false)))
@@ -427,7 +435,8 @@ class RdsUpgradeServiceTest {
         StackDto stackDto = createStackDto(stack, DatabaseAvailabilityType.HA);
         when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN), any())).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_10, status));
         when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stackDto);
-        when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, ACCOUNT_ID)).thenReturn(Optional.empty());
+        when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, TARGET_VERSION.getMajorVersion(), ACCOUNT_ID))
+                .thenReturn(Optional.empty());
         when(entitlementService.isPostgresUpgradeAttachedDatahubsCheckSkipped(ACCOUNT_ID)).thenReturn(false);
 
         Assertions.assertThatCode(() -> doAs(USER_CRN, () -> underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION, false)))

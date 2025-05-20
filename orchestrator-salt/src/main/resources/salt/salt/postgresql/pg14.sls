@@ -5,9 +5,9 @@
 
 include:
 {% if not salt['file.file_exists']('/usr/pgsql-14/bin/psql') %}
-  - postgresql.pg14-install
+  - postgresql.pg-install
 {% endif %}
-  - postgresql.pg14-alternatives
+  - postgresql.pg-alternatives
 
 {% for version in ['10', '11'] %}
 {% if salt['file.file_exists']('/usr/lib/systemd/system/postgresql-' +  version + '.service') %}
