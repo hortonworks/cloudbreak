@@ -1,6 +1,5 @@
 package com.sequenceiq.datalake.service.upgrade;
 
-import static com.sequenceiq.cloudbreak.util.TestConstants.ACCOUNT_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -16,7 +15,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeShowAvailableImages;
@@ -62,7 +63,7 @@ class SdxUpgradeFilterTest {
         sdxUpgradeRequest.setDryRun(true);
 
         UpgradeV4Response actualUpgradeResponse = underTest.filterSdxUpgradeResponse(sdxUpgradeRequest, upgradeV4Response,
-            SdxClusterShape.ENTERPRISE, ACCOUNT_ID);
+            SdxClusterShape.ENTERPRISE);
 
         assertEquals(1, actualUpgradeResponse.getUpgradeCandidates().size());
         assertEquals(IMAGE_ID_LAST, actualUpgradeResponse.getUpgradeCandidates().get(0).getImageId());
@@ -78,7 +79,7 @@ class SdxUpgradeFilterTest {
         imageInfoV4Response1.setComponentVersions(new ImageComponentVersions("",  "",  "7.3.0", "",  "", "", List.of()));
         UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
         upgradeV4Response.setUpgradeCandidates(List.of(imageInfoV4Response1, imageInfoV4Response2, imageInfoV4Response3));
-        UpgradeV4Response response = underTest.filterSdxUpgradeResponse(sdxUpgradeRequest, upgradeV4Response, SdxClusterShape.LIGHT_DUTY, ACCOUNT_ID);
+        UpgradeV4Response response = underTest.filterSdxUpgradeResponse(sdxUpgradeRequest, upgradeV4Response, SdxClusterShape.LIGHT_DUTY);
         assertEquals(3, response.getUpgradeCandidates().size());
     }
 
@@ -92,7 +93,8 @@ class SdxUpgradeFilterTest {
         imageInfoV4Response3.setComponentVersions(new ImageComponentVersions("",  "",  "7.3.0", "",  "", "", List.of()));
         UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
         upgradeV4Response.setUpgradeCandidates(List.of(imageInfoV4Response1, imageInfoV4Response2, imageInfoV4Response3));
-        UpgradeV4Response response = underTest.filterSdxUpgradeResponse(sdxUpgradeRequest, upgradeV4Response, SdxClusterShape.MEDIUM_DUTY_HA, ACCOUNT_ID);
+        UpgradeV4Response response = ThreadBasedUserCrnProvider.doAs(TestConstants.CRN,
+                () -> underTest.filterSdxUpgradeResponse(sdxUpgradeRequest, upgradeV4Response, SdxClusterShape.MEDIUM_DUTY_HA));
         assertEquals(1, response.getUpgradeCandidates().size());
         List<String> candidates = response.getUpgradeCandidates().stream().map(candidate -> candidate.getComponentVersions().getCdp()).toList();
         assertTrue(candidates.contains("7.2.17"));
@@ -108,46 +110,9 @@ class SdxUpgradeFilterTest {
         imageInfoV4Response1.setComponentVersions(new ImageComponentVersions("",  "",  "7.3.0", "",  "", "", List.of()));
         UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
         upgradeV4Response.setUpgradeCandidates(List.of(imageInfoV4Response1, imageInfoV4Response2, imageInfoV4Response3));
-        UpgradeV4Response response = underTest.filterSdxUpgradeResponse(sdxUpgradeRequest, upgradeV4Response, SdxClusterShape.ENTERPRISE, ACCOUNT_ID);
+        UpgradeV4Response response = underTest.filterSdxUpgradeResponse(sdxUpgradeRequest, upgradeV4Response, SdxClusterShape.ENTERPRISE);
         assertEquals(3, response.getUpgradeCandidates().size());
     }
-
-/*    @Test
-    public void testShowLatestOnlyShouldReturnLatestUpgradeCandidatesPerRuntime() {
-        ImageComponentVersions imageComponentVersionsFor702 = new ImageComponentVersions();
-        imageComponentVersionsFor702.setCm(V_7_0_2);
-        imageComponentVersionsFor702.setCdp(V_7_0_2);
-
-        ImageComponentVersions imageComponentVersionsFor703 = new ImageComponentVersions();
-        imageComponentVersionsFor703.setCm(V_7_0_3);
-        imageComponentVersionsFor703.setCdp(V_7_0_3);
-
-        ImageInfoV4Response imageInfo1 = new ImageInfoV4Response();
-        imageInfo1.setImageId(IMAGE_ID + 1);
-        imageInfo1.setCreated(1L);
-        imageInfo1.setComponentVersions(imageComponentVersionsFor702);
-
-        ImageInfoV4Response imageInfo2 = new ImageInfoV4Response();
-        imageInfo2.setImageId(IMAGE_ID + 2);
-        imageInfo2.setCreated(2L);
-        imageInfo2.setComponentVersions(imageComponentVersionsFor702);
-
-        ImageInfoV4Response imageInfo3 = new ImageInfoV4Response();
-        imageInfo3.setImageId(IMAGE_ID + 3);
-        imageInfo3.setCreated(3L);
-        imageInfo3.setComponentVersions(imageComponentVersionsFor703);
-
-        UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
-        upgradeV4Response.setUpgradeCandidates(List.of(imageInfo1, imageInfo2, imageInfo3));
-        sdxUpgradeRequest.setShowAvailableImages(SdxUpgradeShowAvailableImages.LATEST_ONLY);
-
-        UpgradeV4Response actualResponse = underTest.filterSdxUpgradeResponse(sdxUpgradeRequest, upgradeV4Response);
-
-        assertEquals(2, actualResponse.getUpgradeCandidates().size());
-        assertFalse(actualResponse.getUpgradeCandidates().stream().anyMatch(imageInfoV4Response -> imageInfoV4Response.getImageId().equals(IMAGE_ID + 1)));
-        assertTrue(actualResponse.getUpgradeCandidates().stream().anyMatch(imageInfoV4Response -> imageInfoV4Response.getImageId().equals(IMAGE_ID + 2)));
-        assertTrue(actualResponse.getUpgradeCandidates().stream().anyMatch(imageInfoV4Response -> imageInfoV4Response.getImageId().equals(IMAGE_ID + 3)));
-    }*/
 
     @Test
     public void testShowAvailableImagesShouldReturnAllUpgradeCandidates() {
@@ -179,7 +144,7 @@ class SdxUpgradeFilterTest {
         upgradeV4Response.setUpgradeCandidates(List.of(imageInfo1, imageInfo2, imageInfo3));
         sdxUpgradeRequest.setShowAvailableImages(SdxUpgradeShowAvailableImages.SHOW);
 
-        underTest.filterSdxUpgradeResponse(sdxUpgradeRequest, upgradeV4Response, SdxClusterShape.ENTERPRISE, ACCOUNT_ID);
+        underTest.filterSdxUpgradeResponse(sdxUpgradeRequest, upgradeV4Response, SdxClusterShape.ENTERPRISE);
 
         assertEquals(3, upgradeV4Response.getUpgradeCandidates().size());
         assertTrue(upgradeV4Response.getUpgradeCandidates().stream().anyMatch(imageInfoV4Response -> imageInfoV4Response.getImageId().equals(IMAGE_ID + 1)));

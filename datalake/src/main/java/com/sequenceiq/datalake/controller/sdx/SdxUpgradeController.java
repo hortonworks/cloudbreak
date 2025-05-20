@@ -43,9 +43,9 @@ public class SdxUpgradeController implements SdxUpgradeEndpoint {
     public SdxUpgradeResponse upgradeClusterByName(@ResourceName String clusterName, SdxUpgradeRequest request) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         if (request.isDryRun() || request.isShowAvailableImagesSet()) {
-            return sdxRuntimeUpgradeService.checkForUpgradeByName(clusterName, request, ThreadBasedUserCrnProvider.getAccountId(), false);
+            return sdxRuntimeUpgradeService.checkForUpgradeByName(userCrn, clusterName, request, false);
         } else {
-            return sdxRuntimeUpgradeService.triggerUpgradeByName(userCrn, clusterName, request, ThreadBasedUserCrnProvider.getAccountId(), false);
+            return sdxRuntimeUpgradeService.triggerUpgradeByName(userCrn, clusterName, request, false);
         }
     }
 
@@ -54,9 +54,9 @@ public class SdxUpgradeController implements SdxUpgradeEndpoint {
     public SdxUpgradeResponse upgradeClusterByCrn(@ResourceCrn String clusterCrn, SdxUpgradeRequest request) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         if (request.isDryRun() || request.isShowAvailableImagesSet()) {
-            return sdxRuntimeUpgradeService.checkForUpgradeByCrn(userCrn, clusterCrn, request, ThreadBasedUserCrnProvider.getAccountId(), false);
+            return sdxRuntimeUpgradeService.checkForUpgradeByCrn(userCrn, clusterCrn, request, false);
         } else {
-            return sdxRuntimeUpgradeService.triggerUpgradeByCrn(userCrn, clusterCrn, request, ThreadBasedUserCrnProvider.getAccountId(), false);
+            return sdxRuntimeUpgradeService.triggerUpgradeByCrn(userCrn, clusterCrn, request, false);
         }
     }
 
@@ -65,9 +65,9 @@ public class SdxUpgradeController implements SdxUpgradeEndpoint {
     public SdxUpgradeResponse prepareClusterUpgradeByName(@ResourceName String name, SdxUpgradeRequest request) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         if (request.isDryRun() || request.isShowAvailableImagesSet()) {
-            return sdxRuntimeUpgradeService.checkForUpgradeByName(name, request, ThreadBasedUserCrnProvider.getAccountId(), true);
+            return sdxRuntimeUpgradeService.checkForUpgradeByName(userCrn, name, request, true);
         } else {
-            return sdxRuntimeUpgradeService.triggerUpgradeByName(userCrn, name, request, ThreadBasedUserCrnProvider.getAccountId(), true);
+            return sdxRuntimeUpgradeService.triggerUpgradeByName(userCrn, name, request, true);
         }
     }
 
@@ -76,9 +76,9 @@ public class SdxUpgradeController implements SdxUpgradeEndpoint {
     public SdxUpgradeResponse prepareClusterUpgradeByCrn(@ResourceCrn String crn, SdxUpgradeRequest request) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         if (request.isDryRun() || request.isShowAvailableImagesSet()) {
-            return sdxRuntimeUpgradeService.checkForUpgradeByCrn(userCrn, crn, request, ThreadBasedUserCrnProvider.getAccountId(), true);
+            return sdxRuntimeUpgradeService.checkForUpgradeByCrn(userCrn, crn, request, true);
         } else {
-            return sdxRuntimeUpgradeService.triggerUpgradeByCrn(userCrn, crn, request, ThreadBasedUserCrnProvider.getAccountId(), true);
+            return sdxRuntimeUpgradeService.triggerUpgradeByCrn(userCrn, crn, request, true);
         }
     }
 

@@ -13,21 +13,16 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
-import com.sequenceiq.cloudbreak.auth.ClouderaManagerLicenseProvider;
-import com.sequenceiq.cloudbreak.auth.JsonCMLicense;
-import com.sequenceiq.cloudbreak.auth.PaywallAccessChecker;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrSkipOptions;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
@@ -37,8 +32,8 @@ import com.sequenceiq.datalake.controller.sdx.SdxUpgradeClusterConverter;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.validation.upgrade.SdxUpgradeValidator;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxUpgradeReplaceVms;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeResponse;
@@ -49,9 +44,6 @@ public class SdxRuntimeUpgradeService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxRuntimeUpgradeService.class);
 
     private static final long WORKSPACE_ID = 0L;
-
-    @Value("${sdx.paywall.url}")
-    private String paywallUrl;
 
     @Inject
     private StackV4Endpoint stackV4Endpoint;
@@ -69,77 +61,49 @@ public class SdxRuntimeUpgradeService {
     private SdxUpgradeClusterConverter sdxUpgradeClusterConverter;
 
     @Inject
-    private EntitlementService entitlementService;
-
-    @Inject
-    private PaywallAccessChecker paywallAccessChecker;
-
-    @Inject
-    private ClouderaManagerLicenseProvider clouderaManagerLicenseProvider;
-
-    @Inject
     private SdxUpgradeFilter upgradeFilter;
 
-    private static String getTargetCdhVersion(List<ImageInfoV4Response> upgradeCandidates, String targetImageId) {
-        return upgradeCandidates.stream().filter(image -> image.getImageId().equals(targetImageId)).findFirst()
-                .orElseThrow(() -> new BadRequestException(String.format("The %s image id is not present among the candidates", targetImageId)))
-                .getComponentVersions().getCdp();
-    }
+    @Inject
+    private SdxUpgradeValidator sdxUpgradeValidator;
 
-    public SdxUpgradeResponse checkForUpgradeByName(String clusterName, SdxUpgradeRequest upgradeSdxClusterRequest, String accountId,
-            boolean upgradePreparation) {
-        return checkForSdxUpgradeResponse(upgradeSdxClusterRequest, clusterName, accountId, upgradePreparation);
-    }
-
-    public SdxUpgradeResponse checkForUpgradeByCrn(String userCrn, String crn, SdxUpgradeRequest upgradeSdxClusterRequest, String accountId,
-            boolean upgradePreparation) {
-        String clusterName = getClusterName(userCrn, crn);
-        return checkForSdxUpgradeResponse(upgradeSdxClusterRequest, clusterName, accountId, upgradePreparation);
-    }
-
-    private String getClusterName(String userCrn, String clusterCrn) {
-        SdxCluster cluster = sdxService.getByCrn(userCrn, clusterCrn);
-        MDCBuilder.buildMdcContext(cluster);
-        return cluster.getClusterName();
-    }
-
-    public SdxUpgradeResponse triggerUpgradeByName(String userCrn, String clusterName, SdxUpgradeRequest upgradeRequest, String accountId,
-            boolean upgradePreparation) {
+    public SdxUpgradeResponse checkForUpgradeByName(String userCrn, String clusterName, SdxUpgradeRequest upgradeRequest, boolean upgradePreparation) {
         SdxCluster cluster = sdxService.getByNameInAccount(userCrn, clusterName);
-        boolean skipBackup = upgradeRequest != null && Boolean.TRUE.equals(upgradeRequest.getSkipBackup());
-        MDCBuilder.buildMdcContext(cluster);
-        SdxUpgradeResponse sdxUpgradeResponse = checkForUpgradeByName(clusterName, upgradeRequest, accountId, upgradePreparation);
-        validateUpgradeCandidates(clusterName, sdxUpgradeResponse);
-        return upgradePreparation ? initSdxUpgradePreparation(userCrn, sdxUpgradeResponse, upgradeRequest, cluster, skipBackup)
-                : initSdxUpgrade(userCrn, accountId, sdxUpgradeResponse, upgradeRequest, cluster);
+        return checkForSdxUpgradeResponse(upgradeRequest, cluster, userCrn, upgradePreparation);
     }
 
-    public SdxUpgradeResponse triggerUpgradeByCrn(String userCrn, String clusterCrn, SdxUpgradeRequest upgradeRequest, String accountId,
-            boolean upgradePreparation) {
+    public SdxUpgradeResponse checkForUpgradeByCrn(String userCrn, String clusterCrn, SdxUpgradeRequest upgradeRequest, boolean upgradePreparation) {
         SdxCluster cluster = sdxService.getByCrn(userCrn, clusterCrn);
+        return checkForSdxUpgradeResponse(upgradeRequest, cluster, userCrn, upgradePreparation);
+    }
+
+    public SdxUpgradeResponse triggerUpgradeByName(String userCrn, String clusterName, SdxUpgradeRequest upgradeRequest, boolean upgradePreparation) {
+        SdxCluster cluster = sdxService.getByNameInAccount(userCrn, clusterName);
+        return triggerUpgrade(userCrn, cluster, upgradeRequest, upgradePreparation);
+    }
+
+    public SdxUpgradeResponse triggerUpgradeByCrn(String userCrn, String clusterCrn, SdxUpgradeRequest upgradeRequest, boolean upgradePreparation) {
+        SdxCluster cluster = sdxService.getByCrn(userCrn, clusterCrn);
+        return triggerUpgrade(userCrn, cluster, upgradeRequest, upgradePreparation);
+    }
+
+    private SdxUpgradeResponse triggerUpgrade(String userCrn, SdxCluster cluster, SdxUpgradeRequest upgradeRequest, boolean upgradePreparation) {
         boolean skipBackup = upgradeRequest != null && Boolean.TRUE.equals(upgradeRequest.getSkipBackup());
         MDCBuilder.buildMdcContext(cluster);
-        SdxUpgradeResponse sdxUpgradeResponse = checkForUpgradeByCrn(userCrn, clusterCrn, upgradeRequest, accountId, upgradePreparation);
+        SdxUpgradeResponse sdxUpgradeResponse = checkForSdxUpgradeResponse(upgradeRequest, cluster, userCrn, upgradePreparation);
         validateUpgradeCandidates(cluster.getClusterName(), sdxUpgradeResponse);
-        return upgradePreparation ? initSdxUpgradePreparation(userCrn, sdxUpgradeResponse, upgradeRequest, cluster, skipBackup)
-                : initSdxUpgrade(userCrn, accountId, sdxUpgradeResponse, upgradeRequest, cluster);
+        sdxUpgradeValidator.verifyPaywallAccess(userCrn, upgradeRequest);
+        return upgradePreparation ? initSdxUpgradePreparation(sdxUpgradeResponse, upgradeRequest, cluster, skipBackup)
+                : initSdxUpgrade(sdxUpgradeResponse, upgradeRequest, cluster);
     }
 
-    private boolean isInternalRepoAllowedForUpgrade(String userCrn) {
-        String accountId = sdxService.getAccountIdFromCrn(userCrn);
-        return entitlementService.isInternalRepositoryForUpgradeAllowed(accountId);
-    }
-
-    private SdxUpgradeResponse checkForSdxUpgradeResponse(SdxUpgradeRequest upgradeSdxClusterRequest, String clusterName, String accountId,
-            boolean upgradePreparation) {
-        UpgradeV4Request request = createUpgradeV4Request(upgradeSdxClusterRequest, upgradePreparation);
-
+    private SdxUpgradeResponse checkForSdxUpgradeResponse(SdxUpgradeRequest upgradeRequest, SdxCluster cluster, String userCrn, boolean upgradePreparation) {
+        UpgradeV4Request request = createUpgradeV4Request(upgradeRequest, upgradePreparation);
         UpgradeV4Response upgradeV4Response = ThreadBasedUserCrnProvider
                 .doAsInternalActor(
-                        () -> stackV4Endpoint.checkForClusterUpgradeByName(WORKSPACE_ID, clusterName, request, accountId));
-        SdxCluster datalake = sdxService.getByNameOrCrn(ThreadBasedUserCrnProvider.getUserCrn(), NameOrCrn.ofName(clusterName));
-        UpgradeV4Response filteredUpgradeV4Response = upgradeFilter.filterSdxUpgradeResponse(upgradeSdxClusterRequest, upgradeV4Response,
-                datalake.getClusterShape(), accountId);
+                        () -> stackV4Endpoint.checkForClusterUpgradeByName(WORKSPACE_ID, cluster.getClusterName(), request,
+                                Crn.safeFromString(userCrn).getAccountId()));
+        UpgradeV4Response filteredUpgradeV4Response = upgradeFilter.filterSdxUpgradeResponse(upgradeRequest, upgradeV4Response,
+                cluster.getClusterShape());
         return sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(filteredUpgradeV4Response);
     }
 
@@ -151,16 +115,20 @@ public class SdxRuntimeUpgradeService {
         return request;
     }
 
-    private SdxUpgradeResponse initSdxUpgrade(String userCrn, String accountId, SdxUpgradeResponse sdxUpgradeResponse, SdxUpgradeRequest request,
-            SdxCluster cluster) {
+    private SdxUpgradeResponse initSdxUpgrade(SdxUpgradeResponse sdxUpgradeResponse, SdxUpgradeRequest request, SdxCluster cluster) {
         List<ImageInfoV4Response> upgradeCandidates = sdxUpgradeResponse.getUpgradeCandidates();
-        verifyPaywallAccess(userCrn, request);
-        validateRollingUpgrade(accountId, request, cluster.getClusterShape());
+        sdxUpgradeValidator.validateRollingUpgradeByClusterShape(request, cluster.getClusterShape());
         String targetImageId = determineImageId(request, upgradeCandidates, sdxUpgradeResponse.getCurrent().getComponentVersions().getOs());
         String targetCdhVersion = getTargetCdhVersion(upgradeCandidates, targetImageId);
         FlowIdentifier flowIdentifier = triggerDatalakeUpgradeFlow(request, cluster, targetImageId);
         String message = messagesService.getMessage(ResourceEvent.DATALAKE_UPGRADE.getMessage(), List.of(targetCdhVersion, targetImageId));
         return new SdxUpgradeResponse(message, flowIdentifier);
+    }
+
+    private static String getTargetCdhVersion(List<ImageInfoV4Response> upgradeCandidates, String targetImageId) {
+        return upgradeCandidates.stream().filter(image -> image.getImageId().equals(targetImageId)).findFirst()
+                .orElseThrow(() -> new BadRequestException(String.format("The %s image id is not present among the candidates", targetImageId)))
+                .getComponentVersions().getCdp();
     }
 
     private FlowIdentifier triggerDatalakeUpgradeFlow(SdxUpgradeRequest request, SdxCluster cluster, String imageId) {
@@ -176,43 +144,16 @@ public class SdxRuntimeUpgradeService {
                 rollingUpgradeEnabled, keepVariant);
     }
 
-    private void validateRollingUpgrade(String accountId, SdxUpgradeRequest request, SdxClusterShape clusterShape) {
-        boolean rollingUpgradeEnabled = Boolean.TRUE.equals(request.getRollingUpgradeEnabled());
-        if (rollingUpgradeEnabled && clusterShape != SdxClusterShape.ENTERPRISE && !entitlementService.isSkipRollingUpgradeValidationEnabled(accountId)) {
-            String message = String.format("Rolling upgrade is not supported for %s cluster shape.", clusterShape.name());
-            LOGGER.warn(message);
-            throw new BadRequestException(message);
-        }
-    }
-
-    private SdxUpgradeResponse initSdxUpgradePreparation(String userCrn, SdxUpgradeResponse sdxUpgradeResponse, SdxUpgradeRequest request,
-            SdxCluster cluster, boolean skipBackup) {
+    private SdxUpgradeResponse initSdxUpgradePreparation(SdxUpgradeResponse upgradeResponse, SdxUpgradeRequest request, SdxCluster cluster, boolean skipBackup) {
         if (Boolean.TRUE.equals(request.getLockComponents())) {
             throw new BadRequestException("Upgrade preparation is not necessary in case of OS upgrade.");
         }
-        verifyPaywallAccess(userCrn, request);
-        List<ImageInfoV4Response> upgradeCandidates = sdxUpgradeResponse.getUpgradeCandidates();
-        String imageId = determineImageId(request, upgradeCandidates, sdxUpgradeResponse.getCurrent().getComponentVersions().getOs());
+        List<ImageInfoV4Response> upgradeCandidates = upgradeResponse.getUpgradeCandidates();
+        String imageId = determineImageId(request, upgradeCandidates, upgradeResponse.getCurrent().getComponentVersions().getOs());
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerDatalakeRuntimeUpgradePreparationFlow(cluster, imageId, skipBackup);
         String targetCdhVersion = getTargetCdhVersion(upgradeCandidates, imageId);
         String message = messagesService.getMessage(ResourceEvent.DATALAKE_UPGRADE_PREPARATION.getMessage(), List.of(targetCdhVersion, imageId));
         return new SdxUpgradeResponse(message, flowIdentifier);
-    }
-
-    private void verifyPaywallAccess(String userCrn, SdxUpgradeRequest upgradeRequest) {
-        if (upgradeRequest != null && !Boolean.TRUE.equals(upgradeRequest.getLockComponents())) {
-            if (!isInternalRepoAllowedForUpgrade(userCrn)) {
-                verifyCMLicenseValidity(userCrn);
-            } else {
-                LOGGER.info("Internal repo is allowed for upgrade, skip CM license validation");
-            }
-        }
-    }
-
-    private void verifyCMLicenseValidity(String userCrn) {
-        LOGGER.info("Verify if the CM license is valid to authenticate to {}", paywallUrl);
-        JsonCMLicense license = clouderaManagerLicenseProvider.getLicense(userCrn);
-        paywallAccessChecker.checkPaywallAccess(license, paywallUrl);
     }
 
     private String determineImageId(SdxUpgradeRequest upgradeRequest, List<ImageInfoV4Response> upgradeCandidates, String currentOs) {
