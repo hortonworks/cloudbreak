@@ -13,6 +13,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import jakarta.ws.rs.BadRequestException;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -20,8 +22,11 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
@@ -31,10 +36,15 @@ import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.environment.EnvironmentStatus;
+import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
+import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.service.EnvironmentCreationService;
+import com.sequenceiq.environment.environment.service.EnvironmentModificationService;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentUpgradeCcmService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
@@ -64,6 +74,9 @@ class EnvironmentControllerTest {
 
     @Mock
     private EnvironmentService environmentService;
+
+    @Mock
+    private EnvironmentModificationService environmentModificationService;
 
     @Mock
     private FreeIpaService freeIpaService;
@@ -104,6 +117,81 @@ class EnvironmentControllerTest {
     void testUpgradeCcmByCrnCallsService() {
         underTest.upgradeCcmByCrn("crn123");
         verify(upgradeCcmService).upgradeCcmByCrn("crn123");
+    }
+
+    @Test
+    void testEditByNameNotAvailable() {
+        String accountId = "accountId";
+        NameOrCrn environmentCRN = NameOrCrn.ofName(ENV_CRN);
+        Environment env = new Environment();
+        env.setStatus(EnvironmentStatus.CREATE_FAILED);
+        try (MockedStatic<ThreadBasedUserCrnProvider> mockedThreadBasedUserCrnProvider = Mockito.mockStatic(ThreadBasedUserCrnProvider.class)) {
+            mockedThreadBasedUserCrnProvider.when(ThreadBasedUserCrnProvider::getAccountId).thenReturn(accountId);
+            when(environmentModificationService.getEnvironment(accountId, environmentCRN)).thenReturn(env);
+            try {
+                underTest.editByName(ENV_CRN, null);
+            } catch (BadRequestException e) {
+                assertEquals("Environment status is not AVAILABLE for Edit", e.getMessage());
+            }
+        }
+    }
+
+    @Test
+    void testEditByNameAvailable() {
+        String accountId = "accountId";
+        NameOrCrn environmentCRN = NameOrCrn.ofName(ENV_CRN);
+        Environment env = new Environment();
+        env.setStatus(EnvironmentStatus.AVAILABLE);
+        EnvironmentEditDto environmentEditDto = EnvironmentEditDto.builder().build();
+        EnvironmentDto environmentDto = EnvironmentDto.builder().withName(ENV_CRN).build();
+        environmentDto.setName("environmentName");
+        try (MockedStatic<ThreadBasedUserCrnProvider> mockedThreadBasedUserCrnProvider = Mockito.mockStatic(ThreadBasedUserCrnProvider.class)) {
+            mockedThreadBasedUserCrnProvider.when(ThreadBasedUserCrnProvider::getAccountId).thenReturn(accountId);
+            when(environmentModificationService.getEnvironment(accountId, environmentCRN)).thenReturn(env);
+            when(environmentApiConverter.initEditDto(env, null)).thenReturn(environmentEditDto);
+            when(environmentModificationService.edit(env, environmentEditDto)).thenReturn(environmentDto);
+            when(environmentResponseConverter.dtoToDetailedResponse(environmentDto)).thenReturn(DetailedEnvironmentResponse.builder().build());
+            DetailedEnvironmentResponse response = underTest.editByName(ENV_CRN, null);
+            assertEquals(DetailedEnvironmentResponse.class, response.getClass());
+        }
+    }
+
+    @Test
+    void testChangeCredentialByEnvironmentNameNotAvailable() {
+        String accountId = "accountId";
+        NameOrCrn environmentCRN = NameOrCrn.ofName(ENV_CRN);
+        Environment env = new Environment();
+        env.setStatus(EnvironmentStatus.CREATE_FAILED);
+        try (MockedStatic<ThreadBasedUserCrnProvider> mockedThreadBasedUserCrnProvider = Mockito.mockStatic(ThreadBasedUserCrnProvider.class)) {
+            mockedThreadBasedUserCrnProvider.when(ThreadBasedUserCrnProvider::getAccountId).thenReturn(accountId);
+            when(environmentModificationService.getEnvironment(accountId, environmentCRN)).thenReturn(env);
+            try {
+                underTest.changeCredentialByEnvironmentName(ENV_CRN, null);
+            } catch (BadRequestException e) {
+                assertEquals("Environment status is not AVAILABLE for Edit", e.getMessage());
+            }
+        }
+    }
+
+    @Test
+    void testChangeCredentialByEnvironmentNameAvailable() {
+        String accountId = "accountId";
+        NameOrCrn environmentCRN = NameOrCrn.ofName(ENV_CRN);
+        Environment env = new Environment();
+        env.setStatus(EnvironmentStatus.AVAILABLE);
+        EnvironmentChangeCredentialDto environmentChangeCredentialDto = EnvironmentChangeCredentialDto.builder().build();
+        EnvironmentDto environmentDto = EnvironmentDto.builder().withName(ENV_CRN).build();
+        environmentDto.setName("environmentName");
+        try (MockedStatic<ThreadBasedUserCrnProvider> mockedThreadBasedUserCrnProvider = Mockito.mockStatic(ThreadBasedUserCrnProvider.class)) {
+            mockedThreadBasedUserCrnProvider.when(ThreadBasedUserCrnProvider::getAccountId).thenReturn(accountId);
+            when(environmentModificationService.getEnvironment(accountId, environmentCRN)).thenReturn(env);
+            when(environmentApiConverter.convertEnvironmentChangeCredentialDto(null)).thenReturn(environmentChangeCredentialDto);
+            when(environmentModificationService.changeCredentialByEnvironmentName(accountId, ENV_CRN, environmentChangeCredentialDto))
+                    .thenReturn(environmentDto);
+            when(environmentResponseConverter.dtoToDetailedResponse(environmentDto)).thenReturn(DetailedEnvironmentResponse.builder().build());
+            DetailedEnvironmentResponse response = underTest.changeCredentialByEnvironmentName(ENV_CRN, null);
+            assertEquals(DetailedEnvironmentResponse.class, response.getClass());
+        }
     }
 
     @ParameterizedTest

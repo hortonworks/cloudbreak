@@ -18,6 +18,7 @@ import jakarta.transaction.Transactional;
 import jakarta.transaction.Transactional.TxType;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.BadRequestException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,6 +70,7 @@ import com.sequenceiq.environment.authorization.EnvironmentFiltering;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
+import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
@@ -299,6 +301,9 @@ public class EnvironmentController implements EnvironmentEndpoint {
     public DetailedEnvironmentResponse editByName(@ResourceName String environmentName, @NotNull @Valid EnvironmentEditRequest request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Environment environment = environmentModificationService.getEnvironment(accountId, NameOrCrn.ofName(environmentName));
+        if (environment.getStatus() != EnvironmentStatus.AVAILABLE) {
+            throw new BadRequestException("Environment status is not AVAILABLE for Edit");
+        }
         EnvironmentEditDto editDto = environmentApiConverter.initEditDto(environment, request);
         EnvironmentDto result = environmentModificationService.edit(environment, editDto);
         return environmentResponseConverter.dtoToDetailedResponse(result);
@@ -346,6 +351,10 @@ public class EnvironmentController implements EnvironmentEndpoint {
     public DetailedEnvironmentResponse changeCredentialByEnvironmentName(@ResourceName String environmentName,
             @RequestObject @Valid EnvironmentChangeCredentialRequest request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        Environment environment = environmentModificationService.getEnvironment(accountId, NameOrCrn.ofName(environmentName));
+        if (environment.getStatus() != EnvironmentStatus.AVAILABLE) {
+            throw new BadRequestException("Environment status is not AVAILABLE for Edit");
+        }
         EnvironmentChangeCredentialDto dto = environmentApiConverter.convertEnvironmentChangeCredentialDto(request);
         EnvironmentDto result = environmentModificationService.changeCredentialByEnvironmentName(accountId, environmentName, dto);
         return environmentResponseConverter.dtoToDetailedResponse(result);
