@@ -268,7 +268,10 @@ public class MockUserManagementServiceTest {
                 {"gcpSecureBootEnabled true", "gcpSecureBootEnabled", true, "CDP_CB_GCP_SECURE_BOOT", true},
 
                 {"lakehouseOptimizerEnabled false", "lakehouseOptimizerEnabled", false, "CDP_LAKEHOUSE_OPTIMIZER_ENABLED", false},
-                {"lakehouseOptimizerEnabled true", "lakehouseOptimizerEnabled", true, "CDP_LAKEHOUSE_OPTIMIZER_ENABLED", true}
+                {"lakehouseOptimizerEnabled true", "lakehouseOptimizerEnabled", true, "CDP_LAKEHOUSE_OPTIMIZER_ENABLED", true},
+
+                {"configureEncryptionProfileEnabled false", "configureEncryptionProfileEnabled", false, "CDP_CB_CONFIGURE_ENCRYPTION_PROFILE", false},
+                {"configureEncryptionProfileEnabled true", "configureEncryptionProfileEnabled", true, "CDP_CB_CONFIGURE_ENCRYPTION_PROFILE", true}
         };
     }
 

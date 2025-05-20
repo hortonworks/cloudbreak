@@ -22,6 +22,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZUR
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_MULTIAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_RESIZE_DISK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_CO2_CALCULATION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_CONFIGURE_ENCRYPTION_PROFILE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_COST_CALCULATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATALAKE;
@@ -572,6 +573,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.ephemeral.xfs.support.enabled}")
     private boolean ephemeralXfsSupportEnabled;
 
+    @Value("${auth.mock.configure.encryption.profile.enabled}")
+    private boolean configureEncryptionProfileEnabled;
+
     @Inject
     private MockEnvironmentUserResourceRole mockEnvironmentUserResourceRole;
 
@@ -1077,6 +1081,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (ephemeralXfsSupportEnabled) {
             builder.addEntitlements(createEntitlement(CDP_CB_XFS_FOR_EPHEMERAL_DISK_SUPPORTED));
+        }
+        if (configureEncryptionProfileEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_CB_CONFIGURE_ENCRYPTION_PROFILE));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
