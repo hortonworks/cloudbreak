@@ -202,6 +202,7 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
                                 .setEnabled(true)
                                 .setBinaryLogEnabled(false)
                 )
-                .setLocationPreference(new LocationPreference().setZone(availabilityZone));
+                .setLocationPreference(new LocationPreference().setZone(availabilityZone))
+                .setEdition("ENTERPRISE");
     }
 }

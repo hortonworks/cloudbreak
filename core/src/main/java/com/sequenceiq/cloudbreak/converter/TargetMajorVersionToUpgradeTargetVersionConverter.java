@@ -14,6 +14,7 @@ public class TargetMajorVersionToUpgradeTargetVersionConverter {
             case VERSION_14 -> UpgradeTargetMajorVersion.VERSION_14;
             case VERSION11 -> UpgradeTargetMajorVersion.VERSION_11;
             case VERSION14 -> UpgradeTargetMajorVersion.VERSION_14;
+            case VERSION17 -> UpgradeTargetMajorVersion.VERSION_17;
         };
     }
 }
