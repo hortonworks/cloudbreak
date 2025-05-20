@@ -228,7 +228,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         LoadBalancer loadBalancer = LoadBalancer.builder().loadBalancerArn("anARN").build();
         DescribeLoadBalancersResponse loadBalancerResponse = DescribeLoadBalancersResponse.builder().loadBalancers(loadBalancer).build();
         when(loadBalancingClient.describeLoadBalancers(any())).thenReturn(loadBalancerResponse);
-        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, INTERNAL, USER_FACING_PORT))
+        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, INTERNAL, USER_FACING_PORT, authenticatedContext.getCloudContext()))
                 .thenReturn(TG_NAME_INTERNAL_NEW);
         when(loadBalancingClient.createTargetGroup(any())).thenThrow(ElasticLoadBalancingV2Exception.builder().message("something went wrong").build());
 
@@ -252,7 +252,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         LoadBalancer loadBalancer = LoadBalancer.builder().loadBalancerArn("anARN").build();
         CreateLoadBalancerResponse loadBalancerResponse = CreateLoadBalancerResponse.builder().loadBalancers(loadBalancer).build();
         when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResponse);
-        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, INTERNAL, USER_FACING_PORT))
+        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, INTERNAL, USER_FACING_PORT, authenticatedContext.getCloudContext()))
                 .thenReturn(TG_NAME_INTERNAL_NEW);
         when(loadBalancingClient.createTargetGroup(any())).thenThrow(ElasticLoadBalancingV2Exception.builder().message("something went wrong").build());
 
@@ -276,7 +276,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         LoadBalancer loadBalancer = LoadBalancer.builder().loadBalancerArn("anARN").build();
         CreateLoadBalancerResponse loadBalancerResponse = CreateLoadBalancerResponse.builder().loadBalancers(loadBalancer).build();
         when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResponse);
-        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, INTERNAL, USER_FACING_PORT))
+        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, INTERNAL, USER_FACING_PORT, authenticatedContext.getCloudContext()))
                 .thenReturn(TG_NAME_INTERNAL_NEW);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_ID)).thenReturn(List.of());
@@ -313,7 +313,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         LoadBalancer loadBalancer = LoadBalancer.builder().loadBalancerArn("anARN").build();
         CreateLoadBalancerResponse loadBalancerResponse = CreateLoadBalancerResponse.builder().loadBalancers(loadBalancer).build();
         when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResponse);
-        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, INTERNAL, USER_FACING_PORT))
+        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, INTERNAL, USER_FACING_PORT, authenticatedContext.getCloudContext()))
                 .thenReturn(TG_NAME_INTERNAL_NEW);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_ID)).thenReturn(List.of());
@@ -355,7 +355,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         LoadBalancer loadBalancer = LoadBalancer.builder().loadBalancerArn("anARN").build();
         CreateLoadBalancerResponse loadBalancerResponse = CreateLoadBalancerResponse.builder().loadBalancers(loadBalancer).build();
         when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResponse);
-        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, INTERNAL, USER_FACING_PORT))
+        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, INTERNAL, USER_FACING_PORT, authenticatedContext.getCloudContext()))
                 .thenReturn(TG_NAME_INTERNAL_NEW);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_ID)).thenReturn(List.of());
@@ -398,7 +398,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         LoadBalancer loadBalancer = LoadBalancer.builder().loadBalancerArn("anARN").build();
         CreateLoadBalancerResponse loadBalancerResponse = CreateLoadBalancerResponse.builder().loadBalancers(loadBalancer).build();
         when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResponse);
-        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, INTERNAL, USER_FACING_PORT))
+        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, INTERNAL, USER_FACING_PORT, authenticatedContext.getCloudContext()))
                 .thenReturn(TG_NAME_INTERNAL_NEW);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_ID)).thenReturn(List.of());
@@ -450,7 +450,8 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         CreateLoadBalancerResponse loadBalancerResponse = CreateLoadBalancerResponse.builder().loadBalancers(loadBalancer).build();
         when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResponse);
         String tgNameNew = getTgName(awsLoadBalancerScheme);
-        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, loadBalancerSchemeName, USER_FACING_PORT)).thenReturn(tgNameNew);
+        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, loadBalancerSchemeName, USER_FACING_PORT, authenticatedContext.getCloudContext()))
+                .thenReturn(tgNameNew);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_ID)).thenReturn(List.of());
         TargetGroup targetGroup = TargetGroup.builder().targetGroupArn("aTargetGroupArn").build();
@@ -502,7 +503,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID)).thenReturn(List.of(loadBalancerResource));
         String tgNameNew = internal ? TG_NAME_INTERNAL_NEW : TG_NAME_EXTERNAL_NEW;
-        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, scheme, USER_FACING_PORT))
+        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, scheme, USER_FACING_PORT, authenticatedContext.getCloudContext()))
                 .thenReturn(tgNameNew);
         when(resourceNameService.loadBalancerTargetGroupResourceTypeSchemeAndPortNamePart(eq(awsLoadBalancerScheme.resourceName()), eq(USER_FACING_PORT)))
                 .thenReturn("TG" + USER_FACING_PORT + awsLoadBalancerScheme.resourceName());
@@ -557,7 +558,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         CreateLoadBalancerResponse loadBalancerResult = CreateLoadBalancerResponse.builder().loadBalancers(loadBalancer).build();
         when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResult);
         String tgNameNew = existingInternal ? TG_NAME_EXTERNAL_NEW : TG_NAME_INTERNAL_NEW;
-        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, schemeNew, USER_FACING_PORT))
+        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, schemeNew, USER_FACING_PORT, authenticatedContext.getCloudContext()))
                 .thenReturn(tgNameNew);
         when(resourceNameService.loadBalancerTargetGroupResourceTypeSchemeAndPortNamePart(eq(awsLoadBalancerScheme.resourceName()), eq(USER_FACING_PORT)))
                 .thenReturn("TG" + USER_FACING_PORT + awsLoadBalancerScheme.resourceName());
@@ -625,7 +626,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_ID))
                 .thenReturn(List.of(targetGroupResource));
         String tgNameNew = internal ? TG_NAME_INTERNAL_NEW : TG_NAME_EXTERNAL_NEW;
-        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, scheme, USER_FACING_PORT))
+        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, scheme, USER_FACING_PORT, authenticatedContext.getCloudContext()))
                 .thenReturn(tgNameNew);
         when(resourceNameService.loadBalancerTargetGroupResourceTypeSchemeAndPortNamePart(eq(awsLoadBalancerScheme.resourceName()), eq(USER_FACING_PORT)))
                 .thenReturn("TG" + USER_FACING_PORT + awsLoadBalancerScheme.resourceName());
@@ -684,7 +685,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_ID))
                 .thenReturn(List.of(targetGroupResource));
         String tgNameNew = existingInternal ? TG_NAME_EXTERNAL_NEW : TG_NAME_INTERNAL_NEW;
-        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, schemeNew, USER_FACING_PORT))
+        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, schemeNew, USER_FACING_PORT, authenticatedContext.getCloudContext()))
                 .thenReturn(tgNameNew);
         when(resourceNameService.loadBalancerTargetGroupResourceTypeSchemeAndPortNamePart(eq(awsLoadBalancerScheme.resourceName()), eq(USER_FACING_PORT)))
                 .thenReturn("TG" + USER_FACING_PORT + awsLoadBalancerScheme.resourceName());
@@ -741,7 +742,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         CreateLoadBalancerResponse loadBalancerResult = CreateLoadBalancerResponse.builder().loadBalancers(loadBalancer).build();
         when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResult);
         String tgNameNew = internal ? TG_NAME_INTERNAL_NEW : TG_NAME_EXTERNAL_NEW;
-        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, scheme, USER_FACING_PORT))
+        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, scheme, USER_FACING_PORT, authenticatedContext.getCloudContext()))
                 .thenReturn(tgNameNew);
         when(resourceNameService.loadBalancerTargetGroupResourceTypeSchemeAndPortNamePart(eq(awsLoadBalancerScheme.resourceName()), eq(USER_FACING_PORT)))
                 .thenReturn("TG" + USER_FACING_PORT + awsLoadBalancerScheme.resourceName());
@@ -799,7 +800,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         CreateLoadBalancerResponse loadBalancerResult = CreateLoadBalancerResponse.builder().loadBalancers(loadBalancer).build();
         when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResult);
         String tgNameNew = existingInternal ? TG_NAME_EXTERNAL_NEW : TG_NAME_INTERNAL_NEW;
-        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, schemeNew, USER_FACING_PORT))
+        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, schemeNew, USER_FACING_PORT, authenticatedContext.getCloudContext()))
                 .thenReturn(tgNameNew);
         when(resourceNameService.loadBalancerTargetGroupResourceTypeSchemeAndPortNamePart(eq(awsLoadBalancerScheme.resourceName()), eq(USER_FACING_PORT)))
                 .thenReturn("TG" + USER_FACING_PORT + awsLoadBalancerScheme.resourceName());
@@ -865,7 +866,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         CreateLoadBalancerResponse loadBalancerResult = CreateLoadBalancerResponse.builder().loadBalancers(loadBalancer).build();
         when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResult);
         String tgNameNew = existingInternal ? TG_NAME_EXTERNAL_NEW : TG_NAME_INTERNAL_NEW;
-        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, schemeNew, USER_FACING_PORT))
+        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, schemeNew, USER_FACING_PORT, authenticatedContext.getCloudContext()))
                 .thenReturn(tgNameNew);
         when(resourceNameService.loadBalancerTargetGroupResourceTypeSchemeAndPortNamePart(eq(awsLoadBalancerScheme.resourceName()), eq(USER_FACING_PORT)))
                 .thenReturn("TG" + USER_FACING_PORT + awsLoadBalancerScheme.resourceName());
@@ -915,7 +916,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         CreateLoadBalancerResponse loadBalancerResult = CreateLoadBalancerResponse.builder().loadBalancers(loadBalancer).build();
         when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResult);
         String tgNameNew = existingInternal ? TG_NAME_EXTERNAL_NEW : TG_NAME_INTERNAL_NEW;
-        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, schemeNew, USER_FACING_PORT))
+        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, schemeNew, USER_FACING_PORT, authenticatedContext.getCloudContext()))
                 .thenReturn(tgNameNew);
         when(resourceNameService.loadBalancerTargetGroupResourceTypeSchemeAndPortNamePart(eq(awsLoadBalancerScheme.resourceName()), eq(USER_FACING_PORT)))
                 .thenReturn("TG" + USER_FACING_PORT + awsLoadBalancerScheme.resourceName());
