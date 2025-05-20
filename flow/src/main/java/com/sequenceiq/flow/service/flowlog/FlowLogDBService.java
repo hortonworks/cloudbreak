@@ -155,9 +155,18 @@ public class FlowLogDBService implements FlowLogService {
             flowLog.setEndTime(flowLog.getCreated());
             LOGGER.info("Persisting final FlowLog: {}", flowLog);
             FlowLog finalFlowLog = flowLogRepository.save(flowLog);
-            flowLogRepository.updateStateStatusToSuccessfulForPendingItemsByFlowId(flowId);
+            setPendingFlowLogsToSuccessful(flowId);
             return finalFlowLog;
         });
+    }
+
+    private void setPendingFlowLogsToSuccessful(String flowId) {
+        // We are using this method because FlowLog has @Version field, and it needs to be properly updated by JPA
+        List<FlowLog> allPendingFlowLogEntryForFlow = flowLogRepository.findAllByFlowIdAndStateStatus(flowId, StateStatus.PENDING);
+        for (FlowLog log : allPendingFlowLogEntryForFlow) {
+            log.setStateStatus(StateStatus.SUCCESSFUL);
+            flowLogRepository.save(log);
+        }
     }
 
     @Override
@@ -176,7 +185,10 @@ public class FlowLogDBService implements FlowLogService {
     @Override
     public void updateLastFlowLogStatus(FlowLog lastFlowLog, boolean failureEvent, String reason) {
         StateStatus stateStatus = failureEvent ? StateStatus.FAILED : StateStatus.SUCCESSFUL;
-        flowLogRepository.updateLastLogStatusInFlow(lastFlowLog.getId(), stateStatus, clock.getCurrentTimeMillis(), reason);
+        lastFlowLog.setStateStatus(stateStatus);
+        lastFlowLog.setEndTime(clock.getCurrentTimeMillis());
+        lastFlowLog.setReason(reason);
+        flowLogRepository.save(lastFlowLog);
     }
 
     @Override

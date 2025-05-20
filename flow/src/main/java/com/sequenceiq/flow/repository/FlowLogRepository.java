@@ -60,10 +60,6 @@ public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
     @Query("UPDATE FlowLog fl SET fl.finalized = true WHERE fl.flowId = :flowId")
     void finalizeByFlowId(@Param("flowId") String flowId);
 
-    @Modifying
-    @Query("UPDATE FlowLog fl SET fl.stateStatus = 'SUCCESSFUL' WHERE fl.flowId = :flowId AND fl.stateStatus = 'PENDING'")
-    void updateStateStatusToSuccessfulForPendingItemsByFlowId(@Param("flowId") String flowId);
-
     @Query("SELECT fl FROM FlowLog fl WHERE fl.cloudbreakNodeId = :cloudbreakNodeId AND fl.stateStatus = 'PENDING'")
     Set<FlowLog> findAllByCloudbreakNodeId(@Param("cloudbreakNodeId") String cloudbreakNodeId);
 
@@ -89,11 +85,6 @@ public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
     Page<FlowLog> findAllByFlowIdsCreatedDesc(@Param("flowIds") Set<String> flowIds, Pageable pageable);
 
     @Modifying
-    @Query("UPDATE FlowLog fl SET fl.stateStatus = :stateStatus, fl.endTime = :endTime, fl.reason = :reason WHERE fl.id = :id")
-    void updateLastLogStatusInFlow(@Param("id") Long id, @Param("stateStatus") StateStatus stateStatus, @Param("endTime") Long endTime,
-            @Param("reason") String reason);
-
-    @Modifying
     @Query("DELETE FROM FlowLog fl WHERE fl.finalized = TRUE AND fl.endTime <= :endTime AND fl.flowId NOT IN (" + SELECT_FAILED_FLOW_IDS + ")")
     int purgeFinalizedSuccessfulFlowLogs(@Param("endTime") Long endTime);
 
@@ -114,6 +105,8 @@ public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
     List<FlowLog> findAllByFlowChainIdOrderByCreatedDesc(String flowChainId);
 
     List<FlowLog> findAllByResourceIdOrderByCreatedDesc(Long resourceId, Pageable page);
+
+    List<FlowLog> findAllByFlowIdAndStateStatus(String flowId, StateStatus stateStatus);
 
     @Query("SELECT COUNT(fl.id) > 0 FROM FlowLog fl WHERE fl.resourceId = :resourceId AND fl.stateStatus = :status")
     Boolean findAnyByStackIdAndStateStatus(@Param("resourceId") Long resourceId, @Param("status") StateStatus status);
