@@ -96,31 +96,40 @@ import-redbeams-aws-rds-root-certs:
 	 make -C redbeams import-aws-rds-root-certs
 
 jira-update-steps_update_jira_ticket:
-	 ./.github/steps/jira-update-steps_update_jira_ticket.sh
+	 ./.github/workflows/pull-request/steps/jira-update-steps_update_jira_ticket.sh
 
 unit-test-steps_gradle_build:
-	 ./.github/steps/unit-test-steps_gradle_build.sh
+	 ./.github/workflows/pull-request/steps/unit-test-steps_gradle_build.sh
 
 checkstyle-main-steps_gradle_build:
-	 ./.github/steps/checkstyle-main-steps_gradle_build.sh
+	 ./.github/workflows/pull-request/steps/checkstyle-main-steps_gradle_build.sh
 
 checkstyle-test-steps_gradle_build:
-	 ./.github/steps/checkstyle-test-steps_gradle_build.sh
+	 ./.github/workflows/pull-request/steps/checkstyle-test-steps_gradle_build.sh
 
 spotbugs-test-steps_gradle_build:
-	 ./.github/steps/spotbugs-test-steps_gradle_build.sh
+	 ./.github/workflows/pull-request/steps/spotbugs-test-steps_gradle_build.sh
 
 spotbugs-main-steps_gradle_build:
-	 ./.github/steps/spotbugs-main-steps_gradle_build.sh
+	 ./.github/workflows/pull-request/steps/spotbugs-main-steps_gradle_build.sh
 
 swagger-compatiblity-steps_openapi_compatibility_check:
-	 ./.github/steps/swagger-compatiblity-steps_openapi_compatibility_check.sh
+	 ./.github/workflows/pull-request/steps/swagger-compatiblity-steps_openapi_compatibility_check.sh
 
 component-test-steps_component_test:
-	 ./.github/steps/component-test-steps_component_test.sh
+	 ./.github/workflows/pull-request/steps/component-test-steps_component_test.sh
 
 integration-test-steps_integration_test:
-	 ./.github/steps/integration-test-steps_integration_test.sh
+	 ./.github/workflows/pull-request/steps/integration-test-steps_integration_test.sh
 
 config-change-int-steps_config_change:
-	 ./.github/steps/config-change-int-steps_config_change.sh
+	 ./.github/workflows/pull-request/steps/config-change-int-steps_config_change.sh
+
+schema-compatiblity-steps_schema_compatiblity:
+	 ./.github/workflows/pull-request/steps/schema-compatiblity-steps_schema_compatiblity.sh
+
+integration-test-steps_schema_compatiblity:
+	 ./.github/workflows/pull-request/steps/integration-test-steps_integration_test.sh
+
+fedramp-integration-test-steps_schema_compatiblity:
+	 ./.github/workflows/pull-request/steps/fedramp-integration-test-steps_integration_test.sh

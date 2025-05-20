@@ -1,0 +1,65 @@
+name: reusable-cloudbreak-pull-request-test
+
+outputs:
+  CM_PRIVATE_REPO_PASSWORD:
+    description: 'Output from the reusable workflow'
+    value: ${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD }}
+  CM_PRIVATE_REPO_USER:
+    description: 'Output from the reusable workflow'
+    value: ${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER }}
+  DOCKERHUB_PASSWORD:
+    description: 'Output from the reusable workflow'
+    value: ${{ steps.build_secrets.outputs.DOCKERHUB_PASSWORD }}
+  DOCKERHUB_USERNAME:
+    description: 'Output from the reusable workflow'
+    value: ${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME }}
+  GITHUB_TOKEN:
+    description: 'Output from the reusable workflow'
+    value: ${{ steps.build_secrets.outputs.GITHUB_TOKEN }}
+  JIRA_TOKEN:
+    description: 'Output from the reusable workflow'
+    value: ${{ steps.build_secrets.outputs.JIRA_TOKEN }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: checkout
+      id: checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: setup_secrets
+      id: build_secrets
+      uses: Kitchen/RE-thirdparty-actions/actions/vault@main
+      with:
+        tlsSkipVerify: true
+        url: https://re-vault.infra.cloudera.com/
+        method: kubernetes
+        path: rke_re_jenkins
+        role: cb
+        secrets: |
+          cb/data/CM_PRIVATE_REPO_PASSWORD CM_PRIVATE_REPO_PASSWORD | CM_PRIVATE_REPO_PASSWORD;
+          cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
+          cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
+          cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
+          cb/data/GITHUB_TOKEN GITHUB_TOKEN | GITHUB_TOKEN;
+          cb/data/JIRA_TOKEN JIRA_TOKEN | JIRA_TOKEN;
+    - name: cache_java_libs
+      id: cache-java
+      uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
+      env:
+        cache-name: cache-java-libs
+      with:
+        path: |
+          /home/jenkins/.gradle/caches
+          /home/jenkins/.gradle/wrapper
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
+          ${{ runner.os }}-build-${{ hashFiles('**/build.gradle') }}
+          ${{ runner.os }}-${{ hashFiles('**/build.gradle') }}
+    - if: ${{ steps.cache-java.outputs.cache-hit != 'true' }}
+      name: list_the_state_of_java_libs
+      continue-on-error: true
+      shell: bash
+      run: ./gradlew dependencies

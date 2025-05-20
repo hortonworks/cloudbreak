@@ -10,4 +10,14 @@ docker run -i --rm \
     -v $(pwd)/../:/tmp/prj:rw \
     -e "CM_PRIVATE_REPO_USER=$CM_PRIVATE_REPO_USER" \
     -e "CM_PRIVATE_REPO_PASSWORD=$CM_PRIVATE_REPO_PASSWORD" \
-    docker-private.infra.cloudera.com/cloudera_base/hardened/cloudera-openjdk:jdk-21-runtime-nofips /tmp/prj/gradlew -b /tmp/prj/build.gradle clean build -x test
+    docker-private.infra.cloudera.com/cloudera_base/hardened/cloudera-openjdk:jdk-21-runtime-nofips /tmp/prj/gradlew \
+    -b /tmp/prj/build.gradle clean build \
+    --quiet \
+    --no-daemon \
+    --parallel \
+    --warning-mode none \
+    -x test \
+    -x checkstyleMain \
+    -x checkstyleTest \
+    -x spotbugsMain \
+    -x spotbugsTest

@@ -31,6 +31,7 @@ plugins {
   id "com.github.spotbugs" version "6.1.12"
   id "com.adarshr.test-logger" version "4.0.0"
   id "nebula.resolution-rules" version "9.0.0"
+  id 'com.diffplug.spotless' version '6.11.0'
 //  id 'nebula.lint' version '17.2.3'
 }
 

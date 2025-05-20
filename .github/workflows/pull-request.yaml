@@ -8,6 +8,8 @@ env:
   BRANCH: ${{github.base_ref}}
   SOURCE_BRANCH: ${{github.head_ref}}
   PULL_REQUEST_NUMBER: ${{ github.event.number }}
+  GITHUB_RUN_ATTEMPT: ${{github.run_attempt}}
+  GITHUB_ENV: true
 
 on:
   workflow_dispatch:
@@ -71,11 +73,12 @@ jobs:
           path: rke_re_jenkins
           role: cb
           secrets: |
-              cb/data/CM_PRIVATE_REPO_PASSWORD CM_PRIVATE_REPO_PASSWORD | CM_PRIVATE_REPO_PASSWORD;
-              cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
-              cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
-              cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
-              cb/data/GITHUB_TOKEN GITHUB_TOKEN | GITHUB_TOKEN;
+            cb/data/CM_PRIVATE_REPO_PASSWORD CM_PRIVATE_REPO_PASSWORD | CM_PRIVATE_REPO_PASSWORD;
+            cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
+            cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
+            cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
+            cb/data/GITHUB_TOKEN GITHUB_TOKEN | GITHUB_TOKEN;
+            cb/data/JIRA_TOKEN JIRA_TOKEN | JIRA_TOKEN;
       - name: cache_java_libs
         id: cache-java
         uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
@@ -93,7 +96,13 @@ jobs:
       - if: ${{ steps.cache-java.outputs.cache-hit != 'true' }}
         name: list_the_state_of_java_libs
         continue-on-error: true
+        shell: bash
         run: ./gradlew dependencies
+      - name: install_tools
+        run: |-
+          #!/bin/bash -x
+          sudo apt-get update
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make uuid-runtime
       - name: gradle_build
         run: |-
           export CM_PRIVATE_REPO_PASSWORD=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}")
@@ -163,10 +172,12 @@ jobs:
           path: rke_re_jenkins
           role: cb
           secrets: |
-              cb/data/CM_PRIVATE_REPO_PASSWORD CM_PRIVATE_REPO_PASSWORD | CM_PRIVATE_REPO_PASSWORD;
-              cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
-              cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
-              cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
+            cb/data/CM_PRIVATE_REPO_PASSWORD CM_PRIVATE_REPO_PASSWORD | CM_PRIVATE_REPO_PASSWORD;
+            cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
+            cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
+            cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
+            cb/data/GITHUB_TOKEN GITHUB_TOKEN | GITHUB_TOKEN;
+            cb/data/JIRA_TOKEN JIRA_TOKEN | JIRA_TOKEN;
       - name: cache_java_libs
         id: cache-java
         uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
@@ -184,7 +195,13 @@ jobs:
       - if: ${{ steps.cache-java.outputs.cache-hit != 'true' }}
         name: list_the_state_of_java_libs
         continue-on-error: true
+        shell: bash
         run: ./gradlew dependencies
+      - name: install_tools
+        run: |-
+          #!/bin/bash -x
+          sudo apt-get update
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make uuid-runtime
       - name: gradle_build
         run: |-
           export CM_PRIVATE_REPO_PASSWORD=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}")
@@ -220,10 +237,12 @@ jobs:
           path: rke_re_jenkins
           role: cb
           secrets: |
-              cb/data/CM_PRIVATE_REPO_PASSWORD CM_PRIVATE_REPO_PASSWORD | CM_PRIVATE_REPO_PASSWORD;
-              cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
-              cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
-              cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
+            cb/data/CM_PRIVATE_REPO_PASSWORD CM_PRIVATE_REPO_PASSWORD | CM_PRIVATE_REPO_PASSWORD;
+            cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
+            cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
+            cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
+            cb/data/GITHUB_TOKEN GITHUB_TOKEN | GITHUB_TOKEN;
+            cb/data/JIRA_TOKEN JIRA_TOKEN | JIRA_TOKEN;
       - name: cache_java_libs
         id: cache-java
         uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
@@ -241,7 +260,13 @@ jobs:
       - if: ${{ steps.cache-java.outputs.cache-hit != 'true' }}
         name: list_the_state_of_java_libs
         continue-on-error: true
+        shell: bash
         run: ./gradlew dependencies
+      - name: install_tools
+        run: |-
+          #!/bin/bash -x
+          sudo apt-get update
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make uuid-runtime
       - name: gradle_build
         run: |-
           export CM_PRIVATE_REPO_PASSWORD=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}")
@@ -277,10 +302,12 @@ jobs:
           path: rke_re_jenkins
           role: cb
           secrets: |
-              cb/data/CM_PRIVATE_REPO_PASSWORD CM_PRIVATE_REPO_PASSWORD | CM_PRIVATE_REPO_PASSWORD;
-              cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
-              cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
-              cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
+            cb/data/CM_PRIVATE_REPO_PASSWORD CM_PRIVATE_REPO_PASSWORD | CM_PRIVATE_REPO_PASSWORD;
+            cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
+            cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
+            cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
+            cb/data/GITHUB_TOKEN GITHUB_TOKEN | GITHUB_TOKEN;
+            cb/data/JIRA_TOKEN JIRA_TOKEN | JIRA_TOKEN;
       - name: cache_java_libs
         id: cache-java
         uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
@@ -298,7 +325,13 @@ jobs:
       - if: ${{ steps.cache-java.outputs.cache-hit != 'true' }}
         name: list_the_state_of_java_libs
         continue-on-error: true
+        shell: bash
         run: ./gradlew dependencies
+      - name: install_tools
+        run: |-
+          #!/bin/bash -x
+          sudo apt-get update
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make uuid-runtime
       - name: gradle_build
         run: |-
           export CM_PRIVATE_REPO_PASSWORD=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}")
@@ -334,10 +367,12 @@ jobs:
           path: rke_re_jenkins
           role: cb
           secrets: |
-              cb/data/CM_PRIVATE_REPO_PASSWORD CM_PRIVATE_REPO_PASSWORD | CM_PRIVATE_REPO_PASSWORD;
-              cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
-              cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
-              cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
+            cb/data/CM_PRIVATE_REPO_PASSWORD CM_PRIVATE_REPO_PASSWORD | CM_PRIVATE_REPO_PASSWORD;
+            cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
+            cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
+            cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
+            cb/data/GITHUB_TOKEN GITHUB_TOKEN | GITHUB_TOKEN;
+            cb/data/JIRA_TOKEN JIRA_TOKEN | JIRA_TOKEN;
       - name: cache_java_libs
         id: cache-java
         uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
@@ -355,7 +390,13 @@ jobs:
       - if: ${{ steps.cache-java.outputs.cache-hit != 'true' }}
         name: list_the_state_of_java_libs
         continue-on-error: true
+        shell: bash
         run: ./gradlew dependencies
+      - name: install_tools
+        run: |-
+          #!/bin/bash -x
+          sudo apt-get update
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make uuid-runtime
       - name: gradle_build
         run: |-
           export CM_PRIVATE_REPO_PASSWORD=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}")
@@ -405,6 +446,8 @@ jobs:
             cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
             cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
             cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
+            cb/data/GITHUB_TOKEN GITHUB_TOKEN | GITHUB_TOKEN;
+            cb/data/JIRA_TOKEN JIRA_TOKEN | JIRA_TOKEN;
       - name: cache_java_libs
         id: cache-java
         uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
@@ -419,15 +462,16 @@ jobs:
             ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
             ${{ runner.os }}-build-${{ hashFiles('**/build.gradle') }}
             ${{ runner.os }}-${{ hashFiles('**/build.gradle') }}
+      - if: ${{ steps.cache-java.outputs.cache-hit != 'true' }}
+        name: list_the_state_of_java_libs
+        continue-on-error: true
+        shell: bash
+        run: ./gradlew dependencies
       - name: install_tools
         run: |-
           #!/bin/bash -x
           sudo apt-get update
-          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make
-      - if: ${{ steps.cache-java.outputs.cache-hit != 'true' }}
-        name: list_the_state_of_java_libs
-        continue-on-error: true
-        run: ./gradlew dependencies
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make uuid-runtime
       - name: openapi_compatibility_check
         run: |-
           export CM_PRIVATE_REPO_PASSWORD=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}")
@@ -460,6 +504,8 @@ jobs:
             cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
             cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
             cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
+            cb/data/GITHUB_TOKEN GITHUB_TOKEN | GITHUB_TOKEN;
+            cb/data/JIRA_TOKEN JIRA_TOKEN | JIRA_TOKEN;
       - name: cache_java_libs
         id: cache-java
         uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
@@ -474,16 +520,16 @@ jobs:
             ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
             ${{ runner.os }}-build-${{ hashFiles('**/build.gradle') }}
             ${{ runner.os }}-${{ hashFiles('**/build.gradle') }}
+      - if: ${{ steps.cache-java.outputs.cache-hit != 'true' }}
+        name: list_the_state_of_java_libs
+        continue-on-error: true
+        shell: bash
+        run: ./gradlew dependencies
       - name: install_tools
         run: |-
           #!/bin/bash -x
           sudo apt-get update
-          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make docker-compose-v2 uuid-runtime
-          docker compose --version
-      - if: ${{ steps.cache-java.outputs.cache-hit != 'true' }}
-        name: list_the_state_of_java_libs
-        continue-on-error: true
-        run: ./gradlew dependencies
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make uuid-runtime
       - name: component_test
         run: |-
           export CM_PRIVATE_REPO_PASSWORD=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}")
@@ -517,6 +563,8 @@ jobs:
             cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
             cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
             cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
+            cb/data/GITHUB_TOKEN GITHUB_TOKEN | GITHUB_TOKEN;
+            cb/data/JIRA_TOKEN JIRA_TOKEN | JIRA_TOKEN;
       - name: cache_java_libs
         id: cache-java
         uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
@@ -531,19 +579,330 @@ jobs:
             ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
             ${{ runner.os }}-build-${{ hashFiles('**/build.gradle') }}
             ${{ runner.os }}-${{ hashFiles('**/build.gradle') }}
+      - if: ${{ steps.cache-java.outputs.cache-hit != 'true' }}
+        name: list_the_state_of_java_libs
+        shell: bash
+        run: ./gradlew dependencies
       - name: install_tools
         run: |-
           #!/bin/bash -x
           sudo apt-get update
-          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make docker-compose-v2 uuid-runtime
-      - if: ${{ steps.cache-java.outputs.cache-hit != 'true' }}
-        name: list_the_state_of_java_libs
-        continue-on-error: true
-        run: ./gradlew dependencies
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make uuid-runtime docker-compose-v2 git curl
       - name: component_test
+        continue-on-error: true
         run: |-
           export CM_PRIVATE_REPO_PASSWORD=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}")
           export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
           export DOCKERHUB_PASSWORD=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_PASSWORD}}")
           export DOCKERHUB_USERNAME=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}")
           make config-change-int-steps_config_change
+  schema-compatibility-test:
+    permissions: write-all
+    name: Schema Compatibility Test
+    runs-on: [ cb-ubuntu22-large ]
+    timeout-minutes: 90
+
+    steps:
+      - name: checkout
+        id: checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: setup_secrets
+        id: build_secrets
+        uses: Kitchen/RE-thirdparty-actions/actions/vault@main
+        with:
+          tlsSkipVerify: true
+          url: https://re-vault.infra.cloudera.com/
+          method: kubernetes
+          path: rke_re_jenkins
+          role: cb
+          secrets: |
+            cb/data/CM_PRIVATE_REPO_PASSWORD CM_PRIVATE_REPO_PASSWORD | CM_PRIVATE_REPO_PASSWORD;
+            cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
+            cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
+            cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
+            cb/data/GITHUB_TOKEN GITHUB_TOKEN | GITHUB_TOKEN;
+            cb/data/JIRA_TOKEN JIRA_TOKEN | JIRA_TOKEN;
+      - name: cache_java_libs
+        id: cache-java
+        uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
+        env:
+          cache-name: cache-java-libs
+        with:
+          path: |
+            /home/jenkins/.gradle/caches
+            /home/jenkins/.gradle/wrapper
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
+            ${{ runner.os }}-build-${{ hashFiles('**/build.gradle') }}
+            ${{ runner.os }}-${{ hashFiles('**/build.gradle') }}
+      - if: ${{ steps.cache-java.outputs.cache-hit != 'true' }}
+        name: list_the_state_of_java_libs
+        continue-on-error: true
+        shell: bash
+        run: ./gradlew dependencies
+      - name: install_tools
+        run: |-
+          #!/bin/bash -x
+          sudo apt-get update
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make uuid-runtime docker-compose-v2 git curl
+      - name: schema_compatibility_test
+        continue-on-error: true
+        run: |-
+          export CM_PRIVATE_REPO_PASSWORD=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}")
+          export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
+          export DOCKERHUB_PASSWORD=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_PASSWORD}}")
+          export DOCKERHUB_USERNAME=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}")
+          export INTEGRATIONTEST_SUITE_FILES=file:/it/src/main/resources/testsuites/v4/mock/all-in-mock-package.yaml
+          export AWS=false
+          export INTEGRATIONTEST_MAX_PG_NETWORK_OUTPUT=9.5GB
+          export INTEGRATIONTEST_UMS_HOST=thunderhead-mock
+          export INTEGRATIONTEST_UMS_PORT=8982
+          export INTEGRATIONTEST_CDL_HOST=thunderhead-mock
+          export INTEGRATIONTEST_CDL_PORT=8982
+          
+          make schema-compatiblity-steps_schema_compatiblity
+
+      - name: schema_compatibility_test_collect_service_artifacts
+        uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
+        if: steps.schema_compatibility_test.conclusion == 'failure'
+        with:
+          name: schema-compatibility-service-artifact
+          retention-days: 5
+          path: |
+            integration-test/cloudbreak.log
+            integration-test/datalake.log
+            integration-test/redbeams.log
+            integration-test/environment.log
+            integration-test/freeipa.log
+            integration-test/thunderhead-mock.log
+            integration-test/cluster-proxy.log
+            integration-test/cluster-proxy-health.log
+            integration-test/dev-gateway.log
+            integration-test/core-gateway.log
+      - name: schema_compatibility_test_collect_test_artifacts
+        uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
+        if: steps.schema_compatibility_test.conclusion == 'failure'
+        with:
+          name: schema-compatibility-test-artifact
+          retention-days: 5
+          path: |
+            integration-test/integcb/Profile
+            integration-test/integcb/docker-compose.yml
+            integration-test/integcb/*revert.result
+            integration-test/test.out
+            integration-test/swagger-validation-result.out
+            integration-test/suites_log/*.log
+            integration-test/test-output/**/*
+            integration-test/dumps/*.hprof
+      - name: schema_compatibility_test_check
+        if: steps.schema_compatibility_test.outcome == 'failure'
+        run: |
+          echo "Schema compatiblity failed, now failing the job."
+          exit 1
+  integration-test:
+    permissions: write-all
+    name: Integration Test
+    runs-on: [ cb-ubuntu22-large ]
+    timeout-minutes: 90
+
+    steps:
+      - name: checkout
+        id: checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: setup_secrets
+        id: build_secrets
+        uses: Kitchen/RE-thirdparty-actions/actions/vault@main
+        with:
+          tlsSkipVerify: true
+          url: https://re-vault.infra.cloudera.com/
+          method: kubernetes
+          path: rke_re_jenkins
+          role: cb
+          secrets: |
+            cb/data/CM_PRIVATE_REPO_PASSWORD CM_PRIVATE_REPO_PASSWORD | CM_PRIVATE_REPO_PASSWORD;
+            cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
+            cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
+            cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
+            cb/data/GITHUB_TOKEN GITHUB_TOKEN | GITHUB_TOKEN;
+            cb/data/JIRA_TOKEN JIRA_TOKEN | JIRA_TOKEN;
+      - name: cache_java_libs
+        id: cache-java
+        uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
+        env:
+          cache-name: cache-java-libs
+        with:
+          path: |
+            /home/jenkins/.gradle/caches
+            /home/jenkins/.gradle/wrapper
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
+            ${{ runner.os }}-build-${{ hashFiles('**/build.gradle') }}
+            ${{ runner.os }}-${{ hashFiles('**/build.gradle') }}
+      - if: ${{ steps.cache-java.outputs.cache-hit != 'true' }}
+        name: list_the_state_of_java_libs
+        continue-on-error: true
+        shell: bash
+        run: ./gradlew dependencies
+      - name: install_tools
+        run: |-
+          #!/bin/bash -x
+          sudo apt-get update
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make uuid-runtime docker-compose-v2 git curl
+      - name: integration_test
+        continue-on-error: true
+        run: |-
+          export CM_PRIVATE_REPO_PASSWORD=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}")
+          export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
+          export DOCKERHUB_PASSWORD=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_PASSWORD}}")
+          export DOCKERHUB_USERNAME=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}")
+          export INTEGRATIONTEST_SUITE_FILES=file:/it/src/main/resources/testsuites/v4/mock/all-in-mock-package.yaml
+          export AWS=false
+          export INTEGRATIONTEST_UMS_HOST=thunderhead-mock
+          export INTEGRATIONTEST_UMS_PORT=8982
+          export INTEGRATIONTEST_CDL_HOST=thunderhead-mock
+          export INTEGRATIONTEST_CDL_PORT=8982
+          export INTEGRATIONTEST_AUTHDISTRIBUTOR_HOST=thunderhead-mock
+          export INTEGRATIONTEST_THREADCOUNT=4
+          export USE_FEDRAMP_CONTAINERS=false
+
+          make integration-test-steps_schema_compatiblity
+          
+          cd integration-test
+          make compress-results
+      - name: integration_test_collect_service_artifacts
+        uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
+        if: steps.integration_test.conclusion == 'failure'
+        with:
+          name: integration-test-service-artifact
+          retention-days: 5
+          path: |
+            integration-test/integcb-logs.tar.gz
+      - name: integration_test_collect_test_artifacts
+        uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
+        if: steps.integration_test.conclusion == 'failure'
+        with:
+          name: integration-test-test-artifact
+          retention-days: 5
+          path: |
+            integration-test/suites.tar.gz
+      - name: integration_test_check
+        if: steps.integration_test.outcome == 'failure'
+        run: |
+          echo "Integration test failed, now failing the job."
+          exit 1
+  fedramp-integration-test:
+    permissions: write-all
+    name: FedRAMP Integration Test
+    runs-on: [ cb-ubuntu22-large ]
+    timeout-minutes: 90
+
+    steps:
+      - name: checkout
+        id: checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: setup_secrets
+        id: build_secrets
+        uses: Kitchen/RE-thirdparty-actions/actions/vault@main
+        with:
+          tlsSkipVerify: true
+          url: https://re-vault.infra.cloudera.com/
+          method: kubernetes
+          path: rke_re_jenkins
+          role: cb
+          secrets: |
+            cb/data/CM_PRIVATE_REPO_PASSWORD CM_PRIVATE_REPO_PASSWORD | CM_PRIVATE_REPO_PASSWORD;
+            cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
+            cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
+            cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
+            cb/data/GITHUB_TOKEN GITHUB_TOKEN | GITHUB_TOKEN;
+            cb/data/JIRA_TOKEN JIRA_TOKEN | JIRA_TOKEN;
+      - name: cache_java_libs
+        id: cache-java
+        uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
+        env:
+          cache-name: cache-java-libs
+        with:
+          path: |
+            /home/jenkins/.gradle/caches
+            /home/jenkins/.gradle/wrapper
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
+            ${{ runner.os }}-build-${{ hashFiles('**/build.gradle') }}
+            ${{ runner.os }}-${{ hashFiles('**/build.gradle') }}
+      - if: ${{ steps.cache-java.outputs.cache-hit != 'true' }}
+        name: list_the_state_of_java_libs
+        continue-on-error: true
+        shell: bash
+        run: ./gradlew dependencies
+      - name: install_tools
+        run: |-
+          #!/bin/bash -x
+          sudo apt-get update
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make uuid-runtime docker-compose-v2
+      - name: fedramp_integration_test
+        continue-on-error: true
+        run: |-
+          export CM_PRIVATE_REPO_PASSWORD=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}")
+          export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
+          export DOCKERHUB_PASSWORD=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_PASSWORD}}")
+          export DOCKERHUB_USERNAME=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}")
+          export INTEGRATIONTEST_SUITE_FILES=file:/it/src/main/resources/testsuites/v4/mock/all-in-mock-package.yaml
+          export AWS=false
+          export INTEGRATIONTEST_UMS_HOST=thunderhead-mock
+          export INTEGRATIONTEST_UMS_PORT=8982
+          export INTEGRATIONTEST_CDL_HOST=thunderhead-mock
+          export INTEGRATIONTEST_CDL_PORT=8982
+          export INTEGRATIONTEST_AUTHDISTRIBUTOR_HOST=thunderhead-mock
+          export INTEGRATIONTEST_THREADCOUNT=4
+          export USE_FEDRAMP_CONTAINERS=true
+
+          make fedramp-integration-test-steps_schema_compatiblity
+          
+          cd integration-test
+          make compress-results
+      - name: fedramp_integration_test_collect_service_artifacts
+        uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
+        if: steps.fedramp_integration_test.conclusion == 'failure'
+        with:
+          name: fedramp-integration-service-artifact
+          retention-days: 5
+          path: |
+            integration-test/cloudbreak.log
+            integration-test/datalake.log
+            integration-test/redbeams.log
+            integration-test/environment.log
+            integration-test/freeipa.log
+            integration-test/thunderhead-mock.log
+            integration-test/cluster-proxy.log
+            integration-test/cluster-proxy-health.log
+            integration-test/dev-gateway.log
+            integration-test/core-gateway.log
+      - name: fedramp_integration_test_collect_test_artifacts
+        uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
+        if: steps.fedramp_integration_test.conclusion == 'failure'
+        with:
+          name: fedramp-integration-test-artifact
+          retention-days: 5
+          path: |
+            integration-test/integcb/Profile
+            integration-test/integcb/docker-compose.yml
+            integration-test/integcb/*revert.result
+            integration-test/test.out
+            integration-test/swagger-validation-result.out
+            integration-test/suites_log/*.log
+            integration-test/test-output/**/*
+            integration-test/dumps/*.hprof
+      - name: fedramp_integration_test_check
+        if: steps.fedramp_integration_test.outcome == 'failure'
+        run: |
+          echo "FedRAMP integration test failed, now failing the job."
+          exit 1

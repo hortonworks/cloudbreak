@@ -10,6 +10,7 @@ buildscript {
 }
 
 apply plugin: 'com.google.protobuf'
+apply plugin: 'com.diffplug.spotless'
 
 dependencies {
   implementation project(':common')
@@ -27,6 +28,14 @@ dependencies {
 
 checkstyle {
   checkstyleMain.exclude '**/generated/**'
+}
+
+tasks.named("build").configure {
+  dependsOn("spotlessApply")
+}
+
+tasks.named("spotlessApply").configure {
+  dependsOn("generateProto")
 }
 
 protobuf {
@@ -48,3 +57,11 @@ protobuf {
   }
   generatedFilesBaseDir = "$projectDir/src/generated"
 }
+
+spotless {
+  java {
+    target 'src/generated/*/java/**/*.java'
+    indentWithSpaces(2)
+  }
+}
+

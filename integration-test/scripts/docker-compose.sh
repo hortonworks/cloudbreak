@@ -13,12 +13,13 @@ set -ex
 date
 echo -e "\n\033[1;96m--- Kill running cbd containers\033[0m\n"
 cd $INTEGCB_LOCATION
-./cbd kill
+docker compose stop
+docker compose rm -f
 cd ..
 
 date
 echo -e "\n\033[1;96m--- Kill running test container\033[0m\n"
-docker compose --compatibility down --remove-orphans
+docker compose down --remove-orphans
 
 date
 echo -e "\n\033[1;96m--- Copy mock infrastructure infrastructure-mock.p12 cert to certs dir\033[0m\n"
@@ -36,7 +37,7 @@ cbd_teardown_and_exit() {
   date
   echo -e "\n\033[1;96m--- ERROR: Failed to bring up all the necessary CBD services! Process is about to terminate!\033[0m\n"
   ./cbd kill
-  docker compose --compatibility down --remove-orphans
+  docker compose down --remove-orphans
   exit 1
 }
 
@@ -58,6 +59,7 @@ cbd_services_sanity_check() {
   fi
 }
 
+less Profile
 ./cbd regenerate
 ./cbd start-wait traefik dev-gateway core-gateway commondb vault cloudbreak environment remote-environment periscope freeipa redbeams datalake externalized-compute haveged mock-infrastructure idbmms cluster-proxy cadence jumpgate-interop jumpgate-admin jumpgate-proxy thunderhead-mock
 RESULT=$?
@@ -81,7 +83,7 @@ check_primary_key () {
         set -e
         echo -e "\n\033[1;96m--- ERROR: There are tables in ${DB_NAME} without primary key. Process is about to terminate!\033[0m\n"
         ./cbd kill
-        docker compose --compatibility down --remove-orphans
+        docker compose down --remove-orphans
         exit 1
     fi
     set -e
@@ -107,17 +109,7 @@ cd ..
 #else
 #    PUBLIC_IP=127.0.0.1
 #fi
-PUBLIC_IP=127.0.0.1
-
-mkdir -p ./apidefinitions
-curl -k http://${PUBLIC_IP}:8080/cb/api/openapi.json -o ./apidefinitions/cloudbreak.json
-curl -k http://${PUBLIC_IP}:8088/environmentservice/api/openapi.json -o ./apidefinitions/environment.json
-curl -k http://${PUBLIC_IP}:8092/remoteenvironmentservice/api/openapi.json -o ./apidefinitions/remote-environment.json
-curl -k http://${PUBLIC_IP}:8090/freeipa/api/openapi.json -o ./apidefinitions/freeipa.json
-curl -k http://${PUBLIC_IP}:8087/redbeams/api/openapi.json -o ./apidefinitions/redbeams.json
-curl -k http://${PUBLIC_IP}:8086/dl/api/openapi.json -o ./apidefinitions/datalake.json
-curl -k http://${PUBLIC_IP}:8085/as/api/openapi.json -o ./apidefinitions/autoscale.json
-curl -k http://${PUBLIC_IP}:8091/externalizedcompute/api/openapi.json -o ./apidefinitions/externalizedcompute.json
+PUBLIC_IP=localhost
 
 date
 echo -e "\n\033[1;96m--- Setting ACCESSKEY/SECRETKEY for test variables:\033[0m\n"
@@ -180,14 +172,14 @@ env | grep -i INTEGRATIONTEST > integrationtest.properties
 if [[ "$INTEGRATIONTEST_CLOUDPROVIDER" == "MOCK" ]]; then
   date
   echo -e "\n\033[1;96m--- Starting prometheus:\033[0m\n"
-  docker compose --compatibility up -d prometheus
+  docker compose up -d prometheus
 fi
 
 date
 echo -e "\n\033[1;96m--- Tests to run:\033[0m\n"
 echo $INTEGRATIONTEST_SUITEFILES
 
-set -o pipefail ; docker compose --compatibility up --remove-orphans --exit-code-from test test | tee test.out
+set -o pipefail ; docker compose up --remove-orphans --exit-code-from test test | tee test.out
 echo -e "\n\033[1;96m--- Test finished\033[0m\n"
 
 echo -e "\n\033[1;96m--- Collect docker stats:\033[0m\n"

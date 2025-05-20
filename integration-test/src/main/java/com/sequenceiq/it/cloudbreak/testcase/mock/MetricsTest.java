@@ -13,6 +13,7 @@ import jakarta.ws.rs.client.WebTarget;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Sets;
@@ -51,6 +52,7 @@ public class MetricsTest extends AbstractMockTest {
 
     }
 
+    @Ignore("This test case should be re-enabled in case of InternalSDXDistroXTest has been removed")
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "cloudbreak service is running",
@@ -64,6 +66,7 @@ public class MetricsTest extends AbstractMockTest {
         assertTrue(actualMetricNames.containsAll(expectedMetricNames));
     }
 
+    @Ignore("This test case should be re-enabled in case of InternalSDXDistroXTest has been removed")
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "environment service is running",
@@ -77,6 +80,7 @@ public class MetricsTest extends AbstractMockTest {
         assertTrue(actualMetricNames.containsAll(expectedMetricNames));
     }
 
+    @Ignore("This test case should be re-enabled in case of InternalSDXDistroXTest has been removed")
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "datalake service is running",
@@ -90,6 +94,7 @@ public class MetricsTest extends AbstractMockTest {
         assertTrue(actualMetricNames.containsAll(expectedMetricNames));
     }
 
+    @Ignore("This test case should be re-enabled in case of InternalSDXDistroXTest has been removed")
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "free IPA service is running",
@@ -103,6 +108,7 @@ public class MetricsTest extends AbstractMockTest {
         assertTrue(actualMetricNames.containsAll(expectedMetricNames));
     }
 
+    @Ignore("This test case should be re-enabled in case of InternalSDXDistroXTest has been removed")
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "redbeams service is running",
@@ -116,6 +122,7 @@ public class MetricsTest extends AbstractMockTest {
         assertTrue(actualMetricNames.containsAll(expectedMetricNames));
     }
 
+    @Ignore("This test case should be re-enabled in case of InternalSDXDistroXTest has been removed")
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "periscope service is running",
@@ -129,6 +136,7 @@ public class MetricsTest extends AbstractMockTest {
         assertTrue(actualMetricNames.containsAll(expectedMetricNames));
     }
 
+    @Ignore("This test case should be re-enabled in case of InternalSDXDistroXTest has been removed")
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "remote environment service is running",
@@ -142,6 +150,7 @@ public class MetricsTest extends AbstractMockTest {
         assertTrue(actualMetricNames.containsAll(expectedMetricNames));
     }
 
+    @Ignore("This test case should be re-enabled in case of InternalSDXDistroXTest has been removed")
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "externalized compute cluster service is running",

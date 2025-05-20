@@ -4,13 +4,13 @@
 
 if [[ -z "${INTEGRATIONTEST_YARN_QUEUE}" ]] && [[ "$AWS" != true ]]; then
   echo -e "\n\033[1;96m--- Stop prometheus container"
-  docker compose --compatibility stop;
+  docker compose stop;
   tar -czvf prometheus-data.tar.gz prometheus-data/;
 fi
 
 echo -e "\n\033[1;96m--- Stop cbd containers"
 cd $INTEGCB_LOCATION;
-docker compose --compatibility stop;
+docker compose stop;
 
 echo -e "\n\033[1;96m--- Save Cluster Proxy logs to file"
 docker logs cbreak_cluster-proxy_1 &> ../cluster-proxy.log;

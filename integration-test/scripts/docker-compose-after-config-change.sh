@@ -11,13 +11,13 @@ set -ex
 
 date
 echo -e "\n\033[1;96m--- Kill running test container\033[0m\n"
-docker compose --compatibility down --remove-orphans
+docker compose down --remove-orphans
 
 cbd_teardown_and_exit() {
   date
   echo -e "\n\033[1;96m--- ERROR: Failed to bring up all the necessary CBD services! Process is about to terminate!\033[0m\n"
   ./cbd kill
-  docker compose --compatibility down --remove-orphans
+  docker compose down --remove-orphans
   exit 1
 }
 
@@ -67,7 +67,7 @@ rm -rf test-output
 export DOCKER_CLIENT_TIMEOUT=120
 export COMPOSE_HTTP_TIMEOUT=120
 
-set -o pipefail ; docker compose --compatibility up --remove-orphans --exit-code-from test test | tee test_2.out
+set -o pipefail ; docker compose up --remove-orphans --exit-code-from test test | tee test_2.out
 echo -e "\n\033[1;96m--- Test finished\033[0m\n"
 
 echo -e "\n\033[1;96m--- Collect docker stats:\033[0m\n"
