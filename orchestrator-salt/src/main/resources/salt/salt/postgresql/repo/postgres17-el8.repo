@@ -1,0 +1,11 @@
+[pgdg17]
+name=PostgreSQL 17
+baseurl=https://archive.cloudera.com/p/postgresql/postgresql17/redhat8/
+enabled=1
+priority=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG-14
+{%- if salt['pillar.get']('cloudera-manager:paywall_username') %}
+username={{ salt['pillar.get']('cloudera-manager:paywall_username') }}
+password={{ salt['pillar.get']('cloudera-manager:paywall_password') }}
+{%- endif %}

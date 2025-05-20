@@ -6,11 +6,11 @@ import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.service.database.DbOverrideConfig;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
 
 @Component
@@ -20,21 +20,25 @@ public class DatabaseUpgradeRuntimeValidator {
 
     private final VersionComparator versionComparator = new VersionComparator();
 
-    @Value("${cb.db.override.minRuntimeVersion}")
-    private String minRuntimeVersion;
+    @Inject
+    private DbOverrideConfig dbOverrideConfig;
 
     @Inject
     private EntitlementService entitlementService;
 
-    public Optional<String> validateRuntimeVersionForUpgrade(String runtimeVersion, String accountId) {
+    public Optional<String> validateRuntimeVersionForUpgrade(String runtimeVersion, String targetMajorVersion, String accountId) {
         Optional<String> validationFailureMessage = Optional.empty();
+        Optional<String> minRuntimeVersion = dbOverrideConfig.findMinRuntimeVersion(targetMajorVersion);
         if (entitlementService.isPostgresUpgradeExceptionEnabled(accountId)) {
             LOGGER.debug("Enable database upgrade for runtime {} because it's enabled by entitlement.", runtimeVersion);
-        } else if (StringUtils.hasText(runtimeVersion) && 0 <= versionComparator.compare(() -> runtimeVersion, () -> minRuntimeVersion)) {
-            LOGGER.debug("The database upgrade is applicable for runtime version {}", runtimeVersion);
+        } else if (StringUtils.hasText(runtimeVersion)
+                && minRuntimeVersion.isPresent()
+                && 0 <= versionComparator.compare(() -> runtimeVersion, minRuntimeVersion::get)) {
+            LOGGER.debug("The database upgrade is applicable for runtime version {} and DB targetVersion {}", runtimeVersion, targetMajorVersion);
         } else {
-            String message = String.format("The database upgrade is not permitted for runtime version %s. The minimum supported runtime version is %s",
-                    runtimeVersion, minRuntimeVersion);
+            String message = String.format("The database upgrade is not permitted for runtime version %s and DB targetVersion %s. " +
+                            "The minimum supported runtime version is %s",
+                    runtimeVersion, targetMajorVersion, minRuntimeVersion.orElse("not configured"));
             LOGGER.warn(message);
             validationFailureMessage = Optional.of(message);
         }

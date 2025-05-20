@@ -31,6 +31,7 @@ public class UpgradeDatabaseServerV4RequestToUpgradeDatabaseServerRequestConvert
         return switch (sourceTargetVersion) {
             case VERSION_11 -> TargetMajorVersion.VERSION_11;
             case VERSION_14 -> TargetMajorVersion.VERSION_14;
+            case VERSION_17 -> TargetMajorVersion.VERSION17;
         };
     }
 
