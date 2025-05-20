@@ -248,6 +248,12 @@
       "latitude": "52.237049",
       "longitude": "21.017532",
       "cdpSupportedServices": [ "ALL" ]
+    },
+    {
+      "name": "Spain Central",
+      "latitude": "40.416775",
+      "longitude": "-3.703790",
+      "cdpSupportedServices": [ "ALL" ]
     }
   ]
 }
