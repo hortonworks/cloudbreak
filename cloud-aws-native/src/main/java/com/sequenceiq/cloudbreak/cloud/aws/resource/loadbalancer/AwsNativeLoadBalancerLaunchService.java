@@ -120,7 +120,8 @@ public class AwsNativeLoadBalancerLaunchService {
                     for (AwsListener listener : awsLoadBalancer.getListeners()) {
                         AwsTargetGroup targetGroup = listener.getTargetGroup();
                         String loadBalancerScheme = awsLoadBalancer.getScheme().resourceName();
-                        creationContext.setTargetGroupName(resourceNameService.loadBalancerTargetGroup(stackName, loadBalancerScheme, targetGroup.getPort()));
+                        creationContext.setTargetGroupName(resourceNameService.loadBalancerTargetGroup(stackName, loadBalancerScheme, targetGroup.getPort(),
+                                creationContext.getCloudContext()));
                         String targetGroupNameTypeSchemePortPart = resourceNameService.loadBalancerTargetGroupResourceTypeSchemeAndPortNamePart(
                                 loadBalancerScheme, targetGroup.getPort());
                         createTargetGroup(creationContext, awsNetworkView, targetGroup, targetGroupNameTypeSchemePortPart);
