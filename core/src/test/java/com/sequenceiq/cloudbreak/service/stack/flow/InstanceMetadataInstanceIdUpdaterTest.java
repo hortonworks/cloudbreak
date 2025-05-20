@@ -8,6 +8,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -82,6 +83,25 @@ class InstanceMetadataInstanceIdUpdaterTest {
 
         Assertions.assertThrows(TransactionService.TransactionRuntimeExecutionException.class,
                 () -> underTest.updateWithInstanceIdAndStatus(stackCreationContext, affectedResources));
+    }
+
+    @Test
+    void testUpdateWithInstanceIdAndStatusShouldNotThrowExceptionWhenTheUpdateIsNotSupportedOnPlatformConnector()
+            throws TransactionService.TransactionExecutionException {
+        List<CloudResourceStatus> affectedResources = List.of();
+        doAnswer((Answer<Void>) invocation -> {
+            Runnable runnable = invocation.getArgument(0);
+            runnable.run();
+            return null;
+        }).when(transactionService).required(any(Runnable.class));
+        ResourceConnector resourceConnector = mock(ResourceConnector.class);
+        when(cloudConnector.resources()).thenReturn(resourceConnector);
+        when(resourceConnector.getInstanceResourceType())
+                .thenThrow(new UnsupportedOperationException("the update is not supported, there is no instance resource type for the platform"));
+
+        Assertions.assertDoesNotThrow(() -> underTest.updateWithInstanceIdAndStatus(stackCreationContext, affectedResources));
+
+        verifyNoInteractions(instanceMetaDataService);
     }
 
     @Test
