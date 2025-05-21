@@ -88,6 +88,7 @@ class StackSaltStatusCheckerJobTest {
 
         lenient().when(stackDtoService.getByIdOpt(STACK_ID)).thenReturn(Optional.of(stackDto));
         lenient().when(stackDto.getStatus()).thenReturn(Status.AVAILABLE);
+        lenient().when(rotateSaltPasswordValidator.isChangeSaltuserPasswordSupported(any())).thenReturn(Boolean.TRUE);
     }
 
     @AfterEach
@@ -165,6 +166,20 @@ class StackSaltStatusCheckerJobTest {
 
             verify(saltPasswordStatusService).getSaltPasswordStatus(stackDto);
             verify(rotateSaltPasswordValidator).validateRotateSaltPassword(stackDto);
+            verify(rotateSaltPasswordTriggerService, never()).triggerRotateSaltPassword(eq(stackDto), any());
+        }
+
+        @Test
+        void fallbackSupportOnly() throws JobExecutionException {
+            when(saltPasswordStatusService.getSaltPasswordStatus(stackDto)).thenReturn(SaltPasswordStatus.EXPIRES);
+            when(rotateSaltPasswordValidator.isChangeSaltuserPasswordSupported(any())).thenReturn(Boolean.FALSE);
+
+            underTest.executeJob(context);
+
+            verify(saltPasswordStatusService).getSaltPasswordStatus(stackDto);
+            verify(rotateSaltPasswordValidator).validateRotateSaltPassword(stackDto);
+            verify(rotateSaltPasswordValidator).isChangeSaltuserPasswordSupported(stackDto);
+            verify(jobService).unschedule(any());
             verify(rotateSaltPasswordTriggerService, never()).triggerRotateSaltPassword(eq(stackDto), any());
         }
 
