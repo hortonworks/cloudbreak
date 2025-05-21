@@ -4,6 +4,8 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUD
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionOlderThanLimited;
 
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -40,7 +42,12 @@ public class DatabaseVersionValidator implements ServiceUpgradeValidator {
     private DatabaseAvailabilityType getDatabaseAvailabilityType(ServiceUpgradeValidationRequest validationRequest) {
         Database database = validationRequest.stack().getDatabase();
         StackType stackType = validationRequest.stack().getType();
-        return StackType.DATALAKE.equals(stackType) ? database.getDatalakeDatabaseAvailabilityType() : database.getExternalDatabaseAvailabilityType();
+        return StackType.DATALAKE.equals(stackType) ? getDatalakeDatabaseAvailabilityType(database) : database.getExternalDatabaseAvailabilityType();
+    }
+
+    private DatabaseAvailabilityType getDatalakeDatabaseAvailabilityType(Database database) {
+        return Optional.ofNullable(database.getDatalakeDatabaseAvailabilityType())
+                .orElse(DatabaseAvailabilityType.NONE);
     }
 
     private boolean isPostgresVersionOlderThanRequired(String databaseVersion) {
