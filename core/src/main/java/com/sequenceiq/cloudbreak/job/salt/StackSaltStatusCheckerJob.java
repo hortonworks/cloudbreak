@@ -118,7 +118,7 @@ public class StackSaltStatusCheckerJob extends StatusCheckerJob {
                         LOGGER.debug("Stack salt sync is skipped, stack state is {}", stackStatus);
                     } else if (SYNCABLE_STATES.contains(stackStatus)) {
                         rotateSaltPasswordValidator.validateRotateSaltPassword(stack);
-                        rotateSaltPasswordIfNeeded(stack);
+                        rotateSaltPasswordIfNeeded(stack, context);
                     } else {
                         LOGGER.warn("Unhandled stack status, {}", stackStatus);
                     }
@@ -132,14 +132,20 @@ public class StackSaltStatusCheckerJob extends StatusCheckerJob {
         }
     }
 
-    private void rotateSaltPasswordIfNeeded(StackDto stack) {
+    private void rotateSaltPasswordIfNeeded(StackDto stack, JobExecutionContext context) {
         try {
             SaltPasswordStatus status = saltPasswordStatusService.getSaltPasswordStatus(stack);
             Optional<RotateSaltPasswordReason> reasonOptional = RotateSaltPasswordReason.getForStatus(status);
             if (reasonOptional.isPresent()) {
                 RotateSaltPasswordReason reason = reasonOptional.get();
                 LOGGER.info("Triggering salt password rotation for status {} with reason {}", status, reason);
-                rotateSaltPasswordTriggerService.triggerRotateSaltPassword(stack, reason);
+                if (rotateSaltPasswordValidator.isChangeSaltuserPasswordSupported(stack)) {
+                    rotateSaltPasswordTriggerService.triggerRotateSaltPassword(stack, reason);
+                } else {
+                    LOGGER.warn("Only fallback mechanism is supported for salt password rotation, which might require manual intervention, " +
+                            "we suggest to initiate the rotation manually, skipping automated rotation!");
+                    jobService.unschedule(context.getJobDetail().getKey());
+                }
             } else {
                 LOGGER.debug("Salt password rotation is not needed for status {}", status);
             }
