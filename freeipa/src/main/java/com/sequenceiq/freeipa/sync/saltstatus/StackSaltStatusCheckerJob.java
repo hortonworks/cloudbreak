@@ -22,6 +22,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.orchestrator.RotateSaltPasswordService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.sync.InterruptSyncingException;
+import com.sequenceiq.freeipa.util.SaltBootstrapVersionChecker;
 
 @DisallowConcurrentExecution
 @Component
@@ -40,6 +41,9 @@ public class StackSaltStatusCheckerJob extends StatusCheckerJob {
 
     @Inject
     private RotateSaltPasswordService rotateSaltPasswordService;
+
+    @Inject
+    private SaltBootstrapVersionChecker saltBootstrapVersionChecker;
 
     @Override
     protected Optional<Object> getMdcContextObject() {
@@ -66,7 +70,7 @@ public class StackSaltStatusCheckerJob extends StatusCheckerJob {
                 LOGGER.debug("StackSaltStatusCheckerJob cannot run, because flow is running for freeipa stack: {}", stackId);
             } else {
                 LOGGER.debug("No flows running, trying to sync freeipa salt");
-                syncAStack(stack);
+                syncAStack(stack, context);
             }
         } catch (BadRequestException e) {
             LOGGER.info("StackSaltStatusCheckerJob cannot run, because validation failed for stack {} with message: {}", stackId, e.getMessage());
@@ -76,12 +80,19 @@ public class StackSaltStatusCheckerJob extends StatusCheckerJob {
         }
     }
 
-    private void syncAStack(Stack stack) {
+    private void syncAStack(Stack stack, JobExecutionContext context) {
         try {
             checkedMeasure(() -> {
                 Optional<RotateSaltPasswordReason> rotateSaltPasswordReason = rotateSaltPasswordService.checkIfSaltPasswordRotationNeeded(stack);
-                rotateSaltPasswordReason.ifPresent(reason ->
-                        rotateSaltPasswordService.triggerRotateSaltPassword(stack.getEnvironmentCrn(), stack.getAccountId(), reason));
+                if (rotateSaltPasswordReason.isPresent()) {
+                    if (saltBootstrapVersionChecker.isChangeSaltuserPasswordSupported(stack)) {
+                        rotateSaltPasswordService.triggerRotateSaltPassword(stack.getEnvironmentCrn(), stack.getAccountId(), rotateSaltPasswordReason.get());
+                    } else {
+                        LOGGER.warn("Only fallback mechanism is supported for salt password rotation, which might require manual intervention, " +
+                                "we suggest to initiate the rotation manually, skipping automated rotation!");
+                        jobService.unschedule(context.getJobDetail().getKey());
+                    }
+                }
             }, LOGGER, ":::Auto sync::: freeipa stack salt sync in {}ms");
         } catch (Exception e) {
             LOGGER.warn(":::Auto sync::: Error occurred during freeipa salt sync: {}", e.getMessage(), e);
