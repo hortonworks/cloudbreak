@@ -330,17 +330,4 @@ public class EC2ClientActions extends EC2Client {
                                 vol.volumeType().name(), vol.size(), CloudVolumeUsageType.GENERAL)).toList();
         }
     }
-
-    public Map<String, String> listAvailabilityZonesForVms(Map<String, String> instanceZoneMap) {
-        Map<String, String> availabilityZoneMap = new HashMap<>();
-        for (Map.Entry<String, String> instanceInfo : instanceZoneMap.entrySet()) {
-            try (Ec2Client ec2Client = buildEC2Client()) {
-                DescribeInstancesRequest describeInstancesRequest = DescribeInstancesRequest.builder().instanceIds(instanceInfo.getKey()).build();
-                DescribeInstancesResponse describeInstancesResponse = ec2Client.describeInstances(describeInstancesRequest);
-                String az = describeInstancesResponse.reservations().getFirst().instances().getFirst().placement().availabilityZone();
-                availabilityZoneMap.put(instanceInfo.getKey(), az);
-            }
-        }
-        return availabilityZoneMap;
-    }
 }

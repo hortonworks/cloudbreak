@@ -1,7 +1,9 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.sdx;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +69,7 @@ public class SdxMultiAzScaleTest extends PreconditionSdxE2ETest {
                 .withRuntimeVersion(commonClusterManagerProperties.getRuntimeVersion())
                 .withEnableMultiAz(true)
                 .when(sdxTestClient.create(), key(sdx))
-                .await(SdxClusterStatusResponse.RUNNING, key(sdx))
+                .await(SdxClusterStatusResponse.RUNNING, key(sdx).withPollingInterval(Duration.ofMinutes(60L)))
                 .awaitForHealthyInstances()
                 .given(sdx, SdxTestDto.class)
                 .when(sdxTestClient.describe(), key(sdx))
@@ -79,8 +81,8 @@ public class SdxMultiAzScaleTest extends PreconditionSdxE2ETest {
                 .withName(sdx)
                 .withGroup("hms_scale_out")
                 .withDesiredCount(5)
-                .when(sdxTestClient.scale(), key(sdx))
-                .await(SdxClusterStatusResponse.RUNNING, key(sdx))
+                .when(sdxTestClient.scale())
+                .await(SdxClusterStatusResponse.RUNNING, emptyRunningParameter().withPollingInterval(Duration.ofMinutes(60L)))
                 .given(sdx, SdxTestDto.class)
                 .when(sdxTestClient.describe(), key(sdx))
                 .then((tc, testDto, client) -> {
@@ -91,8 +93,8 @@ public class SdxMultiAzScaleTest extends PreconditionSdxE2ETest {
                 .withName(sdx)
                 .withGroup("hms_scale_out")
                 .withDesiredCount(3)
-                .when(sdxTestClient.scale(), key(sdx))
-                .await(SdxClusterStatusResponse.RUNNING, key(sdx))
+                .when(sdxTestClient.scale())
+                .await(SdxClusterStatusResponse.RUNNING, emptyRunningParameter().withPollingInterval(Duration.ofMinutes(60L)))
                 .given(sdx, SdxTestDto.class)
                 .when(sdxTestClient.describe(), key(sdx))
                 .then((tc, testDto, client) -> {

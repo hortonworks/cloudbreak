@@ -167,9 +167,4 @@ public class AwsCloudFunctionality implements CloudFunctionality {
             String command) {
         return sshJUtil.executeSshCommandsOnInstances(instanceGroups, hostGroupNames, privateKeyFilePath, command);
     }
-
-    @Override
-    public Map<String, String> listAvailabilityZonesForVms(String clusterName, Map<String, String> instanceZoneMap) {
-        return amazonEC2Util.listAvailabilityZonesForVms(instanceZoneMap);
-    }
 }

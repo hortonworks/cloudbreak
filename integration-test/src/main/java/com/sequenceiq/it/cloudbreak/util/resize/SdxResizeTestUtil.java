@@ -13,7 +13,6 @@ import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
-import com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.PreconditionSdxE2ETest;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
@@ -25,7 +24,7 @@ import com.sequenceiq.sdx.api.model.SdxInstanceGroupDiskRequest;
 import com.sequenceiq.sdx.api.model.SdxInstanceGroupRequest;
 
 @Component
-public class SdxResizeTestUtil extends PreconditionSdxE2ETest  {
+public class SdxResizeTestUtil {
 
     private static final String MDL_RESIZE_FIXED_RUNTIME_VERSION = "7.2.17";
 
@@ -138,32 +137,5 @@ public class SdxResizeTestUtil extends PreconditionSdxE2ETest  {
 
         sdxClusterResizeRequest.setCustomInstanceGroups(List.of(sdxInstanceGroupRequest));
         sdxClusterResizeRequest.setCustomInstanceGroupDiskSize(List.of(sdxInstanceGroupDiskRequest));
-    }
-
-    public SdxInternalTestDto givenProvisionEnvironmentAndDatalake(TestContext testContext, String sdxKey, String runtimeVersion,
-            SdxClusterShape clusterShape, SdxResizeTestValidator validator) {
-        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
-        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
-        SdxCloudStorageRequest cloudStorageRequest = getCloudStorageRequest(testContext);
-
-        return testContext
-                .given("telemetry", TelemetryTestDto.class)
-                .withLogging()
-                .withReportClusterLogs()
-                .given(sdxKey, SdxInternalTestDto.class)
-                .withDatabase(sdxDatabaseRequest)
-                .withCloudStorage(cloudStorageRequest)
-                .withRuntimeVersion(runtimeVersion)
-                .withClusterShape(clusterShape)
-                .withTelemetry("telemetry")
-                .when(sdxTestClient.createInternal(), key(sdxKey))
-                .await(SdxClusterStatusResponse.RUNNING, key(sdxKey))
-                .awaitForHealthyInstances()
-                .then((tc, testDto, client) -> {
-                    validator.setExpectedCrn(sdxUtil.getCrn(testDto, client));
-                    validator.setExpectedName(testDto.getName());
-                    validator.setExpectedRuntime(sdxUtil.getRuntime(testDto, client));
-                    return testDto;
-                });
     }
 }
