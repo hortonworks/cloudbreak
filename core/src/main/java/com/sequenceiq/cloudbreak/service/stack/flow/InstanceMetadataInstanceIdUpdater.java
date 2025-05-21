@@ -53,21 +53,25 @@ public class InstanceMetadataInstanceIdUpdater {
         LOGGER.info("Syncing the status and instanceId of the created instances to the 'instancemetadata' table...");
 
         transactionService.required(() -> {
-            ResourceType instanceResourceType = connector.resources().getInstanceResourceType();
-            List<CloudResource> instanceCloudResources = getInstanceCloudResourcesWithType(cloudResourceStatuses, instanceResourceType);
-            List<InstanceMetaData> requestedInstanceMetadatas = instanceMetaDataService.findAllByStackIdAndStatus(ac.getCloudContext().getId(), REQUESTED);
-            LOGGER.debug("Requested instance metadata entries with private ids: {}",
-                    requestedInstanceMetadatas.stream().map(InstanceMetaData::getPrivateId).collect(Collectors.toSet()));
-            for (InstanceMetaData instanceMetaData : requestedInstanceMetadatas) {
-                Optional<CloudResource> cloudResource = getCloudInstanceResourceForInstanceMetadata(instanceMetaData, instanceCloudResources);
-                cloudResource.ifPresentOrElse(cr -> {
-                    instanceMetaData.setInstanceId(cr.getInstanceId());
-                    instanceMetaData.setInstanceStatus(InstanceStatus.CREATED);
-                }, () -> LOGGER.warn("The instanceId and instanceStatus for instance {} was not set, " +
-                        "because the corresponding resource was not found int the 'resource' table", instanceMetaData.getInstanceName()));
+            try {
+                ResourceType instanceResourceType = connector.resources().getInstanceResourceType();
+                List<CloudResource> instanceCloudResources = getInstanceCloudResourcesWithType(cloudResourceStatuses, instanceResourceType);
+                List<InstanceMetaData> requestedInstanceMetadatas = instanceMetaDataService.findAllByStackIdAndStatus(ac.getCloudContext().getId(), REQUESTED);
+                LOGGER.debug("Requested instance metadata entries with private ids: {}",
+                        requestedInstanceMetadatas.stream().map(InstanceMetaData::getPrivateId).collect(Collectors.toSet()));
+                for (InstanceMetaData instanceMetaData : requestedInstanceMetadatas) {
+                    Optional<CloudResource> cloudResource = getCloudInstanceResourceForInstanceMetadata(instanceMetaData, instanceCloudResources);
+                    cloudResource.ifPresentOrElse(cr -> {
+                        instanceMetaData.setInstanceId(cr.getInstanceId());
+                        instanceMetaData.setInstanceStatus(InstanceStatus.CREATED);
+                    }, () -> LOGGER.warn("The instanceId and instanceStatus for instance {} was not set, " +
+                            "because the corresponding resource was not found int the 'resource' table", instanceMetaData.getInstanceName()));
+                }
+                LOGGER.info("Updated instance metadatas with instance id to '{}' status: {}", InstanceStatus.CREATED, requestedInstanceMetadatas);
+                instanceMetaDataService.saveAll(requestedInstanceMetadatas);
+            } catch (UnsupportedOperationException uo) {
+                LOGGER.warn("Instance metadata update is not supported for cloud platform variant: {}", ac.getCloudContext().getPlatformVariant(), uo);
             }
-            LOGGER.info("Updated instance metadatas with instance id to '{}' status: {}", InstanceStatus.CREATED, requestedInstanceMetadatas);
-            instanceMetaDataService.saveAll(requestedInstanceMetadatas);
         });
     }
 
