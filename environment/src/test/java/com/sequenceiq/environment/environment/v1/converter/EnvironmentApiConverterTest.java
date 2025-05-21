@@ -229,6 +229,31 @@ class EnvironmentApiConverterTest {
     }
 
     @Test
+    void testExternalizedComputeRequestToWithInvalidUdrDto() {
+        ExternalizedComputeCreateRequest externalizedComputeRequest = new ExternalizedComputeCreateRequest();
+        AzureExternalizedComputeParams azureExternalizedComputeParams = new AzureExternalizedComputeParams();
+        azureExternalizedComputeParams.setOutboundType("non invalid outbound type");
+        externalizedComputeRequest.setAzure(azureExternalizedComputeParams);
+        externalizedComputeRequest.setCreate(true);
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.requestToExternalizedComputeClusterDto(externalizedComputeRequest, "accountId"));
+
+        assertEquals("Azure Outbound type 'non invalid outbound type' is not supported", badRequestException.getMessage());
+    }
+
+    @Test
+    void testExternalizedComputeRequestToDto() {
+        ExternalizedComputeCreateRequest externalizedComputeRequest = new ExternalizedComputeCreateRequest();
+        AzureExternalizedComputeParams azureExternalizedComputeParams = new AzureExternalizedComputeParams();
+        azureExternalizedComputeParams.setOutboundType("UDR");
+        externalizedComputeRequest.setAzure(azureExternalizedComputeParams);
+        externalizedComputeRequest.setCreate(true);
+        ExternalizedComputeClusterDto result = underTest.requestToExternalizedComputeClusterDto(externalizedComputeRequest, "accountId");
+
+        assertEquals("udr", result.getOutboundType(), "Outbound type should be lowercase.");
+    }
+
+    @Test
     void testInitEditDto() {
         EnvironmentEditRequest request = createEditEnvironmentRequest();
         request.setDataServices(new DataServicesRequest());

@@ -206,9 +206,11 @@ public class EnvironmentApiConverter {
                     .withPrivateCluster(externalizedCompute.isPrivateCluster());
             AzureExternalizedComputeParams azure = externalizedCompute.getAzure();
             if (azure != null && StringUtils.hasText(azure.getOutboundType())) {
-                builder.withOutboundType(azure.getOutboundType());
+                validateAzureExternalizedComputeParams(azure);
+                builder.withOutboundType(azure.getOutboundType().toLowerCase());
             } else if (StringUtils.hasText(externalizedCompute.getOutboundType())) {
-                builder.withOutboundType(externalizedCompute.getOutboundType());
+                //TODO: this branch needs to be removed after the next cdpcli release
+                builder.withOutboundType(externalizedCompute.getOutboundType().toLowerCase());
             }
             if (StringUtils.hasText(externalizedCompute.getKubeApiAuthorizedIpRanges())) {
                 builder.withKubeApiAuthorizedIpRanges(CidrUtil.cidrSet(externalizedCompute.getKubeApiAuthorizedIpRanges()));
@@ -224,6 +226,12 @@ public class EnvironmentApiConverter {
 
     private String createCrn(@Nonnull String accountId) {
         return regionAwareCrnGenerator.generateCrnStringWithUuid(CrnResourceDescriptor.ENVIRONMENT, accountId);
+    }
+
+    private void validateAzureExternalizedComputeParams(AzureExternalizedComputeParams params) {
+        if (!"udr".equalsIgnoreCase(params.getOutboundType())) {
+                throw new BadRequestException(String.format("Azure Outbound type '%s' is not supported", params.getOutboundType()));
+        }
     }
 
     private ParametersDto paramsToParametersDto(EnvironmentRequest request, String cloudPlatform) {
