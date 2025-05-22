@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.common.service;
 import java.util.Date;
 import java.util.Locale;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,8 @@ import com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceNameService;
 public class AwsResourceNameService extends CloudbreakResourceNameService {
 
     public static final String TG_PART_NAME = "TG";
+
+    private static final int NAME_LAST_RANDOM_PART_LENGTH = 4;
 
     @Value("${cb.max.aws.resource.name.length:}")
     private int maxResourceNameLength;
@@ -91,12 +94,14 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
         name = appendPart(name, scheme);
         String crnPart = getCrnPart(context);
         name = appendPart(name, crnPart);
+        name = appendPart(name, RandomStringUtils.randomAlphanumeric(NAME_LAST_RANDOM_PART_LENGTH));
         name = adjustBaseLength(name, maxLoadBalancerResourceNameLength);
         return name;
     }
 
     private String getCrnPart(CloudContext context) {
-        return StringUtils.removeEnd(Crn.safeFromString(context.getCrn()).getResource().substring(0, getDefaultHashLength() - 1), "-");
+        String crnResourcePart = Crn.safeFromString(context.getCrn()).getResource();
+        return StringUtils.removeEnd(crnResourcePart.substring(0, getDefaultHashLength() - NAME_LAST_RANDOM_PART_LENGTH - 1), "-");
     }
 
     public String loadBalancerTargetGroupResourceTypeSchemeAndPortNamePart(String scheme, int port) {
@@ -113,6 +118,7 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
         name = adjustPartLength(name);
         name = appendPart(name, resourceNameWithScheme);
         name = appendPart(name, getCrnPart(context));
+        name = appendPart(name, RandomStringUtils.randomAlphanumeric(NAME_LAST_RANDOM_PART_LENGTH));
         name = adjustBaseLength(name, maxLoadBalancerResourceNameLength);
         return name;
     }
