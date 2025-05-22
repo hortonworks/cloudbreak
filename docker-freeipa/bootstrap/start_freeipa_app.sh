@@ -9,6 +9,7 @@ set -e
 : ${TRUSTED_CERT_DIR:=/certs/trusted}
 : ${EXPOSE_JMX_BIND_ADDRESS:=0.0.0.0}
 : ${SERVICE_SPECIFIC_CERT_DIR:=/freeipa/certs}
+: ${MOCK_INFRASTRUCTURE_CERT_DIR:=/certs/mock-infrastructure}
 : ${CRYPTOSENSE_ENABLED:=false}
 
 echo "Importing certificates to the default Java certificate  trust store."
@@ -17,7 +18,7 @@ import_cert_with_alias_to_trust_store() {
   cert_dir=$1
   cert=$2
 
-  echo "Adding certificate from file $cert_dir/$cert to trust store"
+  echo "Adding certificate from file $cert_dir/$cert to trust store $JAVA_HOME/lib/security/cacerts"
   if keytool -import -alias "$cert" -noprompt -file "$cert_dir/$cert" -keystore "$JAVA_HOME/lib/security/cacerts" -storepass changeit; then
       echo "Certificate added to default Java trust store with alias $cert."
   else
@@ -58,6 +59,7 @@ import_certs_from_dir_to_keystore() {
 
 import_certs_from_dir_to_keystore $TRUSTED_CERT_DIR
 import_certs_from_dir_to_keystore $SERVICE_SPECIFIC_CERT_DIR
+import_certs_from_dir_to_keystore $MOCK_INFRASTRUCTURE_CERT_DIR
 
 echo "Starting the FreeIpa application..."
 

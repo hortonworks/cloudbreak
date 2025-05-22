@@ -22,8 +22,6 @@ docker compose --compatibility down --remove-orphans
 
 date
 echo -e "\n\033[1;96m--- Copy mock infrastructure infrastructure-mock.p12 cert to certs dir\033[0m\n"
-mkdir -p $INTEGCB_LOCATION/certs/into-nssdb
-cp ../mock-infrastructure/src/main/resources/keystore/infrastructure-mock.pem $INTEGCB_LOCATION/certs/into-nssdb/infrastructure-mock.pem
 mkdir -p $INTEGCB_LOCATION/certs/trusted
 cp ../mock-infrastructure/src/main/resources/keystore/infrastructure-mock.pem $INTEGCB_LOCATION/certs/trusted/infrastructure-mock.pem
 
