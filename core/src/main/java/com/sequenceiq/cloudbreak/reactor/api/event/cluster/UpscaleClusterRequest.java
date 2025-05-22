@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.cluster;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -15,7 +16,7 @@ public class UpscaleClusterRequest extends AbstractClusterScaleRequest {
 
     private final boolean restartServices;
 
-    private final Map<String, Set<String>> hostGroupsWithHostNames;
+    private final Map<String, Collection<String>> hostGroupsWithHostNames;
 
     private final Map<String, Integer> hostGroupWithAdjustment;
 
@@ -40,7 +41,7 @@ public class UpscaleClusterRequest extends AbstractClusterScaleRequest {
             @JsonProperty("hostGroupNames") Set<String> hostGroups,
             @JsonProperty("repair") boolean repair,
             @JsonProperty("restartServices") boolean restartServices,
-            @JsonProperty("hostGroupsWithHostNames") Map<String, Set<String>> hostGroupsWithHostNames,
+            @JsonProperty("hostGroupsWithHostNames") Map<String, Collection<String>> hostGroupsWithHostNames,
             @JsonProperty("hostGroupWithAdjustment") Map<String, Integer> hostGroupWithAdjustment,
             @JsonProperty("primaryGatewayChanged") boolean primaryGatewayChanged,
             @JsonProperty("rollingRestartEnabled") boolean rollingRestartEnabled) {
@@ -61,7 +62,7 @@ public class UpscaleClusterRequest extends AbstractClusterScaleRequest {
         return restartServices;
     }
 
-    public Map<String, Set<String>> getHostGroupsWithHostNames() {
+    public Map<String, Collection<String>> getHostGroupsWithHostNames() {
         return hostGroupsWithHostNames;
     }
 

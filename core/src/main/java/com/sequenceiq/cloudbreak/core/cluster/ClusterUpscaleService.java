@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_WAIT
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_WAITING_FOR_SERVICES_HEALTHY_UNSUCCESSFUL;
 import static java.lang.String.format;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -86,7 +87,7 @@ public class ClusterUpscaleService {
 
     public void installServicesOnNewHosts(UpscaleClusterRequest request) throws CloudbreakException {
         StackDto stackDto = stackDtoService.getById(request.getResourceId());
-        LOGGER.debug("Start installing CM services");
+            LOGGER.debug("Start installing CM services");
         removeUnusedParcelComponents(stackDto);
         Set<HostGroup> hostGroupSetWithRecipes = hostGroupService.getByClusterWithRecipes(stackDto.getCluster().getId());
         Set<HostGroup> hostGroupSetWithInstanceMetadas = hostGroupService.getByCluster(stackDto.getCluster().getId());
@@ -211,8 +212,8 @@ public class ClusterUpscaleService {
         getClusterConnector(stackDto).startComponents(components, hostname);
     }
 
-    private void recommissionHostsIfNeeded(ClusterApi connector, Map<String, Set<String>> hostGroupsWithHostNames) {
-        Set<String> hosts = hostGroupsWithHostNames.values().stream().flatMap(Set::stream).collect(Collectors.toSet());
+    private void recommissionHostsIfNeeded(ClusterApi connector, Map<String, Collection<String>> hostGroupsWithHostNames) {
+        Set<String> hosts = hostGroupsWithHostNames.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
         if (!hosts.isEmpty()) {
             Set<String> decommissionedHosts = new HashSet<>(connector.clusterStatusService().getDecommissionedHostsFromCM());
             List<String> hostsToCommission = hosts.stream()
