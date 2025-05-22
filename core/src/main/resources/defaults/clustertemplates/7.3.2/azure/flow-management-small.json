@@ -2,6 +2,7 @@
   "name": "7.3.2 - Flow Management Light Duty for Azure",
   "description": "",
   "type": "FLOW_MANAGEMENT",
+  "featureState": "DEPRECATED",
   "cloudPlatform": "AZURE",
   "distroXTemplate": {
     "cluster": {

@@ -2,6 +2,7 @@
   "name": "7.3.2 - Flow Management Heavy Duty for AWS",
   "description": "",
   "type": "FLOW_MANAGEMENT",
+  "featureState": "DEPRECATED",
   "cloudPlatform": "AWS",
   "distroXTemplate": {
     "cluster": {

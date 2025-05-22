@@ -2,7 +2,7 @@
   "name": "7.3.2 - Flow Management Light Duty for Google Cloud",
   "description": "",
   "type": "FLOW_MANAGEMENT",
-  "featureState": "RELEASED",
+  "featureState": "DEPRECATED",
   "cloudPlatform": "GCP",
   "distroXTemplate": {
     "cluster": {

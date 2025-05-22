@@ -2,6 +2,7 @@
   "name": "7.3.2 - Flow Management Heavy Duty for YCloud",
   "description": "",
   "type": "FLOW_MANAGEMENT",
+  "featureState": "DEPRECATED",
   "cloudPlatform": "YARN",
   "distroXTemplate": {
     "cluster": {

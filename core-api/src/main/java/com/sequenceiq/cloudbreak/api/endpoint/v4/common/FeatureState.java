@@ -4,4 +4,5 @@ public enum FeatureState {
     PREVIEW,
     RELEASED,
     INTERNAL,
+    DEPRECATED,
 }
