@@ -34,7 +34,6 @@ import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimaps;
-import com.google.common.collect.SetMultimap;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
@@ -364,14 +363,14 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         int batchSize = scalingHardLimitsService.getMaxUpscaleStepInNodeCount();
         LOGGER.info("Batch repair with batch size: {}", batchSize);
         while (!orderedHostMultimap.values().isEmpty()) {
-            SetMultimap<String, String> repairableGroups = HashMultimap.create();
+            Map<String, Set<String>> repairableGroups = new HashMap<>();
             List<Entry<String, String>> hostsToRepairInOneBatch = orderedHostMultimap.entries().stream().limit(batchSize).toList();
             for (Entry<String, String> hostToRepair : hostsToRepairInOneBatch) {
-                repairableGroups.put(hostToRepair.getKey(), hostToRepair.getValue());
+                repairableGroups.computeIfAbsent(hostToRepair.getKey(), k -> new HashSet<>()).add(hostToRepair.getValue());
                 orderedHostMultimap.values().remove(hostToRepair.getValue());
             }
-            Collection<String> repairedHosts = repairableGroups.values();
-            addRepairFlows(event, flowTriggers, Multimaps.asMap(repairableGroups), isPrimaryGWInHosts(primaryGwFQDNOptional, repairedHosts), stackView);
+            Set<String> repairedHosts = repairableGroups.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
+            addRepairFlows(event, flowTriggers, repairableGroups, isPrimaryGWInHosts(primaryGwFQDNOptional, repairedHosts), stackView);
         }
     }
 

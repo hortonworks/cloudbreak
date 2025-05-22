@@ -3,10 +3,10 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.upscale;
 import static com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.ClusterStatus.Value.SCALE_UP;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.FINALIZED_EVENT;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -177,7 +177,7 @@ public class ClusterUpscaleActions {
                             new AmbariRepairSingleMasterStartResult(context.getStackId(), context.getHostGroups());
                     sendEvent(context, result.selector(), result);
                 } else {
-                    Map<String, Set<String>> hostGroupsWithHostNames = getHostNamesByHostGroup(variables);
+                    Map<String, Collection<String>> hostGroupsWithHostNames = getHostNamesByHostGroup(variables);
                     UpscaleClusterRequest request = new UpscaleClusterRequest(context.getStackId(), context.getHostGroups(),
                             context.isRepair(), context.isRestartServices(), hostGroupsWithHostNames, context.getHostGroupWithAdjustment(),
                             context.isSinglePrimaryGateway(), isRollingRestartEnabled(variables));
@@ -496,8 +496,8 @@ public class ClusterUpscaleActions {
             return (String) variables.get(HOST_NAME);
         }
 
-        Map<String, Set<String>> getHostNamesByHostGroup(Map<Object, Object> variables) {
-            return (Map<String, Set<String>>) variables.getOrDefault(HOST_NAMES_BY_HOST_GROUP, new HashMap<>());
+        Map<String, Collection<String>> getHostNamesByHostGroup(Map<Object, Object> variables) {
+            return (Map<String, Collection<String>>) variables.getOrDefault(HOST_NAMES_BY_HOST_GROUP, new HashMap<>());
         }
 
         Map<String, String> getInstalledComponents(Map<Object, Object> variables) {

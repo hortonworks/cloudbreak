@@ -11,6 +11,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -359,7 +360,7 @@ class ClusterUpscaleServiceTest {
         return instance;
     }
 
-    private UpscaleClusterRequest createRequest(boolean repair, boolean restartServices, Map<String, Set<String>> hostGroupsWithHostNames,
+    private UpscaleClusterRequest createRequest(boolean repair, boolean restartServices, Map<String, Collection<String>> hostGroupsWithHostNames,
             Map<String, Integer> hostGroupWithAdjustment, boolean primaryGatewayChanged, boolean rollingRestartEnabled) {
         return new UpscaleClusterRequest(STACK_ID, Set.of("master"), repair, restartServices, hostGroupsWithHostNames, hostGroupWithAdjustment,
                 primaryGatewayChanged, rollingRestartEnabled);
