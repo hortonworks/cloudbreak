@@ -34,7 +34,7 @@ class AwsResourceNameServiceTest {
     private static final CloudContext CLOUD_CONTEXT = CloudContext.Builder.builder()
             .withCrn("crn:cdp:freeipa:us-west-1:cloudera:freeipa:e5ad92a0-148e-4681-8afa-030c8b4912a2").build();
 
-    private static final String CRN_PART = "e5ad92a0-148e";
+    private static final String CRN_PART = "e5ad92a0";
 
     @InjectMocks
     private AwsResourceNameService underTest;
@@ -78,37 +78,37 @@ class AwsResourceNameServiceTest {
     @Test
     void testLoadBalancer() {
         String resourceName = underTest.loadBalancer(STACK_NAME_LONG, SCHEME, CLOUD_CONTEXT);
-        assertEquals("stacknamel-scheme-" + CRN_PART, resourceName);
+        assertTrue(resourceName.matches("stacknamel-scheme-" + CRN_PART + "-[A-Za-z0-9]{4}"));
     }
 
     @Test
     void testLoadBalancerBackwardCompatibleWithNewHash() {
         String resourceName = underTest.loadBalancer("satori-dev", "GwayPriv", CLOUD_CONTEXT);
-        assertEquals("satorid-GwayPriv-" + CRN_PART, resourceName);
+        assertTrue(resourceName.matches("satorid-GwayPriv-" + CRN_PART + "-[A-Za-z0-9]{4}"));
     }
 
     @Test
     void testLoadBalancerShorterThanSevenCharacter() {
         String resourceName = underTest.loadBalancer("sdfsda", SCHEME, CLOUD_CONTEXT);
-        assertEquals("sdfsda-scheme-" + CRN_PART, resourceName);
+        assertTrue(resourceName.matches("sdfsda-scheme-" + CRN_PART + "-[A-Za-z0-9]{4}"));
     }
 
     @Test
     void testLoadBalancerTargetGroup() {
         String resourceName = underTest.loadBalancerTargetGroup(STACK_NAME, SCHEME, PORT, CLOUD_CONTEXT);
-        assertEquals("stackn-8080scheme-" + CRN_PART, resourceName);
+        assertTrue(resourceName.matches("stackn-8080scheme-" + CRN_PART + "-[A-Za-z0-9]{4}"));
     }
 
     @Test
     void testLoadBalancerTargetGroupBackwardCompatibleWithNewHash() {
         String resourceName = underTest.loadBalancerTargetGroup("sator-dev", "GwayPriv", 443, CLOUD_CONTEXT);
-        assertEquals("sator-443GwayPriv-" + CRN_PART, resourceName);
+        assertTrue(resourceName.matches("sator-443GwayPriv-" + CRN_PART + "-[A-Za-z0-9]{4}"));
     }
 
     @Test
     void testLoadBalancerTargetGroupShorterThanSevenCharacter() {
         String resourceName = underTest.loadBalancerTargetGroup("sdfsda", SCHEME, PORT, CLOUD_CONTEXT);
-        assertEquals("sdfsda-8080scheme-" + CRN_PART, resourceName);
+        assertTrue(resourceName.matches("sdfsda-8080scheme-" + CRN_PART + "-[A-Za-z0-9]{4}"));
     }
 
     @Disabled
