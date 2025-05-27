@@ -16,7 +16,7 @@ replace_resolv_conf_nameservers:
     - repl: |
         {%- for forwarder, args in pillar.get('forwarder-zones', {}).items() %}
         {%- for nameserver in args['nameservers'] %}
-          nameserver: {{ nameserver }}
+          nameserver {{ nameserver }}
         {%- endfor %}
         {%- endfor %}
 
