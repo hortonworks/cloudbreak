@@ -2,7 +2,6 @@ package com.sequenceiq.freeipa.service.rotation.saltboot.contextprovider;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
@@ -24,7 +23,6 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
-import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.userdata.UserDataRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
@@ -101,9 +99,28 @@ class SaltBootRotationContextProviderTest {
     }
 
     @Test
-    void testGcpDisabled() {
+    void testSaltBootContextProviderProvidesAllContextDataWithGCP() {
         when(stack.getCloudPlatform()).thenReturn(CloudPlatform.GCP.name());
-        assertThrows(SecretRotationException.class, () -> underTest.getContexts(RESOURCE_CRN));
+        when(uncachedSecretServiceForRotation.getRotation(SALT_BOOT_PASSWORD_VAULT_PATH)).thenReturn(new RotationSecret(NEW_PASSWORD, OLD_PASSWORD));
+        when(uncachedSecretServiceForRotation.getRotation(SALT_BOOT_PRIVATE_KEY_VAULT_PATH))
+                .thenReturn(new RotationSecret(NEW_PRIVATE_KEY, OLD_PRIVATE_KEY));
+
+        Map<SecretRotationStep, RotationContext> contexts = underTest.getContexts(RESOURCE_CRN);
+
+        assertInstanceOf(VaultRotationContext.class, contexts.get(CommonSecretRotationStep.VAULT));
+        assertInstanceOf(CustomJobRotationContext.class, contexts.get(CommonSecretRotationStep.CUSTOM_JOB));
+        assertInstanceOf(SaltBootConfigRotationContext.class, contexts.get(CommonSecretRotationStep.SALTBOOT_CONFIG));
+        assertInstanceOf(UserDataRotationContext.class, contexts.get(CommonSecretRotationStep.USER_DATA));
+
+        SaltBootConfigRotationContext saltBootConfigRotationContext = (SaltBootConfigRotationContext) contexts.get(CommonSecretRotationStep.SALTBOOT_CONFIG);
+        SaltBootUpdateConfiguration serviceUpdateConfiguration = saltBootConfigRotationContext.getServiceUpdateConfiguration();
+        assertEquals("rotated-security-config.yml", serviceUpdateConfiguration.configFile());
+        assertEquals("/etc/salt-bootstrap", serviceUpdateConfiguration.configFolder());
+        assertEquals("newPassword", serviceUpdateConfiguration.newSaltBootPassword());
+        assertEquals("oldPassword", serviceUpdateConfiguration.oldSaltBootPassword());
+        assertEquals(List.of("saltboot.restart-rotated-saltboot"), serviceUpdateConfiguration.serviceRestartActions());
+        assertEquals(Set.of("host1"), serviceUpdateConfiguration.targetFqdns());
+        assertEquals(Set.of("0.0.0.0"), serviceUpdateConfiguration.targetPrivateIps());
     }
 
     @Test
@@ -125,7 +142,7 @@ class SaltBootRotationContextProviderTest {
         assertEquals("/etc/salt-bootstrap", serviceUpdateConfiguration.configFolder());
         assertEquals("newPassword", serviceUpdateConfiguration.newSaltBootPassword());
         assertEquals("oldPassword", serviceUpdateConfiguration.oldSaltBootPassword());
-        assertEquals(List.of("saltboot.stop-saltboot", "saltboot.start-saltboot"), serviceUpdateConfiguration.serviceRestartActions());
+        assertEquals(List.of("saltboot.restart-rotated-saltboot"), serviceUpdateConfiguration.serviceRestartActions());
         assertEquals(Set.of("host1"), serviceUpdateConfiguration.targetFqdns());
         assertEquals(Set.of("0.0.0.0"), serviceUpdateConfiguration.targetPrivateIps());
     }

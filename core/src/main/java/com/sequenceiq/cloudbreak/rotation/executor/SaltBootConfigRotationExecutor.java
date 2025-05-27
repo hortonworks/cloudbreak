@@ -60,14 +60,18 @@ public class SaltBootConfigRotationExecutor extends AbstractRotationExecutor<Sal
     protected void preValidate(SaltBootConfigRotationContext rotationContext) throws Exception {
         SaltBootUpdateConfiguration saltBootUpdateConfiguration = rotationContext.getServiceUpdateConfiguration();
         GatewayConfig gatewayConfig = withOldSecrets(saltBootUpdateConfiguration.primaryGatewayConfig(), saltBootUpdateConfiguration);
-        secretRotationSaltService.validateSalt(rotationContext.getServiceUpdateConfiguration().targetFqdns(), gatewayConfig);
+        if (!isSaltBootReachableWithGatewayConfig(saltBootUpdateConfiguration, gatewayConfig)) {
+            throw new SecretRotationException("Salt boot is not reachable with the old credentials.");
+        }
     }
 
     @Override
     protected void postValidate(SaltBootConfigRotationContext rotationContext) throws Exception {
         SaltBootUpdateConfiguration saltBootUpdateConfiguration = rotationContext.getServiceUpdateConfiguration();
         GatewayConfig gatewayConfig = withNewSecrets(saltBootUpdateConfiguration.primaryGatewayConfig(), saltBootUpdateConfiguration);
-        secretRotationSaltService.validateSalt(rotationContext.getServiceUpdateConfiguration().targetFqdns(), gatewayConfig);
+        if (!isSaltBootReachableWithGatewayConfig(saltBootUpdateConfiguration, gatewayConfig)) {
+            throw new SecretRotationException("Salt boot is not reachable with the new credentials.");
+        }
     }
 
     @Override

@@ -173,11 +173,11 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
         secretTypes.addAll(Set.of(
                 IDBROKER_CERT,
                 EXTERNAL_DATABASE_ROOT_PASSWORD,
-                CM_DB_PASSWORD
-                ));
+                CM_DB_PASSWORD,
+                CM_INTERMEDIATE_CA_CERT,
+                NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY,
+                SALT_BOOT_SECRETS));
         if (!CloudPlatform.GCP.equalsIgnoreCase(cloudProvider)) {
-            // this is excluded due to CB-29204 (the rotation has a bug on GCP)
-            secretTypes.add(SALT_BOOT_SECRETS);
             // these are excluded due to CB-29239 (to decrease execution time of test on GCP)
             secretTypes.addAll(Set.of(
                     // CDPAM-5911

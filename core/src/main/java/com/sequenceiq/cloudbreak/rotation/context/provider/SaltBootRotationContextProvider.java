@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.BaseEncoding;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
@@ -27,7 +26,6 @@ import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
-import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.context.saltboot.SaltBootConfigRotationContext;
 import com.sequenceiq.cloudbreak.rotation.context.saltboot.SaltBootUpdateConfiguration;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
@@ -82,9 +80,6 @@ public class SaltBootRotationContextProvider implements RotationContextProvider 
     @Override
     public Map<SecretRotationStep, RotationContext> getContexts(String resourceCrn) {
         StackDto stack = stackService.getByCrn(resourceCrn);
-        if (GCP.equals(CloudPlatform.fromName(stack.getCloudPlatform()))) {
-            throw new SecretRotationException("Saltboot password rotation is not yet supported on GCP due to stability reasons.");
-        }
         SaltSecurityConfig saltSecurityConfig = stack.getSecurityConfig().getSaltSecurityConfig();
         Secret saltBootPasswordSecret = saltSecurityConfig.getSaltBootPasswordSecret();
         Secret saltBootPrivateKeySecret = saltSecurityConfig.getSaltBootSignPrivateKeySecret();
@@ -137,7 +132,7 @@ public class SaltBootRotationContextProvider implements RotationContextProvider 
                         oldSaltBootPrivateKey,
                         newSaltBootPrivateKey,
                         "/etc/salt-bootstrap",
-                        "security-config.yml",
+                        GCP.equalsIgnoreCase(stack.getCloudPlatform()) ? "rotated-security-config.yml" : "security-config.yml",
                         generateSaltBootSecretConfig(newSaltBootPassword, newSaltBootPrivateKey),
                         generateSaltBootSecretConfig(oldSaltBootPassword, oldSaltBootPrivateKey),
                         stack.getAllAvailableInstances()
@@ -148,7 +143,7 @@ public class SaltBootRotationContextProvider implements RotationContextProvider 
                                 .stream()
                                 .map(InstanceMetadataView::getDiscoveryFQDN)
                                 .collect(Collectors.toSet()),
-                        List.of("saltboot.stop-saltboot", "saltboot.start-saltboot"),
+                        List.of("saltboot.restart-rotated-saltboot"),
                         SALT_STATE_MAX_RETRY,
                         exitCriteriaProvider.get(stack));
             }
