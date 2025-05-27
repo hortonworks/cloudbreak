@@ -1177,7 +1177,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             restartServices(true, restartStaleOnly);
         } catch (ClouderaManagerOperationFailedException e) {
             if (e.getMessage().contains("Command Rolling Restart is not currently available for execution")) {
-                //https://jira.cloudera.com/browse/OPSAPS-70856
+                //https://cloudera.atlassian.net/browse/OPSAPS-70856
                 tryWithoutRollingRestartCommand(e);
             } else {
                 throw e;

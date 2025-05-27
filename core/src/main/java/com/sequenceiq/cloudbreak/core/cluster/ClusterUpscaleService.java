@@ -169,7 +169,7 @@ public class ClusterUpscaleService {
     }
 
     public Map<String, String> gatherInstalledComponents(Long stackId, String hostname) {
-        // TODO: Dead code, will be removed with https://jira.cloudera.com/browse/CB-8349
+        // TODO: Dead code, will be removed with https://cloudera.atlassian.net/browse/CB-8349
         return Map.of();
     }
 
