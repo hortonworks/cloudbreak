@@ -276,7 +276,7 @@ public class AzureTemplateBuilder {
         return getTemplate(armTemplatePath).toString();
     }
 
-    // Quickfix for https://jira.cloudera.com/browse/CB-24844
+    // Quickfix for https://cloudera.atlassian.net/browse/CB-24844
     // If the stored arm template for the stack doesn't contain marketplace image information, we have to use the latest version of the arm template.
     // In this case after template generation we have to replace the LoadBalancers' sku type to "Basic", because without this the deployment creation will be
     // failed on Azure.

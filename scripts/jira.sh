@@ -15,10 +15,10 @@ if echo $commitMessage | grep -iqE "$msg_regex"; then
   ticket_id=$(echo $commitMessage | grep -Eo '^(\w+/)?(\w+[-_])?[0-9]+')
 	if [[ ! -z "$ticket_id" ]]
 	then
-    echo The ticket is: https://jira.cloudera.com/browse/$ticket_id
-    curl -k -D- -H "Authorization: Bearer $JIRA_TOKEN" \
-      -X PUT --data '{"fields":{"customfield_10011": "'"$github_pull_request_link"'"}}' \
-      -H "Content-Type: application/json" https://jira.cloudera.com/rest/api/latest/issue/$ticket_id
+    echo The ticket is: https://cloudera.atlassian.net/browse/$ticket_id
+    curl -k -D- -H "X-Automation-Webhook-Token: $JIRA_CLOUD_TOKEN" \
+    -X POST --data '{"issues":["'"$ticket_id"'"], "data": {"link": "'"$github_pull_request_link"'"}}' \
+    -H "Content-Type: application/json" $JIRA_WEBHOOK
   else
     echo "The ticket id is empty."
   fi

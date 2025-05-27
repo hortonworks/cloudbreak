@@ -18,7 +18,7 @@
 
 /*
  * file copied here from jersey client 2.37 and altered to avoid race condition when integration tests are running against mock
- * https://jira.cloudera.com/browse/CB-22424
+ * https://cloudera.atlassian.net/browse/CB-22424
  */
 
 package org.glassfish.jersey.client.internal;
