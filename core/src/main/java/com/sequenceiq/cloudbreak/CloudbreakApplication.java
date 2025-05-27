@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.util.BouncyCastleFipsProviderLoader;
 
 @EnableAsync
 @ComponentScan(basePackages = "com.sequenceiq",
-        //TODO eliminate this exclude filter for CDPFlowStructuredEventHandler.class with https://jira.cloudera.com/browse/CB-18923
+        //TODO eliminate this exclude filter for CDPFlowStructuredEventHandler.class with https://cloudera.atlassian.net/browse/CB-18923
         excludeFilters = { @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = CDPFlowStructuredEventHandler.class) })
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @EnableJpaAuditing

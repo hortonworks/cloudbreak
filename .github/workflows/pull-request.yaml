@@ -39,10 +39,12 @@ jobs:
           path: rke_re_jenkins
           role: cb
           secrets: |
-            cb/data/JIRA_TOKEN JIRA_TOKEN | JIRA_TOKEN;
+            cb/data/JIRA_WEBHOOK JIRA_WEBHOOK | JIRA_WEBHOOK;
+            cb/data/JIRA_CLOUD_TOKEN JIRA_CLOUD_TOKEN | JIRA_CLOUD_TOKEN;
       - name: update_jira_ticket
         run: |-
-          export JIRA_TOKEN=$(echo "${{ steps.build_secrets.outputs.JIRA_TOKEN }}")
+          export JIRA_WEBHOOK=$(echo "${{ steps.build_secrets.outputs.JIRA_WEBHOOK }}")
+          export JIRA_CLOUD_TOKEN=$(echo "${{ steps.build_secrets.outputs.JIRA_CLOUD_TOKEN }}")
           export PULL_REQUEST_NUMBER=$PULL_REQUEST_NUMBER
           export BRANCH=$SOURCE_BRANCH
           export PROJECT=$PROJECT
@@ -74,7 +76,6 @@ jobs:
               cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
               cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
               cb/data/GITHUB_TOKEN GITHUB_TOKEN | GITHUB_TOKEN;
-              cb/data/JIRA_TOKEN JIRA_TOKEN | JIRA_TOKEN;
       - name: cache_java_libs
         id: cache-java
         uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
