@@ -361,7 +361,7 @@ If you still get the same error then specify the `Trust Store` for `Cloudbreak(c
 
 ***Note:***
 - The path of the Java trust store may be different for your development environment, then please update path in the commands to the right location
-- This solution is only needed until the [CB-18493](https://jira.cloudera.com/browse/CB-18493) has been solved.
+- This solution is only needed until the [CB-18493](https://cloudera.atlassian.net/browse/CB-18493) has been solved.
 
 ### Running Cloudbreak in IDEA
 
