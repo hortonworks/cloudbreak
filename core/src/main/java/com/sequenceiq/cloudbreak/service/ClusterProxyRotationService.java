@@ -53,6 +53,12 @@ public class ClusterProxyRotationService {
 
     private static final String CRT_COEFFICIENT = "qi";
 
+    private static final int SECRETREF_MAX_LENGTH = 3;
+
+    private static final String BASE64_ENCODING = "BASE64";
+
+    private static final String NO_ENCODING = "TEXT";
+
     @Inject
     private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
 
@@ -67,15 +73,22 @@ public class ClusterProxyRotationService {
     public KeyPair readClusterProxyTokenKeys(ReadConfigResponse readConfigResponse) {
         LOGGER.info("Reading token keys from cluster-proxy vault. Path: '{}'", readConfigResponse.getKnoxSecretRef());
         String knoxSecretRef = readConfigResponse.getKnoxSecretRef();
-        String[] pathAndField = knoxSecretRef.split(":", 2);
+        String[] pathAndField = knoxSecretRef.split(":", SECRETREF_MAX_LENGTH);
         try {
             checkPathAndField(pathAndField);
             String jwkJson = uncachedSecretServiceForRotation.getBySecretPath(pathAndField[0], pathAndField[1]);
+            if (isBase64Encoded(pathAndField)) {
+                jwkJson = new String(Base64.getDecoder().decode(jwkJson));
+            }
             LOGGER.info("JWK json read from cluster-proxy, length: {}", StringUtils.length(jwkJson));
             return convertJWKToPEMKeys(jwkJson);
         } catch (IllegalArgumentException | InvalidKeySpecException | NoSuchAlgorithmException e) {
             throw new CloudbreakServiceException("Cannot read JWK format token keys from cluster-proxy.", e);
         }
+    }
+
+    private boolean isBase64Encoded(String[] pathAndField) {
+        return pathAndField.length == SECRETREF_MAX_LENGTH && BASE64_ENCODING.equalsIgnoreCase(pathAndField[2]);
     }
 
     public String generateClusterProxySecretFormat(String knoxSecretJson) {
@@ -85,8 +98,12 @@ public class ClusterProxyRotationService {
     }
 
     private void checkPathAndField(String[] pathAndField) {
-        if (pathAndField == null || pathAndField.length != 2) {
+        if (pathAndField == null || !(pathAndField.length == 2 || pathAndField.length == SECRETREF_MAX_LENGTH)) {
             throw new IllegalArgumentException("Cannot read jwk from cluster-proxy, secret path invalid.");
+        }
+        if (pathAndField.length == SECRETREF_MAX_LENGTH && pathAndField[2] != null && !Set.of(NO_ENCODING, BASE64_ENCODING)
+                .contains(pathAndField[2].toUpperCase())) {
+            throw new IllegalArgumentException(format("Cannot read jwk from cluster-proxy, unknown encoding: '%s'", pathAndField[2]));
         }
         if (!pathAndField[0].startsWith("cluster-proxy/")) {
             throw new IllegalArgumentException(format("Cannot read jwk from cluster-proxy, not a cluster-proxy vault path. Path: '%s'", pathAndField[0]));

@@ -41,6 +41,37 @@ class ClusterProxyRotationServiceTest {
             "\"dp\":\"v2AhVkeJFe3iBSfjaLdE8X4EJPE4l-kzYqBXMjoZMf0LIyKoC608R-839u26KinC9tjgVfSJ3PIkdIKcMo3_ePIUn8ImIIlJ1Qf2yQBqrP7Cc6KBdzPv7kgEA9JwFmfL2tFe5GWoQw7mn-a4DQecwR9FzmLdWR2MQwl34azH1g0\"," +
             "\"dq\":\"fugpnNyxJekWV-AoobEsuT3AifNuggjknIAmLi-QmMYxEezvdA4gYSHYTo3GTrm85XqFsTUeQLC1l30FZRsI8TDQjKP9Q_s7cjtVVLnKNViqyegmXSFkNBYtwKHNxpGQ7ZaQUYyxu9jaVpPEk_12s70GTsM5dq9Pvs1bC2IoAyk\"," +
             "\"qi\":\"KKcPlXMsBHLUpKLnaPXZKjQ2GqoLKdz8Xo2haNSFw47Am0fQlXczhPl_Zx8yijUDCa_dNOLZY3CQZmjqBWUXmg9KK4ZASAQGwg82QGzWUNn89eTNYkFrEEAfzV5pnoUiICyJRekZ6IK-ch7GI2Y2j_f63Zw_kjE0H4KyCd1mzaM\"}";
+
+    private static final String JWK_BASE64 = "eyJrdHkiOiJSU0EiLCJ1c2UiOiJzaWciLCJraWQiOiJlYmJhOTcwZi03ZmZjLTQ3ZjYtYmM0YS04\n" +
+            "NWU3ZDgxMzNjMzEiLCAibiI6Imdvd2V5dThnY3g1UEdSTDVod2tOSzU1WHV3NDRtRWowenNwREVV\n" +
+            "SzVSSFBQbXQtdzhZZUZnaW9rUjMxVVNqUV9QNmRLd1c2aW1DLU1DbnJHUE1CZTZoMDNnbHlTc19u\n" +
+            "bnFfbHcxR0J3SVhpaGdPQzdOZHdRNnlXVEdpZmpodUpCOG9zMDBLRGVjTkMwUG5xdkZkTVFyckF5\n" +
+            "SDBrN2xicXhMZnV5bUc1TmwxLVlwSHhpenVBcFdFRkFYV1ZoYVNCN3ZBdFlMbHVyZEhjUE1ZYzRP\n" +
+            "Z0dXVVc1NlpWMXVqUHpNeGtTWjJsSEtRS0N6dUl5bHg5LU9nQkFOWkFoazR5VmVfM0xVOGpkLXBW\n" +
+            "YWQwaDVaeTZjY1JYMmJpVEw5Q1I4UmxXeHpSVHVjclNoWURJd1daOTBDRHR1djVwbHdkd18xWThD\n" +
+            "Y3lZbVNHdUFmTXhvdVV1cHk2dyIsICJlIjoiQVFBQiIsImQiOiJMT09QaHdvNHB6enB4OTV0Yk5C\n" +
+            "ZzlmbXBnd2w5em1kdnZsZHdQbFFxTG02QUdXb0hodFdwdzd0SDVFa2xIYXJmZ0x5LWlNckpIX2xo\n" +
+            "ZHcwR2MwZFdtN3ZXSlg0OWQ2TmIxUmVkZzNseHRTQ3NzQXNXZEl1cVNhRU85dlIyV1NBZHV3X0E1\n" +
+            "bWdhZE1KZTZBajVnVkNsTU53bkxfalhnMEhCd09VR1lVRzBibk1RZkFGZUVyX3V0R3Q4NDlNWDZ3\n" +
+            "R21hdVZxU29VMWVDMGRwSzRUdjY2YnM5YnhkdXdZa3pNc21Qa29qM1Q5dzE3VEEyc2ZNcWs2eU1u\n" +
+            "OE1sVFFhWEM2SWgybDBDbHNEWExkZUUtMjBwbmFiR3Y4RzNJMUd0RGF1dlNocTROdmNWdFBFeWVV\n" +
+            "anVJMk5XU3pmQW9oWXczRU14eEhsSldGWVVXYkYwNkpEWVdpU1EiLCJwIjoiNXNpbmZfMXZPU0pi\n" +
+            "eTNvU2N3dGhETzRubWZuS0QxMW9OTWFiRUpqQVVyV0lDRWU2Z0lLVGstXzd6dXlJSGFOengycUFl\n" +
+            "c3lJRmVuZDhodmUtWjBJQXl3OVVqX19Ra3NzUGptN1V4bVRxZTk1Qm9pSk41bkNDZEVKZ1ZELUw0\n" +
+            "blZDSDZEeW5qSUpVUVlKbXoyNDNzT3YxeWhfcGNKd0RIcmFIOXN5QmE3R1E4IiwicSI6ImtNLTJS\n" +
+            "LTdnQ1BYUHotUG5UQXBlbUM3VHlwRGRMV0duTjR6VjZDY0JPUW43ejRnTk1xLTU1SGFfcGIyQVJp\n" +
+            "el94ZzE1bzJQWmpQR2M5YnV1dm9HcHJCWUNTZUx0MjlPc2xYbG4zVEdOS0pWRUxtZVNILVV3M2c0\n" +
+            "VFRiMzR0YVA3UVBEQmNtZkROSGxOTUZYWC1QTGhmYUhJTVp1SW45d1Z4MkVtZ1YtdGNHVSIsImRw\n" +
+            "IjoidjJBaFZrZUpGZTNpQlNmamFMZEU4WDRFSlBFNGwta3pZcUJYTWpvWk1mMExJeUtvQzYwOFIt\n" +
+            "ODM5dTI2S2luQzl0amdWZlNKM1BJa2RJS2NNbzNfZVBJVW44SW1JSWxKMVFmMnlRQnFyUDdDYzZL\n" +
+            "QmR6UHY3a2dFQTlKd0ZtZkwydEZlNUdXb1F3N21uLWE0RFFlY3dSOUZ6bUxkV1IyTVF3bDM0YXpI\n" +
+            "MWcwIiwiZHEiOiJmdWdwbk55eEpla1dWLUFvb2JFc3VUM0FpZk51Z2dqa25JQW1MaS1RbU1ZeEVl\n" +
+            "enZkQTRnWVNIWVRvM0dUcm04NVhxRnNUVWVRTEMxbDMwRlpSc0k4VERRaktQOVFfczdjanRWVkxu\n" +
+            "S05WaXF5ZWdtWFNGa05CWXR3S0hOeHBHUTdaYVFVWXl4dTlqYVZwUEVrXzEyczcwR1RzTTVkcTlQ\n" +
+            "dnMxYkMySW9BeWsiLCJxaSI6IktLY1BsWE1zQkhMVXBLTG5hUFhaS2pRMkdxb0xLZHo4WG8yaGFO\n" +
+            "U0Z3NDdBbTBmUWxYY3poUGxfWng4eWlqVURDYV9kTk9MWlkzQ1FabWpxQldVWG1nOUtLNFpBU0FR\n" +
+            "R3dnODJRR3pXVU5uODllVE5Za0ZyRUVBZnpWNXBub1VpSUN5SlJla1o2SUstY2g3R0kyWTJqX2Y2\n" +
+            "M1p3X2tqRTBINEt5Q2QxbXphTSJ9Cg==";
     // CHECKSTYLE:ON
 
     @Mock
@@ -61,6 +92,39 @@ class ClusterProxyRotationServiceTest {
         ArgumentCaptor<String> secretPathArgumentCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> secretFieldArgumentCaptor = ArgumentCaptor.forClass(String.class);
         when(uncachedSecretServiceForRotation.getBySecretPath(secretPathArgumentCaptor.capture(), secretFieldArgumentCaptor.capture())).thenReturn(JWK);
+
+        KeyPair keyPair = underTest.readClusterProxyTokenKeys(readConfigResponse);
+        String secretField = secretFieldArgumentCaptor.getValue();
+        assertEquals(SECRET_FIELD, secretField);
+        String secretPath = secretPathArgumentCaptor.getValue();
+        assertEquals(SECRET_PATH, secretPath);
+
+        assertEquals(ALGORITHM, keyPair.getPublic().getAlgorithm());
+    }
+
+    @Test
+    void readClusterProxyTokenKeysShouldConvertJwkToPemWithTextEncoding() {
+        when(readConfigResponse.getKnoxSecretRef()).thenReturn(SECRET_PATH + ":" + SECRET_FIELD + ":text");
+        ArgumentCaptor<String> secretPathArgumentCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> secretFieldArgumentCaptor = ArgumentCaptor.forClass(String.class);
+        when(uncachedSecretServiceForRotation.getBySecretPath(secretPathArgumentCaptor.capture(), secretFieldArgumentCaptor.capture())).thenReturn(JWK);
+
+        KeyPair keyPair = underTest.readClusterProxyTokenKeys(readConfigResponse);
+        String secretField = secretFieldArgumentCaptor.getValue();
+        assertEquals(SECRET_FIELD, secretField);
+        String secretPath = secretPathArgumentCaptor.getValue();
+        assertEquals(SECRET_PATH, secretPath);
+
+        assertEquals(ALGORITHM, keyPair.getPublic().getAlgorithm());
+    }
+
+    @Test
+    void readClusterProxyTokenKeysShouldConvertJwkToPemWithBase64Encoding() {
+        when(readConfigResponse.getKnoxSecretRef()).thenReturn(SECRET_PATH + ":" + SECRET_FIELD + ":base64");
+        ArgumentCaptor<String> secretPathArgumentCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> secretFieldArgumentCaptor = ArgumentCaptor.forClass(String.class);
+        when(uncachedSecretServiceForRotation.getBySecretPath(secretPathArgumentCaptor.capture(), secretFieldArgumentCaptor.capture()))
+                .thenReturn(JWK_BASE64.replaceAll("\n", ""));
 
         KeyPair keyPair = underTest.readClusterProxyTokenKeys(readConfigResponse);
         String secretField = secretFieldArgumentCaptor.getValue();
@@ -99,6 +163,15 @@ class ClusterProxyRotationServiceTest {
                 () -> underTest.readClusterProxyTokenKeys(readConfigResponse));
         assertEquals("Cannot read JWK format token keys from cluster-proxy.", e.getMessage());
         assertEquals("JWK key from cluster-proxy cannot converted to PEM, key elements missing.", e.getCause().getMessage());
+    }
+
+    @Test
+    void readClusterProxyTokenKeysShouldThrowExceptionUnknownEncoding() {
+        when(readConfigResponse.getKnoxSecretRef()).thenReturn(SECRET_PATH + ":" + SECRET_FIELD + ":unknown");
+        CloudbreakServiceException e = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.readClusterProxyTokenKeys(readConfigResponse));
+        assertEquals("Cannot read JWK format token keys from cluster-proxy.", e.getMessage());
+        assertEquals("Cannot read jwk from cluster-proxy, unknown encoding: 'unknown'", e.getCause().getMessage());
     }
 
     @Test
