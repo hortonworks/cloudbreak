@@ -21,7 +21,6 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -57,11 +56,12 @@ import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Monitoring;
 import com.sequenceiq.common.api.telemetry.model.MonitoringCredential;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.AltusMachineUserService;
-import com.sequenceiq.freeipa.service.EnvironmentService;
+import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -110,7 +110,7 @@ public class TelemetryConfigServiceTest {
     private TelemetryFeatureService telemetryFeatureService;
 
     @Mock
-    private EnvironmentService environmentService;
+    private CachedEnvironmentClientService environmentService;
 
     @BeforeEach
     public void setUp() throws TransactionService.TransactionExecutionException {
@@ -150,7 +150,9 @@ public class TelemetryConfigServiceTest {
         MonitoringCredential monitoringCredential = new MonitoringCredential();
         monitoringCredential.setAccessKey("accessKey");
         monitoringCredential.setPrivateKey("privateKey");
-        given(environmentService.getTlsCipherSuitesIanaList(anyString(), any())).willReturn(List.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"));
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+
+        given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
         given(cmLicenseParser.parseLicense(anyString())).willReturn(Optional.of(license));
         given(umsClient.getAccountDetails(anyString())).willReturn(account);
         given(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).willReturn("myendpoint");
@@ -183,13 +185,15 @@ public class TelemetryConfigServiceTest {
         MonitoringCredential monitoringCredential = new MonitoringCredential();
         monitoringCredential.setAccessKey("accessKey");
         monitoringCredential.setPrivateKey("privateKey");
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+
+        given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
         given(umsClient.getAccountDetails(anyString())).willReturn(account);
         given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
         given(altusMachineUserService.getOrCreateMonitoringCredentialIfNeeded(any(Stack.class), any(CdpAccessKeyType.class)))
                 .willReturn(Optional.of(monitoringCredential));
         given(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).willReturn("myendpoint");
         given(dataBusEndpointProvider.getDatabusS3Endpoint(anyString(), anyString())).willReturn("endpoint");
-        given(environmentService.getTlsCipherSuitesIanaList(anyString(), any())).willReturn(List.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"));
 
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(createStack(telemetry(false, true)));
@@ -206,11 +210,12 @@ public class TelemetryConfigServiceTest {
         UserManagementProto.Account account = UserManagementProto.Account.newBuilder()
                 .setClouderaManagerLicenseKey("myLicense")
                 .build();
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+
+        given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
         given(umsClient.getAccountDetails(anyString())).willReturn(account);
         given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(false);
         Stack stack = createStack(telemetry(false, true));
-        given(environmentService.getTlsCipherSuitesIanaList(anyString(), any())).willReturn(List.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"));
-
         given(stackService.getStackById(STACK_ID)).willReturn(stack);
         given(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).willReturn("myendpoint");
         given(dataBusEndpointProvider.getDatabusS3Endpoint(anyString(), anyString())).willReturn("endpoint");
@@ -230,6 +235,9 @@ public class TelemetryConfigServiceTest {
         UserManagementProto.Account account = UserManagementProto.Account.newBuilder()
                 .setClouderaManagerLicenseKey("myLicense")
                 .build();
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+
+        given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
         given(umsClient.getAccountDetails(anyString())).willReturn(account);
         given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
         MonitoringCredential monitoringCredential = new MonitoringCredential();
@@ -242,7 +250,6 @@ public class TelemetryConfigServiceTest {
         given(monitoringUrlResolver.resolve(anyString(), anyBoolean())).willReturn("http://nope/receive");
         given(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).willReturn("myendpoint");
         given(dataBusEndpointProvider.getDatabusS3Endpoint(anyString(), anyString())).willReturn("endpoint");
-        given(environmentService.getTlsCipherSuitesIanaList(anyString(), any())).willReturn(List.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"));
 
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(stack);
@@ -251,7 +258,7 @@ public class TelemetryConfigServiceTest {
         assertTrue(result.getDatabusContext().isEnabled());
         assertTrue(result.getMonitoringContext().isEnabled());
         assertNotNull(stack.getTelemetry().getMonitoring().getRemoteWriteUrl());
-        assertEquals("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384", result.getTlsCipherSuites().get(0));
+        assertTrue(result.getTlsCipherSuites().contains("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"));
         verify(altusMachineUserService, times(1)).getOrCreateMonitoringCredentialIfNeeded(any(Stack.class), any(CdpAccessKeyType.class));
     }
 
@@ -261,10 +268,12 @@ public class TelemetryConfigServiceTest {
         UserManagementProto.Account account = UserManagementProto.Account.newBuilder()
                 .setClouderaManagerLicenseKey("myLicense")
                 .build();
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+
+        given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
         given(umsClient.getAccountDetails(anyString())).willReturn(account);
         given(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).willReturn("myendpoint");
         given(dataBusEndpointProvider.getDatabusS3Endpoint(anyString(), anyString())).willReturn("endpoint");
-        given(environmentService.getTlsCipherSuitesIanaList(anyString(), any())).willReturn(List.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"));
 
         Telemetry telemetry = telemetry(true, false);
         telemetry.getLogging().setS3(null);

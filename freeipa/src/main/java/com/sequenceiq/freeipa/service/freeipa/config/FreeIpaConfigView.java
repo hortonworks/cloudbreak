@@ -49,15 +49,9 @@ public class FreeIpaConfigView {
 
     private final String seLinux;
 
-    private final String tlsVersionsSpaceSeparated;
-
-    private final String tlsVersionsCommaSeparated;
-
-    private final String tlsCipherSuites;
-
-    private final String tlsCipherSuitesRedHat8;
-
     private final FreeIpaLbConfigView lbConfig;
+
+    private final FreeIpaEncryptionConfigView encryptionConfig;
 
     @SuppressWarnings("ExecutableStatementCount")
     private FreeIpaConfigView(Builder builder) {
@@ -77,11 +71,8 @@ public class FreeIpaConfigView {
         this.secretEncryptionEnabled = builder.secretEncryptionEnabled;
         this.kerberosSecretLocation = builder.kerberosSecretLocation;
         this.seLinux = builder.seLinux;
-        this.tlsVersionsSpaceSeparated = builder.tlsVersionsSpaceSeparated;
-        this.tlsVersionsCommaSeparated = builder.tlsVersionsCommaSeparated;
-        this.tlsCipherSuites = builder.tlsCipherSuites;
-        this.tlsCipherSuitesRedHat8 = builder.tlsCipherSuitesRedHat8;
         this.lbConfig = builder.lbConfig;
+        this.encryptionConfig = builder.encryptionConfig;
     }
 
     public String getRealm() {
@@ -148,12 +139,8 @@ public class FreeIpaConfigView {
         return seLinux;
     }
 
-    public String getTlsVersionsSpaceSeparated() {
-        return tlsVersionsSpaceSeparated;
-    }
-
-    public String getTlsVersionsCommaSeparated() {
-        return tlsVersionsCommaSeparated;
+    public FreeIpaEncryptionConfigView getEncryptionConfig() {
+        return encryptionConfig;
     }
 
     @SuppressWarnings("ExecutableStatementCount")
@@ -180,11 +167,9 @@ public class FreeIpaConfigView {
         map.put("kerberosSecretLocation", kerberosSecretLocation);
         map.put("selinux_mode", seLinux);
         map.put("tlsv13Enabled", false);
-        map.put("tlsVersionsSpaceSeparated", tlsVersionsSpaceSeparated);
-        map.put("tlsVersionsCommaSeparated", tlsVersionsCommaSeparated);
-        map.put("tlsCipherSuites", tlsCipherSuites);
-        map.put("tlsCipherSuitesRedHat8", tlsCipherSuitesRedHat8);
         map.put("loadBalancer", lbConfig.toMap());
+        map.put("encryptionConfig", encryptionConfig.toMap());
+
         return map;
     }
 
@@ -222,15 +207,9 @@ public class FreeIpaConfigView {
 
         private String seLinux;
 
-        private String tlsVersionsSpaceSeparated;
-
-        private String tlsVersionsCommaSeparated;
-
-        private String tlsCipherSuites;
-
-        private String tlsCipherSuitesRedHat8;
-
         private FreeIpaLbConfigView lbConfig = new FreeIpaLbConfigView();
+
+        private FreeIpaEncryptionConfigView encryptionConfig;
 
         public FreeIpaConfigView build() {
             return new FreeIpaConfigView(this);
@@ -306,26 +285,6 @@ public class FreeIpaConfigView {
             return this;
         }
 
-        public Builder withTlsVersionsSpaceSeparated(String tlsVersions) {
-            this.tlsVersionsSpaceSeparated = tlsVersions;
-            return this;
-        }
-
-        public Builder withTlsVersionsCommaSeparated(String tlsVersions) {
-            this.tlsVersionsCommaSeparated = tlsVersions;
-            return this;
-        }
-
-        public Builder withTlsCipherSuites(String tlsCipherSuites) {
-            this.tlsCipherSuites = tlsCipherSuites;
-            return this;
-        }
-
-        public Builder withTlsCipherSuitesRedHat8(String tlsCipherSuitesRedHat8) {
-            this.tlsCipherSuitesRedHat8 = tlsCipherSuitesRedHat8;
-            return this;
-        }
-
         public Builder withKerberosSecretLocation(String kerberosSecretLocation) {
             this.kerberosSecretLocation = kerberosSecretLocation;
             return this;
@@ -338,6 +297,11 @@ public class FreeIpaConfigView {
 
         public Builder withLbConfig(FreeIpaLbConfigView lbConfig) {
             this.lbConfig = lbConfig;
+            return this;
+        }
+
+        public Builder withEncryptionConfig(FreeIpaEncryptionConfigView encryptionConfig) {
+            this.encryptionConfig = encryptionConfig;
             return this;
         }
     }

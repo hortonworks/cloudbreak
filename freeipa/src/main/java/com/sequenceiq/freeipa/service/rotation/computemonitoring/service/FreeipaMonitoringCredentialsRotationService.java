@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfigService;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfigView;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.EnvironmentService;
 import com.sequenceiq.freeipa.service.rotation.SecretRotationSaltService;
 
 @Service
@@ -38,9 +37,6 @@ public class FreeipaMonitoringCredentialsRotationService {
 
     @Inject
     private EntitlementService entitlementService;
-
-    @Inject
-    private EnvironmentService environmentService;
 
     public void validateEnablement(Stack stack) {
         if (!stack.getTelemetry().isComputeMonitoringEnabled() || !entitlementService.isComputeMonitoringEnabled(stack.getAccountId())) {

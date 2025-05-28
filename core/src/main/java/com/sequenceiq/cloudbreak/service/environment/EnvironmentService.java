@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.environment;
 
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -18,7 +17,6 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
-import com.sequenceiq.cloudbreak.tls.TlsSpecificationsHelper;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.environment.api.v1.encryptionprofile.endpoint.EncryptionProfileEndpoint;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
@@ -128,33 +126,5 @@ public class EnvironmentService {
             return desiredStatuses.contains(environmentResponse.getEnvironmentStatus());
         }
         return false;
-    }
-
-    public String getTlsVersions(String environmentCrn, String separator) {
-        return TlsSpecificationsHelper.getTlsVersions(separator);
-        /* TODO: use API call to get values */
-    }
-
-    public String getTlsCipherSuites(String environmentCrn) {
-        return getTlsCipherSuites(environmentCrn, TlsSpecificationsHelper.CipherSuitesLimitType.DEFAULT);
-    }
-
-    private String[] getTlsCipherSuitesList(String environmentCrn, TlsSpecificationsHelper.CipherSuitesLimitType cipherSuiteLimitType) {
-        return TlsSpecificationsHelper.getDefaultCipherSuiteList(cipherSuiteLimitType);
-        /* TODO: use API call to get values */
-    }
-
-    public String getTlsCipherSuites(String environmentCrn, TlsSpecificationsHelper.CipherSuitesLimitType cipherSuiteLimitType, Boolean useInaNames) {
-        String[] tlsCipherSuites = getTlsCipherSuitesList(environmentCrn, cipherSuiteLimitType);
-        return TlsSpecificationsHelper.getTlsCipherSuites(tlsCipherSuites, cipherSuiteLimitType, ":", useInaNames);
-    }
-
-    public String getTlsCipherSuites(String environmentCrn, TlsSpecificationsHelper.CipherSuitesLimitType cipherSuiteLimitType) {
-        return getTlsCipherSuites(environmentCrn, cipherSuiteLimitType, false);
-    }
-
-    public List<String> getTlsCipherSuitesIanaList(String environmentCrn, TlsSpecificationsHelper.CipherSuitesLimitType cipherSuitelimitType) {
-        String[] tlsCipherSuites = getTlsCipherSuitesList(environmentCrn, cipherSuitelimitType);
-        return TlsSpecificationsHelper.getTlsCipherSuitesIanaList(tlsCipherSuites, cipherSuitelimitType);
     }
 }

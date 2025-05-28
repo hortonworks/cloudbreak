@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.common.model.SeLinux;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.LoadBalancer;
@@ -45,6 +46,7 @@ import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.EnvironmentService;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
+import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.freeipa.backup.cloud.S3BackupConfigGenerator;
@@ -75,7 +77,7 @@ class FreeIpaConfigServiceTest {
 
     private static final String ACCOUNT = "testAccount";
 
-    private static final String TLS_VERSIONS = "TLSv1.2";
+    private static final String TLS_VERSIONS = "TLSv1.2 TLSv1.3";
 
     private static final String TLS_CIPHERSUITES = "CIPHERSUITES";
 
@@ -117,6 +119,9 @@ class FreeIpaConfigServiceTest {
     @Mock
     private FreeIpaLoadBalancerService loadBalancerService;
 
+    @Mock
+    private CachedEnvironmentClientService cachedEnvironmentClientService;
+
     @InjectMocks
     private FreeIpaConfigService underTest;
 
@@ -149,7 +154,9 @@ class FreeIpaConfigServiceTest {
         network.setNetworkCidrs(List.of(CIDR));
         stack.setNetwork(network);
         stack.setAccountId(ACCOUNT);
+        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
 
+        when(cachedEnvironmentClientService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         when(freeIpaService.findByStack(any())).thenReturn(freeIpa);
         when(freeIpaClientFactory.getAdminUser()).thenReturn(ADMIN);
         when(networkService.getFilteredSubnetWithCidr(any())).thenReturn(subnetWithCidr);
@@ -160,8 +167,6 @@ class FreeIpaConfigServiceTest {
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         when(proxyConfigDtoService.getByEnvironmentCrn(anyString())).thenReturn(Optional.empty());
         when(environmentService.isSecretEncryptionEnabled(ENV_CRN)).thenReturn(true);
-        when(environmentService.getTlsVersions(ENV_CRN, " ")).thenReturn(TLS_VERSIONS);
-        when(environmentService.getTlsVersions(ENV_CRN, ",")).thenReturn(TLS_VERSIONS);
 
         Node node = new Node(PRIVATE_IP, null, null, null, HOSTNAME, DOMAIN, (String) null);
         Map<String, String> expectedHost = Map.of("ip", PRIVATE_IP, "fqdn", HOSTNAME);
@@ -183,8 +188,9 @@ class FreeIpaConfigServiceTest {
         assertEquals(true, freeIpaConfigView.isSecretEncryptionEnabled());
         assertEquals(KERBEROS_SECRET_LOCATION, freeIpaConfigView.getKerberosSecretLocation());
         assertEquals(SeLinux.ENFORCING.name().toLowerCase(Locale.ROOT), freeIpaConfigView.getSeLinux());
-        assertEquals(TLS_VERSIONS, freeIpaConfigView.getTlsVersionsSpaceSeparated());
-        assertEquals(TLS_VERSIONS, freeIpaConfigView.getTlsVersionsCommaSeparated());
+        Map<String, Object> encryptionMap = freeIpaConfigView.getEncryptionConfig().toMap();
+        assertEquals(TLS_VERSIONS, encryptionMap.get("tlsVersionsSpaceSeparated"));
+        assertEquals(TLS_VERSIONS.replace(' ', ','), encryptionMap.get("tlsVersionsCommaSeparated"));
     }
 
     @Test
@@ -211,7 +217,9 @@ class FreeIpaConfigServiceTest {
         LoadBalancer loadBalancer = new LoadBalancer();
         loadBalancer.setFqdn("lb.fqdn");
         loadBalancer.setEndpoint("lb");
+        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
 
+        when(cachedEnvironmentClientService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         when(freeIpaService.findByStack(any())).thenReturn(freeIpa);
         when(freeIpaClientFactory.getAdminUser()).thenReturn(ADMIN);
         when(networkService.getFilteredSubnetWithCidr(any())).thenReturn(subnetWithCidr);
@@ -222,9 +230,6 @@ class FreeIpaConfigServiceTest {
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         when(proxyConfigDtoService.getByEnvironmentCrn(anyString())).thenReturn(Optional.empty());
         when(environmentService.isSecretEncryptionEnabled(ENV_CRN)).thenReturn(true);
-        when(environmentService.getTlsVersions(ENV_CRN, " ")).thenReturn(TLS_VERSIONS);
-        when(environmentService.getTlsVersions(ENV_CRN, ",")).thenReturn(TLS_VERSIONS);
-        when(environmentService.getTlsCipherSuites(ENV_CRN)).thenReturn(TLS_CIPHERSUITES);
 
         when(loadBalancerService.findByStackId(any())).thenReturn(Optional.of(loadBalancer));
 
@@ -248,8 +253,9 @@ class FreeIpaConfigServiceTest {
         assertEquals(true, freeIpaConfigView.isSecretEncryptionEnabled());
         assertEquals(KERBEROS_SECRET_LOCATION, freeIpaConfigView.getKerberosSecretLocation());
         assertEquals(SeLinux.ENFORCING.name().toLowerCase(Locale.ROOT), freeIpaConfigView.getSeLinux());
-        assertEquals(TLS_VERSIONS, freeIpaConfigView.getTlsVersionsSpaceSeparated());
-        assertEquals(TLS_VERSIONS, freeIpaConfigView.getTlsVersionsCommaSeparated());
+        Map<String, Object> encryptionMap = freeIpaConfigView.getEncryptionConfig().toMap();
+        assertEquals(TLS_VERSIONS, encryptionMap.get("tlsVersionsSpaceSeparated"));
+        assertEquals(TLS_VERSIONS.replace(' ', ','), encryptionMap.get("tlsVersionsCommaSeparated"));
         Map<String, Object> lbConf = (Map<String, Object>) freeIpaConfigView.toMap().get("loadBalancer");
         assertEquals(loadBalancer.getEndpoint(), lbConf.get("endpoint"));
         assertEquals(loadBalancer.getFqdn(), lbConf.get("fqdn"));
@@ -266,9 +272,11 @@ class FreeIpaConfigServiceTest {
         stack.setNetwork(network);
         stack.setEnvironmentCrn(ENV_CRN);
         stack.setAccountId(ACCOUNT);
-
         FreeIpa freeIpa = new FreeIpa();
         freeIpa.setDomain(DOMAIN);
+        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
+
+        when(cachedEnvironmentClientService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         when(freeIpaService.findByStack(any())).thenReturn(freeIpa);
         when(reverseDnsZoneCalculator.reverseDnsZoneForCidrs(any())).thenReturn(REVERSE_ZONE);
         when(networkService.getFilteredSubnetWithCidr(any())).thenReturn(subnetWithCidr);
@@ -277,10 +285,6 @@ class FreeIpaConfigServiceTest {
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         when(networkService.getFilteredSubnetWithCidr(any())).thenReturn(subnetWithCidr);
         when(environmentService.isSecretEncryptionEnabled(ENV_CRN)).thenReturn(false);
-        when(environmentService.getTlsVersions(ENV_CRN, " ")).thenReturn(TLS_VERSIONS);
-        when(environmentService.getTlsVersions(ENV_CRN, ",")).thenReturn(TLS_VERSIONS);
-        when(environmentService.getTlsCipherSuites(ENV_CRN)).thenReturn(TLS_CIPHERSUITES);
-
 
         FreeIpaConfigView freeIpaConfigView = underTest.createFreeIpaConfigs(
                 stack, Set.of());
@@ -290,8 +294,9 @@ class FreeIpaConfigServiceTest {
         assertEquals(false, freeIpaConfigView.isSecretEncryptionEnabled());
         assertEquals(KERBEROS_SECRET_LOCATION, freeIpaConfigView.getKerberosSecretLocation());
         assertEquals(SeLinux.PERMISSIVE.name().toLowerCase(Locale.ROOT), freeIpaConfigView.getSeLinux());
-        assertEquals(TLS_VERSIONS, freeIpaConfigView.getTlsVersionsSpaceSeparated());
-        assertEquals(TLS_VERSIONS, freeIpaConfigView.getTlsVersionsCommaSeparated());
+        Map<String, Object> encryptionMap = freeIpaConfigView.getEncryptionConfig().toMap();
+        assertEquals(TLS_VERSIONS, encryptionMap.get("tlsVersionsSpaceSeparated"));
+        assertEquals(TLS_VERSIONS.replace(' ', ','), encryptionMap.get("tlsVersionsCommaSeparated"));
     }
 
     // @formatter:off

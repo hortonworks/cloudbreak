@@ -32,6 +32,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.freeipa.config.FreeIpaBackupConfigView;
 import com.sequenceiq.freeipa.service.freeipa.config.FreeIpaConfigView;
+import com.sequenceiq.freeipa.service.freeipa.config.FreeIpaEncryptionConfigView;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaNodeUtilService;
 import com.sequenceiq.freeipa.service.orchestrator.FreeIpaSaltPingService;
 import com.sequenceiq.freeipa.service.rotation.FreeIpaDefaultPillarGenerator;
@@ -83,6 +84,7 @@ class SaltPillarUpdateRotationExecutorTest {
                 .withAdminUser("adminuser")
                 .withPassword("adminpassword")
                 .withBackupConfig(mock(FreeIpaBackupConfigView.class))
+                .withEncryptionConfig(mock(FreeIpaEncryptionConfigView.class))
                 .build();
         Map<String, SaltPillarProperties> freeIpaPillar = new HashMap<>();
         freeIpaPillar.put("freeipa", new SaltPillarProperties("/freeipa/init.sls", singletonMap("freeipa", freeIpaConfigView.toMap())));

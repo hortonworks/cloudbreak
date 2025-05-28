@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringServiceType;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
 import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetryConfigProvider;
 import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetrySaltPillarDecorator;
+import com.sequenceiq.cloudbreak.tls.TlsSpecificationsHelper;
 import com.sequenceiq.cloudbreak.tls.TlsSpecificationsHelper.CipherSuitesLimitType;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.model.Logging;
@@ -55,10 +56,12 @@ import com.sequenceiq.common.api.telemetry.model.MonitoringCredential;
 import com.sequenceiq.common.api.telemetry.model.SensitiveLoggingComponent;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.model.VmLog;
+import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.AltusMachineUserService;
-import com.sequenceiq.freeipa.service.EnvironmentService;
+import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -107,7 +110,7 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
     private TransactionService transactionService;
 
     @Inject
-    private EnvironmentService environmentService;
+    private CachedEnvironmentClientService environmentService;
 
     @Override
     public Map<String, SaltPillarProperties> createTelemetryConfigs(Long stackId, Set<TelemetryComponentType> components) {
@@ -132,7 +135,13 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
         telemetryContext.setClusterDetails(createClusterDetails(stack, databusContext));
         NodeStatusContext nodeStatusContext = createNodeStatusContext(stack);
         telemetryContext.setNodeStatusContext(nodeStatusContext);
-        List<String> tlsCipherSuitesBlackBoxExporter = environmentService.getTlsCipherSuitesIanaList(stack.getEnvironmentCrn(),
+        DetailedEnvironmentResponse environmentResponse = environmentService.getByCrn(stack.getEnvironmentCrn());
+        EncryptionProfileResponse encryptionProfileResponse = environmentResponse.getEncryptionProfile();
+        Map<String, Set<String>> userCipherSuits =
+                Optional.ofNullable(encryptionProfileResponse)
+                        .map(EncryptionProfileResponse::getCipherSuites)
+                        .orElse(null);
+        List<String> tlsCipherSuitesBlackBoxExporter = TlsSpecificationsHelper.getTlsCipherSuitesIanaList(userCipherSuits,
                 CipherSuitesLimitType.BLACKBOX_EXPORTER);
         telemetryContext.setTlsCipherSuites(tlsCipherSuitesBlackBoxExporter);
         if (telemetry != null) {

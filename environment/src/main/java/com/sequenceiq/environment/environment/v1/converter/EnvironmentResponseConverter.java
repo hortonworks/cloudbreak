@@ -35,6 +35,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnviro
 import com.sequenceiq.environment.api.v1.environment.model.response.TagResponse;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
 import com.sequenceiq.environment.credential.v1.converter.CredentialViewConverter;
+import com.sequenceiq.environment.encryptionprofile.v1.converter.EncryptionProfileToEncryptionProfileResponseConverter;
 import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -77,12 +78,15 @@ public class EnvironmentResponseConverter {
 
     private final DataServicesConverter dataServicesConverter;
 
+    private final EncryptionProfileToEncryptionProfileResponseConverter encryptionProfileResponseConverter;
+
     public EnvironmentResponseConverter(CredentialToCredentialV1ResponseConverter credentialConverter,
             RegionConverter regionConverter, CredentialViewConverter credentialViewConverter,
             ProxyConfigToProxyResponseConverter proxyConfigToProxyResponseConverter,
             FreeIpaConverter freeIpaConverter, TelemetryApiConverter telemetryApiConverter,
             BackupConverter backupConverter, NetworkDtoToResponseConverter networkDtoToResponseConverter,
-            DataServicesConverter dataServicesConverter) {
+            DataServicesConverter dataServicesConverter,
+            EncryptionProfileToEncryptionProfileResponseConverter encryptionProfileResponseConverter) {
         this.credentialConverter = credentialConverter;
         this.regionConverter = regionConverter;
         this.credentialViewConverter = credentialViewConverter;
@@ -92,6 +96,7 @@ public class EnvironmentResponseConverter {
         this.backupConverter = backupConverter;
         this.networkDtoToResponseConverter = networkDtoToResponseConverter;
         this.dataServicesConverter = dataServicesConverter;
+        this.encryptionProfileResponseConverter = encryptionProfileResponseConverter;
     }
 
     public DetailedEnvironmentResponse dtoToDetailedResponse(EnvironmentDto environmentDto) {
@@ -134,7 +139,8 @@ public class EnvironmentResponseConverter {
                 .withEnableSecretEncryption(environmentDto.isEnableSecretEncryption())
                 .withEnableComputeCluster(environmentDto.isEnableComputeCluster())
                 .withEnvironmentType(environmentDto.getEnvironmentType() != null ? environmentDto.getEnvironmentType().toString() :  null)
-                .withRemoteEnvironmentCrn(environmentDto.getRemoteEnvironmentCrn());
+                .withRemoteEnvironmentCrn(environmentDto.getRemoteEnvironmentCrn())
+                .withEncryptionProfile(encryptionProfileResponseConverter.dtoToResponse(environmentDto.getEncryptionProfile()));
 
         NullUtil.doIfNotNull(environmentDto.getProxyConfig(),
                 proxyConfig -> builder.withProxyConfig(proxyConfigToProxyResponseConverter.convert(environmentDto.getProxyConfig())));
@@ -210,7 +216,8 @@ public class EnvironmentResponseConverter {
                 .withEnableSecretEncryption(environmentViewDto.isEnableSecretEncryption())
                 .withEnableComputeCluster(environmentViewDto.isEnableComputeCluster())
                 .withEnvironmentType(environmentViewDto.getEnvironmentType() != null ? environmentViewDto.getEnvironmentType().toString() : null)
-                .withRemoteEnvironmentCrn(environmentViewDto.getRemoteEnvironmentCrn());
+                .withRemoteEnvironmentCrn(environmentViewDto.getRemoteEnvironmentCrn())
+                .withEncryptionProfile(encryptionProfileResponseConverter.dtoToResponse(environmentViewDto.getEncryptionProfile()));
 
         NullUtil.doIfNotNull(environmentViewDto.getProxyConfig(),
                 proxyConfig -> builder.withProxyConfig(proxyConfigToProxyResponseConverter.convertToView(environmentViewDto.getProxyConfig())));
@@ -251,7 +258,8 @@ public class EnvironmentResponseConverter {
                 .withEnableSecretEncryption(environmentDto.isEnableSecretEncryption())
                 .withEnableComputeCluster(environmentDto.isEnableComputeCluster())
                 .withEnvironmentType(environmentDto.getEnvironmentType() != null ? environmentDto.getEnvironmentType().toString() : null)
-                .withRemoteEnvironmentCrn(environmentDto.getRemoteEnvironmentCrn());
+                .withRemoteEnvironmentCrn(environmentDto.getRemoteEnvironmentCrn())
+                .withEncryptionProfile(encryptionProfileResponseConverter.dtoToResponse(environmentDto.getEncryptionProfile()));
 
         NullUtil.doIfNotNull(environmentDto.getProxyConfig(),
                 proxyConfig -> builder.withProxyConfig(proxyConfigToProxyResponseConverter.convertToView(environmentDto.getProxyConfig())));

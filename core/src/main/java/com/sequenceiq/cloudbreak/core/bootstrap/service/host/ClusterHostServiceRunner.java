@@ -136,6 +136,7 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.template.views.provider.RdsViewProvider;
 import com.sequenceiq.cloudbreak.tls.TlsSpecificationsHelper;
+import com.sequenceiq.cloudbreak.tls.TlsSpecificationsHelper.CipherSuitesLimitType;
 import com.sequenceiq.cloudbreak.util.EphemeralVolumeUtil;
 import com.sequenceiq.cloudbreak.util.NodesUnreachableException;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -148,6 +149,7 @@ import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.model.SeLinux;
+import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
@@ -578,6 +580,16 @@ public class ClusterHostServiceRunner {
         boolean hiveWithRemoteHiveMetastore = blueprintJsonText != null
                 && blueprintJsonText.contains(HiveRoles.HIVESERVER2)
                 && !blueprintJsonText.contains(HiveRoles.HIVEMETASTORE);
+        EncryptionProfileResponse encryptionProfileResponse = detailedEnvironmentResponse.getEncryptionProfile();
+        Set<String> usetTlsVersions =
+                Optional.ofNullable(encryptionProfileResponse)
+                        .map(EncryptionProfileResponse::getTlsVersions)
+                        .orElse(null);
+        Map<String, Set<String>> userCipherSuits =
+                Optional.ofNullable(encryptionProfileResponse)
+                        .map(EncryptionProfileResponse::getCipherSuites)
+                        .orElse(null);
+
         Map<String, ? extends Serializable> clusterProperties = Map.ofEntries(
                 Map.entry("name", stackDto.getCluster().getName()),
                 Map.entry("deployedInChildEnvironment", deployedInChildEnvironment),
@@ -587,13 +599,14 @@ public class ClusterHostServiceRunner {
                 Map.entry("hybridEnabled", hybridEnabled),
                 Map.entry("hiveWithRemoteHiveMetastore", hiveWithRemoteHiveMetastore),
                 Map.entry("tlsv13Enabled", Boolean.FALSE),
-                Map.entry("tlsVersionsSpaceSeparated", environmentService.getTlsVersions(stack.getEnvironmentCrn(), " ")),
-                Map.entry("tlsVersionsCommaSeparated", environmentService.getTlsVersions(stack.getEnvironmentCrn(), ",")),
-                Map.entry("tlsCipherSuites", environmentService.getTlsCipherSuites(stack.getEnvironmentCrn())),
-                Map.entry("tlsCipherSuitesMinimal", environmentService.getTlsCipherSuites(stack.getEnvironmentCrn(),
-                        TlsSpecificationsHelper.CipherSuitesLimitType.MINIMAL)),
-                Map.entry("tlsCipherSuitesJavaIntermediate", environmentService.getTlsCipherSuites(stack.getEnvironmentCrn(),
-                        TlsSpecificationsHelper.CipherSuitesLimitType.JAVA_INTERMEDIATE2018, true))
+                Map.entry("tlsVersionsSpaceSeparated", TlsSpecificationsHelper.getTlsVersions(usetTlsVersions, " ")),
+                Map.entry("tlsVersionsCommaSeparated", TlsSpecificationsHelper.getTlsVersions(usetTlsVersions, ",")),
+                Map.entry("tlsCipherSuites", TlsSpecificationsHelper.getTlsCipherSuites(userCipherSuits,
+                        CipherSuitesLimitType.DEFAULT, ":", false)),
+                Map.entry("tlsCipherSuitesMinimal", TlsSpecificationsHelper.getTlsCipherSuites(userCipherSuits,
+                        CipherSuitesLimitType.MINIMAL, ":", false)),
+                Map.entry("tlsCipherSuitesJavaIntermediate", TlsSpecificationsHelper.getTlsCipherSuites(userCipherSuits,
+                        CipherSuitesLimitType.JAVA_INTERMEDIATE2018, ":", true))
         );
 
         return Map.of("metadata", new SaltPillarProperties("/metadata/init.sls", singletonMap("cluster", clusterProperties)));
@@ -827,6 +840,16 @@ public class ClusterHostServiceRunner {
             LOGGER.debug("Checking if {} is an ip address. Result: {}", gatewayConfig.getPublicAddress(), addressIsIp);
             gateway.put("address_is_ip", addressIsIp);
         }
+        DetailedEnvironmentResponse detailedEnvironmentResponse = environmentService.getByCrn(stackDto.getEnvironmentCrn());
+        EncryptionProfileResponse encryptionProfileResponse = detailedEnvironmentResponse.getEncryptionProfile();
+        Set<String> usetTlsVersions =
+                Optional.ofNullable(encryptionProfileResponse)
+                        .map(EncryptionProfileResponse::getTlsVersions)
+                        .orElse(null);
+        Map<String, Set<String>> userCipherSuits =
+                Optional.ofNullable(encryptionProfileResponse)
+                        .map(EncryptionProfileResponse::getCipherSuites)
+                        .orElse(null);
         ClusterView cluster = stackDto.getCluster();
         gateway.put("username", cluster.getUserName());
         gateway.put("password", cluster.getPassword());
@@ -836,13 +859,13 @@ public class ClusterHostServiceRunner {
         gateway.put("enable_ccmv2_jumpgate", stackDto.getTunnel().useCcmV2Jumpgate());
         gateway.put("activation_in_minutes", activationInMinutes);
         gateway.put("tlsv13Enabled", Boolean.FALSE);
-        gateway.put("tlsVersionsSpaceSeparated", environmentService.getTlsVersions(stackDto.getEnvironmentCrn(), " "));
-        gateway.put("tlsCipherSuites", environmentService.getTlsCipherSuites(stackDto.getEnvironmentCrn()));
-        gateway.put("tlsCipherSuitesRedHat8", environmentService.getTlsCipherSuites(stackDto.getEnvironmentCrn(),
-                TlsSpecificationsHelper.CipherSuitesLimitType.REDHAT_VERSION8));
-        gateway.put("tlsCipherSuitesMinimal", environmentService.getTlsCipherSuites(stackDto.getEnvironmentCrn(),
-                TlsSpecificationsHelper.CipherSuitesLimitType.MINIMAL));
-
+        gateway.put("tlsVersionsSpaceSeparated", TlsSpecificationsHelper.getTlsVersions(usetTlsVersions, " "));
+        gateway.put("tlsCipherSuites", TlsSpecificationsHelper.getTlsCipherSuites(userCipherSuits,
+                CipherSuitesLimitType.DEFAULT, ":", false));
+        gateway.put("tlsCipherSuitesRedHat8", TlsSpecificationsHelper.getTlsCipherSuites(userCipherSuits,
+                CipherSuitesLimitType.REDHAT_VERSION8, ":", false));
+        gateway.put("tlsCipherSuitesMinimal", TlsSpecificationsHelper.getTlsCipherSuites(userCipherSuits,
+                CipherSuitesLimitType.MINIMAL, ":", false));
         gateway.putAll(createKnoxRelatedGatewayConfiguration(stackDto, virtualGroupRequest, connector));
         gateway.putAll(createGatewayUserFacingCertAndFqdn(gatewayConfig, stackDto));
         gateway.put("kerberos", kerberosConfig != null);

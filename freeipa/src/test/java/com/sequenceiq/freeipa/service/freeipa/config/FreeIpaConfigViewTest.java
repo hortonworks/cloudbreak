@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.service.freeipa.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import java.util.Map;
@@ -12,6 +13,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.common.model.SeLinux;
+import com.sequenceiq.freeipa.service.freeipa.config.FreeIpaConfigView.Builder;
 
 @ExtendWith(MockitoExtension.class)
 public class FreeIpaConfigViewTest {
@@ -20,33 +22,35 @@ public class FreeIpaConfigViewTest {
 
     private static final String TLS_VERSION = "TLSv1.2 TLSv1.3";
 
-    private static final String TLS_CIPHERSUITE = "CIPHERSUITE";
+    private static final String TLS_CIPHERSUITE = "ECDHE-ECDSA-AES256-GCM-SHA384";
 
     @ParameterizedTest()
     @ValueSource(booleans = {true, false})
     void testToMap(boolean secretEncryptionEnabled) {
         FreeIpaBackupConfigView backupConfigView = mock(FreeIpaBackupConfigView.class);
-        FreeIpaConfigView freeIpaConfigView = new FreeIpaConfigView.Builder()
+        FreeIpaConfigView freeIpaConfigView = new Builder()
                 .withKerberosSecretLocation(KERBEROS_SECRET_LOCATION)
                 .withBackupConfig(backupConfigView)
                 .withSeLinux(SeLinux.PERMISSIVE.name())
-                .withSecretEncryptionEnabled(secretEncryptionEnabled).build();
+                .withEncryptionConfig(new FreeIpaEncryptionConfigView(null))
+                .withSecretEncryptionEnabled(secretEncryptionEnabled)
+                .build();
         Map<String, Object> freeIpaConfigMap = freeIpaConfigView.toMap();
         assertEquals(secretEncryptionEnabled, freeIpaConfigMap.get("secretEncryptionEnabled"));
         assertEquals(KERBEROS_SECRET_LOCATION, freeIpaConfigMap.get("kerberosSecretLocation"));
         assertEquals(SeLinux.PERMISSIVE.name(), freeIpaConfigMap.get("selinux_mode"));
     }
 
-    @Test()
+    @Test
     public void testToMapForTlsv13() {
         FreeIpaBackupConfigView backupConfigView = mock(FreeIpaBackupConfigView.class);
-        FreeIpaConfigView freeIpaConfigView = new FreeIpaConfigView.Builder()
+        FreeIpaConfigView freeIpaConfigView = new Builder()
                 .withBackupConfig(backupConfigView)
-                .withTlsVersionsCommaSeparated(TLS_VERSION)
-                .withTlsVersionsSpaceSeparated(TLS_VERSION)
-                .withTlsCipherSuites(TLS_CIPHERSUITE).build();
+                .withEncryptionConfig(new FreeIpaEncryptionConfigView(null))
+                .build();
         Map<String, Object> freeIpaConfigMap = freeIpaConfigView.toMap();
-        assertEquals(TLS_VERSION, freeIpaConfigMap.get("tlsVersionsSpaceSeparated"));
-        assertEquals(TLS_CIPHERSUITE, freeIpaConfigMap.get("tlsCipherSuites"));
+        Map<String, Object> encryptionConfigMap = (Map<String, Object>) freeIpaConfigMap.get("encryptionConfig");
+        assertEquals(TLS_VERSION, encryptionConfigMap.get("tlsVersionsSpaceSeparated"));
+        assertTrue(encryptionConfigMap.get("tlsCipherSuites").toString().contains(TLS_CIPHERSUITE));
     }
 }

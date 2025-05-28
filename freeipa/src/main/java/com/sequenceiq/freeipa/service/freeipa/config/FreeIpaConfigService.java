@@ -17,13 +17,14 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
-import com.sequenceiq.cloudbreak.tls.TlsSpecificationsHelper;
 import com.sequenceiq.common.model.SeLinux;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.EnvironmentService;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
+import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.freeipa.dns.ReverseDnsZoneCalculator;
@@ -67,6 +68,9 @@ public class FreeIpaConfigService {
     @Inject
     private FreeIpaLoadBalancerService loadBalancerService;
 
+    @Inject
+    private CachedEnvironmentClientService cachedEnvironmentClientService;
+
     public FreeIpaConfigView createFreeIpaConfigs(Stack stack, Set<Node> hosts) {
         final FreeIpaConfigView.Builder builder = new FreeIpaConfigView.Builder();
 
@@ -77,6 +81,7 @@ public class FreeIpaConfigService {
         LOGGER.debug("Reverse zones : {}", reverseZones);
         String seLinux = null != stack.getSecurityConfig() && null != stack.getSecurityConfig().getSeLinux() ?
                 stack.getSecurityConfig().getSeLinux().toString().toLowerCase(Locale.ROOT) : SeLinux.PERMISSIVE.toString().toLowerCase(Locale.ROOT);
+        DetailedEnvironmentResponse environmentResponse = cachedEnvironmentClientService.getByCrn(stack.getEnvironmentCrn());
         return builder
                 .withRealm(freeIpa.getDomain().toUpperCase(Locale.ROOT))
                 .withDomain(freeIpa.getDomain())
@@ -93,11 +98,7 @@ public class FreeIpaConfigService {
                 .withSecretEncryptionEnabled(environmentService.isSecretEncryptionEnabled(stack.getEnvironmentCrn()))
                 .withKerberosSecretLocation(kerberosSecretLocation)
                 .withSeLinux(seLinux)
-                .withTlsVersionsSpaceSeparated(environmentService.getTlsVersions(stack.getEnvironmentCrn(), " "))
-                .withTlsVersionsCommaSeparated(environmentService.getTlsVersions(stack.getEnvironmentCrn(), ","))
-                .withTlsCipherSuites(environmentService.getTlsCipherSuites(stack.getEnvironmentCrn()))
-                .withTlsCipherSuitesRedHat8(environmentService.getTlsCipherSuites(stack.getEnvironmentCrn(),
-                        TlsSpecificationsHelper.CipherSuitesLimitType.REDHAT_VERSION8))
+                .withEncryptionConfig(new FreeIpaEncryptionConfigView(environmentResponse.getEncryptionProfile()))
                 .withLbConfig(loadBalancerService.findByStackId(stack.getId())
                         .map(lb -> new FreeIpaLbConfigView(lb.getEndpoint(), lb.getFqdn(), lb.getIp()))
                         .orElse(new FreeIpaLbConfigView()))

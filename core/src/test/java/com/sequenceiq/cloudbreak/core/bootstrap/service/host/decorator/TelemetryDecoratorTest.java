@@ -18,7 +18,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import org.junit.Before;
@@ -53,6 +52,7 @@ import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Monitoring;
 import com.sequenceiq.common.api.telemetry.model.MonitoringCredential;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 public class TelemetryDecoratorTest {
 
@@ -109,6 +109,9 @@ public class TelemetryDecoratorTest {
     @Test
     public void testCreateTelemetryContext() {
         // GIVEN
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+
+        given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
         given(telemetry.isComputeMonitoringEnabled()).willReturn(true);
         given(telemetry.getLogging()).willReturn(logging);
         given(telemetry.isCloudStorageLoggingEnabled()).willReturn(true);
@@ -130,6 +133,9 @@ public class TelemetryDecoratorTest {
 
     @Test
     public void testCreateTelemetryContextWithDatalakeForcesCreateOfDatabusCredential() {
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+
+        given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(createStack(StackType.DATALAKE));
         // THEN
@@ -140,6 +146,9 @@ public class TelemetryDecoratorTest {
 
     @Test
     public void testCreateTelemetryContextWithDatahubDoesntForceCreateOfDatabusCredential() {
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+
+        given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(createStack(StackType.WORKLOAD));
         // THEN
@@ -151,6 +160,9 @@ public class TelemetryDecoratorTest {
     @Test
     public void testCreateTelemetryContextWithMonitoringOnly() {
         // GIVEN
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+
+        given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
         given(telemetry.isComputeMonitoringEnabled()).willReturn(true);
         given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
         given(telemetry.getMonitoring()).willReturn(monitoring);
@@ -168,6 +180,9 @@ public class TelemetryDecoratorTest {
     @Test
     public void testMonitoringIsTurnedOffIfEntitlementIsNotGranted() {
         // GIVEN
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+
+        given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
         given(telemetry.isComputeMonitoringEnabled()).willReturn(true);
         given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(false);
         telemetry.setMonitoring(monitoring);
@@ -185,12 +200,14 @@ public class TelemetryDecoratorTest {
     @Test
     public void testMonitoringIsTurnedOnIfEntitlementIsGranted() {
         // GIVEN
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+
+        given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
         given(telemetry.isComputeMonitoringEnabled()).willReturn(false);
         given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
         given(clusterComponentConfigProvider.getSaltStateComponentCbVersion(2L)).willReturn("2.66.0-b100");
         telemetry.setMonitoring(monitoring);
         given(monitoringUrlResolver.resolve(anyString(), anyBoolean())).willReturn("http://nope/receive");
-        given(environmentService.getTlsCipherSuitesIanaList(anyString(), any())).willReturn(List.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"));
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(createStack());
         // THEN
@@ -205,6 +222,9 @@ public class TelemetryDecoratorTest {
     @Test
     public void testCreateTelemetryContextWithMonitoringOnlyAndMajorVersionChanged() {
         // GIVEN
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+
+        given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
         given(telemetry.isComputeMonitoringEnabled()).willReturn(true);
         given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
         given(telemetry.getMonitoring()).willReturn(monitoring);
@@ -223,6 +243,9 @@ public class TelemetryDecoratorTest {
     @Test
     public void testMonitoringIsTurnedOffIfEntitlementIsGrantedButSaltVersionIsTooOld() {
         // GIVEN
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+
+        given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
         given(telemetry.isComputeMonitoringEnabled()).willReturn(false);
         given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
         given(clusterComponentConfigProvider.getSaltStateComponentCbVersion(2L)).willReturn("2.65.0-b61");
@@ -239,6 +262,9 @@ public class TelemetryDecoratorTest {
     @Test
     public void testMonitoringIsTurnedOffIfEntitlementIsGrantedButSaltVersionIsVeryOld() {
         // GIVEN
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+
+        given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
         given(telemetry.isComputeMonitoringEnabled()).willReturn(false);
         given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
         given(clusterComponentConfigProvider.getSaltStateComponentCbVersion(2L)).willReturn("2.21.0-b10000");
@@ -255,6 +281,9 @@ public class TelemetryDecoratorTest {
     @Test
     public void testMonitoringIsTurnedOffIfEntitlementIsGrantedButSaltVersionIsUnkown() {
         // GIVEN
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+
+        given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
         given(telemetry.isComputeMonitoringEnabled()).willReturn(false);
         given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
         given(clusterComponentConfigProvider.getSaltStateComponentCbVersion(2L)).willReturn(null);
@@ -271,6 +300,9 @@ public class TelemetryDecoratorTest {
     @Test
     public void testCreateTelemetryContextLoggingWithoutCloudStorage() {
         // GIVEN
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+
+        given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
         given(telemetry.getLogging()).willReturn(logging);
         given(telemetry.isCloudStorageLoggingEnabled()).willReturn(true);
         // WHEN
@@ -282,6 +314,9 @@ public class TelemetryDecoratorTest {
     @Test
     public void testCreateTelemetryContextWithDefaults() {
         // GIVEN
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+
+        given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(createStack());
         // THEN

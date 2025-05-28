@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -47,6 +48,7 @@ import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringAuthConfig;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringClusterType;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringServiceType;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
+import com.sequenceiq.cloudbreak.tls.TlsSpecificationsHelper;
 import com.sequenceiq.cloudbreak.tls.TlsSpecificationsHelper.CipherSuitesLimitType;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.cloudbreak.view.ClusterView;
@@ -59,6 +61,8 @@ import com.sequenceiq.common.api.telemetry.model.MonitoringCredential;
 import com.sequenceiq.common.api.telemetry.model.SensitiveLoggingComponent;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.model.VmLog;
+import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
 public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
@@ -119,7 +123,13 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
         telemetryContext.setCloudPlatform(stack.getCloudPlatform());
         telemetryContext.setClusterType(mapToFluentClusterType(stack.getType()));
         telemetryContext.setTelemetry(telemetry);
-        List<String> tlsCipherSuitesBlackBoxExporter = environmentService.getTlsCipherSuitesIanaList(stack.getEnvironmentCrn(),
+        DetailedEnvironmentResponse environmentResponse = environmentService.getByCrn(stack.getEnvironmentCrn());
+        EncryptionProfileResponse encryptionProfileResponse = environmentResponse.getEncryptionProfile();
+        Map<String, Set<String>> userCipherSuits =
+                Optional.ofNullable(encryptionProfileResponse)
+                        .map(EncryptionProfileResponse::getCipherSuites)
+                        .orElse(null);
+        List<String> tlsCipherSuitesBlackBoxExporter = TlsSpecificationsHelper.getTlsCipherSuitesIanaList(userCipherSuits,
                 CipherSuitesLimitType.BLACKBOX_EXPORTER);
         telemetryContext.setTlsCipherSuites(tlsCipherSuitesBlackBoxExporter);
         try {

@@ -104,6 +104,8 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
 
     private String remoteEnvironmentCrn;
 
+    private EncryptionProfileDto encryptionProfile;
+
     @Override
     public Long getResourceId() {
         return id;
@@ -458,6 +460,14 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
         this.remoteEnvironmentCrn = remoteEnvironmentCrn;
     }
 
+    public EncryptionProfileDto getEncryptionProfile() {
+        return encryptionProfile;
+    }
+
+    public void setEncryptionProfile(EncryptionProfileDto encryptionProfile) {
+        this.encryptionProfile = encryptionProfile;
+    }
+
     public EnvironmentTelemetryDetails getTelemetryDetails() {
         return telemetry == null ? null : EnvironmentTelemetryDetails.builder()
                 .withStorageLocationBase(Optional.of(telemetry.getLogging()).map(EnvironmentLogging::getStorageLocation).orElse(null))
@@ -478,6 +488,7 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
                 ", enableSecretEncryption=" + enableSecretEncryption +
                 ", environmentType=" + environmentType +
                 ", remoteEnvironmentCrn=" + remoteEnvironmentCrn +
+                ", encryptionProfile=" + encryptionProfile +
                 '}';
     }
 
@@ -560,6 +571,8 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
         private EnvironmentType environmentType;
 
         private String remoteEnvironmentCrn;
+
+        private EncryptionProfileDto encryptionProfile;
 
         protected EnvironmentDtoBaseBuilder() {
         }
@@ -754,6 +767,11 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
             return (B) this;
         }
 
+        public B withEncryptionProfile(EncryptionProfileDto encryptionProfile) {
+            this.encryptionProfile = encryptionProfile;
+            return (B) this;
+        }
+
         protected void build(T environmentDto) {
             environmentDto.setId(id);
             environmentDto.setLocation(locationDto);
@@ -792,6 +810,7 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
             environmentDto.setEnableComputeCluster(enableComputeCluster);
             environmentDto.setEnvironmentType(environmentType == null ? EnvironmentType.PUBLIC_CLOUD : environmentType);
             environmentDto.setRemoteEnvironmentCrn(remoteEnvironmentCrn);
+            environmentDto.setEncryptionProfile(encryptionProfile);
         }
 
         public abstract T build();

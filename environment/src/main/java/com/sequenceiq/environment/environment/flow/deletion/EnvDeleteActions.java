@@ -239,6 +239,7 @@ public class EnvDeleteActions {
                             env.setStatusReason(null);
                             env.setArchived(true);
                             env.setProxyConfig(null);
+                            env.setEncryptionProfile(null);
                             Environment result = environmentService.save(env);
                             EnvironmentDto environmentDto = environmentService.getEnvironmentDto(result);
                             SimpleEnvironmentResponse simpleResponse = environmentResponseConverter.dtoToSimpleResponse(environmentDto, true, true);

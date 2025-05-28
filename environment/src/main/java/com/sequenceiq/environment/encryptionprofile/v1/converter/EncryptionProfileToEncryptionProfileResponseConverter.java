@@ -12,6 +12,7 @@ import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
 import com.sequenceiq.environment.api.v1.encryptionprofile.config.EncryptionProfileConfig;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
+import com.sequenceiq.environment.environment.dto.EncryptionProfileDto;
 
 @Component
 public class EncryptionProfileToEncryptionProfileResponseConverter {
@@ -24,6 +25,10 @@ public class EncryptionProfileToEncryptionProfileResponseConverter {
     }
 
     public EncryptionProfileResponse convert(EncryptionProfile source, boolean useDefaultCipherSuitesIfEmpty) {
+        if (source == null) {
+            return null;
+        }
+
         EncryptionProfileResponse response = new EncryptionProfileResponse();
         response.setName(source.getName());
         response.setDescription(source.getDescription());
@@ -58,5 +63,24 @@ public class EncryptionProfileToEncryptionProfileResponseConverter {
 
     private boolean shouldReturnEmptyMap(Set<String> cipherSuites, boolean useDefaultCipherSuitesIfEmpty) {
         return !useDefaultCipherSuitesIfEmpty && (cipherSuites == null || cipherSuites.isEmpty());
+    }
+
+    public EncryptionProfileResponse dtoToResponse(EncryptionProfileDto encryptionProfile) {
+        if (encryptionProfile == null) {
+            return null;
+        }
+
+        EncryptionProfileResponse response = new EncryptionProfileResponse();
+        response.setName(encryptionProfile.getName());
+        response.setDescription(encryptionProfile.getDescription());
+        response.setCrn(encryptionProfile.getResourceCrn());
+        response.setCreated(encryptionProfile.getCreated());
+        response.setTlsVersions(encryptionProfile.getTlsVersions()
+                .stream()
+                .map(TlsVersion::getVersion)
+                .collect(Collectors.toSet()));
+        response.setCipherSuites(getCipherSuiteMap(encryptionProfile.getCipherSuites(), encryptionProfile.getTlsVersions(), true));
+
+        return response;
     }
 }

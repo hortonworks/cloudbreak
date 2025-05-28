@@ -129,7 +129,6 @@ import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.template.views.provider.RdsViewProvider;
-import com.sequenceiq.cloudbreak.tls.TlsSpecificationsHelper;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.NodesUnreachableException;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -493,6 +492,9 @@ class ClusterHostServiceRunnerTest {
         Set<Node> nodes = Sets.union(Set.of(node("fqdn3")), gatewayNodes);
         List<InstanceMetadataView> gwNodes = Lists.newArrayList(createInstanceMetadata("gateway1"), createInstanceMetadata("gateway2"),
                 createInstanceMetadata("1.1.3.1"), createInstanceMetadata("1.1.3.2"));
+        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
+
+        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         when(stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata()).thenReturn(gwNodes);
         when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
         when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
@@ -508,12 +510,6 @@ class ClusterHostServiceRunnerTest {
                 .thenReturn(Map.of("ipa", new SaltPillarProperties("ipapath", Map.of())));
         when(paywallConfigService.createPaywallPillarConfig(stack)).thenReturn(PAYWALL_PROPERTIES);
 
-        when(environmentService.getTlsVersions(ENV_CRN, " ")).thenReturn("TLSv1.2 TLSv1.3");
-        when(environmentService.getTlsVersions(ENV_CRN, ",")).thenReturn("TLSv1.2,TLSv1.3");
-        when(environmentService.getTlsCipherSuites(ENV_CRN)).thenReturn("CIPHER_SUITE");
-        when(environmentService.getTlsCipherSuites(ENV_CRN, TlsSpecificationsHelper.CipherSuitesLimitType.MINIMAL)).thenReturn("CIPHER_SUITE");
-        when(environmentService.getTlsCipherSuites(ENV_CRN, TlsSpecificationsHelper.CipherSuitesLimitType.JAVA_INTERMEDIATE2018, true))
-                .thenReturn("CIPHER_SUITE");
         underTest.runTargetedClusterServices(stack, Map.of("fqdn3", "1.1.1.1"));
 
         verify(stackUtil, times(1)).collectReachableAndUnreachableCandidateNodes(any(), any());
@@ -565,6 +561,9 @@ class ClusterHostServiceRunnerTest {
         setupMocksForRunClusterServices();
         Set<Node> nodes = Sets.newHashSet(node("fqdn1"), node("fqdn2"), node("fqdn3"),
                 node("gateway1"), node("gateway3"));
+        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
+
+        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_VARIANT.variant().value());
         when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_VARIANT.variant().value());
         when(stackUtil.collectReachableAndCheckNecessaryNodes(any(), any())).thenReturn(nodes);
@@ -576,14 +575,6 @@ class ClusterHostServiceRunnerTest {
                 .thenReturn(Map.of("ipa", new SaltPillarProperties("ipapath", Map.of())));
         when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
         when(paywallConfigService.createPaywallPillarConfig(stack)).thenReturn(PAYWALL_PROPERTIES);
-
-        when(environmentService.getTlsVersions(ENV_CRN, " ")).thenReturn("TLSv1.2 TLSv1.3");
-        when(environmentService.getTlsVersions(ENV_CRN, ",")).thenReturn("TLSv1.2,TLSv1.3");
-        when(environmentService.getTlsCipherSuites(ENV_CRN)).thenReturn("CIPHER_SUITE");
-        when(environmentService.getTlsCipherSuites(ENV_CRN, TlsSpecificationsHelper.CipherSuitesLimitType.MINIMAL))
-                .thenReturn("CIPHER_SUITE");
-        when(environmentService.getTlsCipherSuites(ENV_CRN, TlsSpecificationsHelper.CipherSuitesLimitType.JAVA_INTERMEDIATE2018, true))
-                .thenReturn("CIPHER_SUITE");
 
         underTest.runClusterServices(stack, Map.of(), true);
 
@@ -612,6 +603,9 @@ class ClusterHostServiceRunnerTest {
         setupMocksForRunClusterServices();
         Set<Node> nodes = Sets.newHashSet(node("fqdn1"), node("fqdn2"), node("fqdn3"),
                 node("gateway1"), node("gateway3"));
+        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
+
+        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_VARIANT.variant().value());
         when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_VARIANT.variant().value());
         when(stackUtil.collectReachableAndCheckNecessaryNodes(any(), any())).thenReturn(nodes);
@@ -624,12 +618,6 @@ class ClusterHostServiceRunnerTest {
         when(paywallConfigService.createPaywallPillarConfig(stack)).thenReturn(PAYWALL_PROPERTIES);
         when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
 
-        when(environmentService.getTlsVersions(ENV_CRN, " ")).thenReturn("TLSv1.2 TLSv1.3");
-        when(environmentService.getTlsVersions(ENV_CRN, ",")).thenReturn("TLSv1.2,TLSv1.3");
-        when(environmentService.getTlsCipherSuites(ENV_CRN)).thenReturn("CIPHER_SUITE");
-        when(environmentService.getTlsCipherSuites(ENV_CRN, TlsSpecificationsHelper.CipherSuitesLimitType.MINIMAL)).thenReturn("CIPHER_SUITE");
-        when(environmentService.getTlsCipherSuites(ENV_CRN, TlsSpecificationsHelper.CipherSuitesLimitType.JAVA_INTERMEDIATE2018, true))
-                .thenReturn("CIPHER_SUITE");
         underTest.runClusterServices(stack, Map.of(), false);
 
         ArgumentCaptor<Set<Node>> reachableCandidates = ArgumentCaptor.forClass(Set.class);
@@ -655,21 +643,19 @@ class ClusterHostServiceRunnerTest {
     void testRedeployGatewayCertificate() throws CloudbreakOrchestratorException {
         Set<Node> nodes = Sets.newHashSet(node("fqdn1"), node("fqdn2"), node("fqdn3"),
                 node("gateway1"), node("gateway3"));
+        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
+
+        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         when(stackUtil.collectNodes(any())).thenReturn(nodes);
         when(stackUtil.collectReachableNodes(any())).thenReturn(nodes);
         List<GatewayConfig> gwConfigs = List.of(new GatewayConfig("addr", "endpoint", "privateAddr", 123, "instance", false));
         when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(gwConfigs);
         when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
-        when(environmentService.getTlsVersions(ENV_CRN, " ")).thenReturn("TLSv1.2 TLSv1.3");
-        when(environmentService.getTlsVersions(ENV_CRN, ",")).thenReturn("TLSv1.2,TLSv1.3");
-        when(environmentService.getTlsCipherSuites(ENV_CRN)).thenReturn("CIPHER_SUITE");
-        when(environmentService.getTlsCipherSuites(ENV_CRN, TlsSpecificationsHelper.CipherSuitesLimitType.MINIMAL))
-                .thenReturn("CIPHER_SUITE");
-        when(environmentService.getTlsCipherSuites(ENV_CRN, TlsSpecificationsHelper.CipherSuitesLimitType.JAVA_INTERMEDIATE2018, true))
-                .thenReturn("CIPHER_SUITE");
 
         setupMocksForRunClusterServices();
+
         underTest.redeployGatewayCertificate(stack);
+
         verify(hostOrchestrator, times(1)).initServiceRun(eq(stack), eq(gwConfigs), eq(nodes), eq(nodes), any(), any(), eq(CloudPlatform.AWS.name()));
         verify(hostOrchestrator).runService(eq(gwConfigs), eq(nodes), any(), any());
     }
@@ -680,6 +666,9 @@ class ClusterHostServiceRunnerTest {
         setupMocksForRunClusterServices();
         Set<Node> nodes = Sets.newHashSet(node("fqdn1"), node("fqdn2"), node("fqdn3"),
                 node("gateway1"), node("gateway3"));
+        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
+
+        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         when(stackUtil.collectNodes(any())).thenReturn(nodes);
 
         underTest.redeployGatewayPillarOnly(stack);
@@ -714,16 +703,11 @@ class ClusterHostServiceRunnerTest {
     @Test
     void testAddJavaPillarToSaltConfig() throws CloudbreakOrchestratorException {
         setupMocksForRunClusterServices();
+
         when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AWS_DEFAULT_VARIANT.value());
         when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
-        when(environmentService.getTlsVersions(ENV_CRN, " ")).thenReturn("TLSv1.2 TLSv1.3");
-        when(environmentService.getTlsVersions(ENV_CRN, ",")).thenReturn("TLSv1.2,TLSv1.3");
-
-        when(environmentService.getTlsCipherSuites(ENV_CRN)).thenReturn("CIPHER_SUITE");
-        when(environmentService.getTlsCipherSuites(ENV_CRN, TlsSpecificationsHelper.CipherSuitesLimitType.MINIMAL))
-                .thenReturn("CIPHER_SUITE");
-        when(environmentService.getTlsCipherSuites(ENV_CRN, TlsSpecificationsHelper.CipherSuitesLimitType.JAVA_INTERMEDIATE2018, true))
-                .thenReturn("CIPHER_SUITE");
+        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
+        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
 
         underTest.runClusterServices(stack, Collections.emptyMap(), false);
 
@@ -736,10 +720,14 @@ class ClusterHostServiceRunnerTest {
     void testAddRangerRazPillarForDataLakeToRedeployGateway() throws CloudbreakOrchestratorException {
         setupMocksForRunClusterServices();
         setupMockforRangerRaz(StackType.DATALAKE, true);
+        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
+
+        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         when(componentLocatorService.getImpalaCoordinatorLocations(any()))
                 .thenReturn(Map.of("ip1", List.of("ip1", "ip2")));
 
         underTest.redeployGatewayPillarOnly(stack);
+
         ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
         verify(hostOrchestrator).uploadGatewayPillar(any(), allNodesCaptor.capture(), any(), saltConfig.capture());
 
@@ -754,7 +742,9 @@ class ClusterHostServiceRunnerTest {
     void testAddRangerRazPillarForDataLakeRazNotEnabledToRedeployGateway() throws CloudbreakOrchestratorException {
         setupMocksForRunClusterServices();
         setupMockforRangerRaz(StackType.DATALAKE, false);
+        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
 
+        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         underTest.redeployGatewayPillarOnly(stack);
         ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
         verify(hostOrchestrator).uploadGatewayPillar(any(), allNodesCaptor.capture(), any(), saltConfig.capture());
@@ -767,6 +757,9 @@ class ClusterHostServiceRunnerTest {
     void testAddRangerRazPillarForDataLakeNodesNotAvailableToRedeployGateway() throws CloudbreakOrchestratorException {
         setupMocksForRunClusterServices();
         setupMockforRangerRaz(StackType.DATALAKE, true);
+        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
+
+        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         when(stack.getAliveInstancesInInstanceGroup(anyString())).thenReturn(Collections.emptyList());
 
         underTest.redeployGatewayPillarOnly(stack);
@@ -781,7 +774,9 @@ class ClusterHostServiceRunnerTest {
     void testAddRangerRazPillarForDataHubToRedeployGateway() throws CloudbreakOrchestratorException {
         setupMocksForRunClusterServices();
         setupMockforRangerRaz(StackType.WORKLOAD, true);
+        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
 
+        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         underTest.redeployGatewayPillarOnly(stack);
         ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
         verify(hostOrchestrator).uploadGatewayPillar(any(), allNodesCaptor.capture(), any(), saltConfig.capture());
@@ -817,8 +812,13 @@ class ClusterHostServiceRunnerTest {
         lbPrivate.setIp("ip2");
         lbPrivate.setType(LoadBalancerType.PRIVATE);
         Set<LoadBalancer> loadBalancers = Set.of(lbGateway, lbPrivate);
+        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
+
+        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         when(loadBalancerFqdnUtil.getLoadBalancersForStack(STACK_ID)).thenReturn(loadBalancers);
+
         underTest.redeployGatewayPillarOnly(stack);
+
         ArgumentCaptor<SaltConfig> saltConfigCaptor = ArgumentCaptor.forClass(SaltConfig.class);
         verify(hostOrchestrator).uploadGatewayPillar(any(), allNodesCaptor.capture(), any(), saltConfigCaptor.capture());
         SaltConfig saltConfig = saltConfigCaptor.getValue();
@@ -840,6 +840,9 @@ class ClusterHostServiceRunnerTest {
         setupMocksForRunClusterServices();
         Set<Node> nodes = Sets.newHashSet(node("fqdn1"), node("fqdn2"), node("fqdn3"),
                 node("gateway1"), node("master1"));
+        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
+
+        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         when(stackUtil.collectNodes(any())).thenReturn(nodes);
         when(exposedServiceCollector.getAllServiceNames()).thenReturn(Set.of("RANGER"));
         Map<String, List<String>> locations = new HashMap<>();
@@ -879,6 +882,9 @@ class ClusterHostServiceRunnerTest {
         setupMocksForRunClusterServices();
         Set<Node> nodes = Sets.newHashSet(node("fqdn1"), node("fqdn2"), node("fqdn3"),
                 node("gateway1"), node("master1"));
+        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
+
+        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         when(stackUtil.collectNodes(any())).thenReturn(nodes);
         when(exposedServiceCollector.getAllServiceNames()).thenReturn(Set.of("RANGER"));
         Map<String, List<String>> locations = new HashMap<>();
@@ -899,7 +905,9 @@ class ClusterHostServiceRunnerTest {
         bp.setBlueprintText(mediumDutyBP);
         ReflectionTestUtils.setField(stack, "instanceGroups", instanceGroups);
         ReflectionTestUtils.setField(stack, "blueprint", bp);
+
         underTest.redeployGatewayPillarOnly(stack);
+
         ArgumentCaptor<SaltConfig> saltConfigCaptor = ArgumentCaptor.forClass(SaltConfig.class);
         verify(hostOrchestrator).uploadGatewayPillar(any(), allNodesCaptor.capture(), any(), saltConfigCaptor.capture());
         Set<Node> allNodes = allNodesCaptor.getValue();
@@ -918,6 +926,9 @@ class ClusterHostServiceRunnerTest {
         setupMocksForRunClusterServices();
         Set<Node> nodes = Sets.newHashSet(node("fqdn1"), node("fqdn2"), node("fqdn3"),
                 node("gateway1"), node("master1"));
+        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
+
+        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         when(stackUtil.collectNodes(any())).thenReturn(nodes);
         when(exposedServiceCollector.getAllServiceNames()).thenReturn(Set.of("RANGER"));
         Map<String, List<String>> locations = new HashMap<>();
@@ -938,7 +949,9 @@ class ClusterHostServiceRunnerTest {
         bp.setBlueprintText(lightDutyBP);
         ReflectionTestUtils.setField(stack, "instanceGroups", instanceGroups);
         ReflectionTestUtils.setField(stack, "blueprint", bp);
+
         underTest.redeployGatewayPillarOnly(stack);
+
         ArgumentCaptor<SaltConfig> saltConfigCaptor = ArgumentCaptor.forClass(SaltConfig.class);
         verify(hostOrchestrator).uploadGatewayPillar(any(), allNodesCaptor.capture(), any(), saltConfigCaptor.capture());
         Set<Node> allNodes = allNodesCaptor.getValue();
@@ -982,6 +995,9 @@ class ClusterHostServiceRunnerTest {
     void testKnoxSecurityConfigToRunClusterServices() throws CloudbreakOrchestratorException, IOException {
         setupMocksForRunClusterServices();
         GatewayView clusterGateway = mock(GatewayView.class);
+        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
+
+        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         when(cluster.getId()).thenReturn(CLUSTER_ID);
         when(gatewayService.getByClusterId(CLUSTER_ID)).thenReturn(Optional.of(clusterGateway));
         when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AWS_DEFAULT_VARIANT.value());
@@ -992,14 +1008,6 @@ class ClusterHostServiceRunnerTest {
         when(kerberosDetailService.areClusterManagerManagedKerberosPackages(kerberosConfig)).thenReturn(true);
         when(entitlementService.isTlsv13Enabled(ACCOUNT_ID)).thenReturn(true);
 
-        when(environmentService.getTlsVersions(ENV_CRN, " ")).thenReturn("TLSv1.2 TLSv1.3");
-        when(environmentService.getTlsVersions(ENV_CRN, ",")).thenReturn("TLSv1.2,TLSv1.3");
-
-        when(environmentService.getTlsCipherSuites(ENV_CRN)).thenReturn("CIPHER_SUITE");
-        when(environmentService.getTlsCipherSuites(ENV_CRN, TlsSpecificationsHelper.CipherSuitesLimitType.MINIMAL))
-                .thenReturn("CIPHER_SUITE");
-        when(environmentService.getTlsCipherSuites(ENV_CRN, TlsSpecificationsHelper.CipherSuitesLimitType.JAVA_INTERMEDIATE2018, true))
-                .thenReturn("CIPHER_SUITE");
         underTest.runClusterServices(stack, Collections.emptyMap(), false);
 
         ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
@@ -1023,6 +1031,9 @@ class ClusterHostServiceRunnerTest {
     void testCdpLuksVolumeBackUpToRunClusterServices() throws CloudbreakOrchestratorException, IOException {
         setupMocksForRunClusterServices();
         GatewayView clusterGateway = mock(GatewayView.class);
+        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
+
+        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         when(cluster.getId()).thenReturn(CLUSTER_ID);
         when(gatewayService.getByClusterId(CLUSTER_ID)).thenReturn(Optional.of(clusterGateway));
         when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AWS_DEFAULT_VARIANT.value());
@@ -1032,14 +1043,6 @@ class ClusterHostServiceRunnerTest {
         when(kerberosConfigService.get(ENV_CRN, STACK_NAME)).thenReturn(Optional.of(kerberosConfig));
         when(kerberosDetailService.areClusterManagerManagedKerberosPackages(kerberosConfig)).thenReturn(true);
         when(entitlementService.isTlsv13Enabled(ACCOUNT_ID)).thenReturn(true);
-
-        when(environmentService.getTlsVersions(ENV_CRN, " ")).thenReturn("TLSv1.2 TLSv1.3");
-        when(environmentService.getTlsVersions(ENV_CRN, ",")).thenReturn("TLSv1.2,TLSv1.3");
-
-        when(environmentService.getTlsCipherSuites(ENV_CRN)).thenReturn("CIPHER_SUITE");
-        when(environmentService.getTlsCipherSuites(ENV_CRN, TlsSpecificationsHelper.CipherSuitesLimitType.MINIMAL)).thenReturn("CIPHER_SUITE");
-        when(environmentService.getTlsCipherSuites(ENV_CRN, TlsSpecificationsHelper.CipherSuitesLimitType.JAVA_INTERMEDIATE2018, true))
-                .thenReturn("CIPHER_SUITE");
 
         underTest.runClusterServices(stack, Collections.emptyMap(), false);
 
@@ -1163,7 +1166,7 @@ class ClusterHostServiceRunnerTest {
 
     private void verifyEncryptionProfile(SaltConfig saltConfig) {
         String tlsChipherSuites = (String) getClusterProperties(saltConfig).get("tlsCipherSuitesJavaIntermediate");
-        assertEquals("CIPHER_SUITE", tlsChipherSuites);
+        assertTrue(tlsChipherSuites.contains("TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"));
     }
 
     private void verifyDefaultKerberosCcacheSecretStorage(String expectedValue, SaltConfig saltConfig) {

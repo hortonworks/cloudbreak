@@ -98,12 +98,14 @@ public class FreeipaMonitoringCredentialsRotationServiceTest {
     @Test
     void testUpdate() throws CloudbreakOrchestratorFailedException {
         Stack stack = new Stack();
+        stack.setEnvironmentCrn("envCrn");
         InstanceGroup instanceGroup = new InstanceGroup();
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setInstanceGroup(instanceGroup);
         instanceGroup.setInstanceMetaData(Set.of(instanceMetaData));
         instanceGroup.setTemplate(new Template());
         stack.setInstanceGroups(Set.of(instanceGroup));
+
         when(telemetryContextProvider.createTelemetryContext(any())).thenReturn(new TelemetryContext());
         when(monitoringConfigService.createConfigs(any())).thenReturn(new MonitoringConfigView.Builder().build());
         doNothing().when(saltService).updateSaltPillar(any(), any());

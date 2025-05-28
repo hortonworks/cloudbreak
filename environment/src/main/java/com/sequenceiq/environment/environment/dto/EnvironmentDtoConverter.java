@@ -46,6 +46,8 @@ public class EnvironmentDtoConverter {
 
     private final EnvironmentTagsDtoConverter environmentTagsDtoConverter;
 
+    private final EncryptionProfileDtoConverter encryptionProfileDtoConverter;
+
     public EnvironmentDtoConverter(Map<CloudPlatform,
                     EnvironmentNetworkConverter> environmentNetworkConverterMap,
             Map<CloudPlatform, EnvironmentParametersConverter> environmentParamsConverterMap,
@@ -53,7 +55,8 @@ public class EnvironmentDtoConverter {
             EnvironmentRecipeService environmentRecipeService,
             FreeIpaInstanceCountByGroupProvider ipaInstanceCountByGroupProvider,
             CredentialDetailsConverter credentialDetailsConverter,
-            EnvironmentTagsDtoConverter environmentTagsDtoConverter) {
+            EnvironmentTagsDtoConverter environmentTagsDtoConverter,
+            EncryptionProfileDtoConverter encryptionProfileDtoConverter) {
         this.environmentNetworkConverterMap = environmentNetworkConverterMap;
         this.environmentParamsConverterMap = environmentParamsConverterMap;
         this.authenticationDtoConverter = authenticationDtoConverter;
@@ -61,6 +64,7 @@ public class EnvironmentDtoConverter {
         this.ipaInstanceCountByGroupProvider = ipaInstanceCountByGroupProvider;
         this.credentialDetailsConverter = credentialDetailsConverter;
         this.environmentTagsDtoConverter = environmentTagsDtoConverter;
+        this.encryptionProfileDtoConverter = encryptionProfileDtoConverter;
     }
 
     public EnvironmentViewDto environmentViewToViewDto(EnvironmentView environmentView) {
@@ -97,7 +101,8 @@ public class EnvironmentDtoConverter {
                 .withEnableSecretEncryption(environmentView.isEnableSecretEncryption())
                 .withEnableComputeCluster(isComputeClusterEnabled(environmentView.getDefaultComputeCluster()))
                 .withEnvironmentType(environmentView.getEnvironmentType())
-                .withRemoteEnvironmentCrn(environmentView.getRemoteEnvironmentCrn());
+                .withRemoteEnvironmentCrn(environmentView.getRemoteEnvironmentCrn())
+                .withEncryptionProfile(encryptionProfileDtoConverter.encryptionProfileToDto(environmentView.getEncryptionProfile()));
 
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environmentView.getCloudPlatform());
         doIfNotNull(environmentView.getParameters(), parameters -> builder.withParameters(
@@ -147,7 +152,8 @@ public class EnvironmentDtoConverter {
                 .withCreatorClient(environment.getCreatorClient())
                 .withEnableComputeCluster(isComputeClusterEnabled(environment.getDefaultComputeCluster()))
                 .withEnvironmentType(environment.getEnvironmentType())
-                .withRemoteEnvironmentCrn(environment.getRemoteEnvironmentCrn());
+                .withRemoteEnvironmentCrn(environment.getRemoteEnvironmentCrn())
+                .withEncryptionProfile(encryptionProfileDtoConverter.encryptionProfileToDto(environment.getEncryptionProfile()));
 
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
         builder.withCredentialDetails(credentialDetailsConverter.credentialToCredentialDetails(cloudPlatform, environment.getCredential()));

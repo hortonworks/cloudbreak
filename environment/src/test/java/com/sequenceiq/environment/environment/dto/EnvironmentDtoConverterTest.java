@@ -32,6 +32,7 @@ import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.api.v1.tags.model.response.AccountTagResponse;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.domain.CredentialView;
+import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
 import com.sequenceiq.environment.environment.EnvironmentDeletionType;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.DefaultComputeCluster;
@@ -147,9 +148,6 @@ class EnvironmentDtoConverterTest {
     @Mock
     private EnvironmentRecipeService environmentRecipeService;
 
-    @InjectMocks
-    private EnvironmentDtoConverter underTest;
-
     @Mock
     private EnvironmentView environmentView;
 
@@ -170,6 +168,12 @@ class EnvironmentDtoConverterTest {
 
     @Mock
     private CredentialDetailsConverter credentialDetailsConverter;
+
+    @Mock
+    private EncryptionProfileDtoConverter encryptionProfileDtoConverter;
+
+    @InjectMocks
+    private EnvironmentDtoConverter underTest;
 
     @Test
     void testEnvironmentToEnvironmentDtoFreeIpaCreationWithoutAwsParameters() {
@@ -322,6 +326,7 @@ class EnvironmentDtoConverterTest {
         assertThat(result.getDomain()).isEqualTo(DOMAIN);
         assertThat(result.isEnableSecretEncryption()).isTrue();
         assertThat(result.isEnableComputeCluster()).isTrue();
+        assertThat(result.getEncryptionProfile()).isNull();
 
         LocationDto locationDto = result.getLocation();
         assertThat(locationDto).isNotNull();
@@ -474,6 +479,8 @@ class EnvironmentDtoConverterTest {
         ExperimentalFeatures experimentalFeatures = ExperimentalFeatures.builder().build();
         EnvironmentTags environmentTags = new EnvironmentTags(Map.of(), Map.of());
         ProxyConfig proxyConfig = new ProxyConfig();
+        EncryptionProfile encryptionProfile = new EncryptionProfile();
+        EncryptionProfileDto encryptionProfileDto = EncryptionProfileDto.Builder.builder().build();
 
         when(environment.getId()).thenReturn(ID);
         when(environment.getResourceCrn()).thenReturn(RESOURCE_CRN);
@@ -517,12 +524,17 @@ class EnvironmentDtoConverterTest {
         when(environment.getNetwork()).thenReturn(null);
         when(environment.getParentEnvironment()).thenReturn(null);
         when(environment.isEnableSecretEncryption()).thenReturn(true);
+        when(environment.getEncryptionProfile()).thenReturn(encryptionProfile);
+
         DefaultComputeCluster defaultComputeCluster = new DefaultComputeCluster();
         defaultComputeCluster.setCreate(true);
         when(environment.getDefaultComputeCluster()).thenReturn(defaultComputeCluster);
 
         when(authenticationDtoConverter.authenticationToDto(authentication)).thenReturn(authenticationDto);
         when(environmentRecipeService.getRecipes(ID)).thenReturn(freeipaRecipes);
+
+
+        when(encryptionProfileDtoConverter.encryptionProfileToDto(encryptionProfile)).thenReturn(encryptionProfileDto);
 
         EnvironmentDto result = underTest.environmentToDto(environment);
 
@@ -582,6 +594,8 @@ class EnvironmentDtoConverterTest {
         assertThat(result.getParentEnvironmentCrn()).isNull();
         assertThat(result.getParentEnvironmentName()).isNull();
         assertThat(result.getParentEnvironmentCloudPlatform()).isNull();
+
+        assertThat(result.getEncryptionProfile()).isEqualTo(encryptionProfileDto);
     }
 
     @Test
