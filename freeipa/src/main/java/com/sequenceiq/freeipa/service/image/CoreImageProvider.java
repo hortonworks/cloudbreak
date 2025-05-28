@@ -80,6 +80,6 @@ public class CoreImageProvider implements ImageProvider {
     private Optional<Image> convert(ImageV4Response response) {
         return Optional.ofNullable(response)
                 .map(r -> new Image(r.getCreated(), r.getDate(), r.getDescription(), r.getOs(), r.getUuid(), r.getImageSetsByProvider(), r.getOsType(),
-                        r.getPackageVersions(), r.isAdvertised()));
+                        r.getPackageVersions(), r.isAdvertised(), r.getArchitecture()));
     }
 }

@@ -378,7 +378,8 @@ public interface FreeIpaV1Endpoint {
     FreeIpaRecommendationResponse getRecommendation(
             @ValidCrn(resource = CrnResourceDescriptor.CREDENTIAL) @QueryParam("credentialCrn") @NotEmpty String credentialCrn,
             @QueryParam("region") @NotEmpty String region,
-            @QueryParam("availabilityZone") String availabilityZone);
+            @QueryParam("availabilityZone") String availabilityZone,
+            @QueryParam("architecture") String architecture);
 
     @PUT
     @Path("vertical_scaling")

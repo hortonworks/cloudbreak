@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.image;
 
+import com.sequenceiq.common.model.Architecture;
+
 public record FreeIpaImageFilterSettings(
         String currentImageId,
         String catalog,
@@ -7,5 +9,6 @@ public record FreeIpaImageFilterSettings(
         String targetOs,
         String region,
         String platform,
-        boolean allowMajorOsUpgrade) {
+        boolean allowMajorOsUpgrade,
+        Architecture architecture) {
 }

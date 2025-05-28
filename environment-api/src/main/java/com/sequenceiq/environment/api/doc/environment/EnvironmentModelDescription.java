@@ -165,6 +165,7 @@ public class EnvironmentModelDescription {
     public static final String FREEIPA_IMAGE_CATALOG = "Image catalog for FreeIpa instance creation.";
     public static final String FREEIPA_IMAGE_ID = "Image ID for FreeIpa instance creation.";
     public static final String FREEIPA_IMAGE_OS_TYPE = "OS type to be chosen from the image catalog";
+    public static final String FREEIPA_ARCHITECTURE = "CPU architecture of the freeipa instance";
 
     public static final String CREATE_EXTERNALIZED_COMPUTE_CLUSTER = "Create externalized compute cluster for environment";
     public static final String EXTERNALIZED_COMPUTE_PRIVATE_CLUSTER = "Externalized compute cluster private flag";

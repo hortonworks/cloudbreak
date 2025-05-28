@@ -202,6 +202,6 @@ class ImageFallbackServiceTest {
     }
 
     private Image createImage() {
-        return new Image(123L, "date", "desc", "linux", "1234-456", Map.of(), "magicOs", Map.of(), false);
+        return new Image(123L, "date", "desc", "linux", "1234-456", Map.of(), "magicOs", Map.of(), false, "x86_64");
     }
 }

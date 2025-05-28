@@ -19,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 
 @ExtendWith(MockitoExtension.class)
@@ -146,11 +147,11 @@ class FreeIpaImageFilterTest {
 
     private FreeIpaImageFilterSettings createImageFilterSettings(String currentOs, String targetOs, String region, String platform,
             boolean allowMajorOsUpgrade) {
-        return new FreeIpaImageFilterSettings(null, null, currentOs,  targetOs, region, platform, allowMajorOsUpgrade);
+        return new FreeIpaImageFilterSettings(null, null, currentOs,  targetOs, region, platform, allowMajorOsUpgrade, Architecture.X86_64);
     }
 
     private Image createImage(String imageId, String os, String platform, String region) {
-        return new Image(null, null, null, os, imageId, Map.of(platform, Map.of(region, "imageName")), null, null, true);
+        return new Image(null, null, null, os, imageId, Map.of(platform, Map.of(region, "imageName")), null, null, true, "x86_64");
     }
 
 }

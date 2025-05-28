@@ -27,6 +27,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.api.v1.tags.model.response.AccountTagResponse;
 import com.sequenceiq.environment.credential.domain.Credential;
@@ -710,6 +711,7 @@ class EnvironmentDtoConverterTest {
                 .withEnableMultiAz(FREE_IPA_ENABLE_MULTI_AZ)
                 .withImageId(FREE_IPA_IMAGE_ID)
                 .withSeLinux(SeLinux.ENFORCING)
+                .withArchitecture(Architecture.X86_64)
                 .build();
         ExperimentalFeatures experimentalFeatures = ExperimentalFeatures.builder()
                 .withTunnel(Tunnel.CCMV2_JUMPGATE)
@@ -820,6 +822,7 @@ class EnvironmentDtoConverterTest {
                 .withDisplayName(LOCATION_DISPLAY_NAME)
                 .build();
         FreeIpaCreationDto freeIpaCreation = FreeIpaCreationDto.builder(FREE_IPA_INSTANCE_COUNT_BY_GROUP).withCreate(CREATE_FREE_IPA)
+                .withArchitecture(Architecture.X86_64)
                 .withSeLinux(null)
                 .build();
         Map<String, String> defaultTags = Map.ofEntries(entry("defaultKey1", "defaultValue1"), entry("defaultKey2", "defaultValue2"));

@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.orchestration.OrchestrationNode;
 import com.sequenceiq.cloudbreak.common.orchestration.OrchestratorAware;
+import com.sequenceiq.cloudbreak.converter.ArchitectureConverter;
 import com.sequenceiq.cloudbreak.converter.TunnelConverter;
 import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
@@ -48,6 +49,7 @@ import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 
@@ -163,6 +165,9 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
     private boolean multiAz;
 
     private String supportedImdsVersion;
+
+    @Convert(converter = ArchitectureConverter.class)
+    private Architecture architecture;
 
     public Long getId() {
         return id;
@@ -556,6 +561,14 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
         this.supportedImdsVersion = supportedImdsVersion;
     }
 
+    public Architecture getArchitecture() {
+        return architecture;
+    }
+
+    public void setArchitecture(Architecture architecture) {
+        this.architecture = architecture;
+    }
+
     @Override
     public String toString() {
         return "Stack{" +
@@ -586,6 +599,7 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
                 ", ccmV2AgentCrn='" + ccmV2AgentCrn + '\'' +
                 ", multiAz='" + multiAz + '\'' +
                 ", supportedImdsVersion='" + supportedImdsVersion + '\'' +
+                ", architecture='" + architecture + '\'' +
                 '}';
     }
 
@@ -623,7 +637,8 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
                     && Objects.equals(ccmV2AgentCrn, stack.ccmV2AgentCrn)
                     && Objects.equals(version, stack.version)
                     && Objects.equals(ccmParameters, stack.ccmParameters)
-                    && multiAz == stack.multiAz;
+                    && multiAz == stack.multiAz
+                    && Objects.equals(architecture, stack.architecture);
         }
     }
 
@@ -631,7 +646,7 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
     public int hashCode() {
         return Objects.hash(id, resourceCrn, name, environmentCrn, accountId, region, created, platformvariant, availabilityZone, cloudPlatform, gatewayport,
                 useCcm, tunnel, clusterProxyRegistered, terminated, tags, telemetry, backup, template, owner, appVersion, minaSshdServiceId, ccmV2AgentCrn,
-                version, ccmParameters, multiAz);
+                version, ccmParameters, multiAz, architecture);
     }
 
     @Override

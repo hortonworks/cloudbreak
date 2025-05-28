@@ -98,6 +98,6 @@ public class ImageFallbackService {
 
     private FreeIpaImageFilterSettings createFreeIpaImageFilterSettings(Stack stack, ImageEntity currentImage) {
         return new FreeIpaImageFilterSettings(currentImage.getImageId(), currentImage.getImageCatalogName(), currentImage.getOs(), currentImage.getOs(),
-                stack.getRegion(), stack.getCloudPlatform().toLowerCase(Locale.ROOT), false);
+                stack.getRegion(), stack.getCloudPlatform().toLowerCase(Locale.ROOT), false, stack.getArchitecture());
     }
 }

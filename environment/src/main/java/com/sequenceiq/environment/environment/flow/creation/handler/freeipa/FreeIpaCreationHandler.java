@@ -256,6 +256,9 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         setBackup(environment, createFreeIpaRequest);
         setTags(environment, createFreeIpaRequest);
         setImage(environment, createFreeIpaRequest);
+        if (environment.getFreeIpaCreation().getArchitecture() != null) {
+            createFreeIpaRequest.setArchitecture(environment.getFreeIpaCreation().getArchitecture().getName());
+        }
         setSecurity(environment, createFreeIpaRequest);
 
         SecurityGroupRequest securityGroupRequest = null;

@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.FreeIpaImageRequest;
@@ -59,6 +60,9 @@ public class FreeIpaConverter {
             response.setEnableMultiAz(freeIpaCreation.isEnableMultiAz());
             response.setSecurity(convertSecurity(freeIpaCreation));
             response.setRecipes(freeIpaCreation.getRecipes());
+            if (freeIpaCreation.getArchitecture() != null) {
+                response.setArchitecture(freeIpaCreation.getArchitecture().getName());
+            }
             return response;
         }
     }
@@ -142,6 +146,9 @@ public class FreeIpaConverter {
                 builder.withImageId(image.getId());
                 builder.withImageOs(image.getOs());
             }
+            builder.withArchitecture(Optional.ofNullable(request.getArchitecture())
+                    .map(Architecture::fromStringWithValidation)
+                    .orElse(null));
             Set<String> recipes = request.getRecipes();
             if (recipes != null) {
                 builder.withRecipes(recipes);
@@ -160,9 +167,9 @@ public class FreeIpaConverter {
     }
 
     private FreeIpaLoadBalancerType getFreeIpaLoadBalancerType(AttachedFreeIpaRequest request) {
-            if (StringUtils.isEmpty(request.getLoadBalancerType())) {
-                return FreeIpaLoadBalancerType.getDefault();
-            }
-            return FreeIpaLoadBalancerType.valueOf(request.getLoadBalancerType().toUpperCase(Locale.US));
+        if (StringUtils.isEmpty(request.getLoadBalancerType())) {
+            return FreeIpaLoadBalancerType.getDefault();
+        }
+        return FreeIpaLoadBalancerType.valueOf(request.getLoadBalancerType().toUpperCase(Locale.US));
     }
 }

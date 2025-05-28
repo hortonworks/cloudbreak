@@ -34,6 +34,9 @@ public class FreeIpaResponse implements Serializable {
     @Schema(description = EnvironmentModelDescription.FREEIPA_SECURITY)
     private FreeIpaSecurityResponse security;
 
+    @Schema(description = EnvironmentModelDescription.FREEIPA_ARCHITECTURE)
+    private String architecture;
+
     public Integer getInstanceCountByGroup() {
         return instanceCountByGroup;
     }
@@ -88,6 +91,14 @@ public class FreeIpaResponse implements Serializable {
 
     public void setSecurity(FreeIpaSecurityResponse security) {
         this.security = security;
+    }
+
+    public String getArchitecture() {
+        return architecture;
+    }
+
+    public void setArchitecture(String architecture) {
+        this.architecture = architecture;
     }
 
     @Override

@@ -404,6 +404,11 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         return this;
     }
 
+    public FreeIpaTestDto withArchitecture(String architecture) {
+        getRequest().setArchitecture(architecture);
+        return this;
+    }
+
     public FreeIpaTestDto withCatalog(String catalog) {
         ImageSettingsRequest imageSettingsRequest = new ImageSettingsRequest();
         imageSettingsRequest.setCatalog(catalog);

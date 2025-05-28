@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.common.api.type.EncryptionType;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.environment.api.v1.environment.endpoint.service.azure.HostEncryptionCalculator;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.model.ResourceStatus;
@@ -54,14 +55,17 @@ public class InstanceTemplateRequestToTemplateConverter {
     @Inject
     private CloudParameterCache cloudParameterCache;
 
+    //CHECKSTYLE:OFF
     public Template convert(DetailedEnvironmentResponse environmentResponse, InstanceTemplateRequest source, CloudPlatform cloudPlatform, String accountId,
-        String diskEncryptionSetId, String gcpKmsEncryptionKey, String awsKmsEncryptionKey) {
+            String diskEncryptionSetId, String gcpKmsEncryptionKey, String awsKmsEncryptionKey, Architecture architecture) {
+        //CHECKSTYLE:ON
         Template template = new Template();
         template.setAccountId(accountId);
         template.setName(resourceNameGenerator.generateName(APIResourceType.TEMPLATE));
         template.setStatus(ResourceStatus.USER_MANAGED);
         setVolumesProperty(source.getAttachedVolumes(), template, cloudPlatform);
-        template.setInstanceType(Objects.requireNonNullElse(source.getInstanceType(), defaultInstanceTypeProvider.getForPlatform(cloudPlatform.name())));
+        template.setInstanceType(Objects.requireNonNullElse(source.getInstanceType(),
+                defaultInstanceTypeProvider.getForPlatform(cloudPlatform.name(), architecture)));
         Map<String, Object> attributes = new HashMap<>();
         if (cloudPlatform == CloudPlatform.AWS) {
             if (awsKmsEncryptionKey != null) {
@@ -76,8 +80,8 @@ public class InstanceTemplateRequestToTemplateConverter {
         Optional.ofNullable(source.getAws())
                 .map(AwsInstanceTemplateParameters::getSpot)
                 .ifPresent(spotParameters -> {
-                    attributes.put(AwsInstanceTemplate.EC2_SPOT_PERCENTAGE, spotParameters.getPercentage());
-                    if (Objects.nonNull(spotParameters.getMaxPrice())) {
+                            attributes.put(AwsInstanceTemplate.EC2_SPOT_PERCENTAGE, spotParameters.getPercentage());
+                            if (Objects.nonNull(spotParameters.getMaxPrice())) {
                                 attributes.put(AwsInstanceTemplate.EC2_SPOT_MAX_PRICE, spotParameters.getMaxPrice());
                             }
                         }

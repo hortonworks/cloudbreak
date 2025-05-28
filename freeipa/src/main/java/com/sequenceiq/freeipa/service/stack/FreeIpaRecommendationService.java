@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.common.api.type.CdpResourceType;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.FreeIpaRecommendationResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.VmTypeResponse;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToExtendedCloudCredentialConverter;
@@ -52,9 +53,10 @@ public class FreeIpaRecommendationService {
     @Inject
     private VmTypeToVmTypeResponseConverter vmTypeConverter;
 
-    public FreeIpaRecommendationResponse getRecommendation(String credentialCrn, String region, String availabilityZone) {
+    public FreeIpaRecommendationResponse getRecommendation(String credentialCrn, String region, String availabilityZone, String architecture) {
         Credential credential = credentialService.getCredentialByCredCrn(credentialCrn);
-        String defaultInstanceType = defaultInstanceTypeProvider.getForPlatform(credential.getCloudPlatform());
+        String defaultInstanceType = defaultInstanceTypeProvider.getForPlatform(credential.getCloudPlatform(),
+                Architecture.fromStringWithFallback(architecture));
         Set<VmTypeResponse> availableVmTypes = getAvailableVmTypes(region, availabilityZone, credential, defaultInstanceType);
         return new FreeIpaRecommendationResponse(availableVmTypes, defaultInstanceType);
     }
@@ -98,7 +100,7 @@ public class FreeIpaRecommendationService {
     }
 
     public void validateCustomInstanceType(Stack stack, Credential credential) {
-        String defaultInstanceType = defaultInstanceTypeProvider.getForPlatform(stack.getCloudPlatform());
+        String defaultInstanceType = defaultInstanceTypeProvider.getForPlatform(stack.getCloudPlatform(), stack.getArchitecture());
         Map<String, String> customInstanceTypes = getCustomInstanceTypes(stack, defaultInstanceType);
         if (!customInstanceTypes.isEmpty()) {
             Set<String> availableVmTypes = getAvailableVmTypes(stack.getRegion(), stack.getAvailabilityZone(), credential, defaultInstanceType).stream()

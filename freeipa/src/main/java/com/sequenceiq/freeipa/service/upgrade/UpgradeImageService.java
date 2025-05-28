@@ -97,7 +97,7 @@ public class UpgradeImageService {
                     && targetImages.stream().noneMatch(img -> defaultOs.equalsIgnoreCase(img.getOs()))) {
                 String platformString = platformStringTransformer.getPlatformString(stack);
                 FreeIpaImageFilterSettings imageFilterSettings = new FreeIpaImageFilterSettings(null, catalog, defaultOs, defaultOs,
-                        stack.getRegion(), platformString, false);
+                        stack.getRegion(), platformString, false, stack.getArchitecture());
                 Pair<ImageWrapper, String> rhel8ImageWrapper = imageService.fetchImageWrapperAndName(imageFilterSettings);
                 return Optional.of(convertImageWrapperAndNameToImageInfoResponse(rhel8ImageWrapper));
             } else {
@@ -146,6 +146,6 @@ public class UpgradeImageService {
 
     private FreeIpaImageFilterSettings createFreeIpaImageFilterSettings(Stack stack, ImageInfoResponse currentImage, String catalog) {
         return new FreeIpaImageFilterSettings(currentImage.getId(), catalog, currentImage.getOs(), currentImage.getOs(), stack.getRegion(),
-                stack.getCloudPlatform().toLowerCase(Locale.ROOT), false);
+                stack.getCloudPlatform().toLowerCase(Locale.ROOT), false, stack.getArchitecture());
     }
 }

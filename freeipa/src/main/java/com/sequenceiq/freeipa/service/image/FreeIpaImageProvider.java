@@ -70,7 +70,7 @@ public class FreeIpaImageProvider implements ImageProvider {
         return new FreeIpaImageFilterSettings(imageFilterSettings.currentImageId(),
                 StringUtils.isNotBlank(imageFilterSettings.catalog()) ? imageFilterSettings.catalog() : defaultCatalogUrl,
                 imageFilterSettings.currentOs(), imageFilterSettings.targetOs(),
-                imageFilterSettings.region(), imageFilterSettings.platform(), imageFilterSettings.allowMajorOsUpgrade());
+                imageFilterSettings.region(), imageFilterSettings.platform(), imageFilterSettings.allowMajorOsUpgrade(), imageFilterSettings.architecture());
     }
 
     private Optional<Image> findImageForAppVersion(FreeIpaImageFilterSettings freeIpaImageFilterSettings, ImageCatalog catalog) {

@@ -70,6 +70,8 @@ public class ImageEntity implements AccountIdAwareResource {
 
     private String saltVersion;
 
+    private String architecture;
+
     public String getImageName() {
         return imageName;
     }
@@ -209,6 +211,14 @@ public class ImageEntity implements AccountIdAwareResource {
         this.saltVersion = saltVersion;
     }
 
+    public String getArchitecture() {
+        return architecture;
+    }
+
+    public void setArchitecture(String architecture) {
+        this.architecture = architecture;
+    }
+
     @Override
     public String toString() {
         return "ImageEntity{" +
@@ -226,6 +236,7 @@ public class ImageEntity implements AccountIdAwareResource {
                 ", sourceImage='" + sourceImage + '\'' +
                 ", imdsVersion='" + imdsVersion + '\'' +
                 ", saltVersion='" + saltVersion + '\'' +
+                ", architecture='" + architecture + '\'' +
                 '}';
     }
 
@@ -254,12 +265,13 @@ public class ImageEntity implements AccountIdAwareResource {
                 && Objects.equals(ldapAgentVersion, that.ldapAgentVersion)
                 && Objects.equals(accountId, that.accountId)
                 && Objects.equals(sourceImage, that.sourceImage)
-                && Objects.equals(date, that.date);
+                && Objects.equals(date, that.date)
+                && Objects.equals(architecture, that.architecture);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id, imageName, userdata, os, osType, imageCatalogUrl, imageId,
-                imageCatalogName, date, ldapAgentVersion, accountId, sourceImage);
+                imageCatalogName, date, ldapAgentVersion, accountId, sourceImage, architecture);
     }
 }

@@ -13,6 +13,7 @@ import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +34,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.CloudStorageFolderResolverService;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.environment.dto.FreeIpaLoadBalancerType;
 import com.sequenceiq.freeipa.api.model.Backup;
@@ -44,6 +46,7 @@ import com.sequenceiq.freeipa.converter.image.ImageConverter;
 import com.sequenceiq.freeipa.converter.stack.CreateFreeIpaRequestToStackConverter;
 import com.sequenceiq.freeipa.converter.stack.StackToDescribeFreeIpaResponseConverter;
 import com.sequenceiq.freeipa.dto.Credential;
+import com.sequenceiq.freeipa.dto.ImageWrapper;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
@@ -169,6 +172,11 @@ public class FreeIpaCreationService {
         String template = templateService.waitGetTemplate(getPlatformTemplateRequest);
         stack.setTemplate(template);
         multiAzValidator.validateMultiAzForStack(stack.getPlatformvariant(), stack.getInstanceGroups());
+        ImageSettingsRequest imageSettingsRequest = request.getImage() == null ? new ImageSettingsRequest() : request.getImage();
+        Pair<ImageWrapper, String> imageWrapperStringPair = imageService.fetchImageWrapperAndName(stack, imageSettingsRequest);
+        if (stack.getArchitecture() == null) {
+            stack.setArchitecture(Architecture.fromStringWithFallback(imageWrapperStringPair.getKey().getImage().getArchitecture()));
+        }
         measure(() -> freeIpaRecommendationService.validateCustomInstanceType(stack, credential), LOGGER,
                 "Validating custom instance type took {} ms for {}", stack.getName());
         try {
@@ -177,9 +185,12 @@ public class FreeIpaCreationService {
                 securityConfigService.create(stack, request.getSecurity());
                 freeIpaRecipeService.saveRecipes(request.getRecipes(), savedStack.getId());
                 freeIpaRecipeService.sendCreationUsageReport(stack.getResourceCrn(), CollectionUtils.emptyIfNull(request.getRecipes()).size());
-                ImageSettingsRequest imageSettingsRequest = request.getImage();
-                ImageEntity image = imageService.create(savedStack, Objects.nonNull(imageSettingsRequest) ? imageSettingsRequest : new ImageSettingsRequest());
+                ImageEntity image = imageService.create(savedStack, imageWrapperStringPair);
                 Image imageForIm = imageConverter.convert(image);
+                if (!Objects.equals(savedStack.getArchitecture(), Architecture.fromStringWithFallback(image.getArchitecture()))) {
+                    throw new BadRequestException(String.format("Image architecture doesn't match the selected FreeIPA architecture. Image architecture: %s, " +
+                            "FreeIPA architecture: %s.", imageForIm.getArchitecture(), savedStack.getArchitecture()));
+                }
                 stack.getAllInstanceMetaDataList().forEach(im -> im.setImage(new Json(imageForIm)));
                 savedStack = setSupportedImdsVersionForStackIfNecessary(savedStack, image).orElse(savedStack);
                 FreeIpa freeIpa = freeIpaService.create(savedStack, request.getFreeIpa(), image.getOsType());

@@ -26,7 +26,7 @@ public class ImageConverter implements Converter<ImageEntity, Image> {
                 ),
                 source.getOs(),
                 source.getOsType(),
-                Architecture.X86_64.getName(),
+                Architecture.fromStringWithFallback(source.getArchitecture()).getName(),
                 source.getImageCatalogUrl(),
                 source.getImageCatalogName(),
                 source.getImageId(),

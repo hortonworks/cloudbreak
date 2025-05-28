@@ -63,7 +63,7 @@ class DefaultInstanceGroupProviderTest {
 
     @Test
     void createDefaultTemplateTestNoVolumeEncryptionWhenAzure() {
-        Template result = underTest.createDefaultTemplate(environmentResponse, CloudPlatform.AZURE, ACCOUNT_ID, null, null, null);
+        Template result = underTest.createDefaultTemplate(environmentResponse, CloudPlatform.AZURE, ACCOUNT_ID, null, null, null, null);
 
         assertThat(result).isNotNull();
         assertThat(result.getAttributes()).isNull();
@@ -71,7 +71,7 @@ class DefaultInstanceGroupProviderTest {
 
     @Test
     void createDefaultTemplateTestVolumeEncryptionAddedWhenAzure() {
-        Template result = underTest.createDefaultTemplate(environmentResponse, CloudPlatform.AZURE, ACCOUNT_ID, "dummyDiskEncryptionSet", null, null);
+        Template result = underTest.createDefaultTemplate(environmentResponse, CloudPlatform.AZURE, ACCOUNT_ID, "dummyDiskEncryptionSet", null, null, null);
 
         assertThat(result).isNotNull();
         Json attributes = result.getAttributes();
@@ -83,7 +83,7 @@ class DefaultInstanceGroupProviderTest {
     @Test
     void createDefaultTemplateTestVolumeEncryptionAddedWhenAzureAndNoDESAndEncryptionAtHostEnabled() {
         when(hostEncryptionCalculator.hostEncryptionRequired(any())).thenReturn(true);
-        Template result = underTest.createDefaultTemplate(environmentResponse, CloudPlatform.AZURE, ACCOUNT_ID, null, null, null);
+        Template result = underTest.createDefaultTemplate(environmentResponse, CloudPlatform.AZURE, ACCOUNT_ID, null, null, null, null);
 
         assertThat(result).isNotNull();
         Json attributes = result.getAttributes();
@@ -94,7 +94,7 @@ class DefaultInstanceGroupProviderTest {
     @Test
     void createDefaultTemplateTestVolumeEncryptionAddedWhenAzureAndEncryptionAtHostEnabled() {
         when(hostEncryptionCalculator.hostEncryptionRequired(any())).thenReturn(true);
-        Template result = underTest.createDefaultTemplate(environmentResponse, CloudPlatform.AZURE, ACCOUNT_ID, "dummyDiskEncryptionSet", null, null);
+        Template result = underTest.createDefaultTemplate(environmentResponse, CloudPlatform.AZURE, ACCOUNT_ID, "dummyDiskEncryptionSet", null, null, null);
 
         assertThat(result).isNotNull();
         Json attributes = result.getAttributes();
@@ -107,7 +107,7 @@ class DefaultInstanceGroupProviderTest {
     @Test
     void createDefaultTemplateTestDefaultVolumeEncryptionAddedWhenAwsCustomEncryptionKeyIsAbsent() {
 
-        Template result = underTest.createDefaultTemplate(environmentResponse, CloudPlatform.AWS, ACCOUNT_ID, null, null, null);
+        Template result = underTest.createDefaultTemplate(environmentResponse, CloudPlatform.AWS, ACCOUNT_ID, null, null, null, null);
 
         assertThat(result).isNotNull();
         Json attributes = result.getAttributes();
@@ -119,7 +119,7 @@ class DefaultInstanceGroupProviderTest {
     @Test
     void createDefaultTemplateTestCustomVolumeEncryptionWhenEncryptionIsPresent() {
 
-        Template result = underTest.createDefaultTemplate(environmentResponse, CloudPlatform.AWS, ACCOUNT_ID, null, null, "dummyAwsEncryptionKey");
+        Template result = underTest.createDefaultTemplate(environmentResponse, CloudPlatform.AWS, ACCOUNT_ID, null, null, "dummyAwsEncryptionKey", null);
 
         assertThat(result).isNotNull();
         Json attributes = result.getAttributes();
@@ -130,7 +130,7 @@ class DefaultInstanceGroupProviderTest {
 
     @Test
     void createDefaultTemplateTestVolumeEncryptionAddedWhenGcp() {
-        Template result = underTest.createDefaultTemplate(environmentResponse, CloudPlatform.GCP, ACCOUNT_ID, null, "dummyEncryptionKey", null);
+        Template result = underTest.createDefaultTemplate(environmentResponse, CloudPlatform.GCP, ACCOUNT_ID, null, "dummyEncryptionKey", null, null);
 
         assertThat(result).isNotNull();
         Json attributes = result.getAttributes();

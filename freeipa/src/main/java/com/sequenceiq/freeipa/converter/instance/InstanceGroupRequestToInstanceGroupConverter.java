@@ -65,10 +65,10 @@ public class InstanceGroupRequestToInstanceGroupConverter {
         instanceGroup.setTemplate(source.getInstanceTemplate() == null
                 ? defaultInstanceGroupProvider.createDefaultTemplate(environment, cloudPlatform, accountId,
                     cloudArgsForIgConverter.get(DISK_ENCRYPTION_SET_ID), cloudArgsForIgConverter.get(GCP_KMS_ENCRYPTION_KEY),
-                    cloudArgsForIgConverter.get(AWS_KMS_ENCRYPTION_KEY))
+                    cloudArgsForIgConverter.get(AWS_KMS_ENCRYPTION_KEY), stack.getArchitecture())
                 : templateConverter.convert(environment, source.getInstanceTemplate(), cloudPlatform, accountId,
                     cloudArgsForIgConverter.get(DISK_ENCRYPTION_SET_ID), cloudArgsForIgConverter.get(GCP_KMS_ENCRYPTION_KEY),
-                    cloudArgsForIgConverter.get(AWS_KMS_ENCRYPTION_KEY)));
+                    cloudArgsForIgConverter.get(AWS_KMS_ENCRYPTION_KEY), stack.getArchitecture()));
         instanceGroup.setSecurityGroup(securityGroupConverter.convert(source.getSecurityGroup()));
         instanceGroup.setInstanceGroupNetwork(hasEmptyNetworkOnStackRequest(source, networkRequest, cloudPlatform)
                 ? defaultInstanceGroupProvider.createDefaultNetwork(cloudPlatform, networkRequest)

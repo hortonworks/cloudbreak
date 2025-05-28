@@ -35,6 +35,7 @@ import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.telemetry.request.MonitoringRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.telemetry.request.WorkloadAnalyticsRequest;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
@@ -99,6 +100,7 @@ public class StackToCreateFreeIpaRequestConverter implements Converter<Stack, Cr
         request.setAuthentication(getStackAuthenticationRequest(source.getStackAuthentication()));
         request.setNetwork(getNetworkRequest(source.getNetwork()));
         request.setImage(getImageSettingsRequest(source.getImage()));
+        request.setArchitecture(Optional.ofNullable(source.getArchitecture()).map(Architecture::getName).orElse(null));
         request.setFreeIpa(getFreeIpaServerRequest(source));
         request.setGatewayPort(source.getGatewayport());
         request.setTelemetry(getTelemetry(source));

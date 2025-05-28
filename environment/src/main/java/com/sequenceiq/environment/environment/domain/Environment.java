@@ -102,6 +102,8 @@ public class Environment implements AuthResource, AccountAwareResource {
 
     private String freeIpaImageOs;
 
+    private String freeIpaArchitecture;
+
     private String freeIpaPlatformVariant;
 
     @Column(nullable = false)
@@ -493,6 +495,14 @@ public class Environment implements AuthResource, AccountAwareResource {
 
     public void setFreeIpaImageOs(String freeIpaImageOs) {
         this.freeIpaImageOs = freeIpaImageOs;
+    }
+
+    public String getFreeIpaArchitecture() {
+        return freeIpaArchitecture;
+    }
+
+    public void setFreeIpaArchitecture(String freeIpaArchitecture) {
+        this.freeIpaArchitecture = freeIpaArchitecture;
     }
 
     public EnvironmentAuthentication getAuthentication() {

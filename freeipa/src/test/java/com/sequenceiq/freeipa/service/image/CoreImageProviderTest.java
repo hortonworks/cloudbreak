@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.dto.ImageWrapper;
 
@@ -161,7 +162,7 @@ public class CoreImageProviderTest {
     }
 
     private FreeIpaImageFilterSettings createImageFilterSettings() {
-        return new FreeIpaImageFilterSettings(IMAGE_ID, CATALOG_NAME, null, null, REGION, PLATFORM, false);
+        return new FreeIpaImageFilterSettings(IMAGE_ID, CATALOG_NAME, null, null, REGION, PLATFORM, false, Architecture.X86_64);
     }
 
     private ImageV4Response anImageResponse() {

@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.PublicKeyConnector;
 import com.sequenceiq.cloudbreak.cloud.service.GetCloudParameterException;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.credential.service.CredentialService;
@@ -278,12 +279,19 @@ public class EnvironmentValidatorService {
         if (StringUtils.isNoneBlank(freeIpaCreation.getImageId(), freeIpaCreation.getImageOs())) {
             validationResultBuilder.error("FreeIpa deployment requests can not have both image id and image os parameters set.");
         }
+        validateArchitecture(freeIpaCreation, accountId, validationResultBuilder);
         if (freeIpaCreation.getSeLinux() != null
                 && SeLinux.ENFORCING.equals(freeIpaCreation.getSeLinux())
                 && !entitlementService.isCdpSecurityEnforcingSELinux(accountId)) {
             validationResultBuilder.error("SELinux enforcing requires CDP_SECURITY_ENFORCING_SELINUX entitlement for your account.");
         }
         return validationResultBuilder.build();
+    }
+
+    private void validateArchitecture(FreeIpaCreationDto freeIpaCreation, String accountId, ValidationResultBuilder validationResultBuilder) {
+        if (Architecture.ARM64.equals(freeIpaCreation.getArchitecture()) && !entitlementService.isDataLakeArmEnabled(accountId)) {
+            validationResultBuilder.error("Your account is not entitled to use arm64 instances.");
+        }
     }
 
     private Boolean singleInstanceIsOnDemandOrSpot(FreeIpaCreationDto freeIpaCreation) {

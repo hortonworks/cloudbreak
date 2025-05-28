@@ -30,6 +30,8 @@ public class Image {
 
     private static final String UUID_PROPERTY = "uuid";
 
+    private static final String ARCHITECTURE_PROPERTY = "architecture";
+
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private final long created;
 
@@ -52,6 +54,8 @@ public class Image {
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private final boolean advertised;
 
+    private final String architecture;
+
     @JsonCreator
     public Image(
             @JsonProperty(CREATED_PROPERTY) Long created,
@@ -62,7 +66,8 @@ public class Image {
             @JsonProperty(value = IMAGES_PROPERTY, required = true) Map<String, Map<String, String>> imageSetsByProvider,
             @JsonProperty(OS_TYPE_PROPERTY) String osType,
             @JsonProperty(PACKAGE_VERSIONS_PROPERTY) Map<String, String> packageVersions,
-            @JsonProperty(ADVERTISED_PROPERTY) boolean advertised) {
+            @JsonProperty(ADVERTISED_PROPERTY) boolean advertised,
+            @JsonProperty(ARCHITECTURE_PROPERTY) String architecture) {
         this.created = Objects.requireNonNullElse(created, 0L);
         this.date = date;
         this.description = description;
@@ -72,6 +77,7 @@ public class Image {
         this.imageSetsByProvider = imageSetsByProvider;
         this.packageVersions = packageVersions;
         this.advertised = advertised;
+        this.architecture = architecture;
     }
 
     @JsonProperty(CREATED_PROPERTY)
@@ -119,6 +125,12 @@ public class Image {
         return advertised;
     }
 
+    @JsonProperty("architecture")
+    public String getArchitecture() {
+        return architecture;
+    }
+
+    // CHECKSTYLE:OFF
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -134,12 +146,14 @@ public class Image {
                 && Objects.equals(osType, image.osType)
                 && Objects.equals(uuid, image.uuid)
                 && Objects.equals(imageSetsByProvider, image.imageSetsByProvider)
-                && Objects.equals(advertised, image.advertised);
+                && Objects.equals(advertised, image.advertised)
+                && Objects.equals(architecture, image.architecture);
     }
+    // CHECKSTYLE:ON
 
     @Override
     public int hashCode() {
-        return Objects.hash(date, description, os, osType, uuid, imageSetsByProvider, advertised);
+        return Objects.hash(date, description, os, osType, uuid, imageSetsByProvider, advertised, architecture);
     }
 
     @Override
@@ -152,6 +166,7 @@ public class Image {
         sb.append(", uuid='").append(uuid).append('\'');
         sb.append(", imageSetsByProvider=").append(imageSetsByProvider);
         sb.append(", advertised=").append(advertised);
+        sb.append(", architecture=").append(architecture);
         sb.append('}');
         return sb.toString();
     }

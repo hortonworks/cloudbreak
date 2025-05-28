@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.SeLinux;
 
 @JsonDeserialize(builder = FreeIpaCreationDto.Builder.class)
@@ -34,6 +35,8 @@ public class FreeIpaCreationDto {
 
     private SeLinux seLinux;
 
+    private Architecture architecture;
+
     private FreeIpaCreationDto(Builder builder) {
         create = builder.create;
         instanceCountByGroup = builder.instanceCountByGroup;
@@ -47,6 +50,7 @@ public class FreeIpaCreationDto {
         instanceType = builder.instanceType;
         recipes = builder.recipes;
         seLinux = builder.seLinux;
+        architecture = builder.architecture;
     }
 
     public void setCreate(boolean create) {
@@ -145,6 +149,14 @@ public class FreeIpaCreationDto {
         this.seLinux = seLinux;
     }
 
+    public Architecture getArchitecture() {
+        return architecture;
+    }
+
+    public void setArchitecture(Architecture architecture) {
+        this.architecture = architecture;
+    }
+
     @Override
     public String toString() {
         return "FreeIpaCreationDto{" +
@@ -160,6 +172,7 @@ public class FreeIpaCreationDto {
                 ", imageId='" + imageId + '\'' +
                 ", imageOs='" + imageOs + '\'' +
                 ", instanceType='" + instanceType + '\'' +
+                ", architecture='" + architecture + '\'' +
                 '}';
     }
 
@@ -193,6 +206,8 @@ public class FreeIpaCreationDto {
         private SeLinux seLinux = SeLinux.PERMISSIVE;
 
         private Set<String> recipes = Collections.emptySet();
+
+        private Architecture architecture;
 
         private Builder(int instanceCountByGroup) {
             this.instanceCountByGroup = instanceCountByGroup;
@@ -258,6 +273,11 @@ public class FreeIpaCreationDto {
 
         public Builder withSeLinux(SeLinux seLinux) {
             this.seLinux = seLinux;
+            return this;
+        }
+
+        public Builder withArchitecture(Architecture architecture) {
+            this.architecture = architecture;
             return this;
         }
 

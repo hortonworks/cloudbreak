@@ -30,6 +30,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.ImageCatalog;
 import com.sequenceiq.freeipa.dto.ImageWrapper;
@@ -349,6 +350,6 @@ public class FreeIpaImageProviderTest {
     }
 
     private FreeIpaImageFilterSettings createImageFilterSettings(String id, String catalog, String currentOs, String targetOs, boolean allowMajorOsUpgrade) {
-        return new FreeIpaImageFilterSettings(id, catalog, currentOs, targetOs, DEFAULT_REGION, DEFAULT_PLATFORM, allowMajorOsUpgrade);
+        return new FreeIpaImageFilterSettings(id, catalog, currentOs, targetOs, DEFAULT_REGION, DEFAULT_PLATFORM, allowMajorOsUpgrade, Architecture.X86_64);
     }
 }

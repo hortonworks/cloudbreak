@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.DefaultComputeCluster;
@@ -46,7 +47,7 @@ public class EnvironmentDtoConverter {
     private final EnvironmentTagsDtoConverter environmentTagsDtoConverter;
 
     public EnvironmentDtoConverter(Map<CloudPlatform,
-            EnvironmentNetworkConverter> environmentNetworkConverterMap,
+                    EnvironmentNetworkConverter> environmentNetworkConverterMap,
             Map<CloudPlatform, EnvironmentParametersConverter> environmentParamsConverterMap,
             AuthenticationDtoConverter authenticationDtoConverter,
             EnvironmentRecipeService environmentRecipeService,
@@ -191,6 +192,9 @@ public class EnvironmentDtoConverter {
         environment.setDeletionType(NONE);
         environment.setFreeIpaImageId(creationDto.getFreeIpaCreation().getImageId());
         environment.setFreeIpaImageOs(creationDto.getFreeIpaCreation().getImageOs());
+        if (creationDto.getFreeIpaCreation().getArchitecture() != null) {
+            environment.setFreeIpaArchitecture(creationDto.getFreeIpaCreation().getArchitecture().getName());
+        }
         environment.setAdminGroupName(creationDto.getAdminGroupName());
         environment.setCreated(System.currentTimeMillis());
         environment.setTags(environmentTagsDtoConverter.getTags(creationDto));
@@ -289,6 +293,7 @@ public class EnvironmentDtoConverter {
                 .withImageCatalog(environment.getFreeIpaImageCatalog())
                 .withImageId(environment.getFreeIpaImageId())
                 .withImageOs(environment.getFreeIpaImageOs())
+                .withArchitecture(Optional.ofNullable(environment.getFreeIpaArchitecture()).map(Architecture::fromStringWithFallback).orElse(null))
                 .withEnableMultiAz(environment.isFreeIpaEnableMultiAz())
                 .withRecipes(environmentRecipeService.getRecipes(environment.getId()))
                 .withSeLinux(environment.getSeLinux())

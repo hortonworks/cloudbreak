@@ -43,6 +43,7 @@ import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsDiskEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
@@ -128,6 +129,9 @@ public class CreateFreeIpaRequestToStackConverter {
         stack.setStackStatus(new StackStatus(stack, "Stack provision requested.", DetailedStackStatus.PROVISION_REQUESTED));
         stack.setAvailabilityZone(Optional.ofNullable(source.getPlacement()).map(PlacementBase::getAvailabilityZone).orElse(null));
         stack.setMultiAz(Boolean.TRUE.equals(source.getEnableMultiAz()));
+        if (StringUtils.isNotBlank(source.getArchitecture())) {
+            stack.setArchitecture(Architecture.fromStringWithValidation(source.getArchitecture()));
+        }
         updateCloudPlatformAndRelatedFields(source, stack, cloudPlatform);
         stack.setStackAuthentication(stackAuthenticationConverter.convert(source.getAuthentication()));
         if (source.getNetwork() != null) {

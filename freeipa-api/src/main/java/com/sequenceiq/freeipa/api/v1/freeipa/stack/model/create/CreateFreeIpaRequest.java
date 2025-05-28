@@ -66,6 +66,10 @@ public class CreateFreeIpaRequest implements TaggableRequest {
     @Schema(description = FreeIpaModelDescriptions.IMAGE_SETTINGS)
     private ImageSettingsRequest image;
 
+    @Valid
+    @Schema(description = FreeIpaModelDescriptions.FREEIPA_ARCHITECTURE)
+    private String architecture;
+
     @Schema(description = FreeIpaModelDescriptions.RECIPES)
     private Set<String> recipes;
 
@@ -226,6 +230,14 @@ public class CreateFreeIpaRequest implements TaggableRequest {
 
     public void setTags(Map<String, String> tags) {
         this.tags = tags;
+    }
+
+    public String getArchitecture() {
+        return architecture;
+    }
+
+    public void setArchitecture(String architecture) {
+        this.architecture = architecture;
     }
 
     public Set<String> getRecipes() {

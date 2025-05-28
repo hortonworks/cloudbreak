@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.ImageInfoResponse;
@@ -261,13 +262,14 @@ class UpgradeImageServiceTest {
     public void testFindTargetImagesRhel8Added() {
         Stack stack = new Stack();
         stack.setRegion("region");
+        stack.setArchitecture(Architecture.X86_64);
         Image image = createImage("2021-09-01", "centos7");
         ImageWrapper imageWrapper = ImageWrapper.ofFreeipaImage(image, CATALOG_URL);
         when(imageService.fetchImagesWrapperAndName(eq(stack), any(), any(), eq(false))).thenReturn(List.of(Pair.of(imageWrapper, "imageName")));
         setDefaultOsToRhel8();
         when(platformStringTransformer.getPlatformString(stack)).thenReturn("aws");
         FreeIpaImageFilterSettings imageFilterSettings = new FreeIpaImageFilterSettings(null, CATALOG_URL, DEFAULT_OS, DEFAULT_OS,
-                stack.getRegion(), "aws", false);
+                stack.getRegion(), "aws", false, Architecture.X86_64);
         Image rhel8 = createImage("2012-09-01", DEFAULT_OS);
         when(imageService.fetchImageWrapperAndName(imageFilterSettings)).thenReturn(Pair.of(ImageWrapper.ofFreeipaImage(rhel8, CATALOG_URL), "rhel8Image"));
 
@@ -330,7 +332,7 @@ class UpgradeImageServiceTest {
     }
 
     private Image createImage(String date, String os) {
-        return new Image(123L, date, "desc", os, UUID.randomUUID().toString(), Map.of(), "magicOs", Map.of(), false);
+        return new Image(123L, date, "desc", os, UUID.randomUUID().toString(), Map.of(), "magicOs", Map.of(), false, "x86_64");
     }
 
     private void setDefaultOsToRhel8() {

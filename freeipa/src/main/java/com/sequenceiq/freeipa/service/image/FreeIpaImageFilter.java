@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 
 @Component
@@ -52,6 +53,7 @@ public class FreeIpaImageFilter {
             List<Image> filteredImages = candidateImages.stream()
                     .filter(img -> filterPlatformAndRegion(imageFilterSettings, img))
                     .filter(img -> filterOs(imageFilterSettings, img))
+                    .filter(image -> imageFilterSettings.architecture() == null || architectureMatches(image, imageFilterSettings))
                     .toList();
             if (!filteredImages.isEmpty()) {
                 List<Image> notApplicableImages = new ArrayList<>(candidateImages);
@@ -66,6 +68,14 @@ public class FreeIpaImageFilter {
         }
     }
 
+    private static boolean architectureMatches(Image image, FreeIpaImageFilterSettings imageFilterSettings) {
+        if (image.getArchitecture() == null && Architecture.X86_64.equals(imageFilterSettings.architecture())) {
+            return true;
+        } else {
+            return imageFilterSettings.architecture().getName().equalsIgnoreCase(image.getArchitecture());
+        }
+    }
+
     private boolean filterPlatformAndRegion(FreeIpaImageFilterSettings imageFilterSettings, Image image) {
         Map<String, Map<String, String>> imageSetsByProvider = image.getImageSetsByProvider();
         return imageSetsByProvider.containsKey(imageFilterSettings.platform())
@@ -77,7 +87,7 @@ public class FreeIpaImageFilter {
         return supportedOsService.isSupported(candidateImageOs) &&
                 (StringUtils.isBlank(imageFilterSettings.targetOs()) || imageFilterSettings.targetOs().equalsIgnoreCase(candidateImageOs))
                 && (majorOsUpgradeAllowed(imageFilterSettings, candidateImageOs)
-                    || (candidateImageOs.equalsIgnoreCase(imageFilterSettings.currentOs()) || StringUtils.isBlank(imageFilterSettings.currentOs())));
+                || (candidateImageOs.equalsIgnoreCase(imageFilterSettings.currentOs()) || StringUtils.isBlank(imageFilterSettings.currentOs())));
     }
 
     private boolean majorOsUpgradeAllowed(FreeIpaImageFilterSettings imageFilterSettings, String targetOs) {

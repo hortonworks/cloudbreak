@@ -92,7 +92,8 @@ public class UpgradeService {
     private FreeIpaImageFilterSettings createFreeIpaImageFilterSettings(Stack stack, FreeIpaUpgradeRequest request, ImageSettingsRequest imageSettingsRequest,
             String currentOs) {
         return new FreeIpaImageFilterSettings(imageSettingsRequest.getId(), imageSettingsRequest.getCatalog(), currentOs, imageSettingsRequest.getOs(),
-                stack.getRegion(), platformStringTransformer.getPlatformString(stack), Boolean.TRUE.equals(request.getAllowMajorOsUpgrade()));
+                stack.getRegion(), platformStringTransformer.getPlatformString(stack), Boolean.TRUE.equals(request.getAllowMajorOsUpgrade()),
+                stack.getArchitecture());
     }
 
     @SuppressWarnings("IllegalType")

@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
@@ -164,7 +166,7 @@ public class ImageServiceTest {
     @Test
     public void testGetImageGivenIdInputNotFound() {
         FreeIpaImageFilterSettings imageSettings = new FreeIpaImageFilterSettings(FAKE_ID, IMAGE_CATALOG, DEFAULT_OS, DEFAULT_OS, REGION, DEFAULT_PLATFORM,
-                false);
+                false, Architecture.X86_64);
 
         when(imageProviderFactory.getImageProvider(IMAGE_CATALOG)).thenReturn(imageProvider);
         when(imageProvider.getImage(imageSettings)).thenReturn(Optional.empty());
@@ -218,19 +220,34 @@ public class ImageServiceTest {
         stack.setRegion(DEFAULT_REGION);
         stack.setAccountId(ACCOUNT_ID);
         ImageSettingsRequest imageRequest = new ImageSettingsRequest();
-        when(imageProviderFactory.getImageProvider(any())).thenReturn(imageProvider);
-        when(imageProvider.getImage(any())).thenReturn(Optional.of(ImageWrapper.ofCoreImage(image, IMAGE_CATALOG)));
-        when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(DEFAULT_PLATFORM, Collections.singletonMap(DEFAULT_REGION, EXISTING_ID)));
         when(imageRepository.save(any(ImageEntity.class))).thenAnswer(invocation -> invocation.getArgument(0, ImageEntity.class));
         when(imageConverter.convert(any(), any())).thenReturn(new ImageEntity());
-        when(platformStringTransformer.getPlatformString(stack)).thenReturn("aws");
 
-        ImageEntity imageEntity = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, imageRequest));
+        ImageEntity imageEntity = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.create(stack, Pair.of(ImageWrapper.ofCoreImage(image, IMAGE_CATALOG), EXISTING_ID)));
 
         assertEquals(stack, imageEntity.getStack());
         assertEquals(EXISTING_ID, imageEntity.getImageName());
         assertNull(imageEntity.getImageCatalogUrl());
         assertEquals(IMAGE_CATALOG, imageEntity.getImageCatalogName());
+    }
+
+    @Test
+    public void testImageFetch() {
+        Stack stack = new Stack();
+        stack.setCloudPlatform(DEFAULT_PLATFORM);
+        stack.setRegion(DEFAULT_REGION);
+        stack.setAccountId(ACCOUNT_ID);
+        ImageSettingsRequest imageRequest = new ImageSettingsRequest();
+        when(imageProviderFactory.getImageProvider(any())).thenReturn(imageProvider);
+        when(imageProvider.getImage(any())).thenReturn(Optional.of(ImageWrapper.ofCoreImage(image, IMAGE_CATALOG)));
+        when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(DEFAULT_PLATFORM, Collections.singletonMap(DEFAULT_REGION, EXISTING_ID)));
+        when(platformStringTransformer.getPlatformString(stack)).thenReturn("aws");
+
+        Pair<ImageWrapper, String> imageWrapperWithName = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.fetchImageWrapperAndName(stack, imageRequest));
+
+        assertEquals(EXISTING_ID, imageWrapperWithName.getValue());
     }
 
     @Test
@@ -286,7 +303,7 @@ public class ImageServiceTest {
         when(imageRepository.getByStack(stack)).thenReturn(imageEntity);
 
         when(imageProviderFactory.getImageProvider(IMAGE_CATALOG)).thenReturn(imageProvider);
-        Image image = new Image(123L, "now", "desc", DEFAULT_OS, IMAGE_UUID, Map.of(), "os", Map.of(), true);
+        Image image = new Image(123L, "now", "desc", DEFAULT_OS, IMAGE_UUID, Map.of(), "os", Map.of(), true, "x86_64");
         ImageWrapper imageWrapper = ImageWrapper.ofCoreImage(image, IMAGE_CATALOG);
         when(imageProvider.getImage(any())).thenReturn(Optional.of(imageWrapper));
         when(platformStringTransformer.getPlatformString(stack)).thenReturn("aws");

@@ -59,6 +59,9 @@ public class AttachedFreeIpaRequest implements Serializable {
     @Schema(description = EnvironmentModelDescription.FREEIPA_SECURITY)
     private FreeIpaSecurityRequest security;
 
+    @Schema(description = EnvironmentModelDescription.FREEIPA_ARCHITECTURE)
+    private String architecture;
+
     public Boolean getCreate() {
         return create;
     }
@@ -99,21 +102,12 @@ public class AttachedFreeIpaRequest implements Serializable {
         this.aws = aws;
     }
 
-    @Override
-    public String toString() {
-        return "AttachedFreeIpaRequest{" +
-                "create=" + create +
-                ", instanceCountByGroup=" + instanceCountByGroup +
-                ", loadBalancer=" + loadBalancerType +
-                ", instanceType=" + instanceType +
-                ", enableMultiAz=" + enableMultiAz +
-                ", platformVariant=" + platformVariant +
-                ", aws=" + aws +
-                ", azure=" + azure +
-                ", gcp=" + gcp +
-                ", image=" + image +
-                ", security=" + security +
-                '}';
+    public String getArchitecture() {
+        return architecture;
+    }
+
+    public void setArchitecture(String architecture) {
+        this.architecture = architecture;
     }
 
     public FreeIpaSecurityRequest getSecurity() {
@@ -172,4 +166,21 @@ public class AttachedFreeIpaRequest implements Serializable {
         this.recipes = recipes;
     }
 
+    @Override
+    public String toString() {
+        return "AttachedFreeIpaRequest{" +
+                "create=" + create +
+                ", instanceCountByGroup=" + instanceCountByGroup +
+                ", loadBalancer=" + loadBalancerType +
+                ", instanceType=" + instanceType +
+                ", enableMultiAz=" + enableMultiAz +
+                ", platformVariant=" + platformVariant +
+                ", aws=" + aws +
+                ", azure=" + azure +
+                ", gcp=" + gcp +
+                ", image=" + image +
+                ", security=" + security +
+                ", architecture=" + architecture +
+                '}';
+    }
 }

@@ -23,7 +23,7 @@ class ImageToImageEntityConverterTest {
                         "source-image", SOURCE_IMAGE,
                         "imds", "v2",
                         ImagePackageVersion.SALT.getKey(), "3001.8"),
-                false);
+                false, "x86_64");
 
         ImageEntity result = underTest.convert("accountId", source);
 
@@ -39,7 +39,7 @@ class ImageToImageEntityConverterTest {
 
     @Test
     void testExtracImdsVersion() {
-        Image source = new Image(1L, "date", "", "arch", "1-2-a-b", Map.of(), "manjaro", Map.of("imds", "anything"), false);
+        Image source = new Image(1L, "date", "", "arch", "1-2-a-b", Map.of(), "manjaro", Map.of("imds", "anything"), false, "x86_64");
 
         String result = underTest.extractImdsVersion(source);
 
@@ -48,7 +48,7 @@ class ImageToImageEntityConverterTest {
 
     @Test
     void testExtractLdapAgentVersion() {
-        Image source = new Image(1L, "date", "", "arch", "1-2-a-b", Map.of(), "manjaro", Map.of("freeipa-ldap-agent", "1.2.3"), false);
+        Image source = new Image(1L, "date", "", "arch", "1-2-a-b", Map.of(), "manjaro", Map.of("freeipa-ldap-agent", "1.2.3"), false, "x86_64");
 
         String result = underTest.extractLdapAgentVersion(source);
 
@@ -79,7 +79,7 @@ class ImageToImageEntityConverterTest {
 
     @Test
     void testExtractSourceImage() {
-        Image source = new Image(1L, "date", "", "arch", "1-2-a-b", Map.of(), "manjaro", Map.of("source-image", SOURCE_IMAGE), false);
+        Image source = new Image(1L, "date", "", "arch", "1-2-a-b", Map.of(), "manjaro", Map.of("source-image", SOURCE_IMAGE), false, "x86_64");
 
         String result = underTest.extractSourceImage(source);
 

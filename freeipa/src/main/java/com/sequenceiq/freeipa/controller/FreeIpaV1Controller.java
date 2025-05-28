@@ -488,8 +488,8 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_ENVIRONMENT)
-    public FreeIpaRecommendationResponse getRecommendation(String credentialCrn, String region, String availabilityZone) {
-        return freeIpaRecommendationService.getRecommendation(credentialCrn, region, availabilityZone);
+    public FreeIpaRecommendationResponse getRecommendation(String credentialCrn, String region, String availabilityZone, String architecture) {
+        return freeIpaRecommendationService.getRecommendation(credentialCrn, region, availabilityZone, architecture);
     }
 
     @Override

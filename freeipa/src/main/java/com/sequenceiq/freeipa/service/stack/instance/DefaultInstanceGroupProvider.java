@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.common.api.type.EncryptionType;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.environment.api.v1.environment.endpoint.service.azure.HostEncryptionCalculator;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.model.ResourceStatus;
@@ -56,14 +57,14 @@ public class DefaultInstanceGroupProvider {
     private HostEncryptionCalculator hostEncryptionCalculator;
 
     public Template createDefaultTemplate(DetailedEnvironmentResponse environmentResponse, CloudPlatform cloudPlatform,
-        String accountId, String diskEncryptionSetId, String gcpKmsEncryptionKey, String awsKmsEncryptionKey) {
+        String accountId, String diskEncryptionSetId, String gcpKmsEncryptionKey, String awsKmsEncryptionKey, Architecture architecture) {
         Template template = new Template();
         template.setName(resourceNameGenerator.generateName(APIResourceType.TEMPLATE));
         template.setStatus(ResourceStatus.DEFAULT);
         template.setRootVolumeSize(defaultRootVolumeSizeProvider.getForPlatform(cloudPlatform.name()));
         template.setVolumeCount(0);
         template.setVolumeSize(0);
-        template.setInstanceType(defaultInstanceTypeProvider.getForPlatform(cloudPlatform.name()));
+        template.setInstanceType(defaultInstanceTypeProvider.getForPlatform(cloudPlatform.name(), architecture));
         template.setAccountId(accountId);
         if (cloudPlatform == AWS) {
             if (awsKmsEncryptionKey != null) {

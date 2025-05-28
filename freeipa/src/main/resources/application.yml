@@ -74,7 +74,9 @@ freeipa:
     default.os: redhat8
     cache.ttl: 15
   platform.default.instanceType:
-    AWS: m5.large
+    AWS:
+      x86_64: m5.large
+      arm64: r7gd.large
     AZURE: Standard_DS3_v2
     GCP: e2-standard-2
     MOCK: large

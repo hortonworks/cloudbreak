@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.common.api.type.CdpResourceType;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.FreeIpaRecommendationResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.VmTypeResponse;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToExtendedCloudCredentialConverter;
@@ -63,9 +64,9 @@ class FreeIpaRecommendationServiceTest {
     public void testGetRecommendation() {
         when(credentialService.getCredentialByCredCrn(anyString())).thenReturn(new Credential("AWS", "", "", "", ""));
         when(cloudParameterService.getVmTypesV2(any(), eq("eu-central-1"), eq("AWS"), eq(CdpResourceType.DEFAULT), any())).thenReturn(initCloudVmTypes());
-        when(defaultInstanceTypeProvider.getForPlatform(eq("AWS"))).thenReturn("medium");
+        when(defaultInstanceTypeProvider.getForPlatform(eq("AWS"), eq(Architecture.X86_64))).thenReturn("medium");
 
-        FreeIpaRecommendationResponse recommendation = underTest.getRecommendation("cred", "eu-central-1", null);
+        FreeIpaRecommendationResponse recommendation = underTest.getRecommendation("cred", "eu-central-1", null, null);
         assertEquals("medium", recommendation.getDefaultInstanceType());
         Set<VmTypeResponse> vmTypes = recommendation.getVmTypes();
         assertEquals(2, vmTypes.size());
@@ -74,7 +75,7 @@ class FreeIpaRecommendationServiceTest {
 
     @Test
     public void testValidateCustomInstanceTypeWhenCustomInstanceTypeIsSmaller() {
-        when(defaultInstanceTypeProvider.getForPlatform(eq("AWS"))).thenReturn("medium");
+        when(defaultInstanceTypeProvider.getForPlatform(eq("AWS"), any())).thenReturn("medium");
         when(cloudParameterService.getVmTypesV2(any(), eq("eu-central-1"), eq("AWS"), eq(CdpResourceType.DEFAULT), any())).thenReturn(initCloudVmTypes());
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
@@ -84,7 +85,7 @@ class FreeIpaRecommendationServiceTest {
 
     @Test
     public void testValidateCustomInstanceTypeWhenCustomInstanceTypeIsLarger() {
-        when(defaultInstanceTypeProvider.getForPlatform(eq("AWS"))).thenReturn("medium");
+        when(defaultInstanceTypeProvider.getForPlatform(eq("AWS"), any())).thenReturn("medium");
         when(cloudParameterService.getVmTypesV2(any(), eq("eu-central-1"), eq("AWS"), eq(CdpResourceType.DEFAULT), any())).thenReturn(initCloudVmTypes());
 
         assertDoesNotThrow(() -> underTest.validateCustomInstanceType(createStack("large"), new Credential("AWS", "Cred", null, "crn", "account")));
