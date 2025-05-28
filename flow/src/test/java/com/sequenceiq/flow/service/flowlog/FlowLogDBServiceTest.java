@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -250,9 +251,10 @@ class FlowLogDBServiceTest {
         when(transactionService.required(any(Supplier.class))).thenAnswer(invocation -> ((Supplier) invocation.getArguments()[0]).get());
         when(nodeConfig.getId()).thenReturn(NODE_ID);
         underTest.cancelTooOldTerminationFlowForResource(1L, 10000L);
-        verify(flowLogRepository).finalizeByFlowId(eq("flow1"));
-        verify(flowLogRepository, times(0)).finalizeByFlowId(eq("flow2"));
         verify(flowLogRepository).save(eq(realFlowLog1));
+        verify(flowLogRepository).findAllByFlowIdOrderByCreatedDesc("flow1");
+        verify(flowLogRepository, never()).findAllByFlowIdOrderByCreatedDesc("flow2");
+        verify(flowLogRepository).saveAll(anyList());
     }
 
     @Test
@@ -268,9 +270,10 @@ class FlowLogDBServiceTest {
         when(flowLogRepository.findAllRunningFlowLogByResourceId(eq(1L))).thenReturn(flowLogs);
         when(applicationFlowInformation.getTerminationFlow()).thenReturn(Collections.singletonList(TerminationFlowConfig.class));
         underTest.cancelTooOldTerminationFlowForResource(1L, 10000L);
-        verify(flowLogRepository, times(0)).finalizeByFlowId(eq("flow1"));
-        verify(flowLogRepository, times(0)).finalizeByFlowId(eq("flow2"));
         verify(flowLogRepository, times(0)).save(any());
+        verify(flowLogRepository, never()).findAllByFlowIdOrderByCreatedDesc("flow1");
+        verify(flowLogRepository, never()).findAllByFlowIdOrderByCreatedDesc("flow2");
+        verify(flowLogRepository, never()).saveAll(anyList());
     }
 
     @Test
@@ -306,10 +309,10 @@ class FlowLogDBServiceTest {
     }
 
     @Test
-    void testClose() throws TransactionExecutionException {
+    void testFinish() throws TransactionExecutionException {
         prepareFinalization();
         Map<Object, Object> params = Map.of("param1", StateStatus.SUCCESSFUL, "param2", 234L, "param3", "true");
-        underTest.close(ID, FLOW_ID, false, params, REASON);
+        underTest.finish(ID, FLOW_ID, false, params, REASON);
 
         verifyFinalization();
         FlowLog savedFlowLog = savedFlowLogCaptor.getValue();
@@ -330,7 +333,6 @@ class FlowLogDBServiceTest {
         prepareFinalization();
         underTest.cancel(ID, FLOW_ID);
 
-        verify(flowLogRepository).finalizeByFlowId(FLOW_ID);
         verify(flowLogRepository, times(2)).save(savedFlowLogCaptor.capture());
         assertThat(savedFlowLogCaptor.getAllValues()).hasSize(2);
         FlowLog savedFlowLog = savedFlowLogCaptor.getAllValues().get(1);
@@ -344,6 +346,8 @@ class FlowLogDBServiceTest {
         assertThat(savedFlowLog.getVariablesJackson()).isNull();
         assertTrue(savedFlowLog.getCreated() > 0L);
         assertEquals(savedFlowLog.getCreated(), savedFlowLog.getEndTime());
+        verify(flowLogRepository).findAllByFlowIdOrderByCreatedDesc(FLOW_ID);
+        verify(flowLogRepository).saveAll(anyList());
     }
 
     private void prepareFinalization() throws TransactionExecutionException {
@@ -354,15 +358,23 @@ class FlowLogDBServiceTest {
         lastFlowLog.setId(DATABASE_ID);
         when(flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.of(lastFlowLog));
         when(nodeConfig.getId()).thenReturn(NODE_ID);
+        FlowLog initialFlowLog = new FlowLog(DATABASE_ID, FLOW_ID, "initState", false, StateStatus.SUCCESSFUL, OperationType.DIAGNOSTICS);
+        when(flowLogRepository.findAllByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(List.of(lastFlowLog, initialFlowLog));
     }
 
     private void verifyFinalization() {
-        verify(flowLogRepository).finalizeByFlowId(FLOW_ID);
         verify(flowLogRepository, times(2)).save(savedFlowLogCaptor.capture());
         assertThat(savedFlowLogCaptor.getAllValues()).hasSize(2);
         FlowLog lastFlowLog = savedFlowLogCaptor.getAllValues().get(0);
         assertEquals(DATABASE_ID, lastFlowLog.getId());
         assertEquals(REASON, lastFlowLog.getReason());
+        verify(flowLogRepository).findAllByFlowIdOrderByCreatedDesc(FLOW_ID);
+        ArgumentCaptor<List<FlowLog>> flowLogsCaptor = ArgumentCaptor.forClass(List.class);
+        verify(flowLogRepository).saveAll(flowLogsCaptor.capture());
+        List<FlowLog> savedFlowLogs = flowLogsCaptor.getValue();
+        assertThat(savedFlowLogs).hasSize(2);
+        assertThat(savedFlowLogs).allMatch(flowLog -> Boolean.TRUE.equals(flowLog.getFinalized()));
+        assertThat(savedFlowLogs).allMatch(flowLog -> !StateStatus.PENDING.equals(flowLog.getStateStatus()));
     }
 
     private FlowLog createFlowLog(boolean pending, String flowId) {
@@ -487,38 +499,41 @@ class FlowLogDBServiceTest {
     }
 
     @Test
-    void testCloseFlowWhenFlowFound() {
+    void testCloseFlowOnErrorWhenErrorFound() {
         FlowLog flowLog = new FlowLog(ID, FLOW_ID, "currentState", false, StateStatus.PENDING, OperationType.PROVISION);
         flowLog.setId(FLOW_LOG_ID);
         when(flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.of(flowLog));
-        underTest.closeFlow(FLOW_ID, null);
+        underTest.closeFlowOnError(FLOW_ID, null);
         verify(flowLogRepository, times(1)).findFirstByFlowIdOrderByCreatedDesc(eq(FLOW_ID));
         verify(applicationFlowInformation, times(1)).handleFlowFail(eq(flowLog));
         verify(flowLogRepository, times(1)).save(eq(flowLog));
-        verify(flowLogRepository, times(1)).finalizeByFlowId(eq(FLOW_ID));
+        verify(flowLogRepository).findAllByFlowIdOrderByCreatedDesc(eq(FLOW_ID));
+        verify(flowLogRepository).saveAll(anyList());
     }
 
     @Test
-    void testCloseFlowWhenFlowFoundButHandlingFails() {
+    void testCloseFlowOnErrorWhenHandlingFails() {
         FlowLog flowLog = new FlowLog(ID, FLOW_ID, "currentState", false, StateStatus.PENDING, OperationType.PROVISION);
         flowLog.setId(FLOW_LOG_ID);
         when(flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.of(flowLog));
         doThrow(new RuntimeException("Boom")).when(applicationFlowInformation).handleFlowFail(any());
-        underTest.closeFlow(FLOW_ID, null);
+        underTest.closeFlowOnError(FLOW_ID, null);
         verify(flowLogRepository, times(1)).findFirstByFlowIdOrderByCreatedDesc(eq(FLOW_ID));
         verify(applicationFlowInformation, times(1)).handleFlowFail(eq(flowLog));
         verify(flowLogRepository, times(1)).save(eq(flowLog));
-        verify(flowLogRepository, times(1)).finalizeByFlowId(eq(FLOW_ID));
+        verify(flowLogRepository).findAllByFlowIdOrderByCreatedDesc(eq(FLOW_ID));
+        verify(flowLogRepository).saveAll(anyList());
     }
 
     @Test
-    void testCloseFlowWhenFlowNotFound() {
+    void testCloseFlowOnErrorWhenFlowNotFound() {
         when(flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.empty());
-        underTest.closeFlow(FLOW_ID, null);
+        underTest.closeFlowOnError(FLOW_ID, null);
         verify(flowLogRepository, times(1)).findFirstByFlowIdOrderByCreatedDesc(eq(FLOW_ID));
         verify(applicationFlowInformation, never()).handleFlowFail(any());
         verify(flowLogRepository, never()).save(any());
-        verify(flowLogRepository, never()).finalizeByFlowId(anyString());
+        verify(flowLogRepository, never()).findAllByFlowIdOrderByCreatedDesc(anyString());
+        verify(flowLogRepository, never()).saveAll(anyList());
     }
 
     public static class TerminationFlowConfig extends AbstractFlowConfiguration<MockFlowState, MockFlowEvent> {

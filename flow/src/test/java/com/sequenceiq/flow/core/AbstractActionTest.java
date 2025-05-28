@@ -122,7 +122,7 @@ public class AbstractActionTest {
         RuntimeException exception = new IllegalStateException("something went wrong");
         Mockito.doThrow(exception).when(underTest).doExecute(any(CommonContext.class), nullable(Payload.class), any());
         stateMachine.sendEvent(new GenericMessage<>(Event.DOIT, Collections.singletonMap(FlowConstants.FLOW_PARAMETERS, FLOW_PARAMETERS)));
-        verify(flowLogDBService, times(1)).closeFlow(FLOW_ID, "Unhandled exception happened in flow execution, type: " +
+        verify(flowLogDBService, times(1)).closeFlowOnError(FLOW_ID, "Unhandled exception happened in flow execution, type: " +
                 "java.lang.IllegalStateException, message: something went wrong");
     }
 
@@ -133,7 +133,7 @@ public class AbstractActionTest {
         Mockito.doThrow(exception).when(underTest).doExecute(any(CommonContext.class), nullable(Payload.class), any());
         Mockito.doThrow(new NullPointerException("null")).when(underTest).getFailurePayload(any(), any(), any());
         stateMachine.sendEvent(new GenericMessage<>(Event.DOIT, Collections.singletonMap(FlowConstants.FLOW_PARAMETERS, FLOW_PARAMETERS)));
-        verify(flowLogDBService, times(1)).closeFlow(FLOW_ID, "Unhandled exception happened in flow execution, type: " +
+        verify(flowLogDBService, times(1)).closeFlowOnError(FLOW_ID, "Unhandled exception happened in flow execution, type: " +
                 "java.lang.IllegalStateException, message: something went wrong");
     }
 

@@ -132,7 +132,7 @@ public class EventBusConfig {
                         .orElse(null);
                 if (flowId != null) {
                     LOGGER.error("Unhandled exception happened in flow {}, lets cancel it", flowId, exception);
-                    flowLogDBService.closeFlow(flowId, String.format("Unhandled exception happened in flow, type: %s, message: %s",
+                    flowLogDBService.closeFlowOnError(flowId, String.format("Unhandled exception happened in flow, type: %s, message: %s",
                             exception.getClass().getName(), exception.getMessage()));
                 } else {
                     LOGGER.error("We were not able to guess flowId on thread: {}", generateStackTrace());
@@ -151,7 +151,7 @@ public class EventBusConfig {
             if (!executorService.isShutdown() && !executorService.isTerminated()) {
                 String flowId = tryGetFlowIdFromEvent(event);
                 if (flowId != null) {
-                    flowLogDBService.closeFlow(flowId, String.format("Unhanded event: %s", event.getClass().getName()));
+                    flowLogDBService.closeFlowOnError(flowId, String.format("Unhanded event: %s", event.getClass().getName()));
                 } else {
                     LOGGER.error("We were not able to guess flowId on thread: {}", generateStackTrace());
                 }

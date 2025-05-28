@@ -20,7 +20,7 @@ public interface FlowLogService {
 
     Iterable<FlowLog> saveAll(Iterable<FlowLog> entities);
 
-    FlowLog close(Long resourceId, String flowId, boolean failed, Map<Object, Object> contextParams, String reason) throws TransactionExecutionException;
+    FlowLog finish(Long resourceId, String flowId, boolean failed, Map<Object, Object> contextParams, String reason) throws TransactionExecutionException;
 
     FlowLog cancel(Long resourceId, String flowId) throws TransactionExecutionException;
 

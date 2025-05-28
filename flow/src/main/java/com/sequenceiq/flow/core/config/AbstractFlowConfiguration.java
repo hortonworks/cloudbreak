@@ -163,7 +163,7 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
                     public void eventNotAccepted(Message<E> event) {
                         LOGGER.error("{} not accepted event: {}", getClass().getSimpleName(), event);
                         FlowParameters flowParameters = (FlowParameters) event.getHeaders().get(MessageFactory.HEADERS.FLOW_PARAMETERS.name());
-                        flowLogDBService.closeFlow(flowParameters.getFlowId(), String.format("%s not accepted event: %s",
+                        flowLogDBService.closeFlowOnError(flowParameters.getFlowId(), String.format("%s not accepted event: %s",
                                 getClass().getSimpleName(), event.getPayload() != null ? event.getPayload().getClass().getName() : "missing payload"));
                     }
                 };

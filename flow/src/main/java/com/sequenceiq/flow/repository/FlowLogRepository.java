@@ -56,10 +56,6 @@ public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
     @Query("SELECT DISTINCT fl.flowId, fl.resourceId, fl.cloudbreakNodeId FROM FlowLog fl WHERE fl.stateStatus = 'PENDING'")
     List<Object[]> findAllPending();
 
-    @Modifying
-    @Query("UPDATE FlowLog fl SET fl.finalized = true WHERE fl.flowId = :flowId")
-    void finalizeByFlowId(@Param("flowId") String flowId);
-
     @Query("SELECT fl FROM FlowLog fl WHERE fl.cloudbreakNodeId = :cloudbreakNodeId AND fl.stateStatus = 'PENDING'")
     Set<FlowLog> findAllByCloudbreakNodeId(@Param("cloudbreakNodeId") String cloudbreakNodeId);
 

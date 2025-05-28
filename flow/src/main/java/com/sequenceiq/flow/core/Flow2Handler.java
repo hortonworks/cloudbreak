@@ -8,6 +8,7 @@ import static com.sequenceiq.flow.core.FlowConstants.FLOW_CHAIN_TYPE;
 import static com.sequenceiq.flow.core.FlowConstants.FLOW_FINAL;
 import static com.sequenceiq.flow.core.FlowConstants.FLOW_ID;
 import static com.sequenceiq.flow.core.FlowConstants.FLOW_OPERATION_TYPE;
+import static com.sequenceiq.flow.core.FlowState.FlowStateConstants.INIT_STATE;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -46,7 +47,6 @@ import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.cleanup.InMemoryCleanup;
-import com.sequenceiq.flow.core.FlowState.FlowStateConstants;
 import com.sequenceiq.flow.core.cache.FlowStatCache;
 import com.sequenceiq.flow.core.chain.FlowChainHandler;
 import com.sequenceiq.flow.core.chain.FlowChains;
@@ -177,7 +177,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
             throws TransactionExecutionException {
         String flowId = flowParameters.getFlowId();
         LOGGER.debug("flow finalizing arrived: id: {}", flowId);
-        flowLogService.close(resourceId, flowId, false, contextParams, null);
+        flowLogService.finish(resourceId, flowId, false, contextParams, null);
         Flow flow = runningFlows.remove(flowId);
         if (flow != null) {
             Optional<FlowFinalizerCallback> finalizerCallback = createFinalizerCallback(flow);
@@ -245,8 +245,8 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                 String flowId = UUID.randomUUID().toString();
                 FlowConfiguration<?> flowConfig = getFlowConfiguration(key);
                 addFlowParameters(flowParameters, flowId, flowChainId, flowConfig);
-                flowLogService.save(flowParameters, flowChainId, key, payload, contextParams, flowConfig.getClass(), FlowStateConstants.INIT_STATE);
-                flowLogService.close(payload.getResourceId(), flowId, !success, contextParams, reason);
+                flowLogService.save(flowParameters, flowChainId, key, payload, contextParams, flowConfig.getClass(), INIT_STATE);
+                flowLogService.finish(payload.getResourceId(), flowId, !success, contextParams, reason);
                 flowChains.cleanFlowChain(flowChainId, flowParameters.getFlowTriggerUserCrn());
                 flowChains.removeFullFlowChain(flowChainId, success);
             } catch (TransactionExecutionException e) {

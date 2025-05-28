@@ -105,7 +105,7 @@ public class FlowLogDBService implements FlowLogService {
     }
 
     @Override
-    public FlowLog close(Long resourceId, String flowId, boolean failed, Map<Object, Object> contextParams, String reason)
+    public FlowLog finish(Long resourceId, String flowId, boolean failed, Map<Object, Object> contextParams, String reason)
             throws TransactionExecutionException {
         return finalize(resourceId, flowId, FlowConstants.FINISHED_STATE, failed, contextParams, reason);
     }
@@ -123,15 +123,10 @@ public class FlowLogDBService implements FlowLogService {
         return flowLog;
     }
 
-    public void finalize(String flowId) {
-        flowLogRepository.finalizeByFlowId(flowId);
-    }
-
     private FlowLog finalize(Long resourceId, String flowId, String state, boolean failed, Map<Object, Object> contextParams, String reason)
             throws TransactionExecutionException {
         return transactionService.required(() -> {
             LOGGER.info("Finalize flow [{}] with state [{}] and failed [{}] for resource [{}]", flowId, state, failed, resourceId);
-            flowLogRepository.finalizeByFlowId(flowId);
             Optional<FlowLog> lastFlowLogOpt = findFirstByFlowIdOrderByCreatedDesc(flowId);
             OperationType operationType = OperationType.UNKNOWN;
             if (lastFlowLogOpt.isPresent()) {
@@ -155,18 +150,21 @@ public class FlowLogDBService implements FlowLogService {
             flowLog.setEndTime(flowLog.getCreated());
             LOGGER.info("Persisting final FlowLog: {}", flowLog);
             FlowLog finalFlowLog = flowLogRepository.save(flowLog);
-            setPendingFlowLogsToSuccessful(flowId);
+            finalizeAllFlowLogs(flowId);
             return finalFlowLog;
         });
     }
 
-    private void setPendingFlowLogsToSuccessful(String flowId) {
+    private void finalizeAllFlowLogs(String flowId) {
         // We are using this method because FlowLog has @Version field, and it needs to be properly updated by JPA
-        List<FlowLog> allPendingFlowLogEntryForFlow = flowLogRepository.findAllByFlowIdAndStateStatus(flowId, StateStatus.PENDING);
-        for (FlowLog log : allPendingFlowLogEntryForFlow) {
-            log.setStateStatus(StateStatus.SUCCESSFUL);
-            flowLogRepository.save(log);
+        List<FlowLog> flowLogs = flowLogRepository.findAllByFlowIdOrderByCreatedDesc(flowId);
+        for (FlowLog flowLog : flowLogs) {
+            flowLog.setFinalized(Boolean.TRUE);
+            if (StateStatus.PENDING.equals(flowLog.getStateStatus())) {
+                flowLog.setStateStatus(StateStatus.SUCCESSFUL);
+            }
         }
+        flowLogRepository.saveAll(flowLogs);
     }
 
     @Override
@@ -445,7 +443,7 @@ public class FlowLogDBService implements FlowLogService {
                 .values().stream().filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
     }
 
-    public void closeFlow(String flowId, String reason) {
+    public void closeFlowOnError(String flowId, String reason) {
         findFirstByFlowIdOrderByCreatedDesc(flowId).ifPresent(flowLog -> {
             try {
                 applicationFlowInformation.handleFlowFail(flowLog);
@@ -453,7 +451,7 @@ public class FlowLogDBService implements FlowLogService {
                 LOGGER.error("Exception occurred while handled {} flow failure. Message: {}", flowId, e.getMessage(), e);
             }
             updateLastFlowLogStatus(flowLog, true, reason);
-            finalize(flowLog.getFlowId());
+            finalizeAllFlowLogs(flowId);
         });
     }
 }

@@ -110,7 +110,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
     private void closeFlowOnError(Exception ex, String flowId) {
         if (flowId != null) {
             LOGGER.error("Closing flow with id {}", flowId);
-            flowLogDBService.closeFlow(flowId, String.format("Unhandled exception happened in flow execution, type: %s, message: %s",
+            flowLogDBService.closeFlowOnError(flowId, String.format("Unhandled exception happened in flow execution, type: %s, message: %s",
                     ex.getClass().getName(), ex.getMessage()));
         }
     }

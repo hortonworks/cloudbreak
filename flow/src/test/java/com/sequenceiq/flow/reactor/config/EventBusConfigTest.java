@@ -55,7 +55,7 @@ class EventBusConfigTest {
         headers.set("FLOW_ID", "123");
         eventBus.notify("notexist", new Event<>(headers, null));
         verify(flowLogDBService, timeout(2000).times(1))
-                .closeFlow("123", "Unhanded event: com.sequenceiq.cloudbreak.eventbus.Event");
+                .closeFlowOnError("123", "Unhanded event: com.sequenceiq.cloudbreak.eventbus.Event");
     }
 
     @Test
@@ -71,7 +71,7 @@ class EventBusConfigTest {
         });
         eventBus.notify("exampleselector", new Event<>(headers, null));
         verify(flowLogDBService, timeout(2000).times(1))
-                .closeFlow("123", "Unhandled exception happened in flow, type: java.lang.RuntimeException, message: uncaught exception");
+                .closeFlowOnError("123", "Unhandled exception happened in flow, type: java.lang.RuntimeException, message: uncaught exception");
     }
 
     @Configuration
