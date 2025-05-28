@@ -27,6 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.ImageCatalog;
@@ -65,6 +66,16 @@ public class ImageServiceTest {
     private static final String ACCOUNT_ID = "cloudera";
 
     private static final LocalDateTime MOCK_NOW = LocalDateTime.of(1969, 4, 1, 4, 20);
+
+    private static final String LDAP_AGENT_VERSION = "1.2.3";
+
+    private static final String SOURCE_IMAGE = "source-image";
+
+    private static final String IMDS_VERSION = "v2";
+
+    private static final String SALT_VERSION = "3001.8";
+
+    private static final String GATEWAY_USERDATA = "gateway userdata";
 
     @Mock
     private ImageProviderFactory imageProviderFactory;
@@ -180,10 +191,10 @@ public class ImageServiceTest {
         when(image.getOsType()).thenReturn("rhel8");
         when(image.getUuid()).thenReturn(IMAGE_UUID);
         when(imageRepository.save(any(ImageEntity.class))).thenAnswer(invocation -> invocation.getArgument(0, ImageEntity.class));
-        when(imageConverter.extractLdapAgentVersion(image)).thenReturn("1.2.3");
-        when(imageConverter.extractSourceImage(image)).thenReturn("source-image");
-        when(imageConverter.extractImdsVersion(image)).thenReturn("v2");
-        when(imageConverter.extractSaltVersion(image)).thenReturn("3001.8");
+        when(imageConverter.extractLdapAgentVersion(image)).thenReturn(LDAP_AGENT_VERSION);
+        when(imageConverter.extractSourceImage(image)).thenReturn(SOURCE_IMAGE);
+        when(imageConverter.extractImdsVersion(image)).thenReturn(IMDS_VERSION);
+        when(imageConverter.extractSaltVersion(image)).thenReturn(SALT_VERSION);
         when(platformStringTransformer.getPlatformString(stack)).thenReturn("aws");
 
         ImageEntity imageEntity = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.changeImage(stack, imageRequest));
@@ -192,12 +203,12 @@ public class ImageServiceTest {
         assertEquals(IMAGE_CATALOG_URL, imageEntity.getImageCatalogUrl());
         assertNull(imageEntity.getImageCatalogName());
         assertEquals(IMAGE_UUID, imageEntity.getImageId());
-        assertEquals("1.2.3", imageEntity.getLdapAgentVersion());
-        assertEquals("source-image", imageEntity.getSourceImage());
+        assertEquals(LDAP_AGENT_VERSION, imageEntity.getLdapAgentVersion());
+        assertEquals(SOURCE_IMAGE, imageEntity.getSourceImage());
         assertEquals("rh8", imageEntity.getOs());
         assertEquals("rhel8", imageEntity.getOsType());
-        assertEquals("v2", imageEntity.getImdsVersion());
-        assertEquals("3001.8", imageEntity.getSaltVersion());
+        assertEquals(IMDS_VERSION, imageEntity.getImdsVersion());
+        assertEquals(SALT_VERSION, imageEntity.getSaltVersion());
     }
 
     @Test
@@ -229,6 +240,14 @@ public class ImageServiceTest {
         originalImage.setImageId(IMAGE_UUID);
         originalImage.setImageCatalogName(IMAGE_CATALOG);
         originalImage.setImageCatalogUrl(IMAGE_CATALOG_URL);
+        originalImage.setOs(OsType.CENTOS7.getOs());
+        originalImage.setOsType(OsType.CENTOS7.getOsType());
+        originalImage.setLdapAgentVersion(LDAP_AGENT_VERSION);
+        originalImage.setSourceImage(SOURCE_IMAGE);
+        originalImage.setImdsVersion(IMDS_VERSION);
+        originalImage.setSaltVersion(SALT_VERSION);
+        originalImage.setGatewayUserdata(GATEWAY_USERDATA);
+
         when(imageRevisionReaderService.find(2L, 3L)).thenReturn(originalImage);
         ImageEntity currentImage = new ImageEntity();
         currentImage.setId(2L);
@@ -244,6 +263,13 @@ public class ImageServiceTest {
         assertEquals(IMAGE_CATALOG, revertedImage.getImageCatalogName());
         assertEquals(IMAGE_CATALOG_URL, revertedImage.getImageCatalogUrl());
         assertEquals(EXISTING_ID, revertedImage.getImageName());
+        assertEquals(OsType.CENTOS7.getOs(), revertedImage.getOs());
+        assertEquals(OsType.CENTOS7.getOsType(), revertedImage.getOsType());
+        assertEquals(LDAP_AGENT_VERSION, revertedImage.getLdapAgentVersion());
+        assertEquals(SOURCE_IMAGE, revertedImage.getSourceImage());
+        assertEquals(IMDS_VERSION, revertedImage.getImdsVersion());
+        assertEquals(SALT_VERSION, revertedImage.getSaltVersion());
+        assertEquals(GATEWAY_USERDATA, revertedImage.getGatewayUserdata());
     }
 
     @Test

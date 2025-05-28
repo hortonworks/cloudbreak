@@ -139,10 +139,18 @@ public class ImageService {
         LOGGER.info("Reverting to revision [{}] using {}", revision, originalImageEntity);
         ImageEntity imageEntity = imageRepository.findById(imageEntityId).get();
         imageEntity.setImageName(originalImageEntity.getImageName());
+        imageEntity.setOs(originalImageEntity.getOs());
+        imageEntity.setOsType(originalImageEntity.getOsType());
         imageEntity.setAccountId(accountId);
         imageEntity.setImageId(originalImageEntity.getImageId());
         imageEntity.setImageCatalogName(originalImageEntity.getImageCatalogName());
         imageEntity.setImageCatalogUrl(originalImageEntity.getImageCatalogUrl());
+        imageEntity.setDate(originalImageEntity.getDate());
+        imageEntity.setLdapAgentVersion(originalImageEntity.getLdapAgentVersion());
+        imageEntity.setSourceImage(originalImageEntity.getSourceImage());
+        imageEntity.setImdsVersion(originalImageEntity.getImdsVersion());
+        imageEntity.setSaltVersion(originalImageEntity.getSaltVersion());
+        imageEntity.setGatewayUserdata(originalImageEntity.getGatewayUserdata());
         imageRepository.save(imageEntity);
         LOGGER.info("Image reverted");
     }
