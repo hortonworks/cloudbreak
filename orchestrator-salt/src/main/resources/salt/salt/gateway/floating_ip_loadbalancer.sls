@@ -1,5 +1,6 @@
 {%- set os = salt['grains.get']('os') %}
-{%- if salt['pillar.get']('platform') == 'AZURE' and salt['pillar.get']('gateway:loadbalancers:floatingIpEnabled', False) %}
+{%- if (salt['pillar.get']('platform') == 'AZURE' and salt['pillar.get']('gateway:loadbalancers:floatingIpEnabled', False))
+  or (salt['pillar.get']('platform') == 'GCP') and salt['pillar.get']('gateway:loadbalancers:frontends') is defined and salt['pillar.get']('gateway:loadbalancers:frontends') | length > 0 %}
 {%- if os == "RedHat" %}
 create_loopback_service_unit:
   file.managed:
