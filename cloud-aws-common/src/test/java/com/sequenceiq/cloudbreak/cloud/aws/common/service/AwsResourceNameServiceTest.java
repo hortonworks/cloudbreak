@@ -96,19 +96,19 @@ class AwsResourceNameServiceTest {
     @Test
     void testLoadBalancerTargetGroup() {
         String resourceName = underTest.loadBalancerTargetGroup(STACK_NAME, SCHEME, PORT, CLOUD_CONTEXT);
-        assertTrue(resourceName.matches("stackn-8080scheme-" + CRN_PART + "-[A-Za-z0-9]{4}"));
+        assertTrue(resourceName.matches("stac-TG8080scheme-" + CRN_PART + "-[A-Za-z0-9]{4}"));
     }
 
     @Test
     void testLoadBalancerTargetGroupBackwardCompatibleWithNewHash() {
         String resourceName = underTest.loadBalancerTargetGroup("sator-dev", "GwayPriv", 443, CLOUD_CONTEXT);
-        assertTrue(resourceName.matches("sator-443GwayPriv-" + CRN_PART + "-[A-Za-z0-9]{4}"));
+        assertTrue(resourceName.matches("sat-TG443GwayPriv-" + CRN_PART + "-[A-Za-z0-9]{4}"));
     }
 
     @Test
     void testLoadBalancerTargetGroupShorterThanSevenCharacter() {
         String resourceName = underTest.loadBalancerTargetGroup("sdfsda", SCHEME, PORT, CLOUD_CONTEXT);
-        assertTrue(resourceName.matches("sdfsda-8080scheme-" + CRN_PART + "-[A-Za-z0-9]{4}"));
+        assertTrue(resourceName.matches("sdfs-TG8080scheme-" + CRN_PART + "-[A-Za-z0-9]{4}"));
     }
 
     @Disabled

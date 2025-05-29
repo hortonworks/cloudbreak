@@ -105,7 +105,7 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
     }
 
     public String loadBalancerTargetGroupResourceTypeSchemeAndPortNamePart(String scheme, int port) {
-        return port + scheme;
+        return TG_PART_NAME + port + scheme;
     }
 
     public String loadBalancerTargetGroup(String stackName, String scheme, int port, CloudContext context) {
