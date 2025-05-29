@@ -8,10 +8,11 @@
     "cluster": {
       "blueprintName": "7.2.16 - Search Analytics"
     },
+    "enableLoadBalancer": true,
     "instanceGroups": [
       {
         "name": "manager",
-        "nodeCount": 1,
+        "nodeCount": 2,
         "recoveryMode": "MANUAL",
         "template": {
           "attachedVolumes": [

@@ -17,6 +17,17 @@
         "roleConfigGroups": [ ]
       },
       {
+        "refName": "knox",
+        "roleConfigGroups": [
+          {
+            "base": true,
+            "refName": "knox-KNOX_GATEWAY-BASE",
+            "roleType": "KNOX_GATEWAY"
+          }
+        ],
+        "serviceType": "KNOX"
+      },
+      {
         "refName": "zookeeper",
         "serviceType": "ZOOKEEPER",
         "roleConfigGroups": [
@@ -99,8 +110,9 @@
     "hostTemplates": [
       {
         "refName": "manager",
-        "cardinality": 1,
+        "cardinality": 2,
         "roleConfigGroupsRefNames": [
+          "knox-KNOX_GATEWAY-BASE",
           "solr-GATEWAY-BASE"
         ]
       },

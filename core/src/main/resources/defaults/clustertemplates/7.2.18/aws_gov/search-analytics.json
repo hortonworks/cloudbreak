@@ -11,10 +11,11 @@
     "externalDatabase": {
       "availabilityType": "HA"
     },
+    "enableLoadBalancer": true,
     "instanceGroups": [
       {
         "name": "manager",
-        "nodeCount": 1,
+        "nodeCount": 2,
         "recoveryMode": "MANUAL",
         "template": {
           "attachedVolumes": [

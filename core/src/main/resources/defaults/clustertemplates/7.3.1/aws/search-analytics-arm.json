@@ -9,10 +9,11 @@
       "blueprintName": "7.3.1 - Search Analytics"
     },
     "architecture": "arm64",
+    "enableLoadBalancer": true,
     "instanceGroups": [
       {
         "name": "manager",
-        "nodeCount": 1,
+        "nodeCount": 2,
         "recoveryMode": "MANUAL",
         "template": {
           "attachedVolumes": [
