@@ -173,8 +173,6 @@ freeipa:
       53: TCP_UDP
       88: TCP_UDP
       636: TCP
-      749: TCP
-      4444: UDP
     supported-variants: AWS_NATIVE,AWS_NATIVE_GOV,AZURE,GCP
   secret.rotation:
     kmskey.rotationPeriodInDays: 365
