@@ -1147,27 +1147,43 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             LOGGER.info("CM version is: {}", clouderaManagerRepoDetails.getVersion());
             if (isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails.getVersion(), CLOUDERAMANAGER_VERSION_7_9_0)) {
                 LOGGER.info("Current action is repair and CM version is newer than 7.9.0, start services on hosts because services were stopped");
-                try {
+                if (!hosts.isEmpty()) {
                     LOGGER.info("Start roles on hosts: {}", hosts);
-                    if (!hosts.isEmpty()) {
-                        ApiHostNameList items = new ApiHostNameList().items(hosts);
-                        ApiCommand apiCommand = clouderaManagerApiFactory.getClouderaManagerResourceApi(v31Client).hostsStartRolesCommand(items);
-                        ExtendedPollingResult extendedPollingResult =
-                                clouderaManagerPollingServiceProvider.startPollingStartRolesCommand(stack, v31Client, apiCommand.getId());
-                        if (extendedPollingResult.isExited()) {
-                            throw new CancellationException("Cluster was terminated while waiting for start roles on hosts");
-                        } else if (extendedPollingResult.isTimeout()) {
-                            throw new CloudbreakServiceException(
-                                    String.format("Cloudera Manager start roles command {} timed out. CM command Id: %s", apiCommand.getId()));
-                        }
-                    }
-                } catch (ApiException e) {
-                    LOGGER.error("Failed to start roles on nodes: {}", hosts, e);
-                    throw new CloudbreakServiceException("Failed to start roles on nodes: " + hosts, e);
+                    clusterCommandService.findTopByClusterIdAndClusterCommandType(stack.getCluster().getId(), ClusterCommandType.HOST_START_ROLES)
+                            .ifPresentOrElse(this::waitStartRolesCommand, () -> {
+                                try {
+                                    ApiHostNameList items = new ApiHostNameList().items(hosts);
+                                    ApiCommand apiCommand = clouderaManagerApiFactory.getClouderaManagerResourceApi(v31Client).hostsStartRolesCommand(items);
+
+                                    ClusterCommand clusterCommand = new ClusterCommand();
+                                    clusterCommand.setClusterId(stack.getCluster().getId());
+                                    clusterCommand.setCommandId(apiCommand.getId());
+                                    clusterCommand.setClusterCommandType(ClusterCommandType.HOST_START_ROLES);
+                                    clusterCommandService.save(clusterCommand);
+
+                                    waitStartRolesCommand(clusterCommand);
+                                } catch (ApiException e) {
+                                    LOGGER.error("Failed to start roles on nodes: {}", hosts, e);
+                                    throw new CloudbreakServiceException("Failed to start roles on nodes: " + hosts, e);
+                                }
+                            });
+
                 }
             }
         } else {
             LOGGER.warn("Don't run start roles command because hosts are empty");
+        }
+    }
+
+    private void waitStartRolesCommand(ClusterCommand clusterCommand) {
+        ExtendedPollingResult extendedPollingResult =
+                clouderaManagerPollingServiceProvider.startPollingStartRolesCommand(stack, v31Client, clusterCommand.getCommandId());
+        clusterCommandService.delete(clusterCommand);
+        if (extendedPollingResult.isExited()) {
+            throw new CancellationException("Cluster was terminated while waiting for start roles on hosts");
+        } else if (extendedPollingResult.isTimeout()) {
+            throw new CloudbreakServiceException(
+                    String.format("Cloudera Manager start roles command {} timed out. CM command Id: %s", clusterCommand.getCommandId()));
         }
     }
 

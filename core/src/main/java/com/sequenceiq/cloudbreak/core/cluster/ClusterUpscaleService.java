@@ -123,7 +123,7 @@ public class ClusterUpscaleService {
         } catch (ScalingException se) {
             flowMessageService.fireEventAndLog(stackDto.getId(), UPDATE_IN_PROGRESS.name(),
                     CLUSTER_SCALING_UPSCALE_FAILED, Joiner.on(",").join(se.getFailedInstanceIds()));
-            if (Boolean.FALSE.equals(request.isRepair()) && !request.isPrimaryGatewayChanged()
+            if (!request.isRepair() && !request.isPrimaryGatewayChanged()
                     && entitlementService.targetedUpscaleSupported(stackDto.getAccountId())) {
                 clusterService.updateInstancesToZombieByInstanceIds(stackDto.getId(), se.getFailedInstanceIds());
             } else {
