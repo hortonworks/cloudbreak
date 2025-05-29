@@ -47,6 +47,7 @@ import com.google.common.collect.Sets;
 import com.google.common.net.InetAddresses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.api.service.ExposedService;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
@@ -111,6 +112,7 @@ import com.sequenceiq.cloudbreak.san.LoadBalancerSANProvider;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
@@ -304,6 +306,9 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private EntitlementService entitlementService;
+
+    @Inject
+    private BlueprintService blueprintService;
 
     public NodeReachabilityResult runClusterServices(@Nonnull StackDto stackDto,
             Map<String, String> candidateAddresses, boolean runPreServiceDeploymentRecipe) {
@@ -565,8 +570,8 @@ public class ClusterHostServiceRunner {
                     .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
                     .collect(Collectors.toMap(
                             InstanceMetadataView::getDiscoveryFQDN,
-                            node -> getMountPath(stack, group.getInstanceGroup()),
-                            (l, r) -> getMountPath(stack, group.getInstanceGroup()))));
+                            node -> getMountPath(stackDto, group.getInstanceGroup()),
+                            (l, r) -> getMountPath(stackDto, group.getInstanceGroup()))));
         });
         servicePillar.put("startup", new SaltPillarProperties("/mount/startup.sls", singletonMap("mount", mountPathMap)));
 
@@ -618,10 +623,19 @@ public class ClusterHostServiceRunner {
         return new SaltConfig(servicePillar, grainsProperties);
     }
 
-    private Map<String, String> getMountPath(StackView stack, InstanceGroupView group) {
+    private Map<String, String> getMountPath(StackDto stack, InstanceGroupView group) {
         String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
+        Optional<String> stackVersion = Optional.ofNullable(stack.getStackVersion()).or(() -> {
+            try {
+                return Optional.ofNullable(blueprintService.getCdhVersion(NameOrCrn.ofName(stack.getBlueprint().getName()), stack.getWorkspaceId()));
+            } catch (Exception e) {
+                LOGGER.error("Failed to get version to check if xfs is supported for the cluster, ", e);
+                return Optional.empty();
+            }
+        });
         boolean xfsSupportForEphemeralDisksEntitled = entitlementService.isXfsForEphemeralDisksSupported(accountId);
-        boolean xfsForEphemeralDisksSupported = EphemeralVolumeUtil.xfsForEphemeralSupported(xfsSupportForEphemeralDisksEntitled, stack);
+        boolean xfsForEphemeralDisksSupported =
+                EphemeralVolumeUtil.xfsForEphemeralSupported(xfsSupportForEphemeralDisksEntitled, stack.getStack(), stackVersion);
         return Map.of("mount_path", getMountPath(group),
                 "cloud_platform", stack.getCloudPlatform(),
                 "temporary_storage", group.getTemplate().getTemporaryStorage().name(),

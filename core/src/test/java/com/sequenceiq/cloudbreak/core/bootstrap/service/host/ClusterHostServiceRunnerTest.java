@@ -331,6 +331,7 @@ class ClusterHostServiceRunnerTest {
         lenient().when(blueprint.getBlueprintJsonText()).thenReturn(EXTENDED_BLUEPRINT_TEXT);
         lenient().when(environmentConfigProvider.getEnvironmentByCrn(ENV_CRN)).thenReturn(environmentResponse);
         lenient().when(stack.getStack().getResourceCrn()).thenReturn(TEST_CLUSTER_CRN);
+        lenient().when(stack.getStackVersion()).thenReturn("7.3.1");
     }
 
     @Test

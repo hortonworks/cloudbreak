@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -32,6 +33,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.diskvalidator.DiskValidator;
@@ -68,6 +70,9 @@ public class MountDisks {
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private BlueprintService blueprintService;
+
     public void mountAllDisks(Long stackId) throws CloudbreakException {
         LOGGER.debug("Mount all disks for stack.");
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
@@ -98,10 +103,17 @@ public class MountDisks {
         try {
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
             ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
-
+            Optional<String> stackVersion = Optional.ofNullable(stack.getStackVersion()).or(() -> {
+                try {
+                    return Optional.ofNullable(blueprintService.getCdhVersion(NameOrCrn.ofName(stack.getBlueprint().getName()), stack.getWorkspaceId()));
+                } catch (Exception e) {
+                    LOGGER.error("Failed to get version to check if xfs is supported for the cluster, ", e);
+                    return Optional.empty();
+                }
+            });
             String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
             boolean xfsSupportForEphemeralDisksEntitled = entitlementService.isXfsForEphemeralDisksSupported(accountId);
-            boolean xfsForEphemeralDisksSupported = EphemeralVolumeUtil.xfsForEphemeralSupported(xfsSupportForEphemeralDisksEntitled, stack);
+            boolean xfsForEphemeralDisksSupported = EphemeralVolumeUtil.xfsForEphemeralSupported(xfsSupportForEphemeralDisksEntitled, stack, stackVersion);
             hostOrchestrator.updateMountDiskPillar(stack, gatewayConfigs, stackUtil.collectNodesWithDiskData(stack), exitCriteriaModel,
                     stack.getPlatformVariant(), xfsForEphemeralDisksSupported);
             LOGGER.debug("Execute format and mount states.");
