@@ -17,7 +17,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
-public class SdxResizeTests extends PreconditionSdxE2ETest {
+public class SdxResizeWithMultiAzEnabledTest extends PreconditionSdxE2ETest {
     @Inject
     private CommonClusterManagerProperties commonClusterManagerProperties;
 
@@ -34,28 +34,30 @@ public class SdxResizeTests extends PreconditionSdxE2ETest {
     @UseSpotInstances
     @Description(
             given = "there is an available environment with a running SDX cluster (CUSTOM shape, single-az)",
-            when = "resize is called on the SDX cluster (target shape: ENTERPRISE single-az )",
+            when = "resize is called on the SDX cluster (target shape: ENTERPRISE multi-az )",
             then = "SDX resize should be successful, the new cluster should be up and running"
     )
-    public void testSdxResize(TestContext testContext) {
+    public void testSdxResizeWithMultiAzEnabled(TestContext testContext) {
         String sdxKey = resourcePropertyProvider().getName();
         String runtimeVersion = commonClusterManagerProperties.getRuntimeVersion();
 
         sdxResizeTestUtil
-            .givenProvisionEnvironmentAndDatalake(testContext, sdxKey, runtimeVersion, SdxClusterShape.CUSTOM, sdxResizeTestValidator)
-            .then((tc, testDto, client) -> {
-                SdxClusterResizeRequest sdxClusterResizeRequest = testDto.getSdxResizeRequest();
-                sdxClusterResizeRequest.setClusterShape(SdxClusterShape.ENTERPRISE);
-                sdxClusterResizeRequest.setSkipValidation(true);
-                return testDto;
-            })
-            .when(sdxTestClient.resize(), key(sdxKey))
-            .await(SdxClusterStatusResponse.STOP_IN_PROGRESS, key(sdxKey).withoutWaitForFlow())
-            .await(SdxClusterStatusResponse.STACK_CREATION_IN_PROGRESS, key(sdxKey).withoutWaitForFlow())
-            .await(SdxClusterStatusResponse.RUNNING, key(sdxKey))
-            .awaitForHealthyInstances()
-            // Ensure new cluster is of the right shape and has carried over the necessary info from the original cluster.
-            .then((tc, dto, client) -> sdxResizeTestValidator.validateResizedCluster(dto))
-            .validate();
+                .givenProvisionEnvironmentAndDatalake(testContext, sdxKey, runtimeVersion, SdxClusterShape.CUSTOM, sdxResizeTestValidator)
+                .then((tc, testDto, client) -> {
+                    SdxClusterResizeRequest sdxClusterResizeRequest = testDto.getSdxResizeRequest();
+                    sdxClusterResizeRequest.setClusterShape(SdxClusterShape.ENTERPRISE);
+                    sdxClusterResizeRequest.setEnableMultiAz(true);
+                    sdxResizeTestValidator.setExpectedMultiAzDatalake(true);
+                    sdxClusterResizeRequest.setSkipValidation(true);
+                    return testDto;
+                })
+                .when(sdxTestClient.resize(), key(sdxKey))
+                .await(SdxClusterStatusResponse.STOP_IN_PROGRESS, key(sdxKey).withoutWaitForFlow())
+                .await(SdxClusterStatusResponse.STACK_CREATION_IN_PROGRESS, key(sdxKey).withoutWaitForFlow())
+                .await(SdxClusterStatusResponse.RUNNING, key(sdxKey))
+                .awaitForHealthyInstances()
+                // Ensure new cluster is of the right shape and has carried over the necessary info from the original cluster.
+                .then((tc, dto, client) -> sdxResizeTestValidator.validateResizedCluster(dto, tc))
+                .validate();
     }
 }

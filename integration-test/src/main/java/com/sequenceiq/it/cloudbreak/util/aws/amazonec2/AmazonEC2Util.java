@@ -76,4 +76,7 @@ public class AmazonEC2Util {
         return ec2ClientActions.getSelectedInstancesVolumeIds(instanceIds, true);
     }
 
+    public Map<String, String> listAvailabilityZonesForVms(Map<String, String> instanceZoneMap) {
+        return ec2ClientActions.listAvailabilityZonesForVms(instanceZoneMap);
+    }
 }
