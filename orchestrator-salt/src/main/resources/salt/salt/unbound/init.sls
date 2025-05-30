@@ -30,28 +30,12 @@ remove_cluster_conf_from_unbound:
     - context:
       private_address: {{ host.private_address }}
 
-include_access_config:
-  file.replace:
-    - name: /etc/unbound/unbound.conf
-    - pattern: '#include: "otherfile.conf"'
-    - repl: 'include: "/etc/unbound/access.conf"'
-
 set_max_ttl:
   file.replace:
     - name: /etc/unbound/unbound.conf
     - pattern: '(#\s)?cache-max-ttl:.*'
     - append_if_not_found: True
     - repl: 'cache-max-ttl: 30'
-
-/etc/unbound/access.conf:
-  file.managed:
-    - source: salt://unbound/config/access.conf
-
-enable_auto_interface:
-  file.replace:
-    - name: /etc/unbound/unbound.conf
-    - pattern: "  interface-automatic: no"
-    - repl: "  interface-automatic: yes"
 
 reload_unbound:
   cmd.run:
@@ -64,5 +48,4 @@ unbound:
   service.running:
     - enable: True
     - watch:
-      - file: enable_auto_interface
-      - file: /etc/unbound/access.conf
+      - file: set_max_ttl
