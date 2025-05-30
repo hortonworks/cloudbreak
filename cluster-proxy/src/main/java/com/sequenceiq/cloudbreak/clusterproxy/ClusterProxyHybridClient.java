@@ -19,6 +19,8 @@ import org.springframework.web.client.RestTemplate;
 
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataContextRequest;
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataContextResponse;
+import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesRequest;
+import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesResponse;
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentRequest;
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
 import com.cloudera.thunderhead.service.environments2api.model.ListEnvironmentsResponse;
@@ -34,6 +36,9 @@ public class ClusterProxyHybridClient {
 
     private static final String REMOTE_CLUSTER_GET_REMOTE_DATA_CONTEXT_CONFIG_PATH =
             "/proxy/%s/PvcControlPlane/api/v1/servicediscovery/describeDatalakeAsApiRemoteDataContext";
+
+    private static final String REMOTE_CLUSTER_GET_DATALKE_SERVICES_CONFIG_PATH =
+            "/proxy/%s/PvcControlPlane/api/v1/servicediscovery/describeDatalakeServices";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterProxyHybridClient.class);
 
@@ -118,6 +123,30 @@ public class ClusterProxyHybridClient {
         }
     }
 
+    public DescribeDatalakeServicesResponse getDatalakeServices(String clusterIdentifier, String userCrn, String environmentCrn) {
+        String getConfigUrl = String.format(clusterProxyConfiguration.getClusterProxyUrl() + REMOTE_CLUSTER_GET_DATALKE_SERVICES_CONFIG_PATH,
+                clusterIdentifier);
+        try {
+            LOGGER.info("Reading Datalake services with cluster proxy configuration for cluster Identifier: {}", clusterIdentifier);
+            Optional<ResponseEntity<DescribeDatalakeServicesResponse>> response = measure(() ->
+                            getDatalakeServicesFromUrl(getConfigUrl, userCrn, environmentCrn),
+                    LOGGER,
+                    "Query Datalake from {} with crn {} ms took {}.", clusterIdentifier, environmentCrn);
+            LOGGER.info("Cluster proxy with remote cluster get Datalake services response: {}", response);
+            return response.isEmpty() ? new DescribeDatalakeServicesResponse() : response.get().getBody();
+        } catch (RestClientResponseException e) {
+            String message = String.format("Error getting Datalake services for environment '%s' with cluster proxy configuration for " +
+                    "cluster identifier '%s', " + "Error Response Body '%s'", environmentCrn, clusterIdentifier, e.getResponseBodyAsString());
+            LOGGER.warn(message + " URL: " + getConfigUrl, e);
+            throw new ClusterProxyException(message, e);
+        } catch (Exception e) {
+            String message = String.format("Error reading Datalake services for cluster identifier '%s' and " +
+                    "environment crn '%s'", clusterIdentifier, environmentCrn);
+            LOGGER.warn(message + " URL: " + getConfigUrl, e);
+            throw new ClusterProxyException(message, e);
+        }
+    }
+
     private Optional<ResponseEntity<DescribeEnvironmentResponse>> getEnvironmentsFromUrl(String readConfigUrl, String userCrn, String environment) {
         try {
             DescribeEnvironmentRequest postRequest = new DescribeEnvironmentRequest();
@@ -139,6 +168,19 @@ public class ClusterProxyHybridClient {
             postRequest.setDatalake(environment);
             return Optional.of(
                     hybridRestTemplate.postForEntity(readConfigUrl, requestEntity(postRequest, userCrn), DescribeDatalakeAsApiRemoteDataContextResponse.class));
+        } catch (JsonProcessingException e) {
+            LOGGER.warn("Error occurred when tried to parse the response json.", e);
+            return Optional.empty();
+        }
+    }
+
+    private Optional<ResponseEntity<DescribeDatalakeServicesResponse>> getDatalakeServicesFromUrl(String readConfigUrl, String userCrn,
+            String environment) {
+        try {
+            DescribeDatalakeServicesRequest postRequest = new DescribeDatalakeServicesRequest();
+            postRequest.setClusterid(environment);
+            return Optional.of(
+                    hybridRestTemplate.postForEntity(readConfigUrl, requestEntity(postRequest, userCrn), DescribeDatalakeServicesResponse.class));
         } catch (JsonProcessingException e) {
             LOGGER.warn("Error occurred when tried to parse the response json.", e);
             return Optional.empty();

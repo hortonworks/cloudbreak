@@ -28,7 +28,9 @@ public enum DeploymentType {
   
   INPAAS("INPAAS"),
   
-  SDXSVC("SDXSVC");
+  SDXSVC("SDXSVC"),
+  
+  PDL("PDL");
 
   private String value;
 

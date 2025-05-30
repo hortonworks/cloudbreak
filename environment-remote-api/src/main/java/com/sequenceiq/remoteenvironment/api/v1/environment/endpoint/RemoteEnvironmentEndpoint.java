@@ -1,5 +1,6 @@
 package com.sequenceiq.remoteenvironment.api.v1.environment.endpoint;
 
+import static com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentOpDescription.DATALAKE_SERVICES_NOTES;
 import static com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentOpDescription.ENVIRONMENT_NOTES;
 import static com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentOpDescription.LIST;
 import static com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentOpDescription.POST_BY_CRN;
@@ -15,6 +16,8 @@ import jakarta.ws.rs.core.MediaType;
 import org.springframework.validation.annotation.Validated;
 
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataContextResponse;
+import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesRequest;
+import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesResponse;
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.DescribeRemoteEnvironment;
@@ -51,5 +54,12 @@ public interface RemoteEnvironmentEndpoint {
     @Operation(summary = POST_BY_CRN, description = ENVIRONMENT_NOTES, operationId = "getRdcV1ByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DescribeDatalakeAsApiRemoteDataContextResponse getRdcByCrn(@Valid DescribeRemoteEnvironment request);
+
+    @POST
+    @Path("/datalakeServices")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = POST_BY_CRN, description = DATALAKE_SERVICES_NOTES, operationId = "getDatalakeByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    DescribeDatalakeServicesResponse getDatalakeServicesByCrn(@Valid DescribeDatalakeServicesRequest request);
 
 }

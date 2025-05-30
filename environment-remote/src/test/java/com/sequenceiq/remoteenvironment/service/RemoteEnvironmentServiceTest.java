@@ -24,6 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataContextResponse;
+import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesResponse;
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
 import com.cloudera.thunderhead.service.environments2api.model.EnvironmentSummary;
 import com.cloudera.thunderhead.service.environments2api.model.ListEnvironmentsResponse;
@@ -309,5 +310,65 @@ class RemoteEnvironmentServiceTest {
         RuntimeException runtimeException = assertThrows(RuntimeException.class,
                 () -> remoteEnvironmentService.getRdcForEnvironment(PUBLIC_CLOUD_ACCOUNT_ID, ENV_CRN));
         assertEquals(String.format(String.format("Unable to fetch remote data context for crn %s", ENV_CRN)), runtimeException.getMessage());
+    }
+
+    @Test
+    public void testGetDatalakeServicesForEnvironment() {
+        PrivateControlPlane privateControlPlane = mock(PrivateControlPlane.class);
+        when(privateControlPlane.getResourceCrn()).thenReturn(CONTROL_PLANE);
+        DescribeDatalakeServicesResponse describeDatalakeServicesResponse
+                = mock(DescribeDatalakeServicesResponse.class);
+
+        when(entitlementService.hybridCloudEnabled(PUBLIC_CLOUD_ACCOUNT_ID)).thenReturn(true);
+        when(privateControlPlaneServiceMock.getByPrivateCloudAccountIdAndPublicCloudAccountId(TENANT, PUBLIC_CLOUD_ACCOUNT_ID))
+                .thenReturn(Optional.of(privateControlPlane));
+        when(clusterProxyHybridClientMock.getDatalakeServices(eq(CONTROL_PLANE), any(), eq(ENV_CRN)))
+                .thenReturn(describeDatalakeServicesResponse);
+
+        DescribeDatalakeServicesResponse result = remoteEnvironmentService.getDatalakeServicesForEnvironment(PUBLIC_CLOUD_ACCOUNT_ID, ENV_CRN);
+        assertEquals(describeDatalakeServicesResponse, result);
+    }
+
+    @Test
+    public void testGetDatalakeServicesForEnvironmentEntitlementNotAssigned() {
+        when(entitlementService.hybridCloudEnabled(PUBLIC_CLOUD_ACCOUNT_ID)).thenReturn(false);
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> remoteEnvironmentService.getDatalakeServicesForEnvironment(PUBLIC_CLOUD_ACCOUNT_ID, ENV_CRN));
+        assertEquals("Unable to fetch Datalake services since entitlement CDP_HYBRID_CLOUD is not assigned", badRequestException.getMessage());
+    }
+
+    @Test
+    public void testGetDatalakeServicesForEnvironmentThrowsBadRequestExceptionInvalidCrn() {
+        String invalidCrn = "test";
+        when(entitlementService.hybridCloudEnabled(PUBLIC_CLOUD_ACCOUNT_ID)).thenReturn(true);
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> remoteEnvironmentService.getDatalakeServicesForEnvironment(PUBLIC_CLOUD_ACCOUNT_ID, invalidCrn));
+        assertEquals(String.format("The provided environment CRN('%s') is invalid", invalidCrn), badRequestException.getMessage());
+    }
+
+    @Test
+    public void testGetDatalakeServicesForEnvironmentThrowsBadRequestExceptionControlPlaneDoesNotExist() {
+        when(entitlementService.hybridCloudEnabled(PUBLIC_CLOUD_ACCOUNT_ID)).thenReturn(true);
+        when(privateControlPlaneServiceMock.getByPrivateCloudAccountIdAndPublicCloudAccountId(TENANT, PUBLIC_CLOUD_ACCOUNT_ID))
+                .thenReturn(Optional.empty());
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> remoteEnvironmentService.getDatalakeServicesForEnvironment(PUBLIC_CLOUD_ACCOUNT_ID, ENV_CRN));
+        assertEquals(String.format("There is no control plane for this account with account id %s.", TENANT), badRequestException.getMessage());
+    }
+
+    @Test
+    public void testGetDatalakeServicesForEnvironmentThrowsExceptionWhenClusterProxyFails() {
+        when(entitlementService.hybridCloudEnabled(PUBLIC_CLOUD_ACCOUNT_ID)).thenReturn(true);
+        PrivateControlPlane privateControlPlane = mock(PrivateControlPlane.class);
+        when(privateControlPlane.getResourceCrn()).thenReturn(CONTROL_PLANE);
+        when(privateControlPlaneServiceMock.getByPrivateCloudAccountIdAndPublicCloudAccountId(TENANT, PUBLIC_CLOUD_ACCOUNT_ID))
+                .thenReturn(Optional.of(privateControlPlane));
+        when(clusterProxyHybridClientMock.getDatalakeServices(eq(CONTROL_PLANE), any(), eq(ENV_CRN)))
+                .thenThrow(new RuntimeException());
+
+        RuntimeException runtimeException = assertThrows(RuntimeException.class,
+                () -> remoteEnvironmentService.getDatalakeServicesForEnvironment(PUBLIC_CLOUD_ACCOUNT_ID, ENV_CRN));
+        assertEquals(String.format(String.format("Unable to fetch data lake services for crn %s", ENV_CRN)), runtimeException.getMessage());
     }
 }

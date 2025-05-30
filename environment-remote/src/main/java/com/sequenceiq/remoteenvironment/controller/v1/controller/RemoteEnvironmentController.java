@@ -5,6 +5,8 @@ import jakarta.inject.Inject;
 import org.springframework.stereotype.Controller;
 
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataContextResponse;
+import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesRequest;
+import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesResponse;
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -38,5 +40,10 @@ public class RemoteEnvironmentController implements RemoteEnvironmentEndpoint {
     @Override
     public DescribeDatalakeAsApiRemoteDataContextResponse getRdcByCrn(DescribeRemoteEnvironment request) {
         return remoteEnvironmentService.getRdcForEnvironment(ThreadBasedUserCrnProvider.getAccountId(), request.getCrn());
+    }
+
+    @Override
+    public DescribeDatalakeServicesResponse getDatalakeServicesByCrn(DescribeDatalakeServicesRequest request) {
+        return remoteEnvironmentService.getDatalakeServicesForEnvironment(ThreadBasedUserCrnProvider.getAccountId(), request.getClusterid());
     }
 }

@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataContextResponse;
+import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesResponse;
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -124,6 +125,30 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
         return response;
     }
 
+    public DescribeDatalakeServicesResponse getDatalakeServicesForEnvironment(String publicCloudAccountId, String environmentCrn) {
+        DescribeDatalakeServicesResponse response = null;
+        if (entitlementService.hybridCloudEnabled(publicCloudAccountId)) {
+            try {
+                String privateCloudAccountId = Crn.safeFromString(environmentCrn).getAccountId();
+                Optional<PrivateControlPlane> privateControlPlane =
+                        privateControlPlaneService.getByPrivateCloudAccountIdAndPublicCloudAccountId(privateCloudAccountId, publicCloudAccountId);
+                if (privateControlPlane.isPresent()) {
+                    String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+                    response = getDatalakeServicesForEnvironmentWithActor(privateControlPlane.get(), environmentCrn, userCrn);
+                } else {
+                    throw new BadRequestException(String.format("There is no control plane for this account with account id %s.", privateCloudAccountId));
+                }
+            } catch (CrnParseException crnParseException) {
+                String message = String.format("The provided environment CRN('%s') is invalid", environmentCrn);
+                LOGGER.info(message);
+                throw new BadRequestException(message, crnParseException);
+            }
+        } else {
+            throw new BadRequestException(String.format("Unable to fetch Datalake services since entitlement %s is not assigned", CDP_HYBRID_CLOUD));
+        }
+        return response;
+    }
+
     private List<SimpleRemoteEnvironmentResponse> listEnvironmentsFromPrivateControlPlaneWithActor(PrivateControlPlane controlPlane, String actorCrn) {
         String cpName = controlPlane.getName();
         String cpCrn = controlPlane.getResourceCrn();
@@ -183,6 +208,27 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
         } catch (Exception e) {
             LOGGER.warn("Failed to query environment for crn {}", environmentCrn);
             throw new RuntimeException(String.format("Unable to fetch remote data context for crn %s", environmentCrn));
+        }
+        return response;
+    }
+
+    private DescribeDatalakeServicesResponse getDatalakeServicesForEnvironmentWithActor(PrivateControlPlane controlPlane, String environmentCrn,
+            String actorCrn) {
+        LOGGER.debug("The getDatalakeServicesForEnvironmentWithActor of remote environment('{}') with actor('{}') is executed by thread: {}",
+                environmentCrn, actorCrn,
+                Thread.currentThread().getName());
+        DescribeDatalakeServicesResponse response = null;
+        try {
+            response = measure(() ->
+                            clusterProxyHybridClient.getDatalakeServices(
+                                    controlPlane.getResourceCrn(),
+                                    actorCrn,
+                                    environmentCrn),
+                    LOGGER,
+                    "Cluster proxy call took us {} ms for pvc {}", controlPlane.getResourceCrn());
+        } catch (Exception e) {
+            LOGGER.warn("Failed to query environment for crn {}", environmentCrn);
+            throw new RuntimeException(String.format("Unable to fetch data lake services for crn %s", environmentCrn));
         }
         return response;
     }

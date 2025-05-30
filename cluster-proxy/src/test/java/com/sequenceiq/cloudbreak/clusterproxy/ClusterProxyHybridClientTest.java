@@ -23,6 +23,7 @@ import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataContextResponse;
+import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesResponse;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -50,6 +51,9 @@ public class ClusterProxyHybridClientTest {
     @Mock
     private DescribeDatalakeAsApiRemoteDataContextResponse describeDatalakeAsApiRemoteDataContextResponse;
 
+    @Mock
+    private DescribeDatalakeServicesResponse describeDatalakeServicesResponse;
+
     @InjectMocks
     private ClusterProxyHybridClient underTest = new ClusterProxyHybridClient(restTemplate);
 
@@ -57,6 +61,7 @@ public class ClusterProxyHybridClientTest {
     public void setup() {
         when(clusterProxyConfiguration.getClusterProxyUrl()).thenReturn(CLUSTER_PROXY_URL);
         when(describeDatalakeAsApiRemoteDataContextResponse.getDatalake()).thenReturn(DATALAKE);
+        when(describeDatalakeServicesResponse.getClusterid()).thenReturn(DATALAKE);
         when(responseEntity.getBody()).thenReturn(describeDatalakeAsApiRemoteDataContextResponse);
         when(restTemplate.postForEntity(anyString(), any(), any())).thenReturn(responseEntity);
     }
@@ -92,6 +97,41 @@ public class ClusterProxyHybridClientTest {
         when(restTemplate.postForEntity(anyString(), any(), any())).thenThrow(new RuntimeException("testMessage"));
         ClusterProxyException e = assertThrows(ClusterProxyException.class, () ->
                 underTest.getRemoteDataContext(CONTROL_PLANE, "user", ENVIRONMENT));
+        assertEquals(expectedErrorMessage, e.getMessage());
+    }
+
+    @Test
+    public void testGetDatalakeServices() {
+        when(responseEntity.getBody()).thenReturn(describeDatalakeServicesResponse);
+        String clusterProxyUrl = String.format(
+                "%s/proxy/%s/PvcControlPlane/api/v1/servicediscovery/describeDatalakeServices", CLUSTER_PROXY_URL, CONTROL_PLANE);
+        DescribeDatalakeServicesResponse describeDatalakeServicesResponse =
+                underTest.getDatalakeServices(CONTROL_PLANE, "user", ENVIRONMENT);
+        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+        verify(restTemplate).postForEntity(captor.capture(), any(), any());
+        String clusterConfigUrl = captor.getValue();
+        assertEquals(clusterProxyUrl, clusterConfigUrl);
+        assertEquals(DATALAKE, describeDatalakeServicesResponse.getClusterid());
+    }
+
+    @Test
+    public void testGetDatalakeServicesThrowsRestClientResponseException() {
+        String expectedErrorMessage = String.format("Error getting Datalake services for environment '%s' with cluster proxy configuration for " +
+                "cluster identifier '%s', " + "Error Response Body '%s'", ENVIRONMENT, CONTROL_PLANE, ERROR_RESPONSE);
+        when(restTemplate.postForEntity(anyString(), any(), any())).thenThrow(new RestClientResponseException("testMessage", 200, "statusText", null,
+                ERROR_RESPONSE.getBytes(), Charset.defaultCharset()));
+        ClusterProxyException e = assertThrows(ClusterProxyException.class, () ->
+                underTest.getDatalakeServices(CONTROL_PLANE, "user", ENVIRONMENT));
+        assertEquals(expectedErrorMessage, e.getMessage());
+    }
+
+    @Test
+    public void testGetDatalakeServicesThrowsException() {
+        String expectedErrorMessage = String.format("Error reading Datalake services for cluster identifier '%s' and " +
+                "environment crn '%s'", CONTROL_PLANE, ENVIRONMENT);
+        when(restTemplate.postForEntity(anyString(), any(), any())).thenThrow(new RuntimeException("testMessage"));
+        ClusterProxyException e = assertThrows(ClusterProxyException.class, () ->
+                underTest.getDatalakeServices(CONTROL_PLANE, "user", ENVIRONMENT));
         assertEquals(expectedErrorMessage, e.getMessage());
     }
 }

@@ -360,6 +360,7 @@ definitions:
     enum:
       - INPAAS
       - SDXSVC
+      - PDL
   Metadata:
     type: object
     description: Metadata details of the datalake.
