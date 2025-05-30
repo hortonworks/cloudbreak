@@ -21,7 +21,7 @@ public class RunnerInfoConverter {
 
     static Optional<RunnerInfo> convertToRunnerInfo(String key, JsonNode runnerInfoNode) {
         if (!runnerInfoNode.isObject()) {
-            LOGGER.debug("Cannot convert JSON to runner info Object as the value is not "
+            LOGGER.trace("Cannot convert JSON to runner info Object as the value is not "
                             + "a JSON object {} for key '{}'", runnerInfoNode, key);
             return Optional.empty();
         }

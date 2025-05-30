@@ -91,7 +91,7 @@ public class JidInfoResponseTransformer {
         try {
             List<RunnerInfo> runnerInfos = runnerInfoObjects(hostResults, hostName);
             if (runnerInfos.isEmpty() && !highstate) {
-                LOGGER.debug("Fill runner info with empty value for {}", hostName);
+                LOGGER.trace("Fill runner info with empty value for {}", hostName);
                 result.put(hostName, null);
             } else {
                 LOGGER.debug("Converting runner info for {}", hostName);
