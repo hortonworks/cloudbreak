@@ -36,7 +36,7 @@ ext {
   nettyVersion = '4.2.0.Final'
   reactorNettyHttp = '1.2.5'
   okhttpVersion = '4.12.0'
-  tomcatVersion = '10.1.40'
+  tomcatVersion = '10.1.41'
 
   // Cloud SDKs
   awsSdkVersion = '2.28.3'
@@ -62,7 +62,7 @@ ext {
   commonsCollections4Version = '4.4'
   guavaVersion = '33.4.8-jre'
   byteBuddyVersion = '1.17.5'
-  commonsBeanutilsVersion = '1.10.1'
+  commonsBeanutilsVersion = '1.11.0'
 
   // Logging
   logbackVersion = '1.5.18'
