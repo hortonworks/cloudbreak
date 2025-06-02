@@ -221,7 +221,7 @@ public class DynamicEntitlementRefreshService {
     }
 
     private boolean isSaltRefreshNeeded(Map<String, Boolean> changedEntitlements) {
-        return changedEntitlements.containsKey(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING);
+        return changedEntitlements.containsKey(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name());
     }
 
     public void setupDynamicEntitlementsForProvision(String resourceCrn, Telemetry telemetry) {

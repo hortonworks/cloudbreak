@@ -37,6 +37,7 @@ import com.sequenceiq.flow.service.FlowService;
 import com.sequenceiq.freeipa.entity.DynamicEntitlement;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.chain.FlowChainTriggers;
+import com.sequenceiq.freeipa.flow.stack.dynamicentitlement.RefreshEntitlementParamsFlowChainTriggerEvent;
 import com.sequenceiq.freeipa.service.DynamicEntitlementService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -241,7 +242,11 @@ class DynamicEntitlementRefreshServiceTest {
         when(stack.getId()).thenReturn(STACK_ID);
         underTest.changeClusterConfigurationIfEntitlementsChanged(stack);
 
-        verify(freeIpaFlowManager).notify(eq(FlowChainTriggers.REFRESH_ENTITLEMENT_PARAM_CHAIN_TRIGGER_EVENT), any());
+
+        ArgumentCaptor<RefreshEntitlementParamsFlowChainTriggerEvent> triggerEventCaptor =
+                ArgumentCaptor.forClass(RefreshEntitlementParamsFlowChainTriggerEvent.class);
+        verify(freeIpaFlowManager).notify(eq(FlowChainTriggers.REFRESH_ENTITLEMENT_PARAM_CHAIN_TRIGGER_EVENT), triggerEventCaptor.capture());
+        assertTrue(triggerEventCaptor.getValue().getSaltRefreshNeeded());
     }
 
     @Test
