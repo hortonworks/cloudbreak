@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.util;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_3_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 
+import java.util.Optional;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -56,11 +57,12 @@ public class EphemeralVolumeUtil {
                 .anyMatch(e -> e.equalsIgnoreCase(type));
     }
 
-    public static boolean xfsForEphemeralSupported(boolean entitled, StackView stack) {
+    public static boolean xfsForEphemeralSupported(boolean entitled, StackView stack, Optional<String> stackVersion) {
         return entitled &&
                 StackType.WORKLOAD.equals(stack.getType()) &&
                 CloudPlatform.AWS.equals(CloudPlatform.fromName(stack.getCloudPlatform())) &&
                 CodUtil.isCodCluster(stack) &&
-                isVersionNewerOrEqualThanLimited(stack.getStackVersion(), CLOUDERA_STACK_VERSION_7_3_1);
+                stackVersion.isPresent() &&
+                isVersionNewerOrEqualThanLimited(stackVersion.get(), CLOUDERA_STACK_VERSION_7_3_1);
     }
 }

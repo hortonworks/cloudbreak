@@ -87,6 +87,7 @@ public class MountDisksTest {
         when(stack.getCluster()).thenReturn(new Cluster());
         when(stack.getDiskResourceType()).thenReturn(ResourceType.MOCK_VOLUME);
         when(stack.getResourceCrn()).thenReturn(TestUtil.STACK_CRN);
+        when(stack.getStackVersion()).thenReturn("7.3.1");
         Node node1 = new Node("1.1.1.1", "1.1.1.1", "id1", "m5.xlarge", "node-1", "worker");
         Node node2 = new Node("1.1.1.2", "1.1.1.2", "id2", "m5.xlarge", "node-2", "worker");
         Set<Node> reachableNodes = new HashSet<>();
