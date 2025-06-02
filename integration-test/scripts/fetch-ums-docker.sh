@@ -1,8 +1,8 @@
 #!/bin/bash -ex
 
-: ${AZURE_CLIENT_ID:? required}
-: ${AZURE_CLIENT_SECRET:? required}
-: ${AZURE_TENANT_ID:? required}
+export AZURE_CLIENT_ID="${AZURE_CLIENT_ID}"
+export AZURE_CLIENT_SECRET="${AZURE_CLIENT_SECRET}"
+export AZURE_TENANT_ID="${AZURE_TENANT_ID}"
 : ${INTEGRATIONTEST_UMS_JSONSECRET_VERSION:="e556a55296e349f993d324680baa3350"}
 : ${INTEGRATIONTEST_UMS_JSONSECRET_DESTINATIONPATH:="./src/main/resources/ums-users/api-credentials.json"}
 : ${INTEGRATIONTEST_UMS_JSONSECRET_NAME:="real-ums-users-dev"}
@@ -59,17 +59,21 @@ fetch-ums-secrets() {
         -e INTEGRATIONTEST_UMS_JSONSECRET_VERSION \
         -e INTEGRATIONTEST_UMS_JSONSECRET_DESTINATIONPATH \
         -e INTEGRATIONTEST_UMS_JSONSECRET_NAME \
+        -e GITHUB_ENV \
         $IMAGE_NAME /bin/bash -c "set -o pipefail ; set -ex && env && cd /prj/integration-test && eval ./scripts/fetch-ums-users.sh | tee fetchums.log"
   else
+    ls -la
     docker run \
         -i \
         --rm \
         --name $CONTAINER_NAME \
-        -v $WORKSPACE:/prj:rw \
+        -v "$(pwd)":/prj:rw \
         -e INTEGRATIONTEST_UMS_JSONSECRET_VERSION \
         -e INTEGRATIONTEST_UMS_JSONSECRET_DESTINATIONPATH \
         -e INTEGRATIONTEST_UMS_JSONSECRET_NAME \
-        $IMAGE_NAME /bin/bash -c "set -o pipefail ; set -ex && env && cd /prj/integration-test && eval ./scripts/fetch-ums-users-gh-action.sh | tee fetchums.log"
+        -e REAL_UMS_USERS_DEV \
+        -e GITHUB_ENV \
+        $IMAGE_NAME /bin/bash -c "set -o pipefail ; set -ex && env && cd prj && eval ./scripts/fetch-ums-users.sh | tee fetchums.log"
   fi
   RESULT=$?
 }

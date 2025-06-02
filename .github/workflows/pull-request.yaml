@@ -100,7 +100,6 @@ jobs:
         run: ./gradlew dependencies
       - name: install_tools
         run: |-
-          #!/bin/bash -x
           sudo apt-get update
           DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make uuid-runtime
       - name: gradle_build
@@ -199,7 +198,6 @@ jobs:
         run: ./gradlew dependencies
       - name: install_tools
         run: |-
-          #!/bin/bash -x
           sudo apt-get update
           DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make uuid-runtime
       - name: gradle_build
@@ -264,7 +262,6 @@ jobs:
         run: ./gradlew dependencies
       - name: install_tools
         run: |-
-          #!/bin/bash -x
           sudo apt-get update
           DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make uuid-runtime
       - name: gradle_build
@@ -329,7 +326,6 @@ jobs:
         run: ./gradlew dependencies
       - name: install_tools
         run: |-
-          #!/bin/bash -x
           sudo apt-get update
           DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make uuid-runtime
       - name: gradle_build
@@ -394,7 +390,6 @@ jobs:
         run: ./gradlew dependencies
       - name: install_tools
         run: |-
-          #!/bin/bash -x
           sudo apt-get update
           DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make uuid-runtime
       - name: gradle_build
@@ -469,7 +464,6 @@ jobs:
         run: ./gradlew dependencies
       - name: install_tools
         run: |-
-          #!/bin/bash -x
           sudo apt-get update
           DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make uuid-runtime
       - name: openapi_compatibility_check
@@ -527,7 +521,6 @@ jobs:
         run: ./gradlew dependencies
       - name: install_tools
         run: |-
-          #!/bin/bash -x
           sudo apt-get update
           DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make uuid-runtime
       - name: component_test
@@ -585,7 +578,6 @@ jobs:
         run: ./gradlew dependencies
       - name: install_tools
         run: |-
-          #!/bin/bash -x
           sudo apt-get update
           DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make uuid-runtime docker-compose-v2 git curl
       - name: component_test
@@ -645,7 +637,6 @@ jobs:
         run: ./gradlew dependencies
       - name: install_tools
         run: |-
-          #!/bin/bash -x
           sudo apt-get update
           DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make uuid-runtime docker-compose-v2 git curl
       - name: schema_compatibility_test
@@ -751,7 +742,6 @@ jobs:
         run: ./gradlew dependencies
       - name: install_tools
         run: |-
-          #!/bin/bash -x
           sudo apt-get update
           DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make uuid-runtime docker-compose-v2 git curl
       - name: integration_test
@@ -771,7 +761,7 @@ jobs:
           export INTEGRATIONTEST_THREADCOUNT=4
           export USE_FEDRAMP_CONTAINERS=false
 
-          make integration-test-steps_schema_compatiblity
+          make integration-test-steps_integration_test
           
           cd integration-test
           make compress-results
@@ -845,7 +835,6 @@ jobs:
         run: ./gradlew dependencies
       - name: install_tools
         run: |-
-          #!/bin/bash -x
           sudo apt-get update
           DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make uuid-runtime docker-compose-v2
       - name: fedramp_integration_test
@@ -865,7 +854,7 @@ jobs:
           export INTEGRATIONTEST_THREADCOUNT=4
           export USE_FEDRAMP_CONTAINERS=true
 
-          make fedramp-integration-test-steps_schema_compatiblity
+          make fedramp-integration-test-steps_fedramp_integration_test
           
           cd integration-test
           make compress-results
@@ -905,4 +894,121 @@ jobs:
         if: steps.fedramp_integration_test.outcome == 'failure'
         run: |
           echo "FedRAMP integration test failed, now failing the job."
+          exit 1
+  real-ums-test:
+    permissions: write-all
+    name: Real UMS Test
+    runs-on: [ cb-ubuntu22-large ]
+    timeout-minutes: 90
+
+    steps:
+      - name: checkout
+        id: checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: setup_secrets
+        id: build_secrets
+        uses: Kitchen/RE-thirdparty-actions/actions/vault@main
+        with:
+          tlsSkipVerify: true
+          url: https://re-vault.infra.cloudera.com/
+          method: kubernetes
+          path: rke_re_jenkins
+          role: cb
+          secrets: |
+            cb/data/CM_PRIVATE_REPO_PASSWORD CM_PRIVATE_REPO_PASSWORD | CM_PRIVATE_REPO_PASSWORD;
+            cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
+            cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
+            cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
+            cb/data/GITHUB_TOKEN GITHUB_TOKEN | GITHUB_TOKEN;
+            cb/data/JIRA_TOKEN JIRA_TOKEN | JIRA_TOKEN;
+            cb/data/REAL_UMS_USERS_DEV REAL_UMS_USERS_DEV|REAL_UMS_USERS_DEV;
+      - name: cache_java_libs
+        id: cache-java
+        uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
+        env:
+          cache-name: cache-java-libs
+        with:
+          path: |
+            /home/jenkins/.gradle/caches
+            /home/jenkins/.gradle/wrapper
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
+            ${{ runner.os }}-build-${{ hashFiles('**/build.gradle') }}
+            ${{ runner.os }}-${{ hashFiles('**/build.gradle') }}
+      - if: ${{ steps.cache-java.outputs.cache-hit != 'true' }}
+        name: list_the_state_of_java_libs
+        continue-on-error: true
+        shell: bash
+        run: ./gradlew dependencies
+      - name: install_tools
+        run: |-
+          sudo apt-get update
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make uuid-runtime docker-compose-v2
+      - name: real_ums_test
+        continue-on-error: true
+        run: |-
+          export CM_PRIVATE_REPO_PASSWORD=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}")
+          export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
+          export DOCKERHUB_PASSWORD=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_PASSWORD}}")
+          export DOCKERHUB_USERNAME=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}")
+          export REAL_UMS_USERS_DEV='${{ steps.build_secrets.outputs.REAL_UMS_USERS_DEV }}'
+          
+          export AWS=false
+          export INTEGRATIONTEST_SUITE_FILES=file:/it/src/main/resources/testsuites/v4/mock/real-ums-mock-tests.yaml
+          export INTEGRATIONTEST_UMS_HOST=usermanagement-internal.eu-1.cdp.mow-dev.cloudera.com
+          export INTEGRATIONTEST_UMS_PORT=80
+          export INTEGRATIONTEST_CDL_HOST=thunderhead-mock
+          export INTEGRATIONTEST_CDL_PORT=8982
+          export CUSTOM_UMS_SHORT_TIMEOUT=10
+          export INTEGRATIONTEST_UMS_DEPLOYMENTKEY=dev
+          export INTEGRATIONTEST_UMS_ACCOUNTKEY=e2e_eu
+          export INTEGRATIONTEST_UMS_JSONSECRET_DESTINATIONPATH=./src/main/resources/ums-users/api-credentials.json
+
+          echo $REAL_UMS_USERS_DEV
+          
+
+
+          make real-ums-test-steps_real_ums_test
+
+          cd integration-test
+          make compress-results
+      - name: real_ums_test_collect_service_artifacts
+        uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
+        if: steps.real_ums_test.conclusion == 'failure'
+        with:
+          name: real-ums-test-artifact
+          retention-days: 5
+          path: |
+            integration-test/cloudbreak.log
+            integration-test/datalake.log
+            integration-test/redbeams.log
+            integration-test/environment.log
+            integration-test/freeipa.log
+            integration-test/thunderhead-mock.log
+            integration-test/cluster-proxy.log
+            integration-test/cluster-proxy-health.log
+            integration-test/dev-gateway.log
+            integration-test/core-gateway.log
+      - name: real_ums_test_collect_test_artifacts
+        uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
+        if: steps.real_ums_test.conclusion == 'failure'
+        with:
+          name: real-ums-test-artifact
+          retention-days: 5
+          path: |
+            integration-test/integcb/Profile
+            integration-test/integcb/docker-compose.yml
+            integration-test/integcb/*revert.result
+            integration-test/test.out
+            integration-test/swagger-validation-result.out
+            integration-test/suites_log/*.log
+            integration-test/test-output/**/*
+            integration-test/dumps/*.hprof
+      - name: real_ums_test_check
+        if: steps.real_ums_test.outcome == 'failure'
+        run: |
+          echo "Real UMS test failed, now failing the job."
           exit 1

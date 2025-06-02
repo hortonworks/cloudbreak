@@ -128,8 +128,8 @@ config-change-int-steps_config_change:
 schema-compatiblity-steps_schema_compatiblity:
 	 ./.github/workflows/pull-request/steps/schema-compatiblity-steps_schema_compatiblity.sh
 
-integration-test-steps_schema_compatiblity:
-	 ./.github/workflows/pull-request/steps/integration-test-steps_integration_test.sh
-
-fedramp-integration-test-steps_schema_compatiblity:
+fedramp-integration-test-steps_fedramp_integration_test:
 	 ./.github/workflows/pull-request/steps/fedramp-integration-test-steps_integration_test.sh
+
+real-ums-test-steps_real_ums_test:
+	 ./.github/workflows/pull-request/steps/real-ums-test-steps_real_ums_test.sh

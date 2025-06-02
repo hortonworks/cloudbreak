@@ -30,18 +30,23 @@ init-ums-users-temp() {
 }
 
 init-azure-auth() {
-    if [[ -z $AZURE_CLIENT_ID ]]; then
-        echo "Azure Username and Password has not been set! So Azure Interactive Login has been initiated!"
-        az login
-    else
-        az login -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --service-principal --tenant $AZURE_TENANT_ID
+    if [[ "$GITHUB_ENV" == false ]]; then
+      if [[ -z $AZURE_CLIENT_ID ]]; then
+          echo "Azure Username and Password has not been set! So Azure Interactive Login has been initiated!"
+          az login
+      else
+          az login -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --service-principal --tenant $AZURE_TENANT_ID
+      fi
     fi
 }
 
 fetch-real-ums-users() {
-    echo "Fetching Manowar Dev Real UMS Users from Azure 'jenkins-secret' key vault..."
-    az keyvault secret show --name $USER_JSON_SECRET --vault-name "jenkins-secret" --version $SECRET_VERSION --query 'value' -o tsv | jq '.' > $USER_JSON_LOCATION
-
+    if [[ "$GITHUB_ENV" == false ]]; then
+      echo "Fetching Manowar Dev Real UMS Users from Azure 'jenkins-secret' key vault..."
+      az keyvault secret show --name $USER_JSON_SECRET --vault-name "jenkins-secret" --version $SECRET_VERSION --query 'value' -o tsv | jq '.' > $USER_JSON_LOCATION
+    else
+      echo $REAL_UMS_USERS_DEV| jq '.' > $USER_JSON_LOCATION
+    fi
     echo "Validate Real UMS User Store: File should be a valid JSON at: $USER_JSON_LOCATION"
     cat $USER_JSON_LOCATION | jq type
 }
