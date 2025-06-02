@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
 import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.AUTH_FAILURE;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.OPT_IN_REQUIRED;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.UNAUTHORIZED_OPERATION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -95,11 +97,35 @@ class AwsDefaultRegionSelectorTest {
 
     @Test
     void testDetermineDefaultRegionWhenGlobalDefaultRegionDescribeFailsWithAuthExceptionAndNoAdditionalRegionsAreConfigured() {
-        Ec2Exception amazonEC2Exception = (Ec2Exception) Ec2Exception.builder()
-                .message("SomethingBadHappened")
-                .awsErrorDetails(AwsErrorDetails.builder().errorCode(AUTH_FAILURE).build())
-                .build();
+        Ec2Exception amazonEC2Exception = getEc2Exception("SomethingBadHappened", AUTH_FAILURE);
+        when(ec2Client.describeRegions(any(DescribeRegionsRequest.class))).thenThrow(amazonEC2Exception);
+        when(awsClient.createAccessWithMinimalRetries(any(AwsCredentialView.class), eq(GLOBAL_DEFAULT_ZONE))).thenReturn(ec2Client);
+        when(platformResources.getEnabledRegions()).thenReturn(null);
 
+        AwsDefaultRegionSelectionFailed ex = assertThrows(AwsDefaultRegionSelectionFailed.class, () -> underTest.determineDefaultRegion(new CloudCredential()));
+
+        assertEquals(String.format("Failed to describe available EC2 regions in region '%s'", GLOBAL_DEFAULT_ZONE), ex.getMessage());
+        verify(awsClient, times(1)).createAccessWithMinimalRetries(any(AwsCredentialView.class), eq(GLOBAL_DEFAULT_ZONE));
+        verify(ec2Client, times(1)).describeRegions(any(DescribeRegionsRequest.class));
+    }
+
+    @Test
+    void testDetermineDefaultRegionWhenGlobalDefaultRegionDescribeFailsWithUnAuthorizedOperationAndNoAdditionalRegionsAreConfigured() {
+        Ec2Exception amazonEC2Exception = getEc2Exception("You are not authorized to perform this operation.", UNAUTHORIZED_OPERATION);
+        when(ec2Client.describeRegions(any(DescribeRegionsRequest.class))).thenThrow(amazonEC2Exception);
+        when(awsClient.createAccessWithMinimalRetries(any(AwsCredentialView.class), eq(GLOBAL_DEFAULT_ZONE))).thenReturn(ec2Client);
+        when(platformResources.getEnabledRegions()).thenReturn(null);
+
+        AwsDefaultRegionSelectionFailed ex = assertThrows(AwsDefaultRegionSelectionFailed.class, () -> underTest.determineDefaultRegion(new CloudCredential()));
+
+        assertEquals(String.format("Failed to describe available EC2 regions in region '%s'", GLOBAL_DEFAULT_ZONE), ex.getMessage());
+        verify(awsClient, times(1)).createAccessWithMinimalRetries(any(AwsCredentialView.class), eq(GLOBAL_DEFAULT_ZONE));
+        verify(ec2Client, times(1)).describeRegions(any(DescribeRegionsRequest.class));
+    }
+
+    @Test
+    void testDetermineDefaultRegionWhenGlobalDefaultRegionDescribeFailsWithNotOptInOperationAndNoAdditionalRegionsAreConfigured() {
+        Ec2Exception amazonEC2Exception = getEc2Exception("You are not authorized to use the requested service", OPT_IN_REQUIRED);
         when(ec2Client.describeRegions(any(DescribeRegionsRequest.class))).thenThrow(amazonEC2Exception);
         when(awsClient.createAccessWithMinimalRetries(any(AwsCredentialView.class), eq(GLOBAL_DEFAULT_ZONE))).thenReturn(ec2Client);
         when(platformResources.getEnabledRegions()).thenReturn(null);
@@ -113,15 +139,14 @@ class AwsDefaultRegionSelectorTest {
 
     @Test
     void testDetermineDefaultRegionWhenGlobalDefaultRegionIsNotViableAndOneOfTheAdditionalRegionsIsViable() {
-        Ec2Exception amazonEC2Exception = (Ec2Exception) Ec2Exception.builder()
-                .message("SomethingBadHappened")
-                .awsErrorDetails(AwsErrorDetails.builder().errorCode(AUTH_FAILURE).build())
-                .build();
+        Ec2Exception authFailureException = getEc2Exception("SomethingBadHappened", AUTH_FAILURE);
+        Ec2Exception unauthorizedOperation = getEc2Exception("You are not authorized to perform this operation.", UNAUTHORIZED_OPERATION);
+        Ec2Exception optInRequiredException = getEc2Exception("You are not authorized to use the requested service", OPT_IN_REQUIRED);
         when(ec2Client.describeRegions(any(DescribeRegionsRequest.class))).thenReturn(DescribeRegionsResponse.builder().build());
         when(awsClient.createAccessWithMinimalRetries(any(AwsCredentialView.class), any()))
-                .thenThrow(amazonEC2Exception)
-                .thenThrow(amazonEC2Exception)
-                .thenThrow(amazonEC2Exception)
+                .thenThrow(authFailureException)
+                .thenThrow(optInRequiredException)
+                .thenThrow(unauthorizedOperation)
                 .thenReturn(ec2Client);
 
         String actual = underTest.determineDefaultRegion(new CloudCredential());
@@ -136,10 +161,7 @@ class AwsDefaultRegionSelectorTest {
     @Test
     void testDetermineDefaultRegionWhenGlobalDefaultRegionIsNotViableAndNoneOfTheAdditionalRegionsIsViable() {
         when(awsClient.createAccessWithMinimalRetries(any(AwsCredentialView.class), any())).thenReturn(ec2Client);
-        Ec2Exception amazonEC2Exception = (Ec2Exception) Ec2Exception.builder()
-                .message("SomethingBadHappened")
-                .awsErrorDetails(AwsErrorDetails.builder().errorCode(AUTH_FAILURE).build())
-                        .build();
+        Ec2Exception amazonEC2Exception = getEc2Exception("SomethingBadHappened", AUTH_FAILURE);
         when(ec2Client.describeRegions(any(DescribeRegionsRequest.class))).thenThrow(amazonEC2Exception);
 
         AwsDefaultRegionSelectionFailed exception = assertThrows(AwsDefaultRegionSelectionFailed.class,
@@ -162,5 +184,12 @@ class AwsDefaultRegionSelectorTest {
         assertNull(actual);
         verify(awsClient, times(1)).createAccessWithMinimalRetries(any(AwsCredentialView.class), eq(credentialSpecificDefaultRegion));
         verify(ec2Client, times(1)).describeRegions(any(DescribeRegionsRequest.class));
+    }
+
+    private static Ec2Exception getEc2Exception(String message, String errorCode) {
+        return (Ec2Exception) Ec2Exception.builder()
+                .message(message)
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode(errorCode).build())
+                .build();
     }
 }
