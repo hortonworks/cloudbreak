@@ -535,7 +535,7 @@ Please do not forget to replace `<VAULT_ROOT_TOKEN>` with the value of `VAULT_RO
 ```
 -Dremoteenvironment.identity.server.url=http://localhost:8092
 -Dserver.port=8092
--Daltus.ums.host=ums.thunderhead-dev.cloudera.com
+-Daltus.ums.host=usermanagement.internal-insecure.dps.mow-dev.cloudera.com
 -Dvault.root.token=<VAULT_ROOT_TOKEN>
 -Dremotecluster.host=localhost
 -Dremotecluster.port=9983

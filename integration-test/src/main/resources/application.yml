@@ -48,8 +48,8 @@ integrationtest:
   remoteenvironment:
     server: http://localhost
   ums:
-    host: ums.thunderhead-dev.cloudera.com
-    port: 8982
+    host: usermanagement.internal-insecure.dps.mow-dev.cloudera.com
+    port: 80
     # Possible values: default, legacy, e2e, e2e_eu
     accountKey: e2e_eu
     # Possible values: dev, int, stage, prod
