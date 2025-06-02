@@ -373,7 +373,7 @@ integrationtest:
       endpoint: http://dash.yprod.comops.io
     instance:
       cpuCount: 8
-      memory: 16384
+      memory: 32768
       rootVolumeSize: 200
       volumeSize: 0
       volumeCount: 0
