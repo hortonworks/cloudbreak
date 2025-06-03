@@ -9,5 +9,4 @@
 set_selinux_mode:
   selinux.mode:
     - name: {{ selinux_mode }}
-
 {% endif %}
