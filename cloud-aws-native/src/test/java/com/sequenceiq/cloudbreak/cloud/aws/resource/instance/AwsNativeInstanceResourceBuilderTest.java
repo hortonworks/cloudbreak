@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.resource.instance;
 
 import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.NOT_FOUND;
 import static com.sequenceiq.cloudbreak.cloud.model.CloudInstance.USERDATA_SECRET_ID;
+import static com.sequenceiq.common.model.DefaultApplicationTag.RESOURCE_CRN;
 import static com.sequenceiq.common.model.DefaultApplicationTag.RESOURCE_ID;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -359,6 +360,44 @@ class AwsNativeInstanceResourceBuilderTest {
                 .hasSize(2)
                 .anyMatch(filter -> "tag:Name".equals(filter.name()) && filter.values().contains(instanceName))
                 .anyMatch(filter -> ("tag:" + RESOURCE_ID.key()).equals(filter.name()) && filter.values().contains(stackId));
+    }
+
+    @Test
+    void testBuildWhenInstanceExistAndRunningWithSameCrnNoStackId() throws Exception {
+        String crn = "resourceCrn";
+        String instanceName = "instance-name";
+        when(cloudStack.getTags()).thenReturn(Map.of(RESOURCE_CRN.key(), crn));
+        CloudResource cloudResource = CloudResource.builder()
+                .withName("name")
+                .withType(ResourceType.AWS_INSTANCE)
+                .withStatus(CommonStatus.CREATED)
+                .withParameters(emptyMap())
+                .build();
+        long privateId = 0;
+        Instance instance = Instance.builder()
+                .instanceId(INSTANCE_ID)
+                .architecture(ArchitectureValues.X86_64)
+                .state(InstanceState.builder().code(AwsNativeInstanceResourceBuilder.AWS_INSTANCE_RUNNING_CODE).build())
+                .tags(Tag.builder().key(RESOURCE_CRN.key()).value(crn).build())
+                .build();
+        when(awsStackNameCommonUtil.getInstanceName(any(), any(), any())).thenReturn(instanceName);
+        when(awsMethodExecutor.execute(any(), eq(Optional.empty()))).thenCallRealMethod();
+        when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
+        DescribeInstancesResponse response = DescribeInstancesResponse.builder()
+                .reservations(Reservation.builder().instances(instance).build())
+                .build();
+        ArgumentCaptor<DescribeInstancesRequest> requestCaptor = ArgumentCaptor.forClass(DescribeInstancesRequest.class);
+        when(amazonEc2Client.describeInstances(requestCaptor.capture())).thenReturn(response);
+        when(cloudInstance.getTemplate()).thenReturn(instanceTemplate);
+
+        List<CloudResource> actual = underTest.build(awsContext, cloudInstance, privateId, ac, group, Collections.singletonList(cloudResource), cloudStack);
+        assertEquals(INSTANCE_ID, actual.getFirst().getInstanceId());
+        verify(amazonEc2Client, times(0)).startInstances(any());
+        DescribeInstancesRequest request = requestCaptor.getValue();
+        assertThat(request.filters())
+                .hasSize(2)
+                .anyMatch(filter -> "tag:Name".equals(filter.name()) && filter.values().contains(instanceName))
+                .anyMatch(filter -> ("tag:" + RESOURCE_CRN.key()).equals(filter.name()) && filter.values().contains(crn));
     }
 
     @Test
