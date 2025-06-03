@@ -36,7 +36,6 @@ import com.sequenceiq.periscope.domain.LoadAlert;
 import com.sequenceiq.periscope.domain.LoadAlertConfiguration;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.monitor.event.ClusterStatusSyncEvent;
-import com.sequenceiq.periscope.service.AltusMachineUserService;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.DependentHostGroupsService;
 import com.sequenceiq.periscope.utils.StackResponseUtils;
@@ -57,9 +56,6 @@ class ClusterStatusSyncHandlerTest {
 
     @Mock
     private CloudbreakCommunicator cloudbreakCommunicator;
-
-    @Mock
-    private AltusMachineUserService altusMachineUserService;
 
     @Mock
     private DependentHostGroupsService dependentHostGroupsService;
@@ -83,6 +79,17 @@ class ClusterStatusSyncHandlerTest {
 
         verify(clusterService).setState(AUTOSCALE_CLUSTER_ID, ClusterState.SUSPENDED);
         verify(cloudbreakCommunicator).getByCrn(CLOUDBREAK_STACK_CRN);
+    }
+
+    @Test
+    void testOnApplicationEventWhenAutoscalingDisabled() {
+        Cluster cluster = getACluster(ClusterState.RUNNING);
+        cluster.setAutoscalingEnabled(Boolean.FALSE);
+
+        underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
+        verify(clusterService).findById(AUTOSCALE_CLUSTER_ID);
+        verify(clusterService, never()).setState(AUTOSCALE_CLUSTER_ID, ClusterState.SUSPENDED);
+        verify(cloudbreakCommunicator, never()).getByCrn(CLOUDBREAK_STACK_CRN);
     }
 
     @Test
@@ -402,6 +409,7 @@ class ClusterStatusSyncHandlerTest {
         cluster.setId(AUTOSCALE_CLUSTER_ID);
         cluster.setStackCrn(CLOUDBREAK_STACK_CRN);
         cluster.setState(clusterState);
+        cluster.setAutoscalingEnabled(Boolean.TRUE);
         cluster.setEnvironmentCrn(TEST_ENVIRONMENT_CRN);
         cluster.setMachineUserCrn("testMachineUser");
         cluster.setStopStartScalingEnabled(Boolean.FALSE);
