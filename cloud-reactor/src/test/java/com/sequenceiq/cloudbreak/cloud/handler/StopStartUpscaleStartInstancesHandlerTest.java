@@ -368,6 +368,43 @@ public class StopStartUpscaleStartInstancesHandlerTest {
     }
 
     @Test
+    void testStartInstancesWhereLessInstancesAvailableOnCloudProvider() {
+        List<CloudInstance> allInstancesInHg = generateCloudInstances(10);
+        List<CloudInstance> stoppedInstancesInHg = generateCloudInstances(6);
+        List<CloudInstance> startedInstancesWithServicesNotRunning = generateCloudInstances(0);
+        int numInstancesToStart = 5;
+
+        StopStartUpscaleStartInstancesRequest request = new StopStartUpscaleStartInstancesRequest(cloudContext, cloudCredential, cloudStack,
+                "compute", stoppedInstancesInHg, allInstancesInHg, startedInstancesWithServicesNotRunning, numInstancesToStart);
+
+        int expectedInstances = 4;
+        List<CloudInstance> stoppedInstancesArg = stoppedInstancesInHg.subList(0, 4);
+        List<CloudVmInstanceStatus> startedInstanceStatusList = generateStartedCloudVmInstanceStatuses(stoppedInstancesArg);
+        List<CloudVmInstanceStatus> stoppedInstanceStatusList = generateStoppedCloudVmInstanceStatuses(stoppedInstancesArg);
+
+        when(instanceConnector.checkWithoutRetry(any(AuthenticatedContext.class), eq(stoppedInstancesInHg))).thenReturn(stoppedInstanceStatusList);
+        when(instanceConnector.startWithLimitedRetry(any(AuthenticatedContext.class), eq(null), any(), anyLong()))
+                .thenReturn(startedInstanceStatusList);
+
+        Event event = new Event(request);
+        underTest.accept(event);
+
+        ArgumentCaptor<Event> resultCaptor = ArgumentCaptor.forClass(Event.class);
+        verify(eventBus).notify(any(), resultCaptor.capture());
+        verify(instanceConnector).checkWithoutRetry(any(AuthenticatedContext.class), eq(stoppedInstancesInHg));
+        verify(instanceConnector).startWithLimitedRetry(
+                any(AuthenticatedContext.class), eq(null), eq(stoppedInstancesArg), anyLong());
+
+        assertEquals(1, resultCaptor.getAllValues().size());
+        Event resultEvent = resultCaptor.getValue();
+        assertEquals(StopStartUpscaleStartInstancesResult.class, resultEvent.getData().getClass());
+        StopStartUpscaleStartInstancesResult result = (StopStartUpscaleStartInstancesResult) resultEvent.getData();
+
+        verifyAffectedInstancesInResult(startedInstanceStatusList, result.getAffectedInstanceStatuses());
+        assertEquals(expectedInstances, result.getAffectedInstanceStatuses().size());
+    }
+
+    @Test
     void testStartInstancesIncludingInstancesWithServicesNotRunning() {
         List<CloudInstance> allInstancesInHg = generateCloudInstances(10);
         List<CloudInstance> stoppedInstancesInHg = generateCloudInstances(6);
@@ -380,9 +417,9 @@ public class StopStartUpscaleStartInstancesHandlerTest {
         int expectedInstances = Math.min(stoppedInstancesInHg.size(), numInstancesToStart - startedInstancesWithServicesNotRunning.size());
         List<CloudInstance> stoppedInstancesArg = stoppedInstancesInHg.subList(0, expectedInstances);
         List<CloudVmInstanceStatus> startedInstanceStatusList = generateStartedCloudVmInstanceStatuses(stoppedInstancesArg);
-        List<CloudVmInstanceStatus> stoppedInstanceStatusList = generateStoppedCloudVmInstanceStatuses(stoppedInstancesArg);
-        when(instanceConnector.checkWithoutRetry(any(AuthenticatedContext.class), eq(stoppedInstancesArg))).thenReturn(stoppedInstanceStatusList);
-        when(instanceConnector.startWithLimitedRetry(any(AuthenticatedContext.class), eq(null), eq(stoppedInstancesArg), anyLong()))
+        List<CloudVmInstanceStatus> stoppedInstanceStatusList = generateStoppedCloudVmInstanceStatuses(stoppedInstancesInHg);
+        when(instanceConnector.checkWithoutRetry(any(AuthenticatedContext.class), eq(stoppedInstancesInHg))).thenReturn(stoppedInstanceStatusList);
+        when(instanceConnector.startWithLimitedRetry(any(AuthenticatedContext.class), eq(null), any(), anyLong()))
                 .thenReturn(startedInstanceStatusList);
 
         Event event = new Event(request);
@@ -390,7 +427,7 @@ public class StopStartUpscaleStartInstancesHandlerTest {
 
         ArgumentCaptor<Event> resultCaptor = ArgumentCaptor.forClass(Event.class);
         verify(eventBus).notify(any(), resultCaptor.capture());
-        verify(instanceConnector).checkWithoutRetry(any(AuthenticatedContext.class), eq(stoppedInstancesArg));
+        verify(instanceConnector).checkWithoutRetry(any(AuthenticatedContext.class), eq(stoppedInstancesInHg));
         verify(instanceConnector).startWithLimitedRetry(
                 any(AuthenticatedContext.class), eq(null), eq(stoppedInstancesArg), anyLong());
 
@@ -459,7 +496,7 @@ public class StopStartUpscaleStartInstancesHandlerTest {
         List<CloudVmInstanceStatus> stoppedInstanceStatusList = generateStoppedCloudVmInstanceStatuses(stoppedInstancesArg);
         when(instanceConnector.checkWithoutRetry(
                 any(AuthenticatedContext.class),
-                eq(stoppedInstancesArg)))
+                eq(stoppedInstancesInHg)))
                 .thenReturn(stoppedInstanceStatusList);
         when(instanceConnector.
                 startWithLimitedRetry(
@@ -546,7 +583,7 @@ public class StopStartUpscaleStartInstancesHandlerTest {
                 generateStartedCloudVmInstanceStatusesIncludingOtherStates(stoppedInstancesArg);
         when(instanceConnector.checkWithoutRetry(
                 any(AuthenticatedContext.class),
-                eq(stoppedInstancesArg)))
+                eq(stoppedInstancesInHg)))
                 .thenReturn(stoppedInstanceStatusList);
         when(instanceConnector.
                 startWithLimitedRetry(
@@ -560,7 +597,7 @@ public class StopStartUpscaleStartInstancesHandlerTest {
 
         ArgumentCaptor<Event> resultCaptor = ArgumentCaptor.forClass(Event.class);
         verify(eventBus).notify(any(), resultCaptor.capture());
-        verify(instanceConnector).checkWithoutRetry(any(AuthenticatedContext.class), eq(stoppedInstancesArg));
+        verify(instanceConnector).checkWithoutRetry(any(AuthenticatedContext.class), eq(stoppedInstancesInHg));
         verify(instanceConnector).startWithLimitedRetry(
                 any(AuthenticatedContext.class), eq(null), eq(stoppedInstancesInHg.subList(0, expectedInstances)), any(Long.class));
         verifyNoMoreInteractions(instanceConnector);
