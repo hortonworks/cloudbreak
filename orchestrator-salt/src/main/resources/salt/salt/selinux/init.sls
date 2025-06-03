@@ -9,9 +9,4 @@
 set_selinux_mode:
   selinux.mode:
     - name: {{ selinux_mode }}
-
-set_httpd_permissive:
-  cmd.run:
-    - name: semanage permissive -a httpd_t
-    - unless: semanage permissive -l | grep httpd_t
 {% endif %}
