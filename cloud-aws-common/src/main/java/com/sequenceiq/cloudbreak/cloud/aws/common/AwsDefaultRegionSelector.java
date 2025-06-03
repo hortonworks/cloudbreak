@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
 import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.AUTH_FAILURE;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.OPT_IN_REQUIRED;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.UNAUTHORIZED_OPERATION;
 
 import java.util.List;
 import java.util.Set;
@@ -26,6 +28,8 @@ import software.amazon.awssdk.services.ec2.model.Ec2Exception;
 public class AwsDefaultRegionSelector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsDefaultRegionSelector.class);
+
+    private static final Set<String> UNAUTHORIZED_OPERATIONS = Set.of(AUTH_FAILURE, UNAUTHORIZED_OPERATION, OPT_IN_REQUIRED);
 
     @Inject
     private AwsPlatformResources platformResources;
@@ -81,7 +85,8 @@ public class AwsDefaultRegionSelector {
         } catch (Ec2Exception ec2Exception) {
             String errorMessage = String.format("Unable to describe regions via using EC2 region '%s' APIs, due to: '%s'", region, ec2Exception.getMessage());
             LOGGER.debug(errorMessage, ec2Exception);
-            if (!AUTH_FAILURE.equals(ec2Exception.awsErrorDetails().errorCode())) {
+            String errorCode = ec2Exception.awsErrorDetails().errorCode();
+            if (!UNAUTHORIZED_OPERATIONS.contains(errorCode)) {
                 throw ec2Exception;
             }
         } catch (RuntimeException e) {

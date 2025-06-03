@@ -14,6 +14,10 @@ public class AwsSdkErrorCodes {
 
     public static final String AUTH_FAILURE = "AuthFailure";
 
+    public static final String UNAUTHORIZED_OPERATION = "UnauthorizedOperation";
+
+    public static final String OPT_IN_REQUIRED = "OptInRequired";
+
     public static final String VOLUME_NOT_FOUND = "InvalidVolume.NotFound";
 
     public static final String NOT_FOUND = "NotFound";
