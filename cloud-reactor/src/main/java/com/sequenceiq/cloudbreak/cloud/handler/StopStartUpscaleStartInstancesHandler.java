@@ -80,17 +80,16 @@ public class StopStartUpscaleStartInstancesHandler implements CloudPlatformEvent
             } else {
                 // Filter based on CB state, but confirm against the cloud provider. It is OK to start fewer instances than requested.
                 // TODO CB-15132: We could go back to the cloud provider and try finding additional stopped instances.
-                instancesToStart = stoppedInstancesInCbHg.subList(0, numInstancesToStart);
-                stoppedInstancesOnCloudProvider = collectStoppedInstancesFromCloudProvider(connector, ac, instancesToStart);
-                Set<CloudInstance> stoppedInstancesOnCloudProviderSet =
-                        stoppedInstancesOnCloudProvider.stream().map(CloudVmInstanceStatus::getCloudInstance).collect(Collectors.toUnmodifiableSet());
-                instancesToStart = instancesToStart.stream()
-                        .filter(i -> stoppedInstancesOnCloudProviderSet.contains(i))
-                        .collect(Collectors.toList());
+                stoppedInstancesOnCloudProvider = collectStoppedInstancesFromCloudProvider(connector, ac, stoppedInstancesInCbHg);
+                instancesToStart = stoppedInstancesOnCloudProvider
+                        .stream()
+                        .map(CloudVmInstanceStatus::getCloudInstance)
+                        .limit(numInstancesToStart)
+                        .toList();
             }
 
             LOGGER.info("Requested instances to start={}, actual instances being started={}, numInstancesWithServicesNotRunning={}" +
-                    ", numStoppedInstanceCountInCbHg={}, numStoppedInstancesOnCloudProvider(subset)={}",
+                    ", numStoppedInstanceCountInCbHg={}, numStoppedInstancesOnCloudProvider={}",
                     request.getNumInstancesToStart(), instancesToStart.size(), request.getStartedInstancesWithServicesNotRunning().size(),
                     stoppedInstancesInCbHg.size(), stoppedInstancesOnCloudProvider.size());
 
