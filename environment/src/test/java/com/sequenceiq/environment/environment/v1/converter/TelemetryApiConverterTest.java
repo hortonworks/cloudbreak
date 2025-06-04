@@ -34,6 +34,7 @@ import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentLogging;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.environment.dto.telemetry.S3CloudStorageParameters;
+import com.sequenceiq.environment.telemetry.domain.AccountTelemetry;
 
 @ExtendWith(MockitoExtension.class)
 public class TelemetryApiConverterTest {
@@ -78,7 +79,7 @@ public class TelemetryApiConverterTest {
         telemetryRequest.setFeatures(fr);
         given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
         // WHEN
-        EnvironmentTelemetry result = underTest.convert(telemetryRequest, new Features(), ACCOUNT_ID);
+        EnvironmentTelemetry result = underTest.convert(telemetryRequest, getAccountTelemetry(), ACCOUNT_ID);
         // THEN
         assertEquals(INSTANCE_PROFILE_VALUE, result.getLogging().getS3().getInstanceProfile());
         assertEquals("http://myaddress/api/v1/receive", result.getMonitoring().getRemoteWriteUrl());
@@ -93,7 +94,7 @@ public class TelemetryApiConverterTest {
         // GIVEN
         TelemetryRequest telemetryRequest = new TelemetryRequest();
         // WHEN
-        EnvironmentTelemetry result = underTest.convert(telemetryRequest, new Features(), ACCOUNT_ID);
+        EnvironmentTelemetry result = underTest.convert(telemetryRequest, getAccountTelemetry(), ACCOUNT_ID);
         // THEN
         assertNull(result.getFeatures());
     }
@@ -105,7 +106,7 @@ public class TelemetryApiConverterTest {
         FeaturesRequest fr = new FeaturesRequest();
         telemetryRequest.setFeatures(fr);
         // WHEN
-        EnvironmentTelemetry result = underTest.convert(telemetryRequest, new Features(), ACCOUNT_ID);
+        EnvironmentTelemetry result = underTest.convert(telemetryRequest, getAccountTelemetry(), ACCOUNT_ID);
         // THEN
         assertNull(result.getFeatures().getWorkloadAnalytics());
     }
@@ -118,7 +119,7 @@ public class TelemetryApiConverterTest {
         fr.addWorkloadAnalytics(true);
         telemetryRequest.setFeatures(fr);
         // WHEN
-        EnvironmentTelemetry result = underTest.convert(telemetryRequest, new Features(), ACCOUNT_ID);
+        EnvironmentTelemetry result = underTest.convert(telemetryRequest, getAccountTelemetry(), ACCOUNT_ID);
         // THEN
         assertTrue(result.getFeatures().getWorkloadAnalytics().getEnabled());
     }
@@ -128,7 +129,7 @@ public class TelemetryApiConverterTest {
         // GIVEN
         TelemetryRequest telemetryRequest = new TelemetryRequest();
         // WHEN
-        EnvironmentTelemetry result = underTest.convert(telemetryRequest, new Features(), ACCOUNT_ID);
+        EnvironmentTelemetry result = underTest.convert(telemetryRequest, getAccountTelemetry(), ACCOUNT_ID);
         // THEN
         assertNull(result.getFeatures());
         assertNull(result.getMonitoring().getRemoteWriteUrl());
@@ -143,7 +144,7 @@ public class TelemetryApiConverterTest {
         telemetryRequest.setFeatures(featuresRequest);
         given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(false);
         // WHEN
-        EnvironmentTelemetry result = underTest.convert(telemetryRequest, new Features(), ACCOUNT_ID);
+        EnvironmentTelemetry result = underTest.convert(telemetryRequest, getAccountTelemetry(), ACCOUNT_ID);
         // THEN
         assertNull(result.getFeatures().getMonitoring());
         assertNull(result.getMonitoring().getRemoteWriteUrl());
@@ -158,7 +159,7 @@ public class TelemetryApiConverterTest {
         telemetryRequest.setFeatures(featuresRequest);
         given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
         // WHEN
-        EnvironmentTelemetry result = underTest.convert(telemetryRequest, new Features(), ACCOUNT_ID);
+        EnvironmentTelemetry result = underTest.convert(telemetryRequest, getAccountTelemetry(), ACCOUNT_ID);
         // THEN
         assertFalse(result.getFeatures().getMonitoring().getEnabled());
         assertNotNull(result.getMonitoring().getRemoteWriteUrl());
@@ -172,14 +173,14 @@ public class TelemetryApiConverterTest {
         fr.addWorkloadAnalytics(false);
         telemetryRequest.setFeatures(fr);
         // WHEN
-        EnvironmentTelemetry result = underTest.convert(telemetryRequest, new Features(), ACCOUNT_ID);
+        EnvironmentTelemetry result = underTest.convert(telemetryRequest, getAccountTelemetry(), ACCOUNT_ID);
         // THEN
         assertFalse(result.getFeatures().getWorkloadAnalytics().getEnabled());
     }
 
     @Test
     void convertTestTelemetryRequestTestWhenNullTelemetry() {
-        EnvironmentTelemetry result = underTest.convert(null, new Features(), ACCOUNT_ID);
+        EnvironmentTelemetry result = underTest.convert(null, getAccountTelemetry(), ACCOUNT_ID);
 
         assertThat(result).isNull();
     }
@@ -189,7 +190,7 @@ public class TelemetryApiConverterTest {
         TelemetryRequest request = new TelemetryRequest();
         request.setLogging(null);
 
-        EnvironmentTelemetry result = underTest.convert(request, new Features(), ACCOUNT_ID);
+        EnvironmentTelemetry result = underTest.convert(request, getAccountTelemetry(), ACCOUNT_ID);
 
         assertThat(result).isNotNull();
         assertThat(result.getLogging()).isNull();
@@ -202,7 +203,7 @@ public class TelemetryApiConverterTest {
         request.setLogging(loggingRequest);
         loggingRequest.setStorageLocation(STORAGE_LOCATION);
 
-        EnvironmentTelemetry result = underTest.convert(request, new Features(), ACCOUNT_ID);
+        EnvironmentTelemetry result = underTest.convert(request, getAccountTelemetry(), ACCOUNT_ID);
 
         assertThat(result).isNotNull();
         EnvironmentLogging logging = result.getLogging();
@@ -280,6 +281,12 @@ public class TelemetryApiConverterTest {
 
         assertNotNull(telemetry.getLogging());
         assertNotNull(telemetry.getWorkloadAnalytics());
+    }
+
+    private AccountTelemetry getAccountTelemetry() {
+        AccountTelemetry accountTelemetry = new AccountTelemetry();
+        accountTelemetry.setFeatures(new Features());
+        return accountTelemetry;
     }
 
 }

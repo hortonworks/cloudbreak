@@ -1,7 +1,10 @@
 package com.sequenceiq.environment.telemetry.domain;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -12,8 +15,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Where;
 
+import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.auth.security.AuthResource;
 import com.sequenceiq.cloudbreak.common.dal.model.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -21,6 +26,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 import com.sequenceiq.common.api.telemetry.model.Features;
+import com.sequenceiq.common.api.telemetry.model.SensitiveLoggingComponent;
 
 @Entity
 @Where(clause = "archived = false")
@@ -45,6 +51,8 @@ public class AccountTelemetry implements Serializable, AuthResource, AccountIdAw
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json features;
+
+    private String enabledSensitiveStorageLogs;
 
     private boolean archived;
 
@@ -110,6 +118,17 @@ public class AccountTelemetry implements Serializable, AuthResource, AccountIdAw
         this.resourceCrn = resourceCrn;
     }
 
+    public Set<SensitiveLoggingComponent> getEnabledSensitiveStorageLogs() {
+        if (StringUtils.isNotEmpty(enabledSensitiveStorageLogs)) {
+            return Arrays.stream(enabledSensitiveStorageLogs.split(",")).map(SensitiveLoggingComponent::valueOf).collect(Collectors.toSet());
+        }
+        return Set.of();
+    }
+
+    public void setEnabledSensitiveStorageLogs(Set<String> enabledSensitiveStorageLogs) {
+        this.enabledSensitiveStorageLogs = Joiner.on(",").join(enabledSensitiveStorageLogs);
+    }
+
     @Override
     public String toString() {
         return "AccountTelemetry{" +
@@ -119,6 +138,7 @@ public class AccountTelemetry implements Serializable, AuthResource, AccountIdAw
                 ", rules=" + rules +
                 ", features=" + features +
                 ", archived=" + archived +
+                ", enabledSensitiveStorageLogs=" + enabledSensitiveStorageLogs +
                 '}';
     }
 }

@@ -3,6 +3,7 @@ package com.sequenceiq.environment.telemetry.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.ws.rs.ForbiddenException;
@@ -133,6 +134,7 @@ public class AccountTelemetryService {
         defaultFeatures.addCloudStorageLogging(true);
         defaultTelemetry.setRules(defaultEncodedRules);
         defaultTelemetry.setFeatures(defaultFeatures);
+        defaultTelemetry.setEnabledSensitiveStorageLogs(Set.of());
         return defaultTelemetry;
     }
 

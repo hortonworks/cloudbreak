@@ -252,6 +252,7 @@ public class AzureCloudProvider extends AbstractCloudProvider {
         adlsGen2CloudStorageV1Parameters.setSecure(getSecure());
         loggingRequest.setAdlsGen2(adlsGen2CloudStorageV1Parameters);
         loggingRequest.setStorageLocation(getBaseLocation());
+        loggingRequest.setEnabledSensitiveStorageLogs(Set.of("SALT"));
         return loggingRequest;
     }
 

@@ -1,7 +1,12 @@
 package com.sequenceiq.common.api.telemetry.model;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Set;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
@@ -21,6 +26,8 @@ public class Logging implements Serializable {
 
     @Deprecated
     private CloudwatchParams cloudwatch;
+
+    private Set<SensitiveLoggingComponent> enabledSensitiveStorageLogs;
 
     public String getStorageLocation() {
         return storageLocation;
@@ -64,6 +71,24 @@ public class Logging implements Serializable {
         this.cloudwatch = cloudwatch;
     }
 
+    public Set<SensitiveLoggingComponent> getEnabledSensitiveStorageLogs() {
+        return enabledSensitiveStorageLogs;
+    }
+
+    public void setEnabledSensitiveStorageLogs(Set<SensitiveLoggingComponent> enabledSensitiveStorageLogs) {
+        this.enabledSensitiveStorageLogs = enabledSensitiveStorageLogs;
+    }
+
+    public void setEnabledSensitiveStorageLogsByStrings(Set<String> enabledSensitiveStorageLogs) {
+        if (enabledSensitiveStorageLogs != null) {
+            this.enabledSensitiveStorageLogs = enabledSensitiveStorageLogs.stream()
+                    .filter(stringValue -> Arrays.stream(SensitiveLoggingComponent.values())
+                            .anyMatch(enumValue -> StringUtils.equals(enumValue.name(), stringValue)))
+                    .map(SensitiveLoggingComponent::valueOf)
+                    .collect(Collectors.toSet());
+        }
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", Logging.class.getSimpleName() + "[", "]")
@@ -72,6 +97,7 @@ public class Logging implements Serializable {
                 .add("adlsGen2='" + adlsGen2 + '\'')
                 .add("gcs='" + gcs + '\'')
                 .add("cloudwatch='" + cloudwatch + '\'')
+                .add("enabledSensitiveStorageLogs='" + enabledSensitiveStorageLogs + '\'')
                 .toString();
     }
 }

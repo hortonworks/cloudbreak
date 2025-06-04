@@ -1,12 +1,17 @@
 package com.sequenceiq.environment.environment.dto.telemetry;
 
 import java.io.Serializable;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
+import com.sequenceiq.common.api.telemetry.model.SensitiveLoggingComponent;
 import com.sequenceiq.environment.environment.dto.StorageLocationAware;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -23,6 +28,8 @@ public class EnvironmentLogging implements Serializable, StorageLocationAware {
 
     @Deprecated
     private CloudwatchParams cloudwatch;
+
+    private Set<String> enabledSensitiveStorageLogs;
 
     public String getStorageLocation() {
         return storageLocation;
@@ -70,6 +77,19 @@ public class EnvironmentLogging implements Serializable, StorageLocationAware {
         this.cloudwatch = cloudwatch;
     }
 
+    public Set<String> getEnabledSensitiveStorageLogs() {
+        return enabledSensitiveStorageLogs;
+    }
+
+    public void setEnabledSensitiveStorageLogs(Set<String> enabledSensitiveStorageLogs) {
+        this.enabledSensitiveStorageLogs = enabledSensitiveStorageLogs;
+    }
+
+    public void setEnabledSensitiveStorageLogsByEnum(Set<SensitiveLoggingComponent> enabledSensitiveStorageLogs) {
+        this.enabledSensitiveStorageLogs =
+                CollectionUtils.emptyIfNull(enabledSensitiveStorageLogs).stream().map(SensitiveLoggingComponent::name).collect(Collectors.toSet());
+    }
+
     @Override
     public String toString() {
         return "EnvironmentLogging{" +
@@ -78,6 +98,7 @@ public class EnvironmentLogging implements Serializable, StorageLocationAware {
                 ", adlsGen2=" + adlsGen2 +
                 ", gcs=" + gcs +
                 ", cloudwatch=" + cloudwatch +
+                ", enabledSensitiveStorageLogs=" + enabledSensitiveStorageLogs +
                 '}';
     }
 

@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.v1.converter;
 
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -16,6 +17,7 @@ import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.base.FeaturesBase;
 import com.sequenceiq.common.api.telemetry.model.Features;
+import com.sequenceiq.common.api.telemetry.model.SensitiveLoggingComponent;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.telemetry.request.MonitoringRequest;
@@ -32,6 +34,7 @@ import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentMonitorin
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentWorkloadAnalytics;
 import com.sequenceiq.environment.environment.dto.telemetry.S3CloudStorageParameters;
+import com.sequenceiq.environment.telemetry.domain.AccountTelemetry;
 
 @Component
 public class TelemetryApiConverter {
@@ -52,27 +55,28 @@ public class TelemetryApiConverter {
         this.storageLocationDecorator = storageLocationDecorator;
     }
 
-    public EnvironmentTelemetry convert(TelemetryRequest request, Features accountFeatures, String accountId) {
+    public EnvironmentTelemetry convert(TelemetryRequest request, AccountTelemetry accountTelemetry, String accountId) {
         EnvironmentTelemetry telemetry = null;
         if (request != null) {
             telemetry = new EnvironmentTelemetry();
-            telemetry.setLogging(createLoggingFromRequest(request.getLogging()));
+            telemetry.setLogging(createLoggingFromRequest(request.getLogging(), accountTelemetry.getEnabledSensitiveStorageLogs()));
             telemetry.setMonitoring(createMonitoringFromRequest(request.getMonitoring(), accountId));
             telemetry.setWorkloadAnalytics(createWorkloadAnalyticsFromRequest(request.getWorkloadAnalytics()));
-            telemetry.setFeatures(createEnvironmentFeaturesFromRequest(request.getFeatures(), accountFeatures, accountId));
+            telemetry.setFeatures(createEnvironmentFeaturesFromRequest(request.getFeatures(), accountTelemetry.getFeatures(), accountId));
             telemetry.setFluentAttributes(new HashMap<>(request.getFluentAttributes()));
         }
         return telemetry;
     }
 
-    public EnvironmentTelemetry convertForEdit(EnvironmentTelemetry telemetry, TelemetryRequest request, Features accountFeatures, String accountId) {
+    public EnvironmentTelemetry convertForEdit(EnvironmentTelemetry telemetry, TelemetryRequest request, AccountTelemetry accountTelemetry, String accountId) {
         if (request != null) {
-            executeTelemetryEditForFieldIfNeeded(request.getLogging(), this::createLoggingFromRequest, telemetry::setLogging);
+            executeTelemetryEditForFieldIfNeeded(request.getLogging(),
+                    loggingRequest -> createLoggingFromRequest(loggingRequest, accountTelemetry.getEnabledSensitiveStorageLogs()), telemetry::setLogging);
             executeTelemetryEditForFieldIfNeeded(request.getMonitoring(),
                     monitoring -> createMonitoringFromRequest(request.getMonitoring(), accountId), telemetry::setMonitoring);
             executeTelemetryEditForFieldIfNeeded(request.getWorkloadAnalytics(), this::createWorkloadAnalyticsFromRequest, telemetry::setWorkloadAnalytics);
             executeTelemetryEditForFieldIfNeeded(request.getFeatures(),
-                    features -> createEnvironmentFeaturesFromRequest(features, accountFeatures, accountId), telemetry::setFeatures);
+                    features -> createEnvironmentFeaturesFromRequest(features, accountTelemetry.getFeatures(), accountId), telemetry::setFeatures);
             executeTelemetryEditForFieldIfNeeded(request.getFluentAttributes(), attr -> attr, telemetry::setFluentAttributes);
         }
         return telemetry;
@@ -116,6 +120,7 @@ public class TelemetryApiConverter {
             loggingRequest.setS3(convertS3(logging.getS3()));
             loggingRequest.setAdlsGen2(convertAdlsV2(logging.getAdlsGen2()));
             loggingRequest.setGcs(convertGcs(logging.getGcs()));
+            loggingRequest.setEnabledSensitiveStorageLogs(logging.getEnabledSensitiveStorageLogs());
         }
         return loggingRequest;
     }
@@ -152,13 +157,15 @@ public class TelemetryApiConverter {
         return featuresResponse;
     }
 
-    private EnvironmentLogging createLoggingFromRequest(LoggingRequest loggingRequest) {
+    private EnvironmentLogging createLoggingFromRequest(LoggingRequest loggingRequest,
+            Set<SensitiveLoggingComponent> enabledSensitiveStorageLogs) {
         EnvironmentLogging logging = null;
         if (loggingRequest != null) {
             logging = new EnvironmentLogging();
             logging.setS3(convertS3(loggingRequest.getS3()));
             logging.setAdlsGen2(convertAdlsV2(loggingRequest.getAdlsGen2()));
             logging.setGcs(convertGcs(loggingRequest.getGcs()));
+            logging.setEnabledSensitiveStorageLogsByEnum(enabledSensitiveStorageLogs);
             storageLocationDecorator.setLoggingStorageLocationFromRequest(logging, loggingRequest.getStorageLocation());
         }
         return logging;
@@ -272,6 +279,7 @@ public class TelemetryApiConverter {
             loggingResponse.setS3(convertS3(logging.getS3()));
             loggingResponse.setAdlsGen2(convertAdlsV2(logging.getAdlsGen2()));
             loggingResponse.setGcs(convertGcs(logging.getGcs()));
+            loggingResponse.setEnabledSensitiveStorageLogs(logging.getEnabledSensitiveStorageLogs());
         }
         return loggingResponse;
     }

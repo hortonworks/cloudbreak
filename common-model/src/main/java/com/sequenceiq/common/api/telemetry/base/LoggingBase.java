@@ -1,6 +1,8 @@
 package com.sequenceiq.common.api.telemetry.base;
 
 import java.io.Serializable;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.validation.constraints.NotNull;
 
@@ -11,6 +13,7 @@ import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.doc.TelemetryModelDescription;
 import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
+import com.sequenceiq.common.api.telemetry.model.SensitiveLoggingComponent;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -35,6 +38,8 @@ public abstract class LoggingBase implements Serializable {
     @Deprecated
     @Schema(description = TelemetryModelDescription.TELEMETRY_LOGGING_CLOUDWATCH_ATTRIBUTES)
     private CloudwatchParams cloudwatch;
+
+    private Set<String> enabledSensitiveStorageLogs;
 
     public String getStorageLocation() {
         return storageLocation;
@@ -78,6 +83,20 @@ public abstract class LoggingBase implements Serializable {
         this.cloudwatch = cloudwatch;
     }
 
+    public Set<String> getEnabledSensitiveStorageLogs() {
+        return enabledSensitiveStorageLogs;
+    }
+
+    public void setEnabledSensitiveStorageLogs(Set<String> enabledSensitiveStorageLogs) {
+        this.enabledSensitiveStorageLogs = enabledSensitiveStorageLogs;
+    }
+
+    public void setEnabledSensitiveStorageLogsByEnum(Set<SensitiveLoggingComponent> enabledSensitiveStorageLogs) {
+        if (enabledSensitiveStorageLogs != null) {
+            this.enabledSensitiveStorageLogs = enabledSensitiveStorageLogs.stream().map(SensitiveLoggingComponent::name).collect(Collectors.toSet());
+        }
+    }
+
     @Override
     public String toString() {
         return "LoggingBase{" +
@@ -85,6 +104,7 @@ public abstract class LoggingBase implements Serializable {
                 ", s3=" + s3 +
                 ", adlsGen2=" + adlsGen2 +
                 ", gcs=" + gcs +
+                ", enabledSensitiveStorageLogs=" + enabledSensitiveStorageLogs +
                 '}';
     }
 }

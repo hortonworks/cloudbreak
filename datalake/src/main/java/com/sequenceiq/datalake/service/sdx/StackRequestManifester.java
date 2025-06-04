@@ -332,6 +332,7 @@ public class StackRequestManifester {
             loggingRequest.setAdlsGen2(envLogging.getAdlsGen2());
             loggingRequest.setGcs(envLogging.getGcs());
             loggingRequest.setStorageLocation(envLogging.getStorageLocation());
+            loggingRequest.setEnabledSensitiveStorageLogs(envLogging.getEnabledSensitiveStorageLogs());
             telemetryRequest.setLogging(loggingRequest);
             MonitoringRequest monitoringRequest = new MonitoringRequest();
             MonitoringResponse envMonitoring = envTelemetry.getMonitoring();

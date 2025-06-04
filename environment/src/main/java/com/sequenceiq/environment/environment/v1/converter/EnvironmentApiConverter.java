@@ -158,7 +158,7 @@ public class EnvironmentApiConverter {
                 .withExternalizedComputeCluster(requestToExternalizedComputeClusterDto(request.getExternalizedComputeCreateRequest(), accountId))
                 .withLocation(locationRequestToDto(request.getLocation()))
                 .withTelemetry(telemetryApiConverter.convert(request.getTelemetry(),
-                        accountTelemetryService.getOrDefault(accountId).getFeatures(), accountId))
+                        accountTelemetryService.getOrDefault(accountId), accountId))
                 .withBackup(request.getBackup() != null && isNotEmpty(request.getBackup().getStorageLocation()) ?
                         backupConverter.convert(request.getBackup()) : backupConverter.convert(request.getTelemetry()))
                 .withRegions(locationRequestToRegions(request.getLocation(), cloudPlatform))
@@ -450,7 +450,7 @@ public class EnvironmentApiConverter {
         NullUtil.doIfNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
         NullUtil.doIfNotNull(request.getAuthentication(), authentication -> builder.withAuthentication(authenticationRequestToDto(authentication)));
         NullUtil.doIfNotNull(request.getTelemetry(), telemetryRequest -> builder.withTelemetry(telemetryApiConverter.convertForEdit(
-                currentEnvironmentFromDb.getTelemetry(), request.getTelemetry(), accountTelemetryService.getOrDefault(accountId).getFeatures(), accountId)));
+                currentEnvironmentFromDb.getTelemetry(), request.getTelemetry(), accountTelemetryService.getOrDefault(accountId), accountId)));
         NullUtil.doIfNotNull(request.getBackup(), backupRequest -> builder.withBackup(backupConverter.convert(request.getBackup())));
         NullUtil.doIfNotNull(request.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessRequestToDto(securityAccess)));
         NullUtil.doIfNotNull(request.getAws(), awsParams -> builder.withParameters(awsParamsToParametersDto(awsParams, null)));

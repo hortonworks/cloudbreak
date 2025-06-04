@@ -184,6 +184,7 @@ public class GcpCloudProvider extends AbstractCloudProvider {
         LoggingRequest loggingRequest = new LoggingRequest();
         loggingRequest.setGcs(gcsCloudStorageV1Parameters);
         loggingRequest.setStorageLocation(getBaseLocation());
+        loggingRequest.setEnabledSensitiveStorageLogs(Set.of("SALT"));
         return loggingRequest;
     }
 

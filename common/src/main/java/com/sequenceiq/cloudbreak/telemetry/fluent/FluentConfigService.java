@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.telemetry.fluent;
 
 import java.util.HashMap;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +24,7 @@ import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3ConfigGenerator;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.Logging;
+import com.sequenceiq.common.api.telemetry.model.SensitiveLoggingComponent;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 @Service
@@ -73,6 +75,9 @@ public class FluentConfigService implements TelemetryPillarConfigGenerator<Fluen
             builder.withEnabled(true);
             Logging logging = telemetry.getLogging();
             setupCloudStorageLogging(builder, logging);
+            if (CollectionUtils.emptyIfNull(logShipperContext.getEnabledSensitiveStorageLogs()).contains(SensitiveLoggingComponent.SALT)) {
+                builder.withIncludeSaltLogsInCloudStorageLogs();
+            }
         }
         return builder
                 .withRegion(logShipperContext.getCloudRegion())

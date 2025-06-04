@@ -18,6 +18,7 @@ public class AccountTelemetryConverter {
             telemetry = new AccountTelemetry();
             telemetry.setFeatures(convertFeatures(request.getFeatures()));
             telemetry.setRules(request.getRules());
+            telemetry.setEnabledSensitiveStorageLogs(request.getEnabledSensitiveStorageLogs());
         }
         return telemetry;
     }
@@ -28,6 +29,7 @@ public class AccountTelemetryConverter {
             response = new AccountTelemetryResponse();
             response.setFeatures(convertFeatures(source.getFeatures()));
             response.setRules(source.getRules());
+            response.setEnabledSensitiveStorageLogsByEnum(source.getEnabledSensitiveStorageLogs());
         }
         return response;
     }

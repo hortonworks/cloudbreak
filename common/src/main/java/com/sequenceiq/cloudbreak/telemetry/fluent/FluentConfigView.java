@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.telemetry.fluent;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -11,6 +13,7 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfigView;
 import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
+import com.sequenceiq.common.api.telemetry.model.SensitiveLoggingComponent;
 
 public class FluentConfigView implements TelemetryConfigView {
 
@@ -78,6 +81,8 @@ public class FluentConfigView implements TelemetryConfigView {
 
     private final Map<String, Object> overrideAttributes;
 
+    private Set<SensitiveLoggingComponent> enabledSensitiveStorageLogs;
+
     private FluentConfigView(Builder builder) {
         this.enabled = builder.enabled;
         this.cloudStorageLoggingEnabled = builder.cloudStorageLoggingEnabled;
@@ -103,6 +108,7 @@ public class FluentConfigView implements TelemetryConfigView {
         this.gcsProjectId = builder.gcsProjectId;
         this.anonymizationRules = builder.anonymizationRules;
         this.overrideAttributes = builder.overrideAttributes;
+        this.enabledSensitiveStorageLogs = builder.enabledSensitiveStorageLogs;
     }
 
     public String getUser() {
@@ -193,12 +199,17 @@ public class FluentConfigView implements TelemetryConfigView {
         return this.overrideAttributes;
     }
 
+    public Set<SensitiveLoggingComponent> getEnabledSensitiveStorageLogs() {
+        return enabledSensitiveStorageLogs;
+    }
+
     @Override
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("enabled", this.enabled);
         map.put("cloudStorageLoggingEnabled", this.cloudStorageLoggingEnabled);
-        map.put("dbusIncludeSaltLogs", DBUS_INCLUDE_SALT_LOGS_DEFAULT);
+        map.put("dbusIncludeSaltLogs", CollectionUtils.emptyIfNull(enabledSensitiveStorageLogs).contains(SensitiveLoggingComponent.SALT) ||
+                DBUS_INCLUDE_SALT_LOGS_DEFAULT);
         map.put("user", ObjectUtils.defaultIfNull(this.user, TD_AGENT_USER_DEFAULT));
         map.put("group", ObjectUtils.defaultIfNull(this.group, TD_AGENT_GROUP_DEFAULT));
         map.put("environmentRegion", ObjectUtils.defaultIfNull(this.environmentRegion, Crn.Region.US_WEST_1.getName()));
@@ -288,8 +299,15 @@ public class FluentConfigView implements TelemetryConfigView {
 
         private Map<String, Object> overrideAttributes;
 
+        private Set<SensitiveLoggingComponent> enabledSensitiveStorageLogs = new HashSet<>();
+
         public FluentConfigView build() {
             return new FluentConfigView(this);
+        }
+
+        public Builder withIncludeSaltLogsInCloudStorageLogs() {
+            enabledSensitiveStorageLogs.add(SensitiveLoggingComponent.SALT);
+            return this;
         }
 
         public Builder withEnabled(boolean enabled) {

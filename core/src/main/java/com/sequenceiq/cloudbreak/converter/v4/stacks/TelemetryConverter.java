@@ -265,6 +265,7 @@ public class TelemetryConverter {
             loggingRequest.setAdlsGen2(logging.getAdlsGen2());
             loggingRequest.setGcs(logging.getGcs());
             loggingRequest.setStorageLocation(logging.getStorageLocation());
+            loggingRequest.setEnabledSensitiveStorageLogsByEnum(logging.getEnabledSensitiveStorageLogs());
         }
         return loggingRequest;
     }
@@ -298,6 +299,7 @@ public class TelemetryConverter {
             logging.setS3(loggingRequest.getS3());
             logging.setAdlsGen2(loggingRequest.getAdlsGen2());
             logging.setGcs(loggingRequest.getGcs());
+            logging.setEnabledSensitiveStorageLogsByStrings(loggingRequest.getEnabledSensitiveStorageLogs());
         }
         return logging;
     }
@@ -338,6 +340,7 @@ public class TelemetryConverter {
             loggingResponse.setS3(logging.getS3());
             loggingResponse.setAdlsGen2(logging.getAdlsGen2());
             loggingResponse.setGcs(logging.getGcs());
+            loggingResponse.setEnabledSensitiveStorageLogsByEnum(logging.getEnabledSensitiveStorageLogs());
         }
         return loggingResponse;
     }
@@ -386,6 +389,7 @@ public class TelemetryConverter {
             loggingRequest.setS3(loggingResponse.getS3());
             loggingRequest.setAdlsGen2(loggingResponse.getAdlsGen2());
             loggingRequest.setGcs(loggingResponse.getGcs());
+            loggingRequest.setEnabledSensitiveStorageLogs(loggingResponse.getEnabledSensitiveStorageLogs());
         }
         return loggingRequest;
     }

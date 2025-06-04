@@ -10,6 +10,7 @@ import java.util.Set;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -50,6 +51,7 @@ import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Monitoring;
 import com.sequenceiq.common.api.telemetry.model.MonitoringCredential;
+import com.sequenceiq.common.api.telemetry.model.SensitiveLoggingComponent;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.model.VmLog;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
@@ -201,6 +203,9 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
         if (telemetry.isCloudStorageLoggingEnabled() && logging != null
                 && ObjectUtils.anyNotNull(logging.getS3(), logging.getAdlsGen2(), logging.getGcs())) {
             builder.enabled().cloudStorageLogging();
+            if (CollectionUtils.emptyIfNull(logging.getEnabledSensitiveStorageLogs()).contains(SensitiveLoggingComponent.SALT)) {
+                builder.includeSaltLogsInCloudStorageLogs();
+            }
         }
         return builder
                 .withVmLogs(vmLogList)

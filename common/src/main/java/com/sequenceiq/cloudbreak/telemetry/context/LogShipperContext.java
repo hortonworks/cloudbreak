@@ -1,7 +1,10 @@
 package com.sequenceiq.cloudbreak.telemetry.context;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import com.sequenceiq.common.api.telemetry.model.SensitiveLoggingComponent;
 import com.sequenceiq.common.api.telemetry.model.VmLog;
 
 public class LogShipperContext {
@@ -14,11 +17,14 @@ public class LogShipperContext {
 
     private final List<VmLog> vmLogs;
 
+    private final Set<SensitiveLoggingComponent> enabledSensitiveStorageLogs;
+
     private LogShipperContext(Builder builder) {
         this.enabled = builder.enabled;
         this.cloudStorageLogging = builder.cloudStorageLogging;
         this.cloudRegion = builder.cloudRegion;
         this.vmLogs = builder.vmLogs;
+        this.enabledSensitiveStorageLogs = builder.enabledSensitiveStorageLogs;
     }
 
     public boolean isEnabled() {
@@ -35,6 +41,10 @@ public class LogShipperContext {
 
     public String getCloudRegion() {
         return cloudRegion;
+    }
+
+    public Set<SensitiveLoggingComponent> getEnabledSensitiveStorageLogs() {
+        return enabledSensitiveStorageLogs;
     }
 
     public static Builder builder() {
@@ -61,6 +71,8 @@ public class LogShipperContext {
 
         private List<VmLog> vmLogs;
 
+        private Set<SensitiveLoggingComponent> enabledSensitiveStorageLogs = new HashSet<>();
+
         private Builder() {
         }
 
@@ -85,6 +97,11 @@ public class LogShipperContext {
 
         public Builder withVmLogs(List<VmLog> vmLogs) {
             this.vmLogs = vmLogs;
+            return this;
+        }
+
+        public Builder includeSaltLogsInCloudStorageLogs() {
+            enabledSensitiveStorageLogs.add(SensitiveLoggingComponent.SALT);
             return this;
         }
 

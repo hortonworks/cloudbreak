@@ -100,6 +100,7 @@ public class TelemetryConverter {
                 gcsCloudStorageV1Parameters.setServiceAccountEmail(loggingRequest.getGcs().getServiceAccountEmail());
                 logging.setGcs(gcsCloudStorageV1Parameters);
             }
+            logging.setEnabledSensitiveStorageLogsByStrings(loggingRequest.getEnabledSensitiveStorageLogs());
         }
         return logging;
     }
@@ -138,6 +139,7 @@ public class TelemetryConverter {
                 gcsCloudStorageV1Parameters.setServiceAccountEmail(logging.getGcs().getServiceAccountEmail());
                 loggingResponse.setGcs(gcsCloudStorageV1Parameters);
             }
+            loggingResponse.setEnabledSensitiveStorageLogsByEnum(logging.getEnabledSensitiveStorageLogs());
         }
         return loggingResponse;
     }

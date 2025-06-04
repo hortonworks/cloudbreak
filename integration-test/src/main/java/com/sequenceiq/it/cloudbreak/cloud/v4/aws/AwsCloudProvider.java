@@ -161,6 +161,7 @@ public class AwsCloudProvider extends AbstractCloudProvider {
         s3CloudStorageV1Parameters.setInstanceProfile(getInstanceProfile());
         loggingRequest.setS3(s3CloudStorageV1Parameters);
         loggingRequest.setStorageLocation(getBaseLocation());
+        loggingRequest.setEnabledSensitiveStorageLogs(Set.of("SALT"));
         return loggingRequest;
     }
 

@@ -207,7 +207,6 @@ class EnvironmentApiConverterTest {
 
         verify(credentialService).getCloudPlatformByCredential(anyString(), anyString(), any());
         verify(freeIpaConverter).convert(request.getFreeIpa(), "test-aws", cloudPlatform.name());
-        verify(accountTelemetry).getFeatures();
         verify(accountTelemetryService).getOrDefault(any());
         verify(telemetryApiConverter).convert(eq(request.getTelemetry()), any(), anyString());
         verify(tunnelConverter).convert(request.getTunnel());
@@ -286,7 +285,6 @@ class EnvironmentApiConverterTest {
         assertEquals(proxyConfig, actual.getProxyConfig());
         assertEquals(dataServices, actual.getDataServices());
 
-        verify(accountTelemetry).getFeatures();
         verify(accountTelemetryService).getOrDefault(any());
         verify(telemetryApiConverter).convertForEdit(any(), eq(request.getTelemetry()), any(), anyString());
         verify(networkRequestToDtoConverter).convert(request.getNetwork());
