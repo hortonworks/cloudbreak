@@ -9,7 +9,7 @@ public class StackArchiverConfig {
     @Value("${archivestack.intervalseconds:60}")
     private int intervalInSeconds;
 
-    @Value("${archivestack.retention.period.days:14}")
+    @Value("${archivestack.retention.period.days:90}")
     private int retentionPeriodInDays;
 
     @Value("${archivestack.archiver.limit:30}")
