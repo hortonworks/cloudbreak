@@ -40,7 +40,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.publicendpoint.EnvironmentBasedDomainNameProvider;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -84,7 +84,7 @@ class BaseDnsEntryServiceTest {
     private CertificateCreationService certificateCreationService;
 
     @Mock
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Mock
     private ComponentLocatorService componentLocatorService;

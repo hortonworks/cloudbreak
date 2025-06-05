@@ -37,7 +37,7 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.database.DatabaseService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -69,7 +69,7 @@ public class RdsUpgradeService {
     private CloudbreakMessagesService messagesService;
 
     @Inject
-    private EnvironmentClientService environmentService;
+    private EnvironmentService environmentService;
 
     @Value("${cb.db.env.upgrade.rds.targetversion}")
     private TargetMajorVersion defaultTargetMajorVersion;

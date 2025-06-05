@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.controller.validation.template.InstanceTemplate
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.environment.PlatformResourceClientService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
@@ -31,7 +31,7 @@ public class StackValidator {
     private InstanceTemplateValidator templateRequestValidator;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Inject
     private PlatformResourceClientService platformResourceClientService;

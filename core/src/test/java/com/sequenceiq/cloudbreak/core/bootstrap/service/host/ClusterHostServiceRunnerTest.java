@@ -112,6 +112,7 @@ import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentConfigProvider;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
@@ -127,6 +128,7 @@ import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.template.views.provider.RdsViewProvider;
+import com.sequenceiq.cloudbreak.tls.TlsSpecificationsHelper;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.NodesUnreachableException;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -165,6 +167,9 @@ class ClusterHostServiceRunnerTest {
     private static final String KERBEROS_SECRET_LOCATION = "kerberosSecretLocation";
 
     private static final String EXTENDED_BLUEPRINT_TEXT = "extendedBlueprintText";
+
+    @Mock
+    private EnvironmentService environmentService;
 
     @Mock
     private GatewayConfigService gatewayConfigService;
@@ -493,10 +498,17 @@ class ClusterHostServiceRunnerTest {
         when(kerberosDetailService.areClusterManagerManagedKerberosPackages(kerberosConfig)).thenReturn(true);
 
         when(sssdConfigProvider.createSssdAdPillar(kerberosConfig)).thenReturn(Map.of("ad", new SaltPillarProperties("adpath", Map.of())));
+
         when(sssdConfigProvider.createSssdIpaPillar(eq(kerberosConfig), anyMap(), eq(ENV_CRN), any(), eq(EXTENDED_BLUEPRINT_TEXT)))
                 .thenReturn(Map.of("ipa", new SaltPillarProperties("ipapath", Map.of())));
         when(paywallConfigService.createPaywallPillarConfig(stack)).thenReturn(PAYWALL_PROPERTIES);
 
+        when(environmentService.getTlsVersions(ENV_CRN, " ")).thenReturn("TLSv1.2 TLSv1.3");
+        when(environmentService.getTlsVersions(ENV_CRN, ",")).thenReturn("TLSv1.2,TLSv1.3");
+        when(environmentService.getTlsCipherSuites(ENV_CRN)).thenReturn("CIPHER_SUITE");
+        when(environmentService.getTlsCipherSuites(ENV_CRN, TlsSpecificationsHelper.CipherSuitesLimitType.MINIMAL)).thenReturn("CIPHER_SUITE");
+        when(environmentService.getTlsCipherSuites(ENV_CRN, TlsSpecificationsHelper.CipherSuitesLimitType.JAVA_INTERMEDIATE2018, true))
+                .thenReturn("CIPHER_SUITE");
         underTest.runTargetedClusterServices(stack, Map.of("fqdn3", "1.1.1.1"));
 
         verify(stackUtil, times(1)).collectReachableAndUnreachableCandidateNodes(any(), any());
@@ -513,7 +525,7 @@ class ClusterHostServiceRunnerTest {
         assertFalse(reachableNodes.stream().anyMatch(node -> StringUtils.equals("fqdn2", node.getHostname())));
         assertTrue(saltConfig.getValue().getServicePillarConfig().keySet().stream().allMatch(Objects::nonNull));
         verifySecretEncryption(false, saltConfig.getValue());
-        verifyTlsv13Enabled(false, saltConfig.getValue());
+        verifyEncryptionProfile(saltConfig.getValue());
 
         verifyDefaultKerberosCcacheSecretStorage(DEFAULT_KERBEROS_CCACHE_SECRET_STORAGE, saltConfig.getValue());
         verifyKerberosSecretLocation(KERBEROS_SECRET_LOCATION, saltConfig.getValue());
@@ -560,6 +572,14 @@ class ClusterHostServiceRunnerTest {
         when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
         when(paywallConfigService.createPaywallPillarConfig(stack)).thenReturn(PAYWALL_PROPERTIES);
 
+        when(environmentService.getTlsVersions(ENV_CRN, " ")).thenReturn("TLSv1.2 TLSv1.3");
+        when(environmentService.getTlsVersions(ENV_CRN, ",")).thenReturn("TLSv1.2,TLSv1.3");
+        when(environmentService.getTlsCipherSuites(ENV_CRN)).thenReturn("CIPHER_SUITE");
+        when(environmentService.getTlsCipherSuites(ENV_CRN, TlsSpecificationsHelper.CipherSuitesLimitType.MINIMAL))
+                .thenReturn("CIPHER_SUITE");
+        when(environmentService.getTlsCipherSuites(ENV_CRN, TlsSpecificationsHelper.CipherSuitesLimitType.JAVA_INTERMEDIATE2018, true))
+                .thenReturn("CIPHER_SUITE");
+
         underTest.runClusterServices(stack, Map.of(), true);
 
         ArgumentCaptor<Set<Node>> reachableCandidates = ArgumentCaptor.forClass(Set.class);
@@ -578,7 +598,7 @@ class ClusterHostServiceRunnerTest {
         verifyDefaultKerberosCcacheSecretStorage(DEFAULT_KERBEROS_CCACHE_SECRET_STORAGE, saltConfig.getValue());
         verifyKerberosSecretLocation(KERBEROS_SECRET_LOCATION, saltConfig.getValue());
         verifyNoInteractions(backUpDecorator);
-        verifyTlsv13Enabled(false, saltConfig.getValue());
+        verifyEncryptionProfile(saltConfig.getValue());
     }
 
     @Test
@@ -599,6 +619,12 @@ class ClusterHostServiceRunnerTest {
         when(paywallConfigService.createPaywallPillarConfig(stack)).thenReturn(PAYWALL_PROPERTIES);
         when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
 
+        when(environmentService.getTlsVersions(ENV_CRN, " ")).thenReturn("TLSv1.2 TLSv1.3");
+        when(environmentService.getTlsVersions(ENV_CRN, ",")).thenReturn("TLSv1.2,TLSv1.3");
+        when(environmentService.getTlsCipherSuites(ENV_CRN)).thenReturn("CIPHER_SUITE");
+        when(environmentService.getTlsCipherSuites(ENV_CRN, TlsSpecificationsHelper.CipherSuitesLimitType.MINIMAL)).thenReturn("CIPHER_SUITE");
+        when(environmentService.getTlsCipherSuites(ENV_CRN, TlsSpecificationsHelper.CipherSuitesLimitType.JAVA_INTERMEDIATE2018, true))
+                .thenReturn("CIPHER_SUITE");
         underTest.runClusterServices(stack, Map.of(), false);
 
         ArgumentCaptor<Set<Node>> reachableCandidates = ArgumentCaptor.forClass(Set.class);
@@ -617,7 +643,7 @@ class ClusterHostServiceRunnerTest {
         verifyDefaultKerberosCcacheSecretStorage(DEFAULT_KERBEROS_CCACHE_SECRET_STORAGE, saltConfig.getValue());
         verifyKerberosSecretLocation(KERBEROS_SECRET_LOCATION, saltConfig.getValue());
         verifyNoInteractions(backUpDecorator);
-        verifyTlsv13Enabled(false, saltConfig.getValue());
+        verifyEncryptionProfile(saltConfig.getValue());
     }
 
     @Test
@@ -629,6 +655,13 @@ class ClusterHostServiceRunnerTest {
         List<GatewayConfig> gwConfigs = List.of(new GatewayConfig("addr", "endpoint", "privateAddr", 123, "instance", false));
         when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(gwConfigs);
         when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
+        when(environmentService.getTlsVersions(ENV_CRN, " ")).thenReturn("TLSv1.2 TLSv1.3");
+        when(environmentService.getTlsVersions(ENV_CRN, ",")).thenReturn("TLSv1.2,TLSv1.3");
+        when(environmentService.getTlsCipherSuites(ENV_CRN)).thenReturn("CIPHER_SUITE");
+        when(environmentService.getTlsCipherSuites(ENV_CRN, TlsSpecificationsHelper.CipherSuitesLimitType.MINIMAL))
+                .thenReturn("CIPHER_SUITE");
+        when(environmentService.getTlsCipherSuites(ENV_CRN, TlsSpecificationsHelper.CipherSuitesLimitType.JAVA_INTERMEDIATE2018, true))
+                .thenReturn("CIPHER_SUITE");
 
         setupMocksForRunClusterServices();
         underTest.redeployGatewayCertificate(stack);
@@ -677,6 +710,15 @@ class ClusterHostServiceRunnerTest {
     void testAddJavaPillarToSaltConfig() throws CloudbreakOrchestratorException {
         setupMocksForRunClusterServices();
         when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AWS_DEFAULT_VARIANT.value());
+        when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
+        when(environmentService.getTlsVersions(ENV_CRN, " ")).thenReturn("TLSv1.2 TLSv1.3");
+        when(environmentService.getTlsVersions(ENV_CRN, ",")).thenReturn("TLSv1.2,TLSv1.3");
+
+        when(environmentService.getTlsCipherSuites(ENV_CRN)).thenReturn("CIPHER_SUITE");
+        when(environmentService.getTlsCipherSuites(ENV_CRN, TlsSpecificationsHelper.CipherSuitesLimitType.MINIMAL))
+                .thenReturn("CIPHER_SUITE");
+        when(environmentService.getTlsCipherSuites(ENV_CRN, TlsSpecificationsHelper.CipherSuitesLimitType.JAVA_INTERMEDIATE2018, true))
+                .thenReturn("CIPHER_SUITE");
 
         underTest.runClusterServices(stack, Collections.emptyMap(), false);
 
@@ -945,14 +987,21 @@ class ClusterHostServiceRunnerTest {
         when(kerberosDetailService.areClusterManagerManagedKerberosPackages(kerberosConfig)).thenReturn(true);
         when(entitlementService.isTlsv13Enabled(ACCOUNT_ID)).thenReturn(true);
 
+        when(environmentService.getTlsVersions(ENV_CRN, " ")).thenReturn("TLSv1.2 TLSv1.3");
+        when(environmentService.getTlsVersions(ENV_CRN, ",")).thenReturn("TLSv1.2,TLSv1.3");
+
+        when(environmentService.getTlsCipherSuites(ENV_CRN)).thenReturn("CIPHER_SUITE");
+        when(environmentService.getTlsCipherSuites(ENV_CRN, TlsSpecificationsHelper.CipherSuitesLimitType.MINIMAL))
+                .thenReturn("CIPHER_SUITE");
+        when(environmentService.getTlsCipherSuites(ENV_CRN, TlsSpecificationsHelper.CipherSuitesLimitType.JAVA_INTERMEDIATE2018, true))
+                .thenReturn("CIPHER_SUITE");
         underTest.runClusterServices(stack, Collections.emptyMap(), false);
 
         ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
         verify(hostOrchestrator).runService(any(), any(), saltConfig.capture(), any());
 
         verifySecretEncryption(true, saltConfig.getValue());
-        verifyTlsv13Enabled(true, saltConfig.getValue());
-
+        verifyEncryptionProfile(saltConfig.getValue());
 
         String knoxGatewaySecurityDir = (String) getGatewayProperties(saltConfig.getValue()).get("knoxGatewaySecurityDir");
         assertEquals(KNOX_GATEWAY_SECURITY_DIR, knoxGatewaySecurityDir);
@@ -960,11 +1009,8 @@ class ClusterHostServiceRunnerTest {
         String knoxIdBrokerSecurityDir = (String) getIDBrokerProperties(saltConfig.getValue()).get("knoxIdBrokerSecurityDir");
         assertEquals(KNOX_IDBROKER_SECURITY_DIR, knoxIdBrokerSecurityDir);
 
-
         verifyDefaultKerberosCcacheSecretStorage(DEFAULT_KERBEROS_CCACHE_SECRET_STORAGE, saltConfig.getValue());
         verifyKerberosSecretLocation(KERBEROS_SECRET_LOCATION, saltConfig.getValue());
-
-
     }
 
     @Test
@@ -982,13 +1028,21 @@ class ClusterHostServiceRunnerTest {
         when(kerberosDetailService.areClusterManagerManagedKerberosPackages(kerberosConfig)).thenReturn(true);
         when(entitlementService.isTlsv13Enabled(ACCOUNT_ID)).thenReturn(true);
 
+        when(environmentService.getTlsVersions(ENV_CRN, " ")).thenReturn("TLSv1.2 TLSv1.3");
+        when(environmentService.getTlsVersions(ENV_CRN, ",")).thenReturn("TLSv1.2,TLSv1.3");
+
+        when(environmentService.getTlsCipherSuites(ENV_CRN)).thenReturn("CIPHER_SUITE");
+        when(environmentService.getTlsCipherSuites(ENV_CRN, TlsSpecificationsHelper.CipherSuitesLimitType.MINIMAL)).thenReturn("CIPHER_SUITE");
+        when(environmentService.getTlsCipherSuites(ENV_CRN, TlsSpecificationsHelper.CipherSuitesLimitType.JAVA_INTERMEDIATE2018, true))
+                .thenReturn("CIPHER_SUITE");
+
         underTest.runClusterServices(stack, Collections.emptyMap(), false);
 
         ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
         verify(hostOrchestrator).runService(any(), any(), saltConfig.capture(), any());
 
         verifySecretEncryption(true, saltConfig.getValue());
-        verifyTlsv13Enabled(true, saltConfig.getValue());
+        verifyEncryptionProfile(saltConfig.getValue());
 
         verify(backUpDecorator).decoratePillarWithBackup(eq(stack), eq(environmentResponse), any());
     }
@@ -1102,9 +1156,9 @@ class ClusterHostServiceRunnerTest {
         assertEquals(expectedValue, secretEncryptionEnabled);
     }
 
-    private void verifyTlsv13Enabled(boolean expectedValue, SaltConfig saltConfig) {
-        boolean tlsv13Enabled = (Boolean) getClusterProperties(saltConfig).get("tlsv13Enabled");
-        assertEquals(expectedValue, tlsv13Enabled);
+    private void verifyEncryptionProfile(SaltConfig saltConfig) {
+        String tlsChipherSuites = (String) getClusterProperties(saltConfig).get("tlsCipherSuitesJavaIntermediate");
+        assertEquals("CIPHER_SUITE", tlsChipherSuites);
     }
 
     private void verifyDefaultKerberosCcacheSecretStorage(String expectedValue, SaltConfig saltConfig) {

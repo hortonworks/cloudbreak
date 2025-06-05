@@ -40,7 +40,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -67,7 +67,7 @@ public class InstanceMetadataAvailabilityZoneCalculator {
     private CloudPlatformConnectors cloudPlatformConnectors;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;

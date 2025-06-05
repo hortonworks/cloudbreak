@@ -31,7 +31,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRd
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsUpgradeDatabaseServerResult;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.rds.RdsUpgradeOrchestratorService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
@@ -68,7 +68,7 @@ class UpgradeRdsHandlerTest {
     private TargetMajorVersionToUpgradeTargetVersionConverter targetMajorVersionToUpgradeTargetVersionConverter;
 
     @Mock
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Mock
     private StackUpdater stackUpdater;

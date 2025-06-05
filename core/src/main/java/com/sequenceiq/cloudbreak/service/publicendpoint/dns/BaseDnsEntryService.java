@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.PemDnsEntryCreateOrUpdateException;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.publicendpoint.BasePublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.api.type.EnvironmentType;
@@ -29,7 +29,7 @@ public abstract class BaseDnsEntryService extends BasePublicEndpointManagementSe
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseDnsEntryService.class);
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     protected abstract Map<String, List<String>> getComponentLocation(StackDtoDelegate stack);
 

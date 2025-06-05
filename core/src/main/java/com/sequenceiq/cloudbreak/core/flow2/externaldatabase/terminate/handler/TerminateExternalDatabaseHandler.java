@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.TerminateExternalDatabaseFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.TerminateExternalDatabaseRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.TerminateExternalDatabaseResult;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
@@ -45,7 +45,7 @@ public class TerminateExternalDatabaseHandler implements EventHandler<TerminateE
     private StackUpdaterService stackUpdaterService;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Inject
     private StackService stackService;

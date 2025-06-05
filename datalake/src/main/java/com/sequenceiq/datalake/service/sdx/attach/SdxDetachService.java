@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobSe
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.job.SdxClusterJobAdapter;
-import com.sequenceiq.datalake.service.EnvironmentClientService;
+import com.sequenceiq.datalake.service.sdx.EnvironmentService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 
@@ -46,7 +46,7 @@ public class SdxDetachService {
     private StatusCheckerJobService jobService;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     /**
      * Detaches the internal SDX cluster by assigning it a new "detached" name and CRN.

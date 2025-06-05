@@ -35,7 +35,7 @@ import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
@@ -51,7 +51,7 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
     private static final Logger LOGGER = LoggerFactory.getLogger(GatewayPublicEndpointManagementService.class);
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Inject
     private SecurityConfigService securityConfigService;

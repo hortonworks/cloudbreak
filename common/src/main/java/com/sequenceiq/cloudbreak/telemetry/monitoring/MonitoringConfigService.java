@@ -38,6 +38,8 @@ public class MonitoringConfigService implements TelemetryPillarConfigGenerator<M
 
     private final AdlsGen2ConfigGenerator adlsGen2ConfigGenerator;
 
+    private List<String> tlsCipherSuitesBlackBoxEporter;
+
     public MonitoringConfigService(MonitoringConfiguration monitoringConfiguration, AdlsGen2ConfigGenerator adlsGen2ConfigGenerator) {
         this.monitoringConfiguration = monitoringConfiguration;
         this.adlsGen2ConfigGenerator = adlsGen2ConfigGenerator;
@@ -196,5 +198,9 @@ public class MonitoringConfigService implements TelemetryPillarConfigGenerator<M
     private boolean areAuthConfigsValid(MonitoringAuthConfig authConfig) {
         return authConfig != null && authConfig.getPassword() != null
                 && StringUtils.isNoneBlank(authConfig.getUsername(), authConfig.getPassword());
+    }
+
+    public void setTlsCipherSuitesBlackBoxEporter(List<String> tlsCipherSuites) {
+        this.tlsCipherSuitesBlackBoxEporter = tlsCipherSuites;
     }
 }

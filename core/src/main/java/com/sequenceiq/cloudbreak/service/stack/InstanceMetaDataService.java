@@ -51,7 +51,7 @@ import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.dto.SubnetIdWithResourceNameAndCrn;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -71,7 +71,7 @@ public class InstanceMetaDataService {
     private InstanceMetaDataRepository repository;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Inject
     private ResourceRetriever resourceRetriever;

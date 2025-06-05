@@ -45,7 +45,7 @@ import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.StopExternalDatabaseFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.StopExternalDatabaseRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.StopExternalDatabaseResult;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.externaldatabase.DatabaseServerParameterDecorator;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -71,7 +71,7 @@ class StopExternalDatabaseHandlerTest {
     private StackUpdaterService stackUpdaterService;
 
     @Mock
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Mock
     private ExternalDatabaseConfig externalDatabaseConfig;

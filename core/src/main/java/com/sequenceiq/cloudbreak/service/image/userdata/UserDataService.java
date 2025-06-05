@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.domain.Userdata;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.repository.UserdataRepository;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigUserDataReplacer;
@@ -81,7 +81,7 @@ public class UserDataService {
     private ProxyConfigUserDataReplacer proxyConfigUserDataReplacer;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     public void deleteByStackId(Long stackId) {
         Optional<Userdata> userdataOptional = userdataRepository.findByStackId(stackId);

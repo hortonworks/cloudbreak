@@ -36,7 +36,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -55,7 +55,7 @@ public class ProviderBasedMultiAzSetupValidator {
     private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Inject
     private CredentialConverter credentialConverter;

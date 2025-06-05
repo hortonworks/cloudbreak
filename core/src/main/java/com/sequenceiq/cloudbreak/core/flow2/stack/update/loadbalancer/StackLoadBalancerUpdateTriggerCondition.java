@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -30,7 +30,7 @@ public class StackLoadBalancerUpdateTriggerCondition implements FlowTriggerCondi
     private InstanceGroupService instanceGroupService;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Inject
     private LoadBalancerConfigService loadBalancerConfigService;

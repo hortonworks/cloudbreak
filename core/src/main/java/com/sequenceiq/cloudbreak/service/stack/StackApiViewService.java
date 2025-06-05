@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.domain.view.HostGroupView;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.repository.HostGroupViewRepository;
 import com.sequenceiq.cloudbreak.repository.StackApiViewRepository;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.flow.core.FlowLogService;
 
 @Service
@@ -37,7 +37,7 @@ public class StackApiViewService {
     private FlowLogService flowLogService;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Inject
     private StackApiViewRepository stackApiViewRepository;

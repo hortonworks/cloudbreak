@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmFlowChainTriggerEvent;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -49,7 +49,7 @@ public class StackCcmUpgradeService {
     private ReactorNotifier reactorNotifier;
 
     @Inject
-    private EnvironmentClientService environmentService;
+    private EnvironmentService environmentService;
 
     @Inject
     private CloudbreakMessagesService messagesService;

@@ -86,7 +86,7 @@ import com.sequenceiq.cloudbreak.service.cluster.DatabaseSslService;
 import com.sequenceiq.cloudbreak.service.cluster.InstanceGroupMetadataCollector;
 import com.sequenceiq.cloudbreak.service.customconfigs.CustomConfigurationsService;
 import com.sequenceiq.cloudbreak.service.customconfigs.CustomConfigurationsViewProvider;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.environment.tag.AccountTagClientService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
@@ -215,7 +215,7 @@ public class StackToTemplatePreparationObjectConverterTest {
     private KerberosConfigService kerberosConfigService;
 
     @Mock
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Mock
     private CredentialConverter credentialConverter;

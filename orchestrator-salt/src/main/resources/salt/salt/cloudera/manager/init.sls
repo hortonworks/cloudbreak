@@ -31,9 +31,10 @@ setup_missed_cm_heartbeat:
     - unless: grep "MISSED_HB_BAD" /etc/cloudera-scm-server/cm.settings
 
 setup_tls_chipher:
+{% set tlsCipherSuitesJavaIntermediate = salt['pillar.get']('cluster:tlsCipherSuitesJavaIntermediate')%}
   file.append:
     - name: /etc/cloudera-scm-server/cm.settings
-    - text: setsettings CMF_OVERRIDE_TLS_CIPHERS TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256:TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256:TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384:TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384:TLS_DHE_RSA_WITH_AES_128_GCM_SHA256:TLS_DHE_RSA_WITH_AES_256_GCM_SHA384:TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256:TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA:TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA:TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384:TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA:TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA:TLS_DHE_RSA_WITH_AES_128_CBC_SHA256:TLS_DHE_RSA_WITH_AES_128_CBC_SHA:TLS_DHE_RSA_WITH_AES_256_CBC_SHA256:TLS_DHE_RSA_WITH_AES_256_CBC_SHA:TLS_RSA_WITH_AES_128_CBC_SHA:TLS_RSA_WITH_AES_256_CBC_SHA
+    - text: setsettings CMF_OVERRIDE_TLS_CIPHERS {{ tlsCipherSuitesJavaIntermediate }}
     - unless: grep "CMF_OVERRIDE_TLS_CIPHERS" /etc/cloudera-scm-server/cm.settings
 
 {% if salt['pillar.get']('cluster:gov_cloud', False) == True %}

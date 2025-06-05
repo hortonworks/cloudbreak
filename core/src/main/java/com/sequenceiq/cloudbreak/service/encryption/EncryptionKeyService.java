@@ -39,7 +39,7 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackEncryption;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.stack.StackEncryptionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -81,7 +81,7 @@ public class EncryptionKeyService {
     private StackEncryptionService stackEncryptionService;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Inject
     private CloudInformationDecoratorProvider cloudInformationDecoratorProvider;

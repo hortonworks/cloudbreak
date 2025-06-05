@@ -32,6 +32,7 @@ import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.Template;
+import com.sequenceiq.freeipa.service.EnvironmentService;
 import com.sequenceiq.freeipa.service.rotation.SecretRotationSaltService;
 
 @ExtendWith(MockitoExtension.class)
@@ -51,6 +52,9 @@ public class FreeipaMonitoringCredentialsRotationServiceTest {
 
     @InjectMocks
     private FreeipaMonitoringCredentialsRotationService underTest;
+
+    @Mock
+    private EnvironmentService environmentService;
 
     @Test
     void testEnablementCheckIfMonitoringDisabledForStack() {

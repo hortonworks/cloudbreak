@@ -79,7 +79,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.stack.GatewaySecurityGroupDecorator;
 import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
@@ -111,7 +111,7 @@ public class StackV4RequestToStackConverter {
     private WorkspaceService workspaceService;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Inject
     private ProviderParameterCalculator providerParameterCalculator;

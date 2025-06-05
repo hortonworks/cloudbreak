@@ -34,7 +34,7 @@ import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext
 import com.sequenceiq.cloudbreak.service.encryption.CloudInformationDecorator;
 import com.sequenceiq.cloudbreak.service.encryption.CloudInformationDecoratorProvider;
 import com.sequenceiq.cloudbreak.service.encryption.EncryptionKeyService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.stack.StackEncryptionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -57,7 +57,7 @@ public class CBStackEncryptionKeysRotationContextProvider implements RotationCon
     private CloudInformationDecoratorProvider cloudInformationDecoratorProvider;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Inject
     private ResourceRetriever resourceRetriever;

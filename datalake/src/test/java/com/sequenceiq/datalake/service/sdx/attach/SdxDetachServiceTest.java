@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobSe
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
-import com.sequenceiq.datalake.service.EnvironmentClientService;
+import com.sequenceiq.datalake.service.sdx.EnvironmentService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -67,7 +67,7 @@ public class SdxDetachServiceTest {
     private StatusCheckerJobService mockJobService;
 
     @Mock
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @InjectMocks
     private SdxAttachDetachUtils mockSdxAttachDetachUtils = spy(SdxAttachDetachUtils.class);

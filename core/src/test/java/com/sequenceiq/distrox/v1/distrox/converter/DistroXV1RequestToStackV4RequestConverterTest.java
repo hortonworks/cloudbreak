@@ -39,7 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.TelemetryConverter;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAvailabilityType;
@@ -82,7 +82,7 @@ class DistroXV1RequestToStackV4RequestConverterTest {
     private DistroXParameterConverter stackParameterConverter;
 
     @Mock
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Mock
     private SdxConverter sdxConverter;

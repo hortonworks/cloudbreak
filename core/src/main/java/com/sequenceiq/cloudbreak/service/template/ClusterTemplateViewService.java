@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.domain.projection.ClusterTemplateStatusView;
 import com.sequenceiq.cloudbreak.domain.view.ClusterTemplateView;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterTemplateViewRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.distrox.v1.distrox.service.InternalClusterTemplateValidator;
 
@@ -27,7 +27,7 @@ public class ClusterTemplateViewService extends AbstractWorkspaceAwareResourceSe
     private InternalClusterTemplateValidator internalClusterTemplateValidator;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Override
     protected WorkspaceResourceRepository<ClusterTemplateView, Long> repository() {

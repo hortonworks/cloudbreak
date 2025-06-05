@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.encryption.DeleteUserda
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.encryption.DeleteUserdataSecretsFinished;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.encryption.DeleteUserdataSecretsRequest;
 import com.sequenceiq.cloudbreak.service.encryption.UserdataSecretsService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -31,7 +31,7 @@ public class DeleteUserdataSecretsHandler extends ExceptionCatcherEventHandler<D
     private StackService stackService;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Inject
     private UserdataSecretsService userdataSecretsService;

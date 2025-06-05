@@ -15,7 +15,7 @@ public class EnvironmentConfigProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentConfigProvider.class);
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     public boolean isChildEnvironment(String environmentCrn) {
         DetailedEnvironmentResponse environment = getEnvironmentByCrn(environmentCrn);

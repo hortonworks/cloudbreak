@@ -36,9 +36,9 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxDatabaseRepository;
-import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.sdx.CloudbreakPoller;
 import com.sequenceiq.datalake.service.sdx.CloudbreakStackService;
+import com.sequenceiq.datalake.service.sdx.EnvironmentService;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.database.DatabaseServerParameterSetter;
@@ -93,7 +93,7 @@ public class SdxDatabaseServerUpgradeService {
     private Map<CloudPlatform, DatabaseServerParameterSetter> databaseServerParameterSetterMap;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Inject
     private SdxDatabaseRepository sdxDatabaseRepository;

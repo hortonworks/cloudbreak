@@ -34,7 +34,7 @@ import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.context.SaltStateApplyRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -50,7 +50,7 @@ class CBLUKSVolumePassphraseRotationContextProviderTest {
     private StackDtoService stackDtoService;
 
     @Mock
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Mock
     private GatewayConfigService gatewayConfigService;

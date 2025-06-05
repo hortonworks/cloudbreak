@@ -41,7 +41,7 @@ import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.status.StatusCheckResult;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageOsService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -82,7 +82,7 @@ class DistroXServiceTest {
     private DistroXV1RequestToStackV4RequestConverter stackRequestConverter;
 
     @Mock
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Mock
     private WorkspaceService workspaceService;

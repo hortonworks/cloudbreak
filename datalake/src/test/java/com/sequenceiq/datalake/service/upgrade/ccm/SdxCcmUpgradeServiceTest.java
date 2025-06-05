@@ -34,8 +34,8 @@ import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
-import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.sdx.CloudbreakPoller;
+import com.sequenceiq.datalake.service.sdx.EnvironmentService;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
@@ -57,7 +57,7 @@ class SdxCcmUpgradeServiceTest {
     private static final String CLUSTER_NAME = "SdxCluster";
 
     @Mock
-    private EnvironmentClientService environmentService;
+    private EnvironmentService environmentService;
 
     @Mock
     private SdxService sdxService;

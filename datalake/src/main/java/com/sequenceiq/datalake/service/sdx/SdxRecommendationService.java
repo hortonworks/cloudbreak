@@ -48,7 +48,6 @@ import com.sequenceiq.datalake.configuration.CDPConfigService;
 import com.sequenceiq.datalake.converter.VmTypeConverter;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.events.EventSenderService;
-import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformVmtypesResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
@@ -68,7 +67,7 @@ public class SdxRecommendationService {
     private CDPConfigService cdpConfigService;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Inject
     private VmTypeConverter vmTypeConverter;

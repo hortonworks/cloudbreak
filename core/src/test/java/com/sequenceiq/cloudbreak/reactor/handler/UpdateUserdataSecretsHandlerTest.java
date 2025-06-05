@@ -33,7 +33,7 @@ import com.sequenceiq.cloudbreak.service.encryption.CloudInformationDecorator;
 import com.sequenceiq.cloudbreak.service.encryption.CloudInformationDecoratorProvider;
 import com.sequenceiq.cloudbreak.service.encryption.EncryptionKeyService;
 import com.sequenceiq.cloudbreak.service.encryption.UserdataSecretsService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -56,7 +56,7 @@ class UpdateUserdataSecretsHandlerTest {
     private StackService stackService;
 
     @Mock
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Mock
     private UserdataSecretsService userdataSecretsService;

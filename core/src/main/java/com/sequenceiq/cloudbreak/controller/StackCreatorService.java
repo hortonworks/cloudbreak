@@ -75,7 +75,7 @@ import com.sequenceiq.cloudbreak.service.NodeCountLimitValidator;
 import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
@@ -133,7 +133,7 @@ public class StackCreatorService {
     private CloudbreakMetricService metricService;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Inject
     private RecipeService recipeService;

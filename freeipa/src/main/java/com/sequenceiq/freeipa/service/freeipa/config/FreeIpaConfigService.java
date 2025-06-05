@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
+import com.sequenceiq.cloudbreak.tls.TlsSpecificationsHelper;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.entity.FreeIpa;
@@ -96,7 +97,11 @@ public class FreeIpaConfigService {
                 .withSecretEncryptionEnabled(environmentService.isSecretEncryptionEnabled(stack.getEnvironmentCrn()))
                 .withKerberosSecretLocation(kerberosSecretLocation)
                 .withSeLinux(seLinux)
-                .withTlsv13Enabled(entitlementService.isTlsv13Enabled(stack.getAccountId()))
+                .withTlsVersionsSpaceSeparated(environmentService.getTlsVersions(stack.getEnvironmentCrn(), " "))
+                .withTlsVersionsCommaSeparated(environmentService.getTlsVersions(stack.getEnvironmentCrn(), ","))
+                .withTlsCipherSuites(environmentService.getTlsCipherSuites(stack.getEnvironmentCrn()))
+                .withTlsCipherSuitesRedHat8(environmentService.getTlsCipherSuites(stack.getEnvironmentCrn(),
+                        TlsSpecificationsHelper.CipherSuitesLimitType.REDHAT_VERSION8))
                 .withLbConfig(loadBalancerService.findByStackId(stack.getId())
                         .map(lb -> new FreeIpaLbConfigView(lb.getEndpoint(), lb.getFqdn(), lb.getIp()))
                         .orElse(new FreeIpaLbConfigView()))

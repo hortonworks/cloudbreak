@@ -54,7 +54,7 @@ import com.sequenceiq.datalake.flow.modifyproxy.ModifyProxyConfigTrackerEvent;
 import com.sequenceiq.datalake.flow.verticalscale.addvolumes.event.DatalakeAddVolumesEvent;
 import com.sequenceiq.datalake.flow.verticalscale.diskupdate.event.DatalakeDiskUpdateEvent;
 import com.sequenceiq.datalake.flow.verticalscale.rootvolume.event.DatalakeRootVolumeUpdateEvent;
-import com.sequenceiq.datalake.service.EnvironmentClientService;
+import com.sequenceiq.datalake.service.sdx.EnvironmentService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
@@ -90,7 +90,7 @@ class SdxReactorFlowManagerTest {
     private DatalakeDrConfig datalakeDrConfig;
 
     @Mock
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Mock
     private EventBus reactor;

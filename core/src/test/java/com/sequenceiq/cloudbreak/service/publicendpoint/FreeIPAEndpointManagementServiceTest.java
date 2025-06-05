@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.common.api.type.LoadBalancerType;
@@ -51,7 +51,7 @@ public class FreeIPAEndpointManagementServiceTest {
     private DnsV1Endpoint dnsV1Endpoint;
 
     @Mock
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Mock
     private LoadBalancerPersistenceService loadBalancerPersistenceService;

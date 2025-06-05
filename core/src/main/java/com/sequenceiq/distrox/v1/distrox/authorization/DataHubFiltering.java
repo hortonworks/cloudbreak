@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
@@ -41,7 +41,7 @@ public class DataHubFiltering extends AbstractAuthorizationFiltering<StackViewV4
     private WorkspaceService workspaceService;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     public StackViewV4Responses filterDataHubs(AuthorizationResourceAction action, String environmentName, String environmentCrn) {
         Map<String, Object> args = new HashMap<>();

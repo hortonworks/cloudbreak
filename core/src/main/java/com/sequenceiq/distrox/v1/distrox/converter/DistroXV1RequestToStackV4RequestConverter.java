@@ -33,7 +33,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.TelemetryConverter;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
@@ -75,7 +75,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
     private DistroXParameterConverter stackParameterConverter;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Inject
     private SdxConverter sdxConverter;

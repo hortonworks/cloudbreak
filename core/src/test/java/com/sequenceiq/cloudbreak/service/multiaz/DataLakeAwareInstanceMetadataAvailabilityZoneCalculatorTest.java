@@ -35,7 +35,7 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.AvailabilityZone;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.common.api.type.InstanceGroupName;
@@ -76,7 +76,7 @@ class DataLakeAwareInstanceMetadataAvailabilityZoneCalculatorTest {
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Mock
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Spy
     @InjectMocks

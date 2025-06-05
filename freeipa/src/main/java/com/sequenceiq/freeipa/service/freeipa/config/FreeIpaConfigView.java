@@ -49,7 +49,13 @@ public class FreeIpaConfigView {
 
     private final String seLinux;
 
-    private final boolean tlsv13Enabled;
+    private final String tlsVersionsSpaceSeparated;
+
+    private final String tlsVersionsCommaSeparated;
+
+    private final String tlsCipherSuites;
+
+    private final String tlsCipherSuitesRedHat8;
 
     private final FreeIpaLbConfigView lbConfig;
 
@@ -71,7 +77,10 @@ public class FreeIpaConfigView {
         this.secretEncryptionEnabled = builder.secretEncryptionEnabled;
         this.kerberosSecretLocation = builder.kerberosSecretLocation;
         this.seLinux = builder.seLinux;
-        this.tlsv13Enabled = builder.tlsv13Enabled;
+        this.tlsVersionsSpaceSeparated = builder.tlsVersionsSpaceSeparated;
+        this.tlsVersionsCommaSeparated = builder.tlsVersionsCommaSeparated;
+        this.tlsCipherSuites = builder.tlsCipherSuites;
+        this.tlsCipherSuitesRedHat8 = builder.tlsCipherSuitesRedHat8;
         this.lbConfig = builder.lbConfig;
     }
 
@@ -139,8 +148,12 @@ public class FreeIpaConfigView {
         return seLinux;
     }
 
-    public boolean isTlsv13Enabled() {
-        return tlsv13Enabled;
+    public String getTlsVersionsSpaceSeparated() {
+        return tlsVersionsSpaceSeparated;
+    }
+
+    public String getTlsVersionsCommaSeparated() {
+        return tlsVersionsCommaSeparated;
     }
 
     @SuppressWarnings("ExecutableStatementCount")
@@ -166,7 +179,11 @@ public class FreeIpaConfigView {
         map.put("secretEncryptionEnabled", secretEncryptionEnabled);
         map.put("kerberosSecretLocation", kerberosSecretLocation);
         map.put("selinux_mode", seLinux);
-        map.put("tlsv13Enabled", tlsv13Enabled);
+        map.put("tlsv13Enabled", false);
+        map.put("tlsVersionsSpaceSeparated", tlsVersionsSpaceSeparated);
+        map.put("tlsVersionsCommaSeparated", tlsVersionsCommaSeparated);
+        map.put("tlsCipherSuites", tlsCipherSuites);
+        map.put("tlsCipherSuitesRedHat8", tlsCipherSuitesRedHat8);
         map.put("loadBalancer", lbConfig.toMap());
         return map;
     }
@@ -205,7 +222,13 @@ public class FreeIpaConfigView {
 
         private String seLinux;
 
-        private boolean tlsv13Enabled;
+        private String tlsVersionsSpaceSeparated;
+
+        private String tlsVersionsCommaSeparated;
+
+        private String tlsCipherSuites;
+
+        private String tlsCipherSuitesRedHat8;
 
         private FreeIpaLbConfigView lbConfig = new FreeIpaLbConfigView();
 
@@ -283,8 +306,23 @@ public class FreeIpaConfigView {
             return this;
         }
 
-        public Builder withTlsv13Enabled(boolean tlsv13Enabled) {
-            this.tlsv13Enabled = tlsv13Enabled;
+        public Builder withTlsVersionsSpaceSeparated(String tlsVersions) {
+            this.tlsVersionsSpaceSeparated = tlsVersions;
+            return this;
+        }
+
+        public Builder withTlsVersionsCommaSeparated(String tlsVersions) {
+            this.tlsVersionsCommaSeparated = tlsVersions;
+            return this;
+        }
+
+        public Builder withTlsCipherSuites(String tlsCipherSuites) {
+            this.tlsCipherSuites = tlsCipherSuites;
+            return this;
+        }
+
+        public Builder withTlsCipherSuitesRedHat8(String tlsCipherSuitesRedHat8) {
+            this.tlsCipherSuitesRedHat8 = tlsCipherSuitesRedHat8;
             return this;
         }
 

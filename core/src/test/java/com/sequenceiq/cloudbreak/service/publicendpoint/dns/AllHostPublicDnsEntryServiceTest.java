@@ -33,7 +33,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -64,7 +64,7 @@ class AllHostPublicDnsEntryServiceTest {
     private static final String CONSOLE_CDP_APPS = "console-cdp.apps";
 
     @Mock
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Mock
     private DnsManagementService dnsManagementService;

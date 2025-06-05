@@ -68,7 +68,7 @@ import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingService;
@@ -207,7 +207,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     private BlueprintViewProvider blueprintViewProvider;
 
     @Mock
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Mock
     private DetailedEnvironmentResponse environmentResponse;

@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.model.ApiConfigEnforcement;
+import com.sequenceiq.cloudbreak.tls.TlsSpecificationsHelper;
 
 @Service
 public class ClouderaManagerCipherService {
@@ -22,46 +23,6 @@ public class ClouderaManagerCipherService {
 
     public static final String POLICY_SEPARATOR = ",";
 
-    public static final String OPENSSL_INTERMEDIATE2018 =
-            "ECDHE-ECDSA-AES128-GCM-SHA256," +
-                    "ECDHE-RSA-AES128-GCM-SHA256," +
-                    "ECDHE-ECDSA-AES256-GCM-SHA384," +
-                    "ECDHE-RSA-AES256-GCM-SHA384," +
-                    "DHE-RSA-AES128-GCM-SHA256," +
-                    "DHE-RSA-AES256-GCM-SHA384," +
-                    "ECDHE-ECDSA-AES128-SHA256," +
-                    "ECDHE-ECDSA-AES128-SHA," +
-                    "ECDHE-RSA-AES128-SHA," +
-                    "ECDHE-ECDSA-AES256-SHA384," +
-                    "ECDHE-ECDSA-AES256-SHA," +
-                    "ECDHE-RSA-AES256-SHA," +
-                    "DHE-RSA-AES128-SHA256," +
-                    "DHE-RSA-AES128-SHA," +
-                    "DHE-RSA-AES256-SHA256," +
-                    "DHE-RSA-AES256-SHA," +
-                    "AES128-SHA," +
-                    "AES256-SHA";
-
-    public static final String JAVA_INTERMEDIATE2018 =
-            "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256," +
-                    "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256," +
-                    "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384," +
-                    "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384," +
-                    "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256," +
-                    "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384," +
-                    "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256," +
-                    "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA," +
-                    "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA," +
-                    "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384," +
-                    "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA," +
-                    "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA," +
-                    "TLS_DHE_RSA_WITH_AES_128_CBC_SHA256," +
-                    "TLS_DHE_RSA_WITH_AES_128_CBC_SHA," +
-                    "TLS_DHE_RSA_WITH_AES_256_CBC_SHA256," +
-                    "TLS_DHE_RSA_WITH_AES_256_CBC_SHA," +
-                    "TLS_RSA_WITH_AES_128_CBC_SHA," +
-                    "TLS_RSA_WITH_AES_256_CBC_SHA";
-
     public static final String JAVA_EXCLUDE_INTERMEDIATE2018 =
             "^.*MD5.*$," +
                     "^TLS_DH_.*$," +
@@ -77,7 +38,8 @@ public class ClouderaManagerCipherService {
 
         ApiConfigEnforcement tlsChipherSuiteJavaEnforcement = new ApiConfigEnforcement();
         tlsChipherSuiteJavaEnforcement.setLabel(TLS_CIPHER_SUITE_JAVA);
-        tlsChipherSuiteJavaEnforcement.setDefaultValue(JAVA_INTERMEDIATE2018);
+        tlsChipherSuiteJavaEnforcement.setDefaultValue(
+                TlsSpecificationsHelper.getCipherSuiteString(TlsSpecificationsHelper.CipherSuitesLimitType.JAVA_INTERMEDIATE2018, POLICY_SEPARATOR));
         tlsChipherSuiteJavaEnforcement.setSeparator(POLICY_SEPARATOR);
 
         ApiConfigEnforcement tlsChipherSuiteJavaExcludedEnforcement = new ApiConfigEnforcement();
@@ -87,7 +49,9 @@ public class ClouderaManagerCipherService {
 
         ApiConfigEnforcement tlsChipherListOpenSslEnforcement = new ApiConfigEnforcement();
         tlsChipherListOpenSslEnforcement.setLabel(TLS_CIPHERS_LIST_OPENSSL);
-        tlsChipherListOpenSslEnforcement.setDefaultValue(OPENSSL_INTERMEDIATE2018);
+        tlsChipherListOpenSslEnforcement.setDefaultValue(
+                TlsSpecificationsHelper.getCipherSuiteString(TlsSpecificationsHelper.CipherSuitesLimitType.OPENSSL_INTERMEDIATE2018, POLICY_SEPARATOR));
+
         tlsChipherListOpenSslEnforcement.setSeparator(POLICY_SEPARATOR);
 
         apiConfigEnforcements.add(tlsChipherSuiteEnforcement);

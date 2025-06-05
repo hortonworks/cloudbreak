@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -45,7 +45,7 @@ public class ValidateCloudConfigHandler extends ExceptionCatcherEventHandler<Val
     private static final Logger LOGGER = getLogger(ValidateCloudConfigHandler.class);
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Inject
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;

@@ -83,7 +83,7 @@ import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.environment.marketplace.AzureMarketplaceTermsClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
@@ -135,7 +135,7 @@ public class StackToCloudStackConverter {
     private CloudFileSystemViewProvider cloudFileSystemViewProvider;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Inject
     private LoadBalancerPersistenceService loadBalancerPersistenceService;

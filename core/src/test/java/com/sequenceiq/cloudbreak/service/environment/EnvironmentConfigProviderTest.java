@@ -17,7 +17,7 @@ public class EnvironmentConfigProviderTest {
     private static final String ENVIRONMENT_CRN = "environmentCrn";
 
     @Mock
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Mock
     private DetailedEnvironmentResponse detailedEnvironmentResponse;

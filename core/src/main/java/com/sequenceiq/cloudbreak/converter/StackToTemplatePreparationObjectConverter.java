@@ -68,7 +68,7 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.service.cluster.DatabaseSslService;
 import com.sequenceiq.cloudbreak.service.customconfigs.CustomConfigurationsService;
 import com.sequenceiq.cloudbreak.service.customconfigs.CustomConfigurationsViewProvider;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
@@ -145,7 +145,7 @@ public class StackToTemplatePreparationObjectConverter {
     private KerberosConfigService kerberosConfigService;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Inject
     private AwsMockAccountMappingService awsMockAccountMappingService;

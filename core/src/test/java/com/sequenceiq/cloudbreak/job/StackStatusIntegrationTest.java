@@ -75,7 +75,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.UpdateHostsValidator;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
@@ -165,7 +165,7 @@ class StackStatusIntegrationTest {
     private RuntimeVersionService runtimeVersionService;
 
     @MockBean
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @MockBean
     private ServiceStatusCheckerLogLocationDecorator serviceStatusCheckerLogLocationDecorator;

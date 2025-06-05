@@ -47,7 +47,7 @@ import com.sequenceiq.cloudbreak.domain.view.ClusterTemplateView;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.template.ClusterTemplateService;
 import com.sequenceiq.cloudbreak.service.template.ClusterTemplateViewService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -86,7 +86,7 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Inject
     private CloudbreakRestRequestThreadLocalService threadLocalService;

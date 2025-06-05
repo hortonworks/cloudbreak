@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.datalake.configuration.PlatformConfig;
 import com.sequenceiq.datalake.entity.SdxCluster;
-import com.sequenceiq.datalake.service.EnvironmentClientService;
+import com.sequenceiq.datalake.service.sdx.EnvironmentService;
 import com.sequenceiq.datalake.service.sdx.database.DatabaseServerParameterSetter;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
@@ -32,7 +32,7 @@ public class DatabasePauseSupportServiceTest {
     private static final String ENVIRONMENT_CRN = "env crn";
 
     @Mock
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Mock
     private SdxCluster sdxCluster;

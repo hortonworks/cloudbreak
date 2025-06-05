@@ -136,7 +136,6 @@ import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.repository.SdxDatabaseRepository;
-import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
@@ -188,7 +187,7 @@ class SdxServiceTest {
     private SdxReactorFlowManager sdxReactorFlowManager;
 
     @Mock
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Mock
     private Clock clock;

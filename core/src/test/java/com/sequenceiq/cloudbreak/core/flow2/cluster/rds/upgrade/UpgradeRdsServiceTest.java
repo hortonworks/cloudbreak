@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.rds.DatabaseUpgradeBackupRestoreChecker;
 import com.sequenceiq.cloudbreak.service.upgrade.rds.RdsUpgradeOrchestratorService;
@@ -91,7 +91,7 @@ class UpgradeRdsServiceTest {
     private StackDtoService stackDtoService;
 
     @Mock
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @InjectMocks
     private UpgradeRdsService underTest;

@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.common.api.backup.response.BackupResponse;
 import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
+import com.sequenceiq.datalake.service.sdx.EnvironmentService;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
@@ -21,7 +22,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.azure.Resourc
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @RunWith(MockitoJUnitRunner.class)
-public class EnvironmentClientServiceTest {
+public class EnvironmentServiceTest {
 
     private static final String ENV_CRN = "crn:cdp:environments:us-west-1:460c0d8f-ae8e-4dce-9cd7-2351762eb9ac:environment:6b2b1600-8ac6-4c26-aa34-dab36f4bd243";
 
@@ -35,7 +36,7 @@ public class EnvironmentClientServiceTest {
     private EnvironmentEndpoint environmentEndpoint;
 
     @InjectMocks
-    private EnvironmentClientService underTest;
+    private EnvironmentService underTest;
 
     @Test
     public void testSdxBackupLocationOnUpgradeRequestEnabled() {

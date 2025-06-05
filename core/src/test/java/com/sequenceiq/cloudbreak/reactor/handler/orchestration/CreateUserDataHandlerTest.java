@@ -31,7 +31,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.CreateUserData
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.CreateUserDataSuccess;
 import com.sequenceiq.cloudbreak.service.encryption.EncryptionKeyService;
 import com.sequenceiq.cloudbreak.service.encryption.UserdataSecretsService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
 import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -62,7 +62,7 @@ class CreateUserDataHandlerTest {
     private StackService stackService;
 
     @Mock
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Mock
     private UserdataSecretsService userdataSecretsService;

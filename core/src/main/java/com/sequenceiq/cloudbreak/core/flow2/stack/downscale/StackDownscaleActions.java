@@ -36,7 +36,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.DownscaleRemoveUserdataSecretsRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.DownscaleRemoveUserdataSecretsSuccess;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
@@ -70,7 +70,7 @@ public class StackDownscaleActions {
     private StackToCloudStackConverter stackToCloudStackConverter;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Bean(name = "DOWNSCALE_COLLECT_RESOURCES_STATE")
     public Action<?, ?> stackDownscaleCollectResourcesAction() {

@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.DownscaleRemoveUserdataSecretsRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.DownscaleRemoveUserdataSecretsSuccess;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.AdjustmentType;
@@ -78,7 +78,7 @@ class StackDownscaleActionsTest {
     private Event<Object> event;
 
     @Mock
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @InjectMocks
     private StackDownscaleActions underTest;

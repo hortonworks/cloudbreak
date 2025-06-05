@@ -63,6 +63,7 @@
 {% else %}
   {% set cm_cluster_type = "COMPUTE_CLUSTER" %}
 {% endif %}
+{% set tls_cipher_suites_blackbox_exporter = salt['pillar.get']('monitoring:tlsCipherSuitesBlackBoxExporter') %}
 
 {% do monitoring.update({
     "enabled": monitoring_enabled,
@@ -106,5 +107,6 @@
     "requestSignerUser" : request_signer_user,
     "monitoringAccessKeyId": monitoring_access_key_id,
     "monitoringPrivateKey": monitoring_access_key_secret,
-    "monitoringAccessKeyType": monitoring_access_key_type
+    "monitoringAccessKeyType": monitoring_access_key_type,
+    "tlsCipherSuitesBlackBoxExporter": tls_cipher_suites_blackbox_exporter,
 }) %}

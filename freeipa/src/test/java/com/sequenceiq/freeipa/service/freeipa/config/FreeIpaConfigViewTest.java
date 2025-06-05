@@ -5,6 +5,7 @@ import static org.mockito.Mockito.mock;
 
 import java.util.Map;
 
+import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -16,6 +17,10 @@ import com.sequenceiq.common.model.SeLinux;
 public class FreeIpaConfigViewTest {
 
     private static final String KERBEROS_SECRET_LOCATION = "kerberosSecretLocation";
+
+    private static final String TLS_VERSION = "TLSv1.2 TLSv1.3";
+
+    private static final String TLS_CIPHERSUITE = "CIPHERSUITE";
 
     @ParameterizedTest()
     @ValueSource(booleans = {true, false})
@@ -32,14 +37,16 @@ public class FreeIpaConfigViewTest {
         assertEquals(SeLinux.PERMISSIVE.name(), freeIpaConfigMap.get("selinux_mode"));
     }
 
-    @ParameterizedTest()
-    @ValueSource(booleans = {true, false})
-    void testToMapForTlsv13(boolean tlsv13Enabled) {
+    @Test()
+    public void testToMapForTlsv13() {
         FreeIpaBackupConfigView backupConfigView = mock(FreeIpaBackupConfigView.class);
         FreeIpaConfigView freeIpaConfigView = new FreeIpaConfigView.Builder()
                 .withBackupConfig(backupConfigView)
-                .withTlsv13Enabled(tlsv13Enabled).build();
+                .withTlsVersionsCommaSeparated(TLS_VERSION)
+                .withTlsVersionsSpaceSeparated(TLS_VERSION)
+                .withTlsCipherSuites(TLS_CIPHERSUITE).build();
         Map<String, Object> freeIpaConfigMap = freeIpaConfigView.toMap();
-        assertEquals(tlsv13Enabled, freeIpaConfigMap.get("tlsv13Enabled"));
+        assertEquals(TLS_VERSION, freeIpaConfigMap.get("tlsVersionsSpaceSeparated"));
+        assertEquals(TLS_CIPHERSUITE, freeIpaConfigMap.get("tlsCipherSuites"));
     }
 }

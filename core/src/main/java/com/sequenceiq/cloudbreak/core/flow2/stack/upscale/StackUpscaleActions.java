@@ -78,7 +78,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpscaleUpdateU
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpscaleUpdateUserdataSecretsSuccess;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.encryption.UserdataSecretsService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.multiaz.DataLakeAwareInstanceMetadataAvailabilityZoneCalculator;
 import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;
@@ -135,7 +135,7 @@ public class StackUpscaleActions {
     private DataLakeAwareInstanceMetadataAvailabilityZoneCalculator availabilityZoneCalculator;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Inject
     private UserdataSecretsService userdataSecretsService;

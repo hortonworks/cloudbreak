@@ -7,6 +7,7 @@ import com.sequenceiq.cloudbreak.client.AbstractUserCrnServiceEndpoint;
 import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
 import com.sequenceiq.environment.api.v1.credential.endpoint.AuditCredentialEndpoint;
 import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
+import com.sequenceiq.environment.api.v1.encryptionprofile.endpoint.EncryptionProfileEndpoint;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentDefaultComputeClusterEndpoint;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.marketplace.endpoint.AzureMarketplaceTermsEndpoint;
@@ -68,6 +69,11 @@ public class EnvironmentServiceCrnEndpoints extends AbstractUserCrnServiceEndpoi
     @Override
     public AzureMarketplaceTermsEndpoint azureMarketplaceTermsEndpoint() {
         return getEndpoint(AzureMarketplaceTermsEndpoint.class);
+    }
+
+    @Override
+    public EncryptionProfileEndpoint encryptionProfileEndpoint() {
+        return getEndpoint(EncryptionProfileEndpoint.class);
     }
 
 }

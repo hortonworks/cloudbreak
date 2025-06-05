@@ -13,13 +13,13 @@ import com.sequenceiq.common.model.DatabaseType;
 import com.sequenceiq.datalake.configuration.PlatformConfig;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxDatabase;
-import com.sequenceiq.datalake.service.EnvironmentClientService;
+import com.sequenceiq.datalake.service.sdx.EnvironmentService;
 import com.sequenceiq.datalake.service.sdx.database.DatabaseServerParameterSetter;
 
 @Component
 public class DatabasePauseSupportService {
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Inject
     private PlatformConfig platformConfig;

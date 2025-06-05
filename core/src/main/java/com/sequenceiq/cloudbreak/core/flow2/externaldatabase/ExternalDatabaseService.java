@@ -53,7 +53,7 @@ import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.externaldatabase.DatabaseOperation;
 import com.sequenceiq.cloudbreak.service.externaldatabase.DatabaseServerParameterDecorator;
 import com.sequenceiq.cloudbreak.service.externaldatabase.PollingConfig;
@@ -127,7 +127,7 @@ public class ExternalDatabaseService {
     private SdxClientService sdxClientService;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Inject
     private CloudbreakEventService cloudbreakEventService;

@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.converter.InstanceMetadataToImageIdConverter;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
@@ -47,7 +47,7 @@ public class InstanceMetaDataToCloudInstanceConverter {
     private InstanceMetadataToImageIdConverter instanceMetadataToImageIdConverter;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Inject
     private InstanceGroupService instanceGroupService;

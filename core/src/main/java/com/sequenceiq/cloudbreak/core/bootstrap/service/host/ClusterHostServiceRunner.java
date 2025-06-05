@@ -38,6 +38,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.http.conn.util.InetAddressUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -117,6 +118,7 @@ import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentConfigProvider;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
@@ -133,6 +135,7 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.template.views.provider.RdsViewProvider;
+import com.sequenceiq.cloudbreak.tls.TlsSpecificationsHelper;
 import com.sequenceiq.cloudbreak.util.EphemeralVolumeUtil;
 import com.sequenceiq.cloudbreak.util.NodesUnreachableException;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -309,6 +312,9 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private BlueprintService blueprintService;
+
+    @Autowired
+    private EnvironmentService environmentService;
 
     public NodeReachabilityResult runClusterServices(@Nonnull StackDto stackDto,
             Map<String, String> candidateAddresses, boolean runPreServiceDeploymentRecipe) {
@@ -580,15 +586,24 @@ public class ClusterHostServiceRunner {
         boolean hiveWithRemoteHiveMetastore = blueprintJsonText != null
                 && blueprintJsonText.contains(HiveRoles.HIVESERVER2)
                 && !blueprintJsonText.contains(HiveRoles.HIVEMETASTORE);
-        Map<String, ? extends Serializable> clusterProperties = Map.of(
-                "name", stackDto.getCluster().getName(),
-                "deployedInChildEnvironment", deployedInChildEnvironment,
-                "gov_cloud", stackDto.isOnGovPlatformVariant(),
-                "secretEncryptionEnabled", detailedEnvironmentResponse.isEnableSecretEncryption(),
-                "selinux_mode", seLinux,
-                "tlsv13Enabled", entitlementService.isTlsv13Enabled(stackDto.getAccountId()),
-                "hybridEnabled", hybridEnabled,
-                "hiveWithRemoteHiveMetastore", hiveWithRemoteHiveMetastore);
+        Map<String, ? extends Serializable> clusterProperties = Map.ofEntries(
+                Map.entry("name", stackDto.getCluster().getName()),
+                Map.entry("deployedInChildEnvironment", deployedInChildEnvironment),
+                Map.entry("gov_cloud", stackDto.isOnGovPlatformVariant()),
+                Map.entry("secretEncryptionEnabled", detailedEnvironmentResponse.isEnableSecretEncryption()),
+                Map.entry("selinux_mode", seLinux),
+                Map.entry("hybridEnabled", hybridEnabled),
+                Map.entry("hiveWithRemoteHiveMetastore", hiveWithRemoteHiveMetastore),
+                Map.entry("tlsv13Enabled", Boolean.FALSE),
+                Map.entry("tlsVersionsSpaceSeparated", environmentService.getTlsVersions(stack.getEnvironmentCrn(), " ")),
+                Map.entry("tlsVersionsCommaSeparated", environmentService.getTlsVersions(stack.getEnvironmentCrn(), ",")),
+                Map.entry("tlsCipherSuites", environmentService.getTlsCipherSuites(stack.getEnvironmentCrn())),
+                Map.entry("tlsCipherSuitesMinimal", environmentService.getTlsCipherSuites(stack.getEnvironmentCrn(),
+                        TlsSpecificationsHelper.CipherSuitesLimitType.MINIMAL)),
+                Map.entry("tlsCipherSuitesJavaIntermediate", environmentService.getTlsCipherSuites(stack.getEnvironmentCrn(),
+                        TlsSpecificationsHelper.CipherSuitesLimitType.JAVA_INTERMEDIATE2018, true))
+        );
+
         return Map.of("metadata", new SaltPillarProperties("/metadata/init.sls", singletonMap("cluster", clusterProperties)));
     }
 
@@ -856,6 +871,13 @@ public class ClusterHostServiceRunner {
         gateway.put("enable_ccmv2", stackDto.getTunnel().useCcmV2OrJumpgate());
         gateway.put("enable_ccmv2_jumpgate", stackDto.getTunnel().useCcmV2Jumpgate());
         gateway.put("activation_in_minutes", activationInMinutes);
+        gateway.put("tlsv13Enabled", Boolean.FALSE);
+        gateway.put("tlsVersionsSpaceSeparated", environmentService.getTlsVersions(stackDto.getEnvironmentCrn(), " "));
+        gateway.put("tlsCipherSuites", environmentService.getTlsCipherSuites(stackDto.getEnvironmentCrn()));
+        gateway.put("tlsCipherSuitesRedHat8", environmentService.getTlsCipherSuites(stackDto.getEnvironmentCrn(),
+                TlsSpecificationsHelper.CipherSuitesLimitType.REDHAT_VERSION8));
+        gateway.put("tlsCipherSuitesMinimal", environmentService.getTlsCipherSuites(stackDto.getEnvironmentCrn(),
+                TlsSpecificationsHelper.CipherSuitesLimitType.MINIMAL));
 
         gateway.putAll(createKnoxRelatedGatewayConfiguration(stackDto, virtualGroupRequest, connector));
         gateway.putAll(createGatewayUserFacingCertAndFqdn(gatewayConfig, stackDto));

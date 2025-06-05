@@ -70,7 +70,7 @@ import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeTriggerRestoreEvent
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.repository.SdxOperationRepository;
-import com.sequenceiq.datalake.service.EnvironmentClientService;
+import com.sequenceiq.datalake.service.sdx.EnvironmentService;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
@@ -127,7 +127,7 @@ public class SdxBackupRestoreService {
     private DatalakeDrConfig datalakeDrConfig;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Inject
     private SdxService sdxService;

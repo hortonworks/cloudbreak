@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.StopExternalDatabaseFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.StopExternalDatabaseRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.StopExternalDatabaseResult;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.externaldatabase.DatabaseServerParameterDecorator;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.common.model.DatabaseType;
@@ -52,7 +52,7 @@ public class StopExternalDatabaseHandler extends ExceptionCatcherEventHandler<St
     private StackUpdaterService stackUpdaterService;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Inject
     private ExternalDatabaseConfig externalDatabaseConfig;

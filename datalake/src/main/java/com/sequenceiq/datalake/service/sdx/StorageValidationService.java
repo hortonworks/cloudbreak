@@ -34,7 +34,6 @@ import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.events.EventSenderService;
-import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageValidator;
 import com.sequenceiq.datalake.service.validation.converter.CredentialResponseToCloudCredentialConverter;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
@@ -53,7 +52,7 @@ public class StorageValidationService {
     private CloudProviderServicesV4Endopint cloudProviderServicesV4Endpoint;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Inject
     private CloudStorageValidator cloudStorageValidator;

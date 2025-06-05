@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CompactViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialViewResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -30,7 +30,7 @@ public class EnvironmentServiceDecorator {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentServiceDecorator.class);
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     public void prepareEnvironmentsAndCredentialName(Set<StackViewV4Response> stackViewResponses, NameOrCrn nameOrCrn) {
         if (nameOrCrn.hasCrn()) {

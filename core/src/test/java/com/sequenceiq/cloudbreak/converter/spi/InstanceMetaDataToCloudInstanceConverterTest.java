@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -53,7 +53,7 @@ public class InstanceMetaDataToCloudInstanceConverterTest extends AbstractEntity
     private InstanceMetadataToImageIdConverter instanceMetadataToImageIdConverter;
 
     @Mock
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Mock
     private DetailedEnvironmentResponse environment;

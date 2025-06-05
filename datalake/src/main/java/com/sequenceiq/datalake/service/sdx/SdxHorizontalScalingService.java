@@ -35,7 +35,6 @@ import com.sequenceiq.datalake.entity.DatalakeInstanceGroupScalingDetails;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
-import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
@@ -60,7 +59,7 @@ public class SdxHorizontalScalingService {
     private EntitlementService entitlementService;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;

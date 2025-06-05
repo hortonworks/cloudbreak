@@ -48,7 +48,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
@@ -89,7 +89,7 @@ class GatewayPublicEndpointManagementServiceTest {
             "-----END RSA PRIVATE KEY-----";
 
     @Mock
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Mock
     private SecurityConfigService securityConfigService;

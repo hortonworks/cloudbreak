@@ -45,7 +45,7 @@ import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.consumption.AttachedVolumeConsumptionCollectionSchedulingSuccess;
 import com.sequenceiq.cloudbreak.reactor.handler.ImageFallbackService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
@@ -94,7 +94,7 @@ class StackCreationActionsTest {
     private LoadBalancerPersistenceService loadBalancerPersistenceService;
 
     @Mock
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Mock
     private ResourceService resourceService;

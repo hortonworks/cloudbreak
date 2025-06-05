@@ -43,7 +43,7 @@ import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.Userdata;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.UserdataRepository;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigUserDataReplacer;
@@ -109,7 +109,7 @@ public class UserDataServiceTest {
     private ProxyConfigDtoService proxyConfigDtoService;
 
     @Mock
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Mock
     private AsyncTaskExecutor intermediateBuilderExecutor;

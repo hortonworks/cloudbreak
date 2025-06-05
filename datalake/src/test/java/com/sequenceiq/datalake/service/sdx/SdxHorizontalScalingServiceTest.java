@@ -39,7 +39,6 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.DatalakeInstanceGroupScalingDetails;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
-import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
@@ -61,7 +60,7 @@ public class SdxHorizontalScalingServiceTest {
     private SdxReactorFlowManager sdxReactorFlowManager;
 
     @Mock
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Mock
     private StackV4Endpoint stackV4Endpoint;

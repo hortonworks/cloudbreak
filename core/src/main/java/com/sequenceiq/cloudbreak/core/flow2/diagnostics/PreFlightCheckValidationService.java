@@ -5,7 +5,7 @@ import jakarta.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 
 @Component
 public class PreFlightCheckValidationService {
@@ -14,7 +14,7 @@ public class PreFlightCheckValidationService {
     private ComponentConfigProviderService componentConfigProviderService;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     public boolean preFlightCheckSupported(Long stackId, String environmentCrm) {
         return !proxyConfigUsed(environmentCrm);

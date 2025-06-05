@@ -65,7 +65,7 @@ import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.stack.GatewaySecurityGroupDecorator;
 import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
@@ -135,7 +135,7 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
     private AwsEnvironmentNetworkConverter awsEnvironmentNetworkConverter;
 
     @Mock
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Mock
     private KerberosConfigService kerberosConfigService;

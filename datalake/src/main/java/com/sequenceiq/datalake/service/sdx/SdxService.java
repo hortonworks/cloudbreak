@@ -147,7 +147,6 @@ import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.repository.SdxDatabaseRepository;
-import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.database.DatabaseParameterInitUtil;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
@@ -210,7 +209,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     private DistroxService distroxService;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Inject
     private SdxStatusService sdxStatusService;

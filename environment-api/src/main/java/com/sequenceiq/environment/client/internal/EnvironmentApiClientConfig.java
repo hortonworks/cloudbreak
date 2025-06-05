@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.client.ThreadLocalUserCrnWebTargetBuilder;
 import com.sequenceiq.cloudbreak.client.WebTargetEndpointFactory;
 import com.sequenceiq.environment.api.EnvironmentApi;
 import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
+import com.sequenceiq.environment.api.v1.encryptionprofile.endpoint.EncryptionProfileEndpoint;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.marketplace.endpoint.AzureMarketplaceTermsEndpoint;
 import com.sequenceiq.environment.api.v1.platformresource.CredentialPlatformResourceEndpoint;
@@ -87,4 +88,11 @@ public class EnvironmentApiClientConfig {
     AzureMarketplaceTermsEndpoint azureMarketplaceTermsEndpoint(WebTarget environmentApiClientWebTarget) {
         return new WebTargetEndpointFactory().createEndpoint(environmentApiClientWebTarget, AzureMarketplaceTermsEndpoint.class);
     }
+
+    @Bean
+    @ConditionalOnBean(name = "environmentApiClientWebTarget")
+    EncryptionProfileEndpoint encryptionProfileEndpoint(WebTarget environmentApiClientWebTarget) {
+        return new WebTargetEndpointFactory().createEndpoint(environmentApiClientWebTarget, EncryptionProfileEndpoint.class);
+    }
+
 }

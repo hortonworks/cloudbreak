@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service;
 
+import java.util.List;
+
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.ClientErrorException;
@@ -12,6 +14,8 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.cloudbreak.tls.TlsSpecificationsHelper;
+import com.sequenceiq.environment.api.v1.encryptionprofile.endpoint.EncryptionProfileEndpoint;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
 
@@ -22,6 +26,9 @@ public class EnvironmentService {
 
     @Inject
     private EnvironmentEndpoint environmentEndpoint;
+
+    @Inject
+    private EncryptionProfileEndpoint encryptionProfileEndpoint;
 
     @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
@@ -47,5 +54,30 @@ public class EnvironmentService {
 
     public boolean isSecretEncryptionEnabled(String environmentCrn) {
         return environmentEndpoint.getByCrn(environmentCrn).isEnableSecretEncryption();
+    }
+
+    public String getTlsVersions(String environmentCrn, String separator) {
+        return TlsSpecificationsHelper.getTlsVersions(separator);
+        /* TODO: use API call to get values */
+    }
+
+    public String getTlsCipherSuites(String environmentCrn) {
+        return getTlsCipherSuites(environmentCrn, TlsSpecificationsHelper.CipherSuitesLimitType.DEFAULT);
+    }
+
+    private String[] getTlsCipherSuitesList(String environmentCrn, TlsSpecificationsHelper.CipherSuitesLimitType cipherSuiteLimitType) {
+        return TlsSpecificationsHelper.getDefaultCipherSuiteList(cipherSuiteLimitType);
+        /* TODO: use API call to get values */
+    }
+
+    public String getTlsCipherSuites(String environmentCrn, TlsSpecificationsHelper.CipherSuitesLimitType cipherSuiteLimitType) {
+        String[] tlsCipherSuites = getTlsCipherSuitesList(environmentCrn, cipherSuiteLimitType);
+        return TlsSpecificationsHelper.getTlsCipherSuites(tlsCipherSuites, cipherSuiteLimitType, ":");
+
+    }
+
+    public List<String> getTlsCipherSuitesIanaList(String environmentCrn, TlsSpecificationsHelper.CipherSuitesLimitType cipherSuitelimitType) {
+        String[] tlsCipherSuites = getTlsCipherSuitesList(environmentCrn, cipherSuitelimitType);
+        return TlsSpecificationsHelper.getTlsCipherSuitesIanaList(tlsCipherSuites, cipherSuitelimitType);
     }
 }

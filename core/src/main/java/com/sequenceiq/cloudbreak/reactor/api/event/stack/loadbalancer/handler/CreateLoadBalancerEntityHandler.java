@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.CreateLoad
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.CreateLoadBalancerEntityRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.CreateLoadBalancerEntitySuccess;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
@@ -52,7 +52,7 @@ public class CreateLoadBalancerEntityHandler extends ExceptionCatcherEventHandle
     private StackService stackService;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Inject
     private LoadBalancerConfigService loadBalancerConfigService;

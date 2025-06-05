@@ -1,4 +1,4 @@
-{%- set tlsv13Enabled = True if salt['pillar.get']('cluster:tlsv13Enabled', False) == True else False %}
+{%- set tlsVersions = salt['pillar.get']('freeipa:tlsVersionsCommaSeparated') %}
 /opt/salt/scripts/set_default_java_version.sh:
   file.managed:
     - source:
@@ -40,14 +40,6 @@ set_dns_negativ_ttl:
     - repl: "networkaddress.cache.negative.ttl=0"
     - unless: cat {{ java_home }}/jre/lib/security/java.security | grep ^networkaddress.cache.negative.ttl=0$
 
-{% if tlsv13Enabled == True %}
-set_tls_version:
-  file.append:
-    - name: {{ java_home }}/jre/lib/security/java.security
-    - text:
-        - jdk.tls.client.protocols=TLSv1.3
-        - jdk.tls.server.protocols=TLSv1.3
-{% endif %}
 
 {% if salt['pillar.get']('cluster:gov_cloud', False) == True %}
 

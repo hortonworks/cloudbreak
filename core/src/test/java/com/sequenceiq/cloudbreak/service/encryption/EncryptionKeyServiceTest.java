@@ -60,7 +60,7 @@ import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredenti
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackEncryption;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.stack.StackEncryptionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -140,7 +140,7 @@ public class EncryptionKeyServiceTest {
     private StackService stackService;
 
     @Mock
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Mock
     private ExtendedCloudCredential extendedCloudCredential;

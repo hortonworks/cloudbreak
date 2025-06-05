@@ -35,7 +35,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.host.TelemetryOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.telemetry.converter.DiagnosticCloudStorageConverter;
@@ -77,7 +77,7 @@ class CloudStorageValidationServiceTest {
     private StackService stackService;
 
     @Mock
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Mock
     private CloudbreakEventService eventService;

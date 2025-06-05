@@ -94,8 +94,8 @@ import com.sequenceiq.datalake.flow.verticalscale.addvolumes.event.DatalakeAddVo
 import com.sequenceiq.datalake.flow.verticalscale.diskupdate.event.DatalakeDiskUpdateEvent;
 import com.sequenceiq.datalake.flow.verticalscale.diskupdate.event.DatalakeDiskUpdateStateSelectors;
 import com.sequenceiq.datalake.flow.verticalscale.rootvolume.event.DatalakeRootVolumeUpdateEvent;
-import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.rotation.SdxRotationService;
+import com.sequenceiq.datalake.service.sdx.EnvironmentService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.datalake.settings.SdxRepairSettings;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -125,7 +125,7 @@ public class SdxReactorFlowManager {
     private ErrorHandlerAwareReactorEventFactory eventFactory;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Inject
     private FlowNameFormatService flowNameFormatService;

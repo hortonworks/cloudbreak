@@ -75,6 +75,10 @@ class FreeIpaConfigServiceTest {
 
     private static final String ACCOUNT = "testAccount";
 
+    private static final String TLS_VERSIONS = "TLSv1.2";
+
+    private static final String TLS_CIPHERSUITES = "CIPHERSUITES";
+
     private Multimap<String, String> subnetWithCidr;
 
     @Spy
@@ -156,7 +160,8 @@ class FreeIpaConfigServiceTest {
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         when(proxyConfigDtoService.getByEnvironmentCrn(anyString())).thenReturn(Optional.empty());
         when(environmentService.isSecretEncryptionEnabled(ENV_CRN)).thenReturn(true);
-        when(entitlementService.isTlsv13Enabled(ACCOUNT)).thenReturn(true);
+        when(environmentService.getTlsVersions(ENV_CRN, " ")).thenReturn(TLS_VERSIONS);
+        when(environmentService.getTlsVersions(ENV_CRN, ",")).thenReturn(TLS_VERSIONS);
 
         Node node = new Node(PRIVATE_IP, null, null, null, HOSTNAME, DOMAIN, (String) null);
         Map<String, String> expectedHost = Map.of("ip", PRIVATE_IP, "fqdn", HOSTNAME);
@@ -178,7 +183,8 @@ class FreeIpaConfigServiceTest {
         assertEquals(true, freeIpaConfigView.isSecretEncryptionEnabled());
         assertEquals(KERBEROS_SECRET_LOCATION, freeIpaConfigView.getKerberosSecretLocation());
         assertEquals(SeLinux.ENFORCING.name().toLowerCase(Locale.ROOT), freeIpaConfigView.getSeLinux());
-        assertEquals(true, freeIpaConfigView.isTlsv13Enabled());
+        assertEquals(TLS_VERSIONS, freeIpaConfigView.getTlsVersionsSpaceSeparated());
+        assertEquals(TLS_VERSIONS, freeIpaConfigView.getTlsVersionsCommaSeparated());
     }
 
     @Test
@@ -216,7 +222,10 @@ class FreeIpaConfigServiceTest {
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         when(proxyConfigDtoService.getByEnvironmentCrn(anyString())).thenReturn(Optional.empty());
         when(environmentService.isSecretEncryptionEnabled(ENV_CRN)).thenReturn(true);
-        when(entitlementService.isTlsv13Enabled(ACCOUNT)).thenReturn(true);
+        when(environmentService.getTlsVersions(ENV_CRN, " ")).thenReturn(TLS_VERSIONS);
+        when(environmentService.getTlsVersions(ENV_CRN, ",")).thenReturn(TLS_VERSIONS);
+        when(environmentService.getTlsCipherSuites(ENV_CRN)).thenReturn(TLS_CIPHERSUITES);
+
         when(loadBalancerService.findByStackId(any())).thenReturn(Optional.of(loadBalancer));
 
         Node node = new Node(PRIVATE_IP, null, null, null, HOSTNAME, DOMAIN, (String) null);
@@ -239,7 +248,8 @@ class FreeIpaConfigServiceTest {
         assertEquals(true, freeIpaConfigView.isSecretEncryptionEnabled());
         assertEquals(KERBEROS_SECRET_LOCATION, freeIpaConfigView.getKerberosSecretLocation());
         assertEquals(SeLinux.ENFORCING.name().toLowerCase(Locale.ROOT), freeIpaConfigView.getSeLinux());
-        assertEquals(true, freeIpaConfigView.isTlsv13Enabled());
+        assertEquals(TLS_VERSIONS, freeIpaConfigView.getTlsVersionsSpaceSeparated());
+        assertEquals(TLS_VERSIONS, freeIpaConfigView.getTlsVersionsCommaSeparated());
         Map<String, Object> lbConf = (Map<String, Object>) freeIpaConfigView.toMap().get("loadBalancer");
         assertEquals(loadBalancer.getEndpoint(), lbConf.get("endpoint"));
         assertEquals(loadBalancer.getFqdn(), lbConf.get("fqdn"));
@@ -267,7 +277,10 @@ class FreeIpaConfigServiceTest {
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         when(networkService.getFilteredSubnetWithCidr(any())).thenReturn(subnetWithCidr);
         when(environmentService.isSecretEncryptionEnabled(ENV_CRN)).thenReturn(false);
-        when(entitlementService.isTlsv13Enabled(ACCOUNT)).thenReturn(false);
+        when(environmentService.getTlsVersions(ENV_CRN, " ")).thenReturn(TLS_VERSIONS);
+        when(environmentService.getTlsVersions(ENV_CRN, ",")).thenReturn(TLS_VERSIONS);
+        when(environmentService.getTlsCipherSuites(ENV_CRN)).thenReturn(TLS_CIPHERSUITES);
+
 
         FreeIpaConfigView freeIpaConfigView = underTest.createFreeIpaConfigs(
                 stack, Set.of());
@@ -277,7 +290,8 @@ class FreeIpaConfigServiceTest {
         assertEquals(false, freeIpaConfigView.isSecretEncryptionEnabled());
         assertEquals(KERBEROS_SECRET_LOCATION, freeIpaConfigView.getKerberosSecretLocation());
         assertEquals(SeLinux.PERMISSIVE.name().toLowerCase(Locale.ROOT), freeIpaConfigView.getSeLinux());
-        assertEquals(false, freeIpaConfigView.isTlsv13Enabled());
+        assertEquals(TLS_VERSIONS, freeIpaConfigView.getTlsVersionsSpaceSeparated());
+        assertEquals(TLS_VERSIONS, freeIpaConfigView.getTlsVersionsCommaSeparated());
     }
 
     // @formatter:off

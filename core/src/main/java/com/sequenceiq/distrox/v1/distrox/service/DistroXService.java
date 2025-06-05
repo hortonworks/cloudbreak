@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.status.StatusCheckResult;
 import com.sequenceiq.cloudbreak.service.ReservedTagValidatorService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageOsService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -55,7 +55,7 @@ public class DistroXService {
     private WorkspaceService workspaceService;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private EnvironmentService environmentClientService;
 
     @Inject
     private DistroXV1RequestToStackV4RequestConverter stackRequestConverter;

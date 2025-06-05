@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeS3guardValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeS3guardValidationFinishedEvent;
 import com.sequenceiq.cloudbreak.eventbus.Event;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -27,7 +27,7 @@ public class ClusterUpgradeS3guardValidationHandler extends ExceptionCatcherEven
     private StackService stackService;
 
     @Inject
-    private EnvironmentClientService environmentService;
+    private EnvironmentService environmentService;
 
     @Override
     public String selector() {

@@ -88,6 +88,8 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
     private String capacity;
 
+    private List<String> tlsCipherSuitesBlackBoxExporter;
+
     private final String walTruncateFrequency;
 
     private final String remoteWriteUrl;
@@ -292,6 +294,7 @@ public class MonitoringConfigView implements TelemetryConfigView {
         if (this.requestSigner != null) {
             map.putAll(requestSigner.toMap());
         }
+        map.put("tlsCipherSuitesBlackBoxExporter", this.tlsCipherSuitesBlackBoxExporter);
         return map;
     }
 
