@@ -67,6 +67,10 @@ public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStat
         if (cluster == null) {
             return;
         }
+        if (!cluster.isAutoscalingEnabled()) {
+            LOGGER.info("Cannot assess autoscaling state as Autoscaling is disabled for: {}", cluster.getStackCrn());
+            return;
+        }
         LoggingUtils.buildMdcContext(cluster);
 
         StackV4Response stackResponse = cloudbreakCommunicator.getByCrn(cluster.getStackCrn());
@@ -194,18 +198,6 @@ public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStat
             return timeAlerts.stream().filter(this::isPolicyAttached).map(sbp -> sbp.getScalingPolicy().getHostGroup()).collect(toSet());
         }
         return loadAlerts.stream().filter(this::isPolicyAttached).map(lbp -> lbp.getScalingPolicy().getHostGroup()).collect(toSet());
-    }
-
-    protected void beforeDeleteCleanup(Cluster cluster) {
-        try {
-            if (cluster.getEnvironmentCrn() != null && clusterService.countByEnvironmentCrn(cluster.getEnvironmentCrn()) <= 1) {
-                altusMachineUserService.deleteMachineUserForEnvironment(cluster.getClusterPertain().getTenant(),
-                        cluster.getMachineUserCrn(), cluster.getEnvironmentCrn());
-            }
-        } catch (Exception ex) {
-            LOGGER.warn("Error deleting machineUserCrn '{}' for environment '{}'",
-                    cluster.getMachineUserCrn(), cluster.getEnvironmentCrn(), ex);
-        }
     }
 
     protected void populateEnvironmentAndMachineUserIfNotPresent(Cluster cluster) {
