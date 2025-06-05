@@ -18,7 +18,8 @@ public enum AuthorizationResourceType {
     KERBEROS(false),
     FREEIPA(false),
     LDAP(false),
-    STRUCTURED_EVENT(false);
+    STRUCTURED_EVENT(false),
+    ENCRYPTION_PROFILE(false);
 
     private final boolean hierarchicalAuthorizationNeeded;
 

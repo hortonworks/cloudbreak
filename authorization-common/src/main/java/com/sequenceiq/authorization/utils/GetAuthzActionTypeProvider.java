@@ -8,6 +8,7 @@ import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_DATABASE_SERVER;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_DATAHUB;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_DATALAKE;
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_ENCRYPTION_PROFILE;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_ENVIRONMENT;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_PROXY;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_RECIPE;
@@ -21,6 +22,7 @@ import static com.sequenceiq.authorization.resource.AuthorizationResourceType.DA
 import static com.sequenceiq.authorization.resource.AuthorizationResourceType.DATABASE_SERVER;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceType.DATAHUB;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceType.DATALAKE;
+import static com.sequenceiq.authorization.resource.AuthorizationResourceType.ENCRYPTION_PROFILE;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceType.ENVIRONMENT;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceType.FREEIPA;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceType.IMAGE_CATALOG;
@@ -66,6 +68,7 @@ public final class GetAuthzActionTypeProvider {
         PAIRS.add(new AuthzActionTypePair(DATAHUB, DESCRIBE_DATAHUB));
         PAIRS.add(new AuthzActionTypePair(RECIPE, DESCRIBE_RECIPE));
         PAIRS.add(new AuthzActionTypePair(PROXY, DESCRIBE_PROXY));
+        PAIRS.add(new AuthzActionTypePair(ENCRYPTION_PROFILE, DESCRIBE_ENCRYPTION_PROFILE));
     }
 
     private GetAuthzActionTypeProvider() {

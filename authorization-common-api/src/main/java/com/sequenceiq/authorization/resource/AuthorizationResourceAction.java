@@ -112,6 +112,9 @@ public enum AuthorizationResourceAction {
     ROTATE_DL_SECRETS("datalake/rotateSecrets", AuthorizationResourceType.DATALAKE),
     ROTATE_DH_SECRETS("datahub/rotateSecrets", AuthorizationResourceType.DATAHUB),
     ROTATE_FREEIPA_SECRETS("environments/rotateFreeipaSecrets", AuthorizationResourceType.ENVIRONMENT),
+    CREATE_ENCRYPTION_PROFILE("environments/createEncryptionProfile", AuthorizationResourceType.ENCRYPTION_PROFILE),
+    DESCRIBE_ENCRYPTION_PROFILE("environments/describeEncryptionProfile", AuthorizationResourceType.ENCRYPTION_PROFILE),
+    DELETE_ENCRYPTION_PROFILE("environments/deleteEncryptionProfile", AuthorizationResourceType.ENCRYPTION_PROFILE),
     // deprecated actions, please do not use them
     ENVIRONMENT_READ("environments/read", AuthorizationResourceType.ENVIRONMENT),
     ENVIRONMENT_WRITE("environments/write", AuthorizationResourceType.ENVIRONMENT),

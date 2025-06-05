@@ -466,7 +466,8 @@ public class Crn {
         USERSYNC("usersync"),
         PVC_CONTROL_PLANE("pvcControlPlane"),
         VIRTUAL_CLUSTER("virtualCluster"),
-        MLSERVING("mlserving");
+        MLSERVING("mlserving"),
+        ENCRYPTION_PROFILE("encryptionProfile");
 
         private static final ImmutableMap<String, ResourceType> FROM_STRING;
 

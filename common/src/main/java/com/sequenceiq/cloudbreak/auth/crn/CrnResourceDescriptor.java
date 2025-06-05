@@ -47,7 +47,8 @@ public enum CrnResourceDescriptor {
     WXM_ENVIRONMENT(Crn.ResourceType.WXM_ENVIRONMENT, Crn.Service.ENVIRONMENTS),
     COMPUTE_DOCKER_CONFIG(Crn.ResourceType.DOCKER_CONFIG, Crn.Service.COMPUTE),
     COMPUTE_CLUSTER(Crn.ResourceType.CLUSTER, Crn.Service.COMPUTE),
-    HYBRID(Crn.ResourceType.PVC_CONTROL_PLANE, Crn.Service.HYBRID);
+    HYBRID(Crn.ResourceType.PVC_CONTROL_PLANE, Crn.Service.HYBRID),
+    ENCYRPTION_PROFILE(Crn.ResourceType.ENCRYPTION_PROFILE, Crn.Service.ENVIRONMENTS);
 
     private Crn.ResourceType resourceType;
 

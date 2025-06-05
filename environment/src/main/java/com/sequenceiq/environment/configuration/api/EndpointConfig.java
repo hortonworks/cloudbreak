@@ -23,6 +23,7 @@ import com.sequenceiq.environment.api.EnvironmentApi;
 import com.sequenceiq.environment.credential.v1.AuditCredentialV1Controller;
 import com.sequenceiq.environment.credential.v1.CredentialInternalV1Controller;
 import com.sequenceiq.environment.credential.v1.CredentialV1Controller;
+import com.sequenceiq.environment.encryptionprofile.v1.controller.EncryptionProfileController;
 import com.sequenceiq.environment.environment.v1.EnvironmentController;
 import com.sequenceiq.environment.environment.v1.EnvironmentDefaultComputeClusterController;
 import com.sequenceiq.environment.environment.v1.EnvironmentInternalV1Controller;
@@ -53,6 +54,7 @@ public class EndpointConfig extends ResourceConfig {
             AccountTagController.class,
             AccountTelemetryController.class,
             ProxyController.class,
+            EncryptionProfileController.class,
             EnvironmentController.class,
             EnvironmentDefaultComputeClusterController.class,
             EnvironmentInternalV1Controller.class,

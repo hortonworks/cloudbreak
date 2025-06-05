@@ -31,7 +31,8 @@ public enum ResourceEvent {
     FILESYSTEM_DELETED("resource.filesystem.deleted"),
     TOPOLOGY_DELETED("resource.topology.deleted"),
     TEST_CONNECTION_SUCCESS("resource.connection.success"),
-    TEST_CONNECTION_FAILED("resource.connection.failed"),;
+    TEST_CONNECTION_FAILED("resource.connection.failed"),
+    ENCRYPTION_PROFILE_CREATED("resource.encryptionprofile.created"),;
 
     private final String message;
 
