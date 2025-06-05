@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.rms;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_18;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isHmsRangerServiceNameRequired;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.rms.RangerRmsRoles.RANGER_RMS_SERVER_REF_NAME;
@@ -76,7 +77,9 @@ public class RangerRmsDatalakeConfigProvider extends AbstractRoleConfigProvider 
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         List<ApiClusterTemplateConfig> configs = new ArrayList<>();
         configs.add(config(HMS_MAP_MANAGED_TABLES, Boolean.TRUE.toString()));
-        configs.add(config(HMS_SOURCE_SERVICE_NAME, HMS_SOURCE_SERVICE_NAME_VALUE));
+        if (isHmsRangerServiceNameRequired(source.getProductDetailsView().getCm().getVersion())) {
+            configs.add(config(HMS_SOURCE_SERVICE_NAME, HMS_SOURCE_SERVICE_NAME_VALUE));
+        }
         configs.add(config(SUPPORTED_URI_SCHEME, SUPPORTED_URI_SCHEME_VALUE));
         if (isHa(source)) {
             configs.add(config(HA_ENABLED, Boolean.TRUE.toString()));

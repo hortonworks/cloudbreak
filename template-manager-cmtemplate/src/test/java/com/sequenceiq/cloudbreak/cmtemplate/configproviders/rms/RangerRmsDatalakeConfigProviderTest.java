@@ -139,6 +139,27 @@ public class RangerRmsDatalakeConfigProviderTest {
     }
 
     @Test
+    public void getRangerRmsRoleConfigsWhen732() {
+        TemplatePreparationObject templatePreparationObject = getTemplatePreparationObject("7.3.2", CloudPlatform.AWS, StackType.DATALAKE, true);
+        ApiClusterTemplateService apiClusterTemplateService = mock(ApiClusterTemplateService.class);
+        when(cmTemplateProcessor.getServiceByType(eq(RANGER_RMS_SERVICE_TYPE))).thenReturn(Optional.of(apiClusterTemplateService));
+        ApiClusterTemplateRoleConfigGroup apiClusterTemplateRoleConfigGroup = mock(ApiClusterTemplateRoleConfigGroup.class);
+        when(apiClusterTemplateService.getRoleConfigGroups()).thenReturn(List.of(apiClusterTemplateRoleConfigGroup));
+        when(apiClusterTemplateRoleConfigGroup.getRoleType()).thenReturn(RANGER_RMS_SERVER_ROLE_TYPE);
+        when(apiClusterTemplateRoleConfigGroup.getRefName()).thenReturn(RANGER_RMS_SERVER_REF_NAME);
+        Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, templatePreparationObject);
+        assertEquals(1, roleConfigs.size());
+        assertTrue(roleConfigs.containsKey(RANGER_RMS_SERVER_REF_NAME));
+        List<ApiClusterTemplateConfig> configs = roleConfigs.get(RANGER_RMS_SERVER_REF_NAME);
+        assertAll(
+                () -> assertEquals(HMS_MAP_MANAGED_TABLES, configs.get(0).getName()),
+                () -> assertEquals(SUPPORTED_URI_SCHEME, configs.get(1).getName()),
+                () -> assertEquals("true", configs.get(0).getValue()),
+                () -> assertEquals(SUPPORTED_URI_SCHEME_VALUE, configs.get(1).getValue())
+        );
+    }
+
+    @Test
     public void getRangerRmsRoleConfigsHa() {
         ClouderaManagerRepo cmRepo = new ClouderaManagerRepo();
         cmRepo.setVersion(RMS_MINIMUM_VERSION);
