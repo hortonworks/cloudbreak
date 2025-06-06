@@ -63,7 +63,36 @@ class FreeIpaRecommendationServiceTest {
     @Test
     public void testGetRecommendation() {
         when(credentialService.getCredentialByCredCrn(anyString())).thenReturn(new Credential("AWS", "", "", "", ""));
-        when(cloudParameterService.getVmTypesV2(any(), eq("eu-central-1"), eq("AWS"), eq(CdpResourceType.DEFAULT), any())).thenReturn(initCloudVmTypes());
+        when(cloudParameterService.getVmTypesV2(any(), eq("eu-central-1"), eq("AWS"), eq(CdpResourceType.DEFAULT),
+                eq(Map.of("architecture", Architecture.X86_64.getName())))).thenReturn(initCloudVmTypes());
+        when(defaultInstanceTypeProvider.getForPlatform(eq("AWS"), eq(Architecture.X86_64))).thenReturn("medium");
+
+        FreeIpaRecommendationResponse recommendation = underTest.getRecommendation("cred", "eu-central-1", null, Architecture.X86_64.getName());
+        assertEquals("medium", recommendation.getDefaultInstanceType());
+        Set<VmTypeResponse> vmTypes = recommendation.getVmTypes();
+        assertEquals(2, vmTypes.size());
+        assertThat(vmTypes.stream().map(VmTypeResponse::getValue).collect(Collectors.toSet())).containsExactly("large", "medium");
+    }
+
+    @Test
+    public void testGetRecommendationWithArm() {
+        when(credentialService.getCredentialByCredCrn(anyString())).thenReturn(new Credential("AWS", "", "", "", ""));
+        when(cloudParameterService.getVmTypesV2(any(), eq("eu-central-1"), eq("AWS"), eq(CdpResourceType.DEFAULT),
+                eq(Map.of("architecture", Architecture.ARM64.getName())))).thenReturn(initCloudVmTypes());
+        when(defaultInstanceTypeProvider.getForPlatform(eq("AWS"), eq(Architecture.ARM64))).thenReturn("medium");
+
+        FreeIpaRecommendationResponse recommendation = underTest.getRecommendation("cred", "eu-central-1", null, Architecture.ARM64.getName());
+        assertEquals("medium", recommendation.getDefaultInstanceType());
+        Set<VmTypeResponse> vmTypes = recommendation.getVmTypes();
+        assertEquals(2, vmTypes.size());
+        assertThat(vmTypes.stream().map(VmTypeResponse::getValue).collect(Collectors.toSet())).containsExactly("large", "medium");
+    }
+
+    @Test
+    public void testGetRecommendationWithDefaultX86Architecture() {
+        when(credentialService.getCredentialByCredCrn(anyString())).thenReturn(new Credential("AWS", "", "", "", ""));
+        when(cloudParameterService.getVmTypesV2(any(), eq("eu-central-1"), eq("AWS"), eq(CdpResourceType.DEFAULT),
+                eq(Map.of("architecture", Architecture.X86_64.getName())))).thenReturn(initCloudVmTypes());
         when(defaultInstanceTypeProvider.getForPlatform(eq("AWS"), eq(Architecture.X86_64))).thenReturn("medium");
 
         FreeIpaRecommendationResponse recommendation = underTest.getRecommendation("cred", "eu-central-1", null, null);

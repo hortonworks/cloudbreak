@@ -1,7 +1,6 @@
 package com.sequenceiq.freeipa.service.stack;
 
 import static com.sequenceiq.cloudbreak.constant.AwsPlatformResourcesFilterConstants.ARCHITECTURE;
-import static com.sequenceiq.common.model.Architecture.X86_64;
 
 import java.util.Collections;
 import java.util.Map;
@@ -55,19 +54,20 @@ public class FreeIpaRecommendationService {
 
     public FreeIpaRecommendationResponse getRecommendation(String credentialCrn, String region, String availabilityZone, String architecture) {
         Credential credential = credentialService.getCredentialByCredCrn(credentialCrn);
-        String defaultInstanceType = defaultInstanceTypeProvider.getForPlatform(credential.getCloudPlatform(),
-                Architecture.fromStringWithFallback(architecture));
-        Set<VmTypeResponse> availableVmTypes = getAvailableVmTypes(region, availabilityZone, credential, defaultInstanceType);
+        Architecture architectureEnum = Architecture.fromStringWithFallback(architecture);
+        String defaultInstanceType = defaultInstanceTypeProvider.getForPlatform(credential.getCloudPlatform(), architectureEnum);
+        Set<VmTypeResponse> availableVmTypes = getAvailableVmTypes(region, availabilityZone, credential, defaultInstanceType, architectureEnum);
         return new FreeIpaRecommendationResponse(availableVmTypes, defaultInstanceType);
     }
 
-    private Set<VmTypeResponse> getAvailableVmTypes(String region, String availabilityZone, Credential credential, String defaultInstanceType) {
+    private Set<VmTypeResponse> getAvailableVmTypes(String region, String availabilityZone, Credential credential, String defaultInstanceType,
+            Architecture architecture) {
         CloudVmTypes vmTypes = cloudParameterService.getVmTypesV2(
                 extendedCloudCredentialConverter.convert(credential),
                 region,
                 credential.getCloudPlatform(),
                 CdpResourceType.DEFAULT,
-                Map.of(ARCHITECTURE, X86_64.getName()));
+                Map.of(ARCHITECTURE, Optional.ofNullable(architecture).orElse(Architecture.X86_64).getName()));
 
         Set<VmType> availableVmTypes = Collections.emptySet();
         if (vmTypes.getCloudVmResponses() != null && StringUtils.isNotBlank(availabilityZone)
@@ -103,7 +103,8 @@ public class FreeIpaRecommendationService {
         String defaultInstanceType = defaultInstanceTypeProvider.getForPlatform(stack.getCloudPlatform(), stack.getArchitecture());
         Map<String, String> customInstanceTypes = getCustomInstanceTypes(stack, defaultInstanceType);
         if (!customInstanceTypes.isEmpty()) {
-            Set<String> availableVmTypes = getAvailableVmTypes(stack.getRegion(), stack.getAvailabilityZone(), credential, defaultInstanceType).stream()
+            Set<String> availableVmTypes = getAvailableVmTypes(stack.getRegion(), stack.getAvailabilityZone(), credential, defaultInstanceType,
+                    stack.getArchitecture()).stream()
                     .map(VmTypeResponse::getValue)
                     .collect(Collectors.toSet());
             customInstanceTypes.forEach((instanceGroup, instanceType) -> {
