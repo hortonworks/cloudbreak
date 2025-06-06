@@ -1,9 +1,5 @@
 package com.sequenceiq.freeipa.flow.stack.termination.action;
 
-import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
-import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
-import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -16,9 +12,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.common.event.Payload;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
@@ -63,18 +57,7 @@ abstract class AbstractStackTerminationAction<P extends Payload>
     protected StackTerminationContext createFlowContext(FlowParameters flowParameters, StateContext<StackTerminationState,
             StackTerminationEvent> stateContext, P payload) {
         Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
-        MDCBuilder.buildMdcContext(stack);
-        Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
-        CloudContext cloudContext = CloudContext.Builder.builder()
-                .withId(stack.getId())
-                .withName(stack.getName())
-                .withCrn(stack.getResourceCrn())
-                .withPlatform(stack.getCloudPlatform())
-                .withVariant(stack.getPlatformvariant())
-                .withLocation(location)
-                .withUserName(stack.getOwner())
-                .withAccountId(stack.getAccountId())
-                .build();
+        CloudContext cloudContext = buildContext(stack);
         Credential credential = credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn());
         CloudCredential cloudCredential = credentialConverter.convert(credential);
         CloudStack cloudStack = cloudStackConverter.convert(stack);

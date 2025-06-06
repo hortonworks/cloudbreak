@@ -4,8 +4,12 @@ import static com.sequenceiq.environment.environment.EnvironmentStatus.ENV_STOPP
 import static com.sequenceiq.environment.environment.EnvironmentStatus.FREEIPA_CREATION_IN_PROGRESS;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.FREEIPA_DELETED_ON_PROVIDER_SIDE;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.FREEIPA_DELETE_IN_PROGRESS;
+import static com.sequenceiq.environment.environment.EnvironmentStatus.FREEIPA_FINISH_CROSS_REALM_TRUST_FAILED;
+import static com.sequenceiq.environment.environment.EnvironmentStatus.FREEIPA_FINISH_CROSS_REALM_TRUST_IN_PROGRESS;
+import static com.sequenceiq.environment.environment.EnvironmentStatus.FREEIPA_FINISH_CROSS_REALM_TRUST_SUCCESSFUL;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.FREEIPA_PREPARE_CROSS_REALM_TRUST_FAILED;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.FREEIPA_PREPARE_CROSS_REALM_TRUST_IN_PROGRESS;
+import static com.sequenceiq.environment.environment.EnvironmentStatus.FREEIPA_PREPARE_CROSS_REALM_TRUST_PENDING;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.FREEIPA_REBUILD_FAILED;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.FREEIPA_REBUILD_IN_PROGRESS;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.FREEIPA_STALE;
@@ -29,12 +33,16 @@ import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DE
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_IN_PROGRESS;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DIAGNOSTICS_COLLECTION_IN_PROGRESS;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DOWNSCALE_FAILED;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.FINISH_CROSS_REALM_TRUST_FAILED;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.FINISH_CROSS_REALM_TRUST_IN_PROGRESS;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.FINISH_CROSS_REALM_TRUST_SUCCESSFUL;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.MAINTENANCE_MODE_ENABLED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.MODIFY_PROXY_CONFIG_FAILED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.MODIFY_PROXY_CONFIG_IN_PROGRESS;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.MODIFY_PROXY_CONFIG_REQUESTED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.PREPARE_CROSS_REALM_TRUST_FAILED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.PREPARE_CROSS_REALM_TRUST_IN_PROGRESS;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.PREPARE_CROSS_REALM_TRUST_PENDING;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.REBUILD_FAILED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.REBUILD_IN_PROGRESS;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.REPAIR_FAILED;
@@ -118,7 +126,11 @@ public class EnvironmentSyncService {
             Map.entry(REBUILD_FAILED, FREEIPA_REBUILD_FAILED),
             Map.entry(STALE, FREEIPA_STALE),
             Map.entry(PREPARE_CROSS_REALM_TRUST_IN_PROGRESS, FREEIPA_PREPARE_CROSS_REALM_TRUST_IN_PROGRESS),
-            Map.entry(PREPARE_CROSS_REALM_TRUST_FAILED, FREEIPA_PREPARE_CROSS_REALM_TRUST_FAILED)
+            Map.entry(PREPARE_CROSS_REALM_TRUST_PENDING, FREEIPA_PREPARE_CROSS_REALM_TRUST_PENDING),
+            Map.entry(PREPARE_CROSS_REALM_TRUST_FAILED, FREEIPA_PREPARE_CROSS_REALM_TRUST_FAILED),
+            Map.entry(FINISH_CROSS_REALM_TRUST_IN_PROGRESS, FREEIPA_FINISH_CROSS_REALM_TRUST_IN_PROGRESS),
+            Map.entry(FINISH_CROSS_REALM_TRUST_FAILED, FREEIPA_FINISH_CROSS_REALM_TRUST_FAILED),
+            Map.entry(FINISH_CROSS_REALM_TRUST_SUCCESSFUL, FREEIPA_FINISH_CROSS_REALM_TRUST_SUCCESSFUL)
     );
 
     private final FreeIpaService freeIpaService;

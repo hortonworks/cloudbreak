@@ -29,7 +29,8 @@ import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
-import com.sequenceiq.freeipa.flow.freeipa.crossrealm.trust.FreeIpaPrepareCrossRealmTrustFlowEvent;
+import com.sequenceiq.freeipa.flow.freeipa.crossrealm.trust.finish.FreeIpaFinishCrossRealmTrustFlowEvent;
+import com.sequenceiq.freeipa.flow.freeipa.crossrealm.trust.prepare.FreeIpaPrepareCrossRealmTrustFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.imdupdate.event.FreeIpaInstanceMetadataUpdateEvent;
 import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.FreeIpaLoadBalancerCreationEvent;
 import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionEvent;
@@ -58,7 +59,8 @@ class FreeIpaFlowInformationTest {
             FreeIpaRebuildFlowEvent.REBUILD_EVENT.event(),
             FreeIpaInstanceMetadataUpdateEvent.STACK_IMDUPDATE_EVENT.event(),
             FreeIpaLoadBalancerCreationEvent.FREEIPA_LOAD_BALANCER_CREATION_EVENT.event(),
-            FreeIpaPrepareCrossRealmTrustFlowEvent.PREPARE_CROSS_REALM_TRUST_EVENT.event()
+            FreeIpaPrepareCrossRealmTrustFlowEvent.PREPARE_CROSS_REALM_TRUST_EVENT.event(),
+            FreeIpaFinishCrossRealmTrustFlowEvent.FINISH_CROSS_REALM_TRUST_EVENT.event()
     );
 
     @Mock

@@ -149,8 +149,18 @@ public enum EnvironmentStatus {
     FREEIPA_PREPARE_CROSS_REALM_TRUST_IN_PROGRESS(
             com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.FREEIPA_PREPARE_CROSS_REALM_TRUST_IN_PROGRESS
     ),
+    FREEIPA_PREPARE_CROSS_REALM_TRUST_PENDING(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.FREEIPA_PREPARE_CROSS_REALM_TRUST_PENDING
+    ),
     FREEIPA_PREPARE_CROSS_REALM_TRUST_FAILED(
             com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.FREEIPA_PREPARE_CROSS_REALM_TRUST_FAILED),
+    FREEIPA_FINISH_CROSS_REALM_TRUST_IN_PROGRESS(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.FREEIPA_FINISH_CROSS_REALM_TRUST_IN_PROGRESS
+    ),
+    FREEIPA_FINISH_CROSS_REALM_TRUST_FAILED(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.FREEIPA_FINISH_CROSS_REALM_TRUST_FAILED),
+    FREEIPA_FINISH_CROSS_REALM_TRUST_SUCCESSFUL(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.FREEIPA_FINISH_CROSS_REALM_TRUST_SUCCESSFUL),
 
     // Start updating the LoadBalancer on Data Lake in an Environment
     LOAD_BALANCER_ENV_UPDATE_STARTED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.LOAD_BALANCER_ENV_UPDATE_STARTED),

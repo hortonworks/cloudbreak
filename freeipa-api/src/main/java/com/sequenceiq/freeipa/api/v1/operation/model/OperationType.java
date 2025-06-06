@@ -19,7 +19,9 @@ public enum OperationType {
     CHANGE_DYNAMIC_ENTITLEMENTS,
     REBUILD,
     MODIFY_ROOT_VOLUME,
-    MODIFY_SELINUX_MODE;
+    MODIFY_SELINUX_MODE,
+    PREPARE_CROSS_REALM_TRUST,
+    FINISH_CROSS_REALM_TRUST;
 
     private final String lowerCaseName;
 

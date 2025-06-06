@@ -2437,6 +2437,13 @@ message CDPFreeIPAStatus {
     PREPARE_CROSS_REALM_TRUST_FINISHED = 41;
     // The status when building cross-realm trust for CDP FreeIPA is failed
     PREPARE_CROSS_REALM_TRUST_FAILED = 42;
+
+    // The status when finishing to set up cross-realm trust for CDP FreeIPA is started
+    FINISH_CROSS_REALM_TRUST_STARTED = 43;
+    // The status when finishing to set up cross-realm trust for CDP FreeIPA is successful
+    FINISH_CROSS_REALM_TRUST_FINISHED = 44;
+    // The status when finishing to set up cross-realm trust for CDP FreeIPA is failed
+    FINISH_CROSS_REALM_TRUST_FAILED = 45;
   }
 }
 

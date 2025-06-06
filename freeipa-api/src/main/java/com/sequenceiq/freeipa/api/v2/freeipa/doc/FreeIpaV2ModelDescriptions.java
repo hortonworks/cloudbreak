@@ -10,6 +10,12 @@ public class FreeIpaV2ModelDescriptions {
     public static final String DATA_BACKUP_STORAGE_PATH = "Cloud storage path, where the 'header' file and 'ipa-data.tar' file is available " +
             "and can be downloaded from. Header file host filed must match the hostname provided in 'instanceToRestoreFqdn'.";
 
+    public static final String FQDN = "Fully qualified domain name of the Active Directory server.";
+
+    public static final String IP = "IP address of the Active Directory server.";
+
+    public static final String REALM = "Realm of the Active Directory server.";
+
     private FreeIpaV2ModelDescriptions() {
     }
 }

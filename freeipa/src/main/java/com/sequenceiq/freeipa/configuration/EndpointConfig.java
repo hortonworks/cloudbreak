@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.structuredevent.rest.filter.CDPStructuredEventF
 import com.sequenceiq.flow.controller.FlowPublicController;
 import com.sequenceiq.freeipa.api.FreeIpaApi;
 import com.sequenceiq.freeipa.controller.ClientTestV1Controller;
+import com.sequenceiq.freeipa.controller.CrossRealmV1Controller;
 import com.sequenceiq.freeipa.controller.DiagnosticsV1Controller;
 import com.sequenceiq.freeipa.controller.DnsV1Controller;
 import com.sequenceiq.freeipa.controller.EncryptionV1Controller;
@@ -75,7 +76,8 @@ public class EndpointConfig extends ResourceConfig {
             CDPEventV1Endpoint.class,
             AuthorizationUtilController.class,
             OpenApiController.class,
-            EncryptionV1Controller.class);
+            EncryptionV1Controller.class,
+            CrossRealmV1Controller.class);
 
     @Value("${info.app.version:unspecified}")
     private String applicationVersion;
