@@ -6,6 +6,8 @@ public class AwsCredentialAttributes {
 
     private RoleBasedCredentialAttributes roleBased;
 
+    private String defaultRegion;
+
     public KeyBasedCredentialAttributes getKeyBased() {
         return keyBased;
     }
@@ -20,5 +22,13 @@ public class AwsCredentialAttributes {
 
     public void setRoleBased(RoleBasedCredentialAttributes roleBased) {
         this.roleBased = roleBased;
+    }
+
+    public String getDefaultRegion() {
+        return defaultRegion;
+    }
+
+    public void setDefaultRegion(String defaultRegion) {
+        this.defaultRegion = defaultRegion;
     }
 }

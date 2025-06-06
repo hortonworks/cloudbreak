@@ -1,17 +1,25 @@
 package com.sequenceiq.environment.credential.validation.aws;
 
 import java.io.IOException;
+import java.util.Optional;
+
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
+import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
+import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
+import com.sequenceiq.environment.credential.attributes.CredentialAttributes;
+import com.sequenceiq.environment.credential.attributes.aws.AwsCredentialAttributes;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.validation.ProviderCredentialValidator;
 
@@ -19,6 +27,9 @@ import com.sequenceiq.environment.credential.validation.ProviderCredentialValida
 public class AwsCredentialValidator implements ProviderCredentialValidator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsCredentialValidator.class);
+
+    @Inject
+    private CloudParameterService cloudParameterService;
 
     @Override
     public String supportedProvider() {
@@ -32,10 +43,12 @@ public class AwsCredentialValidator implements ProviderCredentialValidator {
 
     @Override
     public ValidationResult validateUpdate(Credential original, Credential newCred, ValidationResultBuilder resultBuilder) {
-        return validateKeyBasedRoleBasedChange(original, newCred, resultBuilder);
+        validateKeyBasedRoleBasedChange(original, newCred, resultBuilder);
+        validateDefaultRegionUpdate(newCred, resultBuilder);
+        return resultBuilder.build();
     }
 
-    private ValidationResult validateKeyBasedRoleBasedChange(Credential original, Credential newCred, ValidationResultBuilder resultBuilder) {
+    private void validateKeyBasedRoleBasedChange(Credential original, Credential newCred, ValidationResultBuilder resultBuilder) {
         try {
             JsonNode originalKeyBased = JsonUtil.readTree(original.getAttributes()).get("aws").get("keyBased");
             JsonNode originalRoleBased = JsonUtil.readTree(original.getAttributes()).get("aws").get("roleBased");
@@ -51,7 +64,20 @@ public class AwsCredentialValidator implements ProviderCredentialValidator {
             resultBuilder.error("Missing attributes from the JSON!");
             LOGGER.warn("Missing attributes from the JSON!", npe);
         }
-        return resultBuilder.build();
+    }
+
+    private void validateDefaultRegionUpdate(Credential newCred, ValidationResultBuilder resultBuilder) {
+        CredentialAttributes credentialAttributes = JsonUtil.readValueUnchecked(newCred.getAttributes(), CredentialAttributes.class);
+        Optional.ofNullable(credentialAttributes)
+                .map(CredentialAttributes::getAws)
+                .map(AwsCredentialAttributes::getDefaultRegion)
+                .ifPresent(defaultRegion -> {
+                    CloudRegions cdpRegions = cloudParameterService.getCdpRegions(CloudPlatform.AWS.name(), AwsConstants.AWS_DEFAULT_VARIANT.value());
+                    if (!cdpRegions.getRegionNames().contains(defaultRegion)) {
+                        resultBuilder.error("The specified default region '" + defaultRegion + "' is not supported on AWS by CDP."
+                                + "Please provide a valid region name!");
+                    }
+                });
     }
 
     private boolean isNotNull(JsonNode jsonNode) {

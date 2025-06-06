@@ -5,9 +5,13 @@ import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 import java.io.IOException;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.AwsCredentialParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.KeyBasedParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.RoleBasedParameters;
@@ -19,11 +23,13 @@ import com.sequenceiq.environment.credential.domain.Credential;
 
 @Component
 public class AwsCredentialV1ParametersToAwsCredentialAttributesConverter {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwsCredentialV1ParametersToAwsCredentialAttributesConverter.class);
 
     public AwsCredentialAttributes convert(AwsCredentialParameters source, Optional<Credential> originalCredential) {
         AwsCredentialAttributes response = new AwsCredentialAttributes();
         doIfNotNull(source.getKeyBased(), params -> response.setKeyBased(getKeyBased(params)));
         doIfNotNull(source.getRoleBased(), params -> response.setRoleBased(getRoleBased(params, originalCredential)));
+        updateDefaultRegionDuringModify(source, originalCredential, response);
         return response;
     }
 
@@ -31,6 +37,7 @@ public class AwsCredentialV1ParametersToAwsCredentialAttributesConverter {
         AwsCredentialParameters response = new AwsCredentialParameters();
         doIfNotNull(source.getKeyBased(), params -> response.setKeyBased(getKeyBased(params)));
         doIfNotNull(source.getRoleBased(), params -> response.setRoleBased(getRoleBased(params)));
+        doIfNotNull(source.getDefaultRegion(), response::setDefaultRegion);
         return response;
     }
 
@@ -49,7 +56,10 @@ public class AwsCredentialV1ParametersToAwsCredentialAttributesConverter {
             Json json = new Json(originalCredential.get().getAttributes());
             try {
                 CredentialAttributes credentialAttributes = json.get(CredentialAttributes.class);
-                return Optional.ofNullable(credentialAttributes.getAws().getRoleBased().getExternalId());
+                return Optional.ofNullable(credentialAttributes)
+                        .map(CredentialAttributes::getAws)
+                        .map(AwsCredentialAttributes::getRoleBased)
+                        .map(RoleBasedCredentialAttributes::getExternalId);
             } catch (IOException e) {
                 return Optional.empty();
             }
@@ -75,5 +85,22 @@ public class AwsCredentialV1ParametersToAwsCredentialAttributesConverter {
         keyBased.setAccessKey(source.getAccessKey());
         keyBased.setSecretKey(source.getSecretKey());
         return keyBased;
+    }
+
+    private void updateDefaultRegionDuringModify(AwsCredentialParameters source, Optional<Credential> originalCredential, AwsCredentialAttributes response) {
+        if (originalCredential.isPresent()) {
+            Credential credential = originalCredential.get();
+            if (StringUtils.isNotEmpty(source.getDefaultRegion())) {
+                if (StringUtils.isNotEmpty(credential.getAttributes())) {
+                    CredentialAttributes attributes = JsonUtil.readValueUnchecked(originalCredential.get().getAttributes(), CredentialAttributes.class);
+                    String originalDefaultRegion = Optional.ofNullable(attributes)
+                            .map(CredentialAttributes::getAws)
+                            .map(AwsCredentialAttributes::getDefaultRegion)
+                            .orElse(null);
+                    LOGGER.info("Default region changed from: {} to: {}", originalDefaultRegion, source.getDefaultRegion());
+                    response.setDefaultRegion(source.getDefaultRegion());
+                }
+            }
+        }
     }
 }

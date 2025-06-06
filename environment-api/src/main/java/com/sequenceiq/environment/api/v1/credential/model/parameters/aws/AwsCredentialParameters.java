@@ -28,6 +28,8 @@ public class AwsCredentialParameters implements Serializable {
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Boolean govCloud = false;
 
+    private String defaultRegion;
+
     public KeyBasedParameters getKeyBased() {
         return keyBased;
     }
@@ -52,12 +54,21 @@ public class AwsCredentialParameters implements Serializable {
         this.govCloud = govCloud;
     }
 
+    public String getDefaultRegion() {
+        return defaultRegion;
+    }
+
+    public void setDefaultRegion(String defaultRegion) {
+        this.defaultRegion = defaultRegion;
+    }
+
     @Override
     public String toString() {
         return "AwsCredentialParameters{" +
                 "keyBased=" + keyBased +
                 ", roleBased=" + roleBased +
                 ", govCloud=" + govCloud +
+                ", defaultRegion=" + defaultRegion +
                 '}';
     }
 }
