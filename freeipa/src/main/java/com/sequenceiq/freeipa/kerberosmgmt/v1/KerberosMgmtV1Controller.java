@@ -5,8 +5,6 @@ import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CR
 
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,40 +72,45 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
     @Inject
     private CustomCheckUtil customCheckUtil;
 
+    @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
-    public ServiceKeytabResponse generateServiceKeytab(@RequestObject @Valid ServiceKeytabRequest request, @AccountId String accountIdForInternalUsage) {
+    public ServiceKeytabResponse generateServiceKeytab(@RequestObject ServiceKeytabRequest request, @AccountId String accountIdForInternalUsage) {
         return retryableWithKeytabCreationException((Void v) -> {
             String accountId = crnService.getCurrentAccountId();
             return serviceKeytab.generateServiceKeytab(request, accountId);
         });
     }
 
+    @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
-    public ServiceKeytabResponse getServiceKeytab(@RequestObject @Valid ServiceKeytabRequest request) {
+    public ServiceKeytabResponse getServiceKeytab(@RequestObject ServiceKeytabRequest request) {
         return retryableWithKeytabCreationException((Void v) -> {
             String accountId = crnService.getCurrentAccountId();
             return serviceKeytab.getExistingServiceKeytab(request, accountId);
         });
     }
 
+    @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
-    public HostKeytabResponse generateHostKeytab(@RequestObject @Valid HostKeytabRequest request) {
+    public HostKeytabResponse generateHostKeytab(@RequestObject HostKeytabRequest request) {
         return retryableWithKeytabCreationException((Void v) -> {
             String accountId = crnService.getCurrentAccountId();
             return hostKeytab.generateHostKeytab(request, accountId);
         });
     }
 
+    @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
-    public HostKeytabResponse getHostKeytab(@RequestObject @Valid HostKeytabRequest request) {
+    public HostKeytabResponse getHostKeytab(@RequestObject HostKeytabRequest request) {
         return retryableWithKeytabCreationException((Void v) -> {
             String accountId = crnService.getCurrentAccountId();
             return hostKeytab.getExistingHostKeytab(request, accountId);
         });
     }
 
+    @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
-    public void deleteServicePrincipal(@RequestObject @Valid ServicePrincipalRequest request) {
+    public void deleteServicePrincipal(@RequestObject ServicePrincipalRequest request) {
         retryableWithDeletionException((Void v) -> {
             String accountId = crnService.getCurrentAccountId();
             keytabCleanupService.deleteServicePrincipal(request, accountId);
@@ -115,8 +118,9 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
         });
     }
 
+    @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
-    public void deleteHost(@RequestObject @Valid HostRequest request) {
+    public void deleteHost(@RequestObject HostRequest request) {
         retryableWithDeletionException((Void v) -> {
             String accountId = crnService.getCurrentAccountId();
             keytabCleanupService.deleteHost(request, accountId);
@@ -124,20 +128,23 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
         });
     }
 
+    @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
-    public void cleanupClusterSecrets(@RequestObject @Valid VaultCleanupRequest request) {
+    public void cleanupClusterSecrets(@RequestObject VaultCleanupRequest request) {
         String accountId = crnService.getCurrentAccountId();
         keytabCleanupService.cleanupByCluster(request, accountId);
     }
 
+    @Override
     @CheckPermissionByResourceCrn(action = EDIT_ENVIRONMENT)
     public void cleanupEnvironmentSecrets(@ResourceCrn String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
         keytabCleanupService.cleanupByEnvironment(environmentCrn, accountId);
     }
 
+    @Override
     @CustomPermissionCheck
-    public String getUserKeytab(@NotEmpty String environmentCrn, @NotEmpty String targetUserCrn) {
+    public String getUserKeytab(String environmentCrn, String targetUserCrn) {
         String actorCrn = checkActorCrn();
         LOGGER.debug("getUserKeytab() request for environmentCrn={} for targetUserCrn={} as actorCrn={}",
                 environmentCrn, actorCrn, targetUserCrn);

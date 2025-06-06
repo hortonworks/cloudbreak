@@ -14,9 +14,6 @@ import java.util.stream.Collectors;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.transaction.Transactional.TxType;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 
 import org.slf4j.Logger;
 import org.springframework.stereotype.Controller;
@@ -32,13 +29,11 @@ import com.sequenceiq.authorization.annotation.ResourceCrnList;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.UsedSubnetsByEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -152,15 +147,15 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     @Override
     @InternalOnly
-    public DatabaseServerCertificateStatusV4Responses listDatabaseServersCertificateStatus(
-            @Valid @NotNull DatabaseServerCertificateStatusV4Request request, @InitiatorUserCrn String initiatorUserCrn) {
+    public DatabaseServerCertificateStatusV4Responses listDatabaseServersCertificateStatus(DatabaseServerCertificateStatusV4Request request,
+            @InitiatorUserCrn String initiatorUserCrn) {
         return databaseServerSslCertificateConfigService.listDatabaseServersCertificateStatus(request, ThreadBasedUserCrnProvider.getAccountId());
     }
 
     @Override
     @InternalOnly
     public ClusterDatabaseServerCertificateStatusV4Responses listDatabaseServersCertificateStatusByStackCrns(
-            @Valid @NotNull ClusterDatabaseServerCertificateStatusV4Request request, @InitiatorUserCrn String initiatorUserCrn) {
+            ClusterDatabaseServerCertificateStatusV4Request request, @InitiatorUserCrn String initiatorUserCrn) {
         return databaseServerSslCertificateConfigService.listDatabaseServersCertificateStatus(request, ThreadBasedUserCrnProvider.getAccountId());
     }
 
@@ -210,17 +205,13 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     @Override
     @InternalOnly
-    public DatabaseServerStatusV4Response migrateDatabaseToSslByCrnInternal(
-            @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String crn,
-            @InitiatorUserCrn String initiatorUserCrn) {
+    public DatabaseServerStatusV4Response migrateDatabaseToSslByCrnInternal(@ResourceCrn String crn, @InitiatorUserCrn String initiatorUserCrn) {
         return null;
     }
 
     @Override
     @InternalOnly
-    public void enforceSslOnDatabaseByCrnInternal(
-            @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String crn,
-            @InitiatorUserCrn String initiatorUserCrn) {
+    public void enforceSslOnDatabaseByCrnInternal(@ResourceCrn String crn, @InitiatorUserCrn String initiatorUserCrn) {
     }
 
     @Override
@@ -314,34 +305,33 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.START_DATABASE_SERVER)
-    public void start(@ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String crn) {
+    public void start(@ResourceCrn String crn) {
         redbeamsStartService.startDatabaseServer(crn);
     }
 
     @Override
     @InternalOnly
     @AccountIdNotNeeded
-    public FlowIdentifier rotateSslCert(@ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String crn) {
+    public FlowIdentifier rotateSslCert(@ResourceCrn String crn) {
         return redbeamsRotateSslService.rotateDatabaseServerSslCert(crn);
     }
 
     @Override
     @InternalOnly
     @AccountIdNotNeeded
-    public FlowIdentifier updateToLatestSslCert(@ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String crn) {
+    public FlowIdentifier updateToLatestSslCert(@ResourceCrn String crn) {
         return redbeamsRotateSslService.updateToLatestDatabaseServerSslCert(crn);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.STOP_DATABASE_SERVER)
-    public void stop(@ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String crn) {
+    public void stop(@ResourceCrn String crn) {
         redbeamsStopService.stopDatabaseServer(crn);
     }
 
     @Override
     @InternalOnly
-    public UpgradeDatabaseServerV4Response upgrade(@ResourceCrn @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) String databaseServerCrn,
-            @Valid @NotNull UpgradeDatabaseServerV4Request request) {
+    public UpgradeDatabaseServerV4Response upgrade(@ResourceCrn String databaseServerCrn, UpgradeDatabaseServerV4Request request) {
         UpgradeDatabaseRequest upgradeDatabaseRequest = upgradeDatabaseServerV4RequestConverter.convert(request);
         return upgradeDatabaseServerV4ResponseConverter.convert(redbeamsUpgradeService.upgradeDatabaseServer(databaseServerCrn, upgradeDatabaseRequest));
     }
@@ -355,22 +345,20 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     @Override
     @InternalOnly
-    public UpgradeDatabaseServerV4Response validateUpgrade(@ResourceCrn @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) String crn,
-            @Valid @NotNull UpgradeDatabaseServerV4Request request) {
+    public UpgradeDatabaseServerV4Response validateUpgrade(@ResourceCrn String crn, UpgradeDatabaseServerV4Request request) {
         UpgradeDatabaseRequest upgradeDatabaseRequest = upgradeDatabaseServerV4RequestConverter.convert(request);
         return upgradeDatabaseServerV4ResponseConverter.convert(redbeamsUpgradeService.validateUpgradeDatabaseServer(crn, upgradeDatabaseRequest));
     }
 
     @Override
     @InternalOnly
-    public UpgradeDatabaseServerV4Response validateUpgradeCleanup(@ResourceCrn @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER)
-    String crn) {
+    public UpgradeDatabaseServerV4Response validateUpgradeCleanup(@ResourceCrn String crn) {
         return upgradeDatabaseServerV4ResponseConverter.convert(redbeamsUpgradeService.validateUpgradeDatabaseServerCleanup(crn));
     }
 
     @Override
     @InternalOnly
-    public FlowIdentifier rotateSecret(@Valid @NotNull RotateDatabaseServerSecretV4Request request, @InitiatorUserCrn String initiatorUserCrn) {
+    public FlowIdentifier rotateSecret(RotateDatabaseServerSecretV4Request request, @InitiatorUserCrn String initiatorUserCrn) {
         return redbeamsRotationService.rotateSecrets(request.getCrn(), List.of(request.getSecret()), request.getExecutionType(),
                 request.getAdditionalProperties());
     }
@@ -378,15 +366,14 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     @Override
     @InternalOnly
     @AccountIdNotNeeded
-    public FlowIdentifier retry(@ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String databaseCrn) {
+    public FlowIdentifier retry(@ResourceCrn String databaseCrn) {
         return retryService.retry(databaseCrn);
     }
 
     @Override
     @InternalOnly
     @AccountIdNotNeeded
-    public List<RetryableFlowResponse> listRetryableFlows(
-            @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String databaseCrn) {
+    public List<RetryableFlowResponse> listRetryableFlows(@ResourceCrn String databaseCrn) {
         return retryService.getRetryableFlows(databaseCrn);
     }
 }

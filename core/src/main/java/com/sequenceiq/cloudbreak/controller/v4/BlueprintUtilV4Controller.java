@@ -5,7 +5,6 @@ import java.util.Set;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.transaction.Transactional.TxType;
-import jakarta.validation.constraints.NotEmpty;
 
 import org.springframework.stereotype.Controller;
 
@@ -87,7 +86,7 @@ public class BlueprintUtilV4Controller extends NotificationController implements
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_CREDENTIAL)
     public RecommendationV4Response createRecommendationByCredCrn(Long workspaceId, String definitionName, String blueprintName,
-            @ResourceCrn String credentialCrn, @NotEmpty String region, String platformVariant,
+            @ResourceCrn String credentialCrn, String region, String platformVariant,
             String availabilityZone, CdpResourceType resourceType) {
         return blueprintService.getRecommendationByCredentialCrn(
                 threadLocalService.getRequestedWorkspaceId(),
@@ -103,7 +102,7 @@ public class BlueprintUtilV4Controller extends NotificationController implements
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
     public RecommendationV4Response createRecommendationByEnvCrn(Long workspaceId, String definitionName, String blueprintName,
-            @ResourceCrn String environmentCrn, @NotEmpty String region, String platformVariant,
+            @ResourceCrn String environmentCrn, String region, String platformVariant,
             String availabilityZone, CdpResourceType resourceType, String architecture) {
         return blueprintService.getRecommendationByEnvironmentCrn(
                 threadLocalService.getRequestedWorkspaceId(),

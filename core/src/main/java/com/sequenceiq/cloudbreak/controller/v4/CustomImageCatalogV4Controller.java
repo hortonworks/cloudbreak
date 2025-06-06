@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 
 import org.springframework.stereotype.Controller;
 
@@ -114,7 +113,7 @@ public class CustomImageCatalogV4Controller implements CustomImageCatalogV4Endpo
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_IMAGE_CATALOG)
-    public CustomImageCatalogV4CreateResponse create(@Valid CustomImageCatalogV4CreateRequest request, @AccountId String accountId) {
+    public CustomImageCatalogV4CreateResponse create(CustomImageCatalogV4CreateRequest request, @AccountId String accountId) {
         String creator = ThreadBasedUserCrnProvider.getUserCrn();
         ImageCatalog imageCatalog = customImageCatalogV4CreateRequestToImageCatalogConverter.convert(request);
         ImageCatalog savedImageCatalog = customImageCatalogService
@@ -146,7 +145,7 @@ public class CustomImageCatalogV4Controller implements CustomImageCatalogV4Endpo
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.EDIT_IMAGE_CATALOG)
     public CustomImageCatalogV4CreateImageResponse createCustomImage(@ResourceName String name,
-            @Valid CustomImageCatalogV4CreateImageRequest request, @AccountId String accountId) {
+            CustomImageCatalogV4CreateImageRequest request, @AccountId String accountId) {
         CustomImage customImage = customImageCatalogV4CreateImageRequestToCustomImageConverter.convert(request);
         CustomImage savedCustomImage = customImageCatalogService
                 .createCustomImage(restRequestThreadLocalService.getRequestedWorkspaceId(), accountId, name, customImage);
@@ -157,7 +156,7 @@ public class CustomImageCatalogV4Controller implements CustomImageCatalogV4Endpo
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.EDIT_IMAGE_CATALOG)
     public CustomImageCatalogV4UpdateImageResponse updateCustomImage(@ResourceName String name, String imageId,
-            @Valid CustomImageCatalogV4UpdateImageRequest request, @AccountId String accountId) {
+            CustomImageCatalogV4UpdateImageRequest request, @AccountId String accountId) {
         CustomImage customImage = customImageCatalogV4UpdateImageRequestToCustomImageConverter.convert(request);
         customImage.setName(imageId);
         CustomImage savedCustomImage = customImageCatalogService

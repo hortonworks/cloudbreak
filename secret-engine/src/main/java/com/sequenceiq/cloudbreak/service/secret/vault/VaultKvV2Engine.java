@@ -35,17 +35,17 @@ public class VaultKvV2Engine implements SecretEngine {
 
     private static final String PATH_PATTERN = "^[^{}]*$";
 
-    @Value("${vault.kv.engine.v2.path:}")
-    private String enginePath;
-
-    @Value("#{'${secret.application:}/'}")
-    private String appPath;
-
     private final MetricService metricService;
 
     private final VaultTemplate vaultRestTemplate;
 
     private final VaultSecretConverter vaultSecretConverter;
+
+    @Value("${vault.kv.engine.v2.path:}")
+    private String enginePath;
+
+    @Value("#{'${secret.application:}/'}")
+    private String appPath;
 
     public VaultKvV2Engine(@Qualifier("CommonMetricService") MetricService metricService, VaultTemplate vaultRestTemplate,
             VaultSecretConverter vaultSecretConverter) {
@@ -75,13 +75,13 @@ public class VaultKvV2Engine implements SecretEngine {
 
     @Override
     @Cacheable(cacheNames = VaultConstants.CACHE_NAME, key = "#fullSecretPath")
-    public Map<String, String> getWithCache(@NotNull String fullSecretPath) {
+    public Map<String, String> getWithCache(String fullSecretPath) {
         return get(fullSecretPath);
     }
 
     @Override
     @CacheEvict(cacheNames = VaultConstants.CACHE_NAME, key = "#fullSecretPath")
-    public Map<String, String> getWithoutCache(@NotNull String fullSecretPath) {
+    public Map<String, String> getWithoutCache(String fullSecretPath) {
         return get(fullSecretPath);
     }
 
@@ -104,7 +104,7 @@ public class VaultKvV2Engine implements SecretEngine {
 
     @Override
     @CacheEvict(cacheNames = VaultConstants.CACHE_NAME, key = "#fullSecretPath")
-    public String put(@NotNull String fullSecretPath, @NotNull Map<String, String> value) {
+    public String put(String fullSecretPath, Map<String, String> value) {
         validatePathOwnedByApp(fullSecretPath, "store");
         long start = System.currentTimeMillis();
         LOGGER.info("Storing secret to {}", fullSecretPath);

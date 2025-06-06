@@ -145,6 +145,14 @@ subprojects {
     }
   }
 
+  afterEvaluate { project ->
+    if (project.plugins.hasPlugin('java')) {
+      project.dependencies {
+        annotationProcessor "org.hibernate.validator:hibernate-validator-annotation-processor:${hibernateValidatorVersion}"
+      }
+    }
+  }
+
   configurations {
     deployerJars
     all*.exclude group: 'org.slf4j', module: 'slf4j-log4j12'

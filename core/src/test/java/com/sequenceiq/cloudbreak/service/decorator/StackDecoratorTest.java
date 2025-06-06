@@ -37,7 +37,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
@@ -116,9 +115,6 @@ public class StackDecoratorTest {
 
     @Mock
     private ClusterV4Request clusterRequest;
-
-    @Mock
-    private EnvironmentSettingsV4Request environmentSettingsRequest;
 
     @Mock
     private User user;
@@ -200,7 +196,6 @@ public class StackDecoratorTest {
         when(defaultOrchestrator.get(any(Platform.class))).thenReturn(orchestrator);
         when(instanceGroupToInstanceGroupParameterRequestConverter.convert(any(InstanceGroup.class))).thenReturn(instanceGroupParameterRequest);
         lenient().when(request.getCluster()).thenReturn(clusterRequest);
-        lenient().when(environmentSettingsRequest.getCredentialName()).thenReturn(credentialName);
         lenient().when(sharedServiceValidator.checkSharedServiceStackRequirements(any(StackV4Request.class), any(Workspace.class)))
                 .thenReturn(validationResult);
         environmentResponse = new DetailedEnvironmentResponse();

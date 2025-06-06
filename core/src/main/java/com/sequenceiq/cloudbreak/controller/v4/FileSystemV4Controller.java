@@ -4,7 +4,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
-import jakarta.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Controller;
 
@@ -57,11 +56,11 @@ public class FileSystemV4Controller implements FileSystemV4Endpoint {
     @Override
     @InternalOnly
     public FileSystemParameterV4Responses getFileSystemParametersInternal(Long workspaceId,
-            @NotNull String blueprintName,
-            @NotNull String clusterName,
+            String blueprintName,
+            String clusterName,
             String accountName,
-            @NotNull String storageName,
-            @NotNull String fileSystemType,
+            String storageName,
+            String fileSystemType,
             Boolean attachedCluster,
             Boolean secure,
             @AccountId String accountId) {

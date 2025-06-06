@@ -5,7 +5,6 @@ import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CR
 import static com.sequenceiq.freeipa.api.v1.freeipa.test.model.ClientTestBaseV1Response.resultOf;
 
 import jakarta.inject.Inject;
-import jakarta.validation.Valid;
 
 import org.springframework.stereotype.Controller;
 
@@ -34,19 +33,19 @@ public class ClientTestV1Controller implements ClientTestV1Endpoint {
 
     @Override
     @CheckPermissionByRequestProperty(type = CRN, action = DESCRIBE_ENVIRONMENT, path = "environmentCrn")
-    public ClientTestBaseV1Response checkUsers(@RequestObject @Valid CheckUsersV1Request checkUsersRequest) {
+    public ClientTestBaseV1Response checkUsers(@RequestObject CheckUsersV1Request checkUsersRequest) {
         return resultOf(freeipaClientTestService.checkUsers(checkUsersRequest.getEnvironmentCrn(), checkUsersRequest.getUsers()));
     }
 
     @Override
     @CheckPermissionByRequestProperty(type = CRN, action = DESCRIBE_ENVIRONMENT, path = "environmentCrn")
-    public ClientTestBaseV1Response checkGroups(@RequestObject @Valid CheckGroupsV1Request checkGroupsRequest) {
+    public ClientTestBaseV1Response checkGroups(@RequestObject CheckGroupsV1Request checkGroupsRequest) {
         return resultOf(freeipaClientTestService.checkGroups(checkGroupsRequest.getEnvironmentCrn(), checkGroupsRequest.getGroups()));
     }
 
     @Override
     @CheckPermissionByRequestProperty(type = CRN, action = DESCRIBE_ENVIRONMENT, path = "environmentCrn")
-    public ClientTestBaseV1Response checkUsersInGroup(@RequestObject @Valid CheckUsersInGroupV1Request checkUsersInGroupRequest) {
+    public ClientTestBaseV1Response checkUsersInGroup(@RequestObject CheckUsersInGroupV1Request checkUsersInGroupRequest) {
         return resultOf(freeipaClientTestService.checkUsersInGroup(checkUsersInGroupRequest.getEnvironmentCrn(),
                 checkUsersInGroupRequest.getUsers(), checkUsersInGroupRequest.getGroup()));
     }

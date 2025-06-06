@@ -18,7 +18,6 @@ import org.springframework.data.domain.Page;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Responses;
-import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.EventOpDescription;
@@ -40,7 +39,7 @@ public interface EventV4Endpoint {
     @Operation(summary = EventOpDescription.GET_BY_TIMESTAMP, description = Notes.EVENT_NOTES,
             operationId = "getEventsInWorkspace",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    CloudbreakEventV4Responses list(@QueryParam("since") Long since, @AccountId @QueryParam("accountId") String accountId);
+    CloudbreakEventV4Responses list(@QueryParam("since") Long since, @QueryParam("accountId") String accountId);
 
     @GET
     @Path("{name}")
@@ -52,7 +51,7 @@ public interface EventV4Endpoint {
             @PathParam("name") String name,
             @QueryParam("page") @DefaultValue("0") @Min(0) @Max(200) Integer page,
             @QueryParam("size") @DefaultValue("100") @Min(1) @Max(200) Integer size,
-            @AccountId @QueryParam("accountId") String accountId);
+            @QueryParam("accountId") String accountId);
 
     @GET
     @Path("{name}/list")
@@ -64,7 +63,7 @@ public interface EventV4Endpoint {
             @PathParam("name") String name,
             @QueryParam("page") @DefaultValue("0") @Min(0) @Max(200) Integer page,
             @QueryParam("size") @DefaultValue("100") @Min(1) @Max(200) Integer size,
-            @AccountId @QueryParam("accountId") String accountId);
+            @QueryParam("accountId") String accountId);
 
     @GET
     @Path("crn/{crn}/list")
@@ -84,7 +83,7 @@ public interface EventV4Endpoint {
     @Operation(summary = EventOpDescription.GET_EVENTS_BY_NAME, description = Notes.EVENT_NOTES,
             operationId = "getStructuredEventsInWorkspace",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    StructuredEventContainer structured(@PathParam("name") String name, @AccountId @QueryParam("accountId") String accountId);
+    StructuredEventContainer structured(@PathParam("name") String name, @QueryParam("accountId") String accountId);
 
     @GET
     @Path("crn/{crn}/structured")
@@ -100,5 +99,5 @@ public interface EventV4Endpoint {
     @Operation(summary = EventOpDescription.GET_EVENTS_ZIP_BY_NAME, description = Notes.EVENT_NOTES,
             operationId = "getStructuredEventsZipInWorkspace",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    Response download(@PathParam("name") String name, @AccountId @QueryParam("accountId") String accountId);
+    Response download(@PathParam("name") String name, @QueryParam("accountId") String accountId);
 }

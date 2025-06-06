@@ -24,7 +24,6 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.freeipa.api.v1.dns.doc.DnsOperationDescriptions;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsARecordRequest;
@@ -111,7 +110,7 @@ public interface DnsV1Endpoint {
     @Operation(summary = DnsOperationDescriptions.ADD_DNS_A_RECORD, description = FreeIpaNotes.FREEIPA_NOTES,
             operationId = "addDnsARecordV1Internal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    void addDnsARecordInternal(@AccountId @QueryParam("accountId") @NotEmpty String accountId, @Valid @NotNull AddDnsARecordRequest request);
+    void addDnsARecordInternal(@QueryParam("accountId") @NotEmpty String accountId, @Valid @NotNull AddDnsARecordRequest request);
 
     @DELETE
     @Path("record/a")
@@ -137,7 +136,7 @@ public interface DnsV1Endpoint {
     @Operation(summary = DnsOperationDescriptions.ADD_DNS_CNAME_RECORD, description = FreeIpaNotes.FREEIPA_NOTES,
             operationId = "addDnsCnameRecordV1Internal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    void addDnsCnameRecordInternal(@AccountId @QueryParam("accountId") @NotEmpty String accountId, @Valid @NotNull AddDnsCnameRecordRequest request);
+    void addDnsCnameRecordInternal(@QueryParam("accountId") @NotEmpty String accountId, @Valid @NotNull AddDnsCnameRecordRequest request);
 
     @DELETE
     @Path("record/cname")

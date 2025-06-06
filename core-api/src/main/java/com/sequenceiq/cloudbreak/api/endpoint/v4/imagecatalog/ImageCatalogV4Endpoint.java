@@ -26,7 +26,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageRec
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.RuntimeVersionsV4Response;
-import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.ImageCatalogOpDescription;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
@@ -166,7 +165,7 @@ public interface ImageCatalogV4Endpoint {
             description = IMAGE_CATALOG_NOTES, operationId = "getImageById",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     ImagesV4Response getImageByImageId(@PathParam("workspaceId") Long workspaceId, @QueryParam("imageId") String imageId,
-            @AccountId @QueryParam("accountId") String accountId) throws Exception;
+            @QueryParam("accountId") String accountId) throws Exception;
 
     @GET
     @Path("{name}/image")
@@ -175,7 +174,7 @@ public interface ImageCatalogV4Endpoint {
             description = IMAGE_CATALOG_NOTES, operationId = "getImageByNameAndId",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     ImagesV4Response getImageByCatalogNameAndImageId(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("imageId") String imageId, @AccountId @QueryParam("accountId") String accountId) throws Exception;
+            @QueryParam("imageId") String imageId, @QueryParam("accountId") String accountId) throws Exception;
 
     @GET
     @Path("{name}/singleimage")
@@ -193,7 +192,7 @@ public interface ImageCatalogV4Endpoint {
             operationId = "getSingleImageByNameAndIdInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     ImageV4Response getSingleImageByCatalogNameAndImageIdInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("imageId") String imageId, @AccountId @QueryParam("accountId") String accountId) throws Exception;
+            @QueryParam("imageId") String imageId, @QueryParam("accountId") String accountId) throws Exception;
 
     @GET
     @Path("image/{imageId}")

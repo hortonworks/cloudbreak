@@ -16,7 +16,6 @@ import jakarta.ws.rs.core.MediaType;
 
 import org.springframework.validation.annotation.Validated;
 
-import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
@@ -54,7 +53,7 @@ public interface FlowEndpoint {
     @Operation(summary = "Get last flow log for resource by resource name", description = "Flow log operations",
             operationId = "getLastFlowByResourceName",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    FlowLogResponse getLastFlowByResourceName(@QueryParam ("accountId") @AccountId String accountId, @PathParam("resourceName") String resourceName);
+    FlowLogResponse getLastFlowByResourceName(@QueryParam ("accountId") String accountId, @PathParam("resourceName") String resourceName);
 
     @GET
     @Path("/logs/resource/crn/{resourceCrn}/last")
@@ -70,7 +69,7 @@ public interface FlowEndpoint {
     @Operation(summary = "Get flow logs for resource by resource name", description = "Flow log operations",
             operationId = "getFlowLogsByResourceName",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    List<FlowLogResponse> getFlowLogsByResourceName(@QueryParam ("accountId") @AccountId String accountId, @PathParam("resourceName") String resourceName);
+    List<FlowLogResponse> getFlowLogsByResourceName(@QueryParam ("accountId") String accountId, @PathParam("resourceName") String resourceName);
 
     @GET
     @Path("/logs/resource/crn/{resourceCrn}")

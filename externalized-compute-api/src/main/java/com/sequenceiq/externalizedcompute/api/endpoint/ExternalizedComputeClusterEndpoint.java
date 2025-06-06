@@ -17,7 +17,6 @@ import jakarta.ws.rs.core.MediaType;
 import org.springframework.validation.annotation.Validated;
 
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
-import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterRequest;
@@ -48,9 +47,8 @@ public interface ExternalizedComputeClusterEndpoint {
     @Operation(summary = "delete Externalized Compute cluster", description = "delete externalized cluster",
             operationId = "deleteExternalizedComputeCluster",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    FlowIdentifier delete(
-            @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("environmentCrn") String environmentCrn,
-            @NotEmpty @PathParam("name") @NotEmpty String name, @QueryParam("force") boolean force);
+    FlowIdentifier delete(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("environmentCrn") String environmentCrn,
+            @PathParam("name") @NotEmpty String name, @QueryParam("force") boolean force);
 
     @GET
     @Path("{environmentCrn}/{name}")
@@ -58,8 +56,7 @@ public interface ExternalizedComputeClusterEndpoint {
     @Operation(summary = "get Externalized Compute cluster", description = "get externalized cluster",
             operationId = "getExternalizedComputeCluster",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    ExternalizedComputeClusterResponse describe(
-            @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("environmentCrn") String environmentCrn,
+    ExternalizedComputeClusterResponse describe(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("environmentCrn") String environmentCrn,
             @NotEmpty @PathParam("name") String name);
 
     @GET
@@ -68,8 +65,7 @@ public interface ExternalizedComputeClusterEndpoint {
     @Operation(summary = "list Externalized Compute cluster for env", description = "list externalized cluster for env",
             operationId = "listExternalizedComputeClusterForEnv",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    List<ExternalizedComputeClusterResponse> list(
-            @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("environmentCrn") String environmentCrn);
+    List<ExternalizedComputeClusterResponse> list(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("environmentCrn") String environmentCrn);
 
     @Deprecated(forRemoval = true)
     @GET
@@ -78,7 +74,6 @@ public interface ExternalizedComputeClusterEndpoint {
     @Operation(summary = "list Externalized Compute cluster for env", description = "list externalized cluster for env",
             operationId = "listExternalizedComputeClusterForEnv",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    List<ExternalizedComputeClusterResponse> listDeprecated(
-            @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("envCrn") String envCrn);
+    List<ExternalizedComputeClusterResponse> listDeprecated(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("envCrn") String envCrn);
 
 }

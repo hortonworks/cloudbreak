@@ -4,7 +4,6 @@ import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
 
 import jakarta.inject.Inject;
-import jakarta.validation.Valid;
 
 import org.springframework.stereotype.Controller;
 
@@ -29,7 +28,7 @@ public class FreeIpaV2Controller implements FreeIpaV2Endpoint {
 
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = REPAIR_FREEIPA)
-    public RebuildV2Response rebuildv2(@RequestObject @Valid RebuildV2Request request) {
+    public RebuildV2Response rebuildv2(@RequestObject RebuildV2Request request) {
         String accountId = crnService.getCurrentAccountId();
         return rebuildService.rebuild(accountId, request);
     }

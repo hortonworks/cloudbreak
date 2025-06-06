@@ -5,13 +5,11 @@ import java.util.Objects;
 import jakarta.validation.constraints.NotNull;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.storage.CloudStorageParametersV4Response;
-import com.sequenceiq.common.api.cloudstorage.old.validation.ValidGcsCloudStorageParameters;
 import com.sequenceiq.common.model.FileSystemType;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema
-@ValidGcsCloudStorageParameters
 public class GcsCloudStorageParametersV4Response implements CloudStorageParametersV4Response {
 
     @Schema

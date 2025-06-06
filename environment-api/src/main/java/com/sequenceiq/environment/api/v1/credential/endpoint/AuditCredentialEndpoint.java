@@ -14,7 +14,6 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.environment.api.doc.credential.CredentialDescriptor;
@@ -56,7 +55,7 @@ public interface AuditCredentialEndpoint {
     @Operation(summary = CredentialOpDescription.GET_BY_NAME,
             description = CredentialDescriptor.CREDENTIAL_NOTES, operationId = "getAuditCredentialByResourceNameV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    CredentialResponse getByResourceName(@PathParam("name") String credentialName, @AccountId @QueryParam("accountId") String accountId);
+    CredentialResponse getByResourceName(@PathParam("name") String credentialName, @QueryParam("accountId") String accountId);
 
     @POST
     @Path("")

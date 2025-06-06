@@ -6,13 +6,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.storage.CloudStorageParametersV4Response;
-import com.sequenceiq.common.api.cloudstorage.old.validation.ValidAdlsCloudStorageParameters;
 import com.sequenceiq.common.model.FileSystemType;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema
-@ValidAdlsCloudStorageParameters
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class AdlsCloudStorageParametersV4Response implements CloudStorageParametersV4Response {

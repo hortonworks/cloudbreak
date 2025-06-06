@@ -8,6 +8,7 @@ import static com.sequenceiq.common.model.OsType.RHEL8;
 import java.util.Map;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
 import com.sequenceiq.common.model.Architecture;
@@ -24,10 +25,10 @@ public abstract class AbstractTelemetryRepoConfigurationHolder {
     @NotBlank
     private String gpgKey;
 
-    @NotBlank
+    @NotNull
     private Integer gpgCheck;
 
-    @NotBlank
+    @NotNull
     private Map<OsType, Map<Architecture, String>> platformValues;
 
     public TelemetryRepoConfiguration selectCorrectRepoConfig(TelemetryContext context) {

@@ -11,7 +11,6 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Responses;
-import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.FileSystemOpDescription;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
@@ -56,5 +55,5 @@ public interface FileSystemV4Endpoint {
             @NotNull @QueryParam("fileSystemType") String fileSystemType,
             @QueryParam("attachedCluster") @DefaultValue("false") Boolean attachedCluster,
             @QueryParam("secure") @DefaultValue("false") Boolean secure,
-            @QueryParam("accountId") @AccountId String accountId);
+            @QueryParam("accountId") String accountId);
 }

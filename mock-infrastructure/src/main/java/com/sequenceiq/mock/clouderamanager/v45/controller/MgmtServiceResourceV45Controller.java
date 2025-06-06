@@ -1,7 +1,6 @@
 package com.sequenceiq.mock.clouderamanager.v45.controller;
 
 import jakarta.inject.Inject;
-import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -25,7 +24,7 @@ public class MgmtServiceResourceV45Controller implements MgmtServiceResourceApi 
     }
 
     @Override
-    public ResponseEntity<ApiCommandList> listActiveCommands(String mockUuid, @Valid String view) {
+    public ResponseEntity<ApiCommandList> listActiveCommands(String mockUuid, String view) {
         return mgmtServiceResourceOperation.listActiveCommands(mockUuid, view);
     }
 
@@ -35,7 +34,7 @@ public class MgmtServiceResourceV45Controller implements MgmtServiceResourceApi 
     }
 
     @Override
-    public ResponseEntity<ApiService> readService(String mockUuid, @Valid String view) {
+    public ResponseEntity<ApiService> readService(String mockUuid, String view) {
         return mgmtServiceResourceOperation.readService(mockUuid, view);
     }
 
@@ -45,7 +44,7 @@ public class MgmtServiceResourceV45Controller implements MgmtServiceResourceApi 
     }
 
     @Override
-    public ResponseEntity<ApiService> setupCMS(String mockUuid, @Valid ApiService body) {
+    public ResponseEntity<ApiService> setupCMS(String mockUuid, ApiService body) {
         return mgmtServiceResourceOperation.setupCMS(mockUuid, body);
     }
 

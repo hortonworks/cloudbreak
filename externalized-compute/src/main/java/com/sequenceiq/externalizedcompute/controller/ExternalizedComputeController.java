@@ -7,8 +7,6 @@ import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.
 import java.util.List;
 
 import jakarta.inject.Inject;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,10 +16,8 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.externalizedcompute.api.endpoint.ExternalizedComputeClusterEndpoint;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterRequest;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterResponse;
@@ -47,7 +43,7 @@ public class ExternalizedComputeController implements ExternalizedComputeCluster
 
     @Override
     @CheckPermissionByAccount(action = CREATE_ENVIRONMENT)
-    public FlowIdentifier create(@Valid ExternalizedComputeClusterRequest externalizedComputeClusterRequest) {
+    public FlowIdentifier create(ExternalizedComputeClusterRequest externalizedComputeClusterRequest) {
         LOGGER.info("Externalized Compute Cluster request: {}", externalizedComputeClusterRequest);
         Crn userCrn = Crn.ofUser(ThreadBasedUserCrnProvider.getUserCrn());
         return externalizedComputeClusterService.prepareComputeClusterCreation(externalizedComputeClusterRequest, false, userCrn);
@@ -55,9 +51,7 @@ public class ExternalizedComputeController implements ExternalizedComputeCluster
 
     @Override
     @CheckPermissionByAccount(action = DELETE_ENVIRONMENT)
-    public FlowIdentifier delete(
-            @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) String environmentCrn,
-            @NotEmpty String name, boolean force) {
+    public FlowIdentifier delete(@ResourceCrn String environmentCrn, String name, boolean force) {
         LOGGER.info("Externalized Compute Cluster delete: {}. Force: {}", name, force);
         ExternalizedComputeCluster externalizedComputeCluster = getExternalizedComputeCluster(environmentCrn, name);
         MDCBuilder.buildMdcContext(externalizedComputeCluster);
@@ -66,9 +60,7 @@ public class ExternalizedComputeController implements ExternalizedComputeCluster
 
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
-    public ExternalizedComputeClusterResponse describe(
-            @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) String environmentCrn,
-            @NotEmpty String name) {
+    public ExternalizedComputeClusterResponse describe(@ResourceCrn String environmentCrn, String name) {
         ExternalizedComputeCluster externalizedComputeCluster = getExternalizedComputeCluster(environmentCrn, name);
         MDCBuilder.buildMdcContext(externalizedComputeCluster);
         return externalizedComputeClusterConverterService.convertToResponse(externalizedComputeCluster);
@@ -76,8 +68,7 @@ public class ExternalizedComputeController implements ExternalizedComputeCluster
 
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
-    public List<ExternalizedComputeClusterResponse> list(
-            @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) String environmentCrn) {
+    public List<ExternalizedComputeClusterResponse> list(@ResourceCrn String environmentCrn) {
         return externalizedComputeClusterService.getAllByEnvironmentCrn(environmentCrn, ThreadBasedUserCrnProvider.getAccountId())
                 .stream()
                 .map(externalizedComputeClusterConverterService::convertToResponse)
@@ -87,8 +78,7 @@ public class ExternalizedComputeController implements ExternalizedComputeCluster
     @Deprecated(forRemoval = true)
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
-    public List<ExternalizedComputeClusterResponse> listDeprecated(
-            @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) String environmentCrn) {
+    public List<ExternalizedComputeClusterResponse> listDeprecated(@ResourceCrn String environmentCrn) {
         return externalizedComputeClusterService.getAllByEnvironmentCrn(environmentCrn, ThreadBasedUserCrnProvider.getAccountId())
                 .stream()
                 .map(externalizedComputeClusterConverterService::convertToResponse)

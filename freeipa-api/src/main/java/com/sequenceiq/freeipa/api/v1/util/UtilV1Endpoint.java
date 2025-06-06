@@ -10,7 +10,6 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.freeipa.api.v1.util.doc.UtilDescriptions;
 import com.sequenceiq.freeipa.api.v1.util.model.UsedImagesListV1Response;
@@ -37,5 +36,5 @@ public interface UtilV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = UtilDescriptions.USED_IMAGES, operationId = "usedRecipesV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    List<String> usedRecipes(@AccountId @PathParam("accountId") String accountId);
+    List<String> usedRecipes(@PathParam("accountId") String accountId);
 }

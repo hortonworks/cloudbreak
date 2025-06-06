@@ -11,7 +11,7 @@ import jakarta.validation.Payload;
 
 @Documented
 @Constraint(validatedBy = DistroXAutoscaleRequestValidator.class)
-@Target(ElementType.PARAMETER)
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidDistroXAutoscaleRequest {
     String message() default "DistroXAutoscaleRequest validation error";

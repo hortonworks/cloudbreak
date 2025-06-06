@@ -27,7 +27,6 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
-import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.common.api.UsedSubnetsByEnvironmentResponse;
@@ -112,7 +111,7 @@ public interface FreeIpaV1Endpoint {
     @Operation(summary = FreeIpaOperationDescriptions.INTERNAL_GET_BY_ENVID_AND_ACCOUNTID,
             description = FreeIpaNotes.FREEIPA_NOTES, operationId = "internalGetFreeIpaByEnvironmentV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    DescribeFreeIpaResponse describeInternal(@QueryParam("environment") String environmentCrn, @QueryParam("accountId") @AccountId String accountId);
+    DescribeFreeIpaResponse describeInternal(@QueryParam("environment") String environmentCrn, @QueryParam("accountId") String accountId);
 
     @GET
     @Path("/all")
@@ -130,7 +129,7 @@ public interface FreeIpaV1Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<DescribeFreeIpaResponse> describeAllInternal(
             @QueryParam("environment") String environmentCrn,
-            @QueryParam("accountId") @AccountId String accountId);
+            @QueryParam("accountId") String accountId);
 
     @GET
     @Path("/list")
@@ -146,7 +145,7 @@ public interface FreeIpaV1Endpoint {
     @Operation(summary = FreeIpaOperationDescriptions.INTERNAL_LIST_BY_ACCOUNT, description = FreeIpaNotes.FREEIPA_NOTES,
             operationId = "internalListFreeIpaClustersByAccountV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    List<ListFreeIpaResponse> listInternal(@QueryParam("accountId") @AccountId String accountId);
+    List<ListFreeIpaResponse> listInternal(@QueryParam("accountId") String accountId);
 
     @GET
     @Path("health")
@@ -195,7 +194,7 @@ public interface FreeIpaV1Endpoint {
             description = FreeIpaNotes.FREEIPA_NOTES, operationId = "internalGetFreeIpaRootCertificateByEnvironmentV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     String getRootCertificateInternal(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") @NotEmpty String environmentCrn,
-            @QueryParam("accountId") @AccountId String accountId);
+            @QueryParam("accountId") String accountId);
 
     @DELETE
     @Path("")
@@ -219,7 +218,7 @@ public interface FreeIpaV1Endpoint {
     @Operation(summary = FreeIpaOperationDescriptions.INTERNAL_CLEANUP, description = FreeIpaNotes.FREEIPA_NOTES,
             operationId = "internalCleanupV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    OperationStatus internalCleanup(@Valid CleanupRequest request, @QueryParam("accountId") @AccountId String accountId);
+    OperationStatus internalCleanup(@Valid CleanupRequest request, @QueryParam("accountId") String accountId);
 
     @PUT
     @Path("start")
@@ -292,7 +291,7 @@ public interface FreeIpaV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = UPDATE_SALT, description = FreeIpaNotes.FREEIPA_NOTES, operationId = "updateSaltV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    FlowIdentifier updateSaltByName(@QueryParam("environment") @NotEmpty String environmentCrn, @AccountId @QueryParam("accountId") String accountId);
+    FlowIdentifier updateSaltByName(@QueryParam("environment") @NotEmpty String environmentCrn, @QueryParam("accountId") String accountId);
 
     @PUT
     @Path("/upscale")

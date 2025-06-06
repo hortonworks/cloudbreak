@@ -6,7 +6,6 @@ import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CR
 import java.util.List;
 
 import jakarta.inject.Inject;
-import jakarta.validation.Valid;
 
 import org.springframework.stereotype.Controller;
 
@@ -31,7 +30,7 @@ public class DiagnosticsController implements DiagnosticsEndpoint {
 
     @Override
     @CheckPermissionByRequestProperty(path = "stackCrn", type = CRN, action = DESCRIBE_DATALAKE)
-    public FlowIdentifier collectDiagnostics(@RequestObject @Valid DiagnosticsCollectionRequest request) {
+    public FlowIdentifier collectDiagnostics(@RequestObject DiagnosticsCollectionRequest request) {
         return diagnosticsService.collectDiagnostics(request);
     }
 
@@ -55,7 +54,7 @@ public class DiagnosticsController implements DiagnosticsEndpoint {
 
     @Override
     @CheckPermissionByRequestProperty(path = "stackCrn", type = CRN, action = DESCRIBE_DATALAKE)
-    public FlowIdentifier collectCmDiagnostics(@RequestObject @Valid CmDiagnosticsCollectionRequest request) {
+    public FlowIdentifier collectCmDiagnostics(@RequestObject CmDiagnosticsCollectionRequest request) {
         return diagnosticsService.collectCmDiagnostics(request);
     }
 

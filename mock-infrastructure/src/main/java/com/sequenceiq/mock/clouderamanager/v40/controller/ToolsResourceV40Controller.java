@@ -1,7 +1,6 @@
 package com.sequenceiq.mock.clouderamanager.v40.controller;
 
 import jakarta.inject.Inject;
-import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -17,7 +16,7 @@ public class ToolsResourceV40Controller implements ToolsResourceApi {
     private ToolsResourceOperation toolsResourceOperation;
 
     @Override
-    public ResponseEntity<ApiEcho> echo(String mockUuid, @Valid String message) {
+    public ResponseEntity<ApiEcho> echo(String mockUuid, String message) {
         return toolsResourceOperation.echo(mockUuid, message);
     }
 

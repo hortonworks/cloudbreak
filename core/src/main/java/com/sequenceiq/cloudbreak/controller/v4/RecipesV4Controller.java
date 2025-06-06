@@ -6,8 +6,6 @@ import java.util.stream.Collectors;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.transaction.Transactional.TxType;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Controller;
 
@@ -99,13 +97,13 @@ public class RecipesV4Controller extends NotificationController implements Recip
 
     @Override
     @InternalOnly
-    public RecipeV4Response getByNameInternal(Long workspaceId, @AccountId String accountId, @NotNull String name) {
+    public RecipeV4Response getByNameInternal(Long workspaceId, @AccountId String accountId, String name) {
         return getByName(restRequestThreadLocalService.getRequestedWorkspaceId(), name);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_RECIPE)
-    public RecipeV4Response getByCrn(Long workspaceId, @NotNull @ResourceCrn String crn) {
+    public RecipeV4Response getByCrn(Long workspaceId, @ResourceCrn String crn) {
         Recipe recipe = recipeService.get(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getRequestedWorkspaceId());
         return recipeToRecipeV4ResponseConverter.convert(recipe);
     }
@@ -123,7 +121,7 @@ public class RecipesV4Controller extends NotificationController implements Recip
 
     @Override
     @InternalOnly
-    public RecipeV4Response postInternal(@AccountId String accountId, Long workspaceId, @Valid RecipeV4Request request) {
+    public RecipeV4Response postInternal(@AccountId String accountId, Long workspaceId, RecipeV4Request request) {
         Recipe recipeToSave = recipeV4RequestToRecipeConverter.convert(request);
         Recipe recipe = recipeService.createWithInternalUser(recipeToSave,
                 restRequestThreadLocalService.getRequestedWorkspaceId(), accountId);
@@ -141,7 +139,7 @@ public class RecipesV4Controller extends NotificationController implements Recip
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DELETE_RECIPE)
-    public RecipeV4Response deleteByCrn(Long workspaceId, @NotNull @ResourceCrn String crn) {
+    public RecipeV4Response deleteByCrn(Long workspaceId, @ResourceCrn String crn) {
         Recipe deleted = recipeService.delete(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getRequestedWorkspaceId());
         notify(ResourceEvent.RECIPE_DELETED);
         return recipeToRecipeV4ResponseConverter.convert(deleted);

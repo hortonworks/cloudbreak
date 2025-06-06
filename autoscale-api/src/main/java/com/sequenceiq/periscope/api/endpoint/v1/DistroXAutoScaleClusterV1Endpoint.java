@@ -15,7 +15,6 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
-import com.sequenceiq.periscope.api.endpoint.validator.ValidDistroXAutoscaleRequest;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterRequest;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterResponse;
@@ -60,7 +59,7 @@ public interface DistroXAutoScaleClusterV1Endpoint {
             operationId = "updateAutoscaleConfigByClusterCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DistroXAutoscaleClusterResponse updateAutoscaleConfigByClusterCrn(@PathParam("crn") String clusterCrn,
-            @ValidDistroXAutoscaleRequest @Valid DistroXAutoscaleClusterRequest autoscaleClusterRequest);
+            @Valid DistroXAutoscaleClusterRequest autoscaleClusterRequest);
 
     @POST
     @Path("name/{name}/autoscale_config")
@@ -69,7 +68,7 @@ public interface DistroXAutoScaleClusterV1Endpoint {
             operationId = "updateAutoscaleConfigByClusterName",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DistroXAutoscaleClusterResponse updateAutoscaleConfigByClusterName(@PathParam("name") String clusterName,
-            @ValidDistroXAutoscaleRequest @Valid DistroXAutoscaleClusterRequest autoscaleClusterRequest);
+            @Valid DistroXAutoscaleClusterRequest autoscaleClusterRequest);
 
     @DELETE
     @Path("name/{name}")

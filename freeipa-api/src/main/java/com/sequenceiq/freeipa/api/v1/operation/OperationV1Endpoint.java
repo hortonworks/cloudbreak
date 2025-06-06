@@ -11,7 +11,6 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
-import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.flow.api.model.operation.OperationStatusResponse;
@@ -35,8 +34,7 @@ public interface OperationV1Endpoint {
     @Operation(summary = OperationDescriptions.OPERATION_STATUS, description = OperationDescriptions.NOTES,
             operationId = "getOperationStatusV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    OperationStatus getOperationStatus(@NotNull @QueryParam("operationId") String operationId,
-            @AccountId @QueryParam("accountId") String accountId);
+    OperationStatus getOperationStatus(@NotNull @QueryParam("operationId") String operationId, @QueryParam("accountId") String accountId);
 
     @GET
     @Path("/resource/crn/{environmentCrn}")

@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
-import jakarta.validation.Valid;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -35,7 +33,7 @@ public class CloudProviderServicesV4Controller implements CloudProviderServicesV
 
     @Override
     @AccountIdNotNeeded
-    public ObjectStorageMetadataResponse getObjectStorageMetaData(@Valid ObjectStorageMetadataRequest request) {
+    public ObjectStorageMetadataResponse getObjectStorageMetaData(ObjectStorageMetadataRequest request) {
         try {
             return cloudProviderService.getObjectStorageMetaData(request);
         } catch (CloudConnectorException e) {
@@ -45,7 +43,7 @@ public class CloudProviderServicesV4Controller implements CloudProviderServicesV
 
     @Override
     @AccountIdNotNeeded
-    public ObjectStorageValidateResponse validateObjectStorage(@Valid ObjectStorageValidateRequest request) {
+    public ObjectStorageValidateResponse validateObjectStorage(ObjectStorageValidateRequest request) {
         try {
             LOGGER.info("Validate Object Storage request: {}", request);
             return cloudProviderService.validateObjectStorage(request);
@@ -56,7 +54,7 @@ public class CloudProviderServicesV4Controller implements CloudProviderServicesV
 
     @Override
     @AccountIdNotNeeded
-    public NoSqlTableMetadataResponse getNoSqlTableMetaData(@Valid NoSqlTableMetadataRequest request) {
+    public NoSqlTableMetadataResponse getNoSqlTableMetaData(NoSqlTableMetadataRequest request) {
         try {
             return cloudProviderService.getNoSqlTableMetaData(request);
         } catch (CloudConnectorException e) {
@@ -66,7 +64,7 @@ public class CloudProviderServicesV4Controller implements CloudProviderServicesV
 
     @Override
     @AccountIdNotNeeded
-    public NoSqlTableDeleteResponse deleteNoSqlTable(@Valid NoSqlTableDeleteRequest request) {
+    public NoSqlTableDeleteResponse deleteNoSqlTable(NoSqlTableDeleteRequest request) {
         try {
             return cloudProviderService.deleteNoSqlTable(request);
         } catch (CloudConnectorException e) {

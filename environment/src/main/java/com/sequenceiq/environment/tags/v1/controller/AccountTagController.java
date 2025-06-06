@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 import jakarta.transaction.Transactional;
 import jakarta.transaction.Transactional.TxType;
-import jakarta.validation.Valid;
 
 import org.springframework.stereotype.Controller;
 
@@ -86,7 +85,7 @@ public class AccountTagController extends NotificationController implements Acco
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
-    public AccountTagResponses put(@Valid AccountTagRequests request) {
+    public AccountTagResponses put(AccountTagRequests request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         List<AccountTag> accountTags = request.getTags().stream()
                 .map(a -> accountTagsRequestToAccountTagConverter.convert(a))

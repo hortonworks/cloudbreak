@@ -1,7 +1,6 @@
 package com.sequenceiq.datalake.controller.sdx;
 
 import jakarta.inject.Inject;
-import jakarta.validation.Valid;
 
 import org.springframework.stereotype.Controller;
 
@@ -30,15 +29,14 @@ public class SdxRecoveryController implements SdxRecoveryEndpoint {
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.RECOVER_DATALAKE)
-    public SdxRecoveryResponse recoverClusterByName(@ResourceName String name, @Valid SdxRecoveryRequest recoverSdxClusterRequest) {
+    public SdxRecoveryResponse recoverClusterByName(@ResourceName String name, SdxRecoveryRequest recoverSdxClusterRequest) {
         SdxCluster cluster = sdxService.getByNameInAccountAllowDetached(ThreadBasedUserCrnProvider.getUserCrn(), name);
         return sdxRecoverySelectorService.triggerRecovery(cluster, recoverSdxClusterRequest);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.RECOVER_DATALAKE)
-    public SdxRecoveryResponse recoverClusterByCrn(@ResourceCrn String crn,
-            @Valid SdxRecoveryRequest recoverSdxClusterRequest) {
+    public SdxRecoveryResponse recoverClusterByCrn(@ResourceCrn String crn, SdxRecoveryRequest recoverSdxClusterRequest) {
         SdxCluster cluster = sdxService.getByCrn(ThreadBasedUserCrnProvider.getUserCrn(), crn);
         return sdxRecoverySelectorService.triggerRecovery(cluster, recoverSdxClusterRequest);
     }

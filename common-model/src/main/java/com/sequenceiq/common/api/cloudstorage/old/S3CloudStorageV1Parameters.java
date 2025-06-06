@@ -12,7 +12,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema
 @ValidS3CloudStorageParameters
-public class S3CloudStorageV1Parameters implements FileSystemAwareCloudStorage {
+public class S3CloudStorageV1Parameters implements S3CloudStorageParameterBase, FileSystemAwareCloudStorage {
 
     @Schema
     @NotNull
@@ -24,6 +24,7 @@ public class S3CloudStorageV1Parameters implements FileSystemAwareCloudStorage {
         return FileSystemType.S3;
     }
 
+    @Override
     public String getInstanceProfile() {
         return instanceProfile;
     }

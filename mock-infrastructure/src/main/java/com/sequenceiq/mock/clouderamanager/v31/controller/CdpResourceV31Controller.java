@@ -1,7 +1,6 @@
 package com.sequenceiq.mock.clouderamanager.v31.controller;
 
 import jakarta.inject.Inject;
-import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -22,7 +21,7 @@ public class CdpResourceV31Controller implements CdpResourceApi {
     }
 
     @Override
-    public ResponseEntity<ApiRemoteDataContext> postRemoteContext(String mockUuid, @Valid ApiRemoteDataContext body) {
+    public ResponseEntity<ApiRemoteDataContext> postRemoteContext(String mockUuid, ApiRemoteDataContext body) {
         return cdpResourceOperation.postRemoteContext(mockUuid, body);
     }
 }

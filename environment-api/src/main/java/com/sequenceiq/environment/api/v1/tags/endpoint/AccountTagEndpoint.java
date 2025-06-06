@@ -10,7 +10,6 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.environment.api.doc.tag.TagDescription;
 import com.sequenceiq.environment.api.v1.tags.model.request.AccountTagRequests;
@@ -39,7 +38,7 @@ public interface AccountTagEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = TagDescription.GET, description = TagDescription.GET_NOTES, operationId = "listTagsInAccountV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    AccountTagResponses listInAccount(@AccountId @PathParam("accountId") String accountId);
+    AccountTagResponses listInAccount(@PathParam("accountId") String accountId);
 
     @PUT
     @Path("")

@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 
 import org.springframework.stereotype.Controller;
 
@@ -55,7 +54,7 @@ public class DatabaseV4Controller implements DatabaseV4Endpoint {
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.REGISTER_DATABASE)
-    public DatabaseV4Response register(@Valid DatabaseV4Request request) {
+    public DatabaseV4Response register(DatabaseV4Request request) {
         DatabaseConfig databaseConfig = databaseV4RequestToDatabaseConfigConverter.convert(request);
         return databaseConfigToDatabaseV4ResponseConverter.convert(databaseConfigService.register(databaseConfig, false));
     }
@@ -96,7 +95,7 @@ public class DatabaseV4Controller implements DatabaseV4Endpoint {
 
     @Override
     @CheckPermissionByRequestProperty(path = "existingDatabase.name", type = NAME, action = AuthorizationResourceAction.DESCRIBE_DATABASE)
-    public DatabaseTestV4Response test(@RequestObject @Valid DatabaseTestV4Request databaseTestV4Request) {
+    public DatabaseTestV4Response test(@RequestObject DatabaseTestV4Request databaseTestV4Request) {
         throw new UnsupportedOperationException("Connection testing is disabled for security reasons until further notice");
     }
 }

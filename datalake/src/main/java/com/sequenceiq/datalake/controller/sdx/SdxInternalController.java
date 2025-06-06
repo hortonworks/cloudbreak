@@ -1,7 +1,6 @@
 package com.sequenceiq.datalake.controller.sdx;
 
 import jakarta.inject.Inject;
-import jakarta.validation.Valid;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Controller;
@@ -40,7 +39,7 @@ public class SdxInternalController implements SdxInternalEndpoint {
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
-    public SdxClusterResponse create(String name, @Valid SdxInternalClusterRequest createSdxClusterRequest) {
+    public SdxClusterResponse create(String name, SdxInternalClusterRequest createSdxClusterRequest) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         Pair<SdxCluster, FlowIdentifier> result = sdxService.createSdx(userCrn, name, createSdxClusterRequest, createSdxClusterRequest.getStackV4Request());
         SdxCluster sdxCluster = result.getLeft();

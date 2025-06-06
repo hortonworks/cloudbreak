@@ -39,7 +39,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
-import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
@@ -103,7 +102,7 @@ public interface SdxEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "list SDX clusters internally", operationId = "listSdxInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    List<SdxClusterResponse> internalList(@AccountId @QueryParam("accountId") String accountId);
+    List<SdxClusterResponse> internalList(@QueryParam("accountId") String accountId);
 
     @GET
     @Path("{name}")

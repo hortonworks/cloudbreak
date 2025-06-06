@@ -35,7 +35,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response.CustomImag
 import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response.CustomImageCatalogV4GetResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response.CustomImageCatalogV4ListResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response.CustomImageCatalogV4UpdateImageResponse;
-import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -54,7 +53,7 @@ public interface CustomImageCatalogV4Endpoint {
     @Operation(summary = LIST, description = CUSTOM_IMAGE_CATALOG_NOTES,
             operationId = "listCustomImageCatalogs",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    CustomImageCatalogV4ListResponse list(@QueryParam("accountId") @AccountId String accountId);
+    CustomImageCatalogV4ListResponse list(@QueryParam("accountId") String accountId);
 
     @GET
     @Path("name/{name}")
@@ -62,7 +61,7 @@ public interface CustomImageCatalogV4Endpoint {
     @Operation(summary = GET_BY_NAME, description = CUSTOM_IMAGE_CATALOG_NOTES,
             operationId = "getCustomImageCatalogByName",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    CustomImageCatalogV4GetResponse get(@PathParam("name") String name, @QueryParam("accountId") @AccountId String accountId);
+    CustomImageCatalogV4GetResponse get(@PathParam("name") String name, @QueryParam("accountId") String accountId);
 
     @POST
     @Path("")
@@ -70,7 +69,7 @@ public interface CustomImageCatalogV4Endpoint {
     @Operation(summary = CREATE, description = CUSTOM_IMAGE_CATALOG_NOTES,
             operationId = "createCustomImageCatalog",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    CustomImageCatalogV4CreateResponse create(@Valid CustomImageCatalogV4CreateRequest request, @QueryParam("accountId") @AccountId String accountId);
+    CustomImageCatalogV4CreateResponse create(@Valid CustomImageCatalogV4CreateRequest request, @QueryParam("accountId") String accountId);
 
     @DELETE
     @Path("name/{name}")
@@ -78,7 +77,7 @@ public interface CustomImageCatalogV4Endpoint {
     @Operation(summary = DELETE_BY_NAME, description = CUSTOM_IMAGE_CATALOG_NOTES,
             operationId = "deleteCustomImageCatalogByName",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    CustomImageCatalogV4DeleteResponse delete(@PathParam("name") String name, @QueryParam("accountId") @AccountId String accountId);
+    CustomImageCatalogV4DeleteResponse delete(@PathParam("name") String name, @QueryParam("accountId") String accountId);
 
     @GET
     @Path("{name}/image/{imageId}")
@@ -86,7 +85,7 @@ public interface CustomImageCatalogV4Endpoint {
     @Operation(summary = GET_BY_NAME_IN_CATALOG, description = IMAGE_CATALOG_NOTES, operationId = "getCustomImage",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     CustomImageCatalogV4GetImageResponse getCustomImage(@PathParam("name") String name, @PathParam("imageId") String imageId,
-            @QueryParam("accountId") @AccountId String accountId);
+            @QueryParam("accountId") String accountId);
 
     @POST
     @Path("{name}/image")
@@ -95,7 +94,7 @@ public interface CustomImageCatalogV4Endpoint {
             operationId = "createCustomImage",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     CustomImageCatalogV4CreateImageResponse createCustomImage(@PathParam("name") String name,
-            @Valid CustomImageCatalogV4CreateImageRequest request, @QueryParam("accountId") @AccountId String accountId);
+            @Valid CustomImageCatalogV4CreateImageRequest request, @QueryParam("accountId") String accountId);
 
     @PUT
     @Path("{name}/image/{imageId}")
@@ -104,7 +103,7 @@ public interface CustomImageCatalogV4Endpoint {
             operationId = "updateCustomImage",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     CustomImageCatalogV4UpdateImageResponse updateCustomImage(@PathParam("name") String name, @PathParam("imageId") String imageId,
-            @Valid CustomImageCatalogV4UpdateImageRequest request, @QueryParam("accountId") @AccountId String accountId);
+            @Valid CustomImageCatalogV4UpdateImageRequest request, @QueryParam("accountId") String accountId);
 
     @DELETE
     @Path("{name}/image/{imageId}")
@@ -113,6 +112,6 @@ public interface CustomImageCatalogV4Endpoint {
             operationId = "deleteCustomImage",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     CustomImageCatalogV4DeleteImageResponse deleteCustomImage(@PathParam("name") String name, @PathParam("imageId") String imageId,
-            @QueryParam("accountId") @AccountId String accountId);
+            @QueryParam("accountId") String accountId);
 
 }

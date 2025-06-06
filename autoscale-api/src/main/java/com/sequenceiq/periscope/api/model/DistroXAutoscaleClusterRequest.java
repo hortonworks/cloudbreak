@@ -5,10 +5,12 @@ import java.util.List;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
+import com.sequenceiq.periscope.api.endpoint.validator.ValidDistroXAutoscaleRequest;
 import com.sequenceiq.periscope.doc.ApiDescription.ClusterJsonsProperties;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+@ValidDistroXAutoscaleRequest
 @Schema
 public class DistroXAutoscaleClusterRequest implements Json {
     @Schema(description = ClusterJsonsProperties.ENABLE_AUTOSCALING)
@@ -26,10 +28,6 @@ public class DistroXAutoscaleClusterRequest implements Json {
     public DistroXAutoscaleClusterRequest() {
     }
 
-    public void setEnableAutoscaling(Boolean enableAutoscaling) {
-        this.enableAutoscaling = enableAutoscaling;
-    }
-
     public List<TimeAlertRequest> getTimeAlertRequests() {
         return timeAlertRequests != null ? timeAlertRequests : List.of();
     }
@@ -40,6 +38,10 @@ public class DistroXAutoscaleClusterRequest implements Json {
 
     public Boolean getEnableAutoscaling() {
         return enableAutoscaling;
+    }
+
+    public void setEnableAutoscaling(Boolean enableAutoscaling) {
+        this.enableAutoscaling = enableAutoscaling;
     }
 
     public List<LoadAlertRequest> getLoadAlertRequests() {

@@ -7,7 +7,6 @@ import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import jakarta.validation.Valid;
 import jakarta.ws.rs.core.Response;
 
 import org.slf4j.Logger;
@@ -129,7 +128,7 @@ public class CredentialV1Controller extends NotificationController implements Cr
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_CREDENTIAL)
-    public CredentialResponse create(@Valid CredentialRequest createCredentialRequest) {
+    public CredentialResponse create(CredentialRequest createCredentialRequest) {
         LOGGER.debug("Create credential request has received: {}", createCredentialRequest);
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         credentialEntitlementService.checkAzureEntitlement(accountId, createCredentialRequest.getAzure());
@@ -170,7 +169,7 @@ public class CredentialV1Controller extends NotificationController implements Cr
 
     @Override
     @CheckPermissionByRequestProperty(path = "name", type = NAME, action = EDIT_CREDENTIAL)
-    public CredentialResponse modify(@RequestObject @Valid EditCredentialRequest editCredentialRequest) {
+    public CredentialResponse modify(@RequestObject EditCredentialRequest editCredentialRequest) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         credentialEntitlementService.checkAzureEntitlement(accountId, editCredentialRequest.getAzure());
         Credential originalCredential = credentialService.getByNameForAccountId(editCredentialRequest.getName(), accountId, ENVIRONMENT);
@@ -183,7 +182,7 @@ public class CredentialV1Controller extends NotificationController implements Cr
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_CREDENTIAL)
-    public InteractiveCredentialResponse interactiveLogin(@Valid CredentialRequest credentialRequest) {
+    public InteractiveCredentialResponse interactiveLogin(CredentialRequest credentialRequest) {
         throw new UnsupportedOperationException("Interactive login is not supported.");
     }
 

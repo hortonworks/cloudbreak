@@ -83,8 +83,7 @@ public class CommonExperienceService implements Experience {
     }
 
     @Override
-    @NotNull
-    public Map<String, String> collectPolicy(@NotNull EnvironmentExperienceDto environment) {
+    public Map<String, String> collectPolicy(EnvironmentExperienceDto environment) {
         Map<String, String> policies = new LinkedHashMap<>();
         configuredExperiences.stream()
                 .filter(CommonExperience::hasFineGradePolicy)

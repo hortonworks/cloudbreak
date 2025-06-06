@@ -1,7 +1,6 @@
 package com.sequenceiq.mock.clouderamanager.v40.controller;
 
 import jakarta.inject.Inject;
-import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -18,17 +17,17 @@ public class UsersResourceV40Controller implements UsersResourceApi {
     private UsersResourceOperation usersResourceOperation;
 
     @Override
-    public ResponseEntity<ApiUser2List> createUsers2(String mockUuid, @Valid ApiUser2List body) {
+    public ResponseEntity<ApiUser2List> createUsers2(String mockUuid, ApiUser2List body) {
         return usersResourceOperation.createUsers2(mockUuid, body);
     }
 
     @Override
-    public ResponseEntity<ApiUser2List> readUsers2(String mockUuid, @Valid String view) {
+    public ResponseEntity<ApiUser2List> readUsers2(String mockUuid, String view) {
         return usersResourceOperation.readUsers2(mockUuid, view);
     }
 
     @Override
-    public ResponseEntity<ApiUser2> updateUser2(String mockUuid, String userName, @Valid ApiUser2 body) {
+    public ResponseEntity<ApiUser2> updateUser2(String mockUuid, String userName, ApiUser2 body) {
         return usersResourceOperation.updateUser2(mockUuid, userName, body);
     }
 

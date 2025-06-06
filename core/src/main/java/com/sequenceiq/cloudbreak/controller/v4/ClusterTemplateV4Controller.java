@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.transaction.Transactional.TxType;
-import jakarta.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,7 +102,7 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_CLUSTER_DEFINITION)
-    public ClusterTemplateV4Response post(Long workspaceId, @Valid ClusterTemplateV4Request request) {
+    public ClusterTemplateV4Response post(Long workspaceId, ClusterTemplateV4Request request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         String creator = ThreadBasedUserCrnProvider.getUserCrn();
         ClusterTemplate clusterTemplate = clusterTemplateService.createForLoggedInUser(

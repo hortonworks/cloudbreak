@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Reques
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Responses;
-import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.RecipeOpDescription;
@@ -64,7 +63,7 @@ public interface RecipeV4Endpoint {
     @Operation(summary = RecipeOpDescription.GET_BY_NAME_IN_WORKSPACE_INTERNAL, description = Notes.RECIPE_NOTES,
             operationId = "getRecipeInWorkspaceInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    RecipeV4Response getByNameInternal(@PathParam("workspaceId") Long workspaceId, @AccountId @QueryParam("accountId") String accountId,
+    RecipeV4Response getByNameInternal(@PathParam("workspaceId") Long workspaceId, @QueryParam("accountId") String accountId,
             @PathParam("name") @NotNull String name);
 
     @GET
@@ -89,7 +88,7 @@ public interface RecipeV4Endpoint {
     @Operation(summary = RecipeOpDescription.CREATE_IN_WORKSPACE_INTERNAL, description = Notes.RECIPE_NOTES,
             operationId = "createRecipeInWorkspaceInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    RecipeV4Response postInternal(@AccountId @QueryParam("accountId") String accountId,
+    RecipeV4Response postInternal(@QueryParam("accountId") String accountId,
             @PathParam("workspaceId") Long workspaceId, @Valid RecipeV4Request request);
 
     @DELETE

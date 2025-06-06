@@ -12,7 +12,6 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
@@ -87,7 +86,7 @@ public interface AccountTelemetryEndpoint {
     @Operation(summary = AccountTelemetryDescription.GET,
             description = AccountTelemetryDescription.GET_NOTES, operationId = "listRulesInAccountV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    List<AnonymizationRule> listRulesInAccount(@AccountId @PathParam("accountId") String accountId);
+    List<AnonymizationRule> listRulesInAccount(@PathParam("accountId") String accountId);
 
     @POST
     @Path("/rules/test")

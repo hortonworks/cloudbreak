@@ -5,8 +5,6 @@ import static com.sequenceiq.common.model.CredentialType.AUDIT;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import jakarta.validation.Valid;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -87,7 +85,7 @@ public class AuditCredentialV1Controller extends NotificationController implemen
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_AUDIT_CREDENTIAL)
-    public CredentialResponse post(@Valid CredentialRequest createCredentialRequest) {
+    public CredentialResponse post(CredentialRequest createCredentialRequest) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Set<Credential> auditCredentialsByPlatform = credentialService
                 .listAvailablesByAccountId(accountId, AUDIT)
@@ -106,7 +104,7 @@ public class AuditCredentialV1Controller extends NotificationController implemen
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.MODIFY_AUDIT_CREDENTIAL)
-    public CredentialResponse put(@Valid EditCredentialRequest credentialRequest) {
+    public CredentialResponse put(EditCredentialRequest credentialRequest) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Credential originalCredential = credentialService.getByNameForAccountId(credentialRequest.getName(), accountId, AUDIT);
         Credential credential = credentialEditConverter.convert(credentialRequest, originalCredential);

@@ -7,9 +7,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +17,6 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
-import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.facade.CloudbreakEventsFacade;
@@ -32,7 +28,6 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPOperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredNotificationEvent;
-import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1EventEndpoint;
 
 @Controller
@@ -51,10 +46,7 @@ public class DistroXV1EventController implements DistroXV1EventEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
-    public List<CDPStructuredEvent> getAuditEvents(
-            @NotNull @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @ResourceCrn String resourceCrn,
-            @Min(0) @Max(200) Integer page,
-            @Min(1) @Max(200) Integer size) {
+    public List<CDPStructuredEvent> getAuditEvents(@ResourceCrn String resourceCrn, Integer page, Integer size) {
         LOGGER.info("Get Data Hub audit events for {}, page {}, size {}", resourceCrn, page, size);
         Long workspaceId = workspaceService.getForCurrentUser().getId();
         StackView stackView = Optional.ofNullable(stackService.getViewByCrnInWorkspace(resourceCrn, workspaceId)).orElseThrow(notFound("stack", resourceCrn));

@@ -3,7 +3,6 @@ package com.sequenceiq.externalizedcompute.controller;
 import java.util.List;
 
 import jakarta.inject.Inject;
-import jakarta.validation.constraints.NotEmpty;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,12 +11,10 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.externalizedcompute.api.endpoint.ExternalizedComputeClusterInternalEndpoint;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterCredentialValidationResponse;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterInternalRequest;
@@ -58,11 +55,7 @@ public class ExternalizedComputeInternalController implements ExternalizedComput
     }
 
     @Override
-    public FlowIdentifier delete(
-            @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) String environmentCrn,
-            @InitiatorUserCrn String initiatorUserCrn,
-            @NotEmpty String name,
-            boolean force) {
+    public FlowIdentifier delete(@ResourceCrn String environmentCrn, @InitiatorUserCrn String initiatorUserCrn, String name, boolean force) {
         LOGGER.info("Externalized Compute Cluster internal delete: {}", name);
         ExternalizedComputeCluster externalizedComputeCluster = getExternalizedComputeCluster(environmentCrn, name);
         MDCBuilder.buildMdcContext(externalizedComputeCluster);
@@ -70,17 +63,14 @@ public class ExternalizedComputeInternalController implements ExternalizedComput
     }
 
     @Override
-    public ExternalizedComputeClusterResponse describe(
-            @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) String environmentCrn,
-            @NotEmpty String name) {
+    public ExternalizedComputeClusterResponse describe(@ResourceCrn String environmentCrn, String name) {
         ExternalizedComputeCluster externalizedComputeCluster = getExternalizedComputeCluster(environmentCrn, name);
         MDCBuilder.buildMdcContext(externalizedComputeCluster);
         return externalizedComputeClusterConverterService.convertToResponse(externalizedComputeCluster);
     }
 
     @Override
-    public List<ExternalizedComputeClusterResponse> list(
-            @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) String environmentCrn) {
+    public List<ExternalizedComputeClusterResponse> list(@ResourceCrn String environmentCrn) {
         return externalizedComputeClusterService.getAllByEnvironmentCrn(environmentCrn, ThreadBasedUserCrnProvider.getAccountId())
                 .stream()
                 .map(externalizedComputeClusterConverterService::convertToResponse)

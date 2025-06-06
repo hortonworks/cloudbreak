@@ -25,12 +25,12 @@ public abstract class AbstractAccountAwareResourceService<T extends AccountAware
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractAccountAwareResourceService.class);
 
     @Override
-    public T create(@Nonnull T resource, @NotEmpty String accountId) {
+    public T create(T resource, String accountId) {
         return createInternal(resource, accountId);
     }
 
     @Override
-    public T createWithMdcContextRestore(@Nonnull T resource, @NotEmpty String accountId) {
+    public T createWithMdcContextRestore(T resource, String accountId) {
         Map<String, String> mdcContextMap = MDCBuilder.getMdcContextMap();
         try {
             return createInternal(resource, accountId);
@@ -52,7 +52,7 @@ public abstract class AbstractAccountAwareResourceService<T extends AccountAware
     }
 
     @Override
-    public T getByNameForAccountId(@NotEmpty String name, @NotEmpty String accountId) {
+    public T getByNameForAccountId(String name, String accountId) {
         Optional<T> object = repository().findByNameAndAccountId(name, accountId);
         if (object.isEmpty()) {
             throw new NotFoundException(String.format("No resource found with name '%s'", name));
@@ -62,7 +62,7 @@ public abstract class AbstractAccountAwareResourceService<T extends AccountAware
     }
 
     @Override
-    public Set<T> getByNamesForAccountId(Set<String> names, @NotEmpty String accountId) {
+    public Set<T> getByNamesForAccountId(Set<String> names, String accountId) {
         Set<T> results = repository().findByNameInAndAccountId(names, accountId);
         Set<String> notFound = Sets.difference(names,
                 results.stream().map(AccountAwareResource::getName).collect(Collectors.toSet()));
@@ -76,7 +76,7 @@ public abstract class AbstractAccountAwareResourceService<T extends AccountAware
     }
 
     @Override
-    public T getByNameForWorkspaceId(@NotEmpty String name, @NotEmpty String accountId) {
+    public T getByNameForWorkspaceId(String name, String accountId) {
         Optional<T> object = repository().findByNameAndAccountId(name, accountId);
         if (object.isEmpty()) {
             throw new NotFoundException(String.format("No resource found with name '%s'", name));
@@ -86,12 +86,12 @@ public abstract class AbstractAccountAwareResourceService<T extends AccountAware
     }
 
     @Override
-    public Set<T> findAllByAccountId(@NotEmpty String accountId) {
+    public Set<T> findAllByAccountId(String accountId) {
         return repository().findAllByAccountId(accountId);
     }
 
     @Override
-    public T deleteWithMdcContextRestore(@Nonnull T resource) {
+    public T deleteWithMdcContextRestore(T resource) {
         Map<String, String> mdcContextMap = MDCBuilder.getMdcContextMap();
         try {
             return deleteInternal(resource);
@@ -101,7 +101,7 @@ public abstract class AbstractAccountAwareResourceService<T extends AccountAware
     }
 
     @Override
-    public T delete(@Nonnull  T resource) {
+    public T delete(T resource) {
         return deleteInternal(resource);
     }
 
@@ -121,13 +121,13 @@ public abstract class AbstractAccountAwareResourceService<T extends AccountAware
     }
 
     @Override
-    public T deleteByNameFromAccountId(@NotEmpty String name, @NotEmpty String accountId) {
+    public T deleteByNameFromAccountId(String name, String accountId) {
         T toBeDeleted = getByNameForAccountId(name, accountId);
         return delete(toBeDeleted);
     }
 
     @Override
-    public Set<T> deleteMultipleByNameFromAccountId(Set<String> names, @NotEmpty String accountId) {
+    public Set<T> deleteMultipleByNameFromAccountId(Set<String> names, String accountId) {
         Set<T> toBeDeleted = getByNamesForAccountId(names, accountId);
         return delete(toBeDeleted);
     }

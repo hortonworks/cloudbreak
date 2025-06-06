@@ -1,7 +1,6 @@
 package com.sequenceiq.mock.clouderamanager.v31.controller;
 
 import jakarta.inject.Inject;
-import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -29,12 +28,12 @@ public class ClusterResourceV31Controller implements ClustersResourceApi {
     }
 
     @Override
-    public ResponseEntity<ApiCommandList> listActiveCommands(String mockUuid, String clusterName, @Valid String view) {
+    public ResponseEntity<ApiCommandList> listActiveCommands(String mockUuid, String clusterName, String view) {
         return clusterResourceOperation.listActiveCommands(mockUuid, clusterName, view);
     }
 
     @Override
-    public ResponseEntity<ApiHostRefList> listHosts(String mockUuid, String clusterName, @Valid String configName, @Valid String configValue) {
+    public ResponseEntity<ApiHostRefList> listHosts(String mockUuid, String clusterName, String configName, String configValue) {
         return clusterResourceOperation.listRefHosts(mockUuid, clusterName, configName, configValue);
     }
 
@@ -54,7 +53,7 @@ public class ClusterResourceV31Controller implements ClustersResourceApi {
     }
 
     @Override
-    public ResponseEntity<ApiCommand> restartCommand(String mockUuid, String clusterName, @Valid ApiRestartClusterArgs body) {
+    public ResponseEntity<ApiCommand> restartCommand(String mockUuid, String clusterName, ApiRestartClusterArgs body) {
         return clusterResourceOperation.restartCommand(mockUuid, clusterName);
     }
 

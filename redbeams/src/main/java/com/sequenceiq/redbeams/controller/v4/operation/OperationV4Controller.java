@@ -7,9 +7,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
-import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
-import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.flow.api.model.operation.OperationStatusResponse;
 import com.sequenceiq.flow.api.model.operation.OperationView;
 import com.sequenceiq.flow.service.FlowService;
@@ -37,8 +35,7 @@ public class OperationV4Controller implements OperationV4Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_DATABASE_SERVER)
-    public OperationStatusResponse getOperationStatus(
-            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @ResourceCrn String resourceCrn, String operationId) {
+    public OperationStatusResponse getOperationStatus(@ResourceCrn String resourceCrn, String operationId) {
         return flowService.getOperationStatus(resourceCrn, operationId);
     }
 }

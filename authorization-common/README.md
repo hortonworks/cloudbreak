@@ -85,8 +85,10 @@ You should use one of the following annotations on parameter of controller's met
 
 - `@ResourceCrn` - on resource crn parameter,
 - `@RequestObject` - on request object parameter where the proper crn field of the object also annotated with `@ResourceCrn`,
-- `@AccountId` - on an account id (please note that this annotation is also a validation annotation, thus endpoint's method parameter should be annotated too),
+- `@AccountId` - on an account id 
 - `@InitiatorUserCrn` - on an initiator user crn parameter, and the service operations will be done in the name of the given user.
+
+**Please note that authorization-related annotations should be applied to Controller classes, while validation-related annotations should be used on Endpoint classes.**
 
 If you are sure, that your new API and the underlying service logic does not require account id to behave correctly, you can indicate this fact and annotate the controller method with `@AccountIdNotNeeded`.
 

@@ -2,7 +2,6 @@ package com.sequenceiq.environment.marketplace.v1.controller;
 
 import jakarta.transaction.Transactional;
 import jakarta.transaction.Transactional.TxType;
-import jakarta.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +47,7 @@ public class AzureMarketplaceTermsController extends NotificationController impl
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_ENVIRONMENT)
-    public AzureMarketplaceTermsResponse put(@Valid AzureMarketplaceTermsRequest request) {
+    public AzureMarketplaceTermsResponse put(AzureMarketplaceTermsRequest request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         LOGGER.debug("New automatic image terms acceptance setting in account {} : {}", accountId, request.getAccepted());
         azureMarketplaceTermsService.updateOrCreate(request.getAccepted(), accountId);

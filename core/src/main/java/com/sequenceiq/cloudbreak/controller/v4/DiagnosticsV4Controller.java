@@ -6,7 +6,6 @@ import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CR
 import java.util.List;
 
 import jakarta.inject.Inject;
-import jakarta.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +51,7 @@ public class DiagnosticsV4Controller implements DiagnosticsV4Endpoint {
 
     @Override
     @CheckPermissionByRequestProperty(path = "stackCrn", type = CRN, action = DESCRIBE_DATALAKE)
-    public FlowIdentifier collectDiagnostics(@RequestObject @Valid DiagnosticsCollectionRequest request) {
+    public FlowIdentifier collectDiagnostics(@RequestObject DiagnosticsCollectionRequest request) {
         String userCrn = crnService.getCloudbreakUser().getUserCrn();
         LOGGER.debug("collectDiagnostics called with userCrn '{}' for stack '{}'", userCrn, request.getStackCrn());
         return diagnosticsService.startDiagnosticsCollection(request, request.getStackCrn(), userCrn, request.getUuid());
@@ -78,7 +77,7 @@ public class DiagnosticsV4Controller implements DiagnosticsV4Endpoint {
 
     @Override
     @CheckPermissionByRequestProperty(path = "stackCrn", type = CRN, action = DESCRIBE_DATALAKE)
-    public FlowIdentifier collectCmDiagnostics(@RequestObject @Valid CmDiagnosticsCollectionRequest request) {
+    public FlowIdentifier collectCmDiagnostics(@RequestObject CmDiagnosticsCollectionRequest request) {
         String userCrn = crnService.getCloudbreakUser().getUserCrn();
         LOGGER.debug("collectCMDiagnostics called with userCrn '{}' for stack '{}'", userCrn, request.getStackCrn());
         return diagnosticsService.startCmDiagnostics(request, request.getStackCrn(), userCrn);

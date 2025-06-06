@@ -1,7 +1,6 @@
 package com.sequenceiq.mock.clouderamanager.v45.controller;
 
 import jakarta.inject.Inject;
-import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -18,7 +17,7 @@ public class BatchResourceV45Controller implements BatchResourceApi {
     private BatchResourceOperation batchResourceOperation;
 
     @Override
-    public ResponseEntity<ApiBatchResponse> execute(String mockUuid, @Valid ApiBatchRequest body) {
+    public ResponseEntity<ApiBatchResponse> execute(String mockUuid, ApiBatchRequest body) {
         return batchResourceOperation.execute(mockUuid, body);
     }
 

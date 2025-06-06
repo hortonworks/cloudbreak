@@ -65,7 +65,7 @@ public class ExperiencesByLiftie implements Experience {
     }
 
     @Override
-    public void deleteConnectedExperiences(@NotNull EnvironmentExperienceDto environment) {
+    public void deleteConnectedExperiences(EnvironmentExperienceDto environment) {
         throwIfTrue(environment == null, () -> new IllegalArgumentException(EnvironmentExperienceDto.class.getSimpleName() + " cannot be null!"));
         LOGGER.debug("Getting Liftie cluster list for environment '{}'", environment.getName());
         List<LiftieClusterView> clusterViews = getClusterViewsForWorkloads(environment.getName(), environment.getAccountId());

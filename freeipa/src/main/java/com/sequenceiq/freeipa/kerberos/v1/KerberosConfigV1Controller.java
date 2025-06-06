@@ -6,8 +6,6 @@ import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CR
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.transaction.Transactional.TxType;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
 
 import org.springframework.stereotype.Controller;
 
@@ -41,8 +39,7 @@ public class KerberosConfigV1Controller extends NotificationController implement
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
-    public DescribeKerberosConfigResponse getForCluster(@ResourceCrn @NotEmpty String environmentCrn,
-            @NotEmpty String clusterName) {
+    public DescribeKerberosConfigResponse getForCluster(@ResourceCrn String environmentCrn, String clusterName) {
         String accountId = crnService.getCurrentAccountId();
         try {
             return kerberosConfigV1Service.getResponseForCluster(environmentCrn, accountId, clusterName);
@@ -53,7 +50,7 @@ public class KerberosConfigV1Controller extends NotificationController implement
 
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
-    public DescribeKerberosConfigResponse create(@RequestObject @Valid CreateKerberosConfigRequest request) {
+    public DescribeKerberosConfigResponse create(@RequestObject CreateKerberosConfigRequest request) {
         return kerberosConfigV1Service.post(request);
     }
 

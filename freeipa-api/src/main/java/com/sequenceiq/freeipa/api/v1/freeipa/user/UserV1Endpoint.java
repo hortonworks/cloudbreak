@@ -11,7 +11,6 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
-import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.doc.UserNotes;
@@ -70,7 +69,7 @@ public interface UserV1Endpoint {
             operationId = "internalGetSyncOperationStatusV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SyncOperationStatus getSyncOperationStatusInternal(
-            @QueryParam("accountId") @AccountId String accountId, @QueryParam("operationId") @NotNull String operationId);
+            @QueryParam("accountId") String accountId, @QueryParam("operationId") @NotNull String operationId);
 
     @GET
     @Path("lastStatus")

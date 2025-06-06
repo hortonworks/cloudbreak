@@ -2,12 +2,10 @@ package com.sequenceiq.distrox.v1.distrox.controller;
 
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.ROTATE_DH_SECRETS;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
-import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.DATAHUB;
 
 import java.util.List;
 
 import jakarta.inject.Inject;
-import jakarta.validation.constraints.NotEmpty;
 
 import org.springframework.stereotype.Controller;
 
@@ -17,7 +15,6 @@ import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.rotation.service.SecretTypeListService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackRotationService;
-import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1RotationEndpoint;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXSecretRotationRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXSecretTypeResponse;
@@ -40,7 +37,7 @@ public class DistroXV1RotationController implements DistroXV1RotationEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = ROTATE_DH_SECRETS)
-    public List<DistroXSecretTypeResponse> listRotatableDistroXSecretType(@ValidCrn(resource = DATAHUB) @ResourceCrn @NotEmpty String datahubCrn) {
+    public List<DistroXSecretTypeResponse> listRotatableDistroXSecretType(@ResourceCrn String datahubCrn) {
         return listService.listRotatableSecretType(datahubCrn, DistroXSecretTypeResponse.converter());
     }
 }

@@ -1,7 +1,6 @@
 package com.sequenceiq.mock.clouderamanager.v45.controller;
 
 import jakarta.inject.Inject;
-import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -25,17 +24,17 @@ public class HostsResourceV45Controller implements HostsResourceApi {
     }
 
     @Override
-    public ResponseEntity<ApiHost> readHost(String mockUuid, String hostId, @Valid String view) {
+    public ResponseEntity<ApiHost> readHost(String mockUuid, String hostId, String view) {
         return hostsResourceOperation.readHost(mockUuid, hostId, view);
     }
 
     @Override
-    public ResponseEntity<ApiHostList> readHosts(String mockUuid, @Valid String configName, @Valid String configValue, @Valid String view) {
+    public ResponseEntity<ApiHostList> readHosts(String mockUuid, String configName, String configValue, String view) {
         return hostsResourceOperation.readHosts(mockUuid, configName, configValue, view);
     }
 
     @Override
-    public ResponseEntity<ApiCommand> removeHostsFromCluster(String mockUuid, @Valid ApiHostsToRemoveArgs body) {
+    public ResponseEntity<ApiCommand> removeHostsFromCluster(String mockUuid, ApiHostsToRemoveArgs body) {
         return hostsResourceOperation.removeHostsFromCluster(mockUuid, body);
     }
 }

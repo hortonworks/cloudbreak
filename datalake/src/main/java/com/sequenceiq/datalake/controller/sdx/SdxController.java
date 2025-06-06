@@ -38,7 +38,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalSca
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
@@ -48,9 +47,6 @@ import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidate
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
-import com.sequenceiq.cloudbreak.validation.ValidCrn;
-import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
-import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.AzureDatabaseType;
@@ -181,8 +177,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
-    public SdxClusterResponse create(@ValidStackNameFormat @ValidStackNameLength String name,
-            @Valid SdxClusterRequest createSdxClusterRequest) {
+    public SdxClusterResponse create(String name, SdxClusterRequest createSdxClusterRequest) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         validateSdxClusterShape(createSdxClusterRequest.getClusterShape());
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
@@ -224,8 +219,8 @@ public class SdxController implements SdxEndpoint {
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_ENVIRONMENT)
     @CheckPermissionByRequestProperty(path = "credentialCrn", type = CRN, action = DESCRIBE_CREDENTIAL)
-    public ObjectStorageValidateResponse validateCloudStorage(@ValidStackNameFormat @ValidStackNameLength String clusterName,
-            @RequestObject @Valid SdxValidateCloudStorageRequest sdxValidateCloudStorageRequest) {
+    public ObjectStorageValidateResponse validateCloudStorage(String clusterName,
+            @RequestObject SdxValidateCloudStorageRequest sdxValidateCloudStorageRequest) {
         return storageValidationService.validateObjectStorage(sdxValidateCloudStorageRequest.getCredentialCrn(),
                 sdxValidateCloudStorageRequest.getSdxCloudStorageRequest(), sdxValidateCloudStorageRequest.getBlueprintName(), clusterName,
                 sdxValidateCloudStorageRequest.getDataAccessRole(), sdxValidateCloudStorageRequest.getRangerAuditRole(),
@@ -234,7 +229,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByRequestProperty(path = "clusterName", type = NAME, action = DESCRIBE_DATALAKE)
-    public ValidationResult validateBackupStorage(@RequestObject @Valid SdxBackupLocationValidationRequest sdxBackupLocationValidationRequest) {
+    public ValidationResult validateBackupStorage(@RequestObject SdxBackupLocationValidationRequest sdxBackupLocationValidationRequest) {
         SdxCluster sdxCluster = getSdxClusterByName(sdxBackupLocationValidationRequest.getClusterName());
         return storageValidationService.validateBackupStorage(sdxCluster, sdxBackupLocationValidationRequest.getOperationType(),
                 sdxBackupLocationValidationRequest.getBackupLocation());
@@ -282,8 +277,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @FilterListBasedOnPermissions
-    public List<SdxClusterResponse> getByEnvCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @FilterParam(DataLakeFiltering.ENV_CRN)
-    @ResourceCrn String envCrn, boolean includeDetached) {
+    public List<SdxClusterResponse> getByEnvCrn(@FilterParam(DataLakeFiltering.ENV_CRN) @ResourceCrn String envCrn, boolean includeDetached) {
         List<SdxCluster> sdxClusters = dataLakeFiltering.filterDataLakesByEnvCrn(DESCRIBE_DATALAKE, envCrn, includeDetached);
         return convertAttachedSdxClusters(sdxClusters, includeDetached);
     }
@@ -392,7 +386,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.UPDATE_SALT_DATALAKE)
-    public FlowIdentifier updateSaltByCrn(@ValidCrn(resource = CrnResourceDescriptor.VM_DATALAKE) @ResourceCrn String crn) {
+    public FlowIdentifier updateSaltByCrn(@ResourceCrn String crn) {
         SdxCluster sdxCluster = getSdxClusterByCrn(crn);
         return sdxService.updateSalt(sdxCluster);
     }
@@ -444,15 +438,14 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.ROTATE_CERT_DATALAKE)
-    public FlowIdentifier rotateAutoTlsCertificatesByName(@ResourceName String name, @Valid CertificatesRotationV4Request rotateCertificateRequest) {
+    public FlowIdentifier rotateAutoTlsCertificatesByName(@ResourceName String name, CertificatesRotationV4Request rotateCertificateRequest) {
         SdxCluster sdxCluster = getSdxClusterByName(name);
         return certRotationService.rotateAutoTlsCertificates(sdxCluster, rotateCertificateRequest);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.ROTATE_CERT_DATALAKE)
-    public FlowIdentifier rotateAutoTlsCertificatesByCrn(@ResourceCrn String crn,
-            @Valid CertificatesRotationV4Request rotateCertificateRequest) {
+    public FlowIdentifier rotateAutoTlsCertificatesByCrn(@ResourceCrn String crn, CertificatesRotationV4Request rotateCertificateRequest) {
         SdxCluster sdxCluster = getSdxClusterByCrn(crn);
         return certRotationService.rotateAutoTlsCertificates(sdxCluster, rotateCertificateRequest);
     }
@@ -521,7 +514,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DATALAKE_VERTICAL_SCALING)
-    public FlowIdentifier verticalScalingByCrn(@ResourceCrn String crn, @Valid StackVerticalScaleV4Request updateRequest) {
+    public FlowIdentifier verticalScalingByCrn(@ResourceCrn String crn, StackVerticalScaleV4Request updateRequest) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.getByCrn(crn);
         return verticalScaleService.verticalScaleDatalake(sdxCluster, updateRequest, userCrn);
@@ -529,7 +522,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DATALAKE_VERTICAL_SCALING)
-    public FlowIdentifier verticalScalingByName(@ResourceName String name, @Valid StackVerticalScaleV4Request updateRequest) {
+    public FlowIdentifier verticalScalingByName(@ResourceName String name, StackVerticalScaleV4Request updateRequest) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.getByNameInAccount(userCrn, name);
         return verticalScaleService.verticalScaleDatalake(sdxCluster, updateRequest, userCrn);
@@ -545,7 +538,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DATALAKE_HORIZONTAL_SCALING)
-    public FlowIdentifier horizontalScaleByName(@ResourceName String name, @Valid DatalakeHorizontalScaleRequest scaleRequest) {
+    public FlowIdentifier horizontalScaleByName(@ResourceName String name, DatalakeHorizontalScaleRequest scaleRequest) {
         return sdxHorizontalScalingService.horizontalScaleDatalake(name, scaleRequest);
     }
 

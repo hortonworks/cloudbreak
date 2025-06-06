@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.freeipa.api.v1.dns.doc.DnsModelDescription;
-import com.sequenceiq.freeipa.api.v1.dns.validation.AddDnsPtrRecordRequestValidator;
+import com.sequenceiq.freeipa.api.v1.dns.validation.AddDnsPtrRecordRequestValidatorGroup;
 import com.sequenceiq.freeipa.api.v1.dns.validation.ValidAddDnsPtrRecordRequest;
 import com.sequenceiq.service.api.doc.ModelDescriptions;
 
@@ -27,8 +27,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(name = "AddDnsPtrRecordV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@GroupSequence({AddDnsPtrRecordRequest.class, AddDnsPtrRecordRequestValidator.class})
-@ValidAddDnsPtrRecordRequest(groups = AddDnsPtrRecordRequestValidator.class)
+@GroupSequence({AddDnsPtrRecordRequest.class, AddDnsPtrRecordRequestValidatorGroup.class})
+@ValidAddDnsPtrRecordRequest(groups = AddDnsPtrRecordRequestValidatorGroup.class)
 public class AddDnsPtrRecordRequest {
 
     @ResourceCrn

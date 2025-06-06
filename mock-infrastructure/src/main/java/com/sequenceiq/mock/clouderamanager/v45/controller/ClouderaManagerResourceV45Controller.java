@@ -1,7 +1,6 @@
 package com.sequenceiq.mock.clouderamanager.v45.controller;
 
 import jakarta.inject.Inject;
-import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -27,12 +26,12 @@ public class ClouderaManagerResourceV45Controller implements ClouderaManagerReso
     }
 
     @Override
-    public ResponseEntity<ApiCommand> deleteCredentialsCommand(String mockUuid, @Valid String deleteCredentialsMode) {
+    public ResponseEntity<ApiCommand> deleteCredentialsCommand(String mockUuid, String deleteCredentialsMode) {
         return clouderaManagerResourceOperation.deleteCredentialsCommand(mockUuid, deleteCredentialsMode);
     }
 
     @Override
-    public ResponseEntity<ApiConfigList> getConfig(String mockUuid, @Valid String view) {
+    public ResponseEntity<ApiConfigList> getConfig(String mockUuid, String view) {
         return clouderaManagerResourceOperation.getConfig(mockUuid, view);
     }
 
@@ -42,22 +41,22 @@ public class ClouderaManagerResourceV45Controller implements ClouderaManagerReso
     }
 
     @Override
-    public ResponseEntity<ApiCommand> hostsDecommissionCommand(String mockUuid, @Valid ApiHostNameList body) {
+    public ResponseEntity<ApiCommand> hostsDecommissionCommand(String mockUuid, ApiHostNameList body) {
         return clouderaManagerResourceOperation.hostsDecommissionCommand(mockUuid, body);
     }
 
     @Override
-    public ResponseEntity<ApiCommand> importAdminCredentials(String mockUuid, @Valid String password, @Valid String username) {
+    public ResponseEntity<ApiCommand> importAdminCredentials(String mockUuid, String password, String username) {
         return clouderaManagerResourceOperation.importAdminCredentials(mockUuid, password, username);
     }
 
     @Override
-    public ResponseEntity<ApiCommand> importClusterTemplate(String mockUuid, @Valid Boolean addRepositories, @Valid ApiClusterTemplate body) {
+    public ResponseEntity<ApiCommand> importClusterTemplate(String mockUuid, Boolean addRepositories, ApiClusterTemplate body) {
         return clouderaManagerResourceOperation.importClusterTemplate(mockUuid, addRepositories, body);
     }
 
     @Override
-    public ResponseEntity<ApiCommandList> listActiveCommands(String mockUuid, @Valid String view) {
+    public ResponseEntity<ApiCommandList> listActiveCommands(String mockUuid, String view) {
         return clouderaManagerResourceOperation.listActiveCommands(mockUuid, view);
     }
 
@@ -67,7 +66,7 @@ public class ClouderaManagerResourceV45Controller implements ClouderaManagerReso
     }
 
     @Override
-    public ResponseEntity<ApiConfigList> updateConfig(String mockUuid, @Valid String message, @Valid ApiConfigList body) {
+    public ResponseEntity<ApiConfigList> updateConfig(String mockUuid, String message, ApiConfigList body) {
         return clouderaManagerResourceOperation.updateConfig(mockUuid, message, body);
     }
 }

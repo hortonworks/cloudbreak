@@ -12,7 +12,6 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.environment.api.doc.proxy.ProxyConfigDescription;
 import com.sequenceiq.environment.api.v1.proxy.model.request.ProxyRequest;
@@ -51,7 +50,7 @@ public interface ProxyEndpoint {
     @Operation(summary = ProxyConfigDescription.GET_CRN_BY_NAME,
             description = ProxyConfigDescription.PROXY_CONFIG_NOTES, operationId = "getProxyConfigCrnByNameV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    String getCrnByAccountIdAndName(@AccountId @PathParam("accountId") String accountId, @PathParam("name") String name);
+    String getCrnByAccountIdAndName(@PathParam("accountId") String accountId, @PathParam("name") String name);
 
     @GET
     @Path("environment/crn/{environmentCrn}")

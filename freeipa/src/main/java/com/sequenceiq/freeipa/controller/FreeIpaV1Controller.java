@@ -14,9 +14,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,14 +27,12 @@ import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
-import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.State;
 import com.sequenceiq.common.api.UsedSubnetWithResourceResponse;
@@ -211,7 +206,7 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
     @CheckPermissionByRequestProperty(path = "recipes", type = NAME_LIST, action = DESCRIBE_RECIPE, skipOnNull = true)
-    public DescribeFreeIpaResponse create(@RequestObject @Valid CreateFreeIpaRequest request) {
+    public DescribeFreeIpaResponse create(@RequestObject CreateFreeIpaRequest request) {
         ValidationResult validationResult = createFreeIpaRequestValidator.validate(request);
         if (validationResult.getState() == State.ERROR) {
             LOGGER.debug("FreeIPA request has validation error(s): {}.", validationResult.getFormattedErrors());
@@ -224,7 +219,7 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     @Override
     @CheckPermissionByRequestProperty(path = "parentEnvironmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
     @CheckPermissionByRequestProperty(path = "childEnvironmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
-    public void attachChildEnvironment(@RequestObject @Valid AttachChildEnvironmentRequest request) {
+    public void attachChildEnvironment(@RequestObject AttachChildEnvironmentRequest request) {
         ValidationResult validationResult = attachChildEnvironmentRequestValidator.validate(request);
         if (validationResult.hasError()) {
             LOGGER.debug("AttachChildEnvironmentRequest has validation error(s): {}.", validationResult.getFormattedErrors());
@@ -237,7 +232,7 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     @Override
     @CheckPermissionByRequestProperty(path = "parentEnvironmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
     @CheckPermissionByRequestProperty(path = "childEnvironmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
-    public void detachChildEnvironment(@RequestObject @Valid DetachChildEnvironmentRequest request) {
+    public void detachChildEnvironment(@RequestObject DetachChildEnvironmentRequest request) {
         String accountId = crnService.getCurrentAccountId();
         childEnvironmentService.detachChildEnvironment(request, accountId);
     }
@@ -289,7 +284,7 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
-    public String getRootCertificate(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @NotEmpty String environmentCrn) {
+    public String getRootCertificate(@ResourceCrn String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
         try {
             return freeIpaRootCertificateService.getRootCertificate(environmentCrn, accountId);
@@ -300,8 +295,7 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Override
     @InternalOnly
-    public String getRootCertificateInternal(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @NotEmpty String environmentCrn,
-            @AccountId String accountId) {
+    public String getRootCertificateInternal(@ResourceCrn String environmentCrn, @AccountId String accountId) {
         try {
             return freeIpaRootCertificateService.getRootCertificate(environmentCrn, accountId);
         } catch (FreeIpaClientException e) {
@@ -318,98 +312,97 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
-    public OperationStatus cleanup(@RequestObject @Valid CleanupRequest request) {
+    public OperationStatus cleanup(@RequestObject CleanupRequest request) {
         String accountId = crnService.getCurrentAccountId();
         return internalCleanup(request, accountId);
     }
 
     @Override
     @InternalOnly
-    public OperationStatus internalCleanup(@Valid CleanupRequest request, @AccountId String accountId) {
+    public OperationStatus internalCleanup(CleanupRequest request, @AccountId String accountId) {
         return cleanupService.cleanup(accountId, request);
     }
 
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = REPAIR_FREEIPA)
-    public OperationStatus rebootInstances(@RequestObject @Valid RebootInstancesRequest request) {
+    public OperationStatus rebootInstances(@RequestObject RebootInstancesRequest request) {
         String accountId = crnService.getCurrentAccountId();
         return repairInstancesService.rebootInstances(accountId, request);
     }
 
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = REPAIR_FREEIPA)
-    public OperationStatus repairInstances(@RequestObject @Valid RepairInstancesRequest request) {
+    public OperationStatus repairInstances(@RequestObject RepairInstancesRequest request) {
         String accountId = crnService.getCurrentAccountId();
         return repairInstancesService.repairInstances(accountId, request);
     }
 
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = REPAIR_FREEIPA)
-    public DescribeFreeIpaResponse rebuild(@RequestObject @Valid RebuildRequest request) {
+    public DescribeFreeIpaResponse rebuild(@RequestObject RebuildRequest request) {
         String accountId = crnService.getCurrentAccountId();
         return repairInstancesService.rebuild(accountId, request);
     }
 
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = SCALE_FREEIPA)
-    public UpscaleResponse upscale(@RequestObject @Valid UpscaleRequest request) {
+    public UpscaleResponse upscale(@RequestObject UpscaleRequest request) {
         String accountId = crnService.getCurrentAccountId();
         return freeIpaScalingService.upscale(accountId, request);
     }
 
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = SCALE_FREEIPA)
-    public DownscaleResponse downscale(@RequestObject @Valid DownscaleRequest request) {
+    public DownscaleResponse downscale(@RequestObject DownscaleRequest request) {
         String accountId = crnService.getCurrentAccountId();
         return freeIpaScalingService.downscale(accountId, request);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.START_ENVIRONMENT)
-    public void start(@ResourceCrn @NotEmpty String environmentCrn) {
+    public void start(@ResourceCrn String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
         freeIpaStartService.start(environmentCrn, accountId);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.STOP_ENVIRONMENT)
-    public void stop(@ResourceCrn @NotEmpty String environmentCrn) {
+    public void stop(@ResourceCrn String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
         freeIpaStopService.stop(environmentCrn, accountId);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.ROTATE_SALTUSER_PASSWORD_ENVIRONMENT)
-    public FlowIdentifier rotateSaltPassword(@ResourceCrn @NotEmpty String environmentCrn) {
+    public FlowIdentifier rotateSaltPassword(@ResourceCrn String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
         return rotateSaltPasswordService.triggerRotateSaltPassword(environmentCrn, accountId, RotateSaltPasswordReason.MANUAL);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = EDIT_ENVIRONMENT)
-    public String registerWithClusterProxy(@ResourceCrn @NotEmpty String environmentCrn) {
+    public String registerWithClusterProxy(@ResourceCrn String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
         return clusterProxyService.registerFreeIpa(accountId, environmentCrn).toString();
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = EDIT_ENVIRONMENT)
-    public void deregisterWithClusterProxy(@ResourceCrn @NotEmpty String environmentCrn) {
+    public void deregisterWithClusterProxy(@ResourceCrn String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
         clusterProxyService.deregisterFreeIpa(accountId, environmentCrn);
     }
 
     @Override
     @InternalOnly
-    public OperationStatus createBindUser(@Valid @NotNull BindUserCreateRequest request, @InitiatorUserCrn @NotEmpty String initiatorUserCrn) {
+    public OperationStatus createBindUser(BindUserCreateRequest request, @InitiatorUserCrn String initiatorUserCrn) {
         String accountId = crnService.getCurrentAccountId();
         return bindUserCreateService.createBindUser(accountId, request);
     }
 
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
-    public OperationStatus createE2ETestBindUser(@RequestObject @Valid @NotNull BindUserCreateRequest request,
-            @InitiatorUserCrn @NotEmpty String initiatorUserCrn) {
+    public OperationStatus createE2ETestBindUser(@RequestObject BindUserCreateRequest request, @InitiatorUserCrn String initiatorUserCrn) {
         String accountId = crnService.getCurrentAccountId();
         if (entitlementService.isE2ETestOnlyEnabled(accountId)) {
             return bindUserCreateService.createBindUser(accountId, request);
@@ -420,28 +413,28 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
-    public FlowIdentifier changeImage(@RequestObject @Valid @NotNull ImageChangeRequest request) {
+    public FlowIdentifier changeImage(@RequestObject ImageChangeRequest request) {
         String accountId = crnService.getCurrentAccountId();
         return imageChangeService.changeImage(accountId, request);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = EDIT_ENVIRONMENT)
-    public FlowIdentifier updateSaltByName(@ResourceCrn @NotEmpty String environmentCrn, @AccountId String accountId) {
+    public FlowIdentifier updateSaltByName(@ResourceCrn String environmentCrn, @AccountId String accountId) {
         String currentAccountId = Optional.ofNullable(accountId).orElseGet(ThreadBasedUserCrnProvider::getAccountId);
         return saltUpdateService.updateSaltStates(environmentCrn, currentAccountId);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = EDIT_ENVIRONMENT)
-    public FlowIdentifier retry(@ResourceCrn @NotEmpty String environmentCrn) {
+    public FlowIdentifier retry(@ResourceCrn String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
         return retryService.retry(environmentCrn, accountId);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = EDIT_ENVIRONMENT)
-    public List<RetryableFlowResponse> listRetryableFlows(@ResourceCrn @NotEmpty String environmentCrn) {
+    public List<RetryableFlowResponse> listRetryableFlows(@ResourceCrn String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
         return retryService.getRetryableFlows(environmentCrn, accountId);
     }
@@ -455,33 +448,29 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
-    public GenerateImageCatalogResponse generateImageCatalog(@ResourceCrn @NotEmpty String environmentCrn) {
+    public GenerateImageCatalogResponse generateImageCatalog(@ResourceCrn String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
         return imageCatalogGeneratorService.generate(environmentCrn, accountId);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
-    public Image getImage(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @NotEmpty String environmentCrn) {
+    public Image getImage(@ResourceCrn String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
         return freeIpaDescribeService.getImage(environmentCrn, accountId);
     }
 
     @Override
     @InternalOnly
-    public OperationStatus upgradeCcmInternal(
-            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @NotEmpty String environmentCrn,
-            @ValidCrn(resource = {CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER}) @InitiatorUserCrn @NotEmpty String initiatorUserCrn) {
+    public OperationStatus upgradeCcmInternal(@ResourceCrn String environmentCrn, @InitiatorUserCrn String initiatorUserCrn) {
         String accountId = crnService.getCurrentAccountId();
         return upgradeCcmService.upgradeCcm(environmentCrn, accountId);
     }
 
     @Override
     @InternalOnly
-    public OperationStatus modifyProxyConfigInternal(
-            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @NotEmpty String environmentCrn,
-            @ValidCrn(resource = CrnResourceDescriptor.PROXY) @ResourceCrn String previousProxyCrn,
-            @ValidCrn(resource = {CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER}) @InitiatorUserCrn @NotEmpty String initiatorUserCrn) {
+    public OperationStatus modifyProxyConfigInternal(@ResourceCrn String environmentCrn, String previousProxyCrn,
+            @InitiatorUserCrn String initiatorUserCrn) {
         String accountId = crnService.getCurrentAccountId();
         return modifyProxyConfigService.modifyProxyConfig(environmentCrn, previousProxyCrn, accountId);
     }
@@ -494,9 +483,7 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Override
     @InternalOnly
-    public VerticalScaleResponse verticalScalingByCrn(
-            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @NotEmpty String environmentCrn,
-            @RequestObject @Valid @NotNull VerticalScaleRequest updateRequest) {
+    public VerticalScaleResponse verticalScalingByCrn(@ResourceCrn String environmentCrn, @RequestObject VerticalScaleRequest updateRequest) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return freeIpaScalingService.verticalScale(accountId, environmentCrn, updateRequest);
     }
@@ -518,17 +505,13 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.ENVIRONMENT_VERTICAL_SCALING)
-    public UpdateRootVolumeResponse updateRootVolumeByCrn(
-            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @NotEmpty String environmentCrn,
-            @Valid @NotNull DiskUpdateRequest rootDiskVolumesRequest) {
+    public UpdateRootVolumeResponse updateRootVolumeByCrn(@ResourceCrn String environmentCrn, DiskUpdateRequest rootDiskVolumesRequest) {
         return rootVolumeUpdateService.updateRootVolume(environmentCrn, rootDiskVolumesRequest, ThreadBasedUserCrnProvider.getAccountId());
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
-    public ModifySeLinuxResponse modifySelinuxByCrn(
-            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @NotEmpty String environmentCrn,
-            @NotNull SeLinux selinuxMode) {
+    public ModifySeLinuxResponse modifySelinuxByCrn(@ResourceCrn String environmentCrn, SeLinux selinuxMode) {
         if (selinuxMode.equals(SeLinux.DISABLED)) {
             throw new BadRequestException("Cannot set SELinux mode value to DISABLED.");
         }

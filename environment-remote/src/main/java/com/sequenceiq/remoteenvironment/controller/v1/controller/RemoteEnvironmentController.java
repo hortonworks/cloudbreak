@@ -1,7 +1,6 @@
 package com.sequenceiq.remoteenvironment.controller.v1.controller;
 
 import jakarta.inject.Inject;
-import jakarta.validation.Valid;
 
 import org.springframework.stereotype.Controller;
 
@@ -30,7 +29,7 @@ public class RemoteEnvironmentController implements RemoteEnvironmentEndpoint {
     }
 
     @Override
-    public DescribeEnvironmentResponse getByCrn(@Valid DescribeRemoteEnvironment request) {
+    public DescribeEnvironmentResponse getByCrn(DescribeRemoteEnvironment request) {
         MDCBuilder.buildMdcContext();
         return remoteEnvironmentService
                 .getRemoteEnvironment(ThreadBasedUserCrnProvider.getAccountId(), request.getCrn());

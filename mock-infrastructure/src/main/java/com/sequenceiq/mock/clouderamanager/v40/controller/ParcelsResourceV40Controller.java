@@ -1,7 +1,6 @@
 package com.sequenceiq.mock.clouderamanager.v40.controller;
 
 import jakarta.inject.Inject;
-import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -17,7 +16,7 @@ public class ParcelsResourceV40Controller implements ParcelsResourceApi {
     private ParcelsResourceOperation parcelsResourceOperation;
 
     @Override
-    public ResponseEntity<ApiParcelList> readParcels(String mockUuid, String clusterName, @Valid String view) {
+    public ResponseEntity<ApiParcelList> readParcels(String mockUuid, String clusterName, String view) {
         return parcelsResourceOperation.readParcels(mockUuid, clusterName, view);
     }
 }

@@ -7,8 +7,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.client.WebTarget;
@@ -56,9 +54,8 @@ public class LiftieConnectorService implements LiftieApi {
         this.client = client;
     }
 
-    @NotNull
     @Override
-    public ListClustersResponse listClusters(@NotNull String env, @NotNull String tenant, @Nullable String workload, @Nullable Integer page) {
+    public ListClustersResponse listClusters(String env, String tenant, String workload, Integer page) {
         LOGGER.debug("About to connect Kubernetes Experience API to list clusters for environment '{}' account '{}' workload '{}', page '{}'",
                 env, tenant, workload, page == null ? Integer.valueOf(0) : page);
         WebTarget webTarget = client.target(liftiePathProvider.getPathToClustersEndpoint());
@@ -81,7 +78,7 @@ public class LiftieConnectorService implements LiftieApi {
     }
 
     @Override
-    public DeleteClusterResponse deleteCluster(@NotNull String clusterId) {
+    public DeleteClusterResponse deleteCluster(String clusterId) {
         LOGGER.debug("About to connect Kubernetes Experience API to delete cluster {}", clusterId);
         WebTarget webTarget = client.target(liftiePathProvider.getPathToClusterEndpoint(clusterId));
         LOGGER.info("WebTarget has created for deleting Kubernetes cluster with the following cluster id [id: {}]: {}",

@@ -6,9 +6,7 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
-import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.environment.api.v1.operation.endpoint.OperationEndpoint;
 import com.sequenceiq.environment.operation.service.OperationService;
 import com.sequenceiq.flow.api.model.operation.OperationStatusResponse;
@@ -36,8 +34,7 @@ public class OperationController implements OperationEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
-    public OperationStatusResponse getOperationStatus(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn String resourceCrn,
-            String operationId) {
+    public OperationStatusResponse getOperationStatus(@ResourceCrn String resourceCrn, String operationId) {
         return flowService.getOperationStatus(resourceCrn, operationId);
     }
 }

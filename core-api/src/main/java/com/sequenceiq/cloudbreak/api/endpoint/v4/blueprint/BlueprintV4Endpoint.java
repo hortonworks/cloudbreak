@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4ViewResponses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ParametersQueryV4Response;
-import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.BlueprintOpDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.UtilityOpDescription;
@@ -60,7 +59,7 @@ public interface BlueprintV4Endpoint {
     @Operation(summary = BlueprintOpDescription.GET_BY_NAME_IN_WORKSPACE_INTERNAL, description = BLUEPRINT_NOTES,
             operationId = "getBlueprintInWorkspaceInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    BlueprintV4Response getByNameInternal(@PathParam("workspaceId") Long workspaceId, @AccountId @QueryParam("accountId") String accountId,
+    BlueprintV4Response getByNameInternal(@PathParam("workspaceId") Long workspaceId, @QueryParam("accountId") String accountId,
             @PathParam("name") @NotNull String name);
 
     @GET
@@ -85,7 +84,7 @@ public interface BlueprintV4Endpoint {
     @Operation(summary = BlueprintOpDescription.CREATE_IN_WORKSPACE_INTERNAL, description = BLUEPRINT_NOTES,
             operationId = "createBlueprintInWorkspaceInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    BlueprintV4Response postInternal(@AccountId @QueryParam("accountId") String accountId,  @PathParam("workspaceId") Long workspaceId,
+    BlueprintV4Response postInternal(@QueryParam("accountId") String accountId,  @PathParam("workspaceId") Long workspaceId,
             @Valid BlueprintV4Request request);
 
     @DELETE

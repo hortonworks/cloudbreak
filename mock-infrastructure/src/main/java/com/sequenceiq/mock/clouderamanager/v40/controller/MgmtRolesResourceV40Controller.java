@@ -1,7 +1,6 @@
 package com.sequenceiq.mock.clouderamanager.v40.controller;
 
 import jakarta.inject.Inject;
-import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -17,7 +16,7 @@ public class MgmtRolesResourceV40Controller implements MgmtRolesResourceApi {
     private MgmtRolesResourceOperation mgmtRolesResourceOperation;
 
     @Override
-    public ResponseEntity<ApiRoleList> createRoles(String mockUuid, @Valid ApiRoleList body) {
+    public ResponseEntity<ApiRoleList> createRoles(String mockUuid, ApiRoleList body) {
         return mgmtRolesResourceOperation.createRoles(mockUuid, body);
     }
 

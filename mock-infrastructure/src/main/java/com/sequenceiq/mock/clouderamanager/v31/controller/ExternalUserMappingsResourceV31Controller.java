@@ -1,7 +1,6 @@
 package com.sequenceiq.mock.clouderamanager.v31.controller;
 
 import jakarta.inject.Inject;
-import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -18,7 +17,7 @@ public class ExternalUserMappingsResourceV31Controller implements ExternalUserMa
     private ExternalUserMappingsResourceOperation externalUserMappingsResourceOperation;
 
     @Override
-    public ResponseEntity<ApiExternalUserMappingList> createExternalUserMappings(String mockUuid, @Valid ApiExternalUserMappingList body) {
+    public ResponseEntity<ApiExternalUserMappingList> createExternalUserMappings(String mockUuid, ApiExternalUserMappingList body) {
         return externalUserMappingsResourceOperation.createExternalUserMappings(mockUuid, body);
     }
 
@@ -33,12 +32,12 @@ public class ExternalUserMappingsResourceV31Controller implements ExternalUserMa
     }
 
     @Override
-    public ResponseEntity<ApiExternalUserMappingList> readExternalUserMappings(String mockUuid, @Valid String view) {
+    public ResponseEntity<ApiExternalUserMappingList> readExternalUserMappings(String mockUuid, String view) {
         return externalUserMappingsResourceOperation.readExternalUserMappings(mockUuid, view);
     }
 
     @Override
-    public ResponseEntity<ApiExternalUserMapping> updateExternalUserMapping(String mockUuid, String uuid, @Valid ApiExternalUserMapping body) {
+    public ResponseEntity<ApiExternalUserMapping> updateExternalUserMapping(String mockUuid, String uuid, ApiExternalUserMapping body) {
         return externalUserMappingsResourceOperation.updateExternalUserMapping(mockUuid, uuid, body);
     }
 }

@@ -2,12 +2,10 @@ package com.sequenceiq.datalake.controller.sdx;
 
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.ROTATE_DL_SECRETS;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
-import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.VM_DATALAKE;
 
 import java.util.List;
 
 import jakarta.inject.Inject;
-import jakarta.validation.constraints.NotEmpty;
 
 import org.springframework.stereotype.Controller;
 
@@ -17,7 +15,6 @@ import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.rotation.service.SecretTypeListService;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
-import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.rotation.SdxRotationService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -43,7 +40,7 @@ public class SdxRotationController implements SdxRotationEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = ROTATE_DL_SECRETS)
-    public List<SdxSecretTypeResponse> listRotatableSdxSecretType(@ValidCrn(resource = VM_DATALAKE) @ResourceCrn @NotEmpty String datalakeCrn) {
+    public List<SdxSecretTypeResponse> listRotatableSdxSecretType(@ResourceCrn String datalakeCrn) {
         return listService.listRotatableSecretType(datalakeCrn, SdxSecretTypeResponse.converter());
     }
 }

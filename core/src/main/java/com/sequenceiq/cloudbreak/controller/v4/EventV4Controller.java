@@ -10,8 +10,6 @@ import java.util.zip.ZipOutputStream;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.transaction.Transactional.TxType;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.StreamingOutput;
 
@@ -62,8 +60,7 @@ public class EventV4Controller implements EventV4Endpoint {
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
-    public Page<CloudbreakEventV4Response> getCloudbreakEventsByStack(String name, @Min(0) @Max(200) Integer page, @Min(1) @Max(200) Integer size,
-            @AccountId String accountId) {
+    public Page<CloudbreakEventV4Response> getCloudbreakEventsByStack(String name, Integer page, Integer size, @AccountId String accountId) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
         StackView stackView = getStackViewByNameIfAvailable(name);
         return cloudbreakEventsFacade.retrieveEventsByStack(stackView.getId(), stackView.getType(), pageable);
@@ -71,15 +68,13 @@ public class EventV4Controller implements EventV4Endpoint {
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
-    public List<CloudbreakEventV4Response> getPagedCloudbreakEventListByStack(String name, @Min(0) @Max(200) Integer page, @Min(1) @Max(200) Integer size,
-            @AccountId String accountId) {
+    public List<CloudbreakEventV4Response> getPagedCloudbreakEventListByStack(String name, Integer page, Integer size, @AccountId String accountId) {
         return getCloudbreakEventsByStack(name, page, size, accountId).getContent();
     }
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
-    public List<CloudbreakEventV4Response> getPagedCloudbreakEventListByCrn(@ResourceCrn String crn, @Min(0) @Max(200) Integer page,
-            @Min(1) @Max(200) Integer size, boolean onlyAlive) {
+    public List<CloudbreakEventV4Response> getPagedCloudbreakEventListByCrn(@ResourceCrn String crn, Integer page, Integer size, boolean onlyAlive) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
         StackView stackView;
         if (onlyAlive) {

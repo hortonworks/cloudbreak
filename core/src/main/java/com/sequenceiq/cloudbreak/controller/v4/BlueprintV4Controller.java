@@ -6,8 +6,6 @@ import java.util.stream.Collectors;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.transaction.Transactional.TxType;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Controller;
 
@@ -77,20 +75,20 @@ public class BlueprintV4Controller extends NotificationController implements Blu
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_CLUSTER_TEMPLATE)
-    public BlueprintV4Response getByName(Long workspaceId, @ResourceName @NotNull String name) {
+    public BlueprintV4Response getByName(Long workspaceId, @ResourceName String name) {
         Blueprint blueprint = blueprintService.getByWorkspace(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());
         return blueprintToBlueprintV4ResponseConverter.convert(blueprint);
     }
 
     @Override
     @InternalOnly
-    public BlueprintV4Response getByNameInternal(Long workspaceId, @AccountId String accountId, @NotNull String name) {
+    public BlueprintV4Response getByNameInternal(Long workspaceId, @AccountId String accountId, String name) {
         return getByName(restRequestThreadLocalService.getRequestedWorkspaceId(), name);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_CLUSTER_TEMPLATE)
-    public BlueprintV4Response getByCrn(Long workspaceId, @NotNull @ResourceCrn String crn) {
+    public BlueprintV4Response getByCrn(Long workspaceId, @ResourceCrn String crn) {
         Blueprint blueprint = blueprintService.getByWorkspace(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getRequestedWorkspaceId());
         return blueprintToBlueprintV4ResponseConverter.convert(blueprint);
     }
@@ -108,7 +106,7 @@ public class BlueprintV4Controller extends NotificationController implements Blu
 
     @Override
     @InternalOnly
-    public BlueprintV4Response postInternal(@AccountId String accountId, Long workspaceId, @Valid BlueprintV4Request request) {
+    public BlueprintV4Response postInternal(@AccountId String accountId, Long workspaceId, BlueprintV4Request request) {
         Blueprint toSave = blueprintV4RequestToBlueprintConverter.convert(request);
         Blueprint blueprint = blueprintService.createWithInternalUser(toSave, restRequestThreadLocalService.getRequestedWorkspaceId(), accountId);
         notify(ResourceEvent.BLUEPRINT_CREATED);
@@ -117,7 +115,7 @@ public class BlueprintV4Controller extends NotificationController implements Blu
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DELETE_CLUSTER_TEMPLATE)
-    public BlueprintV4Response deleteByName(Long workspaceId, @NotNull @ResourceName String name) {
+    public BlueprintV4Response deleteByName(Long workspaceId, @ResourceName String name) {
         Blueprint deleted = blueprintService.deleteByWorkspace(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());
         notify(ResourceEvent.BLUEPRINT_DELETED);
         return blueprintToBlueprintV4ResponseConverter.convert(deleted);
@@ -125,7 +123,7 @@ public class BlueprintV4Controller extends NotificationController implements Blu
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DELETE_CLUSTER_TEMPLATE)
-    public BlueprintV4Response deleteByCrn(Long workspaceId, @NotNull @ResourceCrn String crn) {
+    public BlueprintV4Response deleteByCrn(Long workspaceId, @ResourceCrn String crn) {
         Blueprint deleted = blueprintService.deleteByWorkspace(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getRequestedWorkspaceId());
         notify(ResourceEvent.BLUEPRINT_DELETED);
         return blueprintToBlueprintV4ResponseConverter.convert(deleted);

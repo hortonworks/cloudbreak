@@ -2,7 +2,8 @@ package com.sequenceiq.cloudbreak.job.stackpatcher.config;
 
 import java.util.Map;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
@@ -13,10 +14,12 @@ import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
 @ConfigurationProperties(prefix = "existing-stack-patcher")
 public class ExistingStackPatcherConfig {
 
-    @NotBlank
+    @NotNull
+    @Min(1)
     private Integer intervalInHours;
 
-    @NotBlank
+    @NotNull
+    @Min(0)
     private Integer maxInitialStartDelayInHours;
 
     private Map<StackPatchType, StackPatchTypeConfig> patchConfigs;

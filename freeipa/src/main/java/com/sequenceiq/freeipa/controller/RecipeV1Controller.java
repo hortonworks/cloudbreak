@@ -6,7 +6,6 @@ import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CR
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME_LIST;
 
 import jakarta.inject.Inject;
-import jakarta.validation.Valid;
 
 import org.springframework.stereotype.Controller;
 
@@ -30,7 +29,7 @@ public class RecipeV1Controller implements RecipeV1Endpoint {
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
     @CheckPermissionByRequestProperty(path = "recipes", type = NAME_LIST, action = DESCRIBE_RECIPE)
-    public void attachRecipes(@Valid @RequestObject RecipeAttachDetachRequest recipeAttach) {
+    public void attachRecipes(@RequestObject RecipeAttachDetachRequest recipeAttach) {
         MDCBuilder.addEnvironmentCrn(recipeAttach.getEnvironmentCrn());
         String accountId = crnService.getCurrentAccountId();
         freeIpaRecipeService.attachRecipes(accountId, recipeAttach);
@@ -38,7 +37,7 @@ public class RecipeV1Controller implements RecipeV1Endpoint {
 
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
-    public void detachRecipes(@Valid @RequestObject RecipeAttachDetachRequest recipeDetach) {
+    public void detachRecipes(@RequestObject RecipeAttachDetachRequest recipeDetach) {
         MDCBuilder.addEnvironmentCrn(recipeDetach.getEnvironmentCrn());
         String accountId = crnService.getCurrentAccountId();
         freeIpaRecipeService.detachRecipes(accountId, recipeDetach);

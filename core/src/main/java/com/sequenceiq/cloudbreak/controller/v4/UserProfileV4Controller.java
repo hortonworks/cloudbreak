@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.controller.v4;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.transaction.Transactional.TxType;
-import jakarta.validation.Valid;
 
 import org.springframework.stereotype.Controller;
 
@@ -59,7 +58,7 @@ public class UserProfileV4Controller implements UserProfileV4Endpoint {
     }
 
     @Override
-    public void putTerminatedClustersPreferences(@Valid ShowTerminatedClustersPreferencesV4Request showInstancesPrefsV4Request) {
+    public void putTerminatedClustersPreferences(ShowTerminatedClustersPreferencesV4Request showInstancesPrefsV4Request) {
         ShowTerminatedClustersConfig showTerminatedClustersConfig =
                 showTerminatedClustersPreferencesConverter
                         .convert(showInstancesPrefsV4Request);

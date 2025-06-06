@@ -10,8 +10,6 @@ import java.util.Set;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.transaction.Transactional.TxType;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,27 +100,27 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public FlowIdentifier putStack(@ResourceCrn String crn, String userId, @Valid UpdateStackV4Request updateRequest) {
+    public FlowIdentifier putStack(@ResourceCrn String crn, String userId, UpdateStackV4Request updateRequest) {
         return stackCommonService.putInDefaultWorkspace(crn, updateRequest);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public FlowIdentifier putStackStartInstancesByCrn(@ResourceCrn String crn, @Valid UpdateStackV4Request updateRequest) {
+    public FlowIdentifier putStackStartInstancesByCrn(@ResourceCrn String crn, UpdateStackV4Request updateRequest) {
         return stackCommonService.putStartInstancesInDefaultWorkspace(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(),
                 updateRequest, ScalingStrategy.STOPSTART);
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public FlowIdentifier putStackStartInstancesByName(@ResourceName String name, @Valid UpdateStackV4Request updateRequest) {
+    public FlowIdentifier putStackStartInstancesByName(@ResourceName String name, UpdateStackV4Request updateRequest) {
         return stackCommonService.putStartInstancesInDefaultWorkspace(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId(),
                 updateRequest, ScalingStrategy.STOPSTART);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public FlowIdentifier putCluster(@ResourceCrn String crn, String userId, @Valid UpdateClusterV4Request updateRequest) {
+    public FlowIdentifier putCluster(@ResourceCrn String crn, String userId, UpdateClusterV4Request updateRequest) {
         return clusterCommonService.put(crn, updateRequest);
     }
 
@@ -166,7 +164,7 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public FlowIdentifier stopInstancesForClusterCrn(@ResourceCrn String clusterCrn, @NotEmpty List<String> instanceIds,
+    public FlowIdentifier stopInstancesForClusterCrn(@ResourceCrn String clusterCrn, List<String> instanceIds,
             Boolean forced, ScalingStrategy scalingStrategy) {
         LOGGER.info("stopInstancesForClusterCrn. ScalingStrategy={}, forced={}, clusterCrn={}, instanceIds=[{}]",
                 scalingStrategy, forced, clusterCrn, instanceIds);
@@ -176,7 +174,7 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public FlowIdentifier stopInstancesForClusterName(@ResourceName String clusterName, @NotEmpty List<String> instanceIds,
+    public FlowIdentifier stopInstancesForClusterName(@ResourceName String clusterName, List<String> instanceIds,
             Boolean forced, ScalingStrategy scalingStrategy) {
         LOGGER.info("stopInstancesForClusterName: ScalingStrategy={}, forced={}, clusterName={}, instanceIds=[{}]",
                 scalingStrategy, forced, clusterName, instanceIds);

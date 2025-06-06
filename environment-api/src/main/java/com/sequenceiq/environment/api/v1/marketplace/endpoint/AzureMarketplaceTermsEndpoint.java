@@ -9,7 +9,6 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.environment.api.doc.marketplace.MarketplaceDescription;
 import com.sequenceiq.environment.api.v1.marketplace.model.AzureMarketplaceTermsRequest;
@@ -37,7 +36,7 @@ public interface AzureMarketplaceTermsEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = MarketplaceDescription.GET, description = MarketplaceDescription.GET_NOTES, operationId = "getTermsSettingInAccountV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    AzureMarketplaceTermsResponse getInAccount(@AccountId @PathParam("accountId") String accountId);
+    AzureMarketplaceTermsResponse getInAccount(@PathParam("accountId") String accountId);
 
     @PUT
     @Path("")

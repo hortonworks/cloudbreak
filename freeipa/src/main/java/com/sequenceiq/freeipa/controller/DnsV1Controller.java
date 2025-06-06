@@ -7,9 +7,6 @@ import java.util.List;
 import java.util.Set;
 
 import jakarta.inject.Inject;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Controller;
 
@@ -62,7 +59,7 @@ public class DnsV1Controller implements DnsV1Endpoint {
 
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
-    public AddDnsZoneForSubnetsResponse addDnsZoneForSubnetIds(@RequestObject @Valid AddDnsZoneForSubnetIdsRequest request) {
+    public AddDnsZoneForSubnetsResponse addDnsZoneForSubnetIds(@RequestObject AddDnsZoneForSubnetIdsRequest request) {
         String accountId = crnService.getCurrentAccountId();
         try {
             return dnsZoneService.addDnsZonesForSubnetIds(request, accountId);
@@ -106,7 +103,7 @@ public class DnsV1Controller implements DnsV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = EDIT_ENVIRONMENT)
-    public void deleteDnsRecordsByFqdn(@ResourceCrn @NotEmpty String environmentCrn, @NotEmpty List<String> fqdns) {
+    public void deleteDnsRecordsByFqdn(@ResourceCrn String environmentCrn, List<String> fqdns) {
         String accountId = crnService.getCurrentAccountId();
         try {
             dnsRecordService.deleteDnsRecordByFqdn(environmentCrn, accountId, fqdns);
@@ -132,7 +129,7 @@ public class DnsV1Controller implements DnsV1Endpoint {
 
     @Override
     @InternalOnly
-    public void addDnsARecordInternal(@AccountId @NotEmpty String accountId, @Valid @NotNull AddDnsARecordRequest request) {
+    public void addDnsARecordInternal(@AccountId String accountId, AddDnsARecordRequest request) {
         addDnsARecordCommon(request, accountId);
     }
 
@@ -164,7 +161,7 @@ public class DnsV1Controller implements DnsV1Endpoint {
 
     @Override
     @InternalOnly
-    public void addDnsCnameRecordInternal(@AccountId @NotEmpty String accountId, @Valid @NotNull AddDnsCnameRecordRequest request) {
+    public void addDnsCnameRecordInternal(@AccountId String accountId, AddDnsCnameRecordRequest request) {
         addDnsCnameRecordCommon(request, accountId);
     }
 

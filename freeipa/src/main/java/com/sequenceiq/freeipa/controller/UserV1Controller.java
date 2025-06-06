@@ -4,8 +4,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import jakarta.inject.Inject;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.ForbiddenException;
 
 import org.slf4j.Logger;
@@ -138,7 +136,7 @@ public class UserV1Controller implements UserV1Endpoint {
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.GET_OPERATION_STATUS)
-    public SyncOperationStatus getSyncOperationStatus(@NotNull String operationId) {
+    public SyncOperationStatus getSyncOperationStatus(String operationId) {
         checkActorCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         LOGGER.debug("getSyncOperationStatus() requested for operation '{}' in account '{}'", operationId, accountId);
@@ -147,14 +145,14 @@ public class UserV1Controller implements UserV1Endpoint {
 
     @Override
     @InternalOnly
-    public SyncOperationStatus getSyncOperationStatusInternal(@AccountId String accountId, @NotNull String operationId) {
+    public SyncOperationStatus getSyncOperationStatusInternal(@AccountId String accountId, String operationId) {
         return operationToSyncOperationStatus.convert(
                 operationService.getOperationForAccountIdAndOperationId(accountId, operationId));
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.GET_OPERATION_STATUS)
-    public SyncOperationStatus getLastSyncOperationStatus(@ResourceCrn @NotEmpty String environmentCrn) {
+    public SyncOperationStatus getLastSyncOperationStatus(@ResourceCrn String environmentCrn) {
         Crn envCrn = Crn.safeFromString(environmentCrn);
         EnvironmentUserSyncState userSyncState = environmentUserSyncStateCalculator.calculateEnvironmentUserSyncState(envCrn.getAccountId(), envCrn);
         return operationToSyncOperationStatus.convert(
@@ -163,7 +161,7 @@ public class UserV1Controller implements UserV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
-    public EnvironmentUserSyncState getUserSyncState(@ResourceCrn @NotEmpty String environmentCrn) {
+    public EnvironmentUserSyncState getUserSyncState(@ResourceCrn String environmentCrn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Crn envCrn = Crn.safeFromString(environmentCrn);
         return environmentUserSyncStateCalculator.calculateEnvironmentUserSyncState(accountId, envCrn);

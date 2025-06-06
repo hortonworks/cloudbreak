@@ -21,7 +21,6 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
-import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
@@ -129,7 +128,7 @@ public interface EnvironmentEndpoint {
     @Operation(summary = EnvironmentOpDescription.INTERNAL_LIST, description = ENVIRONMENT_NOTES,
             operationId = "internalListEnvironmentV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    SimpleEnvironmentResponses listInternal(@QueryParam("accountId") @AccountId String accountId);
+    SimpleEnvironmentResponses listInternal(@QueryParam("accountId") String accountId);
 
     @PUT
     @Path("/name/{name}/change_credential")
@@ -224,8 +223,9 @@ public interface EnvironmentEndpoint {
     @Operation(summary = EnvironmentOpDescription.UPDATE_AZURE_ENCRYPTION_RESOURCES_BY_CRN, description = ENVIRONMENT_NOTES,
             operationId = "UpdateAzureResourceEncryptionParametersV1ByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    DetailedEnvironmentResponse updateAzureResourceEncryptionParametersByEnvironmentCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
-    @PathParam("crn") String crn, @Valid UpdateAzureResourceEncryptionParametersRequest request);
+    DetailedEnvironmentResponse updateAzureResourceEncryptionParametersByEnvironmentCrn(
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
+            @Valid UpdateAzureResourceEncryptionParametersRequest request);
 
     @PUT
     @Path("/crn/{crn}/change_telemetry_features")

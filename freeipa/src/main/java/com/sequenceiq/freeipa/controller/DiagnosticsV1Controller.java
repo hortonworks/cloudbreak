@@ -5,7 +5,6 @@ import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
 
 import jakarta.inject.Inject;
-import jakarta.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +44,7 @@ public class DiagnosticsV1Controller implements DiagnosticsV1Endpoint {
 
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
-    public FlowIdentifier collectDiagnostics(@RequestObject @Valid DiagnosticsCollectionRequest request) {
+    public FlowIdentifier collectDiagnostics(@RequestObject DiagnosticsCollectionRequest request) {
         String accountId = crnService.getCurrentAccountId();
         LOGGER.debug("collectDiagnostics called with accountId '{}'", accountId);
         return diagnosticsService.startDiagnosticsCollection(request, accountId, crnService.getUserCrn());
