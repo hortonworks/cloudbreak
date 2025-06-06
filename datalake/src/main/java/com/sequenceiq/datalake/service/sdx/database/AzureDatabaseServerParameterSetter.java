@@ -69,7 +69,7 @@ public class AzureDatabaseServerParameterSetter implements DatabaseServerParamet
     public void setParameters(DatabaseServerV4StackRequest request, SdxCluster sdxCluster, DetailedEnvironmentResponse env, String initiatorUserCrn) {
         SdxDatabase sdxDatabase = sdxCluster.getSdxDatabase();
         AzureDatabaseServerV4Parameters parameters = new AzureDatabaseServerV4Parameters();
-        SdxDatabaseAvailabilityType availabilityType = DatabaseParameterFallbackUtil.getDatabaseAvailabilityType(
+        SdxDatabaseAvailabilityType availabilityType = DatabaseParameterInitUtil.getDatabaseAvailabilityType(
                 sdxDatabase.getDatabaseAvailabilityType(), sdxDatabase.isCreateDatabase());
         String databaseEngineVersion = sdxDatabase.getDatabaseEngineVersion();
         // Until flexible is not a default. Remove this statement after that

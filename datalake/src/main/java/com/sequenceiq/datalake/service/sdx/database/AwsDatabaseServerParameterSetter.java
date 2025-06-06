@@ -28,7 +28,7 @@ public class AwsDatabaseServerParameterSetter implements DatabaseServerParameter
     public void setParameters(DatabaseServerV4StackRequest request, SdxCluster sdxCluster, DetailedEnvironmentResponse env, String initiatorUserCrn) {
         SdxDatabase sdxDatabase = sdxCluster.getSdxDatabase();
         AwsDatabaseServerV4Parameters parameters = new AwsDatabaseServerV4Parameters();
-        SdxDatabaseAvailabilityType availabilityType = DatabaseParameterFallbackUtil.getDatabaseAvailabilityType(
+        SdxDatabaseAvailabilityType availabilityType = DatabaseParameterInitUtil.getDatabaseAvailabilityType(
                 sdxDatabase.getDatabaseAvailabilityType(), sdxDatabase.isCreateDatabase());
         String databaseEngineVersion = sdxDatabase.getDatabaseEngineVersion();
         if (SdxDatabaseAvailabilityType.HA.equals(availabilityType)) {

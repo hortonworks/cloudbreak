@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.datalake.converter.SdxDatabaseAvailabilityTypeConverter;
-import com.sequenceiq.datalake.service.sdx.database.DatabaseParameterFallbackUtil;
+import com.sequenceiq.datalake.service.sdx.database.DatabaseParameterInitUtil;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 
 @Entity
@@ -53,7 +53,7 @@ public class SdxDatabase {
     }
 
     public SdxDatabaseAvailabilityType getDatabaseAvailabilityType() {
-        return DatabaseParameterFallbackUtil.getDatabaseAvailabilityType(databaseAvailabilityType, createDatabase);
+        return DatabaseParameterInitUtil.getDatabaseAvailabilityType(databaseAvailabilityType, createDatabase);
     }
 
     public void setDatabaseAvailabilityType(SdxDatabaseAvailabilityType databaseAvailabilityType) {

@@ -5,9 +5,8 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 
-// TODO It's only needed for handling backward compatibility, can be removed in CB-21369
-public class DatabaseParameterFallbackUtil {
-    private DatabaseParameterFallbackUtil() {
+public class DatabaseParameterInitUtil {
+    private DatabaseParameterInitUtil() {
     }
 
     public static SdxDatabase setupDatabaseInitParams(SdxDatabaseAvailabilityType databaseAvailabilityType, String dbEngineVersion) {

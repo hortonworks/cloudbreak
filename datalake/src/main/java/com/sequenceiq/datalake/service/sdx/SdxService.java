@@ -149,7 +149,7 @@ import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.repository.SdxDatabaseRepository;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
-import com.sequenceiq.datalake.service.sdx.database.DatabaseParameterFallbackUtil;
+import com.sequenceiq.datalake.service.sdx.database.DatabaseParameterInitUtil;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
@@ -747,7 +747,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             throw new BadRequestException("Cloud storage parameter is required.");
         }
 
-        newSdxCluster.setSdxDatabase(DatabaseParameterFallbackUtil.setupDatabaseInitParams(sdxCluster.getDatabaseAvailabilityType(),
+        newSdxCluster.setSdxDatabase(DatabaseParameterInitUtil.setupDatabaseInitParams(sdxCluster.getDatabaseAvailabilityType(),
                 sdxCluster.getDatabaseEngineVersion(), Optional.ofNullable(sdxCluster.getSdxDatabase()).map(SdxDatabase::getAttributes).orElse(null)));
         StackV4Request stackRequest = getStackRequest(shape, null, cloudPlatform, sdxCluster.getRuntime(), null,
                 Optional.ofNullable(sdxCluster.getArchitecture()).orElse(Architecture.X86_64));
