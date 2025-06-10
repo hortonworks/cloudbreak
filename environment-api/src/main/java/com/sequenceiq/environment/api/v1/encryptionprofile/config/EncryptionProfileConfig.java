@@ -38,6 +38,11 @@ public class EncryptionProfileConfig {
                 .collect(Collectors.toSet());
     }
 
+    public Set<String> getRecommendedCiphers(TlsVersion tlsVersion) {
+        TlsCipherGroup group = tlsCipherMapping.get(tlsVersion);
+        return group != null ? group.getRecommended() : Collections.emptySet();
+    }
+
     public static class TlsCipherGroup {
         private Set<String> available;
 
