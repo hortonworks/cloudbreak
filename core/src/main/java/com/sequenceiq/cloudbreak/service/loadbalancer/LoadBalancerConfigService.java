@@ -129,7 +129,7 @@ public class LoadBalancerConfigService {
         Set<LoadBalancer> loadBalancers = setupLoadBalancers(stack, environment, false, loadBalancerFlagEnabled, sku);
 
         if (stack.getCloudPlatform().equalsIgnoreCase(CloudPlatform.AZURE.toString())) {
-            configureLoadBalancerAvailabilitySets(stack.getName(), loadBalancers);
+            configureLoadBalancerAvailabilitySets(stack, loadBalancers);
             configureLoadBalancerSku(sku, loadBalancers);
         }
         return loadBalancers;
@@ -139,38 +139,38 @@ public class LoadBalancerConfigService {
      * Adds availability sets to instance groups associated with Knox and Oozie target groups.
      * This method updates the JSON parameters associated with certain instance groups.
      *
-     * @param availabilitySetPrefix A string prefix. Should be a stack name normally.
+     * @param stack                 stack object
      * @param loadBalancers         the list of load balancers to look up target groups from.
      */
-    private void configureLoadBalancerAvailabilitySets(String availabilitySetPrefix, Set<LoadBalancer> loadBalancers) {
-        getKnoxInstanceGroups(loadBalancers)
-                .forEach(instanceGroup -> attachAvailabilitySetParameters(availabilitySetPrefix, instanceGroup));
-        getOozieInstanceGroupsForAzure(loadBalancers)
-                .forEach(instanceGroup -> attachAvailabilitySetParameters(availabilitySetPrefix, instanceGroup));
+    private void configureLoadBalancerAvailabilitySets(Stack stack, Set<LoadBalancer> loadBalancers) {
+        getKnoxInstanceGroups(stack, loadBalancers)
+                .forEach(instanceGroup -> attachAvailabilitySetParameters(stack, instanceGroup));
+        getOozieInstanceGroupsForAzure(stack, loadBalancers)
+                .forEach(instanceGroup -> attachAvailabilitySetParameters(stack, instanceGroup));
     }
 
-    private void attachAvailabilitySetParameters(String availabilitySetPrefix, InstanceGroup ig) {
+    private void attachAvailabilitySetParameters(Stack stack, InstanceGroup ig) {
         Map<String, Object> parameters = ig.getAttributes().getMap();
         parameters.put("availabilitySet", Map.ofEntries(
-                entry(AzureInstanceGroupParameters.NAME, availabilitySetNameService.generateName(availabilitySetPrefix, ig.getGroupName())),
+                entry(AzureInstanceGroupParameters.NAME, availabilitySetNameService.generateName(stack.getName(), ig.getGroupName())),
                 entry(AzureInstanceGroupParameters.FAULT_DOMAIN_COUNT, DEFAULT_FAULT_DOMAIN_COUNT),
                 entry(AzureInstanceGroupParameters.UPDATE_DOMAIN_COUNT, DEFAULT_UPDATE_DOMAIN_COUNT)));
         ig.setAttributes(new Json(parameters));
     }
 
-    private Set<InstanceGroup> getKnoxInstanceGroups(Set<LoadBalancer> loadBalancers) {
-        return getInstanceGroups(loadBalancers, TargetGroupType.KNOX);
+    private Set<InstanceGroup> getKnoxInstanceGroups(Stack stack, Set<LoadBalancer> loadBalancers) {
+        return getInstanceGroups(stack, loadBalancers, TargetGroupType.KNOX);
     }
 
-    private Set<InstanceGroup> getOozieInstanceGroupsForAzure(Set<LoadBalancer> loadBalancers) {
-        return getInstanceGroups(loadBalancers, TargetGroupType.OOZIE);
+    private Set<InstanceGroup> getOozieInstanceGroupsForAzure(Stack stack, Set<LoadBalancer> loadBalancers) {
+        return getInstanceGroups(stack, loadBalancers, TargetGroupType.OOZIE);
     }
 
-    private Set<InstanceGroup> getInstanceGroups(Set<LoadBalancer> loadBalancers, TargetGroupType type) {
+    private Set<InstanceGroup> getInstanceGroups(Stack stack, Set<LoadBalancer> loadBalancers, TargetGroupType type) {
         return loadBalancers.stream()
                 .flatMap(loadBalancer -> loadBalancer.getTargetGroupSet().stream())
                 .filter(targetGroup -> type.equals(targetGroup.getType()))
-                .flatMap(targetGroup -> targetGroup.getInstanceGroups().stream())
+                .flatMap(targetGroup -> stack.getInstanceGroups().stream().filter(ig -> ig.getTargetGroups().contains(targetGroup)))
                 .collect(Collectors.toSet());
     }
 
@@ -350,7 +350,6 @@ public class LoadBalancerConfigService {
             LOGGER.info("Knox gateway instance found; enabling Knox load balancer configuration.");
             knoxTargetGroup = new TargetGroup();
             knoxTargetGroup.setType(TargetGroupType.KNOX);
-            knoxTargetGroup.setInstanceGroups(knoxGatewayInstanceGroups);
             if (AWS.equalsIgnoreCase(stack.getCloudPlatform()) &&  stack.getNetwork() != null) {
                 Optional<Map<String, Object>> loadBalancerAttributes = getLoadBalancerAttributeIfExists(stack.getNetwork().getAttributes());
                 if (loadBalancerAttributes.isPresent()) {
@@ -378,7 +377,7 @@ public class LoadBalancerConfigService {
         } else {
             loadBalancer = new LoadBalancer();
             loadBalancer.setType(type);
-            loadBalancer.setStack(stack);
+            loadBalancer.setStackId(stack.getId());
             loadBalancers.add(loadBalancer);
         }
         return loadBalancer;

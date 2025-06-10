@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.domain.stack.loadbalancer;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -12,7 +11,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -21,8 +19,6 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.converter.LoadBalancerSkuConverter;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.converter.LoadBalancerTypeConverter;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
@@ -33,8 +29,8 @@ public class LoadBalancer implements ProvisionEntity  {
     @SequenceGenerator(name = "loadbalancer_generator", sequenceName = "loadbalancer_id_seq", allocationSize = 1)
     private Long id;
 
-    @ManyToOne
-    private Stack stack;
+    @Column(name = "stack_id")
+    private Long stackId;
 
     private String dns;
 
@@ -71,12 +67,12 @@ public class LoadBalancer implements ProvisionEntity  {
         this.id = id;
     }
 
-    public Stack getStack() {
-        return stack;
+    public Long getStackId() {
+        return stackId;
     }
 
-    public void setStack(Stack stack) {
-        this.stack = stack;
+    public void setStackId(Long stackId) {
+        this.stackId = stackId;
     }
 
     public String getDns() {
@@ -123,12 +119,6 @@ public class LoadBalancer implements ProvisionEntity  {
         return targetGroupSet;
     }
 
-    public Set<InstanceGroup> getAllInstanceGroups() {
-        return targetGroupSet.stream()
-            .flatMap(tg -> tg.getInstanceGroups().stream())
-            .collect(Collectors.toSet());
-    }
-
     public void setTargetGroupSet(Set<TargetGroup> targetGroups) {
         this.targetGroupSet = targetGroups;
     }
@@ -170,7 +160,7 @@ public class LoadBalancer implements ProvisionEntity  {
     public String toString() {
         return "LoadBalancer{" +
                 "id=" + id +
-                ", stack=" + stack +
+                ", stackId=" + stackId +
                 ", dns='" + dns + '\'' +
                 ", hostedZoneId='" + hostedZoneId + '\'' +
                 ", ip='" + ip + '\'' +

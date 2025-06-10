@@ -15,9 +15,6 @@ import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 @Transactional(Transactional.TxType.REQUIRED)
 public interface TargetGroupRepository extends CrudRepository<TargetGroup, Long> {
 
-    @Query("SELECT t FROM TargetGroup t INNER JOIN t.instanceGroups ig WHERE ig.id= :instanceGroupId")
-    Set<TargetGroup> findByInstanceGroupId(@Param("instanceGroupId") Long instanceGroupId);
-
     @Query("SELECT t FROM TargetGroup t INNER JOIN t.loadBalancerSet lb WHERE lb.id= :loadBalancerId")
     Set<TargetGroup> findTargetGroupsByLoadBalancerId(@Param("loadBalancerId") Long loadBalancerId);
 }

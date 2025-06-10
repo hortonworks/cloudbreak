@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.converter.TargetGroupTypeConverter;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.common.api.type.TargetGroupType;
 
 @Entity
@@ -34,9 +33,6 @@ public class TargetGroup implements ProvisionEntity {
 
     @ManyToMany(fetch = FetchType.EAGER)
     private Set<LoadBalancer> loadBalancerSet = new HashSet<>();
-
-    @ManyToMany(fetch = FetchType.EAGER)
-    private Set<InstanceGroup> instanceGroups = new HashSet<>();
 
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
@@ -75,14 +71,6 @@ public class TargetGroup implements ProvisionEntity {
 
     public void addLoadBalancer(LoadBalancer loadBalancer) {
         loadBalancerSet.add(loadBalancer);
-    }
-
-    public Set<InstanceGroup> getInstanceGroups() {
-        return instanceGroups;
-    }
-
-    public void setInstanceGroups(Set<InstanceGroup> instanceGroups) {
-        this.instanceGroups = instanceGroups;
     }
 
     public TargetGroupConfigDbWrapper getProviderConfig() {

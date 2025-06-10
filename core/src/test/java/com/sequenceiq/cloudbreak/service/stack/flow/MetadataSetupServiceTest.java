@@ -280,7 +280,7 @@ class MetadataSetupServiceTest {
         stack.setEnvironmentCrn(STACK_CRN);
 
         LoadBalancer loadBalancer = new LoadBalancer();
-        loadBalancer.setStack(stack);
+        loadBalancer.setStackId(stack.getId());
         loadBalancer.setType(LoadBalancerType.PUBLIC);
         loadBalancer.setSku(LoadBalancerSku.STANDARD);
 
@@ -336,7 +336,7 @@ class MetadataSetupServiceTest {
         stack.setDisplayName(STACK_DISPLAY_NAME);
 
         LoadBalancer loadBalancer = new LoadBalancer();
-        loadBalancer.setStack(stack);
+        loadBalancer.setStackId(stack.getId());
         loadBalancer.setType(LoadBalancerType.PUBLIC);
 
         Set<LoadBalancer> loadBalancerSet = new HashSet<>();

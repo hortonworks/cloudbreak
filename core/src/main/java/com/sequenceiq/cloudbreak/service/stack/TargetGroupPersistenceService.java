@@ -27,10 +27,6 @@ public class TargetGroupPersistenceService {
         return repository.findTargetGroupsByLoadBalancerId(loadBalancerId);
     }
 
-    public Set<TargetGroup> findByInstanceGroupId(Long instanceGroupId) {
-        return repository.findByInstanceGroupId(instanceGroupId);
-    }
-
     public void delete(Long targetGroupId) {
         repository.deleteById(targetGroupId);
     }

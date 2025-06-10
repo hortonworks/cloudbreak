@@ -496,7 +496,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
                 .findFirst().get();
         assertEquals(1, masterInstanceGroup.getTargetGroups().size());
 
-        checkAvailabilitySetAttributes(loadBalancers);
+        checkAvailabilitySetAttributes(stack, loadBalancers);
     }
 
     @Test
@@ -521,7 +521,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
                 .findFirst().get();
         assertEquals(1, masterInstanceGroup.getTargetGroups().size());
 
-        checkAvailabilitySetAttributes(loadBalancers);
+        checkAvailabilitySetAttributes(stack, loadBalancers);
     }
 
     @Test
@@ -548,7 +548,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
                 .findFirst().get();
         assertEquals(1, managerInstanceGroup.getTargetGroups().size());
 
-        checkAvailabilitySetAttributes(loadBalancers);
+        checkAvailabilitySetAttributes(stack, loadBalancers);
     }
 
     @Test
@@ -588,7 +588,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
         assertThat(loadBalancers).anyMatch(l -> LoadBalancerType.PRIVATE.equals(l.getType()));
         assertThat(loadBalancers).anyMatch(l -> LoadBalancerType.PUBLIC.equals(l.getType()));
 
-        checkAvailabilitySetAttributes(loadBalancers);
+        checkAvailabilitySetAttributes(stack, loadBalancers);
     }
 
     @Test
@@ -618,7 +618,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
         assertEquals(1, masterInstanceGroup.getTargetGroups().size());
         assertTrue(loadBalancers.stream().allMatch(l -> LoadBalancerSku.STANDARD.equals(l.getSku())));
 
-        checkAvailabilitySetAttributes(loadBalancers);
+        checkAvailabilitySetAttributes(stack, loadBalancers);
     }
 
     @Test
@@ -647,7 +647,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
         assertEquals(1, masterInstanceGroup.getTargetGroups().size());
         assertTrue(loadBalancers.stream().allMatch(l -> LoadBalancerSku.BASIC.equals(l.getSku())));
 
-        checkAvailabilitySetAttributes(loadBalancers);
+        checkAvailabilitySetAttributes(stack, loadBalancers);
     }
 
     @Test
@@ -679,7 +679,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
         assertEquals(1, masterInstanceGroup.getTargetGroups().size());
         assertTrue(loadBalancers.stream().allMatch(l -> LoadBalancerSku.getDefault().equals(l.getSku())));
 
-        checkAvailabilitySetAttributes(loadBalancers);
+        checkAvailabilitySetAttributes(stack, loadBalancers);
     }
 
     @Test
@@ -709,13 +709,14 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
      * This check is only necessary as long as we're using availability sets in instance groups,
      * which is itself only necessary while using the basic, rather than standard, SKU.
      *
-     * @param loadBalancers the set of load balancers to check for a related availability set attribute.
+     * @param stack stack object
      */
-    private void checkAvailabilitySetAttributes(Set<LoadBalancer> loadBalancers) {
+    private void checkAvailabilitySetAttributes(Stack stack, Set<LoadBalancer> loadBalancers) {
         // we traverse lbs -> target groups -> instance groups -> instance group attributes
         Set<Map<String, Object>> allAttributes = loadBalancers.stream()
                 .flatMap(lb -> lb.getTargetGroupSet().stream())
-                .flatMap(targetGroup -> targetGroup.getInstanceGroups().stream())
+                .flatMap(targetGroup -> stack.getInstanceGroups().stream()
+                        .filter(instanceGroup -> instanceGroup.getTargetGroups().contains(targetGroup)))
                 .map(InstanceGroup::getAttributes)
                 .map(Json::getMap)
                 .collect(toSet());
@@ -782,7 +783,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
         assertEquals(1, masterInstanceGroup.getTargetGroups().size());
         assertTrue(loadBalancers.stream().allMatch(l -> LoadBalancerSku.STANDARD.equals(l.getSku())));
 
-        checkAvailabilitySetAttributes(loadBalancers);
+        checkAvailabilitySetAttributes(stack, loadBalancers);
     }
 
     @Test
@@ -811,7 +812,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
                 .filter(ig -> "master".equals(ig.getGroupName()))
                 .findFirst().get();
         assertEquals(1, masterInstanceGroup.getTargetGroups().size());
-        checkAvailabilitySetAttributes(loadBalancers);
+        checkAvailabilitySetAttributes(stack, loadBalancers);
     }
 
     @ParameterizedTest
@@ -834,7 +835,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
 
         underTest.createLoadBalancers(stack, environment, request)
                 .forEach(lb -> lb.getTargetGroupSet()
-                        .forEach(tg -> tg.getInstanceGroups().forEach(ig -> assertFalse(tg.isUseStickySession()))));
+                        .forEach(tg -> assertFalse(tg.isUseStickySession())));
     }
 
     @ParameterizedTest
@@ -856,7 +857,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
 
         underTest.createLoadBalancers(stack, environment, request)
                 .forEach(lb -> lb.getTargetGroupSet()
-                        .forEach(tg -> tg.getInstanceGroups().forEach(ig -> assertFalse(tg.isUseStickySession()))));
+                        .forEach(tg -> assertFalse(tg.isUseStickySession())));
     }
 
     @Test
@@ -878,7 +879,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
 
         underTest.createLoadBalancers(stack, environment, request)
                 .forEach(lb -> lb.getTargetGroupSet()
-                        .forEach(tg -> tg.getInstanceGroups().forEach(ig -> assertFalse(tg.isUseStickySession()))));
+                        .forEach(tg -> assertFalse(tg.isUseStickySession())));
     }
 
     @Test
@@ -897,7 +898,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
 
         underTest.createLoadBalancers(stack, environment, request)
                 .forEach(lb -> lb.getTargetGroupSet()
-                        .forEach(tg -> tg.getInstanceGroups().forEach(ig -> assertNull(tg.isUseStickySession()))));
+                        .forEach(tg -> assertNull(tg.isUseStickySession())));
     }
 
     @Test
@@ -919,7 +920,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
 
         underTest.createLoadBalancers(stack, environment, request)
                 .forEach(lb -> lb.getTargetGroupSet()
-                        .forEach(tg -> tg.getInstanceGroups().forEach(ig -> assertFalse(tg.isUseStickySession()))));
+                        .forEach(tg -> assertFalse(tg.isUseStickySession())));
     }
 
     @Test
@@ -941,7 +942,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
 
         underTest.createLoadBalancers(stack, environment, request)
                 .forEach(lb -> lb.getTargetGroupSet()
-                        .forEach(tg -> tg.getInstanceGroups().forEach(ig -> assertFalse(tg.isUseStickySession()))));
+                        .forEach(tg -> assertFalse(tg.isUseStickySession())));
     }
 
     @Test
@@ -963,7 +964,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
 
         underTest.createLoadBalancers(stack, environment, request)
                 .forEach(lb -> lb.getTargetGroupSet()
-                        .forEach(tg -> tg.getInstanceGroups().forEach(ig -> assertTrue(tg.isUseStickySession()))));
+                        .forEach(tg -> assertTrue(tg.isUseStickySession())));
     }
 
     private Set<LoadBalancer> createLoadBalancers() {

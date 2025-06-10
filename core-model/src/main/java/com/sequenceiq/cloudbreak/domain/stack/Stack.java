@@ -237,7 +237,8 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
 
     private String ccmV2AgentCrn;
 
-    @OneToMany(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "stack_id", referencedColumnName = "id")
     private Set<LoadBalancer> loadBalancers = new HashSet<>();
 
     @Convert(converter = DnsResolverTypeConverter.class)

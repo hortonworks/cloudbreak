@@ -38,7 +38,6 @@ public class OozieTargetGroupProvisioner {
             } else {
                 oozieTargetGroup.setType(TargetGroupType.OOZIE);
             }
-            oozieTargetGroup.setInstanceGroups(Set.of(oozieInstanceGroup.get()));
             if (CloudPlatform.AWS.name().equalsIgnoreCase(stack.getCloudPlatform()) && stack.getNetwork() != null) {
                 Optional<Map<String, Object>> loadBalancerAttributes = getLoadBalancerAttributeIfExists(stack.getNetwork().getAttributes());
                 if (loadBalancerAttributes.isPresent()) {

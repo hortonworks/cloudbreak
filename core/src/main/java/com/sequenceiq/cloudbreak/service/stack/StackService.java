@@ -1284,14 +1284,13 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         LOGGER.debug("Cleanup instancegroups for stack {}", stack.getResourceCrn());
         if (stack.getInstanceGroups() != null) {
             for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-                instanceGroup.setTargetGroups(new HashSet<>());
-                instanceGroupService.save(instanceGroup);
-
                 LOGGER.debug("Cleanup targetgroups for instanceGroup {}", instanceGroup.getId());
-                Set<TargetGroup> targetGroups = targetGroupPersistenceService.findByInstanceGroupId(instanceGroup.getId());
-                for (TargetGroup targetGroup : targetGroups) {
+                for (TargetGroup targetGroup : instanceGroup.getTargetGroups()) {
                     targetGroupPersistenceService.delete(targetGroup.getId());
                 }
+                LOGGER.debug("Cleanup instancegroup {}", instanceGroup.getId());
+                instanceGroup.setTargetGroups(new HashSet<>());
+                instanceGroupService.save(instanceGroup);
                 instanceGroupService.delete(instanceGroup.getId());
             }
         }

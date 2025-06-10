@@ -473,7 +473,7 @@ public class MetadataSetupService {
             StackView stack, LoadBalancerType type) {
         if (stack != null && type != null) {
             for (LoadBalancer loadBalancerMetadata : allLoadBalancerMetadata) {
-                if (Objects.equals(stack.getId(), loadBalancerMetadata.getStack().getId()) &&
+                if (Objects.equals(stack.getId(), loadBalancerMetadata.getStackId()) &&
                         type == loadBalancerMetadata.getType()) {
                     return loadBalancerMetadata;
                 }

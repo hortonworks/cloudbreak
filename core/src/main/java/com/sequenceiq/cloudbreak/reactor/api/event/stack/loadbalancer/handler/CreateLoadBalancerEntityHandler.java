@@ -100,7 +100,6 @@ public class CreateLoadBalancerEntityHandler extends ExceptionCatcherEventHandle
             }
 
             Set<InstanceGroup> instanceGroups = instanceGroupService.getByStackAndFetchTemplates(stack.getId());
-            instanceGroups.forEach(ig -> ig.setTargetGroups(targetGroupPersistenceService.findByInstanceGroupId(ig.getId())));
             Set<LoadBalancer> existingLoadBalancers = loadBalancerPersistenceService.findByStackId(stack.getId());
             stack.setInstanceGroups(instanceGroups);
             Set<LoadBalancer> newLoadBalancers = loadBalancerConfigService.createLoadBalancers(stack, environment, null);
@@ -118,8 +117,7 @@ public class CreateLoadBalancerEntityHandler extends ExceptionCatcherEventHandle
                 measure(() -> targetGroupPersistenceService.saveAll(newLoadBalancers.stream()
                         .flatMap(lb -> lb.getTargetGroupSet().stream()).collect(Collectors.toSet())),
                     LOGGER, "Target groups saved in {} ms for stack {}", stackName);
-                measure(() -> instanceGroupService.saveAll(newLoadBalancers.stream()
-                        .flatMap(lb -> lb.getAllInstanceGroups().stream()).collect(Collectors.toSet())),
+                measure(() -> instanceGroupService.saveAll(stack.getInstanceGroups()),
                     LOGGER, "Instance groups saved in {} ms for stack {}", stackName);
                 if (stack.getNetwork() != null) {
                     measure(() -> networkService.pureSave(stack.getNetwork()), LOGGER,

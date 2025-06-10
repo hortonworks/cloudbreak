@@ -69,7 +69,6 @@ class OozieTargetGroupProvisionerTest {
             assertThat(resultOpt).isPresent();
             assertThat(resultOpt).hasValueSatisfying(tg -> {
                 assertThat(tg.getType()).isEqualTo(targetGroupType);
-                assertThat(tg.getInstanceGroups()).isEqualTo(Set.of(ig));
                 assertThat(ig.getTargetGroups()).contains(tg);
             });
         } else {

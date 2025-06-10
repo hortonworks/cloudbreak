@@ -880,7 +880,6 @@ class StackServiceTest {
 
         doReturn(instanceGroup).when(instanceGroupService).save(any());
         doNothing().when(instanceGroupService).delete(anyLong());
-        doReturn(Set.of(targetGroup)).when(targetGroupPersistenceService).findByInstanceGroupId(anyLong());
         doNothing().when(targetGroupPersistenceService).delete(any());
         when(stackRepository.findByResourceCrnArchivedIsTrue(anyString())).thenReturn(Optional.of(stackForTest));
         when(clusterService.findOneByStackId(anyLong())).thenReturn(Optional.of(cluster));
@@ -916,7 +915,6 @@ class StackServiceTest {
 
         doReturn(instanceGroup).when(instanceGroupService).save(any());
         doNothing().when(instanceGroupService).delete(anyLong());
-        doReturn(Set.of(targetGroup)).when(targetGroupPersistenceService).findByInstanceGroupId(anyLong());
         doNothing().when(targetGroupPersistenceService).delete(any());
         when(stackRepository.findByResourceCrnArchivedIsTrue(anyString())).thenReturn(Optional.of(stackForTest));
         when(clusterService.findOneByStackId(anyLong())).thenReturn(Optional.of(cluster));
@@ -953,7 +951,6 @@ class StackServiceTest {
 
         doReturn(instanceGroup).when(instanceGroupService).save(any());
         doNothing().when(instanceGroupService).delete(anyLong());
-        doReturn(Set.of(targetGroup)).when(targetGroupPersistenceService).findByInstanceGroupId(anyLong());
         doNothing().when(targetGroupPersistenceService).delete(any());
         when(stackRepository.findByResourceCrnArchivedIsTrue(anyString())).thenReturn(Optional.of(stackForTest));
         when(clusterService.findOneByStackId(anyLong())).thenReturn(Optional.of(cluster));
