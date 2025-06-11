@@ -1403,6 +1403,31 @@ class ClouderaManagerModificationServiceTest {
         ApiHostNameList apiHostNameList = apiHostNameListArgumentCaptor.getValue();
         assertThat(apiHostNameList.getItems()).containsOnly("fqdn1", "fqdn2");
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingStartRolesCommand(stack, v31Client, apiCommand.getId());
+        ArgumentCaptor<ClusterCommand> clusterCommandArgumentCaptor = ArgumentCaptor.forClass(ClusterCommand.class);
+        verify(clusterCommandService).save(clusterCommandArgumentCaptor.capture());
+        ClusterCommand startRoleClusterCommand = clusterCommandArgumentCaptor.getValue();
+        verify(clusterCommandService).delete(startRoleClusterCommand);
+        assertEquals(ClusterCommandType.HOST_START_ROLES, startRoleClusterCommand.getClusterCommandType());
+    }
+
+    @Test
+    void testHostsStartRolesIfCommandExists() throws ApiException {
+        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
+        clouderaManagerRepo.setVersion("7.9.0");
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
+        ApiCommand apiCommand = new ApiCommand();
+        apiCommand.setId(new BigDecimal(1));
+        ClusterCommand startRoleClusterCommand = new ClusterCommand();
+        startRoleClusterCommand.setCommandId(apiCommand.getId());
+        when(clusterCommandService.findTopByClusterIdAndClusterCommandType(CLUSTER_ID, ClusterCommandType.HOST_START_ROLES))
+                .thenReturn(Optional.of(startRoleClusterCommand));
+
+        when(clouderaManagerPollingServiceProvider.startPollingStartRolesCommand(stack, v31Client, apiCommand.getId())).thenReturn(success);
+        underTest.hostsStartRoles(List.of("fqdn1", "fqdn2"));
+        verify(clouderaManagerResourceApi, times(0)).hostsStartRolesCommand(any());
+        verify(clouderaManagerPollingServiceProvider, times(1)).startPollingStartRolesCommand(stack, v31Client, apiCommand.getId());
+        verify(clusterCommandService, times(0)).save(any());
+        verify(clusterCommandService).delete(startRoleClusterCommand);
     }
 
     @Test
