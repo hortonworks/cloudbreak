@@ -32,6 +32,7 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -117,7 +118,8 @@ public class RangerRmsDatalakeConfigProviderTest {
 
     @Test
     public void getRangerRmsRoleConfigs() {
-        TemplatePreparationObject templatePreparationObject = getTemplatePreparationObject(RMS_MINIMUM_VERSION, CloudPlatform.AWS, StackType.DATALAKE, true);
+        TemplatePreparationObject templatePreparationObject =
+                getTemplatePreparationObject(RMS_MINIMUM_VERSION, RMS_MINIMUM_VERSION, CloudPlatform.AWS, StackType.DATALAKE, true);
         ApiClusterTemplateService apiClusterTemplateService = mock(ApiClusterTemplateService.class);
         when(cmTemplateProcessor.getServiceByType(eq(RANGER_RMS_SERVICE_TYPE))).thenReturn(Optional.of(apiClusterTemplateService));
         ApiClusterTemplateRoleConfigGroup apiClusterTemplateRoleConfigGroup = mock(ApiClusterTemplateRoleConfigGroup.class);
@@ -140,7 +142,8 @@ public class RangerRmsDatalakeConfigProviderTest {
 
     @Test
     public void getRangerRmsRoleConfigsWhen732() {
-        TemplatePreparationObject templatePreparationObject = getTemplatePreparationObject("7.3.2", CloudPlatform.AWS, StackType.DATALAKE, true);
+        TemplatePreparationObject templatePreparationObject =
+                getTemplatePreparationObject("7.3.2", "7.3.2", CloudPlatform.AWS, StackType.DATALAKE, true);
         ApiClusterTemplateService apiClusterTemplateService = mock(ApiClusterTemplateService.class);
         when(cmTemplateProcessor.getServiceByType(eq(RANGER_RMS_SERVICE_TYPE))).thenReturn(Optional.of(apiClusterTemplateService));
         ApiClusterTemplateRoleConfigGroup apiClusterTemplateRoleConfigGroup = mock(ApiClusterTemplateRoleConfigGroup.class);
@@ -163,6 +166,9 @@ public class RangerRmsDatalakeConfigProviderTest {
     public void getRangerRmsRoleConfigsHa() {
         ClouderaManagerRepo cmRepo = new ClouderaManagerRepo();
         cmRepo.setVersion(RMS_MINIMUM_VERSION);
+        ClouderaManagerProduct cdh = new ClouderaManagerProduct();
+        cdh.setVersion(RMS_MINIMUM_VERSION);
+        cdh.setName("CDH");
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
         generalClusterConfigs.setEnableRangerRaz(true);
         HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.GATEWAY, 2);
@@ -170,7 +176,7 @@ public class RangerRmsDatalakeConfigProviderTest {
         TemplatePreparationObject templatePreparationObject = TemplatePreparationObject.Builder.builder()
                 .withStackType(StackType.DATALAKE)
                 .withCloudPlatform(CloudPlatform.AWS)
-                .withProductDetails(cmRepo, List.of())
+                .withProductDetails(cmRepo, List.of(cdh))
                 .withBlueprintView(new BlueprintView("", RMS_MINIMUM_VERSION, "CDP", null, cmTemplateProcessor))
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, idbroker))
@@ -224,7 +230,8 @@ public class RangerRmsDatalakeConfigProviderTest {
     @Test
     public void isRmsConfigurationNeeded() {
         when(entitlementService.isRmsEnabledOnDatalake(anyString())).thenReturn(true);
-        TemplatePreparationObject templatePreparationObject = getTemplatePreparationObject(RMS_MINIMUM_VERSION, CloudPlatform.AWS, StackType.DATALAKE, true);
+        TemplatePreparationObject templatePreparationObject =
+                getTemplatePreparationObject(RMS_MINIMUM_VERSION, CloudPlatform.AWS, StackType.DATALAKE, true);
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
             boolean configurationNeeded = underTest.isConfigurationNeeded(cmTemplateProcessor, templatePreparationObject);
             assertTrue(configurationNeeded);
@@ -234,7 +241,8 @@ public class RangerRmsDatalakeConfigProviderTest {
     @Test
     public void isRmsConfigurationNotNeededStackTypeWorkload() {
         when(entitlementService.isRmsEnabledOnDatalake(anyString())).thenReturn(true);
-        TemplatePreparationObject templatePreparationObject = getTemplatePreparationObject(RMS_MINIMUM_VERSION, CloudPlatform.AWS, StackType.WORKLOAD, true);
+        TemplatePreparationObject templatePreparationObject =
+                getTemplatePreparationObject(RMS_MINIMUM_VERSION, CloudPlatform.AWS, StackType.WORKLOAD, true);
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
             boolean configurationNeeded = underTest.isConfigurationNeeded(cmTemplateProcessor, templatePreparationObject);
             assertFalse(configurationNeeded);
@@ -244,7 +252,8 @@ public class RangerRmsDatalakeConfigProviderTest {
     @Test
     public void isRmsConfigurationNotNeededRazDisabled() {
         when(entitlementService.isRmsEnabledOnDatalake(anyString())).thenReturn(true);
-        TemplatePreparationObject templatePreparationObject = getTemplatePreparationObject(RMS_MINIMUM_VERSION, CloudPlatform.AWS, StackType.DATALAKE, false);
+        TemplatePreparationObject templatePreparationObject =
+                getTemplatePreparationObject(RMS_MINIMUM_VERSION, CloudPlatform.AWS, StackType.DATALAKE, false);
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
             boolean configurationNeeded = underTest.isConfigurationNeeded(cmTemplateProcessor, templatePreparationObject);
             assertFalse(configurationNeeded);
@@ -254,7 +263,8 @@ public class RangerRmsDatalakeConfigProviderTest {
     @Test
     public void isRmsConfigurationNotNeededCloudPlatformAzure() {
         when(entitlementService.isRmsEnabledOnDatalake(anyString())).thenReturn(true);
-        TemplatePreparationObject templatePreparationObject = getTemplatePreparationObject(RMS_MINIMUM_VERSION, CloudPlatform.AZURE, StackType.DATALAKE, true);
+        TemplatePreparationObject templatePreparationObject =
+                getTemplatePreparationObject(RMS_MINIMUM_VERSION, CloudPlatform.AZURE, StackType.DATALAKE, true);
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
             boolean configurationNeeded = underTest.isConfigurationNeeded(cmTemplateProcessor, templatePreparationObject);
             assertFalse(configurationNeeded);
@@ -264,7 +274,8 @@ public class RangerRmsDatalakeConfigProviderTest {
     @Test
     public void isRmsConfigurationNotNeededVersionLower() {
         when(entitlementService.isRmsEnabledOnDatalake(anyString())).thenReturn(true);
-        TemplatePreparationObject templatePreparationObject = getTemplatePreparationObject(RMS_UNSUPPORTED_VERSION, CloudPlatform.AWS, StackType.DATALAKE, true);
+        TemplatePreparationObject templatePreparationObject =
+                getTemplatePreparationObject(RMS_UNSUPPORTED_VERSION, CloudPlatform.AWS, StackType.DATALAKE, true);
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
             boolean configurationNeeded = underTest.isConfigurationNeeded(cmTemplateProcessor, templatePreparationObject);
             assertFalse(configurationNeeded);
@@ -274,7 +285,8 @@ public class RangerRmsDatalakeConfigProviderTest {
     @Test
     public void isRmsConfigurationNotNeededEntitlementDisabled() {
         when(entitlementService.isRmsEnabledOnDatalake(anyString())).thenReturn(false);
-        TemplatePreparationObject templatePreparationObject = getTemplatePreparationObject(RMS_MINIMUM_VERSION, CloudPlatform.AWS, StackType.DATALAKE, true);
+        TemplatePreparationObject templatePreparationObject =
+                getTemplatePreparationObject(RMS_MINIMUM_VERSION, CloudPlatform.AWS, StackType.DATALAKE, true);
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
             boolean configurationNeeded = underTest.isConfigurationNeeded(cmTemplateProcessor, templatePreparationObject);
             assertFalse(configurationNeeded);
@@ -294,9 +306,22 @@ public class RangerRmsDatalakeConfigProviderTest {
         assertEquals(1, roleTypes.size());
     }
 
-    private TemplatePreparationObject getTemplatePreparationObject(String version, CloudPlatform platform, StackType stackType, boolean razEnabled) {
+    private TemplatePreparationObject getTemplatePreparationObject(String cmVersion, CloudPlatform platform,
+        StackType stackType, boolean razEnabled) {
+        return getTemplatePreparationObject(
+                cmVersion,
+                "7.2.18",
+                platform, stackType,
+                razEnabled);
+    }
+
+    private TemplatePreparationObject getTemplatePreparationObject(String version, String cdhVersion,
+        CloudPlatform platform, StackType stackType, boolean razEnabled) {
         ClouderaManagerRepo cmRepo = new ClouderaManagerRepo();
         cmRepo.setVersion(version);
+        ClouderaManagerProduct clouderaManagerProduct = new ClouderaManagerProduct();
+        clouderaManagerProduct.setVersion(cdhVersion);
+        clouderaManagerProduct.setName("CDH");
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
         generalClusterConfigs.setEnableRangerRaz(razEnabled);
         generalClusterConfigs.setEnableRangerRms(true);
@@ -305,7 +330,7 @@ public class RangerRmsDatalakeConfigProviderTest {
         return TemplatePreparationObject.Builder.builder()
                 .withStackType(stackType)
                 .withCloudPlatform(platform)
-                .withProductDetails(cmRepo, List.of())
+                .withProductDetails(cmRepo, List.of(clouderaManagerProduct))
                 .withBlueprintView(new BlueprintView("", version, "CDP", null, cmTemplateProcessor))
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, idbroker))

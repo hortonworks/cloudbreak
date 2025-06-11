@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -29,6 +30,7 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
@@ -77,7 +79,8 @@ public class RangerRmsDatalakeConfigProvider extends AbstractRoleConfigProvider 
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         List<ApiClusterTemplateConfig> configs = new ArrayList<>();
         configs.add(config(HMS_MAP_MANAGED_TABLES, Boolean.TRUE.toString()));
-        if (isHmsRangerServiceNameRequired(source.getProductDetailsView().getCm().getVersion())) {
+        Optional<ClouderaManagerProduct> cdh = getCdhProduct(source);
+        if (cdh.isPresent() && isHmsRangerServiceNameRequired(cdh.get().getVersion())) {
             configs.add(config(HMS_SOURCE_SERVICE_NAME, HMS_SOURCE_SERVICE_NAME_VALUE));
         }
         configs.add(config(SUPPORTED_URI_SCHEME, SUPPORTED_URI_SCHEME_VALUE));

@@ -225,8 +225,8 @@ public class CMRepositoryVersionUtil {
                 && isVersionNewerOrEqualThanLimited(cmVersion, (MIN_CM_VERSION_FOR_RAZ).get(cloudPlatform));
     }
 
-    public static boolean isHmsRangerServiceNameRequired(String cmVersion) {
-        return isVersionOlderThanLimited(cmVersion, CLOUDERA_STACK_VERSION_7_3_2);
+    public static boolean isHmsRangerServiceNameRequired(String cdhVersion) {
+        return isVersionOlderThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_3_2);
     }
 
     public static boolean isRazSupportedForCloudAndStack(CloudPlatform cloudPlatform, StackType stackType) {
