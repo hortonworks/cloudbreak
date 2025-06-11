@@ -753,9 +753,9 @@ public class AwsPlatformResources implements PlatformResources {
                 }
                 regionDefaultInstanceTypeMap.put(actualRegion, defaultDbVmType);
             }
-            return new PlatformDatabaseCapabilities(new HashMap<>(), regionDefaultInstanceTypeMap);
+            return new PlatformDatabaseCapabilities(new HashMap<>(), regionDefaultInstanceTypeMap, new HashMap<>());
         } catch (Exception e) {
-            return new PlatformDatabaseCapabilities(new HashMap<>(), new HashMap<>());
+            return new PlatformDatabaseCapabilities(new HashMap<>(), new HashMap<>(), new HashMap<>());
         }
     }
 

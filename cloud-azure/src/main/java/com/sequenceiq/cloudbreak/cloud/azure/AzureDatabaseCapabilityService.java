@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Component;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.FlexibleServerCapability;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.FlexibleServerEditionCapability;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerSkuCapability;
+import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerVersionCapability;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.StorageEditionCapability;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.StorageMbCapability;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.ZoneRedundantHaSupportedEnum;
@@ -74,7 +76,9 @@ public class AzureDatabaseCapabilityService {
         enabledRegions.put(databaseAvailabiltyType(SAME_ZONE.name()), getSameZoneSupportedRegions(regions));
         Map<Region, Optional<FlexibleServerCapability>> capabilityMap = client.getFlexibleServerClient().getFlexibleServerCapabilityMap(regions);
         enabledRegions.put(databaseAvailabiltyType(ZONE_REDUNDANT.name()), getZoneRedundantSupportedRegions(regions, capabilityMap));
-        return new PlatformDatabaseCapabilities(enabledRegions, getRegionInstanceTypeMap(regions, capabilityMap, filters));
+        Map<Region, String> regionInstanceTypeMap = getRegionInstanceTypeMap(regions, capabilityMap, filters);
+        Map<Region, Map<String, List<String>>> supportedServerVersionsToUpgrade = getSupportedServerVersionsToUpgrade(regions, capabilityMap);
+        return new PlatformDatabaseCapabilities(enabledRegions, regionInstanceTypeMap, supportedServerVersionsToUpgrade);
     }
 
     public Optional<PlatformDBStorageCapabilities> databaseStorageCapabilities(CloudCredential cloudCredential, Region region) {
@@ -175,5 +179,19 @@ public class AzureDatabaseCapabilityService {
         com.azure.core.management.Region azureRegion = com.azure.core.management.Region.fromName(region.getRegionName());
         regionMap.put(region(azureRegion.label()), value);
         regionMap.put(region(azureRegion.name()), value);
+    }
+
+    private Map<Region, Map<String, List<String>>> getSupportedServerVersionsToUpgrade(Map<Region, AzureCoordinate> regions, Map<Region,
+            Optional<FlexibleServerCapability>> capabilityMap) {
+        return regions.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> capabilityMap.getOrDefault(entry.getKey(), Optional.empty()).stream()
+                                .flatMap(capability -> capability.supportedServerVersions().stream())
+                                .collect(Collectors.toMap(
+                                        ServerVersionCapability::name,
+                                        ServerVersionCapability::supportedVersionsToUpgrade
+                                ))
+                ));
     }
 }

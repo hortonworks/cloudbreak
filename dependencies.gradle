@@ -49,7 +49,7 @@ ext {
   azureSdkResourceManagerMarketplaceVersion = '1.0.0-beta.2'
   azureSdkResourceManagerDataLakeStoreVersion = '1.0.0-beta.1'
   azureSdkResourceManagerPostgresqlVersion = '1.0.2'
-  azureSdkResourceManagerFlexiblePostgresqlVersion = '1.1.0-beta.3'
+  azureSdkResourceManagerFlexiblePostgresqlVersion = '1.2.0-beta.1'
   azureSdkVersion = '1.41.4'
   azureStorageSdkVersion = '8.4.0'
 

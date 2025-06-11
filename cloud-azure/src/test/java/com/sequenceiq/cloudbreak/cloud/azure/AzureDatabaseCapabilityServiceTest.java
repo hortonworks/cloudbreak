@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.TreeSet;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.FlexibleServerCapability;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.FlexibleServerEditionCapability;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerSkuCapability;
+import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerVersionCapability;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.StorageEditionCapability;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.StorageMbCapability;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.ZoneRedundantHaSupportedEnum;
@@ -36,6 +38,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureFlexibleServerClient;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.AzureRegionProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureCoordinate;
+import com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureCoordinate.AzureCoordinateBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDBStorageCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDatabaseCapabilities;
@@ -361,8 +364,49 @@ class AzureDatabaseCapabilityServiceTest {
         Assertions.assertTrue(capabilities.isEmpty());
     }
 
+    @Test
+    void testDatabaseCapabilitiesWithSupportedServerVersionsToUpgrade() {
+        when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
+        when(azureClient.getFlexibleServerClient()).thenReturn(azureFlexibleServerClient);
+        Map<Region, AzureCoordinate> regions = Map.of(
+                Region.region("westus"), azureCoordinate("westus"),
+                Region.region("westus2"), azureCoordinate("westus2"));
+        when(azureRegionProvider.filterEnabledRegions(Region.region("westus"))).thenReturn(regions);
+
+        FlexibleServerCapability flexibleServerCapability1 = createFlexibleServerCapabilityForVersionUpgrades(Map.of(
+                "14", List.of("15", "16"),
+                "15", List.of("16"),
+                "16", List.of()
+        ));
+        FlexibleServerCapability flexibleServerCapability2 = createFlexibleServerCapabilityForVersionUpgrades(Map.of(
+                "14", List.of("15", "16", "17"),
+                "15", List.of("16", "17"),
+                "16", List.of("17")
+        ));
+        Map<Region, Optional<FlexibleServerCapability>> flexibleServerCapabilityMap = Map.of(
+                Region.region("westus"), Optional.of(flexibleServerCapability1),
+                Region.region("westus2"), Optional.of(flexibleServerCapability2));
+        when(azureFlexibleServerClient.getFlexibleServerCapabilityMap(anyMap())).thenReturn(flexibleServerCapabilityMap);
+
+        PlatformDatabaseCapabilities capabilities = azureDatabaseCapabilityService
+                .databaseCapabilities(cloudCredential, Region.region("westus"), Map.of(DATABASE_TYPE, AZURE_FLEXIBLE.name()));
+
+        Map<Region, Map<String, List<String>>> supportedServerVersionsToUpgrade = capabilities.getSupportedServerVersionsToUpgrade();
+        Assertions.assertNotNull(supportedServerVersionsToUpgrade);
+        Map<String, List<String>> westusServerVersions = supportedServerVersionsToUpgrade.get(Region.region("westus"));
+        Assertions.assertNotNull(westusServerVersions);
+        Assertions.assertTrue(westusServerVersions.get("14").contains("16"));
+        Assertions.assertFalse(westusServerVersions.get("14").contains("14"));
+        Assertions.assertFalse(westusServerVersions.get("14").contains("17"));
+        Assertions.assertTrue(westusServerVersions.get("15").contains("16"));
+        Assertions.assertFalse(westusServerVersions.get("15").contains("17"));
+        Assertions.assertFalse(westusServerVersions.get("15").contains("14"));
+        Assertions.assertTrue(westusServerVersions.get("16").isEmpty());
+        Assertions.assertNull(westusServerVersions.get("17"));
+    }
+
     private AzureCoordinate azureCoordinate(String name) {
-        return AzureCoordinate.AzureCoordinateBuilder.builder()
+        return AzureCoordinateBuilder.builder()
                 .longitude("1")
                 .latitude("1")
                 .displayName(name)
@@ -429,5 +473,22 @@ class AzureDatabaseCapabilityServiceTest {
                 .toList();
         lenient().when(storageEditionCapability.supportedStorageMb()).thenReturn(storageMbCapabilities);
         return storageEditionCapability;
+    }
+
+    private FlexibleServerCapability createFlexibleServerCapabilityForVersionUpgrades(Map<String, List<String>> serverVersionUpgrades) {
+        FlexibleServerCapability flexibleServerCapability = mock(FlexibleServerCapability.class);
+        List<ServerVersionCapability> flexibleServerVersionCapabilities = serverVersionUpgrades.entrySet().stream()
+                .map(AzureDatabaseCapabilityServiceTest::createServerVersionCapability)
+                .toList();
+        lenient().when(flexibleServerCapability.supportedServerVersions()).thenReturn(flexibleServerVersionCapabilities);
+        return flexibleServerCapability;
+    }
+
+    @NotNull
+    private static ServerVersionCapability createServerVersionCapability(Map.Entry<String, List<String>> entry) {
+        ServerVersionCapability serverVersionCapability = mock(ServerVersionCapability.class);
+        lenient().when(serverVersionCapability.name()).thenReturn(entry.getKey());
+        lenient().when(serverVersionCapability.supportedVersionsToUpgrade()).thenReturn(entry.getValue());
+        return serverVersionCapability;
     }
 }

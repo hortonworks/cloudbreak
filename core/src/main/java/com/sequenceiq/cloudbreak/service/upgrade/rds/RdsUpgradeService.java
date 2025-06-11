@@ -126,6 +126,7 @@ public class RdsUpgradeService {
         StackDatabaseServerResponse databaseServer = databaseService.getDatabaseServer(nameOrCrn, accountId);
         validateRdsIsNotUpgraded(databaseServer, targetMajorVersion, forced);
         validateRuntimeEligibleForUpgrade(stack, targetMajorVersion.getMajorVersion(), accountId);
+        validateEngineVersionEligibleForUpgrade(stack, databaseServer, targetMajorVersion.getMajorVersion());
         validateStackStatus(stack);
         validateAttachedDatahubsAreNotRunning(stack, accountId);
         validateRdsIsAvailableForUpgrade(databaseServer);
@@ -165,6 +166,18 @@ public class RdsUpgradeService {
         if (runtimeValidationError.isPresent()) {
             LOGGER.warn("There was a validation error: {}", runtimeValidationError.get());
             throw new BadRequestException(runtimeValidationError.get());
+        }
+    }
+
+    private void validateEngineVersionEligibleForUpgrade(StackView stack, StackDatabaseServerResponse databaseServer, String majorVersion) {
+        String currentRdsVersion = getCurrentRdsVersion(databaseServer);
+        Optional<String> majorVersionAvailabilityError = databaseUpgradeRuntimeValidator.validateTargetMajorVersionAvailability(
+                majorVersion,
+                currentRdsVersion,
+                stack);
+        if (majorVersionAvailabilityError.isPresent()) {
+            LOGGER.warn("There was a validation error: {}", majorVersionAvailabilityError.get());
+            throw new BadRequestException(majorVersionAvailabilityError.get());
         }
     }
 

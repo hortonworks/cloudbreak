@@ -14,12 +14,22 @@ public class PlatformDatabaseCapabilitiesResponse {
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private final Map<String, String> regionDefaultInstances;
 
-    public PlatformDatabaseCapabilitiesResponse(Map<String, List<String>> includedRegions, Map<String, String> regionDefaultInstances) {
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private final Map<String, Map<String, List<String>>> regionUpgradeVersions;
+
+    public PlatformDatabaseCapabilitiesResponse(Map<String, List<String>> includedRegions, Map<String, String> regionDefaultInstances,
+            Map<String, Map<String, List<String>>> regionUpgradeVersions) {
         this.includedRegions = includedRegions;
         this.regionDefaultInstances = regionDefaultInstances;
+        this.regionUpgradeVersions = regionUpgradeVersions;
+    }
+
+    public PlatformDatabaseCapabilitiesResponse(Map<String, List<String>> includedRegions, Map<String, String> regionDefaultInstances) {
+        this(includedRegions, regionDefaultInstances, new HashMap<>());
     }
 
     public PlatformDatabaseCapabilitiesResponse() {
+        this.regionUpgradeVersions = new HashMap<>();
         this.includedRegions = new HashMap<>();
         this.regionDefaultInstances = new HashMap<>();
     }
@@ -32,11 +42,16 @@ public class PlatformDatabaseCapabilitiesResponse {
         return regionDefaultInstances;
     }
 
+    public Map<String, Map<String, List<String>>> getRegionUpgradeVersions() {
+        return regionUpgradeVersions;
+    }
+
     @Override
     public String toString() {
         return "PlatformDatabaseCapabilitiesResponse{" +
                 "includedRegions=" + includedRegions +
-                ",regionDefaultInstances=" + regionDefaultInstances +
+                ", regionDefaultInstances=" + regionDefaultInstances +
+                ", regionUpgradeVersions=" + regionUpgradeVersions +
                 '}';
     }
 }

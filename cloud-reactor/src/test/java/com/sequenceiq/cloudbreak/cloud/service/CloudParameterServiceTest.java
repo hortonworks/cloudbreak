@@ -70,7 +70,7 @@ class CloudParameterServiceTest {
 
     @Test
     void getDatabaseCapabilities() {
-        PlatformDatabaseCapabilities expected = new PlatformDatabaseCapabilities(new HashMap<>(), null);
+        PlatformDatabaseCapabilities expected = new PlatformDatabaseCapabilities(new HashMap<>(), null, new HashMap<>());
         GetPlatformDatabaseCapabilityResult response = new GetPlatformDatabaseCapabilityResult(1L, expected);
         doAnswer(invocation -> {
             Event<GetPlatformDatabaseCapabilityRequest> ev = invocation.getArgument(1);

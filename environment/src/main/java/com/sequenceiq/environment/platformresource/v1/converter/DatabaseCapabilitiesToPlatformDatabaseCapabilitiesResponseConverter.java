@@ -36,6 +36,11 @@ public class DatabaseCapabilitiesToPlatformDatabaseCapabilitiesResponseConverter
             String region = typeEntry.getKey().getValue();
             defaultTypes.put(region, typeEntry.getValue());
         }
-        return new PlatformDatabaseCapabilitiesResponse(includedRegions, defaultTypes);
+        Map<String, Map<String, List<String>>> regionUpgradeVersions = new HashMap<>();
+        for (Map.Entry<Region, Map<String, List<String>>> upgradeEntry : source.getSupportedServerVersionsToUpgrade().entrySet()) {
+            String region = upgradeEntry.getKey().getRegionName();
+            regionUpgradeVersions.put(region, upgradeEntry.getValue());
+        }
+        return new PlatformDatabaseCapabilitiesResponse(includedRegions, defaultTypes, regionUpgradeVersions);
     }
 }

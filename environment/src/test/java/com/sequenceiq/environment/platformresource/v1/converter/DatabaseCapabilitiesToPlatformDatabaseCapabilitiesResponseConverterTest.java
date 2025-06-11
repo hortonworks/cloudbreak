@@ -30,8 +30,8 @@ class DatabaseCapabilitiesToPlatformDatabaseCapabilitiesResponseConverterTest {
         regionDefaultInstanceTypeMap.put(region("region2"), "big");
         regionDefaultInstanceTypeMap.put(region("region3"), "big");
         PlatformDatabaseCapabilities source = new PlatformDatabaseCapabilities(
-                enabledRegions, regionDefaultInstanceTypeMap
-        );
+                enabledRegions, regionDefaultInstanceTypeMap,
+                new HashMap<>());
         PlatformDatabaseCapabilitiesResponse response = converter.convert(source);
 
 
