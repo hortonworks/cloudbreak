@@ -34,7 +34,7 @@ ext {
   dnsjavaVersion = '3.6.0'
   httpClientVersion = '5.2.1'
   nettyVersion = '4.2.2.Final'
-  reactorNettyHttp = '1.2.5'
+  reactorNettyHttp = '1.2.7'
   okhttpVersion = '4.12.0'
   tomcatVersion = '10.1.41'
 
