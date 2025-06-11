@@ -1,6 +1,6 @@
 {%- set cmd_list = [] %}
 {%- for lb in salt['pillar.get']('gateway:loadbalancers:frontends') %}
-  {%- if lb['type'] == 'GATEWAY_PRIVATE' or lb['type'] == 'PRIVATE' %}
+  {%- if lb['type'] == 'GATEWAY_PRIVATE' or lb['type'] == 'PRIVATE' or salt['pillar.get']('platform') == 'GCP' %}
     {%- set _ = cmd_list.append("/usr/sbin/ip addr add " + lb['ip'] + "/32 dev lo:0") %}
     {%- if not loop.last %}
       {%- set _ = cmd_list.append("; ") %}
