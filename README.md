@@ -522,10 +522,11 @@ CB_AWS_GOV_ACCOUNT_ID=
 After importing the `cloudbreak` repo root, launch the Remote Environment application by executing the `com.sequenceiq.remoteenvironment.RemoteEnvironmentApplication` class (set `Use classpath of module` to `cloudbreak.remoteenvironment.main`) with the following JVM options. 
 Please do not forget to replace `<VAULT_ROOT_TOKEN>` with the value of `VAULT_ROOT_TOKEN` respectively from the `Profile` file.
 
-#### JVM options for local development setup with local cluster-proxy and mocked remote-cluster service endpoints
+#### JVM options for local development setup with mocked cluster-proxy and remote-cluster service endpoints
 ```
 -Dremoteenvironment.identity.server.url=http://localhost:8092
 -Dserver.port=8092
+-DclusterProxy.url=http://localhost:8080/cluster-proxy/
 -Dvault.root.token=<VAULT_ROOT_TOKEN>
 ```
 
@@ -535,7 +536,7 @@ Please do not forget to replace `<VAULT_ROOT_TOKEN>` with the value of `VAULT_RO
 ```
 -Dremoteenvironment.identity.server.url=http://localhost:8092
 -Dserver.port=8092
--Daltus.ums.host=usermanagement.internal-insecure.dps.mow-dev.cloudera.com
+-Daltus.ums.host=ums.thunderhead-dev.cloudera.com
 -Dvault.root.token=<VAULT_ROOT_TOKEN>
 -Dremotecluster.host=localhost
 -Dremotecluster.port=9983
@@ -593,7 +594,6 @@ After importing the `cloudbreak` repo root, launch the Thunderhead Mock applicat
 
 ```
 -Dauth.config.dir=<CBD_LOCAL_ETC>
--Dvault.root.token=<VAULT_ROOT_TOKEN>
 ```
 
 Replace `<CBD_LOCAL_ETC>` with the full path of your `cbd-local/etc` directory that shall already contain the Cloudera Manager license file `license.txt`.
