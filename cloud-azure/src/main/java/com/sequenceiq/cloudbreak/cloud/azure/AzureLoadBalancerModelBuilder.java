@@ -111,9 +111,9 @@ public class AzureLoadBalancerModelBuilder {
     private List<AzureOutboundRule> collectOutboundRules(CloudLoadBalancer cloudLoadBalancer) {
         if (LoadBalancerType.OUTBOUND.equals(cloudLoadBalancer.getType())) {
             return cloudLoadBalancer.getPortToTargetGroupMapping()
-                    .entrySet().stream()
-                    .map(entry -> {
-                        Group firstGroup = entry.getValue().stream().findFirst().orElse(null);
+                    .values().stream()
+                    .map(groups -> {
+                        Group firstGroup = groups.stream().findFirst().orElse(null);
                         return new AzureOutboundRule(firstGroup);
                     })
                     .collect(toList());

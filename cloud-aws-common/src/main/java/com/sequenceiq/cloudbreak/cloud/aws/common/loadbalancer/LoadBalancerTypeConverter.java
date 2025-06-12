@@ -45,12 +45,9 @@ public class LoadBalancerTypeConverter {
     }
 
     public LoadBalancerType convert(LoadBalancerSchemeEnum type) {
-        switch (type) {
-            case INTERNET_FACING:
-                return LoadBalancerType.PUBLIC;
-            case INTERNAL:
-            default:
-                return LoadBalancerType.PRIVATE;
-        }
+        return switch (type) {
+            case INTERNET_FACING -> LoadBalancerType.PUBLIC;
+            default -> LoadBalancerType.PRIVATE;
+        };
     }
 }
