@@ -13,6 +13,7 @@ After=network.target
 
 [Service]
 Type=oneshot
+RemainAfterExit=yes
 User=root
 ExecStart=/bin/bash -c '{{ cmd_list | join("") }}'
 
