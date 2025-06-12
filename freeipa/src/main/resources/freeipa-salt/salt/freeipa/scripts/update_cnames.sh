@@ -119,7 +119,7 @@ echo "$FPW" | kinit "$ADMIN_USER"
 addCname kdc "$LOADBALANCED_ENDPOINT.$DOMAIN."
 addCname kerberos "$LOADBALANCED_ENDPOINT.$DOMAIN."
 addCname ldap "$LOADBALANCED_ENDPOINT.$DOMAIN."
-addCname freeipa "$LOADBALANCED_ENDPOINT.$DOMAIN."
+addCname freeipa "ipa-ca.$DOMAIN."
 
 addHost "ldap.$DOMAIN"
 addService "ldap/ldap.$DOMAIN"
