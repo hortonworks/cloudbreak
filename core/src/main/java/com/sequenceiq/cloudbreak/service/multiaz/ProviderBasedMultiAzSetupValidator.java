@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -87,14 +88,17 @@ public class ProviderBasedMultiAzSetupValidator {
         boolean atLeastOneZoneDefinedForAllTheGroups = stack.getInstanceGroups().stream()
                 .allMatch(group -> CollectionUtils.isNotEmpty(group.getAvailabilityZones()));
         boolean anyZoneConfiguredOnGroupLevel = stack.getInstanceGroups().stream().anyMatch(group -> CollectionUtils.isNotEmpty(group.getAvailabilityZones()));
-        boolean multipleSubnetsConfiguredOnAnyGroupLevel = stack.getInstanceGroups().stream().anyMatch(this::isInstanceGroupHasMultipleSubnets);
+        boolean atLeastOneSubnetDefinedForAllTheGroups = false;
         if (!stack.isMultiAz()) {
-            if (atLeastOneZoneDefinedForAllTheGroups
-                    || (AWS.name().equals(stack.getCloudPlatform()) && multipleSubnetsConfiguredOnAnyGroupLevel)) {
+            if (AWS.name().equals(stack.getCloudPlatform())) {
+                atLeastOneZoneDefinedForAllTheGroups = false;
+                atLeastOneSubnetDefinedForAllTheGroups = setMultiAzFlagBasedOnSubnets(stack, validationBuilder);
+            }
+            if (atLeastOneZoneDefinedForAllTheGroups || atLeastOneSubnetDefinedForAllTheGroups) {
                 LOGGER.debug("Enabling the multi-AZ flag on the stack, because the instance group level network settings indicate that.");
                 stackService.updateMultiAzFlag(stack.getId(), Boolean.TRUE);
                 stack.setMultiAz(Boolean.TRUE);
-            } else if (anyZoneConfiguredOnGroupLevel) {
+            } else if (anyZoneConfiguredOnGroupLevel && !AWS.name().equals(stack.getCloudPlatform())) {
                 String msg = "The multi-AZ flag was not enabled, but zones were provided on some of the groups of the deployment. " +
                         "Please use the multi-AZ flag or set explicit zone(s) for all the groups of the deployment!";
                 LOGGER.info(msg);
@@ -103,19 +107,32 @@ public class ProviderBasedMultiAzSetupValidator {
         }
     }
 
-    private boolean isInstanceGroupHasMultipleSubnets(InstanceGroup instanceGroup) {
+    private boolean setMultiAzFlagBasedOnSubnets(Stack stack, ValidationResultBuilder validationBuilder) {
+        Set<String> subnetIds = new HashSet<>();
+        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+            List<String> subnetIdsForInstanceGroup = getSubnetIdsForInstanceGroups(instanceGroup);
+            if (subnetIdsForInstanceGroup.isEmpty()) {
+                String message = String.format("There were no SubnetIds defined for this Instance Group: %s.", instanceGroup.getGroupName());
+                LOGGER.info(message);
+                validationBuilder.error(message);
+                return false;
+            }
+            subnetIds.addAll(subnetIdsForInstanceGroup);
+        }
+        return subnetIds.size() > 1;
+    }
+
+    private List<String> getSubnetIdsForInstanceGroups(InstanceGroup instanceGroup) {
         InstanceGroupNetwork instanceGroupNetwork = instanceGroup.getInstanceGroupNetwork();
         if (instanceGroupNetwork != null) {
             Json attributes = instanceGroupNetwork.getAttributes();
             if (attributes != null) {
-                List<String> subnetIds = (List<String>) attributes
+                return (List<String>) attributes
                         .getMap()
                         .getOrDefault(NetworkConstants.SUBNET_IDS, new ArrayList<>());
-
-                return subnetIds.size() > 1;
             }
         }
-        return false;
+        return List.of();
     }
 
     public AvailabilityZoneConnector getAvailabilityZoneConnector(StackView stack) {

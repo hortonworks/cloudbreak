@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -60,6 +61,8 @@ class ProviderBasedMultiAzSetupValidatorTest {
 
     private static final String NO_AVAILABILITY_ZONE_CONFIGURED_ON_ENV = "No availability zone configured on the environment, " +
             "multi/targeted availability zone could not be requested.";
+
+    private static final String NO_SUBNET_PRESENT_FOR_INSTANCE_GROUP = "There were no SubnetIds defined for this Instance Group: is3.";
 
     private static final String STACK_MULTAZ_DISABLED_SOME_GROUPS_AZ_CONFIGURED = "The multi-AZ flag was not enabled, but zones were provided " +
             "on some of the groups of the deployment. Please use the multi-AZ flag or set explicit zone(s) for all the groups of the deployment!";
@@ -124,12 +127,97 @@ class ProviderBasedMultiAzSetupValidatorTest {
     }
 
     @Test
+    void testValidateWhenAwsStackDoNotHaveSubnetsForOneInstanceGroup() {
+        Stack stack = TestUtil.stack();
+        stack.setCloudPlatform(CloudPlatform.AWS.name());
+        stack.setMultiAz(Boolean.FALSE);
+        stack.getInstanceGroups().forEach(ig -> {
+            InstanceGroupNetwork ign = new InstanceGroupNetwork();
+            ign.setAttributes(new Json("{\"subnetIds\": [\"subnet1\", \"subnet2\"]}"));
+            if (!Objects.equals(ig.getGroupName(), "is3")) {
+                ig.setInstanceGroupNetwork(ign);
+            }
+        });
+        underTest.validate(resultBuilder, stack);
+        verify(resultBuilder).error(NO_SUBNET_PRESENT_FOR_INSTANCE_GROUP);
+    }
+
+    @Test
+    void testValidateWhenAwsStackHasDifferentSubnetsForDifferentInstanceGroupsAndEnableMultiAz() {
+        Stack stack = TestUtil.stack();
+        CloudConnector cloudConnector = mock(CloudConnector.class);
+        stack.setCloudPlatform(CloudPlatform.AWS.name());
+        stack.setMultiAz(Boolean.FALSE);
+        stack.getInstanceGroups().forEach(ig -> {
+            if (Objects.equals(ig.getGroupName(), "is1")) {
+                InstanceGroupNetwork ign = new InstanceGroupNetwork();
+                ign.setAttributes(new Json("{\"subnetIds\": [\"subnet1\"]}"));
+                ig.setInstanceGroupNetwork(ign);
+            } else if (Objects.equals(ig.getGroupName(), "is2")) {
+                InstanceGroupNetwork ign = new InstanceGroupNetwork();
+                ign.setAttributes(new Json("{\"subnetIds\": [\"subnet2\"]}"));
+                ig.setInstanceGroupNetwork(ign);
+            } else if (Objects.equals(ig.getGroupName(), "is3")) {
+                InstanceGroupNetwork ign = new InstanceGroupNetwork();
+                ign.setAttributes(new Json("{\"subnetIds\": [\"subnet2\"]}"));
+                ig.setInstanceGroupNetwork(ign);
+            }
+        });
+
+        AvailabilityZoneConnector zoneConnector = mock(AvailabilityZoneConnector.class);
+        when(cloudConnector.availabilityZoneConnector()).thenReturn(zoneConnector);
+        when(zoneConnector.getAvailabilityZones(any(), any(), any(), any())).thenReturn(Set.of("az1", "az2"));
+        when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
+        LocationResponse locationResponse = new LocationResponse();
+        locationResponse.setName("aRegion");
+
+        CloudSubnet cloudSubnet1 = new CloudSubnet();
+        cloudSubnet1.setAvailabilityZone("az1");
+        cloudSubnet1.setId("subnet1");
+        CloudSubnet cloudSubnet2 = new CloudSubnet();
+        cloudSubnet2.setAvailabilityZone("az2");
+        cloudSubnet2.setId("subnet2");
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setNetwork(EnvironmentNetworkResponse.builder()
+                .withSubnetMetas(Map.of("subnet1", cloudSubnet1, "subnet2", cloudSubnet2))
+                .build());
+        detailedEnvironmentResponse.setCredential(new CredentialResponse());
+        detailedEnvironmentResponse.setLocation(locationResponse);
+        when(environmentClientService.getByCrn(any())).thenReturn(detailedEnvironmentResponse);
+        when(credentialConverter.convert(any(CredentialResponse.class))).thenReturn(Credential.builder().build());
+        when(extendedCloudCredentialConverter.convert(any()))
+                .thenReturn(new ExtendedCloudCredential(new CloudCredential(), null, null, null, null));
+
+        underTest.validate(resultBuilder, stack);
+
+        verify(stackService).updateMultiAzFlag(stack.getId(), Boolean.TRUE);
+        verifyNoInteractions(resultBuilder);
+    }
+
+    @Test
+    void testValidateWhenAwsStackHasSameSubnetForAllInstanceGroups() {
+        Stack stack = TestUtil.stack();
+        stack.setCloudPlatform(CloudPlatform.AWS.name());
+        stack.setMultiAz(Boolean.FALSE);
+        stack.getInstanceGroups().forEach(ig -> {
+            InstanceGroupNetwork ign = new InstanceGroupNetwork();
+            ign.setAttributes(new Json("{\"subnetIds\": [\"subnet1\"]}"));
+            ig.setInstanceGroupNetwork(ign);
+        });
+        underTest.validate(resultBuilder, stack);
+
+        verify(stackService, times(0)).updateMultiAzFlag(stack.getId(), Boolean.TRUE);
+        verifyNoInteractions(resultBuilder);
+    }
+
+    @Test
     void testValidateWhenAwsStackHasMultipleSubnetsForInstanceGroupAndMultiAzDisabledForStack() {
         Stack stack = TestUtil.stack();
         CloudConnector cloudConnector = mock(CloudConnector.class);
         stack.setCloudPlatform(CloudPlatform.AWS.name());
         stack.setMultiAz(Boolean.FALSE);
         stack.getInstanceGroups().forEach(ig -> {
+            ig.setInstanceGroupType(InstanceGroupType.GATEWAY);
             InstanceGroupNetwork ign = new InstanceGroupNetwork();
             ign.setAttributes(new Json("{\"subnetIds\": [\"subnet1\", \"subnet2\"]}"));
             if (InstanceGroupType.GATEWAY.equals(ig.getInstanceGroupType())) {
