@@ -191,6 +191,8 @@ public class FreeIpaUpscaleActions {
             @Override
             protected void doExecute(StackContext context, UpscaleEvent payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
+                LOGGER.info("Starting upscale {}", payload);
+                stackUpdater.updateStackStatus(stack, getInProgressStatus(variables), "Starting upscale");
                 String operationId = payload.getOperationId();
                 setOperationId(variables, operationId);
                 setInstanceCountByGroup(variables, payload.getInstanceCountByGroup());
@@ -198,8 +200,6 @@ public class FreeIpaUpscaleActions {
                 setChainedAction(variables, payload.isChained());
                 setFinalChain(variables, payload.isFinalChain());
                 setInstanceIds(variables, payload.getInstanceIds());
-                LOGGER.info("Starting upscale {}", payload);
-                stackUpdater.updateStackStatus(stack, getInProgressStatus(variables), "Starting upscale");
                 instanceGroupAttributeAndStackTemplateUpdater.updateInstanceGroupAttributesAndTemplateIfDefaultDifferent(context, stack);
                 sendEvent(context, UPSCALE_STARTING_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
             }
@@ -324,10 +324,10 @@ public class FreeIpaUpscaleActions {
                     sendEvent(context, new ImageFallbackFailed(payload.getResourceId(), new Exception("Image fallback started second time!")));
                 } else {
                     Stack stack = context.getStack();
-                    instanceMetaDataService.updateInstanceStatusOnUpscaleFailure(stack.getNotDeletedInstanceMetaDataSet());
                     String notificationMessage = payload.getNotificationMessage();
                     stackUpdater.updateStackStatus(stack, getInProgressStatus(variables),
                             StringUtils.isEmpty(notificationMessage) ? "Image fallback initiated" : notificationMessage);
+                    instanceMetaDataService.updateInstanceStatusOnUpscaleFailure(stack.getNotDeletedInstanceMetaDataSet());
 
                     sendEvent(context, new StackEvent(IMAGE_FALLBACK_START_EVENT.event(), payload.getResourceId()));
                 }
@@ -760,17 +760,17 @@ public class FreeIpaUpscaleActions {
             protected void doExecute(StackContext context, UpscaleFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.error("Upscale failed with payload: {}", payload);
                 Stack stack = context.getStack();
+                String errorReason = getErrorReason(payload.getException());
+                stackUpdater.updateStackStatus(context.getStack(), getFailedStatus(variables), errorReason);
                 String environmentCrn = stack.getEnvironmentCrn();
                 SuccessDetails successDetails = new SuccessDetails(environmentCrn);
                 successDetails.getAdditionalDetails()
                         .put(payload.getFailedPhase(), payload.getSuccess() == null ? List.of() : new ArrayList<>(payload.getSuccess()));
-                String errorReason = getErrorReason(payload.getException());
                 String message = "Upscale failed during [" + payload.getFailedPhase() + "]. Reason: " + errorReason;
                 FailureDetails failureDetails = new FailureDetails(environmentCrn, message);
                 if (payload.getFailureDetails() != null) {
                     failureDetails.getAdditionalDetails().putAll(payload.getFailureDetails());
                 }
-                stackUpdater.updateStackStatus(context.getStack(), getFailedStatus(variables), errorReason);
                 operationService.failOperation(stack.getAccountId(), getOperationId(variables), message, List.of(successDetails), List.of(failureDetails));
                 instanceMetaDataService.updateInstanceStatusOnUpscaleFailure(stack.getNotDeletedInstanceMetaDataSet());
                 enableStatusChecker(stack, "Failed upscaling FreeIPA");

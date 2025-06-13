@@ -8,6 +8,7 @@ import jakarta.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
@@ -49,7 +50,13 @@ public class StackUpdater {
     }
 
     public Stack updateStackStatus(Stack stack, DetailedStackStatus detailedStatus, String statusReason) {
-        return doUpdateStackStatus(stack, detailedStatus, statusReason);
+        try {
+            return doUpdateStackStatus(stack, detailedStatus, statusReason);
+        } catch (ObjectOptimisticLockingFailureException e) {
+            LOGGER.warn("Updating stack [{}] status to [{} - {}] failed due to [{}]. Retrying with refetching stack",
+                    stack.getResourceCrn(), detailedStatus, statusReason, e.getMessage(), e);
+            return doUpdateStackStatus(stack.getId(), detailedStatus, statusReason);
+        }
     }
 
     public Stack updateStackSecurityConfig(Stack stack, SecurityConfig securityConfig) {

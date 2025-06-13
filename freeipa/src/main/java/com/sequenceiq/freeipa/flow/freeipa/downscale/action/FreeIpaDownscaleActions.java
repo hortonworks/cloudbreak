@@ -112,6 +112,7 @@ public class FreeIpaDownscaleActions {
             @Override
             protected void doExecute(StackContext context, DownscaleEvent payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
+                stackUpdater.updateStackStatus(stack, getInProgressStatus(variables), "Starting downscale");
                 List<String> instanceIds = payload.getInstanceIds();
                 setInstanceIds(variables, instanceIds);
                 String operationId = payload.getOperationId();
@@ -126,7 +127,6 @@ public class FreeIpaDownscaleActions {
                 setFinalChain(variables, payload.isFinalChain());
                 setInstanceCountByGroup(variables, payload.getInstanceCountByGroup());
                 LOGGER.info("Starting downscale {}", payload);
-                stackUpdater.updateStackStatus(stack, getInProgressStatus(variables), "Starting downscale");
                 sendEvent(context, STARTING_DOWNSCALE_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
             }
         };
@@ -299,8 +299,8 @@ public class FreeIpaDownscaleActions {
         return new AbstractDownscaleAction<>(DownscaleStackResult.class) {
             @Override
             protected void doExecute(StackContext context, DownscaleStackResult payload, Map<Object, Object> variables) {
-                CleanupEvent cleanupEvent = buildCleanupEvent(context, getDownscaleHosts(variables));
                 stackUpdater.updateStackStatus(context.getStack(), getInProgressStatus(variables), "Removing servers");
+                CleanupEvent cleanupEvent = buildCleanupEvent(context, getDownscaleHosts(variables));
                 RemoveServersRequest request = new RemoveServersRequest(cleanupEvent);
                 sendEvent(context, request);
             }
@@ -312,8 +312,8 @@ public class FreeIpaDownscaleActions {
         return new AbstractDownscaleAction<>(RemoveServersResponse.class) {
             @Override
             protected void doExecute(StackContext context, RemoveServersResponse payload, Map<Object, Object> variables) {
-                CleanupEvent cleanupEvent = buildCleanupEvent(context, getDownscaleHosts(variables));
                 stackUpdater.updateStackStatus(context.getStack(), getInProgressStatus(variables), "Removing servers");
+                CleanupEvent cleanupEvent = buildCleanupEvent(context, getDownscaleHosts(variables));
                 RemoveReplicationAgreementsRequest request = new RemoveReplicationAgreementsRequest(cleanupEvent);
                 sendEvent(context, request);
             }
@@ -497,6 +497,8 @@ public class FreeIpaDownscaleActions {
             protected void doExecute(StackContext context, DownscaleFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.error("Downscale failed with payload: " + payload);
                 Stack stack = context.getStack();
+                String errorReason = getErrorReason(payload.getException());
+                stackUpdater.updateStackStatus(context.getStack(), getFailedStatus(variables), errorReason);
                 String environmentCrn = stack.getEnvironmentCrn();
                 SuccessDetails successDetails = new SuccessDetails(environmentCrn);
                 successDetails.getAdditionalDetails()
@@ -506,8 +508,6 @@ public class FreeIpaDownscaleActions {
                 if (payload.getFailureDetails() != null) {
                     failureDetails.getAdditionalDetails().putAll(payload.getFailureDetails());
                 }
-                String errorReason = getErrorReason(payload.getException());
-                stackUpdater.updateStackStatus(context.getStack(), getFailedStatus(variables), errorReason);
                 operationService.failOperation(stack.getAccountId(), getOperationId(variables), message, List.of(successDetails), List.of(failureDetails));
                 enableStatusChecker(stack, "Failed downscaling FreeIPA");
                 sendEvent(context, FAIL_HANDLED_EVENT.event(), payload);
