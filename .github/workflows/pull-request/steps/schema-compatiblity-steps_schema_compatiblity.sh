@@ -29,7 +29,7 @@ main() {
     rm -rf integration-test/integcb/.schema
 
     cd integration-test
-    echo "Bring up schema with target $ghprbTargetBranch "
+    echo "Bring up schema with target $BRANCH "
     VERSION=$(get_latest_version) TARGET_BRANCH=$BRANCH make bring-up-schema
     cd ..
 

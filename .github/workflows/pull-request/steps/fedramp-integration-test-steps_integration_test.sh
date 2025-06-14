@@ -20,8 +20,8 @@ main() {
   VERSION=$(get_latest_version) TARGET_BRANCH=$BRANCH make without-build
   RESULT=$?
   if [[ $(sudo find integration-test/dumps -name "*.hprof" | tail -1) ]]; then
-      sudo cp -v $(sudo find integration-test/dumps -name "*.hprof" | tail -1) .
-      sudo chown -R $(whoami) integration-test/dumps/*.hprof
+    sudo cp -v $(sudo find integration-test/dumps -name "*.hprof" | tail -1) .
+    sudo chown -R $(whoami) integration-test/dumps/*.hprof
   fi
   if [[ $RESULT -eq 0 ]]; then
       make revert-db

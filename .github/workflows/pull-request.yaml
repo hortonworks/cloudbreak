@@ -966,10 +966,7 @@ jobs:
           export INTEGRATIONTEST_UMS_DEPLOYMENTKEY=dev
           export INTEGRATIONTEST_UMS_ACCOUNTKEY=e2e_eu
           export INTEGRATIONTEST_UMS_JSONSECRET_DESTINATIONPATH=./src/main/resources/ums-users/api-credentials.json
-
           echo $REAL_UMS_USERS_DEV
-          
-
 
           make real-ums-test-steps_real_ums_test
 
@@ -1011,4 +1008,167 @@ jobs:
         if: steps.real_ums_test.outcome == 'failure'
         run: |
           echo "Real UMS test failed, now failing the job."
+          exit 1
+  aws-test:
+    permissions: write-all
+    name: Aws Test
+    runs-on: [ cb-ubuntu22-large ]
+    timeout-minutes: 90
+
+    steps:
+      - name: checkout
+        id: checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: setup_secrets
+        id: build_secrets
+        uses: Kitchen/RE-thirdparty-actions/actions/vault@main
+        with:
+          tlsSkipVerify: true
+          url: https://re-vault.infra.cloudera.com/
+          method: kubernetes
+          path: rke_re_jenkins
+          role: cb
+          secrets: |
+            cb/data/CM_PRIVATE_REPO_PASSWORD CM_PRIVATE_REPO_PASSWORD | CM_PRIVATE_REPO_PASSWORD;
+            cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
+            cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
+            cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
+            cb/data/GITHUB_TOKEN GITHUB_TOKEN | GITHUB_TOKEN;
+            cb/data/JIRA_TOKEN JIRA_TOKEN | JIRA_TOKEN;
+            cb/data/INTEGRATIONTEST_AWS_CREDENTIAL_ROLEARN INTEGRATIONTEST_AWS_CREDENTIAL_ROLEARN | INTEGRATIONTEST_AWS_CREDENTIAL_ROLEARN;
+            cb/data/INTEGRATIONTEST_AWS_CREDENTIAL_SECRETKEY INTEGRATIONTEST_AWS_CREDENTIAL_SECRETKEY | INTEGRATIONTEST_AWS_CREDENTIAL_SECRETKEY;
+            cb/data/INTEGRATIONTEST_AWS_CREDENTIAL_ACCESSKEYID INTEGRATIONTEST_AWS_CREDENTIAL_ACCESSKEYID | INTEGRATIONTEST_AWS_CREDENTIAL_ACCESSKEYID;
+            cb/data/INTEGRATIONTEST_RDSCONFIG_RDSUSER INTEGRATIONTEST_RDSCONFIG_RDSUSER | INTEGRATIONTEST_RDSCONFIG_RDSUSER;
+            cb/data/INTEGRATIONTEST_RDSCONFIG_RDSPASSWORD INTEGRATIONTEST_RDSCONFIG_RDSPASSWORD | INTEGRATIONTEST_RDSCONFIG_RDSPASSWORD;
+            cb/data/INTEGRATIONTEST_RDSCONFIG_RDSCONNECTIONURL INTEGRATIONTEST_RDSCONFIG_RDSCONNECTIONURL | INTEGRATIONTEST_RDSCONFIG_RDSCONNECTIONURL;
+            cb/data/INTEGRATIONTEST_LDAPCONFIG_LDAPSERVERHOST INTEGRATIONTEST_LDAPCONFIG_LDAPSERVERHOST | INTEGRATIONTEST_LDAPCONFIG_LDAPSERVERHOST;
+            cb/data/INTEGRATIONTEST_LDAPCONFIG_BINDPASSWORD INTEGRATIONTEST_LDAPCONFIG_BINDPASSWORD | INTEGRATIONTEST_LDAPCONFIG_BINDPASSWORD;
+            cb/data/INTEGRATIONTEST_AWS_DISKENCRYPTIONKEY INTEGRATIONTEST_AWS_DISKENCRYPTIONKEY | INTEGRATIONTEST_AWS_DISKENCRYPTIONKEY;
+            cb/data/INTEGRATIONTEST_AWS_DISKENCRYPTION_ENVIRONMENTKEY INTEGRATIONTEST_AWS_DISKENCRYPTION_ENVIRONMENTKEY | INTEGRATIONTEST_AWS_DISKENCRYPTION_ENVIRONMENTKEY;
+            cb/data/INTEGRATIONTEST_AWS_DISKENCRYPTION_DATAHUBKEY INTEGRATIONTEST_AWS_DISKENCRYPTION_DATAHUBKEY | INTEGRATIONTEST_AWS_DISKENCRYPTION_DATAHUBKEY;
+            cb/data/INTEGRATIONTEST_AWS_CLOUDSTORAGE_S3_INSTANCEPROFILE INTEGRATIONTEST_AWS_CLOUDSTORAGE_S3_INSTANCEPROFILE | INTEGRATIONTEST_AWS_CLOUDSTORAGE_S3_INSTANCEPROFILE;
+            cb/data/INTEGRATIONTEST_AWS_ACCOUNTID INTEGRATIONTEST_AWS_ACCOUNTID | INTEGRATIONTEST_AWS_ACCOUNTID;
+            cb/data/INTEGRATIONTEST_DATABASE_CONNECTIONURL INTEGRATIONTEST_DATABASE_CONNECTIONURL | INTEGRATIONTEST_DATABASE_CONNECTIONURL;
+            cb/data/INTEGRATIONTEST_PROXY_HOST INTEGRATIONTEST_PROXY_HOST | INTEGRATIONTEST_PROXY_HOST;
+            cb/data/INTEGRATIONTEST_PROXY_PORT INTEGRATIONTEST_PROXY_PORT | INTEGRATIONTEST_PROXY_PORT;
+            cb/data/INTEGRATIONTEST_PROXY_NOPROXYHOSTS INTEGRATIONTEST_PROXY_NOPROXYHOSTS | INTEGRATIONTEST_PROXY_NOPROXYHOSTS;
+            cb/data/INTEGRATIONTEST_PROXY_USER INTEGRATIONTEST_PROXY_USER | INTEGRATIONTEST_PROXY_USER;
+            cb/data/INTEGRATIONTEST_PROXY_PASSWORD INTEGRATIONTEST_PROXY_PASSWORD | INTEGRATIONTEST_PROXY_PASSWORD;
+            cb/data/INTEGRATIONTEST_PROXY_USER2 INTEGRATIONTEST_PROXY_USER2 | INTEGRATIONTEST_PROXY_USER2;
+            cb/data/INTEGRATIONTEST_PROXY_PASSWORD2 INTEGRATIONTEST_PROXY_PASSWORD2 | INTEGRATIONTEST_PROXY_PASSWORD2;
+            cb/data/INTEGRATIONTEST_AWS_CLOUDSTORAGE_BASELOCATION INTEGRATIONTEST_AWS_CLOUDSTORAGE_BASELOCATION | INTEGRATIONTEST_AWS_CLOUDSTORAGE_BASELOCATION;
+            cb/data/SEQ_PUB_FILE SEQ_PUB_FILE|SEQ_PUB_FILE;
+            cb/data/SEQ_PRIV_FILE SEQ_PRIV_FILE|SEQ_PRIV_FILE;
+      - name: cache_java_libs
+        id: cache-java
+        uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
+        env:
+          cache-name: cache-java-libs
+        with:
+          path: |
+            /home/jenkins/.gradle/caches
+            /home/jenkins/.gradle/wrapper
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
+            ${{ runner.os }}-build-${{ hashFiles('**/build.gradle') }}
+            ${{ runner.os }}-${{ hashFiles('**/build.gradle') }}
+      - if: ${{ steps.cache-java.outputs.cache-hit != 'true' }}
+        name: list_the_state_of_java_libs
+        continue-on-error: true
+        shell: bash
+        run: ./gradlew dependencies
+      - name: install_tools
+        run: |-
+          sudo apt-get update
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make uuid-runtime docker-compose-v2
+      - name: aws_test
+        continue-on-error: true
+        run: |-
+          export CM_PRIVATE_REPO_PASSWORD=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}")
+          export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
+          export DOCKERHUB_PASSWORD=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_PASSWORD}}")
+          export DOCKERHUB_USERNAME=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}")
+          export AWS=true
+          export INTEGRATIONTEST_AWS_MULTIAZ=false
+          export INTEGRATIONTEST_CLOUDPROVIDER=AWS
+          export INTEGRATIONTEST_AWS_CLOUDSTORAGE_FILESYSTEMTYPE=S3
+          export INTEGRATIONTEST_OUTPUTDIR=.
+          export INTEGRATIONTEST_IMAGECATALOGNAME=cloudbreak-default
+          export AWS_DEFAULT_REGION=eu-central-1
+          export INTEGRATIONTEST_DATABASE_CONNECTIONURL=$(echo "${{ steps.build_secrets.outputs.INTEGRATIONTEST_DATABASE_CONNECTIONURL}}")
+          export INTEGRATIONTEST_TIMEOUT=9000000
+          export INTEGRATIONTEST_UMS_HOST=thunderhead-mock
+          export INTEGRATIONTEST_UMS_PORT=8982
+          export INTEGRATIONTEST_CDL_HOST=thunderhead-mock
+          export INTEGRATIONTEST_CDL_PORT=8982
+          
+          export INTEGRATIONTEST_PROXY_HOST=$(echo "${{ steps.build_secrets.outputs.INTEGRATIONTEST_PROXY_HOST}}")
+          export INTEGRATIONTEST_PROXY_PORT=$(echo "${{ steps.build_secrets.outputs.INTEGRATIONTEST_PROXY_PORT}}")
+          export INTEGRATIONTEST_PROXY_NOPROXYHOSTS=$(echo "${{ steps.build_secrets.outputs.INTEGRATIONTEST_PROXY_NOPROXYHOSTS}}")
+          export INTEGRATIONTEST_PROXY_USER=$(echo "${{ steps.build_secrets.outputs.INTEGRATIONTEST_PROXY_USER}}")
+          export INTEGRATIONTEST_PROXY_PASSWORD=$(echo "${{ steps.build_secrets.outputs.INTEGRATIONTEST_PROXY_PASSWORD}}")
+          export INTEGRATIONTEST_PROXY_USER2=$(echo "${{ steps.build_secrets.outputs.INTEGRATIONTEST_PROXY_USER2}}")
+          export INTEGRATIONTEST_PROXY_PASSWORD2=$(echo "${{ steps.build_secrets.outputs.INTEGRATIONTEST_PROXY_PASSWORD2}}")
+
+          export INTEGRATIONTEST_AWS_CREDENTIAL_ROLEARN=$(echo "${{ steps.build_secrets.outputs.INTEGRATIONTEST_AWS_CREDENTIAL_ROLEARN}}")
+          export INTEGRATIONTEST_AWS_CREDENTIAL_SECRETKEY=$(echo "${{ steps.build_secrets.outputs.INTEGRATIONTEST_AWS_CREDENTIAL_SECRETKEY}}")
+          export INTEGRATIONTEST_AWS_CREDENTIAL_ACCESSKEYID=$(echo "${{ steps.build_secrets.outputs.INTEGRATIONTEST_AWS_CREDENTIAL_ACCESSKEYID}}")
+          export INTEGRATIONTEST_RDSCONFIG_RDSUSER=$(echo "${{ steps.build_secrets.outputs.INTEGRATIONTEST_RDSCONFIG_RDSUSER}}")
+          export INTEGRATIONTEST_RDSCONFIG_RDSPASSWORD=$(echo "${{ steps.build_secrets.outputs.INTEGRATIONTEST_RDSCONFIG_RDSPASSWORD}}")
+          export INTEGRATIONTEST_RDSCONFIG_RDSCONNECTIONURL=$(echo "${{ steps.build_secrets.outputs.INTEGRATIONTEST_RDSCONFIG_RDSCONNECTIONURL}}")
+          export INTEGRATIONTEST_LDAPCONFIG_LDAPSERVERHOST=$(echo "${{ steps.build_secrets.outputs.INTEGRATIONTEST_LDAPCONFIG_LDAPSERVERHOST}}")
+          export INTEGRATIONTEST_LDAPCONFIG_BINDPASSWORD=$(echo "${{ steps.build_secrets.outputs.INTEGRATIONTEST_LDAPCONFIG_BINDPASSWORD}}")
+          export INTEGRATIONTEST_AWS_DISKENCRYPTIONKEY=$(echo "${{ steps.build_secrets.outputs.INTEGRATIONTEST_AWS_DISKENCRYPTIONKEY}}")
+          export INTEGRATIONTEST_AWS_DISKENCRYPTION_ENVIRONMENTKEY=$(echo "${{ steps.build_secrets.outputs.INTEGRATIONTEST_AWS_DISKENCRYPTION_ENVIRONMENTKEY}}")
+          export INTEGRATIONTEST_AWS_DISKENCRYPTION_DATAHUBKEY=$(echo "${{ steps.build_secrets.outputs.INTEGRATIONTEST_AWS_DISKENCRYPTION_DATAHUBKEY}}")
+          export INTEGRATIONTEST_AWS_CLOUDSTORAGE_S3_INSTANCEPROFILE=$(echo "${{ steps.build_secrets.outputs.INTEGRATIONTEST_AWS_CLOUDSTORAGE_S3_INSTANCEPROFILE}}")
+          export INTEGRATIONTEST_AWS_ACCOUNTID=$(echo "${{ steps.build_secrets.outputs.INTEGRATIONTEST_AWS_ACCOUNTID}}")
+          export INTEGRATIONTEST_DATABASE_CONNECTIONURL=$(echo "${{ steps.build_secrets.outputs.INTEGRATIONTEST_DATABASE_CONNECTIONURL}}")
+          export INTEGRATIONTEST_AWS_CLOUDSTORAGE_BASELOCATION=$(echo "${{ steps.build_secrets.outputs.INTEGRATIONTEST_AWS_CLOUDSTORAGE_BASELOCATION}}")
+          export SEQ_PUB_FILE=$(echo "${{ steps.build_secrets.outputs.SEQ_PUB_FILE}}")
+          export SEQ_PRIV_FILE=$(echo "${{ steps.build_secrets.outputs.SEQ_PRIV_FILE}}")
+
+          make aws-test-steps_aws_test
+
+          cd integration-test
+          make compress-results
+      - name: aws_test_collect_service_artifacts
+        uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
+        if: steps.aws_test.conclusion == 'failure'
+        with:
+          name: aws-test-artifact
+          retention-days: 5
+          path: |
+            integration-test/cloudbreak.log
+            integration-test/datalake.log
+            integration-test/redbeams.log
+            integration-test/environment.log
+            integration-test/freeipa.log
+            integration-test/thunderhead-mock.log
+            integration-test/cluster-proxy.log
+            integration-test/cluster-proxy-health.log
+            integration-test/dev-gateway.log
+            integration-test/core-gateway.log
+      - name: aws_test_collect_test_artifacts
+        uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
+        if: steps.aws_test.conclusion == 'failure'
+        with:
+          name: aws-test-artifact
+          retention-days: 5
+          path: |
+            integration-test/integcb/Profile
+            integration-test/integcb/docker-compose.yml
+            integration-test/integcb/*revert.result
+            integration-test/test.out
+            integration-test/swagger-validation-result.out
+            integration-test/suites_log/*.log
+            integration-test/test-output/**/*
+            integration-test/dumps/*.hprof
+      - name: aws_test_check
+        if: steps.aws_test.outcome == 'failure'
+        run: |
+          echo "AWS test failed, now failing the job."
           exit 1

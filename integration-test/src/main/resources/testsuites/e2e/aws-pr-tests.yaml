@@ -1,0 +1,6 @@
+name: "aws-pr-tests"
+tests:
+  - name: "[pull_request]_aws_pr_e2e_tests"
+    excludedGroups: [ azure_singlerg ]
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.pullrequest.PullRequestE2ETest

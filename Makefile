@@ -133,3 +133,6 @@ fedramp-integration-test-steps_fedramp_integration_test:
 
 real-ums-test-steps_real_ums_test:
 	 ./.github/workflows/pull-request/steps/real-ums-test-steps_real_ums_test.sh
+
+aws-test-steps_aws_test:
+	 ./.github/workflows/pull-request/steps/aws-test-steps_aws_test.sh

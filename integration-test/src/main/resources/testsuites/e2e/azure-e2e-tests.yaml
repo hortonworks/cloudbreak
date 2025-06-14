@@ -2,7 +2,6 @@ name: "azure-e2e-tests"
 tests:
   - name: "azure_e2e_tests"
     classes:
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.environment.NewNetworkEnvironmentTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXEncryptedVolumeTest
         includedMethods:
           - testCreateDistroXWithEncryptedVolumesInSingleRG
