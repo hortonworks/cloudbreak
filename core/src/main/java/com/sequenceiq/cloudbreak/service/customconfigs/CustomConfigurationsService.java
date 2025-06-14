@@ -66,7 +66,9 @@ public class CustomConfigurationsService implements CompositeAuthResourcePropert
     }
 
     public List<CustomConfigurations> getAll(String accountId) {
-        return customConfigurationsRepository.findCustomConfigsByAccountId(accountId);
+        List<CustomConfigurations> customConfigsByAccountId = customConfigurationsRepository.findCustomConfigsByAccountId(accountId);
+        LOGGER.info("Retrieved {} configurations for {}", customConfigsByAccountId.size(), accountId);
+        return customConfigsByAccountId;
     }
 
     private CustomConfigurationProperty storePropertyAsSecret(CustomConfigurationProperty property) {
