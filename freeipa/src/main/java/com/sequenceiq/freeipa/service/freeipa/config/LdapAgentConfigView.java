@@ -11,8 +11,11 @@ public class LdapAgentConfigView {
 
     private final String baseDn;
 
-    public LdapAgentConfigView(String baseDn) {
+    private final boolean useTls;
+
+    public LdapAgentConfigView(String baseDn, boolean useTls) {
         this.baseDn = baseDn;
+        this.useTls = useTls;
     }
 
     public Map<String, Object> toMap() {
@@ -20,7 +23,8 @@ public class LdapAgentConfigView {
                 "port", PORT,
                 "host", HOST,
                 "ldapHost", LDAP_HOST,
-                "baseDn", baseDn
+                "baseDn", baseDn,
+                "useTls", useTls
         );
     }
 
@@ -31,6 +35,7 @@ public class LdapAgentConfigView {
                 ", host='" + HOST + '\'' +
                 ", ldapHost='" + LDAP_HOST + '\'' +
                 ", baseDn='" + baseDn + '\'' +
+                ", useTls='" + useTls + '\'' +
                 '}';
     }
 }

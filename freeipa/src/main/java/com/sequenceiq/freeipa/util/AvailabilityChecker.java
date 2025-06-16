@@ -40,14 +40,16 @@ public class AvailabilityChecker {
                     return requiredPackagesInstalled;
                 } else {
                     LOGGER.warn("PackageVersions is null in image {}", image.getUuid());
+                    return false;
                 }
             } else {
                 LOGGER.warn("Image not found");
+                return false;
             }
         } catch (ImageNotFoundException e) {
-            LOGGER.warn("Image not found: {}", e);
+            LOGGER.warn("Image not found", e);
+            return false;
         }
-        return false;
     }
 
     public boolean isPackageAvailable(Long stackId, String packageName, Versioned supportedAfter) {
@@ -76,14 +78,19 @@ public class AvailabilityChecker {
                     return new VersionComparator().compare(currentVersion, version) > 0;
                 } else {
                     LOGGER.warn("PackageVersions is null in image {}", image.getUuid());
+                    return false;
                 }
             } else {
                 LOGGER.warn("Image not found for stack {}", stack.getResourceCrn());
+                return false;
             }
         } catch (ImageNotFoundException e) {
             LOGGER.warn("Image not found for stack {}", stack.getResourceCrn(), e);
+            return false;
         }
-        return false;
     }
 
+    protected ImageService getImageService() {
+        return imageService;
+    }
 }

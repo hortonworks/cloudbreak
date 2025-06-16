@@ -58,7 +58,7 @@ public class SaltConfigProvider {
         servicePillarConfig.putAll(proxyConfigService.createProxyPillarConfig(stack));
         servicePillarConfig.putAll(tagConfigService.createTagsPillarConfig(stack));
         servicePillarConfig.putAll(getCcmPillarProperties(stack));
-        servicePillarConfig.putAll(ldapAgentConfigProvider.generateConfig(freeIpaConfigView.getDomain()));
+        servicePillarConfig.putAll(ldapAgentConfigProvider.generateConfig(stack, freeIpaConfigView.getDomain()));
         servicePillarConfig.putAll(paywallConfigService.createPaywallPillarConfig(stack));
         if (freeIpaConfigView.isSecretEncryptionEnabled()) {
             servicePillarConfig.put("cdpluksvolumebackup", new SaltPillarProperties("/cdpluksvolumebackup/init.sls",

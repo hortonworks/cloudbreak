@@ -102,7 +102,7 @@ class SaltConfigProviderTest {
         when(tagConfigService.createTagsPillarConfig(any())).thenReturn(Map.of());
         when(ccmParametersConfigService.createCcmParametersPillarConfig(eq(ENV_CRN), any())).thenReturn(
                 Map.of(PILLAR, new SaltPillarProperties(PILLARPATH, Map.of(PILLARKEY, PILLARVALUE))));
-        when(ldapAgentConfigProvider.generateConfig(DOMAIN)).thenReturn(Map.of("ldap", new SaltPillarProperties("ldappath", Map.of())));
+        when(ldapAgentConfigProvider.generateConfig(stack, DOMAIN)).thenReturn(Map.of("ldap", new SaltPillarProperties("ldappath", Map.of())));
         when(paywallConfigService.createPaywallPillarConfig(any())).thenReturn(
                 Map.of(PAYWALL_PILLAR, new SaltPillarProperties(PAYWALL_PILLAR_PATH, Map.of())));
 

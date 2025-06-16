@@ -1,4 +1,5 @@
 port: {{ pillar['ldapagent']['port'] }}
 host: '{{ pillar['ldapagent']['host'] }}'
-ldapHost: '{{ pillar['ldapagent']['ldapHost'] }}'
+ldapHost: '{{ salt['grains.get']('fqdn') }}'
 baseDn: '{{ pillar['ldapagent']['baseDn'] }}'
+useSsl: {{ pillar['ldapagent']['useTls'] | default(False) }}
