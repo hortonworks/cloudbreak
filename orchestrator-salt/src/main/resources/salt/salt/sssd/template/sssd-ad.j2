@@ -16,7 +16,6 @@ debug_level = 5
 domains = {{ pillar['sssd-ad']['domainuppercase'] }}
 config_file_version = 2
 services = nss, pam
-default_domain_suffix = {{ pillar['sssd-ad']['domainuppercase'] }}
 
 [domain/{{ pillar['sssd-ad']['domainuppercase'] }}]
 ldap_sasl_authid = {{ ad.server_hostname }}$
@@ -30,7 +29,6 @@ krb5_keytab = {{ kerberosConfigPath }}/krb5.keytab
 krb5_store_password_if_offline = True
 default_shell = /bin/bash
 ldap_id_mapping = True
-use_fully_qualified_names = True
 fallback_homedir = /home/%u
 access_provider = permit
 dyndns_update = true
