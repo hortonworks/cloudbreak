@@ -22,7 +22,6 @@ import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Service
 public class AddTrustService {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(AddTrustService.class);
 
     @Inject

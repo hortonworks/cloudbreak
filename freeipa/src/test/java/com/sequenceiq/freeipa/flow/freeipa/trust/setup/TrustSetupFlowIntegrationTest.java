@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowEventListener;
 import com.sequenceiq.flow.core.FlowRegister;
@@ -175,6 +176,7 @@ class TrustSetupFlowIntegrationTest {
 
     @Test
     void testPrepareCrossRealmTrustWhenSuccessful() {
+        when(validationService.validateTrustSetup(STACK_ID)).thenReturn(ValidationResult.builder().build());
         testFlow();
         InOrder stackStatusVerify = inOrder(stackUpdater);
 
@@ -190,7 +192,7 @@ class TrustSetupFlowIntegrationTest {
     }
 
     @Test
-    public void testValidationFails() {
+    public void testValidationFailsWithException() {
         doThrow(new CloudbreakServiceException("Cross-realm validation failed")).when(validationService).validateTrustSetup(STACK_ID);
         testFlow();
         InOrder stackStatusVerify = inOrder(stackUpdater);
@@ -205,7 +207,19 @@ class TrustSetupFlowIntegrationTest {
     }
 
     @Test
+    public void testValidationFailsWithValidationError() {
+        when(validationService.validateTrustSetup(STACK_ID)).thenReturn(ValidationResult.builder().error("error").build());
+        testFlow();
+        InOrder stackStatusVerify = inOrder(stackUpdater);
+
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, TRUST_SETUP_IN_PROGRESS, "Cross-realm trust validation");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, TRUST_SETUP_FAILED,
+                "Failed to prepare cross-realm trust FreeIPA: error");
+    }
+
+    @Test
     public void testPrepareIpaServerFails() throws CloudbreakOrchestratorFailedException {
+        when(validationService.validateTrustSetup(STACK_ID)).thenReturn(ValidationResult.builder().build());
         doThrow(new CloudbreakServiceException("Prepare IPA server failed")).when(prepareIpaServerService).prepareIpaServer(STACK_ID);
         testFlow();
         InOrder stackStatusVerify = inOrder(stackUpdater);
@@ -222,6 +236,7 @@ class TrustSetupFlowIntegrationTest {
 
     @Test
     public void testConfigureDnsServerFails() throws Exception {
+        when(validationService.validateTrustSetup(STACK_ID)).thenReturn(ValidationResult.builder().build());
         doThrow(new CloudbreakServiceException("Configure DNS server failed")).when(configureDnsServerService).configureDnsServer(STACK_ID);
         testFlow();
         InOrder stackStatusVerify = inOrder(stackUpdater);

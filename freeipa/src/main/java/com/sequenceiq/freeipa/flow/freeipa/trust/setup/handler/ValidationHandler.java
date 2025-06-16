@@ -7,7 +7,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -33,9 +35,12 @@ public class ValidationHandler extends ExceptionCatcherEventHandler<TrustSetupVa
     protected Selectable doAccept(HandlerEvent<TrustSetupValidationRequest> event) {
         TrustSetupValidationRequest request = event.getData();
         try {
-            LOGGER.info("Validate for IPA Server image trust packages");
-            validationService.validateTrustSetup(request.getResourceId());
-            return new TrustSetupValidationSuccess(request.getResourceId());
+            ValidationResult validationResult = validationService.validateTrustSetup(request.getResourceId());
+            if (validationResult.hasError()) {
+                return new TrustSetupValidationFailed(request.getResourceId(), new CloudbreakServiceException(validationResult.getFormattedErrors()));
+            } else {
+                return new TrustSetupValidationSuccess(request.getResourceId());
+            }
         } catch (Exception e) {
             LOGGER.error("Validation failed for trust setup", e);
             return new TrustSetupValidationFailed(request.getResourceId(), e);

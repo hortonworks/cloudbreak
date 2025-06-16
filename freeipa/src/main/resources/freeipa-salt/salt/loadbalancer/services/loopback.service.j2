@@ -1,10 +1,3 @@
-{%- set cmd_list = [] %}
-{%- for lb_ip in salt['pillar.get']('freeipa:loadBalancer:ips') %}
-  {%- set _ = cmd_list.append("/usr/sbin/ip addr add " + lb_ip + "/32 dev lo:0") %}
-  {%- if not loop.last %}
-    {%- set _ = cmd_list.append("; ") %}
-  {%- endif %}
-{%- endfor %}
 [Unit]
 Description=Loopback interface service
 After=network.target

@@ -1,0 +1,47 @@
+#!/bin/bash
+
+dns_name=$1
+dns_server=$2
+expected_ip=$3
+
+if [[ -z "$dns_name" ]]; then
+  echo "Missing active directory server domain parameter" >&2
+  exit 1
+fi
+
+if [[ -z "$dns_server" ]]; then
+  echo "Missing active directory dns server ip address parameter" >&2
+  exit 1
+fi
+
+if [[ -z "$expected_ip" ]]; then
+  echo "Missing active directory server ip address parameter" >&2
+  exit 1
+fi
+
+# Get all A records from the DNS server
+resolved_ips=$(dig +short @"$dns_server" "$dns_name" A)
+
+if [[ -z "$resolved_ips" ]]; then
+  echo "DNS resolution failed: No IP found for $dns_name using DNS server $dns_server" >&2
+  exit 1
+fi
+
+echo "Resolved IPs for $dns_name using DNS server $dns_server: $resolved_ips"
+
+# Check if expected IP is in the list of resolved IPs
+match_found=1
+while IFS= read -r ip; do
+  if [[ "$ip" == "$expected_ip" ]]; then
+    match_found=0
+    break
+  fi
+done <<< "$resolved_ips"
+
+if [[ $match_found -eq 0 ]]; then
+  echo "Success: Expected IP matched!"
+  exit 0
+else
+  echo "Failure: Expected IP did not match. (Expected ip: $expected_ip, Resolved ips: $resolved_ips)" >&2
+  exit 2
+fi

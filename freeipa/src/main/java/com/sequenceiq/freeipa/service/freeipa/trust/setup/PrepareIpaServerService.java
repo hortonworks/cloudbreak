@@ -1,8 +1,5 @@
 package com.sequenceiq.freeipa.service.freeipa.trust.setup;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -13,12 +10,8 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
-import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateRetryParams;
-import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteriaModel;
-import com.sequenceiq.freeipa.service.GatewayConfigService;
+import com.sequenceiq.freeipa.service.rotation.SaltStateParamsService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Service
@@ -36,29 +29,20 @@ public class PrepareIpaServerService {
     private HostOrchestrator hostOrchestrator;
 
     @Inject
-    private GatewayConfigService gatewayConfigService;
+    private StackService stackService;
 
     @Inject
-    private StackService stackService;
+    private SaltStateParamsService saltStateParamsService;
 
     public void prepareIpaServer(Long stackId) throws CloudbreakOrchestratorFailedException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-        OrchestratorStateParams stateParams = createOrchestratorStateParams(primaryGatewayConfig, stack);
+        OrchestratorStateParams stateParams = createOrchestratorStateParams(stack);
         hostOrchestrator.runOrchestratorState(stateParams);
     }
 
-    private OrchestratorStateParams createOrchestratorStateParams(GatewayConfig primaryGatewayConfig, Stack stack) {
-        OrchestratorStateParams stateParameters = new OrchestratorStateParams();
-        stateParameters.setPrimaryGatewayConfig(primaryGatewayConfig);
-        Set<String> targetHostNames = stack.getNotDeletedInstanceMetaDataSet().stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toSet());
-        stateParameters.setTargetHostNames(targetHostNames);
-        stateParameters.setExitCriteriaModel(new StackBasedExitCriteriaModel(stack.getId()));
-        OrchestratorStateRetryParams stateRetryParams = new OrchestratorStateRetryParams();
-        stateRetryParams.setMaxRetry(maxRetryCount);
-        stateRetryParams.setMaxRetryOnError(maxRetryCountOnError);
-        stateParameters.setStateRetryParams(stateRetryParams);
-        stateParameters.setState("trustsetup.adtrust_install");
+    private OrchestratorStateParams createOrchestratorStateParams(Stack stack) {
+        OrchestratorStateParams stateParameters = saltStateParamsService.createStateParams(stack, "trustsetup.adtrust_install", false,
+                maxRetryCount, maxRetryCountOnError);
         LOGGER.debug("Created OrchestratorStateParams for running adtrust install: {}", stateParameters);
         return stateParameters;
     }
