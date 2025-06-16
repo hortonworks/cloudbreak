@@ -1025,6 +1025,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         LOGGER.debug("Minions to stop: {}", minionsToStop);
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGatewayConfigs);
         Set<String> gatewayTargetIpAddresses = getGatewayPrivateIps(allGatewayConfigs);
+        gatewayTargetIpAddresses.removeAll(minionsToStop);
         try (SaltConnector saltConnector = saltService.createSaltConnector(primaryGateway)) {
             saltStateService.stopMinions(saltConnector, minionsToStop);
             if (!CollectionUtils.isEmpty(remainingNodes)) {
