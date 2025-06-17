@@ -146,15 +146,20 @@ public class FreeIpaConverter {
                 builder.withImageId(image.getId());
                 builder.withImageOs(image.getOs());
             }
-            builder.withArchitecture(Optional.ofNullable(request.getArchitecture())
-                    .map(Architecture::fromStringWithValidation)
-                    .orElse(null));
+            builder.withArchitecture(calculateArchitecture(request, image));
             Set<String> recipes = request.getRecipes();
             if (recipes != null) {
                 builder.withRecipes(recipes);
             }
         }
         return builder.build();
+    }
+
+    private Architecture calculateArchitecture(AttachedFreeIpaRequest request, FreeIpaImageRequest image) {
+        return Optional.ofNullable(request.getArchitecture())
+                .map(Architecture::fromStringWithValidation)
+                .orElse(Optional.ofNullable(image)
+                        .filter(i -> StringUtils.isNotBlank(i.getId())).isPresent() ? null : Architecture.X86_64);
     }
 
     private boolean isValidFreeIpaLoadBalancerType(String value) {

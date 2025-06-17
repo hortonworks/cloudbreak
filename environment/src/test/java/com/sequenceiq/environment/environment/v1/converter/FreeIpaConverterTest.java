@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.FreeIpaImageRequest;
@@ -161,6 +162,7 @@ public class FreeIpaConverterTest {
         assertEquals(IMAGE_CATALOG, result.getImageCatalog());
         assertEquals(IMAGE_ID, result.getImageId());
         assertEquals(SeLinux.ENFORCING, result.getSeLinux());
+        assertNull(result.getArchitecture());
     }
 
     @Test
@@ -175,6 +177,7 @@ public class FreeIpaConverterTest {
         verify(ipaInstanceCountByGroupProvider).getInstanceCount(any());
         assertNull(result.getImageCatalog());
         assertNull(result.getImageId());
+        assertEquals(Architecture.X86_64, result.getArchitecture());
     }
 
     @Test
