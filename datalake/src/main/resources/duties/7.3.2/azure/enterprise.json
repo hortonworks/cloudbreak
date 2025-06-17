@@ -11,7 +11,7 @@
     {
       "name": "master",
       "template": {
-        "instanceType": "Standard_D4s_v3",
+        "instanceType": "Standard_D4s_v5",
         "attachedVolumes": [
           {
             "count": 1,
@@ -28,7 +28,7 @@
     {
       "name": "gateway",
       "template": {
-        "instanceType": "Standard_D8s_v3",
+        "instanceType": "Standard_D8s_v5",
         "attachedVolumes": [
           {
             "count": 1,
@@ -45,7 +45,7 @@
     {
       "name": "core",
       "template": {
-        "instanceType": "Standard_D8s_v3",
+        "instanceType": "Standard_D8s_v5",
         "attachedVolumes": [
           {
             "count": 1,
@@ -62,7 +62,7 @@
     {
       "name": "auxiliary",
       "template": {
-        "instanceType": "Standard_D4s_v3",
+        "instanceType": "Standard_D4s_v5",
         "attachedVolumes": [
           {
             "count": 1,
@@ -79,7 +79,7 @@
     {
       "name": "solr_scale_out",
       "template": {
-        "instanceType": "Standard_D4s_v3",
+        "instanceType": "Standard_D4s_v5",
         "attachedVolumes": [
           {
             "count": 1,
@@ -96,7 +96,7 @@
     {
       "name": "storage_scale_out",
       "template": {
-        "instanceType": "Standard_D4s_v3",
+        "instanceType": "Standard_D4s_v5",
         "attachedVolumes": [
           {
             "count": 1,
@@ -147,7 +147,7 @@
     {
       "name": "atlas_scale_out",
       "template": {
-        "instanceType": "Standard_D4s_v3",
+        "instanceType": "Standard_D4s_v5",
         "attachedVolumes": [
           {
             "count": 0,
@@ -164,7 +164,7 @@
     {
       "name": "hms_scale_out",
       "template": {
-        "instanceType": "Standard_D4s_v3",
+        "instanceType": "Standard_D4s_v5",
         "attachedVolumes": [
           {
             "count": 0,
@@ -181,7 +181,7 @@
     {
       "name": "idbroker",
       "template": {
-        "instanceType": "Standard_D2s_v3",
+        "instanceType": "Standard_D2s_v5",
         "attachedVolumes": [
           {
             "count": 0,
