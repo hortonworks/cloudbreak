@@ -42,6 +42,7 @@ import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.environment.encryption.EnvironmentEncryptionService;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
+import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.environment.validation.EnvironmentFlowValidatorService;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.environment.environment.validation.ValidationType;
@@ -64,6 +65,7 @@ import com.sequenceiq.environment.proxy.service.ProxyConfigService;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetIdsRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneNetwork;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 @Service
 public class EnvironmentModificationService {
@@ -104,6 +106,8 @@ public class EnvironmentModificationService {
 
     private final EventSenderService eventSenderService;
 
+    private final FreeIpaService freeIpaService;
+
     public EnvironmentModificationService(
             EnvironmentDtoConverter environmentDtoConverter,
             EnvironmentService environmentService,
@@ -121,7 +125,8 @@ public class EnvironmentModificationService {
             EnvironmentReactorFlowManager environmentReactorFlowManager,
             EnvironmentTagsDtoConverter environmentTagsDtoConverter,
             EnvironmentValidatorService environmentValidatorService,
-            EventSenderService eventSenderService) {
+            EventSenderService eventSenderService,
+            FreeIpaService freeIpaService) {
         this.environmentDtoConverter = environmentDtoConverter;
         this.environmentService = environmentService;
         this.credentialService = credentialService;
@@ -133,6 +138,7 @@ public class EnvironmentModificationService {
         this.environmentEncryptionService = environmentEncryptionService;
         this.azureParametersRepository = azureParametersRepository;
         this.dnsV1Endpoint = dnsV1Endpoint;
+        this.freeIpaService = freeIpaService;
         this.proxyConfigService = proxyConfigService;
         this.proxyConfigModificationService = proxyConfigModificationService;
         this.environmentReactorFlowManager = environmentReactorFlowManager;
@@ -424,7 +430,8 @@ public class EnvironmentModificationService {
     private void editFreeIPA(EnvironmentEditDto editDto, Environment environment) {
         NetworkDto networkDto = environmentDtoConverter.networkToNetworkDto(environment);
         AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest = addDnsZoneForSubnetIdsRequest(editDto, environment, networkDto);
-        if (shouldSendSubnetIdsToFreeIpa(addDnsZoneForSubnetIdsRequest)) {
+        Optional<DescribeFreeIpaResponse> freeIpaResponse = freeIpaService.describe(environment.getResourceCrn());
+        if (freeIpaResponse.isPresent() && shouldSendSubnetIdsToFreeIpa(addDnsZoneForSubnetIdsRequest)) {
             dnsV1Endpoint.addDnsZoneForSubnetIds(addDnsZoneForSubnetIdsRequest);
         }
     }

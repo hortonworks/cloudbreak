@@ -58,6 +58,7 @@ import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry
 import com.sequenceiq.environment.environment.encryption.EnvironmentEncryptionService;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
+import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.environment.validation.EnvironmentFlowValidatorService;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.environment.events.EventSenderService;
@@ -81,6 +82,7 @@ import com.sequenceiq.environment.proxy.service.ProxyConfigModificationService;
 import com.sequenceiq.environment.proxy.service.ProxyConfigService;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 @ExtendWith(SpringExtension.class)
 class EnvironmentModificationServiceTest {
@@ -141,6 +143,9 @@ class EnvironmentModificationServiceTest {
 
     @MockBean
     private EnvironmentTagsDtoConverter environmentTagsDtoConverter;
+
+    @MockBean
+    private FreeIpaService freeIpaService;
 
     @MockBean
     private EventSenderService eventSenderService;
@@ -816,6 +821,7 @@ class EnvironmentModificationServiceTest {
     @Test
     void editByNameSubnetIdChange() {
         BaseNetwork awsNetwork = new AwsNetwork();
+        DescribeFreeIpaResponse describeFreeIpaResponse = new DescribeFreeIpaResponse();
 
         EnvironmentEditDto environmentDto = EnvironmentEditDto.builder()
                 .withAccountId(ACCOUNT_ID)
@@ -828,6 +834,8 @@ class EnvironmentModificationServiceTest {
         Environment environment = new Environment();
         when(networkService.validate(any(), any(), any()))
                 .thenReturn(awsNetwork);
+        when(freeIpaService.describe(any()))
+                .thenReturn(Optional.of(describeFreeIpaResponse));
         when(networkService.refreshMetadataFromCloudProvider(any(), any(), any()))
                 .thenReturn(awsNetwork);
         when(networkService.refreshProviderSpecificParameters(any(), any(), any()))
@@ -845,6 +853,7 @@ class EnvironmentModificationServiceTest {
         environmentModificationServiceUnderTest.edit(environment, environmentDto);
 
         verify(networkService, times(1)).validate(any(), any(), any());
+        verify(freeIpaService, times(1)).describe(any());
         verify(networkService, times(1)).refreshMetadataFromCloudProvider(any(), any(), any());
         verify(networkService, times(1)).refreshProviderSpecificParameters(any(), any(), any());
         verify(networkService, times(1)).refreshServiceEndpointCreation(any(), any(), any());
