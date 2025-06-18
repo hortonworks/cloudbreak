@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.upgrade.sync;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -20,6 +21,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.common.model.Architecture;
 
 @Service
 public class CmSyncImageCollectorService {
@@ -53,8 +55,11 @@ public class CmSyncImageCollectorService {
                     ? getAllImagesFromCatalog(stack, imageCatalogName, workspaceId)
                     : getCurrentAndSelectedImagesFromCatalog(currentImage, candidateImageUuids, imageCatalogName, workspaceId);
             return images.stream()
-                    .filter(image -> currentImage.getOs().equalsIgnoreCase(image.getOs())
-                            && currentImage.getOsType().equalsIgnoreCase(image.getOsType()))
+                    .filter(image ->
+                            Objects.equals(Architecture.fromStringWithFallback(currentImage.getArchitecture()),
+                                    Architecture.fromStringWithFallback(image.getArchitecture())) &&
+                                    currentImage.getOs().equalsIgnoreCase(image.getOs())
+                                    && currentImage.getOsType().equalsIgnoreCase(image.getOsType()))
                     .collect(Collectors.toSet());
         } catch (Exception e) {
             LOGGER.warn("It is not possible to collect images for CM sync, returning empty collection: ", e);
