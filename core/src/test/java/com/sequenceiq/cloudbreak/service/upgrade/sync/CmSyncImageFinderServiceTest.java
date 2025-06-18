@@ -11,6 +11,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -34,6 +36,7 @@ import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmParcelSy
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmRepoSyncOperationResult;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOperationResult;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOperationSummary;
+import com.sequenceiq.common.model.Architecture;
 
 @ExtendWith(MockitoExtension.class)
 class CmSyncImageFinderServiceTest {
@@ -68,6 +71,55 @@ class CmSyncImageFinderServiceTest {
 
         assertTrue(actual.isPresent());
         assertEquals("image-2", actual.get().getUuid());
+    }
+
+    @Test
+    void testFindTargetImageForImageSyncWhenArmImageAlsoExists() {
+        Set<ParcelInfo> activeParcels = createActiveParcels(Map.of("CDH", CDH_VERSION, "FLINK", "1.2.3"));
+        CmSyncOperationSummary cmSyncResult = createCmSyncResult(CM_VERSION, activeParcels);
+
+        Image image1 = createImage("image-1", "7.5.1", "7.2.2", 1L, Map.of("FLINK", "1.2.4"));
+        Image image2 = createImage("image-2", CM_VERSION, CDH_VERSION, 1L, Map.of("FLINK", "1.2.3"));
+        Image image2Arm = createImage("image-2-arm", CM_VERSION, CDH_VERSION, 1L, Map.of("FLINK", "1.2.3"), Architecture.ARM64);
+        Image image3 = createImage(CURRENT_IMAGE_ID, CM_VERSION, "7.2.4", 1L, Collections.emptyMap());
+        Set<Image> candidateImages = new LinkedHashSet<>(List.of(image1, image2Arm, image2, image3));
+
+        Optional<Image> actual = underTest.findTargetImageForImageSync(cmSyncResult, candidateImages, CURRENT_IMAGE_ID, false);
+
+        assertTrue(actual.isPresent());
+        assertEquals("image-2", actual.get().getUuid());
+    }
+
+    @Test
+    void testFindTargetImageForImageSyncWhenDifferentArchitectureExists() {
+        Set<ParcelInfo> activeParcels = createActiveParcels(Map.of("CDH", CDH_VERSION, "FLINK", "1.2.3"));
+        CmSyncOperationSummary cmSyncResult = createCmSyncResult(CM_VERSION, activeParcels);
+
+        Image image1 = createImage("image-1", "7.5.1", "7.2.2", 1L, Map.of("FLINK", "1.2.4"));
+        Image image2Arm = createImage("image-2-arm", CM_VERSION, CDH_VERSION, 1L, Map.of("FLINK", "1.2.3"), Architecture.ARM64);
+        Image image3 = createImage(CURRENT_IMAGE_ID, CM_VERSION, "7.2.4", 1L, Collections.emptyMap());
+        Set<Image> candidateImages = new LinkedHashSet<>(List.of(image1, image2Arm, image3));
+
+        Optional<Image> actual = underTest.findTargetImageForImageSync(cmSyncResult, candidateImages, CURRENT_IMAGE_ID, false);
+
+        assertFalse(actual.isPresent());
+    }
+
+    @Test
+    void testFindTargetImageForImageSyncWhenImageIsArm() {
+        Set<ParcelInfo> activeParcels = createActiveParcels(Map.of("CDH", CDH_VERSION, "FLINK", "1.2.3"));
+        CmSyncOperationSummary cmSyncResult = createCmSyncResult(CM_VERSION, activeParcels);
+
+        Image image1 = createImage("image-1", "7.5.1", "7.2.2", 1L, Map.of("FLINK", "1.2.4"), Architecture.ARM64);
+        Image image2X86 = createImage("image-2", CM_VERSION, CDH_VERSION, 1L, Map.of("FLINK", "1.2.3"));
+        Image image2 = createImage("image-2-arm", CM_VERSION, CDH_VERSION, 1L, Map.of("FLINK", "1.2.3"), Architecture.ARM64);
+        Image image3 = createImage(CURRENT_IMAGE_ID, CM_VERSION, "7.2.4", 1L, Collections.emptyMap(), Architecture.ARM64);
+        Set<Image> candidateImages = new LinkedHashSet<>(List.of(image1, image2X86, image2, image3));
+
+        Optional<Image> actual = underTest.findTargetImageForImageSync(cmSyncResult, candidateImages, CURRENT_IMAGE_ID, false);
+
+        assertTrue(actual.isPresent());
+        assertEquals("image-2-arm", actual.get().getUuid());
     }
 
     @Test
@@ -179,6 +231,18 @@ class CmSyncImageFinderServiceTest {
         Image image = Image.builder()
                 .withUuid(imageId)
                 .withCreated(created)
+                .withPackageVersions(createPackageVersions(cmVersion))
+                .withStackDetails(new ImageStackDetails(null, new StackRepoDetails(Map.of(REPOSITORY_VERSION, cdhVersion), null), null))
+                .build();
+        lenient().when(clouderaManagerProductTransformer.transform(image, false, true)).thenReturn(createCmProducts(preWarmParcels));
+        return image;
+    }
+
+    private Image createImage(String imageId, String cmVersion, String cdhVersion, Long created, Map<String, String> preWarmParcels, Architecture architecture) {
+        Image image = Image.builder()
+                .withUuid(imageId)
+                .withCreated(created)
+                .withArchitecture(architecture.getName())
                 .withPackageVersions(createPackageVersions(cmVersion))
                 .withStackDetails(new ImageStackDetails(null, new StackRepoDetails(Map.of(REPOSITORY_VERSION, cdhVersion), null), null))
                 .build();

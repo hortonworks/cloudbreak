@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.upgrade.sync;
 
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -18,6 +19,7 @@ import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOperationSummary;
+import com.sequenceiq.common.model.Architecture;
 
 @Component
 public class CmSyncImageFinderService {
@@ -49,7 +51,8 @@ public class CmSyncImageFinderService {
         Image currentImage = findCurrentImageFromImageCatalog(currentImageId, candidateImages);
         Set<Image> targetImages = candidateImages.stream()
                 .filter(candidateImage ->
-                        cmVersionMatches(candidateImage, cmSyncResult) &&
+                        architectureMatches(currentImage, candidateImage) &&
+                                cmVersionMatches(candidateImage, cmSyncResult) &&
                                 cdhVersionsMatches(candidateImage, cmSyncResult) &&
                                 (datalake || allParcelVersionMatches(candidateImage, cmSyncResult, currentImage)))
                 .collect(Collectors.toSet());
@@ -57,6 +60,11 @@ public class CmSyncImageFinderService {
                 .filter(image -> image.getUuid().equals(currentImageId))
                 .findFirst()
                 .or(() -> targetImages.stream().max(Comparator.comparing(Image::getCreated)));
+    }
+
+    private boolean architectureMatches(Image currentImage, Image candidateImage) {
+        return Objects.equals(Architecture.fromStringWithFallback(currentImage.getArchitecture()),
+                Architecture.fromStringWithFallback(candidateImage.getArchitecture()));
     }
 
     private boolean cmVersionMatches(Image candidateImage, CmSyncOperationSummary cmSyncOperationSummary) {

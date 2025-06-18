@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
 
 @ExtendWith(MockitoExtension.class)
@@ -118,6 +119,54 @@ public class CmSyncImageCollectorServiceTest {
     }
 
     @Test
+    void testCollectImagesWhenArchitectureDoesntMatch() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(CURRENT_CLOUD_PLATFORM);
+        Stack stack = setupStack(true, true);
+        Set<String> candidateImageUuids = Set.of();
+        List<Image> allCdhImages = List.of(getImage(IMAGE_UUID_1, Architecture.ARM64));
+        stack.setResourceCrn(STACK_CRN);
+        StatedImage currentStatedImage = getCurrentStatedImage();
+        when(imageService.getCurrentImage(WORKSPACE_ID, STACK_ID)).thenReturn(currentStatedImage);
+        when(imageService.getCurrentImageCatalogName(STACK_ID)).thenReturn(CURRENT_IMAGE_CATALOG_NAME);
+        when(imageCatalogService.getAllCdhImages(ACCOUNT_ID, WORKSPACE_ID, CURRENT_IMAGE_CATALOG_NAME, Set.of(imageCatalogPlatform))).thenReturn(allCdhImages);
+        when(platformStringTransformer.getPlatformStringForImageCatalogSet(any(), anyString()))
+                .thenReturn(Set.of(imageCatalogPlatform));
+
+        Set<Image> collectedImages = underTest.collectImages(stack, candidateImageUuids);
+
+        assertThat(collectedImages, hasSize(0));
+        verify(imageService).getCurrentImageCatalogName(STACK_ID);
+        verify(imageCatalogService).getAllCdhImages(ACCOUNT_ID, WORKSPACE_ID, CURRENT_IMAGE_CATALOG_NAME, Set.of(imageCatalogPlatform));
+        verify(imageCatalogService, never()).getImageByCatalogName(anyLong(), anyString(), anyString());
+    }
+
+    @Test
+    void testCollectImagesWhenArmArchitectureMatches() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(CURRENT_CLOUD_PLATFORM);
+        Stack stack = setupStack(true, true);
+        Set<String> candidateImageUuids = Set.of();
+        List<Image> allCdhImages = List.of(getImage(IMAGE_UUID_1, Architecture.ARM64));
+        stack.setResourceCrn(STACK_CRN);
+        StatedImage currentStatedImage = getCurrentStatedImage();
+        when(currentStatedImage.getImage().getArchitecture()).thenReturn(Architecture.ARM64.getName());
+        when(imageService.getCurrentImage(WORKSPACE_ID, STACK_ID)).thenReturn(currentStatedImage);
+        when(imageService.getCurrentImageCatalogName(STACK_ID)).thenReturn(CURRENT_IMAGE_CATALOG_NAME);
+        when(imageCatalogService.getAllCdhImages(ACCOUNT_ID, WORKSPACE_ID, CURRENT_IMAGE_CATALOG_NAME, Set.of(imageCatalogPlatform))).thenReturn(allCdhImages);
+        when(platformStringTransformer.getPlatformStringForImageCatalogSet(any(), anyString()))
+                .thenReturn(Set.of(imageCatalogPlatform));
+
+        Set<Image> collectedImages = underTest.collectImages(stack, candidateImageUuids);
+
+        assertThat(collectedImages, hasSize(1));
+        assertThat(collectedImages, containsInAnyOrder(
+                hasProperty("uuid", is(IMAGE_UUID_1))
+        ));
+        verify(imageService).getCurrentImageCatalogName(STACK_ID);
+        verify(imageCatalogService).getAllCdhImages(ACCOUNT_ID, WORKSPACE_ID, CURRENT_IMAGE_CATALOG_NAME, Set.of(imageCatalogPlatform));
+        verify(imageCatalogService, never()).getImageByCatalogName(anyLong(), anyString(), anyString());
+    }
+
+    @Test
     void testCollectImagesWhenImageCatalogNameNotFoundThenReturnsEmpty() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         Stack stack = setupStack(false, false);
         Set<String> candidateImageUuids = Set.of();
@@ -167,6 +216,15 @@ public class CmSyncImageCollectorServiceTest {
         lenient().when(image.getUuid()).thenReturn(uuid);
         lenient().when(image.getOs()).thenReturn(RHEL8.getOs());
         lenient().when(image.getOsType()).thenReturn(RHEL8.getOsType());
+        return image;
+    }
+
+    private Image getImage(String uuid, Architecture architecture) {
+        Image image = mock(Image.class);
+        lenient().when(image.getUuid()).thenReturn(uuid);
+        lenient().when(image.getOs()).thenReturn(RHEL8.getOs());
+        lenient().when(image.getOsType()).thenReturn(RHEL8.getOsType());
+        lenient().when(image.getArchitecture()).thenReturn(architecture.getName());
         return image;
     }
 
