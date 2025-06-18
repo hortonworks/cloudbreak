@@ -274,7 +274,7 @@ public class ImageService {
         return imageWrapper.getImage();
     }
 
-    private FreeIpaImageFilterSettings createImageFilterSettingsFromImageEntity(Stack stack) {
+    public FreeIpaImageFilterSettings createImageFilterSettingsFromImageEntity(Stack stack) {
         ImageEntity imageEntity = getByStack(stack);
         return new FreeIpaImageFilterSettings(imageEntity.getImageId(),
                 Objects.requireNonNullElse(imageEntity.getImageCatalogName(), imageEntity.getImageCatalogUrl()), imageEntity.getOs(), imageEntity.getOs(),

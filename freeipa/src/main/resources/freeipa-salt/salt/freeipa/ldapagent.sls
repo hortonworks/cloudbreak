@@ -16,5 +16,7 @@ start-freeipa-ldapagent:
     - enable: True
     - require:
       - file: /cdp/ipaldapagent/config.yaml
+    - watch:
+      - file: /cdp/ipaldapagent/config.yaml
 
-{% endif %}
+  {% endif %}

@@ -179,4 +179,16 @@ restart_named_if_reconfigured:
     - watch:
         - file: /etc/named/ipa-options-ext.conf
 
+{%- if pillar['ldapagent']['useTls'] | default(False) %}
+  {%- set getInstanceCommand = '$(dsctl -l | head -n1)' %}
+
+turn_on_secure_binds_for_dirsrv389:
+  cmd.run:
+    - names:
+      - dsconf {{ getInstanceCommand }} config replace nsslapd-require-secure-binds=on
+      - dsconf {{ getInstanceCommand }} restart
+    - unless: dsconf {{ getInstanceCommand }} config get nsslapd-require-secure-binds | grep on
+
+{%- endif %}
+
 {% endif %}
