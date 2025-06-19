@@ -5,16 +5,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -31,13 +27,10 @@ public class AwsNativeLoadBalancerIpCollector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsNativeLoadBalancerIpCollector.class);
 
-    @Inject
-    private EntitlementService entitlementService;
-
     @Retryable(retryFor = NotFoundException.class, maxAttempts = 3, backoff = @Backoff(delay = 3000))
     public Optional<String> getLoadBalancerIp(AmazonEc2Client ec2Client, String loadBalancerName, String resourceCrn) {
         CrnResourceDescriptor resourceDescriptor = CrnResourceDescriptor.getByCrnString(resourceCrn);
-        if (isFreeIpaCluster(resourceDescriptor) && isFreeIpaLoadBalancerEnabled()) {
+        if (isFreeIpaCluster(resourceDescriptor)) {
             DescribeNetworkInterfacesResponse describeNetworkInterfacesResponse = getDescribeNetworkInterfaces(ec2Client, loadBalancerName);
             List<String> ips = Optional.of(describeNetworkInterfacesResponse.networkInterfaces())
                     .map(networkInterfaces -> networkInterfaces.stream()
@@ -68,10 +61,6 @@ public class AwsNativeLoadBalancerIpCollector {
             LOGGER.error("Failed to retrieve AWS network interfaces", e);
             throw new CloudConnectorException(e);
         }
-    }
-
-    private boolean isFreeIpaLoadBalancerEnabled() {
-        return entitlementService.isFreeIpaLoadBalancerEnabled(ThreadBasedUserCrnProvider.getAccountId());
     }
 
     private boolean isFreeIpaCluster(CrnResourceDescriptor resourceDescriptor) {

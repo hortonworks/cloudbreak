@@ -17,7 +17,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -47,12 +46,8 @@ class AwsNativeLoadBalancerIpCollectorTest {
     @Mock
     private AmazonEc2Client ec2Client;
 
-    @Mock
-    private EntitlementService entitlementService;
-
     @Test
     void testGetLoadBalancerIpShouldReturnLoadBalancerIpAddresses() {
-        when(entitlementService.isFreeIpaLoadBalancerEnabled(any())).thenReturn(true);
         when(ec2Client.describeNetworkInterfaces(any())).thenReturn(DescribeNetworkInterfacesResponse.builder()
                 .networkInterfaces(NetworkInterface.builder().privateIpAddress(LB_PRIVATE_IP_1).build(),
                         NetworkInterface.builder().privateIpAddress(LB_PRIVATE_IP_2).build())
@@ -70,14 +65,7 @@ class AwsNativeLoadBalancerIpCollectorTest {
     }
 
     @Test
-    void testGetLoadBalancerIpShouldReturnOptionalEmptyWhenTheStackIsFreeipaButTheLoadBalancerEntitlementIsDisabled() {
-        when(entitlementService.isFreeIpaLoadBalancerEnabled(any())).thenReturn(false);
-        assertTrue(doAs(USER_CRN, () -> underTest.getLoadBalancerIp(ec2Client, LB_NAME, FREEIPA_CRN)).isEmpty());
-    }
-
-    @Test
     void testGetLoadBalancerIpShouldThrowExceptionWhenTheNetworkInterfaceResponseIsNull() {
-        when(entitlementService.isFreeIpaLoadBalancerEnabled(any())).thenReturn(true);
         when(ec2Client.describeNetworkInterfaces(any())).thenReturn(DescribeNetworkInterfacesResponse.builder().build());
 
         assertThrows(NotFoundException.class, () -> doAs(USER_CRN, () -> underTest.getLoadBalancerIp(ec2Client, LB_NAME, FREEIPA_CRN)));
@@ -85,7 +73,6 @@ class AwsNativeLoadBalancerIpCollectorTest {
 
     @Test
     void testGetLoadBalancerIpShouldThrowExceptionWhenTheNetworkInterfaceResponsePrivateIpIsNull() {
-        when(entitlementService.isFreeIpaLoadBalancerEnabled(any())).thenReturn(true);
         when(ec2Client.describeNetworkInterfaces(any())).thenReturn(DescribeNetworkInterfacesResponse.builder()
                 .networkInterfaces(NetworkInterface.builder().build(), NetworkInterface.builder().build())
                 .build());
@@ -95,7 +82,6 @@ class AwsNativeLoadBalancerIpCollectorTest {
 
     @Test
     void testGetLoadBalancerIpShouldThrowCloudConnectorExceptionWhenThereIsNoPermission() {
-        when(entitlementService.isFreeIpaLoadBalancerEnabled(any())).thenReturn(true);
         doThrow(Ec2Exception.builder().message("No permission").build()).when(ec2Client).describeNetworkInterfaces(any());
 
         assertThrows(CloudConnectorException.class, () -> doAs(USER_CRN, () -> underTest.getLoadBalancerIp(ec2Client, LB_NAME, FREEIPA_CRN)));
