@@ -504,6 +504,20 @@ public class FreeIpaClient {
         return (DnsZone) invoke("dnszone_add", flags, params, DnsZone.class).getResult();
     }
 
+    public DnsZone addForwardDnsZone(String forwardZone, String forwarderIp, String forwardPolicy) throws FreeIpaClientException {
+        List<Object> flags = List.of(forwardZone);
+        Map<String, Object> params = Map.of(
+                "idnsforwarders", forwarderIp,
+                "idnsforwardpolicy", forwardPolicy);
+        return (DnsZone) invoke("dnsforwardzone_add", flags, params, DnsZone.class).getResult();
+    }
+
+    public DnsZone showForwardDnsZone(String forwardZone) throws FreeIpaClientException {
+        List<Object> flags = List.of(forwardZone);
+        Map<String, Object> params = Map.of();
+        return (DnsZone) invoke("dnsforwardzone_show", flags, params, DnsZone.class).getResult();
+    }
+
     public DnsRecord showDnsRecord(String dnsZoneName, String recordName) throws FreeIpaClientException {
         List<Object> flags = List.of(dnsZoneName, createDnsName(recordName));
         Map<String, Object> params = Map.of();

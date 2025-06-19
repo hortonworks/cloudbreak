@@ -18,7 +18,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishCrossR
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.crossrealm.CrossRealmService;
+import com.sequenceiq.freeipa.service.crossrealm.TrustSetupService;
 import com.sequenceiq.freeipa.util.CrnService;
 
 @Controller
@@ -31,19 +31,19 @@ public class TrustV1Controller implements TrustV1Endpoint {
     private CrnService crnService;
 
     @Inject
-    private CrossRealmService crossRealmService;
+    private TrustSetupService trustSetupService;
 
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = ADMIN_FREEIPA)
     public PrepareCrossRealmTrustResponse setup(@RequestObject PrepareCrossRealmTrustRequest request) {
         String accountId = crnService.getCurrentAccountId();
-        return crossRealmService.prepareCrossRealmTrust(accountId, request);
+        return trustSetupService.setupTrust(accountId, request);
     }
 
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = ADMIN_FREEIPA)
     public FinishCrossRealmTrustResponse finishSetup(@RequestObject FinishCrossRealmTrustRequest request) {
         String accountId = crnService.getCurrentAccountId();
-        return crossRealmService.finishCrossRealmTrust(accountId, request);
+        return trustSetupService.finishTrustSetup(accountId, request);
     }
 }

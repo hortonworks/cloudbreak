@@ -33,16 +33,10 @@ import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DE
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_IN_PROGRESS;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DIAGNOSTICS_COLLECTION_IN_PROGRESS;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DOWNSCALE_FAILED;
-import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.FINISH_CROSS_REALM_TRUST_FAILED;
-import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.FINISH_CROSS_REALM_TRUST_IN_PROGRESS;
-import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.FINISH_CROSS_REALM_TRUST_SUCCESSFUL;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.MAINTENANCE_MODE_ENABLED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.MODIFY_PROXY_CONFIG_FAILED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.MODIFY_PROXY_CONFIG_IN_PROGRESS;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.MODIFY_PROXY_CONFIG_REQUESTED;
-import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.PREPARE_CROSS_REALM_TRUST_FAILED;
-import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.PREPARE_CROSS_REALM_TRUST_IN_PROGRESS;
-import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.PREPARE_CROSS_REALM_TRUST_PENDING;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.REBUILD_FAILED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.REBUILD_IN_PROGRESS;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.REPAIR_FAILED;
@@ -56,6 +50,12 @@ import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.ST
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.STOP_FAILED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.STOP_IN_PROGRESS;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.STOP_REQUESTED;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.TRUST_SETUP_FAILED;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.TRUST_SETUP_FINISH_FAILED;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.TRUST_SETUP_FINISH_IN_PROGRESS;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.TRUST_SETUP_FINISH_REQUIRED;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.TRUST_SETUP_FINISH_SUCCESSFUL;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.TRUST_SETUP_IN_PROGRESS;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.UNHEALTHY;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.UNKNOWN;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.UNREACHABLE;
@@ -125,12 +125,12 @@ public class EnvironmentSyncService {
             Map.entry(REBUILD_IN_PROGRESS, FREEIPA_REBUILD_IN_PROGRESS),
             Map.entry(REBUILD_FAILED, FREEIPA_REBUILD_FAILED),
             Map.entry(STALE, FREEIPA_STALE),
-            Map.entry(PREPARE_CROSS_REALM_TRUST_IN_PROGRESS, FREEIPA_PREPARE_CROSS_REALM_TRUST_IN_PROGRESS),
-            Map.entry(PREPARE_CROSS_REALM_TRUST_PENDING, FREEIPA_PREPARE_CROSS_REALM_TRUST_PENDING),
-            Map.entry(PREPARE_CROSS_REALM_TRUST_FAILED, FREEIPA_PREPARE_CROSS_REALM_TRUST_FAILED),
-            Map.entry(FINISH_CROSS_REALM_TRUST_IN_PROGRESS, FREEIPA_FINISH_CROSS_REALM_TRUST_IN_PROGRESS),
-            Map.entry(FINISH_CROSS_REALM_TRUST_FAILED, FREEIPA_FINISH_CROSS_REALM_TRUST_FAILED),
-            Map.entry(FINISH_CROSS_REALM_TRUST_SUCCESSFUL, FREEIPA_FINISH_CROSS_REALM_TRUST_SUCCESSFUL)
+            Map.entry(TRUST_SETUP_IN_PROGRESS, FREEIPA_PREPARE_CROSS_REALM_TRUST_IN_PROGRESS),
+            Map.entry(TRUST_SETUP_FINISH_REQUIRED, FREEIPA_PREPARE_CROSS_REALM_TRUST_PENDING),
+            Map.entry(TRUST_SETUP_FAILED, FREEIPA_PREPARE_CROSS_REALM_TRUST_FAILED),
+            Map.entry(TRUST_SETUP_FINISH_IN_PROGRESS, FREEIPA_FINISH_CROSS_REALM_TRUST_IN_PROGRESS),
+            Map.entry(TRUST_SETUP_FINISH_FAILED, FREEIPA_FINISH_CROSS_REALM_TRUST_FAILED),
+            Map.entry(TRUST_SETUP_FINISH_SUCCESSFUL, FREEIPA_FINISH_CROSS_REALM_TRUST_SUCCESSFUL)
     );
 
     private final FreeIpaService freeIpaService;

@@ -121,6 +121,9 @@ freeipa:
   max:
     instances: 3
     instance.groups: 1
+    salt.trustsetup:
+        maxretry: 30
+        maxerrorretry: 10
   usersync:
     max-subjects-per-request: 10
     threadpool:

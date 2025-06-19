@@ -2432,18 +2432,18 @@ message CDPFreeIPAStatus {
     ENABLE_SELINUX_FAILED = 39;
 
     // The status when building cross-realm trust for CDP FreeIPA is started
-    PREPARE_CROSS_REALM_TRUST_STARTED = 40;
+    TRUST_SETUP_STARTED = 40;
     // The status when building cross-realm trust for CDP FreeIPA is finished
-    PREPARE_CROSS_REALM_TRUST_FINISHED = 41;
+    TRUST_SETUP_FINISHED = 41;
     // The status when building cross-realm trust for CDP FreeIPA is failed
-    PREPARE_CROSS_REALM_TRUST_FAILED = 42;
+    TRUST_SETUP_FAILED = 42;
 
     // The status when finishing to set up cross-realm trust for CDP FreeIPA is started
-    FINISH_CROSS_REALM_TRUST_STARTED = 43;
+    TRUST_SETUP_FINISH_STARTED = 43;
     // The status when finishing to set up cross-realm trust for CDP FreeIPA is successful
-    FINISH_CROSS_REALM_TRUST_FINISHED = 44;
+    TRUST_SETUP_FINISH_FINISHED = 44;
     // The status when finishing to set up cross-realm trust for CDP FreeIPA is failed
-    FINISH_CROSS_REALM_TRUST_FAILED = 45;
+    TRUST_SETUP_FINISH_FAILED = 45;
   }
 }
 

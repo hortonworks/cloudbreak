@@ -20,8 +20,8 @@ public enum OperationType {
     REBUILD,
     MODIFY_ROOT_VOLUME,
     MODIFY_SELINUX_MODE,
-    PREPARE_CROSS_REALM_TRUST,
-    FINISH_CROSS_REALM_TRUST;
+    TRUST_SETUP,
+    TRUST_SETUP_FINISH;
 
     private final String lowerCaseName;
 
