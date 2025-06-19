@@ -1,0 +1,216 @@
+name: cloudbreak-integration-test-code-coverage
+
+env:
+  APP_NAME: cloudbreak
+  namespace: cloudbreak
+  TARGET_BRANCH: master
+
+on:
+  schedule:
+    - cron:  '0 1 * * 1'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  integration-test-code-coverage:
+    permissions: write-all
+    name: Integration Test Code Coverage
+    runs-on: [ cb-ubuntu22-large ]
+    timeout-minutes: 90
+
+    steps:
+      - name: checkout
+        id: checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: setup_secrets
+        id: build_secrets
+        uses: Kitchen/RE-thirdparty-actions/actions/vault@main
+        with:
+          tlsSkipVerify: true
+          url: https://re-vault.infra.cloudera.com/
+          method: kubernetes
+          path: rke_re_jenkins
+          role: cb
+          secrets: |
+            cb/data/CM_PRIVATE_REPO_PASSWORD CM_PRIVATE_REPO_PASSWORD | CM_PRIVATE_REPO_PASSWORD;
+            cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
+            cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
+            cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
+            cb/data/SONAR_TOKEN SONAR_TOKEN | SONAR_TOKEN;
+      - name: install_tools
+        run: |-
+          #!/bin/bash -x
+          sudo apt-get update
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make uuid-runtime docker-compose-v2 git curl
+      - name: integration_test
+        continue-on-error: true
+        run: |-
+          export CM_PRIVATE_REPO_PASSWORD=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}")
+          export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
+          export DOCKERHUB_PASSWORD=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_PASSWORD}}")
+          export DOCKERHUB_USERNAME=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}")
+          export INTEGRATIONTEST_SUITE_FILES=file:/it/src/main/resources/testsuites/v4/mock/all-in-mock-package.yaml
+          export AWS=false
+          export INTEGRATIONTEST_UMS_HOST=thunderhead-mock
+          export INTEGRATIONTEST_UMS_PORT=8982
+          export INTEGRATIONTEST_CDL_HOST=thunderhead-mock
+          export INTEGRATIONTEST_CDL_PORT=8982
+          export INTEGRATIONTEST_AUTHDISTRIBUTOR_HOST=thunderhead-mock
+          export INTEGRATIONTEST_THREADCOUNT=4
+          export USE_FEDRAMP_CONTAINERS=false
+          
+          cd integration-test
+          make start-integration-test
+      - name: collect_code_coverage_reports
+        run: |-
+          cd integration-test
+          make collect-integration-test-code-coverage
+          make create-xml-reports-from-code-coverage-results
+      - name: upload_code_coverage_reports_to_sonar
+        run: |-
+          #!/bin/bash -x
+          export SONAR_TOKEN=$(echo "${{ steps.build_secrets.outputs.SONAR_TOKEN}}")
+          export SONAR_URL=https://sonarqube.infra.cloudera.com
+          export SONAR_COVERAGE_EXCLUSION_COMMON="**/proto/**,**/generated/**,**/flow/**/*State.java,**/flow/**/event/*Event.java,**/flow/**/event/**/*Event.java,**/flow*/**/*Config.java,**/*Repository.java,**/configuration/*Properties.java,**/configuration/**/*Config.java,**/domain/**,**/Aspects/**"
+          export CORE_SONAR_COVERAGE_EXCLUSION="${SONAR_COVERAGE_EXCLUSION_COMMON},**/reactor/api/event/**,**/flow2/**/*Config.java,**/flow2/**/*State.java,**/flow2/**/*Event.java"
+          export DL_SONAR_COVERAGE_EXCLUSION="${SONAR_COVERAGE_EXCLUSION_COMMON},**/datalake/configuration/**"
+          export ENV_SONAR_COVERAGE_EXCLUSION="${SONAR_COVERAGE_EXCLUSION_COMMON}"
+          export FREEIPA_SONAR_COVERAGE_EXCLUSION="${SONAR_COVERAGE_EXCLUSION_COMMON}"
+          export REMOTE_ENV_SONAR_COVERAGE_EXCLUSION="${SONAR_COVERAGE_EXCLUSION_COMMON},**/config/**,**/flow/**"
+          export SONAR_EXCLUSION=**/proto/**,**/generated/**,**/test/**,**/build/**,**/reports/**,**/resources/**
+          export SONAR_JAVA_BINARIES=build/classes
+          export SONAR_SOURCES=src/main/java/
+          export E1_IGNORE_RULE_KEY="java:S1854"
+          export E1_IGNORE_RESOURCE="**/*Actions.java"
+          
+          cd core && sonar-scanner -X \
+          -Dsonar.token=$SONAR_TOKEN \
+          -Dsonar.coverage.jacoco.xmlReportPaths=../integration-test/integcb/jacoco-reports/cbreak_cloudbreak_1_jacoco_report.xml \
+          -Dsonar.language=java \
+          -Dsonar.java.binaries=$SONAR_JAVA_BINARIES \
+          -Dsonar.java.libraries=$SONAR_JAVA_BINARIES \
+          -Dsonar.verbose=true \
+          -Dsonar.sources=$SONAR_SOURCES \
+          -Dsonar.projectKey=CloudbreakCore_Service_IT_master \
+          -Dsonar.coverage.exclusions=$CORE_SONAR_COVERAGE_EXCLUSION \
+          -Dsonar.exclusions=$SONAR_EXCLUSION \
+          -Dsonar.issue.ignore.multicriteria=e1 \
+          -Dsonar.issue.ignore.multicriteria.e1.ruleKey=$E1_IGNORE_RULE_KEY \
+          -Dsonar.issue.ignore.multicriteria.e1.resourceKey=$E1_IGNORE_RESOURCE \
+          -Dsonar.host.url=$SONAR_URL
+          
+          cd .. && cd datalake && sonar-scanner -X \
+          -Dsonar.token=$SONAR_TOKEN \
+          -Dsonar.coverage.jacoco.xmlReportPaths=../integration-test/integcb/jacoco-reports/cbreak_datalake_1_jacoco_report.xml \
+          -Dsonar.language=java \
+          -Dsonar.java.binaries=$SONAR_JAVA_BINARIES \
+          -Dsonar.java.libraries=$SONAR_JAVA_BINARIES \
+          -Dsonar.verbose=true \
+          -Dsonar.sources=$SONAR_SOURCES \
+          -Dsonar.projectKey=Datalake_Service_IT_master \
+          -Dsonar.coverage.exclusions=$DL_SONAR_COVERAGE_EXCLUSION\
+          -Dsonar.exclusions=$SONAR_EXCLUSION \
+          -Dsonar.issue.ignore.multicriteria=e1 \
+          -Dsonar.issue.ignore.multicriteria.e1.ruleKey=$E1_IGNORE_RULE_KEY \
+          -Dsonar.issue.ignore.multicriteria.e1.resourceKey=$E1_IGNORE_RESOURCE \
+          -Dsonar.host.url=$SONAR_URL
+          
+          cd .. && cd environment && sonar-scanner -X \
+          -Dsonar.token=$SONAR_TOKEN \
+          -Dsonar.coverage.jacoco.xmlReportPaths=../integration-test/integcb/jacoco-reports/cbreak_environment_1_jacoco_report.xml \
+          -Dsonar.language=java \
+          -Dsonar.java.binaries=$SONAR_JAVA_BINARIES \
+          -Dsonar.java.libraries=$SONAR_JAVA_BINARIES \
+          -Dsonar.verbose=true \
+          -Dsonar.sources=$SONAR_SOURCES \
+          -Dsonar.projectKey=Environment_Service_IT_master \
+          -Dsonar.coverage.exclusions=$ENV_SONAR_COVERAGE_EXCLUSION \
+          -Dsonar.exclusions=$SONAR_EXCLUSION \
+          -Dsonar.issue.ignore.multicriteria=e1 \
+          -Dsonar.issue.ignore.multicriteria.e1.ruleKey=$E1_IGNORE_RULE_KEY \
+          -Dsonar.issue.ignore.multicriteria.e1.resourceKey=$E1_IGNORE_RESOURCE \
+          -Dsonar.host.url=$SONAR_URL
+          
+          cd .. && cd externalized-compute && sonar-scanner -X \
+          -Dsonar.token=$SONAR_TOKEN \
+          -Dsonar.coverage.jacoco.xmlReportPaths=../integration-test/integcb/jacoco-reports/cbreak_externalized-compute_1_jacoco_report.xml \
+          -Dsonar.language=java \
+          -Dsonar.java.binaries=$SONAR_JAVA_BINARIES \
+          -Dsonar.java.libraries=$SONAR_JAVA_BINARIES \
+          -Dsonar.verbose=true \
+          -Dsonar.sources=$SONAR_SOURCES \
+          -Dsonar.projectKey=Externalized_Compute_Service_IT_master \
+          -Dsonar.coverage.exclusions=$SONAR_COVERAGE_EXCLUSION_COMMON \
+          -Dsonar.exclusions=$SONAR_EXCLUSION \
+          -Dsonar.issue.ignore.multicriteria=e1 \
+          -Dsonar.issue.ignore.multicriteria.e1.ruleKey=$E1_IGNORE_RULE_KEY \
+          -Dsonar.issue.ignore.multicriteria.e1.resourceKey=$E1_IGNORE_RESOURCE \
+          -Dsonar.host.url=$SONAR_URL
+          
+          cd .. && cd freeipa && sonar-scanner -X \
+          -Dsonar.token=$SONAR_TOKEN \
+          -Dsonar.coverage.jacoco.xmlReportPaths=../integration-test/integcb/jacoco-reports/cbreak_freeipa_1_jacoco_report.xml \
+          -Dsonar.language=java \
+          -Dsonar.java.binaries=$SONAR_JAVA_BINARIES \
+          -Dsonar.java.libraries=$SONAR_JAVA_BINARIES \
+          -Dsonar.verbose=true \
+          -Dsonar.sources=$SONAR_SOURCES \
+          -Dsonar.projectKey=Freeipa_Service_IT_master \
+          -Dsonar.coverage.exclusions=$FREEIPA_SONAR_COVERAGE_EXCLUSION \
+          -Dsonar.exclusions=$SONAR_EXCLUSION \
+          -Dsonar.issue.ignore.multicriteria=e1 \
+          -Dsonar.issue.ignore.multicriteria.e1.ruleKey=$E1_IGNORE_RULE_KEY \
+          -Dsonar.issue.ignore.multicriteria.e1.resourceKey=$E1_IGNORE_RESOURCE \
+          -Dsonar.host.url=$SONAR_URL
+          
+          cd .. && cd redbeams && sonar-scanner -X \
+          -Dsonar.token=$SONAR_TOKEN \
+          -Dsonar.coverage.jacoco.xmlReportPaths=../integration-test/integcb/jacoco-reports/cbreak_redbeams_1_jacoco_report.xml \
+          -Dsonar.language=java \
+          -Dsonar.java.binaries=$SONAR_JAVA_BINARIES \
+          -Dsonar.java.libraries=$SONAR_JAVA_BINARIES \
+          -Dsonar.verbose=true \
+          -Dsonar.sources=$SONAR_SOURCES \
+          -Dsonar.projectKey=Redbeams_Service_IT_master \
+          -Dsonar.coverage.exclusions=$SONAR_COVERAGE_EXCLUSION_COMMON \
+          -Dsonar.exclusions=$SONAR_EXCLUSION \
+          -Dsonar.issue.ignore.multicriteria=e1 \
+          -Dsonar.issue.ignore.multicriteria.e1.ruleKey=$E1_IGNORE_RULE_KEY \
+          -Dsonar.issue.ignore.multicriteria.e1.resourceKey=$E1_IGNORE_RESOURCE \
+          -Dsonar.host.url=$SONAR_URL
+          
+          cd .. && cd environment-remote && sonar-scanner -X \
+          -Dsonar.token=$SONAR_TOKEN \
+          -Dsonar.coverage.jacoco.xmlReportPaths=../integration-test/integcb/jacoco-reports/cbreak_remote-environment_1_jacoco_report.xml \
+          -Dsonar.language=java \
+          -Dsonar.java.binaries=$SONAR_JAVA_BINARIES \
+          -Dsonar.java.libraries=$SONAR_JAVA_BINARIES \
+          -Dsonar.verbose=true \
+          -Dsonar.sources=$SONAR_SOURCES \
+          -Dsonar.projectKey=Remote_Environment_Service_IT_master \
+          -Dsonar.coverage.exclusions=$REMOTE_ENV_SONAR_COVERAGE_EXCLUSION \
+          -Dsonar.exclusions=$SONAR_EXCLUSION \
+          -Dsonar.issue.ignore.multicriteria=e1 \
+          -Dsonar.issue.ignore.multicriteria.e1.ruleKey=$E1_IGNORE_RULE_KEY \
+          -Dsonar.issue.ignore.multicriteria.e1.resourceKey=$E1_IGNORE_RESOURCE \
+          -Dsonar.host.url=$SONAR_URL
+               
+          cd .. && cd autoscale && sonar-scanner -X \
+          -Dsonar.token=$SONAR_TOKEN \
+          -Dsonar.coverage.jacoco.xmlReportPaths=../integration-test/integcb/jacoco-reports/cbreak_periscope_1_jacoco_report.xml \
+          -Dsonar.language=java \
+          -Dsonar.java.binaries=$SONAR_JAVA_BINARIES \
+          -Dsonar.java.libraries=$SONAR_JAVA_BINARIES \
+          -Dsonar.verbose=true \
+          -Dsonar.sources=$SONAR_SOURCES \
+          -Dsonar.projectKey=Periscope_Service_IT_master \
+          -Dsonar.coverage.exclusions=$SONAR_COVERAGE_EXCLUSION_COMMON \
+          -Dsonar.exclusions=$SONAR_EXCLUSION \
+          -Dsonar.issue.ignore.multicriteria=e1 \
+          -Dsonar.issue.ignore.multicriteria.e1.ruleKey=$E1_IGNORE_RULE_KEY \
+          -Dsonar.issue.ignore.multicriteria.e1.resourceKey=$E1_IGNORE_RESOURCE \
+          -Dsonar.host.url=$SONAR_URL

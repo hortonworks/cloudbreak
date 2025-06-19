@@ -17,6 +17,8 @@ runtest: create-image create-cloudbreak-context docker-compose stop-containers c
 
 runtest-ums: create-image create-cloudbreak-context config-ums docker-compose stop-containers check-results
 
+runtest-with-code-coverage: download-cbd create-image-with-code-coverage create-cloudbreak-context docker-compose stop-containers check-results
+
 delete-and-run: download-cbd cbd-delete buildcb runtest
 
 without-build: download-cbd runtest
@@ -48,6 +50,9 @@ clean-up-ums-user-assignments-docker:
 
 create-image:
 	./scripts/create-image.sh
+
+create-image-with-code-coverage:
+	./scripts/create-image-with-code-coverage.sh
 
 create-cloudbreak-context:
 	./scripts/create-cloudbreak-context.sh
@@ -101,3 +106,12 @@ upload-s3:
 	aws s3 cp ./apidefinitions/redbeams.json s3://redbeams-swagger/swagger-$(VERSION).json --acl public-read
 	aws s3 cp ./apidefinitions/datalake.json s3://datalake-swagger/swagger-$(VERSION).json --acl public-read
 	aws s3 cp ./apidefinitions/autoscale.json s3://autoscale-swagger/swagger-$(VERSION).json --acl public-read
+
+start-integration-test:
+	./scripts/start-integration-test.sh
+
+collect-integration-test-code-coverage:
+	./scripts/collect-integration-test-code-coverage.sh
+
+create-xml-reports-from-code-coverage-results:
+	./scripts/create-xml-reports-from-code-coverage-results.sh
