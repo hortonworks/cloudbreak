@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.service.AwsCommonDiskUpdateSer
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.loadbalancer.AwsLoadBalancerLaunchService;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.AwsRdsUpgradeService;
-import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.AwsRdsUpgradeValidatorService;
+import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.AwsRdsUpgradeValidatorService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -126,7 +126,7 @@ public class AwsResourceConnector implements ResourceConnector {
 
     @Override
     public void validateUpgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack, TargetMajorVersion targetMajorVersion) {
-        awsRdsUpgradeValidatorService.validateCustomPropertiesAdded(authenticatedContext, stack);
+        awsRdsUpgradeValidatorService.validateUpgradeDatabaseServer(authenticatedContext, stack, targetMajorVersion);
     }
 
     @Override

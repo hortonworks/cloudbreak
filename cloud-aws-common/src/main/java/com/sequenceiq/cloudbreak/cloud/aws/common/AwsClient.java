@@ -278,6 +278,12 @@ public abstract class AwsClient {
         return new AmazonRdsClient(proxy(rdsClientBuilder.build(), awsCredential, regionName), awsPageCollector);
     }
 
+    public AmazonRdsClient createRdsClient(AuthenticatedContext ac) {
+        AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
+        String regionName = ac.getCloudContext().getLocation().getRegion().value();
+        return createRdsClient(credentialView, regionName);
+    }
+
     public AmazonPricingClient createPricingClient(AwsCredentialView awsCredential, String regionName) {
         PricingClientBuilder clientBuilder = PricingClient.builder()
                 .httpClient(awsApacheClient.getApacheHttpClient())

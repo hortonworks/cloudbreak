@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation;
 
-import java.util.Optional;
-import java.util.Set;
-
 import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -12,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.common.database.Version;
 
 import software.amazon.awssdk.services.rds.model.DescribeDbInstancesRequest;
 import software.amazon.awssdk.services.rds.model.DescribeDbInstancesResponse;
@@ -24,10 +20,7 @@ public class AwsRdsUpgradeOperations {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsRdsUpgradeOperations.class);
 
     @Inject
-    private AwsRdsVersionOperations awsRdsVersionOperations;
-
-    @Inject
-    private AwsRdsUpgradeValidatorService awsRdsUpgradeValidatorService;
+    private AwsRdsUpgradeValidatorProvider awsRdsUpgradeValidatorProvider;
 
     @Inject
     private AwsRdsUpgradeWaitOperations awsRdsUpgradeWaitOperations;
@@ -37,15 +30,6 @@ public class AwsRdsUpgradeOperations {
         DescribeDbInstancesResponse result = rdsClient.describeDBInstances(describeDBInstancesRequest);
         LOGGER.debug("Describing RDS with dbInstanceIdentifier {}, result: {}", dbInstanceIdentifier, result);
         return result;
-    }
-
-    public RdsEngineVersion getHighestUpgradeTargetVersion(AmazonRdsClient rdsClient, Version targetMajorVersion, RdsEngineVersion currentDbVersion) {
-        Set<String> validUpgradeTargets = awsRdsVersionOperations.getAllUpgradeTargetVersions(rdsClient, currentDbVersion);
-        Optional<RdsEngineVersion> upgradeTargetForMajorVersion = awsRdsVersionOperations.getHighestUpgradeVersionForTargetMajorVersion(validUpgradeTargets,
-                targetMajorVersion);
-        awsRdsUpgradeValidatorService.validateUpgradePresentForTargetMajorVersion(upgradeTargetForMajorVersion);
-        LOGGER.debug("The highest available RDS upgrade target version for major version {} is: {}", targetMajorVersion, upgradeTargetForMajorVersion);
-        return upgradeTargetForMajorVersion.get();
     }
 
     public void upgradeRds(AmazonRdsClient rdsClient, RdsEngineVersion targetVersion, String dbInstanceIdentifier, String dbParameterGroupName) {

@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
-import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.CustomAmazonWaiterProvider;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -37,7 +36,7 @@ public class AwsRdsModifyService {
     private AwsRdsParameterGroupService awsRdsParameterGroupService;
 
     public void disableDeleteProtection(AuthenticatedContext ac, DatabaseStack dbStack) {
-        AmazonRdsClient rdsClient = getAmazonRdsClient(ac);
+        AmazonRdsClient rdsClient = awsClient.createRdsClient(ac);
         String dbInstanceIdentifier = dbStack.getDatabaseServer().getServerId();
 
         ModifyDbInstanceRequest modifyDBInstanceRequest = ModifyDbInstanceRequest.builder()
@@ -57,7 +56,7 @@ public class AwsRdsModifyService {
     }
 
     public void updateMasterUserPassword(AuthenticatedContext ac, DatabaseStack databaseStack, String newPassword) {
-        AmazonRdsClient rdsClient = getAmazonRdsClient(ac);
+        AmazonRdsClient rdsClient = awsClient.createRdsClient(ac);
         String dbInstanceIdentifier = databaseStack.getDatabaseServer().getServerId();
         ModifyDbInstanceRequest modifyDBInstanceRequest = ModifyDbInstanceRequest.builder()
                 .dbInstanceIdentifier(dbInstanceIdentifier)
@@ -77,7 +76,7 @@ public class AwsRdsModifyService {
     }
 
     public void migrateNonSslToSsl(AuthenticatedContext ac, DatabaseServer databaseServer) {
-        AmazonRdsClient rdsClient = getAmazonRdsClient(ac);
+        AmazonRdsClient rdsClient = awsClient.createRdsClient(ac);
         String dbInstanceIdentifier = databaseServer.getServerId();
         try {
             awsRdsParameterGroupService.applySslEnforcement(ac, rdsClient, databaseServer);
@@ -99,12 +98,6 @@ public class AwsRdsModifyService {
         Waiter<DescribeDbInstancesResponse> rdsWaiter = customAmazonWaiterProvider.getDbInstanceModifyWaiter();
         DescribeDbInstancesRequest describeDBInstancesRequest = DescribeDbInstancesRequest.builder().dbInstanceIdentifier(dbInstanceIdentifier).build();
         run(() -> rdsClient.describeDBInstances(describeDBInstancesRequest), rdsWaiter, exceptionMessage);
-    }
-
-    private AmazonRdsClient getAmazonRdsClient(AuthenticatedContext ac) {
-        AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
-        String regionName = ac.getCloudContext().getLocation().getRegion().value();
-        return awsClient.createRdsClient(credentialView, regionName);
     }
 }
 

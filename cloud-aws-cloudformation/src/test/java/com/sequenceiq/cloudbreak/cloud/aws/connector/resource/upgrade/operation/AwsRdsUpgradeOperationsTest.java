@@ -13,7 +13,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,7 +29,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.dyngr.exception.PollerStoppedException;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.common.database.Version;
 
 import software.amazon.awssdk.services.rds.model.DescribeDbInstancesRequest;
 import software.amazon.awssdk.services.rds.model.DescribeDbInstancesResponse;
@@ -46,13 +44,10 @@ public class AwsRdsUpgradeOperationsTest {
     private static final String TARGET_VERSION = "targetVersion";
 
     @Mock
-    private AwsRdsVersionOperations awsRdsVersionOperations;
-
-    @Mock
     private AwsRdsUpgradeWaitOperations awsRdsUpgradeWaitOperations;
 
     @Mock
-    private AwsRdsUpgradeValidatorService awsRdsUpgradeValidatorService;
+    private AwsRdsUpgradeValidatorProvider awsRdsUpgradeValidatorProvider;
 
     @Mock
     private AwsRdsCustomParameterSupplier awsRdsCustomParameterSupplier;
@@ -75,37 +70,6 @@ public class AwsRdsUpgradeOperationsTest {
         verify(rdsClient).describeDBInstances(describeDBInstancesRequestArgumentCaptor.capture());
         DescribeDbInstancesRequest request = describeDBInstancesRequestArgumentCaptor.getValue();
         assertEquals(DB_INSTANCE_IDENTIFIER, request.dbInstanceIdentifier());
-    }
-
-    @Test
-    void testGetHighestUpgradeVersion() {
-        Version targetVersion = () -> TARGET_VERSION;
-        RdsEngineVersion currentVersion = new RdsEngineVersion("currentVersion");
-        Set<String> validUpgradeTargets = Set.of("v1", "v2");
-        when(awsRdsVersionOperations.getAllUpgradeTargetVersions(rdsClient, currentVersion)).thenReturn(validUpgradeTargets);
-        RdsEngineVersion highestUpgradeTargetForMajorVersion = new RdsEngineVersion("v1");
-        when(awsRdsVersionOperations.getHighestUpgradeVersionForTargetMajorVersion(validUpgradeTargets, targetVersion))
-                .thenReturn(Optional.of(highestUpgradeTargetForMajorVersion));
-
-        RdsEngineVersion result = underTest.getHighestUpgradeTargetVersion(rdsClient, targetVersion, currentVersion);
-
-        assertEquals(highestUpgradeTargetForMajorVersion, result);
-        verify(awsRdsUpgradeValidatorService).validateUpgradePresentForTargetMajorVersion(Optional.of(highestUpgradeTargetForMajorVersion));
-    }
-
-    @Test
-    void testGetHighestUpgradeVersionWhenValidationThrows() {
-        Version targetVersion = () -> TARGET_VERSION;
-        RdsEngineVersion currentVersion = new RdsEngineVersion("currentVersion");
-        Set<String> validUpgradeTargets = Set.of("v1", "v2");
-        when(awsRdsVersionOperations.getAllUpgradeTargetVersions(rdsClient, currentVersion)).thenReturn(validUpgradeTargets);
-        when(awsRdsVersionOperations.getHighestUpgradeVersionForTargetMajorVersion(validUpgradeTargets, targetVersion)).thenReturn(Optional.empty());
-        doThrow(CloudConnectorException.class).when(awsRdsUpgradeValidatorService)
-                .validateUpgradePresentForTargetMajorVersion(Optional.empty());
-
-        Assertions.assertThrows(CloudConnectorException.class, () ->
-                underTest.getHighestUpgradeTargetVersion(rdsClient, targetVersion, currentVersion)
-        );
     }
 
     @Test

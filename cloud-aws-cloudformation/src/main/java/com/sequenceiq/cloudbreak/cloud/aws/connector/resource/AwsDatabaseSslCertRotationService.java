@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
-import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.CustomAmazonWaiterProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.StackCancellationCheck;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -42,9 +41,7 @@ public class AwsDatabaseSslCertRotationService {
     private CustomAmazonWaiterProvider customAmazonWaiterProvider;
 
     public void applyCertificateChange(AuthenticatedContext ac, DatabaseStack dbStack, String desiredCertificate) {
-            AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
-            String regionName = ac.getCloudContext().getLocation().getRegion().value();
-            AmazonRdsClient rdsClient = awsClient.createRdsClient(credentialView, regionName);
+            AmazonRdsClient rdsClient = awsClient.createRdsClient(ac);
             String dbInstanceIdentifier = dbStack.getDatabaseServer().getServerId();
 
             try {

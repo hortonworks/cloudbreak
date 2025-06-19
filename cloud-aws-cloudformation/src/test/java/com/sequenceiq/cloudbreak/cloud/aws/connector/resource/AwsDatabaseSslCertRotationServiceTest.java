@@ -19,11 +19,8 @@ import com.sequenceiq.cloudbreak.cloud.aws.scheduler.CustomAmazonWaiterProvider;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
-import com.sequenceiq.cloudbreak.cloud.model.Location;
-import com.sequenceiq.cloudbreak.cloud.model.Region;
 
 import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
 import software.amazon.awssdk.core.waiters.Waiter;
@@ -78,14 +75,11 @@ class AwsDatabaseSslCertRotationServiceTest {
                 .build();
         Waiter<DescribeDbInstancesResponse> waiter = mock(Waiter.class);
 
-        when(ac.getCloudCredential()).thenReturn(mock(CloudCredential.class));
         when(ac.getCloudContext()).thenReturn(mock(CloudContext.class));
-        when(ac.getCloudContext().getLocation()).thenReturn(mock(Location.class));
-        when(ac.getCloudContext().getLocation().getRegion()).thenReturn(mock(Region.class));
         when(ac.getCloudContext().getId()).thenReturn(1L);
         when(dbStack.getDatabaseServer()).thenReturn(mock(DatabaseServer.class));
         when(dbStack.getDatabaseServer().getServerId()).thenReturn(dbInstanceIdentifier);
-        when(awsClient.createRdsClient(any(), any())).thenReturn(rdsClient);
+        when(awsClient.createRdsClient(any())).thenReturn(rdsClient);
         when(rdsClient.describeDBInstances(any())).thenReturn(describeDbInstancesResponse);
         when(customAmazonWaiterProvider.getCertRotationStartWaiter()).thenReturn(waiter);
         when(customAmazonWaiterProvider.getDbInstanceModifyWaiter()).thenReturn(waiter);
@@ -99,7 +93,7 @@ class AwsDatabaseSslCertRotationServiceTest {
 
         rotationService.applyCertificateChange(ac, dbStack, desiredCertificate);
 
-        verify(awsClient).createRdsClient(any(), any());
+        verify(awsClient).createRdsClient(any());
         verify(rdsClient).modifyDBInstance(any(ModifyDbInstanceRequest.class));
         verify(rdsClient).rebootDBInstance(any(RebootDbInstanceRequest.class));
         verify(rdsClient.waiters()).waitUntilDBInstanceAvailable(any(DescribeDbInstancesRequest.class), any());
@@ -112,13 +106,9 @@ class AwsDatabaseSslCertRotationServiceTest {
         String desiredCertificate = "desiredCertificate";
         String dbInstanceIdentifier = "desiredCertificate";
 
-        when(ac.getCloudCredential()).thenReturn(mock(CloudCredential.class));
-        when(ac.getCloudContext()).thenReturn(mock(CloudContext.class));
-        when(ac.getCloudContext().getLocation()).thenReturn(mock(Location.class));
-        when(ac.getCloudContext().getLocation().getRegion()).thenReturn(mock(Region.class));
         when(dbStack.getDatabaseServer()).thenReturn(mock(DatabaseServer.class));
         when(dbStack.getDatabaseServer().getServerId()).thenReturn(dbInstanceIdentifier);
-        when(awsClient.createRdsClient(any(), any())).thenReturn(rdsClient);
+        when(awsClient.createRdsClient(any())).thenReturn(rdsClient);
         when(rdsClient.describeDBInstances(any(DescribeDbInstancesRequest.class))).thenThrow(
                 RdsException.create("error", new CloudConnectorException("error")));
 
@@ -136,14 +126,11 @@ class AwsDatabaseSslCertRotationServiceTest {
         String dbInstanceIdentifier = "desiredCertificate";
         RdsException rdsException = mock(RdsException.class);
 
-        when(ac.getCloudCredential()).thenReturn(mock(CloudCredential.class));
         when(ac.getCloudContext()).thenReturn(mock(CloudContext.class));
-        when(ac.getCloudContext().getLocation()).thenReturn(mock(Location.class));
-        when(ac.getCloudContext().getLocation().getRegion()).thenReturn(mock(Region.class));
         when(rdsException.awsErrorDetails()).thenReturn(AwsErrorDetails.builder().errorCode("AccessDenied").build());
         when(dbStack.getDatabaseServer()).thenReturn(mock(DatabaseServer.class));
         when(dbStack.getDatabaseServer().getServerId()).thenReturn(dbInstanceIdentifier);
-        when(awsClient.createRdsClient(any(), any())).thenReturn(rdsClient);
+        when(awsClient.createRdsClient(any())).thenReturn(rdsClient);
         when(rdsClient.describeDBInstances(any(DescribeDbInstancesRequest.class))).thenThrow(rdsException);
         when(rdsClient.waiters()).thenReturn(rdsWaiter);
 
@@ -160,14 +147,11 @@ class AwsDatabaseSslCertRotationServiceTest {
         String dbInstanceIdentifier = "desiredCertificate";
         RdsException rdsException = mock(RdsException.class);
 
-        when(ac.getCloudCredential()).thenReturn(mock(CloudCredential.class));
         when(ac.getCloudContext()).thenReturn(mock(CloudContext.class));
-        when(ac.getCloudContext().getLocation()).thenReturn(mock(Location.class));
-        when(ac.getCloudContext().getLocation().getRegion()).thenReturn(mock(Region.class));
         when(rdsException.awsErrorDetails()).thenReturn(AwsErrorDetails.builder().errorCode("AccessDenied").build());
         when(dbStack.getDatabaseServer()).thenReturn(mock(DatabaseServer.class));
         when(dbStack.getDatabaseServer().getServerId()).thenReturn(dbInstanceIdentifier);
-        when(awsClient.createRdsClient(any(), any())).thenReturn(rdsClient);
+        when(awsClient.createRdsClient(any())).thenReturn(rdsClient);
         when(rdsClient.describeDBInstances(any(DescribeDbInstancesRequest.class))).thenThrow(rdsException);
         when(rdsClient.waiters()).thenThrow(new CloudConnectorException("error"));
 

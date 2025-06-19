@@ -24,7 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsRdsParameterGroupService;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.AwsRdsUpgradeOperations;
-import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.AwsRdsUpgradeValidatorService;
+import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.AwsRdsUpgradeValidatorProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.RdsEngineVersion;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.RdsInfo;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.RdsInstanceStatusesToRdsStateConverter;
@@ -64,7 +64,7 @@ public class AwsRdsUpgradeStepsTest {
     private RdsInstanceStatusesToRdsStateConverter rdsInstanceStatusesToRdsStateConverter;
 
     @Mock
-    private AwsRdsUpgradeValidatorService awsRdsUpgradeValidatorService;
+    private AwsRdsUpgradeValidatorProvider awsRdsUpgradeValidatorProvider;
 
     @InjectMocks
     private AwsRdsUpgradeSteps underTest;
@@ -100,7 +100,7 @@ public class AwsRdsUpgradeStepsTest {
     void testGetRdsInfoWhenValidationThrows() {
         DescribeDbInstancesResponse describeDbInstancesResponse = getDescribeDBInstancesResult(false);
         when(awsRdsUpgradeOperations.describeRds(rdsClient, DB_INSTANCE_IDENTIFIER)).thenReturn(describeDbInstancesResponse);
-        doThrow(CloudConnectorException.class).when(awsRdsUpgradeValidatorService).validateClusterHasASingleVersion(any());
+        doThrow(CloudConnectorException.class).when(awsRdsUpgradeValidatorProvider).validateClusterHasASingleVersion(any());
 
         Assertions.assertThrows(CloudConnectorException.class, () ->
                 underTest.getRdsInfo(rdsClient, DB_INSTANCE_IDENTIFIER)
@@ -116,7 +116,7 @@ public class AwsRdsUpgradeStepsTest {
         RdsInfo rdsInfo = new RdsInfo(RdsState.AVAILABLE, null, currentVersion);
         when(databaseServer.getServerId()).thenReturn(DB_INSTANCE_IDENTIFIER);
         when(databaseServer.isUseSslEnforcement()).thenReturn(true);
-        when(awsRdsUpgradeOperations.getHighestUpgradeTargetVersion(rdsClient, targetMajorVersion, currentVersion))
+        when(awsRdsUpgradeValidatorProvider.getHighestUpgradeTargetVersion(rdsClient, targetMajorVersion, currentVersion))
                 .thenReturn(targetVersion);
         when(awsRdsParameterGroupService.createParameterGroupWithCustomSettings(ac, rdsClient, databaseServer, targetVersion))
                 .thenReturn(DB_PARAMETER_GROUP_NAME);
@@ -137,7 +137,7 @@ public class AwsRdsUpgradeStepsTest {
         RdsEngineVersion targetVersion = new RdsEngineVersion(TARGET_VERSION);
         RdsInfo rdsInfo = new RdsInfo(RdsState.AVAILABLE, null, currentVersion);
         when(databaseServer.getServerId()).thenReturn(DB_INSTANCE_IDENTIFIER);
-        when(awsRdsUpgradeOperations.getHighestUpgradeTargetVersion(rdsClient, targetMajorVersion, currentVersion)).thenReturn(targetVersion);
+        when(awsRdsUpgradeValidatorProvider.getHighestUpgradeTargetVersion(rdsClient, targetMajorVersion, currentVersion)).thenReturn(targetVersion);
 
         underTest.upgradeRds(null, rdsClient, databaseServer, rdsInfo, targetMajorVersion);
 
@@ -149,7 +149,8 @@ public class AwsRdsUpgradeStepsTest {
     void testUpgradeRdsWhenGetHighestUpgradeThrowsThenNoUpgrade() {
         RdsEngineVersion currentVersion = new RdsEngineVersion(CURRENT_VERSION);
         RdsInfo rdsInfo = new RdsInfo(RdsState.AVAILABLE, null, currentVersion);
-        when(awsRdsUpgradeOperations.getHighestUpgradeTargetVersion(rdsClient, targetMajorVersion, currentVersion)).thenThrow(CloudConnectorException.class);
+        when(awsRdsUpgradeValidatorProvider.getHighestUpgradeTargetVersion(rdsClient, targetMajorVersion, currentVersion))
+                .thenThrow(CloudConnectorException.class);
 
         Assertions.assertThrows(CloudConnectorException.class, () ->
                 underTest.upgradeRds(null, rdsClient, databaseServer, rdsInfo, targetMajorVersion)
@@ -165,7 +166,7 @@ public class AwsRdsUpgradeStepsTest {
         RdsEngineVersion targetVersion = new RdsEngineVersion(TARGET_VERSION);
         RdsInfo rdsInfo = new RdsInfo(RdsState.AVAILABLE, null, currentVersion);
         when(databaseServer.isUseSslEnforcement()).thenReturn(true);
-        when(awsRdsUpgradeOperations.getHighestUpgradeTargetVersion(rdsClient, targetMajorVersion, currentVersion)).thenReturn(targetVersion);
+        when(awsRdsUpgradeValidatorProvider.getHighestUpgradeTargetVersion(rdsClient, targetMajorVersion, currentVersion)).thenReturn(targetVersion);
         when(awsRdsParameterGroupService.createParameterGroupWithCustomSettings(ac, rdsClient, databaseServer, targetVersion))
                 .thenThrow(RuntimeException.class);
 

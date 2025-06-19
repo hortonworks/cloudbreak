@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsRdsParameterGroupService;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.AwsRdsUpgradeOperations;
-import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.AwsRdsUpgradeValidatorService;
+import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.AwsRdsUpgradeValidatorProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.RdsEngineVersion;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.RdsInfo;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.RdsInstanceStatusesToRdsStateConverter;
@@ -38,7 +38,7 @@ public class AwsRdsUpgradeSteps {
     private AwsRdsUpgradeOperations awsRdsUpgradeOperations;
 
     @Inject
-    private AwsRdsUpgradeValidatorService awsRdsUpgradeValidatorService;
+    private AwsRdsUpgradeValidatorProvider awsRdsUpgradeValidatorProvider;
 
     @Inject
     private RdsInstanceStatusesToRdsStateConverter rdsInstanceStatusesToRdsStateConverter;
@@ -53,7 +53,7 @@ public class AwsRdsUpgradeSteps {
         Set<String> currentDbEngineVersions = describeDBInstanceResponse.dbInstances().stream()
                 .map(DBInstance::engineVersion)
                 .collect(Collectors.toSet());
-        awsRdsUpgradeValidatorService.validateClusterHasASingleVersion(currentDbEngineVersions);
+        awsRdsUpgradeValidatorProvider.validateClusterHasASingleVersion(currentDbEngineVersions);
 
         Map<String, String> dbArnToInstanceStatuses = describeDBInstanceResponse.dbInstances().stream()
                 .collect(Collectors.toMap(DBInstance::dbInstanceArn, DBInstance::dbInstanceStatus));
@@ -67,7 +67,7 @@ public class AwsRdsUpgradeSteps {
     public List<CloudResource> upgradeRds(AuthenticatedContext ac, AmazonRdsClient rdsClient, DatabaseServer databaseServer, RdsInfo rdsInfo,
             Version targetMajorVersion) {
         RdsEngineVersion currentRdsVersion = rdsInfo.getRdsEngineVersion();
-        RdsEngineVersion upgradeTargetVersion = awsRdsUpgradeOperations.getHighestUpgradeTargetVersion(rdsClient, targetMajorVersion, currentRdsVersion);
+        RdsEngineVersion upgradeTargetVersion = awsRdsUpgradeValidatorProvider.getHighestUpgradeTargetVersion(rdsClient, targetMajorVersion, currentRdsVersion);
         String dbParameterGroupName;
         List<CloudResource> cloudResources = new ArrayList<>();
         if (isCustomParameterGroupNeeded(databaseServer)) {

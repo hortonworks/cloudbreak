@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -22,7 +21,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
-import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.CustomAmazonWaiterProvider;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -83,12 +81,7 @@ public class AwsRdsStopServiceTest {
 
     @BeforeEach
     public void initTests() {
-        when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
-        when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
-        when(cloudContext.getLocation()).thenReturn(location);
-        when(location.getRegion()).thenReturn(region);
-        when(region.value()).thenReturn(REGION);
-        when(awsClient.createRdsClient(any(AwsCredentialView.class), eq(REGION))).thenReturn(amazonRDS);
+        when(awsClient.createRdsClient(any())).thenReturn(amazonRDS);
         when(dbStack.getDatabaseServer()).thenReturn(databaseServer);
         when(databaseServer.getServerId()).thenReturn(DB_INSTANCE_IDENTIFIER);
     }

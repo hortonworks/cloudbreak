@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsRdsParameterGroupService;
-import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.AwsRdsUpgradeValidatorService;
+import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.AwsRdsUpgradeValidatorProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.RdsInfo;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -35,7 +35,7 @@ public class AwsRdsUpgradeService {
     private AwsRdsUpgradeSteps awsRdsUpgradeSteps;
 
     @Inject
-    private AwsRdsUpgradeValidatorService awsRdsUpgradeValidatorService;
+    private AwsRdsUpgradeValidatorProvider awsRdsUpgradeValidatorProvider;
 
     @Inject
     private AwsRdsParameterGroupService awsRdsParameterGroupService;
@@ -48,8 +48,8 @@ public class AwsRdsUpgradeService {
 
         AmazonRdsClient rdsClient = getAmazonRdsClient(ac);
         RdsInfo rdsInfo = getRdsInfo(dbInstanceIdentifier, rdsClient);
-        if (awsRdsUpgradeValidatorService.isRdsMajorVersionSmallerThanTarget(rdsInfo, targetMajorVersion)) {
-            awsRdsUpgradeValidatorService.validateRdsIsAvailableOrUpgrading(rdsInfo);
+        if (awsRdsUpgradeValidatorProvider.isRdsMajorVersionSmallerThanTarget(rdsInfo, targetMajorVersion)) {
+            awsRdsUpgradeValidatorProvider.validateRdsIsAvailableOrUpgrading(rdsInfo);
             upgradeRdsIfNotUpgradingAlready(ac, targetMajorVersion, databaseServer, rdsClient, rdsInfo, persistenceNotifier);
             waitForRdsUpgrade(databaseServer, rdsClient);
             List<CloudResource> removedResources = awsRdsParameterGroupService.removeFormerParamGroups(rdsClient, dbStack.getDatabaseServer(), cloudResources);

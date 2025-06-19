@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsRdsStatusLookupService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -30,12 +31,15 @@ import software.amazon.awssdk.services.rds.model.DBParameterGroupStatus;
 import software.amazon.awssdk.services.rds.model.DescribeDbInstancesResponse;
 
 @Service
-public class AwsRdsUpgradeValidatorService {
+public class AwsRdsUpgradeValidatorProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AwsRdsUpgradeValidatorService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwsRdsUpgradeValidatorProvider.class);
 
     @Inject
     private AwsRdsStatusLookupService awsRdsStatusLookupService;
+
+    @Inject
+    private AwsRdsVersionOperations awsRdsVersionOperations;
 
     public void validateUpgradePresentForTargetMajorVersion(Optional<RdsEngineVersion> upgradeTargetForMajorVersion) {
         if (upgradeTargetForMajorVersion.isEmpty()) {
@@ -116,4 +120,12 @@ public class AwsRdsUpgradeValidatorService {
                 .collect(Collectors.toSet());
     }
 
+    public RdsEngineVersion getHighestUpgradeTargetVersion(AmazonRdsClient rdsClient, Version targetMajorVersion, RdsEngineVersion currentDbVersion) {
+        Set<String> validUpgradeTargets = awsRdsVersionOperations.getAllUpgradeTargetVersions(rdsClient, currentDbVersion);
+        Optional<RdsEngineVersion> upgradeTargetForMajorVersion = awsRdsVersionOperations.getHighestUpgradeVersionForTargetMajorVersion(validUpgradeTargets,
+                targetMajorVersion);
+        validateUpgradePresentForTargetMajorVersion(upgradeTargetForMajorVersion);
+        LOGGER.debug("The highest available RDS upgrade target version for major version {} is: {}", targetMajorVersion, upgradeTargetForMajorVersion);
+        return upgradeTargetForMajorVersion.get();
+    }
 }
