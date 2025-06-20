@@ -39,7 +39,7 @@ dependencies {
     exclude group: "org.hamcrest"
   }
   testImplementation (group: 'org.hamcrest', name: 'hamcrest', version: hamcrestVersion)
-  testImplementation "net.javacrumbs.json-unit:json-unit:4.1.0"
+  testImplementation "net.javacrumbs.json-unit:json-unit:4.1.1"
   testImplementation project(path: ":template-manager-core", configuration: "tests")
   testImplementation project(path: ":core-model", configuration: "tests")
   testImplementation project(path: ':common', configuration: 'tests')
