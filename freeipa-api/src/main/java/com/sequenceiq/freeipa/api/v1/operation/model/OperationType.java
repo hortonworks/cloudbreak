@@ -21,7 +21,8 @@ public enum OperationType {
     MODIFY_ROOT_VOLUME,
     MODIFY_SELINUX_MODE,
     TRUST_SETUP,
-    TRUST_SETUP_FINISH;
+    TRUST_SETUP_FINISH,
+    UPGRADE_DEFAULT_OUTBOUND;
 
     private final String lowerCaseName;
 
@@ -30,14 +31,11 @@ public enum OperationType {
     }
 
     public static OperationType fromSyncOperationType(SyncOperationType syncOperationType) {
-        switch (syncOperationType) {
-            case USER_SYNC:
-                return USER_SYNC;
-            case SET_PASSWORD:
-                return SET_PASSWORD;
-            default:
-                throw new UnsupportedOperationException("SyncOperationType not mapped: " + syncOperationType);
-        }
+        return switch (syncOperationType) {
+            case USER_SYNC -> USER_SYNC;
+            case SET_PASSWORD -> SET_PASSWORD;
+            default -> throw new UnsupportedOperationException("SyncOperationType not mapped: " + syncOperationType);
+        };
     }
 
     public String getLowerCaseName() {

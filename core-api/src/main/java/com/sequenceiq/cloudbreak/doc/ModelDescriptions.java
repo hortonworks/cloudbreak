@@ -597,6 +597,14 @@ public class ModelDescriptions {
         public static final String CCM_UPGRADE_ERROR_REASON = "Reason of the error if Upgrade CCM could not be started.";
     }
 
+    public static class UpgradeOutboundTypeDescription {
+        public static final String FLOW_ID = "Flow identifier for the current Upgrade default outbound operation.";
+        public static final String CURRENT_OUTBOUND_TYPES = "Information about actual outbound types, per stack.";
+        public static final String OUTBOUND_UPGRADE_VALIDATION_MESSAGE = "Information about the stacks that require outbound type upgrade.";
+        public static final String OUTBOUND_UPGRADE_RESPONSE_TYPE = "Information about the Upgrade default outbound operation acceptance.";
+        public static final String OUTBOUND_UPGRADE_ERROR_REASON = "Reason of the error for Upgrade default outbound operation";
+    }
+
     public static class InstanceMetadataUpdateRequest {
         public static final String IMD_UPDATE_TYPE = "Type of instance metadata update.";
     }

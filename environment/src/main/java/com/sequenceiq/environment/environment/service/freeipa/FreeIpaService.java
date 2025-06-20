@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.common.api.type.OutboundType;
 import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
@@ -299,7 +300,7 @@ public class FreeIpaService {
             }
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error(String.format("Failed to synchronize users with FreeIpa for environment '%s' due to: '%s'", environmentCrn, errorMessage), e);
+            LOGGER.error("Failed to synchronize users with FreeIpa for environment '{}' due to: '{}'", environmentCrn, errorMessage, e);
             throw new FreeIpaOperationFailedException(errorMessage, e);
         }
     }
@@ -310,7 +311,7 @@ public class FreeIpaService {
             freeIpaV1Endpoint.start(environmentCrn);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error(String.format("Failed to start FreeIpa cluster for environment '%s' due to: '%s'", environmentCrn, errorMessage), e);
+            LOGGER.error("Failed to start FreeIpa cluster for environment '{}' due to: '{}'", environmentCrn, errorMessage, e);
             throw new FreeIpaOperationFailedException(errorMessage, e);
         }
     }
@@ -321,8 +322,18 @@ public class FreeIpaService {
             freeIpaV1Endpoint.stop(environmentCrn);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error(String.format("Failed to stop FreeIpa cluster for environment '%s' due to: '%s'", environmentCrn, errorMessage), e);
+            LOGGER.error("Failed to stop FreeIpa cluster for environment '{}' due to: '{}'", environmentCrn, errorMessage, e);
             throw new FreeIpaOperationFailedException(errorMessage, e);
         }
+    }
+
+    public OutboundType getNetworkOutbound(String crn) {
+        OutboundType outboundType = ThreadBasedUserCrnProvider.doAsInternalActor(
+                initiatorUserCrn -> {
+                    OutboundType defaultOutbound = freeIpaV1Endpoint.getOutboundType(crn, initiatorUserCrn);
+                    LOGGER.info("Default outbound type for environment {} is {}", crn, defaultOutbound);
+                    return defaultOutbound;
+                });
+        return outboundType != null ? outboundType : OutboundType.NOT_DEFINED;
     }
 }

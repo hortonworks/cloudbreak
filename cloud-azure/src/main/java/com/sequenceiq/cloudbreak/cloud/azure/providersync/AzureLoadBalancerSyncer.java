@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure.providersync;
 
+import static com.sequenceiq.common.api.type.CommonStatus.CREATED;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_LOAD_BALANCER;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_NETWORK;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_NETWORK_INTERFACE;
@@ -29,13 +30,12 @@ import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.OutboundType;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.SkuAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.common.provider.ProviderResourceSyncer;
-import com.sequenceiq.common.api.type.CommonStatus;
+import com.sequenceiq.common.api.type.OutboundType;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
@@ -176,7 +176,7 @@ public class AzureLoadBalancerSyncer implements ProviderResourceSyncer<ResourceT
             LOGGER.debug("Load balancer resource {} not found, creating new resource", loadBalancer.id());
             return CloudResource.builder()
                     .withType(AZURE_LOAD_BALANCER)
-                    .withStatus(CommonStatus.CREATED)
+                    .withStatus(CREATED)
                     .withName(loadBalancer.name())
                     .withReference(loadBalancer.id())
                     .withGroup(loadBalancer.resourceGroupName())

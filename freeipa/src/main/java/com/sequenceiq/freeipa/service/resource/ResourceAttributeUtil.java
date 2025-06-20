@@ -38,6 +38,17 @@ public class ResourceAttributeUtil {
         return ret;
     }
 
+    public <T> Optional<T> getTypedAttributes(Resource resource, Class<T> attributeType) {
+        Json attributes = resource.getAttributes();
+        try {
+            return (Objects.nonNull(attributes.getValue()) && !attributes.getMap().isEmpty())
+                    ? Optional.ofNullable(attributes.get(attributeType))
+                    : Optional.empty();
+        } catch (IOException e) {
+            throw new CloudbreakServiceException("Failed to parse attributes to type: " + attributeType.getSimpleName(), e);
+        }
+    }
+
     public <T> void setTypedAttributes(Resource resource, T attributes) {
         try {
             resource.setAttributes(new Json(attributes));

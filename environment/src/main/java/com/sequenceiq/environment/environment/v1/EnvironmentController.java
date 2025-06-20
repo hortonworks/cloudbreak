@@ -59,6 +59,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentDatabaseServerCertificateStatusV4Response;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentDatabaseServerCertificateStatusV4Responses;
+import com.sequenceiq.environment.api.v1.environment.model.response.OutboundTypeValidationResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
 import com.sequenceiq.environment.api.v1.environment.model.response.SupportedOperatingSystemResponse;
@@ -86,6 +87,7 @@ import com.sequenceiq.environment.environment.service.EnvironmentStackConfigUpda
 import com.sequenceiq.environment.environment.service.EnvironmentStartService;
 import com.sequenceiq.environment.environment.service.EnvironmentStopService;
 import com.sequenceiq.environment.environment.service.EnvironmentUpgradeCcmService;
+import com.sequenceiq.environment.environment.service.EnvironmentUpgradeOutboundService;
 import com.sequenceiq.environment.environment.service.EnvironmentVerticalScaleService;
 import com.sequenceiq.environment.environment.service.SupportedOperatingSystemService;
 import com.sequenceiq.environment.environment.service.cloudstorage.CloudStorageValidator;
@@ -152,6 +154,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     private final ExternalizedComputeFlowService externalizedComputeFlowService;
 
+    private final EnvironmentUpgradeOutboundService environmentUpgradeOutboundService;
+
     public EnvironmentController(
             EnvironmentApiConverter environmentApiConverter,
             EnvironmentResponseConverter environmentResponseConverter,
@@ -175,7 +179,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
             SupportedOperatingSystemService supportedOperatingSystemService,
             ExternalizedComputeFlowService externalizedComputeFlowService,
             EnvironmentReactorFlowManager environmentReactorFlowManager,
-            RedBeamsService redBeamsService) {
+            RedBeamsService redBeamsService,
+            EnvironmentUpgradeOutboundService environmentUpgradeOutboundService) {
         this.environmentApiConverter = environmentApiConverter;
         this.environmentResponseConverter = environmentResponseConverter;
         this.environmentService = environmentService;
@@ -198,6 +203,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
         this.supportedOperatingSystemService = supportedOperatingSystemService;
         this.externalizedComputeFlowService = externalizedComputeFlowService;
         this.redBeamsService = redBeamsService;
+        this.environmentUpgradeOutboundService = environmentUpgradeOutboundService;
     }
 
     @Override
@@ -529,6 +535,12 @@ public class EnvironmentController implements EnvironmentEndpoint {
                 environmentDto.getTunnel() == Tunnel.latestUpgradeTarget() &&
                         ThreadBasedUserCrnProvider.doAsInternalActor(
                                 () -> stackV4Endpoint.getNotCcmUpgradedStackCount(0L, crn, ThreadBasedUserCrnProvider.getUserCrn()) > 0);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    public OutboundTypeValidationResponse validateOutboundTypes(@ResourceCrn String crn) {
+        return environmentUpgradeOutboundService.validateOutboundTypes(crn);
     }
 
     @Override

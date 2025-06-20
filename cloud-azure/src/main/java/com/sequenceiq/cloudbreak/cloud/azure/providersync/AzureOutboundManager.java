@@ -12,8 +12,8 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.NetworkAttributes;
-import com.sequenceiq.cloudbreak.cloud.model.OutboundType;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.common.api.type.OutboundType;
 
 @Service
 public class AzureOutboundManager {

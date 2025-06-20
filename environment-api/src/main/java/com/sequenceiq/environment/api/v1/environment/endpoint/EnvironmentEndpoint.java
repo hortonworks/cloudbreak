@@ -38,6 +38,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.azure.UpdateA
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentDatabaseServerCertificateStatusV4Responses;
+import com.sequenceiq.environment.api.v1.environment.model.response.OutboundTypeValidationResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
 import com.sequenceiq.environment.api.v1.environment.model.response.SupportedOperatingSystemResponse;
@@ -383,6 +384,14 @@ public interface EnvironmentEndpoint {
             operationId = "isUpgradeCcmAvailableV1ByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     boolean isUpgradeCcmAvailable(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn);
+
+    @GET
+    @Path("/crn/{crn}/validate_outbound_types")
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(summary = EnvironmentOpDescription.UPGRADE_DEFAULT_OUTBOUND_AVAILABLE, description = ENVIRONMENT_NOTES,
+            operationId = "validateOutboundTypesByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    OutboundTypeValidationResponse validateOutboundTypes(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn);
 
     @GET
     @Path("/os/supported")

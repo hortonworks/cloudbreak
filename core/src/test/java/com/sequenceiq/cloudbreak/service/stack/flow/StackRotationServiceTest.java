@@ -28,7 +28,6 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidationService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 
@@ -36,10 +35,6 @@ import com.sequenceiq.flow.api.model.FlowType;
 public class StackRotationServiceTest {
 
     private static final String CRN = "crn:cdp:datahub:us-west-1:tenant:cluster:878605d9-f9e9-44c6-9da6-e4bce9570ef5";
-
-    private static final String ENV_CRN = "crn:cdp:environments:us-west-1:9d74eee4:environment:12474ddc";
-
-    private static final String DATALAKE_CRN = "crn:cdp:datalake:us-west-1:default:datalake:d3b8df82-878d-4395-94b1-2e355217446d";
 
     @InjectMocks
     private StackRotationService underTest;
@@ -49,9 +44,6 @@ public class StackRotationServiceTest {
 
     @Mock
     private StackDtoService stackDtoService;
-
-    @Mock
-    private StackService stackService;
 
     @Mock
     private SecretRotationValidationService secretRotationValidationService;

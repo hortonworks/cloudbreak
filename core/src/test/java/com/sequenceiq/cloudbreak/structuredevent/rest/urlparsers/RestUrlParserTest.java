@@ -164,10 +164,10 @@ public class RestUrlParserTest {
                                 setupMocks(methodPath, requestMethod);
                                 if (restUrlParser.fillParams(containerRequestContext, params)) {
                                     matchedParsers.add(restUrlParser);
-                                    LOGGER.info("Found matching parser: " + restUrlParser.getClass().getName());
+                                    LOGGER.info("Found matching parser: {}", restUrlParser.getClass().getName());
                                 }
                             }
-                            LOGGER.info("Matched URL: " + methodPath + "\nslurped params: " + params);
+                            LOGGER.info("Matched URL: {}\nslurped params: {}", methodPath, params);
                             boolean doWeWantToExcludeThePath = doWeWantToExcludeThePath(methodPath);
                             if (!doWeWantToExcludeThePath) {
                                 if (matchedParsers.isEmpty()) {

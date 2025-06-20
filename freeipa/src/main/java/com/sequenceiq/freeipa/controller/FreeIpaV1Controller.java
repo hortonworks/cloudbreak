@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.State;
 import com.sequenceiq.common.api.UsedSubnetWithResourceResponse;
 import com.sequenceiq.common.api.UsedSubnetsByEnvironmentResponse;
+import com.sequenceiq.common.api.type.OutboundType;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.common.model.SubnetIdWithResourceNameAndCrn;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -97,6 +98,7 @@ import com.sequenceiq.freeipa.service.stack.FreeIpaStackHealthDetailsService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaStartService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaStopService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaUpgradeCcmService;
+import com.sequenceiq.freeipa.service.stack.FreeIpaUpgradeDefaultOutboundService;
 import com.sequenceiq.freeipa.service.stack.FreeipaInstanceMetadataUpdateService;
 import com.sequenceiq.freeipa.service.stack.FreeipaModifyProxyConfigService;
 import com.sequenceiq.freeipa.service.stack.RepairInstancesService;
@@ -184,6 +186,9 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Inject
     private FreeIpaUpgradeCcmService upgradeCcmService;
+
+    @Inject
+    private FreeIpaUpgradeDefaultOutboundService upgradeDefaultOutboundService;
 
     @Inject
     private FreeipaModifyProxyConfigService modifyProxyConfigService;
@@ -465,6 +470,13 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     public OperationStatus upgradeCcmInternal(@ResourceCrn String environmentCrn, @InitiatorUserCrn String initiatorUserCrn) {
         String accountId = crnService.getCurrentAccountId();
         return upgradeCcmService.upgradeCcm(environmentCrn, accountId);
+    }
+
+    @Override
+    @InternalOnly
+    public OutboundType getOutboundType(@ResourceCrn String environmentCrn, @InitiatorUserCrn String initiatorUserCrn) {
+        String accountId = crnService.getCurrentAccountId();
+        return upgradeDefaultOutboundService.getCurrentDefaultOutbound(environmentCrn, accountId);
     }
 
     @Override

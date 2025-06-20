@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.model;
+package com.sequenceiq.common.api.type;
 
 public enum OutboundType {
 
@@ -15,5 +15,9 @@ public enum OutboundType {
 
     public boolean shouldSync() {
         return this == NOT_DEFINED || isDefault();
+    }
+
+    public boolean isUpgradeable() {
+        return shouldSync();
     }
 }

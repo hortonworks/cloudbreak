@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.azure.providersync;
 
 import static com.azure.resourcemanager.network.models.IpAllocationMethod.DYNAMIC;
 import static com.azure.resourcemanager.network.models.IpAllocationMethod.STATIC;
-import static com.sequenceiq.cloudbreak.cloud.model.OutboundType.PUBLIC_IP;
+import static com.sequenceiq.common.api.type.OutboundType.PUBLIC_IP;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_NETWORK;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_PUBLIC_IP;
 import static org.junit.jupiter.api.Assertions.assertEquals;

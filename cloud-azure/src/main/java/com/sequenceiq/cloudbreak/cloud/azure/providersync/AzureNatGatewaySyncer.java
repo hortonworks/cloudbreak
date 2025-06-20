@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.azure.providersync;
 
-import static com.sequenceiq.cloudbreak.cloud.model.OutboundType.NOT_DEFINED;
-import static com.sequenceiq.cloudbreak.cloud.model.OutboundType.USER_ASSIGNED_NATGATEWAY;
 import static com.sequenceiq.common.api.type.CommonStatus.DETACHED;
+import static com.sequenceiq.common.api.type.OutboundType.NOT_DEFINED;
+import static com.sequenceiq.common.api.type.OutboundType.USER_ASSIGNED_NATGATEWAY;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_NAT_GATEWAY;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_NETWORK;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_SUBNET;
@@ -29,12 +29,12 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalResourceAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.NetworkAttributes;
-import com.sequenceiq.cloudbreak.cloud.model.OutboundType;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.common.provider.ProviderResourceSyncer;
 import com.sequenceiq.cloudbreak.util.NullUtil;
+import com.sequenceiq.common.api.type.OutboundType;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Service

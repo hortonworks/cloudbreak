@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.providersync;
 
-import static com.sequenceiq.cloudbreak.cloud.model.OutboundType.NOT_DEFINED;
-import static com.sequenceiq.cloudbreak.cloud.model.OutboundType.USER_ASSIGNED_NATGATEWAY;
+import static com.sequenceiq.common.api.type.OutboundType.NOT_DEFINED;
+import static com.sequenceiq.common.api.type.OutboundType.USER_ASSIGNED_NATGATEWAY;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_NAT_GATEWAY;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_NETWORK;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_SUBNET;

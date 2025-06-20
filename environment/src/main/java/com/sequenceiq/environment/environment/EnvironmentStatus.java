@@ -170,6 +170,12 @@ public enum EnvironmentStatus {
     UPGRADE_CCM_ROLLING_BACK(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.UPGRADE_CCM_ROLLING_BACK),
     UPGRADE_CCM_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.UPGRADE_CCM_FAILED),
 
+    // Upgrade Default Outbound
+    UPGRADE_DEFAULT_OUTBOUND_ON_FREEIPA_IN_PROGRESS(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.UPGRADE_DEFAULT_OUTBOUND_ON_FREEIPA_IN_PROGRESS),
+    UPGRADE_DEFAULT_OUTBOUND_ON_FREEIPA_FAILED(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.UPGRADE_DEFAULT_OUTBOUND_ON_FREEIPA_FAILED),
+
     // Vertical Scale FreeIPA
     VERTICAL_SCALE_VALIDATION_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.VERTICAL_SCALE_VALIDATION_IN_PROGRESS),
     VERTICAL_SCALE_VALIDATION_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.VERTICAL_SCALE_VALIDATION_FAILED),

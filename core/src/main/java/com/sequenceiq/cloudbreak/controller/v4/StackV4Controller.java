@@ -64,6 +64,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.Recove
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.rotaterdscert.StackRotateRdsCertificateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.RdsUpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.StackCcmUpgradeV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.StackOutboundTypeValidationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
@@ -83,6 +84,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackRotationService;
 import com.sequenceiq.cloudbreak.service.upgrade.ccm.StackCcmUpgradeService;
+import com.sequenceiq.cloudbreak.service.upgrade.defaultoutbound.StackDefaultOutboundUpgradeService;
 import com.sequenceiq.cloudbreak.service.upgrade.rds.RdsUpgradeService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
@@ -110,6 +112,9 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Inject
     private StackCcmUpgradeService stackCcmUpgradeService;
+
+    @Inject
+    private StackDefaultOutboundUpgradeService defaultOutboundUpgradeService;
 
     @Inject
     private RdsUpgradeService rdsUpgradeService;
@@ -457,6 +462,12 @@ public class StackV4Controller extends NotificationController implements StackV4
     @InternalOnly
     public int getNotCcmUpgradedStackCount(Long workspaceId, String envCrn, @InitiatorUserCrn String initiatorUserCrn) {
         return stackCcmUpgradeService.getNotUpgradedStackCount(envCrn);
+    }
+
+    @Override
+    @InternalOnly
+    public StackOutboundTypeValidationV4Response validateStackOutboundTypes(Long workspaceId, String envCrn, @InitiatorUserCrn String initiatorUserCrn) {
+        return defaultOutboundUpgradeService.getStacksWithOutboundType(workspaceId, envCrn);
     }
 
     @Override

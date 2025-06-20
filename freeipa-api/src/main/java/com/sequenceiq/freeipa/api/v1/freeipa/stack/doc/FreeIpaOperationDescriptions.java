@@ -47,6 +47,8 @@ public final class FreeIpaOperationDescriptions {
             "Initiates the CCM tunnel type upgrade to the latest available version for FreeIPA stack by environment CRN using the internal actor";
     public static final String INTERNAL_MODIFY_PROXY_BY_ENV_ID =
             "Initiates the modification of the proxy config for FreeIPA stack by environment CRN using the internal actor";
+    public static final String INTERNAL_GET_OUTBOUND_TYPE =
+            "Get the outbound type of the FreeIPA stack by environment CRN using the internal actor";
     public static final String GET_RECOMMENDATION = "Get recommendation that advises cloud resources for FreeIPA based on the given credential CRN.";
     public static final String VERTICAL_SCALE_BY_CRN = "Vertical scale by environment CRN.";
     public static final String ROOT_VOLUME_UPDATE_BY_CRN = "Root Volume update by environment CRN.";
