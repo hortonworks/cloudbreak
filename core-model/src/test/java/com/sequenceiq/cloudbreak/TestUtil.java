@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
+import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -312,6 +313,14 @@ public class TestUtil {
         //        network.setAddressPrefixCIDR(DUMMY_ADDRESS_PREFIX_CIDR);
         network.setId(1L);
         network.setName(DUMMY_NAME);
+        return network;
+    }
+
+    public static Network networkWithSubnetId(String subnetId) {
+        Network network = new Network();
+        network.setId(1L);
+        network.setName(DUMMY_NAME);
+        network.setAttributes(new Json(Map.of(NetworkConstants.SUBNET_ID, subnetId)));
         return network;
     }
 

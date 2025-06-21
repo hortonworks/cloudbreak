@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.multiaz;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,8 +16,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
-import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -50,7 +47,7 @@ public class DataLakeAwareInstanceMetadataAvailabilityZoneCalculator extends Ins
             DetailedEnvironmentResponse environment = getDetailedEnvironmentResponse(stack.getEnvironmentCrn());
             Map<String, String> subnetAzMap = prepareSubnetAzMap(environment);
             String stackAz = stackSubnetId == null ? null : subnetAzMap.get(stackSubnetId);
-            stack.getInstanceGroups().forEach(ig -> prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(stackSubnetId, stackAz, ig, stack, subnetAzMap));
+            stack.getInstanceGroups().forEach(ig -> prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(stackSubnetId, stackAz, ig));
             Set<InstanceMetaData> instancesToBeUpdated = new HashSet<>();
             for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
                 instancesToBeUpdated.addAll(instanceGroup.getInstanceMetaData());
@@ -79,17 +76,7 @@ public class DataLakeAwareInstanceMetadataAvailabilityZoneCalculator extends Ins
         return subnetAzPairs;
     }
 
-    private String getStackSubnetIdIfExists(Stack stack) {
-        return Optional.ofNullable(stack.getNetwork())
-                .map(Network::getAttributes)
-                .map(Json::getMap)
-                .map(attr -> attr.get(SUBNET_ID))
-                .map(Object::toString)
-                .orElse(null);
-    }
-
-    protected void prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(String stackSubnetId, String stackAz, InstanceGroup instanceGroup, Stack stack,
-            Map<String, String> subnetAzPairs) {
+    protected void prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(String stackSubnetId, String stackAz, InstanceGroup instanceGroup) {
         for (InstanceMetaData instanceMetaData : instanceGroup.getAllInstanceMetaData()) {
             if (isNullOrEmpty(instanceMetaData.getSubnetId()) && isNullOrEmpty(instanceMetaData.getAvailabilityZone())) {
                 instanceMetaData.setSubnetId(stackSubnetId);
@@ -109,9 +96,10 @@ public class DataLakeAwareInstanceMetadataAvailabilityZoneCalculator extends Ins
     private void populateForEnterpriseDataLake(Stack stack) {
         LOGGER.info("Populating availability zones for Enterprise Data Lake");
         Set<InstanceMetaData> updatedInstancesMetaData = new HashSet<>();
+        String stackSubnetId = getStackSubnetIdIfExists(stack);
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             if (notMasterAndNotAuxiliaryGroup(instanceGroup)) {
-                updatedInstancesMetaData.addAll(populateAvailabilityZonesOnGroup(instanceGroup));
+                updatedInstancesMetaData.addAll(populateAvailabilityZonesOnGroup(instanceGroup, stackSubnetId));
             }
         }
         Optional<InstanceGroup> masterInstanceGroup = getInstanceGroupByInstanceGroupName(stack, InstanceGroupName.MASTER);
@@ -123,7 +111,7 @@ public class DataLakeAwareInstanceMetadataAvailabilityZoneCalculator extends Ins
             LOGGER.info("Auxiliary/Master instance group's meta data: {}", mergedInstanceMetaData);
             Set<String> availabilityZones = masterInstanceGroup.or(() -> auxiliaryInstanceGroup).get().getAvailabilityZones();
             updatedInstancesMetaData.addAll(populateAvailabilityZoneOfInstances(availabilityZones, mergedInstanceMetaData, "Master/Auxiliary",
-                    masterInstanceGroup.isPresent() ? masterInstanceGroup.get() : auxiliaryInstanceGroup.get()));
+                    masterInstanceGroup.isPresent() ? masterInstanceGroup.get() : auxiliaryInstanceGroup.get(), stackSubnetId));
             updateInstancesMetaData(updatedInstancesMetaData);
         } else {
             LOGGER.info("{} and {} instance groups are not present, nothing to do", InstanceGroupName.MASTER.getName(),
