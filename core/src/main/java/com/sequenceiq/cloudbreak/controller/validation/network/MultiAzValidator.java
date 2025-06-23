@@ -58,6 +58,12 @@ public class MultiAzValidator {
             LOGGER.info(variantIsNotSupportedMsg);
             validationBuilder.error(variantIsNotSupportedMsg);
         }
+        if (allSubnetIds.size() == 1 && stack.isMultiAz() && ZONAL_SUBNET_CLOUD_PLATFORMS.contains(stack.getCloudPlatform())) {
+            String multiAzEnabledWithSingleSubnetError = String.format("Cannot enable multiAz for %s as only one subnetId: %s is defined for it",
+                    stack.getDisplayName(), allSubnetIds);
+            LOGGER.info(multiAzEnabledWithSingleSubnetError);
+            validationBuilder.error(multiAzEnabledWithSingleSubnetError);
+        }
         providerBasedMultiAzSetupValidator.validate(validationBuilder, stack);
     }
 

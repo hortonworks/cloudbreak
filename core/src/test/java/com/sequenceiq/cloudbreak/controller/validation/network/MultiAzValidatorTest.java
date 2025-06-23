@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.controller.validation.network;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -30,6 +31,9 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 
 @ExtendWith(MockitoExtension.class)
 public class MultiAzValidatorTest {
+
+    private static final String SINGLE_SUBNET_PRESENT_FOR_MULTIAZ_ENABLED_STACK = "Cannot enable multiAz for trial as only one subnetId: " +
+            "[subnet-123] is defined for it";
 
     @InjectMocks
     private MultiAzValidator underTest;
@@ -63,6 +67,23 @@ public class MultiAzValidatorTest {
         underTest.validateMultiAzForStack(stack, builder);
 
         Mockito.verify(builder, Mockito.times(0)).error(anyString());
+    }
+
+    @Test
+    public void testWhenOneSubnetUSedAndMultiAzEnabledShouldCauseValidationError() {
+        Set<InstanceGroup> instanceGroups = Set.of(
+                instanceGroup(Set.of("subnet-123")),
+                instanceGroup(Set.of("subnet-123"))
+        );
+        Stack stack = TestUtil.stack();
+        stack.setDisplayName("trial");
+        stack.setCloudPlatform("AWS");
+        stack.setPlatformVariant("AWS");
+        stack.setInstanceGroups(instanceGroups);
+        stack.setMultiAz(true);
+
+        underTest.validateMultiAzForStack(stack, builder);
+        verify(builder).error(SINGLE_SUBNET_PRESENT_FOR_MULTIAZ_ENABLED_STACK);
     }
 
     @Test
