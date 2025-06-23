@@ -114,7 +114,7 @@ public class SdxDatabaseServerUpgradeService {
             throwDatalakeNotAvailableForUpgradeError(cluster, targetMajorVersion);
         }
 
-        if (!isRuntimeVersionAllowedForUpgrade(cluster, targetMajorVersion)) {
+        if (!isRuntimeVersionAllowedForUpgrade(cluster)) {
             throwDatalakeRuntimeTooLowError(targetMajorVersion, cluster);
         }
 
@@ -149,8 +149,8 @@ public class SdxDatabaseServerUpgradeService {
         return status.isDatabaseServerUpgradeInProgress();
     }
 
-    private boolean isRuntimeVersionAllowedForUpgrade(SdxCluster cluster, TargetMajorVersion targetMajorVersion) {
-        return databaseUpgradeRuntimeValidator.isRuntimeVersionAllowedForUpgrade(cluster.getRuntime(), targetMajorVersion.getMajorVersion());
+    private boolean isRuntimeVersionAllowedForUpgrade(SdxCluster cluster) {
+        return databaseUpgradeRuntimeValidator.isRuntimeVersionAllowedForUpgrade(cluster.getRuntime());
     }
 
     private boolean isDatalakeAvailableForUpgade(DatalakeStatusEnum status) {
@@ -225,14 +225,8 @@ public class SdxDatabaseServerUpgradeService {
     }
 
     private void throwDatalakeRuntimeTooLowError(TargetMajorVersion targetMajorVersion, SdxCluster cluster) {
-        String errorMessage = String.format("The database upgrade of Data Lake %s is not permitted for runtime version %s.",
-                cluster.getName(),
-                cluster.getRuntime());
-        Optional<String> minRuntimeVersion = databaseUpgradeRuntimeValidator.getMinRuntimeVersion(targetMajorVersion.getMajorVersion());
-        if (minRuntimeVersion.isPresent()) {
-            errorMessage += String.format(" The minimum supported runtime version is %s", minRuntimeVersion.get());
-        }
-        throwBadRequestException(errorMessage);
+        throwBadRequestException(String.format("The database upgrade of Data Lake %s is not permitted for runtime version %s. The minimum supported runtime" +
+                " version is %s", cluster.getName(), cluster.getRuntime(), databaseUpgradeRuntimeValidator.getMinRuntimeVersion()));
     }
 
     private void throwBadRequestException(String message) {

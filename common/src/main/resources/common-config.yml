@@ -149,11 +149,8 @@ jobs:
     password-expiry-threshold-in-days: 14
 cb:
   db.override:
-    versions:
-      - minRuntimeVersion: 7.2.7
-        engineVersion: 14
-      - minRuntimeVersion: 7.3.2
-        engineVersion: 17
+    minRuntimeVersion: 7.2.7
+    engineVersion: 14
 
 quartz:
   initialization:
