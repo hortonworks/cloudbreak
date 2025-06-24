@@ -1,7 +1,10 @@
 package com.sequenceiq.redbeams.service.cloud;
 
+import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
+
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -52,7 +55,7 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
                     dbResourceService.save(resource);
                     return resource;
                 })
-                .toList();
+                .collect(Collectors.toList());
         if (cloudResources.size() != resources.size()) {
             LOGGER.debug("There are {} resource(s), these will not be save", cloudResources.size() - resources.size());
         }
@@ -68,10 +71,7 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
         cloudResources.forEach(cloudResource -> {
             DBResource resource = cloudResourceToDbResourceConverter.convert(cloudResource);
             DBResource persistedResource = dbResourceService.findByStackAndNameAndType(dbStackId, cloudResource.getName(), cloudResource.getType())
-                    .orElseGet(() -> {
-                        LOGGER.debug("Resource {} not found in DB, creating a new one", cloudResource.getName());
-                        return resource;
-                    });
+                    .orElseThrow(notFound("dbResource", cloudResource.getName()));
             updateWithPersistedFields(resource, persistedResource);
             resource.setDbStack(dbStack);
             dbResourceService.save(resource);
@@ -96,7 +96,7 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
     }
 
     private void updateWithPersistedFields(DBResource resource, DBResource persistedResource) {
-        if (persistedResource != null && !persistedResource.equals(resource)) {
+        if (persistedResource != null) {
             resource.setId(persistedResource.getId());
         }
     }
