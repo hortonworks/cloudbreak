@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -27,6 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.transform.ResourceLists;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourcesStatePollerResults;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
+import com.sequenceiq.common.api.type.CommonStatus;
 
 @Component
 public class TerminateStackHandler implements CloudPlatformEventHandler<TerminateStackRequest> {
@@ -67,7 +70,9 @@ public class TerminateStackHandler implements CloudPlatformEventHandler<Terminat
                     statePollerResult = syncPollingScheduler.schedule(task);
                 }
                 if (!statePollerResult.getStatus().equals(ResourceStatus.DELETED)) {
-                    throw new CloudConnectorException("Stack could not be terminated, Resource(s) could not be deleted on the provider side.");
+                    Set<String> existingResources = collectNonDeletedResources(resources);
+                    throw new CloudConnectorException("Stack could not be terminated, Resource(s) could not be deleted on the provider side: "
+                            + String.join(", ", existingResources));
                 } else {
                     result = new TerminateStackResult(request.getResourceId());
                 }
@@ -90,5 +95,12 @@ public class TerminateStackHandler implements CloudPlatformEventHandler<Terminat
             request.getResult().onNext(terminateStackResult);
             eventBus.notify(terminateStackResult.selector(), new Event<>(terminateStackRequestEvent.getHeaders(), terminateStackResult));
         }
+    }
+
+    private Set<String> collectNonDeletedResources(List<CloudResource> resources) {
+        return resources.stream()
+                .filter(cloudResource -> !CommonStatus.DETACHED.equals(cloudResource.getStatus()))
+                .map(CloudResource::getName)
+                .collect(Collectors.toSet());
     }
 }
