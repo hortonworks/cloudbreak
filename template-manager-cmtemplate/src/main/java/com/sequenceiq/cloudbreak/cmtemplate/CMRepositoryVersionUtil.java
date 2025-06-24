@@ -82,8 +82,6 @@ public class CMRepositoryVersionUtil {
 
     public static final Versioned CLOUDERAMANAGER_VERSION_7_13_1_300 = () -> "7.13.1.300";
 
-    public static final Versioned CLOUDERAMANAGER_VERSION_7_13_2 = () -> "7.13.2";
-
     public static final Versioned CLOUDERA_STACK_VERSION_7_2_7 = () -> "7.2.7";
 
     public static final Versioned CLOUDERA_STACK_VERSION_7_2_9 = () -> "7.2.9";
@@ -105,8 +103,6 @@ public class CMRepositoryVersionUtil {
     public static final Versioned CLOUDERA_STACK_VERSION_7_3_0 = () -> "7.3.0";
 
     public static final Versioned CLOUDERA_STACK_VERSION_7_3_1 = () -> "7.3.1";
-
-    public static final Versioned CLOUDERA_STACK_VERSION_7_3_2 = () -> "7.3.2";
 
     public static final Versioned CFM_VERSION_2_0_0_0 = () -> "2.0.0.0";
 
@@ -280,9 +276,7 @@ public class CMRepositoryVersionUtil {
 
     public static boolean isDataSharingConfigurationSupported(String cmVersion, String cdhVersion) {
         return isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_13_1_300) &&
-                isVersionOlderThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_13_2) &&
-                isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_3_1) &&
-                isVersionOlderThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_3_2);
+                isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_3_1);
     }
 
     public static boolean isVersionNewerOrEqualThanLimited(Versioned currentVersion, Versioned limitedAPIVersion) {

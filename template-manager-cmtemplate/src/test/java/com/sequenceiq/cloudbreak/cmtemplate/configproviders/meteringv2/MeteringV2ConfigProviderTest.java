@@ -2,10 +2,8 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.meteringv2;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_13_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_13_1_300;
-import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_13_2;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_18;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_3_1;
-import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_3_2;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.clo.CLOServiceRoles.CLO_SERVER;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.clo.CLOServiceRoles.CLO_SERVICE;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.dlm.DLMServiceRoles.DLM_SERVER;
@@ -216,42 +214,6 @@ class MeteringV2ConfigProviderTest {
 
         BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
         when(blueprintTextProcessor.getVersion()).thenReturn(Optional.empty());
-        BlueprintView blueprintView = mock(BlueprintView.class);
-        when(blueprintView.getProcessor()).thenReturn(blueprintTextProcessor);
-        when(templatePreparationObject.getBlueprintView()).thenReturn(blueprintView);
-
-        assertFalse(underTest.isConfigurationNeeded(null, templatePreparationObject));
-    }
-
-    @Test
-    void configurationNotNeededIfDatalakeWithHighCDHVersion() {
-        when(templatePreparationObject.getStackType()).thenReturn(StackType.DATALAKE);
-
-        ClouderaManagerRepo cm = new ClouderaManagerRepo();
-        cm.setVersion(CLOUDERAMANAGER_VERSION_7_13_1_300.getVersion());
-        ProductDetailsView productDetailsView = new ProductDetailsView(cm, null);
-        when(templatePreparationObject.getProductDetailsView()).thenReturn(productDetailsView);
-
-        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
-        when(blueprintTextProcessor.getVersion()).thenReturn(Optional.of(CLOUDERA_STACK_VERSION_7_3_2.getVersion()));
-        BlueprintView blueprintView = mock(BlueprintView.class);
-        when(blueprintView.getProcessor()).thenReturn(blueprintTextProcessor);
-        when(templatePreparationObject.getBlueprintView()).thenReturn(blueprintView);
-
-        assertFalse(underTest.isConfigurationNeeded(null, templatePreparationObject));
-    }
-
-    @Test
-    void configurationNotNeededIfDatalakeWithHighCMVersion() {
-        when(templatePreparationObject.getStackType()).thenReturn(StackType.DATALAKE);
-
-        ClouderaManagerRepo cm = new ClouderaManagerRepo();
-        cm.setVersion(CLOUDERAMANAGER_VERSION_7_13_2.getVersion());
-        ProductDetailsView productDetailsView = new ProductDetailsView(cm, null);
-        when(templatePreparationObject.getProductDetailsView()).thenReturn(productDetailsView);
-
-        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
-        when(blueprintTextProcessor.getVersion()).thenReturn(Optional.of(CLOUDERA_STACK_VERSION_7_3_1.getVersion()));
         BlueprintView blueprintView = mock(BlueprintView.class);
         when(blueprintView.getProcessor()).thenReturn(blueprintTextProcessor);
         when(templatePreparationObject.getBlueprintView()).thenReturn(blueprintView);
