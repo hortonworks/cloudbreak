@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.encryptionprofile.v1.converter;
 
-import static com.sequenceiq.environment.encryptionprofile.EncryptionProfileTestConstants.CRN;
 import static com.sequenceiq.environment.encryptionprofile.EncryptionProfileTestConstants.DESCRIPTION;
+import static com.sequenceiq.environment.encryptionprofile.EncryptionProfileTestConstants.ENCRYPTION_PROFILE_CRN;
 import static com.sequenceiq.environment.encryptionprofile.EncryptionProfileTestConstants.NAME;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.when;
@@ -41,7 +41,7 @@ class EncryptionProfileToEncryptionProfileResponseConverterTest {
         encryptionProfile = new EncryptionProfile();
         encryptionProfile.setName(NAME);
         encryptionProfile.setDescription(DESCRIPTION);
-        encryptionProfile.setResourceCrn(CRN);
+        encryptionProfile.setResourceCrn(ENCRYPTION_PROFILE_CRN);
 
         encryptionProfile.setTlsVersions(new HashSet<>(Arrays.asList(TlsVersion.TLS_1_2, TlsVersion.TLS_1_3)));
         encryptionProfile.setCipherSuites(new HashSet<>(Arrays.asList(
@@ -64,7 +64,31 @@ class EncryptionProfileToEncryptionProfileResponseConverterTest {
 
         assertThat(response.getName()).isEqualTo(NAME);
         assertThat(response.getDescription()).isEqualTo(DESCRIPTION);
-        assertThat(response.getCrn()).isEqualTo(CRN);
+        assertThat(response.getCrn()).isEqualTo(ENCRYPTION_PROFILE_CRN);
+        assertThat(response.getTlsVersions()).containsExactlyInAnyOrder("TLSv1.2", "TLSv1.3");
+
+        Map<String, Set<String>> expectedCipherMap = new HashMap<>();
+        expectedCipherMap.put("TLSv1.2", new HashSet<>(Arrays.asList("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256")));
+        expectedCipherMap.put("TLSv1.3", new HashSet<>(Arrays.asList("TLS_AES_128_GCM_SHA256")));
+
+        assertThat(response.getCipherSuites()).isEqualTo(expectedCipherMap);
+    }
+
+    @Test
+    void testConvertEmptyCipherSuitesReturnDefaultMap() {
+        // TLS 1.2 only supports one of the cipher suites
+        when(encryptionProfileConfig.getRecommendedCiphers(TlsVersion.TLS_1_2))
+                .thenReturn(new HashSet<>(Arrays.asList("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256")));
+        // TLS 1.3 supports a different one
+        when(encryptionProfileConfig.getRecommendedCiphers(TlsVersion.TLS_1_3))
+                .thenReturn(new HashSet<>(Arrays.asList("TLS_AES_128_GCM_SHA256")));
+        encryptionProfile.setCipherSuites(Collections.emptySet());
+
+        EncryptionProfileResponse response = converter.convert(encryptionProfile);
+
+        assertThat(response.getName()).isEqualTo(NAME);
+        assertThat(response.getDescription()).isEqualTo(DESCRIPTION);
+        assertThat(response.getCrn()).isEqualTo(ENCRYPTION_PROFILE_CRN);
         assertThat(response.getTlsVersions()).containsExactlyInAnyOrder("TLSv1.2", "TLSv1.3");
 
         Map<String, Set<String>> expectedCipherMap = new HashMap<>();
@@ -78,7 +102,7 @@ class EncryptionProfileToEncryptionProfileResponseConverterTest {
     void testConvertEmptyCipherSuitesReturnEmptyMap() {
         encryptionProfile.setCipherSuites(Collections.emptySet());
 
-        EncryptionProfileResponse response = converter.convert(encryptionProfile);
+        EncryptionProfileResponse response = converter.convert(encryptionProfile, false);
 
         assertThat(response.getCipherSuites()).isEmpty();
     }
@@ -87,7 +111,7 @@ class EncryptionProfileToEncryptionProfileResponseConverterTest {
     void testConvertNullCipherSuitesReturnEmptyMap() {
         encryptionProfile.setCipherSuites(null);
 
-        EncryptionProfileResponse response = converter.convert(encryptionProfile);
+        EncryptionProfileResponse response = converter.convert(encryptionProfile, false);
 
         assertThat(response.getCipherSuites()).isEmpty();
     }

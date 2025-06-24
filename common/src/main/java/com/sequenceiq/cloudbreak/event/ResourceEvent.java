@@ -759,6 +759,7 @@ public enum ResourceEvent {
     ROTATE_RDS_CERTIFICATE_FAILED("cluster.externaldatabase.certificate.rotation.failed"),
 
     ENCRYPTION_PROFILE_CREATED("resource.encryptionprofile.created"),
+    ENCRYPTION_PROFILE_DELETED("resource.encryptionprofile.deleted"),
 
     // deprecated
     STACK_GATEWAY_CERTIFICATE_CREATE_FAILED("stack.gateway.certificate.create.skipped"),

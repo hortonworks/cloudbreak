@@ -22,7 +22,7 @@ public class EncryptionProfileTestConstants {
 
     public static final Set<String> CIPHER_SUITES = new HashSet<>(Arrays.asList("TLS_AES_128_GCM_SHA256", "TLS_AES_256_GCM_SHA384"));
 
-    public static final String CRN = "crn:cdp:environments:us-west-1:cloudbreak:encryptionProfile:ecb891ca-18f2-406f-9958-99da466fd0f2";
+    public static final String ENCRYPTION_PROFILE_CRN = "crn:cdp:environments:us-west-1:cloudbreak:encryptionProfile:ecb891ca-18f2-406f-9958-99da466fd0f2";
 
     public static final String USER_CRN = "crn:cdp:iam:us-west-1:cloudbreak:user:ecb891ca-18f2-406f-9958-99da466fd0f2";
 
@@ -40,9 +40,11 @@ public class EncryptionProfileTestConstants {
 
     public static EncryptionProfile getTestEncryptionProfile() {
         EncryptionProfile profile = new EncryptionProfile();
+        profile.setId(1L);
         profile.setName(NAME);
+        profile.setAccountId(ACCOUNT_ID);
         profile.setDescription(DESCRIPTION);
-        profile.setResourceCrn(CRN);
+        profile.setResourceCrn(ENCRYPTION_PROFILE_CRN);
         profile.setCipherSuites(CIPHER_SUITES);
         profile.setTlsVersions(TLS_VERSIONS);
         return profile;
