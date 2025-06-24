@@ -6,10 +6,10 @@
   "cloudPlatform": "AWS",
   "distroXTemplate": {
     "cluster": {
-      "blueprintName": "7.3.2 - Hybrid Data Engineering: HA: Apache Spark3, Apache Hive, Apache Oozie"
+      "blueprintName": "7.3.2 - Hybrid Data Engineering: HA: Apache Spark3, Apache Hive"
     },
     "externalDatabase": {
-      "availabilityType": "HA"
+      "availabilityType": "NONE"
     },
     "enableLoadBalancer": true,
     "instanceGroups": [{

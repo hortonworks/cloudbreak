@@ -509,7 +509,7 @@ cb:
           7.3.1 - SDX Enterprise: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-enterprise;
           7.3.1 - Data Engineering: HA: Apache Spark3, Apache Hive, Apache Oozie=cdp-data-engineering-spark3-ha;
           7.3.1 - Data Engineering: Apache Spark3, Apache Hive, Apache Oozie=cdp-data-engineering-spark3;
-          7.3.1 - Hybrid Data Engineering: HA: Apache Spark3, Apache Hive, Apache Oozie=cdp-hybrid-data-engineering-spark3-ha;
+          7.3.1 - Hybrid Data Engineering: HA: Apache Spark3, Apache Hive=cdp-hybrid-data-engineering-spark3-ha;
           7.3.1 - Data Mart: Apache Impala, Hue=cdp-data-mart;
           7.3.1 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark3=cdp-rt-data-mart-spark3;
           7.3.1 - Streams Messaging High Availability: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control=cdp-streaming-ha;
@@ -534,7 +534,7 @@ cb:
           7.3.2 - SDX Enterprise: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-enterprise;
           7.3.2 - Data Engineering: HA: Apache Spark3, Apache Hive, Apache Oozie=cdp-data-engineering-spark3-ha;
           7.3.2 - Data Engineering: Apache Spark3, Apache Hive, Apache Oozie=cdp-data-engineering-spark3;
-          7.3.2 - Hybrid Data Engineering: HA: Apache Spark3, Apache Hive, Apache Oozie=cdp-hybrid-data-engineering-spark3-ha;
+          7.3.2 - Hybrid Data Engineering: HA: Apache Spark3, Apache Hive=cdp-hybrid-data-engineering-spark3-ha;
           7.3.2 - Data Mart: Apache Impala, Hue=cdp-data-mart;
           7.3.2 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark3=cdp-rt-data-mart-spark3;
           7.3.2 - Streams Messaging High Availability: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control=cdp-streaming-ha;

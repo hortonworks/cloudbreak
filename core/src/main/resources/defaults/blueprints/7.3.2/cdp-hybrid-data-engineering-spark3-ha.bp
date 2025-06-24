@@ -203,35 +203,6 @@
         ]
       },
       {
-        "refName": "oozie",
-        "serviceType": "OOZIE",
-        "roleConfigGroups": [
-          {
-            "refName": "oozie-OOZIE_SERVER-BASE",
-            "roleType": "OOZIE_SERVER",
-            "configs": [
-              {
-                "name": "oozie_config_safety_valve",
-                "value": "<property><name>oozie.service.HadoopAccessorService.nameNode.whitelist</name><value></value></property>"
-              }
-            ],
-            "base": true
-          }
-        ]
-      },
-      {
-        "refName": "sqoop",
-        "serviceType": "SQOOP_CLIENT",
-        "roleConfigGroups": [
-          {
-            "refName": "sqoop-SQOOP_CLIENT-GATEWAY-BASE",
-            "roleType": "GATEWAY",
-            "configs": [ ],
-            "base": true
-          }
-        ]
-      },
-      {
         "refName": "yarn",
         "serviceType": "YARN",
         "serviceConfigs": [
@@ -406,8 +377,7 @@
           "livy_for_spark3-GATEWAY-BASE",
           "spark3_on_yarn-GATEWAY-BASE",
           "tez-GATEWAY-BASE",
-          "yarn-GATEWAY-BASE",
-          "sqoop-SQOOP_CLIENT-GATEWAY-BASE"
+          "yarn-GATEWAY-BASE"
         ]
       },
       {
@@ -429,7 +399,6 @@
           "hdfs-JOURNALNODE-BASE",
           "zookeeper-SERVER-BASE",
           "yarn-GATEWAY-BASE",
-          "sqoop-SQOOP_CLIENT-GATEWAY-BASE",
           "hue-HUE_LOAD_BALANCER-BASE",
           "hue-HUE_SERVER-BASE"
         ]
@@ -445,7 +414,6 @@
           "spark3_on_yarn-GATEWAY-BASE",
           "tez-GATEWAY-BASE",
           "yarn-JOBHISTORY-BASE",
-          "sqoop-SQOOP_CLIENT-GATEWAY-BASE",
           "query_processor-QUERY_PROCESSOR",
           "hdfs-JOURNALNODE-BASE",
           "zookeeper-SERVER-BASE",
@@ -474,13 +442,11 @@
         "cardinality": 2,
         "roleConfigGroupsRefNames": [
           "knox-KNOX_GATEWAY-BASE",
-          "oozie-OOZIE_SERVER-BASE",
           "hive-GATEWAY-BASE",
           "livy_for_spark3-GATEWAY-BASE",
           "hdfs-GATEWAY-BASE",
           "tez-GATEWAY-BASE",
           "yarn-GATEWAY-BASE",
-          "sqoop-SQOOP_CLIENT-GATEWAY-BASE",
           "spark3_on_yarn-GATEWAY-BASE"
         ]
       }

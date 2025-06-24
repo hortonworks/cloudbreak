@@ -6,10 +6,10 @@
   "cloudPlatform": "GCP",
   "distroXTemplate": {
     "cluster": {
-      "blueprintName": "7.3.1 - Hybrid Data Engineering: HA: Apache Spark3, Apache Hive, Apache Oozie"
+      "blueprintName": "7.3.1 - Hybrid Data Engineering: HA: Apache Spark3, Apache Hive"
     },
     "externalDatabase": {
-      "availabilityType": "HA"
+      "availabilityType": "NONE"
     },
     "enableLoadBalancer": true,
     "instanceGroups": [
