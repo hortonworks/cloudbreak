@@ -49,7 +49,7 @@ public class SdxAzureMultiAzVerticalScaleTest extends PreconditionSdxE2ETest {
     public void testSDXAzureMultiAzVerticalScale(TestContext testContext) {
         String sdx = resourcePropertyProvider().getName();
         String sdxVerticalScaleKey = "sdxVerticalScaleKey";
-        String targetInstanceType = "Standard_D5_v2";
+        String targetInstanceType = "Standard_D8s_v5";
         String targetInstanceGroup = "master";
 
         testContext
