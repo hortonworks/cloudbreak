@@ -59,6 +59,8 @@ import_certs_from_dir_to_keystore $MOCK_INFRASTRUCTURE_CERT_DIR
 
 echo "Starting the Cloudbreak application..."
 
+CB_JAVA_OPTS="$CB_JAVA_OPTS -XX:+ExitOnOutOfMemoryError"
+
 set -x
 if [ "$SECURE_RANDOM" == "false" ]; then
   CB_JAVA_OPTS="$CB_JAVA_OPTS -Djava.security.egd=file:/dev/./urandom"

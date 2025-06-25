@@ -61,6 +61,8 @@ import_certs_from_dir_to_keystore $SERVICE_SPECIFIC_CERT_DIR
 
 echo "Starting the Redbeams application..."
 
+REDBEAMS_JAVA_OPTS="$REDBEAMS_JAVA_OPTS -XX:+ExitOnOutOfMemoryError"
+
 set -x
 if [ "$SECURE_RANDOM" == "false" ]; then
   REDBEAMS_JAVA_OPTS="$REDBEAMS_JAVA_OPTS -Djava.security.egd=file:/dev/./urandom"

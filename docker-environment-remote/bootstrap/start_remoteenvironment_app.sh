@@ -58,6 +58,8 @@ import_certs_from_dir_to_keystore $SERVICE_SPECIFIC_CERT_DIR
 
 echo "Starting the Remote Environment application..."
 
+REMOTE_ENVIRONMENT_JAVA_OPTS="$REMOTE_ENVIRONMENT_JAVA_OPTS -XX:+ExitOnOutOfMemoryError"
+
 set -x
 if [ "$SECURE_RANDOM" == "false" ]; then
   REMOTE_ENVIRONMENT_JAVA_OPTS="$REMOTE_ENVIRONMENT_JAVA_OPTS -Djava.security.egd=file:/dev/./urandom"

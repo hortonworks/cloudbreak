@@ -81,7 +81,8 @@ if [ -e "${BC_FIPS_LOCATION}" ]; then
 else
   SECURITY_OPTS="${SECURITY_OPTS} -Djavax.net.ssl.keyStore=NONE -Djavax.net.ssl.keyStoreType=PKCS11 -Djavax.net.ssl.trustStore=NONE -Djavax.net.ssl.trustStoreType=PKCS11"
 fi
-ENVIRONMENT_JAVA_OPTS="${ENVIRONMENT_JAVA_OPTS} ${SECURITY_OPTS}"
+
+ENVIRONMENT_JAVA_OPTS="${ENVIRONMENT_JAVA_OPTS} ${SECURITY_OPTS} -XX:+ExitOnOutOfMemoryError"
 
 if [ "$SECURE_RANDOM" == "false" ]; then
   ENVIRONMENT_JAVA_OPTS="$ENVIRONMENT_JAVA_OPTS -Djava.security.egd=file:/dev/./urandom"
