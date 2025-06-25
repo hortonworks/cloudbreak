@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.ExternalResourceAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
@@ -79,6 +80,7 @@ abstract class AbstractStackTerminationAction<P extends Payload>
         CloudStack cloudStack = cloudStackConverter.convert(stack);
         List<CloudResource> resources = resourceService.getAllByStackId(stack.getId()).stream()
                 .map(r -> cloudResourceConverter.convert(r))
+                .filter(cr -> cr.getParameterStrict(CloudResource.ATTRIBUTES, ExternalResourceAttributes.class) == null)
                 .collect(Collectors.toList());
         return createStackTerminationContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, resources, terminationType);
     }
