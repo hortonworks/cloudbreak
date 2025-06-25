@@ -77,7 +77,6 @@ class AbstractStackTerminationActionTest {
     @Mock
     private ResourceService resourceService;
 
-
     @ParameterizedTest
     @MethodSource("createFlowContextTestDataProvider")
     void testCreateFlowContext(CloudResource cloudResource, int expectedResourceCount) {
