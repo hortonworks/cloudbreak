@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.multiaz;
 
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -22,7 +23,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.util.Strings;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -182,9 +182,11 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
 
     @Test
     void testPopulateWhenTheStackIsMultiAzEnabledButSomeOfTheInstancesHaveAzConfigAlready() {
+        String subnetId = "aSubnetId";
         List<String> groupAvailabilityZonesForMetadata = List.of("1", "2");
         List<String> groupAvailabilityZonesForGroup = List.of("1", "2", "3");
         Stack stack = getStackWithGroupsAndInstances(groupAvailabilityZonesForMetadata, groupAvailabilityZonesForGroup);
+        stack.setNetwork(TestUtil.networkWithSubnetId(subnetId));
         stack.getInstanceGroups()
                 .forEach(ig -> ig.getInstanceMetaData().addAll(getInstanceMetaData(1, List.of(), ig, Set.of())));
 
@@ -201,6 +203,8 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
                 .allMatch(im -> groupAvailabilityZonesForGroup.contains(im.getAvailabilityZone())));
         assertTrue(instancesExpectedToBeUpdated.stream()
                 .allMatch(im -> ("/" + im.getAvailabilityZone()).equals(im.getRackId())));
+        Assertions.assertTrue(savedInstanceMetadatas.getValue().stream()
+                .allMatch(im -> isNotEmpty(im.getSubnetId()) && subnetId.equals(im.getSubnetId())));
     }
 
     @Test
@@ -234,8 +238,10 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
     @MethodSource("testAvailabilityZoneDistributionForWholeInstanceGroupData")
     void testPopulateShouldDistributeNodesAcrossInstancesOfTheGroup(int instanceCountByGroup, Set<String> groupAvailabilityZones,
             Map<String, Integer> expectedInstanceCountByAz) {
+        String subnetId = "aSubnetId";
         when(cloudPlatformConnectors.get(any()).availabilityZoneConnector()).thenReturn(availabilityZoneConnector);
         Stack stack = TestUtil.stack(Status.REQUESTED, TestUtil.azureCredential());
+        stack.setNetwork(TestUtil.networkWithSubnetId(subnetId));
         stack.setMultiAz(Boolean.TRUE);
         stack.getInstanceGroups()
                 .forEach(ig -> ig.setInstanceMetaData(TestUtil.generateInstanceMetaDatas(instanceCountByGroup, ig.getId(), ig)));
@@ -264,6 +270,8 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
                 assertEquals(Long.valueOf(expectedCountByAzEntry.getValue()), actualInstanceCountByAz);
             }
         }
+        Assertions.assertTrue(stack.getNotDeletedInstanceMetaDataSet().stream()
+                .allMatch(im -> isNotEmpty(im.getSubnetId()) && subnetId.equals(im.getSubnetId())));
     }
 
     @ParameterizedTest(name = "testPopulateShouldDistributeAwsNodesAcrossInstancesOfTheGroup settings " +
@@ -323,6 +331,7 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
                 assertEquals(Long.valueOf(expectedCountBySubnetEntry.getValue()), actualInstanceCountByAz);
             }
         }
+        Assertions.assertTrue(stack.getNotDeletedInstanceMetaDataSet().stream().allMatch(im -> isNotEmpty(im.getSubnetId())));
     }
 
     @Test
@@ -352,6 +361,9 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
         notDeletedInstanceMetaDataSet.stream()
                 .filter(e -> e.getInstanceStatus().equals(InstanceStatus.CREATED))
                 .forEach(e -> assertTrue(Strings.isNullOrEmpty(e.getAvailabilityZone())));
+        Assertions.assertTrue(stack.getNotDeletedInstanceMetaDataSet().stream()
+                .filter(e -> e.getInstanceStatus().equals(InstanceStatus.CREATED))
+                .allMatch(im -> isNotEmpty(im.getSubnetId())));
     }
 
     @Test
@@ -364,6 +376,9 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
 
         assertFalse(actual);
         verifyNoInteractions(instanceMetaDataService);
+        Assertions.assertTrue(stack.getNotDeletedInstanceMetaDataSet().stream()
+                .filter(e -> e.getInstanceStatus().equals(InstanceStatus.CREATED))
+                .allMatch(im -> isNotEmpty(im.getSubnetId())));
     }
 
     @Test
@@ -382,7 +397,9 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
     void testPopulateForScalingWhenPopulationIsNeededAndUpscale() {
         List<String> groupAvailabilityZonesForMetadata = List.of("1", "2");
         List<String> groupAvailabilityZonesForGroup = List.of("1", "2", "3");
+        String subnetId = "aSubnetId";
         Stack stack = getStackWithGroupsAndInstances(groupAvailabilityZonesForMetadata, groupAvailabilityZonesForGroup);
+        stack.setNetwork(TestUtil.networkWithSubnetId(subnetId));
         stack.getInstanceGroups()
                 .forEach(ig -> ig.getInstanceMetaData().addAll(getInstanceMetaData(1, List.of(), ig, Set.of())));
 
@@ -399,9 +416,10 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
         verify(instanceMetaDataService, times(0)).getAvailabilityZoneFromDiskIfRepair(any(), anyBoolean(), anyString(), anyString());
         assertTrue(savedInstanceMetadatas.getValue().size() == 3);
         savedInstanceMetadatas.getValue()
-                .forEach(im -> assertTrue(StringUtils.isNotEmpty(im.getAvailabilityZone())));
+                .forEach(im -> assertTrue(isNotEmpty(im.getAvailabilityZone())));
         savedInstanceMetadatas.getValue()
                 .forEach(im -> assertTrue(groupAvailabilityZonesForGroup.contains(im.getAvailabilityZone())));
+        Assertions.assertTrue(savedInstanceMetadatas.getValue().stream().allMatch(im -> subnetId.equals(im.getSubnetId())));
     }
 
     @Test
@@ -409,7 +427,9 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
         Set<String> targetedAzs = Set.of("1", "2");
         List<String> groupAvailabilityZonesForMetadata = List.of("1", "2");
         List<String> groupAvailabilityZonesForGroup = List.of("1", "2", "3");
+        String subnetId = "aSubnetId";
         Stack stack = getStackWithGroupsAndInstances(groupAvailabilityZonesForMetadata, groupAvailabilityZonesForGroup);
+        stack.setNetwork(TestUtil.networkWithSubnetId(subnetId));
         stack.getInstanceGroups()
                 .forEach(ig -> ig.getInstanceMetaData().addAll(getInstanceMetaData(1, List.of(), ig, Set.of())));
 
@@ -427,13 +447,14 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
         verify(instanceMetaDataService).saveAll(savedInstanceMetadatas.capture());
         assertTrue(savedInstanceMetadatas.getValue().size() == 3);
         savedInstanceMetadatas.getValue()
-                .forEach(im -> assertTrue(StringUtils.isNotEmpty(im.getAvailabilityZone())));
+                .forEach(im -> assertTrue(isNotEmpty(im.getAvailabilityZone())));
         savedInstanceMetadatas.getValue()
                 .forEach(im -> assertTrue(groupAvailabilityZonesForGroup.contains(im.getAvailabilityZone())));
         savedInstanceMetadatas.getValue()
                 .stream()
                 .filter(e -> e.getInstanceStatus().equals(InstanceStatus.CREATED))
                 .forEach(e -> assertTrue(targetedAzs.contains(e.getAvailabilityZone())));
+        Assertions.assertTrue(savedInstanceMetadatas.getValue().stream().allMatch(im -> subnetId.equals(im.getSubnetId())));
     }
 
     @Test
@@ -442,7 +463,9 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
         List<String> groupAvailabilityZonesForMetadata = List.of();
         List<String> groupAvailabilityZonesForGroup = List.of("1", "2", "3");
         Map<String, String> expectedAvailabilityZoneByFqdn = new HashMap<>();
+        String subnetId = "aSubnetId";
         Stack stack = getStackWithGroupsAndInstances(groupAvailabilityZonesForMetadata, groupAvailabilityZonesForGroup);
+        stack.setNetwork(TestUtil.networkWithSubnetId(subnetId));
         stack.getInstanceGroups()
                 .forEach(ig -> ig.getInstanceMetaData().addAll(getInstanceMetaData(1, List.of(), ig, Set.of())));
 
@@ -477,6 +500,7 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
             assertEquals(expectedAz, instanceMetaData.getAvailabilityZone());
             assertEquals("/" + expectedAz, instanceMetaData.getRackId());
         });
+        Assertions.assertTrue(savedInstanceMetadatas.getValue().stream().allMatch(im -> subnetId.equals(im.getSubnetId())));
     }
 
     @Test
@@ -535,6 +559,8 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
             assertEquals(expectedSubnetId, instanceMetaData.getSubnetId());
             assertEquals("/" + expectedAz, instanceMetaData.getRackId());
         });
+        Assertions.assertTrue(savedInstanceMetadatas.getValue().stream()
+                .allMatch(im -> expectedSubnetIdForAz.values().contains(im.getSubnetId())));
     }
 
     @Test
@@ -542,7 +568,9 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
         boolean repair = Boolean.TRUE;
         List<String> groupAvailabilityZonesForMetadata = List.of("1", "2");
         List<String> groupAvailabilityZonesForGroup = List.of("1", "2", "3");
+        String subnetId = "aSubnetId";
         Stack stack = getStackWithGroupsAndInstances(groupAvailabilityZonesForMetadata, groupAvailabilityZonesForGroup);
+        stack.setNetwork(TestUtil.networkWithSubnetId(subnetId));
         stack.getInstanceGroups()
                 .forEach(ig -> ig.getInstanceMetaData().addAll(getInstanceMetaData(1, List.of(), ig, Set.of())));
 
@@ -565,6 +593,9 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
         notDeletedInstanceMetaDataSet.stream().filter(im -> "is1".equals(im.getInstanceGroup().getGroupName()))
                 .forEach(im -> zoneNodeCount.put(im.getAvailabilityZone(), 1 + zoneNodeCount.getOrDefault(im.getAvailabilityZone(), 0L)));
         assertEquals(Map.of("1", 1L, "2", 1L, "3", 1L), zoneNodeCount);
+        Assertions.assertTrue(notDeletedInstanceMetaDataSet.stream()
+                .filter(im -> InstanceStatus.REQUESTED.equals(im.getInstanceStatus()))
+                .allMatch(im -> subnetId.equals(im.getSubnetId())));
     }
 
     private Stack getStackWithGroupsAndInstances(List<String> groupAvailabilityZonesForMetadata, List<String> groupAvailabilityZonesForGroup) {

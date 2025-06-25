@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.ExternalResourceAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.NetworkAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.OutboundType;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -173,6 +174,7 @@ public class AzureNatGatewaySyncer implements ProviderResourceSyncer<ResourceTyp
     private CloudResourceStatus buildResource(ResourceId natGatewayResourceId, String natGatewayId) {
         CloudResource newNatGateway =
                 azureCloudResourceService.buildCloudResource(natGatewayResourceId.name(), natGatewayId, AZURE_NAT_GATEWAY);
+        newNatGateway.setTypedAttributes(new ExternalResourceAttributes());
         return new CloudResourceStatus(newNatGateway, ResourceStatus.CREATED);
     }
 

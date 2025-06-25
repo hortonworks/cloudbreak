@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -138,7 +140,9 @@ class DataLakeAwareInstanceMetadataAvailabilityZoneCalculatorTest {
 
     @Test
     void testPopulateWhenStackIsNotMultiAzEnabled() {
+        String subnetId = "aSubnetId";
         Stack stack = TestUtil.stack();
+        stack.setNetwork(TestUtil.networkWithSubnetId(subnetId));
         stack.setMultiAz(Boolean.FALSE);
         when(stackService.getByIdWithLists(anyLong())).thenReturn(stack);
         when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environmentResponse);
@@ -148,6 +152,8 @@ class DataLakeAwareInstanceMetadataAvailabilityZoneCalculatorTest {
         verify(underTest, times(1)).updateInstancesMetaData(any());
         verify(underTest, times(1)).populateSupportedOnStack(stack);
         verify(underTest, times(0)).populate(stack);
+        Assertions.assertTrue(stack.getNotTerminatedInstanceMetaDataSet().stream()
+                .allMatch(im -> StringUtils.isNotEmpty(im.getSubnetId()) && subnetId.equals(im.getSubnetId())));
     }
 
     @Test
@@ -212,8 +218,10 @@ class DataLakeAwareInstanceMetadataAvailabilityZoneCalculatorTest {
 
     @Test
     void testPopulateWhenMultiAzEnabledEnterpriseDataLakeHasOnlyMasterGroup() {
+        String subnetId = "aSubnetId";
         Set<String> environmentAvailabilityZones = Set.of("1", "2", "3");
         Stack stack = TestUtil.stack(Status.REQUESTED, TestUtil.azureCredential());
+        stack.setNetwork(TestUtil.networkWithSubnetId(subnetId));
         stack.setMultiAz(Boolean.TRUE);
         stack.setType(StackType.DATALAKE);
         stack.getInstanceGroups()
@@ -241,12 +249,16 @@ class DataLakeAwareInstanceMetadataAvailabilityZoneCalculatorTest {
                         assertEquals(Long.valueOf(1), actualInstanceCountByAz);
                     });
         }
+        Assertions.assertTrue(stack.getNotTerminatedInstanceMetaDataSet().stream()
+                .allMatch(im -> StringUtils.isNotEmpty(im.getSubnetId()) && subnetId.equals(im.getSubnetId())));
     }
 
     @Test
     void testPopulateWhenMultiAzEnabledEnterpriseDataLakeHasOnlyAuxiliaryGroup() {
+        String subnetId = "aSubnetId";
         Set<String> environmentAvailabilityZones = Set.of("1", "2", "3");
         Stack stack = TestUtil.stack(Status.REQUESTED, TestUtil.azureCredential());
+        stack.setNetwork(TestUtil.networkWithSubnetId(subnetId));
         stack.setMultiAz(Boolean.TRUE);
         stack.setType(StackType.DATALAKE);
         stack.getInstanceGroups()
@@ -277,6 +289,8 @@ class DataLakeAwareInstanceMetadataAvailabilityZoneCalculatorTest {
                         assertEquals(Long.valueOf(1), actualInstanceCountByAz);
                     });
         }
+        Assertions.assertTrue(stack.getNotTerminatedInstanceMetaDataSet().stream()
+                .allMatch(im -> StringUtils.isNotEmpty(im.getSubnetId()) && subnetId.equals(im.getSubnetId())));
     }
 
     @ParameterizedTest(name = "testPopulateShouldDistributeNodesAcrossInstancesOfTheMasterAndAuxiliaryGroups settings " +
@@ -284,7 +298,9 @@ class DataLakeAwareInstanceMetadataAvailabilityZoneCalculatorTest {
     @MethodSource("testAvailabilityZoneDistributionForWholeInstanceGroupData")
     void testPopulateShouldDistributeNodesAcrossInstancesOfTheMasterAndAuxiliaryGroups(int masterInstanceCount, int auxiliaryInstanceCount,
             Set<String> expectedZonesForGroups, Map<String, Integer> expectedInstanceCountByAz) {
+        String subnetId = "aSubnetId";
         Stack stack = TestUtil.stack(Status.REQUESTED, TestUtil.azureCredential());
+        stack.setNetwork(TestUtil.networkWithSubnetId(subnetId));
         stack.setMultiAz(Boolean.TRUE);
         stack.setType(StackType.DATALAKE);
         stack.getInstanceGroups()
@@ -318,5 +334,7 @@ class DataLakeAwareInstanceMetadataAvailabilityZoneCalculatorTest {
                     .count();
             assertEquals(Long.valueOf(expectedCountByZone), actualCount);
         }
+        Assertions.assertTrue(stack.getNotTerminatedInstanceMetaDataSet().stream()
+                .allMatch(im -> StringUtils.isNotEmpty(im.getSubnetId()) && subnetId.equals(im.getSubnetId())));
     }
 }
