@@ -47,7 +47,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.model.database.ExternalDatabaseParameters;
@@ -164,11 +163,10 @@ public class AzureResourceConnector extends AbstractResourceConnector {
                 instances = persistCloudResources(ac, stack, notifier, cloudContext, stackName, resourceGroupName, templateDeployment);
             }
             resourcesPersisted = true;
-            Network network = stack.getNetwork();
-            List<String> subnetNameList = azureUtils.getCustomSubnetIds(network);
-
+            String networkName = azureUtils.getCustomNetworkId(stack.getNetwork());
+            List<String> subnetNameList = azureUtils.getCustomSubnetIds(stack.getNetwork());
             List<CloudResource> networkResources = azureCloudResourceService.collectAndSaveNetworkAndSubnet(
-                    resourceGroupName, stackName, notifier, cloudContext, subnetNameList, network, client);
+                    resourceGroupName, stackName, notifier, cloudContext, subnetNameList, networkName, client);
             azureComputeResourceService.buildComputeResourcesForLaunch(ac, stack, adjustmentTypeWithThreshold, instances, networkResources);
         } catch (ManagementException e) {
             throw azureUtils.convertToCloudConnectorException(e, "Stack provisioning");

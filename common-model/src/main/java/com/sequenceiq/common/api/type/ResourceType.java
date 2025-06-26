@@ -78,8 +78,6 @@ public enum ResourceType {
     AZURE_LOAD_BALANCER,
     AZURE_MANAGED_IDENTITY,
     AZURE_KEYVAULT_KEY,
-    AZURE_NAT_GATEWAY,
-    AZURE_FIREWALL,
 
     // ARM
     ARM_TEMPLATE(CommonResourceType.TEMPLATE),
