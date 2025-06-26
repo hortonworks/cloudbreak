@@ -11,6 +11,7 @@ import org.testng.ITestResult;
 import org.testng.annotations.BeforeMethod;
 import org.testng.util.Strings;
 
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAvailabilityType;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
@@ -334,11 +335,15 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         return validKerberos;
     }
 
-    protected void createEnvironmentWithFreeIpa(TestContext testContext) {
-        initiateEnvironmentCreation(testContext);
+    protected void createEnvironmentWithFreeIpa(TestContext testContext, Architecture architecture) {
+        initiateEnvironmentCreation(testContext, architecture);
         waitForEnvironmentCreation(testContext);
         waitForUserSync(testContext);
         setFreeIpaResponse(testContext);
+    }
+
+    protected void createEnvironmentWithFreeIpa(TestContext testContext) {
+        createEnvironmentWithFreeIpa(testContext, null);
     }
 
     protected void waitForUserSync(TestContext testContext) {
@@ -374,7 +379,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .validate();
     }
 
-    protected void initiateEnvironmentCreation(TestContext testContext) {
+    protected void initiateEnvironmentCreation(TestContext testContext, Architecture architecture) {
         testContext
                 .given("telemetry", TelemetryTestDto.class)
                 .withLogging()
@@ -385,11 +390,16 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .withTunnel(testContext.getTunnel())
                 .withResourceEncryption(testContext.isResourceEncryptionEnabled())
                 .withCreateFreeIpa(Boolean.TRUE)
+                .withFreeIpaArchitecture(architecture)
                 .withFreeIpaNodes(getFreeIpaInstanceCountByProvider(testContext))
                 .withFreeIpaImage(commonCloudProperties().getImageValidation().getFreeIpaImageCatalog(),
                         commonCloudProperties().getImageValidation().getFreeIpaImageUuid())
                 .when(environmentTestClient.create())
                 .validate();
+    }
+
+    protected void initiateEnvironmentCreation(TestContext testContext) {
+        initiateEnvironmentCreation(testContext, null);
     }
 
     protected void waitForEnvironmentCreation(TestContext testContext) {

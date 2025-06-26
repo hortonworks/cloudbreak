@@ -17,11 +17,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 import org.testng.ITestResult;
 import org.testng.util.Strings;
 import org.testng.xml.XmlSuite;
 import org.testng.xml.XmlTest;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.common.model.Architecture;
@@ -129,13 +132,49 @@ public class ImageValidatorE2ETestUtil {
     }
 
     public Optional<ImageV4Response> getImageUnderValidation(TestContext testContext) {
-        ImagesV4Response imagesV4Response = getImages(testContext);
-        List<ImageV4Response> images = new LinkedList<>();
-        images.addAll(imagesV4Response.getBaseImages());
-        images.addAll(imagesV4Response.getCdhImages());
-        return images.stream()
-                .filter(img -> img.getUuid().equalsIgnoreCase(getImageUuid()))
-                .findFirst();
+
+        final String imageUuid = getImageUuid();
+        ImagesV4Response imagesV4Response = null;
+        if (isFreeIpaImageValidation()) {
+
+            try {
+                RestTemplate restTemplate = new RestTemplate();
+                //Sadly for FreeIPA we have a URL, not a catalog name!
+                String url = getImageCatalogName();
+                String json = restTemplate.getForObject(url, String.class);
+
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode root = mapper.readTree(json);
+                JsonNode images = root.path("images").path("freeipa-images");
+                for (JsonNode image : images) {
+                    if (imageUuid.equals(image.path("uuid").asText())) {
+                        ImageV4Response response = new ImageV4Response();
+                        response.setDefaultImage(true);
+                        response.setCreated(image.path("created").asLong());
+                        response.setPublished(image.path("published").asLong());
+                        response.setDate(image.path("date").asText());
+                        response.setDescription(image.path("description").asText());
+                        response.setOs(image.path("os").asText());
+                        response.setOsType(image.path("os_type").asText());
+                        response.setArchitecture(image.path("architecture").asText());
+                        response.setUuid(image.path("uuid").asText());
+                        return Optional.of(response);
+                    }
+                }
+                return Optional.empty();
+            } catch (Exception e) {
+                throw new TestFailException("Failed to query FreeIPA image for validation!");
+            }
+
+        } else {
+            imagesV4Response = getImages(testContext);
+            List<ImageV4Response> images = new LinkedList<>();
+            images.addAll(imagesV4Response.getBaseImages());
+            images.addAll(imagesV4Response.getCdhImages());
+            return images.stream()
+                    .filter(img -> img.getUuid().equalsIgnoreCase(imageUuid))
+                    .findFirst();
+        }
     }
 
     private ImagesV4Response getImages(TestContext testContext) {
@@ -161,6 +200,11 @@ public class ImageValidatorE2ETestUtil {
         return isFreeIpaImageValidation()
                 ? commonCloudProperties.getImageValidation().getFreeIpaImageUuid()
                 : commonCloudProperties.getImageValidation().getImageUuid();
+    }
+
+    public Architecture getArchitecture(TestContext testContext) {
+        ImageV4Response imageUnderValidation = getImageUnderValidation(testContext).orElseThrow();
+        return Architecture.fromStringWithFallback(imageUnderValidation.getArchitecture());
     }
 
     private void createImageValidationSourceCatalog(TestContext testContext, String url, String name) {
