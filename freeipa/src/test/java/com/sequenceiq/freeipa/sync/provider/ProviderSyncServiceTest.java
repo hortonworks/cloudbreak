@@ -89,6 +89,7 @@ class ProviderSyncServiceTest {
         when(credentialService.getCredentialByEnvCrn(eq(ENVIRONMENT_CRN))).thenReturn(new Credential(null, null, null, null, null));
         when(credentialConverter.convert(any())).thenReturn(cloudCredential);
         CloudPlatformVariant platformVariant = new CloudPlatformVariant(CloudPlatform.AZURE.name(), CloudPlatform.AZURE.name());
+//        when(cloudContext.getPlatformVariant()).thenReturn(platformVariant);
         when(cloudPlatformConnectors.get(platformVariant)).thenReturn(cloudConnector);
         Authenticator authenticator = mock(Authenticator.class);
         when(authenticator.authenticate(any(), eq(cloudCredential))).thenReturn(authenticatedContext);

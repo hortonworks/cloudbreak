@@ -97,8 +97,7 @@ public class ProviderSyncService {
 
     private List<CloudResource> getCloudResources(StackDto stack) {
         Set<ResourceType> resourceTypesToSync = providerSyncConfig.getResourceTypeList();
-        return resourceService.getAllCloudResource(stack.getId())
-                .stream()
+        return resourceService.getAllCloudResource(stack.getId()).stream()
                 .filter(cloudResource -> resourceTypesToSync.contains(cloudResource.getType()))
                 .collect(Collectors.toList());
     }

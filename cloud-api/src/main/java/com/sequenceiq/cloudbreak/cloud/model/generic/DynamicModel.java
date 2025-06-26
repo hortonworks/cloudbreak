@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
@@ -63,26 +62,7 @@ public class DynamicModel {
             try {
                 return JsonUtil.readValue(objectAsJson, clazz);
             } catch (IOException ex) {
-                LOGGER.info("Can't read json as class: {}", clazz, ex);
-                throw new CloudbreakServiceException(ex);
-            }
-        }
-    }
-
-    public <T> T getParameterStrict(String key, Class<T> clazz) {
-        try {
-            return clazz.cast(parameters.get(key));
-        } catch (ClassCastException e) {
-            LOGGER.error("Can't cast to {}, trying to read it as an Object, then write it to json and try to read it to {}", clazz, clazz);
-            Object object = parameters.get(key);
-            String objectAsJson = JsonUtil.writeValueAsStringSilent(object);
-            try {
-                return JsonUtil.readValueStrict(objectAsJson, clazz);
-            } catch (UnrecognizedPropertyException ex) {
-                LOGGER.info("Unrecognized property in json: {}", objectAsJson, ex);
-                return null;
-            } catch (IOException ex) {
-                LOGGER.info("Can't read json as class: {}", clazz, ex);
+                LOGGER.info("Can't read json as class: " + clazz, ex);
                 throw new CloudbreakServiceException(ex);
             }
         }

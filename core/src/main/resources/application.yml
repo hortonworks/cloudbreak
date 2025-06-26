@@ -855,9 +855,9 @@ dynamic-entitlement:
     cb: CDP_CENTRAL_COMPUTE_MONITORING
 
 provider-sync:
-  resourcetype-list: AZURE_PUBLIC_IP,AZURE_NAT_GATEWAY,AZURE_NETWORK,AZURE_SUBNET,AZURE_LOAD_BALANCER,AZURE_NETWORK_INTERFACE
+  resourcetype-list: AZURE_PUBLIC_IP
   enabled-providers: AZURE
-  enabled: true
+  enabled: false
 
 clusterdns:
   host: localhost

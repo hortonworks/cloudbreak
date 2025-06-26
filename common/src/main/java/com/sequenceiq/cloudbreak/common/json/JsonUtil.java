@@ -64,11 +64,6 @@ public class JsonUtil {
         return MAPPER.readValue(content, valueType);
     }
 
-    public static <T> T readValueStrict(String content, Class<T> valueType) throws IOException {
-        MAPPER.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        return MAPPER.readValue(content, valueType);
-    }
-
     public static <T> T readValueFromGrpcJson(String content, Class<T> valueType) {
         ObjectMapper mapper = getObjectMapperForGrpcJsonProcessing();
         try {

@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
-import java.util.Objects;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -83,23 +81,5 @@ public class CloudResourceStatus {
                 ", statusReason='" + statusReason + '\'' +
                 ", id=" + privateId +
                 '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        CloudResourceStatus that = (CloudResourceStatus) o;
-        return Objects.equals(cloudResource, that.cloudResource) &&
-                status == that.status &&
-                Objects.equals(statusReason, that.statusReason) &&
-                Objects.equals(privateId, that.privateId);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getCloudResource(), getStatus(), getStatusReason(), getPrivateId());
     }
 }

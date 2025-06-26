@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.service.eventbus;
 
+import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -47,9 +50,9 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
                     resourceService.save(resource);
                     return resource;
                 })
-                .toList();
+                .collect(Collectors.toList());
         if (cloudResources.size() != resources.size()) {
-            LOGGER.debug("There are {} resource(s) which won't be saved", cloudResources.size() - resources.size());
+            LOGGER.debug("There are {} resource(s) which won't be save", cloudResources.size() - resources.size());
         }
         return notification;
     }
@@ -61,12 +64,9 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
         Stack stack = findStackById(stackId);
         List<CloudResource> cloudResources = notification.getCloudResources();
         cloudResources.forEach(cloudResource -> {
-            Resource resource = cloudResourceToResourceConverter.convert(cloudResource);
             Resource persistedResource = getPersistedResource(stackId, cloudResource)
-                    .orElseGet(() -> {
-                        LOGGER.debug("Resource {} not found in DB, creating a new one", cloudResource.getName());
-                        return resource;
-                    });
+                    .orElseThrow(notFound("resource", cloudResource.getName()));
+            Resource resource = cloudResourceToResourceConverter.convert(cloudResource);
             updateWithPersistedFields(resource, persistedResource);
             setStack(stack, cloudResource, resource);
             resourceService.save(resource);
@@ -95,7 +95,7 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
     }
 
     private void updateWithPersistedFields(Resource resource, Resource persistedResource) {
-        if (persistedResource != null && !persistedResource.equals(resource)) {
+        if (persistedResource != null) {
             resource.setId(persistedResource.getId());
             resource.setInstanceGroup(persistedResource.getInstanceGroup());
         }
