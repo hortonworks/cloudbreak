@@ -23,4 +23,8 @@ public interface PlatformAwareSdxDescribeService extends PlatformAwareSdxCommonS
     Optional<SdxAccessView> getSdxAccessViewByEnvironmentCrn(String environmentCrn);
 
     Set<String> listSdxCrnsDetachedIncluded(String environmentCrn);
+
+    default Optional<String> getCACertsForEnvironment(String environmentCrn) {
+        return Optional.empty();
+    }
 }

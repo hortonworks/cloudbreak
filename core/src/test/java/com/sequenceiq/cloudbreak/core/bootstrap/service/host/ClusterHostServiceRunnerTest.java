@@ -681,18 +681,7 @@ class ClusterHostServiceRunnerTest {
         underTest.runClusterServices(stack, Collections.emptyMap(), false);
 
         verify(hostOrchestrator).runService(any(), any(), any(), any());
-        verify(javaPillarDecorator).decorateWithJavaProperties(eq(stack), any());
-    }
-
-    @Test
-    @MockitoSettings(strictness = Strictness.LENIENT)
-    void testAddJavaPillarToRedeployGateway() throws CloudbreakOrchestratorException {
-        setupMocksForRunClusterServices();
-
-        underTest.redeployGatewayPillarOnly(stack);
-
-        verify(hostOrchestrator).uploadGatewayPillar(any(), allNodesCaptor.capture(), any(), any());
-        verify(javaPillarDecorator).decorateWithJavaProperties(eq(stack), any());
+        verify(javaPillarDecorator).createJavaPillars(eq(stack), any());
     }
 
     @Test

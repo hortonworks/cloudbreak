@@ -527,26 +527,8 @@ public class ClusterHostServiceRunner {
         servicePillar.putAll(hostAttributeDecorator.createHostAttributePillars(stackDto));
         servicePillar.put("discovery", new SaltPillarProperties("/discovery/init.sls", singletonMap("platform", stack.getCloudPlatform())));
         String virtualGroupsEnvironmentCrn = environmentConfigProvider.getParentEnvironmentCrn(stack.getEnvironmentCrn());
-        boolean deployedInChildEnvironment = !virtualGroupsEnvironmentCrn.equals(stack.getEnvironmentCrn());
         DetailedEnvironmentResponse detailedEnvironmentResponse = environmentConfigProvider.getEnvironmentByCrn(stackDto.getEnvironmentCrn());
-        String seLinux = stackDto.getSecurityConfig() != null && stackDto.getSecurityConfig().getSeLinux() != null ?
-                stackDto.getSecurityConfig().getSeLinux().toString().toLowerCase(Locale.ROOT) : SeLinux.PERMISSIVE.toString().toLowerCase(Locale.ROOT);
-        boolean hybridEnabled = stack.isDatalake() && EnvironmentType.HYBRID_BASE.toString().equals(detailedEnvironmentResponse.getEnvironmentType());
-        // Hive with remote HMS workaround - TODO remove after OPSAPS-73356
-        String blueprintJsonText = stackDto.getBlueprint().getBlueprintJsonText();
-        boolean hiveWithRemoteHiveMetastore = blueprintJsonText != null
-                && blueprintJsonText.contains(HiveRoles.HIVESERVER2)
-                && !blueprintJsonText.contains(HiveRoles.HIVEMETASTORE);
-        Map<String, ? extends Serializable> clusterProperties = Map.of(
-                "name", stackDto.getCluster().getName(),
-                "deployedInChildEnvironment", deployedInChildEnvironment,
-                "gov_cloud", stackDto.isOnGovPlatformVariant(),
-                "secretEncryptionEnabled", detailedEnvironmentResponse.isEnableSecretEncryption(),
-                "selinux_mode", seLinux,
-                "tlsv13Enabled", entitlementService.isTlsv13Enabled(stackDto.getAccountId()),
-                "hybridEnabled", hybridEnabled,
-                "hiveWithRemoteHiveMetastore", hiveWithRemoteHiveMetastore);
-        servicePillar.put("metadata", new SaltPillarProperties("/metadata/init.sls", singletonMap("cluster", clusterProperties)));
+        servicePillar.putAll(createMetadataPillars(stackDto, stack, detailedEnvironmentResponse, virtualGroupsEnvironmentCrn));
         ClusterPreCreationApi connector = clusterApiConnectors.getConnector(cluster);
         Map<String, List<String>> serviceLocations = getServiceLocations(stackDto);
         Optional<LdapView> ldapView = ldapConfigService.get(stack.getEnvironmentCrn(), stack.getName());
@@ -555,7 +537,7 @@ public class ClusterHostServiceRunner {
                 clouderaManagerRepo));
         saveIdBrokerPillar(cluster, servicePillar);
         postgresConfigService.decorateServicePillarWithPostgresIfNeeded(servicePillar, stackDto);
-        javaPillarDecorator.decorateWithJavaProperties(stackDto, servicePillar);
+        servicePillar.putAll(javaPillarDecorator.createJavaPillars(stackDto, detailedEnvironmentResponse));
 
         addClouderaManagerConfig(stackDto, servicePillar, clouderaManagerRepo, primaryGatewayConfig);
         ldapView.ifPresent(ldap -> saveLdapPillar(ldap, servicePillar));
@@ -585,6 +567,29 @@ public class ClusterHostServiceRunner {
         }
 
         return new SaltConfig(servicePillar, grainsProperties);
+    }
+
+    private Map<String, SaltPillarProperties> createMetadataPillars(StackDto stackDto, StackView stack, DetailedEnvironmentResponse detailedEnvironmentResponse,
+            String virtualGroupsEnvironmentCrn) {
+        boolean deployedInChildEnvironment = !virtualGroupsEnvironmentCrn.equals(stack.getEnvironmentCrn());
+        String seLinux = stackDto.getSecurityConfig() != null && stackDto.getSecurityConfig().getSeLinux() != null ?
+                stackDto.getSecurityConfig().getSeLinux().toString().toLowerCase(Locale.ROOT) : SeLinux.PERMISSIVE.toString().toLowerCase(Locale.ROOT);
+        boolean hybridEnabled = stack.isDatalake() && EnvironmentType.HYBRID_BASE.toString().equals(detailedEnvironmentResponse.getEnvironmentType());
+        // Hive with remote HMS workaround - TODO remove after OPSAPS-73356
+        String blueprintJsonText = stackDto.getBlueprint().getBlueprintJsonText();
+        boolean hiveWithRemoteHiveMetastore = blueprintJsonText != null
+                && blueprintJsonText.contains(HiveRoles.HIVESERVER2)
+                && !blueprintJsonText.contains(HiveRoles.HIVEMETASTORE);
+        Map<String, ? extends Serializable> clusterProperties = Map.of(
+                "name", stackDto.getCluster().getName(),
+                "deployedInChildEnvironment", deployedInChildEnvironment,
+                "gov_cloud", stackDto.isOnGovPlatformVariant(),
+                "secretEncryptionEnabled", detailedEnvironmentResponse.isEnableSecretEncryption(),
+                "selinux_mode", seLinux,
+                "tlsv13Enabled", entitlementService.isTlsv13Enabled(stackDto.getAccountId()),
+                "hybridEnabled", hybridEnabled,
+                "hiveWithRemoteHiveMetastore", hiveWithRemoteHiveMetastore);
+        return Map.of("metadata", new SaltPillarProperties("/metadata/init.sls", singletonMap("cluster", clusterProperties)));
     }
 
     public void removeSecurityConfigFromCMAgentsConfig(StackDto stackDto, Set<Node> reachableNodes) {
@@ -618,7 +623,6 @@ public class ClusterHostServiceRunner {
         Map<String, SaltPillarProperties> servicePillar =
                 new HashMap<>(createGatewayPillar(primaryGatewayConfig, stackDto, virtualGroupRequest, connector, kerberosConfig, serviceLocations,
                         clouderaManagerRepo));
-        javaPillarDecorator.decorateWithJavaProperties(stackDto, servicePillar);
 
         return new SaltConfig(servicePillar, grainsProperties);
     }

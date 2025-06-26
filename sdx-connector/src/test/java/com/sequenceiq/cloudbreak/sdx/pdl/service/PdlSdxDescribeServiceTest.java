@@ -28,6 +28,7 @@ import com.cloudera.cdp.servicediscovery.model.ApiRemoteDataContext;
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataContextResponse;
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
 import com.cloudera.thunderhead.service.environments2api.model.Environment;
+import com.cloudera.thunderhead.service.environments2api.model.GetRootCertificateResponse;
 import com.cloudera.thunderhead.service.environments2api.model.PrivateDatalakeDetails;
 import com.cloudera.thunderhead.service.environments2api.model.PvcEnvironmentDetails;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -284,6 +285,16 @@ public class PdlSdxDescribeServiceTest {
         assertTrue(sdxAccessViewOptional.isPresent());
         SdxAccessView sdxAccessView = sdxAccessViewOptional.get();
         assertEquals(CM_IP, sdxAccessView.rangerFqdn());
+    }
+
+    @Test
+    void testGetCACertsForEnvironment() {
+        when(remoteEnvironmentEndpoint.getRootCertificateByCrn(PDL_CRN)).thenReturn(new GetRootCertificateResponse().contents("certecske"));
+        when(environment.getCrn()).thenReturn(PDL_CRN);
+
+        Optional<String> result = underTest.getCACertsForEnvironment(ENV_CRN);
+
+        assertEquals("certecske", result.get());
     }
 
     private void setEnabled(boolean pdlEnabled) {

@@ -287,4 +287,14 @@ class PlatformAwareSdxConnectorTest {
         underTest.startByEnvironment(ENV_CRN);
         verify(pdlSdxStartStopService).startSdx(anyString());
     }
+
+    @Test
+    public void testGetCACertsForEnvironment() {
+        when(pdlSdxDescribeService.listSdxCrns(anyString())).thenReturn(Set.of(PDL_CRN));
+        when(pdlSdxDescribeService.getCACertsForEnvironment(ENV_CRN)).thenReturn(Optional.of("certecske"));
+
+        Optional<String> response = underTest.getCACertsForEnvironment(ENV_CRN);
+
+        assertEquals("certecske", response.get());
+    }
 }

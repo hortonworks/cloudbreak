@@ -8,6 +8,7 @@ import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataCo
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesRequest;
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesResponse;
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
+import com.cloudera.thunderhead.service.environments2api.model.GetRootCertificateResponse;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -45,5 +46,10 @@ public class RemoteEnvironmentController implements RemoteEnvironmentEndpoint {
     @Override
     public DescribeDatalakeServicesResponse getDatalakeServicesByCrn(DescribeDatalakeServicesRequest request) {
         return remoteEnvironmentService.getDatalakeServicesForEnvironment(ThreadBasedUserCrnProvider.getAccountId(), request.getClusterid());
+    }
+
+    @Override
+    public GetRootCertificateResponse getRootCertificateByCrn(String environmentCrn) {
+        return remoteEnvironmentService.getRootCertificate(ThreadBasedUserCrnProvider.getAccountId(), environmentCrn);
     }
 }

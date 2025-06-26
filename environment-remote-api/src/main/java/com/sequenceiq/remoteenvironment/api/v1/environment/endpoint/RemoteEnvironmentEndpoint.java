@@ -1,5 +1,6 @@
 package com.sequenceiq.remoteenvironment.api.v1.environment.endpoint;
 
+import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.ENVIRONMENT;
 import static com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentOpDescription.DATALAKE_SERVICES_NOTES;
 import static com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentOpDescription.ENVIRONMENT_NOTES;
 import static com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentOpDescription.LIST;
@@ -11,6 +12,7 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 
 import org.springframework.validation.annotation.Validated;
@@ -19,7 +21,9 @@ import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataCo
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesRequest;
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesResponse;
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
+import com.cloudera.thunderhead.service.environments2api.model.GetRootCertificateResponse;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
+import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.DescribeRemoteEnvironment;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponses;
 
@@ -62,4 +66,10 @@ public interface RemoteEnvironmentEndpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DescribeDatalakeServicesResponse getDatalakeServicesByCrn(@Valid DescribeDatalakeServicesRequest request);
 
+    @GET
+    @Path("/rootCertificate")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Fetch environment root certificate", operationId = "getRootCertificateByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    GetRootCertificateResponse getRootCertificateByCrn(@QueryParam("environmentCrn") @ValidCrn(resource = ENVIRONMENT) String environmentCrn);
 }

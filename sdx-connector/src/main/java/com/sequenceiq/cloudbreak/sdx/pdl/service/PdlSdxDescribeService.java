@@ -3,14 +3,15 @@ package com.sequenceiq.cloudbreak.sdx.pdl.service;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import com.cloudera.api.swagger.model.ApiRemoteDataContext;
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataContextResponse;
 import com.cloudera.thunderhead.service.environments2api.model.Environment;
+import com.cloudera.thunderhead.service.environments2api.model.GetRootCertificateResponse;
 import com.cloudera.thunderhead.service.environments2api.model.PrivateDatalakeDetails;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
@@ -56,7 +57,7 @@ public class PdlSdxDescribeService extends AbstractPdlSdxService implements Plat
         if (isEnabled(environmentCrn)) {
             String pvcCrn = getPrivateCloudEnvCrn(environmentCrn).orElse(null);
             LOGGER.info("pvcCrn is {}", pvcCrn);
-            if (!StringUtils.isEmpty(pvcCrn)) {
+            if (StringUtils.isNotBlank(pvcCrn)) {
                 return Set.of(pvcCrn);
             }
         }
@@ -95,7 +96,7 @@ public class PdlSdxDescribeService extends AbstractPdlSdxService implements Plat
                     && environment.getPvcEnvironmentDetails().getPrivateDatalakeDetails() != null) {
                 PrivateDatalakeDetails privateDatalakeDetails = environment.getPvcEnvironmentDetails().getPrivateDatalakeDetails();
                 return Optional.of(SdxAccessView.builder().withRangerFqdn(
-                        !StringUtils.isEmpty(privateDatalakeDetails.getCmFQDN()) ? privateDatalakeDetails.getCmFQDN() : privateDatalakeDetails.getCmIP())
+                        StringUtils.isNotBlank(privateDatalakeDetails.getCmFQDN()) ? privateDatalakeDetails.getCmFQDN() : privateDatalakeDetails.getCmIP())
                         .build());
             }
         }
@@ -107,4 +108,14 @@ public class PdlSdxDescribeService extends AbstractPdlSdxService implements Plat
         return listSdxCrns(environmentCrn);
     }
 
+    @Override
+    public Optional<String> getCACertsForEnvironment(String environmentCrn) {
+        if  (isEnabled(environmentCrn)) {
+            Environment privateEnvironment = getPrivateEnvForPublicEnv(environmentCrn);
+            GetRootCertificateResponse response = getRemoteEnvironmentEndPoint().getRootCertificateByCrn(privateEnvironment.getCrn());
+            return Optional.ofNullable(response).map(GetRootCertificateResponse::getContents);
+        } else {
+            return Optional.empty();
+        }
+    }
 }

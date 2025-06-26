@@ -27,6 +27,7 @@ import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataCo
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesResponse;
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
 import com.cloudera.thunderhead.service.environments2api.model.EnvironmentSummary;
+import com.cloudera.thunderhead.service.environments2api.model.GetRootCertificateResponse;
 import com.cloudera.thunderhead.service.environments2api.model.ListEnvironmentsResponse;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyHybridClient;
@@ -234,7 +235,7 @@ class RemoteEnvironmentServiceTest {
                 .getRemoteEnvironment(
                         PUBLIC_CLOUD_ACCOUNT_ID,
                         ENV_CRN));
-        assertEquals("Unable to fetch remote environment since entitlement CDP_HYBRID_CLOUD is not assigned", ex.getMessage());
+        assertEquals("Unable to fetch from remote environment since entitlement CDP_HYBRID_CLOUD is not assigned", ex.getMessage());
     }
 
     @Test
@@ -274,7 +275,7 @@ class RemoteEnvironmentServiceTest {
         when(entitlementService.hybridCloudEnabled(PUBLIC_CLOUD_ACCOUNT_ID)).thenReturn(false);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> remoteEnvironmentService.getRdcForEnvironment(PUBLIC_CLOUD_ACCOUNT_ID, ENV_CRN));
-        assertEquals("Unable to fetch remote data context since entitlement CDP_HYBRID_CLOUD is not assigned", badRequestException.getMessage());
+        assertEquals("Unable to fetch from remote environment since entitlement CDP_HYBRID_CLOUD is not assigned", badRequestException.getMessage());
     }
 
     @Test
@@ -334,7 +335,7 @@ class RemoteEnvironmentServiceTest {
         when(entitlementService.hybridCloudEnabled(PUBLIC_CLOUD_ACCOUNT_ID)).thenReturn(false);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> remoteEnvironmentService.getDatalakeServicesForEnvironment(PUBLIC_CLOUD_ACCOUNT_ID, ENV_CRN));
-        assertEquals("Unable to fetch Datalake services since entitlement CDP_HYBRID_CLOUD is not assigned", badRequestException.getMessage());
+        assertEquals("Unable to fetch from remote environment since entitlement CDP_HYBRID_CLOUD is not assigned", badRequestException.getMessage());
     }
 
     @Test
@@ -370,5 +371,28 @@ class RemoteEnvironmentServiceTest {
         RuntimeException runtimeException = assertThrows(RuntimeException.class,
                 () -> remoteEnvironmentService.getDatalakeServicesForEnvironment(PUBLIC_CLOUD_ACCOUNT_ID, ENV_CRN));
         assertEquals(String.format(String.format("Unable to fetch data lake services for crn %s", ENV_CRN)), runtimeException.getMessage());
+    }
+
+    @Test
+    public void testGetRootCertificateWhenEntitlementGrantedAndPrivateControlPlanePresentedShouldReturn() {
+        PrivateControlPlane privateControlPlane = new PrivateControlPlane();
+        privateControlPlane.setPrivateCloudAccountId("accountId");
+        privateControlPlane.setUrl("url");
+        privateControlPlane.setResourceCrn("crn");
+        privateControlPlane.setId(1L);
+        privateControlPlane.setPrivateCloudAccountId("5abe6882-ff63-4ad2-af86-a5582872a9cd");
+
+        when(entitlementService.hybridCloudEnabled(anyString())).thenReturn(true);
+        when(privateControlPlaneServiceMock.getByPrivateCloudAccountIdAndPublicCloudAccountId(anyString(), anyString()))
+                .thenReturn(Optional.of(privateControlPlane));
+        when(clusterProxyHybridClientMock.getRootCertificate(anyString(), any(), anyString()))
+                .thenReturn(new GetRootCertificateResponse().contents("certecske"));
+
+        GetRootCertificateResponse result = remoteEnvironmentService
+                .getRootCertificate(
+                        PUBLIC_CLOUD_ACCOUNT_ID, ENV_CRN
+                );
+
+        assertEquals("certecske", result.getContents());
     }
 }

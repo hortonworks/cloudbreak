@@ -2,8 +2,13 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator;
 
 import static java.util.Collections.singletonMap;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -11,8 +16,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.util.CertProcessor;
+import com.sequenceiq.common.api.type.EnvironmentType;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
 public class JavaPillarDecorator {
@@ -31,11 +41,37 @@ public class JavaPillarDecorator {
     @Value("${cb.safelogic.bouncycastletls.hash:}")
     private String bouncyCastleTlsHash;
 
-    public void decorateWithJavaProperties(StackDto stackDto, Map<String, SaltPillarProperties> servicePillar) {
+    @Inject
+    private PlatformAwareSdxConnector sdxConnector;
+
+    @Inject
+    private CertProcessor certProcessor;
+
+    public Map<String, SaltPillarProperties> createJavaPillars(StackDto stackDto, DetailedEnvironmentResponse detailedEnvironmentResponse) {
         Map<String, Object> config = new HashMap<>();
         addVersion(stackDto, config);
         addSafeLogicProperties(stackDto, config);
-        servicePillar.put("java", new SaltPillarProperties("/java/init.sls", singletonMap("java", config)));
+        config.putAll(createCertificatePillar(stackDto, detailedEnvironmentResponse));
+        return Map.of("java", new SaltPillarProperties("/java/init.sls", singletonMap("java", config)));
+    }
+
+    private Map<String, Object> createCertificatePillar(StackDto stackDto, DetailedEnvironmentResponse detailedEnvironmentResponse) {
+        if (EnvironmentType.isHybrid(detailedEnvironmentResponse.getEnvironmentType())
+                && StringUtils.isNotBlank(detailedEnvironmentResponse.getRemoteEnvironmentCrn())
+                && StackType.WORKLOAD == stackDto.getType()) {
+            Optional<String> caCertificates = sdxConnector.getCACertsForEnvironment(detailedEnvironmentResponse.getCrn());
+            if (caCertificates.isPresent() && StringUtils.isNotBlank(caCertificates.get())) {
+                String[] certs = certProcessor.itemizeSingleLargeCertInput(caCertificates.get());
+                Map<String, String> certByFingerPrint = Arrays.stream(certs)
+                        .collect(Collectors.toMap(certProcessor::calculateSha256FingerprintForCert, cert -> cert));
+                return Map.of("rootCertificates", certByFingerPrint);
+            } else {
+                LOGGER.info("Root Certificate is missing or empty");
+                return Map.of();
+            }
+        } else {
+            return Map.of();
+        }
     }
 
     private void addVersion(StackDto stackDto, Map<String, Object> config) {

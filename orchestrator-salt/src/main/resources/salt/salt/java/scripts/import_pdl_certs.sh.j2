@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+set -e
+
+# Fetch already imported cacerts with fingerprint, but ':' removed
+STORE_CERTS=$(keytool -list -cacerts -storepass changeit | sed 's/://g')
+
+{% for fingerprint, certificate in salt['pillar.get']('java:rootCertificates', {}).items() %}
+
+if echo $STORE_CERTS | grep -q {{ fingerprint }}; then
+  echo "{{ fingerprint }} already present";
+else
+  echo "Importing cert with fingerprint {{ fingerprint }}"
+  CERT_TMP=$(mktemp)
+  cat <<'EOF_CERT' > "$CERT_TMP"
+{{ certificate }}
+EOF_CERT
+  CERT_ALIAS="pdl_$(echo "{{ fingerprint }}" | cut -c -8)_$(date +%s)"
+  echo "Import cert with fingerprint {{ fingerprint }} and with alias $CERT_ALIAS"
+  keytool -importcert -cacerts -storepass changeit -noprompt -alias "$CERT_ALIAS" -file $CERT_TMP 2>&1 | tee -a /var/log/import_certs.log && exit ${PIPESTATUS[0]}
+  echo "Imported cert with fingerprint {{ fingerprint }}"
+  rm -f $CERT_TMP
+fi
+
+{% endfor %}
+
+set +e

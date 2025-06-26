@@ -40,10 +40,8 @@ public class RemoteClusterServiceClient {
     }
 
     public List<PvcControlPlaneConfiguration> listAllPrivateControlPlanes() {
-        String requestId = MDCBuilder.getOrGenerateRequestId();
+        RemoteClusterInternalGrpc.RemoteClusterInternalBlockingStub internalBlockingStub = createRemoteClusterInternalBlockingStub();
         String nextToken = null;
-        RemoteClusterInternalGrpc.RemoteClusterInternalBlockingStub internalBlockingStub = stubProvider.newInternalStub(channel, requestId,
-                remoteClusterConfig.getGrpcTimeoutSec(), remoteClusterConfig.internalCrnForIamServiceAsString(), remoteClusterConfig.getCallingServiceName());
 
         List<PvcControlPlaneConfiguration> items = new ArrayList<>();
         do {
@@ -69,13 +67,15 @@ public class RemoteClusterServiceClient {
     }
 
     public String registerPrivateEnvironmentBaseClusters(RegisterPvcBaseClusterRequest registerPvcBaseClusterRequest) {
-        String requestId = MDCBuilder.getOrGenerateRequestId();
-        RemoteClusterInternalGrpc.RemoteClusterInternalBlockingStub internalBlockingStub = stubProvider.newInternalStub(channel, requestId,
-                remoteClusterConfig.getGrpcTimeoutSec(), remoteClusterConfig.internalCrnForIamServiceAsString(), remoteClusterConfig.getCallingServiceName());
-
+        RemoteClusterInternalGrpc.RemoteClusterInternalBlockingStub internalBlockingStub = createRemoteClusterInternalBlockingStub();
 
         RegisterPvcBaseClusterResponse registerPvcBaseClusterResponse = internalBlockingStub.registerPvcBaseCluster(registerPvcBaseClusterRequest);
         return registerPvcBaseClusterResponse.getClusterCrn();
     }
 
+    private RemoteClusterInternalGrpc.RemoteClusterInternalBlockingStub createRemoteClusterInternalBlockingStub() {
+        String requestId = MDCBuilder.getOrGenerateRequestId();
+        return stubProvider.newInternalStub(channel, requestId,
+                remoteClusterConfig.getGrpcTimeoutSec(), remoteClusterConfig.internalCrnForIamServiceAsString(), remoteClusterConfig.getCallingServiceName());
+    }
 }

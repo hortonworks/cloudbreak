@@ -123,3 +123,23 @@ change_krb5_conf_crypto_policies:
 {% endif %}
 
 {% endif %}
+
+{% if pillar.get('java:rootCertificates') is defined %}
+
+/opt/salt/scripts/import_pdl_certs.sh:
+  file.managed:
+    - template: jinja
+    - source: salt://java/scripts/import_pdl_certs.sh.j2
+    - user: root
+    - group: root
+    - mode: 700
+
+import_pdl_certs:
+  cmd.run:
+    - name: /opt/salt/scripts/import_pdl_certs.sh
+    - failhard: True
+    - require:
+        - file: /opt/salt/scripts/import_pdl_certs.sh
+    - onchanges:
+        - file: /opt/salt/scripts/import_pdl_certs.sh
+{% endif %}

@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataContextResponse;
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesResponse;
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
+import com.cloudera.thunderhead.service.environments2api.model.GetRootCertificateResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -27,6 +28,7 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyHybridClient;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponse;
 import com.sequenceiq.remoteenvironment.controller.v1.converter.PrivateControlPlaneEnvironmentToRemoteEnvironmentConverter;
@@ -60,35 +62,14 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
             LOGGER.info("Starting to list environments from '{}' control planes with actor('{}')", privateControlPlanes.size(), userCrn);
             String controlPlaneNames = privateControlPlanes.stream().map(PrivateControlPlane::getName).collect(Collectors.joining(","));
             LOGGER.debug("Starting to list environments from control planes with name '{}' actor('{}')", controlPlaneNames, userCrn);
-            privateControlPlanes.stream()
-                    .parallel()
+            privateControlPlanes
                     .forEach(item -> responses.addAll(listEnvironmentsFromPrivateControlPlaneWithActor(item, userCrn)));
         }
         return responses;
     }
 
     public DescribeEnvironmentResponse getRemoteEnvironment(String publicCloudAccountId, String environmentCrn) {
-        DescribeEnvironmentResponse response = null;
-        if (entitlementService.hybridCloudEnabled(publicCloudAccountId)) {
-            try {
-                String privateCloudAccountId = Crn.safeFromString(environmentCrn).getAccountId();
-                Optional<PrivateControlPlane> privateControlPlane =
-                        privateControlPlaneService.getByPrivateCloudAccountIdAndPublicCloudAccountId(privateCloudAccountId, publicCloudAccountId);
-                if (privateControlPlane.isPresent()) {
-                    String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-                    response = describeRemoteEnvironmentWithActor(privateControlPlane.get(), environmentCrn, userCrn);
-                } else {
-                    throw new BadRequestException(String.format("There is no control plane for this account with account id %s.", privateCloudAccountId));
-                }
-            } catch (CrnParseException crnParseException) {
-                String message = String.format("The provided environment CRN('%s') is invalid", environmentCrn);
-                LOGGER.info(message);
-                throw new BadRequestException(message, crnParseException);
-            }
-        } else {
-            throw new BadRequestException(String.format("Unable to fetch remote environment since entitlement %s is not assigned", CDP_HYBRID_CLOUD));
-        }
-        return response;
+        return callRemoteEnvironment(publicCloudAccountId, environmentCrn, this::describeRemoteEnvironmentWithActor);
     }
 
     public List<SimpleRemoteEnvironmentResponse> listRemoteEnvironmentsInternal(PrivateControlPlane controlPlane) {
@@ -101,32 +82,23 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
         return describeRemoteEnvironmentWithActor(controlPlane, environmentCrn, actor.getCrn());
     }
 
+    public GetRootCertificateResponse getRootCertificate(String publicCloudAccountId, String environmentCrn) {
+        return callRemoteEnvironment(publicCloudAccountId, environmentCrn, this::getRootCertificateWithActor);
+    }
+
+    public GetRootCertificateResponse getRootCertificateInternal(String publicCloudAccountId, String environmentCrn) {
+        return callRemoteEnvironment(publicCloudAccountId, environmentCrn, this::getRootCertificateWithActor);
+    }
+
     public DescribeDatalakeAsApiRemoteDataContextResponse getRdcForEnvironment(String publicCloudAccountId, String environmentCrn) {
-        DescribeDatalakeAsApiRemoteDataContextResponse response = null;
-        if (entitlementService.hybridCloudEnabled(publicCloudAccountId)) {
-            try {
-                String privateCloudAccountId = Crn.safeFromString(environmentCrn).getAccountId();
-                Optional<PrivateControlPlane> privateControlPlane =
-                        privateControlPlaneService.getByPrivateCloudAccountIdAndPublicCloudAccountId(privateCloudAccountId, publicCloudAccountId);
-                if (privateControlPlane.isPresent()) {
-                    String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-                    response = getRdcForEnvironmentWithActor(privateControlPlane.get(), environmentCrn, userCrn);
-                } else {
-                    throw new BadRequestException(String.format("There is no control plane for this account with account id %s.", privateCloudAccountId));
-                }
-            } catch (CrnParseException crnParseException) {
-                String message = String.format("The provided environment CRN('%s') is invalid", environmentCrn);
-                LOGGER.info(message);
-                throw new BadRequestException(message, crnParseException);
-            }
-        } else {
-            throw new BadRequestException(String.format("Unable to fetch remote data context since entitlement %s is not assigned", CDP_HYBRID_CLOUD));
-        }
-        return response;
+        return callRemoteEnvironment(publicCloudAccountId, environmentCrn, this::getRdcForEnvironmentWithActor);
     }
 
     public DescribeDatalakeServicesResponse getDatalakeServicesForEnvironment(String publicCloudAccountId, String environmentCrn) {
-        DescribeDatalakeServicesResponse response = null;
+        return callRemoteEnvironment(publicCloudAccountId, environmentCrn, this::getDatalakeServicesForEnvironmentWithActor);
+    }
+
+    private <T> T callRemoteEnvironment(String publicCloudAccountId, String environmentCrn, RemoteEnvironmentCaller<T> function) {
         if (entitlementService.hybridCloudEnabled(publicCloudAccountId)) {
             try {
                 String privateCloudAccountId = Crn.safeFromString(environmentCrn).getAccountId();
@@ -134,19 +106,18 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
                         privateControlPlaneService.getByPrivateCloudAccountIdAndPublicCloudAccountId(privateCloudAccountId, publicCloudAccountId);
                 if (privateControlPlane.isPresent()) {
                     String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-                    response = getDatalakeServicesForEnvironmentWithActor(privateControlPlane.get(), environmentCrn, userCrn);
+                    return function.call(privateControlPlane.get(), environmentCrn, userCrn);
                 } else {
                     throw new BadRequestException(String.format("There is no control plane for this account with account id %s.", privateCloudAccountId));
                 }
             } catch (CrnParseException crnParseException) {
                 String message = String.format("The provided environment CRN('%s') is invalid", environmentCrn);
-                LOGGER.info(message);
+                LOGGER.warn(message, crnParseException);
                 throw new BadRequestException(message, crnParseException);
             }
         } else {
-            throw new BadRequestException(String.format("Unable to fetch Datalake services since entitlement %s is not assigned", CDP_HYBRID_CLOUD));
+            throw new BadRequestException(String.format("Unable to fetch from remote environment since entitlement %s is not assigned", CDP_HYBRID_CLOUD));
         }
-        return response;
     }
 
     private List<SimpleRemoteEnvironmentResponse> listEnvironmentsFromPrivateControlPlaneWithActor(PrivateControlPlane controlPlane, String actorCrn) {
@@ -160,7 +131,6 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
                     .getEnvironments()
                     .stream()
                     .filter(resp -> isCrnValidAndWithinAccount(controlPlane.getPrivateCloudAccountId(), resp.getCrn()))
-                    .parallel()
                     .map(environment -> {
                         LOGGER.debug("Remote environment list on private control plane: {}/{} will be executed by thread: {}", cpName, cpCrn,
                                 Thread.currentThread().getName());
@@ -168,7 +138,7 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
                     })
                     .collect(Collectors.toList()), LOGGER, "Cluster proxy call took us {} ms for pvc {}/{}", cpName, cpCrn);
         } catch (Exception e) {
-            LOGGER.warn("Failed to query environments from url '{}' of control plane '{}/{}'", controlPlane.getUrl(), cpName, cpCrn);
+            LOGGER.warn("Failed to query environments from url '{}' of control plane '{}/{}'", controlPlane.getUrl(), cpName, cpCrn, e);
         }
         return responses;
     }
@@ -176,61 +146,51 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
     private DescribeEnvironmentResponse describeRemoteEnvironmentWithActor(PrivateControlPlane controlPlane, String environmentCrn, String actorCrn) {
         LOGGER.debug("The describe of remote environment('{}') with actor('{}') is executed by thread: {}", environmentCrn, actorCrn,
                 Thread.currentThread().getName());
-        DescribeEnvironmentResponse response = null;
         try {
-            response = measure(() ->
-                            clusterProxyHybridClient.getEnvironment(
-                                    controlPlane.getResourceCrn(),
-                                    actorCrn,
-                                    environmentCrn),
-                    LOGGER,
-                    "Cluster proxy call took us {} ms for pvc {}", controlPlane.getResourceCrn());
+            return measure(() -> clusterProxyHybridClient.getEnvironment(controlPlane.getResourceCrn(), actorCrn, environmentCrn),
+                    LOGGER, "Cluster proxy call took us {} ms for pvc {}", controlPlane.getResourceCrn());
         } catch (Exception e) {
-            LOGGER.warn("Failed to query environment for crn {}", environmentCrn);
-            throw new RuntimeException(String.format("Unable to fetch environment for crn %s", environmentCrn));
+            LOGGER.warn("Failed to query environment for crn {}", environmentCrn, e);
+            throw new CloudbreakServiceException(String.format("Unable to fetch environment for crn %s", environmentCrn), e);
         }
-        return response;
+    }
+
+    private GetRootCertificateResponse getRootCertificateWithActor(PrivateControlPlane controlPlane, String environmentCrn, String actorCrn) {
+        LOGGER.debug("Fetching root certificate of remote environment('{}') with actor('{}') is executed by thread: {}", environmentCrn, actorCrn,
+                Thread.currentThread().getName());
+        try {
+            return measure(() -> clusterProxyHybridClient.getRootCertificate(controlPlane.getResourceCrn(), actorCrn, environmentCrn),
+                    LOGGER, "Cluster proxy call took us {} ms for pvc {}", controlPlane.getResourceCrn());
+        } catch (Exception e) {
+            LOGGER.warn("Failed to fetch root certificate for crn {}", environmentCrn, e);
+            throw new CloudbreakServiceException(String.format("Unable to fetch root certificate for crn %s", environmentCrn), e);
+        }
     }
 
     private DescribeDatalakeAsApiRemoteDataContextResponse getRdcForEnvironmentWithActor(PrivateControlPlane controlPlane, String environmentCrn,
             String actorCrn) {
         LOGGER.debug("The getRdcForEnvironmentWithActor of remote environment('{}') with actor('{}') is executed by thread: {}", environmentCrn, actorCrn,
                 Thread.currentThread().getName());
-        DescribeDatalakeAsApiRemoteDataContextResponse response = null;
         try {
-            response = measure(() ->
-                            clusterProxyHybridClient.getRemoteDataContext(
-                                    controlPlane.getResourceCrn(),
-                                    actorCrn,
-                                    environmentCrn),
-                    LOGGER,
-                    "Cluster proxy call took us {} ms for pvc {}", controlPlane.getResourceCrn());
+            return measure(() -> clusterProxyHybridClient.getRemoteDataContext(controlPlane.getResourceCrn(), actorCrn, environmentCrn),
+                    LOGGER, "Cluster proxy call took us {} ms for pvc {}", controlPlane.getResourceCrn());
         } catch (Exception e) {
-            LOGGER.warn("Failed to query environment for crn {}", environmentCrn);
-            throw new RuntimeException(String.format("Unable to fetch remote data context for crn %s", environmentCrn));
+            LOGGER.warn("Failed to query environment for crn {}", environmentCrn, e);
+            throw new CloudbreakServiceException(String.format("Unable to fetch remote data context for crn %s", environmentCrn), e);
         }
-        return response;
     }
 
     private DescribeDatalakeServicesResponse getDatalakeServicesForEnvironmentWithActor(PrivateControlPlane controlPlane, String environmentCrn,
             String actorCrn) {
         LOGGER.debug("The getDatalakeServicesForEnvironmentWithActor of remote environment('{}') with actor('{}') is executed by thread: {}",
-                environmentCrn, actorCrn,
-                Thread.currentThread().getName());
-        DescribeDatalakeServicesResponse response = null;
+                environmentCrn, actorCrn, Thread.currentThread().getName());
         try {
-            response = measure(() ->
-                            clusterProxyHybridClient.getDatalakeServices(
-                                    controlPlane.getResourceCrn(),
-                                    actorCrn,
-                                    environmentCrn),
-                    LOGGER,
-                    "Cluster proxy call took us {} ms for pvc {}", controlPlane.getResourceCrn());
+            return measure(() -> clusterProxyHybridClient.getDatalakeServices(controlPlane.getResourceCrn(), actorCrn, environmentCrn),
+                    LOGGER, "Cluster proxy call took us {} ms for pvc {}", controlPlane.getResourceCrn());
         } catch (Exception e) {
-            LOGGER.warn("Failed to query environment for crn {}", environmentCrn);
-            throw new RuntimeException(String.format("Unable to fetch data lake services for crn %s", environmentCrn));
+            LOGGER.warn("Failed to query environment for crn {}", environmentCrn, e);
+            throw new CloudbreakServiceException(String.format("Unable to fetch data lake services for crn %s", environmentCrn), e);
         }
-        return response;
     }
 
     private boolean isCrnValidAndWithinAccount(String accountId, String envCrn) {
