@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.azure.service;
 
 import org.apache.commons.lang3.text.WordUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -8,6 +10,8 @@ import com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceNameService;
 
 @Service("AzureResourceNameService")
 public class AzureResourceNameService extends CloudbreakResourceNameService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AzureResourceNameService.class);
 
     @Value("${cb.max.azure.resource.name.length:}")
     private int maxResourceNameLength;

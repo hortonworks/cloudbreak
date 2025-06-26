@@ -409,7 +409,6 @@ public class AzureResourceConnector extends AbstractResourceConnector {
 
         providerResourceSyncers.stream()
                 .filter(syncer -> syncer.platform().equals(authenticatedContext.getCloudContext().getPlatform()))
-                .filter(syncer -> syncer.shouldSync(authenticatedContext, resources))
                 .forEach(syncer -> result.addAll(syncer.sync(authenticatedContext, resources)));
 
         for (CloudResource resource : resources) {

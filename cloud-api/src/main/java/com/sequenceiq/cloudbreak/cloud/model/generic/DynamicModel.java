@@ -63,7 +63,7 @@ public class DynamicModel {
             try {
                 return JsonUtil.readValue(objectAsJson, clazz);
             } catch (IOException ex) {
-                LOGGER.info("Can't read json as class: {}", clazz, ex);
+                LOGGER.info("Can't read json as class: " + clazz, ex);
                 throw new CloudbreakServiceException(ex);
             }
         }

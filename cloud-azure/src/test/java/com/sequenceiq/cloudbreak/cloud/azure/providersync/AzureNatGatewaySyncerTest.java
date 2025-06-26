@@ -1,12 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.azure.providersync;
 
-import static com.sequenceiq.cloudbreak.cloud.model.OutboundType.NOT_DEFINED;
-import static com.sequenceiq.cloudbreak.cloud.model.OutboundType.USER_ASSIGNED_NATGATEWAY;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_NAT_GATEWAY;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_NETWORK;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_SUBNET;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
@@ -36,7 +33,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.NetworkAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
-import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
@@ -56,9 +52,6 @@ class AzureNatGatewaySyncerTest {
 
     @Mock
     private Subnet subnet;
-
-    @Mock
-    private AzureOutboundManager azureOutboundManager;
 
     @BeforeEach
     void setUp() {
@@ -82,7 +75,7 @@ class AzureNatGatewaySyncerTest {
 
     @Test
     void testSyncWhenNatGatewayExists() {
-        // Given
+        // GIVEN
         String natGatewayId = "/subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.Network/natGateways/nat1";
         String networkName = "network1";
         String resourceGroupName = "rg1";
@@ -96,52 +89,45 @@ class AzureNatGatewaySyncerTest {
         when(azureClient.getSubnetProperties(resourceGroupName, networkName, subnetName)).thenReturn(subnet);
         when(subnet.natGatewayId()).thenReturn(natGatewayId);
         when(subnet.id()).thenReturn("/subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.Network/virtualNetworks/network1/subnets/subnet1");
-        when(azureOutboundManager.updateNetworkOutbound(network, USER_ASSIGNED_NATGATEWAY))
-                .thenReturn(new CloudResourceStatus(network, ResourceStatus.UPDATED));
 
-        // When
+        // WHEN
         List<CloudResourceStatus> result = underTest.sync(authenticatedContext, resources);
 
-        // Then
-        assertEquals(2, result.size());
+        // THEN
+        assertEquals(1, result.size());
         assertEquals(ResourceStatus.CREATED, result.getFirst().getStatus());
-        assertEquals(ResourceStatus.UPDATED, result.get(1).getStatus());
         verify(azureClient, times(1)).getSubnetProperties(resourceGroupName, networkName, subnetName);
-        verify(azureOutboundManager, times(1)).updateNetworkOutbound(network, USER_ASSIGNED_NATGATEWAY);
     }
 
     @Test
     void testSyncWhenNatGatewayDeleted() {
-        // Given
+        // GIVEN
         String networkName = "network1";
         String resourceGroupName = "rg1";
         String subnetName = "subnet1";
 
         CloudResource natGateway = createCloudResource("nat1", AZURE_NAT_GATEWAY);
         CloudResource network = createCloudResource(networkName, AZURE_NETWORK);
+
         CloudResource subnetResource = createCloudResource(subnetName, AZURE_SUBNET);
         List<CloudResource> resources = List.of(natGateway, network, subnetResource);
 
         when(azureClient.getSubnetProperties(resourceGroupName, networkName, subnetName)).thenReturn(subnet);
         when(subnet.natGatewayId()).thenReturn(null);
         when(subnet.id()).thenReturn("/subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.Network/virtualNetworks/network1/subnets/subnet1");
-        when(azureOutboundManager.updateNetworkOutbound(network, NOT_DEFINED))
-                .thenReturn(new CloudResourceStatus(network, ResourceStatus.UPDATED));
 
-        // When
+        // WHEN
         List<CloudResourceStatus> result = underTest.sync(authenticatedContext, resources);
 
-        // Then
-        assertEquals(2, result.size());
+        // THEN
+        assertEquals(1, result.size());
         assertEquals(ResourceStatus.DELETED, result.getFirst().getStatus());
-        assertEquals(ResourceStatus.UPDATED, result.get(1).getStatus());
         verify(azureClient, times(1)).getSubnetProperties(resourceGroupName, networkName, subnetName);
-        verify(azureOutboundManager, times(1)).updateNetworkOutbound(network, NOT_DEFINED);
     }
 
     @Test
     void testSyncWhenSubnetNotFound() {
-        // Given
+        // GIVEN
         String networkName = "network1";
         String resourceGroupName = "rg1";
         String subnetName = "subnet1";
@@ -153,17 +139,17 @@ class AzureNatGatewaySyncerTest {
 
         when(azureClient.getSubnetProperties(resourceGroupName, networkName, subnetName)).thenReturn(null);
 
-        // When
+        // WHEN
         List<CloudResourceStatus> result = underTest.sync(authenticatedContext, resources);
 
-        // Then
+        // THEN
         assertTrue(result.isEmpty());
         verify(azureClient, times(1)).getSubnetProperties(resourceGroupName, networkName, subnetName);
     }
 
     @Test
     void testSyncWhenNoSubnetFound() {
-        // Given
+        // GIVEN
         String networkName = "network1";
         String resourceGroupName = "rg1";
         String subnetName = "subnet1";
@@ -174,17 +160,17 @@ class AzureNatGatewaySyncerTest {
 
         when(azureClient.getSubnetProperties(resourceGroupName, networkName, subnetName)).thenReturn(null);
 
-        // When
+        // WHEN
         List<CloudResourceStatus> result = underTest.sync(authenticatedContext, resources);
 
-        // Then
+        // THEN
         assertTrue(result.isEmpty());
         verify(azureClient, times(1)).getSubnetProperties(resourceGroupName, networkName, subnetName);
     }
 
     @Test
     void testSyncWhenNatGatewayFound() {
-        // Given
+        // GIVEN
         String natGatewayId = "/subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.Network/natGateways/nat1";
         String networkName = "network1";
         String resourceGroupName = "rg1";
@@ -197,27 +183,23 @@ class AzureNatGatewaySyncerTest {
         when(azureClient.getSubnetProperties(resourceGroupName, networkName, subnetName)).thenReturn(subnet);
         when(subnet.natGatewayId()).thenReturn(natGatewayId);
         when(subnet.id()).thenReturn("/subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.Network/virtualNetworks/network1/subnets/subnet1");
-        when(azureOutboundManager.updateNetworkOutbound(network, USER_ASSIGNED_NATGATEWAY))
-                .thenReturn(new CloudResourceStatus(network, ResourceStatus.UPDATED));
 
-        // When
+        // WHEN
         List<CloudResourceStatus> result = underTest.sync(authenticatedContext, resources);
 
-        // Then
-        assertEquals(2, result.size());
+        // THEN
+        assertEquals(1, result.size());
         CloudResourceStatus foundResource = result.getFirst();
         assertEquals(ResourceStatus.CREATED, foundResource.getStatus());
         assertEquals("nat1", foundResource.getCloudResource().getName());
         assertEquals(AZURE_NAT_GATEWAY, foundResource.getCloudResource().getType());
         assertEquals(natGatewayId, foundResource.getCloudResource().getReference());
-        assertEquals(ResourceStatus.UPDATED, result.get(1).getStatus());
         verify(azureClient, times(1)).getSubnetProperties(resourceGroupName, networkName, subnetName);
-        verify(azureOutboundManager, times(1)).updateNetworkOutbound(network, USER_ASSIGNED_NATGATEWAY);
     }
 
     @Test
     void testSyncWhenNoNatGatewayFound() {
-        // Given
+        // GIVEN
         String networkName = "network1";
         String resourceGroupName = "rg1";
         String subnetName = "subnet1";
@@ -230,143 +212,26 @@ class AzureNatGatewaySyncerTest {
         when(subnet.natGatewayId()).thenReturn(null);
         when(subnet.id()).thenReturn("/subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.Network/virtualNetworks/network1/subnets/subnet1");
 
-        // When
+        // WHEN
         List<CloudResourceStatus> result = underTest.sync(authenticatedContext, resources);
 
-        // Then
+        // THEN
         assertTrue(result.isEmpty());
         verify(azureClient, times(1)).getSubnetProperties(resourceGroupName, networkName, subnetName);
     }
 
     @Test
     void testSyncWhenEmptyResourcesProvided() {
-        // Given
+        // GIVEN
         List<CloudResource> resources = new ArrayList<>();
 
-        // When
+        // WHEN
         List<CloudResourceStatus> result = underTest.sync(authenticatedContext, resources);
 
-        // Then
+        // THEN
         assertTrue(result.isEmpty());
         verify(azureClient, never()).getSubnetProperties(any(), any(), any());
         verify(azureCloudResourceService, never()).buildCloudResource(any(), any(), any());
-    }
-
-    @Test
-    void testShouldSyncWithMatchingResourceType() {
-        // Given
-        CloudResource natGateway = createCloudResource("nat1", AZURE_NAT_GATEWAY);
-        CloudResource network = createCloudResource("network1", AZURE_NETWORK);
-        List<CloudResource> resources = List.of(natGateway, network);
-
-        // When
-        boolean shouldSync = underTest.shouldSync(authenticatedContext, resources);
-
-        // Then
-        assertTrue(shouldSync);
-    }
-
-    @Test
-    void testShouldSyncWithoutMatchingResource() {
-        // Given
-        CloudResource network = createCloudResource("network1", AZURE_NETWORK);
-        List<CloudResource> resources = List.of(network);
-        when(azureOutboundManager.shouldSyncForOutbound(resources)).thenReturn(false);
-
-        // When
-        boolean shouldSync = underTest.shouldSync(authenticatedContext, resources);
-
-        // Then
-        assertFalse(shouldSync);
-    }
-
-    @Test
-    void testShouldSyncWithEmptyResources() {
-        // Given
-        List<CloudResource> resources = List.of();
-        when(azureOutboundManager.shouldSyncForOutbound(resources)).thenReturn(false);
-
-        // When
-        boolean shouldSync = underTest.shouldSync(authenticatedContext, resources);
-
-        // Then
-        assertFalse(shouldSync);
-    }
-
-    @Test
-    void testSyncWhenExistingNatGatewayWithSameReference() {
-        // Given
-        String natGatewayId = "/subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.Network/natGateways/nat1";
-        String networkName = "network1";
-        String resourceGroupName = "rg1";
-        String subnetName = "subnet1";
-
-        CloudResource existingNatGateway = CloudResource.builder()
-                .withName("nat1")
-                .withType(AZURE_NAT_GATEWAY)
-                .withStatus(CommonStatus.CREATED)
-                .withReference(natGatewayId)
-                .build();
-        CloudResource network = createCloudResource(networkName, AZURE_NETWORK);
-        CloudResource subnetResource = createCloudResource(subnetName, AZURE_SUBNET);
-        List<CloudResource> resources = List.of(existingNatGateway, network, subnetResource);
-
-        when(azureClient.getSubnetProperties(resourceGroupName, networkName, subnetName)).thenReturn(subnet);
-        when(subnet.natGatewayId()).thenReturn(natGatewayId);
-        when(subnet.id()).thenReturn("/subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.Network/virtualNetworks/network1/subnets/subnet1");
-        when(azureOutboundManager.updateNetworkOutbound(network, USER_ASSIGNED_NATGATEWAY))
-                .thenReturn(new CloudResourceStatus(network, ResourceStatus.UPDATED));
-
-        // When
-        List<CloudResourceStatus> result = underTest.sync(authenticatedContext, resources);
-
-        // Then
-        assertEquals(2, result.size());
-        CloudResourceStatus status = result.getFirst();
-        assertEquals(ResourceStatus.CREATED, status.getStatus());
-        assertEquals(natGatewayId, status.getCloudResource().getReference());
-        assertEquals(ResourceStatus.UPDATED, result.get(1).getStatus());
-        verify(azureClient, times(1)).getSubnetProperties(resourceGroupName, networkName, subnetName);
-        verify(azureOutboundManager, times(1)).updateNetworkOutbound(network, USER_ASSIGNED_NATGATEWAY);
-    }
-
-    @Test
-    void testSyncWhenExistingNatGatewayWithDifferentReference() {
-        // Given
-        String oldNatGatewayId = "/subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.Network/natGateways/nat1";
-        String newNatGatewayId = "/subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.Network/natGateways/nat2";
-        String networkName = "network1";
-        String resourceGroupName = "rg1";
-        String subnetName = "subnet1";
-
-        CloudResource existingNatGateway = CloudResource.builder()
-                .withName("nat1")
-                .withType(AZURE_NAT_GATEWAY)
-                .withStatus(CommonStatus.CREATED)
-                .withReference(oldNatGatewayId)
-                .build();
-        CloudResource network = createCloudResource(networkName, AZURE_NETWORK);
-        CloudResource subnetResource = createCloudResource(subnetName, AZURE_SUBNET);
-        List<CloudResource> resources = List.of(existingNatGateway, network, subnetResource);
-
-        when(azureClient.getSubnetProperties(resourceGroupName, networkName, subnetName)).thenReturn(subnet);
-        when(subnet.natGatewayId()).thenReturn(newNatGatewayId);
-        when(subnet.id()).thenReturn("/subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.Network/virtualNetworks/network1/subnets/subnet1");
-        when(azureOutboundManager.updateNetworkOutbound(network, USER_ASSIGNED_NATGATEWAY))
-                .thenReturn(new CloudResourceStatus(network, ResourceStatus.UPDATED));
-
-        // When
-        List<CloudResourceStatus> result = underTest.sync(authenticatedContext, resources);
-
-        // Then
-        assertEquals(2, result.size());
-        CloudResourceStatus status = result.getFirst();
-        assertEquals(ResourceStatus.CREATED, status.getStatus());
-        assertEquals(newNatGatewayId, status.getCloudResource().getReference());
-        assertEquals(ResourceStatus.UPDATED, result.get(1).getStatus());
-        verify(azureClient, times(1)).getSubnetProperties(resourceGroupName, networkName, subnetName);
-        verify(azureOutboundManager, times(1)).updateNetworkOutbound(network, USER_ASSIGNED_NATGATEWAY);
-        verify(azureCloudResourceService, times(1)).buildCloudResource("nat2", newNatGatewayId, AZURE_NAT_GATEWAY);
     }
 
     private CloudResource createCloudResource(String name, ResourceType type) {
