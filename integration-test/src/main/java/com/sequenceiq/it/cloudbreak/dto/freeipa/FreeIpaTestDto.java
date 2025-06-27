@@ -34,7 +34,6 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
 import com.sequenceiq.common.api.type.Tunnel;
-import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
@@ -126,7 +125,6 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
                 .withImageValidationCatalogAndImageIfPresent()
                 .withTunnel(getTestContext().getTunnel())
                 .withTags(getCloudProvider().getTags())
-                .withArchitecture(Architecture.X86_64.getName())
                 .withVariant();
     }
 
