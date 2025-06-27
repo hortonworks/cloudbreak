@@ -28,7 +28,7 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_D8s_v3",
+          "instanceType": "Standard_D8ds_v5",
           "cloudPlatform": "AZURE"
         },
         "type": "GATEWAY"

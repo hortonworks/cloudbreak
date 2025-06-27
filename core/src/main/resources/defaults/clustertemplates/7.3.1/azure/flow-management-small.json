@@ -17,7 +17,7 @@
         "type": "GATEWAY",
         "recoveryMode": "MANUAL",
         "template": {
-          "instanceType": "Standard_D8s_v3",
+          "instanceType": "Standard_D8ds_v5",
           "attachedVolumes": [
             {
               "size": 100,
@@ -33,7 +33,7 @@
         "type": "CORE",
         "recoveryMode": "MANUAL",
         "template": {
-          "instanceType": "Standard_D8s_v3",
+          "instanceType": "Standard_D8ds_v5",
           "rootVolume": {
             "size": 150
           },
@@ -52,7 +52,7 @@
         "type": "CORE",
         "recoveryMode": "MANUAL",
         "template": {
-          "instanceType": "Standard_D8s_v3",
+          "instanceType": "Standard_D8ds_v5",
           "rootVolume": {
             "size": 150
           },

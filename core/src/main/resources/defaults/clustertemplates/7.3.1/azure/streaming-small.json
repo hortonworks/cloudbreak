@@ -15,7 +15,7 @@
         "name": "master",
         "scalabilityOption": "FORBIDDEN",
         "template": {
-          "instanceType": "Standard_E8s_v3",
+          "instanceType": "Standard_E8ds_v5",
           "attachedVolumes": [
             {
               "count": 1,
@@ -32,7 +32,7 @@
         "name": "core_broker",
         "scalabilityOption": "FORBIDDEN",
         "template": {
-          "instanceType": "Standard_D8s_v3",
+          "instanceType": "Standard_D8ds_v5",
           "attachedVolumes": [
             {
               "count": 1,
@@ -49,7 +49,7 @@
       {
         "name": "broker",
         "template": {
-          "instanceType": "Standard_D8s_v3",
+          "instanceType": "Standard_D8ds_v5",
           "attachedVolumes": [
             {
               "count": 1,
@@ -76,7 +76,7 @@
           "azure": {
             "manageDisk": true
           },
-          "instanceType": "Standard_D8s_v3"
+          "instanceType": "Standard_D8ds_v5"
         },
         "nodeCount": 0,
         "type": "CORE",

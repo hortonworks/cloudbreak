@@ -26,7 +26,7 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_D16s_v3",
+          "instanceType": "Standard_D16ds_v5",
           "rootVolume": {
             "size": 150
           },
@@ -49,7 +49,7 @@
         "recoveryMode": "MANUAL",
         "template": {
           "azure": {},
-          "instanceType": "Standard_D16s_v3",
+          "instanceType": "Standard_D16ds_v5",
           "rootVolume": {
             "size": 150
           },
@@ -72,7 +72,7 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_D16s_v3",
+          "instanceType": "Standard_D16ds_v5",
           "rootVolume": {
             "size": 150
           },
@@ -102,7 +102,7 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_D16s_v3",
+          "instanceType": "Standard_D16ds_v5",
           "rootVolume": {
             "size": 150
           },
@@ -130,7 +130,7 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_D16s_v3",
+          "instanceType": "Standard_D16ds_v5",
           "rootVolume": {
             "size": 150
           },
@@ -160,7 +160,7 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_D16s_v3",
+          "instanceType": "Standard_D16ds_v5",
           "rootVolume": {
             "size": 150
           },

@@ -26,7 +26,7 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_D16s_v3"
+          "instanceType": "Standard_D16ds_v5"
         },
         "nodeCount": 1,
         "type": "GATEWAY",
@@ -89,7 +89,7 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_D8s_v3"
+          "instanceType": "Standard_D8ds_v5"
         },
         "nodeCount": 0,
         "type": "CORE",
