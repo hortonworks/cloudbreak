@@ -2,7 +2,6 @@ package com.sequenceiq.environment.resourcepersister;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.notification.model.ResourceNotification;
 import com.sequenceiq.cloudbreak.cloud.service.Persister;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 
@@ -51,7 +49,7 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
                     resourceService.save(resource);
                     return resource;
                 })
-                .collect(Collectors.toList());
+                .toList();
         if (cloudResources.size() != resources.size()) {
             LOGGER.debug("There are {} resource(s), these will not be save", cloudResources.size() - resources.size());
         }
@@ -68,7 +66,10 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
         cloudResources.forEach(cloudResource -> {
             Resource resource = cloudResourceToResourceConverter.convert(cloudResource);
             Resource persistedResource = resourceService.findByResourceReferenceAndType(cloudResource.getReference(), cloudResource.getType())
-                    .orElseThrow(NotFoundException.notFound("resource", cloudResource.getName()));
+                    .orElseGet(() -> {
+                        LOGGER.debug("Resource {} not found in DB, creating a new one", cloudResource.getName());
+                        return resource;
+                    });
             resource.setEnvironment(environment);
             updateWithPersistedFields(resource, persistedResource);
             resourceService.save(resource);
@@ -92,7 +93,7 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
     }
 
     private void updateWithPersistedFields(Resource resource, Resource persistedResource) {
-        if (persistedResource != null) {
+        if (persistedResource != null && !persistedResource.equals(resource)) {
             resource.setId(persistedResource.getId());
         }
     }
