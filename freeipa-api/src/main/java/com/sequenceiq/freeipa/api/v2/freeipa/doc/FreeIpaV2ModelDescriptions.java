@@ -16,6 +16,9 @@ public class FreeIpaV2ModelDescriptions {
 
     public static final String REALM = "Realm of the Active Directory server.";
 
+    public static final String TRUST_SECRET = "The trust shared secret is a password-like key entered during trust configuration that is shared between " +
+            "the IDM and AD domains to secure and validate the trust relationship.";
+
     private FreeIpaV2ModelDescriptions() {
     }
 }

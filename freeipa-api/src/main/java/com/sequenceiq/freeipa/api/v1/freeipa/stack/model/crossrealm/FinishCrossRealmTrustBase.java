@@ -19,11 +19,6 @@ public class FinishCrossRealmTrustBase {
     @Schema(description = ModelDescriptions.ENVIRONMENT_CRN, requiredMode = Schema.RequiredMode.REQUIRED)
     private String environmentCrn;
 
-    @ValidCrn(resource = CrnResourceDescriptor.FREEIPA)
-    @NotEmpty
-    @Schema(description = ModelDescriptions.CRN, requiredMode = Schema.RequiredMode.REQUIRED)
-    private String resourceCrn;
-
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
@@ -32,19 +27,10 @@ public class FinishCrossRealmTrustBase {
         this.environmentCrn = environmentCrn;
     }
 
-    public String getResourceCrn() {
-        return resourceCrn;
-    }
-
-    public void setResourceCrn(String resourceCrn) {
-        this.resourceCrn = resourceCrn;
-    }
-
     @Override
     public String toString() {
         return "FinishCrossRealmTrustBase{" +
                 "environmentCrn='" + environmentCrn + '\'' +
-                ", resourceCrn='" + resourceCrn + '\'' +
                 '}';
     }
 }
