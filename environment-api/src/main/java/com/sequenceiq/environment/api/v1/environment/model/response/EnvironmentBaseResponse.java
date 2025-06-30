@@ -141,7 +141,9 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
     @Schema(description = EnvironmentModelDescription.ENVIRONMENT_ENABLE_COMPUTE_CLUSTER, requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean enableComputeCluster;
 
-    @Schema(description = EnvironmentModelDescription.ENVIRONMENT_TYPE, subTypes = {DetailedEnvironmentResponse.class, SimpleEnvironmentResponse.class})
+    @Schema(description = EnvironmentModelDescription.ENVIRONMENT_TYPE,
+            subTypes = {DetailedEnvironmentResponse.class, SimpleEnvironmentResponse.class},
+            requiredMode = Schema.RequiredMode.REQUIRED)
     private String environmentType;
 
     @Schema(description = EnvironmentModelDescription.REMOTE_ENV_CRN, subTypes = {DetailedEnvironmentResponse.class, SimpleEnvironmentResponse.class})

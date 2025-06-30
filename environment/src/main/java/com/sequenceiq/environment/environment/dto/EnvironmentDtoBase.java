@@ -790,7 +790,7 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
             environmentDto.setEnableSecretEncryption(enableSecretEncryption);
             environmentDto.setCreatorClient(creatorClient);
             environmentDto.setEnableComputeCluster(enableComputeCluster);
-            environmentDto.setEnvironmentType(environmentType);
+            environmentDto.setEnvironmentType(environmentType == null ? EnvironmentType.PUBLIC_CLOUD : environmentType);
             environmentDto.setRemoteEnvironmentCrn(remoteEnvironmentCrn);
         }
 
