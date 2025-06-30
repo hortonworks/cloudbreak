@@ -6,7 +6,6 @@ import static com.sequenceiq.freeipa.api.v2.freeipa.doc.FreeIpaV2ModelDescriptio
 import static com.sequenceiq.freeipa.api.v2.freeipa.doc.FreeIpaV2ModelDescriptions.TRUST_SECRET;
 
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -29,8 +28,7 @@ public class PrepareCrossRealmTrustRequest extends PrepareCrossRealmTrustBase {
     @Schema(description = REALM, requiredMode = Schema.RequiredMode.REQUIRED)
     private String realm;
 
-    @NotNull
-    @Schema(description = TRUST_SECRET, requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = TRUST_SECRET, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String trustSecret;
 
     public String getFqdn() {
@@ -71,7 +69,6 @@ public class PrepareCrossRealmTrustRequest extends PrepareCrossRealmTrustBase {
                 "fqdn='" + fqdn + '\'' +
                 ", ip='" + ip + '\'' +
                 ", realm='" + realm + '\'' +
-                ", trustSecret='" + trustSecret + '\'' +
                 "} " + super.toString();
     }
 }

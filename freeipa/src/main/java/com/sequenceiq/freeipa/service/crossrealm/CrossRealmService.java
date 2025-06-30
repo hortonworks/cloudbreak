@@ -4,12 +4,14 @@ import java.util.Set;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishCrossRealmTrustRequest;
@@ -74,6 +76,12 @@ public class CrossRealmService {
         crossRealmTrust.setFqdn(request.getFqdn());
         crossRealmTrust.setIp(request.getIp());
         crossRealmTrust.setRealm(request.getRealm());
+        if (StringUtils.isBlank(request.getTrustSecret())) {
+            LOGGER.debug("Cross realm trust secret is not provided, generating a new one.");
+            crossRealmTrust.setTrustSecret(PasswordUtil.generatePassword());
+        } else {
+            crossRealmTrust.setTrustSecret(request.getTrustSecret());
+        }
 
         crossRealmTrust = crossRealmTrustRepository.save(crossRealmTrust);
         LOGGER.debug("Saved cross-realm configuration: {}", crossRealmTrust);
