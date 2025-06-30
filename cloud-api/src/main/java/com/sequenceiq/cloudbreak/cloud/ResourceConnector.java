@@ -190,7 +190,6 @@ public interface ResourceConnector {
     List<CloudResourceStatus> launchValidateUpgradeDatabaseServerResources(AuthenticatedContext authenticatedContext, DatabaseStack stack,
             TargetMajorVersion targetMajorVersion, DatabaseStack migratedDbStack, PersistenceNotifier persistenceNotifier) throws Exception;
 
-
     /**
      * This method cleans up the canary RDS instance and related cloud resources on the cloud platform that are used to validate the database stack
      * upgrade if necessary and throws Exception in case of any validation error.

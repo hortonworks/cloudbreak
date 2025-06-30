@@ -25,15 +25,15 @@ public class BackupRestoreEvent extends StackEvent {
     private final boolean dryRun;
 
     public BackupRestoreEvent(Long stackId, String backupLocation, String backupId) {
-        this (null, stackId, backupLocation, backupId, false);
+        this(null, stackId, backupLocation, backupId, false);
     }
 
     public BackupRestoreEvent(Long stackId, String backupLocation, String backupId, boolean dryRun) {
-        this (null, stackId, backupLocation, backupId, dryRun);
+        this(null, stackId, backupLocation, backupId, dryRun);
     }
 
     public BackupRestoreEvent(Long stackId, String backupLocation, String backupId, int databaseMaxDurationInMin, boolean dryRun) {
-        this (null, stackId, backupLocation, backupId, databaseMaxDurationInMin, dryRun);
+        this(null, stackId, backupLocation, backupId, databaseMaxDurationInMin, dryRun);
     }
 
     public BackupRestoreEvent(String selector, Long stackId, String backupLocation, String backupId, boolean dryRun) {
