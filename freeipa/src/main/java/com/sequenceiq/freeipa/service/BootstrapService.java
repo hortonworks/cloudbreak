@@ -30,6 +30,7 @@ import com.sequenceiq.freeipa.repository.StackRepository;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
+import com.sequenceiq.freeipa.util.SaltBootstrapVersionChecker;
 
 @Service
 public class BootstrapService {
@@ -60,6 +61,9 @@ public class BootstrapService {
     @Inject
     private CompressUtil compressUtil;
 
+    @Inject
+    private SaltBootstrapVersionChecker saltBootstrapVersionChecker;
+
     public void bootstrap(Long stackId) throws CloudbreakOrchestratorException {
         bootstrap(stackId, null, false);
     }
@@ -69,7 +73,7 @@ public class BootstrapService {
     }
 
     public void bootstrap(Long stackId, List<String> instanceIds, boolean restartAll) throws CloudbreakOrchestratorException {
-        Stack stack = stackRepository.findById(stackId).get();
+        Stack stack = stackRepository.findOneWithLists(stackId).get();
         Set<InstanceMetaData> instanceMetaDatas = instanceMetaDataService.findNotTerminatedForStack(stack.getId()).stream()
                 .filter(instanceMetaData -> Objects.isNull(instanceIds) || instanceIds.contains(instanceMetaData.getInstanceId()))
                 .collect(Collectors.toSet());
@@ -92,10 +96,11 @@ public class BootstrapService {
             throws CloudbreakOrchestratorException {
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getGatewayConfigs(stack, instanceMetaDatas);
+        boolean fqdnAsHostnameSupported = saltBootstrapVersionChecker.isFqdnAsHostnameSupported(stack);
 
         Set<Node> allNodes = instanceMetaDatas.stream()
                 .map(im -> {
-                    String hostname = getHostname(freeIpa, im);
+                    String hostname = getHostname(freeIpa, im, fqdnAsHostnameSupported);
                     return new Node(im.getPrivateIp(), im.getPublicIpWrapper(), im.getInstanceId(), im.getInstanceGroup().getTemplate().getInstanceType(),
                             hostname, freeIpa.getDomain(), im.getInstanceGroup().getGroupName());
                 }).collect(Collectors.toSet());
@@ -125,14 +130,19 @@ public class BootstrapService {
         }
     }
 
-    private String getHostname(FreeIpa freeIpa, InstanceMetaData im) {
+    private String getHostname(FreeIpa freeIpa, InstanceMetaData im, boolean fqdnAsHostnameSupported) {
         if (StringUtils.isNotBlank(im.getDiscoveryFQDN()) && StringUtils.endsWith(im.getDiscoveryFQDN(), freeIpa.getDomain())) {
-            LOGGER.info("Using already set hostname [{}] from InstanceMetaData for [{}]", im.getDiscoveryFQDN(), im.getInstanceId());
-            return StringUtils.removeEnd(StringUtils.removeEnd(im.getDiscoveryFQDN(), freeIpa.getDomain()), ".");
+            String hostname = fqdnAsHostnameSupported ? im.getDiscoveryFQDN()
+                    : StringUtils.removeEnd(StringUtils.removeEnd(im.getDiscoveryFQDN(), freeIpa.getDomain()), ".");
+            LOGGER.info("Using already set hostname [{}] from InstanceMetaData for [{}]. Final hostname: [{}]",
+                    im.getDiscoveryFQDN(), im.getInstanceId(), hostname);
+            return hostname;
         } else {
-            String generateHostname = hostDiscoveryService.generateHostname(freeIpa.getHostname(), null, im.getPrivateId(), false);
-            LOGGER.info("Hostname is not set in InstanceMetaData for [{}], generated hostname: [{}]", im.getDiscoveryFQDN(), generateHostname);
-            return generateHostname;
+            String generatedHostname = hostDiscoveryService.generateHostname(freeIpa.getHostname(), null, im.getPrivateId(), false);
+            String hostname = fqdnAsHostnameSupported ? generatedHostname + "." + freeIpa.getDomain() : generatedHostname;
+            LOGGER.info("Hostname is not set in InstanceMetaData for [{}], generated hostname: [{}]. Final hostname: [{}]",
+                    im.getDiscoveryFQDN(), generatedHostname, hostname);
+            return hostname;
         }
     }
 

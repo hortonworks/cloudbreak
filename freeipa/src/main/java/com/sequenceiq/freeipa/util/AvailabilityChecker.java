@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.util;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -13,7 +14,10 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
+import com.sequenceiq.freeipa.dto.ImageWrapper;
+import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.image.FreeIpaImageFilterSettings;
 import com.sequenceiq.freeipa.service.image.ImageNotFoundException;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -96,5 +100,33 @@ public class AvailabilityChecker {
 
     protected ImageService getImageService() {
         return imageService;
+    }
+
+    protected boolean doesAllImageSupport(Stack stack, String packageName, Versioned supportedAfter) {
+        Set<String> imageIdsInUse = stack.getNotTerminatedInstanceMetaDataSet().stream()
+                .map(InstanceMetaData::getImage)
+                .map(imageJson -> imageJson.getSilent(com.sequenceiq.cloudbreak.cloud.model.Image.class))
+                .map(com.sequenceiq.cloudbreak.cloud.model.Image::getImageId)
+                .collect(Collectors.toSet());
+        String currentImageId = getImageService().getImageForStack(stack).getUuid();
+        imageIdsInUse.add(currentImageId);
+        return imageIdsInUse.size() == 1
+                || doesAllNonCurrentImageSupport(stack, currentImageId, imageIdsInUse, packageName, supportedAfter);
+    }
+
+    private boolean doesAllNonCurrentImageSupport(Stack stack, String currentImageId, Set<String> imageIdsInUse, String packageName,
+            Versioned supportedAfter) {
+        imageIdsInUse.remove(currentImageId);
+        FreeIpaImageFilterSettings imageFilterSettings = getImageService().createImageFilterSettingsFromImageEntity(stack);
+        try {
+            return imageIdsInUse.stream()
+                    .map(imageFilterSettings::withImageId)
+                    .map(imageService::getImage)
+                    .map(ImageWrapper::getImage)
+                    .allMatch(image -> isPackageAvailable(packageName, supportedAfter, image));
+        } catch (ImageNotFoundException e) {
+            LOGGER.warn("Image not found, feature support cannot be determined, returning false");
+            return false;
+        }
     }
 }

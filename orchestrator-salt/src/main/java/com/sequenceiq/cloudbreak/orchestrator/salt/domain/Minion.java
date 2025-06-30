@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.orchestrator.salt.domain;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class Minion {
 
     private String address;
@@ -78,8 +80,13 @@ public class Minion {
         this.hostName = hostName;
     }
 
+    /**
+     * FreeIPA requires hostname to be the same as FQDN. Minion ID is the FQDN of the host.
+     * To handle this scenario, we only append domain to hostname if the hostname is not the FQDN already.
+     * @return FQDN of the host
+     */
     public String getId() {
-        return hostName + '.' + domain;
+        return StringUtils.endsWith(hostName, domain) ? hostName : hostName + '.' + domain;
     }
 
     public boolean isRestartNeeded() {
