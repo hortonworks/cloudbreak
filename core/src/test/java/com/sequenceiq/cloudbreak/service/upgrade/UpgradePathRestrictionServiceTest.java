@@ -87,7 +87,13 @@ class UpgradePathRestrictionServiceTest {
                 Arguments.of("7.2.18", 300, "7.3.1", 300, true),
 
                 Arguments.of("7.2.17", 100, "7.3.2", 0, true),
-                Arguments.of("7.3.1", 0, "7.3.1", 100, true)
+                Arguments.of("7.3.1", 0, "7.3.1", 100, true),
+
+                Arguments.of("7.2.16", 0, "7.2.18", 1100, false),
+                Arguments.of("7.2.17", 0, "7.2.18", 1100, false),
+                Arguments.of("7.2.18", 1100, "7.3.1", 0, false),
+                Arguments.of("7.2.18", 1100, "7.3.1", 400, false),
+                Arguments.of("7.2.18", 1100, "7.3.1", 500, true)
 
         );
     }
