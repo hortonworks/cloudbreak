@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(name = "PrepareCrossRealmTrustRequest")
+@Schema(name = "FinishCrossRealmTrustRequest")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class FinishCrossRealmTrustRequest extends FinishCrossRealmTrustBase {
