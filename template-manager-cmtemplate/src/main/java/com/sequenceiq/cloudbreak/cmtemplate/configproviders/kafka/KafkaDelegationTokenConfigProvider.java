@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 @Component
 public class KafkaDelegationTokenConfigProvider implements CmTemplateComponentConfigProvider {
 
-    private static final String CONFIG_VALUE = "false";
+    private static final String CONFIG_VALUE = "true";
 
     private static final int MINIMUM_KRAFT_NODECOUNT = 0;
 

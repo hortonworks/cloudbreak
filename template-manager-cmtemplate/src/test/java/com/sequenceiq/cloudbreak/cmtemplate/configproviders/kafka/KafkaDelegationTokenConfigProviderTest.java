@@ -80,7 +80,7 @@ class KafkaDelegationTokenConfigProviderTest {
         when(templatePreparationObject.getHostGroupsWithComponent(KafkaRoles.KAFKA_KRAFT)).thenReturn(Stream.of(kraft));
 
         List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(cmTemplateProcessor, templatePreparationObject);
-        List<ApiClusterTemplateConfig> expected = List.of(config(KafkaConfigs.DELEGATION_TOKEN_ENABLE, "false"));
+        List<ApiClusterTemplateConfig> expected = List.of(config(KafkaConfigs.DELEGATION_TOKEN_ENABLE, "true"));
 
         Assertions.assertEquals(expected, result);
     }
