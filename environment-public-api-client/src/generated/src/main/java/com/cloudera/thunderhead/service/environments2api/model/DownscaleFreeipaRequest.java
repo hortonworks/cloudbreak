@@ -32,7 +32,8 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   DownscaleFreeipaRequest.JSON_PROPERTY_ENVIRONMENT_NAME,
   DownscaleFreeipaRequest.JSON_PROPERTY_TARGET_AVAILABILITY_TYPE,
-  DownscaleFreeipaRequest.JSON_PROPERTY_INSTANCES
+  DownscaleFreeipaRequest.JSON_PROPERTY_INSTANCES,
+  DownscaleFreeipaRequest.JSON_PROPERTY_FORCE
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
 public class DownscaleFreeipaRequest {
@@ -79,6 +80,9 @@ public class DownscaleFreeipaRequest {
 
   public static final String JSON_PROPERTY_INSTANCES = "instances";
   private List<String> instances = new ArrayList<>();
+
+  public static final String JSON_PROPERTY_FORCE = "force";
+  private Boolean force = false;
 
   public DownscaleFreeipaRequest() {
   }
@@ -168,6 +172,32 @@ public class DownscaleFreeipaRequest {
     this.instances = instances;
   }
 
+
+  public DownscaleFreeipaRequest force(Boolean force) {
+    
+    this.force = force;
+    return this;
+  }
+
+   /**
+   * Force the downscale regardless of the status of the FreeIPA nodes and skip some validations.
+   * @return force
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_FORCE)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public Boolean getForce() {
+    return force;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_FORCE)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setForce(Boolean force) {
+    this.force = force;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -179,12 +209,13 @@ public class DownscaleFreeipaRequest {
     DownscaleFreeipaRequest downscaleFreeipaRequest = (DownscaleFreeipaRequest) o;
     return Objects.equals(this.environmentName, downscaleFreeipaRequest.environmentName) &&
         Objects.equals(this.targetAvailabilityType, downscaleFreeipaRequest.targetAvailabilityType) &&
-        Objects.equals(this.instances, downscaleFreeipaRequest.instances);
+        Objects.equals(this.instances, downscaleFreeipaRequest.instances) &&
+        Objects.equals(this.force, downscaleFreeipaRequest.force);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(environmentName, targetAvailabilityType, instances);
+    return Objects.hash(environmentName, targetAvailabilityType, instances, force);
   }
 
   @Override
@@ -194,6 +225,7 @@ public class DownscaleFreeipaRequest {
     sb.append("    environmentName: ").append(toIndentedString(environmentName)).append("\n");
     sb.append("    targetAvailabilityType: ").append(toIndentedString(targetAvailabilityType)).append("\n");
     sb.append("    instances: ").append(toIndentedString(instances)).append("\n");
+    sb.append("    force: ").append(toIndentedString(force)).append("\n");
     sb.append("}");
     return sb.toString();
   }

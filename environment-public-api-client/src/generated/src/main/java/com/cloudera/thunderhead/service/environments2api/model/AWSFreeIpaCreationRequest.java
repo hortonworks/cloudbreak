@@ -36,7 +36,8 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   AWSFreeIpaCreationRequest.JSON_PROPERTY_USE_CLOUD_FORMATION,
   AWSFreeIpaCreationRequest.JSON_PROPERTY_MULTI_AZ,
   AWSFreeIpaCreationRequest.JSON_PROPERTY_SPOT_PERCENTAGE,
-  AWSFreeIpaCreationRequest.JSON_PROPERTY_SPOT_MAX_PRICE
+  AWSFreeIpaCreationRequest.JSON_PROPERTY_SPOT_MAX_PRICE,
+  AWSFreeIpaCreationRequest.JSON_PROPERTY_ARCHITECTURE
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
 public class AWSFreeIpaCreationRequest {
@@ -60,6 +61,44 @@ public class AWSFreeIpaCreationRequest {
 
   public static final String JSON_PROPERTY_SPOT_MAX_PRICE = "spotMaxPrice";
   private Double spotMaxPrice;
+
+  /**
+   * Specifies the CPU architecture of freeipa instance type. Values are ARM64, X86_64.
+   */
+  public enum ArchitectureEnum {
+    ARM64("ARM64"),
+    
+    X86_64("X86_64");
+
+    private String value;
+
+    ArchitectureEnum(String value) {
+      this.value = value;
+    }
+
+    @JsonValue
+    public String getValue() {
+      return value;
+    }
+
+    @Override
+    public String toString() {
+      return String.valueOf(value);
+    }
+
+    @JsonCreator
+    public static ArchitectureEnum fromValue(String value) {
+      for (ArchitectureEnum b : ArchitectureEnum.values()) {
+        if (b.value.equals(value)) {
+          return b;
+        }
+      }
+      throw new IllegalArgumentException("Unexpected value '" + value + "'");
+    }
+  }
+
+  public static final String JSON_PROPERTY_ARCHITECTURE = "architecture";
+  private ArchitectureEnum architecture;
 
   public AWSFreeIpaCreationRequest() {
   }
@@ -257,6 +296,32 @@ public class AWSFreeIpaCreationRequest {
     this.spotMaxPrice = spotMaxPrice;
   }
 
+
+  public AWSFreeIpaCreationRequest architecture(ArchitectureEnum architecture) {
+    
+    this.architecture = architecture;
+    return this;
+  }
+
+   /**
+   * Specifies the CPU architecture of freeipa instance type. Values are ARM64, X86_64.
+   * @return architecture
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_ARCHITECTURE)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public ArchitectureEnum getArchitecture() {
+    return architecture;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_ARCHITECTURE)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setArchitecture(ArchitectureEnum architecture) {
+    this.architecture = architecture;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -272,12 +337,13 @@ public class AWSFreeIpaCreationRequest {
         Objects.equals(this.useCloudFormation, awSFreeIpaCreationRequest.useCloudFormation) &&
         Objects.equals(this.multiAz, awSFreeIpaCreationRequest.multiAz) &&
         Objects.equals(this.spotPercentage, awSFreeIpaCreationRequest.spotPercentage) &&
-        Objects.equals(this.spotMaxPrice, awSFreeIpaCreationRequest.spotMaxPrice);
+        Objects.equals(this.spotMaxPrice, awSFreeIpaCreationRequest.spotMaxPrice) &&
+        Objects.equals(this.architecture, awSFreeIpaCreationRequest.architecture);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(instanceCountByGroup, recipes, instanceType, useCloudFormation, multiAz, spotPercentage, spotMaxPrice);
+    return Objects.hash(instanceCountByGroup, recipes, instanceType, useCloudFormation, multiAz, spotPercentage, spotMaxPrice, architecture);
   }
 
   @Override
@@ -291,6 +357,7 @@ public class AWSFreeIpaCreationRequest {
     sb.append("    multiAz: ").append(toIndentedString(multiAz)).append("\n");
     sb.append("    spotPercentage: ").append(toIndentedString(spotPercentage)).append("\n");
     sb.append("    spotMaxPrice: ").append(toIndentedString(spotMaxPrice)).append("\n");
+    sb.append("    architecture: ").append(toIndentedString(architecture)).append("\n");
     sb.append("}");
     return sb.toString();
   }

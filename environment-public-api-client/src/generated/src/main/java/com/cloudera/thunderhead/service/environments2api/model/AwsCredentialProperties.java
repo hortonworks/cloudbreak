@@ -28,7 +28,8 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
  */
 @JsonPropertyOrder({
   AwsCredentialProperties.JSON_PROPERTY_ROLE_ARN,
-  AwsCredentialProperties.JSON_PROPERTY_GOV_CLOUD
+  AwsCredentialProperties.JSON_PROPERTY_GOV_CLOUD,
+  AwsCredentialProperties.JSON_PROPERTY_DEFAULT_REGION
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
 public class AwsCredentialProperties {
@@ -37,6 +38,9 @@ public class AwsCredentialProperties {
 
   public static final String JSON_PROPERTY_GOV_CLOUD = "govCloud";
   private Boolean govCloud;
+
+  public static final String JSON_PROPERTY_DEFAULT_REGION = "defaultRegion";
+  private String defaultRegion;
 
   public AwsCredentialProperties() {
   }
@@ -74,7 +78,7 @@ public class AwsCredentialProperties {
   }
 
    /**
-   * Flag that indicates that the given AWS credential is GovCloud specfic.
+   * Flag that indicates that the given AWS credential is GovCloud specific.
    * @return govCloud
   **/
   @javax.annotation.Nullable
@@ -92,6 +96,32 @@ public class AwsCredentialProperties {
     this.govCloud = govCloud;
   }
 
+
+  public AwsCredentialProperties defaultRegion(String defaultRegion) {
+    
+    this.defaultRegion = defaultRegion;
+    return this;
+  }
+
+   /**
+   * The default region for the Credential to be used during API interactions.
+   * @return defaultRegion
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_DEFAULT_REGION)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public String getDefaultRegion() {
+    return defaultRegion;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_DEFAULT_REGION)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setDefaultRegion(String defaultRegion) {
+    this.defaultRegion = defaultRegion;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -102,12 +132,13 @@ public class AwsCredentialProperties {
     }
     AwsCredentialProperties awsCredentialProperties = (AwsCredentialProperties) o;
     return Objects.equals(this.roleArn, awsCredentialProperties.roleArn) &&
-        Objects.equals(this.govCloud, awsCredentialProperties.govCloud);
+        Objects.equals(this.govCloud, awsCredentialProperties.govCloud) &&
+        Objects.equals(this.defaultRegion, awsCredentialProperties.defaultRegion);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(roleArn, govCloud);
+    return Objects.hash(roleArn, govCloud, defaultRegion);
   }
 
   @Override
@@ -116,6 +147,7 @@ public class AwsCredentialProperties {
     sb.append("class AwsCredentialProperties {\n");
     sb.append("    roleArn: ").append(toIndentedString(roleArn)).append("\n");
     sb.append("    govCloud: ").append(toIndentedString(govCloud)).append("\n");
+    sb.append("    defaultRegion: ").append(toIndentedString(defaultRegion)).append("\n");
     sb.append("}");
     return sb.toString();
   }

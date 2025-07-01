@@ -82,6 +82,29 @@ paths:
           description: The default response on an error.
           schema:
             $ref: '#/definitions/Error'
+  /api/v1/environments2/createYARNEnvironment:
+    post:
+      summary: Creates a new YCLOUD environment by providing the cloud provider access and network information.
+      description: Creates a new YCLOUD environment.
+      operationId: createYARNEnvironment
+      x-hidden: true
+      x-hidden-reason: 'FOR_CLOUDERA_USE_ONLY: This is an internal Cloudera feature.'
+      x-mutating: true
+      parameters:
+        - name: input
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/CreateYARNEnvironmentRequest'
+      responses:
+        200:
+          description: Expected response to a valid request.
+          schema:
+            $ref: '#/definitions/CreateYARNEnvironmentResponse'
+        default:
+          description: The default response on an error.
+          schema:
+            $ref: '#/definitions/Error'
   /api/v1/environments2/createAWSGovCloudEnvironment:
     post:
       summary: Creates a new AWS GovCloud environment by providing the cloud provider access and network information. A FreeIPA server will be automatically provisioned when an environment is created.
@@ -163,6 +186,29 @@ paths:
           description: Expected response to a valid request.
           schema:
             $ref: '#/definitions/CreatePrivateEnvironmentResponse'
+        default:
+          description: The default response on an error.
+          schema:
+            $ref: '#/definitions/Error'
+  /api/v1/environments2/createYARNCredential:
+    post:
+      summary: Creates a new YCLOUD credential that can be attatched to an environment. The credential is used for authorization to provision resources such as compute instances within your cloud provider account.
+      description: Creates a new YCLOUD credential.
+      operationId: createYARNCredential
+      x-hidden: true
+      x-hidden-reason: 'FOR_CLOUDERA_USE_ONLY: This is an internal Cloudera feature.'
+      x-mutating: true
+      parameters:
+        - name: input
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/CreateYARNCredentialRequest'
+      responses:
+        200:
+          description: Expected response to a valid request.
+          schema:
+            $ref: '#/definitions/CreateYARNCredentialResponse'
         default:
           description: The default response on an error.
           schema:
@@ -2114,9 +2160,6 @@ paths:
       description: Rotate FreeIPA related secrets for FreeIPA instances.
       operationId: rotateFreeipaSecrets
       x-mutating: true
-      x-hidden: true
-      x-hidden-reason: IN_DEVELOPMENT
-      x-hidden-retention: BETA
       parameters:
         - name: input
           in: body
@@ -2138,9 +2181,6 @@ paths:
       description: Lists FreeIPA related secret types for FreeIPA instances.
       operationId: listFreeipaSecretTypes
       x-mutating: false
-      x-hidden: true
-      x-hidden-reason: IN_DEVELOPMENT
-      x-hidden-retention: BETA
       parameters:
         - name: input
           in: body
@@ -2413,6 +2453,29 @@ paths:
           description: The default response on an error.
           schema:
             $ref: '#/definitions/Error'
+  /api/v1/environments2/modifySelinux:
+    post:
+      summary: Modifies SELinux mode on FreeIPA instances of the environment.
+      description: Modifies SELinux mode on FreeIPA instances of the environment.
+      operationId: modifySelinux
+      x-mutating: true
+      x-hidden: true
+      x-hidden-reason: IN_DEVELOPMENT
+      parameters:
+        - name: input
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ModifySelinuxRequest'
+      responses:
+        200:
+          description: Expected response to a valid request.
+          schema:
+            $ref: '#/definitions/ModifySelinuxResponse'
+        default:
+          description: The default response on an error.
+          schema:
+            $ref: '#/definitions/Error'
 definitions:
   GetIdBrokerMappingsCliForEnvRequest:
     x-hidden: true
@@ -2612,6 +2675,36 @@ definitions:
       credential:
         description: The credential object.
         $ref: '#/definitions/Credential'
+  CreateYARNCredentialRequest:
+    type: object
+    description: Request object for a createYARNCredential method.
+    x-hidden: true
+    x-hidden-reason: 'FOR_CLOUDERA_USE_ONLY: This is an internal Cloudera feature.'
+    required:
+      - credentialName
+      - endpointValue
+    properties:
+      credentialName:
+        type: string
+        description: The name of the credential.
+      endpointValue:
+        type: string
+        x-no-paramfile: true
+        description: The endpoint of YARN.
+      description:
+        type: string
+        description: A description for the credential.
+  CreateYARNCredentialResponse:
+    type: object
+    description: Response object for a createYARNCredential method.
+    x-hidden: true
+    x-hidden-reason: 'FOR_CLOUDERA_USE_ONLY: This is an internal Cloudera feature.'
+    required:
+      - credential
+    properties:
+      credential:
+        description: The credential object.
+        $ref: '#/definitions/Credential'
   CreateAWSCredentialRequest:
     type: object
     description: Request object for a create AWS credential request.
@@ -2744,6 +2837,12 @@ definitions:
         type: boolean
         default: false
         description: Whether to verify permissions upon saving or not.
+      defaultRegion:
+        type: string
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
+        x-hidden-retention: BETA
+        description: The default region for the Credential to be used during API interactions.
   UpdateAwsCredentialResponse:
     type: object
     properties:
@@ -2843,7 +2942,13 @@ definitions:
         description: The AWS role arn for the given credential.
       govCloud:
         type: boolean
-        description: Flag that indicates that the given AWS credential is GovCloud specfic.
+        description: Flag that indicates that the given AWS credential is GovCloud specific.
+      defaultRegion:
+        type: string
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
+        x-hidden-retention: BETA
+        description: The default region for the Credential to be used during API interactions.
   AzureCredentialProperties:
     type: object
     description: The credential properties that closely related to those that have been created on Azure.
@@ -3030,6 +3135,17 @@ definitions:
       computeClusterConfiguration:
         description: The Externalized k8s configuration create request for the environment
         $ref: '#/definitions/AzureComputeClusterConfigurationRequest'
+  CreateYARNEnvironmentRequest:
+    type: object
+    description: Request object for a create createYARNEnvironment method.
+    x-hidden: true
+    x-hidden-reason: 'FOR_CLOUDERA_USE_ONLY: This is an internal Cloudera feature.'
+    required:
+      - inputJson
+    properties:
+      inputJson:
+        type: string
+        description: Provides the input values for YCLOUD environment creation in JSON format.
   CreateAWSEnvironmentRequest:
     type: object
     description: Request object for a create AWS environment request.
@@ -3343,8 +3459,6 @@ definitions:
       environmentQuota:
         description: Set quota for resources in this Environment.
         $ref: '#/definitions/EnvironmentQuota'
-        x-hidden: true
-        x-hidden-reason: IN_DEVELOPMENT
       kubeConfig:
         type: string
         description: Name of credentials holding kubeconfig for access to the kubernetes cluster paired with this Environment.
@@ -3620,6 +3734,17 @@ definitions:
   CreateAWSEnvironmentResponse:
     type: object
     description: Response object for a create AWS environment request.
+    required:
+      - environment
+    properties:
+      environment:
+        $ref: '#/definitions/Environment'
+        description: Created environment object.
+  CreateYARNEnvironmentResponse:
+    type: object
+    description: Response object for a createYARNEnvironment method.
+    x-hidden: true
+    x-hidden-reason: 'FOR_CLOUDERA_USE_ONLY: This is an internal Cloudera feature.'
     required:
       - environment
     properties:
@@ -4883,6 +5008,9 @@ definitions:
       kdcHost:
         type: string
         description: KDC host.
+      kdcHostIp:
+        type: string
+        description: KDC host IP address.
       kerberized:
         type: boolean
         description: Whether kerberized or not.
@@ -5072,6 +5200,30 @@ definitions:
         x-hidden: true
         x-hidden-reason: IN_DEVELOPMENT
         x-no-compatibility-guarantee: true
+      secondaryCidrsWithNames:
+        type: array
+        description: The Secondary CIDR IP ranges and names of the subnet (currently only available on Google Cloud).
+        items:
+          $ref: '#/definitions/SecondaryCidrWithName'
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
+        x-no-compatibility-guarantee: true
+  SecondaryCidrWithName:
+    type: object
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
+    x-no-compatibility-guarantee: true
+    description: A single entry that contains secondary cidr and name.
+    required:
+      - name
+      - cidr
+    properties:
+      name:
+        type: string
+        description: The name of the secondary range.
+      cidr:
+        type: string
+        description: The cidr of the secondary range.
   NetworkAwsParams:
     type: object
     description: AWS network parameters.
@@ -6487,6 +6639,15 @@ definitions:
         description: Max hourly price of spot instances.
         x-hidden: true
         x-hidden-reason: IN_DEVELOPMENT
+      architecture:
+        type: string
+        x-hidden: true
+        x-hidden-retention: BETA
+        x-hidden-reason: IN_DEVELOPMENT
+        description: Specifies the CPU architecture of freeipa instance type. Values are ARM64, X86_64.
+        enum:
+          - ARM64
+          - X86_64
   AzureFreeIpaCreationRequest:
     description: Request object for creating FreeIPA in the environment.
     type: object
@@ -6524,9 +6685,6 @@ definitions:
         type: string
         description: Custom instance type of FreeIPA instances.
       multiAz:
-        x-hidden: true
-        x-hidden-reason: IN_DEVELOPMENT
-        x-hidden-retention: BETA
         type: boolean
         default: false
         description: Flag that enables deployment of the FreeIPA in a multi-availability zone.
@@ -6612,6 +6770,9 @@ definitions:
         description: Details of a FreeIPA load balancer.
         x-hidden: true
         x-hidden-reason: IN_DEVELOPMENT
+      imageDetails:
+        $ref: '#/definitions/ImageInfo'
+        description: The image details.
   FreeIpaInstance:
     type: object
     description: Object for a FreeIPA instance providing specific information about the instance.
@@ -7927,6 +8088,10 @@ definitions:
         items:
           type: string
         description: The instance Ids to downscale.
+      force:
+        type: boolean
+        description: Force the downscale regardless of the status of the FreeIPA nodes and skip some validations.
+        default: false
   DownscaleFreeipaResponse:
     type: object
     description: The response object for FreeIPA downscale.
@@ -8036,6 +8201,19 @@ definitions:
       catalogName:
         type: string
         description: Image catalog name.
+  ImageInfo:
+    type: object
+    description: Basic information about an image.
+    properties:
+      imageId:
+        type: string
+        description: The ID of the image.
+      imageCatalogName:
+        type: string
+        description: The name of the image catalog of the image.
+      imageOs:
+        type: string
+        description: The OS of the image.
   RetryFreeipaRequest:
     type: object
     description: Request object for retry FreeIPA request.
@@ -8091,9 +8269,6 @@ definitions:
   RotateFreeipaSecretsRequest:
     type: object
     description: Request object for starting secret rotation for FreeIPA.
-    x-hidden: true
-    x-hidden-reason: IN_DEVELOPMENT
-    x-hidden-retention: BETA
     required:
       - environment
       - secretTypes
@@ -8107,9 +8282,6 @@ definitions:
           type: string
         description: The list of secrets that need replacement.
   RotateFreeipaSecretsResponse:
-    x-hidden: true
-    x-hidden-reason: IN_DEVELOPMENT
-    x-hidden-retention: BETA
     type: object
     description: Response object for rotating secrets.
     properties:
@@ -8119,9 +8291,6 @@ definitions:
   ListFreeipaSecretTypesRequest:
     type: object
     description: Request for listing possible secret values for Freeipa.
-    x-hidden: true
-    x-hidden-reason: IN_DEVELOPMENT
-    x-hidden-retention: BETA
     required:
       - environment
     properties:
@@ -8129,9 +8298,6 @@ definitions:
         type: string
         description: The environment CRN where Freeipa is located.
   ListFreeipaSecretTypesResponse:
-    x-hidden: true
-    x-hidden-reason: IN_DEVELOPMENT
-    x-hidden-retention: BETA
     type: object
     description: Response for listing possible secret values for Freeipa.
     required:
@@ -8143,9 +8309,6 @@ definitions:
           $ref: '#/definitions/SecretTypeResponse'
         description: The list of secret types supported by FreeIpa.
   SecretTypeResponse:
-    x-hidden: true
-    x-hidden-reason: IN_DEVELOPMENT
-    x-hidden-retention: BETA
     x-mutating: false
     type: object
     description: Response object for showing the secret types and descriptions.
@@ -8408,8 +8571,6 @@ definitions:
   EnvironmentQuota:
     type: object
     description: Resource pool quota for the Environment.
-    x-hidden: true
-    x-hidden-reason: IN_DEVELOPMENT
     properties:
       cpuQuota:
         type: integer
@@ -8502,3 +8663,36 @@ definitions:
       result:
         type: string
         description: The result of the operation.
+  ModifySelinuxRequest:
+    type: object
+    description: Request object for modifying SELinux mode on FreeIPA.
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
+    required:
+      - environment
+      - selinux
+    properties:
+      environment:
+        type: string
+        description: The Environment CRN.
+      selinux:
+        type: string
+        description: SELinux Mode.
+        enum:
+          - ENFORCING
+          - PERMISSIVE
+  ModifySelinuxResponse:
+    type: object
+    description: Response object for modifying SELinux mode on FreeIPA.
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
+    required:
+      - flowId
+      - type
+    properties:
+      flowId:
+        type: string
+        description: Flow ID of the modify SELinux flow.
+      type:
+        type: string
+        description: Flow Type of the modify SELinux flow.

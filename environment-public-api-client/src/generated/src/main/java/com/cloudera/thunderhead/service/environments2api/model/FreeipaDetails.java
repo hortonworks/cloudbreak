@@ -17,6 +17,7 @@ import java.util.Objects;
 import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.FreeIpaInstance;
 import com.cloudera.thunderhead.service.environments2api.model.FreeIpaLoadBalancer;
+import com.cloudera.thunderhead.service.environments2api.model.ImageInfo;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -43,7 +44,8 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   FreeipaDetails.JSON_PROPERTY_INSTANCES,
   FreeipaDetails.JSON_PROPERTY_INSTANCE_COUNT_BY_GROUP,
   FreeipaDetails.JSON_PROPERTY_MULTI_AZ,
-  FreeipaDetails.JSON_PROPERTY_LOAD_BALANCER
+  FreeipaDetails.JSON_PROPERTY_LOAD_BALANCER,
+  FreeipaDetails.JSON_PROPERTY_IMAGE_DETAILS
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
 public class FreeipaDetails {
@@ -73,6 +75,9 @@ public class FreeipaDetails {
 
   public static final String JSON_PROPERTY_LOAD_BALANCER = "loadBalancer";
   private FreeIpaLoadBalancer loadBalancer;
+
+  public static final String JSON_PROPERTY_IMAGE_DETAILS = "imageDetails";
+  private ImageInfo imageDetails;
 
   public FreeipaDetails() {
   }
@@ -336,6 +341,32 @@ public class FreeipaDetails {
     this.loadBalancer = loadBalancer;
   }
 
+
+  public FreeipaDetails imageDetails(ImageInfo imageDetails) {
+    
+    this.imageDetails = imageDetails;
+    return this;
+  }
+
+   /**
+   * Get imageDetails
+   * @return imageDetails
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_IMAGE_DETAILS)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public ImageInfo getImageDetails() {
+    return imageDetails;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_IMAGE_DETAILS)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setImageDetails(ImageInfo imageDetails) {
+    this.imageDetails = imageDetails;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -353,12 +384,13 @@ public class FreeipaDetails {
         Objects.equals(this.instances, freeipaDetails.instances) &&
         Objects.equals(this.instanceCountByGroup, freeipaDetails.instanceCountByGroup) &&
         Objects.equals(this.multiAz, freeipaDetails.multiAz) &&
-        Objects.equals(this.loadBalancer, freeipaDetails.loadBalancer);
+        Objects.equals(this.loadBalancer, freeipaDetails.loadBalancer) &&
+        Objects.equals(this.imageDetails, freeipaDetails.imageDetails);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(crn, domain, hostname, serverIP, recipes, instances, instanceCountByGroup, multiAz, loadBalancer);
+    return Objects.hash(crn, domain, hostname, serverIP, recipes, instances, instanceCountByGroup, multiAz, loadBalancer, imageDetails);
   }
 
   @Override
@@ -374,6 +406,7 @@ public class FreeipaDetails {
     sb.append("    instanceCountByGroup: ").append(toIndentedString(instanceCountByGroup)).append("\n");
     sb.append("    multiAz: ").append(toIndentedString(multiAz)).append("\n");
     sb.append("    loadBalancer: ").append(toIndentedString(loadBalancer)).append("\n");
+    sb.append("    imageDetails: ").append(toIndentedString(imageDetails)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -31,7 +31,8 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   UpdateAwsCredentialRequest.JSON_PROPERTY_ROLE_ARN,
   UpdateAwsCredentialRequest.JSON_PROPERTY_DESCRIPTION,
   UpdateAwsCredentialRequest.JSON_PROPERTY_SKIP_ORG_POLICY_DECISIONS,
-  UpdateAwsCredentialRequest.JSON_PROPERTY_VERIFY_PERMISSIONS
+  UpdateAwsCredentialRequest.JSON_PROPERTY_VERIFY_PERMISSIONS,
+  UpdateAwsCredentialRequest.JSON_PROPERTY_DEFAULT_REGION
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
 public class UpdateAwsCredentialRequest {
@@ -49,6 +50,9 @@ public class UpdateAwsCredentialRequest {
 
   public static final String JSON_PROPERTY_VERIFY_PERMISSIONS = "verifyPermissions";
   private Boolean verifyPermissions = false;
+
+  public static final String JSON_PROPERTY_DEFAULT_REGION = "defaultRegion";
+  private String defaultRegion;
 
   public UpdateAwsCredentialRequest() {
   }
@@ -182,6 +186,32 @@ public class UpdateAwsCredentialRequest {
     this.verifyPermissions = verifyPermissions;
   }
 
+
+  public UpdateAwsCredentialRequest defaultRegion(String defaultRegion) {
+    
+    this.defaultRegion = defaultRegion;
+    return this;
+  }
+
+   /**
+   * The default region for the Credential to be used during API interactions.
+   * @return defaultRegion
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_DEFAULT_REGION)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public String getDefaultRegion() {
+    return defaultRegion;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_DEFAULT_REGION)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setDefaultRegion(String defaultRegion) {
+    this.defaultRegion = defaultRegion;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -195,12 +225,13 @@ public class UpdateAwsCredentialRequest {
         Objects.equals(this.roleArn, updateAwsCredentialRequest.roleArn) &&
         Objects.equals(this.description, updateAwsCredentialRequest.description) &&
         Objects.equals(this.skipOrgPolicyDecisions, updateAwsCredentialRequest.skipOrgPolicyDecisions) &&
-        Objects.equals(this.verifyPermissions, updateAwsCredentialRequest.verifyPermissions);
+        Objects.equals(this.verifyPermissions, updateAwsCredentialRequest.verifyPermissions) &&
+        Objects.equals(this.defaultRegion, updateAwsCredentialRequest.defaultRegion);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(credentialName, roleArn, description, skipOrgPolicyDecisions, verifyPermissions);
+    return Objects.hash(credentialName, roleArn, description, skipOrgPolicyDecisions, verifyPermissions, defaultRegion);
   }
 
   @Override
@@ -212,6 +243,7 @@ public class UpdateAwsCredentialRequest {
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    skipOrgPolicyDecisions: ").append(toIndentedString(skipOrgPolicyDecisions)).append("\n");
     sb.append("    verifyPermissions: ").append(toIndentedString(verifyPermissions)).append("\n");
+    sb.append("    defaultRegion: ").append(toIndentedString(defaultRegion)).append("\n");
     sb.append("}");
     return sb.toString();
   }

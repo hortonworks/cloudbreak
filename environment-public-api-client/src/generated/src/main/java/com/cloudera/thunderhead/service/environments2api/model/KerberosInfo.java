@@ -30,6 +30,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   KerberosInfo.JSON_PROPERTY_KDC_TYPE,
   KerberosInfo.JSON_PROPERTY_KERBEROS_REALM,
   KerberosInfo.JSON_PROPERTY_KDC_HOST,
+  KerberosInfo.JSON_PROPERTY_KDC_HOST_IP,
   KerberosInfo.JSON_PROPERTY_KERBERIZED
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
@@ -42,6 +43,9 @@ public class KerberosInfo {
 
   public static final String JSON_PROPERTY_KDC_HOST = "kdcHost";
   private String kdcHost;
+
+  public static final String JSON_PROPERTY_KDC_HOST_IP = "kdcHostIp";
+  private String kdcHostIp;
 
   public static final String JSON_PROPERTY_KERBERIZED = "kerberized";
   private Boolean kerberized;
@@ -127,6 +131,32 @@ public class KerberosInfo {
   }
 
 
+  public KerberosInfo kdcHostIp(String kdcHostIp) {
+    
+    this.kdcHostIp = kdcHostIp;
+    return this;
+  }
+
+   /**
+   * KDC host IP address.
+   * @return kdcHostIp
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_KDC_HOST_IP)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public String getKdcHostIp() {
+    return kdcHostIp;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_KDC_HOST_IP)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setKdcHostIp(String kdcHostIp) {
+    this.kdcHostIp = kdcHostIp;
+  }
+
+
   public KerberosInfo kerberized(Boolean kerberized) {
     
     this.kerberized = kerberized;
@@ -164,12 +194,13 @@ public class KerberosInfo {
     return Objects.equals(this.kdcType, kerberosInfo.kdcType) &&
         Objects.equals(this.kerberosRealm, kerberosInfo.kerberosRealm) &&
         Objects.equals(this.kdcHost, kerberosInfo.kdcHost) &&
+        Objects.equals(this.kdcHostIp, kerberosInfo.kdcHostIp) &&
         Objects.equals(this.kerberized, kerberosInfo.kerberized);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(kdcType, kerberosRealm, kdcHost, kerberized);
+    return Objects.hash(kdcType, kerberosRealm, kdcHost, kdcHostIp, kerberized);
   }
 
   @Override
@@ -179,6 +210,7 @@ public class KerberosInfo {
     sb.append("    kdcType: ").append(toIndentedString(kdcType)).append("\n");
     sb.append("    kerberosRealm: ").append(toIndentedString(kerberosRealm)).append("\n");
     sb.append("    kdcHost: ").append(toIndentedString(kdcHost)).append("\n");
+    sb.append("    kdcHostIp: ").append(toIndentedString(kdcHostIp)).append("\n");
     sb.append("    kerberized: ").append(toIndentedString(kerberized)).append("\n");
     sb.append("}");
     return sb.toString();
