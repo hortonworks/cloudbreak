@@ -98,10 +98,9 @@ ext {
   hikariCPVersion = '5.0.1'
 
   // Crypto
-  bouncycastleVersion = '1.78'
-  bouncycastleFipsVersion = '2.0.0'
-  bouncycastlePkixFipsVersion = '2.0.7'
-  bouncycastleUtilFipsVersion = '2.0.3'
+  bouncycastleFipsVersion = '2.1.0'
+  bouncycastlePkixFipsVersion = '2.1.9'
+  bouncycastleUtilFipsVersion = '2.1.4'
 
   // Cloudera
   cmClientVersion = '7.12.0.0'
