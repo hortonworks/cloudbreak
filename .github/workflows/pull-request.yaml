@@ -110,7 +110,7 @@ jobs:
           export DOCKERHUB_USERNAME=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}")
           make unit-test-steps_gradle_build
       - name: add_test_report
-        if: success() || failure()
+        if: ${{ always() }}
         id: test-report
         env:
           GITHUB_TOKEN: ${{ steps.build_secrets.outputs.GITHUB_TOKEN}}
@@ -208,7 +208,7 @@ jobs:
           export DOCKERHUB_USERNAME=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}")
           make checkstyle-main-steps_gradle_build
       - uses: cloudbreak/cloudbreak-github-actions/actions/checkstyle-github-action@master
-        if: success() || failure()
+        if: ${{ always() }}
         name: checkstyle_main_report
         with:
           name: Checkstyle Main Report
@@ -272,7 +272,7 @@ jobs:
           export DOCKERHUB_USERNAME=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}")
           make checkstyle-test-steps_gradle_build
       - uses: cloudbreak/cloudbreak-github-actions/actions/checkstyle-github-action@master
-        if: success() || failure()
+        if: ${{ always() }}
         name: checkstyle_test_report
         with:
           name: Checkstyle Test Report
@@ -336,7 +336,7 @@ jobs:
           export DOCKERHUB_USERNAME=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}")
           make spotbugs-test-steps_gradle_build
       - uses: cloudbreak/cloudbreak-github-actions/actions/spotbugs-github-action@master
-        if: success() || failure()
+        if: ${{ always() }}
         name: spotbugs_test_report
         with:
           name: SpotBugs Test Report
@@ -581,7 +581,6 @@ jobs:
           sudo apt-get update
           DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make uuid-runtime docker-compose-v2 git curl
       - name: component_test
-        continue-on-error: true
         run: |-
           export CM_PRIVATE_REPO_PASSWORD=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}")
           export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
@@ -640,7 +639,6 @@ jobs:
           sudo apt-get update
           DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make uuid-runtime docker-compose-v2 git curl
       - name: schema_compatibility_test
-        continue-on-error: true
         run: |-
           export CM_PRIVATE_REPO_PASSWORD=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}")
           export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
@@ -658,7 +656,7 @@ jobs:
 
       - name: schema_compatibility_test_collect_service_artifacts
         uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
-        if: steps.schema_compatibility_test.conclusion == 'failure'
+        if: ${{ always() }}
         with:
           name: schema-compatibility-service-artifact
           retention-days: 5
@@ -745,7 +743,6 @@ jobs:
           sudo apt-get update
           DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make uuid-runtime docker-compose-v2 git curl
       - name: integration_test
-        continue-on-error: true
         run: |-
           export CM_PRIVATE_REPO_PASSWORD=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}")
           export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
@@ -767,7 +764,7 @@ jobs:
           make compress-results
       - name: integration_test_collect_service_artifacts
         uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
-        if: steps.integration_test.conclusion == 'failure'
+        if: ${{ always() }}
         with:
           name: integration-test-service-artifact
           retention-days: 5
@@ -775,17 +772,12 @@ jobs:
             integration-test/integcb-logs.tar.gz
       - name: integration_test_collect_test_artifacts
         uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
-        if: steps.integration_test.conclusion == 'failure'
+        if: ${{ always() }}
         with:
           name: integration-test-test-artifact
           retention-days: 5
           path: |
             integration-test/suites.tar.gz
-      - name: integration_test_check
-        if: steps.integration_test.outcome == 'failure'
-        run: |
-          echo "Integration test failed, now failing the job."
-          exit 1
   fedramp-integration-test:
     permissions: write-all
     name: FedRAMP Integration Test
@@ -838,7 +830,6 @@ jobs:
           sudo apt-get update
           DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make uuid-runtime docker-compose-v2
       - name: fedramp_integration_test
-        continue-on-error: true
         run: |-
           export CM_PRIVATE_REPO_PASSWORD=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}")
           export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
@@ -860,7 +851,7 @@ jobs:
           make compress-results
       - name: fedramp_integration_test_collect_service_artifacts
         uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
-        if: steps.fedramp_integration_test.conclusion == 'failure'
+        if: ${{ always() }}
         with:
           name: fedramp-integration-service-artifact
           retention-days: 5
@@ -877,7 +868,7 @@ jobs:
             integration-test/core-gateway.log
       - name: fedramp_integration_test_collect_test_artifacts
         uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
-        if: steps.fedramp_integration_test.conclusion == 'failure'
+        if: ${{ always() }}
         with:
           name: fedramp-integration-test-artifact
           retention-days: 5
@@ -890,11 +881,6 @@ jobs:
             integration-test/suites_log/*.log
             integration-test/test-output/**/*
             integration-test/dumps/*.hprof
-      - name: fedramp_integration_test_check
-        if: steps.fedramp_integration_test.outcome == 'failure'
-        run: |
-          echo "FedRAMP integration test failed, now failing the job."
-          exit 1
   real-ums-test:
     permissions: write-all
     name: Real UMS Test
@@ -948,7 +934,6 @@ jobs:
           sudo apt-get update
           DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make uuid-runtime docker-compose-v2
       - name: real_ums_test
-        continue-on-error: true
         run: |-
           export CM_PRIVATE_REPO_PASSWORD=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}")
           export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
@@ -974,7 +959,7 @@ jobs:
           make compress-results
       - name: real_ums_test_collect_service_artifacts
         uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
-        if: steps.real_ums_test.conclusion == 'failure'
+        if: ${{ always() }}
         with:
           name: real-ums-test-artifact
           retention-days: 5
@@ -991,7 +976,7 @@ jobs:
             integration-test/core-gateway.log
       - name: real_ums_test_collect_test_artifacts
         uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
-        if: steps.real_ums_test.conclusion == 'failure'
+        if: ${{ always() }}
         with:
           name: real-ums-test-artifact
           retention-days: 5
@@ -1004,11 +989,6 @@ jobs:
             integration-test/suites_log/*.log
             integration-test/test-output/**/*
             integration-test/dumps/*.hprof
-      - name: real_ums_test_check
-        if: steps.real_ums_test.outcome == 'failure'
-        run: |
-          echo "Real UMS test failed, now failing the job."
-          exit 1
   aws-test:
     permissions: write-all
     name: Aws Test
@@ -1085,7 +1065,6 @@ jobs:
           sudo apt-get update
           DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make uuid-runtime docker-compose-v2
       - name: aws_test
-        continue-on-error: true
         run: |-
           export CM_PRIVATE_REPO_PASSWORD=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}")
           export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
@@ -1137,7 +1116,7 @@ jobs:
           make compress-results
       - name: aws_test_collect_service_artifacts
         uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
-        if: steps.aws_test.conclusion == 'failure'
+        if: ${{ always() }}
         with:
           name: aws-test-artifact
           retention-days: 5
@@ -1154,7 +1133,7 @@ jobs:
             integration-test/core-gateway.log
       - name: aws_test_collect_test_artifacts
         uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
-        if: steps.aws_test.conclusion == 'failure'
+        if: ${{ always() }}
         with:
           name: aws-test-artifact
           retention-days: 5
@@ -1167,8 +1146,3 @@ jobs:
             integration-test/suites_log/*.log
             integration-test/test-output/**/*
             integration-test/dumps/*.hprof
-      - name: aws_test_check
-        if: steps.aws_test.outcome == 'failure'
-        run: |
-          echo "AWS test failed, now failing the job."
-          exit 1
