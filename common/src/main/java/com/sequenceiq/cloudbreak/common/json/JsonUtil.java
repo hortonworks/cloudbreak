@@ -53,6 +53,12 @@ public class JsonUtil {
         MAPPER.registerModule(new Hibernate6Module());
     }
 
+    private static final ObjectMapper STRICT_MAPPER = MAPPER.copy();
+
+    static {
+        STRICT_MAPPER.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    }
+
     private JsonUtil() {
     }
 
@@ -62,6 +68,11 @@ public class JsonUtil {
 
     public static <T> T readValue(String content, Class<T> valueType) throws IOException {
         return MAPPER.readValue(content, valueType);
+    }
+
+    public static <T> T readValueStrict(String content, Class<T> valueType) throws IOException {
+        return STRICT_MAPPER.readValue(content, valueType);
+
     }
 
     public static <T> T readValueFromGrpcJson(String content, Class<T> valueType) {

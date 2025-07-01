@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
@@ -139,6 +140,9 @@ public class FreeIpaCreationService {
     @Inject
     private SecurityConfigService securityConfigService;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     @Value("${info.app.version:}")
     private String appVersion;
 
@@ -176,6 +180,9 @@ public class FreeIpaCreationService {
         Pair<ImageWrapper, String> imageWrapperStringPair = imageService.fetchImageWrapperAndName(stack, imageSettingsRequest);
         if (stack.getArchitecture() == null) {
             stack.setArchitecture(Architecture.fromStringWithFallback(imageWrapperStringPair.getKey().getImage().getArchitecture()));
+        }
+        if (Architecture.ARM64.equals(stack.getArchitecture()) && !entitlementService.isDataLakeArmEnabled(accountId)) {
+            throw new BadRequestException("Arm64 architecture is not enabled in your account.");
         }
         measure(() -> freeIpaRecommendationService.validateCustomInstanceType(stack, credential), LOGGER,
                 "Validating custom instance type took {} ms for {}", stack.getName());

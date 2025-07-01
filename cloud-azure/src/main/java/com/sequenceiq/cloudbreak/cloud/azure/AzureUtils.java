@@ -283,7 +283,7 @@ public class AzureUtils {
         for (Group group : stack.getGroups()) {
             InstanceTemplate template = group.getReferenceInstanceTemplate();
             if (!template.getVolumes().isEmpty()) {
-                String volumeType = template.getVolumes().get(0).getType();
+                String volumeType = template.getVolumes().getFirst().getType();
                 String flavor = template.getFlavor();
                 AzureDiskType diskType = AzureDiskType.getByValue(volumeType);
                 validateStorageTypeForGroup(diskType, flavor);

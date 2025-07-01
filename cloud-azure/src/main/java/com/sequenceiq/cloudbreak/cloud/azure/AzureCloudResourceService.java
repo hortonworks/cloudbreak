@@ -58,6 +58,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.DeploymentType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.cloud.model.NetworkAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.util.NullUtil;
@@ -323,8 +325,11 @@ public class AzureCloudResourceService {
     }
 
     public List<CloudResource> collectAndSaveNetworkAndSubnet(String resourceGroupName, String virtualNetwork, PersistenceNotifier notifier,
-            CloudContext cloudContext, List<String> subnetNameList, String networkName, AzureClient client) {
+            CloudContext cloudContext, List<String> subnetNameList, Network network, AzureClient client) {
         List<CloudResource> resources = new ArrayList<>();
+
+        String networkName = azureUtils.getCustomNetworkId(network);
+        String networkResourceGroupName = azureUtils.getCustomResourceGroupName(network);
 
         if (subnetNameList.isEmpty()) {
             Optional<Subnet> first = client.getSubnets(resourceGroupName, virtualNetwork).values().stream().findFirst();
@@ -346,6 +351,8 @@ public class AzureCloudResourceService {
                 withName(networkName).
                 withType(AZURE_NETWORK).
                 build();
+        NetworkAttributes networkAttributes = createAttributes(networkName, cloudContext, networkResourceGroupName);
+        networkResource.setTypedAttributes(networkAttributes);
         resources.add(networkResource);
         notifier.notifyAllocation(networkResource, cloudContext);
         for (String subnetName : subnetNameList) {
@@ -357,5 +364,13 @@ public class AzureCloudResourceService {
             notifier.notifyAllocation(subnetResource, cloudContext);
         }
         return resources;
+    }
+
+    private NetworkAttributes createAttributes(String networkName, CloudContext cloudContext, String networkResourceGroupName) {
+        NetworkAttributes networkAttributes = new NetworkAttributes();
+        networkAttributes.setResourceGroupName(networkResourceGroupName);
+        networkAttributes.setNetworkId(networkName);
+        networkAttributes.setCloudPlatform(cloudContext.getPlatform().value());
+        return networkAttributes;
     }
 }

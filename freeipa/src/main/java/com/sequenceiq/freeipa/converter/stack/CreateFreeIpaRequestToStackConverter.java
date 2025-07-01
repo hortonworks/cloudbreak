@@ -117,7 +117,7 @@ public class CreateFreeIpaRequestToStackConverter {
     private Set<String> defaultGatewayCidr;
 
     public Stack convert(CreateFreeIpaRequest source, DetailedEnvironmentResponse environment, String accountId,
-        Future<String> ownerFuture, String userCrn, String cloudPlatform) {
+            Future<String> ownerFuture, String userCrn, String cloudPlatform) {
         Stack stack = new Stack();
         stack.setEnvironmentCrn(source.getEnvironmentCrn());
         stack.setAccountId(accountId);
@@ -131,6 +131,8 @@ public class CreateFreeIpaRequestToStackConverter {
         stack.setMultiAz(Boolean.TRUE.equals(source.getEnableMultiAz()));
         if (StringUtils.isNotBlank(source.getArchitecture())) {
             stack.setArchitecture(Architecture.fromStringWithValidation(source.getArchitecture()));
+        } else if (Optional.ofNullable(source.getImage()).filter(image -> StringUtils.isNotBlank(image.getId())).isEmpty()) {
+            stack.setArchitecture(Architecture.X86_64);
         }
         updateCloudPlatformAndRelatedFields(source, stack, cloudPlatform);
         stack.setStackAuthentication(stackAuthenticationConverter.convert(source.getAuthentication()));
@@ -271,7 +273,7 @@ public class CreateFreeIpaRequestToStackConverter {
     }
 
     private Set<InstanceGroup> convertInstanceGroups(CreateFreeIpaRequest source, Stack stack,
-        DetailedEnvironmentResponse environment, String accountId) {
+            DetailedEnvironmentResponse environment, String accountId) {
         if (CollectionUtils.isEmpty(source.getInstanceGroups())) {
             throw new BadRequestException(String.format("No instancegroups are specified. Instancegroups field cannot be empty."));
         }
