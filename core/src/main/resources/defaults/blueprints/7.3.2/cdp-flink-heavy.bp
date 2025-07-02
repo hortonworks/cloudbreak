@@ -44,7 +44,8 @@
         "cardinality": 3,
         "roleConfigGroupsRefNames": [
           "hdfs-DATANODE-BASE",
-          "yarn-NODEMANAGER-BASE"
+          "yarn-NODEMANAGER-BASE",
+          "flink-GATEWAY-BASE"
         ]
       }
     ],
