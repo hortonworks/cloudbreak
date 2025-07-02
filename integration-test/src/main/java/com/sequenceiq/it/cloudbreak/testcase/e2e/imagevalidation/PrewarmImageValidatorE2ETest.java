@@ -40,12 +40,18 @@ public class PrewarmImageValidatorE2ETest extends AbstractE2ETest implements Ima
     @Inject
     private ImageAssertions imageAssertions;
 
+    private ImageV4Response imageUnderValidation;
+
+    private Architecture architecture;
+
     @Override
     protected void setupTest(TestContext testContext) {
         imageValidatorE2ETestUtil.setupTest(testContext);
         createDefaultCredential(testContext);
         initializeDefaultBlueprints(testContext);
-        createEnvironmentWithFreeIpa(testContext);
+        imageUnderValidation = imageValidatorE2ETestUtil.getImageUnderValidation(testContext).orElseThrow();
+        architecture = Architecture.fromStringWithFallback(imageUnderValidation.getArchitecture());
+        createEnvironmentWithFreeIpa(testContext, architecture);
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -55,14 +61,10 @@ public class PrewarmImageValidatorE2ETest extends AbstractE2ETest implements Ima
             when = "a SDX internal create request is sent",
             then = "the SDX cluster and the corresponding DistroX cluster is created")
     public void testCreateInternalSdxAndDistrox(TestContext testContext) {
-        Architecture architecture;
         String blueprintName;
         if (imageValidatorE2ETestUtil.isFreeIpaImageValidation()) {
-            architecture = Architecture.X86_64;
             blueprintName = commonClusterManagerProperties().getDataEngDistroXBlueprintNameForCurrentRuntime();
         } else {
-            ImageV4Response imageUnderValidation = imageValidatorE2ETestUtil.getImageUnderValidation(testContext).orElseThrow();
-            architecture = Architecture.fromStringWithFallback(imageUnderValidation.getArchitecture());
             blueprintName = commonClusterManagerProperties().getDataEngDistroXBlueprintName(imageUnderValidation.getVersion());
         }
 

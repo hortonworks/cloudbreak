@@ -35,6 +35,7 @@ import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
 import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETest;
+import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETestUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
@@ -57,13 +58,15 @@ public class MonitoringTests extends AbstractE2ETest implements ImageValidatorE2
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
 
+    @Inject
+    private ImageValidatorE2ETestUtil imageValidatorE2ETestUtil;
+
     @Value("${integrationtest.telemetry.remoteWriteUrl:}")
     private String remoteWriteUrl;
 
     @Override
     protected void setupTest(TestContext testContext) {
-        testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
-        createDefaultUser(testContext);
+        imageValidatorE2ETestUtil.setupTest(testContext);
         initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
     }
@@ -137,6 +140,7 @@ public class MonitoringTests extends AbstractE2ETest implements ImageValidatorE2
                 .given(FreeIpaTestDto.class)
                     .withEnvironment()
                     .withTelemetry("telemetry")
+                    .withArchitecture(imageValidatorE2ETestUtil.getArchitecture(testContext).getName())
                 .when(freeIpaTestClient.create())
                 .await(Status.AVAILABLE)
                 .awaitForHealthyInstances()

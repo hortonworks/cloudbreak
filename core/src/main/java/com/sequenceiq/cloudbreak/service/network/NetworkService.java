@@ -9,8 +9,6 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +24,6 @@ import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourc
 
 @Service
 public class NetworkService extends AbstractArchivistService<Network> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(NetworkService.class);
 
     @Inject
     private NetworkRepository networkRepository;
@@ -55,7 +52,7 @@ public class NetworkService extends AbstractArchivistService<Network> {
             if (stacksWithThisNetwork.size() > 1) {
                 String clusters = stacksWithThisNetwork
                         .stream()
-                        .map(stack -> stack.getName())
+                        .map(StackIdView::getName)
                         .collect(Collectors.joining(", "));
                 throw new BadRequestException(String.format(
                         "There are clusters associated with network '%s'(ID:'%s'). Please remove these before deleting the network. "

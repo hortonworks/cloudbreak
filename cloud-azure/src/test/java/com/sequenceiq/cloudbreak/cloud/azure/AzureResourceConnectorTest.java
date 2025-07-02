@@ -183,7 +183,6 @@ public class AzureResourceConnectorTest {
         verify(azureComputeResourceService, times(1)).buildComputeResourcesForLaunch(eq(ac), eq(stack), eq(adjustmentTypeWithThreshold),
                 eq(instances), any());
         verify(azureCloudResourceService, times(1)).getInstanceCloudResources(STACK_NAME, instances, groups, RESOURCE_GROUP_NAME);
-        verify(azureUtils, times(1)).getCustomNetworkId(network);
         verify(azureUtils, times(1)).getCustomSubnetIds(network);
         verify(azureMarketplaceImageProviderService, never()).getSourceImage(eq(imageModel));
         verify(azureMarketplaceImageProviderService, times(0)).get(imageModel);
@@ -202,7 +201,6 @@ public class AzureResourceConnectorTest {
         verify(azureComputeResourceService, times(1)).buildComputeResourcesForLaunch(any(AuthenticatedContext.class),
                 any(CloudStack.class), eq(adjustmentTypeWithThreshold), any(), any());
         verify(azureCloudResourceService, times(1)).getInstanceCloudResources(STACK_NAME, instances, groups, RESOURCE_GROUP_NAME);
-        verify(azureUtils, times(1)).getCustomNetworkId(network);
         verify(client, never()).createTemplateDeployment(any(), any(), any(), any());
         verify(client, times(2)).getTemplateDeployment(any(), any());
         verify(azureMarketplaceImageProviderService, never()).getSourceImage(eq(imageModel));
@@ -222,7 +220,6 @@ public class AzureResourceConnectorTest {
         verify(azureComputeResourceService, times(1)).buildComputeResourcesForLaunch(any(AuthenticatedContext.class),
                 any(CloudStack.class), eq(adjustmentTypeWithThreshold), any(), any());
         verify(azureCloudResourceService, times(1)).getInstanceCloudResources(STACK_NAME, instances, groups, RESOURCE_GROUP_NAME);
-        verify(azureUtils, times(1)).getCustomNetworkId(network);
         verify(client, times(1)).createTemplateDeployment(any(), any(), any(), any());
         verify(client, times(1)).getTemplateDeployment(any(), any());
         verify(azureMarketplaceImageProviderService, never()).getSourceImage(eq(imageModel));
@@ -274,7 +271,6 @@ public class AzureResourceConnectorTest {
         verify(azureComputeResourceService, times(1)).buildComputeResourcesForLaunch(eq(ac), eq(stack), eq(adjustmentTypeWithThreshold),
                 eq(instances), any());
         verify(azureCloudResourceService, times(1)).getInstanceCloudResources(STACK_NAME, instances, groups, RESOURCE_GROUP_NAME);
-        verify(azureUtils, times(1)).getCustomNetworkId(network);
         verify(azureUtils, times(1)).getCustomSubnetIds(network);
         verify(azureMarketplaceImageProviderService, times(0)).get(imageModel);
         verify(azureMarketplaceImageProviderService, times(2)).getSourceImage(eq(imageModel));

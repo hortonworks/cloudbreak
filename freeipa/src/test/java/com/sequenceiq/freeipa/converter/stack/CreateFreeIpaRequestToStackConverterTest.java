@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsDiskEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
@@ -40,6 +41,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResour
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.NetworkRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.StackAuthenticationRequest;
@@ -220,6 +222,68 @@ public class CreateFreeIpaRequestToStackConverterTest {
         Stack stack = underTest.convert(source, environmentResponse, ACCOUNT_ID, owner, "crn1", CloudPlatform.GCP.name());
         assertEquals(mapCaptorForEncryption.getValue().get(GCP_KMS_ENCRYPTION_KEY), "dummyEncryptionKey");
         assertEquals(stack.isMultiAz(), false);
+    }
+
+    @Test
+    void testArchitectureWhenImageIsPresentWithOsButArchitectureIsNotSet() {
+        CreateFreeIpaRequest source = createCreateFreeIpaRequest();
+        ImageSettingsRequest image = new ImageSettingsRequest();
+        image.setOs("redhat8");
+        source.setImage(image);
+        Future<String> owner = CompletableFuture.completedFuture("dummyUser");
+
+        when(crnService.createCrn(ACCOUNT_ID, CrnResourceDescriptor.FREEIPA)).thenReturn("resourceCrn");
+        when(stackAuthenticationConverter.convert(source.getAuthentication())).thenReturn(new StackAuthentication());
+        when(instanceGroupConverter.convert(any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any())).thenReturn(new InstanceGroup());
+        when(telemetryConverter.convert(ACCOUNT_ID, source.getTelemetry())).thenReturn(new Telemetry());
+        when(backupConverter.convert(source.getTelemetry())).thenReturn(new Backup());
+        when(entitlementService.internalTenant(ACCOUNT_ID)).thenReturn(Boolean.FALSE);
+        when(costTagging.prepareDefaultTags(any())).thenReturn(new HashMap<>());
+
+        Stack stack = underTest.convert(source,
+                new DetailedEnvironmentResponse(),
+                ACCOUNT_ID,
+                owner,
+                "crn1",
+                CloudPlatform.AWS.name());
+        assertEquals(stack.getArchitecture(), Architecture.X86_64);
+    }
+
+    @Test
+    void testArchitectureWhenImageIsPresentWithIdButArchitectureIsNotSet() {
+        CreateFreeIpaRequest source = createCreateFreeIpaRequest();
+        ImageSettingsRequest image = new ImageSettingsRequest();
+        image.setId("imageId-1");
+        source.setImage(image);
+        Future<String> owner = CompletableFuture.completedFuture("dummyUser");
+
+        when(crnService.createCrn(ACCOUNT_ID, CrnResourceDescriptor.FREEIPA)).thenReturn("resourceCrn");
+        when(stackAuthenticationConverter.convert(source.getAuthentication())).thenReturn(new StackAuthentication());
+        when(instanceGroupConverter.convert(any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any())).thenReturn(new InstanceGroup());
+        when(telemetryConverter.convert(ACCOUNT_ID, source.getTelemetry())).thenReturn(new Telemetry());
+        when(backupConverter.convert(source.getTelemetry())).thenReturn(new Backup());
+        when(entitlementService.internalTenant(ACCOUNT_ID)).thenReturn(Boolean.FALSE);
+        when(costTagging.prepareDefaultTags(any())).thenReturn(new HashMap<>());
+
+        Stack stack = underTest.convert(source,
+                new DetailedEnvironmentResponse(),
+                ACCOUNT_ID,
+                owner,
+                "crn1",
+                CloudPlatform.AWS.name());
+        assertNull(stack.getArchitecture());
     }
 
     private CreateFreeIpaRequest createCreateFreeIpaRequest() {

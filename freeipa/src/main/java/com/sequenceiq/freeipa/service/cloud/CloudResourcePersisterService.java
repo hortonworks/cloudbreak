@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.notification.model.ResourceNotification;
 import com.sequenceiq.cloudbreak.cloud.service.Persister;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.freeipa.converter.cloud.CloudResourceToResourceConverter;
 import com.sequenceiq.freeipa.entity.Resource;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -62,9 +61,12 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
         Stack stack = findStackById(stackId);
         List<CloudResource> cloudResources = notification.getCloudResources();
         cloudResources.forEach(cloudResource -> {
-            Resource persistedResource = getPersistedResource(stackId, cloudResource)
-                    .orElseThrow(NotFoundException.notFound("resource", cloudResource.getName()));
             Resource resource = cloudResourceToResourceConverter.convert(cloudResource);
+            Resource persistedResource = getPersistedResource(stackId, cloudResource)
+                    .orElseGet(() -> {
+                        LOGGER.debug("Resource {} not found in DB, creating a new one", cloudResource.getName());
+                        return resource;
+                    });
             updateWithPersistedFields(resource, persistedResource);
             setStack(stack, cloudResource, resource);
             resourceService.save(resource);
@@ -93,7 +95,7 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
     }
 
     private void updateWithPersistedFields(Resource resource, Resource persistedResource) {
-        if (persistedResource != null) {
+        if (persistedResource != null && !persistedResource.equals(resource)) {
             resource.setId(persistedResource.getId());
             resource.setInstanceGroup(persistedResource.getInstanceGroup());
         }

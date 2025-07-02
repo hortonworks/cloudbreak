@@ -24,6 +24,7 @@ import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.type.FeatureSetting;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.CustomDockerRegistryV1Parameters;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
@@ -142,6 +143,13 @@ public class EnvironmentTestDto
 
     public EnvironmentTestDto withFreeIpaRecipe(Set<String> recipes) {
         getRequest().getFreeIpa().setRecipes(recipes);
+        return this;
+    }
+
+    public EnvironmentTestDto withFreeIpaArchitecture(Architecture architecture) {
+        if (architecture != null) {
+            getRequest().getFreeIpa().setArchitecture(architecture.getName());
+        }
         return this;
     }
 

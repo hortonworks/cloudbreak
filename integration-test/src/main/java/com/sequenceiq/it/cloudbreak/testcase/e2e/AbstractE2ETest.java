@@ -18,6 +18,7 @@ import org.testng.annotations.Listeners;
 
 import com.azure.resourcemanager.resources.models.ResourceGroup;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.assertion.encryption.SecretEncryptionAssertions;
 import com.sequenceiq.it.cloudbreak.assertion.safelogic.SafeLogicAssertions;
@@ -123,10 +124,14 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
                 .validate();
     }
 
+    protected void createEnvironmentWithFreeIpa(TestContext testContext, Architecture architecture) {
+        createResourceGroup(testContext);
+        super.createEnvironmentWithFreeIpa(testContext, architecture);
+    }
+
     @Override
     protected void createEnvironmentWithFreeIpa(TestContext testContext) {
-        createResourceGroup(testContext);
-        super.createEnvironmentWithFreeIpa(testContext);
+        createEnvironmentWithFreeIpa(testContext, null);
     }
 
     @Override

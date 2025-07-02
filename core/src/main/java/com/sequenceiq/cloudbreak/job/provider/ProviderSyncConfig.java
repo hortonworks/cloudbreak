@@ -10,7 +10,7 @@ import com.sequenceiq.common.api.type.ResourceType;
 @Component
 public class ProviderSyncConfig {
 
-    @Value("${provider-sync.intervalminutes:60}")
+    @Value("${provider-sync.intervalminutes:360}")
     private int intervalInMinutes;
 
     @Value("${provider-sync.enabled:false}")
