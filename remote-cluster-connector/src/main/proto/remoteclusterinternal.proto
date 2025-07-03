@@ -55,7 +55,7 @@ message GeneratePvcWorkloadAuthTokenResponse {
   // The authentication token.
   string token = 2 [(options.FieldExtension.sensitive) = true];
   // When the token  will expire
-  string expireAt = 3;
+  int64 expireAt = 3;
 }
 
 // Request object for the ListAllPvcControlPlanes method.
@@ -91,13 +91,13 @@ message RegisterPvcBaseClusterRequest {
   // The CRN of the Private Cloud control plane.
   string pvcCrn = 1 [(options.FieldExtension.required) = true];
   // The Cloudera Manager Hostname.
-  string cmHostname = 2 [(options.FieldExtension.required) = true];
+  string cmHostname = 2;
   // The Cloudera Manager Port.
-  int32 cmPort = 3 [(options.FieldExtension.required) = true];
+  int32 cmPort = 3;
   // The Data Center name.
   string dcName = 4 [(options.FieldExtension.required) = true];
   // The boolean to represent if Cloudera Manager is running on HTTP Secure Connection or not.
-  bool isHttpSecure = 5 [(options.FieldExtension.required) = true];
+  bool isHttpSecure = 5;
   // The optional Knox IP Address.
   string knoxIpAddress = 6;
   // The optional Knox IP Port.
@@ -106,6 +106,10 @@ message RegisterPvcBaseClusterRequest {
   string cmUrl = 8;
   // The optional Knox Gateway URL.
   string knoxGatewayUrl = 9;
+  // The cluster ID of the PVC Base Cluster.
+  string cmClusterId = 10;
+  // The CRN of the Private Cloud environment.
+  string environmentCrn = 11;
 }
 
 // Response Object for RegisterPvcBaseCluster method.

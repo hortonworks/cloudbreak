@@ -21,14 +21,18 @@ service RemoteCluster {
   // Register a Private Cloud control plane. :: Register a Private Cloud control plane in Public Cloud.
   rpc RegisterPvcControlPlane (RegisterPvcControlPlaneRequest)
       returns (RegisterPvcControlPlaneResponse) {
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
     option (options.MethodExtension.right) = "remotecluster/registerPvcControlPlane";
     option (options.MethodExtension.mutating) = true;
     option (options.MethodExtension.entitlement) = "CDP_HYBRID_CLOUD";
   }
 
-  // Unregister a Private Cloud control plane. :: Unregister a Private Cloud control plane from the Public Cloud.
+  // Unregister a Private Cloud control plane. :: Unregister a Private Cloud control plane from the Public Cloud, and clean up the Public Cloud resources from Private Cloud control plane resulting complete termination of the connection.
   rpc UnregisterPvcControlPlane (UnregisterPvcControlPlaneRequest)
       returns (UnregisterPvcControlPlaneResponse) {
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
     option (options.MethodExtension.mutating) = true;
     option (options.MethodExtension.entitlement) = "CDP_HYBRID_CLOUD";
   }
@@ -36,13 +40,26 @@ service RemoteCluster {
   // Describe a registered Private Cloud control plane configuration. :: Describe a registered Private Cloud control plane configuration.
   rpc DescribePvcControlPlane (DescribePvcControlPlaneRequest)
       returns (DescribePvcControlPlaneResponse) {
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
     option (options.MethodExtension.mutating) = false;
+    option (options.MethodExtension.entitlement) = "CDP_HYBRID_CLOUD";
+  }
+
+  // Rotates the agent credentials. :: Rotates the Jumpgate Agent's credentials in PvC.
+  rpc RotateAgentCredentials (RotateAgentCredentialsRequest)
+      returns (RotateAgentCredentialsResponse) {
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+    option (options.MethodExtension.mutating) = true;
     option (options.MethodExtension.entitlement) = "CDP_HYBRID_CLOUD";
   }
 
   // List registered Private Cloud control plane configurations. :: List registered Private Cloud control plane configurations.
   rpc ListPvcControlPlanes (ListPvcControlPlanesRequest)
       returns (ListPvcControlPlanesResponse) {
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
     option (options.MethodExtension.paginates) = true;
     option (options.MethodExtension.pagingDefaultMaxItems) = 20;
     option (options.MethodExtension.mutating) = false;
@@ -52,33 +69,19 @@ service RemoteCluster {
   // Test the connectivity to the Private Cloud control plane. :: Test the connectivity from Public Cloud control plane to the registered Private Cloud control plane.
   rpc TestPvcControlPlaneConnectivity (TestPvcControlPlaneConnectivityRequest)
       returns (TestPvcControlPlaneConnectivityResponse) {
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
     option (options.MethodExtension.mutating) = false;
     option (options.MethodExtension.entitlement) = "CDP_HYBRID_CLOUD";
   }
 
-  // Lists all the registered remote clusters. :: Lists all the registered remote clusters.
-  rpc ListRemoteClusters (ListRemoteClustersRequest)
-      returns (ListRemoteClustersResponse) {
+  // Update the Private Cloud control plane registration. :: Update the Private Cloud control plane registration in Public Cloud.
+  rpc UpdatePvcControlPlane (UpdatePvcControlPlaneRequest)
+      returns (UpdatePvcControlPlaneResponse) {
     option (options.MethodExtension.hidden) = true;
     option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
-    option (options.MethodExtension.paginates) = true;
-    option (options.MethodExtension.pagingDefaultMaxItems) = 20;
-    option (options.MethodExtension.mutating) = false;
-  }
-
-  // Get the remote cluster details. :: Get the remote cluster details.
-  rpc GetRemoteCluster (GetRemoteClusterRequest)
-      returns (GetRemoteClusterResponse) {
-    option (options.MethodExtension.hidden) = true;
-    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
-    option (options.MethodExtension.mutating) = false;
-  }
-  // Gets the service details of the cluster. :: Gets the service details of the cluster.
-  rpc GetServiceDetails (GetServiceDetailsRequest)
-      returns (GetServiceDetailsResponse) {
-    option (options.MethodExtension.hidden) = true;
-    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
-    option (options.MethodExtension.mutating) = false;
+    option (options.MethodExtension.mutating) = true;
+    option (options.MethodExtension.entitlement) = "CDP_HYBRID_CLOUD";
   }
 }
 
@@ -109,6 +112,14 @@ message RegisterPvcControlPlaneResponse {
 message UnregisterPvcControlPlaneRequest {
   // The account ID or CRN of the Private Cloud control plane.
   string pvc = 1 [(options.FieldExtension.required) = true];
+  // Set to `true` to unregister on premises clusters.
+  // Defaults to `false` if not set. if `false` on premises clusters will not be unregistered.
+  bool unregisterOnPremClusters = 2;
+  // Set to `true` to enable force unregister, This option may be used when on premises control plane connection has failed or the delete operation is failing.
+  // This option only guarantees to remove this instance from cloud control plane, and may leave hybrid connection lingering on on premises control plane.
+  // You may have to delete the connection from on premises control plane manually for complete cleanup.
+  // Defaults to `false` if not set.
+  bool force = 3;
 }
 
 // Response object for the UnregisterPvcControlPlaneResponse method.
@@ -125,6 +136,39 @@ message DescribePvcControlPlaneRequest {
 message DescribePvcControlPlaneResponse {
   // The Private Cloud control plane configuration.
   PvcControlPlaneConfiguration controlPlaneConfiguration = 1;
+}
+
+// Request object for the  RotateAgentCredentialsRequest method.
+message RotateAgentCredentialsRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // The account ID or CRN of the Private Cloud control plane.
+  string pvc = 1 [(options.FieldExtension.required) = true];
+}
+
+// Response object for the RotateAgentCredentialsResponse method.
+message RotateAgentCredentialsResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+}
+
+// Request object for the  UpdatePvcControlPlane method.
+message UpdatePvcControlPlaneRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // The account ID or CRN of the Private Cloud control plane.
+  string pvc = 1 [(options.FieldExtension.required) = true];
+  // The name or ID or CRN of the SAML identity provider from Public Cloud control plane in which users are allowed to operate on the Private Cloud control plane.
+  // The same or equivalent SAML IDP should be used by the Public Cloud control plane and the Private Cloud control plane, in order for the user to be mapped by SAML user ID.
+  string samlIdentityProvider = 4 [(options.FieldExtension.required) = true];
+  // The description of the Private Cloud control plane.
+  string description = 5;
+}
+
+// Response object for the UpdatePvcControlPlane method.
+message UpdatePvcControlPlaneResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
 }
 
 // Request object for the ListPvcControlPlanesRequest method.
@@ -177,227 +221,9 @@ message PvcControlPlaneConfiguration {
   int32 pvcEnvironmentCount = 9;
   // The date/time for the last updated time.
   int64 lastUpdatedTime = 10 [(options.FieldExtension.datetime) = true];
-}
-
-// Request object for the ListRemoteClusters method.
-message ListRemoteClustersRequest {
-  option (options.MessageExtension.hidden) = true;
-  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
-  // The page size.
-  int32 pageSize = 1 [(options.FieldExtension.pagingPageSize) = true,
-    (options.FieldExtension.minimum) = 1,
-    (options.FieldExtension.maximum) = 100];
-  // A token to specify where to start paginating. This is the nextToken from a previously truncated response.
-  string pageToken = 2 [(options.FieldExtension.pagingInputToken) = true];
-  // Manager type of the remote cluster.
-  ManagerType.Value managerType = 3;
-  // Services in the remote cluster.
-  repeated string services = 4;
-  // Operator on which the filters should be applied.
-  Operator.Value operator = 5;
-
-}
-
-// Response object for the ListRemoteClusters method.
-message ListRemoteClustersResponse {
-  option (options.MessageExtension.hidden) = true;
-  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
-  // List of remote cluster details.
-  repeated RemoteClusterData remoteClusters = 1 [(options.FieldExtension.pagingResult) = true];
-  // The token to use when requesting the next set of results. If not present, there are no additional results.
-  string nextPageToken = 2 [(options.FieldExtension.pagingOutputToken) = true];
-}
-
-// Request object for the GetRemoteClusterRequest method.
-message GetRemoteClusterRequest {
-  option (options.MessageExtension.hidden) = true;
-  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
-  // The CRN of the cluster.
-  string clusterCrn = 1 [(options.FieldExtension.required) = true];
-}
-
-// Response object for the GetRemoteClusterResponse method.
-message GetRemoteClusterResponse {
-  option (options.MessageExtension.hidden) = true;
-  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
-  // Object containing the remote cluster detail.
-  RemoteClusterData remoteClusters = 1;
-}
-
-// Request object for the GetServiceDetails method.
-message GetServiceDetailsRequest {
-  option (options.MessageExtension.hidden) = true;
-  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
-  // The ID of the remote cluster.
-  int64 clusterId = 1 [(options.FieldExtension.required) = true];
-}
-
-// Response object for the GetServiceDetails method.
-message GetServiceDetailsResponse {
-  option (options.MessageExtension.hidden) = true;
-  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
-  // List of service detail information.
-  repeated ServiceDetail serviceDetails = 1;
-}
-
-// Object containing the remote cluster information.
-message RemoteClusterData {
-  option (options.MessageExtension.hidden) = true;
-  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
-  // The clusterId of the registered remote cluster.
-  int64 id = 1 [(options.FieldExtension.required) = true];
-  // The accountId of the registered remote cluster.
-  string accountId = 2 [(options.FieldExtension.required) = true];
-  // The name of the registered remote cluster.
-  string name = 3 [(options.FieldExtension.required) = true];
-  // The data center name of the registered remote cluster.
-  string dcName = 4 [(options.FieldExtension.required) = true];
-  // The clusterCrn of the registered remote cluster.
-  string clusterCrn = 5 [(options.FieldExtension.required) = true];
-  // The IP address of the registered remote cluster.
-  string ipAddress = 6 [(options.FieldExtension.required) = true];
-  // The type of the registered remote cluster.
-  RemoteClusterType.Value clusterType = 7 [(options.FieldExtension.required) = true];
-  // The active status of the registered remote cluster.
-  State.Value state = 8 [(options.FieldExtension.required) = true];
-  reserved 9, 10;
-  // The description of the registered remote cluster.
-  string description = 11;
-  // The location of the registered remote cluster.
-  int64 locationId = 12;
-  // The time at which the remote cluster was registered.
-  int64 lastCreateTime = 13 [(options.FieldExtension.datetime) = true];
-  // The time at which the remote cluster was updated.
-  int64 lastUpdatedTime = 14 [(options.FieldExtension.datetime) = true];
-  // The time at which the remote cluster was updated. Its value is in Coordinated Universal Time.
-  int64 updatedUtc = 15 [(options.FieldExtension.datetime) = true];
-  // The list of clusters in the remote cluster.
-  repeated Cluster clusters = 16;
-  // The knox enablement of the registered remote cluster.
-  bool knoxEnabled = 17;
-  // The knox url of the registered remote cluster.
-  string knoxUrl = 18;
-  // The user name of the remote cluster.
-  string username = 19;
-  // The password of the remote cluster.
-  string password = 20 [(options.FieldExtension.sensitive) = true];
-  // Highlights if the remote clusters allows untrusted connections.
-  bool allowUntrusted = 21;
-  // Highlights if the remote cluster works behind a gateway.
-  bool behindGateway = 22;
-  // The manager type of the registered remote cluster.
-  ManagerType.Value managerType = 23;
-  // The manager URI of the registered remote cluster.
-  string managerUri = 24;
-  // The owner of the registered remote cluster.
-  string createdBy = 25;
-  // The connectivity version of the remote cluster.
-  string connectivityVersion = 26;
-  // Whether the cluster upgrade is in progress.
-  bool isUpgradeInProgress = 27;
-  // The key ID of the registered remote cluster.
-  string newKeyId = 28;
-  // The location of the data center.
-  Location location = 29;
-}
-
-// Object containing the service information.
-message ServiceDetail {
-  option (options.MessageExtension.hidden) = true;
-  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
-  // Name of the service.
-  string serviceName = 1;
-  // State of the service.
-  string state = 2;
-  // Version of the service.
-  string serviceVersion = 3;
-}
-
-// Object containing the discovered cluster information.
-message Cluster {
-  option (options.MessageExtension.hidden) = true;
-  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
-  // The ID of the discovered cluster.
-  int64 id = 1 [(options.FieldExtension.required) = true];
-  // The name of the discovered cluster.
-  string name = 2 [(options.FieldExtension.required) = true];
-  // The dataplane cluster ID.
-  int64 dataplaneClusterId = 3 [(options.FieldExtension.required) = true];
-  // The cluster URL of the discovered cluster.
-  string clusterUrl = 4;
-  // Whether Value to identify if the cluster is secured or not.
-  bool secured = 5;
-  // The kerberos user of the cluster.
-  string kerberosUser = 6;
-  // The kerberos ticket location of the cluster.
-  string kerberosTicketLocation = 7;
-  // The properties of the cluster.
-  string properties = 8;
-  // The version of the cluster.
-  string version = 9;
-  // The display name of the discovered cluster.
-  string displayName = 10;
-  // The manager type of the discovered cluster.
-  ManagerType.Value managerType = 11;
-  // The manager URI of the discovered cluster.
-  string managerUri = 12;
-  // The stats of the discovered cluster.
-  string stats = 13;
-
-}
-
-// Object containing the location of the data center.
-message Location {
-  option (options.MessageExtension.hidden) = true;
-  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
-  // ID of the location.
-  int64 id = 1  [(options.FieldExtension.required) = true];
-  // City in which the data center is located.
-  string city = 2;
-  // Province in which the data center is located.
-  string province = 3;
-  // Country in which the data center is located.
-  string country = 4;
-  // ISO2 of the location.
-  string iso2 = 5;
-  // Latitude of the location.
-  int64 latitude = 6;
-  // Longitude of the location.
-  int64 longitude = 7;
-}
-
-// State of the remote cluster.
-message State {
-  option (options.MessageExtension.hidden) = true;
-  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
-  enum Value {
-    UNSET = 0;
-    // Remote-cluster yet to be synced.
-    TO_SYNC = 1;
-    // Remote-cluster sync in-progress.
-    SYNC_IN_PROGRESS = 2;
-    // Remote-cluster sync successful.
-    SYNCED = 3;
-    // Remote-cluster sync error.
-    SYNC_ERROR = 4;
-    // Remote-cluster knox dependency verification successful.
-    KNOX_TOPOLOGY_DEP_VERIFIED = 5;
-    // Remote-cluster knox dependency verification pending.
-    KNOX_TOPOLOGY_DEP_PENDING = 6;
-  }
-}
-
-// Manager type of the remote cluster.
-message ManagerType {
-  option (options.MessageExtension.hidden) = true;
-  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
-  enum Value {
-    UNSET = 0;
-    // Ambari as manager type.
-    AMBARI = 1;
-    // Cloudera-manager as manager type.
-    CLOUDERA_MANAGER = 2;
-  }
+  // The status of the Jumpgate Agent Secret Rotation in the Private Cloud control plane.
+  string agentSecretRotationStatus = 11 [(options.FieldExtension.hidden) = true,
+    (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT"];
 }
 
 // The type of a remote cluster.
@@ -405,33 +231,5 @@ message ClusterType {
   enum Value {
     // CDP Private Cloud control plane.
     CDP_PVC = 0;
-  }
-}
-
-// The type of remote cluster.
-message RemoteClusterType {
-  option (options.MessageExtension.hidden) = true;
-  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
-  enum Value {
-    UNSET = 0;
-    // Legacy hadoop cluster.
-    HDP = 1;
-    // CDH Cluster.
-    CDH = 2;
-    // CDPDC Cluster.
-    CDPDC = 3;
-  }
-}
-
-// The type of operator.
-message Operator {
-  option (options.MessageExtension.hidden) = true;
-  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
-  enum Value {
-    UNSET = 0;
-    // AND operator.
-    AND = 1;
-    // OR operator.
-    OR = 2;
   }
 }

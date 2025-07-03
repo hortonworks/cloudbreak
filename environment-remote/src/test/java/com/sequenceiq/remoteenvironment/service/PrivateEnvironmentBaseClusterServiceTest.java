@@ -57,10 +57,12 @@ class PrivateEnvironmentBaseClusterServiceTest {
     @MethodSource("testRegisterHappyPathsValueProvider")
     void testRegisterHappyPaths(String cmUrl, String knoxGatewayUrl) {
         String baseClusterCrn = "baseClusterCrn";
+        String privateEnvironmentCrn = "privateEnvironmentCrn";
         DescribeEnvironmentResponse envDetails = Mockito.mock(Answers.RETURNS_DEEP_STUBS);
         when(envDetails.getEnvironment().getPvcEnvironmentDetails().getCmHost()).thenReturn(cmUrl);
         when(envDetails.getEnvironment().getPvcEnvironmentDetails().getKnoxGatewayUrl()).thenReturn(knoxGatewayUrl);
         when(envDetails.getEnvironment().getEnvironmentName()).thenReturn(ENVIRONMENT_NAME);
+        when(envDetails.getEnvironment().getCrn()).thenReturn(privateEnvironmentCrn);
         when(grpcRemoteClusterClient.registerPrivateEnvironmentBaseCluster(any())).thenReturn(baseClusterCrn);
 
         String registerBaseClusterCrn = underTest.registerBaseCluster(envDetails, CONTROL_PLANE_CRN, CONTROL_PLANE_NAME);
@@ -72,6 +74,7 @@ class PrivateEnvironmentBaseClusterServiceTest {
         assertEquals(cmUrl, capturedRequest.getCmUrl());
         assertEquals(knoxGatewayUrl, capturedRequest.getKnoxGatewayUrl());
         assertEquals(CONTROL_PLANE_NAME + "_" + ENVIRONMENT_NAME + "_datacenter", capturedRequest.getDcName());
+        assertEquals(privateEnvironmentCrn, capturedRequest.getEnvironmentCrn());
     }
 
     @Test

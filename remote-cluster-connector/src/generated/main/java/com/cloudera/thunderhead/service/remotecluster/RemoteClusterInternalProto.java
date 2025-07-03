@@ -1028,20 +1028,10 @@ public final class RemoteClusterInternalProto {
      * When the token  will expire
      * </pre>
      *
-     * <code>string expireAt = 3;</code>
+     * <code>int64 expireAt = 3;</code>
      * @return The expireAt.
      */
-    java.lang.String getExpireAt();
-    /**
-     * <pre>
-     * When the token  will expire
-     * </pre>
-     *
-     * <code>string expireAt = 3;</code>
-     * @return The bytes for expireAt.
-     */
-    com.google.protobuf.ByteString
-        getExpireAtBytes();
+    long getExpireAt();
   }
   /**
    * <pre>
@@ -1062,7 +1052,6 @@ public final class RemoteClusterInternalProto {
     private GeneratePvcWorkloadAuthTokenResponse() {
       endpointUrl_ = "";
       token_ = "";
-      expireAt_ = "";
     }
 
     @java.lang.Override
@@ -1180,50 +1169,18 @@ public final class RemoteClusterInternalProto {
     }
 
     public static final int EXPIREAT_FIELD_NUMBER = 3;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object expireAt_ = "";
+    private long expireAt_ = 0L;
     /**
      * <pre>
      * When the token  will expire
      * </pre>
      *
-     * <code>string expireAt = 3;</code>
+     * <code>int64 expireAt = 3;</code>
      * @return The expireAt.
      */
     @java.lang.Override
-    public java.lang.String getExpireAt() {
-      java.lang.Object ref = expireAt_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        expireAt_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * When the token  will expire
-     * </pre>
-     *
-     * <code>string expireAt = 3;</code>
-     * @return The bytes for expireAt.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getExpireAtBytes() {
-      java.lang.Object ref = expireAt_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        expireAt_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public long getExpireAt() {
+      return expireAt_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -1246,8 +1203,8 @@ public final class RemoteClusterInternalProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(token_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, token_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(expireAt_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, expireAt_);
+      if (expireAt_ != 0L) {
+        output.writeInt64(3, expireAt_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -1264,8 +1221,9 @@ public final class RemoteClusterInternalProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(token_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, token_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(expireAt_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, expireAt_);
+      if (expireAt_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(3, expireAt_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -1286,8 +1244,8 @@ public final class RemoteClusterInternalProto {
           .equals(other.getEndpointUrl())) return false;
       if (!getToken()
           .equals(other.getToken())) return false;
-      if (!getExpireAt()
-          .equals(other.getExpireAt())) return false;
+      if (getExpireAt()
+          != other.getExpireAt()) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -1304,7 +1262,8 @@ public final class RemoteClusterInternalProto {
       hash = (37 * hash) + TOKEN_FIELD_NUMBER;
       hash = (53 * hash) + getToken().hashCode();
       hash = (37 * hash) + EXPIREAT_FIELD_NUMBER;
-      hash = (53 * hash) + getExpireAt().hashCode();
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getExpireAt());
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -1442,7 +1401,7 @@ public final class RemoteClusterInternalProto {
         bitField0_ = 0;
         endpointUrl_ = "";
         token_ = "";
-        expireAt_ = "";
+        expireAt_ = 0L;
         return this;
       }
 
@@ -1541,10 +1500,8 @@ public final class RemoteClusterInternalProto {
           bitField0_ |= 0x00000002;
           onChanged();
         }
-        if (!other.getExpireAt().isEmpty()) {
-          expireAt_ = other.expireAt_;
-          bitField0_ |= 0x00000004;
-          onChanged();
+        if (other.getExpireAt() != 0L) {
+          setExpireAt(other.getExpireAt());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
@@ -1582,11 +1539,11 @@ public final class RemoteClusterInternalProto {
                 bitField0_ |= 0x00000002;
                 break;
               } // case 18
-              case 26: {
-                expireAt_ = input.readStringRequireUtf8();
+              case 24: {
+                expireAt_ = input.readInt64();
                 bitField0_ |= 0x00000004;
                 break;
-              } // case 26
+              } // case 24
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -1788,60 +1745,30 @@ public final class RemoteClusterInternalProto {
         return this;
       }
 
-      private java.lang.Object expireAt_ = "";
+      private long expireAt_ ;
       /**
        * <pre>
        * When the token  will expire
        * </pre>
        *
-       * <code>string expireAt = 3;</code>
+       * <code>int64 expireAt = 3;</code>
        * @return The expireAt.
        */
-      public java.lang.String getExpireAt() {
-        java.lang.Object ref = expireAt_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          expireAt_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+      @java.lang.Override
+      public long getExpireAt() {
+        return expireAt_;
       }
       /**
        * <pre>
        * When the token  will expire
        * </pre>
        *
-       * <code>string expireAt = 3;</code>
-       * @return The bytes for expireAt.
-       */
-      public com.google.protobuf.ByteString
-          getExpireAtBytes() {
-        java.lang.Object ref = expireAt_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          expireAt_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * When the token  will expire
-       * </pre>
-       *
-       * <code>string expireAt = 3;</code>
+       * <code>int64 expireAt = 3;</code>
        * @param value The expireAt to set.
        * @return This builder for chaining.
        */
-      public Builder setExpireAt(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
+      public Builder setExpireAt(long value) {
+
         expireAt_ = value;
         bitField0_ |= 0x00000004;
         onChanged();
@@ -1852,30 +1779,12 @@ public final class RemoteClusterInternalProto {
        * When the token  will expire
        * </pre>
        *
-       * <code>string expireAt = 3;</code>
+       * <code>int64 expireAt = 3;</code>
        * @return This builder for chaining.
        */
       public Builder clearExpireAt() {
-        expireAt_ = getDefaultInstance().getExpireAt();
         bitField0_ = (bitField0_ & ~0x00000004);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * When the token  will expire
-       * </pre>
-       *
-       * <code>string expireAt = 3;</code>
-       * @param value The bytes for expireAt to set.
-       * @return This builder for chaining.
-       */
-      public Builder setExpireAtBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        expireAt_ = value;
-        bitField0_ |= 0x00000004;
+        expireAt_ = 0L;
         onChanged();
         return this;
       }
@@ -4938,7 +4847,7 @@ public final class RemoteClusterInternalProto {
      * The Cloudera Manager Hostname.
      * </pre>
      *
-     * <code>string cmHostname = 2 [(.options.FieldExtension.required) = true];</code>
+     * <code>string cmHostname = 2;</code>
      * @return The cmHostname.
      */
     java.lang.String getCmHostname();
@@ -4947,7 +4856,7 @@ public final class RemoteClusterInternalProto {
      * The Cloudera Manager Hostname.
      * </pre>
      *
-     * <code>string cmHostname = 2 [(.options.FieldExtension.required) = true];</code>
+     * <code>string cmHostname = 2;</code>
      * @return The bytes for cmHostname.
      */
     com.google.protobuf.ByteString
@@ -4958,7 +4867,7 @@ public final class RemoteClusterInternalProto {
      * The Cloudera Manager Port.
      * </pre>
      *
-     * <code>int32 cmPort = 3 [(.options.FieldExtension.required) = true];</code>
+     * <code>int32 cmPort = 3;</code>
      * @return The cmPort.
      */
     int getCmPort();
@@ -4988,7 +4897,7 @@ public final class RemoteClusterInternalProto {
      * The boolean to represent if Cloudera Manager is running on HTTP Secure Connection or not.
      * </pre>
      *
-     * <code>bool isHttpSecure = 5 [(.options.FieldExtension.required) = true];</code>
+     * <code>bool isHttpSecure = 5;</code>
      * @return The isHttpSecure.
      */
     boolean getIsHttpSecure();
@@ -5062,6 +4971,46 @@ public final class RemoteClusterInternalProto {
      */
     com.google.protobuf.ByteString
         getKnoxGatewayUrlBytes();
+
+    /**
+     * <pre>
+     * The cluster ID of the PVC Base Cluster.
+     * </pre>
+     *
+     * <code>string cmClusterId = 10;</code>
+     * @return The cmClusterId.
+     */
+    java.lang.String getCmClusterId();
+    /**
+     * <pre>
+     * The cluster ID of the PVC Base Cluster.
+     * </pre>
+     *
+     * <code>string cmClusterId = 10;</code>
+     * @return The bytes for cmClusterId.
+     */
+    com.google.protobuf.ByteString
+        getCmClusterIdBytes();
+
+    /**
+     * <pre>
+     * The CRN of the Private Cloud environment.
+     * </pre>
+     *
+     * <code>string environmentCrn = 11;</code>
+     * @return The environmentCrn.
+     */
+    java.lang.String getEnvironmentCrn();
+    /**
+     * <pre>
+     * The CRN of the Private Cloud environment.
+     * </pre>
+     *
+     * <code>string environmentCrn = 11;</code>
+     * @return The bytes for environmentCrn.
+     */
+    com.google.protobuf.ByteString
+        getEnvironmentCrnBytes();
   }
   /**
    * <pre>
@@ -5086,6 +5035,8 @@ public final class RemoteClusterInternalProto {
       knoxIpAddress_ = "";
       cmUrl_ = "";
       knoxGatewayUrl_ = "";
+      cmClusterId_ = "";
+      environmentCrn_ = "";
     }
 
     @java.lang.Override
@@ -5163,7 +5114,7 @@ public final class RemoteClusterInternalProto {
      * The Cloudera Manager Hostname.
      * </pre>
      *
-     * <code>string cmHostname = 2 [(.options.FieldExtension.required) = true];</code>
+     * <code>string cmHostname = 2;</code>
      * @return The cmHostname.
      */
     @java.lang.Override
@@ -5184,7 +5135,7 @@ public final class RemoteClusterInternalProto {
      * The Cloudera Manager Hostname.
      * </pre>
      *
-     * <code>string cmHostname = 2 [(.options.FieldExtension.required) = true];</code>
+     * <code>string cmHostname = 2;</code>
      * @return The bytes for cmHostname.
      */
     @java.lang.Override
@@ -5209,7 +5160,7 @@ public final class RemoteClusterInternalProto {
      * The Cloudera Manager Port.
      * </pre>
      *
-     * <code>int32 cmPort = 3 [(.options.FieldExtension.required) = true];</code>
+     * <code>int32 cmPort = 3;</code>
      * @return The cmPort.
      */
     @java.lang.Override
@@ -5271,7 +5222,7 @@ public final class RemoteClusterInternalProto {
      * The boolean to represent if Cloudera Manager is running on HTTP Secure Connection or not.
      * </pre>
      *
-     * <code>bool isHttpSecure = 5 [(.options.FieldExtension.required) = true];</code>
+     * <code>bool isHttpSecure = 5;</code>
      * @return The isHttpSecure.
      */
     @java.lang.Override
@@ -5435,6 +5386,100 @@ public final class RemoteClusterInternalProto {
       }
     }
 
+    public static final int CMCLUSTERID_FIELD_NUMBER = 10;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object cmClusterId_ = "";
+    /**
+     * <pre>
+     * The cluster ID of the PVC Base Cluster.
+     * </pre>
+     *
+     * <code>string cmClusterId = 10;</code>
+     * @return The cmClusterId.
+     */
+    @java.lang.Override
+    public java.lang.String getCmClusterId() {
+      java.lang.Object ref = cmClusterId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        cmClusterId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The cluster ID of the PVC Base Cluster.
+     * </pre>
+     *
+     * <code>string cmClusterId = 10;</code>
+     * @return The bytes for cmClusterId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getCmClusterIdBytes() {
+      java.lang.Object ref = cmClusterId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        cmClusterId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ENVIRONMENTCRN_FIELD_NUMBER = 11;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object environmentCrn_ = "";
+    /**
+     * <pre>
+     * The CRN of the Private Cloud environment.
+     * </pre>
+     *
+     * <code>string environmentCrn = 11;</code>
+     * @return The environmentCrn.
+     */
+    @java.lang.Override
+    public java.lang.String getEnvironmentCrn() {
+      java.lang.Object ref = environmentCrn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        environmentCrn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The CRN of the Private Cloud environment.
+     * </pre>
+     *
+     * <code>string environmentCrn = 11;</code>
+     * @return The bytes for environmentCrn.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getEnvironmentCrnBytes() {
+      java.lang.Object ref = environmentCrn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        environmentCrn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -5476,6 +5521,12 @@ public final class RemoteClusterInternalProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(knoxGatewayUrl_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 9, knoxGatewayUrl_);
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cmClusterId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 10, cmClusterId_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentCrn_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 11, environmentCrn_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -5515,6 +5566,12 @@ public final class RemoteClusterInternalProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(knoxGatewayUrl_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, knoxGatewayUrl_);
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cmClusterId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, cmClusterId_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentCrn_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, environmentCrn_);
+      }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
@@ -5548,6 +5605,10 @@ public final class RemoteClusterInternalProto {
           .equals(other.getCmUrl())) return false;
       if (!getKnoxGatewayUrl()
           .equals(other.getKnoxGatewayUrl())) return false;
+      if (!getCmClusterId()
+          .equals(other.getCmClusterId())) return false;
+      if (!getEnvironmentCrn()
+          .equals(other.getEnvironmentCrn())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -5578,6 +5639,10 @@ public final class RemoteClusterInternalProto {
       hash = (53 * hash) + getCmUrl().hashCode();
       hash = (37 * hash) + KNOXGATEWAYURL_FIELD_NUMBER;
       hash = (53 * hash) + getKnoxGatewayUrl().hashCode();
+      hash = (37 * hash) + CMCLUSTERID_FIELD_NUMBER;
+      hash = (53 * hash) + getCmClusterId().hashCode();
+      hash = (37 * hash) + ENVIRONMENTCRN_FIELD_NUMBER;
+      hash = (53 * hash) + getEnvironmentCrn().hashCode();
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -5722,6 +5787,8 @@ public final class RemoteClusterInternalProto {
         knoxPort_ = 0;
         cmUrl_ = "";
         knoxGatewayUrl_ = "";
+        cmClusterId_ = "";
+        environmentCrn_ = "";
         return this;
       }
 
@@ -5781,6 +5848,12 @@ public final class RemoteClusterInternalProto {
         }
         if (((from_bitField0_ & 0x00000100) != 0)) {
           result.knoxGatewayUrl_ = knoxGatewayUrl_;
+        }
+        if (((from_bitField0_ & 0x00000200) != 0)) {
+          result.cmClusterId_ = cmClusterId_;
+        }
+        if (((from_bitField0_ & 0x00000400) != 0)) {
+          result.environmentCrn_ = environmentCrn_;
         }
       }
 
@@ -5867,6 +5940,16 @@ public final class RemoteClusterInternalProto {
           bitField0_ |= 0x00000100;
           onChanged();
         }
+        if (!other.getCmClusterId().isEmpty()) {
+          cmClusterId_ = other.cmClusterId_;
+          bitField0_ |= 0x00000200;
+          onChanged();
+        }
+        if (!other.getEnvironmentCrn().isEmpty()) {
+          environmentCrn_ = other.environmentCrn_;
+          bitField0_ |= 0x00000400;
+          onChanged();
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -5938,6 +6021,16 @@ public final class RemoteClusterInternalProto {
                 bitField0_ |= 0x00000100;
                 break;
               } // case 74
+              case 82: {
+                cmClusterId_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000200;
+                break;
+              } // case 82
+              case 90: {
+                environmentCrn_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000400;
+                break;
+              } // case 90
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -6053,7 +6146,7 @@ public final class RemoteClusterInternalProto {
        * The Cloudera Manager Hostname.
        * </pre>
        *
-       * <code>string cmHostname = 2 [(.options.FieldExtension.required) = true];</code>
+       * <code>string cmHostname = 2;</code>
        * @return The cmHostname.
        */
       public java.lang.String getCmHostname() {
@@ -6073,7 +6166,7 @@ public final class RemoteClusterInternalProto {
        * The Cloudera Manager Hostname.
        * </pre>
        *
-       * <code>string cmHostname = 2 [(.options.FieldExtension.required) = true];</code>
+       * <code>string cmHostname = 2;</code>
        * @return The bytes for cmHostname.
        */
       public com.google.protobuf.ByteString
@@ -6094,7 +6187,7 @@ public final class RemoteClusterInternalProto {
        * The Cloudera Manager Hostname.
        * </pre>
        *
-       * <code>string cmHostname = 2 [(.options.FieldExtension.required) = true];</code>
+       * <code>string cmHostname = 2;</code>
        * @param value The cmHostname to set.
        * @return This builder for chaining.
        */
@@ -6111,7 +6204,7 @@ public final class RemoteClusterInternalProto {
        * The Cloudera Manager Hostname.
        * </pre>
        *
-       * <code>string cmHostname = 2 [(.options.FieldExtension.required) = true];</code>
+       * <code>string cmHostname = 2;</code>
        * @return This builder for chaining.
        */
       public Builder clearCmHostname() {
@@ -6125,7 +6218,7 @@ public final class RemoteClusterInternalProto {
        * The Cloudera Manager Hostname.
        * </pre>
        *
-       * <code>string cmHostname = 2 [(.options.FieldExtension.required) = true];</code>
+       * <code>string cmHostname = 2;</code>
        * @param value The bytes for cmHostname to set.
        * @return This builder for chaining.
        */
@@ -6145,7 +6238,7 @@ public final class RemoteClusterInternalProto {
        * The Cloudera Manager Port.
        * </pre>
        *
-       * <code>int32 cmPort = 3 [(.options.FieldExtension.required) = true];</code>
+       * <code>int32 cmPort = 3;</code>
        * @return The cmPort.
        */
       @java.lang.Override
@@ -6157,7 +6250,7 @@ public final class RemoteClusterInternalProto {
        * The Cloudera Manager Port.
        * </pre>
        *
-       * <code>int32 cmPort = 3 [(.options.FieldExtension.required) = true];</code>
+       * <code>int32 cmPort = 3;</code>
        * @param value The cmPort to set.
        * @return This builder for chaining.
        */
@@ -6173,7 +6266,7 @@ public final class RemoteClusterInternalProto {
        * The Cloudera Manager Port.
        * </pre>
        *
-       * <code>int32 cmPort = 3 [(.options.FieldExtension.required) = true];</code>
+       * <code>int32 cmPort = 3;</code>
        * @return This builder for chaining.
        */
       public Builder clearCmPort() {
@@ -6281,7 +6374,7 @@ public final class RemoteClusterInternalProto {
        * The boolean to represent if Cloudera Manager is running on HTTP Secure Connection or not.
        * </pre>
        *
-       * <code>bool isHttpSecure = 5 [(.options.FieldExtension.required) = true];</code>
+       * <code>bool isHttpSecure = 5;</code>
        * @return The isHttpSecure.
        */
       @java.lang.Override
@@ -6293,7 +6386,7 @@ public final class RemoteClusterInternalProto {
        * The boolean to represent if Cloudera Manager is running on HTTP Secure Connection or not.
        * </pre>
        *
-       * <code>bool isHttpSecure = 5 [(.options.FieldExtension.required) = true];</code>
+       * <code>bool isHttpSecure = 5;</code>
        * @param value The isHttpSecure to set.
        * @return This builder for chaining.
        */
@@ -6309,7 +6402,7 @@ public final class RemoteClusterInternalProto {
        * The boolean to represent if Cloudera Manager is running on HTTP Secure Connection or not.
        * </pre>
        *
-       * <code>bool isHttpSecure = 5 [(.options.FieldExtension.required) = true];</code>
+       * <code>bool isHttpSecure = 5;</code>
        * @return This builder for chaining.
        */
       public Builder clearIsHttpSecure() {
@@ -6635,6 +6728,190 @@ public final class RemoteClusterInternalProto {
         checkByteStringIsUtf8(value);
         knoxGatewayUrl_ = value;
         bitField0_ |= 0x00000100;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object cmClusterId_ = "";
+      /**
+       * <pre>
+       * The cluster ID of the PVC Base Cluster.
+       * </pre>
+       *
+       * <code>string cmClusterId = 10;</code>
+       * @return The cmClusterId.
+       */
+      public java.lang.String getCmClusterId() {
+        java.lang.Object ref = cmClusterId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          cmClusterId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The cluster ID of the PVC Base Cluster.
+       * </pre>
+       *
+       * <code>string cmClusterId = 10;</code>
+       * @return The bytes for cmClusterId.
+       */
+      public com.google.protobuf.ByteString
+          getCmClusterIdBytes() {
+        java.lang.Object ref = cmClusterId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          cmClusterId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The cluster ID of the PVC Base Cluster.
+       * </pre>
+       *
+       * <code>string cmClusterId = 10;</code>
+       * @param value The cmClusterId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCmClusterId(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        cmClusterId_ = value;
+        bitField0_ |= 0x00000200;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The cluster ID of the PVC Base Cluster.
+       * </pre>
+       *
+       * <code>string cmClusterId = 10;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCmClusterId() {
+        cmClusterId_ = getDefaultInstance().getCmClusterId();
+        bitField0_ = (bitField0_ & ~0x00000200);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The cluster ID of the PVC Base Cluster.
+       * </pre>
+       *
+       * <code>string cmClusterId = 10;</code>
+       * @param value The bytes for cmClusterId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCmClusterIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        cmClusterId_ = value;
+        bitField0_ |= 0x00000200;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object environmentCrn_ = "";
+      /**
+       * <pre>
+       * The CRN of the Private Cloud environment.
+       * </pre>
+       *
+       * <code>string environmentCrn = 11;</code>
+       * @return The environmentCrn.
+       */
+      public java.lang.String getEnvironmentCrn() {
+        java.lang.Object ref = environmentCrn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          environmentCrn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CRN of the Private Cloud environment.
+       * </pre>
+       *
+       * <code>string environmentCrn = 11;</code>
+       * @return The bytes for environmentCrn.
+       */
+      public com.google.protobuf.ByteString
+          getEnvironmentCrnBytes() {
+        java.lang.Object ref = environmentCrn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          environmentCrn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CRN of the Private Cloud environment.
+       * </pre>
+       *
+       * <code>string environmentCrn = 11;</code>
+       * @param value The environmentCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEnvironmentCrn(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        environmentCrn_ = value;
+        bitField0_ |= 0x00000400;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CRN of the Private Cloud environment.
+       * </pre>
+       *
+       * <code>string environmentCrn = 11;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearEnvironmentCrn() {
+        environmentCrn_ = getDefaultInstance().getEnvironmentCrn();
+        bitField0_ = (bitField0_ & ~0x00000400);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CRN of the Private Cloud environment.
+       * </pre>
+       *
+       * <code>string environmentCrn = 11;</code>
+       * @param value The bytes for environmentCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEnvironmentCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        environmentCrn_ = value;
+        bitField0_ |= 0x00000400;
         onChanged();
         return this;
       }
@@ -7354,7 +7631,7 @@ public final class RemoteClusterInternalProto {
       "(\t\022\026\n\016environmentCrn\030\003 \001(\t\"b\n$GeneratePv" +
       "cWorkloadAuthTokenResponse\022\023\n\013endpointUr" +
       "l\030\001 \001(\t\022\023\n\005token\030\002 \001(\tB\004\200\265\030\001\022\020\n\010expireAt" +
-      "\030\003 \001(\t\"E\n\036ListAllPvcControlPlanesRequest" +
+      "\030\003 \001(\003\"E\n\036ListAllPvcControlPlanesRequest" +
       "\022\020\n\010pageSize\030\001 \001(\005\022\021\n\tpageToken\030\002 \001(\t\"\211\001" +
       "\n\037ListAllPvcControlPlanesResponse\022O\n\032con" +
       "trolPlaneConfigurations\030\001 \003(\0132+.remotecl" +
@@ -7362,33 +7639,33 @@ public final class RemoteClusterInternalProto {
       "xtPageToken\030\002 \001(\t\">\n\'GeneratePvcControlP" +
       "laneAuthTokenRequest\022\023\n\005pvcId\030\001 \001(\tB\004\320\265\030" +
       "\001\"?\n(GeneratePvcControlPlaneAuthTokenRes" +
-      "ponse\022\023\n\005token\030\001 \001(\tB\004\200\265\030\001\"\347\001\n\035RegisterP" +
+      "ponse\022\023\n\005token\030\001 \001(\tB\004\200\265\030\001\"\202\002\n\035RegisterP" +
       "vcBaseClusterRequest\022\024\n\006pvcCrn\030\001 \001(\tB\004\320\265" +
-      "\030\001\022\030\n\ncmHostname\030\002 \001(\tB\004\320\265\030\001\022\024\n\006cmPort\030\003" +
-      " \001(\005B\004\320\265\030\001\022\024\n\006dcName\030\004 \001(\tB\004\320\265\030\001\022\032\n\014isHt" +
-      "tpSecure\030\005 \001(\010B\004\320\265\030\001\022\025\n\rknoxIpAddress\030\006 " +
-      "\001(\t\022\020\n\010knoxPort\030\007 \001(\005\022\r\n\005cmUrl\030\010 \001(\t\022\026\n\016" +
-      "knoxGatewayUrl\030\t \001(\t\"4\n\036RegisterPvcBaseC" +
-      "lusterResponse\022\022\n\nclusterCrn\030\001 \001(\t2\344\004\n\025R" +
-      "emoteClusterInternal\022z\n\027ListAllPvcContro" +
-      "lPlanes\022-.remotecluster.ListAllPvcContro" +
-      "lPlanesRequest\032..remotecluster.ListAllPv" +
-      "cControlPlanesResponse\"\000\022\225\001\n GeneratePvc" +
-      "ControlPlaneAuthToken\0226.remotecluster.Ge" +
-      "neratePvcControlPlaneAuthTokenRequest\0327." +
-      "remotecluster.GeneratePvcControlPlaneAut" +
-      "hTokenResponse\"\000\022\211\001\n\034GeneratePvcWorkload" +
-      "AuthToken\0222.remotecluster.GeneratePvcWor" +
-      "kloadAuthTokenRequest\0323.remotecluster.Ge" +
-      "neratePvcWorkloadAuthTokenResponse\"\000\022w\n\026" +
-      "RegisterPvcBaseCluster\022,.remotecluster.R" +
-      "egisterPvcBaseClusterRequest\032-.remoteclu" +
-      "ster.RegisterPvcBaseClusterResponse\"\000\0322\212" +
-      "\304\023.\n\025remoteclusterinternal\022\025RemoteCluste" +
-      "rInternalBg\n.com.cloudera.thunderhead.se" +
-      "rvice.remoteclusterB\032RemoteClusterIntern" +
-      "alProtoZ\031com/cloudera/cdp/protobufb\006prot" +
-      "o3"
+      "\030\001\022\022\n\ncmHostname\030\002 \001(\t\022\016\n\006cmPort\030\003 \001(\005\022\024" +
+      "\n\006dcName\030\004 \001(\tB\004\320\265\030\001\022\024\n\014isHttpSecure\030\005 \001" +
+      "(\010\022\025\n\rknoxIpAddress\030\006 \001(\t\022\020\n\010knoxPort\030\007 " +
+      "\001(\005\022\r\n\005cmUrl\030\010 \001(\t\022\026\n\016knoxGatewayUrl\030\t \001" +
+      "(\t\022\023\n\013cmClusterId\030\n \001(\t\022\026\n\016environmentCr" +
+      "n\030\013 \001(\t\"4\n\036RegisterPvcBaseClusterRespons" +
+      "e\022\022\n\nclusterCrn\030\001 \001(\t2\344\004\n\025RemoteClusterI" +
+      "nternal\022z\n\027ListAllPvcControlPlanes\022-.rem" +
+      "otecluster.ListAllPvcControlPlanesReques" +
+      "t\032..remotecluster.ListAllPvcControlPlane" +
+      "sResponse\"\000\022\225\001\n GeneratePvcControlPlaneA" +
+      "uthToken\0226.remotecluster.GeneratePvcCont" +
+      "rolPlaneAuthTokenRequest\0327.remotecluster" +
+      ".GeneratePvcControlPlaneAuthTokenRespons" +
+      "e\"\000\022\211\001\n\034GeneratePvcWorkloadAuthToken\0222.r" +
+      "emotecluster.GeneratePvcWorkloadAuthToke" +
+      "nRequest\0323.remotecluster.GeneratePvcWork" +
+      "loadAuthTokenResponse\"\000\022w\n\026RegisterPvcBa" +
+      "seCluster\022,.remotecluster.RegisterPvcBas" +
+      "eClusterRequest\032-.remotecluster.Register" +
+      "PvcBaseClusterResponse\"\000\0322\212\304\023.\n\025remotecl" +
+      "usterinternal\022\025RemoteClusterInternalBg\n." +
+      "com.cloudera.thunderhead.service.remotec" +
+      "lusterB\032RemoteClusterInternalProtoZ\031com/" +
+      "cloudera/cdp/protobufb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -7437,7 +7714,7 @@ public final class RemoteClusterInternalProto {
     internal_static_remotecluster_RegisterPvcBaseClusterRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_remotecluster_RegisterPvcBaseClusterRequest_descriptor,
-        new java.lang.String[] { "PvcCrn", "CmHostname", "CmPort", "DcName", "IsHttpSecure", "KnoxIpAddress", "KnoxPort", "CmUrl", "KnoxGatewayUrl", });
+        new java.lang.String[] { "PvcCrn", "CmHostname", "CmPort", "DcName", "IsHttpSecure", "KnoxIpAddress", "KnoxPort", "CmUrl", "KnoxGatewayUrl", "CmClusterId", "EnvironmentCrn", });
     internal_static_remotecluster_RegisterPvcBaseClusterResponse_descriptor =
       getDescriptor().getMessageTypes().get(7);
     internal_static_remotecluster_RegisterPvcBaseClusterResponse_fieldAccessorTable = new

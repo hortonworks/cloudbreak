@@ -111,6 +111,37 @@ public final class RemoteClusterGrpc {
     return getDescribePvcControlPlaneMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest,
+      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse> getRotateAgentCredentialsMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "RotateAgentCredentials",
+      requestType = com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest.class,
+      responseType = com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest,
+      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse> getRotateAgentCredentialsMethod() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse> getRotateAgentCredentialsMethod;
+    if ((getRotateAgentCredentialsMethod = RemoteClusterGrpc.getRotateAgentCredentialsMethod) == null) {
+      synchronized (RemoteClusterGrpc.class) {
+        if ((getRotateAgentCredentialsMethod = RemoteClusterGrpc.getRotateAgentCredentialsMethod) == null) {
+          RemoteClusterGrpc.getRotateAgentCredentialsMethod = getRotateAgentCredentialsMethod =
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "RotateAgentCredentials"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new RemoteClusterMethodDescriptorSupplier("RotateAgentCredentials"))
+              .build();
+        }
+      }
+    }
+    return getRotateAgentCredentialsMethod;
+  }
+
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListPvcControlPlanesRequest,
       com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListPvcControlPlanesResponse> getListPvcControlPlanesMethod;
 
@@ -173,97 +204,35 @@ public final class RemoteClusterGrpc {
     return getTestPvcControlPlaneConnectivityMethod;
   }
 
-  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest,
-      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse> getListRemoteClustersMethod;
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest,
+      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse> getUpdatePvcControlPlaneMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
-      fullMethodName = SERVICE_NAME + '/' + "ListRemoteClusters",
-      requestType = com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest.class,
-      responseType = com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse.class,
+      fullMethodName = SERVICE_NAME + '/' + "UpdatePvcControlPlane",
+      requestType = com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest.class,
+      responseType = com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse.class,
       methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
-  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest,
-      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse> getListRemoteClustersMethod() {
-    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse> getListRemoteClustersMethod;
-    if ((getListRemoteClustersMethod = RemoteClusterGrpc.getListRemoteClustersMethod) == null) {
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest,
+      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse> getUpdatePvcControlPlaneMethod() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse> getUpdatePvcControlPlaneMethod;
+    if ((getUpdatePvcControlPlaneMethod = RemoteClusterGrpc.getUpdatePvcControlPlaneMethod) == null) {
       synchronized (RemoteClusterGrpc.class) {
-        if ((getListRemoteClustersMethod = RemoteClusterGrpc.getListRemoteClustersMethod) == null) {
-          RemoteClusterGrpc.getListRemoteClustersMethod = getListRemoteClustersMethod =
-              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse>newBuilder()
+        if ((getUpdatePvcControlPlaneMethod = RemoteClusterGrpc.getUpdatePvcControlPlaneMethod) == null) {
+          RemoteClusterGrpc.getUpdatePvcControlPlaneMethod = getUpdatePvcControlPlaneMethod =
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ListRemoteClusters"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "UpdatePvcControlPlane"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest.getDefaultInstance()))
+                  com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse.getDefaultInstance()))
-              .setSchemaDescriptor(new RemoteClusterMethodDescriptorSupplier("ListRemoteClusters"))
+                  com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new RemoteClusterMethodDescriptorSupplier("UpdatePvcControlPlane"))
               .build();
         }
       }
     }
-    return getListRemoteClustersMethod;
-  }
-
-  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest,
-      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse> getGetRemoteClusterMethod;
-
-  @io.grpc.stub.annotations.RpcMethod(
-      fullMethodName = SERVICE_NAME + '/' + "GetRemoteCluster",
-      requestType = com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest.class,
-      responseType = com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse.class,
-      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
-  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest,
-      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse> getGetRemoteClusterMethod() {
-    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse> getGetRemoteClusterMethod;
-    if ((getGetRemoteClusterMethod = RemoteClusterGrpc.getGetRemoteClusterMethod) == null) {
-      synchronized (RemoteClusterGrpc.class) {
-        if ((getGetRemoteClusterMethod = RemoteClusterGrpc.getGetRemoteClusterMethod) == null) {
-          RemoteClusterGrpc.getGetRemoteClusterMethod = getGetRemoteClusterMethod =
-              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse>newBuilder()
-              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetRemoteCluster"))
-              .setSampledToLocalTracing(true)
-              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest.getDefaultInstance()))
-              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse.getDefaultInstance()))
-              .setSchemaDescriptor(new RemoteClusterMethodDescriptorSupplier("GetRemoteCluster"))
-              .build();
-        }
-      }
-    }
-    return getGetRemoteClusterMethod;
-  }
-
-  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest,
-      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse> getGetServiceDetailsMethod;
-
-  @io.grpc.stub.annotations.RpcMethod(
-      fullMethodName = SERVICE_NAME + '/' + "GetServiceDetails",
-      requestType = com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest.class,
-      responseType = com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse.class,
-      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
-  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest,
-      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse> getGetServiceDetailsMethod() {
-    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse> getGetServiceDetailsMethod;
-    if ((getGetServiceDetailsMethod = RemoteClusterGrpc.getGetServiceDetailsMethod) == null) {
-      synchronized (RemoteClusterGrpc.class) {
-        if ((getGetServiceDetailsMethod = RemoteClusterGrpc.getGetServiceDetailsMethod) == null) {
-          RemoteClusterGrpc.getGetServiceDetailsMethod = getGetServiceDetailsMethod =
-              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse>newBuilder()
-              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetServiceDetails"))
-              .setSampledToLocalTracing(true)
-              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest.getDefaultInstance()))
-              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse.getDefaultInstance()))
-              .setSchemaDescriptor(new RemoteClusterMethodDescriptorSupplier("GetServiceDetails"))
-              .build();
-        }
-      }
-    }
-    return getGetServiceDetailsMethod;
+    return getUpdatePvcControlPlaneMethod;
   }
 
   /**
@@ -329,7 +298,7 @@ public final class RemoteClusterGrpc {
 
     /**
      * <pre>
-     * Unregister a Private Cloud control plane. :: Unregister a Private Cloud control plane from the Public Cloud.
+     * Unregister a Private Cloud control plane. :: Unregister a Private Cloud control plane from the Public Cloud, and clean up the Public Cloud resources from Private Cloud control plane resulting complete termination of the connection.
      * </pre>
      */
     default void unregisterPvcControlPlane(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UnregisterPvcControlPlaneRequest request,
@@ -345,6 +314,16 @@ public final class RemoteClusterGrpc {
     default void describePvcControlPlane(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.DescribePvcControlPlaneRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.DescribePvcControlPlaneResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDescribePvcControlPlaneMethod(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Rotates the agent credentials. :: Rotates the Jumpgate Agent's credentials in PvC.
+     * </pre>
+     */
+    default void rotateAgentCredentials(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getRotateAgentCredentialsMethod(), responseObserver);
     }
 
     /**
@@ -369,32 +348,12 @@ public final class RemoteClusterGrpc {
 
     /**
      * <pre>
-     * Lists all the registered remote clusters. :: Lists all the registered remote clusters.
+     * Update the Private Cloud control plane registration. :: Update the Private Cloud control plane registration in Public Cloud.
      * </pre>
      */
-    default void listRemoteClusters(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest request,
-        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse> responseObserver) {
-      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListRemoteClustersMethod(), responseObserver);
-    }
-
-    /**
-     * <pre>
-     * Get the remote cluster details. :: Get the remote cluster details.
-     * </pre>
-     */
-    default void getRemoteCluster(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest request,
-        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse> responseObserver) {
-      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetRemoteClusterMethod(), responseObserver);
-    }
-
-    /**
-     * <pre>
-     * Gets the service details of the cluster. :: Gets the service details of the cluster.
-     * </pre>
-     */
-    default void getServiceDetails(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest request,
-        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse> responseObserver) {
-      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetServiceDetailsMethod(), responseObserver);
+    default void updatePvcControlPlane(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUpdatePvcControlPlaneMethod(), responseObserver);
     }
   }
 
@@ -444,7 +403,7 @@ public final class RemoteClusterGrpc {
 
     /**
      * <pre>
-     * Unregister a Private Cloud control plane. :: Unregister a Private Cloud control plane from the Public Cloud.
+     * Unregister a Private Cloud control plane. :: Unregister a Private Cloud control plane from the Public Cloud, and clean up the Public Cloud resources from Private Cloud control plane resulting complete termination of the connection.
      * </pre>
      */
     public void unregisterPvcControlPlane(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UnregisterPvcControlPlaneRequest request,
@@ -462,6 +421,17 @@ public final class RemoteClusterGrpc {
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.DescribePvcControlPlaneResponse> responseObserver) {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getDescribePvcControlPlaneMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Rotates the agent credentials. :: Rotates the Jumpgate Agent's credentials in PvC.
+     * </pre>
+     */
+    public void rotateAgentCredentials(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getRotateAgentCredentialsMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -488,35 +458,13 @@ public final class RemoteClusterGrpc {
 
     /**
      * <pre>
-     * Lists all the registered remote clusters. :: Lists all the registered remote clusters.
+     * Update the Private Cloud control plane registration. :: Update the Private Cloud control plane registration in Public Cloud.
      * </pre>
      */
-    public void listRemoteClusters(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest request,
-        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse> responseObserver) {
+    public void updatePvcControlPlane(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse> responseObserver) {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
-          getChannel().newCall(getListRemoteClustersMethod(), getCallOptions()), request, responseObserver);
-    }
-
-    /**
-     * <pre>
-     * Get the remote cluster details. :: Get the remote cluster details.
-     * </pre>
-     */
-    public void getRemoteCluster(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest request,
-        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse> responseObserver) {
-      io.grpc.stub.ClientCalls.asyncUnaryCall(
-          getChannel().newCall(getGetRemoteClusterMethod(), getCallOptions()), request, responseObserver);
-    }
-
-    /**
-     * <pre>
-     * Gets the service details of the cluster. :: Gets the service details of the cluster.
-     * </pre>
-     */
-    public void getServiceDetails(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest request,
-        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse> responseObserver) {
-      io.grpc.stub.ClientCalls.asyncUnaryCall(
-          getChannel().newCall(getGetServiceDetailsMethod(), getCallOptions()), request, responseObserver);
+          getChannel().newCall(getUpdatePvcControlPlaneMethod(), getCallOptions()), request, responseObserver);
     }
   }
 
@@ -551,7 +499,7 @@ public final class RemoteClusterGrpc {
 
     /**
      * <pre>
-     * Unregister a Private Cloud control plane. :: Unregister a Private Cloud control plane from the Public Cloud.
+     * Unregister a Private Cloud control plane. :: Unregister a Private Cloud control plane from the Public Cloud, and clean up the Public Cloud resources from Private Cloud control plane resulting complete termination of the connection.
      * </pre>
      */
     public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UnregisterPvcControlPlaneResponse unregisterPvcControlPlane(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UnregisterPvcControlPlaneRequest request) {
@@ -567,6 +515,16 @@ public final class RemoteClusterGrpc {
     public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.DescribePvcControlPlaneResponse describePvcControlPlane(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.DescribePvcControlPlaneRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getDescribePvcControlPlaneMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Rotates the agent credentials. :: Rotates the Jumpgate Agent's credentials in PvC.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse rotateAgentCredentials(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getRotateAgentCredentialsMethod(), getCallOptions(), request);
     }
 
     /**
@@ -591,32 +549,12 @@ public final class RemoteClusterGrpc {
 
     /**
      * <pre>
-     * Lists all the registered remote clusters. :: Lists all the registered remote clusters.
+     * Update the Private Cloud control plane registration. :: Update the Private Cloud control plane registration in Public Cloud.
      * </pre>
      */
-    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse listRemoteClusters(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest request) {
+    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse updatePvcControlPlane(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
-          getChannel(), getListRemoteClustersMethod(), getCallOptions(), request);
-    }
-
-    /**
-     * <pre>
-     * Get the remote cluster details. :: Get the remote cluster details.
-     * </pre>
-     */
-    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse getRemoteCluster(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest request) {
-      return io.grpc.stub.ClientCalls.blockingUnaryCall(
-          getChannel(), getGetRemoteClusterMethod(), getCallOptions(), request);
-    }
-
-    /**
-     * <pre>
-     * Gets the service details of the cluster. :: Gets the service details of the cluster.
-     * </pre>
-     */
-    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse getServiceDetails(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest request) {
-      return io.grpc.stub.ClientCalls.blockingUnaryCall(
-          getChannel(), getGetServiceDetailsMethod(), getCallOptions(), request);
+          getChannel(), getUpdatePvcControlPlaneMethod(), getCallOptions(), request);
     }
   }
 
@@ -652,7 +590,7 @@ public final class RemoteClusterGrpc {
 
     /**
      * <pre>
-     * Unregister a Private Cloud control plane. :: Unregister a Private Cloud control plane from the Public Cloud.
+     * Unregister a Private Cloud control plane. :: Unregister a Private Cloud control plane from the Public Cloud, and clean up the Public Cloud resources from Private Cloud control plane resulting complete termination of the connection.
      * </pre>
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UnregisterPvcControlPlaneResponse> unregisterPvcControlPlane(
@@ -670,6 +608,17 @@ public final class RemoteClusterGrpc {
         com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.DescribePvcControlPlaneRequest request) {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getDescribePvcControlPlaneMethod(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Rotates the agent credentials. :: Rotates the Jumpgate Agent's credentials in PvC.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse> rotateAgentCredentials(
+        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getRotateAgentCredentialsMethod(), getCallOptions()), request);
     }
 
     /**
@@ -696,46 +645,23 @@ public final class RemoteClusterGrpc {
 
     /**
      * <pre>
-     * Lists all the registered remote clusters. :: Lists all the registered remote clusters.
+     * Update the Private Cloud control plane registration. :: Update the Private Cloud control plane registration in Public Cloud.
      * </pre>
      */
-    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse> listRemoteClusters(
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest request) {
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse> updatePvcControlPlane(
+        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest request) {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
-          getChannel().newCall(getListRemoteClustersMethod(), getCallOptions()), request);
-    }
-
-    /**
-     * <pre>
-     * Get the remote cluster details. :: Get the remote cluster details.
-     * </pre>
-     */
-    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse> getRemoteCluster(
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest request) {
-      return io.grpc.stub.ClientCalls.futureUnaryCall(
-          getChannel().newCall(getGetRemoteClusterMethod(), getCallOptions()), request);
-    }
-
-    /**
-     * <pre>
-     * Gets the service details of the cluster. :: Gets the service details of the cluster.
-     * </pre>
-     */
-    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse> getServiceDetails(
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest request) {
-      return io.grpc.stub.ClientCalls.futureUnaryCall(
-          getChannel().newCall(getGetServiceDetailsMethod(), getCallOptions()), request);
+          getChannel().newCall(getUpdatePvcControlPlaneMethod(), getCallOptions()), request);
     }
   }
 
   private static final int METHODID_REGISTER_PVC_CONTROL_PLANE = 0;
   private static final int METHODID_UNREGISTER_PVC_CONTROL_PLANE = 1;
   private static final int METHODID_DESCRIBE_PVC_CONTROL_PLANE = 2;
-  private static final int METHODID_LIST_PVC_CONTROL_PLANES = 3;
-  private static final int METHODID_TEST_PVC_CONTROL_PLANE_CONNECTIVITY = 4;
-  private static final int METHODID_LIST_REMOTE_CLUSTERS = 5;
-  private static final int METHODID_GET_REMOTE_CLUSTER = 6;
-  private static final int METHODID_GET_SERVICE_DETAILS = 7;
+  private static final int METHODID_ROTATE_AGENT_CREDENTIALS = 3;
+  private static final int METHODID_LIST_PVC_CONTROL_PLANES = 4;
+  private static final int METHODID_TEST_PVC_CONTROL_PLANE_CONNECTIVITY = 5;
+  private static final int METHODID_UPDATE_PVC_CONTROL_PLANE = 6;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -766,6 +692,10 @@ public final class RemoteClusterGrpc {
           serviceImpl.describePvcControlPlane((com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.DescribePvcControlPlaneRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.DescribePvcControlPlaneResponse>) responseObserver);
           break;
+        case METHODID_ROTATE_AGENT_CREDENTIALS:
+          serviceImpl.rotateAgentCredentials((com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse>) responseObserver);
+          break;
         case METHODID_LIST_PVC_CONTROL_PLANES:
           serviceImpl.listPvcControlPlanes((com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListPvcControlPlanesRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListPvcControlPlanesResponse>) responseObserver);
@@ -774,17 +704,9 @@ public final class RemoteClusterGrpc {
           serviceImpl.testPvcControlPlaneConnectivity((com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.TestPvcControlPlaneConnectivityRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.TestPvcControlPlaneConnectivityResponse>) responseObserver);
           break;
-        case METHODID_LIST_REMOTE_CLUSTERS:
-          serviceImpl.listRemoteClusters((com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest) request,
-              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse>) responseObserver);
-          break;
-        case METHODID_GET_REMOTE_CLUSTER:
-          serviceImpl.getRemoteCluster((com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest) request,
-              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse>) responseObserver);
-          break;
-        case METHODID_GET_SERVICE_DETAILS:
-          serviceImpl.getServiceDetails((com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest) request,
-              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse>) responseObserver);
+        case METHODID_UPDATE_PVC_CONTROL_PLANE:
+          serviceImpl.updatePvcControlPlane((com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -826,6 +748,13 @@ public final class RemoteClusterGrpc {
               com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.DescribePvcControlPlaneResponse>(
                 service, METHODID_DESCRIBE_PVC_CONTROL_PLANE)))
         .addMethod(
+          getRotateAgentCredentialsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest,
+              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse>(
+                service, METHODID_ROTATE_AGENT_CREDENTIALS)))
+        .addMethod(
           getListPvcControlPlanesMethod(),
           io.grpc.stub.ServerCalls.asyncUnaryCall(
             new MethodHandlers<
@@ -840,26 +769,12 @@ public final class RemoteClusterGrpc {
               com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.TestPvcControlPlaneConnectivityResponse>(
                 service, METHODID_TEST_PVC_CONTROL_PLANE_CONNECTIVITY)))
         .addMethod(
-          getListRemoteClustersMethod(),
+          getUpdatePvcControlPlaneMethod(),
           io.grpc.stub.ServerCalls.asyncUnaryCall(
             new MethodHandlers<
-              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest,
-              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse>(
-                service, METHODID_LIST_REMOTE_CLUSTERS)))
-        .addMethod(
-          getGetRemoteClusterMethod(),
-          io.grpc.stub.ServerCalls.asyncUnaryCall(
-            new MethodHandlers<
-              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest,
-              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse>(
-                service, METHODID_GET_REMOTE_CLUSTER)))
-        .addMethod(
-          getGetServiceDetailsMethod(),
-          io.grpc.stub.ServerCalls.asyncUnaryCall(
-            new MethodHandlers<
-              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest,
-              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse>(
-                service, METHODID_GET_SERVICE_DETAILS)))
+              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest,
+              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse>(
+                service, METHODID_UPDATE_PVC_CONTROL_PLANE)))
         .build();
   }
 
@@ -911,11 +826,10 @@ public final class RemoteClusterGrpc {
               .addMethod(getRegisterPvcControlPlaneMethod())
               .addMethod(getUnregisterPvcControlPlaneMethod())
               .addMethod(getDescribePvcControlPlaneMethod())
+              .addMethod(getRotateAgentCredentialsMethod())
               .addMethod(getListPvcControlPlanesMethod())
               .addMethod(getTestPvcControlPlaneConnectivityMethod())
-              .addMethod(getListRemoteClustersMethod())
-              .addMethod(getGetRemoteClusterMethod())
-              .addMethod(getGetServiceDetailsMethod())
+              .addMethod(getUpdatePvcControlPlaneMethod())
               .build();
         }
       }

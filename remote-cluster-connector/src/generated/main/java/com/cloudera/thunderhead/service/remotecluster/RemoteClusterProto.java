@@ -2243,6 +2243,30 @@ public final class RemoteClusterProto {
      */
     com.google.protobuf.ByteString
         getPvcBytes();
+
+    /**
+     * <pre>
+     * Set to `true` to unregister on premises clusters.
+     * Defaults to `false` if not set. if `false` on premises clusters will not be unregistered.
+     * </pre>
+     *
+     * <code>bool unregisterOnPremClusters = 2;</code>
+     * @return The unregisterOnPremClusters.
+     */
+    boolean getUnregisterOnPremClusters();
+
+    /**
+     * <pre>
+     * Set to `true` to enable force unregister, This option may be used when on premises control plane connection has failed or the delete operation is failing.
+     * This option only guarantees to remove this instance from cloud control plane, and may leave hybrid connection lingering on on premises control plane.
+     * You may have to delete the connection from on premises control plane manually for complete cleanup.
+     * Defaults to `false` if not set.
+     * </pre>
+     *
+     * <code>bool force = 3;</code>
+     * @return The force.
+     */
+    boolean getForce();
   }
   /**
    * <pre>
@@ -2331,6 +2355,40 @@ public final class RemoteClusterProto {
       }
     }
 
+    public static final int UNREGISTERONPREMCLUSTERS_FIELD_NUMBER = 2;
+    private boolean unregisterOnPremClusters_ = false;
+    /**
+     * <pre>
+     * Set to `true` to unregister on premises clusters.
+     * Defaults to `false` if not set. if `false` on premises clusters will not be unregistered.
+     * </pre>
+     *
+     * <code>bool unregisterOnPremClusters = 2;</code>
+     * @return The unregisterOnPremClusters.
+     */
+    @java.lang.Override
+    public boolean getUnregisterOnPremClusters() {
+      return unregisterOnPremClusters_;
+    }
+
+    public static final int FORCE_FIELD_NUMBER = 3;
+    private boolean force_ = false;
+    /**
+     * <pre>
+     * Set to `true` to enable force unregister, This option may be used when on premises control plane connection has failed or the delete operation is failing.
+     * This option only guarantees to remove this instance from cloud control plane, and may leave hybrid connection lingering on on premises control plane.
+     * You may have to delete the connection from on premises control plane manually for complete cleanup.
+     * Defaults to `false` if not set.
+     * </pre>
+     *
+     * <code>bool force = 3;</code>
+     * @return The force.
+     */
+    @java.lang.Override
+    public boolean getForce() {
+      return force_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -2348,6 +2406,12 @@ public final class RemoteClusterProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pvc_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, pvc_);
       }
+      if (unregisterOnPremClusters_ != false) {
+        output.writeBool(2, unregisterOnPremClusters_);
+      }
+      if (force_ != false) {
+        output.writeBool(3, force_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -2359,6 +2423,14 @@ public final class RemoteClusterProto {
       size = 0;
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pvc_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, pvc_);
+      }
+      if (unregisterOnPremClusters_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(2, unregisterOnPremClusters_);
+      }
+      if (force_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(3, force_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -2377,6 +2449,10 @@ public final class RemoteClusterProto {
 
       if (!getPvc()
           .equals(other.getPvc())) return false;
+      if (getUnregisterOnPremClusters()
+          != other.getUnregisterOnPremClusters()) return false;
+      if (getForce()
+          != other.getForce()) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -2390,6 +2466,12 @@ public final class RemoteClusterProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + PVC_FIELD_NUMBER;
       hash = (53 * hash) + getPvc().hashCode();
+      hash = (37 * hash) + UNREGISTERONPREMCLUSTERS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getUnregisterOnPremClusters());
+      hash = (37 * hash) + FORCE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getForce());
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -2526,6 +2608,8 @@ public final class RemoteClusterProto {
         super.clear();
         bitField0_ = 0;
         pvc_ = "";
+        unregisterOnPremClusters_ = false;
+        force_ = false;
         return this;
       }
 
@@ -2561,6 +2645,12 @@ public final class RemoteClusterProto {
         int from_bitField0_ = bitField0_;
         if (((from_bitField0_ & 0x00000001) != 0)) {
           result.pvc_ = pvc_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.unregisterOnPremClusters_ = unregisterOnPremClusters_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.force_ = force_;
         }
       }
 
@@ -2613,6 +2703,12 @@ public final class RemoteClusterProto {
           bitField0_ |= 0x00000001;
           onChanged();
         }
+        if (other.getUnregisterOnPremClusters() != false) {
+          setUnregisterOnPremClusters(other.getUnregisterOnPremClusters());
+        }
+        if (other.getForce() != false) {
+          setForce(other.getForce());
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -2644,6 +2740,16 @@ public final class RemoteClusterProto {
                 bitField0_ |= 0x00000001;
                 break;
               } // case 10
+              case 16: {
+                unregisterOnPremClusters_ = input.readBool();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 16
+              case 24: {
+                force_ = input.readBool();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 24
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -2749,6 +2855,106 @@ public final class RemoteClusterProto {
         checkByteStringIsUtf8(value);
         pvc_ = value;
         bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private boolean unregisterOnPremClusters_ ;
+      /**
+       * <pre>
+       * Set to `true` to unregister on premises clusters.
+       * Defaults to `false` if not set. if `false` on premises clusters will not be unregistered.
+       * </pre>
+       *
+       * <code>bool unregisterOnPremClusters = 2;</code>
+       * @return The unregisterOnPremClusters.
+       */
+      @java.lang.Override
+      public boolean getUnregisterOnPremClusters() {
+        return unregisterOnPremClusters_;
+      }
+      /**
+       * <pre>
+       * Set to `true` to unregister on premises clusters.
+       * Defaults to `false` if not set. if `false` on premises clusters will not be unregistered.
+       * </pre>
+       *
+       * <code>bool unregisterOnPremClusters = 2;</code>
+       * @param value The unregisterOnPremClusters to set.
+       * @return This builder for chaining.
+       */
+      public Builder setUnregisterOnPremClusters(boolean value) {
+
+        unregisterOnPremClusters_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Set to `true` to unregister on premises clusters.
+       * Defaults to `false` if not set. if `false` on premises clusters will not be unregistered.
+       * </pre>
+       *
+       * <code>bool unregisterOnPremClusters = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearUnregisterOnPremClusters() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        unregisterOnPremClusters_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean force_ ;
+      /**
+       * <pre>
+       * Set to `true` to enable force unregister, This option may be used when on premises control plane connection has failed or the delete operation is failing.
+       * This option only guarantees to remove this instance from cloud control plane, and may leave hybrid connection lingering on on premises control plane.
+       * You may have to delete the connection from on premises control plane manually for complete cleanup.
+       * Defaults to `false` if not set.
+       * </pre>
+       *
+       * <code>bool force = 3;</code>
+       * @return The force.
+       */
+      @java.lang.Override
+      public boolean getForce() {
+        return force_;
+      }
+      /**
+       * <pre>
+       * Set to `true` to enable force unregister, This option may be used when on premises control plane connection has failed or the delete operation is failing.
+       * This option only guarantees to remove this instance from cloud control plane, and may leave hybrid connection lingering on on premises control plane.
+       * You may have to delete the connection from on premises control plane manually for complete cleanup.
+       * Defaults to `false` if not set.
+       * </pre>
+       *
+       * <code>bool force = 3;</code>
+       * @param value The force to set.
+       * @return This builder for chaining.
+       */
+      public Builder setForce(boolean value) {
+
+        force_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Set to `true` to enable force unregister, This option may be used when on premises control plane connection has failed or the delete operation is failing.
+       * This option only guarantees to remove this instance from cloud control plane, and may leave hybrid connection lingering on on premises control plane.
+       * You may have to delete the connection from on premises control plane manually for complete cleanup.
+       * Defaults to `false` if not set.
+       * </pre>
+       *
+       * <code>bool force = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearForce() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        force_ = false;
         onChanged();
         return this;
       }
@@ -4492,6 +4698,2385 @@ public final class RemoteClusterProto {
 
     @java.lang.Override
     public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.DescribePvcControlPlaneResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface RotateAgentCredentialsRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:remotecluster.RotateAgentCredentialsRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The account ID or CRN of the Private Cloud control plane.
+     * </pre>
+     *
+     * <code>string pvc = 1 [(.options.FieldExtension.required) = true];</code>
+     * @return The pvc.
+     */
+    java.lang.String getPvc();
+    /**
+     * <pre>
+     * The account ID or CRN of the Private Cloud control plane.
+     * </pre>
+     *
+     * <code>string pvc = 1 [(.options.FieldExtension.required) = true];</code>
+     * @return The bytes for pvc.
+     */
+    com.google.protobuf.ByteString
+        getPvcBytes();
+  }
+  /**
+   * <pre>
+   * Request object for the  RotateAgentCredentialsRequest method.
+   * </pre>
+   *
+   * Protobuf type {@code remotecluster.RotateAgentCredentialsRequest}
+   */
+  public static final class RotateAgentCredentialsRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:remotecluster.RotateAgentCredentialsRequest)
+      RotateAgentCredentialsRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use RotateAgentCredentialsRequest.newBuilder() to construct.
+    private RotateAgentCredentialsRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private RotateAgentCredentialsRequest() {
+      pvc_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new RotateAgentCredentialsRequest();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_RotateAgentCredentialsRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_RotateAgentCredentialsRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest.Builder.class);
+    }
+
+    public static final int PVC_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object pvc_ = "";
+    /**
+     * <pre>
+     * The account ID or CRN of the Private Cloud control plane.
+     * </pre>
+     *
+     * <code>string pvc = 1 [(.options.FieldExtension.required) = true];</code>
+     * @return The pvc.
+     */
+    @java.lang.Override
+    public java.lang.String getPvc() {
+      java.lang.Object ref = pvc_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        pvc_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The account ID or CRN of the Private Cloud control plane.
+     * </pre>
+     *
+     * <code>string pvc = 1 [(.options.FieldExtension.required) = true];</code>
+     * @return The bytes for pvc.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getPvcBytes() {
+      java.lang.Object ref = pvc_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        pvc_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pvc_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, pvc_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pvc_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, pvc_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest other = (com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest) obj;
+
+      if (!getPvc()
+          .equals(other.getPvc())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + PVC_FIELD_NUMBER;
+      hash = (53 * hash) + getPvc().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Request object for the  RotateAgentCredentialsRequest method.
+     * </pre>
+     *
+     * Protobuf type {@code remotecluster.RotateAgentCredentialsRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:remotecluster.RotateAgentCredentialsRequest)
+        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_RotateAgentCredentialsRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_RotateAgentCredentialsRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        pvc_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_RotateAgentCredentialsRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest build() {
+        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest buildPartial() {
+        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest result = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.pvc_ = pvc_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest) {
+          return mergeFrom((com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest other) {
+        if (other == com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest.getDefaultInstance()) return this;
+        if (!other.getPvc().isEmpty()) {
+          pvc_ = other.pvc_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                pvc_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object pvc_ = "";
+      /**
+       * <pre>
+       * The account ID or CRN of the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>string pvc = 1 [(.options.FieldExtension.required) = true];</code>
+       * @return The pvc.
+       */
+      public java.lang.String getPvc() {
+        java.lang.Object ref = pvc_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          pvc_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The account ID or CRN of the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>string pvc = 1 [(.options.FieldExtension.required) = true];</code>
+       * @return The bytes for pvc.
+       */
+      public com.google.protobuf.ByteString
+          getPvcBytes() {
+        java.lang.Object ref = pvc_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          pvc_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The account ID or CRN of the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>string pvc = 1 [(.options.FieldExtension.required) = true];</code>
+       * @param value The pvc to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvc(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        pvc_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The account ID or CRN of the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>string pvc = 1 [(.options.FieldExtension.required) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvc() {
+        pvc_ = getDefaultInstance().getPvc();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The account ID or CRN of the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>string pvc = 1 [(.options.FieldExtension.required) = true];</code>
+       * @param value The bytes for pvc to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvcBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        pvc_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:remotecluster.RotateAgentCredentialsRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:remotecluster.RotateAgentCredentialsRequest)
+    private static final com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest();
+    }
+
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<RotateAgentCredentialsRequest>
+        PARSER = new com.google.protobuf.AbstractParser<RotateAgentCredentialsRequest>() {
+      @java.lang.Override
+      public RotateAgentCredentialsRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<RotateAgentCredentialsRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<RotateAgentCredentialsRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface RotateAgentCredentialsResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:remotecluster.RotateAgentCredentialsResponse)
+      com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * <pre>
+   * Response object for the RotateAgentCredentialsResponse method.
+   * </pre>
+   *
+   * Protobuf type {@code remotecluster.RotateAgentCredentialsResponse}
+   */
+  public static final class RotateAgentCredentialsResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:remotecluster.RotateAgentCredentialsResponse)
+      RotateAgentCredentialsResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use RotateAgentCredentialsResponse.newBuilder() to construct.
+    private RotateAgentCredentialsResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private RotateAgentCredentialsResponse() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new RotateAgentCredentialsResponse();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_RotateAgentCredentialsResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_RotateAgentCredentialsResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse.Builder.class);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse other = (com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse) obj;
+
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Response object for the RotateAgentCredentialsResponse method.
+     * </pre>
+     *
+     * Protobuf type {@code remotecluster.RotateAgentCredentialsResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:remotecluster.RotateAgentCredentialsResponse)
+        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_RotateAgentCredentialsResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_RotateAgentCredentialsResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_RotateAgentCredentialsResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse build() {
+        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse buildPartial() {
+        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse result = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse(this);
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse) {
+          return mergeFrom((com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse other) {
+        if (other == com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:remotecluster.RotateAgentCredentialsResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:remotecluster.RotateAgentCredentialsResponse)
+    private static final com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse();
+    }
+
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<RotateAgentCredentialsResponse>
+        PARSER = new com.google.protobuf.AbstractParser<RotateAgentCredentialsResponse>() {
+      @java.lang.Override
+      public RotateAgentCredentialsResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<RotateAgentCredentialsResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<RotateAgentCredentialsResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface UpdatePvcControlPlaneRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:remotecluster.UpdatePvcControlPlaneRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The account ID or CRN of the Private Cloud control plane.
+     * </pre>
+     *
+     * <code>string pvc = 1 [(.options.FieldExtension.required) = true];</code>
+     * @return The pvc.
+     */
+    java.lang.String getPvc();
+    /**
+     * <pre>
+     * The account ID or CRN of the Private Cloud control plane.
+     * </pre>
+     *
+     * <code>string pvc = 1 [(.options.FieldExtension.required) = true];</code>
+     * @return The bytes for pvc.
+     */
+    com.google.protobuf.ByteString
+        getPvcBytes();
+
+    /**
+     * <pre>
+     * The name or ID or CRN of the SAML identity provider from Public Cloud control plane in which users are allowed to operate on the Private Cloud control plane.
+     * The same or equivalent SAML IDP should be used by the Public Cloud control plane and the Private Cloud control plane, in order for the user to be mapped by SAML user ID.
+     * </pre>
+     *
+     * <code>string samlIdentityProvider = 4 [(.options.FieldExtension.required) = true];</code>
+     * @return The samlIdentityProvider.
+     */
+    java.lang.String getSamlIdentityProvider();
+    /**
+     * <pre>
+     * The name or ID or CRN of the SAML identity provider from Public Cloud control plane in which users are allowed to operate on the Private Cloud control plane.
+     * The same or equivalent SAML IDP should be used by the Public Cloud control plane and the Private Cloud control plane, in order for the user to be mapped by SAML user ID.
+     * </pre>
+     *
+     * <code>string samlIdentityProvider = 4 [(.options.FieldExtension.required) = true];</code>
+     * @return The bytes for samlIdentityProvider.
+     */
+    com.google.protobuf.ByteString
+        getSamlIdentityProviderBytes();
+
+    /**
+     * <pre>
+     * The description of the Private Cloud control plane.
+     * </pre>
+     *
+     * <code>string description = 5;</code>
+     * @return The description.
+     */
+    java.lang.String getDescription();
+    /**
+     * <pre>
+     * The description of the Private Cloud control plane.
+     * </pre>
+     *
+     * <code>string description = 5;</code>
+     * @return The bytes for description.
+     */
+    com.google.protobuf.ByteString
+        getDescriptionBytes();
+  }
+  /**
+   * <pre>
+   * Request object for the  UpdatePvcControlPlane method.
+   * </pre>
+   *
+   * Protobuf type {@code remotecluster.UpdatePvcControlPlaneRequest}
+   */
+  public static final class UpdatePvcControlPlaneRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:remotecluster.UpdatePvcControlPlaneRequest)
+      UpdatePvcControlPlaneRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use UpdatePvcControlPlaneRequest.newBuilder() to construct.
+    private UpdatePvcControlPlaneRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private UpdatePvcControlPlaneRequest() {
+      pvc_ = "";
+      samlIdentityProvider_ = "";
+      description_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new UpdatePvcControlPlaneRequest();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_UpdatePvcControlPlaneRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_UpdatePvcControlPlaneRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest.Builder.class);
+    }
+
+    public static final int PVC_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object pvc_ = "";
+    /**
+     * <pre>
+     * The account ID or CRN of the Private Cloud control plane.
+     * </pre>
+     *
+     * <code>string pvc = 1 [(.options.FieldExtension.required) = true];</code>
+     * @return The pvc.
+     */
+    @java.lang.Override
+    public java.lang.String getPvc() {
+      java.lang.Object ref = pvc_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        pvc_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The account ID or CRN of the Private Cloud control plane.
+     * </pre>
+     *
+     * <code>string pvc = 1 [(.options.FieldExtension.required) = true];</code>
+     * @return The bytes for pvc.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getPvcBytes() {
+      java.lang.Object ref = pvc_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        pvc_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int SAMLIDENTITYPROVIDER_FIELD_NUMBER = 4;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object samlIdentityProvider_ = "";
+    /**
+     * <pre>
+     * The name or ID or CRN of the SAML identity provider from Public Cloud control plane in which users are allowed to operate on the Private Cloud control plane.
+     * The same or equivalent SAML IDP should be used by the Public Cloud control plane and the Private Cloud control plane, in order for the user to be mapped by SAML user ID.
+     * </pre>
+     *
+     * <code>string samlIdentityProvider = 4 [(.options.FieldExtension.required) = true];</code>
+     * @return The samlIdentityProvider.
+     */
+    @java.lang.Override
+    public java.lang.String getSamlIdentityProvider() {
+      java.lang.Object ref = samlIdentityProvider_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        samlIdentityProvider_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The name or ID or CRN of the SAML identity provider from Public Cloud control plane in which users are allowed to operate on the Private Cloud control plane.
+     * The same or equivalent SAML IDP should be used by the Public Cloud control plane and the Private Cloud control plane, in order for the user to be mapped by SAML user ID.
+     * </pre>
+     *
+     * <code>string samlIdentityProvider = 4 [(.options.FieldExtension.required) = true];</code>
+     * @return The bytes for samlIdentityProvider.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getSamlIdentityProviderBytes() {
+      java.lang.Object ref = samlIdentityProvider_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        samlIdentityProvider_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int DESCRIPTION_FIELD_NUMBER = 5;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object description_ = "";
+    /**
+     * <pre>
+     * The description of the Private Cloud control plane.
+     * </pre>
+     *
+     * <code>string description = 5;</code>
+     * @return The description.
+     */
+    @java.lang.Override
+    public java.lang.String getDescription() {
+      java.lang.Object ref = description_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        description_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The description of the Private Cloud control plane.
+     * </pre>
+     *
+     * <code>string description = 5;</code>
+     * @return The bytes for description.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getDescriptionBytes() {
+      java.lang.Object ref = description_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        description_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pvc_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, pvc_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(samlIdentityProvider_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, samlIdentityProvider_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(description_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, description_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pvc_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, pvc_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(samlIdentityProvider_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, samlIdentityProvider_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(description_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, description_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest other = (com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest) obj;
+
+      if (!getPvc()
+          .equals(other.getPvc())) return false;
+      if (!getSamlIdentityProvider()
+          .equals(other.getSamlIdentityProvider())) return false;
+      if (!getDescription()
+          .equals(other.getDescription())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + PVC_FIELD_NUMBER;
+      hash = (53 * hash) + getPvc().hashCode();
+      hash = (37 * hash) + SAMLIDENTITYPROVIDER_FIELD_NUMBER;
+      hash = (53 * hash) + getSamlIdentityProvider().hashCode();
+      hash = (37 * hash) + DESCRIPTION_FIELD_NUMBER;
+      hash = (53 * hash) + getDescription().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Request object for the  UpdatePvcControlPlane method.
+     * </pre>
+     *
+     * Protobuf type {@code remotecluster.UpdatePvcControlPlaneRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:remotecluster.UpdatePvcControlPlaneRequest)
+        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_UpdatePvcControlPlaneRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_UpdatePvcControlPlaneRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        pvc_ = "";
+        samlIdentityProvider_ = "";
+        description_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_UpdatePvcControlPlaneRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest build() {
+        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest buildPartial() {
+        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest result = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.pvc_ = pvc_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.samlIdentityProvider_ = samlIdentityProvider_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.description_ = description_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest) {
+          return mergeFrom((com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest other) {
+        if (other == com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest.getDefaultInstance()) return this;
+        if (!other.getPvc().isEmpty()) {
+          pvc_ = other.pvc_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (!other.getSamlIdentityProvider().isEmpty()) {
+          samlIdentityProvider_ = other.samlIdentityProvider_;
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        if (!other.getDescription().isEmpty()) {
+          description_ = other.description_;
+          bitField0_ |= 0x00000004;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                pvc_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 34: {
+                samlIdentityProvider_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 34
+              case 42: {
+                description_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 42
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object pvc_ = "";
+      /**
+       * <pre>
+       * The account ID or CRN of the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>string pvc = 1 [(.options.FieldExtension.required) = true];</code>
+       * @return The pvc.
+       */
+      public java.lang.String getPvc() {
+        java.lang.Object ref = pvc_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          pvc_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The account ID or CRN of the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>string pvc = 1 [(.options.FieldExtension.required) = true];</code>
+       * @return The bytes for pvc.
+       */
+      public com.google.protobuf.ByteString
+          getPvcBytes() {
+        java.lang.Object ref = pvc_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          pvc_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The account ID or CRN of the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>string pvc = 1 [(.options.FieldExtension.required) = true];</code>
+       * @param value The pvc to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvc(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        pvc_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The account ID or CRN of the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>string pvc = 1 [(.options.FieldExtension.required) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvc() {
+        pvc_ = getDefaultInstance().getPvc();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The account ID or CRN of the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>string pvc = 1 [(.options.FieldExtension.required) = true];</code>
+       * @param value The bytes for pvc to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvcBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        pvc_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object samlIdentityProvider_ = "";
+      /**
+       * <pre>
+       * The name or ID or CRN of the SAML identity provider from Public Cloud control plane in which users are allowed to operate on the Private Cloud control plane.
+       * The same or equivalent SAML IDP should be used by the Public Cloud control plane and the Private Cloud control plane, in order for the user to be mapped by SAML user ID.
+       * </pre>
+       *
+       * <code>string samlIdentityProvider = 4 [(.options.FieldExtension.required) = true];</code>
+       * @return The samlIdentityProvider.
+       */
+      public java.lang.String getSamlIdentityProvider() {
+        java.lang.Object ref = samlIdentityProvider_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          samlIdentityProvider_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The name or ID or CRN of the SAML identity provider from Public Cloud control plane in which users are allowed to operate on the Private Cloud control plane.
+       * The same or equivalent SAML IDP should be used by the Public Cloud control plane and the Private Cloud control plane, in order for the user to be mapped by SAML user ID.
+       * </pre>
+       *
+       * <code>string samlIdentityProvider = 4 [(.options.FieldExtension.required) = true];</code>
+       * @return The bytes for samlIdentityProvider.
+       */
+      public com.google.protobuf.ByteString
+          getSamlIdentityProviderBytes() {
+        java.lang.Object ref = samlIdentityProvider_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          samlIdentityProvider_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The name or ID or CRN of the SAML identity provider from Public Cloud control plane in which users are allowed to operate on the Private Cloud control plane.
+       * The same or equivalent SAML IDP should be used by the Public Cloud control plane and the Private Cloud control plane, in order for the user to be mapped by SAML user ID.
+       * </pre>
+       *
+       * <code>string samlIdentityProvider = 4 [(.options.FieldExtension.required) = true];</code>
+       * @param value The samlIdentityProvider to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSamlIdentityProvider(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        samlIdentityProvider_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The name or ID or CRN of the SAML identity provider from Public Cloud control plane in which users are allowed to operate on the Private Cloud control plane.
+       * The same or equivalent SAML IDP should be used by the Public Cloud control plane and the Private Cloud control plane, in order for the user to be mapped by SAML user ID.
+       * </pre>
+       *
+       * <code>string samlIdentityProvider = 4 [(.options.FieldExtension.required) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSamlIdentityProvider() {
+        samlIdentityProvider_ = getDefaultInstance().getSamlIdentityProvider();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The name or ID or CRN of the SAML identity provider from Public Cloud control plane in which users are allowed to operate on the Private Cloud control plane.
+       * The same or equivalent SAML IDP should be used by the Public Cloud control plane and the Private Cloud control plane, in order for the user to be mapped by SAML user ID.
+       * </pre>
+       *
+       * <code>string samlIdentityProvider = 4 [(.options.FieldExtension.required) = true];</code>
+       * @param value The bytes for samlIdentityProvider to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSamlIdentityProviderBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        samlIdentityProvider_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object description_ = "";
+      /**
+       * <pre>
+       * The description of the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>string description = 5;</code>
+       * @return The description.
+       */
+      public java.lang.String getDescription() {
+        java.lang.Object ref = description_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          description_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The description of the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>string description = 5;</code>
+       * @return The bytes for description.
+       */
+      public com.google.protobuf.ByteString
+          getDescriptionBytes() {
+        java.lang.Object ref = description_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          description_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The description of the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>string description = 5;</code>
+       * @param value The description to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDescription(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        description_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The description of the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>string description = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDescription() {
+        description_ = getDefaultInstance().getDescription();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The description of the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>string description = 5;</code>
+       * @param value The bytes for description to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDescriptionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        description_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:remotecluster.UpdatePvcControlPlaneRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:remotecluster.UpdatePvcControlPlaneRequest)
+    private static final com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest();
+    }
+
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<UpdatePvcControlPlaneRequest>
+        PARSER = new com.google.protobuf.AbstractParser<UpdatePvcControlPlaneRequest>() {
+      @java.lang.Override
+      public UpdatePvcControlPlaneRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<UpdatePvcControlPlaneRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<UpdatePvcControlPlaneRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface UpdatePvcControlPlaneResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:remotecluster.UpdatePvcControlPlaneResponse)
+      com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * <pre>
+   * Response object for the UpdatePvcControlPlane method.
+   * </pre>
+   *
+   * Protobuf type {@code remotecluster.UpdatePvcControlPlaneResponse}
+   */
+  public static final class UpdatePvcControlPlaneResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:remotecluster.UpdatePvcControlPlaneResponse)
+      UpdatePvcControlPlaneResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use UpdatePvcControlPlaneResponse.newBuilder() to construct.
+    private UpdatePvcControlPlaneResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private UpdatePvcControlPlaneResponse() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new UpdatePvcControlPlaneResponse();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_UpdatePvcControlPlaneResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_UpdatePvcControlPlaneResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse.Builder.class);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse other = (com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse) obj;
+
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Response object for the UpdatePvcControlPlane method.
+     * </pre>
+     *
+     * Protobuf type {@code remotecluster.UpdatePvcControlPlaneResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:remotecluster.UpdatePvcControlPlaneResponse)
+        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_UpdatePvcControlPlaneResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_UpdatePvcControlPlaneResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_UpdatePvcControlPlaneResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse build() {
+        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse buildPartial() {
+        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse result = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse(this);
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse) {
+          return mergeFrom((com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse other) {
+        if (other == com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:remotecluster.UpdatePvcControlPlaneResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:remotecluster.UpdatePvcControlPlaneResponse)
+    private static final com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse();
+    }
+
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<UpdatePvcControlPlaneResponse>
+        PARSER = new com.google.protobuf.AbstractParser<UpdatePvcControlPlaneResponse>() {
+      @java.lang.Override
+      public UpdatePvcControlPlaneResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<UpdatePvcControlPlaneResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<UpdatePvcControlPlaneResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -7454,6 +10039,26 @@ public final class RemoteClusterProto {
      * @return The lastUpdatedTime.
      */
     long getLastUpdatedTime();
+
+    /**
+     * <pre>
+     * The status of the Jumpgate Agent Secret Rotation in the Private Cloud control plane.
+     * </pre>
+     *
+     * <code>string agentSecretRotationStatus = 11 [(.options.FieldExtension.hidden) = true, (.options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT"];</code>
+     * @return The agentSecretRotationStatus.
+     */
+    java.lang.String getAgentSecretRotationStatus();
+    /**
+     * <pre>
+     * The status of the Jumpgate Agent Secret Rotation in the Private Cloud control plane.
+     * </pre>
+     *
+     * <code>string agentSecretRotationStatus = 11 [(.options.FieldExtension.hidden) = true, (.options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT"];</code>
+     * @return The bytes for agentSecretRotationStatus.
+     */
+    com.google.protobuf.ByteString
+        getAgentSecretRotationStatusBytes();
   }
   /**
    * <pre>
@@ -7480,6 +10085,7 @@ public final class RemoteClusterProto {
       baseUrl_ = "";
       idpCrn_ = "";
       pvcStatus_ = "";
+      agentSecretRotationStatus_ = "";
     }
 
     @java.lang.Override
@@ -7887,6 +10493,53 @@ public final class RemoteClusterProto {
       return lastUpdatedTime_;
     }
 
+    public static final int AGENTSECRETROTATIONSTATUS_FIELD_NUMBER = 11;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object agentSecretRotationStatus_ = "";
+    /**
+     * <pre>
+     * The status of the Jumpgate Agent Secret Rotation in the Private Cloud control plane.
+     * </pre>
+     *
+     * <code>string agentSecretRotationStatus = 11 [(.options.FieldExtension.hidden) = true, (.options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT"];</code>
+     * @return The agentSecretRotationStatus.
+     */
+    @java.lang.Override
+    public java.lang.String getAgentSecretRotationStatus() {
+      java.lang.Object ref = agentSecretRotationStatus_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        agentSecretRotationStatus_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The status of the Jumpgate Agent Secret Rotation in the Private Cloud control plane.
+     * </pre>
+     *
+     * <code>string agentSecretRotationStatus = 11 [(.options.FieldExtension.hidden) = true, (.options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT"];</code>
+     * @return The bytes for agentSecretRotationStatus.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getAgentSecretRotationStatusBytes() {
+      java.lang.Object ref = agentSecretRotationStatus_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        agentSecretRotationStatus_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -7931,6 +10584,9 @@ public final class RemoteClusterProto {
       if (lastUpdatedTime_ != 0L) {
         output.writeInt64(10, lastUpdatedTime_);
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(agentSecretRotationStatus_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 11, agentSecretRotationStatus_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -7973,6 +10629,9 @@ public final class RemoteClusterProto {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(10, lastUpdatedTime_);
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(agentSecretRotationStatus_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, agentSecretRotationStatus_);
+      }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
@@ -8007,6 +10666,8 @@ public final class RemoteClusterProto {
           != other.getPvcEnvironmentCount()) return false;
       if (getLastUpdatedTime()
           != other.getLastUpdatedTime()) return false;
+      if (!getAgentSecretRotationStatus()
+          .equals(other.getAgentSecretRotationStatus())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -8039,6 +10700,8 @@ public final class RemoteClusterProto {
       hash = (37 * hash) + LASTUPDATEDTIME_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getLastUpdatedTime());
+      hash = (37 * hash) + AGENTSECRETROTATIONSTATUS_FIELD_NUMBER;
+      hash = (53 * hash) + getAgentSecretRotationStatus().hashCode();
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -8184,6 +10847,7 @@ public final class RemoteClusterProto {
         pvcStatus_ = "";
         pvcEnvironmentCount_ = 0;
         lastUpdatedTime_ = 0L;
+        agentSecretRotationStatus_ = "";
         return this;
       }
 
@@ -8246,6 +10910,9 @@ public final class RemoteClusterProto {
         }
         if (((from_bitField0_ & 0x00000200) != 0)) {
           result.lastUpdatedTime_ = lastUpdatedTime_;
+        }
+        if (((from_bitField0_ & 0x00000400) != 0)) {
+          result.agentSecretRotationStatus_ = agentSecretRotationStatus_;
         }
       }
 
@@ -8337,6 +11004,11 @@ public final class RemoteClusterProto {
         if (other.getLastUpdatedTime() != 0L) {
           setLastUpdatedTime(other.getLastUpdatedTime());
         }
+        if (!other.getAgentSecretRotationStatus().isEmpty()) {
+          agentSecretRotationStatus_ = other.agentSecretRotationStatus_;
+          bitField0_ |= 0x00000400;
+          onChanged();
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -8413,6 +11085,11 @@ public final class RemoteClusterProto {
                 bitField0_ |= 0x00000200;
                 break;
               } // case 80
+              case 90: {
+                agentSecretRotationStatus_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000400;
+                break;
+              } // case 90
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -9234,6 +11911,98 @@ public final class RemoteClusterProto {
         onChanged();
         return this;
       }
+
+      private java.lang.Object agentSecretRotationStatus_ = "";
+      /**
+       * <pre>
+       * The status of the Jumpgate Agent Secret Rotation in the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>string agentSecretRotationStatus = 11 [(.options.FieldExtension.hidden) = true, (.options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT"];</code>
+       * @return The agentSecretRotationStatus.
+       */
+      public java.lang.String getAgentSecretRotationStatus() {
+        java.lang.Object ref = agentSecretRotationStatus_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          agentSecretRotationStatus_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The status of the Jumpgate Agent Secret Rotation in the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>string agentSecretRotationStatus = 11 [(.options.FieldExtension.hidden) = true, (.options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT"];</code>
+       * @return The bytes for agentSecretRotationStatus.
+       */
+      public com.google.protobuf.ByteString
+          getAgentSecretRotationStatusBytes() {
+        java.lang.Object ref = agentSecretRotationStatus_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          agentSecretRotationStatus_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The status of the Jumpgate Agent Secret Rotation in the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>string agentSecretRotationStatus = 11 [(.options.FieldExtension.hidden) = true, (.options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT"];</code>
+       * @param value The agentSecretRotationStatus to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAgentSecretRotationStatus(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        agentSecretRotationStatus_ = value;
+        bitField0_ |= 0x00000400;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The status of the Jumpgate Agent Secret Rotation in the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>string agentSecretRotationStatus = 11 [(.options.FieldExtension.hidden) = true, (.options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT"];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearAgentSecretRotationStatus() {
+        agentSecretRotationStatus_ = getDefaultInstance().getAgentSecretRotationStatus();
+        bitField0_ = (bitField0_ & ~0x00000400);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The status of the Jumpgate Agent Secret Rotation in the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>string agentSecretRotationStatus = 11 [(.options.FieldExtension.hidden) = true, (.options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT"];</code>
+       * @param value The bytes for agentSecretRotationStatus to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAgentSecretRotationStatusBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        agentSecretRotationStatus_ = value;
+        bitField0_ |= 0x00000400;
+        onChanged();
+        return this;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -9293,15873 +12062,6 @@ public final class RemoteClusterProto {
 
     @java.lang.Override
     public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.PvcControlPlaneConfiguration getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface ListRemoteClustersRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:remotecluster.ListRemoteClustersRequest)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <pre>
-     * The page size.
-     * </pre>
-     *
-     * <code>int32 pageSize = 1 [(.options.FieldExtension.pagingPageSize) = true, (.options.FieldExtension.minimum) = 1, (.options.FieldExtension.maximum) = 100];</code>
-     * @return The pageSize.
-     */
-    int getPageSize();
-
-    /**
-     * <pre>
-     * A token to specify where to start paginating. This is the nextToken from a previously truncated response.
-     * </pre>
-     *
-     * <code>string pageToken = 2 [(.options.FieldExtension.pagingInputToken) = true];</code>
-     * @return The pageToken.
-     */
-    java.lang.String getPageToken();
-    /**
-     * <pre>
-     * A token to specify where to start paginating. This is the nextToken from a previously truncated response.
-     * </pre>
-     *
-     * <code>string pageToken = 2 [(.options.FieldExtension.pagingInputToken) = true];</code>
-     * @return The bytes for pageToken.
-     */
-    com.google.protobuf.ByteString
-        getPageTokenBytes();
-
-    /**
-     * <pre>
-     * Manager type of the remote cluster.
-     * </pre>
-     *
-     * <code>.remotecluster.ManagerType.Value managerType = 3;</code>
-     * @return The enum numeric value on the wire for managerType.
-     */
-    int getManagerTypeValue();
-    /**
-     * <pre>
-     * Manager type of the remote cluster.
-     * </pre>
-     *
-     * <code>.remotecluster.ManagerType.Value managerType = 3;</code>
-     * @return The managerType.
-     */
-    com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Value getManagerType();
-
-    /**
-     * <pre>
-     * Services in the remote cluster.
-     * </pre>
-     *
-     * <code>repeated string services = 4;</code>
-     * @return A list containing the services.
-     */
-    java.util.List<java.lang.String>
-        getServicesList();
-    /**
-     * <pre>
-     * Services in the remote cluster.
-     * </pre>
-     *
-     * <code>repeated string services = 4;</code>
-     * @return The count of services.
-     */
-    int getServicesCount();
-    /**
-     * <pre>
-     * Services in the remote cluster.
-     * </pre>
-     *
-     * <code>repeated string services = 4;</code>
-     * @param index The index of the element to return.
-     * @return The services at the given index.
-     */
-    java.lang.String getServices(int index);
-    /**
-     * <pre>
-     * Services in the remote cluster.
-     * </pre>
-     *
-     * <code>repeated string services = 4;</code>
-     * @param index The index of the value to return.
-     * @return The bytes of the services at the given index.
-     */
-    com.google.protobuf.ByteString
-        getServicesBytes(int index);
-
-    /**
-     * <pre>
-     * Operator on which the filters should be applied.
-     * </pre>
-     *
-     * <code>.remotecluster.Operator.Value operator = 5;</code>
-     * @return The enum numeric value on the wire for operator.
-     */
-    int getOperatorValue();
-    /**
-     * <pre>
-     * Operator on which the filters should be applied.
-     * </pre>
-     *
-     * <code>.remotecluster.Operator.Value operator = 5;</code>
-     * @return The operator.
-     */
-    com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator.Value getOperator();
-  }
-  /**
-   * <pre>
-   * Request object for the ListRemoteClusters method.
-   * </pre>
-   *
-   * Protobuf type {@code remotecluster.ListRemoteClustersRequest}
-   */
-  public static final class ListRemoteClustersRequest extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:remotecluster.ListRemoteClustersRequest)
-      ListRemoteClustersRequestOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use ListRemoteClustersRequest.newBuilder() to construct.
-    private ListRemoteClustersRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private ListRemoteClustersRequest() {
-      pageToken_ = "";
-      managerType_ = 0;
-      services_ =
-          com.google.protobuf.LazyStringArrayList.emptyList();
-      operator_ = 0;
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new ListRemoteClustersRequest();
-    }
-
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_ListRemoteClustersRequest_descriptor;
-    }
-
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_ListRemoteClustersRequest_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest.Builder.class);
-    }
-
-    public static final int PAGESIZE_FIELD_NUMBER = 1;
-    private int pageSize_ = 0;
-    /**
-     * <pre>
-     * The page size.
-     * </pre>
-     *
-     * <code>int32 pageSize = 1 [(.options.FieldExtension.pagingPageSize) = true, (.options.FieldExtension.minimum) = 1, (.options.FieldExtension.maximum) = 100];</code>
-     * @return The pageSize.
-     */
-    @java.lang.Override
-    public int getPageSize() {
-      return pageSize_;
-    }
-
-    public static final int PAGETOKEN_FIELD_NUMBER = 2;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object pageToken_ = "";
-    /**
-     * <pre>
-     * A token to specify where to start paginating. This is the nextToken from a previously truncated response.
-     * </pre>
-     *
-     * <code>string pageToken = 2 [(.options.FieldExtension.pagingInputToken) = true];</code>
-     * @return The pageToken.
-     */
-    @java.lang.Override
-    public java.lang.String getPageToken() {
-      java.lang.Object ref = pageToken_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        pageToken_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * A token to specify where to start paginating. This is the nextToken from a previously truncated response.
-     * </pre>
-     *
-     * <code>string pageToken = 2 [(.options.FieldExtension.pagingInputToken) = true];</code>
-     * @return The bytes for pageToken.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getPageTokenBytes() {
-      java.lang.Object ref = pageToken_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        pageToken_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int MANAGERTYPE_FIELD_NUMBER = 3;
-    private int managerType_ = 0;
-    /**
-     * <pre>
-     * Manager type of the remote cluster.
-     * </pre>
-     *
-     * <code>.remotecluster.ManagerType.Value managerType = 3;</code>
-     * @return The enum numeric value on the wire for managerType.
-     */
-    @java.lang.Override public int getManagerTypeValue() {
-      return managerType_;
-    }
-    /**
-     * <pre>
-     * Manager type of the remote cluster.
-     * </pre>
-     *
-     * <code>.remotecluster.ManagerType.Value managerType = 3;</code>
-     * @return The managerType.
-     */
-    @java.lang.Override public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Value getManagerType() {
-      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Value result = com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Value.forNumber(managerType_);
-      return result == null ? com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Value.UNRECOGNIZED : result;
-    }
-
-    public static final int SERVICES_FIELD_NUMBER = 4;
-    @SuppressWarnings("serial")
-    private com.google.protobuf.LazyStringArrayList services_ =
-        com.google.protobuf.LazyStringArrayList.emptyList();
-    /**
-     * <pre>
-     * Services in the remote cluster.
-     * </pre>
-     *
-     * <code>repeated string services = 4;</code>
-     * @return A list containing the services.
-     */
-    public com.google.protobuf.ProtocolStringList
-        getServicesList() {
-      return services_;
-    }
-    /**
-     * <pre>
-     * Services in the remote cluster.
-     * </pre>
-     *
-     * <code>repeated string services = 4;</code>
-     * @return The count of services.
-     */
-    public int getServicesCount() {
-      return services_.size();
-    }
-    /**
-     * <pre>
-     * Services in the remote cluster.
-     * </pre>
-     *
-     * <code>repeated string services = 4;</code>
-     * @param index The index of the element to return.
-     * @return The services at the given index.
-     */
-    public java.lang.String getServices(int index) {
-      return services_.get(index);
-    }
-    /**
-     * <pre>
-     * Services in the remote cluster.
-     * </pre>
-     *
-     * <code>repeated string services = 4;</code>
-     * @param index The index of the value to return.
-     * @return The bytes of the services at the given index.
-     */
-    public com.google.protobuf.ByteString
-        getServicesBytes(int index) {
-      return services_.getByteString(index);
-    }
-
-    public static final int OPERATOR_FIELD_NUMBER = 5;
-    private int operator_ = 0;
-    /**
-     * <pre>
-     * Operator on which the filters should be applied.
-     * </pre>
-     *
-     * <code>.remotecluster.Operator.Value operator = 5;</code>
-     * @return The enum numeric value on the wire for operator.
-     */
-    @java.lang.Override public int getOperatorValue() {
-      return operator_;
-    }
-    /**
-     * <pre>
-     * Operator on which the filters should be applied.
-     * </pre>
-     *
-     * <code>.remotecluster.Operator.Value operator = 5;</code>
-     * @return The operator.
-     */
-    @java.lang.Override public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator.Value getOperator() {
-      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator.Value result = com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator.Value.forNumber(operator_);
-      return result == null ? com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator.Value.UNRECOGNIZED : result;
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (pageSize_ != 0) {
-        output.writeInt32(1, pageSize_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pageToken_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, pageToken_);
-      }
-      if (managerType_ != com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Value.UNSET.getNumber()) {
-        output.writeEnum(3, managerType_);
-      }
-      for (int i = 0; i < services_.size(); i++) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, services_.getRaw(i));
-      }
-      if (operator_ != com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator.Value.UNSET.getNumber()) {
-        output.writeEnum(5, operator_);
-      }
-      getUnknownFields().writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (pageSize_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(1, pageSize_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pageToken_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, pageToken_);
-      }
-      if (managerType_ != com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Value.UNSET.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(3, managerType_);
-      }
-      {
-        int dataSize = 0;
-        for (int i = 0; i < services_.size(); i++) {
-          dataSize += computeStringSizeNoTag(services_.getRaw(i));
-        }
-        size += dataSize;
-        size += 1 * getServicesList().size();
-      }
-      if (operator_ != com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator.Value.UNSET.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(5, operator_);
-      }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest)) {
-        return super.equals(obj);
-      }
-      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest other = (com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest) obj;
-
-      if (getPageSize()
-          != other.getPageSize()) return false;
-      if (!getPageToken()
-          .equals(other.getPageToken())) return false;
-      if (managerType_ != other.managerType_) return false;
-      if (!getServicesList()
-          .equals(other.getServicesList())) return false;
-      if (operator_ != other.operator_) return false;
-      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + PAGESIZE_FIELD_NUMBER;
-      hash = (53 * hash) + getPageSize();
-      hash = (37 * hash) + PAGETOKEN_FIELD_NUMBER;
-      hash = (53 * hash) + getPageToken().hashCode();
-      hash = (37 * hash) + MANAGERTYPE_FIELD_NUMBER;
-      hash = (53 * hash) + managerType_;
-      if (getServicesCount() > 0) {
-        hash = (37 * hash) + SERVICES_FIELD_NUMBER;
-        hash = (53 * hash) + getServicesList().hashCode();
-      }
-      hash = (37 * hash) + OPERATOR_FIELD_NUMBER;
-      hash = (53 * hash) + operator_;
-      hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * <pre>
-     * Request object for the ListRemoteClusters method.
-     * </pre>
-     *
-     * Protobuf type {@code remotecluster.ListRemoteClustersRequest}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:remotecluster.ListRemoteClustersRequest)
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequestOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_ListRemoteClustersRequest_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_ListRemoteClustersRequest_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest.Builder.class);
-      }
-
-      // Construct using com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest.newBuilder()
-      private Builder() {
-
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        bitField0_ = 0;
-        pageSize_ = 0;
-        pageToken_ = "";
-        managerType_ = 0;
-        services_ =
-            com.google.protobuf.LazyStringArrayList.emptyList();
-        operator_ = 0;
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_ListRemoteClustersRequest_descriptor;
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest getDefaultInstanceForType() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest build() {
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest buildPartial() {
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest result = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest(this);
-        if (bitField0_ != 0) { buildPartial0(result); }
-        onBuilt();
-        return result;
-      }
-
-      private void buildPartial0(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest result) {
-        int from_bitField0_ = bitField0_;
-        if (((from_bitField0_ & 0x00000001) != 0)) {
-          result.pageSize_ = pageSize_;
-        }
-        if (((from_bitField0_ & 0x00000002) != 0)) {
-          result.pageToken_ = pageToken_;
-        }
-        if (((from_bitField0_ & 0x00000004) != 0)) {
-          result.managerType_ = managerType_;
-        }
-        if (((from_bitField0_ & 0x00000008) != 0)) {
-          services_.makeImmutable();
-          result.services_ = services_;
-        }
-        if (((from_bitField0_ & 0x00000010) != 0)) {
-          result.operator_ = operator_;
-        }
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest) {
-          return mergeFrom((com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest other) {
-        if (other == com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest.getDefaultInstance()) return this;
-        if (other.getPageSize() != 0) {
-          setPageSize(other.getPageSize());
-        }
-        if (!other.getPageToken().isEmpty()) {
-          pageToken_ = other.pageToken_;
-          bitField0_ |= 0x00000002;
-          onChanged();
-        }
-        if (other.managerType_ != 0) {
-          setManagerTypeValue(other.getManagerTypeValue());
-        }
-        if (!other.services_.isEmpty()) {
-          if (services_.isEmpty()) {
-            services_ = other.services_;
-            bitField0_ |= 0x00000008;
-          } else {
-            ensureServicesIsMutable();
-            services_.addAll(other.services_);
-          }
-          onChanged();
-        }
-        if (other.operator_ != 0) {
-          setOperatorValue(other.getOperatorValue());
-        }
-        this.mergeUnknownFields(other.getUnknownFields());
-        onChanged();
-        return this;
-      }
-
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        if (extensionRegistry == null) {
-          throw new java.lang.NullPointerException();
-        }
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              case 8: {
-                pageSize_ = input.readInt32();
-                bitField0_ |= 0x00000001;
-                break;
-              } // case 8
-              case 18: {
-                pageToken_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000002;
-                break;
-              } // case 18
-              case 24: {
-                managerType_ = input.readEnum();
-                bitField0_ |= 0x00000004;
-                break;
-              } // case 24
-              case 34: {
-                java.lang.String s = input.readStringRequireUtf8();
-                ensureServicesIsMutable();
-                services_.add(s);
-                break;
-              } // case 34
-              case 40: {
-                operator_ = input.readEnum();
-                bitField0_ |= 0x00000010;
-                break;
-              } // case 40
-              default: {
-                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
-                  done = true; // was an endgroup tag
-                }
-                break;
-              } // default:
-            } // switch (tag)
-          } // while (!done)
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.unwrapIOException();
-        } finally {
-          onChanged();
-        } // finally
-        return this;
-      }
-      private int bitField0_;
-
-      private int pageSize_ ;
-      /**
-       * <pre>
-       * The page size.
-       * </pre>
-       *
-       * <code>int32 pageSize = 1 [(.options.FieldExtension.pagingPageSize) = true, (.options.FieldExtension.minimum) = 1, (.options.FieldExtension.maximum) = 100];</code>
-       * @return The pageSize.
-       */
-      @java.lang.Override
-      public int getPageSize() {
-        return pageSize_;
-      }
-      /**
-       * <pre>
-       * The page size.
-       * </pre>
-       *
-       * <code>int32 pageSize = 1 [(.options.FieldExtension.pagingPageSize) = true, (.options.FieldExtension.minimum) = 1, (.options.FieldExtension.maximum) = 100];</code>
-       * @param value The pageSize to set.
-       * @return This builder for chaining.
-       */
-      public Builder setPageSize(int value) {
-
-        pageSize_ = value;
-        bitField0_ |= 0x00000001;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The page size.
-       * </pre>
-       *
-       * <code>int32 pageSize = 1 [(.options.FieldExtension.pagingPageSize) = true, (.options.FieldExtension.minimum) = 1, (.options.FieldExtension.maximum) = 100];</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearPageSize() {
-        bitField0_ = (bitField0_ & ~0x00000001);
-        pageSize_ = 0;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object pageToken_ = "";
-      /**
-       * <pre>
-       * A token to specify where to start paginating. This is the nextToken from a previously truncated response.
-       * </pre>
-       *
-       * <code>string pageToken = 2 [(.options.FieldExtension.pagingInputToken) = true];</code>
-       * @return The pageToken.
-       */
-      public java.lang.String getPageToken() {
-        java.lang.Object ref = pageToken_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          pageToken_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * A token to specify where to start paginating. This is the nextToken from a previously truncated response.
-       * </pre>
-       *
-       * <code>string pageToken = 2 [(.options.FieldExtension.pagingInputToken) = true];</code>
-       * @return The bytes for pageToken.
-       */
-      public com.google.protobuf.ByteString
-          getPageTokenBytes() {
-        java.lang.Object ref = pageToken_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          pageToken_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * A token to specify where to start paginating. This is the nextToken from a previously truncated response.
-       * </pre>
-       *
-       * <code>string pageToken = 2 [(.options.FieldExtension.pagingInputToken) = true];</code>
-       * @param value The pageToken to set.
-       * @return This builder for chaining.
-       */
-      public Builder setPageToken(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        pageToken_ = value;
-        bitField0_ |= 0x00000002;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * A token to specify where to start paginating. This is the nextToken from a previously truncated response.
-       * </pre>
-       *
-       * <code>string pageToken = 2 [(.options.FieldExtension.pagingInputToken) = true];</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearPageToken() {
-        pageToken_ = getDefaultInstance().getPageToken();
-        bitField0_ = (bitField0_ & ~0x00000002);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * A token to specify where to start paginating. This is the nextToken from a previously truncated response.
-       * </pre>
-       *
-       * <code>string pageToken = 2 [(.options.FieldExtension.pagingInputToken) = true];</code>
-       * @param value The bytes for pageToken to set.
-       * @return This builder for chaining.
-       */
-      public Builder setPageTokenBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        pageToken_ = value;
-        bitField0_ |= 0x00000002;
-        onChanged();
-        return this;
-      }
-
-      private int managerType_ = 0;
-      /**
-       * <pre>
-       * Manager type of the remote cluster.
-       * </pre>
-       *
-       * <code>.remotecluster.ManagerType.Value managerType = 3;</code>
-       * @return The enum numeric value on the wire for managerType.
-       */
-      @java.lang.Override public int getManagerTypeValue() {
-        return managerType_;
-      }
-      /**
-       * <pre>
-       * Manager type of the remote cluster.
-       * </pre>
-       *
-       * <code>.remotecluster.ManagerType.Value managerType = 3;</code>
-       * @param value The enum numeric value on the wire for managerType to set.
-       * @return This builder for chaining.
-       */
-      public Builder setManagerTypeValue(int value) {
-        managerType_ = value;
-        bitField0_ |= 0x00000004;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Manager type of the remote cluster.
-       * </pre>
-       *
-       * <code>.remotecluster.ManagerType.Value managerType = 3;</code>
-       * @return The managerType.
-       */
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Value getManagerType() {
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Value result = com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Value.forNumber(managerType_);
-        return result == null ? com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Value.UNRECOGNIZED : result;
-      }
-      /**
-       * <pre>
-       * Manager type of the remote cluster.
-       * </pre>
-       *
-       * <code>.remotecluster.ManagerType.Value managerType = 3;</code>
-       * @param value The managerType to set.
-       * @return This builder for chaining.
-       */
-      public Builder setManagerType(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Value value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        bitField0_ |= 0x00000004;
-        managerType_ = value.getNumber();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Manager type of the remote cluster.
-       * </pre>
-       *
-       * <code>.remotecluster.ManagerType.Value managerType = 3;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearManagerType() {
-        bitField0_ = (bitField0_ & ~0x00000004);
-        managerType_ = 0;
-        onChanged();
-        return this;
-      }
-
-      private com.google.protobuf.LazyStringArrayList services_ =
-          com.google.protobuf.LazyStringArrayList.emptyList();
-      private void ensureServicesIsMutable() {
-        if (!services_.isModifiable()) {
-          services_ = new com.google.protobuf.LazyStringArrayList(services_);
-        }
-        bitField0_ |= 0x00000008;
-      }
-      /**
-       * <pre>
-       * Services in the remote cluster.
-       * </pre>
-       *
-       * <code>repeated string services = 4;</code>
-       * @return A list containing the services.
-       */
-      public com.google.protobuf.ProtocolStringList
-          getServicesList() {
-        services_.makeImmutable();
-        return services_;
-      }
-      /**
-       * <pre>
-       * Services in the remote cluster.
-       * </pre>
-       *
-       * <code>repeated string services = 4;</code>
-       * @return The count of services.
-       */
-      public int getServicesCount() {
-        return services_.size();
-      }
-      /**
-       * <pre>
-       * Services in the remote cluster.
-       * </pre>
-       *
-       * <code>repeated string services = 4;</code>
-       * @param index The index of the element to return.
-       * @return The services at the given index.
-       */
-      public java.lang.String getServices(int index) {
-        return services_.get(index);
-      }
-      /**
-       * <pre>
-       * Services in the remote cluster.
-       * </pre>
-       *
-       * <code>repeated string services = 4;</code>
-       * @param index The index of the value to return.
-       * @return The bytes of the services at the given index.
-       */
-      public com.google.protobuf.ByteString
-          getServicesBytes(int index) {
-        return services_.getByteString(index);
-      }
-      /**
-       * <pre>
-       * Services in the remote cluster.
-       * </pre>
-       *
-       * <code>repeated string services = 4;</code>
-       * @param index The index to set the value at.
-       * @param value The services to set.
-       * @return This builder for chaining.
-       */
-      public Builder setServices(
-          int index, java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        ensureServicesIsMutable();
-        services_.set(index, value);
-        bitField0_ |= 0x00000008;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Services in the remote cluster.
-       * </pre>
-       *
-       * <code>repeated string services = 4;</code>
-       * @param value The services to add.
-       * @return This builder for chaining.
-       */
-      public Builder addServices(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        ensureServicesIsMutable();
-        services_.add(value);
-        bitField0_ |= 0x00000008;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Services in the remote cluster.
-       * </pre>
-       *
-       * <code>repeated string services = 4;</code>
-       * @param values The services to add.
-       * @return This builder for chaining.
-       */
-      public Builder addAllServices(
-          java.lang.Iterable<java.lang.String> values) {
-        ensureServicesIsMutable();
-        com.google.protobuf.AbstractMessageLite.Builder.addAll(
-            values, services_);
-        bitField0_ |= 0x00000008;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Services in the remote cluster.
-       * </pre>
-       *
-       * <code>repeated string services = 4;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearServices() {
-        services_ =
-          com.google.protobuf.LazyStringArrayList.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000008);;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Services in the remote cluster.
-       * </pre>
-       *
-       * <code>repeated string services = 4;</code>
-       * @param value The bytes of the services to add.
-       * @return This builder for chaining.
-       */
-      public Builder addServicesBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        ensureServicesIsMutable();
-        services_.add(value);
-        bitField0_ |= 0x00000008;
-        onChanged();
-        return this;
-      }
-
-      private int operator_ = 0;
-      /**
-       * <pre>
-       * Operator on which the filters should be applied.
-       * </pre>
-       *
-       * <code>.remotecluster.Operator.Value operator = 5;</code>
-       * @return The enum numeric value on the wire for operator.
-       */
-      @java.lang.Override public int getOperatorValue() {
-        return operator_;
-      }
-      /**
-       * <pre>
-       * Operator on which the filters should be applied.
-       * </pre>
-       *
-       * <code>.remotecluster.Operator.Value operator = 5;</code>
-       * @param value The enum numeric value on the wire for operator to set.
-       * @return This builder for chaining.
-       */
-      public Builder setOperatorValue(int value) {
-        operator_ = value;
-        bitField0_ |= 0x00000010;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Operator on which the filters should be applied.
-       * </pre>
-       *
-       * <code>.remotecluster.Operator.Value operator = 5;</code>
-       * @return The operator.
-       */
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator.Value getOperator() {
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator.Value result = com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator.Value.forNumber(operator_);
-        return result == null ? com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator.Value.UNRECOGNIZED : result;
-      }
-      /**
-       * <pre>
-       * Operator on which the filters should be applied.
-       * </pre>
-       *
-       * <code>.remotecluster.Operator.Value operator = 5;</code>
-       * @param value The operator to set.
-       * @return This builder for chaining.
-       */
-      public Builder setOperator(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator.Value value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        bitField0_ |= 0x00000010;
-        operator_ = value.getNumber();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Operator on which the filters should be applied.
-       * </pre>
-       *
-       * <code>.remotecluster.Operator.Value operator = 5;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearOperator() {
-        bitField0_ = (bitField0_ & ~0x00000010);
-        operator_ = 0;
-        onChanged();
-        return this;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:remotecluster.ListRemoteClustersRequest)
-    }
-
-    // @@protoc_insertion_point(class_scope:remotecluster.ListRemoteClustersRequest)
-    private static final com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest();
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<ListRemoteClustersRequest>
-        PARSER = new com.google.protobuf.AbstractParser<ListRemoteClustersRequest>() {
-      @java.lang.Override
-      public ListRemoteClustersRequest parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        Builder builder = newBuilder();
-        try {
-          builder.mergeFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(builder.buildPartial());
-        } catch (com.google.protobuf.UninitializedMessageException e) {
-          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(e)
-              .setUnfinishedMessage(builder.buildPartial());
-        }
-        return builder.buildPartial();
-      }
-    };
-
-    public static com.google.protobuf.Parser<ListRemoteClustersRequest> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<ListRemoteClustersRequest> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface ListRemoteClustersResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:remotecluster.ListRemoteClustersResponse)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <pre>
-     * List of remote cluster details.
-     * </pre>
-     *
-     * <code>repeated .remotecluster.RemoteClusterData remoteClusters = 1 [(.options.FieldExtension.pagingResult) = true];</code>
-     */
-    java.util.List<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData> 
-        getRemoteClustersList();
-    /**
-     * <pre>
-     * List of remote cluster details.
-     * </pre>
-     *
-     * <code>repeated .remotecluster.RemoteClusterData remoteClusters = 1 [(.options.FieldExtension.pagingResult) = true];</code>
-     */
-    com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData getRemoteClusters(int index);
-    /**
-     * <pre>
-     * List of remote cluster details.
-     * </pre>
-     *
-     * <code>repeated .remotecluster.RemoteClusterData remoteClusters = 1 [(.options.FieldExtension.pagingResult) = true];</code>
-     */
-    int getRemoteClustersCount();
-    /**
-     * <pre>
-     * List of remote cluster details.
-     * </pre>
-     *
-     * <code>repeated .remotecluster.RemoteClusterData remoteClusters = 1 [(.options.FieldExtension.pagingResult) = true];</code>
-     */
-    java.util.List<? extends com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterDataOrBuilder> 
-        getRemoteClustersOrBuilderList();
-    /**
-     * <pre>
-     * List of remote cluster details.
-     * </pre>
-     *
-     * <code>repeated .remotecluster.RemoteClusterData remoteClusters = 1 [(.options.FieldExtension.pagingResult) = true];</code>
-     */
-    com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterDataOrBuilder getRemoteClustersOrBuilder(
-        int index);
-
-    /**
-     * <pre>
-     * The token to use when requesting the next set of results. If not present, there are no additional results.
-     * </pre>
-     *
-     * <code>string nextPageToken = 2 [(.options.FieldExtension.pagingOutputToken) = true];</code>
-     * @return The nextPageToken.
-     */
-    java.lang.String getNextPageToken();
-    /**
-     * <pre>
-     * The token to use when requesting the next set of results. If not present, there are no additional results.
-     * </pre>
-     *
-     * <code>string nextPageToken = 2 [(.options.FieldExtension.pagingOutputToken) = true];</code>
-     * @return The bytes for nextPageToken.
-     */
-    com.google.protobuf.ByteString
-        getNextPageTokenBytes();
-  }
-  /**
-   * <pre>
-   * Response object for the ListRemoteClusters method.
-   * </pre>
-   *
-   * Protobuf type {@code remotecluster.ListRemoteClustersResponse}
-   */
-  public static final class ListRemoteClustersResponse extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:remotecluster.ListRemoteClustersResponse)
-      ListRemoteClustersResponseOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use ListRemoteClustersResponse.newBuilder() to construct.
-    private ListRemoteClustersResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private ListRemoteClustersResponse() {
-      remoteClusters_ = java.util.Collections.emptyList();
-      nextPageToken_ = "";
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new ListRemoteClustersResponse();
-    }
-
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_ListRemoteClustersResponse_descriptor;
-    }
-
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_ListRemoteClustersResponse_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse.Builder.class);
-    }
-
-    public static final int REMOTECLUSTERS_FIELD_NUMBER = 1;
-    @SuppressWarnings("serial")
-    private java.util.List<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData> remoteClusters_;
-    /**
-     * <pre>
-     * List of remote cluster details.
-     * </pre>
-     *
-     * <code>repeated .remotecluster.RemoteClusterData remoteClusters = 1 [(.options.FieldExtension.pagingResult) = true];</code>
-     */
-    @java.lang.Override
-    public java.util.List<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData> getRemoteClustersList() {
-      return remoteClusters_;
-    }
-    /**
-     * <pre>
-     * List of remote cluster details.
-     * </pre>
-     *
-     * <code>repeated .remotecluster.RemoteClusterData remoteClusters = 1 [(.options.FieldExtension.pagingResult) = true];</code>
-     */
-    @java.lang.Override
-    public java.util.List<? extends com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterDataOrBuilder> 
-        getRemoteClustersOrBuilderList() {
-      return remoteClusters_;
-    }
-    /**
-     * <pre>
-     * List of remote cluster details.
-     * </pre>
-     *
-     * <code>repeated .remotecluster.RemoteClusterData remoteClusters = 1 [(.options.FieldExtension.pagingResult) = true];</code>
-     */
-    @java.lang.Override
-    public int getRemoteClustersCount() {
-      return remoteClusters_.size();
-    }
-    /**
-     * <pre>
-     * List of remote cluster details.
-     * </pre>
-     *
-     * <code>repeated .remotecluster.RemoteClusterData remoteClusters = 1 [(.options.FieldExtension.pagingResult) = true];</code>
-     */
-    @java.lang.Override
-    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData getRemoteClusters(int index) {
-      return remoteClusters_.get(index);
-    }
-    /**
-     * <pre>
-     * List of remote cluster details.
-     * </pre>
-     *
-     * <code>repeated .remotecluster.RemoteClusterData remoteClusters = 1 [(.options.FieldExtension.pagingResult) = true];</code>
-     */
-    @java.lang.Override
-    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterDataOrBuilder getRemoteClustersOrBuilder(
-        int index) {
-      return remoteClusters_.get(index);
-    }
-
-    public static final int NEXTPAGETOKEN_FIELD_NUMBER = 2;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object nextPageToken_ = "";
-    /**
-     * <pre>
-     * The token to use when requesting the next set of results. If not present, there are no additional results.
-     * </pre>
-     *
-     * <code>string nextPageToken = 2 [(.options.FieldExtension.pagingOutputToken) = true];</code>
-     * @return The nextPageToken.
-     */
-    @java.lang.Override
-    public java.lang.String getNextPageToken() {
-      java.lang.Object ref = nextPageToken_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        nextPageToken_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * The token to use when requesting the next set of results. If not present, there are no additional results.
-     * </pre>
-     *
-     * <code>string nextPageToken = 2 [(.options.FieldExtension.pagingOutputToken) = true];</code>
-     * @return The bytes for nextPageToken.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getNextPageTokenBytes() {
-      java.lang.Object ref = nextPageToken_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        nextPageToken_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      for (int i = 0; i < remoteClusters_.size(); i++) {
-        output.writeMessage(1, remoteClusters_.get(i));
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(nextPageToken_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, nextPageToken_);
-      }
-      getUnknownFields().writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      for (int i = 0; i < remoteClusters_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(1, remoteClusters_.get(i));
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(nextPageToken_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, nextPageToken_);
-      }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse)) {
-        return super.equals(obj);
-      }
-      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse other = (com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse) obj;
-
-      if (!getRemoteClustersList()
-          .equals(other.getRemoteClustersList())) return false;
-      if (!getNextPageToken()
-          .equals(other.getNextPageToken())) return false;
-      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      if (getRemoteClustersCount() > 0) {
-        hash = (37 * hash) + REMOTECLUSTERS_FIELD_NUMBER;
-        hash = (53 * hash) + getRemoteClustersList().hashCode();
-      }
-      hash = (37 * hash) + NEXTPAGETOKEN_FIELD_NUMBER;
-      hash = (53 * hash) + getNextPageToken().hashCode();
-      hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * <pre>
-     * Response object for the ListRemoteClusters method.
-     * </pre>
-     *
-     * Protobuf type {@code remotecluster.ListRemoteClustersResponse}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:remotecluster.ListRemoteClustersResponse)
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponseOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_ListRemoteClustersResponse_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_ListRemoteClustersResponse_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse.Builder.class);
-      }
-
-      // Construct using com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse.newBuilder()
-      private Builder() {
-
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        bitField0_ = 0;
-        if (remoteClustersBuilder_ == null) {
-          remoteClusters_ = java.util.Collections.emptyList();
-        } else {
-          remoteClusters_ = null;
-          remoteClustersBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000001);
-        nextPageToken_ = "";
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_ListRemoteClustersResponse_descriptor;
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse getDefaultInstanceForType() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse build() {
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse buildPartial() {
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse result = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse(this);
-        buildPartialRepeatedFields(result);
-        if (bitField0_ != 0) { buildPartial0(result); }
-        onBuilt();
-        return result;
-      }
-
-      private void buildPartialRepeatedFields(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse result) {
-        if (remoteClustersBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) != 0)) {
-            remoteClusters_ = java.util.Collections.unmodifiableList(remoteClusters_);
-            bitField0_ = (bitField0_ & ~0x00000001);
-          }
-          result.remoteClusters_ = remoteClusters_;
-        } else {
-          result.remoteClusters_ = remoteClustersBuilder_.build();
-        }
-      }
-
-      private void buildPartial0(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse result) {
-        int from_bitField0_ = bitField0_;
-        if (((from_bitField0_ & 0x00000002) != 0)) {
-          result.nextPageToken_ = nextPageToken_;
-        }
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse) {
-          return mergeFrom((com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse other) {
-        if (other == com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse.getDefaultInstance()) return this;
-        if (remoteClustersBuilder_ == null) {
-          if (!other.remoteClusters_.isEmpty()) {
-            if (remoteClusters_.isEmpty()) {
-              remoteClusters_ = other.remoteClusters_;
-              bitField0_ = (bitField0_ & ~0x00000001);
-            } else {
-              ensureRemoteClustersIsMutable();
-              remoteClusters_.addAll(other.remoteClusters_);
-            }
-            onChanged();
-          }
-        } else {
-          if (!other.remoteClusters_.isEmpty()) {
-            if (remoteClustersBuilder_.isEmpty()) {
-              remoteClustersBuilder_.dispose();
-              remoteClustersBuilder_ = null;
-              remoteClusters_ = other.remoteClusters_;
-              bitField0_ = (bitField0_ & ~0x00000001);
-              remoteClustersBuilder_ = 
-                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
-                   getRemoteClustersFieldBuilder() : null;
-            } else {
-              remoteClustersBuilder_.addAllMessages(other.remoteClusters_);
-            }
-          }
-        }
-        if (!other.getNextPageToken().isEmpty()) {
-          nextPageToken_ = other.nextPageToken_;
-          bitField0_ |= 0x00000002;
-          onChanged();
-        }
-        this.mergeUnknownFields(other.getUnknownFields());
-        onChanged();
-        return this;
-      }
-
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        if (extensionRegistry == null) {
-          throw new java.lang.NullPointerException();
-        }
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              case 10: {
-                com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData m =
-                    input.readMessage(
-                        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData.parser(),
-                        extensionRegistry);
-                if (remoteClustersBuilder_ == null) {
-                  ensureRemoteClustersIsMutable();
-                  remoteClusters_.add(m);
-                } else {
-                  remoteClustersBuilder_.addMessage(m);
-                }
-                break;
-              } // case 10
-              case 18: {
-                nextPageToken_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000002;
-                break;
-              } // case 18
-              default: {
-                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
-                  done = true; // was an endgroup tag
-                }
-                break;
-              } // default:
-            } // switch (tag)
-          } // while (!done)
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.unwrapIOException();
-        } finally {
-          onChanged();
-        } // finally
-        return this;
-      }
-      private int bitField0_;
-
-      private java.util.List<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData> remoteClusters_ =
-        java.util.Collections.emptyList();
-      private void ensureRemoteClustersIsMutable() {
-        if (!((bitField0_ & 0x00000001) != 0)) {
-          remoteClusters_ = new java.util.ArrayList<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData>(remoteClusters_);
-          bitField0_ |= 0x00000001;
-         }
-      }
-
-      private com.google.protobuf.RepeatedFieldBuilderV3<
-          com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData.Builder, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterDataOrBuilder> remoteClustersBuilder_;
-
-      /**
-       * <pre>
-       * List of remote cluster details.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.RemoteClusterData remoteClusters = 1 [(.options.FieldExtension.pagingResult) = true];</code>
-       */
-      public java.util.List<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData> getRemoteClustersList() {
-        if (remoteClustersBuilder_ == null) {
-          return java.util.Collections.unmodifiableList(remoteClusters_);
-        } else {
-          return remoteClustersBuilder_.getMessageList();
-        }
-      }
-      /**
-       * <pre>
-       * List of remote cluster details.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.RemoteClusterData remoteClusters = 1 [(.options.FieldExtension.pagingResult) = true];</code>
-       */
-      public int getRemoteClustersCount() {
-        if (remoteClustersBuilder_ == null) {
-          return remoteClusters_.size();
-        } else {
-          return remoteClustersBuilder_.getCount();
-        }
-      }
-      /**
-       * <pre>
-       * List of remote cluster details.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.RemoteClusterData remoteClusters = 1 [(.options.FieldExtension.pagingResult) = true];</code>
-       */
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData getRemoteClusters(int index) {
-        if (remoteClustersBuilder_ == null) {
-          return remoteClusters_.get(index);
-        } else {
-          return remoteClustersBuilder_.getMessage(index);
-        }
-      }
-      /**
-       * <pre>
-       * List of remote cluster details.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.RemoteClusterData remoteClusters = 1 [(.options.FieldExtension.pagingResult) = true];</code>
-       */
-      public Builder setRemoteClusters(
-          int index, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData value) {
-        if (remoteClustersBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureRemoteClustersIsMutable();
-          remoteClusters_.set(index, value);
-          onChanged();
-        } else {
-          remoteClustersBuilder_.setMessage(index, value);
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * List of remote cluster details.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.RemoteClusterData remoteClusters = 1 [(.options.FieldExtension.pagingResult) = true];</code>
-       */
-      public Builder setRemoteClusters(
-          int index, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData.Builder builderForValue) {
-        if (remoteClustersBuilder_ == null) {
-          ensureRemoteClustersIsMutable();
-          remoteClusters_.set(index, builderForValue.build());
-          onChanged();
-        } else {
-          remoteClustersBuilder_.setMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * List of remote cluster details.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.RemoteClusterData remoteClusters = 1 [(.options.FieldExtension.pagingResult) = true];</code>
-       */
-      public Builder addRemoteClusters(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData value) {
-        if (remoteClustersBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureRemoteClustersIsMutable();
-          remoteClusters_.add(value);
-          onChanged();
-        } else {
-          remoteClustersBuilder_.addMessage(value);
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * List of remote cluster details.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.RemoteClusterData remoteClusters = 1 [(.options.FieldExtension.pagingResult) = true];</code>
-       */
-      public Builder addRemoteClusters(
-          int index, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData value) {
-        if (remoteClustersBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureRemoteClustersIsMutable();
-          remoteClusters_.add(index, value);
-          onChanged();
-        } else {
-          remoteClustersBuilder_.addMessage(index, value);
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * List of remote cluster details.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.RemoteClusterData remoteClusters = 1 [(.options.FieldExtension.pagingResult) = true];</code>
-       */
-      public Builder addRemoteClusters(
-          com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData.Builder builderForValue) {
-        if (remoteClustersBuilder_ == null) {
-          ensureRemoteClustersIsMutable();
-          remoteClusters_.add(builderForValue.build());
-          onChanged();
-        } else {
-          remoteClustersBuilder_.addMessage(builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * List of remote cluster details.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.RemoteClusterData remoteClusters = 1 [(.options.FieldExtension.pagingResult) = true];</code>
-       */
-      public Builder addRemoteClusters(
-          int index, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData.Builder builderForValue) {
-        if (remoteClustersBuilder_ == null) {
-          ensureRemoteClustersIsMutable();
-          remoteClusters_.add(index, builderForValue.build());
-          onChanged();
-        } else {
-          remoteClustersBuilder_.addMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * List of remote cluster details.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.RemoteClusterData remoteClusters = 1 [(.options.FieldExtension.pagingResult) = true];</code>
-       */
-      public Builder addAllRemoteClusters(
-          java.lang.Iterable<? extends com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData> values) {
-        if (remoteClustersBuilder_ == null) {
-          ensureRemoteClustersIsMutable();
-          com.google.protobuf.AbstractMessageLite.Builder.addAll(
-              values, remoteClusters_);
-          onChanged();
-        } else {
-          remoteClustersBuilder_.addAllMessages(values);
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * List of remote cluster details.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.RemoteClusterData remoteClusters = 1 [(.options.FieldExtension.pagingResult) = true];</code>
-       */
-      public Builder clearRemoteClusters() {
-        if (remoteClustersBuilder_ == null) {
-          remoteClusters_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
-          onChanged();
-        } else {
-          remoteClustersBuilder_.clear();
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * List of remote cluster details.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.RemoteClusterData remoteClusters = 1 [(.options.FieldExtension.pagingResult) = true];</code>
-       */
-      public Builder removeRemoteClusters(int index) {
-        if (remoteClustersBuilder_ == null) {
-          ensureRemoteClustersIsMutable();
-          remoteClusters_.remove(index);
-          onChanged();
-        } else {
-          remoteClustersBuilder_.remove(index);
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * List of remote cluster details.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.RemoteClusterData remoteClusters = 1 [(.options.FieldExtension.pagingResult) = true];</code>
-       */
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData.Builder getRemoteClustersBuilder(
-          int index) {
-        return getRemoteClustersFieldBuilder().getBuilder(index);
-      }
-      /**
-       * <pre>
-       * List of remote cluster details.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.RemoteClusterData remoteClusters = 1 [(.options.FieldExtension.pagingResult) = true];</code>
-       */
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterDataOrBuilder getRemoteClustersOrBuilder(
-          int index) {
-        if (remoteClustersBuilder_ == null) {
-          return remoteClusters_.get(index);  } else {
-          return remoteClustersBuilder_.getMessageOrBuilder(index);
-        }
-      }
-      /**
-       * <pre>
-       * List of remote cluster details.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.RemoteClusterData remoteClusters = 1 [(.options.FieldExtension.pagingResult) = true];</code>
-       */
-      public java.util.List<? extends com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterDataOrBuilder> 
-           getRemoteClustersOrBuilderList() {
-        if (remoteClustersBuilder_ != null) {
-          return remoteClustersBuilder_.getMessageOrBuilderList();
-        } else {
-          return java.util.Collections.unmodifiableList(remoteClusters_);
-        }
-      }
-      /**
-       * <pre>
-       * List of remote cluster details.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.RemoteClusterData remoteClusters = 1 [(.options.FieldExtension.pagingResult) = true];</code>
-       */
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData.Builder addRemoteClustersBuilder() {
-        return getRemoteClustersFieldBuilder().addBuilder(
-            com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData.getDefaultInstance());
-      }
-      /**
-       * <pre>
-       * List of remote cluster details.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.RemoteClusterData remoteClusters = 1 [(.options.FieldExtension.pagingResult) = true];</code>
-       */
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData.Builder addRemoteClustersBuilder(
-          int index) {
-        return getRemoteClustersFieldBuilder().addBuilder(
-            index, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData.getDefaultInstance());
-      }
-      /**
-       * <pre>
-       * List of remote cluster details.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.RemoteClusterData remoteClusters = 1 [(.options.FieldExtension.pagingResult) = true];</code>
-       */
-      public java.util.List<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData.Builder> 
-           getRemoteClustersBuilderList() {
-        return getRemoteClustersFieldBuilder().getBuilderList();
-      }
-      private com.google.protobuf.RepeatedFieldBuilderV3<
-          com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData.Builder, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterDataOrBuilder> 
-          getRemoteClustersFieldBuilder() {
-        if (remoteClustersBuilder_ == null) {
-          remoteClustersBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData.Builder, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterDataOrBuilder>(
-                  remoteClusters_,
-                  ((bitField0_ & 0x00000001) != 0),
-                  getParentForChildren(),
-                  isClean());
-          remoteClusters_ = null;
-        }
-        return remoteClustersBuilder_;
-      }
-
-      private java.lang.Object nextPageToken_ = "";
-      /**
-       * <pre>
-       * The token to use when requesting the next set of results. If not present, there are no additional results.
-       * </pre>
-       *
-       * <code>string nextPageToken = 2 [(.options.FieldExtension.pagingOutputToken) = true];</code>
-       * @return The nextPageToken.
-       */
-      public java.lang.String getNextPageToken() {
-        java.lang.Object ref = nextPageToken_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          nextPageToken_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The token to use when requesting the next set of results. If not present, there are no additional results.
-       * </pre>
-       *
-       * <code>string nextPageToken = 2 [(.options.FieldExtension.pagingOutputToken) = true];</code>
-       * @return The bytes for nextPageToken.
-       */
-      public com.google.protobuf.ByteString
-          getNextPageTokenBytes() {
-        java.lang.Object ref = nextPageToken_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          nextPageToken_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The token to use when requesting the next set of results. If not present, there are no additional results.
-       * </pre>
-       *
-       * <code>string nextPageToken = 2 [(.options.FieldExtension.pagingOutputToken) = true];</code>
-       * @param value The nextPageToken to set.
-       * @return This builder for chaining.
-       */
-      public Builder setNextPageToken(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        nextPageToken_ = value;
-        bitField0_ |= 0x00000002;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The token to use when requesting the next set of results. If not present, there are no additional results.
-       * </pre>
-       *
-       * <code>string nextPageToken = 2 [(.options.FieldExtension.pagingOutputToken) = true];</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearNextPageToken() {
-        nextPageToken_ = getDefaultInstance().getNextPageToken();
-        bitField0_ = (bitField0_ & ~0x00000002);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The token to use when requesting the next set of results. If not present, there are no additional results.
-       * </pre>
-       *
-       * <code>string nextPageToken = 2 [(.options.FieldExtension.pagingOutputToken) = true];</code>
-       * @param value The bytes for nextPageToken to set.
-       * @return This builder for chaining.
-       */
-      public Builder setNextPageTokenBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        nextPageToken_ = value;
-        bitField0_ |= 0x00000002;
-        onChanged();
-        return this;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:remotecluster.ListRemoteClustersResponse)
-    }
-
-    // @@protoc_insertion_point(class_scope:remotecluster.ListRemoteClustersResponse)
-    private static final com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse();
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<ListRemoteClustersResponse>
-        PARSER = new com.google.protobuf.AbstractParser<ListRemoteClustersResponse>() {
-      @java.lang.Override
-      public ListRemoteClustersResponse parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        Builder builder = newBuilder();
-        try {
-          builder.mergeFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(builder.buildPartial());
-        } catch (com.google.protobuf.UninitializedMessageException e) {
-          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(e)
-              .setUnfinishedMessage(builder.buildPartial());
-        }
-        return builder.buildPartial();
-      }
-    };
-
-    public static com.google.protobuf.Parser<ListRemoteClustersResponse> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<ListRemoteClustersResponse> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface GetRemoteClusterRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:remotecluster.GetRemoteClusterRequest)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <pre>
-     * The CRN of the cluster.
-     * </pre>
-     *
-     * <code>string clusterCrn = 1 [(.options.FieldExtension.required) = true];</code>
-     * @return The clusterCrn.
-     */
-    java.lang.String getClusterCrn();
-    /**
-     * <pre>
-     * The CRN of the cluster.
-     * </pre>
-     *
-     * <code>string clusterCrn = 1 [(.options.FieldExtension.required) = true];</code>
-     * @return The bytes for clusterCrn.
-     */
-    com.google.protobuf.ByteString
-        getClusterCrnBytes();
-  }
-  /**
-   * <pre>
-   * Request object for the GetRemoteClusterRequest method.
-   * </pre>
-   *
-   * Protobuf type {@code remotecluster.GetRemoteClusterRequest}
-   */
-  public static final class GetRemoteClusterRequest extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:remotecluster.GetRemoteClusterRequest)
-      GetRemoteClusterRequestOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use GetRemoteClusterRequest.newBuilder() to construct.
-    private GetRemoteClusterRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private GetRemoteClusterRequest() {
-      clusterCrn_ = "";
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new GetRemoteClusterRequest();
-    }
-
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_GetRemoteClusterRequest_descriptor;
-    }
-
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_GetRemoteClusterRequest_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest.Builder.class);
-    }
-
-    public static final int CLUSTERCRN_FIELD_NUMBER = 1;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object clusterCrn_ = "";
-    /**
-     * <pre>
-     * The CRN of the cluster.
-     * </pre>
-     *
-     * <code>string clusterCrn = 1 [(.options.FieldExtension.required) = true];</code>
-     * @return The clusterCrn.
-     */
-    @java.lang.Override
-    public java.lang.String getClusterCrn() {
-      java.lang.Object ref = clusterCrn_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        clusterCrn_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * The CRN of the cluster.
-     * </pre>
-     *
-     * <code>string clusterCrn = 1 [(.options.FieldExtension.required) = true];</code>
-     * @return The bytes for clusterCrn.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getClusterCrnBytes() {
-      java.lang.Object ref = clusterCrn_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        clusterCrn_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(clusterCrn_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, clusterCrn_);
-      }
-      getUnknownFields().writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(clusterCrn_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, clusterCrn_);
-      }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest)) {
-        return super.equals(obj);
-      }
-      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest other = (com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest) obj;
-
-      if (!getClusterCrn()
-          .equals(other.getClusterCrn())) return false;
-      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + CLUSTERCRN_FIELD_NUMBER;
-      hash = (53 * hash) + getClusterCrn().hashCode();
-      hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * <pre>
-     * Request object for the GetRemoteClusterRequest method.
-     * </pre>
-     *
-     * Protobuf type {@code remotecluster.GetRemoteClusterRequest}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:remotecluster.GetRemoteClusterRequest)
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequestOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_GetRemoteClusterRequest_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_GetRemoteClusterRequest_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest.Builder.class);
-      }
-
-      // Construct using com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest.newBuilder()
-      private Builder() {
-
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        bitField0_ = 0;
-        clusterCrn_ = "";
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_GetRemoteClusterRequest_descriptor;
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest getDefaultInstanceForType() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest build() {
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest buildPartial() {
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest result = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest(this);
-        if (bitField0_ != 0) { buildPartial0(result); }
-        onBuilt();
-        return result;
-      }
-
-      private void buildPartial0(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest result) {
-        int from_bitField0_ = bitField0_;
-        if (((from_bitField0_ & 0x00000001) != 0)) {
-          result.clusterCrn_ = clusterCrn_;
-        }
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest) {
-          return mergeFrom((com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest other) {
-        if (other == com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest.getDefaultInstance()) return this;
-        if (!other.getClusterCrn().isEmpty()) {
-          clusterCrn_ = other.clusterCrn_;
-          bitField0_ |= 0x00000001;
-          onChanged();
-        }
-        this.mergeUnknownFields(other.getUnknownFields());
-        onChanged();
-        return this;
-      }
-
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        if (extensionRegistry == null) {
-          throw new java.lang.NullPointerException();
-        }
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              case 10: {
-                clusterCrn_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000001;
-                break;
-              } // case 10
-              default: {
-                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
-                  done = true; // was an endgroup tag
-                }
-                break;
-              } // default:
-            } // switch (tag)
-          } // while (!done)
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.unwrapIOException();
-        } finally {
-          onChanged();
-        } // finally
-        return this;
-      }
-      private int bitField0_;
-
-      private java.lang.Object clusterCrn_ = "";
-      /**
-       * <pre>
-       * The CRN of the cluster.
-       * </pre>
-       *
-       * <code>string clusterCrn = 1 [(.options.FieldExtension.required) = true];</code>
-       * @return The clusterCrn.
-       */
-      public java.lang.String getClusterCrn() {
-        java.lang.Object ref = clusterCrn_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          clusterCrn_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The CRN of the cluster.
-       * </pre>
-       *
-       * <code>string clusterCrn = 1 [(.options.FieldExtension.required) = true];</code>
-       * @return The bytes for clusterCrn.
-       */
-      public com.google.protobuf.ByteString
-          getClusterCrnBytes() {
-        java.lang.Object ref = clusterCrn_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          clusterCrn_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The CRN of the cluster.
-       * </pre>
-       *
-       * <code>string clusterCrn = 1 [(.options.FieldExtension.required) = true];</code>
-       * @param value The clusterCrn to set.
-       * @return This builder for chaining.
-       */
-      public Builder setClusterCrn(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        clusterCrn_ = value;
-        bitField0_ |= 0x00000001;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The CRN of the cluster.
-       * </pre>
-       *
-       * <code>string clusterCrn = 1 [(.options.FieldExtension.required) = true];</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearClusterCrn() {
-        clusterCrn_ = getDefaultInstance().getClusterCrn();
-        bitField0_ = (bitField0_ & ~0x00000001);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The CRN of the cluster.
-       * </pre>
-       *
-       * <code>string clusterCrn = 1 [(.options.FieldExtension.required) = true];</code>
-       * @param value The bytes for clusterCrn to set.
-       * @return This builder for chaining.
-       */
-      public Builder setClusterCrnBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        clusterCrn_ = value;
-        bitField0_ |= 0x00000001;
-        onChanged();
-        return this;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:remotecluster.GetRemoteClusterRequest)
-    }
-
-    // @@protoc_insertion_point(class_scope:remotecluster.GetRemoteClusterRequest)
-    private static final com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest();
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<GetRemoteClusterRequest>
-        PARSER = new com.google.protobuf.AbstractParser<GetRemoteClusterRequest>() {
-      @java.lang.Override
-      public GetRemoteClusterRequest parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        Builder builder = newBuilder();
-        try {
-          builder.mergeFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(builder.buildPartial());
-        } catch (com.google.protobuf.UninitializedMessageException e) {
-          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(e)
-              .setUnfinishedMessage(builder.buildPartial());
-        }
-        return builder.buildPartial();
-      }
-    };
-
-    public static com.google.protobuf.Parser<GetRemoteClusterRequest> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<GetRemoteClusterRequest> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface GetRemoteClusterResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:remotecluster.GetRemoteClusterResponse)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <pre>
-     * Object containing the remote cluster detail.
-     * </pre>
-     *
-     * <code>.remotecluster.RemoteClusterData remoteClusters = 1;</code>
-     * @return Whether the remoteClusters field is set.
-     */
-    boolean hasRemoteClusters();
-    /**
-     * <pre>
-     * Object containing the remote cluster detail.
-     * </pre>
-     *
-     * <code>.remotecluster.RemoteClusterData remoteClusters = 1;</code>
-     * @return The remoteClusters.
-     */
-    com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData getRemoteClusters();
-    /**
-     * <pre>
-     * Object containing the remote cluster detail.
-     * </pre>
-     *
-     * <code>.remotecluster.RemoteClusterData remoteClusters = 1;</code>
-     */
-    com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterDataOrBuilder getRemoteClustersOrBuilder();
-  }
-  /**
-   * <pre>
-   * Response object for the GetRemoteClusterResponse method.
-   * </pre>
-   *
-   * Protobuf type {@code remotecluster.GetRemoteClusterResponse}
-   */
-  public static final class GetRemoteClusterResponse extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:remotecluster.GetRemoteClusterResponse)
-      GetRemoteClusterResponseOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use GetRemoteClusterResponse.newBuilder() to construct.
-    private GetRemoteClusterResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private GetRemoteClusterResponse() {
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new GetRemoteClusterResponse();
-    }
-
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_GetRemoteClusterResponse_descriptor;
-    }
-
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_GetRemoteClusterResponse_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse.Builder.class);
-    }
-
-    private int bitField0_;
-    public static final int REMOTECLUSTERS_FIELD_NUMBER = 1;
-    private com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData remoteClusters_;
-    /**
-     * <pre>
-     * Object containing the remote cluster detail.
-     * </pre>
-     *
-     * <code>.remotecluster.RemoteClusterData remoteClusters = 1;</code>
-     * @return Whether the remoteClusters field is set.
-     */
-    @java.lang.Override
-    public boolean hasRemoteClusters() {
-      return ((bitField0_ & 0x00000001) != 0);
-    }
-    /**
-     * <pre>
-     * Object containing the remote cluster detail.
-     * </pre>
-     *
-     * <code>.remotecluster.RemoteClusterData remoteClusters = 1;</code>
-     * @return The remoteClusters.
-     */
-    @java.lang.Override
-    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData getRemoteClusters() {
-      return remoteClusters_ == null ? com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData.getDefaultInstance() : remoteClusters_;
-    }
-    /**
-     * <pre>
-     * Object containing the remote cluster detail.
-     * </pre>
-     *
-     * <code>.remotecluster.RemoteClusterData remoteClusters = 1;</code>
-     */
-    @java.lang.Override
-    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterDataOrBuilder getRemoteClustersOrBuilder() {
-      return remoteClusters_ == null ? com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData.getDefaultInstance() : remoteClusters_;
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (((bitField0_ & 0x00000001) != 0)) {
-        output.writeMessage(1, getRemoteClusters());
-      }
-      getUnknownFields().writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (((bitField0_ & 0x00000001) != 0)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(1, getRemoteClusters());
-      }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse)) {
-        return super.equals(obj);
-      }
-      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse other = (com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse) obj;
-
-      if (hasRemoteClusters() != other.hasRemoteClusters()) return false;
-      if (hasRemoteClusters()) {
-        if (!getRemoteClusters()
-            .equals(other.getRemoteClusters())) return false;
-      }
-      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      if (hasRemoteClusters()) {
-        hash = (37 * hash) + REMOTECLUSTERS_FIELD_NUMBER;
-        hash = (53 * hash) + getRemoteClusters().hashCode();
-      }
-      hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * <pre>
-     * Response object for the GetRemoteClusterResponse method.
-     * </pre>
-     *
-     * Protobuf type {@code remotecluster.GetRemoteClusterResponse}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:remotecluster.GetRemoteClusterResponse)
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponseOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_GetRemoteClusterResponse_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_GetRemoteClusterResponse_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse.Builder.class);
-      }
-
-      // Construct using com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getRemoteClustersFieldBuilder();
-        }
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        bitField0_ = 0;
-        remoteClusters_ = null;
-        if (remoteClustersBuilder_ != null) {
-          remoteClustersBuilder_.dispose();
-          remoteClustersBuilder_ = null;
-        }
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_GetRemoteClusterResponse_descriptor;
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse getDefaultInstanceForType() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse build() {
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse buildPartial() {
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse result = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse(this);
-        if (bitField0_ != 0) { buildPartial0(result); }
-        onBuilt();
-        return result;
-      }
-
-      private void buildPartial0(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse result) {
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000001) != 0)) {
-          result.remoteClusters_ = remoteClustersBuilder_ == null
-              ? remoteClusters_
-              : remoteClustersBuilder_.build();
-          to_bitField0_ |= 0x00000001;
-        }
-        result.bitField0_ |= to_bitField0_;
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse) {
-          return mergeFrom((com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse other) {
-        if (other == com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse.getDefaultInstance()) return this;
-        if (other.hasRemoteClusters()) {
-          mergeRemoteClusters(other.getRemoteClusters());
-        }
-        this.mergeUnknownFields(other.getUnknownFields());
-        onChanged();
-        return this;
-      }
-
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        if (extensionRegistry == null) {
-          throw new java.lang.NullPointerException();
-        }
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              case 10: {
-                input.readMessage(
-                    getRemoteClustersFieldBuilder().getBuilder(),
-                    extensionRegistry);
-                bitField0_ |= 0x00000001;
-                break;
-              } // case 10
-              default: {
-                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
-                  done = true; // was an endgroup tag
-                }
-                break;
-              } // default:
-            } // switch (tag)
-          } // while (!done)
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.unwrapIOException();
-        } finally {
-          onChanged();
-        } // finally
-        return this;
-      }
-      private int bitField0_;
-
-      private com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData remoteClusters_;
-      private com.google.protobuf.SingleFieldBuilderV3<
-          com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData.Builder, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterDataOrBuilder> remoteClustersBuilder_;
-      /**
-       * <pre>
-       * Object containing the remote cluster detail.
-       * </pre>
-       *
-       * <code>.remotecluster.RemoteClusterData remoteClusters = 1;</code>
-       * @return Whether the remoteClusters field is set.
-       */
-      public boolean hasRemoteClusters() {
-        return ((bitField0_ & 0x00000001) != 0);
-      }
-      /**
-       * <pre>
-       * Object containing the remote cluster detail.
-       * </pre>
-       *
-       * <code>.remotecluster.RemoteClusterData remoteClusters = 1;</code>
-       * @return The remoteClusters.
-       */
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData getRemoteClusters() {
-        if (remoteClustersBuilder_ == null) {
-          return remoteClusters_ == null ? com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData.getDefaultInstance() : remoteClusters_;
-        } else {
-          return remoteClustersBuilder_.getMessage();
-        }
-      }
-      /**
-       * <pre>
-       * Object containing the remote cluster detail.
-       * </pre>
-       *
-       * <code>.remotecluster.RemoteClusterData remoteClusters = 1;</code>
-       */
-      public Builder setRemoteClusters(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData value) {
-        if (remoteClustersBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          remoteClusters_ = value;
-        } else {
-          remoteClustersBuilder_.setMessage(value);
-        }
-        bitField0_ |= 0x00000001;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Object containing the remote cluster detail.
-       * </pre>
-       *
-       * <code>.remotecluster.RemoteClusterData remoteClusters = 1;</code>
-       */
-      public Builder setRemoteClusters(
-          com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData.Builder builderForValue) {
-        if (remoteClustersBuilder_ == null) {
-          remoteClusters_ = builderForValue.build();
-        } else {
-          remoteClustersBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00000001;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Object containing the remote cluster detail.
-       * </pre>
-       *
-       * <code>.remotecluster.RemoteClusterData remoteClusters = 1;</code>
-       */
-      public Builder mergeRemoteClusters(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData value) {
-        if (remoteClustersBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) != 0) &&
-            remoteClusters_ != null &&
-            remoteClusters_ != com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData.getDefaultInstance()) {
-            getRemoteClustersBuilder().mergeFrom(value);
-          } else {
-            remoteClusters_ = value;
-          }
-        } else {
-          remoteClustersBuilder_.mergeFrom(value);
-        }
-        if (remoteClusters_ != null) {
-          bitField0_ |= 0x00000001;
-          onChanged();
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * Object containing the remote cluster detail.
-       * </pre>
-       *
-       * <code>.remotecluster.RemoteClusterData remoteClusters = 1;</code>
-       */
-      public Builder clearRemoteClusters() {
-        bitField0_ = (bitField0_ & ~0x00000001);
-        remoteClusters_ = null;
-        if (remoteClustersBuilder_ != null) {
-          remoteClustersBuilder_.dispose();
-          remoteClustersBuilder_ = null;
-        }
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Object containing the remote cluster detail.
-       * </pre>
-       *
-       * <code>.remotecluster.RemoteClusterData remoteClusters = 1;</code>
-       */
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData.Builder getRemoteClustersBuilder() {
-        bitField0_ |= 0x00000001;
-        onChanged();
-        return getRemoteClustersFieldBuilder().getBuilder();
-      }
-      /**
-       * <pre>
-       * Object containing the remote cluster detail.
-       * </pre>
-       *
-       * <code>.remotecluster.RemoteClusterData remoteClusters = 1;</code>
-       */
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterDataOrBuilder getRemoteClustersOrBuilder() {
-        if (remoteClustersBuilder_ != null) {
-          return remoteClustersBuilder_.getMessageOrBuilder();
-        } else {
-          return remoteClusters_ == null ?
-              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData.getDefaultInstance() : remoteClusters_;
-        }
-      }
-      /**
-       * <pre>
-       * Object containing the remote cluster detail.
-       * </pre>
-       *
-       * <code>.remotecluster.RemoteClusterData remoteClusters = 1;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilderV3<
-          com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData.Builder, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterDataOrBuilder> 
-          getRemoteClustersFieldBuilder() {
-        if (remoteClustersBuilder_ == null) {
-          remoteClustersBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData.Builder, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterDataOrBuilder>(
-                  getRemoteClusters(),
-                  getParentForChildren(),
-                  isClean());
-          remoteClusters_ = null;
-        }
-        return remoteClustersBuilder_;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:remotecluster.GetRemoteClusterResponse)
-    }
-
-    // @@protoc_insertion_point(class_scope:remotecluster.GetRemoteClusterResponse)
-    private static final com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse();
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<GetRemoteClusterResponse>
-        PARSER = new com.google.protobuf.AbstractParser<GetRemoteClusterResponse>() {
-      @java.lang.Override
-      public GetRemoteClusterResponse parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        Builder builder = newBuilder();
-        try {
-          builder.mergeFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(builder.buildPartial());
-        } catch (com.google.protobuf.UninitializedMessageException e) {
-          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(e)
-              .setUnfinishedMessage(builder.buildPartial());
-        }
-        return builder.buildPartial();
-      }
-    };
-
-    public static com.google.protobuf.Parser<GetRemoteClusterResponse> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<GetRemoteClusterResponse> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface GetServiceDetailsRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:remotecluster.GetServiceDetailsRequest)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <pre>
-     * The ID of the remote cluster.
-     * </pre>
-     *
-     * <code>int64 clusterId = 1 [(.options.FieldExtension.required) = true];</code>
-     * @return The clusterId.
-     */
-    long getClusterId();
-  }
-  /**
-   * <pre>
-   * Request object for the GetServiceDetails method.
-   * </pre>
-   *
-   * Protobuf type {@code remotecluster.GetServiceDetailsRequest}
-   */
-  public static final class GetServiceDetailsRequest extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:remotecluster.GetServiceDetailsRequest)
-      GetServiceDetailsRequestOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use GetServiceDetailsRequest.newBuilder() to construct.
-    private GetServiceDetailsRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private GetServiceDetailsRequest() {
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new GetServiceDetailsRequest();
-    }
-
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_GetServiceDetailsRequest_descriptor;
-    }
-
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_GetServiceDetailsRequest_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest.Builder.class);
-    }
-
-    public static final int CLUSTERID_FIELD_NUMBER = 1;
-    private long clusterId_ = 0L;
-    /**
-     * <pre>
-     * The ID of the remote cluster.
-     * </pre>
-     *
-     * <code>int64 clusterId = 1 [(.options.FieldExtension.required) = true];</code>
-     * @return The clusterId.
-     */
-    @java.lang.Override
-    public long getClusterId() {
-      return clusterId_;
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (clusterId_ != 0L) {
-        output.writeInt64(1, clusterId_);
-      }
-      getUnknownFields().writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (clusterId_ != 0L) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(1, clusterId_);
-      }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest)) {
-        return super.equals(obj);
-      }
-      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest other = (com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest) obj;
-
-      if (getClusterId()
-          != other.getClusterId()) return false;
-      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + CLUSTERID_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          getClusterId());
-      hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * <pre>
-     * Request object for the GetServiceDetails method.
-     * </pre>
-     *
-     * Protobuf type {@code remotecluster.GetServiceDetailsRequest}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:remotecluster.GetServiceDetailsRequest)
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequestOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_GetServiceDetailsRequest_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_GetServiceDetailsRequest_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest.Builder.class);
-      }
-
-      // Construct using com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest.newBuilder()
-      private Builder() {
-
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        bitField0_ = 0;
-        clusterId_ = 0L;
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_GetServiceDetailsRequest_descriptor;
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest getDefaultInstanceForType() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest build() {
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest buildPartial() {
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest result = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest(this);
-        if (bitField0_ != 0) { buildPartial0(result); }
-        onBuilt();
-        return result;
-      }
-
-      private void buildPartial0(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest result) {
-        int from_bitField0_ = bitField0_;
-        if (((from_bitField0_ & 0x00000001) != 0)) {
-          result.clusterId_ = clusterId_;
-        }
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest) {
-          return mergeFrom((com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest other) {
-        if (other == com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest.getDefaultInstance()) return this;
-        if (other.getClusterId() != 0L) {
-          setClusterId(other.getClusterId());
-        }
-        this.mergeUnknownFields(other.getUnknownFields());
-        onChanged();
-        return this;
-      }
-
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        if (extensionRegistry == null) {
-          throw new java.lang.NullPointerException();
-        }
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              case 8: {
-                clusterId_ = input.readInt64();
-                bitField0_ |= 0x00000001;
-                break;
-              } // case 8
-              default: {
-                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
-                  done = true; // was an endgroup tag
-                }
-                break;
-              } // default:
-            } // switch (tag)
-          } // while (!done)
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.unwrapIOException();
-        } finally {
-          onChanged();
-        } // finally
-        return this;
-      }
-      private int bitField0_;
-
-      private long clusterId_ ;
-      /**
-       * <pre>
-       * The ID of the remote cluster.
-       * </pre>
-       *
-       * <code>int64 clusterId = 1 [(.options.FieldExtension.required) = true];</code>
-       * @return The clusterId.
-       */
-      @java.lang.Override
-      public long getClusterId() {
-        return clusterId_;
-      }
-      /**
-       * <pre>
-       * The ID of the remote cluster.
-       * </pre>
-       *
-       * <code>int64 clusterId = 1 [(.options.FieldExtension.required) = true];</code>
-       * @param value The clusterId to set.
-       * @return This builder for chaining.
-       */
-      public Builder setClusterId(long value) {
-
-        clusterId_ = value;
-        bitField0_ |= 0x00000001;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The ID of the remote cluster.
-       * </pre>
-       *
-       * <code>int64 clusterId = 1 [(.options.FieldExtension.required) = true];</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearClusterId() {
-        bitField0_ = (bitField0_ & ~0x00000001);
-        clusterId_ = 0L;
-        onChanged();
-        return this;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:remotecluster.GetServiceDetailsRequest)
-    }
-
-    // @@protoc_insertion_point(class_scope:remotecluster.GetServiceDetailsRequest)
-    private static final com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest();
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<GetServiceDetailsRequest>
-        PARSER = new com.google.protobuf.AbstractParser<GetServiceDetailsRequest>() {
-      @java.lang.Override
-      public GetServiceDetailsRequest parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        Builder builder = newBuilder();
-        try {
-          builder.mergeFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(builder.buildPartial());
-        } catch (com.google.protobuf.UninitializedMessageException e) {
-          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(e)
-              .setUnfinishedMessage(builder.buildPartial());
-        }
-        return builder.buildPartial();
-      }
-    };
-
-    public static com.google.protobuf.Parser<GetServiceDetailsRequest> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<GetServiceDetailsRequest> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface GetServiceDetailsResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:remotecluster.GetServiceDetailsResponse)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <pre>
-     * List of service detail information.
-     * </pre>
-     *
-     * <code>repeated .remotecluster.ServiceDetail serviceDetails = 1;</code>
-     */
-    java.util.List<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail> 
-        getServiceDetailsList();
-    /**
-     * <pre>
-     * List of service detail information.
-     * </pre>
-     *
-     * <code>repeated .remotecluster.ServiceDetail serviceDetails = 1;</code>
-     */
-    com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail getServiceDetails(int index);
-    /**
-     * <pre>
-     * List of service detail information.
-     * </pre>
-     *
-     * <code>repeated .remotecluster.ServiceDetail serviceDetails = 1;</code>
-     */
-    int getServiceDetailsCount();
-    /**
-     * <pre>
-     * List of service detail information.
-     * </pre>
-     *
-     * <code>repeated .remotecluster.ServiceDetail serviceDetails = 1;</code>
-     */
-    java.util.List<? extends com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetailOrBuilder> 
-        getServiceDetailsOrBuilderList();
-    /**
-     * <pre>
-     * List of service detail information.
-     * </pre>
-     *
-     * <code>repeated .remotecluster.ServiceDetail serviceDetails = 1;</code>
-     */
-    com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetailOrBuilder getServiceDetailsOrBuilder(
-        int index);
-  }
-  /**
-   * <pre>
-   * Response object for the GetServiceDetails method.
-   * </pre>
-   *
-   * Protobuf type {@code remotecluster.GetServiceDetailsResponse}
-   */
-  public static final class GetServiceDetailsResponse extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:remotecluster.GetServiceDetailsResponse)
-      GetServiceDetailsResponseOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use GetServiceDetailsResponse.newBuilder() to construct.
-    private GetServiceDetailsResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private GetServiceDetailsResponse() {
-      serviceDetails_ = java.util.Collections.emptyList();
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new GetServiceDetailsResponse();
-    }
-
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_GetServiceDetailsResponse_descriptor;
-    }
-
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_GetServiceDetailsResponse_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse.Builder.class);
-    }
-
-    public static final int SERVICEDETAILS_FIELD_NUMBER = 1;
-    @SuppressWarnings("serial")
-    private java.util.List<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail> serviceDetails_;
-    /**
-     * <pre>
-     * List of service detail information.
-     * </pre>
-     *
-     * <code>repeated .remotecluster.ServiceDetail serviceDetails = 1;</code>
-     */
-    @java.lang.Override
-    public java.util.List<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail> getServiceDetailsList() {
-      return serviceDetails_;
-    }
-    /**
-     * <pre>
-     * List of service detail information.
-     * </pre>
-     *
-     * <code>repeated .remotecluster.ServiceDetail serviceDetails = 1;</code>
-     */
-    @java.lang.Override
-    public java.util.List<? extends com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetailOrBuilder> 
-        getServiceDetailsOrBuilderList() {
-      return serviceDetails_;
-    }
-    /**
-     * <pre>
-     * List of service detail information.
-     * </pre>
-     *
-     * <code>repeated .remotecluster.ServiceDetail serviceDetails = 1;</code>
-     */
-    @java.lang.Override
-    public int getServiceDetailsCount() {
-      return serviceDetails_.size();
-    }
-    /**
-     * <pre>
-     * List of service detail information.
-     * </pre>
-     *
-     * <code>repeated .remotecluster.ServiceDetail serviceDetails = 1;</code>
-     */
-    @java.lang.Override
-    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail getServiceDetails(int index) {
-      return serviceDetails_.get(index);
-    }
-    /**
-     * <pre>
-     * List of service detail information.
-     * </pre>
-     *
-     * <code>repeated .remotecluster.ServiceDetail serviceDetails = 1;</code>
-     */
-    @java.lang.Override
-    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetailOrBuilder getServiceDetailsOrBuilder(
-        int index) {
-      return serviceDetails_.get(index);
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      for (int i = 0; i < serviceDetails_.size(); i++) {
-        output.writeMessage(1, serviceDetails_.get(i));
-      }
-      getUnknownFields().writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      for (int i = 0; i < serviceDetails_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(1, serviceDetails_.get(i));
-      }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse)) {
-        return super.equals(obj);
-      }
-      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse other = (com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse) obj;
-
-      if (!getServiceDetailsList()
-          .equals(other.getServiceDetailsList())) return false;
-      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      if (getServiceDetailsCount() > 0) {
-        hash = (37 * hash) + SERVICEDETAILS_FIELD_NUMBER;
-        hash = (53 * hash) + getServiceDetailsList().hashCode();
-      }
-      hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * <pre>
-     * Response object for the GetServiceDetails method.
-     * </pre>
-     *
-     * Protobuf type {@code remotecluster.GetServiceDetailsResponse}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:remotecluster.GetServiceDetailsResponse)
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponseOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_GetServiceDetailsResponse_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_GetServiceDetailsResponse_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse.Builder.class);
-      }
-
-      // Construct using com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse.newBuilder()
-      private Builder() {
-
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        bitField0_ = 0;
-        if (serviceDetailsBuilder_ == null) {
-          serviceDetails_ = java.util.Collections.emptyList();
-        } else {
-          serviceDetails_ = null;
-          serviceDetailsBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000001);
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_GetServiceDetailsResponse_descriptor;
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse getDefaultInstanceForType() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse build() {
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse buildPartial() {
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse result = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse(this);
-        buildPartialRepeatedFields(result);
-        if (bitField0_ != 0) { buildPartial0(result); }
-        onBuilt();
-        return result;
-      }
-
-      private void buildPartialRepeatedFields(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse result) {
-        if (serviceDetailsBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) != 0)) {
-            serviceDetails_ = java.util.Collections.unmodifiableList(serviceDetails_);
-            bitField0_ = (bitField0_ & ~0x00000001);
-          }
-          result.serviceDetails_ = serviceDetails_;
-        } else {
-          result.serviceDetails_ = serviceDetailsBuilder_.build();
-        }
-      }
-
-      private void buildPartial0(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse result) {
-        int from_bitField0_ = bitField0_;
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse) {
-          return mergeFrom((com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse other) {
-        if (other == com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse.getDefaultInstance()) return this;
-        if (serviceDetailsBuilder_ == null) {
-          if (!other.serviceDetails_.isEmpty()) {
-            if (serviceDetails_.isEmpty()) {
-              serviceDetails_ = other.serviceDetails_;
-              bitField0_ = (bitField0_ & ~0x00000001);
-            } else {
-              ensureServiceDetailsIsMutable();
-              serviceDetails_.addAll(other.serviceDetails_);
-            }
-            onChanged();
-          }
-        } else {
-          if (!other.serviceDetails_.isEmpty()) {
-            if (serviceDetailsBuilder_.isEmpty()) {
-              serviceDetailsBuilder_.dispose();
-              serviceDetailsBuilder_ = null;
-              serviceDetails_ = other.serviceDetails_;
-              bitField0_ = (bitField0_ & ~0x00000001);
-              serviceDetailsBuilder_ = 
-                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
-                   getServiceDetailsFieldBuilder() : null;
-            } else {
-              serviceDetailsBuilder_.addAllMessages(other.serviceDetails_);
-            }
-          }
-        }
-        this.mergeUnknownFields(other.getUnknownFields());
-        onChanged();
-        return this;
-      }
-
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        if (extensionRegistry == null) {
-          throw new java.lang.NullPointerException();
-        }
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              case 10: {
-                com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail m =
-                    input.readMessage(
-                        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail.parser(),
-                        extensionRegistry);
-                if (serviceDetailsBuilder_ == null) {
-                  ensureServiceDetailsIsMutable();
-                  serviceDetails_.add(m);
-                } else {
-                  serviceDetailsBuilder_.addMessage(m);
-                }
-                break;
-              } // case 10
-              default: {
-                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
-                  done = true; // was an endgroup tag
-                }
-                break;
-              } // default:
-            } // switch (tag)
-          } // while (!done)
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.unwrapIOException();
-        } finally {
-          onChanged();
-        } // finally
-        return this;
-      }
-      private int bitField0_;
-
-      private java.util.List<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail> serviceDetails_ =
-        java.util.Collections.emptyList();
-      private void ensureServiceDetailsIsMutable() {
-        if (!((bitField0_ & 0x00000001) != 0)) {
-          serviceDetails_ = new java.util.ArrayList<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail>(serviceDetails_);
-          bitField0_ |= 0x00000001;
-         }
-      }
-
-      private com.google.protobuf.RepeatedFieldBuilderV3<
-          com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail.Builder, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetailOrBuilder> serviceDetailsBuilder_;
-
-      /**
-       * <pre>
-       * List of service detail information.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.ServiceDetail serviceDetails = 1;</code>
-       */
-      public java.util.List<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail> getServiceDetailsList() {
-        if (serviceDetailsBuilder_ == null) {
-          return java.util.Collections.unmodifiableList(serviceDetails_);
-        } else {
-          return serviceDetailsBuilder_.getMessageList();
-        }
-      }
-      /**
-       * <pre>
-       * List of service detail information.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.ServiceDetail serviceDetails = 1;</code>
-       */
-      public int getServiceDetailsCount() {
-        if (serviceDetailsBuilder_ == null) {
-          return serviceDetails_.size();
-        } else {
-          return serviceDetailsBuilder_.getCount();
-        }
-      }
-      /**
-       * <pre>
-       * List of service detail information.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.ServiceDetail serviceDetails = 1;</code>
-       */
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail getServiceDetails(int index) {
-        if (serviceDetailsBuilder_ == null) {
-          return serviceDetails_.get(index);
-        } else {
-          return serviceDetailsBuilder_.getMessage(index);
-        }
-      }
-      /**
-       * <pre>
-       * List of service detail information.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.ServiceDetail serviceDetails = 1;</code>
-       */
-      public Builder setServiceDetails(
-          int index, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail value) {
-        if (serviceDetailsBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureServiceDetailsIsMutable();
-          serviceDetails_.set(index, value);
-          onChanged();
-        } else {
-          serviceDetailsBuilder_.setMessage(index, value);
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * List of service detail information.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.ServiceDetail serviceDetails = 1;</code>
-       */
-      public Builder setServiceDetails(
-          int index, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail.Builder builderForValue) {
-        if (serviceDetailsBuilder_ == null) {
-          ensureServiceDetailsIsMutable();
-          serviceDetails_.set(index, builderForValue.build());
-          onChanged();
-        } else {
-          serviceDetailsBuilder_.setMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * List of service detail information.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.ServiceDetail serviceDetails = 1;</code>
-       */
-      public Builder addServiceDetails(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail value) {
-        if (serviceDetailsBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureServiceDetailsIsMutable();
-          serviceDetails_.add(value);
-          onChanged();
-        } else {
-          serviceDetailsBuilder_.addMessage(value);
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * List of service detail information.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.ServiceDetail serviceDetails = 1;</code>
-       */
-      public Builder addServiceDetails(
-          int index, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail value) {
-        if (serviceDetailsBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureServiceDetailsIsMutable();
-          serviceDetails_.add(index, value);
-          onChanged();
-        } else {
-          serviceDetailsBuilder_.addMessage(index, value);
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * List of service detail information.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.ServiceDetail serviceDetails = 1;</code>
-       */
-      public Builder addServiceDetails(
-          com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail.Builder builderForValue) {
-        if (serviceDetailsBuilder_ == null) {
-          ensureServiceDetailsIsMutable();
-          serviceDetails_.add(builderForValue.build());
-          onChanged();
-        } else {
-          serviceDetailsBuilder_.addMessage(builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * List of service detail information.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.ServiceDetail serviceDetails = 1;</code>
-       */
-      public Builder addServiceDetails(
-          int index, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail.Builder builderForValue) {
-        if (serviceDetailsBuilder_ == null) {
-          ensureServiceDetailsIsMutable();
-          serviceDetails_.add(index, builderForValue.build());
-          onChanged();
-        } else {
-          serviceDetailsBuilder_.addMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * List of service detail information.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.ServiceDetail serviceDetails = 1;</code>
-       */
-      public Builder addAllServiceDetails(
-          java.lang.Iterable<? extends com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail> values) {
-        if (serviceDetailsBuilder_ == null) {
-          ensureServiceDetailsIsMutable();
-          com.google.protobuf.AbstractMessageLite.Builder.addAll(
-              values, serviceDetails_);
-          onChanged();
-        } else {
-          serviceDetailsBuilder_.addAllMessages(values);
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * List of service detail information.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.ServiceDetail serviceDetails = 1;</code>
-       */
-      public Builder clearServiceDetails() {
-        if (serviceDetailsBuilder_ == null) {
-          serviceDetails_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
-          onChanged();
-        } else {
-          serviceDetailsBuilder_.clear();
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * List of service detail information.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.ServiceDetail serviceDetails = 1;</code>
-       */
-      public Builder removeServiceDetails(int index) {
-        if (serviceDetailsBuilder_ == null) {
-          ensureServiceDetailsIsMutable();
-          serviceDetails_.remove(index);
-          onChanged();
-        } else {
-          serviceDetailsBuilder_.remove(index);
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * List of service detail information.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.ServiceDetail serviceDetails = 1;</code>
-       */
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail.Builder getServiceDetailsBuilder(
-          int index) {
-        return getServiceDetailsFieldBuilder().getBuilder(index);
-      }
-      /**
-       * <pre>
-       * List of service detail information.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.ServiceDetail serviceDetails = 1;</code>
-       */
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetailOrBuilder getServiceDetailsOrBuilder(
-          int index) {
-        if (serviceDetailsBuilder_ == null) {
-          return serviceDetails_.get(index);  } else {
-          return serviceDetailsBuilder_.getMessageOrBuilder(index);
-        }
-      }
-      /**
-       * <pre>
-       * List of service detail information.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.ServiceDetail serviceDetails = 1;</code>
-       */
-      public java.util.List<? extends com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetailOrBuilder> 
-           getServiceDetailsOrBuilderList() {
-        if (serviceDetailsBuilder_ != null) {
-          return serviceDetailsBuilder_.getMessageOrBuilderList();
-        } else {
-          return java.util.Collections.unmodifiableList(serviceDetails_);
-        }
-      }
-      /**
-       * <pre>
-       * List of service detail information.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.ServiceDetail serviceDetails = 1;</code>
-       */
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail.Builder addServiceDetailsBuilder() {
-        return getServiceDetailsFieldBuilder().addBuilder(
-            com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail.getDefaultInstance());
-      }
-      /**
-       * <pre>
-       * List of service detail information.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.ServiceDetail serviceDetails = 1;</code>
-       */
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail.Builder addServiceDetailsBuilder(
-          int index) {
-        return getServiceDetailsFieldBuilder().addBuilder(
-            index, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail.getDefaultInstance());
-      }
-      /**
-       * <pre>
-       * List of service detail information.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.ServiceDetail serviceDetails = 1;</code>
-       */
-      public java.util.List<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail.Builder> 
-           getServiceDetailsBuilderList() {
-        return getServiceDetailsFieldBuilder().getBuilderList();
-      }
-      private com.google.protobuf.RepeatedFieldBuilderV3<
-          com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail.Builder, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetailOrBuilder> 
-          getServiceDetailsFieldBuilder() {
-        if (serviceDetailsBuilder_ == null) {
-          serviceDetailsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail.Builder, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetailOrBuilder>(
-                  serviceDetails_,
-                  ((bitField0_ & 0x00000001) != 0),
-                  getParentForChildren(),
-                  isClean());
-          serviceDetails_ = null;
-        }
-        return serviceDetailsBuilder_;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:remotecluster.GetServiceDetailsResponse)
-    }
-
-    // @@protoc_insertion_point(class_scope:remotecluster.GetServiceDetailsResponse)
-    private static final com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse();
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<GetServiceDetailsResponse>
-        PARSER = new com.google.protobuf.AbstractParser<GetServiceDetailsResponse>() {
-      @java.lang.Override
-      public GetServiceDetailsResponse parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        Builder builder = newBuilder();
-        try {
-          builder.mergeFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(builder.buildPartial());
-        } catch (com.google.protobuf.UninitializedMessageException e) {
-          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(e)
-              .setUnfinishedMessage(builder.buildPartial());
-        }
-        return builder.buildPartial();
-      }
-    };
-
-    public static com.google.protobuf.Parser<GetServiceDetailsResponse> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<GetServiceDetailsResponse> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface RemoteClusterDataOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:remotecluster.RemoteClusterData)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <pre>
-     * The clusterId of the registered remote cluster.
-     * </pre>
-     *
-     * <code>int64 id = 1 [(.options.FieldExtension.required) = true];</code>
-     * @return The id.
-     */
-    long getId();
-
-    /**
-     * <pre>
-     * The accountId of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string accountId = 2 [(.options.FieldExtension.required) = true];</code>
-     * @return The accountId.
-     */
-    java.lang.String getAccountId();
-    /**
-     * <pre>
-     * The accountId of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string accountId = 2 [(.options.FieldExtension.required) = true];</code>
-     * @return The bytes for accountId.
-     */
-    com.google.protobuf.ByteString
-        getAccountIdBytes();
-
-    /**
-     * <pre>
-     * The name of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string name = 3 [(.options.FieldExtension.required) = true];</code>
-     * @return The name.
-     */
-    java.lang.String getName();
-    /**
-     * <pre>
-     * The name of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string name = 3 [(.options.FieldExtension.required) = true];</code>
-     * @return The bytes for name.
-     */
-    com.google.protobuf.ByteString
-        getNameBytes();
-
-    /**
-     * <pre>
-     * The data center name of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string dcName = 4 [(.options.FieldExtension.required) = true];</code>
-     * @return The dcName.
-     */
-    java.lang.String getDcName();
-    /**
-     * <pre>
-     * The data center name of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string dcName = 4 [(.options.FieldExtension.required) = true];</code>
-     * @return The bytes for dcName.
-     */
-    com.google.protobuf.ByteString
-        getDcNameBytes();
-
-    /**
-     * <pre>
-     * The clusterCrn of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string clusterCrn = 5 [(.options.FieldExtension.required) = true];</code>
-     * @return The clusterCrn.
-     */
-    java.lang.String getClusterCrn();
-    /**
-     * <pre>
-     * The clusterCrn of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string clusterCrn = 5 [(.options.FieldExtension.required) = true];</code>
-     * @return The bytes for clusterCrn.
-     */
-    com.google.protobuf.ByteString
-        getClusterCrnBytes();
-
-    /**
-     * <pre>
-     * The IP address of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string ipAddress = 6 [(.options.FieldExtension.required) = true];</code>
-     * @return The ipAddress.
-     */
-    java.lang.String getIpAddress();
-    /**
-     * <pre>
-     * The IP address of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string ipAddress = 6 [(.options.FieldExtension.required) = true];</code>
-     * @return The bytes for ipAddress.
-     */
-    com.google.protobuf.ByteString
-        getIpAddressBytes();
-
-    /**
-     * <pre>
-     * The type of the registered remote cluster.
-     * </pre>
-     *
-     * <code>.remotecluster.RemoteClusterType.Value clusterType = 7 [(.options.FieldExtension.required) = true];</code>
-     * @return The enum numeric value on the wire for clusterType.
-     */
-    int getClusterTypeValue();
-    /**
-     * <pre>
-     * The type of the registered remote cluster.
-     * </pre>
-     *
-     * <code>.remotecluster.RemoteClusterType.Value clusterType = 7 [(.options.FieldExtension.required) = true];</code>
-     * @return The clusterType.
-     */
-    com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType.Value getClusterType();
-
-    /**
-     * <pre>
-     * The active status of the registered remote cluster.
-     * </pre>
-     *
-     * <code>.remotecluster.State.Value state = 8 [(.options.FieldExtension.required) = true];</code>
-     * @return The enum numeric value on the wire for state.
-     */
-    int getStateValue();
-    /**
-     * <pre>
-     * The active status of the registered remote cluster.
-     * </pre>
-     *
-     * <code>.remotecluster.State.Value state = 8 [(.options.FieldExtension.required) = true];</code>
-     * @return The state.
-     */
-    com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State.Value getState();
-
-    /**
-     * <pre>
-     * The description of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string description = 11;</code>
-     * @return The description.
-     */
-    java.lang.String getDescription();
-    /**
-     * <pre>
-     * The description of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string description = 11;</code>
-     * @return The bytes for description.
-     */
-    com.google.protobuf.ByteString
-        getDescriptionBytes();
-
-    /**
-     * <pre>
-     * The location of the registered remote cluster.
-     * </pre>
-     *
-     * <code>int64 locationId = 12;</code>
-     * @return The locationId.
-     */
-    long getLocationId();
-
-    /**
-     * <pre>
-     * The time at which the remote cluster was registered.
-     * </pre>
-     *
-     * <code>int64 lastCreateTime = 13 [(.options.FieldExtension.datetime) = true];</code>
-     * @return The lastCreateTime.
-     */
-    long getLastCreateTime();
-
-    /**
-     * <pre>
-     * The time at which the remote cluster was updated.
-     * </pre>
-     *
-     * <code>int64 lastUpdatedTime = 14 [(.options.FieldExtension.datetime) = true];</code>
-     * @return The lastUpdatedTime.
-     */
-    long getLastUpdatedTime();
-
-    /**
-     * <pre>
-     * The time at which the remote cluster was updated. Its value is in Coordinated Universal Time.
-     * </pre>
-     *
-     * <code>int64 updatedUtc = 15 [(.options.FieldExtension.datetime) = true];</code>
-     * @return The updatedUtc.
-     */
-    long getUpdatedUtc();
-
-    /**
-     * <pre>
-     * The list of clusters in the remote cluster.
-     * </pre>
-     *
-     * <code>repeated .remotecluster.Cluster clusters = 16;</code>
-     */
-    java.util.List<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster> 
-        getClustersList();
-    /**
-     * <pre>
-     * The list of clusters in the remote cluster.
-     * </pre>
-     *
-     * <code>repeated .remotecluster.Cluster clusters = 16;</code>
-     */
-    com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster getClusters(int index);
-    /**
-     * <pre>
-     * The list of clusters in the remote cluster.
-     * </pre>
-     *
-     * <code>repeated .remotecluster.Cluster clusters = 16;</code>
-     */
-    int getClustersCount();
-    /**
-     * <pre>
-     * The list of clusters in the remote cluster.
-     * </pre>
-     *
-     * <code>repeated .remotecluster.Cluster clusters = 16;</code>
-     */
-    java.util.List<? extends com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ClusterOrBuilder> 
-        getClustersOrBuilderList();
-    /**
-     * <pre>
-     * The list of clusters in the remote cluster.
-     * </pre>
-     *
-     * <code>repeated .remotecluster.Cluster clusters = 16;</code>
-     */
-    com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ClusterOrBuilder getClustersOrBuilder(
-        int index);
-
-    /**
-     * <pre>
-     * The knox enablement of the registered remote cluster.
-     * </pre>
-     *
-     * <code>bool knoxEnabled = 17;</code>
-     * @return The knoxEnabled.
-     */
-    boolean getKnoxEnabled();
-
-    /**
-     * <pre>
-     * The knox url of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string knoxUrl = 18;</code>
-     * @return The knoxUrl.
-     */
-    java.lang.String getKnoxUrl();
-    /**
-     * <pre>
-     * The knox url of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string knoxUrl = 18;</code>
-     * @return The bytes for knoxUrl.
-     */
-    com.google.protobuf.ByteString
-        getKnoxUrlBytes();
-
-    /**
-     * <pre>
-     * The user name of the remote cluster.
-     * </pre>
-     *
-     * <code>string username = 19;</code>
-     * @return The username.
-     */
-    java.lang.String getUsername();
-    /**
-     * <pre>
-     * The user name of the remote cluster.
-     * </pre>
-     *
-     * <code>string username = 19;</code>
-     * @return The bytes for username.
-     */
-    com.google.protobuf.ByteString
-        getUsernameBytes();
-
-    /**
-     * <pre>
-     * The password of the remote cluster.
-     * </pre>
-     *
-     * <code>string password = 20 [(.options.FieldExtension.sensitive) = true];</code>
-     * @return The password.
-     */
-    java.lang.String getPassword();
-    /**
-     * <pre>
-     * The password of the remote cluster.
-     * </pre>
-     *
-     * <code>string password = 20 [(.options.FieldExtension.sensitive) = true];</code>
-     * @return The bytes for password.
-     */
-    com.google.protobuf.ByteString
-        getPasswordBytes();
-
-    /**
-     * <pre>
-     * Highlights if the remote clusters allows untrusted connections.
-     * </pre>
-     *
-     * <code>bool allowUntrusted = 21;</code>
-     * @return The allowUntrusted.
-     */
-    boolean getAllowUntrusted();
-
-    /**
-     * <pre>
-     * Highlights if the remote cluster works behind a gateway.
-     * </pre>
-     *
-     * <code>bool behindGateway = 22;</code>
-     * @return The behindGateway.
-     */
-    boolean getBehindGateway();
-
-    /**
-     * <pre>
-     * The manager type of the registered remote cluster.
-     * </pre>
-     *
-     * <code>.remotecluster.ManagerType.Value managerType = 23;</code>
-     * @return The enum numeric value on the wire for managerType.
-     */
-    int getManagerTypeValue();
-    /**
-     * <pre>
-     * The manager type of the registered remote cluster.
-     * </pre>
-     *
-     * <code>.remotecluster.ManagerType.Value managerType = 23;</code>
-     * @return The managerType.
-     */
-    com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Value getManagerType();
-
-    /**
-     * <pre>
-     * The manager URI of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string managerUri = 24;</code>
-     * @return The managerUri.
-     */
-    java.lang.String getManagerUri();
-    /**
-     * <pre>
-     * The manager URI of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string managerUri = 24;</code>
-     * @return The bytes for managerUri.
-     */
-    com.google.protobuf.ByteString
-        getManagerUriBytes();
-
-    /**
-     * <pre>
-     * The owner of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string createdBy = 25;</code>
-     * @return The createdBy.
-     */
-    java.lang.String getCreatedBy();
-    /**
-     * <pre>
-     * The owner of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string createdBy = 25;</code>
-     * @return The bytes for createdBy.
-     */
-    com.google.protobuf.ByteString
-        getCreatedByBytes();
-
-    /**
-     * <pre>
-     * The connectivity version of the remote cluster.
-     * </pre>
-     *
-     * <code>string connectivityVersion = 26;</code>
-     * @return The connectivityVersion.
-     */
-    java.lang.String getConnectivityVersion();
-    /**
-     * <pre>
-     * The connectivity version of the remote cluster.
-     * </pre>
-     *
-     * <code>string connectivityVersion = 26;</code>
-     * @return The bytes for connectivityVersion.
-     */
-    com.google.protobuf.ByteString
-        getConnectivityVersionBytes();
-
-    /**
-     * <pre>
-     * Whether the cluster upgrade is in progress.
-     * </pre>
-     *
-     * <code>bool isUpgradeInProgress = 27;</code>
-     * @return The isUpgradeInProgress.
-     */
-    boolean getIsUpgradeInProgress();
-
-    /**
-     * <pre>
-     * The key ID of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string newKeyId = 28;</code>
-     * @return The newKeyId.
-     */
-    java.lang.String getNewKeyId();
-    /**
-     * <pre>
-     * The key ID of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string newKeyId = 28;</code>
-     * @return The bytes for newKeyId.
-     */
-    com.google.protobuf.ByteString
-        getNewKeyIdBytes();
-
-    /**
-     * <pre>
-     * The location of the data center.
-     * </pre>
-     *
-     * <code>.remotecluster.Location location = 29;</code>
-     * @return Whether the location field is set.
-     */
-    boolean hasLocation();
-    /**
-     * <pre>
-     * The location of the data center.
-     * </pre>
-     *
-     * <code>.remotecluster.Location location = 29;</code>
-     * @return The location.
-     */
-    com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location getLocation();
-    /**
-     * <pre>
-     * The location of the data center.
-     * </pre>
-     *
-     * <code>.remotecluster.Location location = 29;</code>
-     */
-    com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.LocationOrBuilder getLocationOrBuilder();
-  }
-  /**
-   * <pre>
-   * Object containing the remote cluster information.
-   * </pre>
-   *
-   * Protobuf type {@code remotecluster.RemoteClusterData}
-   */
-  public static final class RemoteClusterData extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:remotecluster.RemoteClusterData)
-      RemoteClusterDataOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use RemoteClusterData.newBuilder() to construct.
-    private RemoteClusterData(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private RemoteClusterData() {
-      accountId_ = "";
-      name_ = "";
-      dcName_ = "";
-      clusterCrn_ = "";
-      ipAddress_ = "";
-      clusterType_ = 0;
-      state_ = 0;
-      description_ = "";
-      clusters_ = java.util.Collections.emptyList();
-      knoxUrl_ = "";
-      username_ = "";
-      password_ = "";
-      managerType_ = 0;
-      managerUri_ = "";
-      createdBy_ = "";
-      connectivityVersion_ = "";
-      newKeyId_ = "";
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new RemoteClusterData();
-    }
-
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_RemoteClusterData_descriptor;
-    }
-
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_RemoteClusterData_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData.Builder.class);
-    }
-
-    private int bitField0_;
-    public static final int ID_FIELD_NUMBER = 1;
-    private long id_ = 0L;
-    /**
-     * <pre>
-     * The clusterId of the registered remote cluster.
-     * </pre>
-     *
-     * <code>int64 id = 1 [(.options.FieldExtension.required) = true];</code>
-     * @return The id.
-     */
-    @java.lang.Override
-    public long getId() {
-      return id_;
-    }
-
-    public static final int ACCOUNTID_FIELD_NUMBER = 2;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object accountId_ = "";
-    /**
-     * <pre>
-     * The accountId of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string accountId = 2 [(.options.FieldExtension.required) = true];</code>
-     * @return The accountId.
-     */
-    @java.lang.Override
-    public java.lang.String getAccountId() {
-      java.lang.Object ref = accountId_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        accountId_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * The accountId of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string accountId = 2 [(.options.FieldExtension.required) = true];</code>
-     * @return The bytes for accountId.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getAccountIdBytes() {
-      java.lang.Object ref = accountId_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        accountId_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int NAME_FIELD_NUMBER = 3;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object name_ = "";
-    /**
-     * <pre>
-     * The name of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string name = 3 [(.options.FieldExtension.required) = true];</code>
-     * @return The name.
-     */
-    @java.lang.Override
-    public java.lang.String getName() {
-      java.lang.Object ref = name_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        name_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * The name of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string name = 3 [(.options.FieldExtension.required) = true];</code>
-     * @return The bytes for name.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getNameBytes() {
-      java.lang.Object ref = name_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        name_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int DCNAME_FIELD_NUMBER = 4;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object dcName_ = "";
-    /**
-     * <pre>
-     * The data center name of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string dcName = 4 [(.options.FieldExtension.required) = true];</code>
-     * @return The dcName.
-     */
-    @java.lang.Override
-    public java.lang.String getDcName() {
-      java.lang.Object ref = dcName_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        dcName_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * The data center name of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string dcName = 4 [(.options.FieldExtension.required) = true];</code>
-     * @return The bytes for dcName.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getDcNameBytes() {
-      java.lang.Object ref = dcName_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        dcName_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int CLUSTERCRN_FIELD_NUMBER = 5;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object clusterCrn_ = "";
-    /**
-     * <pre>
-     * The clusterCrn of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string clusterCrn = 5 [(.options.FieldExtension.required) = true];</code>
-     * @return The clusterCrn.
-     */
-    @java.lang.Override
-    public java.lang.String getClusterCrn() {
-      java.lang.Object ref = clusterCrn_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        clusterCrn_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * The clusterCrn of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string clusterCrn = 5 [(.options.FieldExtension.required) = true];</code>
-     * @return The bytes for clusterCrn.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getClusterCrnBytes() {
-      java.lang.Object ref = clusterCrn_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        clusterCrn_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int IPADDRESS_FIELD_NUMBER = 6;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object ipAddress_ = "";
-    /**
-     * <pre>
-     * The IP address of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string ipAddress = 6 [(.options.FieldExtension.required) = true];</code>
-     * @return The ipAddress.
-     */
-    @java.lang.Override
-    public java.lang.String getIpAddress() {
-      java.lang.Object ref = ipAddress_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        ipAddress_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * The IP address of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string ipAddress = 6 [(.options.FieldExtension.required) = true];</code>
-     * @return The bytes for ipAddress.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getIpAddressBytes() {
-      java.lang.Object ref = ipAddress_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        ipAddress_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int CLUSTERTYPE_FIELD_NUMBER = 7;
-    private int clusterType_ = 0;
-    /**
-     * <pre>
-     * The type of the registered remote cluster.
-     * </pre>
-     *
-     * <code>.remotecluster.RemoteClusterType.Value clusterType = 7 [(.options.FieldExtension.required) = true];</code>
-     * @return The enum numeric value on the wire for clusterType.
-     */
-    @java.lang.Override public int getClusterTypeValue() {
-      return clusterType_;
-    }
-    /**
-     * <pre>
-     * The type of the registered remote cluster.
-     * </pre>
-     *
-     * <code>.remotecluster.RemoteClusterType.Value clusterType = 7 [(.options.FieldExtension.required) = true];</code>
-     * @return The clusterType.
-     */
-    @java.lang.Override public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType.Value getClusterType() {
-      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType.Value result = com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType.Value.forNumber(clusterType_);
-      return result == null ? com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType.Value.UNRECOGNIZED : result;
-    }
-
-    public static final int STATE_FIELD_NUMBER = 8;
-    private int state_ = 0;
-    /**
-     * <pre>
-     * The active status of the registered remote cluster.
-     * </pre>
-     *
-     * <code>.remotecluster.State.Value state = 8 [(.options.FieldExtension.required) = true];</code>
-     * @return The enum numeric value on the wire for state.
-     */
-    @java.lang.Override public int getStateValue() {
-      return state_;
-    }
-    /**
-     * <pre>
-     * The active status of the registered remote cluster.
-     * </pre>
-     *
-     * <code>.remotecluster.State.Value state = 8 [(.options.FieldExtension.required) = true];</code>
-     * @return The state.
-     */
-    @java.lang.Override public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State.Value getState() {
-      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State.Value result = com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State.Value.forNumber(state_);
-      return result == null ? com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State.Value.UNRECOGNIZED : result;
-    }
-
-    public static final int DESCRIPTION_FIELD_NUMBER = 11;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object description_ = "";
-    /**
-     * <pre>
-     * The description of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string description = 11;</code>
-     * @return The description.
-     */
-    @java.lang.Override
-    public java.lang.String getDescription() {
-      java.lang.Object ref = description_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        description_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * The description of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string description = 11;</code>
-     * @return The bytes for description.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getDescriptionBytes() {
-      java.lang.Object ref = description_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        description_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int LOCATIONID_FIELD_NUMBER = 12;
-    private long locationId_ = 0L;
-    /**
-     * <pre>
-     * The location of the registered remote cluster.
-     * </pre>
-     *
-     * <code>int64 locationId = 12;</code>
-     * @return The locationId.
-     */
-    @java.lang.Override
-    public long getLocationId() {
-      return locationId_;
-    }
-
-    public static final int LASTCREATETIME_FIELD_NUMBER = 13;
-    private long lastCreateTime_ = 0L;
-    /**
-     * <pre>
-     * The time at which the remote cluster was registered.
-     * </pre>
-     *
-     * <code>int64 lastCreateTime = 13 [(.options.FieldExtension.datetime) = true];</code>
-     * @return The lastCreateTime.
-     */
-    @java.lang.Override
-    public long getLastCreateTime() {
-      return lastCreateTime_;
-    }
-
-    public static final int LASTUPDATEDTIME_FIELD_NUMBER = 14;
-    private long lastUpdatedTime_ = 0L;
-    /**
-     * <pre>
-     * The time at which the remote cluster was updated.
-     * </pre>
-     *
-     * <code>int64 lastUpdatedTime = 14 [(.options.FieldExtension.datetime) = true];</code>
-     * @return The lastUpdatedTime.
-     */
-    @java.lang.Override
-    public long getLastUpdatedTime() {
-      return lastUpdatedTime_;
-    }
-
-    public static final int UPDATEDUTC_FIELD_NUMBER = 15;
-    private long updatedUtc_ = 0L;
-    /**
-     * <pre>
-     * The time at which the remote cluster was updated. Its value is in Coordinated Universal Time.
-     * </pre>
-     *
-     * <code>int64 updatedUtc = 15 [(.options.FieldExtension.datetime) = true];</code>
-     * @return The updatedUtc.
-     */
-    @java.lang.Override
-    public long getUpdatedUtc() {
-      return updatedUtc_;
-    }
-
-    public static final int CLUSTERS_FIELD_NUMBER = 16;
-    @SuppressWarnings("serial")
-    private java.util.List<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster> clusters_;
-    /**
-     * <pre>
-     * The list of clusters in the remote cluster.
-     * </pre>
-     *
-     * <code>repeated .remotecluster.Cluster clusters = 16;</code>
-     */
-    @java.lang.Override
-    public java.util.List<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster> getClustersList() {
-      return clusters_;
-    }
-    /**
-     * <pre>
-     * The list of clusters in the remote cluster.
-     * </pre>
-     *
-     * <code>repeated .remotecluster.Cluster clusters = 16;</code>
-     */
-    @java.lang.Override
-    public java.util.List<? extends com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ClusterOrBuilder> 
-        getClustersOrBuilderList() {
-      return clusters_;
-    }
-    /**
-     * <pre>
-     * The list of clusters in the remote cluster.
-     * </pre>
-     *
-     * <code>repeated .remotecluster.Cluster clusters = 16;</code>
-     */
-    @java.lang.Override
-    public int getClustersCount() {
-      return clusters_.size();
-    }
-    /**
-     * <pre>
-     * The list of clusters in the remote cluster.
-     * </pre>
-     *
-     * <code>repeated .remotecluster.Cluster clusters = 16;</code>
-     */
-    @java.lang.Override
-    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster getClusters(int index) {
-      return clusters_.get(index);
-    }
-    /**
-     * <pre>
-     * The list of clusters in the remote cluster.
-     * </pre>
-     *
-     * <code>repeated .remotecluster.Cluster clusters = 16;</code>
-     */
-    @java.lang.Override
-    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ClusterOrBuilder getClustersOrBuilder(
-        int index) {
-      return clusters_.get(index);
-    }
-
-    public static final int KNOXENABLED_FIELD_NUMBER = 17;
-    private boolean knoxEnabled_ = false;
-    /**
-     * <pre>
-     * The knox enablement of the registered remote cluster.
-     * </pre>
-     *
-     * <code>bool knoxEnabled = 17;</code>
-     * @return The knoxEnabled.
-     */
-    @java.lang.Override
-    public boolean getKnoxEnabled() {
-      return knoxEnabled_;
-    }
-
-    public static final int KNOXURL_FIELD_NUMBER = 18;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object knoxUrl_ = "";
-    /**
-     * <pre>
-     * The knox url of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string knoxUrl = 18;</code>
-     * @return The knoxUrl.
-     */
-    @java.lang.Override
-    public java.lang.String getKnoxUrl() {
-      java.lang.Object ref = knoxUrl_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        knoxUrl_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * The knox url of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string knoxUrl = 18;</code>
-     * @return The bytes for knoxUrl.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getKnoxUrlBytes() {
-      java.lang.Object ref = knoxUrl_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        knoxUrl_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int USERNAME_FIELD_NUMBER = 19;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object username_ = "";
-    /**
-     * <pre>
-     * The user name of the remote cluster.
-     * </pre>
-     *
-     * <code>string username = 19;</code>
-     * @return The username.
-     */
-    @java.lang.Override
-    public java.lang.String getUsername() {
-      java.lang.Object ref = username_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        username_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * The user name of the remote cluster.
-     * </pre>
-     *
-     * <code>string username = 19;</code>
-     * @return The bytes for username.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getUsernameBytes() {
-      java.lang.Object ref = username_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        username_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int PASSWORD_FIELD_NUMBER = 20;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object password_ = "";
-    /**
-     * <pre>
-     * The password of the remote cluster.
-     * </pre>
-     *
-     * <code>string password = 20 [(.options.FieldExtension.sensitive) = true];</code>
-     * @return The password.
-     */
-    @java.lang.Override
-    public java.lang.String getPassword() {
-      java.lang.Object ref = password_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        password_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * The password of the remote cluster.
-     * </pre>
-     *
-     * <code>string password = 20 [(.options.FieldExtension.sensitive) = true];</code>
-     * @return The bytes for password.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getPasswordBytes() {
-      java.lang.Object ref = password_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        password_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int ALLOWUNTRUSTED_FIELD_NUMBER = 21;
-    private boolean allowUntrusted_ = false;
-    /**
-     * <pre>
-     * Highlights if the remote clusters allows untrusted connections.
-     * </pre>
-     *
-     * <code>bool allowUntrusted = 21;</code>
-     * @return The allowUntrusted.
-     */
-    @java.lang.Override
-    public boolean getAllowUntrusted() {
-      return allowUntrusted_;
-    }
-
-    public static final int BEHINDGATEWAY_FIELD_NUMBER = 22;
-    private boolean behindGateway_ = false;
-    /**
-     * <pre>
-     * Highlights if the remote cluster works behind a gateway.
-     * </pre>
-     *
-     * <code>bool behindGateway = 22;</code>
-     * @return The behindGateway.
-     */
-    @java.lang.Override
-    public boolean getBehindGateway() {
-      return behindGateway_;
-    }
-
-    public static final int MANAGERTYPE_FIELD_NUMBER = 23;
-    private int managerType_ = 0;
-    /**
-     * <pre>
-     * The manager type of the registered remote cluster.
-     * </pre>
-     *
-     * <code>.remotecluster.ManagerType.Value managerType = 23;</code>
-     * @return The enum numeric value on the wire for managerType.
-     */
-    @java.lang.Override public int getManagerTypeValue() {
-      return managerType_;
-    }
-    /**
-     * <pre>
-     * The manager type of the registered remote cluster.
-     * </pre>
-     *
-     * <code>.remotecluster.ManagerType.Value managerType = 23;</code>
-     * @return The managerType.
-     */
-    @java.lang.Override public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Value getManagerType() {
-      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Value result = com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Value.forNumber(managerType_);
-      return result == null ? com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Value.UNRECOGNIZED : result;
-    }
-
-    public static final int MANAGERURI_FIELD_NUMBER = 24;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object managerUri_ = "";
-    /**
-     * <pre>
-     * The manager URI of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string managerUri = 24;</code>
-     * @return The managerUri.
-     */
-    @java.lang.Override
-    public java.lang.String getManagerUri() {
-      java.lang.Object ref = managerUri_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        managerUri_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * The manager URI of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string managerUri = 24;</code>
-     * @return The bytes for managerUri.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getManagerUriBytes() {
-      java.lang.Object ref = managerUri_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        managerUri_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int CREATEDBY_FIELD_NUMBER = 25;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object createdBy_ = "";
-    /**
-     * <pre>
-     * The owner of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string createdBy = 25;</code>
-     * @return The createdBy.
-     */
-    @java.lang.Override
-    public java.lang.String getCreatedBy() {
-      java.lang.Object ref = createdBy_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        createdBy_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * The owner of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string createdBy = 25;</code>
-     * @return The bytes for createdBy.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getCreatedByBytes() {
-      java.lang.Object ref = createdBy_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        createdBy_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int CONNECTIVITYVERSION_FIELD_NUMBER = 26;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object connectivityVersion_ = "";
-    /**
-     * <pre>
-     * The connectivity version of the remote cluster.
-     * </pre>
-     *
-     * <code>string connectivityVersion = 26;</code>
-     * @return The connectivityVersion.
-     */
-    @java.lang.Override
-    public java.lang.String getConnectivityVersion() {
-      java.lang.Object ref = connectivityVersion_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        connectivityVersion_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * The connectivity version of the remote cluster.
-     * </pre>
-     *
-     * <code>string connectivityVersion = 26;</code>
-     * @return The bytes for connectivityVersion.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getConnectivityVersionBytes() {
-      java.lang.Object ref = connectivityVersion_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        connectivityVersion_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int ISUPGRADEINPROGRESS_FIELD_NUMBER = 27;
-    private boolean isUpgradeInProgress_ = false;
-    /**
-     * <pre>
-     * Whether the cluster upgrade is in progress.
-     * </pre>
-     *
-     * <code>bool isUpgradeInProgress = 27;</code>
-     * @return The isUpgradeInProgress.
-     */
-    @java.lang.Override
-    public boolean getIsUpgradeInProgress() {
-      return isUpgradeInProgress_;
-    }
-
-    public static final int NEWKEYID_FIELD_NUMBER = 28;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object newKeyId_ = "";
-    /**
-     * <pre>
-     * The key ID of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string newKeyId = 28;</code>
-     * @return The newKeyId.
-     */
-    @java.lang.Override
-    public java.lang.String getNewKeyId() {
-      java.lang.Object ref = newKeyId_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        newKeyId_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * The key ID of the registered remote cluster.
-     * </pre>
-     *
-     * <code>string newKeyId = 28;</code>
-     * @return The bytes for newKeyId.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getNewKeyIdBytes() {
-      java.lang.Object ref = newKeyId_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        newKeyId_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int LOCATION_FIELD_NUMBER = 29;
-    private com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location location_;
-    /**
-     * <pre>
-     * The location of the data center.
-     * </pre>
-     *
-     * <code>.remotecluster.Location location = 29;</code>
-     * @return Whether the location field is set.
-     */
-    @java.lang.Override
-    public boolean hasLocation() {
-      return ((bitField0_ & 0x00000001) != 0);
-    }
-    /**
-     * <pre>
-     * The location of the data center.
-     * </pre>
-     *
-     * <code>.remotecluster.Location location = 29;</code>
-     * @return The location.
-     */
-    @java.lang.Override
-    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location getLocation() {
-      return location_ == null ? com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location.getDefaultInstance() : location_;
-    }
-    /**
-     * <pre>
-     * The location of the data center.
-     * </pre>
-     *
-     * <code>.remotecluster.Location location = 29;</code>
-     */
-    @java.lang.Override
-    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.LocationOrBuilder getLocationOrBuilder() {
-      return location_ == null ? com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location.getDefaultInstance() : location_;
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (id_ != 0L) {
-        output.writeInt64(1, id_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, accountId_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, name_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(dcName_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, dcName_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(clusterCrn_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, clusterCrn_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(ipAddress_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, ipAddress_);
-      }
-      if (clusterType_ != com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType.Value.UNSET.getNumber()) {
-        output.writeEnum(7, clusterType_);
-      }
-      if (state_ != com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State.Value.UNSET.getNumber()) {
-        output.writeEnum(8, state_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(description_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 11, description_);
-      }
-      if (locationId_ != 0L) {
-        output.writeInt64(12, locationId_);
-      }
-      if (lastCreateTime_ != 0L) {
-        output.writeInt64(13, lastCreateTime_);
-      }
-      if (lastUpdatedTime_ != 0L) {
-        output.writeInt64(14, lastUpdatedTime_);
-      }
-      if (updatedUtc_ != 0L) {
-        output.writeInt64(15, updatedUtc_);
-      }
-      for (int i = 0; i < clusters_.size(); i++) {
-        output.writeMessage(16, clusters_.get(i));
-      }
-      if (knoxEnabled_ != false) {
-        output.writeBool(17, knoxEnabled_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(knoxUrl_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 18, knoxUrl_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(username_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 19, username_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(password_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 20, password_);
-      }
-      if (allowUntrusted_ != false) {
-        output.writeBool(21, allowUntrusted_);
-      }
-      if (behindGateway_ != false) {
-        output.writeBool(22, behindGateway_);
-      }
-      if (managerType_ != com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Value.UNSET.getNumber()) {
-        output.writeEnum(23, managerType_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(managerUri_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 24, managerUri_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(createdBy_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 25, createdBy_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(connectivityVersion_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 26, connectivityVersion_);
-      }
-      if (isUpgradeInProgress_ != false) {
-        output.writeBool(27, isUpgradeInProgress_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(newKeyId_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 28, newKeyId_);
-      }
-      if (((bitField0_ & 0x00000001) != 0)) {
-        output.writeMessage(29, getLocation());
-      }
-      getUnknownFields().writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (id_ != 0L) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(1, id_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, accountId_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, name_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(dcName_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, dcName_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(clusterCrn_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, clusterCrn_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(ipAddress_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, ipAddress_);
-      }
-      if (clusterType_ != com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType.Value.UNSET.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(7, clusterType_);
-      }
-      if (state_ != com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State.Value.UNSET.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(8, state_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(description_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, description_);
-      }
-      if (locationId_ != 0L) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(12, locationId_);
-      }
-      if (lastCreateTime_ != 0L) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(13, lastCreateTime_);
-      }
-      if (lastUpdatedTime_ != 0L) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(14, lastUpdatedTime_);
-      }
-      if (updatedUtc_ != 0L) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(15, updatedUtc_);
-      }
-      for (int i = 0; i < clusters_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(16, clusters_.get(i));
-      }
-      if (knoxEnabled_ != false) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(17, knoxEnabled_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(knoxUrl_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(18, knoxUrl_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(username_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(19, username_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(password_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(20, password_);
-      }
-      if (allowUntrusted_ != false) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(21, allowUntrusted_);
-      }
-      if (behindGateway_ != false) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(22, behindGateway_);
-      }
-      if (managerType_ != com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Value.UNSET.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(23, managerType_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(managerUri_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(24, managerUri_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(createdBy_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(25, createdBy_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(connectivityVersion_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(26, connectivityVersion_);
-      }
-      if (isUpgradeInProgress_ != false) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(27, isUpgradeInProgress_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(newKeyId_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(28, newKeyId_);
-      }
-      if (((bitField0_ & 0x00000001) != 0)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(29, getLocation());
-      }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData)) {
-        return super.equals(obj);
-      }
-      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData other = (com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData) obj;
-
-      if (getId()
-          != other.getId()) return false;
-      if (!getAccountId()
-          .equals(other.getAccountId())) return false;
-      if (!getName()
-          .equals(other.getName())) return false;
-      if (!getDcName()
-          .equals(other.getDcName())) return false;
-      if (!getClusterCrn()
-          .equals(other.getClusterCrn())) return false;
-      if (!getIpAddress()
-          .equals(other.getIpAddress())) return false;
-      if (clusterType_ != other.clusterType_) return false;
-      if (state_ != other.state_) return false;
-      if (!getDescription()
-          .equals(other.getDescription())) return false;
-      if (getLocationId()
-          != other.getLocationId()) return false;
-      if (getLastCreateTime()
-          != other.getLastCreateTime()) return false;
-      if (getLastUpdatedTime()
-          != other.getLastUpdatedTime()) return false;
-      if (getUpdatedUtc()
-          != other.getUpdatedUtc()) return false;
-      if (!getClustersList()
-          .equals(other.getClustersList())) return false;
-      if (getKnoxEnabled()
-          != other.getKnoxEnabled()) return false;
-      if (!getKnoxUrl()
-          .equals(other.getKnoxUrl())) return false;
-      if (!getUsername()
-          .equals(other.getUsername())) return false;
-      if (!getPassword()
-          .equals(other.getPassword())) return false;
-      if (getAllowUntrusted()
-          != other.getAllowUntrusted()) return false;
-      if (getBehindGateway()
-          != other.getBehindGateway()) return false;
-      if (managerType_ != other.managerType_) return false;
-      if (!getManagerUri()
-          .equals(other.getManagerUri())) return false;
-      if (!getCreatedBy()
-          .equals(other.getCreatedBy())) return false;
-      if (!getConnectivityVersion()
-          .equals(other.getConnectivityVersion())) return false;
-      if (getIsUpgradeInProgress()
-          != other.getIsUpgradeInProgress()) return false;
-      if (!getNewKeyId()
-          .equals(other.getNewKeyId())) return false;
-      if (hasLocation() != other.hasLocation()) return false;
-      if (hasLocation()) {
-        if (!getLocation()
-            .equals(other.getLocation())) return false;
-      }
-      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + ID_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          getId());
-      hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
-      hash = (53 * hash) + getAccountId().hashCode();
-      hash = (37 * hash) + NAME_FIELD_NUMBER;
-      hash = (53 * hash) + getName().hashCode();
-      hash = (37 * hash) + DCNAME_FIELD_NUMBER;
-      hash = (53 * hash) + getDcName().hashCode();
-      hash = (37 * hash) + CLUSTERCRN_FIELD_NUMBER;
-      hash = (53 * hash) + getClusterCrn().hashCode();
-      hash = (37 * hash) + IPADDRESS_FIELD_NUMBER;
-      hash = (53 * hash) + getIpAddress().hashCode();
-      hash = (37 * hash) + CLUSTERTYPE_FIELD_NUMBER;
-      hash = (53 * hash) + clusterType_;
-      hash = (37 * hash) + STATE_FIELD_NUMBER;
-      hash = (53 * hash) + state_;
-      hash = (37 * hash) + DESCRIPTION_FIELD_NUMBER;
-      hash = (53 * hash) + getDescription().hashCode();
-      hash = (37 * hash) + LOCATIONID_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          getLocationId());
-      hash = (37 * hash) + LASTCREATETIME_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          getLastCreateTime());
-      hash = (37 * hash) + LASTUPDATEDTIME_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          getLastUpdatedTime());
-      hash = (37 * hash) + UPDATEDUTC_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          getUpdatedUtc());
-      if (getClustersCount() > 0) {
-        hash = (37 * hash) + CLUSTERS_FIELD_NUMBER;
-        hash = (53 * hash) + getClustersList().hashCode();
-      }
-      hash = (37 * hash) + KNOXENABLED_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-          getKnoxEnabled());
-      hash = (37 * hash) + KNOXURL_FIELD_NUMBER;
-      hash = (53 * hash) + getKnoxUrl().hashCode();
-      hash = (37 * hash) + USERNAME_FIELD_NUMBER;
-      hash = (53 * hash) + getUsername().hashCode();
-      hash = (37 * hash) + PASSWORD_FIELD_NUMBER;
-      hash = (53 * hash) + getPassword().hashCode();
-      hash = (37 * hash) + ALLOWUNTRUSTED_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-          getAllowUntrusted());
-      hash = (37 * hash) + BEHINDGATEWAY_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-          getBehindGateway());
-      hash = (37 * hash) + MANAGERTYPE_FIELD_NUMBER;
-      hash = (53 * hash) + managerType_;
-      hash = (37 * hash) + MANAGERURI_FIELD_NUMBER;
-      hash = (53 * hash) + getManagerUri().hashCode();
-      hash = (37 * hash) + CREATEDBY_FIELD_NUMBER;
-      hash = (53 * hash) + getCreatedBy().hashCode();
-      hash = (37 * hash) + CONNECTIVITYVERSION_FIELD_NUMBER;
-      hash = (53 * hash) + getConnectivityVersion().hashCode();
-      hash = (37 * hash) + ISUPGRADEINPROGRESS_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-          getIsUpgradeInProgress());
-      hash = (37 * hash) + NEWKEYID_FIELD_NUMBER;
-      hash = (53 * hash) + getNewKeyId().hashCode();
-      if (hasLocation()) {
-        hash = (37 * hash) + LOCATION_FIELD_NUMBER;
-        hash = (53 * hash) + getLocation().hashCode();
-      }
-      hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * <pre>
-     * Object containing the remote cluster information.
-     * </pre>
-     *
-     * Protobuf type {@code remotecluster.RemoteClusterData}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:remotecluster.RemoteClusterData)
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterDataOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_RemoteClusterData_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_RemoteClusterData_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData.Builder.class);
-      }
-
-      // Construct using com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getClustersFieldBuilder();
-          getLocationFieldBuilder();
-        }
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        bitField0_ = 0;
-        id_ = 0L;
-        accountId_ = "";
-        name_ = "";
-        dcName_ = "";
-        clusterCrn_ = "";
-        ipAddress_ = "";
-        clusterType_ = 0;
-        state_ = 0;
-        description_ = "";
-        locationId_ = 0L;
-        lastCreateTime_ = 0L;
-        lastUpdatedTime_ = 0L;
-        updatedUtc_ = 0L;
-        if (clustersBuilder_ == null) {
-          clusters_ = java.util.Collections.emptyList();
-        } else {
-          clusters_ = null;
-          clustersBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00002000);
-        knoxEnabled_ = false;
-        knoxUrl_ = "";
-        username_ = "";
-        password_ = "";
-        allowUntrusted_ = false;
-        behindGateway_ = false;
-        managerType_ = 0;
-        managerUri_ = "";
-        createdBy_ = "";
-        connectivityVersion_ = "";
-        isUpgradeInProgress_ = false;
-        newKeyId_ = "";
-        location_ = null;
-        if (locationBuilder_ != null) {
-          locationBuilder_.dispose();
-          locationBuilder_ = null;
-        }
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_RemoteClusterData_descriptor;
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData getDefaultInstanceForType() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData build() {
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData buildPartial() {
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData result = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData(this);
-        buildPartialRepeatedFields(result);
-        if (bitField0_ != 0) { buildPartial0(result); }
-        onBuilt();
-        return result;
-      }
-
-      private void buildPartialRepeatedFields(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData result) {
-        if (clustersBuilder_ == null) {
-          if (((bitField0_ & 0x00002000) != 0)) {
-            clusters_ = java.util.Collections.unmodifiableList(clusters_);
-            bitField0_ = (bitField0_ & ~0x00002000);
-          }
-          result.clusters_ = clusters_;
-        } else {
-          result.clusters_ = clustersBuilder_.build();
-        }
-      }
-
-      private void buildPartial0(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData result) {
-        int from_bitField0_ = bitField0_;
-        if (((from_bitField0_ & 0x00000001) != 0)) {
-          result.id_ = id_;
-        }
-        if (((from_bitField0_ & 0x00000002) != 0)) {
-          result.accountId_ = accountId_;
-        }
-        if (((from_bitField0_ & 0x00000004) != 0)) {
-          result.name_ = name_;
-        }
-        if (((from_bitField0_ & 0x00000008) != 0)) {
-          result.dcName_ = dcName_;
-        }
-        if (((from_bitField0_ & 0x00000010) != 0)) {
-          result.clusterCrn_ = clusterCrn_;
-        }
-        if (((from_bitField0_ & 0x00000020) != 0)) {
-          result.ipAddress_ = ipAddress_;
-        }
-        if (((from_bitField0_ & 0x00000040) != 0)) {
-          result.clusterType_ = clusterType_;
-        }
-        if (((from_bitField0_ & 0x00000080) != 0)) {
-          result.state_ = state_;
-        }
-        if (((from_bitField0_ & 0x00000100) != 0)) {
-          result.description_ = description_;
-        }
-        if (((from_bitField0_ & 0x00000200) != 0)) {
-          result.locationId_ = locationId_;
-        }
-        if (((from_bitField0_ & 0x00000400) != 0)) {
-          result.lastCreateTime_ = lastCreateTime_;
-        }
-        if (((from_bitField0_ & 0x00000800) != 0)) {
-          result.lastUpdatedTime_ = lastUpdatedTime_;
-        }
-        if (((from_bitField0_ & 0x00001000) != 0)) {
-          result.updatedUtc_ = updatedUtc_;
-        }
-        if (((from_bitField0_ & 0x00004000) != 0)) {
-          result.knoxEnabled_ = knoxEnabled_;
-        }
-        if (((from_bitField0_ & 0x00008000) != 0)) {
-          result.knoxUrl_ = knoxUrl_;
-        }
-        if (((from_bitField0_ & 0x00010000) != 0)) {
-          result.username_ = username_;
-        }
-        if (((from_bitField0_ & 0x00020000) != 0)) {
-          result.password_ = password_;
-        }
-        if (((from_bitField0_ & 0x00040000) != 0)) {
-          result.allowUntrusted_ = allowUntrusted_;
-        }
-        if (((from_bitField0_ & 0x00080000) != 0)) {
-          result.behindGateway_ = behindGateway_;
-        }
-        if (((from_bitField0_ & 0x00100000) != 0)) {
-          result.managerType_ = managerType_;
-        }
-        if (((from_bitField0_ & 0x00200000) != 0)) {
-          result.managerUri_ = managerUri_;
-        }
-        if (((from_bitField0_ & 0x00400000) != 0)) {
-          result.createdBy_ = createdBy_;
-        }
-        if (((from_bitField0_ & 0x00800000) != 0)) {
-          result.connectivityVersion_ = connectivityVersion_;
-        }
-        if (((from_bitField0_ & 0x01000000) != 0)) {
-          result.isUpgradeInProgress_ = isUpgradeInProgress_;
-        }
-        if (((from_bitField0_ & 0x02000000) != 0)) {
-          result.newKeyId_ = newKeyId_;
-        }
-        int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x04000000) != 0)) {
-          result.location_ = locationBuilder_ == null
-              ? location_
-              : locationBuilder_.build();
-          to_bitField0_ |= 0x00000001;
-        }
-        result.bitField0_ |= to_bitField0_;
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData) {
-          return mergeFrom((com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData other) {
-        if (other == com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData.getDefaultInstance()) return this;
-        if (other.getId() != 0L) {
-          setId(other.getId());
-        }
-        if (!other.getAccountId().isEmpty()) {
-          accountId_ = other.accountId_;
-          bitField0_ |= 0x00000002;
-          onChanged();
-        }
-        if (!other.getName().isEmpty()) {
-          name_ = other.name_;
-          bitField0_ |= 0x00000004;
-          onChanged();
-        }
-        if (!other.getDcName().isEmpty()) {
-          dcName_ = other.dcName_;
-          bitField0_ |= 0x00000008;
-          onChanged();
-        }
-        if (!other.getClusterCrn().isEmpty()) {
-          clusterCrn_ = other.clusterCrn_;
-          bitField0_ |= 0x00000010;
-          onChanged();
-        }
-        if (!other.getIpAddress().isEmpty()) {
-          ipAddress_ = other.ipAddress_;
-          bitField0_ |= 0x00000020;
-          onChanged();
-        }
-        if (other.clusterType_ != 0) {
-          setClusterTypeValue(other.getClusterTypeValue());
-        }
-        if (other.state_ != 0) {
-          setStateValue(other.getStateValue());
-        }
-        if (!other.getDescription().isEmpty()) {
-          description_ = other.description_;
-          bitField0_ |= 0x00000100;
-          onChanged();
-        }
-        if (other.getLocationId() != 0L) {
-          setLocationId(other.getLocationId());
-        }
-        if (other.getLastCreateTime() != 0L) {
-          setLastCreateTime(other.getLastCreateTime());
-        }
-        if (other.getLastUpdatedTime() != 0L) {
-          setLastUpdatedTime(other.getLastUpdatedTime());
-        }
-        if (other.getUpdatedUtc() != 0L) {
-          setUpdatedUtc(other.getUpdatedUtc());
-        }
-        if (clustersBuilder_ == null) {
-          if (!other.clusters_.isEmpty()) {
-            if (clusters_.isEmpty()) {
-              clusters_ = other.clusters_;
-              bitField0_ = (bitField0_ & ~0x00002000);
-            } else {
-              ensureClustersIsMutable();
-              clusters_.addAll(other.clusters_);
-            }
-            onChanged();
-          }
-        } else {
-          if (!other.clusters_.isEmpty()) {
-            if (clustersBuilder_.isEmpty()) {
-              clustersBuilder_.dispose();
-              clustersBuilder_ = null;
-              clusters_ = other.clusters_;
-              bitField0_ = (bitField0_ & ~0x00002000);
-              clustersBuilder_ = 
-                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
-                   getClustersFieldBuilder() : null;
-            } else {
-              clustersBuilder_.addAllMessages(other.clusters_);
-            }
-          }
-        }
-        if (other.getKnoxEnabled() != false) {
-          setKnoxEnabled(other.getKnoxEnabled());
-        }
-        if (!other.getKnoxUrl().isEmpty()) {
-          knoxUrl_ = other.knoxUrl_;
-          bitField0_ |= 0x00008000;
-          onChanged();
-        }
-        if (!other.getUsername().isEmpty()) {
-          username_ = other.username_;
-          bitField0_ |= 0x00010000;
-          onChanged();
-        }
-        if (!other.getPassword().isEmpty()) {
-          password_ = other.password_;
-          bitField0_ |= 0x00020000;
-          onChanged();
-        }
-        if (other.getAllowUntrusted() != false) {
-          setAllowUntrusted(other.getAllowUntrusted());
-        }
-        if (other.getBehindGateway() != false) {
-          setBehindGateway(other.getBehindGateway());
-        }
-        if (other.managerType_ != 0) {
-          setManagerTypeValue(other.getManagerTypeValue());
-        }
-        if (!other.getManagerUri().isEmpty()) {
-          managerUri_ = other.managerUri_;
-          bitField0_ |= 0x00200000;
-          onChanged();
-        }
-        if (!other.getCreatedBy().isEmpty()) {
-          createdBy_ = other.createdBy_;
-          bitField0_ |= 0x00400000;
-          onChanged();
-        }
-        if (!other.getConnectivityVersion().isEmpty()) {
-          connectivityVersion_ = other.connectivityVersion_;
-          bitField0_ |= 0x00800000;
-          onChanged();
-        }
-        if (other.getIsUpgradeInProgress() != false) {
-          setIsUpgradeInProgress(other.getIsUpgradeInProgress());
-        }
-        if (!other.getNewKeyId().isEmpty()) {
-          newKeyId_ = other.newKeyId_;
-          bitField0_ |= 0x02000000;
-          onChanged();
-        }
-        if (other.hasLocation()) {
-          mergeLocation(other.getLocation());
-        }
-        this.mergeUnknownFields(other.getUnknownFields());
-        onChanged();
-        return this;
-      }
-
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        if (extensionRegistry == null) {
-          throw new java.lang.NullPointerException();
-        }
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              case 8: {
-                id_ = input.readInt64();
-                bitField0_ |= 0x00000001;
-                break;
-              } // case 8
-              case 18: {
-                accountId_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000002;
-                break;
-              } // case 18
-              case 26: {
-                name_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000004;
-                break;
-              } // case 26
-              case 34: {
-                dcName_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000008;
-                break;
-              } // case 34
-              case 42: {
-                clusterCrn_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000010;
-                break;
-              } // case 42
-              case 50: {
-                ipAddress_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000020;
-                break;
-              } // case 50
-              case 56: {
-                clusterType_ = input.readEnum();
-                bitField0_ |= 0x00000040;
-                break;
-              } // case 56
-              case 64: {
-                state_ = input.readEnum();
-                bitField0_ |= 0x00000080;
-                break;
-              } // case 64
-              case 90: {
-                description_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000100;
-                break;
-              } // case 90
-              case 96: {
-                locationId_ = input.readInt64();
-                bitField0_ |= 0x00000200;
-                break;
-              } // case 96
-              case 104: {
-                lastCreateTime_ = input.readInt64();
-                bitField0_ |= 0x00000400;
-                break;
-              } // case 104
-              case 112: {
-                lastUpdatedTime_ = input.readInt64();
-                bitField0_ |= 0x00000800;
-                break;
-              } // case 112
-              case 120: {
-                updatedUtc_ = input.readInt64();
-                bitField0_ |= 0x00001000;
-                break;
-              } // case 120
-              case 130: {
-                com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster m =
-                    input.readMessage(
-                        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster.parser(),
-                        extensionRegistry);
-                if (clustersBuilder_ == null) {
-                  ensureClustersIsMutable();
-                  clusters_.add(m);
-                } else {
-                  clustersBuilder_.addMessage(m);
-                }
-                break;
-              } // case 130
-              case 136: {
-                knoxEnabled_ = input.readBool();
-                bitField0_ |= 0x00004000;
-                break;
-              } // case 136
-              case 146: {
-                knoxUrl_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00008000;
-                break;
-              } // case 146
-              case 154: {
-                username_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00010000;
-                break;
-              } // case 154
-              case 162: {
-                password_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00020000;
-                break;
-              } // case 162
-              case 168: {
-                allowUntrusted_ = input.readBool();
-                bitField0_ |= 0x00040000;
-                break;
-              } // case 168
-              case 176: {
-                behindGateway_ = input.readBool();
-                bitField0_ |= 0x00080000;
-                break;
-              } // case 176
-              case 184: {
-                managerType_ = input.readEnum();
-                bitField0_ |= 0x00100000;
-                break;
-              } // case 184
-              case 194: {
-                managerUri_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00200000;
-                break;
-              } // case 194
-              case 202: {
-                createdBy_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00400000;
-                break;
-              } // case 202
-              case 210: {
-                connectivityVersion_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00800000;
-                break;
-              } // case 210
-              case 216: {
-                isUpgradeInProgress_ = input.readBool();
-                bitField0_ |= 0x01000000;
-                break;
-              } // case 216
-              case 226: {
-                newKeyId_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x02000000;
-                break;
-              } // case 226
-              case 234: {
-                input.readMessage(
-                    getLocationFieldBuilder().getBuilder(),
-                    extensionRegistry);
-                bitField0_ |= 0x04000000;
-                break;
-              } // case 234
-              default: {
-                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
-                  done = true; // was an endgroup tag
-                }
-                break;
-              } // default:
-            } // switch (tag)
-          } // while (!done)
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.unwrapIOException();
-        } finally {
-          onChanged();
-        } // finally
-        return this;
-      }
-      private int bitField0_;
-
-      private long id_ ;
-      /**
-       * <pre>
-       * The clusterId of the registered remote cluster.
-       * </pre>
-       *
-       * <code>int64 id = 1 [(.options.FieldExtension.required) = true];</code>
-       * @return The id.
-       */
-      @java.lang.Override
-      public long getId() {
-        return id_;
-      }
-      /**
-       * <pre>
-       * The clusterId of the registered remote cluster.
-       * </pre>
-       *
-       * <code>int64 id = 1 [(.options.FieldExtension.required) = true];</code>
-       * @param value The id to set.
-       * @return This builder for chaining.
-       */
-      public Builder setId(long value) {
-
-        id_ = value;
-        bitField0_ |= 0x00000001;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The clusterId of the registered remote cluster.
-       * </pre>
-       *
-       * <code>int64 id = 1 [(.options.FieldExtension.required) = true];</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearId() {
-        bitField0_ = (bitField0_ & ~0x00000001);
-        id_ = 0L;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object accountId_ = "";
-      /**
-       * <pre>
-       * The accountId of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string accountId = 2 [(.options.FieldExtension.required) = true];</code>
-       * @return The accountId.
-       */
-      public java.lang.String getAccountId() {
-        java.lang.Object ref = accountId_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          accountId_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The accountId of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string accountId = 2 [(.options.FieldExtension.required) = true];</code>
-       * @return The bytes for accountId.
-       */
-      public com.google.protobuf.ByteString
-          getAccountIdBytes() {
-        java.lang.Object ref = accountId_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          accountId_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The accountId of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string accountId = 2 [(.options.FieldExtension.required) = true];</code>
-       * @param value The accountId to set.
-       * @return This builder for chaining.
-       */
-      public Builder setAccountId(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        accountId_ = value;
-        bitField0_ |= 0x00000002;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The accountId of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string accountId = 2 [(.options.FieldExtension.required) = true];</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearAccountId() {
-        accountId_ = getDefaultInstance().getAccountId();
-        bitField0_ = (bitField0_ & ~0x00000002);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The accountId of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string accountId = 2 [(.options.FieldExtension.required) = true];</code>
-       * @param value The bytes for accountId to set.
-       * @return This builder for chaining.
-       */
-      public Builder setAccountIdBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        accountId_ = value;
-        bitField0_ |= 0x00000002;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object name_ = "";
-      /**
-       * <pre>
-       * The name of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string name = 3 [(.options.FieldExtension.required) = true];</code>
-       * @return The name.
-       */
-      public java.lang.String getName() {
-        java.lang.Object ref = name_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          name_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The name of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string name = 3 [(.options.FieldExtension.required) = true];</code>
-       * @return The bytes for name.
-       */
-      public com.google.protobuf.ByteString
-          getNameBytes() {
-        java.lang.Object ref = name_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          name_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The name of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string name = 3 [(.options.FieldExtension.required) = true];</code>
-       * @param value The name to set.
-       * @return This builder for chaining.
-       */
-      public Builder setName(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        name_ = value;
-        bitField0_ |= 0x00000004;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The name of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string name = 3 [(.options.FieldExtension.required) = true];</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearName() {
-        name_ = getDefaultInstance().getName();
-        bitField0_ = (bitField0_ & ~0x00000004);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The name of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string name = 3 [(.options.FieldExtension.required) = true];</code>
-       * @param value The bytes for name to set.
-       * @return This builder for chaining.
-       */
-      public Builder setNameBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        name_ = value;
-        bitField0_ |= 0x00000004;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object dcName_ = "";
-      /**
-       * <pre>
-       * The data center name of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string dcName = 4 [(.options.FieldExtension.required) = true];</code>
-       * @return The dcName.
-       */
-      public java.lang.String getDcName() {
-        java.lang.Object ref = dcName_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          dcName_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The data center name of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string dcName = 4 [(.options.FieldExtension.required) = true];</code>
-       * @return The bytes for dcName.
-       */
-      public com.google.protobuf.ByteString
-          getDcNameBytes() {
-        java.lang.Object ref = dcName_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          dcName_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The data center name of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string dcName = 4 [(.options.FieldExtension.required) = true];</code>
-       * @param value The dcName to set.
-       * @return This builder for chaining.
-       */
-      public Builder setDcName(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        dcName_ = value;
-        bitField0_ |= 0x00000008;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The data center name of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string dcName = 4 [(.options.FieldExtension.required) = true];</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearDcName() {
-        dcName_ = getDefaultInstance().getDcName();
-        bitField0_ = (bitField0_ & ~0x00000008);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The data center name of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string dcName = 4 [(.options.FieldExtension.required) = true];</code>
-       * @param value The bytes for dcName to set.
-       * @return This builder for chaining.
-       */
-      public Builder setDcNameBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        dcName_ = value;
-        bitField0_ |= 0x00000008;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object clusterCrn_ = "";
-      /**
-       * <pre>
-       * The clusterCrn of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string clusterCrn = 5 [(.options.FieldExtension.required) = true];</code>
-       * @return The clusterCrn.
-       */
-      public java.lang.String getClusterCrn() {
-        java.lang.Object ref = clusterCrn_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          clusterCrn_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The clusterCrn of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string clusterCrn = 5 [(.options.FieldExtension.required) = true];</code>
-       * @return The bytes for clusterCrn.
-       */
-      public com.google.protobuf.ByteString
-          getClusterCrnBytes() {
-        java.lang.Object ref = clusterCrn_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          clusterCrn_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The clusterCrn of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string clusterCrn = 5 [(.options.FieldExtension.required) = true];</code>
-       * @param value The clusterCrn to set.
-       * @return This builder for chaining.
-       */
-      public Builder setClusterCrn(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        clusterCrn_ = value;
-        bitField0_ |= 0x00000010;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The clusterCrn of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string clusterCrn = 5 [(.options.FieldExtension.required) = true];</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearClusterCrn() {
-        clusterCrn_ = getDefaultInstance().getClusterCrn();
-        bitField0_ = (bitField0_ & ~0x00000010);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The clusterCrn of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string clusterCrn = 5 [(.options.FieldExtension.required) = true];</code>
-       * @param value The bytes for clusterCrn to set.
-       * @return This builder for chaining.
-       */
-      public Builder setClusterCrnBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        clusterCrn_ = value;
-        bitField0_ |= 0x00000010;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object ipAddress_ = "";
-      /**
-       * <pre>
-       * The IP address of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string ipAddress = 6 [(.options.FieldExtension.required) = true];</code>
-       * @return The ipAddress.
-       */
-      public java.lang.String getIpAddress() {
-        java.lang.Object ref = ipAddress_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          ipAddress_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The IP address of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string ipAddress = 6 [(.options.FieldExtension.required) = true];</code>
-       * @return The bytes for ipAddress.
-       */
-      public com.google.protobuf.ByteString
-          getIpAddressBytes() {
-        java.lang.Object ref = ipAddress_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          ipAddress_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The IP address of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string ipAddress = 6 [(.options.FieldExtension.required) = true];</code>
-       * @param value The ipAddress to set.
-       * @return This builder for chaining.
-       */
-      public Builder setIpAddress(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        ipAddress_ = value;
-        bitField0_ |= 0x00000020;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The IP address of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string ipAddress = 6 [(.options.FieldExtension.required) = true];</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearIpAddress() {
-        ipAddress_ = getDefaultInstance().getIpAddress();
-        bitField0_ = (bitField0_ & ~0x00000020);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The IP address of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string ipAddress = 6 [(.options.FieldExtension.required) = true];</code>
-       * @param value The bytes for ipAddress to set.
-       * @return This builder for chaining.
-       */
-      public Builder setIpAddressBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        ipAddress_ = value;
-        bitField0_ |= 0x00000020;
-        onChanged();
-        return this;
-      }
-
-      private int clusterType_ = 0;
-      /**
-       * <pre>
-       * The type of the registered remote cluster.
-       * </pre>
-       *
-       * <code>.remotecluster.RemoteClusterType.Value clusterType = 7 [(.options.FieldExtension.required) = true];</code>
-       * @return The enum numeric value on the wire for clusterType.
-       */
-      @java.lang.Override public int getClusterTypeValue() {
-        return clusterType_;
-      }
-      /**
-       * <pre>
-       * The type of the registered remote cluster.
-       * </pre>
-       *
-       * <code>.remotecluster.RemoteClusterType.Value clusterType = 7 [(.options.FieldExtension.required) = true];</code>
-       * @param value The enum numeric value on the wire for clusterType to set.
-       * @return This builder for chaining.
-       */
-      public Builder setClusterTypeValue(int value) {
-        clusterType_ = value;
-        bitField0_ |= 0x00000040;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The type of the registered remote cluster.
-       * </pre>
-       *
-       * <code>.remotecluster.RemoteClusterType.Value clusterType = 7 [(.options.FieldExtension.required) = true];</code>
-       * @return The clusterType.
-       */
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType.Value getClusterType() {
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType.Value result = com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType.Value.forNumber(clusterType_);
-        return result == null ? com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType.Value.UNRECOGNIZED : result;
-      }
-      /**
-       * <pre>
-       * The type of the registered remote cluster.
-       * </pre>
-       *
-       * <code>.remotecluster.RemoteClusterType.Value clusterType = 7 [(.options.FieldExtension.required) = true];</code>
-       * @param value The clusterType to set.
-       * @return This builder for chaining.
-       */
-      public Builder setClusterType(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType.Value value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        bitField0_ |= 0x00000040;
-        clusterType_ = value.getNumber();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The type of the registered remote cluster.
-       * </pre>
-       *
-       * <code>.remotecluster.RemoteClusterType.Value clusterType = 7 [(.options.FieldExtension.required) = true];</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearClusterType() {
-        bitField0_ = (bitField0_ & ~0x00000040);
-        clusterType_ = 0;
-        onChanged();
-        return this;
-      }
-
-      private int state_ = 0;
-      /**
-       * <pre>
-       * The active status of the registered remote cluster.
-       * </pre>
-       *
-       * <code>.remotecluster.State.Value state = 8 [(.options.FieldExtension.required) = true];</code>
-       * @return The enum numeric value on the wire for state.
-       */
-      @java.lang.Override public int getStateValue() {
-        return state_;
-      }
-      /**
-       * <pre>
-       * The active status of the registered remote cluster.
-       * </pre>
-       *
-       * <code>.remotecluster.State.Value state = 8 [(.options.FieldExtension.required) = true];</code>
-       * @param value The enum numeric value on the wire for state to set.
-       * @return This builder for chaining.
-       */
-      public Builder setStateValue(int value) {
-        state_ = value;
-        bitField0_ |= 0x00000080;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The active status of the registered remote cluster.
-       * </pre>
-       *
-       * <code>.remotecluster.State.Value state = 8 [(.options.FieldExtension.required) = true];</code>
-       * @return The state.
-       */
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State.Value getState() {
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State.Value result = com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State.Value.forNumber(state_);
-        return result == null ? com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State.Value.UNRECOGNIZED : result;
-      }
-      /**
-       * <pre>
-       * The active status of the registered remote cluster.
-       * </pre>
-       *
-       * <code>.remotecluster.State.Value state = 8 [(.options.FieldExtension.required) = true];</code>
-       * @param value The state to set.
-       * @return This builder for chaining.
-       */
-      public Builder setState(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State.Value value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        bitField0_ |= 0x00000080;
-        state_ = value.getNumber();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The active status of the registered remote cluster.
-       * </pre>
-       *
-       * <code>.remotecluster.State.Value state = 8 [(.options.FieldExtension.required) = true];</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearState() {
-        bitField0_ = (bitField0_ & ~0x00000080);
-        state_ = 0;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object description_ = "";
-      /**
-       * <pre>
-       * The description of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string description = 11;</code>
-       * @return The description.
-       */
-      public java.lang.String getDescription() {
-        java.lang.Object ref = description_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          description_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The description of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string description = 11;</code>
-       * @return The bytes for description.
-       */
-      public com.google.protobuf.ByteString
-          getDescriptionBytes() {
-        java.lang.Object ref = description_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          description_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The description of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string description = 11;</code>
-       * @param value The description to set.
-       * @return This builder for chaining.
-       */
-      public Builder setDescription(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        description_ = value;
-        bitField0_ |= 0x00000100;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The description of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string description = 11;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearDescription() {
-        description_ = getDefaultInstance().getDescription();
-        bitField0_ = (bitField0_ & ~0x00000100);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The description of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string description = 11;</code>
-       * @param value The bytes for description to set.
-       * @return This builder for chaining.
-       */
-      public Builder setDescriptionBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        description_ = value;
-        bitField0_ |= 0x00000100;
-        onChanged();
-        return this;
-      }
-
-      private long locationId_ ;
-      /**
-       * <pre>
-       * The location of the registered remote cluster.
-       * </pre>
-       *
-       * <code>int64 locationId = 12;</code>
-       * @return The locationId.
-       */
-      @java.lang.Override
-      public long getLocationId() {
-        return locationId_;
-      }
-      /**
-       * <pre>
-       * The location of the registered remote cluster.
-       * </pre>
-       *
-       * <code>int64 locationId = 12;</code>
-       * @param value The locationId to set.
-       * @return This builder for chaining.
-       */
-      public Builder setLocationId(long value) {
-
-        locationId_ = value;
-        bitField0_ |= 0x00000200;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The location of the registered remote cluster.
-       * </pre>
-       *
-       * <code>int64 locationId = 12;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearLocationId() {
-        bitField0_ = (bitField0_ & ~0x00000200);
-        locationId_ = 0L;
-        onChanged();
-        return this;
-      }
-
-      private long lastCreateTime_ ;
-      /**
-       * <pre>
-       * The time at which the remote cluster was registered.
-       * </pre>
-       *
-       * <code>int64 lastCreateTime = 13 [(.options.FieldExtension.datetime) = true];</code>
-       * @return The lastCreateTime.
-       */
-      @java.lang.Override
-      public long getLastCreateTime() {
-        return lastCreateTime_;
-      }
-      /**
-       * <pre>
-       * The time at which the remote cluster was registered.
-       * </pre>
-       *
-       * <code>int64 lastCreateTime = 13 [(.options.FieldExtension.datetime) = true];</code>
-       * @param value The lastCreateTime to set.
-       * @return This builder for chaining.
-       */
-      public Builder setLastCreateTime(long value) {
-
-        lastCreateTime_ = value;
-        bitField0_ |= 0x00000400;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The time at which the remote cluster was registered.
-       * </pre>
-       *
-       * <code>int64 lastCreateTime = 13 [(.options.FieldExtension.datetime) = true];</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearLastCreateTime() {
-        bitField0_ = (bitField0_ & ~0x00000400);
-        lastCreateTime_ = 0L;
-        onChanged();
-        return this;
-      }
-
-      private long lastUpdatedTime_ ;
-      /**
-       * <pre>
-       * The time at which the remote cluster was updated.
-       * </pre>
-       *
-       * <code>int64 lastUpdatedTime = 14 [(.options.FieldExtension.datetime) = true];</code>
-       * @return The lastUpdatedTime.
-       */
-      @java.lang.Override
-      public long getLastUpdatedTime() {
-        return lastUpdatedTime_;
-      }
-      /**
-       * <pre>
-       * The time at which the remote cluster was updated.
-       * </pre>
-       *
-       * <code>int64 lastUpdatedTime = 14 [(.options.FieldExtension.datetime) = true];</code>
-       * @param value The lastUpdatedTime to set.
-       * @return This builder for chaining.
-       */
-      public Builder setLastUpdatedTime(long value) {
-
-        lastUpdatedTime_ = value;
-        bitField0_ |= 0x00000800;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The time at which the remote cluster was updated.
-       * </pre>
-       *
-       * <code>int64 lastUpdatedTime = 14 [(.options.FieldExtension.datetime) = true];</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearLastUpdatedTime() {
-        bitField0_ = (bitField0_ & ~0x00000800);
-        lastUpdatedTime_ = 0L;
-        onChanged();
-        return this;
-      }
-
-      private long updatedUtc_ ;
-      /**
-       * <pre>
-       * The time at which the remote cluster was updated. Its value is in Coordinated Universal Time.
-       * </pre>
-       *
-       * <code>int64 updatedUtc = 15 [(.options.FieldExtension.datetime) = true];</code>
-       * @return The updatedUtc.
-       */
-      @java.lang.Override
-      public long getUpdatedUtc() {
-        return updatedUtc_;
-      }
-      /**
-       * <pre>
-       * The time at which the remote cluster was updated. Its value is in Coordinated Universal Time.
-       * </pre>
-       *
-       * <code>int64 updatedUtc = 15 [(.options.FieldExtension.datetime) = true];</code>
-       * @param value The updatedUtc to set.
-       * @return This builder for chaining.
-       */
-      public Builder setUpdatedUtc(long value) {
-
-        updatedUtc_ = value;
-        bitField0_ |= 0x00001000;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The time at which the remote cluster was updated. Its value is in Coordinated Universal Time.
-       * </pre>
-       *
-       * <code>int64 updatedUtc = 15 [(.options.FieldExtension.datetime) = true];</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearUpdatedUtc() {
-        bitField0_ = (bitField0_ & ~0x00001000);
-        updatedUtc_ = 0L;
-        onChanged();
-        return this;
-      }
-
-      private java.util.List<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster> clusters_ =
-        java.util.Collections.emptyList();
-      private void ensureClustersIsMutable() {
-        if (!((bitField0_ & 0x00002000) != 0)) {
-          clusters_ = new java.util.ArrayList<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster>(clusters_);
-          bitField0_ |= 0x00002000;
-         }
-      }
-
-      private com.google.protobuf.RepeatedFieldBuilderV3<
-          com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster.Builder, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ClusterOrBuilder> clustersBuilder_;
-
-      /**
-       * <pre>
-       * The list of clusters in the remote cluster.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.Cluster clusters = 16;</code>
-       */
-      public java.util.List<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster> getClustersList() {
-        if (clustersBuilder_ == null) {
-          return java.util.Collections.unmodifiableList(clusters_);
-        } else {
-          return clustersBuilder_.getMessageList();
-        }
-      }
-      /**
-       * <pre>
-       * The list of clusters in the remote cluster.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.Cluster clusters = 16;</code>
-       */
-      public int getClustersCount() {
-        if (clustersBuilder_ == null) {
-          return clusters_.size();
-        } else {
-          return clustersBuilder_.getCount();
-        }
-      }
-      /**
-       * <pre>
-       * The list of clusters in the remote cluster.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.Cluster clusters = 16;</code>
-       */
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster getClusters(int index) {
-        if (clustersBuilder_ == null) {
-          return clusters_.get(index);
-        } else {
-          return clustersBuilder_.getMessage(index);
-        }
-      }
-      /**
-       * <pre>
-       * The list of clusters in the remote cluster.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.Cluster clusters = 16;</code>
-       */
-      public Builder setClusters(
-          int index, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster value) {
-        if (clustersBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureClustersIsMutable();
-          clusters_.set(index, value);
-          onChanged();
-        } else {
-          clustersBuilder_.setMessage(index, value);
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * The list of clusters in the remote cluster.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.Cluster clusters = 16;</code>
-       */
-      public Builder setClusters(
-          int index, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster.Builder builderForValue) {
-        if (clustersBuilder_ == null) {
-          ensureClustersIsMutable();
-          clusters_.set(index, builderForValue.build());
-          onChanged();
-        } else {
-          clustersBuilder_.setMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * The list of clusters in the remote cluster.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.Cluster clusters = 16;</code>
-       */
-      public Builder addClusters(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster value) {
-        if (clustersBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureClustersIsMutable();
-          clusters_.add(value);
-          onChanged();
-        } else {
-          clustersBuilder_.addMessage(value);
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * The list of clusters in the remote cluster.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.Cluster clusters = 16;</code>
-       */
-      public Builder addClusters(
-          int index, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster value) {
-        if (clustersBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureClustersIsMutable();
-          clusters_.add(index, value);
-          onChanged();
-        } else {
-          clustersBuilder_.addMessage(index, value);
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * The list of clusters in the remote cluster.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.Cluster clusters = 16;</code>
-       */
-      public Builder addClusters(
-          com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster.Builder builderForValue) {
-        if (clustersBuilder_ == null) {
-          ensureClustersIsMutable();
-          clusters_.add(builderForValue.build());
-          onChanged();
-        } else {
-          clustersBuilder_.addMessage(builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * The list of clusters in the remote cluster.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.Cluster clusters = 16;</code>
-       */
-      public Builder addClusters(
-          int index, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster.Builder builderForValue) {
-        if (clustersBuilder_ == null) {
-          ensureClustersIsMutable();
-          clusters_.add(index, builderForValue.build());
-          onChanged();
-        } else {
-          clustersBuilder_.addMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * The list of clusters in the remote cluster.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.Cluster clusters = 16;</code>
-       */
-      public Builder addAllClusters(
-          java.lang.Iterable<? extends com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster> values) {
-        if (clustersBuilder_ == null) {
-          ensureClustersIsMutable();
-          com.google.protobuf.AbstractMessageLite.Builder.addAll(
-              values, clusters_);
-          onChanged();
-        } else {
-          clustersBuilder_.addAllMessages(values);
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * The list of clusters in the remote cluster.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.Cluster clusters = 16;</code>
-       */
-      public Builder clearClusters() {
-        if (clustersBuilder_ == null) {
-          clusters_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00002000);
-          onChanged();
-        } else {
-          clustersBuilder_.clear();
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * The list of clusters in the remote cluster.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.Cluster clusters = 16;</code>
-       */
-      public Builder removeClusters(int index) {
-        if (clustersBuilder_ == null) {
-          ensureClustersIsMutable();
-          clusters_.remove(index);
-          onChanged();
-        } else {
-          clustersBuilder_.remove(index);
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * The list of clusters in the remote cluster.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.Cluster clusters = 16;</code>
-       */
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster.Builder getClustersBuilder(
-          int index) {
-        return getClustersFieldBuilder().getBuilder(index);
-      }
-      /**
-       * <pre>
-       * The list of clusters in the remote cluster.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.Cluster clusters = 16;</code>
-       */
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ClusterOrBuilder getClustersOrBuilder(
-          int index) {
-        if (clustersBuilder_ == null) {
-          return clusters_.get(index);  } else {
-          return clustersBuilder_.getMessageOrBuilder(index);
-        }
-      }
-      /**
-       * <pre>
-       * The list of clusters in the remote cluster.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.Cluster clusters = 16;</code>
-       */
-      public java.util.List<? extends com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ClusterOrBuilder> 
-           getClustersOrBuilderList() {
-        if (clustersBuilder_ != null) {
-          return clustersBuilder_.getMessageOrBuilderList();
-        } else {
-          return java.util.Collections.unmodifiableList(clusters_);
-        }
-      }
-      /**
-       * <pre>
-       * The list of clusters in the remote cluster.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.Cluster clusters = 16;</code>
-       */
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster.Builder addClustersBuilder() {
-        return getClustersFieldBuilder().addBuilder(
-            com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster.getDefaultInstance());
-      }
-      /**
-       * <pre>
-       * The list of clusters in the remote cluster.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.Cluster clusters = 16;</code>
-       */
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster.Builder addClustersBuilder(
-          int index) {
-        return getClustersFieldBuilder().addBuilder(
-            index, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster.getDefaultInstance());
-      }
-      /**
-       * <pre>
-       * The list of clusters in the remote cluster.
-       * </pre>
-       *
-       * <code>repeated .remotecluster.Cluster clusters = 16;</code>
-       */
-      public java.util.List<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster.Builder> 
-           getClustersBuilderList() {
-        return getClustersFieldBuilder().getBuilderList();
-      }
-      private com.google.protobuf.RepeatedFieldBuilderV3<
-          com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster.Builder, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ClusterOrBuilder> 
-          getClustersFieldBuilder() {
-        if (clustersBuilder_ == null) {
-          clustersBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster.Builder, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ClusterOrBuilder>(
-                  clusters_,
-                  ((bitField0_ & 0x00002000) != 0),
-                  getParentForChildren(),
-                  isClean());
-          clusters_ = null;
-        }
-        return clustersBuilder_;
-      }
-
-      private boolean knoxEnabled_ ;
-      /**
-       * <pre>
-       * The knox enablement of the registered remote cluster.
-       * </pre>
-       *
-       * <code>bool knoxEnabled = 17;</code>
-       * @return The knoxEnabled.
-       */
-      @java.lang.Override
-      public boolean getKnoxEnabled() {
-        return knoxEnabled_;
-      }
-      /**
-       * <pre>
-       * The knox enablement of the registered remote cluster.
-       * </pre>
-       *
-       * <code>bool knoxEnabled = 17;</code>
-       * @param value The knoxEnabled to set.
-       * @return This builder for chaining.
-       */
-      public Builder setKnoxEnabled(boolean value) {
-
-        knoxEnabled_ = value;
-        bitField0_ |= 0x00004000;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The knox enablement of the registered remote cluster.
-       * </pre>
-       *
-       * <code>bool knoxEnabled = 17;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearKnoxEnabled() {
-        bitField0_ = (bitField0_ & ~0x00004000);
-        knoxEnabled_ = false;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object knoxUrl_ = "";
-      /**
-       * <pre>
-       * The knox url of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string knoxUrl = 18;</code>
-       * @return The knoxUrl.
-       */
-      public java.lang.String getKnoxUrl() {
-        java.lang.Object ref = knoxUrl_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          knoxUrl_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The knox url of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string knoxUrl = 18;</code>
-       * @return The bytes for knoxUrl.
-       */
-      public com.google.protobuf.ByteString
-          getKnoxUrlBytes() {
-        java.lang.Object ref = knoxUrl_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          knoxUrl_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The knox url of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string knoxUrl = 18;</code>
-       * @param value The knoxUrl to set.
-       * @return This builder for chaining.
-       */
-      public Builder setKnoxUrl(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        knoxUrl_ = value;
-        bitField0_ |= 0x00008000;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The knox url of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string knoxUrl = 18;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearKnoxUrl() {
-        knoxUrl_ = getDefaultInstance().getKnoxUrl();
-        bitField0_ = (bitField0_ & ~0x00008000);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The knox url of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string knoxUrl = 18;</code>
-       * @param value The bytes for knoxUrl to set.
-       * @return This builder for chaining.
-       */
-      public Builder setKnoxUrlBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        knoxUrl_ = value;
-        bitField0_ |= 0x00008000;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object username_ = "";
-      /**
-       * <pre>
-       * The user name of the remote cluster.
-       * </pre>
-       *
-       * <code>string username = 19;</code>
-       * @return The username.
-       */
-      public java.lang.String getUsername() {
-        java.lang.Object ref = username_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          username_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The user name of the remote cluster.
-       * </pre>
-       *
-       * <code>string username = 19;</code>
-       * @return The bytes for username.
-       */
-      public com.google.protobuf.ByteString
-          getUsernameBytes() {
-        java.lang.Object ref = username_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          username_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The user name of the remote cluster.
-       * </pre>
-       *
-       * <code>string username = 19;</code>
-       * @param value The username to set.
-       * @return This builder for chaining.
-       */
-      public Builder setUsername(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        username_ = value;
-        bitField0_ |= 0x00010000;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The user name of the remote cluster.
-       * </pre>
-       *
-       * <code>string username = 19;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearUsername() {
-        username_ = getDefaultInstance().getUsername();
-        bitField0_ = (bitField0_ & ~0x00010000);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The user name of the remote cluster.
-       * </pre>
-       *
-       * <code>string username = 19;</code>
-       * @param value The bytes for username to set.
-       * @return This builder for chaining.
-       */
-      public Builder setUsernameBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        username_ = value;
-        bitField0_ |= 0x00010000;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object password_ = "";
-      /**
-       * <pre>
-       * The password of the remote cluster.
-       * </pre>
-       *
-       * <code>string password = 20 [(.options.FieldExtension.sensitive) = true];</code>
-       * @return The password.
-       */
-      public java.lang.String getPassword() {
-        java.lang.Object ref = password_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          password_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The password of the remote cluster.
-       * </pre>
-       *
-       * <code>string password = 20 [(.options.FieldExtension.sensitive) = true];</code>
-       * @return The bytes for password.
-       */
-      public com.google.protobuf.ByteString
-          getPasswordBytes() {
-        java.lang.Object ref = password_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          password_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The password of the remote cluster.
-       * </pre>
-       *
-       * <code>string password = 20 [(.options.FieldExtension.sensitive) = true];</code>
-       * @param value The password to set.
-       * @return This builder for chaining.
-       */
-      public Builder setPassword(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        password_ = value;
-        bitField0_ |= 0x00020000;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The password of the remote cluster.
-       * </pre>
-       *
-       * <code>string password = 20 [(.options.FieldExtension.sensitive) = true];</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearPassword() {
-        password_ = getDefaultInstance().getPassword();
-        bitField0_ = (bitField0_ & ~0x00020000);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The password of the remote cluster.
-       * </pre>
-       *
-       * <code>string password = 20 [(.options.FieldExtension.sensitive) = true];</code>
-       * @param value The bytes for password to set.
-       * @return This builder for chaining.
-       */
-      public Builder setPasswordBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        password_ = value;
-        bitField0_ |= 0x00020000;
-        onChanged();
-        return this;
-      }
-
-      private boolean allowUntrusted_ ;
-      /**
-       * <pre>
-       * Highlights if the remote clusters allows untrusted connections.
-       * </pre>
-       *
-       * <code>bool allowUntrusted = 21;</code>
-       * @return The allowUntrusted.
-       */
-      @java.lang.Override
-      public boolean getAllowUntrusted() {
-        return allowUntrusted_;
-      }
-      /**
-       * <pre>
-       * Highlights if the remote clusters allows untrusted connections.
-       * </pre>
-       *
-       * <code>bool allowUntrusted = 21;</code>
-       * @param value The allowUntrusted to set.
-       * @return This builder for chaining.
-       */
-      public Builder setAllowUntrusted(boolean value) {
-
-        allowUntrusted_ = value;
-        bitField0_ |= 0x00040000;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Highlights if the remote clusters allows untrusted connections.
-       * </pre>
-       *
-       * <code>bool allowUntrusted = 21;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearAllowUntrusted() {
-        bitField0_ = (bitField0_ & ~0x00040000);
-        allowUntrusted_ = false;
-        onChanged();
-        return this;
-      }
-
-      private boolean behindGateway_ ;
-      /**
-       * <pre>
-       * Highlights if the remote cluster works behind a gateway.
-       * </pre>
-       *
-       * <code>bool behindGateway = 22;</code>
-       * @return The behindGateway.
-       */
-      @java.lang.Override
-      public boolean getBehindGateway() {
-        return behindGateway_;
-      }
-      /**
-       * <pre>
-       * Highlights if the remote cluster works behind a gateway.
-       * </pre>
-       *
-       * <code>bool behindGateway = 22;</code>
-       * @param value The behindGateway to set.
-       * @return This builder for chaining.
-       */
-      public Builder setBehindGateway(boolean value) {
-
-        behindGateway_ = value;
-        bitField0_ |= 0x00080000;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Highlights if the remote cluster works behind a gateway.
-       * </pre>
-       *
-       * <code>bool behindGateway = 22;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearBehindGateway() {
-        bitField0_ = (bitField0_ & ~0x00080000);
-        behindGateway_ = false;
-        onChanged();
-        return this;
-      }
-
-      private int managerType_ = 0;
-      /**
-       * <pre>
-       * The manager type of the registered remote cluster.
-       * </pre>
-       *
-       * <code>.remotecluster.ManagerType.Value managerType = 23;</code>
-       * @return The enum numeric value on the wire for managerType.
-       */
-      @java.lang.Override public int getManagerTypeValue() {
-        return managerType_;
-      }
-      /**
-       * <pre>
-       * The manager type of the registered remote cluster.
-       * </pre>
-       *
-       * <code>.remotecluster.ManagerType.Value managerType = 23;</code>
-       * @param value The enum numeric value on the wire for managerType to set.
-       * @return This builder for chaining.
-       */
-      public Builder setManagerTypeValue(int value) {
-        managerType_ = value;
-        bitField0_ |= 0x00100000;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The manager type of the registered remote cluster.
-       * </pre>
-       *
-       * <code>.remotecluster.ManagerType.Value managerType = 23;</code>
-       * @return The managerType.
-       */
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Value getManagerType() {
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Value result = com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Value.forNumber(managerType_);
-        return result == null ? com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Value.UNRECOGNIZED : result;
-      }
-      /**
-       * <pre>
-       * The manager type of the registered remote cluster.
-       * </pre>
-       *
-       * <code>.remotecluster.ManagerType.Value managerType = 23;</code>
-       * @param value The managerType to set.
-       * @return This builder for chaining.
-       */
-      public Builder setManagerType(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Value value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        bitField0_ |= 0x00100000;
-        managerType_ = value.getNumber();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The manager type of the registered remote cluster.
-       * </pre>
-       *
-       * <code>.remotecluster.ManagerType.Value managerType = 23;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearManagerType() {
-        bitField0_ = (bitField0_ & ~0x00100000);
-        managerType_ = 0;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object managerUri_ = "";
-      /**
-       * <pre>
-       * The manager URI of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string managerUri = 24;</code>
-       * @return The managerUri.
-       */
-      public java.lang.String getManagerUri() {
-        java.lang.Object ref = managerUri_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          managerUri_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The manager URI of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string managerUri = 24;</code>
-       * @return The bytes for managerUri.
-       */
-      public com.google.protobuf.ByteString
-          getManagerUriBytes() {
-        java.lang.Object ref = managerUri_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          managerUri_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The manager URI of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string managerUri = 24;</code>
-       * @param value The managerUri to set.
-       * @return This builder for chaining.
-       */
-      public Builder setManagerUri(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        managerUri_ = value;
-        bitField0_ |= 0x00200000;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The manager URI of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string managerUri = 24;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearManagerUri() {
-        managerUri_ = getDefaultInstance().getManagerUri();
-        bitField0_ = (bitField0_ & ~0x00200000);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The manager URI of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string managerUri = 24;</code>
-       * @param value The bytes for managerUri to set.
-       * @return This builder for chaining.
-       */
-      public Builder setManagerUriBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        managerUri_ = value;
-        bitField0_ |= 0x00200000;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object createdBy_ = "";
-      /**
-       * <pre>
-       * The owner of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string createdBy = 25;</code>
-       * @return The createdBy.
-       */
-      public java.lang.String getCreatedBy() {
-        java.lang.Object ref = createdBy_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          createdBy_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The owner of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string createdBy = 25;</code>
-       * @return The bytes for createdBy.
-       */
-      public com.google.protobuf.ByteString
-          getCreatedByBytes() {
-        java.lang.Object ref = createdBy_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          createdBy_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The owner of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string createdBy = 25;</code>
-       * @param value The createdBy to set.
-       * @return This builder for chaining.
-       */
-      public Builder setCreatedBy(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        createdBy_ = value;
-        bitField0_ |= 0x00400000;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The owner of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string createdBy = 25;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearCreatedBy() {
-        createdBy_ = getDefaultInstance().getCreatedBy();
-        bitField0_ = (bitField0_ & ~0x00400000);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The owner of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string createdBy = 25;</code>
-       * @param value The bytes for createdBy to set.
-       * @return This builder for chaining.
-       */
-      public Builder setCreatedByBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        createdBy_ = value;
-        bitField0_ |= 0x00400000;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object connectivityVersion_ = "";
-      /**
-       * <pre>
-       * The connectivity version of the remote cluster.
-       * </pre>
-       *
-       * <code>string connectivityVersion = 26;</code>
-       * @return The connectivityVersion.
-       */
-      public java.lang.String getConnectivityVersion() {
-        java.lang.Object ref = connectivityVersion_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          connectivityVersion_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The connectivity version of the remote cluster.
-       * </pre>
-       *
-       * <code>string connectivityVersion = 26;</code>
-       * @return The bytes for connectivityVersion.
-       */
-      public com.google.protobuf.ByteString
-          getConnectivityVersionBytes() {
-        java.lang.Object ref = connectivityVersion_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          connectivityVersion_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The connectivity version of the remote cluster.
-       * </pre>
-       *
-       * <code>string connectivityVersion = 26;</code>
-       * @param value The connectivityVersion to set.
-       * @return This builder for chaining.
-       */
-      public Builder setConnectivityVersion(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        connectivityVersion_ = value;
-        bitField0_ |= 0x00800000;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The connectivity version of the remote cluster.
-       * </pre>
-       *
-       * <code>string connectivityVersion = 26;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearConnectivityVersion() {
-        connectivityVersion_ = getDefaultInstance().getConnectivityVersion();
-        bitField0_ = (bitField0_ & ~0x00800000);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The connectivity version of the remote cluster.
-       * </pre>
-       *
-       * <code>string connectivityVersion = 26;</code>
-       * @param value The bytes for connectivityVersion to set.
-       * @return This builder for chaining.
-       */
-      public Builder setConnectivityVersionBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        connectivityVersion_ = value;
-        bitField0_ |= 0x00800000;
-        onChanged();
-        return this;
-      }
-
-      private boolean isUpgradeInProgress_ ;
-      /**
-       * <pre>
-       * Whether the cluster upgrade is in progress.
-       * </pre>
-       *
-       * <code>bool isUpgradeInProgress = 27;</code>
-       * @return The isUpgradeInProgress.
-       */
-      @java.lang.Override
-      public boolean getIsUpgradeInProgress() {
-        return isUpgradeInProgress_;
-      }
-      /**
-       * <pre>
-       * Whether the cluster upgrade is in progress.
-       * </pre>
-       *
-       * <code>bool isUpgradeInProgress = 27;</code>
-       * @param value The isUpgradeInProgress to set.
-       * @return This builder for chaining.
-       */
-      public Builder setIsUpgradeInProgress(boolean value) {
-
-        isUpgradeInProgress_ = value;
-        bitField0_ |= 0x01000000;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Whether the cluster upgrade is in progress.
-       * </pre>
-       *
-       * <code>bool isUpgradeInProgress = 27;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearIsUpgradeInProgress() {
-        bitField0_ = (bitField0_ & ~0x01000000);
-        isUpgradeInProgress_ = false;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object newKeyId_ = "";
-      /**
-       * <pre>
-       * The key ID of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string newKeyId = 28;</code>
-       * @return The newKeyId.
-       */
-      public java.lang.String getNewKeyId() {
-        java.lang.Object ref = newKeyId_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          newKeyId_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The key ID of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string newKeyId = 28;</code>
-       * @return The bytes for newKeyId.
-       */
-      public com.google.protobuf.ByteString
-          getNewKeyIdBytes() {
-        java.lang.Object ref = newKeyId_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          newKeyId_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The key ID of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string newKeyId = 28;</code>
-       * @param value The newKeyId to set.
-       * @return This builder for chaining.
-       */
-      public Builder setNewKeyId(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        newKeyId_ = value;
-        bitField0_ |= 0x02000000;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The key ID of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string newKeyId = 28;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearNewKeyId() {
-        newKeyId_ = getDefaultInstance().getNewKeyId();
-        bitField0_ = (bitField0_ & ~0x02000000);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The key ID of the registered remote cluster.
-       * </pre>
-       *
-       * <code>string newKeyId = 28;</code>
-       * @param value The bytes for newKeyId to set.
-       * @return This builder for chaining.
-       */
-      public Builder setNewKeyIdBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        newKeyId_ = value;
-        bitField0_ |= 0x02000000;
-        onChanged();
-        return this;
-      }
-
-      private com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location location_;
-      private com.google.protobuf.SingleFieldBuilderV3<
-          com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location.Builder, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.LocationOrBuilder> locationBuilder_;
-      /**
-       * <pre>
-       * The location of the data center.
-       * </pre>
-       *
-       * <code>.remotecluster.Location location = 29;</code>
-       * @return Whether the location field is set.
-       */
-      public boolean hasLocation() {
-        return ((bitField0_ & 0x04000000) != 0);
-      }
-      /**
-       * <pre>
-       * The location of the data center.
-       * </pre>
-       *
-       * <code>.remotecluster.Location location = 29;</code>
-       * @return The location.
-       */
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location getLocation() {
-        if (locationBuilder_ == null) {
-          return location_ == null ? com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location.getDefaultInstance() : location_;
-        } else {
-          return locationBuilder_.getMessage();
-        }
-      }
-      /**
-       * <pre>
-       * The location of the data center.
-       * </pre>
-       *
-       * <code>.remotecluster.Location location = 29;</code>
-       */
-      public Builder setLocation(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location value) {
-        if (locationBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          location_ = value;
-        } else {
-          locationBuilder_.setMessage(value);
-        }
-        bitField0_ |= 0x04000000;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The location of the data center.
-       * </pre>
-       *
-       * <code>.remotecluster.Location location = 29;</code>
-       */
-      public Builder setLocation(
-          com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location.Builder builderForValue) {
-        if (locationBuilder_ == null) {
-          location_ = builderForValue.build();
-        } else {
-          locationBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x04000000;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The location of the data center.
-       * </pre>
-       *
-       * <code>.remotecluster.Location location = 29;</code>
-       */
-      public Builder mergeLocation(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location value) {
-        if (locationBuilder_ == null) {
-          if (((bitField0_ & 0x04000000) != 0) &&
-            location_ != null &&
-            location_ != com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location.getDefaultInstance()) {
-            getLocationBuilder().mergeFrom(value);
-          } else {
-            location_ = value;
-          }
-        } else {
-          locationBuilder_.mergeFrom(value);
-        }
-        if (location_ != null) {
-          bitField0_ |= 0x04000000;
-          onChanged();
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * The location of the data center.
-       * </pre>
-       *
-       * <code>.remotecluster.Location location = 29;</code>
-       */
-      public Builder clearLocation() {
-        bitField0_ = (bitField0_ & ~0x04000000);
-        location_ = null;
-        if (locationBuilder_ != null) {
-          locationBuilder_.dispose();
-          locationBuilder_ = null;
-        }
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The location of the data center.
-       * </pre>
-       *
-       * <code>.remotecluster.Location location = 29;</code>
-       */
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location.Builder getLocationBuilder() {
-        bitField0_ |= 0x04000000;
-        onChanged();
-        return getLocationFieldBuilder().getBuilder();
-      }
-      /**
-       * <pre>
-       * The location of the data center.
-       * </pre>
-       *
-       * <code>.remotecluster.Location location = 29;</code>
-       */
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.LocationOrBuilder getLocationOrBuilder() {
-        if (locationBuilder_ != null) {
-          return locationBuilder_.getMessageOrBuilder();
-        } else {
-          return location_ == null ?
-              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location.getDefaultInstance() : location_;
-        }
-      }
-      /**
-       * <pre>
-       * The location of the data center.
-       * </pre>
-       *
-       * <code>.remotecluster.Location location = 29;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilderV3<
-          com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location.Builder, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.LocationOrBuilder> 
-          getLocationFieldBuilder() {
-        if (locationBuilder_ == null) {
-          locationBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location.Builder, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.LocationOrBuilder>(
-                  getLocation(),
-                  getParentForChildren(),
-                  isClean());
-          location_ = null;
-        }
-        return locationBuilder_;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:remotecluster.RemoteClusterData)
-    }
-
-    // @@protoc_insertion_point(class_scope:remotecluster.RemoteClusterData)
-    private static final com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData();
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<RemoteClusterData>
-        PARSER = new com.google.protobuf.AbstractParser<RemoteClusterData>() {
-      @java.lang.Override
-      public RemoteClusterData parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        Builder builder = newBuilder();
-        try {
-          builder.mergeFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(builder.buildPartial());
-        } catch (com.google.protobuf.UninitializedMessageException e) {
-          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(e)
-              .setUnfinishedMessage(builder.buildPartial());
-        }
-        return builder.buildPartial();
-      }
-    };
-
-    public static com.google.protobuf.Parser<RemoteClusterData> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<RemoteClusterData> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterData getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface ServiceDetailOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:remotecluster.ServiceDetail)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <pre>
-     * Name of the service.
-     * </pre>
-     *
-     * <code>string serviceName = 1;</code>
-     * @return The serviceName.
-     */
-    java.lang.String getServiceName();
-    /**
-     * <pre>
-     * Name of the service.
-     * </pre>
-     *
-     * <code>string serviceName = 1;</code>
-     * @return The bytes for serviceName.
-     */
-    com.google.protobuf.ByteString
-        getServiceNameBytes();
-
-    /**
-     * <pre>
-     * State of the service.
-     * </pre>
-     *
-     * <code>string state = 2;</code>
-     * @return The state.
-     */
-    java.lang.String getState();
-    /**
-     * <pre>
-     * State of the service.
-     * </pre>
-     *
-     * <code>string state = 2;</code>
-     * @return The bytes for state.
-     */
-    com.google.protobuf.ByteString
-        getStateBytes();
-
-    /**
-     * <pre>
-     * Version of the service.
-     * </pre>
-     *
-     * <code>string serviceVersion = 3;</code>
-     * @return The serviceVersion.
-     */
-    java.lang.String getServiceVersion();
-    /**
-     * <pre>
-     * Version of the service.
-     * </pre>
-     *
-     * <code>string serviceVersion = 3;</code>
-     * @return The bytes for serviceVersion.
-     */
-    com.google.protobuf.ByteString
-        getServiceVersionBytes();
-  }
-  /**
-   * <pre>
-   * Object containing the service information.
-   * </pre>
-   *
-   * Protobuf type {@code remotecluster.ServiceDetail}
-   */
-  public static final class ServiceDetail extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:remotecluster.ServiceDetail)
-      ServiceDetailOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use ServiceDetail.newBuilder() to construct.
-    private ServiceDetail(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private ServiceDetail() {
-      serviceName_ = "";
-      state_ = "";
-      serviceVersion_ = "";
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new ServiceDetail();
-    }
-
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_ServiceDetail_descriptor;
-    }
-
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_ServiceDetail_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail.Builder.class);
-    }
-
-    public static final int SERVICENAME_FIELD_NUMBER = 1;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object serviceName_ = "";
-    /**
-     * <pre>
-     * Name of the service.
-     * </pre>
-     *
-     * <code>string serviceName = 1;</code>
-     * @return The serviceName.
-     */
-    @java.lang.Override
-    public java.lang.String getServiceName() {
-      java.lang.Object ref = serviceName_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        serviceName_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * Name of the service.
-     * </pre>
-     *
-     * <code>string serviceName = 1;</code>
-     * @return The bytes for serviceName.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getServiceNameBytes() {
-      java.lang.Object ref = serviceName_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        serviceName_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int STATE_FIELD_NUMBER = 2;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object state_ = "";
-    /**
-     * <pre>
-     * State of the service.
-     * </pre>
-     *
-     * <code>string state = 2;</code>
-     * @return The state.
-     */
-    @java.lang.Override
-    public java.lang.String getState() {
-      java.lang.Object ref = state_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        state_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * State of the service.
-     * </pre>
-     *
-     * <code>string state = 2;</code>
-     * @return The bytes for state.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getStateBytes() {
-      java.lang.Object ref = state_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        state_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int SERVICEVERSION_FIELD_NUMBER = 3;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object serviceVersion_ = "";
-    /**
-     * <pre>
-     * Version of the service.
-     * </pre>
-     *
-     * <code>string serviceVersion = 3;</code>
-     * @return The serviceVersion.
-     */
-    @java.lang.Override
-    public java.lang.String getServiceVersion() {
-      java.lang.Object ref = serviceVersion_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        serviceVersion_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * Version of the service.
-     * </pre>
-     *
-     * <code>string serviceVersion = 3;</code>
-     * @return The bytes for serviceVersion.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getServiceVersionBytes() {
-      java.lang.Object ref = serviceVersion_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        serviceVersion_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(serviceName_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, serviceName_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(state_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, state_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(serviceVersion_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, serviceVersion_);
-      }
-      getUnknownFields().writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(serviceName_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, serviceName_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(state_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, state_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(serviceVersion_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, serviceVersion_);
-      }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail)) {
-        return super.equals(obj);
-      }
-      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail other = (com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail) obj;
-
-      if (!getServiceName()
-          .equals(other.getServiceName())) return false;
-      if (!getState()
-          .equals(other.getState())) return false;
-      if (!getServiceVersion()
-          .equals(other.getServiceVersion())) return false;
-      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + SERVICENAME_FIELD_NUMBER;
-      hash = (53 * hash) + getServiceName().hashCode();
-      hash = (37 * hash) + STATE_FIELD_NUMBER;
-      hash = (53 * hash) + getState().hashCode();
-      hash = (37 * hash) + SERVICEVERSION_FIELD_NUMBER;
-      hash = (53 * hash) + getServiceVersion().hashCode();
-      hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * <pre>
-     * Object containing the service information.
-     * </pre>
-     *
-     * Protobuf type {@code remotecluster.ServiceDetail}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:remotecluster.ServiceDetail)
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetailOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_ServiceDetail_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_ServiceDetail_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail.Builder.class);
-      }
-
-      // Construct using com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail.newBuilder()
-      private Builder() {
-
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        bitField0_ = 0;
-        serviceName_ = "";
-        state_ = "";
-        serviceVersion_ = "";
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_ServiceDetail_descriptor;
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail getDefaultInstanceForType() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail build() {
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail buildPartial() {
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail result = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail(this);
-        if (bitField0_ != 0) { buildPartial0(result); }
-        onBuilt();
-        return result;
-      }
-
-      private void buildPartial0(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail result) {
-        int from_bitField0_ = bitField0_;
-        if (((from_bitField0_ & 0x00000001) != 0)) {
-          result.serviceName_ = serviceName_;
-        }
-        if (((from_bitField0_ & 0x00000002) != 0)) {
-          result.state_ = state_;
-        }
-        if (((from_bitField0_ & 0x00000004) != 0)) {
-          result.serviceVersion_ = serviceVersion_;
-        }
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail) {
-          return mergeFrom((com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail other) {
-        if (other == com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail.getDefaultInstance()) return this;
-        if (!other.getServiceName().isEmpty()) {
-          serviceName_ = other.serviceName_;
-          bitField0_ |= 0x00000001;
-          onChanged();
-        }
-        if (!other.getState().isEmpty()) {
-          state_ = other.state_;
-          bitField0_ |= 0x00000002;
-          onChanged();
-        }
-        if (!other.getServiceVersion().isEmpty()) {
-          serviceVersion_ = other.serviceVersion_;
-          bitField0_ |= 0x00000004;
-          onChanged();
-        }
-        this.mergeUnknownFields(other.getUnknownFields());
-        onChanged();
-        return this;
-      }
-
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        if (extensionRegistry == null) {
-          throw new java.lang.NullPointerException();
-        }
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              case 10: {
-                serviceName_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000001;
-                break;
-              } // case 10
-              case 18: {
-                state_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000002;
-                break;
-              } // case 18
-              case 26: {
-                serviceVersion_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000004;
-                break;
-              } // case 26
-              default: {
-                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
-                  done = true; // was an endgroup tag
-                }
-                break;
-              } // default:
-            } // switch (tag)
-          } // while (!done)
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.unwrapIOException();
-        } finally {
-          onChanged();
-        } // finally
-        return this;
-      }
-      private int bitField0_;
-
-      private java.lang.Object serviceName_ = "";
-      /**
-       * <pre>
-       * Name of the service.
-       * </pre>
-       *
-       * <code>string serviceName = 1;</code>
-       * @return The serviceName.
-       */
-      public java.lang.String getServiceName() {
-        java.lang.Object ref = serviceName_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          serviceName_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * Name of the service.
-       * </pre>
-       *
-       * <code>string serviceName = 1;</code>
-       * @return The bytes for serviceName.
-       */
-      public com.google.protobuf.ByteString
-          getServiceNameBytes() {
-        java.lang.Object ref = serviceName_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          serviceName_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * Name of the service.
-       * </pre>
-       *
-       * <code>string serviceName = 1;</code>
-       * @param value The serviceName to set.
-       * @return This builder for chaining.
-       */
-      public Builder setServiceName(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        serviceName_ = value;
-        bitField0_ |= 0x00000001;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Name of the service.
-       * </pre>
-       *
-       * <code>string serviceName = 1;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearServiceName() {
-        serviceName_ = getDefaultInstance().getServiceName();
-        bitField0_ = (bitField0_ & ~0x00000001);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Name of the service.
-       * </pre>
-       *
-       * <code>string serviceName = 1;</code>
-       * @param value The bytes for serviceName to set.
-       * @return This builder for chaining.
-       */
-      public Builder setServiceNameBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        serviceName_ = value;
-        bitField0_ |= 0x00000001;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object state_ = "";
-      /**
-       * <pre>
-       * State of the service.
-       * </pre>
-       *
-       * <code>string state = 2;</code>
-       * @return The state.
-       */
-      public java.lang.String getState() {
-        java.lang.Object ref = state_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          state_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * State of the service.
-       * </pre>
-       *
-       * <code>string state = 2;</code>
-       * @return The bytes for state.
-       */
-      public com.google.protobuf.ByteString
-          getStateBytes() {
-        java.lang.Object ref = state_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          state_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * State of the service.
-       * </pre>
-       *
-       * <code>string state = 2;</code>
-       * @param value The state to set.
-       * @return This builder for chaining.
-       */
-      public Builder setState(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        state_ = value;
-        bitField0_ |= 0x00000002;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * State of the service.
-       * </pre>
-       *
-       * <code>string state = 2;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearState() {
-        state_ = getDefaultInstance().getState();
-        bitField0_ = (bitField0_ & ~0x00000002);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * State of the service.
-       * </pre>
-       *
-       * <code>string state = 2;</code>
-       * @param value The bytes for state to set.
-       * @return This builder for chaining.
-       */
-      public Builder setStateBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        state_ = value;
-        bitField0_ |= 0x00000002;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object serviceVersion_ = "";
-      /**
-       * <pre>
-       * Version of the service.
-       * </pre>
-       *
-       * <code>string serviceVersion = 3;</code>
-       * @return The serviceVersion.
-       */
-      public java.lang.String getServiceVersion() {
-        java.lang.Object ref = serviceVersion_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          serviceVersion_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * Version of the service.
-       * </pre>
-       *
-       * <code>string serviceVersion = 3;</code>
-       * @return The bytes for serviceVersion.
-       */
-      public com.google.protobuf.ByteString
-          getServiceVersionBytes() {
-        java.lang.Object ref = serviceVersion_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          serviceVersion_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * Version of the service.
-       * </pre>
-       *
-       * <code>string serviceVersion = 3;</code>
-       * @param value The serviceVersion to set.
-       * @return This builder for chaining.
-       */
-      public Builder setServiceVersion(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        serviceVersion_ = value;
-        bitField0_ |= 0x00000004;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Version of the service.
-       * </pre>
-       *
-       * <code>string serviceVersion = 3;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearServiceVersion() {
-        serviceVersion_ = getDefaultInstance().getServiceVersion();
-        bitField0_ = (bitField0_ & ~0x00000004);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Version of the service.
-       * </pre>
-       *
-       * <code>string serviceVersion = 3;</code>
-       * @param value The bytes for serviceVersion to set.
-       * @return This builder for chaining.
-       */
-      public Builder setServiceVersionBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        serviceVersion_ = value;
-        bitField0_ |= 0x00000004;
-        onChanged();
-        return this;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:remotecluster.ServiceDetail)
-    }
-
-    // @@protoc_insertion_point(class_scope:remotecluster.ServiceDetail)
-    private static final com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail();
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<ServiceDetail>
-        PARSER = new com.google.protobuf.AbstractParser<ServiceDetail>() {
-      @java.lang.Override
-      public ServiceDetail parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        Builder builder = newBuilder();
-        try {
-          builder.mergeFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(builder.buildPartial());
-        } catch (com.google.protobuf.UninitializedMessageException e) {
-          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(e)
-              .setUnfinishedMessage(builder.buildPartial());
-        }
-        return builder.buildPartial();
-      }
-    };
-
-    public static com.google.protobuf.Parser<ServiceDetail> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<ServiceDetail> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ServiceDetail getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface ClusterOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:remotecluster.Cluster)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <pre>
-     * The ID of the discovered cluster.
-     * </pre>
-     *
-     * <code>int64 id = 1 [(.options.FieldExtension.required) = true];</code>
-     * @return The id.
-     */
-    long getId();
-
-    /**
-     * <pre>
-     * The name of the discovered cluster.
-     * </pre>
-     *
-     * <code>string name = 2 [(.options.FieldExtension.required) = true];</code>
-     * @return The name.
-     */
-    java.lang.String getName();
-    /**
-     * <pre>
-     * The name of the discovered cluster.
-     * </pre>
-     *
-     * <code>string name = 2 [(.options.FieldExtension.required) = true];</code>
-     * @return The bytes for name.
-     */
-    com.google.protobuf.ByteString
-        getNameBytes();
-
-    /**
-     * <pre>
-     * The dataplane cluster ID.
-     * </pre>
-     *
-     * <code>int64 dataplaneClusterId = 3 [(.options.FieldExtension.required) = true];</code>
-     * @return The dataplaneClusterId.
-     */
-    long getDataplaneClusterId();
-
-    /**
-     * <pre>
-     * The cluster URL of the discovered cluster.
-     * </pre>
-     *
-     * <code>string clusterUrl = 4;</code>
-     * @return The clusterUrl.
-     */
-    java.lang.String getClusterUrl();
-    /**
-     * <pre>
-     * The cluster URL of the discovered cluster.
-     * </pre>
-     *
-     * <code>string clusterUrl = 4;</code>
-     * @return The bytes for clusterUrl.
-     */
-    com.google.protobuf.ByteString
-        getClusterUrlBytes();
-
-    /**
-     * <pre>
-     * Whether Value to identify if the cluster is secured or not.
-     * </pre>
-     *
-     * <code>bool secured = 5;</code>
-     * @return The secured.
-     */
-    boolean getSecured();
-
-    /**
-     * <pre>
-     * The kerberos user of the cluster.
-     * </pre>
-     *
-     * <code>string kerberosUser = 6;</code>
-     * @return The kerberosUser.
-     */
-    java.lang.String getKerberosUser();
-    /**
-     * <pre>
-     * The kerberos user of the cluster.
-     * </pre>
-     *
-     * <code>string kerberosUser = 6;</code>
-     * @return The bytes for kerberosUser.
-     */
-    com.google.protobuf.ByteString
-        getKerberosUserBytes();
-
-    /**
-     * <pre>
-     * The kerberos ticket location of the cluster.
-     * </pre>
-     *
-     * <code>string kerberosTicketLocation = 7;</code>
-     * @return The kerberosTicketLocation.
-     */
-    java.lang.String getKerberosTicketLocation();
-    /**
-     * <pre>
-     * The kerberos ticket location of the cluster.
-     * </pre>
-     *
-     * <code>string kerberosTicketLocation = 7;</code>
-     * @return The bytes for kerberosTicketLocation.
-     */
-    com.google.protobuf.ByteString
-        getKerberosTicketLocationBytes();
-
-    /**
-     * <pre>
-     * The properties of the cluster.
-     * </pre>
-     *
-     * <code>string properties = 8;</code>
-     * @return The properties.
-     */
-    java.lang.String getProperties();
-    /**
-     * <pre>
-     * The properties of the cluster.
-     * </pre>
-     *
-     * <code>string properties = 8;</code>
-     * @return The bytes for properties.
-     */
-    com.google.protobuf.ByteString
-        getPropertiesBytes();
-
-    /**
-     * <pre>
-     * The version of the cluster.
-     * </pre>
-     *
-     * <code>string version = 9;</code>
-     * @return The version.
-     */
-    java.lang.String getVersion();
-    /**
-     * <pre>
-     * The version of the cluster.
-     * </pre>
-     *
-     * <code>string version = 9;</code>
-     * @return The bytes for version.
-     */
-    com.google.protobuf.ByteString
-        getVersionBytes();
-
-    /**
-     * <pre>
-     * The display name of the discovered cluster.
-     * </pre>
-     *
-     * <code>string displayName = 10;</code>
-     * @return The displayName.
-     */
-    java.lang.String getDisplayName();
-    /**
-     * <pre>
-     * The display name of the discovered cluster.
-     * </pre>
-     *
-     * <code>string displayName = 10;</code>
-     * @return The bytes for displayName.
-     */
-    com.google.protobuf.ByteString
-        getDisplayNameBytes();
-
-    /**
-     * <pre>
-     * The manager type of the discovered cluster.
-     * </pre>
-     *
-     * <code>.remotecluster.ManagerType.Value managerType = 11;</code>
-     * @return The enum numeric value on the wire for managerType.
-     */
-    int getManagerTypeValue();
-    /**
-     * <pre>
-     * The manager type of the discovered cluster.
-     * </pre>
-     *
-     * <code>.remotecluster.ManagerType.Value managerType = 11;</code>
-     * @return The managerType.
-     */
-    com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Value getManagerType();
-
-    /**
-     * <pre>
-     * The manager URI of the discovered cluster.
-     * </pre>
-     *
-     * <code>string managerUri = 12;</code>
-     * @return The managerUri.
-     */
-    java.lang.String getManagerUri();
-    /**
-     * <pre>
-     * The manager URI of the discovered cluster.
-     * </pre>
-     *
-     * <code>string managerUri = 12;</code>
-     * @return The bytes for managerUri.
-     */
-    com.google.protobuf.ByteString
-        getManagerUriBytes();
-
-    /**
-     * <pre>
-     * The stats of the discovered cluster.
-     * </pre>
-     *
-     * <code>string stats = 13;</code>
-     * @return The stats.
-     */
-    java.lang.String getStats();
-    /**
-     * <pre>
-     * The stats of the discovered cluster.
-     * </pre>
-     *
-     * <code>string stats = 13;</code>
-     * @return The bytes for stats.
-     */
-    com.google.protobuf.ByteString
-        getStatsBytes();
-  }
-  /**
-   * <pre>
-   * Object containing the discovered cluster information.
-   * </pre>
-   *
-   * Protobuf type {@code remotecluster.Cluster}
-   */
-  public static final class Cluster extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:remotecluster.Cluster)
-      ClusterOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use Cluster.newBuilder() to construct.
-    private Cluster(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private Cluster() {
-      name_ = "";
-      clusterUrl_ = "";
-      kerberosUser_ = "";
-      kerberosTicketLocation_ = "";
-      properties_ = "";
-      version_ = "";
-      displayName_ = "";
-      managerType_ = 0;
-      managerUri_ = "";
-      stats_ = "";
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new Cluster();
-    }
-
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_Cluster_descriptor;
-    }
-
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_Cluster_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster.Builder.class);
-    }
-
-    public static final int ID_FIELD_NUMBER = 1;
-    private long id_ = 0L;
-    /**
-     * <pre>
-     * The ID of the discovered cluster.
-     * </pre>
-     *
-     * <code>int64 id = 1 [(.options.FieldExtension.required) = true];</code>
-     * @return The id.
-     */
-    @java.lang.Override
-    public long getId() {
-      return id_;
-    }
-
-    public static final int NAME_FIELD_NUMBER = 2;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object name_ = "";
-    /**
-     * <pre>
-     * The name of the discovered cluster.
-     * </pre>
-     *
-     * <code>string name = 2 [(.options.FieldExtension.required) = true];</code>
-     * @return The name.
-     */
-    @java.lang.Override
-    public java.lang.String getName() {
-      java.lang.Object ref = name_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        name_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * The name of the discovered cluster.
-     * </pre>
-     *
-     * <code>string name = 2 [(.options.FieldExtension.required) = true];</code>
-     * @return The bytes for name.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getNameBytes() {
-      java.lang.Object ref = name_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        name_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int DATAPLANECLUSTERID_FIELD_NUMBER = 3;
-    private long dataplaneClusterId_ = 0L;
-    /**
-     * <pre>
-     * The dataplane cluster ID.
-     * </pre>
-     *
-     * <code>int64 dataplaneClusterId = 3 [(.options.FieldExtension.required) = true];</code>
-     * @return The dataplaneClusterId.
-     */
-    @java.lang.Override
-    public long getDataplaneClusterId() {
-      return dataplaneClusterId_;
-    }
-
-    public static final int CLUSTERURL_FIELD_NUMBER = 4;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object clusterUrl_ = "";
-    /**
-     * <pre>
-     * The cluster URL of the discovered cluster.
-     * </pre>
-     *
-     * <code>string clusterUrl = 4;</code>
-     * @return The clusterUrl.
-     */
-    @java.lang.Override
-    public java.lang.String getClusterUrl() {
-      java.lang.Object ref = clusterUrl_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        clusterUrl_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * The cluster URL of the discovered cluster.
-     * </pre>
-     *
-     * <code>string clusterUrl = 4;</code>
-     * @return The bytes for clusterUrl.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getClusterUrlBytes() {
-      java.lang.Object ref = clusterUrl_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        clusterUrl_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int SECURED_FIELD_NUMBER = 5;
-    private boolean secured_ = false;
-    /**
-     * <pre>
-     * Whether Value to identify if the cluster is secured or not.
-     * </pre>
-     *
-     * <code>bool secured = 5;</code>
-     * @return The secured.
-     */
-    @java.lang.Override
-    public boolean getSecured() {
-      return secured_;
-    }
-
-    public static final int KERBEROSUSER_FIELD_NUMBER = 6;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object kerberosUser_ = "";
-    /**
-     * <pre>
-     * The kerberos user of the cluster.
-     * </pre>
-     *
-     * <code>string kerberosUser = 6;</code>
-     * @return The kerberosUser.
-     */
-    @java.lang.Override
-    public java.lang.String getKerberosUser() {
-      java.lang.Object ref = kerberosUser_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        kerberosUser_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * The kerberos user of the cluster.
-     * </pre>
-     *
-     * <code>string kerberosUser = 6;</code>
-     * @return The bytes for kerberosUser.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getKerberosUserBytes() {
-      java.lang.Object ref = kerberosUser_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        kerberosUser_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int KERBEROSTICKETLOCATION_FIELD_NUMBER = 7;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object kerberosTicketLocation_ = "";
-    /**
-     * <pre>
-     * The kerberos ticket location of the cluster.
-     * </pre>
-     *
-     * <code>string kerberosTicketLocation = 7;</code>
-     * @return The kerberosTicketLocation.
-     */
-    @java.lang.Override
-    public java.lang.String getKerberosTicketLocation() {
-      java.lang.Object ref = kerberosTicketLocation_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        kerberosTicketLocation_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * The kerberos ticket location of the cluster.
-     * </pre>
-     *
-     * <code>string kerberosTicketLocation = 7;</code>
-     * @return The bytes for kerberosTicketLocation.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getKerberosTicketLocationBytes() {
-      java.lang.Object ref = kerberosTicketLocation_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        kerberosTicketLocation_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int PROPERTIES_FIELD_NUMBER = 8;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object properties_ = "";
-    /**
-     * <pre>
-     * The properties of the cluster.
-     * </pre>
-     *
-     * <code>string properties = 8;</code>
-     * @return The properties.
-     */
-    @java.lang.Override
-    public java.lang.String getProperties() {
-      java.lang.Object ref = properties_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        properties_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * The properties of the cluster.
-     * </pre>
-     *
-     * <code>string properties = 8;</code>
-     * @return The bytes for properties.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getPropertiesBytes() {
-      java.lang.Object ref = properties_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        properties_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int VERSION_FIELD_NUMBER = 9;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object version_ = "";
-    /**
-     * <pre>
-     * The version of the cluster.
-     * </pre>
-     *
-     * <code>string version = 9;</code>
-     * @return The version.
-     */
-    @java.lang.Override
-    public java.lang.String getVersion() {
-      java.lang.Object ref = version_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        version_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * The version of the cluster.
-     * </pre>
-     *
-     * <code>string version = 9;</code>
-     * @return The bytes for version.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getVersionBytes() {
-      java.lang.Object ref = version_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        version_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int DISPLAYNAME_FIELD_NUMBER = 10;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object displayName_ = "";
-    /**
-     * <pre>
-     * The display name of the discovered cluster.
-     * </pre>
-     *
-     * <code>string displayName = 10;</code>
-     * @return The displayName.
-     */
-    @java.lang.Override
-    public java.lang.String getDisplayName() {
-      java.lang.Object ref = displayName_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        displayName_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * The display name of the discovered cluster.
-     * </pre>
-     *
-     * <code>string displayName = 10;</code>
-     * @return The bytes for displayName.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getDisplayNameBytes() {
-      java.lang.Object ref = displayName_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        displayName_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int MANAGERTYPE_FIELD_NUMBER = 11;
-    private int managerType_ = 0;
-    /**
-     * <pre>
-     * The manager type of the discovered cluster.
-     * </pre>
-     *
-     * <code>.remotecluster.ManagerType.Value managerType = 11;</code>
-     * @return The enum numeric value on the wire for managerType.
-     */
-    @java.lang.Override public int getManagerTypeValue() {
-      return managerType_;
-    }
-    /**
-     * <pre>
-     * The manager type of the discovered cluster.
-     * </pre>
-     *
-     * <code>.remotecluster.ManagerType.Value managerType = 11;</code>
-     * @return The managerType.
-     */
-    @java.lang.Override public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Value getManagerType() {
-      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Value result = com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Value.forNumber(managerType_);
-      return result == null ? com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Value.UNRECOGNIZED : result;
-    }
-
-    public static final int MANAGERURI_FIELD_NUMBER = 12;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object managerUri_ = "";
-    /**
-     * <pre>
-     * The manager URI of the discovered cluster.
-     * </pre>
-     *
-     * <code>string managerUri = 12;</code>
-     * @return The managerUri.
-     */
-    @java.lang.Override
-    public java.lang.String getManagerUri() {
-      java.lang.Object ref = managerUri_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        managerUri_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * The manager URI of the discovered cluster.
-     * </pre>
-     *
-     * <code>string managerUri = 12;</code>
-     * @return The bytes for managerUri.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getManagerUriBytes() {
-      java.lang.Object ref = managerUri_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        managerUri_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int STATS_FIELD_NUMBER = 13;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object stats_ = "";
-    /**
-     * <pre>
-     * The stats of the discovered cluster.
-     * </pre>
-     *
-     * <code>string stats = 13;</code>
-     * @return The stats.
-     */
-    @java.lang.Override
-    public java.lang.String getStats() {
-      java.lang.Object ref = stats_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        stats_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * The stats of the discovered cluster.
-     * </pre>
-     *
-     * <code>string stats = 13;</code>
-     * @return The bytes for stats.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getStatsBytes() {
-      java.lang.Object ref = stats_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        stats_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (id_ != 0L) {
-        output.writeInt64(1, id_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, name_);
-      }
-      if (dataplaneClusterId_ != 0L) {
-        output.writeInt64(3, dataplaneClusterId_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(clusterUrl_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, clusterUrl_);
-      }
-      if (secured_ != false) {
-        output.writeBool(5, secured_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(kerberosUser_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, kerberosUser_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(kerberosTicketLocation_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 7, kerberosTicketLocation_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(properties_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 8, properties_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(version_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 9, version_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(displayName_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 10, displayName_);
-      }
-      if (managerType_ != com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Value.UNSET.getNumber()) {
-        output.writeEnum(11, managerType_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(managerUri_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 12, managerUri_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(stats_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 13, stats_);
-      }
-      getUnknownFields().writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (id_ != 0L) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(1, id_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, name_);
-      }
-      if (dataplaneClusterId_ != 0L) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(3, dataplaneClusterId_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(clusterUrl_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, clusterUrl_);
-      }
-      if (secured_ != false) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(5, secured_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(kerberosUser_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, kerberosUser_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(kerberosTicketLocation_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, kerberosTicketLocation_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(properties_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, properties_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(version_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, version_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(displayName_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, displayName_);
-      }
-      if (managerType_ != com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Value.UNSET.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(11, managerType_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(managerUri_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(12, managerUri_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(stats_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(13, stats_);
-      }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster)) {
-        return super.equals(obj);
-      }
-      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster other = (com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster) obj;
-
-      if (getId()
-          != other.getId()) return false;
-      if (!getName()
-          .equals(other.getName())) return false;
-      if (getDataplaneClusterId()
-          != other.getDataplaneClusterId()) return false;
-      if (!getClusterUrl()
-          .equals(other.getClusterUrl())) return false;
-      if (getSecured()
-          != other.getSecured()) return false;
-      if (!getKerberosUser()
-          .equals(other.getKerberosUser())) return false;
-      if (!getKerberosTicketLocation()
-          .equals(other.getKerberosTicketLocation())) return false;
-      if (!getProperties()
-          .equals(other.getProperties())) return false;
-      if (!getVersion()
-          .equals(other.getVersion())) return false;
-      if (!getDisplayName()
-          .equals(other.getDisplayName())) return false;
-      if (managerType_ != other.managerType_) return false;
-      if (!getManagerUri()
-          .equals(other.getManagerUri())) return false;
-      if (!getStats()
-          .equals(other.getStats())) return false;
-      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + ID_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          getId());
-      hash = (37 * hash) + NAME_FIELD_NUMBER;
-      hash = (53 * hash) + getName().hashCode();
-      hash = (37 * hash) + DATAPLANECLUSTERID_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          getDataplaneClusterId());
-      hash = (37 * hash) + CLUSTERURL_FIELD_NUMBER;
-      hash = (53 * hash) + getClusterUrl().hashCode();
-      hash = (37 * hash) + SECURED_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-          getSecured());
-      hash = (37 * hash) + KERBEROSUSER_FIELD_NUMBER;
-      hash = (53 * hash) + getKerberosUser().hashCode();
-      hash = (37 * hash) + KERBEROSTICKETLOCATION_FIELD_NUMBER;
-      hash = (53 * hash) + getKerberosTicketLocation().hashCode();
-      hash = (37 * hash) + PROPERTIES_FIELD_NUMBER;
-      hash = (53 * hash) + getProperties().hashCode();
-      hash = (37 * hash) + VERSION_FIELD_NUMBER;
-      hash = (53 * hash) + getVersion().hashCode();
-      hash = (37 * hash) + DISPLAYNAME_FIELD_NUMBER;
-      hash = (53 * hash) + getDisplayName().hashCode();
-      hash = (37 * hash) + MANAGERTYPE_FIELD_NUMBER;
-      hash = (53 * hash) + managerType_;
-      hash = (37 * hash) + MANAGERURI_FIELD_NUMBER;
-      hash = (53 * hash) + getManagerUri().hashCode();
-      hash = (37 * hash) + STATS_FIELD_NUMBER;
-      hash = (53 * hash) + getStats().hashCode();
-      hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * <pre>
-     * Object containing the discovered cluster information.
-     * </pre>
-     *
-     * Protobuf type {@code remotecluster.Cluster}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:remotecluster.Cluster)
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ClusterOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_Cluster_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_Cluster_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster.Builder.class);
-      }
-
-      // Construct using com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster.newBuilder()
-      private Builder() {
-
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        bitField0_ = 0;
-        id_ = 0L;
-        name_ = "";
-        dataplaneClusterId_ = 0L;
-        clusterUrl_ = "";
-        secured_ = false;
-        kerberosUser_ = "";
-        kerberosTicketLocation_ = "";
-        properties_ = "";
-        version_ = "";
-        displayName_ = "";
-        managerType_ = 0;
-        managerUri_ = "";
-        stats_ = "";
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_Cluster_descriptor;
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster getDefaultInstanceForType() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster build() {
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster buildPartial() {
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster result = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster(this);
-        if (bitField0_ != 0) { buildPartial0(result); }
-        onBuilt();
-        return result;
-      }
-
-      private void buildPartial0(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster result) {
-        int from_bitField0_ = bitField0_;
-        if (((from_bitField0_ & 0x00000001) != 0)) {
-          result.id_ = id_;
-        }
-        if (((from_bitField0_ & 0x00000002) != 0)) {
-          result.name_ = name_;
-        }
-        if (((from_bitField0_ & 0x00000004) != 0)) {
-          result.dataplaneClusterId_ = dataplaneClusterId_;
-        }
-        if (((from_bitField0_ & 0x00000008) != 0)) {
-          result.clusterUrl_ = clusterUrl_;
-        }
-        if (((from_bitField0_ & 0x00000010) != 0)) {
-          result.secured_ = secured_;
-        }
-        if (((from_bitField0_ & 0x00000020) != 0)) {
-          result.kerberosUser_ = kerberosUser_;
-        }
-        if (((from_bitField0_ & 0x00000040) != 0)) {
-          result.kerberosTicketLocation_ = kerberosTicketLocation_;
-        }
-        if (((from_bitField0_ & 0x00000080) != 0)) {
-          result.properties_ = properties_;
-        }
-        if (((from_bitField0_ & 0x00000100) != 0)) {
-          result.version_ = version_;
-        }
-        if (((from_bitField0_ & 0x00000200) != 0)) {
-          result.displayName_ = displayName_;
-        }
-        if (((from_bitField0_ & 0x00000400) != 0)) {
-          result.managerType_ = managerType_;
-        }
-        if (((from_bitField0_ & 0x00000800) != 0)) {
-          result.managerUri_ = managerUri_;
-        }
-        if (((from_bitField0_ & 0x00001000) != 0)) {
-          result.stats_ = stats_;
-        }
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster) {
-          return mergeFrom((com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster other) {
-        if (other == com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster.getDefaultInstance()) return this;
-        if (other.getId() != 0L) {
-          setId(other.getId());
-        }
-        if (!other.getName().isEmpty()) {
-          name_ = other.name_;
-          bitField0_ |= 0x00000002;
-          onChanged();
-        }
-        if (other.getDataplaneClusterId() != 0L) {
-          setDataplaneClusterId(other.getDataplaneClusterId());
-        }
-        if (!other.getClusterUrl().isEmpty()) {
-          clusterUrl_ = other.clusterUrl_;
-          bitField0_ |= 0x00000008;
-          onChanged();
-        }
-        if (other.getSecured() != false) {
-          setSecured(other.getSecured());
-        }
-        if (!other.getKerberosUser().isEmpty()) {
-          kerberosUser_ = other.kerberosUser_;
-          bitField0_ |= 0x00000020;
-          onChanged();
-        }
-        if (!other.getKerberosTicketLocation().isEmpty()) {
-          kerberosTicketLocation_ = other.kerberosTicketLocation_;
-          bitField0_ |= 0x00000040;
-          onChanged();
-        }
-        if (!other.getProperties().isEmpty()) {
-          properties_ = other.properties_;
-          bitField0_ |= 0x00000080;
-          onChanged();
-        }
-        if (!other.getVersion().isEmpty()) {
-          version_ = other.version_;
-          bitField0_ |= 0x00000100;
-          onChanged();
-        }
-        if (!other.getDisplayName().isEmpty()) {
-          displayName_ = other.displayName_;
-          bitField0_ |= 0x00000200;
-          onChanged();
-        }
-        if (other.managerType_ != 0) {
-          setManagerTypeValue(other.getManagerTypeValue());
-        }
-        if (!other.getManagerUri().isEmpty()) {
-          managerUri_ = other.managerUri_;
-          bitField0_ |= 0x00000800;
-          onChanged();
-        }
-        if (!other.getStats().isEmpty()) {
-          stats_ = other.stats_;
-          bitField0_ |= 0x00001000;
-          onChanged();
-        }
-        this.mergeUnknownFields(other.getUnknownFields());
-        onChanged();
-        return this;
-      }
-
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        if (extensionRegistry == null) {
-          throw new java.lang.NullPointerException();
-        }
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              case 8: {
-                id_ = input.readInt64();
-                bitField0_ |= 0x00000001;
-                break;
-              } // case 8
-              case 18: {
-                name_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000002;
-                break;
-              } // case 18
-              case 24: {
-                dataplaneClusterId_ = input.readInt64();
-                bitField0_ |= 0x00000004;
-                break;
-              } // case 24
-              case 34: {
-                clusterUrl_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000008;
-                break;
-              } // case 34
-              case 40: {
-                secured_ = input.readBool();
-                bitField0_ |= 0x00000010;
-                break;
-              } // case 40
-              case 50: {
-                kerberosUser_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000020;
-                break;
-              } // case 50
-              case 58: {
-                kerberosTicketLocation_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000040;
-                break;
-              } // case 58
-              case 66: {
-                properties_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000080;
-                break;
-              } // case 66
-              case 74: {
-                version_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000100;
-                break;
-              } // case 74
-              case 82: {
-                displayName_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000200;
-                break;
-              } // case 82
-              case 88: {
-                managerType_ = input.readEnum();
-                bitField0_ |= 0x00000400;
-                break;
-              } // case 88
-              case 98: {
-                managerUri_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000800;
-                break;
-              } // case 98
-              case 106: {
-                stats_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00001000;
-                break;
-              } // case 106
-              default: {
-                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
-                  done = true; // was an endgroup tag
-                }
-                break;
-              } // default:
-            } // switch (tag)
-          } // while (!done)
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.unwrapIOException();
-        } finally {
-          onChanged();
-        } // finally
-        return this;
-      }
-      private int bitField0_;
-
-      private long id_ ;
-      /**
-       * <pre>
-       * The ID of the discovered cluster.
-       * </pre>
-       *
-       * <code>int64 id = 1 [(.options.FieldExtension.required) = true];</code>
-       * @return The id.
-       */
-      @java.lang.Override
-      public long getId() {
-        return id_;
-      }
-      /**
-       * <pre>
-       * The ID of the discovered cluster.
-       * </pre>
-       *
-       * <code>int64 id = 1 [(.options.FieldExtension.required) = true];</code>
-       * @param value The id to set.
-       * @return This builder for chaining.
-       */
-      public Builder setId(long value) {
-
-        id_ = value;
-        bitField0_ |= 0x00000001;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The ID of the discovered cluster.
-       * </pre>
-       *
-       * <code>int64 id = 1 [(.options.FieldExtension.required) = true];</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearId() {
-        bitField0_ = (bitField0_ & ~0x00000001);
-        id_ = 0L;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object name_ = "";
-      /**
-       * <pre>
-       * The name of the discovered cluster.
-       * </pre>
-       *
-       * <code>string name = 2 [(.options.FieldExtension.required) = true];</code>
-       * @return The name.
-       */
-      public java.lang.String getName() {
-        java.lang.Object ref = name_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          name_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The name of the discovered cluster.
-       * </pre>
-       *
-       * <code>string name = 2 [(.options.FieldExtension.required) = true];</code>
-       * @return The bytes for name.
-       */
-      public com.google.protobuf.ByteString
-          getNameBytes() {
-        java.lang.Object ref = name_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          name_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The name of the discovered cluster.
-       * </pre>
-       *
-       * <code>string name = 2 [(.options.FieldExtension.required) = true];</code>
-       * @param value The name to set.
-       * @return This builder for chaining.
-       */
-      public Builder setName(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        name_ = value;
-        bitField0_ |= 0x00000002;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The name of the discovered cluster.
-       * </pre>
-       *
-       * <code>string name = 2 [(.options.FieldExtension.required) = true];</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearName() {
-        name_ = getDefaultInstance().getName();
-        bitField0_ = (bitField0_ & ~0x00000002);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The name of the discovered cluster.
-       * </pre>
-       *
-       * <code>string name = 2 [(.options.FieldExtension.required) = true];</code>
-       * @param value The bytes for name to set.
-       * @return This builder for chaining.
-       */
-      public Builder setNameBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        name_ = value;
-        bitField0_ |= 0x00000002;
-        onChanged();
-        return this;
-      }
-
-      private long dataplaneClusterId_ ;
-      /**
-       * <pre>
-       * The dataplane cluster ID.
-       * </pre>
-       *
-       * <code>int64 dataplaneClusterId = 3 [(.options.FieldExtension.required) = true];</code>
-       * @return The dataplaneClusterId.
-       */
-      @java.lang.Override
-      public long getDataplaneClusterId() {
-        return dataplaneClusterId_;
-      }
-      /**
-       * <pre>
-       * The dataplane cluster ID.
-       * </pre>
-       *
-       * <code>int64 dataplaneClusterId = 3 [(.options.FieldExtension.required) = true];</code>
-       * @param value The dataplaneClusterId to set.
-       * @return This builder for chaining.
-       */
-      public Builder setDataplaneClusterId(long value) {
-
-        dataplaneClusterId_ = value;
-        bitField0_ |= 0x00000004;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The dataplane cluster ID.
-       * </pre>
-       *
-       * <code>int64 dataplaneClusterId = 3 [(.options.FieldExtension.required) = true];</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearDataplaneClusterId() {
-        bitField0_ = (bitField0_ & ~0x00000004);
-        dataplaneClusterId_ = 0L;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object clusterUrl_ = "";
-      /**
-       * <pre>
-       * The cluster URL of the discovered cluster.
-       * </pre>
-       *
-       * <code>string clusterUrl = 4;</code>
-       * @return The clusterUrl.
-       */
-      public java.lang.String getClusterUrl() {
-        java.lang.Object ref = clusterUrl_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          clusterUrl_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The cluster URL of the discovered cluster.
-       * </pre>
-       *
-       * <code>string clusterUrl = 4;</code>
-       * @return The bytes for clusterUrl.
-       */
-      public com.google.protobuf.ByteString
-          getClusterUrlBytes() {
-        java.lang.Object ref = clusterUrl_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          clusterUrl_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The cluster URL of the discovered cluster.
-       * </pre>
-       *
-       * <code>string clusterUrl = 4;</code>
-       * @param value The clusterUrl to set.
-       * @return This builder for chaining.
-       */
-      public Builder setClusterUrl(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        clusterUrl_ = value;
-        bitField0_ |= 0x00000008;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The cluster URL of the discovered cluster.
-       * </pre>
-       *
-       * <code>string clusterUrl = 4;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearClusterUrl() {
-        clusterUrl_ = getDefaultInstance().getClusterUrl();
-        bitField0_ = (bitField0_ & ~0x00000008);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The cluster URL of the discovered cluster.
-       * </pre>
-       *
-       * <code>string clusterUrl = 4;</code>
-       * @param value The bytes for clusterUrl to set.
-       * @return This builder for chaining.
-       */
-      public Builder setClusterUrlBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        clusterUrl_ = value;
-        bitField0_ |= 0x00000008;
-        onChanged();
-        return this;
-      }
-
-      private boolean secured_ ;
-      /**
-       * <pre>
-       * Whether Value to identify if the cluster is secured or not.
-       * </pre>
-       *
-       * <code>bool secured = 5;</code>
-       * @return The secured.
-       */
-      @java.lang.Override
-      public boolean getSecured() {
-        return secured_;
-      }
-      /**
-       * <pre>
-       * Whether Value to identify if the cluster is secured or not.
-       * </pre>
-       *
-       * <code>bool secured = 5;</code>
-       * @param value The secured to set.
-       * @return This builder for chaining.
-       */
-      public Builder setSecured(boolean value) {
-
-        secured_ = value;
-        bitField0_ |= 0x00000010;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Whether Value to identify if the cluster is secured or not.
-       * </pre>
-       *
-       * <code>bool secured = 5;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearSecured() {
-        bitField0_ = (bitField0_ & ~0x00000010);
-        secured_ = false;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object kerberosUser_ = "";
-      /**
-       * <pre>
-       * The kerberos user of the cluster.
-       * </pre>
-       *
-       * <code>string kerberosUser = 6;</code>
-       * @return The kerberosUser.
-       */
-      public java.lang.String getKerberosUser() {
-        java.lang.Object ref = kerberosUser_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          kerberosUser_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The kerberos user of the cluster.
-       * </pre>
-       *
-       * <code>string kerberosUser = 6;</code>
-       * @return The bytes for kerberosUser.
-       */
-      public com.google.protobuf.ByteString
-          getKerberosUserBytes() {
-        java.lang.Object ref = kerberosUser_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          kerberosUser_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The kerberos user of the cluster.
-       * </pre>
-       *
-       * <code>string kerberosUser = 6;</code>
-       * @param value The kerberosUser to set.
-       * @return This builder for chaining.
-       */
-      public Builder setKerberosUser(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        kerberosUser_ = value;
-        bitField0_ |= 0x00000020;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The kerberos user of the cluster.
-       * </pre>
-       *
-       * <code>string kerberosUser = 6;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearKerberosUser() {
-        kerberosUser_ = getDefaultInstance().getKerberosUser();
-        bitField0_ = (bitField0_ & ~0x00000020);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The kerberos user of the cluster.
-       * </pre>
-       *
-       * <code>string kerberosUser = 6;</code>
-       * @param value The bytes for kerberosUser to set.
-       * @return This builder for chaining.
-       */
-      public Builder setKerberosUserBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        kerberosUser_ = value;
-        bitField0_ |= 0x00000020;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object kerberosTicketLocation_ = "";
-      /**
-       * <pre>
-       * The kerberos ticket location of the cluster.
-       * </pre>
-       *
-       * <code>string kerberosTicketLocation = 7;</code>
-       * @return The kerberosTicketLocation.
-       */
-      public java.lang.String getKerberosTicketLocation() {
-        java.lang.Object ref = kerberosTicketLocation_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          kerberosTicketLocation_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The kerberos ticket location of the cluster.
-       * </pre>
-       *
-       * <code>string kerberosTicketLocation = 7;</code>
-       * @return The bytes for kerberosTicketLocation.
-       */
-      public com.google.protobuf.ByteString
-          getKerberosTicketLocationBytes() {
-        java.lang.Object ref = kerberosTicketLocation_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          kerberosTicketLocation_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The kerberos ticket location of the cluster.
-       * </pre>
-       *
-       * <code>string kerberosTicketLocation = 7;</code>
-       * @param value The kerberosTicketLocation to set.
-       * @return This builder for chaining.
-       */
-      public Builder setKerberosTicketLocation(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        kerberosTicketLocation_ = value;
-        bitField0_ |= 0x00000040;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The kerberos ticket location of the cluster.
-       * </pre>
-       *
-       * <code>string kerberosTicketLocation = 7;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearKerberosTicketLocation() {
-        kerberosTicketLocation_ = getDefaultInstance().getKerberosTicketLocation();
-        bitField0_ = (bitField0_ & ~0x00000040);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The kerberos ticket location of the cluster.
-       * </pre>
-       *
-       * <code>string kerberosTicketLocation = 7;</code>
-       * @param value The bytes for kerberosTicketLocation to set.
-       * @return This builder for chaining.
-       */
-      public Builder setKerberosTicketLocationBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        kerberosTicketLocation_ = value;
-        bitField0_ |= 0x00000040;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object properties_ = "";
-      /**
-       * <pre>
-       * The properties of the cluster.
-       * </pre>
-       *
-       * <code>string properties = 8;</code>
-       * @return The properties.
-       */
-      public java.lang.String getProperties() {
-        java.lang.Object ref = properties_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          properties_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The properties of the cluster.
-       * </pre>
-       *
-       * <code>string properties = 8;</code>
-       * @return The bytes for properties.
-       */
-      public com.google.protobuf.ByteString
-          getPropertiesBytes() {
-        java.lang.Object ref = properties_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          properties_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The properties of the cluster.
-       * </pre>
-       *
-       * <code>string properties = 8;</code>
-       * @param value The properties to set.
-       * @return This builder for chaining.
-       */
-      public Builder setProperties(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        properties_ = value;
-        bitField0_ |= 0x00000080;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The properties of the cluster.
-       * </pre>
-       *
-       * <code>string properties = 8;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearProperties() {
-        properties_ = getDefaultInstance().getProperties();
-        bitField0_ = (bitField0_ & ~0x00000080);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The properties of the cluster.
-       * </pre>
-       *
-       * <code>string properties = 8;</code>
-       * @param value The bytes for properties to set.
-       * @return This builder for chaining.
-       */
-      public Builder setPropertiesBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        properties_ = value;
-        bitField0_ |= 0x00000080;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object version_ = "";
-      /**
-       * <pre>
-       * The version of the cluster.
-       * </pre>
-       *
-       * <code>string version = 9;</code>
-       * @return The version.
-       */
-      public java.lang.String getVersion() {
-        java.lang.Object ref = version_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          version_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The version of the cluster.
-       * </pre>
-       *
-       * <code>string version = 9;</code>
-       * @return The bytes for version.
-       */
-      public com.google.protobuf.ByteString
-          getVersionBytes() {
-        java.lang.Object ref = version_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          version_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The version of the cluster.
-       * </pre>
-       *
-       * <code>string version = 9;</code>
-       * @param value The version to set.
-       * @return This builder for chaining.
-       */
-      public Builder setVersion(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        version_ = value;
-        bitField0_ |= 0x00000100;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The version of the cluster.
-       * </pre>
-       *
-       * <code>string version = 9;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearVersion() {
-        version_ = getDefaultInstance().getVersion();
-        bitField0_ = (bitField0_ & ~0x00000100);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The version of the cluster.
-       * </pre>
-       *
-       * <code>string version = 9;</code>
-       * @param value The bytes for version to set.
-       * @return This builder for chaining.
-       */
-      public Builder setVersionBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        version_ = value;
-        bitField0_ |= 0x00000100;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object displayName_ = "";
-      /**
-       * <pre>
-       * The display name of the discovered cluster.
-       * </pre>
-       *
-       * <code>string displayName = 10;</code>
-       * @return The displayName.
-       */
-      public java.lang.String getDisplayName() {
-        java.lang.Object ref = displayName_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          displayName_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The display name of the discovered cluster.
-       * </pre>
-       *
-       * <code>string displayName = 10;</code>
-       * @return The bytes for displayName.
-       */
-      public com.google.protobuf.ByteString
-          getDisplayNameBytes() {
-        java.lang.Object ref = displayName_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          displayName_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The display name of the discovered cluster.
-       * </pre>
-       *
-       * <code>string displayName = 10;</code>
-       * @param value The displayName to set.
-       * @return This builder for chaining.
-       */
-      public Builder setDisplayName(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        displayName_ = value;
-        bitField0_ |= 0x00000200;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The display name of the discovered cluster.
-       * </pre>
-       *
-       * <code>string displayName = 10;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearDisplayName() {
-        displayName_ = getDefaultInstance().getDisplayName();
-        bitField0_ = (bitField0_ & ~0x00000200);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The display name of the discovered cluster.
-       * </pre>
-       *
-       * <code>string displayName = 10;</code>
-       * @param value The bytes for displayName to set.
-       * @return This builder for chaining.
-       */
-      public Builder setDisplayNameBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        displayName_ = value;
-        bitField0_ |= 0x00000200;
-        onChanged();
-        return this;
-      }
-
-      private int managerType_ = 0;
-      /**
-       * <pre>
-       * The manager type of the discovered cluster.
-       * </pre>
-       *
-       * <code>.remotecluster.ManagerType.Value managerType = 11;</code>
-       * @return The enum numeric value on the wire for managerType.
-       */
-      @java.lang.Override public int getManagerTypeValue() {
-        return managerType_;
-      }
-      /**
-       * <pre>
-       * The manager type of the discovered cluster.
-       * </pre>
-       *
-       * <code>.remotecluster.ManagerType.Value managerType = 11;</code>
-       * @param value The enum numeric value on the wire for managerType to set.
-       * @return This builder for chaining.
-       */
-      public Builder setManagerTypeValue(int value) {
-        managerType_ = value;
-        bitField0_ |= 0x00000400;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The manager type of the discovered cluster.
-       * </pre>
-       *
-       * <code>.remotecluster.ManagerType.Value managerType = 11;</code>
-       * @return The managerType.
-       */
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Value getManagerType() {
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Value result = com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Value.forNumber(managerType_);
-        return result == null ? com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Value.UNRECOGNIZED : result;
-      }
-      /**
-       * <pre>
-       * The manager type of the discovered cluster.
-       * </pre>
-       *
-       * <code>.remotecluster.ManagerType.Value managerType = 11;</code>
-       * @param value The managerType to set.
-       * @return This builder for chaining.
-       */
-      public Builder setManagerType(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Value value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        bitField0_ |= 0x00000400;
-        managerType_ = value.getNumber();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The manager type of the discovered cluster.
-       * </pre>
-       *
-       * <code>.remotecluster.ManagerType.Value managerType = 11;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearManagerType() {
-        bitField0_ = (bitField0_ & ~0x00000400);
-        managerType_ = 0;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object managerUri_ = "";
-      /**
-       * <pre>
-       * The manager URI of the discovered cluster.
-       * </pre>
-       *
-       * <code>string managerUri = 12;</code>
-       * @return The managerUri.
-       */
-      public java.lang.String getManagerUri() {
-        java.lang.Object ref = managerUri_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          managerUri_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The manager URI of the discovered cluster.
-       * </pre>
-       *
-       * <code>string managerUri = 12;</code>
-       * @return The bytes for managerUri.
-       */
-      public com.google.protobuf.ByteString
-          getManagerUriBytes() {
-        java.lang.Object ref = managerUri_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          managerUri_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The manager URI of the discovered cluster.
-       * </pre>
-       *
-       * <code>string managerUri = 12;</code>
-       * @param value The managerUri to set.
-       * @return This builder for chaining.
-       */
-      public Builder setManagerUri(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        managerUri_ = value;
-        bitField0_ |= 0x00000800;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The manager URI of the discovered cluster.
-       * </pre>
-       *
-       * <code>string managerUri = 12;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearManagerUri() {
-        managerUri_ = getDefaultInstance().getManagerUri();
-        bitField0_ = (bitField0_ & ~0x00000800);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The manager URI of the discovered cluster.
-       * </pre>
-       *
-       * <code>string managerUri = 12;</code>
-       * @param value The bytes for managerUri to set.
-       * @return This builder for chaining.
-       */
-      public Builder setManagerUriBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        managerUri_ = value;
-        bitField0_ |= 0x00000800;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object stats_ = "";
-      /**
-       * <pre>
-       * The stats of the discovered cluster.
-       * </pre>
-       *
-       * <code>string stats = 13;</code>
-       * @return The stats.
-       */
-      public java.lang.String getStats() {
-        java.lang.Object ref = stats_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          stats_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The stats of the discovered cluster.
-       * </pre>
-       *
-       * <code>string stats = 13;</code>
-       * @return The bytes for stats.
-       */
-      public com.google.protobuf.ByteString
-          getStatsBytes() {
-        java.lang.Object ref = stats_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          stats_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The stats of the discovered cluster.
-       * </pre>
-       *
-       * <code>string stats = 13;</code>
-       * @param value The stats to set.
-       * @return This builder for chaining.
-       */
-      public Builder setStats(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        stats_ = value;
-        bitField0_ |= 0x00001000;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The stats of the discovered cluster.
-       * </pre>
-       *
-       * <code>string stats = 13;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearStats() {
-        stats_ = getDefaultInstance().getStats();
-        bitField0_ = (bitField0_ & ~0x00001000);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The stats of the discovered cluster.
-       * </pre>
-       *
-       * <code>string stats = 13;</code>
-       * @param value The bytes for stats to set.
-       * @return This builder for chaining.
-       */
-      public Builder setStatsBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        stats_ = value;
-        bitField0_ |= 0x00001000;
-        onChanged();
-        return this;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:remotecluster.Cluster)
-    }
-
-    // @@protoc_insertion_point(class_scope:remotecluster.Cluster)
-    private static final com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster();
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<Cluster>
-        PARSER = new com.google.protobuf.AbstractParser<Cluster>() {
-      @java.lang.Override
-      public Cluster parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        Builder builder = newBuilder();
-        try {
-          builder.mergeFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(builder.buildPartial());
-        } catch (com.google.protobuf.UninitializedMessageException e) {
-          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(e)
-              .setUnfinishedMessage(builder.buildPartial());
-        }
-        return builder.buildPartial();
-      }
-    };
-
-    public static com.google.protobuf.Parser<Cluster> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<Cluster> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Cluster getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface LocationOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:remotecluster.Location)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <pre>
-     * ID of the location.
-     * </pre>
-     *
-     * <code>int64 id = 1 [(.options.FieldExtension.required) = true];</code>
-     * @return The id.
-     */
-    long getId();
-
-    /**
-     * <pre>
-     * City in which the data center is located.
-     * </pre>
-     *
-     * <code>string city = 2;</code>
-     * @return The city.
-     */
-    java.lang.String getCity();
-    /**
-     * <pre>
-     * City in which the data center is located.
-     * </pre>
-     *
-     * <code>string city = 2;</code>
-     * @return The bytes for city.
-     */
-    com.google.protobuf.ByteString
-        getCityBytes();
-
-    /**
-     * <pre>
-     * Province in which the data center is located.
-     * </pre>
-     *
-     * <code>string province = 3;</code>
-     * @return The province.
-     */
-    java.lang.String getProvince();
-    /**
-     * <pre>
-     * Province in which the data center is located.
-     * </pre>
-     *
-     * <code>string province = 3;</code>
-     * @return The bytes for province.
-     */
-    com.google.protobuf.ByteString
-        getProvinceBytes();
-
-    /**
-     * <pre>
-     * Country in which the data center is located.
-     * </pre>
-     *
-     * <code>string country = 4;</code>
-     * @return The country.
-     */
-    java.lang.String getCountry();
-    /**
-     * <pre>
-     * Country in which the data center is located.
-     * </pre>
-     *
-     * <code>string country = 4;</code>
-     * @return The bytes for country.
-     */
-    com.google.protobuf.ByteString
-        getCountryBytes();
-
-    /**
-     * <pre>
-     * ISO2 of the location.
-     * </pre>
-     *
-     * <code>string iso2 = 5;</code>
-     * @return The iso2.
-     */
-    java.lang.String getIso2();
-    /**
-     * <pre>
-     * ISO2 of the location.
-     * </pre>
-     *
-     * <code>string iso2 = 5;</code>
-     * @return The bytes for iso2.
-     */
-    com.google.protobuf.ByteString
-        getIso2Bytes();
-
-    /**
-     * <pre>
-     * Latitude of the location.
-     * </pre>
-     *
-     * <code>int64 latitude = 6;</code>
-     * @return The latitude.
-     */
-    long getLatitude();
-
-    /**
-     * <pre>
-     * Longitude of the location.
-     * </pre>
-     *
-     * <code>int64 longitude = 7;</code>
-     * @return The longitude.
-     */
-    long getLongitude();
-  }
-  /**
-   * <pre>
-   * Object containing the location of the data center.
-   * </pre>
-   *
-   * Protobuf type {@code remotecluster.Location}
-   */
-  public static final class Location extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:remotecluster.Location)
-      LocationOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use Location.newBuilder() to construct.
-    private Location(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private Location() {
-      city_ = "";
-      province_ = "";
-      country_ = "";
-      iso2_ = "";
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new Location();
-    }
-
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_Location_descriptor;
-    }
-
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_Location_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location.Builder.class);
-    }
-
-    public static final int ID_FIELD_NUMBER = 1;
-    private long id_ = 0L;
-    /**
-     * <pre>
-     * ID of the location.
-     * </pre>
-     *
-     * <code>int64 id = 1 [(.options.FieldExtension.required) = true];</code>
-     * @return The id.
-     */
-    @java.lang.Override
-    public long getId() {
-      return id_;
-    }
-
-    public static final int CITY_FIELD_NUMBER = 2;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object city_ = "";
-    /**
-     * <pre>
-     * City in which the data center is located.
-     * </pre>
-     *
-     * <code>string city = 2;</code>
-     * @return The city.
-     */
-    @java.lang.Override
-    public java.lang.String getCity() {
-      java.lang.Object ref = city_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        city_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * City in which the data center is located.
-     * </pre>
-     *
-     * <code>string city = 2;</code>
-     * @return The bytes for city.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getCityBytes() {
-      java.lang.Object ref = city_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        city_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int PROVINCE_FIELD_NUMBER = 3;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object province_ = "";
-    /**
-     * <pre>
-     * Province in which the data center is located.
-     * </pre>
-     *
-     * <code>string province = 3;</code>
-     * @return The province.
-     */
-    @java.lang.Override
-    public java.lang.String getProvince() {
-      java.lang.Object ref = province_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        province_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * Province in which the data center is located.
-     * </pre>
-     *
-     * <code>string province = 3;</code>
-     * @return The bytes for province.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getProvinceBytes() {
-      java.lang.Object ref = province_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        province_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int COUNTRY_FIELD_NUMBER = 4;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object country_ = "";
-    /**
-     * <pre>
-     * Country in which the data center is located.
-     * </pre>
-     *
-     * <code>string country = 4;</code>
-     * @return The country.
-     */
-    @java.lang.Override
-    public java.lang.String getCountry() {
-      java.lang.Object ref = country_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        country_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * Country in which the data center is located.
-     * </pre>
-     *
-     * <code>string country = 4;</code>
-     * @return The bytes for country.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getCountryBytes() {
-      java.lang.Object ref = country_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        country_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int ISO2_FIELD_NUMBER = 5;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object iso2_ = "";
-    /**
-     * <pre>
-     * ISO2 of the location.
-     * </pre>
-     *
-     * <code>string iso2 = 5;</code>
-     * @return The iso2.
-     */
-    @java.lang.Override
-    public java.lang.String getIso2() {
-      java.lang.Object ref = iso2_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        iso2_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * ISO2 of the location.
-     * </pre>
-     *
-     * <code>string iso2 = 5;</code>
-     * @return The bytes for iso2.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getIso2Bytes() {
-      java.lang.Object ref = iso2_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        iso2_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int LATITUDE_FIELD_NUMBER = 6;
-    private long latitude_ = 0L;
-    /**
-     * <pre>
-     * Latitude of the location.
-     * </pre>
-     *
-     * <code>int64 latitude = 6;</code>
-     * @return The latitude.
-     */
-    @java.lang.Override
-    public long getLatitude() {
-      return latitude_;
-    }
-
-    public static final int LONGITUDE_FIELD_NUMBER = 7;
-    private long longitude_ = 0L;
-    /**
-     * <pre>
-     * Longitude of the location.
-     * </pre>
-     *
-     * <code>int64 longitude = 7;</code>
-     * @return The longitude.
-     */
-    @java.lang.Override
-    public long getLongitude() {
-      return longitude_;
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (id_ != 0L) {
-        output.writeInt64(1, id_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(city_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, city_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(province_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, province_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(country_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, country_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(iso2_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, iso2_);
-      }
-      if (latitude_ != 0L) {
-        output.writeInt64(6, latitude_);
-      }
-      if (longitude_ != 0L) {
-        output.writeInt64(7, longitude_);
-      }
-      getUnknownFields().writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (id_ != 0L) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(1, id_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(city_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, city_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(province_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, province_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(country_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, country_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(iso2_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, iso2_);
-      }
-      if (latitude_ != 0L) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(6, latitude_);
-      }
-      if (longitude_ != 0L) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(7, longitude_);
-      }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location)) {
-        return super.equals(obj);
-      }
-      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location other = (com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location) obj;
-
-      if (getId()
-          != other.getId()) return false;
-      if (!getCity()
-          .equals(other.getCity())) return false;
-      if (!getProvince()
-          .equals(other.getProvince())) return false;
-      if (!getCountry()
-          .equals(other.getCountry())) return false;
-      if (!getIso2()
-          .equals(other.getIso2())) return false;
-      if (getLatitude()
-          != other.getLatitude()) return false;
-      if (getLongitude()
-          != other.getLongitude()) return false;
-      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + ID_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          getId());
-      hash = (37 * hash) + CITY_FIELD_NUMBER;
-      hash = (53 * hash) + getCity().hashCode();
-      hash = (37 * hash) + PROVINCE_FIELD_NUMBER;
-      hash = (53 * hash) + getProvince().hashCode();
-      hash = (37 * hash) + COUNTRY_FIELD_NUMBER;
-      hash = (53 * hash) + getCountry().hashCode();
-      hash = (37 * hash) + ISO2_FIELD_NUMBER;
-      hash = (53 * hash) + getIso2().hashCode();
-      hash = (37 * hash) + LATITUDE_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          getLatitude());
-      hash = (37 * hash) + LONGITUDE_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          getLongitude());
-      hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * <pre>
-     * Object containing the location of the data center.
-     * </pre>
-     *
-     * Protobuf type {@code remotecluster.Location}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:remotecluster.Location)
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.LocationOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_Location_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_Location_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location.Builder.class);
-      }
-
-      // Construct using com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location.newBuilder()
-      private Builder() {
-
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        bitField0_ = 0;
-        id_ = 0L;
-        city_ = "";
-        province_ = "";
-        country_ = "";
-        iso2_ = "";
-        latitude_ = 0L;
-        longitude_ = 0L;
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_Location_descriptor;
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location getDefaultInstanceForType() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location build() {
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location buildPartial() {
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location result = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location(this);
-        if (bitField0_ != 0) { buildPartial0(result); }
-        onBuilt();
-        return result;
-      }
-
-      private void buildPartial0(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location result) {
-        int from_bitField0_ = bitField0_;
-        if (((from_bitField0_ & 0x00000001) != 0)) {
-          result.id_ = id_;
-        }
-        if (((from_bitField0_ & 0x00000002) != 0)) {
-          result.city_ = city_;
-        }
-        if (((from_bitField0_ & 0x00000004) != 0)) {
-          result.province_ = province_;
-        }
-        if (((from_bitField0_ & 0x00000008) != 0)) {
-          result.country_ = country_;
-        }
-        if (((from_bitField0_ & 0x00000010) != 0)) {
-          result.iso2_ = iso2_;
-        }
-        if (((from_bitField0_ & 0x00000020) != 0)) {
-          result.latitude_ = latitude_;
-        }
-        if (((from_bitField0_ & 0x00000040) != 0)) {
-          result.longitude_ = longitude_;
-        }
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location) {
-          return mergeFrom((com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location other) {
-        if (other == com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location.getDefaultInstance()) return this;
-        if (other.getId() != 0L) {
-          setId(other.getId());
-        }
-        if (!other.getCity().isEmpty()) {
-          city_ = other.city_;
-          bitField0_ |= 0x00000002;
-          onChanged();
-        }
-        if (!other.getProvince().isEmpty()) {
-          province_ = other.province_;
-          bitField0_ |= 0x00000004;
-          onChanged();
-        }
-        if (!other.getCountry().isEmpty()) {
-          country_ = other.country_;
-          bitField0_ |= 0x00000008;
-          onChanged();
-        }
-        if (!other.getIso2().isEmpty()) {
-          iso2_ = other.iso2_;
-          bitField0_ |= 0x00000010;
-          onChanged();
-        }
-        if (other.getLatitude() != 0L) {
-          setLatitude(other.getLatitude());
-        }
-        if (other.getLongitude() != 0L) {
-          setLongitude(other.getLongitude());
-        }
-        this.mergeUnknownFields(other.getUnknownFields());
-        onChanged();
-        return this;
-      }
-
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        if (extensionRegistry == null) {
-          throw new java.lang.NullPointerException();
-        }
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              case 8: {
-                id_ = input.readInt64();
-                bitField0_ |= 0x00000001;
-                break;
-              } // case 8
-              case 18: {
-                city_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000002;
-                break;
-              } // case 18
-              case 26: {
-                province_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000004;
-                break;
-              } // case 26
-              case 34: {
-                country_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000008;
-                break;
-              } // case 34
-              case 42: {
-                iso2_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000010;
-                break;
-              } // case 42
-              case 48: {
-                latitude_ = input.readInt64();
-                bitField0_ |= 0x00000020;
-                break;
-              } // case 48
-              case 56: {
-                longitude_ = input.readInt64();
-                bitField0_ |= 0x00000040;
-                break;
-              } // case 56
-              default: {
-                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
-                  done = true; // was an endgroup tag
-                }
-                break;
-              } // default:
-            } // switch (tag)
-          } // while (!done)
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.unwrapIOException();
-        } finally {
-          onChanged();
-        } // finally
-        return this;
-      }
-      private int bitField0_;
-
-      private long id_ ;
-      /**
-       * <pre>
-       * ID of the location.
-       * </pre>
-       *
-       * <code>int64 id = 1 [(.options.FieldExtension.required) = true];</code>
-       * @return The id.
-       */
-      @java.lang.Override
-      public long getId() {
-        return id_;
-      }
-      /**
-       * <pre>
-       * ID of the location.
-       * </pre>
-       *
-       * <code>int64 id = 1 [(.options.FieldExtension.required) = true];</code>
-       * @param value The id to set.
-       * @return This builder for chaining.
-       */
-      public Builder setId(long value) {
-
-        id_ = value;
-        bitField0_ |= 0x00000001;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * ID of the location.
-       * </pre>
-       *
-       * <code>int64 id = 1 [(.options.FieldExtension.required) = true];</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearId() {
-        bitField0_ = (bitField0_ & ~0x00000001);
-        id_ = 0L;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object city_ = "";
-      /**
-       * <pre>
-       * City in which the data center is located.
-       * </pre>
-       *
-       * <code>string city = 2;</code>
-       * @return The city.
-       */
-      public java.lang.String getCity() {
-        java.lang.Object ref = city_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          city_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * City in which the data center is located.
-       * </pre>
-       *
-       * <code>string city = 2;</code>
-       * @return The bytes for city.
-       */
-      public com.google.protobuf.ByteString
-          getCityBytes() {
-        java.lang.Object ref = city_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          city_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * City in which the data center is located.
-       * </pre>
-       *
-       * <code>string city = 2;</code>
-       * @param value The city to set.
-       * @return This builder for chaining.
-       */
-      public Builder setCity(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        city_ = value;
-        bitField0_ |= 0x00000002;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * City in which the data center is located.
-       * </pre>
-       *
-       * <code>string city = 2;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearCity() {
-        city_ = getDefaultInstance().getCity();
-        bitField0_ = (bitField0_ & ~0x00000002);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * City in which the data center is located.
-       * </pre>
-       *
-       * <code>string city = 2;</code>
-       * @param value The bytes for city to set.
-       * @return This builder for chaining.
-       */
-      public Builder setCityBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        city_ = value;
-        bitField0_ |= 0x00000002;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object province_ = "";
-      /**
-       * <pre>
-       * Province in which the data center is located.
-       * </pre>
-       *
-       * <code>string province = 3;</code>
-       * @return The province.
-       */
-      public java.lang.String getProvince() {
-        java.lang.Object ref = province_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          province_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * Province in which the data center is located.
-       * </pre>
-       *
-       * <code>string province = 3;</code>
-       * @return The bytes for province.
-       */
-      public com.google.protobuf.ByteString
-          getProvinceBytes() {
-        java.lang.Object ref = province_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          province_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * Province in which the data center is located.
-       * </pre>
-       *
-       * <code>string province = 3;</code>
-       * @param value The province to set.
-       * @return This builder for chaining.
-       */
-      public Builder setProvince(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        province_ = value;
-        bitField0_ |= 0x00000004;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Province in which the data center is located.
-       * </pre>
-       *
-       * <code>string province = 3;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearProvince() {
-        province_ = getDefaultInstance().getProvince();
-        bitField0_ = (bitField0_ & ~0x00000004);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Province in which the data center is located.
-       * </pre>
-       *
-       * <code>string province = 3;</code>
-       * @param value The bytes for province to set.
-       * @return This builder for chaining.
-       */
-      public Builder setProvinceBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        province_ = value;
-        bitField0_ |= 0x00000004;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object country_ = "";
-      /**
-       * <pre>
-       * Country in which the data center is located.
-       * </pre>
-       *
-       * <code>string country = 4;</code>
-       * @return The country.
-       */
-      public java.lang.String getCountry() {
-        java.lang.Object ref = country_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          country_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * Country in which the data center is located.
-       * </pre>
-       *
-       * <code>string country = 4;</code>
-       * @return The bytes for country.
-       */
-      public com.google.protobuf.ByteString
-          getCountryBytes() {
-        java.lang.Object ref = country_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          country_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * Country in which the data center is located.
-       * </pre>
-       *
-       * <code>string country = 4;</code>
-       * @param value The country to set.
-       * @return This builder for chaining.
-       */
-      public Builder setCountry(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        country_ = value;
-        bitField0_ |= 0x00000008;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Country in which the data center is located.
-       * </pre>
-       *
-       * <code>string country = 4;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearCountry() {
-        country_ = getDefaultInstance().getCountry();
-        bitField0_ = (bitField0_ & ~0x00000008);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Country in which the data center is located.
-       * </pre>
-       *
-       * <code>string country = 4;</code>
-       * @param value The bytes for country to set.
-       * @return This builder for chaining.
-       */
-      public Builder setCountryBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        country_ = value;
-        bitField0_ |= 0x00000008;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object iso2_ = "";
-      /**
-       * <pre>
-       * ISO2 of the location.
-       * </pre>
-       *
-       * <code>string iso2 = 5;</code>
-       * @return The iso2.
-       */
-      public java.lang.String getIso2() {
-        java.lang.Object ref = iso2_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          iso2_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * ISO2 of the location.
-       * </pre>
-       *
-       * <code>string iso2 = 5;</code>
-       * @return The bytes for iso2.
-       */
-      public com.google.protobuf.ByteString
-          getIso2Bytes() {
-        java.lang.Object ref = iso2_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          iso2_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * ISO2 of the location.
-       * </pre>
-       *
-       * <code>string iso2 = 5;</code>
-       * @param value The iso2 to set.
-       * @return This builder for chaining.
-       */
-      public Builder setIso2(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        iso2_ = value;
-        bitField0_ |= 0x00000010;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * ISO2 of the location.
-       * </pre>
-       *
-       * <code>string iso2 = 5;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearIso2() {
-        iso2_ = getDefaultInstance().getIso2();
-        bitField0_ = (bitField0_ & ~0x00000010);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * ISO2 of the location.
-       * </pre>
-       *
-       * <code>string iso2 = 5;</code>
-       * @param value The bytes for iso2 to set.
-       * @return This builder for chaining.
-       */
-      public Builder setIso2Bytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        iso2_ = value;
-        bitField0_ |= 0x00000010;
-        onChanged();
-        return this;
-      }
-
-      private long latitude_ ;
-      /**
-       * <pre>
-       * Latitude of the location.
-       * </pre>
-       *
-       * <code>int64 latitude = 6;</code>
-       * @return The latitude.
-       */
-      @java.lang.Override
-      public long getLatitude() {
-        return latitude_;
-      }
-      /**
-       * <pre>
-       * Latitude of the location.
-       * </pre>
-       *
-       * <code>int64 latitude = 6;</code>
-       * @param value The latitude to set.
-       * @return This builder for chaining.
-       */
-      public Builder setLatitude(long value) {
-
-        latitude_ = value;
-        bitField0_ |= 0x00000020;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Latitude of the location.
-       * </pre>
-       *
-       * <code>int64 latitude = 6;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearLatitude() {
-        bitField0_ = (bitField0_ & ~0x00000020);
-        latitude_ = 0L;
-        onChanged();
-        return this;
-      }
-
-      private long longitude_ ;
-      /**
-       * <pre>
-       * Longitude of the location.
-       * </pre>
-       *
-       * <code>int64 longitude = 7;</code>
-       * @return The longitude.
-       */
-      @java.lang.Override
-      public long getLongitude() {
-        return longitude_;
-      }
-      /**
-       * <pre>
-       * Longitude of the location.
-       * </pre>
-       *
-       * <code>int64 longitude = 7;</code>
-       * @param value The longitude to set.
-       * @return This builder for chaining.
-       */
-      public Builder setLongitude(long value) {
-
-        longitude_ = value;
-        bitField0_ |= 0x00000040;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Longitude of the location.
-       * </pre>
-       *
-       * <code>int64 longitude = 7;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearLongitude() {
-        bitField0_ = (bitField0_ & ~0x00000040);
-        longitude_ = 0L;
-        onChanged();
-        return this;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:remotecluster.Location)
-    }
-
-    // @@protoc_insertion_point(class_scope:remotecluster.Location)
-    private static final com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location();
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<Location>
-        PARSER = new com.google.protobuf.AbstractParser<Location>() {
-      @java.lang.Override
-      public Location parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        Builder builder = newBuilder();
-        try {
-          builder.mergeFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(builder.buildPartial());
-        } catch (com.google.protobuf.UninitializedMessageException e) {
-          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(e)
-              .setUnfinishedMessage(builder.buildPartial());
-        }
-        return builder.buildPartial();
-      }
-    };
-
-    public static com.google.protobuf.Parser<Location> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<Location> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Location getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface StateOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:remotecluster.State)
-      com.google.protobuf.MessageOrBuilder {
-  }
-  /**
-   * <pre>
-   * State of the remote cluster.
-   * </pre>
-   *
-   * Protobuf type {@code remotecluster.State}
-   */
-  public static final class State extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:remotecluster.State)
-      StateOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use State.newBuilder() to construct.
-    private State(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private State() {
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new State();
-    }
-
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_State_descriptor;
-    }
-
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_State_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State.Builder.class);
-    }
-
-    /**
-     * Protobuf enum {@code remotecluster.State.Value}
-     */
-    public enum Value
-        implements com.google.protobuf.ProtocolMessageEnum {
-      /**
-       * <code>UNSET = 0;</code>
-       */
-      UNSET(0),
-      /**
-       * <pre>
-       * Remote-cluster yet to be synced.
-       * </pre>
-       *
-       * <code>TO_SYNC = 1;</code>
-       */
-      TO_SYNC(1),
-      /**
-       * <pre>
-       * Remote-cluster sync in-progress.
-       * </pre>
-       *
-       * <code>SYNC_IN_PROGRESS = 2;</code>
-       */
-      SYNC_IN_PROGRESS(2),
-      /**
-       * <pre>
-       * Remote-cluster sync successful.
-       * </pre>
-       *
-       * <code>SYNCED = 3;</code>
-       */
-      SYNCED(3),
-      /**
-       * <pre>
-       * Remote-cluster sync error.
-       * </pre>
-       *
-       * <code>SYNC_ERROR = 4;</code>
-       */
-      SYNC_ERROR(4),
-      /**
-       * <pre>
-       * Remote-cluster knox dependency verification successful.
-       * </pre>
-       *
-       * <code>KNOX_TOPOLOGY_DEP_VERIFIED = 5;</code>
-       */
-      KNOX_TOPOLOGY_DEP_VERIFIED(5),
-      /**
-       * <pre>
-       * Remote-cluster knox dependency verification pending.
-       * </pre>
-       *
-       * <code>KNOX_TOPOLOGY_DEP_PENDING = 6;</code>
-       */
-      KNOX_TOPOLOGY_DEP_PENDING(6),
-      UNRECOGNIZED(-1),
-      ;
-
-      /**
-       * <code>UNSET = 0;</code>
-       */
-      public static final int UNSET_VALUE = 0;
-      /**
-       * <pre>
-       * Remote-cluster yet to be synced.
-       * </pre>
-       *
-       * <code>TO_SYNC = 1;</code>
-       */
-      public static final int TO_SYNC_VALUE = 1;
-      /**
-       * <pre>
-       * Remote-cluster sync in-progress.
-       * </pre>
-       *
-       * <code>SYNC_IN_PROGRESS = 2;</code>
-       */
-      public static final int SYNC_IN_PROGRESS_VALUE = 2;
-      /**
-       * <pre>
-       * Remote-cluster sync successful.
-       * </pre>
-       *
-       * <code>SYNCED = 3;</code>
-       */
-      public static final int SYNCED_VALUE = 3;
-      /**
-       * <pre>
-       * Remote-cluster sync error.
-       * </pre>
-       *
-       * <code>SYNC_ERROR = 4;</code>
-       */
-      public static final int SYNC_ERROR_VALUE = 4;
-      /**
-       * <pre>
-       * Remote-cluster knox dependency verification successful.
-       * </pre>
-       *
-       * <code>KNOX_TOPOLOGY_DEP_VERIFIED = 5;</code>
-       */
-      public static final int KNOX_TOPOLOGY_DEP_VERIFIED_VALUE = 5;
-      /**
-       * <pre>
-       * Remote-cluster knox dependency verification pending.
-       * </pre>
-       *
-       * <code>KNOX_TOPOLOGY_DEP_PENDING = 6;</code>
-       */
-      public static final int KNOX_TOPOLOGY_DEP_PENDING_VALUE = 6;
-
-
-      public final int getNumber() {
-        if (this == UNRECOGNIZED) {
-          throw new java.lang.IllegalArgumentException(
-              "Can't get the number of an unknown enum value.");
-        }
-        return value;
-      }
-
-      /**
-       * @param value The numeric wire value of the corresponding enum entry.
-       * @return The enum associated with the given numeric wire value.
-       * @deprecated Use {@link #forNumber(int)} instead.
-       */
-      @java.lang.Deprecated
-      public static Value valueOf(int value) {
-        return forNumber(value);
-      }
-
-      /**
-       * @param value The numeric wire value of the corresponding enum entry.
-       * @return The enum associated with the given numeric wire value.
-       */
-      public static Value forNumber(int value) {
-        switch (value) {
-          case 0: return UNSET;
-          case 1: return TO_SYNC;
-          case 2: return SYNC_IN_PROGRESS;
-          case 3: return SYNCED;
-          case 4: return SYNC_ERROR;
-          case 5: return KNOX_TOPOLOGY_DEP_VERIFIED;
-          case 6: return KNOX_TOPOLOGY_DEP_PENDING;
-          default: return null;
-        }
-      }
-
-      public static com.google.protobuf.Internal.EnumLiteMap<Value>
-          internalGetValueMap() {
-        return internalValueMap;
-      }
-      private static final com.google.protobuf.Internal.EnumLiteMap<
-          Value> internalValueMap =
-            new com.google.protobuf.Internal.EnumLiteMap<Value>() {
-              public Value findValueByNumber(int number) {
-                return Value.forNumber(number);
-              }
-            };
-
-      public final com.google.protobuf.Descriptors.EnumValueDescriptor
-          getValueDescriptor() {
-        if (this == UNRECOGNIZED) {
-          throw new java.lang.IllegalStateException(
-              "Can't get the descriptor of an unrecognized enum value.");
-        }
-        return getDescriptor().getValues().get(ordinal());
-      }
-      public final com.google.protobuf.Descriptors.EnumDescriptor
-          getDescriptorForType() {
-        return getDescriptor();
-      }
-      public static final com.google.protobuf.Descriptors.EnumDescriptor
-          getDescriptor() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State.getDescriptor().getEnumTypes().get(0);
-      }
-
-      private static final Value[] VALUES = values();
-
-      public static Value valueOf(
-          com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-        if (desc.getType() != getDescriptor()) {
-          throw new java.lang.IllegalArgumentException(
-            "EnumValueDescriptor is not for this type.");
-        }
-        if (desc.getIndex() == -1) {
-          return UNRECOGNIZED;
-        }
-        return VALUES[desc.getIndex()];
-      }
-
-      private final int value;
-
-      private Value(int value) {
-        this.value = value;
-      }
-
-      // @@protoc_insertion_point(enum_scope:remotecluster.State.Value)
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      getUnknownFields().writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      size += getUnknownFields().getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State)) {
-        return super.equals(obj);
-      }
-      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State other = (com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State) obj;
-
-      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * <pre>
-     * State of the remote cluster.
-     * </pre>
-     *
-     * Protobuf type {@code remotecluster.State}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:remotecluster.State)
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.StateOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_State_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_State_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State.Builder.class);
-      }
-
-      // Construct using com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State.newBuilder()
-      private Builder() {
-
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_State_descriptor;
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State getDefaultInstanceForType() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State build() {
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State buildPartial() {
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State result = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State(this);
-        onBuilt();
-        return result;
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State) {
-          return mergeFrom((com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State other) {
-        if (other == com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State.getDefaultInstance()) return this;
-        this.mergeUnknownFields(other.getUnknownFields());
-        onChanged();
-        return this;
-      }
-
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        if (extensionRegistry == null) {
-          throw new java.lang.NullPointerException();
-        }
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              default: {
-                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
-                  done = true; // was an endgroup tag
-                }
-                break;
-              } // default:
-            } // switch (tag)
-          } // while (!done)
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.unwrapIOException();
-        } finally {
-          onChanged();
-        } // finally
-        return this;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:remotecluster.State)
-    }
-
-    // @@protoc_insertion_point(class_scope:remotecluster.State)
-    private static final com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State();
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<State>
-        PARSER = new com.google.protobuf.AbstractParser<State>() {
-      @java.lang.Override
-      public State parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        Builder builder = newBuilder();
-        try {
-          builder.mergeFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(builder.buildPartial());
-        } catch (com.google.protobuf.UninitializedMessageException e) {
-          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(e)
-              .setUnfinishedMessage(builder.buildPartial());
-        }
-        return builder.buildPartial();
-      }
-    };
-
-    public static com.google.protobuf.Parser<State> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<State> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.State getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface ManagerTypeOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:remotecluster.ManagerType)
-      com.google.protobuf.MessageOrBuilder {
-  }
-  /**
-   * <pre>
-   * Manager type of the remote cluster.
-   * </pre>
-   *
-   * Protobuf type {@code remotecluster.ManagerType}
-   */
-  public static final class ManagerType extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:remotecluster.ManagerType)
-      ManagerTypeOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use ManagerType.newBuilder() to construct.
-    private ManagerType(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private ManagerType() {
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new ManagerType();
-    }
-
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_ManagerType_descriptor;
-    }
-
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_ManagerType_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Builder.class);
-    }
-
-    /**
-     * Protobuf enum {@code remotecluster.ManagerType.Value}
-     */
-    public enum Value
-        implements com.google.protobuf.ProtocolMessageEnum {
-      /**
-       * <code>UNSET = 0;</code>
-       */
-      UNSET(0),
-      /**
-       * <pre>
-       * Ambari as manager type.
-       * </pre>
-       *
-       * <code>AMBARI = 1;</code>
-       */
-      AMBARI(1),
-      /**
-       * <pre>
-       * Cloudera-manager as manager type.
-       * </pre>
-       *
-       * <code>CLOUDERA_MANAGER = 2;</code>
-       */
-      CLOUDERA_MANAGER(2),
-      UNRECOGNIZED(-1),
-      ;
-
-      /**
-       * <code>UNSET = 0;</code>
-       */
-      public static final int UNSET_VALUE = 0;
-      /**
-       * <pre>
-       * Ambari as manager type.
-       * </pre>
-       *
-       * <code>AMBARI = 1;</code>
-       */
-      public static final int AMBARI_VALUE = 1;
-      /**
-       * <pre>
-       * Cloudera-manager as manager type.
-       * </pre>
-       *
-       * <code>CLOUDERA_MANAGER = 2;</code>
-       */
-      public static final int CLOUDERA_MANAGER_VALUE = 2;
-
-
-      public final int getNumber() {
-        if (this == UNRECOGNIZED) {
-          throw new java.lang.IllegalArgumentException(
-              "Can't get the number of an unknown enum value.");
-        }
-        return value;
-      }
-
-      /**
-       * @param value The numeric wire value of the corresponding enum entry.
-       * @return The enum associated with the given numeric wire value.
-       * @deprecated Use {@link #forNumber(int)} instead.
-       */
-      @java.lang.Deprecated
-      public static Value valueOf(int value) {
-        return forNumber(value);
-      }
-
-      /**
-       * @param value The numeric wire value of the corresponding enum entry.
-       * @return The enum associated with the given numeric wire value.
-       */
-      public static Value forNumber(int value) {
-        switch (value) {
-          case 0: return UNSET;
-          case 1: return AMBARI;
-          case 2: return CLOUDERA_MANAGER;
-          default: return null;
-        }
-      }
-
-      public static com.google.protobuf.Internal.EnumLiteMap<Value>
-          internalGetValueMap() {
-        return internalValueMap;
-      }
-      private static final com.google.protobuf.Internal.EnumLiteMap<
-          Value> internalValueMap =
-            new com.google.protobuf.Internal.EnumLiteMap<Value>() {
-              public Value findValueByNumber(int number) {
-                return Value.forNumber(number);
-              }
-            };
-
-      public final com.google.protobuf.Descriptors.EnumValueDescriptor
-          getValueDescriptor() {
-        if (this == UNRECOGNIZED) {
-          throw new java.lang.IllegalStateException(
-              "Can't get the descriptor of an unrecognized enum value.");
-        }
-        return getDescriptor().getValues().get(ordinal());
-      }
-      public final com.google.protobuf.Descriptors.EnumDescriptor
-          getDescriptorForType() {
-        return getDescriptor();
-      }
-      public static final com.google.protobuf.Descriptors.EnumDescriptor
-          getDescriptor() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.getDescriptor().getEnumTypes().get(0);
-      }
-
-      private static final Value[] VALUES = values();
-
-      public static Value valueOf(
-          com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-        if (desc.getType() != getDescriptor()) {
-          throw new java.lang.IllegalArgumentException(
-            "EnumValueDescriptor is not for this type.");
-        }
-        if (desc.getIndex() == -1) {
-          return UNRECOGNIZED;
-        }
-        return VALUES[desc.getIndex()];
-      }
-
-      private final int value;
-
-      private Value(int value) {
-        this.value = value;
-      }
-
-      // @@protoc_insertion_point(enum_scope:remotecluster.ManagerType.Value)
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      getUnknownFields().writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      size += getUnknownFields().getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType)) {
-        return super.equals(obj);
-      }
-      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType other = (com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType) obj;
-
-      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * <pre>
-     * Manager type of the remote cluster.
-     * </pre>
-     *
-     * Protobuf type {@code remotecluster.ManagerType}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:remotecluster.ManagerType)
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerTypeOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_ManagerType_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_ManagerType_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.Builder.class);
-      }
-
-      // Construct using com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.newBuilder()
-      private Builder() {
-
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_ManagerType_descriptor;
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType getDefaultInstanceForType() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType build() {
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType buildPartial() {
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType result = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType(this);
-        onBuilt();
-        return result;
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType) {
-          return mergeFrom((com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType other) {
-        if (other == com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType.getDefaultInstance()) return this;
-        this.mergeUnknownFields(other.getUnknownFields());
-        onChanged();
-        return this;
-      }
-
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        if (extensionRegistry == null) {
-          throw new java.lang.NullPointerException();
-        }
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              default: {
-                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
-                  done = true; // was an endgroup tag
-                }
-                break;
-              } // default:
-            } // switch (tag)
-          } // while (!done)
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.unwrapIOException();
-        } finally {
-          onChanged();
-        } // finally
-        return this;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:remotecluster.ManagerType)
-    }
-
-    // @@protoc_insertion_point(class_scope:remotecluster.ManagerType)
-    private static final com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType();
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<ManagerType>
-        PARSER = new com.google.protobuf.AbstractParser<ManagerType>() {
-      @java.lang.Override
-      public ManagerType parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        Builder builder = newBuilder();
-        try {
-          builder.mergeFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(builder.buildPartial());
-        } catch (com.google.protobuf.UninitializedMessageException e) {
-          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(e)
-              .setUnfinishedMessage(builder.buildPartial());
-        }
-        return builder.buildPartial();
-      }
-    };
-
-    public static com.google.protobuf.Parser<ManagerType> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<ManagerType> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ManagerType getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -25677,1099 +12579,6 @@ public final class RemoteClusterProto {
 
   }
 
-  public interface RemoteClusterTypeOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:remotecluster.RemoteClusterType)
-      com.google.protobuf.MessageOrBuilder {
-  }
-  /**
-   * <pre>
-   * The type of remote cluster.
-   * </pre>
-   *
-   * Protobuf type {@code remotecluster.RemoteClusterType}
-   */
-  public static final class RemoteClusterType extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:remotecluster.RemoteClusterType)
-      RemoteClusterTypeOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use RemoteClusterType.newBuilder() to construct.
-    private RemoteClusterType(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private RemoteClusterType() {
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new RemoteClusterType();
-    }
-
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_RemoteClusterType_descriptor;
-    }
-
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_RemoteClusterType_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType.Builder.class);
-    }
-
-    /**
-     * Protobuf enum {@code remotecluster.RemoteClusterType.Value}
-     */
-    public enum Value
-        implements com.google.protobuf.ProtocolMessageEnum {
-      /**
-       * <code>UNSET = 0;</code>
-       */
-      UNSET(0),
-      /**
-       * <pre>
-       * Legacy hadoop cluster.
-       * </pre>
-       *
-       * <code>HDP = 1;</code>
-       */
-      HDP(1),
-      /**
-       * <pre>
-       * CDH Cluster.
-       * </pre>
-       *
-       * <code>CDH = 2;</code>
-       */
-      CDH(2),
-      /**
-       * <pre>
-       * CDPDC Cluster.
-       * </pre>
-       *
-       * <code>CDPDC = 3;</code>
-       */
-      CDPDC(3),
-      UNRECOGNIZED(-1),
-      ;
-
-      /**
-       * <code>UNSET = 0;</code>
-       */
-      public static final int UNSET_VALUE = 0;
-      /**
-       * <pre>
-       * Legacy hadoop cluster.
-       * </pre>
-       *
-       * <code>HDP = 1;</code>
-       */
-      public static final int HDP_VALUE = 1;
-      /**
-       * <pre>
-       * CDH Cluster.
-       * </pre>
-       *
-       * <code>CDH = 2;</code>
-       */
-      public static final int CDH_VALUE = 2;
-      /**
-       * <pre>
-       * CDPDC Cluster.
-       * </pre>
-       *
-       * <code>CDPDC = 3;</code>
-       */
-      public static final int CDPDC_VALUE = 3;
-
-
-      public final int getNumber() {
-        if (this == UNRECOGNIZED) {
-          throw new java.lang.IllegalArgumentException(
-              "Can't get the number of an unknown enum value.");
-        }
-        return value;
-      }
-
-      /**
-       * @param value The numeric wire value of the corresponding enum entry.
-       * @return The enum associated with the given numeric wire value.
-       * @deprecated Use {@link #forNumber(int)} instead.
-       */
-      @java.lang.Deprecated
-      public static Value valueOf(int value) {
-        return forNumber(value);
-      }
-
-      /**
-       * @param value The numeric wire value of the corresponding enum entry.
-       * @return The enum associated with the given numeric wire value.
-       */
-      public static Value forNumber(int value) {
-        switch (value) {
-          case 0: return UNSET;
-          case 1: return HDP;
-          case 2: return CDH;
-          case 3: return CDPDC;
-          default: return null;
-        }
-      }
-
-      public static com.google.protobuf.Internal.EnumLiteMap<Value>
-          internalGetValueMap() {
-        return internalValueMap;
-      }
-      private static final com.google.protobuf.Internal.EnumLiteMap<
-          Value> internalValueMap =
-            new com.google.protobuf.Internal.EnumLiteMap<Value>() {
-              public Value findValueByNumber(int number) {
-                return Value.forNumber(number);
-              }
-            };
-
-      public final com.google.protobuf.Descriptors.EnumValueDescriptor
-          getValueDescriptor() {
-        if (this == UNRECOGNIZED) {
-          throw new java.lang.IllegalStateException(
-              "Can't get the descriptor of an unrecognized enum value.");
-        }
-        return getDescriptor().getValues().get(ordinal());
-      }
-      public final com.google.protobuf.Descriptors.EnumDescriptor
-          getDescriptorForType() {
-        return getDescriptor();
-      }
-      public static final com.google.protobuf.Descriptors.EnumDescriptor
-          getDescriptor() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType.getDescriptor().getEnumTypes().get(0);
-      }
-
-      private static final Value[] VALUES = values();
-
-      public static Value valueOf(
-          com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-        if (desc.getType() != getDescriptor()) {
-          throw new java.lang.IllegalArgumentException(
-            "EnumValueDescriptor is not for this type.");
-        }
-        if (desc.getIndex() == -1) {
-          return UNRECOGNIZED;
-        }
-        return VALUES[desc.getIndex()];
-      }
-
-      private final int value;
-
-      private Value(int value) {
-        this.value = value;
-      }
-
-      // @@protoc_insertion_point(enum_scope:remotecluster.RemoteClusterType.Value)
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      getUnknownFields().writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      size += getUnknownFields().getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType)) {
-        return super.equals(obj);
-      }
-      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType other = (com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType) obj;
-
-      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * <pre>
-     * The type of remote cluster.
-     * </pre>
-     *
-     * Protobuf type {@code remotecluster.RemoteClusterType}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:remotecluster.RemoteClusterType)
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterTypeOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_RemoteClusterType_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_RemoteClusterType_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType.Builder.class);
-      }
-
-      // Construct using com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType.newBuilder()
-      private Builder() {
-
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_RemoteClusterType_descriptor;
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType getDefaultInstanceForType() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType build() {
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType buildPartial() {
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType result = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType(this);
-        onBuilt();
-        return result;
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType) {
-          return mergeFrom((com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType other) {
-        if (other == com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType.getDefaultInstance()) return this;
-        this.mergeUnknownFields(other.getUnknownFields());
-        onChanged();
-        return this;
-      }
-
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        if (extensionRegistry == null) {
-          throw new java.lang.NullPointerException();
-        }
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              default: {
-                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
-                  done = true; // was an endgroup tag
-                }
-                break;
-              } // default:
-            } // switch (tag)
-          } // while (!done)
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.unwrapIOException();
-        } finally {
-          onChanged();
-        } // finally
-        return this;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:remotecluster.RemoteClusterType)
-    }
-
-    // @@protoc_insertion_point(class_scope:remotecluster.RemoteClusterType)
-    private static final com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType();
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<RemoteClusterType>
-        PARSER = new com.google.protobuf.AbstractParser<RemoteClusterType>() {
-      @java.lang.Override
-      public RemoteClusterType parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        Builder builder = newBuilder();
-        try {
-          builder.mergeFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(builder.buildPartial());
-        } catch (com.google.protobuf.UninitializedMessageException e) {
-          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(e)
-              .setUnfinishedMessage(builder.buildPartial());
-        }
-        return builder.buildPartial();
-      }
-    };
-
-    public static com.google.protobuf.Parser<RemoteClusterType> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<RemoteClusterType> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RemoteClusterType getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface OperatorOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:remotecluster.Operator)
-      com.google.protobuf.MessageOrBuilder {
-  }
-  /**
-   * <pre>
-   * The type of operator.
-   * </pre>
-   *
-   * Protobuf type {@code remotecluster.Operator}
-   */
-  public static final class Operator extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:remotecluster.Operator)
-      OperatorOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use Operator.newBuilder() to construct.
-    private Operator(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private Operator() {
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new Operator();
-    }
-
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_Operator_descriptor;
-    }
-
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_Operator_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator.Builder.class);
-    }
-
-    /**
-     * Protobuf enum {@code remotecluster.Operator.Value}
-     */
-    public enum Value
-        implements com.google.protobuf.ProtocolMessageEnum {
-      /**
-       * <code>UNSET = 0;</code>
-       */
-      UNSET(0),
-      /**
-       * <pre>
-       * AND operator.
-       * </pre>
-       *
-       * <code>AND = 1;</code>
-       */
-      AND(1),
-      /**
-       * <pre>
-       * OR operator.
-       * </pre>
-       *
-       * <code>OR = 2;</code>
-       */
-      OR(2),
-      UNRECOGNIZED(-1),
-      ;
-
-      /**
-       * <code>UNSET = 0;</code>
-       */
-      public static final int UNSET_VALUE = 0;
-      /**
-       * <pre>
-       * AND operator.
-       * </pre>
-       *
-       * <code>AND = 1;</code>
-       */
-      public static final int AND_VALUE = 1;
-      /**
-       * <pre>
-       * OR operator.
-       * </pre>
-       *
-       * <code>OR = 2;</code>
-       */
-      public static final int OR_VALUE = 2;
-
-
-      public final int getNumber() {
-        if (this == UNRECOGNIZED) {
-          throw new java.lang.IllegalArgumentException(
-              "Can't get the number of an unknown enum value.");
-        }
-        return value;
-      }
-
-      /**
-       * @param value The numeric wire value of the corresponding enum entry.
-       * @return The enum associated with the given numeric wire value.
-       * @deprecated Use {@link #forNumber(int)} instead.
-       */
-      @java.lang.Deprecated
-      public static Value valueOf(int value) {
-        return forNumber(value);
-      }
-
-      /**
-       * @param value The numeric wire value of the corresponding enum entry.
-       * @return The enum associated with the given numeric wire value.
-       */
-      public static Value forNumber(int value) {
-        switch (value) {
-          case 0: return UNSET;
-          case 1: return AND;
-          case 2: return OR;
-          default: return null;
-        }
-      }
-
-      public static com.google.protobuf.Internal.EnumLiteMap<Value>
-          internalGetValueMap() {
-        return internalValueMap;
-      }
-      private static final com.google.protobuf.Internal.EnumLiteMap<
-          Value> internalValueMap =
-            new com.google.protobuf.Internal.EnumLiteMap<Value>() {
-              public Value findValueByNumber(int number) {
-                return Value.forNumber(number);
-              }
-            };
-
-      public final com.google.protobuf.Descriptors.EnumValueDescriptor
-          getValueDescriptor() {
-        if (this == UNRECOGNIZED) {
-          throw new java.lang.IllegalStateException(
-              "Can't get the descriptor of an unrecognized enum value.");
-        }
-        return getDescriptor().getValues().get(ordinal());
-      }
-      public final com.google.protobuf.Descriptors.EnumDescriptor
-          getDescriptorForType() {
-        return getDescriptor();
-      }
-      public static final com.google.protobuf.Descriptors.EnumDescriptor
-          getDescriptor() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator.getDescriptor().getEnumTypes().get(0);
-      }
-
-      private static final Value[] VALUES = values();
-
-      public static Value valueOf(
-          com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-        if (desc.getType() != getDescriptor()) {
-          throw new java.lang.IllegalArgumentException(
-            "EnumValueDescriptor is not for this type.");
-        }
-        if (desc.getIndex() == -1) {
-          return UNRECOGNIZED;
-        }
-        return VALUES[desc.getIndex()];
-      }
-
-      private final int value;
-
-      private Value(int value) {
-        this.value = value;
-      }
-
-      // @@protoc_insertion_point(enum_scope:remotecluster.Operator.Value)
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      getUnknownFields().writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      size += getUnknownFields().getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator)) {
-        return super.equals(obj);
-      }
-      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator other = (com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator) obj;
-
-      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * <pre>
-     * The type of operator.
-     * </pre>
-     *
-     * Protobuf type {@code remotecluster.Operator}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:remotecluster.Operator)
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.OperatorOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_Operator_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_Operator_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator.Builder.class);
-      }
-
-      // Construct using com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator.newBuilder()
-      private Builder() {
-
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.internal_static_remotecluster_Operator_descriptor;
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator getDefaultInstanceForType() {
-        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator build() {
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      @java.lang.Override
-      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator buildPartial() {
-        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator result = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator(this);
-        onBuilt();
-        return result;
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator) {
-          return mergeFrom((com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator other) {
-        if (other == com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator.getDefaultInstance()) return this;
-        this.mergeUnknownFields(other.getUnknownFields());
-        onChanged();
-        return this;
-      }
-
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        if (extensionRegistry == null) {
-          throw new java.lang.NullPointerException();
-        }
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              default: {
-                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
-                  done = true; // was an endgroup tag
-                }
-                break;
-              } // default:
-            } // switch (tag)
-          } // while (!done)
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.unwrapIOException();
-        } finally {
-          onChanged();
-        } // finally
-        return this;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:remotecluster.Operator)
-    }
-
-    // @@protoc_insertion_point(class_scope:remotecluster.Operator)
-    private static final com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator();
-    }
-
-    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<Operator>
-        PARSER = new com.google.protobuf.AbstractParser<Operator>() {
-      @java.lang.Override
-      public Operator parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        Builder builder = newBuilder();
-        try {
-          builder.mergeFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(builder.buildPartial());
-        } catch (com.google.protobuf.UninitializedMessageException e) {
-          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(e)
-              .setUnfinishedMessage(builder.buildPartial());
-        }
-        return builder.buildPartial();
-      }
-    };
-
-    public static com.google.protobuf.Parser<Operator> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<Operator> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.Operator getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_remotecluster_RegisterPvcControlPlaneRequest_descriptor;
   private static final 
@@ -26801,6 +12610,26 @@ public final class RemoteClusterProto {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_remotecluster_DescribePvcControlPlaneResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_remotecluster_RotateAgentCredentialsRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_remotecluster_RotateAgentCredentialsRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_remotecluster_RotateAgentCredentialsResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_remotecluster_RotateAgentCredentialsResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_remotecluster_UpdatePvcControlPlaneRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_remotecluster_UpdatePvcControlPlaneRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_remotecluster_UpdatePvcControlPlaneResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_remotecluster_UpdatePvcControlPlaneResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_remotecluster_ListPvcControlPlanesRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -26826,80 +12655,10 @@ public final class RemoteClusterProto {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_remotecluster_PvcControlPlaneConfiguration_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_remotecluster_ListRemoteClustersRequest_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_remotecluster_ListRemoteClustersRequest_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_remotecluster_ListRemoteClustersResponse_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_remotecluster_ListRemoteClustersResponse_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_remotecluster_GetRemoteClusterRequest_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_remotecluster_GetRemoteClusterRequest_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_remotecluster_GetRemoteClusterResponse_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_remotecluster_GetRemoteClusterResponse_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_remotecluster_GetServiceDetailsRequest_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_remotecluster_GetServiceDetailsRequest_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_remotecluster_GetServiceDetailsResponse_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_remotecluster_GetServiceDetailsResponse_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_remotecluster_RemoteClusterData_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_remotecluster_RemoteClusterData_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_remotecluster_ServiceDetail_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_remotecluster_ServiceDetail_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_remotecluster_Cluster_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_remotecluster_Cluster_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_remotecluster_Location_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_remotecluster_Location_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_remotecluster_State_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_remotecluster_State_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_remotecluster_ManagerType_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_remotecluster_ManagerType_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_remotecluster_ClusterType_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_remotecluster_ClusterType_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_remotecluster_RemoteClusterType_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_remotecluster_RemoteClusterType_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_remotecluster_Operator_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_remotecluster_Operator_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -26918,129 +12677,75 @@ public final class RemoteClusterProto {
       "esponse\022N\n\031controlPlaneConfiguration\030\001 \001" +
       "(\0132+.remotecluster.PvcControlPlaneConfig" +
       "uration\022!\n\031connectivityConfiguration\030\002 \001" +
-      "(\t\"5\n UnregisterPvcControlPlaneRequest\022\021" +
-      "\n\003pvc\030\001 \001(\tB\004\320\265\030\001\"#\n!UnregisterPvcContro" +
-      "lPlaneResponse\"3\n\036DescribePvcControlPlan" +
-      "eRequest\022\021\n\003pvc\030\001 \001(\tB\004\320\265\030\001\"q\n\037DescribeP" +
-      "vcControlPlaneResponse\022N\n\031controlPlaneCo" +
-      "nfiguration\030\001 \001(\0132+.remotecluster.PvcCon" +
-      "trolPlaneConfiguration\"V\n\033ListPvcControl" +
-      "PlanesRequest\022\036\n\010pageSize\030\001 \001(\005B\014\220\265\030\001\330\265\030" +
-      "\001\340\265\030d\022\027\n\tpageToken\030\002 \001(\tB\004\230\265\030\001\"\222\001\n\034ListP" +
-      "vcControlPlanesResponse\022U\n\032controlPlaneC" +
-      "onfigurations\030\001 \003(\0132+.remotecluster.PvcC" +
-      "ontrolPlaneConfigurationB\004\240\265\030\001\022\033\n\rnextPa" +
-      "geToken\030\002 \001(\tB\004\250\265\030\001\";\n&TestPvcControlPla" +
-      "neConnectivityRequest\022\021\n\003pvc\030\001 \001(\tB\004\320\265\030\001" +
-      "\")\n\'TestPvcControlPlaneConnectivityRespo" +
-      "nse\"\200\002\n\034PvcControlPlaneConfiguration\022\r\n\005" +
-      "pvcId\030\001 \001(\t\022\016\n\006pvcCrn\030\002 \001(\t\022.\n\004type\030\003 \001(" +
-      "\0162 .remotecluster.ClusterType.Value\022\014\n\004n" +
-      "ame\030\004 \001(\t\022\023\n\013description\030\005 \001(\t\022\017\n\007baseUr" +
-      "l\030\006 \001(\t\022\016\n\006idpCrn\030\007 \001(\t\022\021\n\tpvcStatus\030\010 \001" +
-      "(\t\022\033\n\023pvcEnvironmentCount\030\t \001(\005\022\035\n\017lastU" +
-      "pdatedTime\030\n \001(\003B\004\260\265\030\001\"\346\001\n\031ListRemoteClu" +
-      "stersRequest\022\036\n\010pageSize\030\001 \001(\005B\014\220\265\030\001\330\265\030\001" +
-      "\340\265\030d\022\027\n\tpageToken\030\002 \001(\tB\004\230\265\030\001\0225\n\013manager" +
-      "Type\030\003 \001(\0162 .remotecluster.ManagerType.V" +
-      "alue\022\020\n\010services\030\004 \003(\t\022/\n\010operator\030\005 \001(\016" +
-      "2\035.remotecluster.Operator.Value:\026\200\227\"\001\212\227\"" +
-      "\016IN_DEVELOPMENT\"\221\001\n\032ListRemoteClustersRe" +
-      "sponse\022>\n\016remoteClusters\030\001 \003(\0132 .remotec" +
-      "luster.RemoteClusterDataB\004\240\265\030\001\022\033\n\rnextPa" +
-      "geToken\030\002 \001(\tB\004\250\265\030\001:\026\200\227\"\001\212\227\"\016IN_DEVELOPM" +
-      "ENT\"K\n\027GetRemoteClusterRequest\022\030\n\ncluste" +
-      "rCrn\030\001 \001(\tB\004\320\265\030\001:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT" +
-      "\"l\n\030GetRemoteClusterResponse\0228\n\016remoteCl" +
-      "usters\030\001 \001(\0132 .remotecluster.RemoteClust" +
-      "erData:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"K\n\030GetSer" +
-      "viceDetailsRequest\022\027\n\tclusterId\030\001 \001(\003B\004\320" +
-      "\265\030\001:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"i\n\031GetServic" +
-      "eDetailsResponse\0224\n\016serviceDetails\030\001 \003(\013" +
-      "2\034.remotecluster.ServiceDetail:\026\200\227\"\001\212\227\"\016" +
-      "IN_DEVELOPMENT\"\261\006\n\021RemoteClusterData\022\020\n\002" +
-      "id\030\001 \001(\003B\004\320\265\030\001\022\027\n\taccountId\030\002 \001(\tB\004\320\265\030\001\022" +
-      "\022\n\004name\030\003 \001(\tB\004\320\265\030\001\022\024\n\006dcName\030\004 \001(\tB\004\320\265\030" +
-      "\001\022\030\n\nclusterCrn\030\005 \001(\tB\004\320\265\030\001\022\027\n\tipAddress" +
-      "\030\006 \001(\tB\004\320\265\030\001\022A\n\013clusterType\030\007 \001(\0162&.remo" +
-      "tecluster.RemoteClusterType.ValueB\004\320\265\030\001\022" +
-      "/\n\005state\030\010 \001(\0162\032.remotecluster.State.Val" +
-      "ueB\004\320\265\030\001\022\023\n\013description\030\013 \001(\t\022\022\n\nlocatio" +
-      "nId\030\014 \001(\003\022\034\n\016lastCreateTime\030\r \001(\003B\004\260\265\030\001\022" +
-      "\035\n\017lastUpdatedTime\030\016 \001(\003B\004\260\265\030\001\022\030\n\nupdate" +
-      "dUtc\030\017 \001(\003B\004\260\265\030\001\022(\n\010clusters\030\020 \003(\0132\026.rem" +
-      "otecluster.Cluster\022\023\n\013knoxEnabled\030\021 \001(\010\022" +
-      "\017\n\007knoxUrl\030\022 \001(\t\022\020\n\010username\030\023 \001(\t\022\026\n\010pa" +
-      "ssword\030\024 \001(\tB\004\200\265\030\001\022\026\n\016allowUntrusted\030\025 \001" +
-      "(\010\022\025\n\rbehindGateway\030\026 \001(\010\0225\n\013managerType" +
-      "\030\027 \001(\0162 .remotecluster.ManagerType.Value" +
-      "\022\022\n\nmanagerUri\030\030 \001(\t\022\021\n\tcreatedBy\030\031 \001(\t\022" +
-      "\033\n\023connectivityVersion\030\032 \001(\t\022\033\n\023isUpgrad" +
-      "eInProgress\030\033 \001(\010\022\020\n\010newKeyId\030\034 \001(\t\022)\n\010l" +
-      "ocation\030\035 \001(\0132\027.remotecluster.Location:\026" +
-      "\200\227\"\001\212\227\"\016IN_DEVELOPMENTJ\004\010\t\020\nJ\004\010\n\020\013\"c\n\rSe" +
-      "rviceDetail\022\023\n\013serviceName\030\001 \001(\t\022\r\n\005stat" +
-      "e\030\002 \001(\t\022\026\n\016serviceVersion\030\003 \001(\t:\026\200\227\"\001\212\227\"" +
-      "\016IN_DEVELOPMENT\"\330\002\n\007Cluster\022\020\n\002id\030\001 \001(\003B" +
-      "\004\320\265\030\001\022\022\n\004name\030\002 \001(\tB\004\320\265\030\001\022 \n\022dataplaneCl" +
-      "usterId\030\003 \001(\003B\004\320\265\030\001\022\022\n\nclusterUrl\030\004 \001(\t\022" +
-      "\017\n\007secured\030\005 \001(\010\022\024\n\014kerberosUser\030\006 \001(\t\022\036" +
-      "\n\026kerberosTicketLocation\030\007 \001(\t\022\022\n\nproper" +
-      "ties\030\010 \001(\t\022\017\n\007version\030\t \001(\t\022\023\n\013displayNa" +
-      "me\030\n \001(\t\0225\n\013managerType\030\013 \001(\0162 .remotecl" +
-      "uster.ManagerType.Value\022\022\n\nmanagerUri\030\014 " +
-      "\001(\t\022\r\n\005stats\030\r \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPME" +
-      "NT\"\230\001\n\010Location\022\020\n\002id\030\001 \001(\003B\004\320\265\030\001\022\014\n\004cit" +
-      "y\030\002 \001(\t\022\020\n\010province\030\003 \001(\t\022\017\n\007country\030\004 \001" +
-      "(\t\022\014\n\004iso2\030\005 \001(\t\022\020\n\010latitude\030\006 \001(\003\022\021\n\tlo" +
-      "ngitude\030\007 \001(\003:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\262\001" +
-      "\n\005State\"\220\001\n\005Value\022\t\n\005UNSET\020\000\022\013\n\007TO_SYNC\020" +
-      "\001\022\024\n\020SYNC_IN_PROGRESS\020\002\022\n\n\006SYNCED\020\003\022\016\n\nS" +
-      "YNC_ERROR\020\004\022\036\n\032KNOX_TOPOLOGY_DEP_VERIFIE" +
-      "D\020\005\022\035\n\031KNOX_TOPOLOGY_DEP_PENDING\020\006:\026\200\227\"\001" +
-      "\212\227\"\016IN_DEVELOPMENT\"[\n\013ManagerType\"4\n\005Val" +
-      "ue\022\t\n\005UNSET\020\000\022\n\n\006AMBARI\020\001\022\024\n\020CLOUDERA_MA" +
-      "NAGER\020\002:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"#\n\013Clust" +
-      "erType\"\024\n\005Value\022\013\n\007CDP_PVC\020\000\"\\\n\021RemoteCl" +
-      "usterType\"/\n\005Value\022\t\n\005UNSET\020\000\022\007\n\003HDP\020\001\022\007" +
-      "\n\003CDH\020\002\022\t\n\005CDPDC\020\003:\026\200\227\"\001\212\227\"\016IN_DEVELOPME" +
-      "NT\"G\n\010Operator\"#\n\005Value\022\t\n\005UNSET\020\000\022\007\n\003AN" +
-      "D\020\001\022\006\n\002OR\020\002:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT2\370\t\n\r" +
-      "RemoteCluster\022\273\001\n\027RegisterPvcControlPlan" +
-      "e\022-.remotecluster.RegisterPvcControlPlan" +
-      "eRequest\032..remotecluster.RegisterPvcCont" +
-      "rolPlaneResponse\"A\202\246\035%remotecluster/regi" +
-      "sterPvcControlPlane\212\246\035\020CDP_HYBRID_CLOUD\310" +
-      "\246\035\001\022\230\001\n\031UnregisterPvcControlPlane\022/.remo" +
-      "tecluster.UnregisterPvcControlPlaneReque" +
-      "st\0320.remotecluster.UnregisterPvcControlP" +
-      "laneResponse\"\030\212\246\035\020CDP_HYBRID_CLOUD\310\246\035\001\022\222" +
-      "\001\n\027DescribePvcControlPlane\022-.remoteclust" +
-      "er.DescribePvcControlPlaneRequest\032..remo" +
-      "tecluster.DescribePvcControlPlaneRespons" +
-      "e\"\030\212\246\035\020CDP_HYBRID_CLOUD\310\246\035\000\022\221\001\n\024ListPvcC" +
-      "ontrolPlanes\022*.remotecluster.ListPvcCont" +
-      "rolPlanesRequest\032+.remotecluster.ListPvc" +
-      "ControlPlanesResponse\" \212\246\035\020CDP_HYBRID_CL" +
-      "OUD\220\246\035\001\230\246\035\024\310\246\035\000\022\252\001\n\037TestPvcControlPlaneC" +
-      "onnectivity\0225.remotecluster.TestPvcContr" +
-      "olPlaneConnectivityRequest\0326.remoteclust" +
-      "er.TestPvcControlPlaneConnectivityRespon" +
-      "se\"\030\212\246\035\020CDP_HYBRID_CLOUD\310\246\035\000\022\215\001\n\022ListRem" +
-      "oteClusters\022(.remotecluster.ListRemoteCl" +
-      "ustersRequest\032).remotecluster.ListRemote" +
-      "ClustersResponse\"\"\220\246\035\001\230\246\035\024\240\246\035\001\252\246\035\016IN_DEV" +
-      "ELOPMENT\310\246\035\000\022\177\n\020GetRemoteCluster\022&.remot" +
-      "ecluster.GetRemoteClusterRequest\032\'.remot" +
-      "ecluster.GetRemoteClusterResponse\"\032\240\246\035\001\252" +
-      "\246\035\016IN_DEVELOPMENT\310\246\035\000\022\202\001\n\021GetServiceDeta" +
-      "ils\022\'.remotecluster.GetServiceDetailsReq" +
-      "uest\032(.remotecluster.GetServiceDetailsRe" +
-      "sponse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\032\"\212\304\023\036" +
-      "\n\rremotecluster\022\rRemoteClusterBc\n.com.cl" +
-      "oudera.thunderhead.service.remotecluster" +
-      "B\022RemoteClusterProtoZ\031com/cloudera/cdp/p" +
-      "rotobuf\200\210\'\001b\006proto3"
+      "(\t\"f\n UnregisterPvcControlPlaneRequest\022\021" +
+      "\n\003pvc\030\001 \001(\tB\004\320\265\030\001\022 \n\030unregisterOnPremClu" +
+      "sters\030\002 \001(\010\022\r\n\005force\030\003 \001(\010\"#\n!Unregister" +
+      "PvcControlPlaneResponse\"3\n\036DescribePvcCo" +
+      "ntrolPlaneRequest\022\021\n\003pvc\030\001 \001(\tB\004\320\265\030\001\"q\n\037" +
+      "DescribePvcControlPlaneResponse\022N\n\031contr" +
+      "olPlaneConfiguration\030\001 \001(\0132+.remoteclust" +
+      "er.PvcControlPlaneConfiguration\"J\n\035Rotat" +
+      "eAgentCredentialsRequest\022\021\n\003pvc\030\001 \001(\tB\004\320" +
+      "\265\030\001:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"8\n\036RotateAge" +
+      "ntCredentialsResponse:\026\200\227\"\001\212\227\"\016IN_DEVELO" +
+      "PMENT\"\202\001\n\034UpdatePvcControlPlaneRequest\022\021" +
+      "\n\003pvc\030\001 \001(\tB\004\320\265\030\001\022\"\n\024samlIdentityProvide" +
+      "r\030\004 \001(\tB\004\320\265\030\001\022\023\n\013description\030\005 \001(\t:\026\200\227\"\001" +
+      "\212\227\"\016IN_DEVELOPMENT\"7\n\035UpdatePvcControlPl" +
+      "aneResponse:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"V\n\033L" +
+      "istPvcControlPlanesRequest\022\036\n\010pageSize\030\001" +
+      " \001(\005B\014\220\265\030\001\330\265\030\001\340\265\030d\022\027\n\tpageToken\030\002 \001(\tB\004\230" +
+      "\265\030\001\"\222\001\n\034ListPvcControlPlanesResponse\022U\n\032" +
+      "controlPlaneConfigurations\030\001 \003(\0132+.remot" +
+      "ecluster.PvcControlPlaneConfigurationB\004\240" +
+      "\265\030\001\022\033\n\rnextPageToken\030\002 \001(\tB\004\250\265\030\001\";\n&Test" +
+      "PvcControlPlaneConnectivityRequest\022\021\n\003pv" +
+      "c\030\001 \001(\tB\004\320\265\030\001\")\n\'TestPvcControlPlaneConn" +
+      "ectivityResponse\"\273\002\n\034PvcControlPlaneConf" +
+      "iguration\022\r\n\005pvcId\030\001 \001(\t\022\016\n\006pvcCrn\030\002 \001(\t" +
+      "\022.\n\004type\030\003 \001(\0162 .remotecluster.ClusterTy" +
+      "pe.Value\022\014\n\004name\030\004 \001(\t\022\023\n\013description\030\005 " +
+      "\001(\t\022\017\n\007baseUrl\030\006 \001(\t\022\016\n\006idpCrn\030\007 \001(\t\022\021\n\t" +
+      "pvcStatus\030\010 \001(\t\022\033\n\023pvcEnvironmentCount\030\t" +
+      " \001(\005\022\035\n\017lastUpdatedTime\030\n \001(\003B\004\260\265\030\001\0229\n\031a" +
+      "gentSecretRotationStatus\030\013 \001(\tB\026\270\265\030\001\302\265\030\016" +
+      "IN_DEVELOPMENT\"#\n\013ClusterType\"\024\n\005Value\022\013" +
+      "\n\007CDP_PVC\020\0002\235\n\n\rRemoteCluster\022\321\001\n\027Regist" +
+      "erPvcControlPlane\022-.remotecluster.Regist" +
+      "erPvcControlPlaneRequest\032..remotecluster" +
+      ".RegisterPvcControlPlaneResponse\"W\202\246\035%re" +
+      "motecluster/registerPvcControlPlane\212\246\035\020C" +
+      "DP_HYBRID_CLOUD\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035" +
+      "\001\022\256\001\n\031UnregisterPvcControlPlane\022/.remote" +
+      "cluster.UnregisterPvcControlPlaneRequest" +
+      "\0320.remotecluster.UnregisterPvcControlPla" +
+      "neResponse\".\212\246\035\020CDP_HYBRID_CLOUD\240\246\035\001\252\246\035\016" +
+      "IN_DEVELOPMENT\310\246\035\001\022\250\001\n\027DescribePvcContro" +
+      "lPlane\022-.remotecluster.DescribePvcContro" +
+      "lPlaneRequest\032..remotecluster.DescribePv" +
+      "cControlPlaneResponse\".\212\246\035\020CDP_HYBRID_CL" +
+      "OUD\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\022\245\001\n\026Rotate" +
+      "AgentCredentials\022,.remotecluster.RotateA" +
+      "gentCredentialsRequest\032-.remotecluster.R" +
+      "otateAgentCredentialsResponse\".\212\246\035\020CDP_H" +
+      "YBRID_CLOUD\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001\022\247\001" +
+      "\n\024ListPvcControlPlanes\022*.remotecluster.L" +
+      "istPvcControlPlanesRequest\032+.remoteclust" +
+      "er.ListPvcControlPlanesResponse\"6\212\246\035\020CDP" +
+      "_HYBRID_CLOUD\220\246\035\001\230\246\035\024\240\246\035\001\252\246\035\016IN_DEVELOPM" +
+      "ENT\310\246\035\000\022\300\001\n\037TestPvcControlPlaneConnectiv" +
+      "ity\0225.remotecluster.TestPvcControlPlaneC" +
+      "onnectivityRequest\0326.remotecluster.TestP" +
+      "vcControlPlaneConnectivityResponse\".\212\246\035\020" +
+      "CDP_HYBRID_CLOUD\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246" +
+      "\035\000\022\242\001\n\025UpdatePvcControlPlane\022+.remoteclu" +
+      "ster.UpdatePvcControlPlaneRequest\032,.remo" +
+      "tecluster.UpdatePvcControlPlaneResponse\"" +
+      ".\212\246\035\020CDP_HYBRID_CLOUD\240\246\035\001\252\246\035\016IN_DEVELOPM" +
+      "ENT\310\246\035\001\032\"\212\304\023\036\n\rremotecluster\022\rRemoteClus" +
+      "terBc\n.com.cloudera.thunderhead.service." +
+      "remoteclusterB\022RemoteClusterProtoZ\031com/c" +
+      "loudera/cdp/protobuf\200\210\'\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -27064,7 +12769,7 @@ public final class RemoteClusterProto {
     internal_static_remotecluster_UnregisterPvcControlPlaneRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_remotecluster_UnregisterPvcControlPlaneRequest_descriptor,
-        new java.lang.String[] { "Pvc", });
+        new java.lang.String[] { "Pvc", "UnregisterOnPremClusters", "Force", });
     internal_static_remotecluster_UnregisterPvcControlPlaneResponse_descriptor =
       getDescriptor().getMessageTypes().get(3);
     internal_static_remotecluster_UnregisterPvcControlPlaneResponse_fieldAccessorTable = new
@@ -27083,129 +12788,71 @@ public final class RemoteClusterProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_remotecluster_DescribePvcControlPlaneResponse_descriptor,
         new java.lang.String[] { "ControlPlaneConfiguration", });
-    internal_static_remotecluster_ListPvcControlPlanesRequest_descriptor =
+    internal_static_remotecluster_RotateAgentCredentialsRequest_descriptor =
       getDescriptor().getMessageTypes().get(6);
+    internal_static_remotecluster_RotateAgentCredentialsRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_remotecluster_RotateAgentCredentialsRequest_descriptor,
+        new java.lang.String[] { "Pvc", });
+    internal_static_remotecluster_RotateAgentCredentialsResponse_descriptor =
+      getDescriptor().getMessageTypes().get(7);
+    internal_static_remotecluster_RotateAgentCredentialsResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_remotecluster_RotateAgentCredentialsResponse_descriptor,
+        new java.lang.String[] { });
+    internal_static_remotecluster_UpdatePvcControlPlaneRequest_descriptor =
+      getDescriptor().getMessageTypes().get(8);
+    internal_static_remotecluster_UpdatePvcControlPlaneRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_remotecluster_UpdatePvcControlPlaneRequest_descriptor,
+        new java.lang.String[] { "Pvc", "SamlIdentityProvider", "Description", });
+    internal_static_remotecluster_UpdatePvcControlPlaneResponse_descriptor =
+      getDescriptor().getMessageTypes().get(9);
+    internal_static_remotecluster_UpdatePvcControlPlaneResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_remotecluster_UpdatePvcControlPlaneResponse_descriptor,
+        new java.lang.String[] { });
+    internal_static_remotecluster_ListPvcControlPlanesRequest_descriptor =
+      getDescriptor().getMessageTypes().get(10);
     internal_static_remotecluster_ListPvcControlPlanesRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_remotecluster_ListPvcControlPlanesRequest_descriptor,
         new java.lang.String[] { "PageSize", "PageToken", });
     internal_static_remotecluster_ListPvcControlPlanesResponse_descriptor =
-      getDescriptor().getMessageTypes().get(7);
+      getDescriptor().getMessageTypes().get(11);
     internal_static_remotecluster_ListPvcControlPlanesResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_remotecluster_ListPvcControlPlanesResponse_descriptor,
         new java.lang.String[] { "ControlPlaneConfigurations", "NextPageToken", });
     internal_static_remotecluster_TestPvcControlPlaneConnectivityRequest_descriptor =
-      getDescriptor().getMessageTypes().get(8);
+      getDescriptor().getMessageTypes().get(12);
     internal_static_remotecluster_TestPvcControlPlaneConnectivityRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_remotecluster_TestPvcControlPlaneConnectivityRequest_descriptor,
         new java.lang.String[] { "Pvc", });
     internal_static_remotecluster_TestPvcControlPlaneConnectivityResponse_descriptor =
-      getDescriptor().getMessageTypes().get(9);
+      getDescriptor().getMessageTypes().get(13);
     internal_static_remotecluster_TestPvcControlPlaneConnectivityResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_remotecluster_TestPvcControlPlaneConnectivityResponse_descriptor,
         new java.lang.String[] { });
     internal_static_remotecluster_PvcControlPlaneConfiguration_descriptor =
-      getDescriptor().getMessageTypes().get(10);
+      getDescriptor().getMessageTypes().get(14);
     internal_static_remotecluster_PvcControlPlaneConfiguration_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_remotecluster_PvcControlPlaneConfiguration_descriptor,
-        new java.lang.String[] { "PvcId", "PvcCrn", "Type", "Name", "Description", "BaseUrl", "IdpCrn", "PvcStatus", "PvcEnvironmentCount", "LastUpdatedTime", });
-    internal_static_remotecluster_ListRemoteClustersRequest_descriptor =
-      getDescriptor().getMessageTypes().get(11);
-    internal_static_remotecluster_ListRemoteClustersRequest_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_remotecluster_ListRemoteClustersRequest_descriptor,
-        new java.lang.String[] { "PageSize", "PageToken", "ManagerType", "Services", "Operator", });
-    internal_static_remotecluster_ListRemoteClustersResponse_descriptor =
-      getDescriptor().getMessageTypes().get(12);
-    internal_static_remotecluster_ListRemoteClustersResponse_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_remotecluster_ListRemoteClustersResponse_descriptor,
-        new java.lang.String[] { "RemoteClusters", "NextPageToken", });
-    internal_static_remotecluster_GetRemoteClusterRequest_descriptor =
-      getDescriptor().getMessageTypes().get(13);
-    internal_static_remotecluster_GetRemoteClusterRequest_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_remotecluster_GetRemoteClusterRequest_descriptor,
-        new java.lang.String[] { "ClusterCrn", });
-    internal_static_remotecluster_GetRemoteClusterResponse_descriptor =
-      getDescriptor().getMessageTypes().get(14);
-    internal_static_remotecluster_GetRemoteClusterResponse_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_remotecluster_GetRemoteClusterResponse_descriptor,
-        new java.lang.String[] { "RemoteClusters", });
-    internal_static_remotecluster_GetServiceDetailsRequest_descriptor =
-      getDescriptor().getMessageTypes().get(15);
-    internal_static_remotecluster_GetServiceDetailsRequest_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_remotecluster_GetServiceDetailsRequest_descriptor,
-        new java.lang.String[] { "ClusterId", });
-    internal_static_remotecluster_GetServiceDetailsResponse_descriptor =
-      getDescriptor().getMessageTypes().get(16);
-    internal_static_remotecluster_GetServiceDetailsResponse_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_remotecluster_GetServiceDetailsResponse_descriptor,
-        new java.lang.String[] { "ServiceDetails", });
-    internal_static_remotecluster_RemoteClusterData_descriptor =
-      getDescriptor().getMessageTypes().get(17);
-    internal_static_remotecluster_RemoteClusterData_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_remotecluster_RemoteClusterData_descriptor,
-        new java.lang.String[] { "Id", "AccountId", "Name", "DcName", "ClusterCrn", "IpAddress", "ClusterType", "State", "Description", "LocationId", "LastCreateTime", "LastUpdatedTime", "UpdatedUtc", "Clusters", "KnoxEnabled", "KnoxUrl", "Username", "Password", "AllowUntrusted", "BehindGateway", "ManagerType", "ManagerUri", "CreatedBy", "ConnectivityVersion", "IsUpgradeInProgress", "NewKeyId", "Location", });
-    internal_static_remotecluster_ServiceDetail_descriptor =
-      getDescriptor().getMessageTypes().get(18);
-    internal_static_remotecluster_ServiceDetail_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_remotecluster_ServiceDetail_descriptor,
-        new java.lang.String[] { "ServiceName", "State", "ServiceVersion", });
-    internal_static_remotecluster_Cluster_descriptor =
-      getDescriptor().getMessageTypes().get(19);
-    internal_static_remotecluster_Cluster_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_remotecluster_Cluster_descriptor,
-        new java.lang.String[] { "Id", "Name", "DataplaneClusterId", "ClusterUrl", "Secured", "KerberosUser", "KerberosTicketLocation", "Properties", "Version", "DisplayName", "ManagerType", "ManagerUri", "Stats", });
-    internal_static_remotecluster_Location_descriptor =
-      getDescriptor().getMessageTypes().get(20);
-    internal_static_remotecluster_Location_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_remotecluster_Location_descriptor,
-        new java.lang.String[] { "Id", "City", "Province", "Country", "Iso2", "Latitude", "Longitude", });
-    internal_static_remotecluster_State_descriptor =
-      getDescriptor().getMessageTypes().get(21);
-    internal_static_remotecluster_State_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_remotecluster_State_descriptor,
-        new java.lang.String[] { });
-    internal_static_remotecluster_ManagerType_descriptor =
-      getDescriptor().getMessageTypes().get(22);
-    internal_static_remotecluster_ManagerType_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_remotecluster_ManagerType_descriptor,
-        new java.lang.String[] { });
+        new java.lang.String[] { "PvcId", "PvcCrn", "Type", "Name", "Description", "BaseUrl", "IdpCrn", "PvcStatus", "PvcEnvironmentCount", "LastUpdatedTime", "AgentSecretRotationStatus", });
     internal_static_remotecluster_ClusterType_descriptor =
-      getDescriptor().getMessageTypes().get(23);
+      getDescriptor().getMessageTypes().get(15);
     internal_static_remotecluster_ClusterType_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_remotecluster_ClusterType_descriptor,
         new java.lang.String[] { });
-    internal_static_remotecluster_RemoteClusterType_descriptor =
-      getDescriptor().getMessageTypes().get(24);
-    internal_static_remotecluster_RemoteClusterType_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_remotecluster_RemoteClusterType_descriptor,
-        new java.lang.String[] { });
-    internal_static_remotecluster_Operator_descriptor =
-      getDescriptor().getMessageTypes().get(25);
-    internal_static_remotecluster_Operator_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_remotecluster_Operator_descriptor,
-        new java.lang.String[] { });
     com.google.protobuf.ExtensionRegistry registry =
         com.google.protobuf.ExtensionRegistry.newInstance();
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.datetime);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.hidden);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.hiddenReason);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.maximum);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.minimum);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.noParamfile);
@@ -27214,7 +12861,6 @@ public final class RemoteClusterProto {
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.pagingPageSize);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.pagingResult);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.required);
-    registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.sensitive);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FileExtension.audit);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MessageExtension.hidden);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MessageExtension.hiddenReason);
