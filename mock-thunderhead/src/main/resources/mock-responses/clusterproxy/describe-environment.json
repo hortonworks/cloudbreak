@@ -244,6 +244,7 @@
           "kdcType": "MIT KDC",
           "kerberosRealm": "ROOT.COMOPS.SITE",
           "kdcHost": "ccycloud-1.cldr-7131.root.comops.site",
+          "kdcHostIp": "10.1.2.3/16",
           "kerberized": true
         }
       }
