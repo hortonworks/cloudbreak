@@ -39,6 +39,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentLo
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.ExternalizedComputeCreateRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.HybridEnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.SecurityAccessRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsDiskEncryptionParameters;
@@ -60,6 +61,7 @@ import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentHybridDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentLoadBalancerDto;
 import com.sequenceiq.environment.environment.dto.ExternalizedComputeClusterDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
@@ -434,6 +436,12 @@ public class EnvironmentApiConverter {
                 .build();
     }
 
+    private EnvironmentHybridDto hybridEnvironmentRequest(HybridEnvironmentRequest hybridEnvironmentRequest) {
+        return EnvironmentHybridDto.builder()
+                .withRemoteEnvironmentCrn(hybridEnvironmentRequest.getRemoteEnvironmentCrn())
+                .build();
+    }
+
     public EnvironmentEditDto initEditDto(Environment currentEnvironmentFromDb, EnvironmentEditRequest request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentEditDto.Builder builder = EnvironmentEditDto.builder()
@@ -453,6 +461,8 @@ public class EnvironmentApiConverter {
                 currentEnvironmentFromDb.getTelemetry(), request.getTelemetry(), accountTelemetryService.getOrDefault(accountId), accountId)));
         NullUtil.doIfNotNull(request.getBackup(), backupRequest -> builder.withBackup(backupConverter.convert(request.getBackup())));
         NullUtil.doIfNotNull(request.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessRequestToDto(securityAccess)));
+        NullUtil.doIfNotNull(request.getHybridEnvironment(), hybridEnvironmentRequest ->
+                builder.withHybridEnvironment(hybridEnvironmentRequest(hybridEnvironmentRequest)));
         NullUtil.doIfNotNull(request.getAws(), awsParams -> builder.withParameters(awsParamsToParametersDto(awsParams, null)));
         NullUtil.doIfNotNull(request.getAzure(), azureParams -> builder.withParameters(azureParamsToParametersDto(azureParams)));
         NullUtil.doIfNotNull(request.getProxy(), proxyRequest -> builder.withProxyConfig(proxyRequestToProxyConfigConverter.convert(proxyRequest)));

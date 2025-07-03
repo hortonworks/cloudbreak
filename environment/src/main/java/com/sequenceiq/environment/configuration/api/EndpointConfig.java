@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPEventV1Endpoin
 import com.sequenceiq.cloudbreak.structuredevent.rest.filter.CDPRestAuditFilter;
 import com.sequenceiq.cloudbreak.structuredevent.rest.filter.CDPStructuredEventFilter;
 import com.sequenceiq.environment.api.EnvironmentApi;
+import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentHybridEndpoint;
 import com.sequenceiq.environment.credential.v1.AuditCredentialV1Controller;
 import com.sequenceiq.environment.credential.v1.CredentialInternalV1Controller;
 import com.sequenceiq.environment.credential.v1.CredentialV1Controller;
@@ -56,6 +57,7 @@ public class EndpointConfig extends ResourceConfig {
             ProxyController.class,
             EncryptionProfileController.class,
             EnvironmentController.class,
+            EnvironmentHybridEndpoint.class,
             EnvironmentDefaultComputeClusterController.class,
             EnvironmentInternalV1Controller.class,
             OperationController.class,

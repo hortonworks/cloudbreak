@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.api.client;
 
+import com.sequenceiq.freeipa.api.v1.freeipa.crossrealm.TrustV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.flow.FreeIpaV1FlowEndpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaRotationV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
@@ -16,6 +17,8 @@ import com.sequenceiq.freeipa.api.v2.freeipa.FreeIpaV2Endpoint;
 
 public interface FreeIpaApiEndpoint {
     FreeIpaV1Endpoint getFreeIpaV1Endpoint();
+
+    TrustV1Endpoint getCrossRealmV1Endpoint();
 
     FreeIpaV2Endpoint getFreeIpaV2Endpoint();
 

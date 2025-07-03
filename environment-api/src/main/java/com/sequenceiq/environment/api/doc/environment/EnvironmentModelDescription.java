@@ -62,6 +62,7 @@ public class EnvironmentModelDescription {
     public static final String POLICY_VALIDATION_ERROR_SERVICE = "The policy validation service name";
     public static final String POLICY_VALIDATION_ERROR_MESSAGE = "The policy validation message of service";
     public static final String POLICY_VALIDATION_ERROR_CODE = "The policy validation code";
+    public static final String REMOTE_ENVIRONMENT_CRN = "The Remote environment crn";
 
     public static final String CREDENTIAL_NAME_REQUEST = "Name of the credential of the environment. If the name is given, "
             + "the detailed credential is ignored in the request.";
@@ -186,6 +187,8 @@ public class EnvironmentModelDescription {
     public static final String NO_OUTBOUND_LOAD_BALANCER = "Flag that marks the request to not create an outbound load balancer";
 
     public static final String DATA_SERVICES = "Data Services parameters of the environment";
+
+    public static final String HYBRID_ENVIRONMENT = "Hybrid environment related requests";
 
     public static final String FREEIPA_NODE_COUNT = "FreeIPA node count of the environment";
 

@@ -69,6 +69,12 @@ public enum Status {
 
     public static final Collection<Status> FREEIPA_VERTICALLY_NON_SCALABLE_STATUSES = List.of(DELETED_ON_PROVIDER_SIDE, DELETE_IN_PROGRESS, DELETE_COMPLETED);
 
+    public static final Collection<Status> FREEIPA_CROSS_REALM_SETUP_FINISH_ENABLE_STATUSES = List.of(
+            PREPARE_CROSS_REALM_TRUST_PENDING,
+            FINISH_CROSS_REALM_TRUST_FAILED);
+
+    public static final Collection<Status> FREEIPA_CROSS_REALM_SETUP_ENABLE_STATUSES = List.of(AVAILABLE, PREPARE_CROSS_REALM_TRUST_FAILED);
+
     public static final Collection<Status> FREEIPA_STOPPABLE_STATUSES = List.of(AVAILABLE, STOP_FAILED, START_FAILED);
 
     public static final Collection<Status> FREEIPA_STARTABLE_STATUSES = List.of(STOPPED, STOP_FAILED, START_FAILED, STALE);
@@ -168,6 +174,14 @@ public enum Status {
 
     public boolean isVerticallyScalable() {
         return !FREEIPA_VERTICALLY_NON_SCALABLE_STATUSES.contains(this);
+    }
+
+    public boolean isCrossRealmFinishable() {
+        return FREEIPA_CROSS_REALM_SETUP_FINISH_ENABLE_STATUSES.contains(this);
+    }
+
+    public boolean isCrossRealmPreparable() {
+        return FREEIPA_CROSS_REALM_SETUP_ENABLE_STATUSES.contains(this);
     }
 
     //CHECKSTYLE:OFF: CyclomaticComplexity

@@ -185,4 +185,12 @@ public interface EnvironmentRepository extends AccountAwareResourceRepository<En
     @Modifying
     @Query("UPDATE Environment e SET e.status = :status, e.statusReason = :statusReason WHERE e.id = :id AND e.archived = false")
     int updateEnvironmentStatusAndStatusReason(Long id, EnvironmentStatus status, String statusReason);
+
+    @Modifying
+    @Query("UPDATE Environment e SET e.remoteEnvironmentCrn = :remoteEnvironmentCrn " +
+            "WHERE e.resourceCrn = :environmentCrn AND e.accountId = :accountId AND e.archived = false")
+    int updateRemoteEnvironmentCrn(
+            @Param("accountId") String accountId,
+            @Param("environmentCrn") String environmentCrn,
+            @Param("remoteEnvironmentCrn") String remoteEnvironmentCrn);
 }

@@ -168,6 +168,17 @@ public class FreeIpaPollerProvider {
         return checkVerticalScaleStatus(flowLogResponse);
     }
 
+    public AttemptResult<Void> crossRealmFlowCheck(Long envId, String envCrn, String flowId) {
+        if (PollGroup.CANCELLED.equals(EnvironmentInMemoryStateStore.get(envId))) {
+            LOGGER.info("FreeIpa polling cancelled in inmemory store, id: " + envId);
+            return AttemptResults.breakFor("FreeIpa polling cancelled in inmemory store, id: " + envId);
+        }
+        FlowLogResponse flowLogResponse = ThreadBasedUserCrnProvider.doAsInternalActor(
+                () ->  freeIpaService.getFlowStatus(flowId));
+        LOGGER.debug("[----------FREEIPA - CHECK----------]Flow status: {}", flowLogResponse);
+        return checkCrossRealmStatus(flowLogResponse);
+    }
+
     private boolean operationCompleted(OperationStatus operationStatus) {
         return OperationState.COMPLETED == operationStatus.getStatus();
     }
@@ -213,6 +224,29 @@ public class FreeIpaPollerProvider {
                 return AttemptResults.breakFor("FreeIpa vertical scale failed.");
             default:
                 return AttemptResults.breakFor("FreeIpa vertical scale failed: unexpected operation status returned: " + state);
+        }
+    }
+
+    private AttemptResult<Void> checkCrossRealmStatus(FlowLogResponse flowLogResponse) {
+        StateStatus state = flowLogResponse.getStateStatus();
+        if (flowCompleted(flowLogResponse) && state.equals(StateStatus.SUCCESSFUL)) {
+            FlowCheckResponse flowCheckResponse = ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> freeIpaService.getFlowCheckStatus(flowLogResponse.getFlowId()));
+            Boolean latestFlowFinalizedAndFailed = flowCheckResponse.getLatestFlowFinalizedAndFailed();
+            if (latestFlowFinalizedAndFailed) {
+                return AttemptResults.breakFor("FreeIpa cross realm trust setup failed.");
+            } else {
+                return AttemptResults.finishWith(null);
+            }
+        }
+        switch (state) {
+            case SUCCESSFUL:
+            case PENDING:
+                return AttemptResults.justContinue();
+            case FAILED:
+                return AttemptResults.breakFor("FreeIpa trust setup failed.");
+            default:
+                return AttemptResults.breakFor("FreeIpa trust setup failed: unexpected operation status returned: " + state);
         }
     }
 

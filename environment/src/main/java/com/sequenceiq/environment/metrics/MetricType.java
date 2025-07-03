@@ -28,6 +28,12 @@ public enum MetricType implements Metric {
     ENV_VERTICAL_SCALE_FINISHED("environment.vertical.scale.finished"),
     ENV_VERTICAL_SCALE_FAILED("environment.vertical.scale.failed"),
 
+    ENV_TRUST_SETUP_FINISH_FINISHED("environment.cross.realm.setup.finish.finished"),
+    ENV_CROSS_REALM_TRUST_SETUP_FINISH_FAILED("environment.cross.realm.setup.finish.failed"),
+
+    ENV_TRUST_SETUP_FINISHED("environment.cross.realm.trust.setup.finished"),
+    ENV_TRUST_SETUP_FAILED("environment.cross.realm.trust.setup.failed"),
+
     ENV_ENABLE_SELINUX_FINISHED("environment.enable.selinux.finished"),
     ENV_ENABLE_SELINUX_FAILED("environment.enable.selinux.failed");
 

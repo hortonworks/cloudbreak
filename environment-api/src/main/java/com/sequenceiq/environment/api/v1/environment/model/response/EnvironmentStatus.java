@@ -112,6 +112,17 @@ public enum EnvironmentStatus {
     VERTICAL_SCALE_ON_FREEIPA_FAILED("Vertical Scale on FreeIPA failed"),
     VERTICAL_SCALE_FAILED("Vertical Scale failed"),
 
+    TRUST_SETUP_VALIDATION_IN_PROGRESS("Cross Realm Trust setup validation in progress"),
+    TRUST_SETUP_VALIDATION_FAILED("Cross Realm Trust setup validation failed"),
+    TRUST_SETUP_IN_PROGRESS("Cross Realm Trust setup in progress"),
+    TRUST_SETUP_FAILED("Cross Realm Trust setup failed"),
+    TRUST_SETUP_FINISH_REQUIRED("Cross Realm Trust setup finish required"),
+
+    TRUST_SETUP_FINISH_VALIDATION_IN_PROGRESS("Cross Realm Trust setup finish validation in progress"),
+    TRUST_SETUP_FINISH_VALIDATION_FAILED("Cross Realm Trust setup finish validation failed"),
+    TRUST_SETUP_FINISH_IN_PROGRESS("Cross Realm Trust setup finish in progress"),
+    TRUST_SETUP_FINISH_FAILED("Cross Realm Trust setup finish failed"),
+
     ENABLE_SELINUX_VALIDATION_IN_PROGRESS("Validation for Enable SeLinux"),
     ENABLE_SELINUX_VALIDATION_FAILED("Validation for Enable SeLinux failed"),
     ENABLE_SELINUX_ON_FREEIPA_IN_PROGRESS("Enable SeLinux on FreeIPA"),

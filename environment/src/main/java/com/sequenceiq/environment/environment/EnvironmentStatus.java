@@ -192,6 +192,28 @@ public enum EnvironmentStatus {
     VERTICAL_SCALE_ON_FREEIPA_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.VERTICAL_SCALE_ON_FREEIPA_FAILED),
     VERTICAL_SCALE_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.VERTICAL_SCALE_FAILED),
 
+    // Cross Realm Trust setup FreeIPA
+    TRUST_SETUP_VALIDATION_IN_PROGRESS(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.TRUST_SETUP_VALIDATION_IN_PROGRESS),
+    TRUST_SETUP_VALIDATION_FAILED(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.TRUST_SETUP_VALIDATION_FAILED),
+    TRUST_SETUP_IN_PROGRESS(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.TRUST_SETUP_IN_PROGRESS),
+    TRUST_SETUP_FAILED(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.TRUST_SETUP_FAILED),
+    TRUST_SETUP_FINISH_REQUIRED(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.TRUST_SETUP_FINISH_REQUIRED),
+
+    // Cross Realm Trust setup finish FreeIPA
+    TRUST_SETUP_FINISH_VALIDATION_IN_PROGRESS(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.TRUST_SETUP_FINISH_VALIDATION_IN_PROGRESS),
+    TRUST_SETUP_FINISH_VALIDATION_FAILED(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.TRUST_SETUP_FINISH_VALIDATION_FAILED),
+    TRUST_SETUP_FINISH_IN_PROGRESS(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.TRUST_SETUP_FINISH_IN_PROGRESS),
+    TRUST_SETUP_FINISH_FAILED(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.TRUST_SETUP_FINISH_FAILED),
+
     // Enabel SeLinux FreeIPA
     ENABLE_SELINUX_VALIDATION_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.ENABLE_SELINUX_VALIDATION_IN_PROGRESS),
     ENABLE_SELINUX_VALIDATION_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.ENABLE_SELINUX_VALIDATION_FAILED),

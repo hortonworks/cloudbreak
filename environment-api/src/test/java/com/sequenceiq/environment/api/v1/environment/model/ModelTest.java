@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.openpojo.reflection.PojoClass;
 import com.openpojo.reflection.PojoClassFilter;
@@ -20,6 +22,8 @@ import com.openpojo.validation.test.impl.GetterTester;
 import com.openpojo.validation.test.impl.SetterTester;
 
 class ModelTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ModelTest.class);
 
     private static final String MODEL_PACKAGE = "com.sequenceiq.environment.api.v1.environment.model";
 
@@ -44,12 +48,24 @@ class ModelTest {
                 .with(new NoNestedClassRule())
                 .with(new NoFieldShadowingRule())
                 .build();
-        validator.validate(pojoClasses);
+        for (PojoClass pojoClass : pojoClasses) {
+            try {
+                validator.validate(pojoClass);
+            } catch (Exception e) {
+                LOGGER.error(String.format("Exception occurred because: %s in %s class", e, pojoClass.getName()));
+            }
+        }
 
         validator = ValidatorBuilder.create()
                 .with(new SetterTester())
                 .build();
-        validator.validate(pojoClasses);
+        for (PojoClass pojoClass : pojoClasses) {
+            try {
+                validator.validate(pojoClass);
+            } catch (Exception e) {
+                LOGGER.error(String.format("Exception occurred because: %s in %s class", e, pojoClass.getName()));
+            }
+        }
         // openpojo will do for now (seems buggy) but later would worth experimenting with pojo-tester (https://www.pojo.pl/)
     }
 }

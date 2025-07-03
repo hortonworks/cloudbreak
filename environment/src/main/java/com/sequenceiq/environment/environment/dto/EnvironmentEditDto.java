@@ -51,6 +51,8 @@ public class EnvironmentEditDto {
 
     private final Integer freeipaNodeCount;
 
+    private final EnvironmentHybridDto environmentHybridDto;
+
     public EnvironmentEditDto(Builder builder) {
         this.description = builder.description;
         this.accountId = builder.accountId;
@@ -71,6 +73,7 @@ public class EnvironmentEditDto {
         this.cloudPlatform = builder.cloudPlatform;
         this.dataServices = builder.dataServices;
         this.freeipaNodeCount = builder.freeipaNodeCount;
+        this.environmentHybridDto = builder.environmentHybridDto;
     }
 
     public String getDescription() {
@@ -149,6 +152,10 @@ public class EnvironmentEditDto {
         return freeipaNodeCount;
     }
 
+    public EnvironmentHybridDto getEnvironmentHybridDto() {
+        return environmentHybridDto;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -175,6 +182,7 @@ public class EnvironmentEditDto {
                 ", cloudPlatform=" + cloudPlatform +
                 ", dataServices=" + dataServices +
                 ", freeipaNodeCount=" + freeipaNodeCount +
+                ", environmentHybridDto=" + environmentHybridDto +
                 '}';
     }
 
@@ -217,6 +225,8 @@ public class EnvironmentEditDto {
 
         private Integer freeipaNodeCount;
 
+        private EnvironmentHybridDto environmentHybridDto;
+
         private Builder() {
         }
 
@@ -257,6 +267,11 @@ public class EnvironmentEditDto {
 
         public Builder withSecurityAccess(SecurityAccessDto securityAccess) {
             this.securityAccess = securityAccess;
+            return this;
+        }
+
+        public Builder withHybridEnvironment(EnvironmentHybridDto environmentHybridDto) {
+            this.environmentHybridDto = environmentHybridDto;
             return this;
         }
 

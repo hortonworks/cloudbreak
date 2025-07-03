@@ -53,6 +53,7 @@ import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.domain.RegionWrapper;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
+import com.sequenceiq.environment.environment.dto.EnvironmentHybridDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
@@ -389,6 +390,10 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
         return environmentRepository.findAllByAccountIdAndParentEnvIdAndArchivedIsFalse(accountId, parentEnvironmentId);
     }
 
+    public void updateRemoteEnvironmentCrn(String accountId, String environmentCrn, String remoteEnvironmentCrn) {
+        environmentRepository.updateRemoteEnvironmentCrn(accountId, environmentCrn, remoteEnvironmentCrn);
+    }
+
     public void assignEnvironmentAdminRole(String userCrn, String environmentCrn) {
         try {
             grpcUmsClient.assignResourceRole(userCrn,
@@ -505,4 +510,10 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
         }
     }
 
+    public void editHybrid(Environment environment, EnvironmentHybridDto environmentHybridDto) {
+        LOGGER.debug("Editing Hybrid access for environment.");
+        if (StringUtils.isNotBlank(environmentHybridDto.getRemoteEnvironmentCrn())) {
+            environment.setRemoteEnvironmentCrn(environmentHybridDto.getRemoteEnvironmentCrn());
+        }
+    }
 }

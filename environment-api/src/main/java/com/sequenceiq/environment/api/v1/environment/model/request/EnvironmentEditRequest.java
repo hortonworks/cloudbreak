@@ -75,6 +75,9 @@ public class EnvironmentEditRequest implements Serializable {
     @Schema(description = EnvironmentModelDescription.DATA_SERVICES)
     private DataServicesRequest dataServices;
 
+    @Schema(description = EnvironmentModelDescription.HYBRID_ENVIRONMENT)
+    private HybridEnvironmentRequest hybridEnvironment;
+
     @Schema(description = EnvironmentModelDescription.FREEIPA_NODE_COUNT)
     private Integer freeIpaNodeCount;
 
@@ -206,6 +209,14 @@ public class EnvironmentEditRequest implements Serializable {
         this.freeIpaNodeCount = freeIpaNodeCount;
     }
 
+    public HybridEnvironmentRequest getHybridEnvironment() {
+        return hybridEnvironment;
+    }
+
+    public void setHybridEnvironment(HybridEnvironmentRequest hybridEnvironment) {
+        this.hybridEnvironment = hybridEnvironment;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentEditRequest{" +
@@ -225,6 +236,7 @@ public class EnvironmentEditRequest implements Serializable {
                 ", tags=" + tags +
                 ", dataServices=" + dataServices +
                 ", freeipaNodeCount=" + freeIpaNodeCount +
+                ", hybridEnvironment=" + hybridEnvironment +
                 '}';
     }
 }

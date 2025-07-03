@@ -17,6 +17,10 @@ import com.sequenceiq.environment.environment.poller.FreeIpaPollerProvider;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishCrossRealmTrustRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishCrossRealmTrustResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleResponse;
@@ -41,6 +45,9 @@ public class FreeIpaPollerService {
     @Value("${env.verticalscale.freeipa.polling.attempt:60}")
     private Integer verticalscaleAttempt;
 
+    @Value("${env.crossrealm.freeipa.polling.attempt:30}")
+    private Integer crossRealmAttempt;
+
     @Value("${env.stop.polling.sleep.time:10}")
     private Integer startStopSleeptime;
 
@@ -52,6 +59,9 @@ public class FreeIpaPollerService {
 
     @Value("${env.verticalscale.freeipa.polling.sleeptime:30}")
     private Integer verticalscaleSleeptime;
+
+    @Value("${env.crossrealm.freeipa.polling.sleeptime:30}")
+    private Integer crossRealmSleeptime;
 
     private final FreeIpaService freeIpaService;
 
@@ -116,6 +126,36 @@ public class FreeIpaPollerService {
             } catch (PollerStoppedException e) {
                 LOGGER.warn("FreeIPA Vertical Scale timed out or error happened.", e);
                 throw new FreeIpaOperationFailedException("FreeIPA Vertical Scale timed out or error happened: " + e.getMessage());
+            }
+        }
+    }
+
+    public void waitForCrossRealmTrustSetup(Long envId, String envCrn, PrepareCrossRealmTrustRequest prepareCrossRealmTrustRequest) {
+        PrepareCrossRealmTrustResponse response = freeIpaService.crossRealmPrepare(envCrn, prepareCrossRealmTrustRequest);
+        if (response.getFlowIdentifier() != null) {
+            try {
+                Polling.stopAfterAttempt(crossRealmAttempt)
+                        .stopIfException(true)
+                        .waitPeriodly(crossRealmSleeptime, TimeUnit.SECONDS)
+                        .run(() -> freeipaPollerProvider.crossRealmFlowCheck(envId, envCrn, response.getFlowIdentifier().getPollableId()));
+            } catch (PollerStoppedException e) {
+                LOGGER.warn("FreeIPA cross realm trust prepare timed out or error happened.", e);
+                throw new FreeIpaOperationFailedException("FreeIPAcross realm trust prepare timed out or error happened: " + e.getMessage());
+            }
+        }
+    }
+
+    public void waitForCrossRealmFinish(Long envId, String envCrn, FinishCrossRealmTrustRequest finishCrossRealmTrustRequest) {
+        FinishCrossRealmTrustResponse response = freeIpaService.crossRealmFinish(envCrn, finishCrossRealmTrustRequest);
+        if (response.getFlowIdentifier() != null) {
+            try {
+                Polling.stopAfterAttempt(crossRealmAttempt)
+                        .stopIfException(true)
+                        .waitPeriodly(crossRealmSleeptime, TimeUnit.SECONDS)
+                        .run(() -> freeipaPollerProvider.crossRealmFlowCheck(envId, envCrn, response.getFlowIdentifier().getPollableId()));
+            } catch (PollerStoppedException e) {
+                LOGGER.warn("FreeIPA cross realm trust finish timed out or error happened.", e);
+                throw new FreeIpaOperationFailedException("FreeIPAcross realm trust finish timed out or error happened: " + e.getMessage());
             }
         }
     }

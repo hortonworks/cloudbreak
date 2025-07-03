@@ -21,10 +21,15 @@ import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
 import com.sequenceiq.flow.api.model.operation.OperationView;
+import com.sequenceiq.freeipa.api.v1.freeipa.crossrealm.TrustV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.flow.FreeIpaV1FlowEndpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishCrossRealmTrustRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishCrossRealmTrustResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
@@ -44,6 +49,8 @@ public class FreeIpaService {
 
     private final FreeIpaV1Endpoint freeIpaV1Endpoint;
 
+    private final TrustV1Endpoint trustV1Endpoint;
+
     private final OperationV1Endpoint operationV1Endpoint;
 
     private final UserV1Endpoint userV1Endpoint;
@@ -54,7 +61,9 @@ public class FreeIpaService {
 
     private final FreeIpaV1FlowEndpoint flowEndpoint;
 
-    public FreeIpaService(FreeIpaV1Endpoint freeIpaV1Endpoint,
+    public FreeIpaService(
+            FreeIpaV1Endpoint freeIpaV1Endpoint,
+            TrustV1Endpoint trustV1Endpoint,
             OperationV1Endpoint operationV1Endpoint,
             FreeIpaV1FlowEndpoint flowEndpoint,
             UserV1Endpoint userV1Endpoint,
@@ -63,6 +72,7 @@ public class FreeIpaService {
         this.freeIpaV1Endpoint = freeIpaV1Endpoint;
         this.operationV1Endpoint = operationV1Endpoint;
         this.userV1Endpoint = userV1Endpoint;
+        this.trustV1Endpoint = trustV1Endpoint;
         this.webApplicationExceptionMessageExtractor = webApplicationExceptionMessageExtractor;
         this.eventService = eventService;
         this.flowEndpoint = flowEndpoint;
@@ -248,6 +258,30 @@ public class FreeIpaService {
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error("Failed to vertical scale on FreeIpa for environment {} due to: {}", environmentCrn, errorMessage, e);
+            throw new FreeIpaOperationFailedException(errorMessage, e);
+        }
+    }
+
+    public PrepareCrossRealmTrustResponse crossRealmPrepare(String environmentCrn, PrepareCrossRealmTrustRequest prepareCrossRealmTrustRequest) {
+        try {
+            LOGGER.debug("Calling FreeIPA cross realm prepare for environment {}", environmentCrn);
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> trustV1Endpoint.setup(prepareCrossRealmTrustRequest));
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error("Failed to prepare cross realm on FreeIpa for environment {} due to: {}", environmentCrn, errorMessage, e);
+            throw new FreeIpaOperationFailedException(errorMessage, e);
+        }
+    }
+
+    public FinishCrossRealmTrustResponse crossRealmFinish(String environmentCrn, FinishCrossRealmTrustRequest finishCrossRealmTrustRequest) {
+        try {
+            LOGGER.debug("Calling FreeIPA cross realm finish for environment {}", environmentCrn);
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> trustV1Endpoint.finishSetup(finishCrossRealmTrustRequest));
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error("Failed to finish cross realm on FreeIpa for environment {} due to: {}", environmentCrn, errorMessage, e);
             throw new FreeIpaOperationFailedException(errorMessage, e);
         }
     }

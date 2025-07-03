@@ -794,7 +794,19 @@ public enum ResourceEvent {
     SHARED_SERVICE_DB_SECRET_ROTATION_CONFIG_UPDATE_FINISHED_DH("shared.service.db.rotation.dh.config.update.finished.notification"),
     SHARED_SERVICE_DB_SECRET_ROTATION_CONFIG_UPDATE_FINISHED_DL("shared.service.db.rotation.dl.config.update.finished.notification"),
     SHARED_SERVICE_DB_SECRET_ROTATION_CONFIG_UPDATE_FAILED_DH("shared.service.db.rotation.dh.config.update.failed.notification"),
-    SHARED_SERVICE_DB_SECRET_ROTATION_CONFIG_UPDATE_FAILED_DL("shared.service.db.rotation.dl.config.update.failed.notification");
+    SHARED_SERVICE_DB_SECRET_ROTATION_CONFIG_UPDATE_FAILED_DL("shared.service.db.rotation.dl.config.update.failed.notification"),
+
+    ENVIRONMENT_SETUP_TRUST_VALIDATION_STARTED("environment.setup.cross.realm.trust.validation.started"),
+    ENVIRONMENT_SETUP_TRUST_STARTED("environment.setup.cross.realm.trust.started"),
+    ENVIRONMENT_SETUP_TRUST_FINISHED("environment.setup.cross.realm.trust.finished"),
+    ENVIRONMENT_SETUP_TRUST_VALIDATION_FAILED("environment.setup.cross.realm.trust.validation.failed"),
+    ENVIRONMENT_SETUP_TRUST_FAILED("environment.setup.cross.realm.trust.failed"),
+
+    ENVIRONMENT_SETUP_FINISH_TRUST_VALIDATION_STARTED("environment.setup.finish.cross.realm.trust.validation.started"),
+    ENVIRONMENT_SETUP_FINISH_TRUST_VALIDATION_FAILED("environment.setup.finish.cross.realm.trust.validation.failed"),
+    ENVIRONMENT_SETUP_FINISH_TRUST_STARTED("environment.setup.finish.cross.realm.trust.started"),
+    ENVIRONMENT_SETUP_FINISH_TRUST_FINISHED("environment.setup.finish.cross.realm.trust.finished"),
+    ENVIRONMENT_SETUP_FINISH_TRUST_FAILED("environment.setup.finish.cross.realm.trust.failed");
 
     private final String message;
 

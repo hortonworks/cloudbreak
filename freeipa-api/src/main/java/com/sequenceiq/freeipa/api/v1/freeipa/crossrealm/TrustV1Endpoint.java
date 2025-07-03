@@ -23,21 +23,21 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Path("/v1/cross_realm_trust")
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "/v1/cross_realm_trust")
-public interface CrossRealmV1Endpoint {
+public interface TrustV1Endpoint {
 
     @POST
-    @Path("/prepare")
+    @Path("/setup")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = FreeIpaOperationDescriptions.PREPARE_CROSS_REALM_TRUST, description = FreeIpaNotes.FREEIPA_NOTES,
+    @Operation(summary = FreeIpaOperationDescriptions.SETUP_CROSS_REALM_TRUST, description = FreeIpaNotes.FREEIPA_NOTES,
             operationId = "prepareCrossRealmTrustV1", responses = @ApiResponse(responseCode = "200", description = "successful operation",
             useReturnTypeSchema = true))
-    PrepareCrossRealmTrustResponse prepare(@Valid PrepareCrossRealmTrustRequest request);
+    PrepareCrossRealmTrustResponse setup(@Valid PrepareCrossRealmTrustRequest request);
 
     @POST
-    @Path("/finish")
+    @Path("/finish_setup")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = FreeIpaOperationDescriptions.FINISH_CROSS_REALM_TRUST, description = FreeIpaNotes.FREEIPA_NOTES,
+    @Operation(summary = FreeIpaOperationDescriptions.SETUP_FINISH_CROSS_REALM_TRUST, description = FreeIpaNotes.FREEIPA_NOTES,
             operationId = "finishCrossRealmTrustV1", responses = @ApiResponse(responseCode = "200", description = "successful operation",
             useReturnTypeSchema = true))
-    FinishCrossRealmTrustResponse finish(@Valid FinishCrossRealmTrustRequest request);
+    FinishCrossRealmTrustResponse finishSetup(@Valid FinishCrossRealmTrustRequest request);
 }

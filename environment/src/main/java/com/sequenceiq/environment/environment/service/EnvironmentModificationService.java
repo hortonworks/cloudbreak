@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentSetupCrossRealmTrustRequest;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -33,6 +34,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentHybridDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentTagsDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
@@ -62,9 +64,11 @@ import com.sequenceiq.environment.parameters.service.ParametersService;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 import com.sequenceiq.environment.proxy.service.ProxyConfigModificationService;
 import com.sequenceiq.environment.proxy.service.ProxyConfigService;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetIdsRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneNetwork;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishCrossRealmTrustRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 @Service
@@ -155,6 +159,7 @@ public class EnvironmentModificationService {
         editAdminGroupNameIfChanged(environment, editDto);
         editAuthenticationIfChanged(editDto, environment);
         editSecurityAccessIfChanged(editDto, environment);
+        editHybridIfChanged(editDto, environment);
         editIdBrokerMappingSource(editDto, environment);
         editCloudStorageValidation(editDto, environment);
         editTunnelIfChanged(editDto, environment);
@@ -207,6 +212,27 @@ public class EnvironmentModificationService {
             EnvironmentFeatures features) {
         Environment environment = getEnvironment(accountId, NameOrCrn.ofCrn(crn));
         return changeTelemetryFeatures(features, environment);
+    }
+
+    public FlowIdentifier setupCrossRealmSetup(String accountId, NameOrCrn nameOrCrn, EnvironmentSetupCrossRealmTrustRequest request) {
+        Environment environment = getEnvironment(accountId, nameOrCrn);
+        return environmentReactorFlowManager.triggerSetupCrossRealmTrust(
+                environment.getId(),
+                environment.getAccountId(),
+                environment.getName(),
+                environment.getCreator(),
+                environment.getResourceCrn(),
+                request);
+    }
+
+    public FlowIdentifier setupFinishCrossRealmSetup(String accountId, NameOrCrn nameOrCrn) {
+        Environment environment = getEnvironment(accountId, nameOrCrn);
+        return environmentReactorFlowManager.triggerSetupFinishCrossRealmTrust(
+                environment.getId(),
+                environment.getName(),
+                environment.getCreator(),
+                environment.getResourceCrn(),
+                new FinishCrossRealmTrustRequest());
     }
 
     public Environment getEnvironment(String accountId, NameOrCrn nameOrCrn) {
@@ -383,6 +409,13 @@ public class EnvironmentModificationService {
                 throw new BadRequestException(validationResult.getFormattedErrors());
             }
             environmentService.editSecurityAccess(environment, securityAccessDto);
+        }
+    }
+
+    private void editHybridIfChanged(EnvironmentEditDto editDto, Environment environment) {
+        EnvironmentHybridDto environmentHybridDto = editDto.getEnvironmentHybridDto();
+        if (environmentHybridDto != null) {
+            environmentService.editHybrid(environment, environmentHybridDto);
         }
     }
 
