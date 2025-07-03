@@ -8,7 +8,6 @@ import javax.net.ssl.SSLContext;
 import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.ssl.SSLContexts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,9 +16,9 @@ import org.springframework.stereotype.Component;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.sequenceiq.cloudbreak.client.CertificateTrustManager;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
-import com.sequenceiq.cloudbreak.client.KeyStoreUtil;
 import com.sequenceiq.cloudbreak.cm.client.tracing.CmRequestIdProviderInterceptor;
 import com.sequenceiq.cloudbreak.cm.client.tracing.CmRequestLoggerInterceptor;
+import com.sequenceiq.cloudbreak.service.sslcontext.SSLContextProvider;
 import com.sequenceiq.cloudbreak.util.HostUtil;
 
 @Component
@@ -62,6 +61,9 @@ public class ClouderaManagerApiClientProvider {
 
     @Inject
     private CmRequestLoggerInterceptor cmRequestLoggerInterceptor;
+
+    @Inject
+    private SSLContextProvider sslContextProvider;
 
     public ApiClient getDefaultClient(Integer gatewayPort, HttpClientConfig clientConfig, String apiVersion) throws ClouderaManagerClientInitException {
         ApiClient client = getClouderaManagerClient(clientConfig, gatewayPort, "admin", "admin", apiVersion);
@@ -126,10 +128,8 @@ public class ClouderaManagerApiClientProvider {
         cmClient.setVerifyingSsl(true);
         try {
             if (isCmSslConfigValidClientConfigValid(clientConfig) && !clientConfig.isClusterProxyEnabled()) {
-                SSLContext sslContext = SSLContexts.custom()
-                        .loadTrustMaterial(KeyStoreUtil.createTrustStore(clientConfig.getServerCert(), Optional.empty()), null)
-                        .loadKeyMaterial(KeyStoreUtil.createKeyStore(clientConfig.getClientCert(), clientConfig.getClientKey()), "consul".toCharArray())
-                        .build();
+                SSLContext sslContext = sslContextProvider.getSSLContext(clientConfig.getServerCert(), Optional.empty(),
+                        clientConfig.getClientCert(), clientConfig.getClientKey());
                 cmClient.getHttpClient().setSslSocketFactory(sslContext.getSocketFactory());
                 cmClient.getHttpClient().setHostnameVerifier(CertificateTrustManager.hostnameVerifier());
             }

@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 
+import javax.net.ssl.SSLContext;
+
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation;
@@ -86,7 +88,7 @@ public class SaltConnector implements Closeable {
 
     private final String hostname;
 
-    public SaltConnector(GatewayConfig gatewayConfig, SaltErrorResolver saltErrorResolver, boolean restDebug,
+    public SaltConnector(GatewayConfig gatewayConfig, SSLContext sslContext, SaltErrorResolver saltErrorResolver, boolean restDebug,
             boolean saltLoggerEnabled, boolean saltLoggerResponseBodyEnabled, int connectTimeoutMs, OptionalInt readTimeout) {
         try {
             Collection<Object> saltFilters = Collections.emptySet();
@@ -96,9 +98,7 @@ public class SaltConnector implements Closeable {
                     saltFilters.add(new SaltReaderInterceptor());
                 }
             }
-            restClient = RestClientUtil.createClient(gatewayConfig.getServerCert(), gatewayConfig.getNewServerCert(),
-                    gatewayConfig.getClientCert(), gatewayConfig.getClientKey(),
-                    connectTimeoutMs, readTimeout, restDebug, saltFilters);
+            restClient = RestClientUtil.createClient(sslContext, connectTimeoutMs, readTimeout, restDebug, saltFilters);
             this.hostname = gatewayConfig.getHostname();
             String saltBootPasswd = Optional.ofNullable(gatewayConfig.getSaltBootPassword()).orElse(SALT_BOOT_PASSWORD);
             saltTarget = restClient.target(gatewayConfig.getGatewayUrl())
@@ -113,9 +113,9 @@ public class SaltConnector implements Closeable {
         }
     }
 
-    public SaltConnector(GatewayConfig gatewayConfig, SaltErrorResolver saltErrorResolver, boolean debug, boolean saltLogger,
+    public SaltConnector(GatewayConfig gatewayConfig, SSLContext sslContext, SaltErrorResolver saltErrorResolver, boolean debug, boolean saltLogger,
             boolean saltLoggerResponseBodyEnabled) {
-        this(gatewayConfig, saltErrorResolver, debug, saltLogger, saltLoggerResponseBodyEnabled, CONNECT_TIMEOUT_MS, OptionalInt.empty());
+        this(gatewayConfig, sslContext, saltErrorResolver, debug, saltLogger, saltLoggerResponseBodyEnabled, CONNECT_TIMEOUT_MS, OptionalInt.empty());
     }
 
     @Measure(SaltConnector.class)

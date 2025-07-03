@@ -5,6 +5,8 @@ import java.net.URL;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.net.ssl.SSLContext;
+
 import jakarta.inject.Inject;
 import jakarta.ws.rs.client.Client;
 
@@ -19,6 +21,7 @@ import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.client.RpcListener;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
+import com.sequenceiq.cloudbreak.service.sslcontext.SSLContextProvider;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.TlsSecurityService;
@@ -40,6 +43,9 @@ public abstract class AbstractFreeIpaHttpClientFactory<T> {
 
     @Inject
     private ClusterProxyConfiguration clusterProxyConfiguration;
+
+    @Inject
+    private SSLContextProvider sslContextProvider;
 
     public T getClient(Stack stack, InstanceMetaData instance)
             throws FreeIpaClientException, MalformedURLException {
@@ -93,8 +99,9 @@ public abstract class AbstractFreeIpaHttpClientFactory<T> {
 
     private Client createRestClient(HttpClientConfig clientConfig) throws RetryableFreeIpaClientException {
         try {
-            return RestClientUtil.createClient(clientConfig.getServerCert(), clientConfig.getClientCert(), clientConfig.getClientKey(),
-                    getConnectionTimeoutMillis(), getReadTimeoutMillis(), restDebug);
+            SSLContext sslContext = sslContextProvider.getSSLContext(clientConfig.getServerCert(), Optional.empty(),
+                    clientConfig.getClientCert(), clientConfig.getClientKey());
+            return RestClientUtil.createClient(sslContext, getConnectionTimeoutMillis(), getReadTimeoutMillis(), restDebug);
         } catch (Exception e) {
             throw new RetryableFreeIpaClientException("Unable to create client for FreeIPA health checks", e);
         }

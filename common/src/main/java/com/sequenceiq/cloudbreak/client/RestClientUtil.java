@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.client;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
@@ -14,8 +13,6 @@ import javax.net.ssl.SSLContext;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.ssl.SSLContexts;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.filter.EncodingFilter;
@@ -61,42 +58,22 @@ public class RestClientUtil {
         }
     }
 
-    public static Client createClient(String serverCert, String clientCert, String clientKey, boolean debug) throws Exception {
-        return createClient(serverCert, Optional.empty(), clientCert, clientKey, CONNECT_TIMEOUT_MS, OptionalInt.empty(), debug);
-    }
-
-    public static Client createClient(String serverCert, String clientCert, String clientKey, int connectionTimeout, int readTimeout, boolean debug)
+    public static Client createClient(SSLContext sslContext, int connectionTimeout, int readTimeout, boolean debug)
             throws Exception {
-        return createClient(serverCert, Optional.empty(), clientCert, clientKey, connectionTimeout, OptionalInt.of(readTimeout), debug);
+        return createClient(sslContext, connectionTimeout, OptionalInt.of(readTimeout), debug);
     }
 
-    public static Client createClient(String serverCert, Optional<String> additionalServerCert, String clientCert, String clientKey, int connectionTimeout,
+    public static Client createClient(SSLContext sslContext, int connectionTimeout,
             OptionalInt readTimeout, boolean debug)
             throws Exception {
-        return createClient(serverCert, additionalServerCert, clientCert, clientKey, connectionTimeout, readTimeout, debug, Collections.emptySet());
-    }
-
-    @SuppressWarnings("checkstyle:ParameterNumberCheck")
-    public static Client createClient(String serverCert, Optional<String> additionalServerCert, String clientCert, String clientKey, int connectionTimeout,
-            OptionalInt readTimeout, boolean debug, Collection<Object> providers)
-            throws Exception {
-        SSLContext sslContext;
-        if (StringUtils.isNoneBlank(serverCert, clientCert, clientKey)) {
-            sslContext = SSLContexts.custom()
-                    .loadTrustMaterial(KeyStoreUtil.createTrustStore(serverCert, additionalServerCert), null)
-                    .loadKeyMaterial(KeyStoreUtil.createKeyStore(clientCert, clientKey), "consul".toCharArray())
-                    .build();
-        } else {
-            sslContext = CertificateTrustManager.sslContext();
-        }
-        return createClient(sslContext, connectionTimeout, readTimeout, debug, providers);
+        return createClient(sslContext, connectionTimeout, readTimeout, debug, Collections.emptySet());
     }
 
     public static Client createClient(SSLContext sslContext, boolean debug) {
         return createClient(sslContext, CONNECT_TIMEOUT_MS, OptionalInt.empty(), debug, Collections.emptySet());
     }
 
-    private static Client createClient(SSLContext sslContext, int connectionTimeout, OptionalInt readTimeout, boolean debug,
+    public static Client createClient(SSLContext sslContext, int connectionTimeout, OptionalInt readTimeout, boolean debug,
             Collection<Object> providers) {
         ClientConfig config = new ClientConfig();
         config.property(ClientProperties.FOLLOW_REDIRECTS, "false");

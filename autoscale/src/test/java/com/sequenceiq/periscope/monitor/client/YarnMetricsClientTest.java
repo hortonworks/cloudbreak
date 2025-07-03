@@ -11,6 +11,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
+import javax.net.ssl.SSLContext;
+
 import jakarta.ws.rs.core.UriBuilder;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.service.sslcontext.SSLContextProvider;
 import com.sequenceiq.periscope.aspects.RequestLogging;
 import com.sequenceiq.periscope.config.YarnConfig;
 import com.sequenceiq.periscope.domain.Cluster;
@@ -48,6 +51,9 @@ public class YarnMetricsClientTest {
 
     @Mock
     private TlsSecurityService tlsSecurityService;
+
+    @Mock
+    private SSLContextProvider sslContextProvider;
 
     @Mock
     private Clock clock;
@@ -111,6 +117,9 @@ public class YarnMetricsClientTest {
     void testGetYarnMetricsForClusterForMock() throws Exception {
         TlsConfiguration tlsConfig = mock(TlsConfiguration.class);
         when(tlsSecurityService.getTls(any())).thenReturn(tlsConfig);
+        SSLContext sslContext = mock(SSLContext.class);
+        when(sslContextProvider.getSSLContext(tlsConfig.getServerCert(), Optional.empty(), tlsConfig.getClientCert(), tlsConfig.getClientKey()))
+                .thenReturn(sslContext);
         try (MockedStatic<UriBuilder> mockedStatic = Mockito.mockStatic(UriBuilder.class)) {
             UriBuilder uriBuilder = mock(UriBuilder.class);
             mockedStatic.when(() -> UriBuilder.fromPath(anyString())).thenReturn(uriBuilder);
@@ -124,6 +133,9 @@ public class YarnMetricsClientTest {
     void testGetYarnMetricsForClusterForNonMock() throws Exception {
         TlsConfiguration tlsConfig = mock(TlsConfiguration.class);
         String cloudProvider = "AWS";
+        SSLContext sslContext = mock(SSLContext.class);
+        when(sslContextProvider.getSSLContext(tlsConfig.getServerCert(), Optional.empty(), tlsConfig.getClientCert(), tlsConfig.getClientKey()))
+                .thenReturn(sslContext);
         when(tlsSecurityService.getTls(any())).thenReturn(tlsConfig);
         when(tlsHttpClientConfigurationService.isClusterProxyApplicable(cloudProvider)).thenReturn(true);
         when(clusterProxyConfigurationService.getClusterProxyUrl()).thenReturn(Optional.of("https://localhost:10080"));

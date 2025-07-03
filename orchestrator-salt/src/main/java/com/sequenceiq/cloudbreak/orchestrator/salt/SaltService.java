@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.stream.Collectors;
 
+import javax.net.ssl.SSLContext;
+
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -17,6 +19,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.utils.GatewayConfigComparator;
+import com.sequenceiq.cloudbreak.service.sslcontext.SSLContextProvider;
 
 @Service
 public class SaltService {
@@ -25,6 +28,9 @@ public class SaltService {
 
     @Inject
     private SaltErrorResolver saltErrorResolver;
+
+    @Inject
+    private SSLContextProvider sslContextProvider;
 
     @Value("${rest.debug}")
     private boolean restDebug;
@@ -36,11 +42,15 @@ public class SaltService {
     private boolean saltLoggerResponseBodyEnabled;
 
     public SaltConnector createSaltConnector(GatewayConfig gatewayConfig) {
-        return new SaltConnector(gatewayConfig, saltErrorResolver, restDebug, saltLoggerEnabled, saltLoggerResponseBodyEnabled);
+        SSLContext sslContext = sslContextProvider.getSSLContext(gatewayConfig.getServerCert(), gatewayConfig.getNewServerCert(),
+                gatewayConfig.getClientCert(), gatewayConfig.getClientKey());
+        return new SaltConnector(gatewayConfig, sslContext, saltErrorResolver, restDebug, saltLoggerEnabled, saltLoggerResponseBodyEnabled);
     }
 
     public SaltConnector createSaltConnector(GatewayConfig gatewayConfig, int connectTimeoutMs, int readTimeout) {
-        return new SaltConnector(gatewayConfig, saltErrorResolver, restDebug, saltLoggerEnabled, saltLoggerResponseBodyEnabled,
+        SSLContext sslContext = sslContextProvider.getSSLContext(gatewayConfig.getServerCert(), gatewayConfig.getNewServerCert(),
+                gatewayConfig.getClientCert(), gatewayConfig.getClientKey());
+        return new SaltConnector(gatewayConfig, sslContext, saltErrorResolver, restDebug, saltLoggerEnabled, saltLoggerResponseBodyEnabled,
                 connectTimeoutMs, OptionalInt.of(readTimeout));
     }
 

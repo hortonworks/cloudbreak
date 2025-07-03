@@ -5,6 +5,8 @@ import static com.sequenceiq.periscope.domain.MetricType.YARN_FORBIDDEN_EXCEPTIO
 import java.util.List;
 import java.util.Optional;
 
+import javax.net.ssl.SSLContext;
+
 import jakarta.inject.Inject;
 import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.client.Client;
@@ -24,6 +26,7 @@ import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.metrics.type.MetricTag;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.service.sslcontext.SSLContextProvider;
 import com.sequenceiq.periscope.aspects.RequestLogging;
 import com.sequenceiq.periscope.config.YarnConfig;
 import com.sequenceiq.periscope.domain.Cluster;
@@ -80,12 +83,16 @@ public class YarnMetricsClient {
     @Inject
     private YarnConfig yarnConfig;
 
+    @Inject
+    private SSLContextProvider sslContextProvider;
+
     @Retryable(value = Exception.class, maxAttempts = 2, backoff = @Backoff(delay = 5000))
     public YarnScalingServiceV1Response getYarnMetricsForCluster(Cluster cluster, StackV4Response stackV4Response,
             String hostGroup, String pollingUserCrn, Optional<Integer> maxDecommissionNodeCount) throws Exception {
         TlsConfiguration tlsConfig = tlsSecurityService.getTls(cluster.getId());
-        Client restClient = RestClientUtil.createClient(tlsConfig.getServerCert(),
-                tlsConfig.getClientCert(), tlsConfig.getClientKey(), true);
+        SSLContext sslContext = sslContextProvider.getSSLContext(tlsConfig.getServerCert(), Optional.empty(),
+                tlsConfig.getClientCert(), tlsConfig.getClientKey());
+        Client restClient = RestClientUtil.createClient(sslContext, true);
         long start = clock.getCurrentTimeMillis();
         InstanceConfig instanceConfig = null;
         if (CloudPlatform.valueOf(cluster.getCloudPlatform()) == CloudPlatform.MOCK) {
@@ -121,9 +128,9 @@ public class YarnMetricsClient {
     public YarnScalingServiceV1Response getYarnMetricsForCluster(Cluster cluster,
             String hostGroup, String pollingUserCrn, Optional<Integer> connectionTimeout, Optional<Integer> readTimeout) throws Exception {
         TlsConfiguration tlsConfig = tlsSecurityService.getTls(cluster.getId());
-        Client restClient;
-        restClient = RestClientUtil.createClient(tlsConfig.getServerCert(),
-                tlsConfig.getClientCert(), tlsConfig.getClientKey(), connectionTimeout.get(), readTimeout.get(), true);
+        SSLContext sslContext = sslContextProvider.getSSLContext(tlsConfig.getServerCert(), Optional.empty(),
+                tlsConfig.getClientCert(), tlsConfig.getClientKey());
+        Client restClient = RestClientUtil.createClient(sslContext, connectionTimeout.get(), readTimeout.get(), true);
         String yarnApiUrl = getYarnApiUrl(cluster);
         long start = clock.getCurrentTimeMillis();
         InstanceConfig instanceConfig = defaultInstanceConfig();
