@@ -17,6 +17,8 @@ public class NetworkAttributes implements Serializable {
 
     private String networkId;
 
+    private OutboundType outboundType;
+
     private final Class<NetworkAttributes> attributeType = NetworkAttributes.class;
 
     /**
@@ -60,6 +62,14 @@ public class NetworkAttributes implements Serializable {
         this.networkId = networkId;
     }
 
+    public OutboundType getOutboundType() {
+        return outboundType == null ? OutboundType.NOT_DEFINED : outboundType;
+    }
+
+    public void setOutboundType(OutboundType outboundType) {
+        this.outboundType = outboundType;
+    }
+
     @Override
     public String toString() {
         return "NetworkAttributes{" +
@@ -67,6 +77,7 @@ public class NetworkAttributes implements Serializable {
                 ", cloudPlatform='" + cloudPlatform + '\'' +
                 ", resourceGroupName='" + resourceGroupName + '\'' +
                 ", networkId='" + networkId + '\'' +
+                ", outboundType=" + outboundType +
                 ", attributeType=" + attributeType +
                 '}';
     }

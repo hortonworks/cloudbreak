@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Supplier;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 import com.sequenceiq.common.api.type.CommonResourceType;
 import com.sequenceiq.common.api.type.CommonStatus;
@@ -134,6 +135,11 @@ public class CloudResource extends DynamicModel {
     public <T> void setTypedAttributes(T attributes) {
         putParameter(ATTRIBUTES, attributes);
         putParameter(ATTRIBUTE_TYPE, attributes.getClass().getCanonicalName());
+    }
+
+    public <T> T getTypedAttributes(Class<T> type, Supplier<T> defaultSupplier) {
+        T attributes = getParameter(ATTRIBUTES, type);
+        return attributes == null ? defaultSupplier.get() : attributes;
     }
 
     @Override
