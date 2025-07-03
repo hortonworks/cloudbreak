@@ -33,6 +33,7 @@ import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeTriggerRestoreEvent
 import com.sequenceiq.datalake.flow.dr.validation.event.DatalakeTriggerBackupValidationEvent;
 import com.sequenceiq.datalake.flow.dr.validation.event.DatalakeTriggerRestoreValidationEvent;
 import com.sequenceiq.datalake.flow.loadbalancer.dns.event.StartUpdateLoadBalancerDNSEvent;
+import com.sequenceiq.datalake.flow.refresh.event.DatahubRefreshStartEvent;
 import com.sequenceiq.datalake.flow.stop.event.SdxStartStopEvent;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
@@ -99,6 +100,8 @@ public class DatalakeResizeFlowEventChainFactory implements FlowEventChainFactor
         // Update FreeIPA LB DNS entry in case it was deleted during deletion of other DL with same LB endpoint.
         chain.add(new StartUpdateLoadBalancerDNSEvent(UPDATE_LOAD_BALANCER_DNS_IPA_EVENT.event(), event.getResourceId(),
                 event.getSdxCluster().getClusterName(), event.getUserId()));
+
+        chain.add(new DatahubRefreshStartEvent(event.getResourceId(), event.getSdxCluster().getClusterName(), event.getUserId()));
 
         chain.add(new FlowChainFinalizePayload(getName(), event.getResourceId(), event.accepted()));
 
