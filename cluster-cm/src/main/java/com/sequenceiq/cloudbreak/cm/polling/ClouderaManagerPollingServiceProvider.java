@@ -323,7 +323,7 @@ public class ClouderaManagerPollingServiceProvider {
 
     public ExtendedPollingResult startPollingRemoveHostsFromCluster(StackDtoDelegate stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager to finish removal of hosts from cluster. [Server address: {}]", stack.getClusterManagerIp());
-        return pollCommandWithTimeListener(stack, apiClient, commandId, ClouderaManagerPollingTimeoutProvider.getDefaultTimeout(stack.getCloudPlatform()),
+        return pollCommandWithTimeListener(stack, apiClient, commandId, ClouderaManagerPollingTimeoutProvider.getRemoveHostsTimeout(stack.getCloudPlatform()),
                 new ClouderaManagerDefaultListenerTask(clouderaManagerApiPojoFactory, clusterEventService, "Remove hosts from cluster"));
     }
 

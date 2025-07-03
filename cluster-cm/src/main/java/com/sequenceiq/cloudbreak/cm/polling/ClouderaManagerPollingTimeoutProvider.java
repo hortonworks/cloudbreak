@@ -12,6 +12,8 @@ public class ClouderaManagerPollingTimeoutProvider {
 
     private static final long POLL_FOR_ONE_HOUR = TimeUnit.HOURS.toSeconds(1);
 
+    private static final long POLL_FOR_THREE_HOURS = TimeUnit.HOURS.toSeconds(3);
+
     private ClouderaManagerPollingTimeoutProvider() {
 
     }
@@ -28,5 +30,12 @@ public class ClouderaManagerPollingTimeoutProvider {
             return DEFAULT_MOCK_TIMEOUT;
         }
         return POLL_FOR_15_MINUTES;
+    }
+
+    public static long getRemoveHostsTimeout(String cloudPlatform) {
+        if (CloudPlatform.MOCK.equals(CloudPlatform.valueOf(cloudPlatform))) {
+            return DEFAULT_MOCK_TIMEOUT;
+        }
+        return POLL_FOR_THREE_HOURS;
     }
 }

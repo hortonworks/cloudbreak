@@ -529,7 +529,10 @@ public class ClouderaManagerDecommissioner {
                 if (pollingResult.isExited()) {
                     throw new CancellationException("Cluster was terminated while waiting for hosts removal from CM.");
                 } else if (pollingResult.isTimeout()) {
-                    throw new CloudbreakServiceException("Timeout while Cloudera Manager tried to remove hosts from cluster.");
+                    throw new CloudbreakServiceException("Timeout while Cloudera Manager tried to remove hosts from cluster. " +
+                            "If this issue persist, please see the following page to tune HDFS settings: " +
+                            "https://docs.cloudera.com/cloudera-manager/7.12.0/managing-clusters/topics/" +
+                            "cm-tuning-hdfs-prior-to-decommissioning-datanodes.html");
                 }
             } else {
                 LOGGER.debug("Hosts already removed.");
