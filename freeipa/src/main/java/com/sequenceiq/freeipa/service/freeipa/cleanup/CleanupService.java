@@ -170,6 +170,11 @@ public class CleanupService {
     public Pair<Set<String>, Map<String, String>> removeDnsEntries(Long stackId, Set<String> hosts, Set<String> ips, String domain)
             throws FreeIpaClientException {
         FreeIpaClient client = getFreeIpaClient(stackId);
+        return removeDnsEntries(client, hosts, ips, domain);
+    }
+
+    public Pair<Set<String>, Map<String, String>> removeDnsEntries(FreeIpaClient client, Set<String> hosts, Set<String> ips, String domain)
+            throws FreeIpaClientException {
         Set<String> dnsCleanupSuccess = new HashSet<>();
         Map<String, String> dnsCleanupFailed = new HashMap<>();
         Set<String> allDnsZoneName = client.findAllDnsZone().stream().map(DnsZone::getIdnsname).collect(Collectors.toSet());

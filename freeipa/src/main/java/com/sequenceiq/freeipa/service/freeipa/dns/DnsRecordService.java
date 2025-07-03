@@ -32,8 +32,10 @@ import com.sequenceiq.freeipa.client.model.DnsRecord;
 import com.sequenceiq.freeipa.client.model.DnsZone;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.config.FreeIpaDomainUtils;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
+import com.sequenceiq.freeipa.service.freeipa.cleanup.CleanupService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Service
@@ -48,6 +50,9 @@ public class DnsRecordService {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private CleanupService cleanupService;
 
     @Retryable(value = RetryableFreeIpaClientException.class,
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
@@ -95,6 +100,10 @@ public class DnsRecordService {
 
     private FreeIpaAndClient createFreeIpaAndClient(String environmentCrn, String accountId) throws FreeIpaClientException {
         Stack stack = stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
+        return createFreeIpaAndClient(stack);
+    }
+
+    private FreeIpaAndClient createFreeIpaAndClient(Stack stack) throws FreeIpaClientException {
         MDCBuilder.buildMdcContext(stack);
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
         FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
@@ -107,26 +116,26 @@ public class DnsRecordService {
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
     @Measure(DnsRecordService.class)
     public void addDnsARecord(String accountId, @Valid AddDnsARecordRequest request) throws FreeIpaClientException {
-        FreeIpaAndClient freeIpaAndClient = createFreeIpaAndClient(request.getEnvironmentCrn(), accountId);
+        Stack stack = stackService.getByEnvironmentCrnAndAccountId(request.getEnvironmentCrn(), accountId);
+        FreeIpaAndClient freeIpaAndClient = createFreeIpaAndClient(stack);
         LOGGER.info("Processing AddDnsARecordRequest: {}", request);
         String zone = calculateZone(request.getDnsZone(), freeIpaAndClient);
         Optional<DnsRecord> dnsRecord = ignoreNotFoundExceptionWithValue(() -> freeIpaAndClient.getClient().showDnsRecord(zone, request.getHostname()), null);
-        if (dnsRecord.isPresent()) {
-            handleExistingARecord(freeIpaAndClient.getClient(), accountId, request, dnsRecord.get(), zone);
-        } else {
+        if (dnsRecord.isEmpty() && !request.isForce()) {
             createDnsARecord(freeIpaAndClient.getClient(), zone, request.getHostname(), request.getIp(), request.isCreateReverse());
+        } else if (request.isForce() && (dnsRecord.isEmpty() || !dnsRecord.get().getArecord().contains(request.getIp()))) {
+            LOGGER.debug("Force updating DNS record {} based on the requested data: {}", dnsRecord, request);
+            cleanupOldRecords(freeIpaAndClient.getClient(), request, stack);
+            createDnsARecord(freeIpaAndClient.getClient(), zone, request.getHostname(), request.getIp(), request.isCreateReverse());
+        } else {
+            dnsRecord.ifPresent(record -> validateExistingARecordMatchesRequested(request.getIp(), record));
         }
     }
 
-    private void handleExistingARecord(FreeIpaClient freeIpaClient, String accountId, AddDnsARecordRequest request, DnsRecord dnsRecord, String zone)
-            throws FreeIpaClientException {
-        if (request.isForce() && !dnsRecord.getArecord().contains(request.getIp())) {
-            LOGGER.info("Record already exists and the target doesn't match. A Record {}, IP: {}. Deleting record", dnsRecord.getArecord(), request.getIp());
-            deleteDnsRecord(accountId, request.getEnvironmentCrn(), null, request.getHostname());
-            createDnsARecord(freeIpaClient, zone, request.getHostname(), request.getIp(), request.isCreateReverse());
-        } else {
-            validateExistingARecordMatchesRequested(request.getIp(), dnsRecord);
-        }
+    private void cleanupOldRecords(FreeIpaClient freeIpaClient, AddDnsARecordRequest request, Stack stack) throws FreeIpaClientException {
+        FreeIpa freeIpa = freeIpaService.findByStack(stack);
+        String domain = freeIpa.getDomain();
+        cleanupService.removeDnsEntries(freeIpaClient, Set.of(FreeIpaDomainUtils.buildFqdn(request.getHostname(), domain)), Set.of(request.getIp()), domain);
     }
 
     private String calculateZone(String zoneFromRequest, FreeIpaAndClient freeIpaAndClient) throws FreeIpaClientException {

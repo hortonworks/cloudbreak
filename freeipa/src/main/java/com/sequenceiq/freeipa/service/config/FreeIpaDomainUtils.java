@@ -53,7 +53,7 @@ public class FreeIpaDomainUtils {
         return buildFqdn(IPA_CA_HOST, domain);
     }
 
-    private static String buildFqdn(String host, String domain) {
+    public static String buildFqdn(String host, String domain) {
         return host + SEPARATOR + domain;
     }
 
