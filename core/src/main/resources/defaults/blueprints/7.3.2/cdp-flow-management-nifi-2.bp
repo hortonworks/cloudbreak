@@ -252,6 +252,22 @@
               {
                 "name": "nifi.components.status.repository.implementation",
                 "value": "org.apache.nifi.controller.status.history.questdb.EmbeddedQuestDbStatusHistoryRepository"
+              },
+              {
+                "name": "nifi.provenance.repository.max.storage.size",
+                "value": "150 GB"
+              },
+              {
+                "name": "nifi.provenance.repository.rollover.size",
+                "value": "1 GB"
+              },
+              {
+                "name": "nifi.provenance.repository.index.shard.size",
+                "value": "4 GB"
+              },
+              {
+                "name": "nifi.content.repository.archive.max.retention.period",
+                "value": "30 days"
               }
             ]
           }
