@@ -1,9 +1,5 @@
 {%- from 'sssd/ad-settings.sls' import ad with context %}
 
-add_cldr_repo:
-  cmd.run:
-    - name: curl https://mirror.infra.cloudera.com/repos/rhel/server/8/8.10/rhel8.10_cldr_mirrors.repo > /etc/yum.repos.d/rhel8.10_cldr_mirrors.repo
-
 ad_packages_install:
   pkg.installed:
     - pkgs:
