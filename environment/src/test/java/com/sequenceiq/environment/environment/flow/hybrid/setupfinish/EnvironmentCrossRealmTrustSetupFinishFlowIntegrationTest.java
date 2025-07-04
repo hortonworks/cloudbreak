@@ -257,8 +257,7 @@ class EnvironmentCrossRealmTrustSetupFinishFlowIntegrationTest {
                         ENVIRONMENT_ID,
                         ENVIRONMENT_NAME,
                         USER_CRN,
-                        ENVIRONMENT_CRN,
-                        finishCrossRealmTrustRequest
+                        ENVIRONMENT_CRN
                     )
                 );
     }

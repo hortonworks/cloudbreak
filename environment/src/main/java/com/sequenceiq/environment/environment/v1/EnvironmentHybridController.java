@@ -14,13 +14,13 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentHybridEndpoint;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentFinishSetupCrossRealmTrustRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentSetupCrossRealmTrustRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentSetupCrossRealmTrustResponse;
 import com.sequenceiq.environment.credential.v1.converter.EnvironmentHybridConverter;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.service.EnvironmentModificationService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishCrossRealmTrustRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishCrossRealmTrustResponse;
 
 @Controller
@@ -63,7 +63,7 @@ public class EnvironmentHybridController implements EnvironmentHybridEndpoint {
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
-    public FinishCrossRealmTrustResponse finishSetupByName(@ResourceName String environmentName, FinishCrossRealmTrustRequest request) {
+    public FinishCrossRealmTrustResponse finishSetupByName(@ResourceName String environmentName, EnvironmentFinishSetupCrossRealmTrustRequest request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         FlowIdentifier flowIdentifier = environmentModificationService.setupFinishCrossRealmSetup(
                 accountId,
@@ -73,7 +73,7 @@ public class EnvironmentHybridController implements EnvironmentHybridEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
-    public FinishCrossRealmTrustResponse finishSetupByCrn(@ResourceCrn String crn, FinishCrossRealmTrustRequest request) {
+    public FinishCrossRealmTrustResponse finishSetupByCrn(@ResourceCrn String crn, EnvironmentFinishSetupCrossRealmTrustRequest request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         FlowIdentifier flowIdentifier = environmentModificationService.setupFinishCrossRealmSetup(
                 accountId,

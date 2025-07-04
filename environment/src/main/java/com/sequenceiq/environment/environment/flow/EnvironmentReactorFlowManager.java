@@ -55,7 +55,6 @@ import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.service.FlowCancelService;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishCrossRealmTrustRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 
 @Service
@@ -116,8 +115,7 @@ public class EnvironmentReactorFlowManager {
         return sendEvent(environmentCrossRealmTrustSetupEvent, userCrn);
     }
 
-    public FlowIdentifier triggerSetupFinishCrossRealmTrust(long envId, String envName, String userCrn, String envCrn,
-        FinishCrossRealmTrustRequest request) {
+    public FlowIdentifier triggerSetupFinishCrossRealmTrust(long envId, String envName, String userCrn, String envCrn) {
         LOGGER.info("Environment cross realm finish flow triggered.");
         EnvironmentCrossRealmTrustSetupFinishEvent environmentCrossRealmTrustSetupFinishEvent =
                 EnvironmentCrossRealmTrustSetupFinishEvent.builder()

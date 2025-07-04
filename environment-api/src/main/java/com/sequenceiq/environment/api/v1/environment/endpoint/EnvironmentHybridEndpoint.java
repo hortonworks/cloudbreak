@@ -11,11 +11,11 @@ import jakarta.ws.rs.core.MediaType;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentFinishSetupCrossRealmTrustRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentSetupCrossRealmTrustRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentSetupCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaNotes;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishCrossRealmTrustRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishCrossRealmTrustResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -56,7 +56,7 @@ public interface EnvironmentHybridEndpoint {
             useReturnTypeSchema = true))
     FinishCrossRealmTrustResponse finishSetupByName(
             @PathParam("name") String environmentName,
-            @Valid FinishCrossRealmTrustRequest request);
+            @Valid EnvironmentFinishSetupCrossRealmTrustRequest request);
 
     @POST
     @Path("/cross_realm_trust/crn/{crn}/finish_setup")
@@ -66,5 +66,5 @@ public interface EnvironmentHybridEndpoint {
             useReturnTypeSchema = true))
     FinishCrossRealmTrustResponse finishSetupByCrn(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
-            @Valid FinishCrossRealmTrustRequest request);
+            @Valid EnvironmentFinishSetupCrossRealmTrustRequest request);
 }

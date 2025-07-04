@@ -68,7 +68,6 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetIdsRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneNetwork;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishCrossRealmTrustRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 @Service
@@ -231,8 +230,7 @@ public class EnvironmentModificationService {
                 environment.getId(),
                 environment.getName(),
                 environment.getCreator(),
-                environment.getResourceCrn(),
-                new FinishCrossRealmTrustRequest());
+                environment.getResourceCrn());
     }
 
     public Environment getEnvironment(String accountId, NameOrCrn nameOrCrn) {
