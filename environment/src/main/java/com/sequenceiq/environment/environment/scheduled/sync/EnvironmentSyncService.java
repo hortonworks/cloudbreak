@@ -141,12 +141,21 @@ public class EnvironmentSyncService {
 
     public EnvironmentStatus getStatusByFreeipa(Environment environment) {
         Optional<DescribeFreeIpaResponse> freeIpaResponseOpt = freeIpaService.internalDescribe(environment.getResourceCrn(), environment.getAccountId());
-        if (freeIpaResponseOpt.isPresent()) {
-            return FREEIPA_STATUS_TO_ENV_STATUS_MAP.get(freeIpaResponseOpt.get().getStatus());
-        } else if (environment.isCreateFreeIpa()) {
-            return FREEIPA_DELETED_ON_PROVIDER_SIDE;
+        if (isHybridEnvironment(environment)) {
+            return environment.getStatus();
+        } else {
+            if (freeIpaResponseOpt.isPresent()) {
+                return FREEIPA_STATUS_TO_ENV_STATUS_MAP.get(freeIpaResponseOpt.get().getStatus());
+            } else if (environment.isCreateFreeIpa()) {
+                return FREEIPA_DELETED_ON_PROVIDER_SIDE;
+            }
+            return EnvironmentStatus.AVAILABLE;
         }
-        return EnvironmentStatus.AVAILABLE;
+
+    }
+
+    private boolean isHybridEnvironment(Environment environment) {
+        return environment.getEnvironmentType() != null && environment.getEnvironmentType().isHybrid();
     }
 
     @VisibleForTesting

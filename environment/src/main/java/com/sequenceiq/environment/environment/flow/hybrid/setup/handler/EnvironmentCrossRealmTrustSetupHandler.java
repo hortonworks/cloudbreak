@@ -4,6 +4,8 @@ import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SET
 import static com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupHandlerSelectors.TRUST_SETUP_HANDLER;
 import static com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupStateSelectors.FINISH_TRUST_SETUP_EVENT;
 
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -19,6 +21,7 @@ import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 @Component
 public class EnvironmentCrossRealmTrustSetupHandler extends ExceptionCatcherEventHandler<EnvironmentCrossRealmTrustSetupEvent> {
@@ -34,7 +37,8 @@ public class EnvironmentCrossRealmTrustSetupHandler extends ExceptionCatcherEven
     protected EnvironmentCrossRealmTrustSetupHandler(
         FreeIpaService freeIpaService,
         FreeIpaPollerService freePollerIpaService,
-        EnvironmentService environmentService) {
+        EnvironmentService environmentService
+    ) {
         this.freeIpaService = freeIpaService;
         freeIpaPollerService = freePollerIpaService;
         this.environmentService = environmentService;
@@ -60,7 +64,9 @@ public class EnvironmentCrossRealmTrustSetupHandler extends ExceptionCatcherEven
                     data.getResourceCrn(),
                     data.getRemoteEnvironmentCrn());
 
-            freeIpaService.describe(data.getResourceCrn()).ifPresentOrElse(freeIpa -> {
+            Optional<DescribeFreeIpaResponse> describe = freeIpaService.describe(data.getResourceCrn());
+            if (describe.isPresent()) {
+                DescribeFreeIpaResponse freeIpa = describe.get();
                 if (freeIpa.getStatus() == null || freeIpa.getAvailabilityStatus() == null) {
                     throw new FreeIpaOperationFailedException("FreeIPA status is unpredictable, cross realm trust setup interrupted.");
                 } else if (!freeIpa.getStatus().isCrossRealmPreparable()) {
@@ -73,10 +79,7 @@ public class EnvironmentCrossRealmTrustSetupHandler extends ExceptionCatcherEven
                             data.getResourceCrn(),
                             getPrepareCrossRealmTrustRequest(data));
                 }
-            }, () -> {
-                throw new FreeIpaOperationFailedException(String.format("FreeIPA cannot be found for environment %s",
-                        data.getResourceName()));
-            });
+            }
             LOGGER.debug("FINISH_TRUST_SETUP_EVENT event sent");
             return EnvironmentCrossRealmTrustSetupEvent.builder()
                     .withSelector(FINISH_TRUST_SETUP_EVENT.selector())

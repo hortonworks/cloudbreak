@@ -18,7 +18,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupEvent;
 import com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupFailedEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
@@ -92,17 +91,6 @@ class EnvironmentCrossRealmTrustSetupHandlerTest {
         );
 
         assertThat(result.selector()).isEqualTo(FINISH_TRUST_SETUP_EVENT.selector());
-    }
-
-    @Test
-    void testDoAcceptFreeIpaNotFound() {
-        when(freeIpaService.describe(eventData.getResourceCrn()))
-                .thenReturn(Optional.empty());
-
-        Selectable result = handler.doAccept(event);
-
-        assertThat(result).isInstanceOf(EnvironmentCrossRealmTrustSetupFailedEvent.class);
-        assertThat(((EnvironmentCrossRealmTrustSetupFailedEvent) result).getEnvironmentStatus()).isEqualTo(EnvironmentStatus.TRUST_SETUP_FAILED);
     }
 
     @Test

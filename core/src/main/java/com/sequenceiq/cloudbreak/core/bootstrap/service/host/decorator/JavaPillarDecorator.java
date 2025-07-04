@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator;
 
+import static com.sequenceiq.common.api.type.EnvironmentType.isHybridFromEnvironmentTypeString;
 import static java.util.Collections.singletonMap;
 
 import java.util.Arrays;
@@ -21,7 +22,6 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.util.CertProcessor;
-import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
@@ -56,7 +56,7 @@ public class JavaPillarDecorator {
     }
 
     private Map<String, Object> createCertificatePillar(StackDto stackDto, DetailedEnvironmentResponse detailedEnvironmentResponse) {
-        if (EnvironmentType.isHybrid(detailedEnvironmentResponse.getEnvironmentType())
+        if (isHybridFromEnvironmentTypeString(detailedEnvironmentResponse.getEnvironmentType())
                 && StringUtils.isNotBlank(detailedEnvironmentResponse.getRemoteEnvironmentCrn())
                 && StackType.WORKLOAD == stackDto.getType()) {
             Optional<String> caCertificates = sdxConnector.getCACertsForEnvironment(detailedEnvironmentResponse.getCrn());

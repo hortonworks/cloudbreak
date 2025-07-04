@@ -1,9 +1,23 @@
 package com.sequenceiq.environment.environment.flow.hybrid.setup.action;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_TRUST_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_TRUST_FINISHED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_TRUST_STARTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_TRUST_VALIDATION_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_TRUST_VALIDATION_STARTED;
+import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SETUP_FINISH_REQUIRED;
+import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SETUP_IN_PROGRESS;
+import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SETUP_VALIDATION_IN_PROGRESS;
+import static com.sequenceiq.environment.environment.flow.hybrid.setup.EnvironmentCrossRealmTrustSetupState.TRUST_SETUP_FAILED_STATE;
+import static com.sequenceiq.environment.environment.flow.hybrid.setup.EnvironmentCrossRealmTrustSetupState.TRUST_SETUP_FINISHED_STATE;
+import static com.sequenceiq.environment.environment.flow.hybrid.setup.EnvironmentCrossRealmTrustSetupState.TRUST_SETUP_STATE;
+import static com.sequenceiq.environment.environment.flow.hybrid.setup.EnvironmentCrossRealmTrustSetupState.TRUST_SETUP_VALIDATION_STATE;
 import static com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupHandlerSelectors.TRUST_SETUP_HANDLER;
 import static com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupHandlerSelectors.TRUST_SETUP_VALIDATION_HANDLER;
 import static com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupStateSelectors.FINALIZE_TRUST_SETUP_EVENT;
 import static com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupStateSelectors.HANDLED_FAILED_TRUST_SETUP_EVENT;
+import static com.sequenceiq.environment.metrics.MetricType.ENV_TRUST_SETUP_FAILED;
+import static com.sequenceiq.environment.metrics.MetricType.ENV_TRUST_SETUP_FINISHED;
 
 import java.util.Map;
 
@@ -23,7 +37,6 @@ import com.sequenceiq.environment.environment.flow.hybrid.setup.event.Environmen
 import com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupStateSelectors;
 import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateService;
 import com.sequenceiq.environment.metrics.EnvironmentMetricService;
-import com.sequenceiq.environment.metrics.MetricType;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -53,9 +66,9 @@ public class EnvironmentCrossRealmTrustSetupActions {
                         .updateEnvironmentStatusAndNotify(
                                 context,
                                 payload,
-                                EnvironmentStatus.TRUST_SETUP_VALIDATION_IN_PROGRESS,
-                                ResourceEvent.ENVIRONMENT_SETUP_TRUST_VALIDATION_STARTED,
-                                EnvironmentCrossRealmTrustSetupState.TRUST_SETUP_VALIDATION_STATE);
+                                TRUST_SETUP_VALIDATION_IN_PROGRESS,
+                                ENVIRONMENT_SETUP_TRUST_VALIDATION_STARTED,
+                                TRUST_SETUP_VALIDATION_STATE);
                 sendEvent(context, TRUST_SETUP_VALIDATION_HANDLER.selector(), payload);
             }
         };
@@ -68,9 +81,12 @@ public class EnvironmentCrossRealmTrustSetupActions {
             @Override
             protected void doExecute(CommonContext context, EnvironmentCrossRealmTrustSetupEvent payload, Map<Object, Object> variables) {
                 environmentStatusUpdateService
-                        .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.TRUST_SETUP_IN_PROGRESS,
-                                ResourceEvent.ENVIRONMENT_SETUP_TRUST_STARTED,
-                                EnvironmentCrossRealmTrustSetupState.TRUST_SETUP_STATE);
+                        .updateEnvironmentStatusAndNotify(
+                                context,
+                                payload,
+                                TRUST_SETUP_IN_PROGRESS,
+                                ENVIRONMENT_SETUP_TRUST_STARTED,
+                                TRUST_SETUP_STATE);
                 sendEvent(context, TRUST_SETUP_HANDLER.selector(), payload);
             }
         };
@@ -82,10 +98,13 @@ public class EnvironmentCrossRealmTrustSetupActions {
             @Override
             protected void doExecute(CommonContext context, EnvironmentCrossRealmTrustSetupEvent payload, Map<Object, Object> variables) {
                 EnvironmentDto environmentDto = environmentStatusUpdateService
-                        .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.TRUST_SETUP_FINISH_REQUIRED,
-                                ResourceEvent.ENVIRONMENT_SETUP_TRUST_FINISHED,
-                                EnvironmentCrossRealmTrustSetupState.TRUST_SETUP_FINISHED_STATE);
-                metricService.incrementMetricCounter(MetricType.ENV_TRUST_SETUP_FINISHED, environmentDto);
+                        .updateEnvironmentStatusAndNotify(
+                                context,
+                                payload,
+                                TRUST_SETUP_FINISH_REQUIRED,
+                                ENVIRONMENT_SETUP_TRUST_FINISHED,
+                                TRUST_SETUP_FINISHED_STATE);
+                metricService.incrementMetricCounter(ENV_TRUST_SETUP_FINISHED, environmentDto);
                 sendEvent(context, FINALIZE_TRUST_SETUP_EVENT.event(), payload);
             }
         };
@@ -108,19 +127,20 @@ public class EnvironmentCrossRealmTrustSetupActions {
                 LOGGER.error(String.format("Failed to setup Cross Realm Trust in environment status: '%s'.",
                         payload.getEnvironmentStatus()), payload.getException());
                 EnvironmentDto environmentDto = environmentStatusUpdateService
-                        .updateFailedEnvironmentStatusAndNotify(context,
+                        .updateFailedEnvironmentStatusAndNotify(
+                                context,
                                 payload,
                                 payload.getEnvironmentStatus(),
                                 convertStatus(payload.getEnvironmentStatus()),
-                                EnvironmentCrossRealmTrustSetupState.TRUST_SETUP_FAILED_STATE);
-                metricService.incrementMetricCounter(MetricType.ENV_TRUST_SETUP_FAILED, environmentDto, payload.getException());
+                                TRUST_SETUP_FAILED_STATE);
+                metricService.incrementMetricCounter(ENV_TRUST_SETUP_FAILED, environmentDto, payload.getException());
                 sendEvent(context, HANDLED_FAILED_TRUST_SETUP_EVENT.event(), payload);
             }
 
             private ResourceEvent convertStatus(EnvironmentStatus status) {
                 return switch (status) {
-                    case TRUST_SETUP_VALIDATION_FAILED -> ResourceEvent.ENVIRONMENT_SETUP_TRUST_VALIDATION_FAILED;
-                    default -> ResourceEvent.ENVIRONMENT_SETUP_TRUST_FAILED;
+                    case TRUST_SETUP_VALIDATION_FAILED -> ENVIRONMENT_SETUP_TRUST_VALIDATION_FAILED;
+                    default -> ENVIRONMENT_SETUP_TRUST_FAILED;
                 };
             }
         };
