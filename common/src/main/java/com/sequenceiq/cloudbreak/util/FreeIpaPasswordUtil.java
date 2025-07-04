@@ -16,41 +16,44 @@ public class FreeIpaPasswordUtil {
 
     private static final String SPECIAL_CHARS = "?.-_+";
 
-    private static final int MAX_ATTEMPTS = 1000;
+    private static final int MAX_ATTEMPTS = 100000;
+
+    private static final int MIN_INPUT_LENGTH = 3;
 
     private FreeIpaPasswordUtil() {
     }
 
     public static String generatePassword() {
+        int attempts = 0;
+        String generatedPassword = generateRandomPassword();
+        while (hasTripleRepeatingCharacters(generatedPassword)) {
+            if (attempts > MAX_ATTEMPTS) {
+                throw new IllegalStateException("Cannot generate password without 3 repeating characters");
+            }
+            generatedPassword = generateRandomPassword();
+            attempts++;
+        }
+        return generatedPassword;
+    }
+
+    private static String generateRandomPassword() {
         String upperCaseLetters = PasswordUtil.getRandomAlphabetic(PWD_PART_LENGTH).toUpperCase(Locale.ROOT);
         String lowerCaseLetters = PasswordUtil.getRandomAlphabetic(PWD_PART_LENGTH).toLowerCase(Locale.ROOT);
-        String pwdPrefix = doNotRepeatCharacters(PasswordUtil.getRandomAlphabetic(PWD_PREFIX_LENGTH));
+        String pwdPrefix = PasswordUtil.getRandomAlphabetic(PWD_PREFIX_LENGTH);
         String numbers = PasswordUtil.getRandomNumeric(PWD_PART_LENGTH);
         String raw = upperCaseLetters.concat(lowerCaseLetters).concat(numbers).concat(SPECIAL_CHARS);
         List<String> list = Arrays.asList(raw.split(""));
         Collections.shuffle(list, SECURE_RANDOM);
-        return pwdPrefix.concat(doNotRepeatCharacters(String.join("", list)));
+        return pwdPrefix.concat(String.join("", list));
     }
 
-    public static String doNotRepeatCharacters(String random) {
-        int attempts = 0;
-        String randomToCheck = random;
-        while (hasTripleRepeat(randomToCheck)) {
-            if (attempts > MAX_ATTEMPTS) {
-                throw new IllegalStateException("Cannot generate password without repeating characters");
-            }
-            List<String> list = Arrays.asList(randomToCheck.split(""));
-            Collections.shuffle(list, SECURE_RANDOM);
-            randomToCheck = String.join("", list);
-            attempts++;
+    public static boolean hasTripleRepeatingCharacters(String input) {
+        if (input == null || input.length() < MIN_INPUT_LENGTH) {
+            return false;
         }
-        return randomToCheck;
-    }
-
-    private static boolean hasTripleRepeat(String random) {
-        for (int i = 0; i < random.length() - 2; i++) {
-            char c = random.charAt(i);
-            if (c == random.charAt(i + 1) && c == random.charAt(i + 2)) {
+        for (int i = 0; i < input.length() - 2; i++) {
+            char c = input.charAt(i);
+            if (c == input.charAt(i + 1) && c == input.charAt(i + 2)) {
                 return true;
             }
         }

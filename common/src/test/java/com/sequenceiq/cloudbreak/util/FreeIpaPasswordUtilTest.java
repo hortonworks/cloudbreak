@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Set;
 
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 class FreeIpaPasswordUtilTest {
@@ -18,35 +19,32 @@ class FreeIpaPasswordUtilTest {
         assertEquals(32, actual.length());
     }
 
-    @Test
+    @RepeatedTest(10000)
     void testGeneratePassword() {
         String actual = FreeIpaPasswordUtil.generatePassword();
         long characterClasses = PATTERNS.stream().filter(actual::matches).count();
 
         assertEquals(4, characterClasses);
+        assertFalse(FreeIpaPasswordUtil.hasTripleRepeatingCharacters(actual));
     }
 
     @Test
-    void testDoNotRepeatCharactersWhenStringLenghtIsTooShort() {
-        String result = FreeIpaPasswordUtil.doNotRepeatCharacters("aa");
-        assertEquals("aa", result);
+    void testHasTripleRepeatingCharactersWhenNull() {
+        assertFalse(FreeIpaPasswordUtil.hasTripleRepeatingCharacters(null));
     }
 
     @Test
-    void testDoNotRepeatCharactersWhenThreeSameCharacter() {
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> FreeIpaPasswordUtil.doNotRepeatCharacters("aaa"));
-        assertEquals("Cannot generate password without repeating characters", exception.getMessage());
+    void testHasTripleRepeatingCharactersWhenLenghtIsShort() {
+        assertFalse(FreeIpaPasswordUtil.hasTripleRepeatingCharacters("aa"));
     }
 
     @Test
-    void testDoNotRepeatCharactersWhenInputContainsInvalidSequence() {
-        String result = FreeIpaPasswordUtil.doNotRepeatCharacters("aaa1");
-        assertNotEquals("aaa1", result);
+    void testHasTripleRepeatWhenNoTripleRepeatingCharacters() {
+        assertFalse(FreeIpaPasswordUtil.hasTripleRepeatingCharacters("aabbccdd"));
     }
 
     @Test
-    void testDoNotRepeatCharactersWhenInputDoesNotContainInvalidSequence() {
-        String result = FreeIpaPasswordUtil.doNotRepeatCharacters("abcd");
-        assertEquals("abcd", result);
+    void testHasTripleRepeatWhenTripeRepeatingCharacters() {
+        assertTrue(FreeIpaPasswordUtil.hasTripleRepeatingCharacters("aaa"));
     }
 }
