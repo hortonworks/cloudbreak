@@ -190,7 +190,7 @@ public class SdxResizeTestValidator {
                             getInstanceGroupByName(customInstanceGroup.getName(), instanceGroupV4Responses)
                                     .ifPresent(instanceGroup -> {
                                         if (customInstanceGroup.getInstanceType().equals(instanceGroup.getTemplate().getInstanceType())) {
-                                            fail("custom instanceType is already the expected instanceType before resize" +
+                                            fail("custom instanceType is already the expected instanceType before resize: " +
                                                             customInstanceGroup.getName(),
                                                     customInstanceGroup.getInstanceType(),
                                                     instanceGroup.getTemplate().getInstanceType());

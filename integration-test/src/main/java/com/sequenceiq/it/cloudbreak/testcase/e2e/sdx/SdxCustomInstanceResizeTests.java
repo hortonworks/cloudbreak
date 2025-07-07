@@ -46,7 +46,7 @@ public class SdxCustomInstanceResizeTests extends PreconditionSdxE2ETest {
         String instanceType = switch (testContext.getCloudPlatform().name().toLowerCase()) {
             case "aws" -> "m5.4xlarge";
             case "azure" -> "Standard_D8s_v3";
-            case "gcp" -> "e2-standard-8";
+            case "gcp" -> "n2-standard-8";
             default -> throw new TestFailException("Custom instanceType has no value for cloud platform:" + testContext.getCloudPlatform().name());
         };
 
