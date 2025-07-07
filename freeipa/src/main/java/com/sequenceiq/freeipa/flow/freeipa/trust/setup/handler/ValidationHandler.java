@@ -14,7 +14,7 @@ import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.TrustSetupValidationFailed;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.TrustSetupValidationRequest;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.TrustSetupValidationSuccess;
-import com.sequenceiq.freeipa.service.freeipa.trust.setup.ValidationService;
+import com.sequenceiq.freeipa.service.freeipa.trust.setup.TrustSetupValidationService;
 
 @Component
 public class ValidationHandler extends ExceptionCatcherEventHandler<TrustSetupValidationRequest> {
@@ -22,7 +22,7 @@ public class ValidationHandler extends ExceptionCatcherEventHandler<TrustSetupVa
     private static final Logger LOGGER = LoggerFactory.getLogger(ValidationHandler.class);
 
     @Inject
-    private ValidationService validationService;
+    private TrustSetupValidationService validationService;
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<TrustSetupValidationRequest> event) {

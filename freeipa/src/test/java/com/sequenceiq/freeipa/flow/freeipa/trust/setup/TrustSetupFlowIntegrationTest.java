@@ -66,7 +66,7 @@ import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.freeipa.trust.setup.ConfigureDnsServerService;
 import com.sequenceiq.freeipa.service.freeipa.trust.setup.PrepareIpaServerService;
-import com.sequenceiq.freeipa.service.freeipa.trust.setup.ValidationService;
+import com.sequenceiq.freeipa.service.freeipa.trust.setup.TrustSetupValidationService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
@@ -137,7 +137,7 @@ class TrustSetupFlowIntegrationTest {
     private NodeValidator nodeValidator;
 
     @MockBean
-    private ValidationService validationService;
+    private TrustSetupValidationService validationService;
 
     @MockBean
     private PrepareIpaServerService prepareIpaServerService;
