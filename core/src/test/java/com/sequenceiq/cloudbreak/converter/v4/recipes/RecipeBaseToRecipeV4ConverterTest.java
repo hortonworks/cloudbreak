@@ -22,9 +22,9 @@ public class RecipeBaseToRecipeV4ConverterTest extends AbstractJsonConverterTest
     public void testConvert() {
         // GIVEN
         // WHEN
-        Recipe result = underTest.convert(getRequest("recipe.json"));
+        Recipe result = underTest.convert(getRequest("recipe.json"), "accountId");
         // THEN
-        assertAllFieldsNotNull(result, List.of("creator", "resourceCrn", "created"));
+        assertAllFieldsNotNull(result, List.of("creator", "resourceCrn", "created", "accountId"));
     }
 
     @Override

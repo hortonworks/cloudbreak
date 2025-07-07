@@ -282,6 +282,21 @@ public class RecipeServiceTest {
     }
 
     @Test
+    public void testCreateWhenAccountReachedMaxRecipeLimit() {
+        Recipe recipe = getRecipe();
+        when(recipeRepository.countByAccountId("account_id")).thenReturn(2501);
+
+        String userCrn = CrnTestUtil.getUserCrnBuilder()
+                .setResource("user_id")
+                .setAccountId("account_id")
+                .build().toString();
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(userCrn, () -> underTest.createForLoggedInUser(recipe, 1L, "account_id", userCrn)));
+
+        assertEquals("Max recipe limit reached in account. Please remove unused recipes.", exception.getMessage());
+    }
+
+    @Test
     public void testCreateWithInternalUser() {
         Recipe recipe = getRecipe();
         recipe.setCreator(null);

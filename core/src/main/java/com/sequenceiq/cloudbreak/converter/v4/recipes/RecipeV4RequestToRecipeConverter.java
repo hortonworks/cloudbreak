@@ -11,13 +11,14 @@ import com.sequenceiq.cloudbreak.domain.Recipe;
 @Component
 public class RecipeV4RequestToRecipeConverter {
 
-    public Recipe convert(RecipeV4Request source) {
+    public Recipe convert(RecipeV4Request source, String accountId) {
         Recipe recipe = new Recipe();
         recipe.setName(source.getName());
         recipe.setDescription(source.getDescription());
         recipe.setRecipeType(recipeType(source.getType()));
         recipe.setContent(source.getContent());
         recipe.setCreationType(CreationType.USER);
+        recipe.setAccountId(accountId);
         return recipe;
     }
 

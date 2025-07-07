@@ -57,6 +57,8 @@ public class RecipeService extends AbstractArchivistService<Recipe> implements C
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecipeService.class);
 
+    private static final int MAX_RECIPE_SIZE_PER_WORKSPACE = 2500;
+
     @Inject
     private RecipeRepository recipeRepository;
 
@@ -158,6 +160,9 @@ public class RecipeService extends AbstractArchivistService<Recipe> implements C
         if (recipeViewRepository.findByNameAndWorkspaceId(recipe.getName(), workspaceId).isPresent()) {
             String message = String.format("%s already exists with name '%s'", recipe.getResourceName(), recipe.getName());
             throw new BadRequestException(message);
+        }
+        if (recipeRepository.countByAccountId(accountId) >= MAX_RECIPE_SIZE_PER_WORKSPACE) {
+            throw new BadRequestException("Max recipe limit reached in account. Please remove unused recipes.");
         }
         String resourceCrn = createCRN(accountId);
         recipe.setResourceCrn(resourceCrn);

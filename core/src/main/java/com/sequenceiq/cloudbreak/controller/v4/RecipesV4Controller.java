@@ -113,7 +113,7 @@ public class RecipesV4Controller extends NotificationController implements Recip
     public RecipeV4Response post(Long workspaceId, RecipeV4Request request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         String creator = ThreadBasedUserCrnProvider.getUserCrn();
-        Recipe recipeToSave = recipeV4RequestToRecipeConverter.convert(request);
+        Recipe recipeToSave = recipeV4RequestToRecipeConverter.convert(request, accountId);
         Recipe recipe = recipeService.createForLoggedInUser(recipeToSave, restRequestThreadLocalService.getRequestedWorkspaceId(), accountId, creator);
         notify(ResourceEvent.RECIPE_CREATED);
         return recipeToRecipeV4ResponseConverter.convert(recipe);
@@ -122,7 +122,7 @@ public class RecipesV4Controller extends NotificationController implements Recip
     @Override
     @InternalOnly
     public RecipeV4Response postInternal(@AccountId String accountId, Long workspaceId, RecipeV4Request request) {
-        Recipe recipeToSave = recipeV4RequestToRecipeConverter.convert(request);
+        Recipe recipeToSave = recipeV4RequestToRecipeConverter.convert(request, accountId);
         Recipe recipe = recipeService.createWithInternalUser(recipeToSave,
                 restRequestThreadLocalService.getRequestedWorkspaceId(), accountId);
         notify(ResourceEvent.RECIPE_CREATED);

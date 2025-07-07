@@ -75,8 +75,14 @@ public class Recipe implements ProvisionEntity, WorkspaceAwareResource, Archivab
     @Convert(converter = CreationTypeConverter.class)
     private CreationType creationType;
 
+    private String accountId;
+
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     /**
@@ -103,10 +109,6 @@ public class Recipe implements ProvisionEntity, WorkspaceAwareResource, Archivab
 
     public void setResourceCrn(String resourceCrn) {
         this.resourceCrn = resourceCrn;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     @Override
@@ -138,6 +140,10 @@ public class Recipe implements ProvisionEntity, WorkspaceAwareResource, Archivab
         return content.getRaw();
     }
 
+    public void setContent(String content) {
+        this.content = new Secret(content);
+    }
+
     public String getContentSecret() {
         return content.getSecret();
     }
@@ -146,12 +152,18 @@ public class Recipe implements ProvisionEntity, WorkspaceAwareResource, Archivab
         return archived;
     }
 
+    @Override
+    public void setArchived(boolean archived) {
+        this.archived = archived;
+    }
+
     public Long getDeletionTimestamp() {
         return deletionTimestamp;
     }
 
-    public void setContent(String content) {
-        this.content = new Secret(content);
+    @Override
+    public void setDeletionTimestamp(Long timestampMillisecs) {
+        deletionTimestamp = timestampMillisecs;
     }
 
     @Override
@@ -162,16 +174,6 @@ public class Recipe implements ProvisionEntity, WorkspaceAwareResource, Archivab
     @Override
     public void setWorkspace(Workspace workspace) {
         this.workspace = workspace;
-    }
-
-    @Override
-    public void setDeletionTimestamp(Long timestampMillisecs) {
-        deletionTimestamp = timestampMillisecs;
-    }
-
-    @Override
-    public void setArchived(boolean archived) {
-        this.archived = archived;
     }
 
     @Override
@@ -210,6 +212,14 @@ public class Recipe implements ProvisionEntity, WorkspaceAwareResource, Archivab
         return null;
     }
 
+    public String getAccountId() {
+        return accountId;
+    }
+
+    public void setAccountId(String accountId) {
+        this.accountId = accountId;
+    }
+
     @Override
     public String toString() {
         return "Recipe{" +
@@ -224,6 +234,7 @@ public class Recipe implements ProvisionEntity, WorkspaceAwareResource, Archivab
                 ", deletionTimestamp=" + deletionTimestamp +
                 ", created=" + created +
                 ", creationType=" + creationType +
+                ", accountId=" + accountId +
                 '}';
     }
 }
