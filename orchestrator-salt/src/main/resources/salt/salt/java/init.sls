@@ -136,7 +136,7 @@ change_krb5_conf_crypto_policies:
 
 import_pdl_certs:
   cmd.run:
-    - name: /opt/salt/scripts/import_pdl_certs.sh
+    - name: /opt/salt/scripts/import_pdl_certs.sh 2>&1 | tee -a /var/log/import_certs.log && exit ${PIPESTATUS[0]}
     - failhard: True
     - require:
         - file: /opt/salt/scripts/import_pdl_certs.sh
