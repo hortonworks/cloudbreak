@@ -406,11 +406,6 @@ public class AzureResourceConnector extends AbstractResourceConnector {
         List<CloudResourceStatus> result = new ArrayList<>();
         AzureClient client = authenticatedContext.getParameter(AzureClient.class);
         String stackName = azureUtils.getStackName(authenticatedContext.getCloudContext());
-
-        providerResourceSyncers.stream()
-                .filter(syncer -> syncer.platform().equals(authenticatedContext.getCloudContext().getPlatform()))
-                .forEach(syncer -> result.addAll(syncer.sync(authenticatedContext, resources)));
-
         for (CloudResource resource : resources) {
             ResourceType resourceType = resource.getType();
             if (resourceType == ResourceType.ARM_TEMPLATE) {
@@ -422,6 +417,16 @@ public class AzureResourceConnector extends AbstractResourceConnector {
                 }
             }
         }
+        return result;
+    }
+
+    @Override
+    public List<CloudResourceStatus> checkForSyncer(AuthenticatedContext authenticatedContext, List<CloudResource> resources) {
+        List<CloudResourceStatus> result = new ArrayList<>();
+        providerResourceSyncers.stream()
+                .filter(syncer -> syncer.platform().equals(authenticatedContext.getCloudContext().getPlatform()))
+                .forEach(syncer -> result.addAll(syncer.sync(authenticatedContext, resources)));
+        LOGGER.debug("Resource sync result: {}", result);
         return result;
     }
 
