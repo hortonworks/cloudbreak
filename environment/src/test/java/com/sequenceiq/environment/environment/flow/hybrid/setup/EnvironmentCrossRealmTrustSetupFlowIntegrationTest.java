@@ -68,7 +68,7 @@ import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
 import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
-import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentSetupCrossRealmTrustRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.SetupCrossRealmTrustRequest;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
@@ -251,12 +251,12 @@ class EnvironmentCrossRealmTrustSetupFlowIntegrationTest {
     }
 
     private FlowIdentifier triggerFlow() {
-        EnvironmentSetupCrossRealmTrustRequest environmentSetupCrossRealmTrustRequest = new EnvironmentSetupCrossRealmTrustRequest();
-        environmentSetupCrossRealmTrustRequest.setRealm("realm");
-        environmentSetupCrossRealmTrustRequest.setTrustSecret("trust-secret");
-        environmentSetupCrossRealmTrustRequest.setFqdn("fqdn");
-        environmentSetupCrossRealmTrustRequest.setIp("10.0.0.1");
-        environmentSetupCrossRealmTrustRequest.setRemoteEnvironmentCrn("remoteenvcrn");
+        SetupCrossRealmTrustRequest setupCrossRealmTrustRequest = new SetupCrossRealmTrustRequest();
+        setupCrossRealmTrustRequest.setRealm("realm");
+        setupCrossRealmTrustRequest.setTrustSecret("trust-secret");
+        setupCrossRealmTrustRequest.setFqdn("fqdn");
+        setupCrossRealmTrustRequest.setIp("10.0.0.1");
+        setupCrossRealmTrustRequest.setRemoteEnvironmentCrn("remoteenvcrn");
         return ThreadBasedUserCrnProvider.doAs(
                 USER_CRN,
                 () -> environmentReactorFlowManager.triggerSetupCrossRealmTrust(
@@ -265,7 +265,7 @@ class EnvironmentCrossRealmTrustSetupFlowIntegrationTest {
                         ENVIRONMENT_NAME,
                         USER_CRN,
                         ENVIRONMENT_CRN,
-                        environmentSetupCrossRealmTrustRequest
+                        setupCrossRealmTrustRequest
                 )
         );
     }

@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(name = "FinishCrossRealmTrustRequest")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class FinishCrossRealmTrustRequest extends FinishCrossRealmTrustBase {
+public class FinishSetupCrossRealmTrustRequest extends FinishSetupCrossRealmTrustBase {
     @Override
     public String toString() {
         return "FinishCrossRealmTrustRequest{} " + super.toString();

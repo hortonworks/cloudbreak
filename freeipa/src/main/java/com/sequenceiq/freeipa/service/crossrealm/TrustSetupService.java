@@ -15,8 +15,8 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishCrossRealmTrustRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishCrossRealmTrustResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupCrossRealmTrustRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
@@ -88,7 +88,7 @@ public class TrustSetupService {
         LOGGER.debug("Saved cross-realm trust configuration: {}", crossRealmTrust);
     }
 
-    public FinishCrossRealmTrustResponse finishTrustSetup(String accountId, FinishCrossRealmTrustRequest request) {
+    public FinishSetupCrossRealmTrustResponse finishTrustSetup(String accountId, FinishSetupCrossRealmTrustRequest request) {
         String environmentCrn = request.getEnvironmentCrn();
         Stack stack = stackService.getFreeIpaStackWithMdcContext(environmentCrn, accountId);
 
@@ -101,7 +101,7 @@ public class TrustSetupService {
         FinishTrustSetupEvent finishTrustSetupEvent = new FinishTrustSetupEvent(stack.getId(), operation.getOperationId());
         FlowIdentifier flowIdentifier = flowManager.notify(finishTrustSetupEvent.selector(), finishTrustSetupEvent);
 
-        FinishCrossRealmTrustResponse response = new FinishCrossRealmTrustResponse();
+        FinishSetupCrossRealmTrustResponse response = new FinishSetupCrossRealmTrustResponse();
         response.setFlowIdentifier(flowIdentifier);
         response.setOperationStatus(operationConverter.convert(operation));
         BeanUtils.copyProperties(request, response);

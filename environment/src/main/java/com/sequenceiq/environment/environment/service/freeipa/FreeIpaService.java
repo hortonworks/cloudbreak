@@ -26,8 +26,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.flow.FreeIpaV1FlowEndpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishCrossRealmTrustRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishCrossRealmTrustResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupCrossRealmTrustRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
@@ -274,7 +274,7 @@ public class FreeIpaService {
         }
     }
 
-    public FinishCrossRealmTrustResponse crossRealmFinish(String environmentCrn, FinishCrossRealmTrustRequest finishCrossRealmTrustRequest) {
+    public FinishSetupCrossRealmTrustResponse crossRealmFinish(String environmentCrn, FinishSetupCrossRealmTrustRequest finishCrossRealmTrustRequest) {
         try {
             LOGGER.debug("Calling FreeIPA cross realm finish for environment {}", environmentCrn);
             return ThreadBasedUserCrnProvider.doAsInternalActor(

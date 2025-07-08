@@ -17,8 +17,8 @@ import com.sequenceiq.environment.environment.poller.FreeIpaPollerProvider;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishCrossRealmTrustRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishCrossRealmTrustResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupCrossRealmTrustRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
@@ -145,8 +145,8 @@ public class FreeIpaPollerService {
         }
     }
 
-    public void waitForCrossRealmFinish(Long envId, String envCrn, FinishCrossRealmTrustRequest finishCrossRealmTrustRequest) {
-        FinishCrossRealmTrustResponse response = freeIpaService.crossRealmFinish(envCrn, finishCrossRealmTrustRequest);
+    public void waitForCrossRealmFinish(Long envId, String envCrn, FinishSetupCrossRealmTrustRequest finishCrossRealmTrustRequest) {
+        FinishSetupCrossRealmTrustResponse response = freeIpaService.crossRealmFinish(envCrn, finishCrossRealmTrustRequest);
         if (response.getFlowIdentifier() != null) {
             try {
                 Polling.stopAfterAttempt(crossRealmAttempt)

@@ -27,7 +27,7 @@ import com.sequenceiq.environment.environment.service.freeipa.FreeIpaPollerServi
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishCrossRealmTrustRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupCrossRealmTrustRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 @ExtendWith(MockitoExtension.class)
@@ -74,7 +74,7 @@ class EnvironmentCrossRealmTrustSetupFinishHandlerTest {
 
         handler.accept(event);
 
-        verify(freeIpaPollerService).waitForCrossRealmFinish(eq(RESOURCE_ID), eq(RESOURCE_CRN), any(FinishCrossRealmTrustRequest.class));
+        verify(freeIpaPollerService).waitForCrossRealmFinish(eq(RESOURCE_ID), eq(RESOURCE_CRN), any(FinishSetupCrossRealmTrustRequest.class));
     }
 
     @Test

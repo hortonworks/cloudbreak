@@ -12,9 +12,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(name = "EnvironmentSetupV1CrossRealmTrustRequest")
+@Schema(name = "SetupCrossRealmTrustV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class EnvironmentSetupCrossRealmTrustRequest {
+public class SetupCrossRealmTrustRequest {
 
     @NotEmpty
     @Schema(description = FQDN, requiredMode = Schema.RequiredMode.REQUIRED)
@@ -77,7 +77,7 @@ public class EnvironmentSetupCrossRealmTrustRequest {
 
     @Override
     public String toString() {
-        return "EnvironmentPrepareCrossRealmTrustRequest{" +
+        return "SetupCrossRealmTrustRequest{" +
                 "fqdn='" + fqdn + '\'' +
                 ", ip='" + ip + '\'' +
                 ", realm='" + realm + '\'' +

@@ -7,10 +7,10 @@ import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(name = "PrepareCrossRealmTrustResponse")
+@Schema(name = "FinishSetupV1CrossRealmTrustResponse")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class FinishCrossRealmTrustResponse extends FinishCrossRealmTrustBase {
+public class FinishSetupCrossRealmTrustResponse extends FinishSetupCrossRealmTrustBase {
 
     private FlowIdentifier flowIdentifier;
 
@@ -34,7 +34,7 @@ public class FinishCrossRealmTrustResponse extends FinishCrossRealmTrustBase {
 
     @Override
     public String toString() {
-        return "PrepareCrossRealmTrustResponse{" +
+        return "FinishSetupCrossRealmTrustResponse{" +
                 "flowIdentifier=" + flowIdentifier +
                 ", operationStatus=" + operationStatus +
                 "} " + super.toString();

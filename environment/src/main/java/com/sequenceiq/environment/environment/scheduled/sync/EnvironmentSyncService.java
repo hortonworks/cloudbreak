@@ -4,12 +4,6 @@ import static com.sequenceiq.environment.environment.EnvironmentStatus.ENV_STOPP
 import static com.sequenceiq.environment.environment.EnvironmentStatus.FREEIPA_CREATION_IN_PROGRESS;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.FREEIPA_DELETED_ON_PROVIDER_SIDE;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.FREEIPA_DELETE_IN_PROGRESS;
-import static com.sequenceiq.environment.environment.EnvironmentStatus.FREEIPA_FINISH_CROSS_REALM_TRUST_FAILED;
-import static com.sequenceiq.environment.environment.EnvironmentStatus.FREEIPA_FINISH_CROSS_REALM_TRUST_IN_PROGRESS;
-import static com.sequenceiq.environment.environment.EnvironmentStatus.FREEIPA_FINISH_CROSS_REALM_TRUST_SUCCESSFUL;
-import static com.sequenceiq.environment.environment.EnvironmentStatus.FREEIPA_PREPARE_CROSS_REALM_TRUST_FAILED;
-import static com.sequenceiq.environment.environment.EnvironmentStatus.FREEIPA_PREPARE_CROSS_REALM_TRUST_IN_PROGRESS;
-import static com.sequenceiq.environment.environment.EnvironmentStatus.FREEIPA_PREPARE_CROSS_REALM_TRUST_PENDING;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.FREEIPA_REBUILD_FAILED;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.FREEIPA_REBUILD_IN_PROGRESS;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.FREEIPA_STALE;
@@ -125,12 +119,12 @@ public class EnvironmentSyncService {
             Map.entry(REBUILD_IN_PROGRESS, FREEIPA_REBUILD_IN_PROGRESS),
             Map.entry(REBUILD_FAILED, FREEIPA_REBUILD_FAILED),
             Map.entry(STALE, FREEIPA_STALE),
-            Map.entry(TRUST_SETUP_IN_PROGRESS, FREEIPA_PREPARE_CROSS_REALM_TRUST_IN_PROGRESS),
-            Map.entry(TRUST_SETUP_FINISH_REQUIRED, FREEIPA_PREPARE_CROSS_REALM_TRUST_PENDING),
-            Map.entry(TRUST_SETUP_FAILED, FREEIPA_PREPARE_CROSS_REALM_TRUST_FAILED),
-            Map.entry(TRUST_SETUP_FINISH_IN_PROGRESS, FREEIPA_FINISH_CROSS_REALM_TRUST_IN_PROGRESS),
-            Map.entry(TRUST_SETUP_FINISH_FAILED, FREEIPA_FINISH_CROSS_REALM_TRUST_FAILED),
-            Map.entry(TRUST_SETUP_FINISH_SUCCESSFUL, FREEIPA_FINISH_CROSS_REALM_TRUST_SUCCESSFUL)
+            Map.entry(TRUST_SETUP_IN_PROGRESS, EnvironmentStatus.TRUST_SETUP_IN_PROGRESS),
+            Map.entry(TRUST_SETUP_FINISH_REQUIRED, EnvironmentStatus.TRUST_SETUP_FINISH_REQUIRED),
+            Map.entry(TRUST_SETUP_FAILED, EnvironmentStatus.TRUST_SETUP_FAILED),
+            Map.entry(TRUST_SETUP_FINISH_IN_PROGRESS, EnvironmentStatus.TRUST_SETUP_FINISH_IN_PROGRESS),
+            Map.entry(TRUST_SETUP_FINISH_FAILED, EnvironmentStatus.TRUST_SETUP_FINISH_FAILED),
+            Map.entry(TRUST_SETUP_FINISH_SUCCESSFUL, EnvironmentStatus.AVAILABLE)
     );
 
     private final FreeIpaService freeIpaService;

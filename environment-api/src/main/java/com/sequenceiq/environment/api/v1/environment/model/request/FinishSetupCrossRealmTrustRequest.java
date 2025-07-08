@@ -4,12 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(name = "EnvironmentFinishSetupV1CrossRealmTrustRequest")
+@Schema(name = "FinishSetupCrossRealmTrustV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class EnvironmentFinishSetupCrossRealmTrustRequest {
+public class FinishSetupCrossRealmTrustRequest {
 
     @Override
     public String toString() {
-        return "EnvironmentPrepareCrossRealmTrustRequest{}";
+        return "FinishSetupCrossRealmTrustRequest{}";
     }
 }

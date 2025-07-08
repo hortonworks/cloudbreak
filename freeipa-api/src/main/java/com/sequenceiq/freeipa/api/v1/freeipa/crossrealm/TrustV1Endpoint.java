@@ -10,8 +10,8 @@ import jakarta.ws.rs.core.MediaType;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaNotes;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishCrossRealmTrustRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishCrossRealmTrustResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupCrossRealmTrustRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustResponse;
 
@@ -39,5 +39,5 @@ public interface TrustV1Endpoint {
     @Operation(summary = FreeIpaOperationDescriptions.SETUP_FINISH_CROSS_REALM_TRUST, description = FreeIpaNotes.FREEIPA_NOTES,
             operationId = "finishCrossRealmTrustV1", responses = @ApiResponse(responseCode = "200", description = "successful operation",
             useReturnTypeSchema = true))
-    FinishCrossRealmTrustResponse finishSetup(@Valid FinishCrossRealmTrustRequest request);
+    FinishSetupCrossRealmTrustResponse finishSetup(@Valid FinishSetupCrossRealmTrustRequest request);
 }

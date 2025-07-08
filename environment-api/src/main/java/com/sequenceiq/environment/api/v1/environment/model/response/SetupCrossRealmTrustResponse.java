@@ -6,9 +6,9 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(name = "EnvironmentSetupV1CrossRealmTrustResponse")
+@Schema(name = "SetupCrossRealmTrustV1Response")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class EnvironmentSetupCrossRealmTrustResponse {
+public class SetupCrossRealmTrustResponse {
 
     @Schema(description = ModelDescriptions.FLOW_IDENTIFIER)
     private FlowIdentifier flowIdentifier;
@@ -23,7 +23,7 @@ public class EnvironmentSetupCrossRealmTrustResponse {
 
     @Override
     public String toString() {
-        return "PrepareCrossRealmTrustResponse{" +
+        return "SetupCrossRealmTrustResponse{" +
                 "flowIdentifier=" + flowIdentifier +
                 "} " + super.toString();
     }

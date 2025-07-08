@@ -20,7 +20,7 @@ import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishCrossRealmTrustRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupCrossRealmTrustRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 @Component
@@ -62,7 +62,7 @@ public class EnvironmentCrossRealmTrustSetupFinishHandler extends ExceptionCatch
                             freeIpa.getStatus().name());
                 } else {
                     LOGGER.info("FreeIPA Cross Realm Trust setup finished.");
-                    FinishCrossRealmTrustRequest finishCrossRealmTrustRequest = new FinishCrossRealmTrustRequest();
+                    FinishSetupCrossRealmTrustRequest finishCrossRealmTrustRequest = new FinishSetupCrossRealmTrustRequest();
                     finishCrossRealmTrustRequest.setEnvironmentCrn(data.getResourceCrn());
                     freeIpaPollerService.waitForCrossRealmFinish(
                             data.getResourceId(),

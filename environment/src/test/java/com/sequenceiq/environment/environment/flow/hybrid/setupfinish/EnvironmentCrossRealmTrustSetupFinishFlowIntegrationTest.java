@@ -97,7 +97,7 @@ import com.sequenceiq.flow.repository.FlowLogRepository;
 import com.sequenceiq.flow.repository.FlowOperationStatsRepository;
 import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishCrossRealmTrustRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupCrossRealmTrustRequest;
 import com.sequenceiq.notification.NotificationService;
 
 import io.micrometer.core.instrument.MeterRegistry;
@@ -249,7 +249,7 @@ class EnvironmentCrossRealmTrustSetupFinishFlowIntegrationTest {
     }
 
     private FlowIdentifier triggerFlow() {
-        FinishCrossRealmTrustRequest finishCrossRealmTrustRequest = new FinishCrossRealmTrustRequest();
+        FinishSetupCrossRealmTrustRequest finishCrossRealmTrustRequest = new FinishSetupCrossRealmTrustRequest();
 
         return ThreadBasedUserCrnProvider.doAs(
                 USER_CRN,

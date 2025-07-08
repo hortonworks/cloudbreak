@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
-import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentSetupCrossRealmTrustRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.SetupCrossRealmTrustRequest;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -213,7 +213,7 @@ public class EnvironmentModificationService {
         return changeTelemetryFeatures(features, environment);
     }
 
-    public FlowIdentifier setupCrossRealmSetup(String accountId, NameOrCrn nameOrCrn, EnvironmentSetupCrossRealmTrustRequest request) {
+    public FlowIdentifier setupCrossRealmSetup(String accountId, NameOrCrn nameOrCrn, SetupCrossRealmTrustRequest request) {
         Environment environment = getEnvironment(accountId, nameOrCrn);
         return environmentReactorFlowManager.triggerSetupCrossRealmTrust(
                 environment.getId(),

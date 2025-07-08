@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
 import com.sequenceiq.common.api.type.DataHubStartAction;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
-import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentSetupCrossRealmTrustRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.SetupCrossRealmTrustRequest;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -95,7 +95,7 @@ public class EnvironmentReactorFlowManager {
     }
 
     public FlowIdentifier triggerSetupCrossRealmTrust(long envId, String accountId, String envName, String userCrn, String envCrn,
-        EnvironmentSetupCrossRealmTrustRequest request) {
+        SetupCrossRealmTrustRequest request) {
         LOGGER.info("Environment cross realm prepare flow triggered.");
         EnvironmentCrossRealmTrustSetupEvent environmentCrossRealmTrustSetupEvent =
                 EnvironmentCrossRealmTrustSetupEvent.builder()

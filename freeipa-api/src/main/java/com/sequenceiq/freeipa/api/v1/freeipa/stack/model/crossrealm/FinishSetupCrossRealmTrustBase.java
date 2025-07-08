@@ -13,7 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class FinishCrossRealmTrustBase {
+public class FinishSetupCrossRealmTrustBase {
     @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
     @NotEmpty
     @Schema(description = ModelDescriptions.ENVIRONMENT_CRN, requiredMode = Schema.RequiredMode.REQUIRED)
@@ -29,7 +29,7 @@ public class FinishCrossRealmTrustBase {
 
     @Override
     public String toString() {
-        return "FinishCrossRealmTrustBase{" +
+        return "FinishSetupCrossRealmTrustBase{" +
                 "environmentCrn='" + environmentCrn + '\'' +
                 '}';
     }
