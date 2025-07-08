@@ -193,7 +193,7 @@ public class StackToDescribeFreeIpaResponseConverter {
 
     private TrustResponse convertTrust(Stack stack) {
         TrustResponse trustResponse = new TrustResponse();
-        Optional<CrossRealmTrust> crossRealmTrust = crossRealmTrustService.getByIdIfExists(stack.getId());
+        Optional<CrossRealmTrust> crossRealmTrust = crossRealmTrustService.getByStackIdIfExists(stack.getId());
         if (crossRealmTrust.isPresent()) {
             CrossRealmTrust trust = crossRealmTrust.get();
             trustResponse.setTrustStatus(trust.getTrustStatus().name());

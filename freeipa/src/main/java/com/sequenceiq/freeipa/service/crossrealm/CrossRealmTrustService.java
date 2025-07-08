@@ -20,7 +20,7 @@ public class CrossRealmTrustService {
     @Inject
     private CrossRealmTrustRepository crossRealmTrustRepository;
 
-    public CrossRealmTrust getById(Long stackId) {
+    public CrossRealmTrust getByStackId(Long stackId) {
         return crossRealmTrustRepository.findByStackId(stackId)
                 .orElseThrow(() -> {
                     LOGGER.warn("Cross-realm trust config not found by FreeIPA stack id: {}", stackId);
@@ -28,7 +28,7 @@ public class CrossRealmTrustService {
                 });
     }
 
-    public Optional<CrossRealmTrust> getByIdIfExists(Long stackId) {
+    public Optional<CrossRealmTrust> getByStackIdIfExists(Long stackId) {
         return crossRealmTrustRepository.findByStackId(stackId);
     }
 

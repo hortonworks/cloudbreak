@@ -140,6 +140,8 @@ public class CrossRealmTrust implements AccountIdAwareResource {
                 ", fqdn='" + fqdn + '\'' +
                 ", ip='" + ip + '\'' +
                 ", realm='" + realm + '\'' +
+                ", trustStatus=" + trustStatus +
+                ", operationId='" + operationId + '\'' +
                 '}';
     }
 }

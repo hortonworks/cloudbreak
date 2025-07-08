@@ -6,7 +6,6 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.periscope.api.model.ActivityStatus;
 import com.sequenceiq.periscope.api.model.ApiActivityStatus;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleScalingActivityResponse;
@@ -48,10 +47,5 @@ public class DistroXAutoscaleScalingActivityResponseConverter extends AbstractCo
 
     private ApiActivityStatus convert(ActivityStatus activityStatus) {
         return ACTIVITY_STATUS_MAP.get(activityStatus);
-    }
-
-    @VisibleForTesting
-    Map<ActivityStatus, ApiActivityStatus> getActivityStatusMap() {
-        return ACTIVITY_STATUS_MAP;
     }
 }

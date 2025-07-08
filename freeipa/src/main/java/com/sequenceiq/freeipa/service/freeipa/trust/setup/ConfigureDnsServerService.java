@@ -66,7 +66,7 @@ public class ConfigureDnsServerService {
     public void configureDnsServer(Long stackId) throws Exception {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-        CrossRealmTrust crossRealmTrust = crossRealmTrustService.getById(stackId);
+        CrossRealmTrust crossRealmTrust = crossRealmTrustService.getByStackId(stackId);
 
         addDnsForwardZone(stack, crossRealmTrust);
         OrchestratorStateParams stateParams = createOrchestratorStateParams(primaryGatewayConfig, crossRealmTrust, stackId);

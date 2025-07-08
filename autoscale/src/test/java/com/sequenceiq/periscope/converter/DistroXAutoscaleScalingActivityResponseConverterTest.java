@@ -6,11 +6,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.Instant;
 import java.util.Date;
 import java.util.EnumSet;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.periscope.api.model.ActivityStatus;
@@ -39,7 +41,7 @@ class DistroXAutoscaleScalingActivityResponseConverterTest {
     @Test
     void testAllActivityStatusesNeedToBeMapped() {
         EnumSet<ActivityStatus> allStatuses = EnumSet.allOf(ActivityStatus.class);
-        assertThat(allStatuses).hasSameElementsAs(underTest.getActivityStatusMap().keySet());
+        assertThat(allStatuses).hasSameElementsAs(((Map) ReflectionTestUtils.getField(underTest, "ACTIVITY_STATUS_MAP")).keySet());
     }
 
     @Test

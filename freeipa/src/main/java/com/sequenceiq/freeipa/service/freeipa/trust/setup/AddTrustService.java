@@ -49,7 +49,7 @@ public class AddTrustService {
     public void addTrust(Long stackId) throws CloudbreakOrchestratorFailedException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-        CrossRealmTrust crossRealmTrust = crossRealmTrustService.getById(stackId);
+        CrossRealmTrust crossRealmTrust = crossRealmTrustService.getByStackId(stackId);
         OrchestratorStateParams stateParams = createOrchestratorStateParams(primaryGatewayConfig, crossRealmTrust, stackId);
         hostOrchestrator.runOrchestratorState(stateParams);
     }

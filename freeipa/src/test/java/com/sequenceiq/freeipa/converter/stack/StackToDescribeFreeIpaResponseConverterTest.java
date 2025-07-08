@@ -185,7 +185,7 @@ class StackToDescribeFreeIpaResponseConverterTest {
 
         setupMocks(stack, image, freeIpa, freeIpaServerResponse, userSyncStatus);
         setupLoadBalancerMock(stack.getId());
-        when(crossRealmTrustService.getByIdIfExists(stack.getId())).thenReturn(Optional.of(crossRealmTrust));
+        when(crossRealmTrustService.getByStackIdIfExists(stack.getId())).thenReturn(Optional.of(crossRealmTrust));
 
         DescribeFreeIpaResponse result = underTest.convert(stack, image, freeIpa, Optional.of(userSyncStatus), true, environmentResponse);
 

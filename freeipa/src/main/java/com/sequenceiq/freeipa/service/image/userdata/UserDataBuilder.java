@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.io.BaseEncoding;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityMode;
@@ -155,10 +154,5 @@ public class UserDataBuilder {
             LOGGER.error(e.getMessage(), e);
             throw new CloudConnectorException("Failed to process init script freemarker template", e);
         }
-    }
-
-    @VisibleForTesting
-    void setFreemarkerConfiguration(Configuration freemarkerConfiguration) {
-        this.freemarkerConfiguration = freemarkerConfiguration;
     }
 }

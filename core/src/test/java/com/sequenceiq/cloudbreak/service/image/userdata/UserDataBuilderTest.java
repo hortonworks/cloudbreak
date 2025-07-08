@@ -83,7 +83,7 @@ class UserDataBuilderTest {
         factoryBean.setTemplateLoaderPath("classpath:/");
         factoryBean.afterPropertiesSet();
         Configuration configuration = factoryBean.getObject();
-        underTest.setFreemarkerConfiguration(configuration);
+        ReflectionTestUtils.setField(underTest, "freemarkerConfiguration", configuration);
 
         UserDataBuilderParams params = new UserDataBuilderParams();
         params.setCustomUserData("date >> /tmp/time.txt");

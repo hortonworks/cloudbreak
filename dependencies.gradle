@@ -80,7 +80,7 @@ ext {
   jacksonDatabindNullable = "0.2.6"
 
   // Templating
-  freemarkerVersion = '2.3.31'
+  freemarkerVersion = '2.3.34'
   handlebarsVersion = '4.3.1'
   jinjavaVersion = '2.5.2'
 

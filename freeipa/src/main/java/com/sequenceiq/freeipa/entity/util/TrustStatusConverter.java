@@ -12,8 +12,8 @@ public class TrustStatusConverter implements AttributeConverter<TrustStatus, Str
     private static final Logger LOGGER = LoggerFactory.getLogger(TrustStatusConverter.class);
 
     @Override
-    public String convertToDatabaseColumn(TrustStatus stackStatus) {
-        return stackStatus.name();
+    public String convertToDatabaseColumn(TrustStatus trustStatus) {
+        return trustStatus.name();
     }
 
     @Override
