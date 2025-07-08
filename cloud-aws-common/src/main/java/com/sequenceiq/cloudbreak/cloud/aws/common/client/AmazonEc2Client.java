@@ -1,9 +1,25 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.client;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.INCORRECT_INSTANCE_STATE;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.INCORRECT_STATE;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.INCORRECT_STATE_EXCEPTION;
 import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.INSTANCE_NOT_FOUND;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.INTERNAL_ERROR;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.INTERNAL_FAILURE;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.INVALID_HOST_STATE;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.INVALID_STATE;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.REQUEST_EXPIRED;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.SERVER_INTERNAL;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.SERVICE_UNAVAILABLE;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.UNAVAILABLE;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.VOLUME_IN_USE;
+
+import java.util.Set;
 
 import com.sequenceiq.cloudbreak.service.Retry;
+import com.sequenceiq.cloudbreak.service.Retry.ActionFailedException;
 
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.AllocateAddressRequest;
 import software.amazon.awssdk.services.ec2.model.AllocateAddressResponse;
@@ -100,6 +116,9 @@ import software.amazon.awssdk.services.ec2.waiters.Ec2Waiter;
 
 public class AmazonEc2Client extends AmazonClient {
 
+    private static final Set<String> RETRIABLE_ERRORS = Set.of(REQUEST_EXPIRED, INCORRECT_INSTANCE_STATE, INCORRECT_STATE, INCORRECT_STATE_EXCEPTION,
+            INVALID_HOST_STATE, INVALID_STATE, VOLUME_IN_USE, SERVER_INTERNAL, INTERNAL_FAILURE, SERVICE_UNAVAILABLE, INTERNAL_ERROR, UNAVAILABLE);
+
     private final Ec2Client client;
 
     private final Retry retry;
@@ -110,31 +129,73 @@ public class AmazonEc2Client extends AmazonClient {
     }
 
     public CreateVolumeResponse createVolume(CreateVolumeRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.createVolume(request));
+        return retry.testWith2SecDelayMax15Times(() -> {
+            try {
+                return client.createVolume(request);
+            } catch (AwsServiceException ex) {
+                throw createActionFailedExceptionIfRetriableError(ex);
+            }
+        });
     }
 
     public DescribeSubnetsResponse describeSubnets(DescribeSubnetsRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.describeSubnets(request));
+        return retry.testWith2SecDelayMax15Times(() -> {
+            try {
+                return client.describeSubnets(request);
+            } catch (AwsServiceException ex) {
+                throw createActionFailedExceptionIfRetriableError(ex);
+            }
+        });
     }
 
     public DescribeNetworkInterfacesResponse describeNetworkInterfaces(DescribeNetworkInterfacesRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.describeNetworkInterfaces(request));
+        return retry.testWith2SecDelayMax15Times(() -> {
+            try {
+                return client.describeNetworkInterfaces(request);
+            } catch (AwsServiceException ex) {
+                throw createActionFailedExceptionIfRetriableError(ex);
+            }
+        });
     }
 
     public ModifyInstanceAttributeResponse modifyInstanceAttribute(ModifyInstanceAttributeRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.modifyInstanceAttribute(request));
+        return retry.testWith2SecDelayMax15Times(() -> {
+            try {
+                return client.modifyInstanceAttribute(request);
+            } catch (AwsServiceException ex) {
+                throw createActionFailedExceptionIfRetriableError(ex);
+            }
+        });
     }
 
     public DeleteVolumeResponse deleteVolume(DeleteVolumeRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.deleteVolume(request));
+        return retry.testWith2SecDelayMax15Times(() -> {
+            try {
+                return client.deleteVolume(request);
+            } catch (AwsServiceException ex) {
+                throw createActionFailedExceptionIfRetriableError(ex);
+            }
+        });
     }
 
     public DescribeVolumesResponse describeVolumes(DescribeVolumesRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.describeVolumes(request));
+        return retry.testWith2SecDelayMax15Times(() -> {
+            try {
+                return client.describeVolumes(request);
+            } catch (AwsServiceException ex) {
+                throw createActionFailedExceptionIfRetriableError(ex);
+            }
+        });
     }
 
     public AttachVolumeResponse attachVolume(AttachVolumeRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.attachVolume(request));
+        return retry.testWith2SecDelayMax15Times(() -> {
+            try {
+                return client.attachVolume(request);
+            } catch (AwsServiceException ex) {
+                throw createActionFailedExceptionIfRetriableError(ex);
+            }
+        });
     }
 
     public DescribeRegionsResponse describeRegions(DescribeRegionsRequest describeRegionsRequest) {
@@ -200,7 +261,7 @@ public class AmazonEc2Client extends AmazonClient {
                 return client.describeInstances(describeInstancesRequest);
             } catch (Ec2Exception e) {
                 if (e.awsErrorDetails().errorCode().equalsIgnoreCase(INSTANCE_NOT_FOUND)) {
-                    throw new Retry.ActionFailedException("The requested instances are not found on AWS side: " + describeInstancesRequest.instanceIds(), e);
+                    throw new ActionFailedException("The requested instances are not found on AWS side: " + describeInstancesRequest.instanceIds(), e);
                 } else {
                     throw e;
                 }
@@ -309,18 +370,53 @@ public class AmazonEc2Client extends AmazonClient {
     }
 
     public DetachVolumeResponse detachVolume(DetachVolumeRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.detachVolume(request));
+        return retry.testWith2SecDelayMax15Times(() -> {
+            try {
+                return client.detachVolume(request);
+            } catch (AwsServiceException ex) {
+                throw createActionFailedExceptionIfRetriableError(ex);
+            }
+        });
     }
 
     public ModifyVolumeResponse modifyVolume(ModifyVolumeRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.modifyVolume(request));
+        return retry.testWith2SecDelayMax15Times(() -> {
+            try {
+                return client.modifyVolume(request);
+            } catch (AwsServiceException ex) {
+                throw createActionFailedExceptionIfRetriableError(ex);
+            }
+        });
     }
 
     public DescribeVolumesModificationsResponse describeVolumeModifications(DescribeVolumesModificationsRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.describeVolumesModifications(request));
+        return retry.testWith2SecDelayMax15Times(() -> {
+            try {
+                return client.describeVolumesModifications(request);
+            } catch (AwsServiceException ex) {
+                throw createActionFailedExceptionIfRetriableError(ex);
+            }
+        });
     }
 
     public ModifyInstanceMetadataOptionsResponse modifyInstanceMetadataOptions(ModifyInstanceMetadataOptionsRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.modifyInstanceMetadataOptions(request));
+        return retry.testWith2SecDelayMax15Times(() -> {
+            try {
+                return client.modifyInstanceMetadataOptions(request);
+            } catch (AwsServiceException ex) {
+                throw createActionFailedExceptionIfRetriableError(ex);
+            }
+        });
     }
+
+    private RuntimeException createActionFailedExceptionIfRetriableError(AwsServiceException ex) {
+        if (ex.awsErrorDetails() != null) {
+            String errorCode = ex.awsErrorDetails().errorCode();
+            if (RETRIABLE_ERRORS.contains(errorCode)) {
+                return new ActionFailedException(ex);
+            }
+        }
+        return ex;
+    }
+
 }

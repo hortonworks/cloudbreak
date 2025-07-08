@@ -1,9 +1,19 @@
 package com.sequenceiq.cloudbreak.cloud.aws.client;
 
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.INTERNAL_FAILURE;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.REQUEST_EXPIRED;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.RESOURCE_IN_USE;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.SERVICE_LINKED_ROLE_FAILURE;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.SERVICE_UNAVAILABLE;
+
+import java.util.Set;
+
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonClient;
 import com.sequenceiq.cloudbreak.service.Retry;
+import com.sequenceiq.cloudbreak.service.Retry.ActionFailedException;
 
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.autoscaling.AutoScalingClient;
 import software.amazon.awssdk.services.autoscaling.model.CreateLaunchConfigurationRequest;
 import software.amazon.awssdk.services.autoscaling.model.CreateLaunchConfigurationResponse;
@@ -31,6 +41,9 @@ import software.amazon.awssdk.services.autoscaling.waiters.AutoScalingWaiter;
 
 public class AmazonAutoScalingClient extends AmazonClient {
 
+    private static final Set<String> RETRIABLE_ERRORS = Set.of(INTERNAL_FAILURE, REQUEST_EXPIRED, SERVICE_UNAVAILABLE, RESOURCE_IN_USE,
+            SERVICE_LINKED_ROLE_FAILURE);
+
     private final AutoScalingClient client;
 
     private final Retry retry;
@@ -41,36 +54,83 @@ public class AmazonAutoScalingClient extends AmazonClient {
     }
 
     public SuspendProcessesResponse suspendProcesses(SuspendProcessesRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.suspendProcesses(request));
+        return retry.testWith2SecDelayMax15Times(() -> {
+            try {
+                return client.suspendProcesses(request);
+            } catch (AwsServiceException ex) {
+                throw createActionFailedExceptionIfRetriableError(ex);
+            }
+        });
     }
 
     public ResumeProcessesResponse resumeProcesses(ResumeProcessesRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.resumeProcesses(request));
+        return retry.testWith2SecDelayMax15Times(() -> {
+            try {
+                return client.resumeProcesses(request);
+            } catch (AwsServiceException ex) {
+                throw createActionFailedExceptionIfRetriableError(ex);
+            }
+        });
     }
 
     public DescribeAutoScalingGroupsResponse describeAutoScalingGroups(DescribeAutoScalingGroupsRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.describeAutoScalingGroups(request));
+        return retry.testWith2SecDelayMax15Times(() -> {
+            try {
+                return client.describeAutoScalingGroups(request);
+            } catch (AwsServiceException ex) {
+                throw createActionFailedExceptionIfRetriableError(ex);
+            }
+        });
     }
 
     public UpdateAutoScalingGroupResponse updateAutoScalingGroup(UpdateAutoScalingGroupRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.updateAutoScalingGroup(request));
+        return retry.testWith2SecDelayMax15Times(() -> {
+            try {
+                return client.updateAutoScalingGroup(request);
+            } catch (AwsServiceException ex) {
+                throw createActionFailedExceptionIfRetriableError(ex);
+            }
+        });
     }
 
     public DetachInstancesResponse detachInstances(DetachInstancesRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.detachInstances(request));
+        return retry.testWith2SecDelayMax15Times(() -> {
+            try {
+                return client.detachInstances(request);
+            } catch (AwsServiceException ex) {
+                throw createActionFailedExceptionIfRetriableError(ex);
+            }
+        });
     }
 
     public DescribeAutoScalingInstancesResponse describeAutoScalingInstances(DescribeAutoScalingInstancesRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.describeAutoScalingInstances(request));
+        return retry.testWith2SecDelayMax15Times(() -> {
+            try {
+                return client.describeAutoScalingInstances(request);
+            } catch (AwsServiceException ex) {
+                throw createActionFailedExceptionIfRetriableError(ex);
+            }
+        });
     }
 
     public DescribeScalingActivitiesResponse describeScalingActivities(DescribeScalingActivitiesRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.describeScalingActivities(request));
+        return retry.testWith2SecDelayMax15Times(() -> {
+            try {
+                return client.describeScalingActivities(request);
+            } catch (AwsServiceException ex) {
+                throw createActionFailedExceptionIfRetriableError(ex);
+            }
+        });
     }
 
     public TerminateInstanceInAutoScalingGroupResponse terminateInstance(TerminateInstanceInAutoScalingGroupRequest terminateInstanceInAutoScalingGroupRequest) {
-        return retry.testWith2SecDelayMax15Times(() ->
-                client.terminateInstanceInAutoScalingGroup(terminateInstanceInAutoScalingGroupRequest));
+        return retry.testWith2SecDelayMax15Times(() -> {
+            try {
+                return client.terminateInstanceInAutoScalingGroup(terminateInstanceInAutoScalingGroupRequest);
+            } catch (AwsServiceException ex) {
+                throw createActionFailedExceptionIfRetriableError(ex);
+            }
+        });
     }
 
     public DescribeLaunchConfigurationsResponse describeLaunchConfigurations(DescribeLaunchConfigurationsRequest launchConfigurationsRequest) {
@@ -88,5 +148,15 @@ public class AmazonAutoScalingClient extends AmazonClient {
 
     public CreateLaunchConfigurationResponse createLaunchConfiguration(CreateLaunchConfigurationRequest createLaunchConfigurationRequest) {
         return client.createLaunchConfiguration(createLaunchConfigurationRequest);
+    }
+
+    private RuntimeException createActionFailedExceptionIfRetriableError(AwsServiceException ex) {
+        if (ex.awsErrorDetails() != null) {
+            String errorCode = ex.awsErrorDetails().errorCode();
+            if (RETRIABLE_ERRORS.contains(errorCode)) {
+                return new ActionFailedException(ex);
+            }
+        }
+        return ex;
     }
 }

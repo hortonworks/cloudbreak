@@ -1,7 +1,16 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.client;
 
-import com.sequenceiq.cloudbreak.service.Retry;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.INTERNAL_FAILURE;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.INTERNAL_SERVICE_ERROR;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.REQUEST_EXPIRED;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.SERVICE_UNAVAILABLE;
 
+import java.util.Set;
+
+import com.sequenceiq.cloudbreak.service.Retry;
+import com.sequenceiq.cloudbreak.service.Retry.ActionFailedException;
+
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import software.amazon.awssdk.services.secretsmanager.model.CreateSecretRequest;
 import software.amazon.awssdk.services.secretsmanager.model.CreateSecretResponse;
@@ -19,6 +28,7 @@ import software.amazon.awssdk.services.secretsmanager.model.UpdateSecretRequest;
 import software.amazon.awssdk.services.secretsmanager.model.UpdateSecretResponse;
 
 public class AmazonSecretsManagerClient extends AmazonClient {
+    private static final Set<String> RETRIABLE_ERRORS = Set.of(INTERNAL_FAILURE, INTERNAL_SERVICE_ERROR, REQUEST_EXPIRED, SERVICE_UNAVAILABLE);
 
     private final SecretsManagerClient secretsManagerClient;
 
@@ -30,30 +40,82 @@ public class AmazonSecretsManagerClient extends AmazonClient {
     }
 
     public GetSecretValueResponse getSecretValue(GetSecretValueRequest getSecretValueRequest) {
-        return retry.testWith2SecDelayMax15Times(() -> secretsManagerClient.getSecretValue(getSecretValueRequest));
+        return retry.testWith2SecDelayMax15Times(() -> {
+            try {
+                return secretsManagerClient.getSecretValue(getSecretValueRequest);
+            } catch (AwsServiceException ex) {
+                throw createActionFailedExceptionIfRetriableError(ex);
+            }
+        });
     }
 
     public DescribeSecretResponse describeSecret(DescribeSecretRequest describeSecretRequest) {
-        return retry.testWith2SecDelayMax15Times(() -> secretsManagerClient.describeSecret(describeSecretRequest));
+        return retry.testWith2SecDelayMax15Times(() -> {
+            try {
+                return secretsManagerClient.describeSecret(describeSecretRequest);
+            } catch (AwsServiceException ex) {
+                throw createActionFailedExceptionIfRetriableError(ex);
+            }
+        });
     }
 
     public CreateSecretResponse createSecret(CreateSecretRequest createSecretRequest) {
-        return retry.testWith2SecDelayMax15Times(() -> secretsManagerClient.createSecret(createSecretRequest));
+        return retry.testWith2SecDelayMax15Times(() -> {
+            try {
+                return secretsManagerClient.createSecret(createSecretRequest);
+            } catch (AwsServiceException ex) {
+                throw createActionFailedExceptionIfRetriableError(ex);
+            }
+        });
     }
 
     public DeleteSecretResponse deleteSecret(DeleteSecretRequest deleteSecretRequest) {
-        return retry.testWith2SecDelayMax15Times(() -> secretsManagerClient.deleteSecret(deleteSecretRequest));
+        return retry.testWith2SecDelayMax15Times(() -> {
+            try {
+                return secretsManagerClient.deleteSecret(deleteSecretRequest);
+            } catch (AwsServiceException ex) {
+                throw createActionFailedExceptionIfRetriableError(ex);
+            }
+        });
     }
 
     public UpdateSecretResponse updateSecret(UpdateSecretRequest updateSecretRequest) {
-        return retry.testWith2SecDelayMax15Times(() -> secretsManagerClient.updateSecret(updateSecretRequest));
+        return retry.testWith2SecDelayMax15Times(() -> {
+            try {
+                return secretsManagerClient.updateSecret(updateSecretRequest);
+            } catch (AwsServiceException ex) {
+                throw createActionFailedExceptionIfRetriableError(ex);
+            }
+        });
     }
 
     public PutResourcePolicyResponse putResourcePolicy(PutResourcePolicyRequest putResourcePolicyRequest) {
-        return retry.testWith2SecDelayMax15Times(() -> secretsManagerClient.putResourcePolicy(putResourcePolicyRequest));
+        return retry.testWith2SecDelayMax15Times(() -> {
+            try {
+                return secretsManagerClient.putResourcePolicy(putResourcePolicyRequest);
+            } catch (AwsServiceException ex) {
+                throw createActionFailedExceptionIfRetriableError(ex);
+            }
+        });
     }
 
     public GetResourcePolicyResponse getResourcePolicy(GetResourcePolicyRequest getResourcePolicyRequest) {
-        return retry.testWith2SecDelayMax15Times(() -> secretsManagerClient.getResourcePolicy(getResourcePolicyRequest));
+        return retry.testWith2SecDelayMax15Times(() -> {
+            try {
+                return secretsManagerClient.getResourcePolicy(getResourcePolicyRequest);
+            } catch (AwsServiceException ex) {
+                throw createActionFailedExceptionIfRetriableError(ex);
+            }
+        });
+    }
+
+    private RuntimeException createActionFailedExceptionIfRetriableError(AwsServiceException ex) {
+        if (ex.awsErrorDetails() != null) {
+            String errorCode = ex.awsErrorDetails().errorCode();
+            if (RETRIABLE_ERRORS.contains(errorCode)) {
+                return new ActionFailedException(ex);
+            }
+        }
+        return ex;
     }
 }

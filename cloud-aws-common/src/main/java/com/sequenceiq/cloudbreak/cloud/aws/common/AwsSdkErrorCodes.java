@@ -34,6 +34,38 @@ public class AwsSdkErrorCodes {
 
     public static final String DUPLICATE_LISTENER = "DuplicateListener";
 
+    public static final String INCORRECT_STATE = "IncorrectState";
+
+    public static final String INCORRECT_INSTANCE_STATE = "IncorrectInstanceState";
+
+    public static final String INCORRECT_STATE_EXCEPTION = "IncorrectStateException";
+
+    public static final String INVALID_HOST_STATE = "InvalidHostState";
+
+    public static final String INVALID_STATE = "InvalidState";
+
+    public static final String INTERNAL_FAILURE = "InternalFailure";
+
+    public static final String INTERNAL_ERROR = "InternalError";
+
+    public static final String INTERNAL_ERROR_EXCEPTION = "InternalErrorException";
+
+    public static final String INTERNAL_SERVICE_ERROR = "InternalServiceError";
+
+    public static final String REQUEST_EXPIRED = "RequestExpired";
+
+    public static final String RESOURCE_IN_USE = "ResourceInUse";
+
+    public static final String SERVER_INTERNAL = "ServerInternal";
+
+    public static final String SERVICE_LINKED_ROLE_FAILURE = "ServiceLinkedRoleFailure";
+
+    public static final String SERVICE_UNAVAILABLE = "ServiceUnavailable";
+
+    public static final String VOLUME_IN_USE = "VolumeInUse";
+
+    public static final String UNAVAILABLE = "Unavailable";
+
     private AwsSdkErrorCodes() {
 
     }
