@@ -130,4 +130,13 @@ public class FreeIpaModelDescriptions {
         public static final String RESOURCE_ID = "resource id of the LoadBalancer";
     }
 
+    public static class CrossRealmTrustModelDescriptions {
+        public static final String FQDN = "Fully qualified domain name of the Active Directory server.";
+        public static final String IP = "IP address of the Active Directory server.";
+        public static final String REALM = "Realm of the Active Directory server.";
+        public static final String TRUST_SECRET = "The trust shared secret is a password-like key entered during trust configuration that is shared between " +
+                "the IDM and AD domains to secure and validate the trust relationship.";
+        public static final String AD_TRUST_SETUP_COMMANDS = "Active directory commands to be executed for cross-realm trust setup.";
+        public static final String BASE_CLUSTER_KRB5_CONF = "krb5.conf content to be used on base cluster for cross-realm trust setup.";
+    }
 }

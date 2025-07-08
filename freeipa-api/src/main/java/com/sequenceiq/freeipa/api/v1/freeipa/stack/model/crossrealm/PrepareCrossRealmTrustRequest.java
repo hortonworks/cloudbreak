@@ -1,9 +1,6 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm;
 
-import static com.sequenceiq.freeipa.api.v2.freeipa.doc.FreeIpaV2ModelDescriptions.FQDN;
-import static com.sequenceiq.freeipa.api.v2.freeipa.doc.FreeIpaV2ModelDescriptions.IP;
-import static com.sequenceiq.freeipa.api.v2.freeipa.doc.FreeIpaV2ModelDescriptions.REALM;
-import static com.sequenceiq.freeipa.api.v2.freeipa.doc.FreeIpaV2ModelDescriptions.TRUST_SECRET;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions.CrossRealmTrustModelDescriptions;
 
 import jakarta.validation.constraints.NotEmpty;
 
@@ -12,23 +9,23 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(name = "PrepareCrossRealmTrustRequest")
+@Schema(name = "PrepareCrossRealmTrustV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PrepareCrossRealmTrustRequest extends PrepareCrossRealmTrustBase {
     @NotEmpty
-    @Schema(description = FQDN, requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = CrossRealmTrustModelDescriptions.FQDN, requiredMode = Schema.RequiredMode.REQUIRED)
     private String fqdn;
 
     @NotEmpty
-    @Schema(description = IP, requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = CrossRealmTrustModelDescriptions.IP, requiredMode = Schema.RequiredMode.REQUIRED)
     private String ip;
 
     @NotEmpty
-    @Schema(description = REALM, requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = CrossRealmTrustModelDescriptions.REALM, requiredMode = Schema.RequiredMode.REQUIRED)
     private String realm;
 
-    @Schema(description = TRUST_SECRET, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = CrossRealmTrustModelDescriptions.TRUST_SECRET, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String trustSecret;
 
     public String getFqdn() {

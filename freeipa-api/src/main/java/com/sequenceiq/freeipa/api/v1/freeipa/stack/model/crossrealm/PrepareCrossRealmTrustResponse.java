@@ -7,7 +7,7 @@ import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(name = "PrepareCrossRealmTrustResponse")
+@Schema(name = "PrepareCrossRealmTrustV1Response")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PrepareCrossRealmTrustResponse extends PrepareCrossRealmTrustBase {
