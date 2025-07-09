@@ -28,8 +28,6 @@ dependencies {
 
   implementation     group: 'org.springframework.boot',          name: 'spring-boot-starter-jersey',     version: springBootVersion
 
-  implementation     group: 'net.i2p.crypto',                    name: 'eddsa',                          version: '0.3.0'
-
   implementation     group: 'org.glassfish.jersey.core',         name: 'jersey-client',                  version: jerseyCoreVersion
   implementation     group: 'org.glassfish.jersey.media',        name: 'jersey-media-multipart',         version: jerseyCoreVersion
   implementation     group: 'org.apache.httpcomponents.client5', name: 'httpclient5',                    version: httpClientVersion

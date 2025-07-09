@@ -7,7 +7,7 @@ main() {
       echo "no need for build"
   else
     cd integration-test
-    make fetch-secrets-docker
+    make fetch-ums-docker-gh-action
 
     cd ..
     ./gradlew -Penv=jenkins -b build.gradle build \
@@ -24,6 +24,7 @@ main() {
     cd integration-test
 
     export PRIMARYKEY_CHECK=true
+    export AWS=false
     echo "export CPUS_FOR_CLOUDBREAK=4.0" >> integcb/Profile_template
     echo "export COMMON_DB_VOL=${GITHUB_RUN_ATTEMPT}-sm" >> integcb/Profile_template
 

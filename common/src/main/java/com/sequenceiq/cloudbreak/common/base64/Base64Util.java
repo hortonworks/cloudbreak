@@ -17,6 +17,10 @@ public class Base64Util {
         return Base64.getEncoder().encodeToString(nonBase64Bytes);
     }
 
+    public static String encodeToUrlString(byte[] nonBase64Bytes) {
+        return Base64.getUrlEncoder().encodeToString(nonBase64Bytes);
+    }
+
     public static byte[] decodeAsByteArray(String base64String) {
         return Base64.getDecoder().decode(base64String);
     }

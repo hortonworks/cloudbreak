@@ -17,18 +17,15 @@ apply plugin: 'com.google.protobuf'
 
 dependencies {
   api project(':grpc-common')
-
-  implementation group: 'javax.annotation',             name: 'javax.annotation-api',           version: javaxAnnotationApiVersion
-
-  implementation group: 'org.springframework.boot',     name: 'spring-boot-starter-jersey',     version: springBootVersion
-
-  implementation group: 'net.i2p.crypto',               name: 'eddsa',                          version: '0.3.0'
-
-  implementation group: 'org.glassfish.jersey.core',    name: 'jersey-client',                  version: jerseyCoreVersion
-  implementation group: 'org.glassfish.jersey.media',   name: 'jersey-media-multipart',         version: jerseyCoreVersion
-  implementation group: 'org.apache.httpcomponents.client5', name: 'httpclient5',               version: httpClientVersion
-
-  implementation     group: 'com.google.protobuf',      name: 'protobuf-java',                  version: protobufVersion
+  implementation group: 'org.bouncycastle',                   name: 'bc-fips',                        version: bouncycastleFipsVersion
+  implementation group: 'org.bouncycastle',                   name: 'bcpkix-fips',                    version: bouncycastlePkixFipsVersion
+  implementation group: 'org.bouncycastle',                   name: 'bcutil-fips',                    version: bouncycastleUtilFipsVersion
+  implementation group: 'javax.annotation',                   name: 'javax.annotation-api',           version: javaxAnnotationApiVersion
+  implementation group: 'org.springframework.boot',           name: 'spring-boot-starter-jersey',     version: springBootVersion
+  implementation group: 'org.glassfish.jersey.core',          name: 'jersey-client',                  version: jerseyCoreVersion
+  implementation group: 'org.glassfish.jersey.media',         name: 'jersey-media-multipart',         version: jerseyCoreVersion
+  implementation group: 'org.apache.httpcomponents.client5',  name: 'httpclient5',                    version: httpClientVersion
+  implementation group: 'com.google.protobuf',                name: 'protobuf-java',                  version: protobufVersion
 
   api ("io.grpc:grpc-all:$grpcVersion") {
     exclude group: 'org.mockito'

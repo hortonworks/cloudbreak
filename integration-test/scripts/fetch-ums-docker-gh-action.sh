@@ -5,6 +5,7 @@
 
 fetch-ums-users() {
     echo "Fetching Manowar Dev Real UMS Users from RELENG key vault..."
+    mkdir -p ./src/main/resources/ums-users
     echo $REAL_UMS_USERS_DEV | jq '.' > $INTEGRATIONTEST_UMS_JSONSECRET_DESTINATIONPATH
 
     echo "Validate Real UMS User Store: File should be a valid JSON at: $INTEGRATIONTEST_UMS_JSONSECRET_DESTINATIONPATH"

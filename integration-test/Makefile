@@ -63,6 +63,9 @@ fetch-secrets:
 fetch-secrets-docker:
 	./scripts/fetch-ums-docker.sh
 
+fetch-ums-docker-gh-action:
+	./scripts/fetch-ums-docker-gh-action.sh
+
 docker-compose:
 	CB_VERSION=$(CB_VERSION) CB_TARGET_BRANCH=$(CB_TARGET_BRANCH) ./scripts/docker-compose.sh
 
