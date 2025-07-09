@@ -2,7 +2,6 @@
   "name": "7.3.2 - Flow Management - NiFi 2 - Heavy Duty for Azure",
   "description": "",
   "type": "FLOW_MANAGEMENT",
-  "featureState": "PREVIEW",
   "cloudPlatform": "AZURE",
   "distroXTemplate": {
     "cluster": {

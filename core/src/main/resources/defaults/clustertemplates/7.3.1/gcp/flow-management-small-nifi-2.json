@@ -2,7 +2,6 @@
   "name": "7.3.1 - Flow Management - NiFi 2 - Light Duty for Google Cloud",
   "description": "",
   "type": "FLOW_MANAGEMENT",
-  "featureState": "PREVIEW",
   "cloudPlatform": "GCP",
   "distroXTemplate": {
     "cluster": {
