@@ -190,7 +190,7 @@ cb:
         GCP: pd-ssd
         MOCK: magnetic
     upgrade:
-      embedded.targetversion: VERSION_14
+      embedded.targetversion: VERSION_17
       rds:
         targetversion: VERSION_14
       rds.backuprestore:

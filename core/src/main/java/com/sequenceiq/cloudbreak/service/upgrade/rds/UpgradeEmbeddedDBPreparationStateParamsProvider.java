@@ -24,6 +24,14 @@ public class UpgradeEmbeddedDBPreparationStateParamsProvider {
 
     private static final String DEFAULT_ORIGINAL_POSTGRES_VERSION = "10";
 
+    private static final String POSTGRES_PILLAR = "postgres";
+
+    private static final String UPGRADE_PILLAR = "upgrade";
+
+    private static final String POSTGRES_PATH_PREFIX = "/usr/pgsql-";
+
+    private static final String TMP_DIR_SUFFIX = "/tmp";
+
     @Value("${cb.db.env.upgrade.embedded.targetversion}")
     private TargetMajorVersion targetMajorVersion;
 
@@ -32,13 +40,25 @@ public class UpgradeEmbeddedDBPreparationStateParamsProvider {
                 ? stackDto.getDatabase().getExternalDatabaseEngineVersion() : DEFAULT_ORIGINAL_POSTGRES_VERSION;
         Map<String, Object> params = new HashMap<>();
         Map<String, Object> postgresParams = new HashMap<>();
-        params.put("postgres", postgresParams);
+        params.put(POSTGRES_PILLAR, postgresParams);
         Map<String, String> upgradeParams = new HashMap<>();
-        postgresParams.put("upgrade", upgradeParams);
+        postgresParams.put(UPGRADE_PILLAR, upgradeParams);
         upgradeParams.put(ORIGINAL_POSTGRES_VERSION_KEY, originalVersion);
-        upgradeParams.put(ORIGINAL_POSTGRES_BINARIES_KEY, "/usr/pgsql-" + originalVersion);
-        upgradeParams.put(TEMP_DIRECTORY_KEY, VolumeUtils.DATABASE_VOLUME + "/tmp");
+        upgradeParams.put(ORIGINAL_POSTGRES_BINARIES_KEY, POSTGRES_PATH_PREFIX + originalVersion);
+        upgradeParams.put(TEMP_DIRECTORY_KEY, VolumeUtils.DATABASE_VOLUME + TMP_DIR_SUFFIX);
         upgradeParams.put(NEW_POSTGRES_VERSION_KEY, targetMajorVersion.getMajorVersion());
         return params;
     }
-}
+
+    public Map<String, Object> createParamsWithNewVersion() {
+        Map<String, Object> params = new HashMap<>();
+        Map<String, Object> postgresParams = new HashMap<>();
+        params.put("postgres", postgresParams);
+        Map<String, String> upgradeParams = new HashMap<>();
+        postgresParams.put("upgrade", upgradeParams);
+        upgradeParams.put(NEW_POSTGRES_VERSION_KEY, targetMajorVersion.getMajorVersion());
+        return params;
+
+    }
+
+    }

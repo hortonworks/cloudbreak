@@ -7,8 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-
 @Component
 public class DatabaseDefaultVersionProvider {
 
@@ -17,8 +15,7 @@ public class DatabaseDefaultVersionProvider {
     @Inject
     private DbOverrideConfig dbOverrideConfig;
 
-    public String calculateDbVersionBasedOnRuntimeAndOsIfMissing(String runtime, String os, String requestedDbEngineVersion, CloudPlatform cloudPlatform,
-            boolean externalDb, boolean flexibleServer) {
+    public String calculateDbVersionBasedOnRuntimeAndOsIfMissing(String runtime, String os, String requestedDbEngineVersion) {
         if (StringUtils.isNotBlank(requestedDbEngineVersion)) {
             LOGGER.debug("DB engine version already requested to be [{}]", requestedDbEngineVersion);
             return requestedDbEngineVersion;

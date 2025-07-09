@@ -73,7 +73,6 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
@@ -333,7 +332,6 @@ class StackServiceTest {
     void testCreateWithRuntime() throws Exception {
         when(connector.checkAndGetPlatformVariant(stack)).thenReturn(variant);
         when(variant.value()).thenReturn(VARIANT_VALUE);
-        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.MOCK.name());
         String os = "redhat8";
         when(image.getOs()).thenReturn(os);
         ClouderaManagerProduct cdhProduct = new ClouderaManagerProduct();
@@ -348,7 +346,7 @@ class StackServiceTest {
         database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.NONE);
         when(stack.getDatabase()).thenReturn(database);
         String calculatedDbVersion = "11";
-        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(stackVersion, os, dbVersion, CloudPlatform.MOCK, false, true))
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(stackVersion, os, dbVersion))
                 .thenReturn(calculatedDbVersion);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace));
@@ -363,7 +361,6 @@ class StackServiceTest {
     void testCreateWithRuntimeFlexibleEnabledSingleRequested() throws Exception {
         when(connector.checkAndGetPlatformVariant(stack)).thenReturn(variant);
         when(variant.value()).thenReturn(VARIANT_VALUE);
-        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.MOCK.name());
         String os = "redhat8";
         when(image.getOs()).thenReturn(os);
         ClouderaManagerProduct cdhProduct = new ClouderaManagerProduct();
@@ -378,7 +375,7 @@ class StackServiceTest {
         database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.NON_HA);
         when(stack.getDatabase()).thenReturn(database);
         String calculatedDbVersion = "11";
-        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(stackVersion, os, dbVersion, CloudPlatform.MOCK, true, false))
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(stackVersion, os, dbVersion))
                 .thenReturn(calculatedDbVersion);
         when(azureDatabaseServerParameterDecorator.getDatabaseType(anyMap())).thenReturn(Optional.of(AzureDatabaseType.SINGLE_SERVER));
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace));
@@ -393,7 +390,6 @@ class StackServiceTest {
     void testCreateWithRuntimeFlexibleEnabledFlexibleRequested() throws Exception {
         when(connector.checkAndGetPlatformVariant(stack)).thenReturn(variant);
         when(variant.value()).thenReturn(VARIANT_VALUE);
-        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.MOCK.name());
         String os = "redhat8";
         when(image.getOs()).thenReturn(os);
         ClouderaManagerProduct cdhProduct = new ClouderaManagerProduct();
@@ -408,7 +404,7 @@ class StackServiceTest {
         database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.NON_HA);
         when(stack.getDatabase()).thenReturn(database);
         String calculatedDbVersion = "11";
-        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(stackVersion, os, dbVersion, CloudPlatform.MOCK, true, true))
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(stackVersion, os, dbVersion))
                 .thenReturn(calculatedDbVersion);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace));
@@ -423,7 +419,6 @@ class StackServiceTest {
     void testCreateWithRuntimeFlexibleEnabledWithoutDbRequest() throws Exception {
         when(connector.checkAndGetPlatformVariant(stack)).thenReturn(variant);
         when(variant.value()).thenReturn(VARIANT_VALUE);
-        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.MOCK.name());
         String os = "redhat8";
         when(image.getOs()).thenReturn(os);
         ClouderaManagerProduct cdhProduct = new ClouderaManagerProduct();
@@ -438,7 +433,7 @@ class StackServiceTest {
         database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.NON_HA);
         when(stack.getDatabase()).thenReturn(database);
         String calculatedDbVersion = "11";
-        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(stackVersion, os, dbVersion, CloudPlatform.MOCK, true, true))
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(stackVersion, os, dbVersion))
                 .thenReturn(calculatedDbVersion);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace));
@@ -453,7 +448,6 @@ class StackServiceTest {
     void testCreateWithoutRuntime() throws Exception {
         when(connector.checkAndGetPlatformVariant(stack)).thenReturn(variant);
         when(variant.value()).thenReturn(VARIANT_VALUE);
-        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.MOCK.name());
         String os = "redhat8";
         when(image.getOs()).thenReturn(os);
         when(imageService.create(stack, statedImage)).thenReturn(Set.of());
@@ -463,7 +457,7 @@ class StackServiceTest {
         database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.NONE);
         when(stack.getDatabase()).thenReturn(database);
         String calculatedDbVersion = "11";
-        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(null, os, dbVersion, CloudPlatform.MOCK, false, true))
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(null, os, dbVersion))
                 .thenReturn(calculatedDbVersion);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace));
@@ -478,7 +472,6 @@ class StackServiceTest {
     void testCreateImageFoundNoStackStatusUpdate() {
         when(connector.checkAndGetPlatformVariant(stack)).thenReturn(variant);
         when(variant.value()).thenReturn(VARIANT_VALUE);
-        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.MOCK.name());
         Database database = new Database();
         database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.NONE);
         when(stack.getDatabase()).thenReturn(database);
@@ -498,7 +491,6 @@ class StackServiceTest {
     void testCreateNoPublicKey(String publicKey) {
         when(stack.getPlatformVariant()).thenReturn(VARIANT_VALUE);
         when(stackAuthentication.getPublicKey()).thenReturn(publicKey);
-        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.MOCK.name());
         Database database = new Database();
         database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.NONE);
         when(stack.getDatabase()).thenReturn(database);
@@ -524,7 +516,6 @@ class StackServiceTest {
     void testCreatePublicKey(String platformVariant, boolean fipsEnabledExpected) {
         when(stack.getPlatformVariant()).thenReturn(platformVariant);
         when(stackAuthentication.getPublicKey()).thenReturn(PUBLIC_KEY);
-        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.MOCK.name());
         Database database = new Database();
         database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.NONE);
         when(stack.getDatabase()).thenReturn(database);
@@ -540,7 +531,6 @@ class StackServiceTest {
     @Test
     void testCreateSetsArchitectureFromImage() {
         when(image.getArchitecture()).thenReturn(Architecture.ARM64.getName());
-        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.MOCK.name());
         when(stack.getPlatformVariant()).thenReturn(VARIANT_VALUE);
         Database database = new Database();
         database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.NONE);

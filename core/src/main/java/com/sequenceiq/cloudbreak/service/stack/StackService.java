@@ -46,7 +46,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.ClusterExposedServiceV4Response;
@@ -703,10 +702,8 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
     private void setDbVersion(Stack stack, StatedImage imgFromCatalog) {
         boolean flexibleServerRequested = !isSingleServerRequested(stack);
         String dbEngineVersion = databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(
-                stack.getStackVersion(), imgFromCatalog.getImage().getOs(), stack.getExternalDatabaseEngineVersion(),
-                CloudPlatform.valueOf(stack.getCloudPlatform()),
-                !Optional.ofNullable(stack.getDatabase().getExternalDatabaseAvailabilityType()).orElse(DatabaseAvailabilityType.NONE).isEmbedded(),
-                flexibleServerRequested);
+                stack.getStackVersion(), imgFromCatalog.getImage().getOs(), stack.getExternalDatabaseEngineVersion()
+        );
         if (stack.getDatabase() != null) {
             stack.getDatabase().setExternalDatabaseEngineVersion(dbEngineVersion);
         }

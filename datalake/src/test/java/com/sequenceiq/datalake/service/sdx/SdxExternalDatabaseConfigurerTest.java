@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.lenient;
@@ -58,7 +57,7 @@ public class SdxExternalDatabaseConfigurerTest {
 
     @BeforeEach
     void setUp() {
-        lenient().when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(any(), any(), any(), any(), anyBoolean(), anyBoolean()))
+        lenient().when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(any(), any(), any()))
                 .thenReturn("11");
         environmentResponse = new DetailedEnvironmentResponse();
     }
@@ -236,7 +235,7 @@ public class SdxExternalDatabaseConfigurerTest {
         assertTrue(sdxDatabase.isCreateDatabase());
         assertEquals(SdxDatabaseAvailabilityType.HA, sdxDatabase.getDatabaseAvailabilityType());
         assertEquals("11", sdxDatabase.getDatabaseEngineVersion());
-        verify(databaseDefaultVersionProvider).calculateDbVersionBasedOnRuntimeAndOsIfMissing("7.2.0", "sles", null, CloudPlatform.AZURE, true, false);
+        verify(databaseDefaultVersionProvider).calculateDbVersionBasedOnRuntimeAndOsIfMissing("7.2.0", "sles", null);
     }
 
     @Test
@@ -260,7 +259,7 @@ public class SdxExternalDatabaseConfigurerTest {
         assertTrue(sdxDatabase.isCreateDatabase());
         assertEquals(SdxDatabaseAvailabilityType.HA, sdxDatabase.getDatabaseAvailabilityType());
         assertEquals("11", sdxDatabase.getDatabaseEngineVersion());
-        verify(databaseDefaultVersionProvider).calculateDbVersionBasedOnRuntimeAndOsIfMissing("7.2.0", "sles", null, CloudPlatform.AZURE, true, true);
+        verify(databaseDefaultVersionProvider).calculateDbVersionBasedOnRuntimeAndOsIfMissing("7.2.0", "sles", null);
     }
 
     @Test
@@ -284,7 +283,7 @@ public class SdxExternalDatabaseConfigurerTest {
         assertTrue(sdxDatabase.isCreateDatabase());
         assertEquals(SdxDatabaseAvailabilityType.HA, sdxDatabase.getDatabaseAvailabilityType());
         assertEquals("11", sdxDatabase.getDatabaseEngineVersion());
-        verify(databaseDefaultVersionProvider).calculateDbVersionBasedOnRuntimeAndOsIfMissing("7.2.0", "sles", null, CloudPlatform.AZURE, true, false);
+        verify(databaseDefaultVersionProvider).calculateDbVersionBasedOnRuntimeAndOsIfMissing("7.2.0", "sles", null);
     }
 
     @Test
@@ -310,7 +309,7 @@ public class SdxExternalDatabaseConfigurerTest {
         assertTrue(sdxDatabase.isCreateDatabase());
         assertEquals(SdxDatabaseAvailabilityType.HA, sdxDatabase.getDatabaseAvailabilityType());
         assertEquals("11", sdxDatabase.getDatabaseEngineVersion());
-        verify(databaseDefaultVersionProvider).calculateDbVersionBasedOnRuntimeAndOsIfMissing("7.2.0", "sles", null, CloudPlatform.AZURE, true, true);
+        verify(databaseDefaultVersionProvider).calculateDbVersionBasedOnRuntimeAndOsIfMissing("7.2.0", "sles", null);
     }
 
     @Test
@@ -329,7 +328,7 @@ public class SdxExternalDatabaseConfigurerTest {
         assertTrue(sdxDatabase.isCreateDatabase());
         assertEquals(SdxDatabaseAvailabilityType.HA, sdxDatabase.getDatabaseAvailabilityType());
         assertEquals("11", sdxDatabase.getDatabaseEngineVersion());
-        verify(databaseDefaultVersionProvider).calculateDbVersionBasedOnRuntimeAndOsIfMissing("7.2.0", "sles", null, CloudPlatform.AZURE, true, true);
+        verify(databaseDefaultVersionProvider).calculateDbVersionBasedOnRuntimeAndOsIfMissing("7.2.0", "sles", null);
     }
 
     @Test
@@ -391,7 +390,7 @@ public class SdxExternalDatabaseConfigurerTest {
         databaseRequest.setAvailabilityType(DatabaseAvailabilityType.HA);
         SdxCluster sdxCluster = new SdxCluster();
         when(platformConfig.isExternalDatabaseSupportedOrExperimental(cloudPlatform)).thenReturn(true);
-        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(any(), any(), any(), any(), anyBoolean(), anyBoolean()))
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(any(), any(), any()))
                 .thenReturn(null);
 
         SdxDatabase sdxDatabase = ThreadBasedUserCrnProvider.doAs(ACTOR,

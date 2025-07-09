@@ -44,13 +44,9 @@ public class RdsUpgradeOrchestratorService {
 
     private static final String RESTORE_STATE = "postgresql/upgrade/restore";
 
-    private static final String PG11_INSTALL_STATE = "postgresql/pg11-install";
+    private static final String PG_INSTALL_STATE = "postgresql/pg-install";
 
-    private static final String PG11_ALTERNATIVES_STATE = "postgresql/pg11-alternatives";
-
-    private static final String PG14_INSTALL_STATE = "postgresql/pg14-install";
-
-    private static final String PG14_ALTERNATIVES_STATE = "postgresql/pg14-alternatives";
+    private static final String PG_ALTERNATIVES_STATE = "postgresql/pg-alternatives";
 
     private static final String UPGRADE_EMBEDDED_DATABASE = "postgresql/upgrade/embedded";
 
@@ -128,15 +124,15 @@ public class RdsUpgradeOrchestratorService {
     }
 
     public void installPostgresPackages(Long stackId, MajorVersion targetVersion) throws CloudbreakOrchestratorException {
-        String installSaltState = MajorVersion.VERSION_14.equals(targetVersion) ? PG14_INSTALL_STATE : PG11_INSTALL_STATE;
-        OrchestratorStateParams stateParams = createStateParams(stackId, installSaltState, false);
+        OrchestratorStateParams stateParams = createStateParams(stackId, PG_INSTALL_STATE, false);
+        stateParams.setStateParams(upgradeEmbeddedDBPreparationStateParamsProvider.createParamsWithNewVersion());
         LOGGER.debug("Calling installPostgresPackages with state params '{}'", stateParams);
         hostOrchestrator.runOrchestratorState(stateParams);
     }
 
     public void updatePostgresAlternatives(Long stackId, MajorVersion targetVersion) throws CloudbreakOrchestratorException {
-        String alternativesSaltState = MajorVersion.VERSION_14.equals(targetVersion) ? PG14_ALTERNATIVES_STATE : PG11_ALTERNATIVES_STATE;
-        OrchestratorStateParams stateParams = createStateParams(stackId, alternativesSaltState, false);
+        OrchestratorStateParams stateParams = createStateParams(stackId, PG_ALTERNATIVES_STATE, false);
+        stateParams.setStateParams(upgradeEmbeddedDBPreparationStateParamsProvider.createParamsWithNewVersion());
         LOGGER.debug("Calling updatePostgresAlternatives with state params '{}'", stateParams);
         hostOrchestrator.runOrchestratorState(stateParams);
     }

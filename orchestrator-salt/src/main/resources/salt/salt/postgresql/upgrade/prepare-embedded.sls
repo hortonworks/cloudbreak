@@ -13,7 +13,7 @@
 {%- do salt.log.debug("log_running_postgres_version " ~ running_postgres_version) %}
 
   {%- if new_postgres_version | int in [11, 14, 17] %}
-  {%- set pg_version = "pg" ~ postgres_version %}
+  {%- set pg_version = "pg" ~ new_postgres_version %}
   {%- if not salt['file.file_exists']('/usr/' ~ pg_version ~ '/bin/psql') %}
 include:
   - postgresql.pg-install

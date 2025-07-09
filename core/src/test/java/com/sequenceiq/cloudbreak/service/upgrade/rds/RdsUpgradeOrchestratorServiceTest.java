@@ -444,8 +444,7 @@ class RdsUpgradeOrchestratorServiceTest {
     @EnumSource(MajorVersion.class)
     void testInstallPostgresPackages(MajorVersion targetVersion) throws CloudbreakOrchestratorException {
         OrchestratorStateParams stateParams = new OrchestratorStateParams();
-        when(saltStateParamsService.createStateParams(stack,
-                MajorVersion.VERSION_14 == targetVersion ? "postgresql/pg14-install" : "postgresql/pg11-install", false, 2000, 3))
+        when(saltStateParamsService.createStateParams(stack, "postgresql/pg-install", false, 2000, 3))
                 .thenReturn(stateParams);
 
         underTest.installPostgresPackages(STACK_ID, targetVersion);
@@ -457,8 +456,7 @@ class RdsUpgradeOrchestratorServiceTest {
     @EnumSource(MajorVersion.class)
     void testUpdatePostgresAlternatives(MajorVersion targetVersion) throws CloudbreakOrchestratorException {
         OrchestratorStateParams stateParams = new OrchestratorStateParams();
-        when(saltStateParamsService.createStateParams(stack,
-                MajorVersion.VERSION_14 == targetVersion ? "postgresql/pg14-alternatives" : "postgresql/pg11-alternatives", false, 2000, 3))
+        when(saltStateParamsService.createStateParams(stack, "postgresql/pg-alternatives", false, 2000, 3))
                 .thenReturn(stateParams);
 
         underTest.updatePostgresAlternatives(STACK_ID, targetVersion);

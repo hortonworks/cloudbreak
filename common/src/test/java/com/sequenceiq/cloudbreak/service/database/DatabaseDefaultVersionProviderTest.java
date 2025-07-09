@@ -72,8 +72,8 @@ class DatabaseDefaultVersionProviderTest {
         if (externalDatabaseEngineVersion == null && runtime != null) {
             when(dbOverrideConfig.findEngineVersionForRuntime(runtime)).thenReturn(findEngineVersionForRuntime(runtime));
         }
-        String result = underTest.calculateDbVersionBasedOnRuntimeAndOsIfMissing(runtime, os, externalDatabaseEngineVersion, cloudPlatform, true,
-                true);
+        String result = underTest.calculateDbVersionBasedOnRuntimeAndOsIfMissing(runtime, os, externalDatabaseEngineVersion
+        );
 
         assertEquals(expected, result);
     }

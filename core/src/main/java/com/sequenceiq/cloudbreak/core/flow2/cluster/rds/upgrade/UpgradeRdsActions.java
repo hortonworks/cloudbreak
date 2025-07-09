@@ -216,7 +216,7 @@ public class UpgradeRdsActions {
     }
 
     @Bean(name = "UPGRADE_RDS_INSTALL_POSTGRES_PACKAGES_STATE")
-    public Action<?, ?> installPg11() {
+    public Action<?, ?> installPgPackages() {
         return new AbstractUpgradeRdsAction<>(UpgradeRdsStartCMServicesResult.class) {
             @Override
             protected void doExecute(UpgradeRdsContext context, UpgradeRdsStartCMServicesResult payload, Map<Object, Object> variables) {

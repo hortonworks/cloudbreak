@@ -11,10 +11,8 @@
 
 include:
   - postgresql.disaster_recovery
-{%- if postgres_version == 11 %}
-  - postgresql.pg11-alternatives
-{%- elif postgres_version == 14 %}
-  - postgresql.pg14-alternatives
+{%- if postgres_version in [11, 14, 17] %}
+  - postgresql.pg-alternatives
 {%- endif %}
 
 {% if 'None' != configure_remote_db %}
