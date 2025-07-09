@@ -67,7 +67,7 @@ public class ProviderSyncService {
 
         CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
         AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
-        List<CloudResourceStatus> resourceStatusList = connector.resources().check(ac, cloudResources);
+        List<CloudResourceStatus> resourceStatusList = connector.resources().checkForSyncer(ac, cloudResources);
         List<CloudResource> syncedCloudResources = resourceStatusList.stream()
                 .map(CloudResourceStatus::getCloudResource)
                 .toList();

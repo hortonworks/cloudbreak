@@ -117,7 +117,7 @@ class ProviderSyncServiceTest {
         List<CloudResourceStatus> filteredResourceStatusList = filteredList.stream()
                 .map(resource -> new CloudResourceStatus(resource, ResourceStatus.CREATED))
                 .toList();
-        when(resourceConnector.check(authenticatedContext, filteredList)).thenReturn(filteredResourceStatusList);
+        when(resourceConnector.checkForSyncer(authenticatedContext, filteredList)).thenReturn(filteredResourceStatusList);
 
         underTest.syncResources(stack);
 
@@ -146,7 +146,7 @@ class ProviderSyncServiceTest {
         List<CloudResourceStatus> resourceStatusList = resourceList.stream()
                 .map(resource -> new CloudResourceStatus(resource, ResourceStatus.CREATED))
                 .toList();
-        when(resourceConnector.check(authenticatedContext, resourceList)).thenReturn(resourceStatusList);
+        when(resourceConnector.checkForSyncer(authenticatedContext, resourceList)).thenReturn(resourceStatusList);
 
         underTest.syncResources(stack);
 
@@ -168,7 +168,7 @@ class ProviderSyncServiceTest {
         List<CloudResourceStatus> resourceStatusList = resourceList.stream()
                 .map(resource -> new CloudResourceStatus(resource, ResourceStatus.CREATED))
                 .toList();
-        when(resourceConnector.check(authenticatedContext, resourceList)).thenReturn(resourceStatusList);
+        when(resourceConnector.checkForSyncer(authenticatedContext, resourceList)).thenReturn(resourceStatusList);
 
         underTest.syncResources(stack);
 

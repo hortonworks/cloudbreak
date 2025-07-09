@@ -232,6 +232,17 @@ public interface ResourceConnector {
     List<CloudResourceStatus> check(AuthenticatedContext authenticatedContext, List<CloudResource> resources);
 
     /**
+     * Invoked to check for the resources by the different Provider Syncer implementations.
+     *
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param resources            the resources for which the status needs to be checked
+     * @return the status of resources allocated on the given cloud platform
+     */
+    default List<CloudResourceStatus> checkForSyncer(AuthenticatedContext authenticatedContext, List<CloudResource> resources) {
+        throw new UnsupportedOperationException("Check for syncer is not supported for this provider.");
+    }
+
+    /**
      * Delete the complete infrastructure from Cloud platform. It does not need to wait/block until the infrastructure termination is finished,
      * but it can return immediately and the {@link #check(AuthenticatedContext, List)} method is invoked to check regularly whether the infrastructure and
      * all resources have already been terminated or not.
