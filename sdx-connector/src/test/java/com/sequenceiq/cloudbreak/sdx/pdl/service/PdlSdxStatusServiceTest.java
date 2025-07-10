@@ -7,7 +7,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.lang.reflect.Field;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -20,7 +19,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.util.ReflectionUtils;
 
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
 import com.cloudera.thunderhead.service.environments2api.model.Environment;
@@ -38,7 +36,7 @@ import com.sequenceiq.remoteenvironment.api.v1.environment.model.DescribeRemoteE
 public class PdlSdxStatusServiceTest {
     private static final String TENANT = "tenant";
 
-    private static final String PDL_CRN =  String.format("crn:altus:environments:us-west-1:%s:environment:crn1", TENANT);
+    private static final String PDL_CRN = String.format("crn:altus:environments:us-west-1:%s:environment:crn1", TENANT);
 
     private static final String ENV_CRN = "crn:cdp:environments:us-west-1:tenant:environment:crn1";
 
@@ -71,7 +69,6 @@ public class PdlSdxStatusServiceTest {
 
     @BeforeEach
     void setup() {
-        setEnabled(true);
         when(detailedEnvironmentResponse.getRemoteEnvironmentCrn()).thenReturn(PDL_CRN);
         when(entitlementService.hybridCloudEnabled(TENANT)).thenReturn(true);
         when(environmentEndpoint.getByCrn(ENV_CRN)).thenReturn(detailedEnvironmentResponse);
@@ -79,20 +76,6 @@ public class PdlSdxStatusServiceTest {
         when(environment.getPvcEnvironmentDetails()).thenReturn(pvcEnvironmentDetails);
         when(describeEnvironmentResponse.getEnvironment()).thenReturn(environment);
         when(remoteEnvironmentEndpoint.getByCrn(any())).thenReturn(describeEnvironmentResponse);
-    }
-
-    @Test
-    public void testListSdxCrnStatusPairEmptyNotEnabled() {
-        setEnabled(false);
-        when(detailedEnvironmentResponse.getRemoteEnvironmentCrn()).thenReturn(PDL_CRN);
-        assertTrue(underTest.listSdxCrnStatusPair(ENV_CRN).isEmpty());
-    }
-
-    @Test
-    public void testListSdxCrnStatusPairEmptyEntitlementNotAssigned() {
-        when(entitlementService.hybridCloudEnabled(TENANT)).thenReturn(false);
-        when(detailedEnvironmentResponse.getRemoteEnvironmentCrn()).thenReturn(PDL_CRN);
-        assertTrue(underTest.listSdxCrnStatusPair(ENV_CRN).isEmpty());
     }
 
     @Test
@@ -142,7 +125,7 @@ public class PdlSdxStatusServiceTest {
     public void testListSdxCrnStatusPair() {
         when(environment.getCrn()).thenReturn(PDL_CRN);
         when(privateDatalakeDetails.getStatus()).thenReturn(PrivateDatalakeDetails.StatusEnum.AVAILABLE);
-        Set<Pair<String, PrivateDatalakeDetails.StatusEnum>> sdxSet =  underTest.listSdxCrnStatusPair(ENV_CRN);
+        Set<Pair<String, PrivateDatalakeDetails.StatusEnum>> sdxSet = underTest.listSdxCrnStatusPair(ENV_CRN);
         assertEquals(1, sdxSet.size());
         Pair<String, PrivateDatalakeDetails.StatusEnum> sdx = sdxSet.iterator().next();
         assertEquals(PDL_CRN, sdx.getKey());
@@ -160,9 +143,4 @@ public class PdlSdxStatusServiceTest {
         assertEquals(StatusCheckResult.NOT_AVAILABLE, underTest.getAvailabilityStatusCheckResult(PrivateDatalakeDetails.StatusEnum.NOT_AVAILABLE));
     }
 
-    private void setEnabled(boolean pdlEnabled) {
-        Field pdlEnabledField = ReflectionUtils.findField(PdlSdxStatusService.class, "pdlEnabled");
-        ReflectionUtils.makeAccessible(pdlEnabledField);
-        ReflectionUtils.setField(pdlEnabledField, underTest, pdlEnabled);
-    }
 }

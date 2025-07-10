@@ -25,17 +25,15 @@ public class PdlSdxStatusService extends AbstractPdlSdxService implements Platfo
     @Override
     public Set<Pair<String, StatusEnum>> listSdxCrnStatusPair(String environmentCrn) {
         Set<Pair<String, StatusEnum>> result = new HashSet<>();
-        if (isEnabled(environmentCrn)) {
-            try {
-                Environment environment = getPrivateEnvForPublicEnv(environmentCrn);
-                if (environment != null && environment.getPvcEnvironmentDetails() != null
-                        && environment.getPvcEnvironmentDetails().getPrivateDatalakeDetails() != null) {
-                    result.add(Pair.of(environment.getCrn(), environment.getPvcEnvironmentDetails().getPrivateDatalakeDetails().getStatus()));
-                }
-            } catch (RuntimeException exception) {
-                LOGGER.error(String.format("Private datalake not found for environment. CRN: %s.", environmentCrn), exception);
-                return Collections.emptySet();
+        try {
+            Environment environment = getPrivateEnvForPublicEnv(environmentCrn);
+            if (environment != null && environment.getPvcEnvironmentDetails() != null
+                    && environment.getPvcEnvironmentDetails().getPrivateDatalakeDetails() != null) {
+                result.add(Pair.of(environment.getCrn(), environment.getPvcEnvironmentDetails().getPrivateDatalakeDetails().getStatus()));
             }
+        } catch (RuntimeException exception) {
+            LOGGER.error(String.format("Private datalake not found for environment. CRN: %s.", environmentCrn), exception);
+            return Collections.emptySet();
         }
         return result;
     }

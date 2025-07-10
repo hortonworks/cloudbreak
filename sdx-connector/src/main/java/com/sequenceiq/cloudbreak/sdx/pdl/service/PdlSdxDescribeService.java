@@ -35,70 +35,65 @@ public class PdlSdxDescribeService extends AbstractPdlSdxService implements Plat
 
     @Override
     public Optional<String> getRemoteDataContext(String crn) {
-        if (isEnabled(crn)) {
-            try {
-                DescribeRemoteEnvironment describeRemoteEnvironment = getRemoteEnvironmentRequest(crn);
-                DescribeDatalakeAsApiRemoteDataContextResponse remoteDataContext = getRemoteEnvironmentEndPoint().getRdcByCrn(describeRemoteEnvironment);
-                String parsedJson = JsonUtil.writeValueAsString(remoteDataContext.getContext());
-                ApiRemoteDataContext apiRemoteDataContext = OBJECT_MAPPER.readValue(parsedJson, ApiRemoteDataContext.class);
-                return Optional.of(OBJECT_MAPPER.writeValueAsString(apiRemoteDataContext));
-            } catch (JsonProcessingException e) {
-                LOGGER.error(String.format("Json processing failed, thus we cannot query remote data context. CRN: %s.", crn), e);
-            } catch (RuntimeException exception) {
-                LOGGER.error(String.format("Not able to fetch the RDC for CDL from Service Discovery. CRN: %s.", crn), exception);
-            }
-            throw new RuntimeException("Not able to fetch the RDC for PDL from Service Discovery");
+        try {
+            DescribeRemoteEnvironment describeRemoteEnvironment = getRemoteEnvironmentRequest(crn);
+            DescribeDatalakeAsApiRemoteDataContextResponse remoteDataContext = getRemoteEnvironmentEndPoint().getRdcByCrn(describeRemoteEnvironment);
+            String parsedJson = JsonUtil.writeValueAsString(remoteDataContext.getContext());
+            ApiRemoteDataContext apiRemoteDataContext = OBJECT_MAPPER.readValue(parsedJson, ApiRemoteDataContext.class);
+            return Optional.of(OBJECT_MAPPER.writeValueAsString(apiRemoteDataContext));
+        } catch (JsonProcessingException e) {
+            LOGGER.error(String.format("Json processing failed, thus we cannot query remote data context. CRN: %s.", crn), e);
+        } catch (RuntimeException exception) {
+            LOGGER.error(String.format("Not able to fetch the RDC for CDL from Service Discovery. CRN: %s.", crn), exception);
         }
-        return Optional.empty();
+        throw new RuntimeException("Not able to fetch the RDC for PDL from Service Discovery");
     }
 
     @Override
     public Set<String> listSdxCrns(String environmentCrn) {
-        if (isEnabled(environmentCrn)) {
+        try {
             String pvcCrn = getPrivateCloudEnvCrn(environmentCrn).orElse(null);
-            LOGGER.info("pvcCrn is {}", pvcCrn);
+            LOGGER.info("Private Cloud CRN is {}", pvcCrn);
             if (StringUtils.isNotBlank(pvcCrn)) {
                 return Set.of(pvcCrn);
             }
+        } catch (Exception e) {
+            LOGGER.info("No Private Cloud environment found with CRN: {}", environmentCrn, e);
         }
         return Set.of();
     }
 
     @Override
     public Optional<SdxBasicView> getSdxByEnvironmentCrn(String environmentCrn) {
-        if (isEnabled(environmentCrn)) {
-            try {
-                Environment environment = getPrivateEnvForPublicEnv(environmentCrn);
-                if (environment != null && environment.getPvcEnvironmentDetails() != null
-                        && environment.getPvcEnvironmentDetails().getPrivateDatalakeDetails() != null) {
-                    PrivateDatalakeDetails privateDatalakeDetails = environment.getPvcEnvironmentDetails().getPrivateDatalakeDetails();
-                    return Optional.of(SdxBasicView.builder()
-                            .withName(privateDatalakeDetails.getDatalakeName())
-                            .withCrn(environment.getCrn())
-                            .withRuntime(environment.getCdpRuntimeVersion())
-                            .withRazEnabled(privateDatalakeDetails.getEnableRangerRaz())
-                            .withCreated(privateDatalakeDetails.getCreationTimeEpochMillis())
-                            .withPlatform(TargetPlatform.PDL)
-                            .build());
-                }
-            } catch (RuntimeException exception) {
-                LOGGER.error(String.format("Exception while fetching CRN for private datalake with Environment: %s.", environmentCrn), exception);
+        try {
+            Environment environment = getPrivateEnvForPublicEnv(environmentCrn);
+            if (environment != null && environment.getPvcEnvironmentDetails() != null
+                    && environment.getPvcEnvironmentDetails().getPrivateDatalakeDetails() != null) {
+                PrivateDatalakeDetails privateDatalakeDetails = environment.getPvcEnvironmentDetails().getPrivateDatalakeDetails();
+                return Optional.of(SdxBasicView.builder()
+                        .withName(privateDatalakeDetails.getDatalakeName())
+                        .withCrn(environment.getCrn())
+                        .withRuntime(environment.getCdpRuntimeVersion())
+                        .withRazEnabled(privateDatalakeDetails.getEnableRangerRaz())
+                        .withCreated(privateDatalakeDetails.getCreationTimeEpochMillis())
+                        .withPlatform(TargetPlatform.PDL)
+                        .build());
             }
+        } catch (RuntimeException exception) {
+            LOGGER.error(String.format("Exception while fetching CRN for private datalake with Environment: %s.", environmentCrn), exception);
         }
         return Optional.empty();
     }
 
     @Override
     public Optional<SdxAccessView> getSdxAccessViewByEnvironmentCrn(String environmentCrn) {
-        if  (isEnabled(environmentCrn)) {
-            Environment environment = getPrivateEnvForPublicEnv(environmentCrn);
-            if (environment != null && environment.getPvcEnvironmentDetails() != null
-                    && environment.getPvcEnvironmentDetails().getPrivateDatalakeDetails() != null) {
-                PrivateDatalakeDetails privateDatalakeDetails = environment.getPvcEnvironmentDetails().getPrivateDatalakeDetails();
-                return Optional.of(SdxAccessView.builder().withRangerFqdn(
-                        StringUtils.isNotBlank(privateDatalakeDetails.getCmFQDN()) ? privateDatalakeDetails.getCmFQDN() : privateDatalakeDetails.getCmIP())
-                        .build());
-            }
+        Environment environment = getPrivateEnvForPublicEnv(environmentCrn);
+        if (environment != null && environment.getPvcEnvironmentDetails() != null
+                && environment.getPvcEnvironmentDetails().getPrivateDatalakeDetails() != null) {
+            PrivateDatalakeDetails privateDatalakeDetails = environment.getPvcEnvironmentDetails().getPrivateDatalakeDetails();
+            return Optional.of(SdxAccessView.builder().withRangerFqdn(
+                            StringUtils.isNotBlank(privateDatalakeDetails.getCmFQDN()) ? privateDatalakeDetails.getCmFQDN() : privateDatalakeDetails.getCmIP())
+                    .build());
         }
         return Optional.empty();
     }
@@ -110,12 +105,8 @@ public class PdlSdxDescribeService extends AbstractPdlSdxService implements Plat
 
     @Override
     public Optional<String> getCACertsForEnvironment(String environmentCrn) {
-        if  (isEnabled(environmentCrn)) {
-            Environment privateEnvironment = getPrivateEnvForPublicEnv(environmentCrn);
-            GetRootCertificateResponse response = getRemoteEnvironmentEndPoint().getRootCertificateByCrn(privateEnvironment.getCrn());
-            return Optional.ofNullable(response).map(GetRootCertificateResponse::getContents);
-        } else {
-            return Optional.empty();
-        }
+        Environment privateEnvironment = getPrivateEnvForPublicEnv(environmentCrn);
+        GetRootCertificateResponse response = getRemoteEnvironmentEndPoint().getRootCertificateByCrn(privateEnvironment.getCrn());
+        return Optional.ofNullable(response).map(GetRootCertificateResponse::getContents);
     }
 }

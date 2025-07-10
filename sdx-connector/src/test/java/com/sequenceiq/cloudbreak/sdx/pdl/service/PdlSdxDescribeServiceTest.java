@@ -9,7 +9,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.Optional;
 import java.util.Set;
 
@@ -22,7 +21,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.util.ReflectionUtils;
 
 import com.cloudera.cdp.servicediscovery.model.ApiRemoteDataContext;
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataContextResponse;
@@ -47,7 +45,7 @@ import com.sequenceiq.remoteenvironment.api.v1.environment.model.DescribeRemoteE
 public class PdlSdxDescribeServiceTest {
     private static final String TENANT = "tenant";
 
-    private static final String PDL_CRN =  String.format("crn:altus:environments:us-west-1:%s:environment:crn1", TENANT);
+    private static final String PDL_CRN = String.format("crn:altus:environments:us-west-1:%s:environment:crn1", TENANT);
 
     private static final String ENV_CRN = "crn:cdp:environments:us-west-1:tenant:environment:crn1";
 
@@ -92,7 +90,6 @@ public class PdlSdxDescribeServiceTest {
 
     @BeforeEach
     void setup() {
-        setEnabled(true);
         when(detailedEnvironmentResponse.getRemoteEnvironmentCrn()).thenReturn(PDL_CRN);
         when(entitlementService.hybridCloudEnabled(TENANT)).thenReturn(true);
         when(environmentEndpoint.getByCrn(ENV_CRN)).thenReturn(detailedEnvironmentResponse);
@@ -100,14 +97,6 @@ public class PdlSdxDescribeServiceTest {
         when(environment.getPvcEnvironmentDetails()).thenReturn(pvcEnvironmentDetails);
         when(describeEnvironmentResponse.getEnvironment()).thenReturn(environment);
         when(remoteEnvironmentEndpoint.getByCrn(any())).thenReturn(describeEnvironmentResponse);
-    }
-
-    @Test
-    public void testGetRemoteDataContextEmptyString() throws IOException {
-        setEnabled(false);
-        Optional<String> expectedRdc = underTest.getRemoteDataContext(PDL_CRN);
-        assertTrue(expectedRdc.isEmpty());
-        verify(remoteEnvironmentEndpoint, never()).getRdcByCrn(any());
     }
 
     @Test
@@ -121,7 +110,7 @@ public class PdlSdxDescribeServiceTest {
     public void testGetRemoteDataContext() throws IOException {
         String rdc = FileReaderUtils.readFileFromClasspath("com/sequenceiq/cloudbreak/sdx/common/service/rdc.json");
         ObjectMapper objectMapper = new ObjectMapper();
-        ApiRemoteDataContext apiRemoteDataContext =  objectMapper.readValue(rdc, ApiRemoteDataContext.class);
+        ApiRemoteDataContext apiRemoteDataContext = objectMapper.readValue(rdc, ApiRemoteDataContext.class);
         DescribeDatalakeAsApiRemoteDataContextResponse remoteDataContextResponse = new DescribeDatalakeAsApiRemoteDataContextResponse();
         remoteDataContextResponse.setContext(apiRemoteDataContext);
         when(remoteEnvironmentEndpoint.getRdcByCrn(any())).thenReturn(remoteDataContextResponse);
@@ -131,7 +120,7 @@ public class PdlSdxDescribeServiceTest {
         DescribeRemoteEnvironment describeRemoteEnvironment = captor.getValue();
         assertEquals(PDL_CRN, describeRemoteEnvironment.getCrn());
         assertTrue(expectedRdc.isPresent());
-        com.cloudera.api.swagger.model.ApiRemoteDataContext cmApiRemoteDataContext =  objectMapper.readValue(rdc,
+        com.cloudera.api.swagger.model.ApiRemoteDataContext cmApiRemoteDataContext = objectMapper.readValue(rdc,
                 com.cloudera.api.swagger.model.ApiRemoteDataContext.class);
         assertEquals("pub-ak-aws3-dl", cmApiRemoteDataContext.getEndPointId());
         assertEquals("CDH 7.3.1", cmApiRemoteDataContext.getClusterVersion());
@@ -152,20 +141,6 @@ public class PdlSdxDescribeServiceTest {
     }
 
     @Test
-    public void testListSdxCrnsEmptyNotEnabled() {
-        setEnabled(false);
-        when(detailedEnvironmentResponse.getRemoteEnvironmentCrn()).thenReturn(PDL_CRN);
-        assertTrue(underTest.listSdxCrns(ENV_CRN).isEmpty());
-    }
-
-    @Test
-    public void testListSdxCrnsEmptyEntitlementNotAssigned() {
-        when(entitlementService.hybridCloudEnabled(TENANT)).thenReturn(false);
-        when(detailedEnvironmentResponse.getRemoteEnvironmentCrn()).thenReturn(PDL_CRN);
-        assertTrue(underTest.listSdxCrns(ENV_CRN).isEmpty());
-    }
-
-    @Test
     public void testListSdxCrnsEmpty() {
         when(detailedEnvironmentResponse.getRemoteEnvironmentCrn()).thenReturn(null);
         assertTrue(underTest.listSdxCrns(ENV_CRN).isEmpty());
@@ -179,18 +154,6 @@ public class PdlSdxDescribeServiceTest {
         assertEquals(1, sdxs.size());
         assertEquals(Set.of(PDL_CRN), sdxs);
         verify(environmentEndpoint).getByCrn(ENV_CRN);
-    }
-
-    @Test
-    public void testGetSdxByEnvironmentCrnNotEnabled() {
-        setEnabled(false);
-        assertTrue(underTest.getSdxByEnvironmentCrn(ENV_CRN).isEmpty());
-    }
-
-    @Test
-    public void testGetSdxByEnvironmentCrnEntitlementNotAssigned() {
-        when(entitlementService.hybridCloudEnabled(TENANT)).thenReturn(false);
-        assertTrue(underTest.getSdxByEnvironmentCrn(ENV_CRN).isEmpty());
     }
 
     @Test
@@ -223,7 +186,7 @@ public class PdlSdxDescribeServiceTest {
         when(privateDatalakeDetails.getDatalakeName()).thenReturn(DATALAKE_NAME);
         when(privateDatalakeDetails.getEnableRangerRaz()).thenReturn(ENABLE_RANGER_RAZ);
         when(privateDatalakeDetails.getCreationTimeEpochMillis()).thenReturn(CREATED);
-        Optional<SdxBasicView> sdxBasicViewOptional =  underTest.getSdxByEnvironmentCrn(ENV_CRN);
+        Optional<SdxBasicView> sdxBasicViewOptional = underTest.getSdxByEnvironmentCrn(ENV_CRN);
         assertTrue(sdxBasicViewOptional.isPresent());
         SdxBasicView sdxBasicView = sdxBasicViewOptional.get();
         assertEquals(PDL_CRN, sdxBasicView.crn());
@@ -231,18 +194,6 @@ public class PdlSdxDescribeServiceTest {
         assertEquals(CDP_RUNTIME, sdxBasicView.runtime());
         assertEquals(CREATED, sdxBasicView.created());
         assertEquals(TargetPlatform.PDL, sdxBasicView.platform());
-    }
-
-    @Test
-    public void testGetSdxAccessViewByEnvironmentCrnNotEnabled() {
-        setEnabled(false);
-        assertTrue(underTest.getSdxAccessViewByEnvironmentCrn(ENV_CRN).isEmpty());
-    }
-
-    @Test
-    public void testGetSdxAccessViewByEnvironmentCrnEntitlementNotAssigned() {
-        when(entitlementService.hybridCloudEnabled(TENANT)).thenReturn(false);
-        assertTrue(underTest.getSdxAccessViewByEnvironmentCrn(ENV_CRN).isEmpty());
     }
 
     @Test
@@ -272,7 +223,7 @@ public class PdlSdxDescribeServiceTest {
     public void testGetSdxAccessViewByEnvironmentCmFqdn() {
         when(privateDatalakeDetails.getCmFQDN()).thenReturn(CM_FQDN);
         when(privateDatalakeDetails.getCmIP()).thenReturn(CM_IP);
-        Optional<SdxAccessView> sdxAccessViewOptional =  underTest.getSdxAccessViewByEnvironmentCrn(ENV_CRN);
+        Optional<SdxAccessView> sdxAccessViewOptional = underTest.getSdxAccessViewByEnvironmentCrn(ENV_CRN);
         assertTrue(sdxAccessViewOptional.isPresent());
         SdxAccessView sdxAccessView = sdxAccessViewOptional.get();
         assertEquals(CM_FQDN, sdxAccessView.rangerFqdn());
@@ -281,7 +232,7 @@ public class PdlSdxDescribeServiceTest {
     @Test
     public void testGetSdxAccessViewByEnvironmentCmIp() {
         when(privateDatalakeDetails.getCmIP()).thenReturn(CM_IP);
-        Optional<SdxAccessView> sdxAccessViewOptional =  underTest.getSdxAccessViewByEnvironmentCrn(ENV_CRN);
+        Optional<SdxAccessView> sdxAccessViewOptional = underTest.getSdxAccessViewByEnvironmentCrn(ENV_CRN);
         assertTrue(sdxAccessViewOptional.isPresent());
         SdxAccessView sdxAccessView = sdxAccessViewOptional.get();
         assertEquals(CM_IP, sdxAccessView.rangerFqdn());
@@ -297,9 +248,4 @@ public class PdlSdxDescribeServiceTest {
         assertEquals("certecske", result.get());
     }
 
-    private void setEnabled(boolean pdlEnabled) {
-        Field pdlEnabledField = ReflectionUtils.findField(PdlSdxStatusService.class, "pdlEnabled");
-        ReflectionUtils.makeAccessible(pdlEnabledField);
-        ReflectionUtils.setField(pdlEnabledField, underTest, pdlEnabled);
-    }
 }
