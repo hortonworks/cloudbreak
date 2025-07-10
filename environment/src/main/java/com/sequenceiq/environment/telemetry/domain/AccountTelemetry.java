@@ -15,6 +15,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Where;
 
@@ -126,7 +127,7 @@ public class AccountTelemetry implements Serializable, AuthResource, AccountIdAw
     }
 
     public void setEnabledSensitiveStorageLogs(Set<String> enabledSensitiveStorageLogs) {
-        this.enabledSensitiveStorageLogs = Joiner.on(",").join(enabledSensitiveStorageLogs);
+        this.enabledSensitiveStorageLogs = Joiner.on(",").join(CollectionUtils.emptyIfNull(enabledSensitiveStorageLogs));
     }
 
     @Override
