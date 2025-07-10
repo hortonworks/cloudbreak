@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.telemetry.TelemetryContextProvider;
 import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfigService;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfigView;
-import com.sequenceiq.cloudbreak.tls.TlsSpecificationsHelper;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.EnvironmentService;
 import com.sequenceiq.freeipa.service.rotation.SecretRotationSaltService;
@@ -67,12 +66,7 @@ public class FreeipaMonitoringCredentialsRotationService {
     private void refreshMonitoringPillars(Stack stackDto) {
         try {
             TelemetryContext telemetryContext = telemetryContextProvider.createTelemetryContext(stackDto);
-            List<String> tlsCipherSuitesBlackBoxExporter = environmentService.getTlsCipherSuitesIanaList(stackDto.getAccountId(),
-                    TlsSpecificationsHelper.CipherSuitesLimitType.BLACKBOX_EXPORTER);
-
             MonitoringConfigView monitoringConfigView = monitoringConfigService.createConfigs(telemetryContext);
-            monitoringConfigService.setTlsCipherSuitesBlackBoxEporter(tlsCipherSuitesBlackBoxExporter);
-
             SaltPillarProperties saltPillarProperties = new SaltPillarProperties("/" + MONITORING_KEY + "/init.sls",
                     Map.of(MONITORING_KEY, monitoringConfigView.toMap()));
             saltService.updateSaltPillar(stackDto, Map.of(MONITORING_KEY, saltPillarProperties));

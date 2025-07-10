@@ -18,6 +18,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.Before;
@@ -39,6 +40,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
 import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
@@ -83,6 +85,9 @@ public class TelemetryDecoratorTest {
     @Mock
     private Logging logging;
 
+    @Mock
+    private EnvironmentService environmentService;
+
     @Spy
     private Monitoring monitoring = new Monitoring();
 
@@ -97,7 +102,8 @@ public class TelemetryDecoratorTest {
                 monitoringUrlResolver,
                 componentConfigProviderService,
                 clusterComponentConfigProvider,
-                "1.0.0");
+                "1.0.0",
+                environmentService);
     }
 
     @Test
@@ -184,6 +190,7 @@ public class TelemetryDecoratorTest {
         given(clusterComponentConfigProvider.getSaltStateComponentCbVersion(2L)).willReturn("2.66.0-b100");
         telemetry.setMonitoring(monitoring);
         given(monitoringUrlResolver.resolve(anyString(), anyBoolean())).willReturn("http://nope/receive");
+        given(environmentService.getTlsCipherSuitesIanaList(anyString(), any())).willReturn(List.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"));
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(createStack());
         // THEN
@@ -191,6 +198,7 @@ public class TelemetryDecoratorTest {
         assertFalse(result.getLogShipperContext().isEnabled());
         assertTrue(result.getMonitoringContext().isEnabled());
         assertNotNull(telemetry.getMonitoring().getRemoteWriteUrl());
+        assertTrue(result.getTlsCipherSuites().contains("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"));
         verify(altusMachineUserService, times(1)).storeMonitoringCredential(any(Optional.class), any(Stack.class), any(CdpAccessKeyType.class));
     }
 
@@ -333,6 +341,7 @@ public class TelemetryDecoratorTest {
         creator.setUserCrn("crn:cdp:iam:us-west-1:accountId:user:name");
         stack.setCreator(creator);
         stack.setResourceCrn("crn:cdp:cloudbreak:us-west-1:someone:stack:12345");
+        stack.setEnvironmentCrn("crn:cdp:cloudbreak:us-west-1:someone:environment:12345");
         stack.setRegion("region");
         when(stackDto.getStack()).thenReturn(stack);
         when(stackDto.getCluster()).thenReturn(cluster);

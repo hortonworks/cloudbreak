@@ -142,6 +142,7 @@ public class MonitoringConfigView implements TelemetryConfigView {
         this.privateKey = builder.privateKey;
         this.accessKeyType = builder.accessKeyType;
         this.cmAutoTls = builder.cmAutoTls;
+        this.tlsCipherSuitesBlackBoxExporter = builder.tlsCipherSuitesBlackBoxExporter;
     }
 
     public boolean isEnabled() {
@@ -370,6 +371,8 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
         private RequestSignerConfigView requestSigner;
 
+        private List<String> tlsCipherSuitesBlackBoxExporter;
+
         public MonitoringConfigView build() {
             return new MonitoringConfigView(this);
         }
@@ -546,6 +549,11 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
         public Builder withCmAutoTls(boolean cmAutoTls) {
             this.cmAutoTls = cmAutoTls;
+            return this;
+        }
+
+        public Builder withTlsCipherSuit(List<String> tlsCipherSuit) {
+            this.tlsCipherSuitesBlackBoxExporter = tlsCipherSuit;
             return this;
         }
     }

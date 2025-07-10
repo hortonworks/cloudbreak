@@ -38,8 +38,6 @@ public class MonitoringConfigService implements TelemetryPillarConfigGenerator<M
 
     private final AdlsGen2ConfigGenerator adlsGen2ConfigGenerator;
 
-    private List<String> tlsCipherSuitesBlackBoxEporter;
-
     public MonitoringConfigService(MonitoringConfiguration monitoringConfiguration, AdlsGen2ConfigGenerator adlsGen2ConfigGenerator) {
         this.monitoringConfiguration = monitoringConfiguration;
         this.adlsGen2ConfigGenerator = adlsGen2ConfigGenerator;
@@ -68,6 +66,8 @@ public class MonitoringConfigService implements TelemetryPillarConfigGenerator<M
         builder.withMaxShards(monitoringConfiguration.getAgent().getMaxShards());
         builder.withMaxSamplesPerSend(monitoringConfiguration.getAgent().getMaxSamplesPerSend());
         builder.withCapacity(monitoringConfiguration.getAgent().getCapacity());
+        builder.withTlsCipherSuit(context.getTlsCipherSuites());
+
         if (monitoringContext.getCredential() != null) {
             String accessKeyType = StringUtils.defaultIfBlank(monitoringContext.getCredential().getAccessKeyType(), DEFAULT_ACCESS_KEY_TYPE);
             builder.withAccessKeyId(monitoringContext.getCredential().getAccessKey())
@@ -198,9 +198,5 @@ public class MonitoringConfigService implements TelemetryPillarConfigGenerator<M
     private boolean areAuthConfigsValid(MonitoringAuthConfig authConfig) {
         return authConfig != null && authConfig.getPassword() != null
                 && StringUtils.isNoneBlank(authConfig.getUsername(), authConfig.getPassword());
-    }
-
-    public void setTlsCipherSuitesBlackBoxEporter(List<String> tlsCipherSuites) {
-        this.tlsCipherSuitesBlackBoxEporter = tlsCipherSuites;
     }
 }

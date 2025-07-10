@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.environment;
 
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -150,5 +151,10 @@ public class EnvironmentService {
 
     public String getTlsCipherSuites(String environmentCrn, TlsSpecificationsHelper.CipherSuitesLimitType cipherSuiteLimitType) {
         return getTlsCipherSuites(environmentCrn, cipherSuiteLimitType, false);
+    }
+
+    public List<String> getTlsCipherSuitesIanaList(String environmentCrn, TlsSpecificationsHelper.CipherSuitesLimitType cipherSuitelimitType) {
+        String[] tlsCipherSuites = getTlsCipherSuitesList(environmentCrn, cipherSuitelimitType);
+        return TlsSpecificationsHelper.getTlsCipherSuitesIanaList(tlsCipherSuites, cipherSuitelimitType);
     }
 }

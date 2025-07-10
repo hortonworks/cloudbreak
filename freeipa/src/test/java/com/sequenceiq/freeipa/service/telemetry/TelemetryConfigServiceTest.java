@@ -21,6 +21,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -60,6 +61,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.AltusMachineUserService;
+import com.sequenceiq.freeipa.service.EnvironmentService;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -107,6 +109,9 @@ public class TelemetryConfigServiceTest {
     @Mock
     private TelemetryFeatureService telemetryFeatureService;
 
+    @Mock
+    private EnvironmentService environmentService;
+
     @BeforeEach
     public void setUp() throws TransactionService.TransactionExecutionException {
         underTest = new TelemetryConfigService();
@@ -145,6 +150,7 @@ public class TelemetryConfigServiceTest {
         MonitoringCredential monitoringCredential = new MonitoringCredential();
         monitoringCredential.setAccessKey("accessKey");
         monitoringCredential.setPrivateKey("privateKey");
+        given(environmentService.getTlsCipherSuitesIanaList(anyString(), any())).willReturn(List.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"));
         given(cmLicenseParser.parseLicense(anyString())).willReturn(Optional.of(license));
         given(umsClient.getAccountDetails(anyString())).willReturn(account);
         given(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).willReturn("myendpoint");
@@ -183,6 +189,8 @@ public class TelemetryConfigServiceTest {
                 .willReturn(Optional.of(monitoringCredential));
         given(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).willReturn("myendpoint");
         given(dataBusEndpointProvider.getDatabusS3Endpoint(anyString(), anyString())).willReturn("endpoint");
+        given(environmentService.getTlsCipherSuitesIanaList(anyString(), any())).willReturn(List.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"));
+
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(createStack(telemetry(false, true)));
         // THEN
@@ -201,6 +209,8 @@ public class TelemetryConfigServiceTest {
         given(umsClient.getAccountDetails(anyString())).willReturn(account);
         given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(false);
         Stack stack = createStack(telemetry(false, true));
+        given(environmentService.getTlsCipherSuitesIanaList(anyString(), any())).willReturn(List.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"));
+
         given(stackService.getStackById(STACK_ID)).willReturn(stack);
         given(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).willReturn("myendpoint");
         given(dataBusEndpointProvider.getDatabusS3Endpoint(anyString(), anyString())).willReturn("endpoint");
@@ -232,6 +242,8 @@ public class TelemetryConfigServiceTest {
         given(monitoringUrlResolver.resolve(anyString(), anyBoolean())).willReturn("http://nope/receive");
         given(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).willReturn("myendpoint");
         given(dataBusEndpointProvider.getDatabusS3Endpoint(anyString(), anyString())).willReturn("endpoint");
+        given(environmentService.getTlsCipherSuitesIanaList(anyString(), any())).willReturn(List.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"));
+
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(stack);
         // THEN
@@ -239,6 +251,7 @@ public class TelemetryConfigServiceTest {
         assertTrue(result.getDatabusContext().isEnabled());
         assertTrue(result.getMonitoringContext().isEnabled());
         assertNotNull(stack.getTelemetry().getMonitoring().getRemoteWriteUrl());
+        assertEquals("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384", result.getTlsCipherSuites().get(0));
         verify(altusMachineUserService, times(1)).getOrCreateMonitoringCredentialIfNeeded(any(Stack.class), any(CdpAccessKeyType.class));
     }
 
@@ -251,6 +264,8 @@ public class TelemetryConfigServiceTest {
         given(umsClient.getAccountDetails(anyString())).willReturn(account);
         given(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).willReturn("myendpoint");
         given(dataBusEndpointProvider.getDatabusS3Endpoint(anyString(), anyString())).willReturn("endpoint");
+        given(environmentService.getTlsCipherSuitesIanaList(anyString(), any())).willReturn(List.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"));
+
         Telemetry telemetry = telemetry(true, false);
         telemetry.getLogging().setS3(null);
         // WHEN
@@ -305,6 +320,7 @@ public class TelemetryConfigServiceTest {
         stack.setRegion("region");
         stack.setResourceCrn("crn:cdp:freeipa:us-west-1:f39af961-e0ce-4f79-826c-45502efb9ca3:environment:11111-2222");
         stack.setImage(new ImageEntity());
+        stack.setEnvironmentCrn("environmentCrn");
         return stack;
     }
 

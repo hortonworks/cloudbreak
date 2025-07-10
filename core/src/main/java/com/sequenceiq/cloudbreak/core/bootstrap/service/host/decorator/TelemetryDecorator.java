@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.tag.ClusterTemplateApplicationTag;
 import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
@@ -46,6 +47,7 @@ import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringAuthConfig;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringClusterType;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringServiceType;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
+import com.sequenceiq.cloudbreak.tls.TlsSpecificationsHelper.CipherSuitesLimitType;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -81,6 +83,8 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
 
     private final ClusterComponentConfigProvider clusterComponentConfigProvider;
 
+    private final EnvironmentService environmentService;
+
     public TelemetryDecorator(AltusMachineUserService altusMachineUserService,
             VmLogsService vmLogsService,
             EntitlementService entitlementService,
@@ -88,7 +92,8 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
             MonitoringUrlResolver monitoringUrlResolver,
             ComponentConfigProviderService componentConfigProviderService,
             ClusterComponentConfigProvider clusterComponentConfigProvider,
-            @Value("${info.app.version:}") String version) {
+            @Value("${info.app.version:}") String version,
+            EnvironmentService environmentService) {
         this.altusMachineUserService = altusMachineUserService;
         this.vmLogsService = vmLogsService;
         this.entitlementService = entitlementService;
@@ -97,6 +102,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
         this.componentConfigProviderService = componentConfigProviderService;
         this.clusterComponentConfigProvider = clusterComponentConfigProvider;
         this.version = version;
+        this.environmentService = environmentService;
     }
 
     @Override
@@ -113,7 +119,9 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
         telemetryContext.setCloudPlatform(stack.getCloudPlatform());
         telemetryContext.setClusterType(mapToFluentClusterType(stack.getType()));
         telemetryContext.setTelemetry(telemetry);
-
+        List<String> tlsCipherSuitesBlackBoxExporter = environmentService.getTlsCipherSuitesIanaList(stack.getEnvironmentCrn(),
+                CipherSuitesLimitType.BLACKBOX_EXPORTER);
+        telemetryContext.setTlsCipherSuites(tlsCipherSuitesBlackBoxExporter);
         try {
             Image image = componentConfigProviderService.getImage(stack.getId());
             telemetryContext.setOsType(image.getOsType());

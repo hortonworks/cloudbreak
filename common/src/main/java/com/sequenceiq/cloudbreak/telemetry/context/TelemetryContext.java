@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.telemetry.context;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
@@ -37,6 +38,8 @@ public class TelemetryContext {
     private String cloudPlatform;
 
     private Boolean devTelemetryRepo = Boolean.FALSE;
+
+    private List<String> tlsCipherSuites;
 
     public <T extends TelemetryConfigView> void addConfigView(T configView) {
         configs.put(configView.getClass(), configView);
@@ -148,6 +151,14 @@ public class TelemetryContext {
 
     public void setDevTelemetryRepo(Boolean devTelemetryRepo) {
         this.devTelemetryRepo = devTelemetryRepo;
+    }
+
+    public List<String> getTlsCipherSuites() {
+        return tlsCipherSuites;
+    }
+
+    public void setTlsCipherSuites(List<String> tlsCipherSuites) {
+        this.tlsCipherSuites = tlsCipherSuites;
     }
 
     @Override
