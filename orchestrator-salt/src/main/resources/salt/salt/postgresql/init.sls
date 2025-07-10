@@ -20,23 +20,23 @@
   {%- set command = 'systemctl show -p FragmentPath postgresql-14' %}
   {%- set unitFile = salt['cmd.run'](command) | replace("FragmentPath=","") %}
   {%- set serviceName = "postgresql-14" %}
-{%- elif postgres_version == 17  %}
-  {%- set command = 'systemctl show -p FragmentPath postgresql-17' %}
-  {%- set unitFile = salt['cmd.run'](command) | replace("FragmentPath=","") %}
-  {%- set serviceName = "postgresql-17" %}
 {%- endif %}
 {%- endif %}
 
 {% if 'None' != configure_remote_db %}
 
 include:
-  {%- if postgres_version in [11, 14, 17] %}
-  {%- set pg_version = "pg" ~ postgres_version %}
-  {%- if not salt['file.file_exists']('/usr/' ~ pg_version ~ '/bin/psql') %}
-  - postgresql.pg-install
-  {%- endif %}
-  - postgresql.pg-alternatives
-  {%- endif %}
+{%- if postgres_version == 11 %}
+{%- if not salt['file.file_exists']('/usr/pgsql-11/bin/psql') %}
+  - postgresql.pg11-install
+{%- endif %}
+  - postgresql.pg11-alternatives
+{%- elif postgres_version == 14  %}
+{%- if not salt['file.file_exists']('/usr/pgsql-14/bin/psql') %}
+  - postgresql.pg14-install
+{%- endif %}
+  - postgresql.pg14-alternatives
+{%- endif %}
   - postgresql.disaster_recovery.recover
 
 /opt/salt/scripts/init_db_remote.sh:
@@ -110,9 +110,12 @@ create_embeddeddb_certificate:
 
 {%- endif %}
 
-  {%- if postgres_version in [11, 14, 17] %}
+{%- if postgres_version == 11 %}
 include:
-  - postgresql.pg{{ postgres_version }}
+  - postgresql.pg11
+{%- elif postgres_version == 14 %}
+include:
+  - postgresql.pg14
 {%- endif %}
 
 ensure-postgres-stopped-before-initdb:

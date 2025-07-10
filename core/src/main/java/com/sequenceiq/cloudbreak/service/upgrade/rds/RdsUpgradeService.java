@@ -125,7 +125,7 @@ public class RdsUpgradeService {
     private void validate(NameOrCrn nameOrCrn, StackView stack, TargetMajorVersion targetMajorVersion, String accountId, boolean forced) {
         StackDatabaseServerResponse databaseServer = databaseService.getDatabaseServer(nameOrCrn, accountId);
         validateRdsIsNotUpgraded(databaseServer, targetMajorVersion, forced);
-        validateRuntimeEligibleForUpgrade(stack, targetMajorVersion.getMajorVersion(), accountId);
+        validateRuntimeEligibleForUpgrade(stack, accountId);
         validateStackStatus(stack);
         validateAttachedDatahubsAreNotRunning(stack, accountId);
         validateRdsIsAvailableForUpgrade(databaseServer);
@@ -159,9 +159,8 @@ public class RdsUpgradeService {
         throw new BadRequestException(message);
     }
 
-    private void validateRuntimeEligibleForUpgrade(StackView stack, String targetMajorVersion, String accountId) {
-        Optional<String> runtimeValidationError =
-                databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(stack.getStackVersion(), targetMajorVersion, accountId);
+    private void validateRuntimeEligibleForUpgrade(StackView stack, String accountId) {
+        Optional<String> runtimeValidationError = databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(stack.getStackVersion(), accountId);
         if (runtimeValidationError.isPresent()) {
             LOGGER.warn("There was a validation error: {}", runtimeValidationError.get());
             throw new BadRequestException(runtimeValidationError.get());

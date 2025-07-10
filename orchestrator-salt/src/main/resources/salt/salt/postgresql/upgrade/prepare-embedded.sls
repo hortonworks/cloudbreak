@@ -12,11 +12,15 @@
 {%- do salt.log.debug("log_temp_directory " ~ temp_directory) %}
 {%- do salt.log.debug("log_running_postgres_version " ~ running_postgres_version) %}
 
-  {%- if new_postgres_version | int in [11, 14, 17] %}
-  {%- set pg_version = "pg" ~ postgres_version %}
-  {%- if not salt['file.file_exists']('/usr/' ~ pg_version ~ '/bin/psql') %}
+{%- if new_postgres_version | int == 11 %}
+{%- if not salt['file.file_exists']('/usr/pgsql-11/bin/psql') %}
 include:
-  - postgresql.pg-install
+  - postgresql.pg11-install
+{%- endif %}
+{%- elif new_postgres_version | int == 14  %}
+{%- if not salt['file.file_exists']('/usr/pgsql-14/bin/psql') %}
+include:
+  - postgresql.pg14-install
 {%- endif %}
 {%- endif %}
 

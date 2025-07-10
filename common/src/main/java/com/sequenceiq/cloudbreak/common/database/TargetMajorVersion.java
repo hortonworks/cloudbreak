@@ -10,8 +10,7 @@ public enum TargetMajorVersion implements Version {
     @Deprecated
     VERSION_14("14"),
     VERSION11("11"),
-    VERSION14("14"),
-    VERSION17("17");
+    VERSION14("14");
 
     private final String version;
 
@@ -30,7 +29,6 @@ public enum TargetMajorVersion implements Version {
             case VERSION_14 -> MajorVersion.VERSION_14;
             case VERSION11 -> MajorVersion.VERSION_11;
             case VERSION14 -> MajorVersion.VERSION_14;
-            case VERSION17 -> MajorVersion.VERSION_17;
         };
     }
 }

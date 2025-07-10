@@ -289,7 +289,6 @@ public class DatabaseCommonTest {
         assertTrue(dbVersionPattern.matcher("12").matches(), "valid version: 12");
         assertTrue(dbVersionPattern.matcher("13").matches(), "valid version: 13");
         assertTrue(dbVersionPattern.matcher("14").matches(), "valid version: 14");
-        assertTrue(dbVersionPattern.matcher("17").matches(), "valid version: 17");
         assertFalse(dbVersionPattern.matcher("141").matches(), "not a valid version");
         assertFalse(dbVersionPattern.matcher("1111").matches(), "valid version twice");
     }
