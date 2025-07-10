@@ -13,7 +13,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Multimap;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
@@ -64,9 +63,6 @@ public class FreeIpaConfigService {
 
     @Inject
     private EnvironmentService environmentService;
-
-    @Inject
-    private EntitlementService entitlementService;
 
     @Inject
     private FreeIpaLoadBalancerService loadBalancerService;

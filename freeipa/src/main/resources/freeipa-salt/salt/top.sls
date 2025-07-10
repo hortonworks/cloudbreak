@@ -31,6 +31,9 @@ base:
              - match: grain
              - freeipa.primary-install
              - freeipa.common-install
+             {% if salt['pillar.get']('environmentType', 'PUBLIC_CLOUD') == 'HYBRID' %}
+             - trustsetup.adtrust_install
+             {% endif %}
              - freeipa.backups
              {% if salt['pillar.get']('freeipa:secretEncryptionEnabled', False) == True %}
              - cdpluksvolumebackup
@@ -45,6 +48,9 @@ base:
              - match: grain
              - freeipa.replica-install
              - freeipa.common-install
+             {% if salt[ 'pillar.get' ]('environmentType', 'PUBLIC_CLOUD') == 'HYBRID' %}
+             - trustsetup.adtrust_install
+             {% endif %}
              - freeipa.backups
              {% if salt['pillar.get']('freeipa:secretEncryptionEnabled', False) == True %}
              - cdpluksvolumebackup
@@ -60,6 +66,9 @@ base:
              - freeipa.replica-install
              - freeipa.common-install
              - freeipa.promote-replica-to-master
+             {% if salt[ 'pillar.get' ]('environmentType', 'PUBLIC_CLOUD') == 'HYBRID' %}
+             - trustsetup.adtrust_install
+             {% endif %}
              - freeipa.backups
              {% if salt['pillar.get']('freeipa:secretEncryptionEnabled', False) == True %}
              - cdpluksvolumebackup

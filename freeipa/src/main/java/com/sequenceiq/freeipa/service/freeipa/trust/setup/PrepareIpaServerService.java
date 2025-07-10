@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.service.freeipa.trust.setup;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -14,6 +15,7 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateRetryParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteriaModel;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
@@ -42,15 +44,16 @@ public class PrepareIpaServerService {
     public void prepareIpaServer(Long stackId) throws CloudbreakOrchestratorFailedException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-        OrchestratorStateParams stateParams = createOrchestratorStateParams(primaryGatewayConfig, stackId);
+        OrchestratorStateParams stateParams = createOrchestratorStateParams(primaryGatewayConfig, stack);
         hostOrchestrator.runOrchestratorState(stateParams);
     }
 
-    private OrchestratorStateParams createOrchestratorStateParams(GatewayConfig primaryGatewayConfig, Long stackId) {
+    private OrchestratorStateParams createOrchestratorStateParams(GatewayConfig primaryGatewayConfig, Stack stack) {
         OrchestratorStateParams stateParameters = new OrchestratorStateParams();
         stateParameters.setPrimaryGatewayConfig(primaryGatewayConfig);
-        stateParameters.setTargetHostNames(Set.of(primaryGatewayConfig.getHostname()));
-        stateParameters.setExitCriteriaModel(new StackBasedExitCriteriaModel(stackId));
+        Set<String> targetHostNames = stack.getNotDeletedInstanceMetaDataSet().stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toSet());
+        stateParameters.setTargetHostNames(targetHostNames);
+        stateParameters.setExitCriteriaModel(new StackBasedExitCriteriaModel(stack.getId()));
         OrchestratorStateRetryParams stateRetryParams = new OrchestratorStateRetryParams();
         stateRetryParams.setMaxRetry(maxRetryCount);
         stateRetryParams.setMaxRetryOnError(maxRetryCountOnError);

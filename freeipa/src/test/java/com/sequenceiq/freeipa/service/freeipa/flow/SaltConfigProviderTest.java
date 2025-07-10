@@ -26,8 +26,11 @@ import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultCcmV2JumpgateParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultCcmV2Parameters;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
+import com.sequenceiq.common.api.type.EnvironmentType;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.freeipa.config.FreeIpaConfigService;
 import com.sequenceiq.freeipa.service.freeipa.config.FreeIpaConfigView;
 import com.sequenceiq.freeipa.service.freeipa.config.LdapAgentConfigProvider;
@@ -83,6 +86,9 @@ class SaltConfigProviderTest {
     @Mock
     private PaywallConfigService paywallConfigService;
 
+    @Mock
+    private CachedEnvironmentClientService environmentClientService;
+
     @InjectMocks
     private SaltConfigProvider underTest;
 
@@ -105,6 +111,9 @@ class SaltConfigProviderTest {
         when(ldapAgentConfigProvider.generateConfig(stack, DOMAIN)).thenReturn(Map.of("ldap", new SaltPillarProperties("ldappath", Map.of())));
         when(paywallConfigService.createPaywallPillarConfig(any())).thenReturn(
                 Map.of(PAYWALL_PILLAR, new SaltPillarProperties(PAYWALL_PILLAR_PATH, Map.of())));
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        environmentResponse.setEnvironmentType(EnvironmentType.PUBLIC_CLOUD.name());
+        when(environmentClientService.getByCrn(ENV_CRN)).thenReturn(environmentResponse);
 
         SaltConfig saltConfig = underTest.getSaltConfig(stack, Set.of());
 
@@ -120,6 +129,7 @@ class SaltConfigProviderTest {
         assertNotNull(discoveryProperties);
         assertEquals("/discovery/init.sls", discoveryProperties.getPath());
         assertEquals(CLOUD_PLATFORM, discoveryProperties.getProperties().get("platform"));
+        assertEquals(EnvironmentType.PUBLIC_CLOUD.name(), discoveryProperties.getProperties().get("environmentType"));
 
         SaltPillarProperties pillarProperties = servicePillarConfig.get(PILLAR);
         assertNotNull(pillarProperties);
@@ -160,10 +170,15 @@ class SaltConfigProviderTest {
     @Test
     void testCdpLuksVolumeBackUpPropertiesSecretEncryptionFalse() {
         Stack stack = mock(Stack.class);
+        when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
         when(stack.getCloudPlatform()).thenReturn(CLOUD_PLATFORM);
         FreeIpaConfigView freeIpaConfigView = mock(FreeIpaConfigView.class);
         when(freeIpaConfigView.getDomain()).thenReturn(DOMAIN);
         when(freeIpaConfigService.createFreeIpaConfigs(any(), any())).thenReturn(freeIpaConfigView);
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        environmentResponse.setEnvironmentType(EnvironmentType.PUBLIC_CLOUD.name());
+        when(environmentClientService.getByCrn(ENV_CRN)).thenReturn(environmentResponse);
+
         SaltConfig saltConfig = underTest.getSaltConfig(stack, Set.of());
 
         Map<String, SaltPillarProperties> servicePillarConfig = saltConfig.getServicePillarConfig();
@@ -177,6 +192,7 @@ class SaltConfigProviderTest {
         Backup backUp = mock(Backup.class);
         when(backUp.getStorageLocation()).thenReturn(BACKUP_LOCATION);
         Stack stack = mock(Stack.class);
+        when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
         when(stack.getBackup()).thenReturn(backUp);
         when(stack.getRegion()).thenReturn(AWS_REGION);
         when(stack.getCloudPlatform()).thenReturn(CLOUD_PLATFORM);
@@ -184,6 +200,9 @@ class SaltConfigProviderTest {
         when(freeIpaConfigView.getDomain()).thenReturn(DOMAIN);
         when(freeIpaConfigView.isSecretEncryptionEnabled()).thenReturn(true);
         when(freeIpaConfigService.createFreeIpaConfigs(any(), any())).thenReturn(freeIpaConfigView);
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        environmentResponse.setEnvironmentType(EnvironmentType.PUBLIC_CLOUD.name());
+        when(environmentClientService.getByCrn(ENV_CRN)).thenReturn(environmentResponse);
 
         SaltConfig saltConfig = underTest.getSaltConfig(stack, Set.of());
 

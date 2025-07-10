@@ -14,3 +14,4 @@ install_adtrust:
     - env:
         - FPW: {{salt['pillar.get']('freeipa:password')}}
     - failhard: True
+    - unless: grep -q "Added by IPA Installer" /etc/samba/smb.conf

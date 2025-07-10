@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.freeipa.config.FreeIpaConfigService;
 import com.sequenceiq.freeipa.service.freeipa.config.FreeIpaConfigView;
 import com.sequenceiq.freeipa.service.freeipa.config.LdapAgentConfigProvider;
@@ -48,6 +49,9 @@ public class SaltConfigProvider {
     @Inject
     private PaywallConfigService paywallConfigService;
 
+    @Inject
+    private CachedEnvironmentClientService environmentClientService;
+
     public SaltConfig getSaltConfig(Stack stack, Set<Node> hosts) {
         SaltConfig saltConfig = new SaltConfig();
         Map<String, SaltPillarProperties> servicePillarConfig = saltConfig.getServicePillarConfig();
@@ -67,14 +71,16 @@ public class SaltConfigProvider {
         return saltConfig;
     }
 
-    private static Map<String, Object> getPlatformMetadata(Stack stack) {
+    private Map<String, Object> getPlatformMetadata(Stack stack) {
         boolean govCloud = Boolean.FALSE;
         if (AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value().equals(stack.getPlatformvariant())) {
             govCloud = Boolean.TRUE;
         }
+        String environmentType = environmentClientService.getByCrn(stack.getEnvironmentCrn()).getEnvironmentType();
         return Map.of(
                 "platform", stack.getCloudPlatform(),
-                "gov_cloud", govCloud);
+                "gov_cloud", govCloud,
+                "environmentType", environmentType);
     }
 
     private static Map<String, Object> getCdpLuksVolumeBackUpProperties(Stack stack) {

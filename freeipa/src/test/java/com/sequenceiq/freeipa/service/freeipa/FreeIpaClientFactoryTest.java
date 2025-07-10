@@ -39,7 +39,7 @@ class FreeIpaClientFactoryTest {
 
     private static final Set<InstanceMetaData> METADATAS = new HashSet<>();
 
-    private static final String FREEIPP_FQDN = "test.host";
+    private static final String FREEIPP_FQDN = "localhost";
 
     @Mock
     private ClusterProxyService clusterProxyService;
