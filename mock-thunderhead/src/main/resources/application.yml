@@ -105,6 +105,7 @@ auth:
     lakehouse.optimizer.enabled: true
     ephemeral.xfs.support.enabled: false
     configure.encryption.profile.enabled: false
+    zookeeper.to.kraft.migration.enabled: false
 crn:
   partition: cdp
   region: us-west-1

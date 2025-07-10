@@ -191,6 +191,9 @@ class EntitlementServiceTest {
 
                 {"CDP_CB_CONFIGURE_ENCRYPTION_PROFILE", (EntitlementCheckFunction) EntitlementService::isConfigureEncryptionProfileEnabled, false},
                 {"CDP_CB_CONFIGURE_ENCRYPTION_PROFILE", (EntitlementCheckFunction) EntitlementService::isConfigureEncryptionProfileEnabled, true},
+
+                {"CDP_ENABLE_ZOOKEEPER_TO_KRAFT_MIGRATION", (EntitlementCheckFunction) EntitlementService::isZookeeperToKRaftMigrationEnabled, false},
+                {"CDP_ENABLE_ZOOKEEPER_TO_KRAFT_MIGRATION", (EntitlementCheckFunction) EntitlementService::isZookeeperToKRaftMigrationEnabled, true},
         };
     }
 

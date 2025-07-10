@@ -50,6 +50,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_MEDIUM_DUTY_WITH_PROFILER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_DISTROX_INSTANCE_TYPES;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_ZOOKEEPER_TO_KRAFT_MIGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPRESS_ONBOARDING;
@@ -611,5 +612,9 @@ public class EntitlementService {
 
     public boolean isConfigureEncryptionProfileEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CB_CONFIGURE_ENCRYPTION_PROFILE);
+    }
+
+    public boolean isZookeeperToKRaftMigrationEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_ENABLE_ZOOKEEPER_TO_KRAFT_MIGRATION);
     }
 }

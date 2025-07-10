@@ -50,6 +50,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAK
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_BACKUP_RESTORE_PERMISSION_CHECKS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_DISTROX_INSTANCE_TYPES;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_ZOOKEEPER_TO_KRAFT_MIGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPRESS_ONBOARDING;
@@ -576,6 +577,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.configure.encryption.profile.enabled}")
     private boolean configureEncryptionProfileEnabled;
 
+    @Value("${auth.mock.zookeeper.to.kraft.migration.enabled}")
+    private boolean zookeeperToKRaftMigrationEnabled;
+
     @Inject
     private MockEnvironmentUserResourceRole mockEnvironmentUserResourceRole;
 
@@ -1084,6 +1088,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (configureEncryptionProfileEnabled) {
             builder.addEntitlements(createEntitlement(CDP_CB_CONFIGURE_ENCRYPTION_PROFILE));
+        }
+        if (zookeeperToKRaftMigrationEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_ENABLE_ZOOKEEPER_TO_KRAFT_MIGRATION));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
