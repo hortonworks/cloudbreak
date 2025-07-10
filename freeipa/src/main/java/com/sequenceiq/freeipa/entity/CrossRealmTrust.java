@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.common.dal.model.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
+import com.sequenceiq.freeipa.entity.util.TrustStatusConverter;
 
 @Entity
 public class CrossRealmTrust implements AccountIdAwareResource {
@@ -36,9 +37,14 @@ public class CrossRealmTrust implements AccountIdAwareResource {
 
     private String realm;
 
+    @Convert(converter = TrustStatusConverter.class)
+    private TrustStatus trustStatus;
+
     @Convert(converter = SecretToString.class)
     @SecretValue
     private Secret trustSecret = Secret.EMPTY;
+
+    private String operationId;
 
     public Long getId() {
         return id;
@@ -102,6 +108,22 @@ public class CrossRealmTrust implements AccountIdAwareResource {
 
     public void setTrustSecret(String trustSecret) {
         this.trustSecret = new Secret(trustSecret);
+    }
+
+    public String getOperationId() {
+        return operationId;
+    }
+
+    public void setOperationId(String operationId) {
+        this.operationId = operationId;
+    }
+
+    public TrustStatus getTrustStatus() {
+        return trustStatus;
+    }
+
+    public void setTrustStatus(TrustStatus trustStatus) {
+        this.trustStatus = trustStatus;
     }
 
     @Override

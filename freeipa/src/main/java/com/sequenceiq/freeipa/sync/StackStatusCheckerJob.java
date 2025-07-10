@@ -1,7 +1,6 @@
 package com.sequenceiq.freeipa.sync;
 
 import static com.sequenceiq.cloudbreak.util.Benchmark.checkedMeasure;
-import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.TRUST_SETUP_FINISH_REQUIRED;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -213,7 +212,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 if (!updateStatusFromFlow && flowLogService.isOtherFlowRunning(stack.getId())) {
                     throw new InterruptSyncingException(AUTO_SYNC_LOG_PREFIX + "interrupt syncing in updateStackStatus, flow is running on freeipa stack " +
                             stack.getName());
-                } else if (!TRUST_SETUP_FINISH_REQUIRED.equals(stack.getStackStatus().getDetailedStackStatus())) {
+                } else {
                     stackUpdater.updateStackStatus(stack, status, result.getMessage());
                 }
             } else {

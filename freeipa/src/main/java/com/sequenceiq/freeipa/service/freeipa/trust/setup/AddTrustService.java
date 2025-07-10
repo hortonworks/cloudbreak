@@ -20,7 +20,7 @@ import com.sequenceiq.freeipa.entity.CrossRealmTrust;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteriaModel;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
-import com.sequenceiq.freeipa.service.crossrealm.TrustSetupService;
+import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Service
@@ -44,12 +44,12 @@ public class AddTrustService {
     private StackService stackService;
 
     @Inject
-    private TrustSetupService trustSetupService;
+    private CrossRealmTrustService crossRealmTrustService;
 
     public void addTrust(Long stackId) throws CloudbreakOrchestratorFailedException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-        CrossRealmTrust crossRealmTrust = trustSetupService.getById(stackId);
+        CrossRealmTrust crossRealmTrust = crossRealmTrustService.getById(stackId);
         OrchestratorStateParams stateParams = createOrchestratorStateParams(primaryGatewayConfig, crossRealmTrust, stackId);
         hostOrchestrator.runOrchestratorState(stateParams);
     }

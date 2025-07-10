@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
+import com.sequenceiq.freeipa.entity.TrustStatus;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.PrepareIpaServerFailed;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.PrepareIpaServerRequest;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.TrustSetupValidationSuccess;
@@ -20,7 +21,7 @@ public class TrustSetupPrepareIpaServerAction extends AbstractTrustSetupAction<T
 
     @Override
     protected void doExecute(StackContext context, TrustSetupValidationSuccess payload, Map<Object, Object> variables) throws Exception {
-        stackUpdater().updateStackStatus(context.getStack(), DetailedStackStatus.TRUST_SETUP_IN_PROGRESS, "Prepare IPA server");
+        updateStatuses(context.getStack(), DetailedStackStatus.TRUST_SETUP_IN_PROGRESS, "Prepare IPA server", TrustStatus.TRUST_SETUP_IN_PROGRESS);
         PrepareIpaServerRequest request = new PrepareIpaServerRequest(payload.getResourceId());
         sendEvent(context, request.selector(), request);
     }

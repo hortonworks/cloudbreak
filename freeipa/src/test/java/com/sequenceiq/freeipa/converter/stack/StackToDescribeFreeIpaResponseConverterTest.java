@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -16,7 +17,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
@@ -27,6 +30,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.StackAuthenticationResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.FreeIpaLoadBalancerResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.usersync.UserSyncStatusResponse;
 import com.sequenceiq.freeipa.converter.authentication.StackAuthenticationToStackAuthenticationResponseConverter;
 import com.sequenceiq.freeipa.converter.freeipa.FreeIpaToFreeIpaServerResponseConverter;
@@ -35,13 +39,16 @@ import com.sequenceiq.freeipa.converter.instance.InstanceGroupToInstanceGroupRes
 import com.sequenceiq.freeipa.converter.network.NetworkToNetworkResponseConverter;
 import com.sequenceiq.freeipa.converter.telemetry.TelemetryConverter;
 import com.sequenceiq.freeipa.converter.usersync.UserSyncStatusToUserSyncStatusResponseConverter;
+import com.sequenceiq.freeipa.entity.CrossRealmTrust;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.LoadBalancer;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackAuthentication;
 import com.sequenceiq.freeipa.entity.StackStatus;
+import com.sequenceiq.freeipa.entity.TrustStatus;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
+import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerService;
 import com.sequenceiq.freeipa.service.recipe.FreeIpaRecipeService;
 import com.sequenceiq.freeipa.util.BalancedDnsAvailabilityChecker;
@@ -129,6 +136,9 @@ class StackToDescribeFreeIpaResponseConverterTest {
     @Mock
     private FreeIpaLoadBalancerService freeIpaLoadBalancerService;
 
+    @Mock
+    private CrossRealmTrustService crossRealmTrustService;
+
     @BeforeEach
     void initInstanceGroupResponse() {
         InstanceMetaDataResponse instanceMetaDataResponse = new InstanceMetaDataResponse();
@@ -149,17 +159,24 @@ class StackToDescribeFreeIpaResponseConverterTest {
 
         setupMocks(stack, image, freeIpa, freeIpaServerResponse, userSyncStatus);
 
-        DescribeFreeIpaResponse result = underTest.convert(stack, image, freeIpa, Optional.of(userSyncStatus), true);
+        DescribeFreeIpaResponse result = underTest.convert(stack, image, freeIpa, Optional.of(userSyncStatus), true, null);
 
         validateResult(tunnel, result, freeIpaServerResponse);
         validateFreeIpaResponse(freeIpaServerResponse, false);
+        assertThat(result.getTrust()).isNull();
     }
 
     @ParameterizedTest(name = "tunnel={0}")
     @EnumSource(Tunnel.class)
     @NullSource
-    void convertTestWithLoadBalancer(Tunnel tunnel) {
+    void convertTestWithLoadBalancerAndCrossRealmTrust(Tunnel tunnel) {
         Stack stack = createStack(tunnel);
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        environmentResponse.setEnvironmentType(EnvironmentType.HYBRID.name());
+        CrossRealmTrust crossRealmTrust = new CrossRealmTrust();
+        crossRealmTrust.setFqdn("fqdn");
+        crossRealmTrust.setOperationId("operationid");
+        crossRealmTrust.setTrustStatus(TrustStatus.TRUST_ACTIVE);
         ImageEntity image = new ImageEntity();
         FreeIpa freeIpa = new FreeIpa();
         freeIpa.setDomain(DOMAIN);
@@ -168,12 +185,38 @@ class StackToDescribeFreeIpaResponseConverterTest {
 
         setupMocks(stack, image, freeIpa, freeIpaServerResponse, userSyncStatus);
         setupLoadBalancerMock(stack.getId());
+        when(crossRealmTrustService.getByIdIfExists(stack.getId())).thenReturn(Optional.of(crossRealmTrust));
 
-        DescribeFreeIpaResponse result = underTest.convert(stack, image, freeIpa, Optional.of(userSyncStatus), true);
+        DescribeFreeIpaResponse result = underTest.convert(stack, image, freeIpa, Optional.of(userSyncStatus), true, environmentResponse);
 
         validateResult(tunnel, result, freeIpaServerResponse);
         validateFreeIpaResponse(freeIpaServerResponse, true);
         validateLoadBalancerResponse(result);
+        validateCrossRealTrustResponse(result);
+    }
+
+    @Test
+    void convertTestHybridNoCrossRealm() {
+        Stack stack = createStack(Tunnel.DIRECT);
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        environmentResponse.setEnvironmentType(EnvironmentType.HYBRID.name());
+        ImageEntity image = new ImageEntity();
+        FreeIpa freeIpa = new FreeIpa();
+        freeIpa.setDomain(DOMAIN);
+        FreeIpaServerResponse freeIpaServerResponse = new FreeIpaServerResponse();
+        UserSyncStatus userSyncStatus = new UserSyncStatus();
+
+        setupMocks(stack, image, freeIpa, freeIpaServerResponse, userSyncStatus);
+
+        DescribeFreeIpaResponse result = underTest.convert(stack, image, freeIpa, Optional.of(userSyncStatus), true, environmentResponse);
+
+        validateResult(Tunnel.DIRECT, result, freeIpaServerResponse);
+        validateFreeIpaResponse(freeIpaServerResponse, false);
+        assertThat(result.getTrust())
+                .isNotNull()
+                .returns(TrustStatus.TRUST_SETUP_REQUIRED.name(), TrustResponse::getTrustStatus)
+                .returns(null, TrustResponse::getOperationId)
+                .returns(null, TrustResponse::getFqdn);
     }
 
     private void validateLoadBalancerResponse(DescribeFreeIpaResponse result) {
@@ -182,6 +225,14 @@ class StackToDescribeFreeIpaResponseConverterTest {
                 .returns(Set.of(LOAD_BALANCER_SERVER_IP), FreeIpaLoadBalancerResponse::getPrivateIps)
                 .returns(LOAD_BALANCER_RESOURCE_ID, FreeIpaLoadBalancerResponse::getResourceId)
                 .returns(LOAD_BALANCER_FQDN, FreeIpaLoadBalancerResponse::getFqdn);
+    }
+
+    private void validateCrossRealTrustResponse(DescribeFreeIpaResponse result) {
+        assertThat(result.getTrust())
+                .isNotNull()
+                .returns(TrustStatus.TRUST_ACTIVE.name(), TrustResponse::getTrustStatus)
+                .returns("operationid", TrustResponse::getOperationId)
+                .returns("fqdn", TrustResponse::getFqdn);
     }
 
     private void setupLoadBalancerMock(Long id) {

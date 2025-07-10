@@ -27,7 +27,7 @@ import com.sequenceiq.freeipa.entity.CrossRealmTrust;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteriaModel;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
-import com.sequenceiq.freeipa.service.crossrealm.TrustSetupService;
+import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -54,7 +54,7 @@ public class ConfigureDnsServerService {
     private StackService stackService;
 
     @Inject
-    private TrustSetupService trustSetupService;
+    private CrossRealmTrustService crossRealmTrustService;
 
     @Inject
     private FreeIpaClientFactory freeIpaClientFactory;
@@ -66,7 +66,7 @@ public class ConfigureDnsServerService {
     public void configureDnsServer(Long stackId) throws Exception {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-        CrossRealmTrust crossRealmTrust = trustSetupService.getById(stackId);
+        CrossRealmTrust crossRealmTrust = crossRealmTrustService.getById(stackId);
 
         addDnsForwardZone(stack, crossRealmTrust);
         OrchestratorStateParams stateParams = createOrchestratorStateParams(primaryGatewayConfig, crossRealmTrust, stackId);

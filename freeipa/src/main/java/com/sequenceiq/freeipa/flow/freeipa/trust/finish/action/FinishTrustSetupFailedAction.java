@@ -13,6 +13,7 @@ import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.TrustStatus;
 import com.sequenceiq.freeipa.flow.freeipa.trust.finish.FreeIpaFinishTrustSetupFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.trust.finish.FreeIpaFinishTrustSetupState;
 import com.sequenceiq.freeipa.flow.freeipa.trust.finish.event.FinishTrustSetupFailureEvent;
@@ -42,9 +43,8 @@ public class FinishTrustSetupFailedAction extends AbstractFinishTrustSetupAction
     protected void doExecute(StackContext context, FinishTrustSetupFailureEvent payload, Map<Object, Object> variables) throws Exception {
         Stack stack = context.getStack();
         String statusReason = "Failed to finish cross-realm trust FreeIPA: " + getErrorReason(payload.getException());
-        stackUpdater().updateStackStatus(stack, DetailedStackStatus.TRUST_SETUP_FINISH_FAILED, statusReason);
+        updateStatuses(stack, DetailedStackStatus.TRUST_SETUP_FINISH_FAILED, statusReason, TrustStatus.TRUST_SETUP_FINISH_FAILED);
         operationService.failOperation(stack.getAccountId(), getOperationId(variables), statusReason);
-        sendEvent(context, new StackEvent(FINISH_TRUST_SETUP_FAILURE_HANDLED_EVENT.event(),
-                payload.getResourceId()));
+        sendEvent(context, new StackEvent(FINISH_TRUST_SETUP_FAILURE_HANDLED_EVENT.event(), payload.getResourceId()));
     }
 }

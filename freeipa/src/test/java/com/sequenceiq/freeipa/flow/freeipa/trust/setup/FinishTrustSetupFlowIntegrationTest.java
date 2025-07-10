@@ -52,6 +52,7 @@ import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.TrustStatus;
 import com.sequenceiq.freeipa.flow.FlowIntegrationTestConfig;
 import com.sequenceiq.freeipa.flow.freeipa.trust.finish.FreeIpaFinishTrustSetupFlowConfig;
 import com.sequenceiq.freeipa.flow.freeipa.trust.finish.action.FinishTrustSetupAddTrustAction;
@@ -60,6 +61,7 @@ import com.sequenceiq.freeipa.flow.freeipa.trust.finish.action.FinishTrustSetupF
 import com.sequenceiq.freeipa.flow.freeipa.trust.finish.event.FinishTrustSetupEvent;
 import com.sequenceiq.freeipa.flow.freeipa.trust.finish.handler.AddTrustHandler;
 import com.sequenceiq.freeipa.service.CredentialService;
+import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.freeipa.trust.setup.AddTrustService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
@@ -134,6 +136,9 @@ class FinishTrustSetupFlowIntegrationTest {
     @MockBean
     private AddTrustService addTrustService;
 
+    @MockBean
+    private CrossRealmTrustService crossRealmTrustService;
+
     @Inject
     private StackService stackService;
 
@@ -166,6 +171,10 @@ class FinishTrustSetupFlowIntegrationTest {
         stackStatusVerify.verify(stackUpdater)
                 .updateStackStatus(stack, DetailedStackStatus.TRUST_SETUP_FINISH_SUCCESSFUL,
                         "Finish setting up cross-realm trust was successful");
+
+        InOrder crossRealmStatusVerify = inOrder(crossRealmTrustService);
+        crossRealmStatusVerify.verify(crossRealmTrustService).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_SETUP_FINISH_IN_PROGRESS);
+        crossRealmStatusVerify.verify(crossRealmTrustService).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_ACTIVE);
     }
 
     @Test
@@ -177,6 +186,10 @@ class FinishTrustSetupFlowIntegrationTest {
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, TRUST_SETUP_FINISH_IN_PROGRESS, "Add cross-realm trust to FreeIPA");
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, TRUST_SETUP_FINISH_FAILED,
                 "Failed to finish cross-realm trust FreeIPA: Cross-realm add trust failed");
+
+        InOrder crossRealmStatusVerify = inOrder(crossRealmTrustService);
+        crossRealmStatusVerify.verify(crossRealmTrustService).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_SETUP_FINISH_IN_PROGRESS);
+        crossRealmStatusVerify.verify(crossRealmTrustService).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_SETUP_FINISH_FAILED);
     }
 
     private void testFlow() {
@@ -220,7 +233,8 @@ class FinishTrustSetupFlowIntegrationTest {
             FinishTrustSetupAddTrustAction.class,
             FinishTrustSetupFinishedAction.class,
             FinishTrustSetupFailedAction.class,
-            AddTrustHandler.class
+            AddTrustHandler.class,
+            CrossRealmTrustService.class
     })
     static class Config {
         @MockBean

@@ -52,6 +52,7 @@ import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.TrustStatus;
 import com.sequenceiq.freeipa.flow.FlowIntegrationTestConfig;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.action.TrustSetupConfigureDnsAction;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.action.TrustSetupFailedAction;
@@ -63,6 +64,7 @@ import com.sequenceiq.freeipa.flow.freeipa.trust.setup.handler.ConfigureDnsHandl
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.handler.PrepareIpaServerHandler;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.handler.ValidationHandler;
 import com.sequenceiq.freeipa.service.CredentialService;
+import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.freeipa.trust.setup.ConfigureDnsServerService;
 import com.sequenceiq.freeipa.service.freeipa.trust.setup.PrepareIpaServerService;
@@ -145,6 +147,9 @@ class TrustSetupFlowIntegrationTest {
     @MockBean
     private ConfigureDnsServerService configureDnsServerService;
 
+    @MockBean
+    private CrossRealmTrustService crossRealmTrustService;
+
     @Inject
     private StackService stackService;
 
@@ -178,6 +183,10 @@ class TrustSetupFlowIntegrationTest {
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, TRUST_SETUP_IN_PROGRESS, "Configuring DNS");
         stackStatusVerify.verify(stackUpdater)
                 .updateStackStatus(stack, DetailedStackStatus.TRUST_SETUP_FINISH_REQUIRED, "Prepare cross-realm trust finished");
+
+        InOrder crossRealmStatusVerify = inOrder(crossRealmTrustService);
+        crossRealmStatusVerify.verify(crossRealmTrustService, times(3)).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_SETUP_IN_PROGRESS);
+        crossRealmStatusVerify.verify(crossRealmTrustService).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_SETUP_FINISH_REQUIRED);
     }
 
     @Test
@@ -189,6 +198,10 @@ class TrustSetupFlowIntegrationTest {
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, TRUST_SETUP_IN_PROGRESS, "Cross-realm trust validation");
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, TRUST_SETUP_FAILED,
                 "Failed to prepare cross-realm trust FreeIPA: Cross-realm validation failed");
+
+        InOrder crossRealmStatusVerify = inOrder(crossRealmTrustService);
+        crossRealmStatusVerify.verify(crossRealmTrustService).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_SETUP_IN_PROGRESS);
+        crossRealmStatusVerify.verify(crossRealmTrustService).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_SETUP_FAILED);
     }
 
     @Test
@@ -201,6 +214,10 @@ class TrustSetupFlowIntegrationTest {
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, TRUST_SETUP_IN_PROGRESS, "Prepare IPA server");
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, TRUST_SETUP_FAILED,
                 "Failed to prepare cross-realm trust FreeIPA: Prepare IPA server failed");
+
+        InOrder crossRealmStatusVerify = inOrder(crossRealmTrustService);
+        crossRealmStatusVerify.verify(crossRealmTrustService, times(2)).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_SETUP_IN_PROGRESS);
+        crossRealmStatusVerify.verify(crossRealmTrustService).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_SETUP_FAILED);
     }
 
     @Test
@@ -214,6 +231,10 @@ class TrustSetupFlowIntegrationTest {
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, TRUST_SETUP_IN_PROGRESS, "Configuring DNS");
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, TRUST_SETUP_FAILED,
                 "Failed to prepare cross-realm trust FreeIPA: Configure DNS server failed");
+
+        InOrder crossRealmStatusVerify = inOrder(crossRealmTrustService);
+        crossRealmStatusVerify.verify(crossRealmTrustService, times(3)).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_SETUP_IN_PROGRESS);
+        crossRealmStatusVerify.verify(crossRealmTrustService).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_SETUP_FAILED);
     }
 
     private void testFlow() {
@@ -261,7 +282,8 @@ class TrustSetupFlowIntegrationTest {
             TrustSetupFailedAction.class,
             ValidationHandler.class,
             PrepareIpaServerHandler.class,
-            ConfigureDnsHandler.class
+            ConfigureDnsHandler.class,
+            CrossRealmTrustService.class
     })
     static class Config {
         @MockBean

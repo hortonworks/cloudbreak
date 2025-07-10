@@ -14,8 +14,10 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageResponse;
 import com.sequenceiq.common.api.cloudstorage.StorageIdentityBase;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.common.model.SeLinux;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
@@ -23,6 +25,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.region.Placement
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.FreeIpaLoadBalancerResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.SecurityResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustResponse;
 import com.sequenceiq.freeipa.converter.authentication.StackAuthenticationToStackAuthenticationResponseConverter;
 import com.sequenceiq.freeipa.converter.freeipa.FreeIpaToFreeIpaServerResponseConverter;
 import com.sequenceiq.freeipa.converter.image.ImageToImageSettingsResponseConverter;
@@ -30,13 +33,16 @@ import com.sequenceiq.freeipa.converter.instance.InstanceGroupToInstanceGroupRes
 import com.sequenceiq.freeipa.converter.network.NetworkToNetworkResponseConverter;
 import com.sequenceiq.freeipa.converter.telemetry.TelemetryConverter;
 import com.sequenceiq.freeipa.converter.usersync.UserSyncStatusToUserSyncStatusResponseConverter;
+import com.sequenceiq.freeipa.entity.CrossRealmTrust;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.LoadBalancer;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.TrustStatus;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
 import com.sequenceiq.freeipa.service.config.FreeIpaDomainUtils;
+import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerService;
 import com.sequenceiq.freeipa.service.recipe.FreeIpaRecipeService;
 import com.sequenceiq.freeipa.util.BalancedDnsAvailabilityChecker;
@@ -77,8 +83,11 @@ public class StackToDescribeFreeIpaResponseConverter {
     @Inject
     private FreeIpaLoadBalancerService freeIpaLoadBalancerService;
 
+    @Inject
+    private CrossRealmTrustService crossRealmTrustService;
+
     public DescribeFreeIpaResponse convert(Stack stack, ImageEntity image, FreeIpa freeIpa, Optional<UserSyncStatus> userSyncStatus,
-            Boolean includeAllInstances) {
+            Boolean includeAllInstances, DetailedEnvironmentResponse environmentResponse) {
         DescribeFreeIpaResponse describeFreeIpaResponse = new DescribeFreeIpaResponse();
         describeFreeIpaResponse.setName(stack.getName());
         describeFreeIpaResponse.setEnvironmentCrn(stack.getEnvironmentCrn());
@@ -106,6 +115,9 @@ public class StackToDescribeFreeIpaResponseConverter {
         userSyncStatus.ifPresent(u -> describeFreeIpaResponse.setUserSyncStatus(userSyncStatusConverter.convert(u, stack.getEnvironmentCrn())));
         describeFreeIpaResponse.setSupportedImdsVersion(stack.getSupportedImdsVersion());
         describeFreeIpaResponse.setSecurity(getSecurity(stack));
+        if (environmentResponse != null && EnvironmentType.isHybridFromEnvironmentTypeString(environmentResponse.getEnvironmentType())) {
+            describeFreeIpaResponse.setTrust(convertTrust(stack));
+        }
         return describeFreeIpaResponse;
     }
 
@@ -179,4 +191,17 @@ public class StackToDescribeFreeIpaResponseConverter {
         return placementResponse;
     }
 
+    private TrustResponse convertTrust(Stack stack) {
+        TrustResponse trustResponse = new TrustResponse();
+        Optional<CrossRealmTrust> crossRealmTrust = crossRealmTrustService.getByIdIfExists(stack.getId());
+        if (crossRealmTrust.isPresent()) {
+            CrossRealmTrust trust = crossRealmTrust.get();
+            trustResponse.setTrustStatus(trust.getTrustStatus().name());
+            trustResponse.setFqdn(trust.getFqdn());
+            trustResponse.setOperationId(trust.getOperationId());
+        } else {
+            trustResponse.setTrustStatus(TrustStatus.TRUST_SETUP_REQUIRED.name());
+        }
+        return trustResponse;
+    }
 }

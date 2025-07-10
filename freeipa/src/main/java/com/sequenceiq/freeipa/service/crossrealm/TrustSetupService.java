@@ -16,7 +16,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
@@ -143,13 +142,5 @@ public class TrustSetupService {
                 krb5.conf content...""");
         response.setBaseClusterCommands(baseClusterTrustSetupCommands);
         return response;
-    }
-
-    public CrossRealmTrust getById(Long stackId) {
-        return crossRealmTrustRepository.findByStackId(stackId)
-                .orElseThrow(() -> {
-                    LOGGER.warn("Cross-realm trust config not found by FreeIPA stack id: {}", stackId);
-                    return new NotFoundException("Cross-realm trust config not found.");
-                });
     }
 }

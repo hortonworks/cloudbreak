@@ -138,5 +138,8 @@ public class FreeIpaModelDescriptions {
                 "the IDM and AD domains to secure and validate the trust relationship.";
         public static final String AD_TRUST_SETUP_COMMANDS = "Active directory commands to be executed for cross-realm trust setup.";
         public static final String BASE_CLUSTER_KRB5_CONF = "krb5.conf content to be used on base cluster for cross-realm trust setup.";
+        public static final String TRUST_DETAILS = "Cross realm trust details.";
+        public static final String TRUST_STATUS = "The cross realm trust status.";
+        public static final String OPERATION_ID = "The id of the last cross realm trust setup related operation.";
     }
 }

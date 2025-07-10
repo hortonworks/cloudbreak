@@ -1,0 +1,13 @@
+package com.sequenceiq.freeipa.entity;
+
+public enum TrustStatus {
+    UNKNOWN,
+    TRUST_SETUP_REQUIRED,
+    TRUST_SETUP_IN_PROGRESS,
+    TRUST_SETUP_FAILED,
+    TRUST_SETUP_FINISH_REQUIRED,
+    TRUST_SETUP_FINISH_IN_PROGRESS,
+    TRUST_SETUP_FINISH_FAILED,
+    TRUST_ACTIVE,
+    TRUST_BROKEN
+}

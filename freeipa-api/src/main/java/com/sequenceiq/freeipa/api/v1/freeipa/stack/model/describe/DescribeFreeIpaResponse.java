@@ -111,6 +111,9 @@ public class DescribeFreeIpaResponse {
     @Schema(description = FreeIpaModelDescriptions.LOADBALANCER_DETAILS)
     private FreeIpaLoadBalancerResponse loadBalancer;
 
+    @Schema(description = FreeIpaModelDescriptions.CrossRealmTrustModelDescriptions.TRUST_DETAILS, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private TrustResponse trust;
+
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
@@ -311,6 +314,14 @@ public class DescribeFreeIpaResponse {
         this.loadBalancer = loadBalancer;
     }
 
+    public TrustResponse getTrust() {
+        return trust;
+    }
+
+    public void setTrust(TrustResponse trust) {
+        this.trust = trust;
+    }
+
     @Override
     public String toString() {
         return "DescribeFreeIpaResponse{" +
@@ -318,11 +329,13 @@ public class DescribeFreeIpaResponse {
                 ", name='" + name + '\'' +
                 ", crn='" + crn + '\'' +
                 ", placement=" + placement +
+                ", tunnel=" + tunnel +
                 ", instanceGroups=" + instanceGroups +
                 ", authentication=" + authentication +
                 ", network=" + network +
                 ", image=" + image +
                 ", freeIpa=" + freeIpa +
+                ", recipes=" + recipes +
                 ", availabilityStatus=" + availabilityStatus +
                 ", status=" + status +
                 ", statusString='" + statusString + '\'' +
@@ -333,10 +346,11 @@ public class DescribeFreeIpaResponse {
                 ", telemetry=" + telemetry +
                 ", cloudStorage=" + cloudStorage +
                 ", userSyncStatus=" + userSyncStatus +
-                ", recipes=" + recipes +
                 ", enableMultiAz=" + enableMultiAz +
-                ", supportedImdsVersion=" + enableMultiAz +
+                ", supportedImdsVersion='" + supportedImdsVersion + '\'' +
                 ", security=" + security +
+                ", loadBalancer=" + loadBalancer +
+                ", trust=" + trust +
                 '}';
     }
 }

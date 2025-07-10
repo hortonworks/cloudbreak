@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
+import com.sequenceiq.freeipa.entity.TrustStatus;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.TrustSetupEvent;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.TrustSetupValidationFailed;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.TrustSetupValidationRequest;
@@ -20,8 +21,9 @@ public class TrustSetupValidationAction extends AbstractTrustSetupAction<TrustSe
 
     @Override
     protected void doExecute(StackContext context, TrustSetupEvent payload, Map<Object, Object> variables) throws Exception {
-        setOperationId(variables, payload.getOperationId());
-        stackUpdater().updateStackStatus(context.getStack(), DetailedStackStatus.TRUST_SETUP_IN_PROGRESS, "Cross-realm trust validation");
+        setOperationId(context.getStack(), variables, payload.getOperationId());
+        updateStatuses(context.getStack(), DetailedStackStatus.TRUST_SETUP_IN_PROGRESS, "Cross-realm trust validation",
+                TrustStatus.TRUST_SETUP_IN_PROGRESS);
         TrustSetupValidationRequest request = new TrustSetupValidationRequest(payload.getResourceId());
         sendEvent(context, request.selector(), request);
     }

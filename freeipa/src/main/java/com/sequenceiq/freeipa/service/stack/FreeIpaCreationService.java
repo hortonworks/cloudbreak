@@ -208,8 +208,8 @@ public class FreeIpaCreationService {
                             stackImageFreeIpaTuple.getLeft().getId(),
                             getFreeIpaLoadBalancerType(request)));
             InMemoryStateStore.putStack(stack.getId(), PollGroup.POLLABLE);
-            return stackToDescribeFreeIpaResponseConverter
-                    .convert(stackImageFreeIpaTuple.getLeft(), stackImageFreeIpaTuple.getMiddle(), stackImageFreeIpaTuple.getRight(), Optional.empty(), false);
+            return stackToDescribeFreeIpaResponseConverter.convert(stackImageFreeIpaTuple.getLeft(), stackImageFreeIpaTuple.getMiddle(),
+                    stackImageFreeIpaTuple.getRight(), Optional.empty(), false, environment);
         } catch (TransactionService.TransactionExecutionException e) {
             LOGGER.error("Creation of FreeIPA failed", e);
             throw new BadRequestException("Creation of FreeIPA failed: " + e.getCause().getMessage(), e);

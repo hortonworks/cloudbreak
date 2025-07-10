@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.converter.stack.StackToDescribeFreeIpaResponseConverter;
@@ -20,6 +21,7 @@ import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
+import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncStatusService;
 import com.sequenceiq.freeipa.service.image.ImageService;
@@ -47,9 +49,13 @@ public class FreeIpaDescribeService {
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private CachedEnvironmentClientService environmentService;
+
     public DescribeFreeIpaResponse describe(String environmentCrn, String accountId) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(environmentCrn, accountId);
-        DescribeFreeIpaResponse response = getResponseForStack(stack, false);
+        DetailedEnvironmentResponse environmentResponse = environmentService.getByCrn(environmentCrn);
+        DescribeFreeIpaResponse response = getResponseForStack(stack, false, environmentResponse);
         LOGGER.trace("FreeIPA describe response: {}", response);
         return response;
     }
@@ -59,8 +65,9 @@ public class FreeIpaDescribeService {
             throw new BadRequestException("The FreeIPA rebuild capability is disabled.");
         }
         List<Stack> stacks = stackService.findMultipleByEnvironmentCrnAndAccountIdEvenIfTerminatedWithList(environmentCrn, accountId);
+        DetailedEnvironmentResponse environmentResponse = environmentService.getByCrn(environmentCrn);
         List<DescribeFreeIpaResponse> response = stacks.stream()
-                .map(s -> getResponseForStack(s, true))
+                .map(s -> getResponseForStack(s, true, environmentResponse))
                 .collect(Collectors.toList());
         LOGGER.trace("FreeIPA describe all response: {}", response);
         return response;
@@ -71,11 +78,11 @@ public class FreeIpaDescribeService {
         return imageService.getImageForStack(stack);
     }
 
-    private DescribeFreeIpaResponse getResponseForStack(Stack stack, Boolean includeAllInstances) {
+    private DescribeFreeIpaResponse getResponseForStack(Stack stack, Boolean includeAllInstances, DetailedEnvironmentResponse environmentResponse) {
         MDCBuilder.buildMdcContext(stack);
         ImageEntity image = imageService.getByStack(stack);
         FreeIpa freeIpa = freeIpaService.findByStackId(stack.getId());
         Optional<UserSyncStatus> userSyncStatus = userSyncStatusService.findByStack(stack);
-        return stackToDescribeFreeIpaResponseConverter.convert(stack, image, freeIpa, userSyncStatus, includeAllInstances);
+        return stackToDescribeFreeIpaResponseConverter.convert(stack, image, freeIpa, userSyncStatus, includeAllInstances, environmentResponse);
     }
 }
