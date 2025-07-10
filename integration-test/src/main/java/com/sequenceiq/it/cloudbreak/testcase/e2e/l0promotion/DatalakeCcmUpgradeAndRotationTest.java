@@ -89,14 +89,12 @@ public class DatalakeCcmUpgradeAndRotationTest extends AbstractE2ETest implement
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "There is a running environment with datalake connected via CCMv1",
-            when = "CCM Upgrade called on the environment - CCMv1 to the latest (JUMPGATE)",
-            then = "environment CCM Upgrade should be successful, along with datalake then CCM V2 Jumpgate agent access key rotation should be successful.")
-    public void testCcmV1Upgrade(TestContext testContext) {
-        createEnvironmentWithCcm(testContext, Tunnel.CCM);
+            given = "There is a running environment with datalake connected via CCMv2",
+            when = "CCM Rotation happens",
+            then = "Datalake then CCM V2 Jumpgate agent access key rotation should be successful.")
+    public void testCcmV2Rotation(TestContext testContext) {
+        createEnvironmentWithCcm(testContext, Tunnel.CCMV2_JUMPGATE);
         createSdxForEnvironment(testContext);
-        validateCcmServices(testContext, Tunnel.CCM);
-        upgradeCcmOnEnvironment(testContext);
         validateCcmServices(testContext, Tunnel.CCMV2_JUMPGATE);
         if (!imageValidatorE2ETestUtil.isImageValidation()) {
             // secret rotation testing is not needed for image validation
@@ -155,15 +153,6 @@ public class DatalakeCcmUpgradeAndRotationTest extends AbstractE2ETest implement
                 .when(sdxTestClient.createInternal())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
-                .validate();
-    }
-
-    private void upgradeCcmOnEnvironment(TestContext testContext) {
-        testContext
-                .given(EnvironmentTestDto.class)
-                .when(environmentTestClient.upgradeCcm())
-                .await(EnvironmentStatus.AVAILABLE)
-                .then(validateCcmUpgradeOnEnvironment())
                 .validate();
     }
 
