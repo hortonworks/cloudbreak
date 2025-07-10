@@ -7,6 +7,6 @@ set -ex
 cd $INTEGCB_LOCATION && \
 ./cbd regenerate && \
 ./cbd start commondb && \
-sudo ./cbd migrate && \
+sudo -E ./cbd migrate && \
 sudo rm -fr .schema/ && \
 cd ..
