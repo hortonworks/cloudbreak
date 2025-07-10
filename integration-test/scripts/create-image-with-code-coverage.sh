@@ -19,7 +19,7 @@ cp ../core/build/libs/cloudbreak.jar ./integcb/docker-containers/docker-cloudbre
 date
 echo -e "\n\033[1;96m--- Change Dockerfile \033[0m\n"
 docker run -v "$(pwd)"/integcb/docker-containers/docker-cloudbreak:/integcb/docker-containers/docker-cloudbreak \
- busybox:1.31.1 /bin/sh -c "sed -i '/cloudbreak-\$VERSION/c\ADD cloudbreak.jar /\nADD jacocoagent.jar /' /integcb/docker-containers/docker-cloudbreak/$folder/Dockerfile"
+ docker-private.infra.cloudera.com/cloudera_thirdparty/busybox:1.31.1 /bin/sh -c "sed -i '/cloudbreak-\$VERSION/c\ADD cloudbreak.jar /\nADD jacocoagent.jar /' /integcb/docker-containers/docker-cloudbreak/$folder/Dockerfile"
 echo "StatusCode######## $?"
 
 date
@@ -29,7 +29,7 @@ cp ../autoscale/build/libs/periscope.jar ./integcb/docker-containers/docker-auto
 date
 echo -e "\n\033[1;96m--- Change Dockerfile \033[0m\n"
 docker run -v "$(pwd)"/integcb/docker-containers/docker-autoscale:/integcb/docker-containers/docker-autoscale \
- busybox:1.31.1 /bin/sh -c "sed -i '/periscope-\$VERSION/c\ADD periscope.jar /\nADD jacocoagent.jar /' /integcb/docker-containers/docker-autoscale/$folder/Dockerfile"
+ docker-private.infra.cloudera.com/cloudera_thirdparty/busybox:1.31.1 /bin/sh -c "sed -i '/periscope-\$VERSION/c\ADD periscope.jar /\nADD jacocoagent.jar /' /integcb/docker-containers/docker-autoscale/$folder/Dockerfile"
 
 date
 echo -e "\n\033[1;96m--- Copy ../datalake/build/libs/datalake.jar to docker-datalake directory\033[0m\n"
@@ -38,7 +38,7 @@ cp ../datalake/build/libs/datalake.jar ./integcb/docker-containers/docker-datala
 date
 echo -e "\n\033[1;96m--- Change Dockerfile \033[0m\n"
 docker run -v "$(pwd)"/integcb/docker-containers/docker-datalake:/integcb/docker-containers/docker-datalake \
- busybox:1.31.1 /bin/sh -c "sed -i '/datalake-\$VERSION/c\ADD datalake.jar /\nADD jacocoagent.jar /' /integcb/docker-containers/docker-datalake/$folder/Dockerfile"
+ docker-private.infra.cloudera.com/cloudera_thirdparty/busybox:1.31.1 /bin/sh -c "sed -i '/datalake-\$VERSION/c\ADD datalake.jar /\nADD jacocoagent.jar /' /integcb/docker-containers/docker-datalake/$folder/Dockerfile"
 
 date
 echo -e "\n\033[1;96m--- Copy ../freeipa/build/libs/freeipa.jar to docker-freeipa directory\033[0m\n"
@@ -47,7 +47,7 @@ cp ../freeipa/build/libs/freeipa.jar ./integcb/docker-containers/docker-freeipa
 date
 echo -e "\n\033[1;96m--- Change Dockerfile \033[0m\n"
 docker run -v "$(pwd)"/integcb/docker-containers/docker-freeipa:/integcb/docker-containers/docker-freeipa \
- busybox:1.31.1 /bin/sh -c "sed -i '/freeipa-\$VERSION/c\ADD freeipa.jar /\nADD jacocoagent.jar /' /integcb/docker-containers/docker-freeipa/$folder/Dockerfile"
+ docker-private.infra.cloudera.com/cloudera_thirdparty/busybox:1.31.1 /bin/sh -c "sed -i '/freeipa-\$VERSION/c\ADD freeipa.jar /\nADD jacocoagent.jar /' /integcb/docker-containers/docker-freeipa/$folder/Dockerfile"
 
 date
 echo -e "\n\033[1;96m--- Copy ../environment/build/libs/environment.jar to docker-environment directory\033[0m\n"
@@ -56,7 +56,7 @@ cp ../environment/build/libs/environment.jar ./integcb/docker-containers/docker-
 date
 echo -e "\n\033[1;96m--- Change Dockerfile \033[0m\n"
 docker run -v "$(pwd)"/integcb/docker-containers/docker-environment:/integcb/docker-containers/docker-environment \
- busybox:1.31.1 /bin/sh -c "sed -i '/environment-\$VERSION/c\ADD environment.jar /\nADD jacocoagent.jar /' /integcb/docker-containers/docker-environment/$folder/Dockerfile"
+ docker-private.infra.cloudera.com/cloudera_thirdparty/busybox:1.31.1 /bin/sh -c "sed -i '/environment-\$VERSION/c\ADD environment.jar /\nADD jacocoagent.jar /' /integcb/docker-containers/docker-environment/$folder/Dockerfile"
 
 date
 echo -e "\n\033[1;96m--- Copy ../environment/build/libs/remote-environment.jar to docker-environment-remote directory\033[0m\n"
@@ -65,7 +65,7 @@ cp ../environment-remote/build/libs/remote-environment.jar ./integcb/docker-cont
 date
 echo -e "\n\033[1;96m--- Change Dockerfile \033[0m\n"
 docker run -v "$(pwd)"/integcb/docker-containers/docker-environment-remote:/integcb/docker-containers/docker-environment-remote \
- busybox:1.31.1 /bin/sh -c "sed -i '/environment-remote-\$VERSION/c\ADD remote-environment.jar /\nADD jacocoagent.jar /' /integcb/docker-containers/docker-environment-remote/$folder/Dockerfile"
+ docker-private.infra.cloudera.com/cloudera_thirdparty/busybox:1.31.1 /bin/sh -c "sed -i '/environment-remote-\$VERSION/c\ADD remote-environment.jar /\nADD jacocoagent.jar /' /integcb/docker-containers/docker-environment-remote/$folder/Dockerfile"
 
 date
 echo -e "\n\033[1;96m--- Copy ../redbeams/build/libs/redbeams.jar to docker-redbeams directory\033[0m\n"
@@ -74,7 +74,7 @@ cp ../redbeams/build/libs/redbeams.jar ./integcb/docker-containers/docker-redbea
 date
 echo -e "\n\033[1;96m--- Change Dockerfile \033[0m\n"
 docker run -v "$(pwd)"/integcb/docker-containers/docker-redbeams:/integcb/docker-containers/docker-redbeams \
- busybox:1.31.1 /bin/sh -c "sed -i '/redbeams-\$VERSION/c\ADD redbeams.jar /\nADD jacocoagent.jar /' /integcb/docker-containers/docker-redbeams/$folder/Dockerfile"
+ docker-private.infra.cloudera.com/cloudera_thirdparty/busybox:1.31.1 /bin/sh -c "sed -i '/redbeams-\$VERSION/c\ADD redbeams.jar /\nADD jacocoagent.jar /' /integcb/docker-containers/docker-redbeams/$folder/Dockerfile"
 
 date
 echo -e "\n\033[1;96m--- Copy ../externalized-compute/build/libs/externalizedcompute.jar to docker-externalized-compute directory\033[0m\n"
@@ -83,7 +83,7 @@ cp ../externalized-compute/build/libs/externalizedcompute.jar ./integcb/docker-c
 date
 echo -e "\n\033[1;96m--- Change Dockerfile \033[0m\n"
 docker run -v "$(pwd)"/integcb/docker-containers/docker-externalized-compute:/integcb/docker-containers/docker-externalized-compute \
- busybox:1.31.1 /bin/sh -c "sed -i '/externalized-compute-\$VERSION/c\ADD externalized-compute.jar /\nADD jacocoagent.jar /' /integcb/docker-containers/docker-externalized-compute/$folder/Dockerfile"
+ docker-private.infra.cloudera.com/cloudera_thirdparty/busybox:1.31.1 /bin/sh -c "sed -i '/externalized-compute-\$VERSION/c\ADD externalized-compute.jar /\nADD jacocoagent.jar /' /integcb/docker-containers/docker-externalized-compute/$folder/Dockerfile"
 
 date
 echo -e "\n\033[1;96m--- Copy ../mock-infrastructure/build/libs/mock-infrastructure.jar to docker-mock-infrastructure directory\033[0m\n"
@@ -95,7 +95,7 @@ cp ../mock-infrastructure/Makefile ./integcb/docker-containers/docker-mock-infra
 date
 echo -e "\n\033[1;96m--- Change Dockerfile \033[0m\n"
 docker run -v "$(pwd)"/integcb/docker-containers/docker-mock-infrastructure:/integcb/docker-containers/docker-mock-infrastructure \
- busybox:1.31.1 /bin/sh -c "sed -i '/mock-infrastructure-\$VERSION/c\ADD mock-infrastructure.jar /\nADD jacocoagent.jar /' /integcb/docker-containers/docker-mock-infrastructure/Dockerfile"
+ docker-private.infra.cloudera.com/cloudera_thirdparty/busybox:1.31.1 /bin/sh -c "sed -i '/mock-infrastructure-\$VERSION/c\ADD mock-infrastructure.jar /\nADD jacocoagent.jar /' /integcb/docker-containers/docker-mock-infrastructure/Dockerfile"
 
 date
 echo -e "\n\033[1;96m--- Copy ../mock-thunderhead/build/libs/mock-thunderhead.jar to docker-mock-thunderhead directory\033[0m\n"
@@ -107,7 +107,7 @@ cp ../mock-thunderhead/Makefile ./integcb/docker-containers/docker-mock-thunderh
 date
 echo -e "\n\033[1;96m--- Change Dockerfile \033[0m\n"
 docker run -v "$(pwd)"/integcb/docker-containers/docker-mock-thunderhead:/integcb/docker-containers/docker-mock-thunderhead \
- busybox:1.31.1 /bin/sh -c "sed -i '/mock-thunderhead-\$VERSION/c\ADD mock-thunderhead.jar /\nADD jacocoagent.jar /' /integcb/docker-containers/docker-mock-thunderhead/Dockerfile"
+ docker-private.infra.cloudera.com/cloudera_thirdparty/busybox:1.31.1 /bin/sh -c "sed -i '/mock-thunderhead-\$VERSION/c\ADD mock-thunderhead.jar /\nADD jacocoagent.jar /' /integcb/docker-containers/docker-mock-thunderhead/Dockerfile"
 
 date
 echo -e "\n\033[1;96m--- Download latest JaCoCo agent\033[0m\n"
@@ -131,25 +131,25 @@ cp ./integcb/jacoco/jacocoagent.jar ./integcb/docker-containers/docker-mock-thun
 date
 echo -e "\n\033[1;96m--- Change starter scripts to inlcude JaCoCo agent \033[0m\n"
 docker run -v "$(pwd)"/integcb/docker-containers/docker-cloudbreak:/integcb/docker-containers/docker-cloudbreak \
- busybox:1.31.1 /bin/sh -c "sed -i 's~JAVA_OPTS} \${SECURITY_OPTS}~& -javaagent:/jacocoagent.jar=destfile=/jacoco.exec,output=file ~' /integcb/docker-containers/docker-cloudbreak/bootstrap/start_cloudbreak_app.sh"
+ docker-private.infra.cloudera.com/cloudera_thirdparty/busybox:1.31.1 /bin/sh -c "sed -i 's~JAVA_OPTS} \${SECURITY_OPTS}~& -javaagent:/jacocoagent.jar=destfile=/jacoco.exec,output=file ~' /integcb/docker-containers/docker-cloudbreak/bootstrap/start_cloudbreak_app.sh"
 docker run -v "$(pwd)"/integcb/docker-containers/docker-datalake:/integcb/docker-containers/docker-datalake \
- busybox:1.31.1 /bin/sh -c "sed -i 's~JAVA_OPTS} \${SECURITY_OPTS}~& -javaagent:/jacocoagent.jar=destfile=/jacoco.exec,output=file ~' /integcb/docker-containers/docker-datalake/bootstrap/start_datalake_app.sh"
+ docker-private.infra.cloudera.com/cloudera_thirdparty/busybox:1.31.1 /bin/sh -c "sed -i 's~JAVA_OPTS} \${SECURITY_OPTS}~& -javaagent:/jacocoagent.jar=destfile=/jacoco.exec,output=file ~' /integcb/docker-containers/docker-datalake/bootstrap/start_datalake_app.sh"
 docker run -v "$(pwd)"/integcb/docker-containers/docker-autoscale:/integcb/docker-containers/docker-autoscale \
- busybox:1.31.1 /bin/sh -c "sed -i 's~JAVA_OPTS} \${SECURITY_OPTS}~& -javaagent:/jacocoagent.jar=destfile=/jacoco.exec,output=file ~' /integcb/docker-containers/docker-autoscale/bootstrap/start_autoscale_app.sh"
+ docker-private.infra.cloudera.com/cloudera_thirdparty/busybox:1.31.1 /bin/sh -c "sed -i 's~JAVA_OPTS} \${SECURITY_OPTS}~& -javaagent:/jacocoagent.jar=destfile=/jacoco.exec,output=file ~' /integcb/docker-containers/docker-autoscale/bootstrap/start_autoscale_app.sh"
 docker run -v "$(pwd)"/integcb/docker-containers/docker-freeipa:/integcb/docker-containers/docker-freeipa \
- busybox:1.31.1 /bin/sh -c "sed -i 's~JAVA_OPTS} \${SECURITY_OPTS}~& -javaagent:/jacocoagent.jar=destfile=/jacoco.exec,output=file ~' /integcb/docker-containers/docker-freeipa/bootstrap/start_freeipa_app.sh"
+ docker-private.infra.cloudera.com/cloudera_thirdparty/busybox:1.31.1 /bin/sh -c "sed -i 's~JAVA_OPTS} \${SECURITY_OPTS}~& -javaagent:/jacocoagent.jar=destfile=/jacoco.exec,output=file ~' /integcb/docker-containers/docker-freeipa/bootstrap/start_freeipa_app.sh"
 docker run -v "$(pwd)"/integcb/docker-containers/docker-environment:/integcb/docker-containers/docker-environment \
- busybox:1.31.1 /bin/sh -c "sed -i 's~JAVA_OPTS} \${SECURITY_OPTS}~& -javaagent:/jacocoagent.jar=destfile=/jacoco.exec,output=file ~' /integcb/docker-containers/docker-environment/bootstrap/start_environment_app.sh"
+ docker-private.infra.cloudera.com/cloudera_thirdparty/busybox:1.31.1 /bin/sh -c "sed -i 's~JAVA_OPTS} \${SECURITY_OPTS}~& -javaagent:/jacocoagent.jar=destfile=/jacoco.exec,output=file ~' /integcb/docker-containers/docker-environment/bootstrap/start_environment_app.sh"
 docker run -v "$(pwd)"/integcb/docker-containers/docker-redbeams:/integcb/docker-containers/docker-redbeams \
- busybox:1.31.1 /bin/sh -c "sed -i 's~JAVA_OPTS} \${SECURITY_OPTS}~& -javaagent:/jacocoagent.jar=destfile=/jacoco.exec,output=file ~' /integcb/docker-containers/docker-redbeams/bootstrap/start_redbeams_app.sh"
+ docker-private.infra.cloudera.com/cloudera_thirdparty/busybox:1.31.1 /bin/sh -c "sed -i 's~JAVA_OPTS} \${SECURITY_OPTS}~& -javaagent:/jacocoagent.jar=destfile=/jacoco.exec,output=file ~' /integcb/docker-containers/docker-redbeams/bootstrap/start_redbeams_app.sh"
 docker run -v "$(pwd)"/integcb/docker-containers/docker-externalized-compute:/integcb/docker-containers/docker-externalized-compute \
- busybox:1.31.1 /bin/sh -c "sed -i 's~JAVA_OPTS} \${SECURITY_OPTS}~& -javaagent:/jacocoagent.jar=destfile=/jacoco.exec,output=file ~' /integcb/docker-containers/docker-externalized-compute/bootstrap/start_externalizedcompute_app.sh"
+ docker-private.infra.cloudera.com/cloudera_thirdparty/busybox:1.31.1 /bin/sh -c "sed -i 's~JAVA_OPTS} \${SECURITY_OPTS}~& -javaagent:/jacocoagent.jar=destfile=/jacoco.exec,output=file ~' /integcb/docker-containers/docker-externalized-compute/bootstrap/start_externalizedcompute_app.sh"
 docker run -v "$(pwd)"/integcb/docker-containers/docker-mock-infrastructure:/integcb/docker-containers/docker-mock-infrastructure \
- busybox:1.31.1 /bin/sh -c "sed -i 's~CMD (java~& -javaagent:/jacocoagent.jar=destfile=/jacoco.exec,output=file~' /integcb/docker-containers/docker-mock-infrastructure/Dockerfile"
+ docker-private.infra.cloudera.com/cloudera_thirdparty/busybox:1.31.1 /bin/sh -c "sed -i 's~CMD (java~& -javaagent:/jacocoagent.jar=destfile=/jacoco.exec,output=file~' /integcb/docker-containers/docker-mock-infrastructure/Dockerfile"
 docker run -v "$(pwd)"/integcb/docker-containers/docker-mock-thunderhead:/integcb/docker-containers/docker-mock-thunderhead \
- busybox:1.31.1 /bin/sh -c "sed -i 's~CMD (java~& -javaagent:/jacocoagent.jar=destfile=/jacoco.exec,output=file~' /integcb/docker-containers/docker-mock-thunderhead/Dockerfile"
+ docker-private.infra.cloudera.com/cloudera_thirdparty/busybox:1.31.1 /bin/sh -c "sed -i 's~CMD (java~& -javaagent:/jacocoagent.jar=destfile=/jacoco.exec,output=file~' /integcb/docker-containers/docker-mock-thunderhead/Dockerfile"
 docker run -v "$(pwd)"/integcb/docker-containers/docker-environment-remote:/integcb/docker-containers/docker-environment-remote \
- busybox:1.31.1 /bin/sh -c "sed -i 's~JAVA_OPTS} \${SECURITY_OPTS}~& -javaagent:/jacocoagent.jar=destfile=/jacoco.exec,output=file ~' /integcb/docker-containers/docker-environment-remote/bootstrap/start_remoteenvironment_app.sh"
+ docker-private.infra.cloudera.com/cloudera_thirdparty/busybox:1.31.1 /bin/sh -c "sed -i 's~JAVA_OPTS} \${SECURITY_OPTS}~& -javaagent:/jacocoagent.jar=destfile=/jacoco.exec,output=file ~' /integcb/docker-containers/docker-environment-remote/bootstrap/start_remoteenvironment_app.sh"
 
 echo -e "\n\033[1;96m--- Build docker images\033[0m\n"
   docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak:dev ./integcb/docker-containers/docker-cloudbreak -f ./integcb/docker-containers/docker-cloudbreak/$folder/Dockerfile $special_build_args & \
