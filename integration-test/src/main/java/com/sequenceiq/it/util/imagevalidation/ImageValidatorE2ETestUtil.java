@@ -203,8 +203,9 @@ public class ImageValidatorE2ETestUtil {
     }
 
     public Architecture getArchitecture(TestContext testContext) {
-        ImageV4Response imageUnderValidation = getImageUnderValidation(testContext).orElseThrow();
-        return Architecture.fromStringWithFallback(imageUnderValidation.getArchitecture());
+        Optional<ImageV4Response> imageUnderValidation = getImageUnderValidation(testContext);
+        String architecture = imageUnderValidation.isPresent() ? imageUnderValidation.get().getArchitecture() : null;
+        return Architecture.fromStringWithFallback(architecture);
     }
 
     private void createImageValidationSourceCatalog(TestContext testContext, String url, String name) {
