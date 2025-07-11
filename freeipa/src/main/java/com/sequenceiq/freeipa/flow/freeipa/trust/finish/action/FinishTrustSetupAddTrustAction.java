@@ -6,7 +6,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
-import com.sequenceiq.freeipa.entity.TrustStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustStatus;
 import com.sequenceiq.freeipa.flow.freeipa.trust.finish.event.FinishTrustSetupAddTrustFailed;
 import com.sequenceiq.freeipa.flow.freeipa.trust.finish.event.FinishTrustSetupAddTrustRequest;
 import com.sequenceiq.freeipa.flow.freeipa.trust.finish.event.FinishTrustSetupEvent;

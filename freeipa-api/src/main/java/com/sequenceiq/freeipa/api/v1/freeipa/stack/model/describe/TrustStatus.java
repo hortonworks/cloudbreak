@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.entity;
+package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe;
 
 public enum TrustStatus {
     UNKNOWN,

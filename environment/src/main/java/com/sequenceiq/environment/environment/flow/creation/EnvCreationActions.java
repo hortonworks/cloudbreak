@@ -18,6 +18,8 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_RESOURCE
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_VALIDATION_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_VALIDATION_STARTED;
+import static com.sequenceiq.environment.environment.EnvironmentStatus.AVAILABLE;
+import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SETUP_REQUIRED;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_COMPUTE_CLUSTER_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_FREEIPA_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_NETWORK_EVENT;
@@ -330,7 +332,7 @@ public class EnvCreationActions {
                 environmentService
                         .findEnvironmentById(payload.getResourceId())
                         .ifPresentOrElse(environment -> {
-                            environment.setStatus(EnvironmentStatus.AVAILABLE);
+                            environment.setStatus(environment.getEnvironmentType().isHybrid() ? TRUST_SETUP_REQUIRED : AVAILABLE);
                             environment.setStatusReason(null);
                             Environment result = environmentService.save(environment);
                             structuredSynchronizerJobService.schedule(environment.getId(), StructuredSynchronizerJobAdapter.class, false);
@@ -360,7 +362,7 @@ public class EnvCreationActions {
                                     ExceptionUtils.throwableOfType(exception, ExternalizedComputeOperationFailedException.class);
                             if (externalizedException != null) {
                                 environment.setStatusReason(externalizedException.getMessage());
-                                environment.setStatus(EnvironmentStatus.AVAILABLE);
+                                environment.setStatus(AVAILABLE);
                             } else {
                                 environment.setStatusReason(exception.getMessage());
                                 environment.setStatus(EnvironmentStatus.CREATE_FAILED);

@@ -71,6 +71,7 @@ import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.WA
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -79,6 +80,7 @@ import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustStatus;
 
 @Component
 public class EnvironmentSyncService {
@@ -142,8 +144,8 @@ public class EnvironmentSyncService {
 
     public EnvironmentStatus getStatusByFreeipa(Environment environment) {
         Optional<DescribeFreeIpaResponse> freeIpaResponseOpt = freeIpaService.internalDescribe(environment.getResourceCrn(), environment.getAccountId());
-        if (isHybridEnvironment(environment)) {
-            return environment.getStatus();
+        if (isHybridEnvironment(environment) && freeIpaResponseOpt.isPresent()) {
+            return getHybridEnvironmentStatus(environment, freeIpaResponseOpt.get());
         } else {
             if (freeIpaResponseOpt.isPresent()) {
                 return FREEIPA_STATUS_TO_ENV_STATUS_MAP.get(freeIpaResponseOpt.get().getStatus());
@@ -152,8 +154,26 @@ public class EnvironmentSyncService {
             }
             return EnvironmentStatus.AVAILABLE;
         }
-
     }
+
+    //CHECKSTYLE:OFF: CyclomaticComplexity
+    private EnvironmentStatus getHybridEnvironmentStatus(Environment environment, DescribeFreeIpaResponse describeFreeIpaResponse) {
+        if (describeFreeIpaResponse.getTrust() != null && StringUtils.isNotBlank(describeFreeIpaResponse.getTrust().getTrustStatus())) {
+            TrustStatus trustStatus = TrustStatus.valueOf(describeFreeIpaResponse.getTrust().getTrustStatus());
+            return switch (trustStatus) {
+                case UNKNOWN, TRUST_SETUP_REQUIRED -> EnvironmentStatus.TRUST_SETUP_REQUIRED;
+                case TRUST_SETUP_IN_PROGRESS -> EnvironmentStatus.TRUST_SETUP_IN_PROGRESS;
+                case TRUST_SETUP_FAILED -> EnvironmentStatus.TRUST_SETUP_FAILED;
+                case TRUST_SETUP_FINISH_REQUIRED -> EnvironmentStatus.TRUST_SETUP_FINISH_REQUIRED;
+                case TRUST_SETUP_FINISH_IN_PROGRESS -> EnvironmentStatus.TRUST_SETUP_FINISH_IN_PROGRESS;
+                case TRUST_SETUP_FINISH_FAILED -> EnvironmentStatus.TRUST_SETUP_FINISH_FAILED;
+                case TRUST_ACTIVE -> EnvironmentStatus.AVAILABLE;
+                case TRUST_BROKEN -> EnvironmentStatus.TRUST_BROKEN;
+            };
+        }
+        return environment.getStatus();
+    }
+    //CHECKSTYLE:ON
 
     private boolean isHybridEnvironment(Environment environment) {
         return environment.getEnvironmentType() != null && environment.getEnvironmentType().isHybrid();

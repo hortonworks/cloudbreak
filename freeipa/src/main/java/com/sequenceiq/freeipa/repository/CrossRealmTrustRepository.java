@@ -8,8 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustStatus;
 import com.sequenceiq.freeipa.entity.CrossRealmTrust;
-import com.sequenceiq.freeipa.entity.TrustStatus;
 
 @Transactional(Transactional.TxType.REQUIRED)
 public interface CrossRealmTrustRepository extends JpaRepository<CrossRealmTrust, Long> {

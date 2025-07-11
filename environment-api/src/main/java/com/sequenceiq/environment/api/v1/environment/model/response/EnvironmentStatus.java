@@ -112,6 +112,9 @@ public enum EnvironmentStatus {
     VERTICAL_SCALE_ON_FREEIPA_FAILED("Vertical Scale on FreeIPA failed"),
     VERTICAL_SCALE_FAILED("Vertical Scale failed"),
 
+    TRUST_SETUP_REQUIRED("Trust Setup Required"),
+    TRUST_BROKEN("Trust broken"),
+
     TRUST_SETUP_VALIDATION_IN_PROGRESS("Cross Realm Trust setup validation in progress"),
     TRUST_SETUP_VALIDATION_FAILED("Cross Realm Trust setup validation failed"),
     TRUST_SETUP_IN_PROGRESS("Cross Realm Trust setup in progress"),

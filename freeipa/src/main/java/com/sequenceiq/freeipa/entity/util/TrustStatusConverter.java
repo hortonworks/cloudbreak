@@ -5,7 +5,7 @@ import jakarta.persistence.AttributeConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.freeipa.entity.TrustStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustStatus;
 
 public class TrustStatusConverter implements AttributeConverter<TrustStatus, String> {
 

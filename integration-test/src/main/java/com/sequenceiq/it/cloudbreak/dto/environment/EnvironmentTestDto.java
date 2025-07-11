@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEven
 import com.sequenceiq.common.api.backup.request.BackupRequest;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.api.type.FeatureSetting;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.common.model.Architecture;
@@ -123,7 +124,13 @@ public class EnvironmentTestDto
                 .withNetwork()
                 .withCloudStorageValidation(CloudStorageValidation.ENABLED)
                 .withTunnel(getTestContext().getTunnel())
-                .withImageValidationFreeIpaCatalogAndImageIfPresent();
+                .withImageValidationFreeIpaCatalogAndImageIfPresent()
+                .withEnvironmentType(EnvironmentType.PUBLIC_CLOUD);
+    }
+
+    private EnvironmentTestDto withEnvironmentType(EnvironmentType environmentType) {
+        getRequest().setEnvironmentType(environmentType.name());
+        return this;
     }
 
     public EnvironmentTestDto withOneFreeIpaNode() {
