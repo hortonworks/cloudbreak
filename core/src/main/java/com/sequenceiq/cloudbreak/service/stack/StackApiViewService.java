@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import jakarta.inject.Inject;
 
@@ -16,12 +15,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.converter.stack.StackListItemToStackApiViewConverter;
 import com.sequenceiq.cloudbreak.domain.projection.StackInstanceCount;
 import com.sequenceiq.cloudbreak.domain.projection.StackListItem;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.HostGroupView;
+import com.sequenceiq.cloudbreak.domain.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.repository.HostGroupViewRepository;
 import com.sequenceiq.cloudbreak.repository.StackApiViewRepository;
@@ -54,6 +56,9 @@ public class StackApiViewService {
     @Inject
     private HostGroupViewRepository hostGroupViewRepository;
 
+    @Inject
+    private InstanceGroupService instanceGroupService;
+
     public StackApiViewService() {
     }
 
@@ -84,10 +89,22 @@ public class StackApiViewService {
 
     private Set<StackApiView> getStackApiViews(Map<Long, Integer> instanceCounts, Set<StackListItem> stackList) {
         Set<Long> clusterIds = stackList.stream().map(StackListItem::getClusterId).collect(Collectors.toSet());
-        Map<Long, List<HostGroupView>> clusterHgMap = getClusterHostGroupMap(clusterIds);
+        Multimap<Long, HostGroupView> clusterHgMap = getClusterHostGroupMap(clusterIds);
+        Multimap<Long, InstanceGroupView> stackIgMap = getStackInstanceGroupMap(stackList.stream().map(StackListItem::getId).collect(Collectors.toSet()));
         return stackList.stream()
-                .map(item -> stackListItemToStackApiViewConverter.convert(item, instanceCounts, clusterHgMap.get(item.getClusterId())))
+                .map(item ->
+                        stackListItemToStackApiViewConverter.convert(item, instanceCounts, clusterHgMap.get(item.getClusterId()), stackIgMap.get(item.getId())))
                 .collect(Collectors.toSet());
+    }
+
+    private Multimap<Long, InstanceGroupView> getStackInstanceGroupMap(Set<Long> stackIds) {
+        if (CollectionUtils.isEmpty(stackIds)) {
+            return HashMultimap.create();
+        }
+        Set<InstanceGroupView> allInstanceGroups = instanceGroupService.getInstanceGroupViewByStackIds(stackIds);
+        Multimap<Long, InstanceGroupView> result = HashMultimap.create();
+        allInstanceGroups.forEach(ig -> result.put(ig.getStackId(), ig));
+        return result;
     }
 
     public Set<StackApiView> retrieveStackViewsByStackIdsAndEnvironmentCrn(Long workspaceId, List<Long> stackIds, String environmentCrn,
@@ -101,17 +118,15 @@ public class StackApiViewService {
         return getStackApiViews(instanceCounts, stackList);
     }
 
-    private Map<Long, List<HostGroupView>> getClusterHostGroupMap(Set<Long> clusterIds) {
+    private Multimap<Long, HostGroupView> getClusterHostGroupMap(Set<Long> clusterIds) {
         if (CollectionUtils.isEmpty(clusterIds)) {
-            return Map.of();
+            return HashMultimap.create();
         }
 
         Set<HostGroupView> allHostGroups = hostGroupViewRepository.findHostGroupsInClusterList(clusterIds);
-        return allHostGroups.stream().collect(Collectors.toMap(
-                hg -> hg.getCluster().getId(),
-                List::of,
-                (left, right) -> Stream.concat(left.stream(), right.stream()).collect(Collectors.toList())
-        ));
+        Multimap<Long, HostGroupView> result = HashMultimap.create();
+        allHostGroups.forEach(hg -> result.put(hg.getClusterId(), hg));
+        return result;
     }
 
     public StackApiView retrieveStackByCrnAndType(String crn, StackType stackType) {

@@ -198,4 +198,8 @@ public class InstanceGroupService {
         instanceGroup.setAvailabilityZones(availabilityZones);
         return repository.save(instanceGroup);
     }
+
+    public Set<InstanceGroupView> getInstanceGroupViewByStackIds(Set<Long> stackIds) {
+        return viewRepository.findInstanceGroupsInStacks(stackIds);
+    }
 }

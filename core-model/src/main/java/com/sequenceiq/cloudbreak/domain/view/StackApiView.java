@@ -45,7 +45,8 @@ public class StackApiView extends CompactView {
     @OneToOne
     private StackStatusView stackStatus;
 
-    @OneToMany(mappedBy = "stack", fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "stack_id")
     private Set<InstanceGroupView> instanceGroups = new HashSet<>();
 
     private Long created;

@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks.view;
 
 
+import java.util.Set;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +28,6 @@ class ClusterApiViewToClusterViewV4ResponseConverterTest {
     @Test
     public void testWhenBlueprintIdIsnull() {
         ClusterApiView testSource = new ClusterApiView();
-        Assertions.assertDoesNotThrow(() -> clusterApiViewToClusterViewV4ResponseConverterUnderTest.convert(testSource));
+        Assertions.assertDoesNotThrow(() -> clusterApiViewToClusterViewV4ResponseConverterUnderTest.convert(testSource, Set.of()));
     }
 }

@@ -15,7 +15,9 @@ import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 @Transactional(Transactional.TxType.REQUIRED)
 public interface InstanceGroupViewRepository  extends CrudRepository<InstanceGroupView, Long> {
 
-    @Query("SELECT i FROM InstanceGroupView i LEFT JOIN FETCH i.instanceMetaData WHERE i.stack.id = :stackId")
+    @Query("SELECT i FROM InstanceGroupView i LEFT JOIN FETCH i.instanceMetaData WHERE i.stackId = :stackId")
     Set<InstanceGroupView> findInstanceGroupsInStack(@Param("stackId") Long stackId);
 
+    @Query("SELECT i FROM InstanceGroupView i LEFT JOIN FETCH i.instanceMetaData WHERE i.stackId IN :stackIds")
+    Set<InstanceGroupView> findInstanceGroupsInStacks(@Param("stackIds") Set<Long> stackIds);
 }

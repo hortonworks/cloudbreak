@@ -15,17 +15,17 @@ import com.sequenceiq.cloudbreak.domain.view.InstanceMetaDataView;
 @Component
 public class HostGroupViewToHostGroupViewV4ResponseConverter {
 
-    public HostGroupViewV4Response convert(HostGroupView source) {
+    public HostGroupViewV4Response convert(HostGroupView source, InstanceGroupView instanceGroup) {
         HostGroupViewV4Response hostGroupViewResponse = new HostGroupViewV4Response();
         hostGroupViewResponse.setId(source.getId());
         hostGroupViewResponse.setName(source.getName());
-        hostGroupViewResponse.setMetadata(getHostMetadata(source));
+        hostGroupViewResponse.setMetadata(getHostMetadata(instanceGroup));
         return hostGroupViewResponse;
     }
 
-    private Set<HostMetadataViewV4Response> getHostMetadata(HostGroupView hostGroupView) {
+    private Set<HostMetadataViewV4Response> getHostMetadata(InstanceGroupView instanceGroup) {
         Set<HostMetadataViewV4Response> hostMetadataResponses = new HashSet<>();
-        Optional.ofNullable(hostGroupView.getInstanceGroup())
+        Optional.ofNullable(instanceGroup)
                 .map(InstanceGroupView::getNotTerminatedInstanceMetaDataSet)
                 .ifPresent(instanceMetaDataSet -> {
                     for (InstanceMetaDataView instanceMetaData : instanceMetaDataSet) {

@@ -32,7 +32,7 @@ public class StackApiViewToStackViewV4ResponseConverter {
         stackViewResponse.setName(source.getName());
         if (source.getCluster() != null) {
             stackViewResponse.setCluster(clusterApiViewToClusterViewV4ResponseConverter
-                    .convert(source.getCluster()));
+                    .convert(source.getCluster(), source.getInstanceGroups()));
         }
         stackViewResponse.setTunnel(source.getTunnel());
         stackViewResponse.setNodeCount(source.getNodeCount());

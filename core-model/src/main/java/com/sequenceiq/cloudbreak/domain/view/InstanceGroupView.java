@@ -9,7 +9,6 @@ import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -33,8 +32,8 @@ public class InstanceGroupView implements ProvisionEntity {
 
     private Long id;
 
-    @ManyToOne
-    private StackApiView stack;
+    @Column(name = "stack_id")
+    private Long stackId;
 
     @Column
     private String groupName;
@@ -62,6 +61,10 @@ public class InstanceGroupView implements ProvisionEntity {
 
     @Convert(converter = ScalabilityOptionConverter.class)
     private ScalabilityOption scalabilityOption = ScalabilityOption.ALLOWED;
+
+    public Long getStackId() {
+        return stackId;
+    }
 
     public Integer getNodeCount() {
         return getNotTerminatedInstanceMetaDataSet().size();

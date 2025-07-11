@@ -16,6 +16,6 @@ import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 @Transactional(TxType.REQUIRED)
 public interface HostGroupViewRepository extends CrudRepository<HostGroupView, Long> {
 
-    @Query("SELECT h FROM HostGroupView h LEFT JOIN FETCH h.instanceGroup ig LEFT JOIN h.cluster c WHERE c.id IN :clusterIds")
+    @Query("SELECT h FROM HostGroupView h WHERE h.clusterId IN :clusterIds")
     Set<HostGroupView> findHostGroupsInClusterList(@Param("clusterIds") Set<Long> clusterIds);
 }

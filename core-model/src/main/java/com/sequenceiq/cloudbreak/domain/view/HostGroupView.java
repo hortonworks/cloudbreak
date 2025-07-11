@@ -1,10 +1,8 @@
 package com.sequenceiq.cloudbreak.domain.view;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
@@ -19,11 +17,11 @@ public class HostGroupView implements ProvisionEntity {
 
     private String name;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private ClusterApiView cluster;
+    @Column(name = "cluster_id")
+    private Long clusterId;
 
-    @OneToOne
-    private InstanceGroupView instanceGroup;
+    @Column(name = "instancegroup_id")
+    private Long instanceGroupId;
 
     public Long getId() {
         return id;
@@ -41,19 +39,19 @@ public class HostGroupView implements ProvisionEntity {
         this.name = name;
     }
 
-    public ClusterApiView getCluster() {
-        return cluster;
+    public Long getClusterId() {
+        return clusterId;
     }
 
-    public void setCluster(ClusterApiView cluster) {
-        this.cluster = cluster;
+    public void setClusterId(Long clusterId) {
+        this.clusterId = clusterId;
     }
 
-    public InstanceGroupView getInstanceGroup() {
-        return instanceGroup;
+    public Long getInstanceGroupId() {
+        return instanceGroupId;
     }
 
-    public void setInstanceGroup(InstanceGroupView instanceGroup) {
-        this.instanceGroup = instanceGroup;
+    public void setInstanceGroupId(Long instanceGroupId) {
+        this.instanceGroupId = instanceGroupId;
     }
 }

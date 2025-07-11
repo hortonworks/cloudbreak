@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.converter.stack;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Component;
@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.domain.projection.StackListItem;
 import com.sequenceiq.cloudbreak.domain.view.BlueprintView;
 import com.sequenceiq.cloudbreak.domain.view.ClusterApiView;
 import com.sequenceiq.cloudbreak.domain.view.HostGroupView;
+import com.sequenceiq.cloudbreak.domain.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.domain.view.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.view.UserView;
@@ -19,7 +20,7 @@ import com.sequenceiq.cloudbreak.domain.view.UserView;
 public class StackListItemToStackApiViewConverter {
 
     public StackApiView convert(StackListItem item, Map<Long, Integer> stackInstanceCounts,
-            List<HostGroupView> hostGroupViews) {
+            Collection<HostGroupView> hostGroupViews, Collection<InstanceGroupView> instanceGroupViews) {
         StackApiView response = new StackApiView();
         response.setId(item.getId());
         response.setResourceCrn(item.getResourceCrn());
@@ -31,6 +32,7 @@ public class StackListItemToStackApiViewConverter {
         stackStatusView.setStatus(item.getStackStatus());
         response.setStackStatus(stackStatusView);
         response.setCluster(getClusterApiView(item, hostGroupViews));
+        response.setInstanceGroups(instanceGroupViews == null ? Collections.emptySet() : new HashSet<>(instanceGroupViews));
         response.setNodeCount(stackInstanceCounts.get(item.getId()));
         response.setTunnel(item.getTunnel());
         response.setEnvironmentCrn(item.getEnvironmentCrn());
@@ -55,7 +57,7 @@ public class StackListItemToStackApiViewConverter {
         return userView;
     }
 
-    private ClusterApiView getClusterApiView(StackListItem item, List<HostGroupView> hostGroupViews) {
+    private ClusterApiView getClusterApiView(StackListItem item, Collection<HostGroupView> hostGroupViews) {
         ClusterApiView clusterResponse = new ClusterApiView();
         clusterResponse.setId(item.getClusterId());
         clusterResponse.setEnvironmentCrn(item.getEnvironmentCrn());
