@@ -204,6 +204,15 @@ class SdxReactorFlowManagerTest {
     }
 
     @Test
+    void testTriggerSdxResizeValidationOnlyEventSend() {
+        SdxCluster sdxCluster = getValidSdxCluster();
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerSdxResize(sdxCluster.getId(), sdxCluster, SKIP_OPTIONS, true));
+        verify(eventSenderService, times(1)).sendEventAndNotification(eq(sdxCluster),
+                eq(ResourceEvent.DATALAKE_RESIZE_VALIDATION_ONLY_TRIGGERED));
+        verify(reactor, times(1)).notify(eq(SDX_RESIZE_FLOW_CHAIN_START_EVENT), any(Event.class));
+    }
+
+    @Test
     void testTriggerSaltUpdate() {
         SdxCluster sdxCluster = getValidSdxCluster();
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerSaltUpdate(sdxCluster));
@@ -258,7 +267,7 @@ class SdxReactorFlowManagerTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerDatalakeRuntimeUpgradeFlow(
                 sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED, SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED,
-                        TestConstants.DO_NOT_KEEP_VARIANT));
+                TestConstants.DO_NOT_KEEP_VARIANT));
 
         verify(eventFactory).createEventWithErrHandler(anyMap(), argumentCaptor.capture());
         DatalakeUpgradeFlowChainStartEvent upgradeEvent = (DatalakeUpgradeFlowChainStartEvent) argumentCaptor.getValue();

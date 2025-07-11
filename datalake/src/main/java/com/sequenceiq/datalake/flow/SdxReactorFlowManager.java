@@ -1,6 +1,7 @@
 package com.sequenceiq.datalake.flow;
 
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_RESIZE_TRIGGERED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_RESIZE_VALIDATION_ONLY_TRIGGERED;
 import static com.sequenceiq.datalake.flow.certrotation.RotateCertificateStateSelectors.ROTATE_CERTIFICATE_STACK_EVENT;
 import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.SDX_VALIDATION_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.recovery.DatalakeUpgradeRecoveryEvent.DATALAKE_RECOVERY_EVENT;
@@ -160,9 +161,17 @@ public class SdxReactorFlowManager {
         if (!performBackup) {
             sdxBackupRestoreService.checkExistingBackup(newSdxCluster, userId);
         }
-        eventSenderService.sendEventAndNotification(newSdxCluster, DATALAKE_RESIZE_TRIGGERED);
+        sendResizeOrValidationTriggeredNotification(newSdxCluster, validationOnly);
         return notify(SDX_RESIZE_FLOW_CHAIN_START_EVENT, new DatalakeResizeFlowChainStartEvent(sdxClusterId, newSdxCluster, userId,
                 backupLocation, performBackup, performRestore, skipOptions, performValidationOnly), newSdxCluster.getClusterName());
+    }
+
+    private void sendResizeOrValidationTriggeredNotification(SdxCluster sdxCluster, boolean validationOnly) {
+        if (validationOnly) {
+            eventSenderService.sendEventAndNotification(sdxCluster, DATALAKE_RESIZE_VALIDATION_ONLY_TRIGGERED);
+        } else {
+            eventSenderService.sendEventAndNotification(sdxCluster, DATALAKE_RESIZE_TRIGGERED);
+        }
     }
 
     public FlowIdentifier triggerSdxResizeRecovery(SdxCluster oldSdxCluster, Optional<SdxCluster> newSdxCluster) {

@@ -679,6 +679,7 @@ public enum ResourceEvent {
     DATALAKE_RECOVERY_STARTED("datalake.recovery.started"),
 
     DATALAKE_RESIZE_TRIGGERED("datalake.resize.triggered"),
+    DATALAKE_RESIZE_VALIDATION_ONLY_TRIGGERED("datalake.resize.validation.only.triggered"),
     DATALAKE_RESIZE_COMPLETE("datalake.resize.complete"),
     DATALAKE_RESIZE_FAILED_DURING_RESTORE("datalake.resize.failure.restore"),
     DATALAKE_RESIZE_FAILED_DURING_CREATION("datalake.resize.failure.create"),
