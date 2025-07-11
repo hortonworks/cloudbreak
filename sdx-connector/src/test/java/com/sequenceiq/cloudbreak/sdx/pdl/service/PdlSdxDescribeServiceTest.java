@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,12 +19,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import com.cloudera.cdp.servicediscovery.model.ApiRemoteDataContext;
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataContextResponse;
+import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesResponse;
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
 import com.cloudera.thunderhead.service.environments2api.model.Environment;
 import com.cloudera.thunderhead.service.environments2api.model.GetRootCertificateResponse;
@@ -31,9 +34,11 @@ import com.cloudera.thunderhead.service.environments2api.model.PrivateDatalakeDe
 import com.cloudera.thunderhead.service.environments2api.model.PvcEnvironmentDetails;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.sdx.RdcView;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxAccessView;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
+import com.sequenceiq.cloudbreak.sdx.pdl.util.PdlRdcUtil;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -69,6 +74,9 @@ public class PdlSdxDescribeServiceTest {
 
     @Mock
     private RemoteEnvironmentEndpoint remoteEnvironmentEndpoint;
+
+    @Spy
+    private PdlRdcUtil pdlRdcUtil;
 
     @Mock
     private DetailedEnvironmentResponse detailedEnvironmentResponse;
@@ -138,6 +146,15 @@ public class PdlSdxDescribeServiceTest {
         assertEquals("ZOOKEEPER", zooKeeperApiEndPoint.getServiceType());
         assertEquals(1, zooKeeperApiEndPoint.getServiceConfigs().size());
         assertEquals(3, zooKeeperApiEndPoint.getEndPointHostList().size());
+    }
+
+    @Test
+    void testExtendRdcView() {
+        RdcView rdcView = mock();
+        DescribeDatalakeServicesResponse datalakeServices = mock();
+        when(remoteEnvironmentEndpoint.getDatalakeServicesByCrn(any())).thenReturn(datalakeServices);
+        RdcView result = underTest.extendRdcView(rdcView);
+        verify(pdlRdcUtil).extendRdcView(rdcView, datalakeServices);
     }
 
     @Test

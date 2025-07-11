@@ -15,13 +15,13 @@ public class RdcView {
 
     private final String stackCrn;
 
-    private final String remoteDataContext;
-
     private final Set<TemplateEndpoint> endpoints;
 
     private final Set<TemplateServiceConfig> serviceConfigs;
 
     private final Set<TemplateRoleConfig> roleConfigs;
+
+    private String remoteDataContext;
 
     public RdcView(
             String stackCrn,
@@ -77,5 +77,9 @@ public class RdcView {
 
     public void extendRoleConfigs(Set<TemplateRoleConfig> roleConfigs) {
         this.roleConfigs.addAll(roleConfigs);
+    }
+
+    public void updateRemoteDataContext(String remoteDataContext) {
+        this.remoteDataContext = remoteDataContext;
     }
 }

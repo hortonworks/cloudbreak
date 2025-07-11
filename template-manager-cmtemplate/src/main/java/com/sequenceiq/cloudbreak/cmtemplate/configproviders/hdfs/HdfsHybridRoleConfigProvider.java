@@ -3,14 +3,17 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.getSafetyValveProperty;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsConfigHelper.HDFS_CLIENT_CONFIG_SAFETY_VALVE;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsConfigHelper.HDFS_SERVICE_CONFIG_SAFETY_VALVE;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsConfigHelper.HYBRID_DH_NAME_SERVICE;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
@@ -23,16 +26,22 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 @Component
 public class HdfsHybridRoleConfigProvider extends AbstractRoleConfigProvider {
 
-    private static final Joiner COMMA_JOINER = Joiner.on(',');
-
     @Inject
     private HdfsConfigHelper hdfsConfigHelper;
 
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         List<ApiClusterTemplateConfig> configs = new ArrayList<>();
-        RdcView rdcView = source.getDatalakeView().get().getRdcView();
-        configs.addAll(getRemoteHdfsHaConfigs(rdcView));
+        getRemoteHdfsHaSafetyValveValue(source)
+                .ifPresent(safetyValveValue -> configs.add(config(HDFS_CLIENT_CONFIG_SAFETY_VALVE, safetyValveValue)));
+        return configs;
+    }
+
+    @Override
+    public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
+        List<ApiClusterTemplateConfig> configs = new ArrayList<>();
+        getRemoteHdfsHaSafetyValveValue(source)
+                .ifPresent(safetyValveValue -> configs.add(config(HDFS_SERVICE_CONFIG_SAFETY_VALVE, safetyValveValue)));
         return configs;
     }
 
@@ -51,13 +60,13 @@ public class HdfsHybridRoleConfigProvider extends AbstractRoleConfigProvider {
         return super.isConfigurationNeeded(cmTemplateProcessor, source) && hdfsConfigHelper.isHybridDatahub(cmTemplateProcessor, source);
     }
 
-    private List<ApiClusterTemplateConfig> getRemoteHdfsHaConfigs(RdcView rdcView) {
-        List<String> nameNodes = List.copyOf(rdcView.getEndpoints(HdfsRoles.HDFS, HdfsRoles.NAMENODE));
-        if (nameNodes.size() > 1) {
-            StringBuilder clientConfigBuilder = new StringBuilder();
-            String datalakeNameService = hdfsConfigHelper.getNameService(rdcView);
-            String nameServices = COMMA_JOINER.join(List.of(datalakeNameService, HYBRID_DH_NAME_SERVICE));
-            clientConfigBuilder
+    private Optional<String> getRemoteHdfsHaSafetyValveValue(TemplatePreparationObject source) {
+        RdcView rdcView = source.getDatalakeView().get().getRdcView();
+        String datalakeNameService = hdfsConfigHelper.getNameService(rdcView);
+        if (ObjectUtils.isNotEmpty(datalakeNameService)) {
+            String nameServices = Joiner.on(',').join(List.of(datalakeNameService, HYBRID_DH_NAME_SERVICE));
+            StringBuilder configValueBuilder = new StringBuilder();
+            configValueBuilder
                     .append(getSafetyValveProperty("dfs.nameservices", nameServices))
                     .append(getSafetyValveProperty("dfs.internal.nameservices", HYBRID_DH_NAME_SERVICE))
                     .append(getSafetyValveProperty("dfs.client.failover.proxy.provider." + datalakeNameService,
@@ -66,13 +75,13 @@ public class HdfsHybridRoleConfigProvider extends AbstractRoleConfigProvider {
             rdcView.getRoleConfigs(HdfsRoles.HDFS, HdfsRoles.NAMENODE).entrySet().stream()
                     .filter(HdfsHybridRoleConfigProvider::isHAConfig)
                     .map(entry -> getSafetyValveProperty(entry.getKey(), entry.getValue()))
-                    .forEach(clientConfigBuilder::append);
-            return List.of(config(HDFS_CLIENT_CONFIG_SAFETY_VALVE, clientConfigBuilder.toString()));
+                    .forEach(configValueBuilder::append);
+            return Optional.of(configValueBuilder.toString());
         }
-        return List.of();
+        return Optional.empty();
     }
 
     private static boolean isHAConfig(Map.Entry<String, String> entry) {
-        return entry.getKey().matches("dfs\\.namenode\\..*-address\\..*") || entry.getKey().matches("dfs\\.ha\\.namenodes\\..*");
+        return entry.getKey().startsWith("dfs.ha.namenodes.") || entry.getKey().startsWith("dfs.namenode.");
     }
 }

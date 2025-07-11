@@ -416,7 +416,7 @@
         },
         {
           "key": "hive_warehouse_external_directory",
-          "value": "s3a://cb-group/akanto/data/warehouse/tablespace/external/hive"
+          "value": "/warehouse/tablespace/external/hive"
         },
         {
           "key": "hive_warehouse_directory",

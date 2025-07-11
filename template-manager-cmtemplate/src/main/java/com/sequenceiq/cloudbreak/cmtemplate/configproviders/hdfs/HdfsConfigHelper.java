@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs;
 
+import static com.sequenceiq.cloudbreak.sdx.RdcConstants.HdfsNameNode.HDFS_NAMENODE_NAMESERVICE;
 import static java.util.stream.Collectors.toSet;
 
 import java.util.List;
@@ -21,6 +22,8 @@ import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 public class HdfsConfigHelper {
 
     public static final String HDFS_CLIENT_CONFIG_SAFETY_VALVE = "hdfs_client_config_safety_valve";
+
+    public static final String HDFS_SERVICE_CONFIG_SAFETY_VALVE = "hdfs_service_config_safety_valve";
 
     public static final String DEFAULT_NAMENODE_PORT = "8020";
 
@@ -76,15 +79,11 @@ public class HdfsConfigHelper {
     }
 
     private Optional<String> getDatalakeHdfsUrl(DatalakeView datalake) {
-        Set<String> nameNodes = datalake.getRdcView().getEndpoints(HdfsRoles.HDFS, HdfsRoles.NAMENODE);
-        return nameNodes.size() > 1
-                ? Optional.of("hdfs://" + getNameService(datalake.getRdcView()))
-                : nameNodes.stream().findFirst();
+        return datalake.getRdcView().getEndpoints(HdfsRoles.HDFS, HdfsRoles.NAMENODE).stream().findFirst();
     }
 
     public String getNameService(RdcView rdcView) {
-        return rdcView.getRoleConfigs(HdfsRoles.HDFS, HdfsRoles.NAMENODE)
-                .getOrDefault("dfs.federation.namenode.nameservice", DEFAULT_NAME_SERVICE);
+        return rdcView.getRoleConfigs(HdfsRoles.HDFS, HdfsRoles.NAMENODE).get(HDFS_NAMENODE_NAMESERVICE);
     }
 
 }

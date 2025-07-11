@@ -1131,10 +1131,16 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
     }
 
     public Set<TemplateEndpoint> calculateEndpoints() {
-        return getHostsWithComponent(HdfsRoles.NAMENODE).stream()
-                .map(nameNode -> String.format("hdfs://%s:%s", nameNode, HdfsConfigHelper.DEFAULT_NAMENODE_PORT))
-                .map(endpoint -> new TemplateEndpoint(HdfsRoles.HDFS, HdfsRoles.NAMENODE, endpoint))
-                .collect(toSet());
+        List<String> nameNodes = getHostsWithComponent(HdfsRoles.NAMENODE);
+        String endpoint;
+        if (nameNodes.size() > 1) {
+            TemplateRoleConfig nameServiceConfig = getTemplateRoleConfig(HdfsRoles.HDFS, HdfsRoles.NAMENODE, "dfs_federation_namenode_nameservice")
+                    .orElseThrow(() -> new CloudbreakServiceException("Failed to determine HDFS namenode nameservice"));
+            endpoint = nameServiceConfig.value();
+        } else {
+            endpoint = String.format("hdfs://%s:%s", nameNodes.getFirst(), HdfsConfigHelper.DEFAULT_NAMENODE_PORT);
+        }
+        return Set.of(new TemplateEndpoint(HdfsRoles.HDFS, HdfsRoles.NAMENODE, endpoint));
     }
 
     public Set<TemplateServiceConfig> calculateServiceConfigs() {
