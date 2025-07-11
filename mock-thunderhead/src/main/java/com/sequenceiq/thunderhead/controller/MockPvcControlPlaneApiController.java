@@ -52,7 +52,7 @@ public class MockPvcControlPlaneApiController {
         LOGGER.info("List remote environments for crn: '{}'", crn);
         try {
             ListEnvironmentsResponse mockRemoteEnvironmentResponses = new ListEnvironmentsResponse();
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 2; i++) {
                 Crn controlPlaneCrn = Crn.safeFromString(crn);
                 String pvControlPlaneAccountId = controlPlaneCrn.getResource();
                 String environmentResourceId = pvControlPlaneAccountId + "-" + i;
