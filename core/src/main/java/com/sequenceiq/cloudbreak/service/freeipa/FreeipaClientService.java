@@ -24,11 +24,9 @@ import com.sequenceiq.flow.api.model.FlowLogResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.flow.FreeIpaV1FlowEndpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaRotationV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.binduser.BindUserCreateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRotationRequest;
-import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 import com.sequenceiq.freeipa.api.v1.util.UtilV1Endpoint;
 
 @Service
@@ -105,22 +103,6 @@ public class FreeipaClientService {
             throw new CloudbreakServiceException(message, e);
         } catch (ProcessingException | IllegalStateException e) {
             String message = String.format("Failed to LIST FreeIPA due to: %s. ", e.getMessage());
-            LOGGER.error(message, e);
-            throw new CloudbreakServiceException(message, e);
-        }
-    }
-
-    public OperationStatus createBindUsers(BindUserCreateRequest request, String initiatorUserCrn) {
-        try {
-            return ThreadBasedUserCrnProvider.doAsInternalActor(
-                    () -> freeIpaV1Endpoint.createBindUser(request, initiatorUserCrn));
-        } catch (WebApplicationException e) {
-            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            String message = String.format("Failed to invoke bind user creation due to: %s. %s.", e.getMessage(), errorMessage);
-            LOGGER.error(message, e);
-            throw new CloudbreakServiceException(message, e);
-        } catch (ProcessingException | IllegalStateException e) {
-            String message = String.format("Failed to invoke bind user creation due to: %s. ", e.getMessage());
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
         }

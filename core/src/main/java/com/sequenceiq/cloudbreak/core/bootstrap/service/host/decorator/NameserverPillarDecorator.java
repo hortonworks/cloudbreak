@@ -2,36 +2,64 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator;
 
 import static java.util.Collections.singletonMap;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import jakarta.inject.Inject;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.conn.util.InetAddressUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
+import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
+import com.sequenceiq.common.api.type.EnvironmentType;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustResponse;
 
 @Component
 public class NameserverPillarDecorator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NameserverPillarDecorator.class);
 
-    public void decorateServicePillarWithNameservers(KerberosConfig kerberosConfig, Map<String, SaltPillarProperties> servicePillar) {
-        if (kerberosConfig != null && StringUtils.hasText(kerberosConfig.getDomain()) && StringUtils.hasText(kerberosConfig.getNameServers())) {
+    @Inject
+    private FreeipaClientService freeipaClient;
+
+    public Map<String, SaltPillarProperties> createPillarForNameservers(KerberosConfig kerberosConfig, String environmentCrn, String environmentType) {
+        if (kerberosConfig != null && StringUtils.isNotBlank(kerberosConfig.getDomain()) && StringUtils.isNotBlank(kerberosConfig.getNameServers())) {
             LOGGER.debug("Add nameserver config to pillar based on kerberos config.");
             List<String> ipList = getKerberosNameServerIps(kerberosConfig);
             validateIpList(ipList);
-            servicePillar.put("forwarder-zones", new SaltPillarProperties("/unbound/forwarders.sls",
-                    singletonMap("forwarder-zones", singletonMap(kerberosConfig.getDomain(), singletonMap("nameservers", ipList)))));
+            Map<String, Map<String, List<String>>> nameservers = new HashMap<>();
+            nameservers.put(kerberosConfig.getDomain(), singletonMap("nameservers", ipList));
+            nameservers.putAll(fetchHybridNameserverConfig(environmentCrn, environmentType, ipList));
+            return Map.of("forwarder-zones", new SaltPillarProperties("/unbound/forwarders.sls",
+                    singletonMap("forwarder-zones", nameservers)));
         } else {
             LOGGER.debug("Skip to add nameserver config for pillar because kerberos config type is {}", kerberosConfig.getType());
+            return Map.of();
+        }
+
+    }
+
+    private Map<String, Map<String, List<String>>> fetchHybridNameserverConfig(String environmentCrn, String environmentType, List<String> ipList) {
+        if (EnvironmentType.isHybridFromEnvironmentTypeString(environmentType)) {
+            TrustResponse trustResponse = freeipaClient.getByEnvironmentCrn(environmentCrn).getTrust();
+            if (trustResponse != null && StringUtils.isNotBlank(trustResponse.getRealm())) {
+                return singletonMap(trustResponse.getRealm().toLowerCase(Locale.ROOT), singletonMap("nameservers", ipList));
+            } else {
+                return Map.of();
+            }
+        } else {
+            return Map.of();
         }
     }
 
@@ -43,7 +71,7 @@ public class NameserverPillarDecorator {
     }
 
     private Predicate<String> filterValidIps() {
-        return ip -> StringUtils.hasText(ip) && InetAddressUtils.isIPv4Address(ip);
+        return ip -> StringUtils.isNotBlank(ip) && InetAddressUtils.isIPv4Address(ip);
     }
 
     private void validateIpList(List<String> ipList) {

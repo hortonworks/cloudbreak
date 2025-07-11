@@ -526,14 +526,15 @@ public class ClusterHostServiceRunner {
         ClusterView cluster = stackDto.getCluster();
         ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(cluster.getId());
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
+        DetailedEnvironmentResponse detailedEnvironmentResponse = environmentConfigProvider.getEnvironmentByCrn(stackDto.getEnvironmentCrn());
         KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()).orElse(null);
-        nameserverPillarDecorator.decorateServicePillarWithNameservers(kerberosConfig, servicePillar);
+        servicePillar.putAll(nameserverPillarDecorator.createPillarForNameservers(kerberosConfig, stack.getEnvironmentCrn(),
+                detailedEnvironmentResponse.getEnvironmentType()));
         servicePillar.putAll(createUnboundEliminationPillar(stack.getDomainDnsResolver()));
         addKerberosConfig(servicePillar, kerberosConfig);
         servicePillar.putAll(hostAttributeDecorator.createHostAttributePillars(stackDto));
         servicePillar.put("discovery", new SaltPillarProperties("/discovery/init.sls", singletonMap("platform", stack.getCloudPlatform())));
         String virtualGroupsEnvironmentCrn = environmentConfigProvider.getParentEnvironmentCrn(stack.getEnvironmentCrn());
-        DetailedEnvironmentResponse detailedEnvironmentResponse = environmentConfigProvider.getEnvironmentByCrn(stackDto.getEnvironmentCrn());
         servicePillar.putAll(createMetadataPillars(stackDto, stack, detailedEnvironmentResponse, virtualGroupsEnvironmentCrn));
         ClusterPreCreationApi connector = clusterApiConnectors.getConnector(cluster);
         Map<String, List<String>> serviceLocations = getServiceLocations(stackDto);

@@ -199,6 +199,7 @@ public class StackToDescribeFreeIpaResponseConverter {
             trustResponse.setTrustStatus(trust.getTrustStatus().name());
             trustResponse.setFqdn(trust.getFqdn());
             trustResponse.setOperationId(trust.getOperationId());
+            trustResponse.setRealm(trust.getRealm());
         } else {
             trustResponse.setTrustStatus(TrustStatus.TRUST_SETUP_REQUIRED.name());
         }

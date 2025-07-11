@@ -19,6 +19,9 @@ public class TrustResponse {
     @Schema(description = CrossRealmTrustModelDescriptions.OPERATION_ID, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String operationId;
 
+    @Schema(description = CrossRealmTrustModelDescriptions.REALM, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private String realm;
+
     public String getFqdn() {
         return fqdn;
     }
@@ -43,12 +46,21 @@ public class TrustResponse {
         this.operationId = operationId;
     }
 
+    public String getRealm() {
+        return realm;
+    }
+
+    public void setRealm(String realm) {
+        this.realm = realm;
+    }
+
     @Override
     public String toString() {
         return "TrustResponse{" +
                 "fqdn='" + fqdn + '\'' +
                 ", trustStatus='" + trustStatus + '\'' +
                 ", operationId='" + operationId + '\'' +
+                ", realm='" + realm + '\'' +
                 '}';
     }
 }
