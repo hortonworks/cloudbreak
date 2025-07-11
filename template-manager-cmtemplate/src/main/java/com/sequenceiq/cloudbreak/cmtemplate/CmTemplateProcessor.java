@@ -77,6 +77,7 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
+import com.sequenceiq.cloudbreak.domain.BlueprintHybridOption;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.TemplateEndpoint;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -1128,6 +1129,12 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
         return getHostGroupsWithComponent(component).stream()
                 .flatMap(hostGroup -> getHostNamesInGroup(hostGroup).stream())
                 .toList();
+    }
+
+    public boolean isHybridDatahub(TemplatePreparationObject source) {
+        return StackType.WORKLOAD.equals(source.getStackType())
+                && source.getDatalakeView().isPresent()
+                && BlueprintHybridOption.BURST_TO_CLOUD.equals(source.getBlueprintView().getHybridOption());
     }
 
     public Set<TemplateEndpoint> calculateEndpoints() {

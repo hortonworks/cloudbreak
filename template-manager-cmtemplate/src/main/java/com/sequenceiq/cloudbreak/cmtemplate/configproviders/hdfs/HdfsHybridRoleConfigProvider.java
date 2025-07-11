@@ -57,7 +57,7 @@ public class HdfsHybridRoleConfigProvider extends AbstractRoleConfigProvider {
 
     @Override
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
-        return super.isConfigurationNeeded(cmTemplateProcessor, source) && hdfsConfigHelper.isHybridDatahub(cmTemplateProcessor, source);
+        return super.isConfigurationNeeded(cmTemplateProcessor, source) && cmTemplateProcessor.isHybridDatahub(source);
     }
 
     private Optional<String> getRemoteHdfsHaSafetyValveValue(TemplatePreparationObject source) {

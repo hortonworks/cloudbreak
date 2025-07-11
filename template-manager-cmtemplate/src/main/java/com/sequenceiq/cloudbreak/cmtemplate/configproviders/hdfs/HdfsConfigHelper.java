@@ -10,9 +10,7 @@ import java.util.Set;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.domain.BlueprintHybridOption;
 import com.sequenceiq.cloudbreak.sdx.RdcView;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.DatalakeView;
@@ -50,13 +48,7 @@ public class HdfsConfigHelper {
     }
 
     public String getNameService(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
-        return isHybridDatahub(templateProcessor, source) ? HYBRID_DH_NAME_SERVICE : DEFAULT_NAME_SERVICE;
-    }
-
-    public boolean isHybridDatahub(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
-        return StackType.WORKLOAD.equals(source.getStackType())
-                && source.getDatalakeView().isPresent()
-                && BlueprintHybridOption.BURST_TO_CLOUD.equals(source.getBlueprintView().getHybridOption());
+        return templateProcessor.isHybridDatahub(source) ? HYBRID_DH_NAME_SERVICE : DEFAULT_NAME_SERVICE;
     }
 
     public Optional<String> getHdfsUrl(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
@@ -73,7 +65,7 @@ public class HdfsConfigHelper {
     }
 
     public Optional<String> getAttachedDatalakeHdfsUrlForHybridDatahub(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
-        return isHybridDatahub(templateProcessor, source)
+        return templateProcessor.isHybridDatahub(source)
                 ? getDatalakeHdfsUrl(source.getDatalakeView().get())
                 : Optional.empty();
     }
