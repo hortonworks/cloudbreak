@@ -130,13 +130,7 @@ public class SdxEventsService {
             return cloudbreakEventV4Responses.stream().map(entry -> convert(entry, sdxCluster.getCrn())).collect(toList());
         } catch (NotFoundException notFoundException) {
             LOGGER.error("Failed to retrieve paged cloudbreak service events due to not found exception!", notFoundException);
-            // We allow not found exceptions when stack not present as they may be caused due to transiency during DL creation.
-            if (sdxCluster.getStackId() == null) {
-                return Collections.emptyList();
-            } else {
-                throw new CloudbreakServiceException("Failed to retrieve paged cloudbreak service events due to not found exception!",
-                        notFoundException);
-            }
+            return Collections.emptyList();
         } catch (Exception exception) {
             LOGGER.error("Failed to retrieve paged cloudbreak service events!", exception);
             throw new CloudbreakServiceException("Failed to retrieve paged cloudbreak service events!", exception);
