@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileRequest;
 import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
@@ -47,6 +48,7 @@ public class EncryptionProfileTestConstants {
         profile.setResourceCrn(ENCRYPTION_PROFILE_CRN);
         profile.setCipherSuites(CIPHER_SUITES);
         profile.setTlsVersions(TLS_VERSIONS);
+        profile.setResourceStatus(ResourceStatus.USER_MANAGED);
         return profile;
     }
 }

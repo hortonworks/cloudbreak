@@ -39,6 +39,9 @@ public class EncryptionProfileResponse {
     @Schema(description = EncryptionProfileModelDescription.TLS_CIPHER_SUITES, requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, Set<String>> cipherSuites;
 
+    @Schema(description = EncryptionProfileModelDescription.STATUS, requiredMode = Schema.RequiredMode.REQUIRED)
+    private String status;
+
     public Set<String> getTlsVersions() {
         return tlsVersions;
     }
@@ -87,6 +90,14 @@ public class EncryptionProfileResponse {
         this.created = created;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     @Override
     public String toString() {
         return "EncryptionProfileRequest{" +
@@ -95,6 +106,7 @@ public class EncryptionProfileResponse {
                 ", crn='" + crn + '\'' +
                 ", tlsVersions='" + tlsVersions + '\'' +
                 ", cipherSuites='" + cipherSuites + '\'' +
+                ", status='" + status + '\'' +
                 '}';
     }
 }

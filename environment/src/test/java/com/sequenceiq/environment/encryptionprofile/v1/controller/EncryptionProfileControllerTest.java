@@ -67,7 +67,6 @@ public class EncryptionProfileControllerTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        when(entitlementService.isConfigureEncryptionProfileEnabled(anyString())).thenReturn(true);
         controller = new EncryptionProfileController(encryptionProfileService,
                 requestConverter,
                 responseConverter,
@@ -81,6 +80,7 @@ public class EncryptionProfileControllerTest {
 
     @Test
     public void testCreate() {
+        when(entitlementService.isConfigureEncryptionProfileEnabled(anyString())).thenReturn(true);
         EncryptionProfileRequest request = new EncryptionProfileRequest();
         EncryptionProfile profile = new EncryptionProfile();
         EncryptionProfileResponse expectedResponse = new EncryptionProfileResponse();
@@ -153,6 +153,7 @@ public class EncryptionProfileControllerTest {
 
     @Test
     public void testDeleteByName() {
+        when(entitlementService.isConfigureEncryptionProfileEnabled(anyString())).thenReturn(true);
         EncryptionProfile profile = new EncryptionProfile();
         EncryptionProfileResponse expectedResponse = new EncryptionProfileResponse();
 
@@ -171,6 +172,8 @@ public class EncryptionProfileControllerTest {
 
     @Test
     public void testDeleteByCrn() {
+        when(entitlementService.isConfigureEncryptionProfileEnabled(anyString())).thenReturn(true);
+
         EncryptionProfile profile = new EncryptionProfile();
         EncryptionProfileResponse expectedResponse = new EncryptionProfileResponse();
 
@@ -193,21 +196,6 @@ public class EncryptionProfileControllerTest {
 
         assertThatThrownBy(() ->
             ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> controller.create(new EncryptionProfileRequest())))
-                .isInstanceOf(ForbiddenException.class)
-                .hasMessageContaining("Encryption profile operations are not enabled for account: cloudbreak");
-
-        assertThatThrownBy(() ->
-                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> controller.getByName("test-name")))
-                .isInstanceOf(ForbiddenException.class)
-                .hasMessageContaining("Encryption profile operations are not enabled for account: cloudbreak");
-
-        assertThatThrownBy(() ->
-                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> controller.getByCrn("test-crn")))
-                .isInstanceOf(ForbiddenException.class)
-                .hasMessageContaining("Encryption profile operations are not enabled for account: cloudbreak");
-
-        assertThatThrownBy(() ->
-                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> controller.list()))
                 .isInstanceOf(ForbiddenException.class)
                 .hasMessageContaining("Encryption profile operations are not enabled for account: cloudbreak");
 

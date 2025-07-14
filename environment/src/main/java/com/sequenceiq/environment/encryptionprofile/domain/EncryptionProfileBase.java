@@ -11,10 +11,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.SequenceGenerator;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.auth.security.AuthResource;
 import com.sequenceiq.cloudbreak.common.dal.model.AccountAwareResource;
 import com.sequenceiq.cloudbreak.common.database.StringSetToStringConverter;
 import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
+import com.sequenceiq.environment.encryptionprofile.converter.ResourceStatusConverter;
 import com.sequenceiq.environment.encryptionprofile.converter.TlsVersionConverter;
 
 @MappedSuperclass
@@ -44,6 +46,10 @@ public class EncryptionProfileBase implements Serializable, AuthResource, Accoun
 
     @Column(nullable = false)
     private String resourceCrn;
+
+    @Convert(converter = ResourceStatusConverter.class)
+    @Column(name = "resourcestatus", nullable = false)
+    private ResourceStatus resourceStatus;
 
     @Column(columnDefinition = "boolean default false")
     private boolean archived;
@@ -94,8 +100,16 @@ public class EncryptionProfileBase implements Serializable, AuthResource, Accoun
         return created;
     }
 
-    private void setCreated(Long created) {
+    public void setCreated(Long created) {
         this.created = created;
+    }
+
+    public ResourceStatus getResourceStatus() {
+        return resourceStatus;
+    }
+
+    public void setResourceStatus(ResourceStatus status) {
+        this.resourceStatus = status;
     }
 
     @Override
@@ -139,6 +153,7 @@ public class EncryptionProfileBase implements Serializable, AuthResource, Accoun
                 ", accountId='" + accountId + '\'' +
                 ", resourceCrn='" + resourceCrn + '\'' +
                 ", created='" + created + '\'' +
+                ", resourceStatus='" + resourceStatus +
                 '}';
     }
 }

@@ -31,6 +31,7 @@ public class EncryptionProfileToEncryptionProfileResponseConverter {
         response.setTlsVersions(source.getTlsVersions().stream().map(TlsVersion::getVersion).collect(Collectors.toSet()));
         response.setCipherSuites(getCipherSuiteMap(source.getCipherSuites(), source.getTlsVersions(), useDefaultCipherSuitesIfEmpty));
         response.setCreated(source.getCreated());
+        response.setStatus(source.getResourceStatus().name());
         return response;
     }
 

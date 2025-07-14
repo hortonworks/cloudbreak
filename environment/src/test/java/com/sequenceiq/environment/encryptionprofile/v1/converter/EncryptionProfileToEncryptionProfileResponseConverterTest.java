@@ -20,6 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
 import com.sequenceiq.environment.api.v1.encryptionprofile.config.EncryptionProfileConfig;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
@@ -42,6 +43,7 @@ class EncryptionProfileToEncryptionProfileResponseConverterTest {
         encryptionProfile.setName(NAME);
         encryptionProfile.setDescription(DESCRIPTION);
         encryptionProfile.setResourceCrn(ENCRYPTION_PROFILE_CRN);
+        encryptionProfile.setResourceStatus(ResourceStatus.USER_MANAGED);
 
         encryptionProfile.setTlsVersions(new HashSet<>(Arrays.asList(TlsVersion.TLS_1_2, TlsVersion.TLS_1_3)));
         encryptionProfile.setCipherSuites(new HashSet<>(Arrays.asList(

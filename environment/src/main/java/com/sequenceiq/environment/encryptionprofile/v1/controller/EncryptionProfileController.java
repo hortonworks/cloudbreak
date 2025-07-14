@@ -73,8 +73,6 @@ public class EncryptionProfileController extends NotificationController implemen
     public EncryptionProfileResponse getByName(@ResourceName String encryptionProfileName) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
 
-        verifyEncryptionProfileEntitlement(accountId);
-
         EncryptionProfile encryptionProfile = encryptionProfileService.getByNameAndAccountId(
                 encryptionProfileName, accountId);
         return encryptionProfileResponseConverter.convert(encryptionProfile);
@@ -83,10 +81,6 @@ public class EncryptionProfileController extends NotificationController implemen
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENCRYPTION_PROFILE)
     public EncryptionProfileResponse getByCrn(@ResourceCrn String encryptionProfileCrn) {
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-
-        verifyEncryptionProfileEntitlement(accountId);
-
         EncryptionProfile encryptionProfile = encryptionProfileService.getByCrn(encryptionProfileCrn);
         return encryptionProfileResponseConverter.convert(encryptionProfile);
     }
@@ -94,10 +88,6 @@ public class EncryptionProfileController extends NotificationController implemen
     @Override
     @FilterListBasedOnPermissions
     public EncryptionProfileResponses list() {
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-
-        verifyEncryptionProfileEntitlement(accountId);
-
         return encryptionProfileFiltering.filterResources(
                 Crn.safeFromString(ThreadBasedUserCrnProvider.getUserCrn()),
                 AuthorizationResourceAction.DESCRIBE_ENCRYPTION_PROFILE,
