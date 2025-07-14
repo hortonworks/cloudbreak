@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.common.api.type.EnvironmentType;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustResponse;
 
 @Component
@@ -52,7 +53,7 @@ public class NameserverPillarDecorator {
 
     private Map<String, Map<String, List<String>>> fetchHybridNameserverConfig(String environmentCrn, String environmentType, List<String> ipList) {
         if (EnvironmentType.isHybridFromEnvironmentTypeString(environmentType)) {
-            TrustResponse trustResponse = freeipaClient.getByEnvironmentCrn(environmentCrn).getTrust();
+            TrustResponse trustResponse = freeipaClient.findByEnvironmentCrn(environmentCrn).map(DescribeFreeIpaResponse::getTrust).orElse(null);
             if (trustResponse != null && StringUtils.isNotBlank(trustResponse.getRealm())) {
                 return singletonMap(trustResponse.getRealm().toLowerCase(Locale.ROOT), singletonMap("nameservers", ipList));
             } else {

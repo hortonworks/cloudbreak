@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -79,7 +80,7 @@ class NameserverPillarDecoratorTest {
         TrustResponse trust = new TrustResponse();
         trust.setRealm("AD.DOMAIN");
         freeIpaResponse.setTrust(trust);
-        when(freeipaClient.getByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(freeIpaResponse);
+        when(freeipaClient.findByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(Optional.of(freeIpaResponse));
 
         Map<String, SaltPillarProperties> servicePillar = underTest.createPillarForNameservers(kerberosConfig, ENVIRONMENT_CRN, EnvironmentType.HYBRID.name());
 
@@ -93,6 +94,25 @@ class NameserverPillarDecoratorTest {
         assertTrue(nameservers.get("ad.domain").get(NAMESERVERS_KEY).contains(KERBEROS_NAMESERVER_2));
 
         assertEquals(2, nameservers.get("ad.domain").get(NAMESERVERS_KEY).size());
+        assertEquals(2, nameservers.get(kerberosConfig.getDomain()).get(NAMESERVERS_KEY).size());
+    }
+
+    @Test
+    void testShouldNotFailPopulateThePillarWhenNoFreeipaIsAvailableForHybrid() {
+        KerberosConfig kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig()
+                .withDomain(DOMAIN)
+                .withNameServers(String.join(",", "null", KERBEROS_NAMESERVER_1, KERBEROS_NAMESERVER_2))
+                .build();
+        when(freeipaClient.findByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(Optional.empty());
+
+        Map<String, SaltPillarProperties> servicePillar = underTest.createPillarForNameservers(kerberosConfig, ENVIRONMENT_CRN, EnvironmentType.HYBRID.name());
+
+        SaltPillarProperties pillarProperties = servicePillar.get(SERVICE_KEY);
+        Map<String, Map<String, List<String>>> nameservers = (Map<String, Map<String, List<String>>>) pillarProperties.getProperties().get(SERVICE_KEY);
+        assertNotNull(pillarProperties);
+        assertEquals(SERVICE_PATH, pillarProperties.getPath());
+        assertTrue(nameservers.get(kerberosConfig.getDomain()).get(NAMESERVERS_KEY).contains(KERBEROS_NAMESERVER_1));
+        assertTrue(nameservers.get(kerberosConfig.getDomain()).get(NAMESERVERS_KEY).contains(KERBEROS_NAMESERVER_2));
         assertEquals(2, nameservers.get(kerberosConfig.getDomain()).get(NAMESERVERS_KEY).size());
     }
 
