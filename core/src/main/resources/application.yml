@@ -298,7 +298,7 @@ cb:
         exclusions:
           7.2.16: cdp-flow-management,cdp-flow-management-small,cdp-flink-heavy,cdp-flink-light,cdp-data-engineering-spark3-ha,cdp-rt-data-mart-spark3
           7.2.17: cdp-flow-management,cdp-flow-management-small,cdp-flink-heavy,cdp-flink-light,cdp-data-engineering-spark3-ha,cdp-rt-data-mart-spark3
-          default: cdp-flow-management,cdp-flow-management-small,cdp-flink-heavy,cdp-flink-light,cdp-flow-management-nifi-2,cdp-flow-management-small-nifi-2,cdp-iceberg
+          default: cdp-flow-management,cdp-flow-management-small,cdp-flink-heavy,cdp-flink-light,cdp-flink-light-ha,cdp-flink-heavy-ha,cdp-flow-management-nifi-2,cdp-flow-management-small-nifi-2,cdp-iceberg
       defaults:
         7.2.7: >
           7.2.7 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx;
@@ -523,6 +523,8 @@ cb:
           7.3.1 - Search Analytics=cdp-search-analytics;
           7.3.1 - Streaming Analytics Light Duty with Apache Flink=cdp-flink-light;
           7.3.1 - Streaming Analytics Heavy Duty with Apache Flink=cdp-flink-heavy;
+          7.3.1 - Streaming Analytics Light Duty High Availability with Apache Flink=cdp-flink-light-ha;
+          7.3.1 - Streaming Analytics Heavy Duty High Availability with Apache Flink=cdp-flink-heavy-ha;
           7.3.1 - COD Edge Node=cdp-cod-edge-node;
           7.3.1 - Edge Flow Management Light Duty=cdp-edge-flow-management-small;
           7.3.1 - Lakehouse Optimizer=cdp-lakehouse-optimizer
@@ -548,6 +550,8 @@ cb:
           7.3.2 - Search Analytics=cdp-search-analytics;
           7.3.2 - Streaming Analytics Light Duty with Apache Flink=cdp-flink-light;
           7.3.2 - Streaming Analytics Heavy Duty with Apache Flink=cdp-flink-heavy;
+          7.3.2 - Streaming Analytics Light Duty High Availability with Apache Flink=cdp-flink-light-ha;
+          7.3.2 - Streaming Analytics Heavy Duty High Availability with Apache Flink=cdp-flink-heavy-ha;
           7.3.2 - COD Edge Node=cdp-cod-edge-node;
           7.3.2 - Edge Flow Management Light Duty=cdp-edge-flow-management-small;
           7.3.2 - Lakehouse Optimizer=cdp-lakehouse-optimizer

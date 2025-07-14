@@ -1,0 +1,281 @@
+{
+  "description": "7.3.1 - Streaming Analytics Light Duty High Availability with Apache Flink",
+  "blueprint": {
+    "cdhVersion": "7.3.1",
+    "displayName": "streaming-analytics",
+    "blueprintUpgradeOption": "GA",
+    "hostTemplates": [
+      {
+        "refName": "master",
+        "cardinality": 1,
+        "roleConfigGroupsRefNames": [
+          "flink-FLINK_HISTORY_SERVER-BASE",
+          "flink-GATEWAY-BASE",
+          "hdfs-BALANCER-BASE",
+          "hdfs-GATEWAY-BASE",
+          "hdfs-JOURNALNODE-BASE",
+          "kafka-GATEWAY-BASE",
+          "yarn-GATEWAY-BASE",
+          "yarn-JOBHISTORY-BASE",
+          "yarn-QUEUEMANAGER_STORE-BASE",
+          "yarn-QUEUEMANAGER_WEBAPP-BASE",
+          "zookeeper-SERVER-BASE"
+        ]
+      },
+      {
+        "refName": "manager",
+        "cardinality": 2,
+        "roleConfigGroupsRefNames": [
+          "knox-KNOX_GATEWAY-BASE",
+          "flink-GATEWAY-BASE",
+          "hdfs-FAILOVERCONTROLLER-BASE",
+          "hdfs-GATEWAY-BASE",
+          "hdfs-JOURNALNODE-BASE",
+          "hdfs-NAMENODE-BASE",
+          "kafka-KAFKA_BROKER-BASE",
+          "yarn-GATEWAY-BASE",
+          "yarn-RESOURCEMANAGER-BASE",
+          "zookeeper-SERVER-BASE",
+          "sql_stream_builder-MATERIALIZED_VIEW_ENGINE-BASE",
+          "sql_stream_builder-STREAMING_SQL_ENGINE-BASE"
+        ]
+      },
+      {
+        "refName": "worker",
+        "cardinality": 3,
+        "roleConfigGroupsRefNames": [
+          "hdfs-DATANODE-BASE",
+          "yarn-NODEMANAGER-BASE",
+          "flink-GATEWAY-BASE"
+        ]
+      },
+      {
+        "refName": "ssb_worker",
+        "cardinality": 0,
+        "roleConfigGroupsRefNames": [
+          "sql_stream_builder-MATERIALIZED_VIEW_ENGINE-BASE",
+          "sql_stream_builder-STREAMING_SQL_ENGINE-BASE",
+          "hdfs-DATANODE-BASE",
+          "yarn-NODEMANAGER-BASE",
+          "flink-GATEWAY-BASE"
+        ]
+      }
+    ],
+    "services": [
+      {
+        "refName": "zookeeper",
+        "serviceType": "ZOOKEEPER",
+        "roleConfigGroups": [
+          {
+            "refName": "zookeeper-SERVER-BASE",
+            "roleType": "SERVER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "hdfs",
+        "serviceType": "HDFS",
+        "serviceConfigs": [
+         {
+           "name": "zookeeper_service",
+           "ref": "zookeeper"
+         }
+       ],
+        "roleConfigGroups": [
+          {
+            "refName": "hdfs-BALANCER-BASE",
+            "roleType": "BALANCER",
+            "base": true
+          },
+          {
+              "refName": "hdfs-FAILOVERCONTROLLER-BASE",
+              "roleType": "FAILOVERCONTROLLER",
+              "base": true
+          },
+          {
+              "refName": "hdfs-JOURNALNODE-BASE",
+              "roleType": "JOURNALNODE",
+              "base": true
+          },
+          {
+            "refName": "hdfs-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          },
+          {
+            "refName": "hdfs-NAMENODE-BASE",
+            "roleType": "NAMENODE",
+            "base": true
+          },
+          {
+            "refName": "hdfs-DATANODE-BASE",
+            "roleType": "DATANODE",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "yarn",
+        "serviceType": "YARN",
+        "serviceConfigs": [
+          {
+            "name": "yarn_admin_acl",
+            "value": "yarn,hdfs,flink,mapred"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "yarn-NODEMANAGER-BASE",
+            "roleType": "NODEMANAGER",
+            "base": true
+          },
+          {
+            "refName": "yarn-JOBHISTORY-BASE",
+            "roleType": "JOBHISTORY",
+            "base": true
+          },
+          {
+            "refName": "yarn-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          },
+          {
+            "refName": "yarn-RESOURCEMANAGER-BASE",
+            "roleType": "RESOURCEMANAGER",
+            "base": true,
+            "configs": [
+              {
+                "name": "resourcemanager_config_safety_valve",
+                "value": "<property><name>yarn.scheduler.configuration.store.class</name><value>zk</value></property>"
+              },
+              {
+                "name": "yarn_resourcemanager_scheduler_class",
+                "value": "org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler"
+              },
+              {
+                "name": "resourcemanager_capacity_scheduler_configuration",
+                "value": "<configuration><property><name>yarn.scheduler.capacity.root.queues</name><value>default</value></property><property><name>yarn.scheduler.capacity.root.capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.default.capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.acl_submit_applications</name><value> </value></property><property><name>yarn.scheduler.capacity.root.acl_administer_queue</name><value> </value></property><property><name>yarn.scheduler.capacity.root.default.acl_submit_applications</name><value>*</value></property><property><name>yarn.scheduler.capacity.root.default.minimum-user-limit-percent</name><value>100</value></property><property><name>yarn.scheduler.capacity.maximum-am-resource-percent</name><value>0.33</value></property><property><name>yarn.scheduler.capacity.node-locality-delay</name><value>0</value></property><property><name>yarn.scheduler.capacity.schedule-asynchronously.maximum-threads</name><value>1</value></property><property><name>yarn.scheduler.capacity.schedule-asynchronously.scheduling-interval-ms</name><value>10</value></property><property><name>yarn.scheduler.capacity.per-node-heartbeat.maximum-offswitch-assignments</name><value>4</value></property></configuration>"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "refName": "queuemanager",
+        "serviceType": "QUEUEMANAGER",
+        "serviceConfigs": [
+          {
+            "name": "kerberos.auth.enabled",
+            "value": "true"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "yarn-QUEUEMANAGER_WEBAPP-BASE",
+            "roleType": "QUEUEMANAGER_WEBAPP",
+            "base": true
+          },
+          {
+            "refName": "yarn-QUEUEMANAGER_STORE-BASE",
+            "roleType": "QUEUEMANAGER_STORE",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "kafka",
+        "serviceType": "KAFKA",
+        "roleConfigGroups": [
+          {
+            "refName": "kafka-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          },
+          {
+            "refName": "kafka-KAFKA_BROKER-BASE",
+            "roleType": "KAFKA_BROKER",
+            "base": true
+          }
+        ],
+        "serviceConfigs": [
+          {
+            "name": "offsets.topic.replication.factor",
+            "value": "2"
+          },
+          {
+            "name": "transaction.state.log.replication.factor",
+            "value": "2"
+          }
+        ]
+      },
+      {
+        "refName": "flink",
+        "serviceType": "FLINK",
+        "serviceConfigs": [
+          {
+            "name": "yarn_service",
+            "ref": "yarn"
+          },
+          {
+            "name": "zookeeper_service",
+            "ref": "zookeeper"
+          },
+          {
+            "name": "hdfs_service",
+            "ref": "hdfs"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "flink-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          },
+          {
+            "refName": "flink-FLINK_HISTORY_SERVER-BASE",
+            "roleType": "FLINK_HISTORY_SERVER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "sql_stream_builder",
+        "serviceType": "SQL_STREAM_BUILDER",
+        "serviceConfigs": [
+          {
+            "name": "flink_service",
+            "ref": "flink"
+          },
+          {
+            "name": "kafka_service",
+            "ref": "kafka"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "sql_stream_builder-STREAMING_SQL_ENGINE-BASE",
+            "roleType": "STREAMING_SQL_ENGINE",
+            "base": true
+          },
+          {
+            "refName": "sql_stream_builder-MATERIALIZED_VIEW_ENGINE-BASE",
+            "roleType": "MATERIALIZED_VIEW_ENGINE",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "knox",
+        "roleConfigGroups": [
+          {
+            "base": true,
+            "refName": "knox-KNOX_GATEWAY-BASE",
+            "roleType": "KNOX_GATEWAY"
+          }
+        ],
+        "serviceType": "KNOX"
+        }
+      ]
+  }
+}

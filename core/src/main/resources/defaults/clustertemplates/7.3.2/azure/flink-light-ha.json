@@ -1,0 +1,112 @@
+{
+  "name": "7.3.2 - Streaming Analytics Light Duty High Availability for Azure",
+  "description": "",
+  "type": "STREAMING",
+  "featureState": "RELEASED",
+  "cloudPlatform": "AZURE",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.3.2 - Streaming Analytics Light Duty High Availability with Apache Flink"
+    },
+    "externalDatabase": {
+      "availabilityType": "HA"
+    },
+    "enableLoadBalancer": true,
+    "instanceGroups": [
+      {
+        "name": "manager",
+        "template": {
+          "attachedVolumes": [
+            {
+              "size": 100,
+              "count": 1,
+              "type": "StandardSSD_LRS"
+            }
+          ],
+          "azure": {
+            "availabilitySet": {
+              "name": "",
+              "faultDomainCount": 2,
+              "updateDomainCount": 20
+            }
+          },
+          "instanceType": "Standard_D16ds_v5"
+        },
+        "nodeCount": 2,
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL",
+        "scalabilityOption": "FORBIDDEN"
+      },
+      {
+        "name": "master",
+        "template": {
+          "attachedVolumes": [
+            {
+              "size": 100,
+              "count": 1,
+              "type": "StandardSSD_LRS"
+            }
+          ],
+          "azure": {
+            "availabilitySet": {
+              "name": "",
+              "faultDomainCount": 2,
+              "updateDomainCount": 20
+            }
+          },
+          "instanceType": "Standard_D8ds_v5"
+        },
+        "nodeCount": 1,
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "scalabilityOption": "FORBIDDEN"
+      },
+      {
+        "name": "worker",
+        "template": {
+          "attachedVolumes": [
+            {
+              "size": 100,
+              "count": 1,
+              "type": "StandardSSD_LRS"
+            }
+          ],
+          "azure": {
+            "availabilitySet": {
+              "name": "",
+              "faultDomainCount": 2,
+              "updateDomainCount": 20
+            }
+          },
+          "instanceType": "Standard_D8ds_v5"
+        },
+        "nodeCount": 3,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "ssb_worker",
+        "template": {
+          "attachedVolumes": [
+            {
+              "size": 100,
+              "count": 1,
+              "type": "StandardSSD_LRS"
+            }
+          ],
+          "azure": {
+            "availabilitySet": {
+              "name": "",
+              "faultDomainCount": 2,
+              "updateDomainCount": 20
+            }
+          },
+          "instanceType": "Standard_D8ds_v5"
+        },
+        "nodeCount": 0,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      }
+    ]
+  }
+}

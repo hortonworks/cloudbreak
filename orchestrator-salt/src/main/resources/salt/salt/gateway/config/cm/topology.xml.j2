@@ -414,6 +414,13 @@
                  <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;enableLoadBalancing=true</value>
              </param>
              {%- endif %}
+
+             {% if 'SSB-SSE-UI' in exposed and 'STREAMING_SQL_ENGINE' in salt['pillar.get']('gateway:location') -%}
+             <param>
+                 <name>SSB-SSE-UI</name>
+                 <value>enableStickySession=true;noFallback=false;enableLoadBalancing=true</value>
+             </param>
+             {%- endif %}
          </provider>
 
     </gateway>

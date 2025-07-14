@@ -1,0 +1,105 @@
+{
+  "name": "7.3.2 - Streaming Analytics Light Duty High Availability (ARM) for AWS",
+  "description": "",
+  "type": "STREAMING",
+  "featureState": "INTERNAL",
+  "cloudPlatform": "AWS",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.3.2 - Streaming Analytics Light Duty High Availability with Apache Flink"
+    },
+    "externalDatabase": {
+      "availabilityType": "HA"
+    },
+    "enableLoadBalancer": true,
+    "architecture": "arm64",
+    "instanceGroups": [
+      {
+        "name": "worker",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "standard"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "r7gd.2xlarge"
+        },
+        "nodeCount": 3,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "manager",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "standard"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "r7gd.4xlarge"
+        },
+        "nodeCount": 2,
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL",
+        "scalabilityOption": "FORBIDDEN"
+      },
+      {
+        "name": "master",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "standard"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "r7gd.2xlarge"
+        },
+        "nodeCount": 1,
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "scalabilityOption": "FORBIDDEN"
+      },
+      {
+        "name": "ssb_worker",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "standard"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "r7gd.2xlarge"
+        },
+        "nodeCount": 0,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      }
+    ]
+  }
+}

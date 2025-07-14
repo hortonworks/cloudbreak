@@ -1,0 +1,84 @@
+{
+  "name": "7.3.2 - Streaming Analytics Light Duty High Availability for Google Cloud",
+  "description": "",
+  "type": "STREAMING",
+  "featureState": "RELEASED",
+  "cloudPlatform": "GCP",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.3.2 - Streaming Analytics Light Duty High Availability with Apache Flink"
+    },
+    "externalDatabase": {
+      "availabilityType": "HA"
+    },
+    "enableLoadBalancer": true,
+    "instanceGroups": [
+      {
+        "name": "worker",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "pd-standard"
+            }
+          ],
+          "instanceType": "e2-standard-8"
+        },
+        "nodeCount": 3,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "ssb_worker",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "pd-standard"
+            }
+          ],
+          "instanceType": "e2-standard-8"
+        },
+        "nodeCount": 0,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "manager",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "pd-standard"
+            }
+          ],
+          "instanceType": "e2-standard-16"
+        },
+        "nodeCount": 2,
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL",
+        "scalabilityOption": "FORBIDDEN"
+      },
+      {
+        "name": "master",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "pd-standard"
+            }
+          ],
+          "instanceType": "e2-standard-8"
+        },
+        "nodeCount": 1,
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "scalabilityOption": "FORBIDDEN"
+      }
+    ]
+  }
+}

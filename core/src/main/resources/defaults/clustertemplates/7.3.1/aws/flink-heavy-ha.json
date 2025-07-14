@@ -1,0 +1,104 @@
+{
+  "name": "7.3.1 - Streaming Analytics Heavy Duty High Availability for AWS",
+  "description": "",
+  "type": "STREAMING",
+  "featureState": "RELEASED",
+  "cloudPlatform": "AWS",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.3.1 - Streaming Analytics Heavy Duty High Availability with Apache Flink"
+    },
+    "externalDatabase": {
+      "availabilityType": "HA"
+    },
+    "enableLoadBalancer": true,
+    "instanceGroups": [
+      {
+        "name": "worker",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 1000,
+              "type": "gp3"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "m5.2xlarge"
+        },
+        "nodeCount": 3,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "manager",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "standard"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "m5.4xlarge"
+        },
+        "nodeCount": 2,
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL",
+        "scalabilityOption": "FORBIDDEN"
+      },
+      {
+        "name": "master",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "standard"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "m5.2xlarge"
+        },
+        "nodeCount": 1,
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "scalabilityOption": "FORBIDDEN"
+      },
+      {
+        "name": "ssb_worker",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 1000,
+              "type": "gp3"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "m5.2xlarge"
+        },
+        "nodeCount": 0,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      }
+    ]
+  }
+}
