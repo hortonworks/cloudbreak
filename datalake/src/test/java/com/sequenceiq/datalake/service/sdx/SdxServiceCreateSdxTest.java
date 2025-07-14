@@ -617,7 +617,7 @@ class SdxServiceCreateSdxTest {
         String lightDutyJson = readLightDutyTestTemplate();
         when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
         when(sdxReactorFlowManager.triggerSdxCreation(any())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
-        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.17", LIGHT_DUTY);
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.17", MEDIUM_DUTY_HA);
         withCloudStorage(sdxClusterRequest);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
         long id = 10L;
@@ -652,7 +652,7 @@ class SdxServiceCreateSdxTest {
     @ParameterizedTest(name = "{0}")
     @EnumSource(value = CloudPlatform.class, mode = Mode.EXCLUDE, names = {"AWS", "AZURE", "GCP"})
     void testSdxCreateRazNotRequestedAndMultiAzRequestedAndBadCloudPlatform(CloudPlatform cloudPlatform) {
-        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.17", LIGHT_DUTY);
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.17", MEDIUM_DUTY_HA);
         withCloudStorage(sdxClusterRequest);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
         mockEnvironmentCall(sdxClusterRequest, cloudPlatform, null);
@@ -705,6 +705,35 @@ class SdxServiceCreateSdxTest {
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(value = SdxClusterShape.class, mode = Mode.EXCLUDE, names = {"MEDIUM_DUTY_HA", "ENTERPRISE"})
+    void testSdxCreateRazNotRequestedAndMultiAzRequestedAndAwsAndBadClusterShape(SdxClusterShape clusterShape) {
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.17", clusterShape);
+        withCloudStorage(sdxClusterRequest);
+        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
+        DetailedEnvironmentResponse detailedEnvironmentResponse = mockEnvironmentCall(sdxClusterRequest, AWS, null);
+        if (clusterShape == MICRO_DUTY) {
+            when(entitlementService.microDutySdxEnabled(Crn.safeFromString(detailedEnvironmentResponse.getCreator()).getAccountId())).thenReturn(true);
+        }
+        sdxClusterRequest.setEnableRangerRaz(false);
+        sdxClusterRequest.setEnableMultiAz(true);
+        when(platformConfig.getMultiAzSupportedPlatforms()).thenReturn(EnumSet.of(AWS, AZURE, GCP));
+
+        StackV4Request internalStackV4Request;
+        if (CUSTOM.equals(clusterShape)) {
+            internalStackV4Request = new StackV4Request();
+            internalStackV4Request.setCluster(new ClusterV4Request());
+        } else {
+            internalStackV4Request = null;
+        }
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, internalStackV4Request)));
+
+        assertThat(badRequestException).hasMessage(String.format("Provisioning a multi AZ cluster on AWS is not supported for cluster shape %s.",
+                clusterShape.name()));
+        verify(sdxClusterRepository, never()).save(any(SdxCluster.class));
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @EnumSource(value = SdxClusterShape.class, mode = Mode.EXCLUDE, names = {"MEDIUM_DUTY_HA", "ENTERPRISE"})
     void testSdxCreateRazNotRequestedAndMultiAzRequestedAndAzureAndBadClusterShape(SdxClusterShape clusterShape) {
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.17", clusterShape);
         withCloudStorage(sdxClusterRequest);
@@ -728,7 +757,7 @@ class SdxServiceCreateSdxTest {
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, internalStackV4Request)));
 
-        assertThat(badRequestException).hasMessage(String.format("Provisioning a multi AZ cluster on Azure is not supported for cluster shape %s.",
+        assertThat(badRequestException).hasMessage(String.format("Provisioning a multi AZ cluster on AZURE is not supported for cluster shape %s.",
                 clusterShape.name()));
         verify(sdxClusterRepository, never()).save(any(SdxCluster.class));
     }

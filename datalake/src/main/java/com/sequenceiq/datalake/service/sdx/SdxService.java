@@ -1051,6 +1051,10 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     private void validateMultiAz(boolean enableMultiAz, DetailedEnvironmentResponse environmentResponse, SdxClusterShape clusterShape) {
         ValidationResultBuilder validationBuilder = new ValidationResultBuilder();
         if (enableMultiAz) {
+            if (!clusterShape.isMultiAzEnabledByDefault()) {
+                validationBuilder.error(String.format("Provisioning a multi AZ cluster on %s is not supported for cluster shape %s.",
+                        environmentResponse.getCloudPlatform(), clusterShape.name()));
+            }
             CloudPlatform cloudPlatform = CloudPlatform.valueOf(environmentResponse.getCloudPlatform());
             Set<CloudPlatform> multiAzSupportedPlatforms = platformConfig.getMultiAzSupportedPlatforms();
             if (!multiAzSupportedPlatforms.contains(cloudPlatform)) {
@@ -1060,10 +1064,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             if (AZURE.equals(cloudPlatform) && !entitlementService.isAzureMultiAzEnabled(environmentResponse.getAccountId())) {
                 validationBuilder.error(String.format("Provisioning a multi AZ cluster on Azure requires entitlement %s.",
                         Entitlement.CDP_CB_AZURE_MULTIAZ.name()));
-            }
-            if (AZURE.equals(cloudPlatform) && !clusterShape.isMultiAzEnabledByDefault()) {
-                validationBuilder.error(String.format("Provisioning a multi AZ cluster on Azure is not supported for cluster shape %s.",
-                        clusterShape.name()));
             }
             if (GCP.equals(cloudPlatform)) {
                 validateMultiAzForGcp(environmentResponse.getAccountId(), clusterShape, validationBuilder);
@@ -1930,11 +1930,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         if (!entitlementService.isGcpMultiAzEnabled(accountId)) {
             validationBuilder.error(String.format("Provisioning a multi AZ cluster on GCP requires entitlement %s.",
                     Entitlement.CDP_CB_GCP_MULTIAZ.name()));
-        }
-
-        if (!clusterShape.isMultiAzEnabledByDefault()) {
-            validationBuilder.error(String.format("Provisioning a multi AZ cluster on GCP is not supported for cluster shape %s.",
-                    clusterShape.name()));
         }
     }
 
