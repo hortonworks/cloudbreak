@@ -6,6 +6,7 @@ import com.sequenceiq.flow.core.RestartAction;
 
 public enum AddVolumesState implements FlowState {
     INIT_STATE,
+    ADD_VOLUMES_VALIDATE_STATE,
     ADD_VOLUMES_STATE,
     ATTACH_VOLUMES_STATE,
     ADD_VOLUMES_ORCHESTRATION_STATE,

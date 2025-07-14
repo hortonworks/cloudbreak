@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -83,6 +85,18 @@ public interface ResourceVolumeConnector {
      * @throws Exception        in case of any error
      */
     default List<CloudResource> getRootVolumes(RootVolumeFetchDto rootVolumeFetchDto) {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
+
+    /**
+     * Gets the count of attached volumes per instance.
+     *
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param instanceIds          the list of instance IDs for which to get the attached volume counts
+     * @return a map where keys are instance IDs and values are the counts of attached volumes
+     */
+    default Map<String, Integer> getAttachedVolumeCountPerInstance(AuthenticatedContext authenticatedContext, CloudStack cloudStack,
+            Collection<String> instanceIds) {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
 }

@@ -19,11 +19,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.azure.resourcemanager.compute.models.Disk;
+import com.azure.resourcemanager.compute.models.VirtualMachine;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimaps;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.ResourceVolumeConnector;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureCloudResourceService;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureVirtualMachineService;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.service.AzureResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -55,6 +58,12 @@ public class AzureResourceVolumeConnector implements ResourceVolumeConnector {
 
     @Inject
     private AzureCloudResourceService azureCloudResourceService;
+
+    @Inject
+    private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
+
+    @Inject
+    private AzureVirtualMachineService azureVirtualMachineService;
 
     @Override
     public void detachVolumes(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources) throws Exception {
@@ -89,7 +98,7 @@ public class AzureResourceVolumeConnector implements ResourceVolumeConnector {
             LOGGER.info("Available Volumes for instances are {}", fqdnToAvailableVolumes);
             cloudResources.forEach(resource -> {
                 CloudInstance cloudInstance = group.getInstances().stream().filter(instance ->
-                        instance.getInstanceId().equals(resource.getInstanceId())).findFirst()
+                                instance.getInstanceId().equals(resource.getInstanceId())).findFirst()
                         .orElseThrow(() -> new CloudbreakServiceException(format("Instance :%s not found", resource.getInstanceId())));
                 String fqdn = getInstanceParameterAsString(cloudInstance, FQDN);
                 List<VolumeSetAttributes.Volume> volumes = getVolumes(resource);
@@ -203,5 +212,14 @@ public class AzureResourceVolumeConnector implements ResourceVolumeConnector {
         AzureClient azureClient = rootVolumeFetchDto.getAuthenticatedContext().getParameter(AzureClient.class);
         return azureCloudResourceService.getAttachedOsDiskResources(rootVolumeFetchDto.getCloudResourceList(),
                 rootVolumeFetchDto.getAzureResourceGroupName(), azureClient);
+    }
+
+    @Override
+    public Map<String, Integer> getAttachedVolumeCountPerInstance(AuthenticatedContext authenticatedContext, CloudStack cloudStack,
+            Collection<String> instanceIds) {
+        AzureClient client = authenticatedContext.getParameter(AzureClient.class);
+        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(authenticatedContext.getCloudContext(), cloudStack);
+        Map<String, VirtualMachine> vms = azureVirtualMachineService.getVirtualMachinesByName(client, resourceGroupName, instanceIds);
+        return vms.values().stream().collect(Collectors.toMap(VirtualMachine::name, vm -> vm.dataDisks().size()));
     }
 }

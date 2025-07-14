@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.resource;
 
 import static com.sequenceiq.cloudbreak.cloud.model.CloudInstance.FQDN;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -31,8 +32,12 @@ import org.mockito.quality.Strictness;
 import org.mockito.stubbing.OngoingStubbing;
 
 import com.azure.resourcemanager.compute.models.Disk;
+import com.azure.resourcemanager.compute.models.VirtualMachine;
+import com.azure.resourcemanager.compute.models.VirtualMachineDataDisk;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureCloudResourceService;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureVirtualMachineService;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.service.AzureResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -62,6 +67,8 @@ class AzureResourceVolumeConnectorTest {
 
     private static final String VOLUME_TYPE = "StandardSSD_LRS";
 
+    private static final String RESOURCE_GROUP_NAME = "resourceGroup";
+
     @Mock
     private AzureVolumeResourceBuilder azureVolumeResourceBuilder;
 
@@ -79,6 +86,12 @@ class AzureResourceVolumeConnectorTest {
 
     @Mock
     private AzureCloudResourceService azureCloudResourceService;
+
+    @Mock
+    private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
+
+    @Mock
+    private AzureVirtualMachineService azureVirtualMachineService;
 
     @Test
     void testUpdateDiskVolumes() {
@@ -339,6 +352,31 @@ class AzureResourceVolumeConnectorTest {
         List<CloudResource> result = underTest.getRootVolumes(rootVolumeFetchDto);
         assertEquals(cloudResourceList, result);
         verify(azureCloudResourceService).getAttachedOsDiskResources(cloudResourceList, resourceGroupName, azureClient);
+    }
+
+    @Test
+    void testGetAttachedVolumeCountPerInstance() {
+        Map<String, Integer> expected = Map.of("instance1", 1, "instance2", 3);
+        CloudStack cloudStack = mock(CloudStack.class);
+        CloudContext cloudContext = mock(CloudContext.class);
+        AzureClient azureClient = mock(AzureClient.class);
+        VirtualMachine vm1 = mock(VirtualMachine.class);
+        when(vm1.name()).thenReturn("instance1");
+        when(vm1.dataDisks())
+                .thenReturn(Map.of(0, mock(VirtualMachineDataDisk.class)));
+        VirtualMachine vm2 = mock(VirtualMachine.class);
+        when(vm2.name()).thenReturn("instance2");
+        when(vm2.dataDisks())
+                .thenReturn(Map.of(0, mock(VirtualMachineDataDisk.class), 1, mock(VirtualMachineDataDisk.class), 2, mock(VirtualMachineDataDisk.class)));
+        when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
+        when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudStack)).thenReturn(RESOURCE_GROUP_NAME);
+        when(azureVirtualMachineService.getVirtualMachinesByName(azureClient, RESOURCE_GROUP_NAME, List.of("instance1", "instance2")))
+                .thenReturn(Map.of("instance1", vm1, "instance2", vm2));
+
+        Map<String, Integer> result = underTest.getAttachedVolumeCountPerInstance(authenticatedContext, cloudStack, List.of("instance1", "instance2"));
+
+        assertThat(result).containsExactlyInAnyOrderEntriesOf(expected);
     }
 
     private CloudResource getCloudResource(String groupName, String instanceName) {

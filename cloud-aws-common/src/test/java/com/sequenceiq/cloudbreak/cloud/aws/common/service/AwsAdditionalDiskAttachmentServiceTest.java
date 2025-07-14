@@ -1,10 +1,12 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -33,9 +35,15 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
 import software.amazon.awssdk.services.ec2.model.AttachVolumeRequest;
 import software.amazon.awssdk.services.ec2.model.AttachVolumeResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeVolumesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeVolumesResponse;
+import software.amazon.awssdk.services.ec2.model.Filter;
+import software.amazon.awssdk.services.ec2.model.Instance;
+import software.amazon.awssdk.services.ec2.model.Reservation;
 import software.amazon.awssdk.services.ec2.model.Volume;
+import software.amazon.awssdk.services.ec2.model.VolumeAttachment;
 import software.amazon.awssdk.services.ec2.model.VolumeState;
 
 @ExtendWith(MockitoExtension.class)
@@ -74,10 +82,65 @@ class AwsAdditionalDiskAttachmentServiceTest {
     @BeforeEach
     void setUp() {
         doReturn(client).when(commonAwsClient).createEc2Client(authenticatedContext);
-        doReturn("test-instance-id").when(cloudResource).getInstanceId();
-        doReturn("vol-id").when(volume).getId();
-        doReturn(List.of(volume)).when(volumeSetAttributes).getVolumes();
-        doReturn(volumeSetAttributes).when(cloudResource).getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+        lenient().doReturn("test-instance-id").when(cloudResource).getInstanceId();
+        lenient().doReturn("vol-id").when(volume).getId();
+        lenient().doReturn(List.of(volume)).when(volumeSetAttributes).getVolumes();
+        lenient().doReturn(volumeSetAttributes).when(cloudResource).getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+    }
+
+    @Test
+    void testGetAttachedVolumeCountPerInstance() {
+        Map<String, Integer> expected = Map.of("instanceId1", 0, "instanceId2", 2);
+        ArgumentCaptor<DescribeInstancesRequest> describeInstancesRequestCaptor = ArgumentCaptor.forClass(DescribeInstancesRequest.class);
+        ArgumentCaptor<DescribeVolumesRequest> describeVolumesRequestCaptor = ArgumentCaptor.forClass(DescribeVolumesRequest.class);
+        when(client.describeInstances(describeInstancesRequestCaptor.capture())).thenReturn(DescribeInstancesResponse.builder()
+                .reservations(Reservation.builder()
+                        .instances(Instance.builder()
+                                        .instanceId("instanceId1")
+                                        .rootDeviceName("/dev/sda1")
+                                        .build(),
+                                Instance.builder()
+                                        .instanceId("instanceId2")
+                                        .rootDeviceName("/dev/sda1")
+                                        .build())
+                        .build())
+                .build());
+        when(client.describeVolumes(describeVolumesRequestCaptor.capture())).thenReturn(DescribeVolumesResponse.builder()
+                .volumes(Volume.builder()
+                                .attachments(VolumeAttachment.builder()
+                                        .instanceId("instanceId1")
+                                        .device("/dev/sda1")
+                                        .build())
+                                .build(),
+                        Volume.builder()
+                                .attachments(VolumeAttachment.builder()
+                                        .instanceId("instanceId2")
+                                        .device("/dev/xvdb")
+                                        .build())
+                                .build(),
+                        Volume.builder()
+                                .attachments(VolumeAttachment.builder()
+                                        .instanceId("instanceId2")
+                                        .device("/dev/sda1")
+                                        .build())
+                                .build(),
+                        Volume.builder()
+                                .attachments(VolumeAttachment.builder()
+                                        .instanceId("instanceId2")
+                                        .device("/dev/xvdc")
+                                        .build())
+                                .build())
+                .build());
+
+        Map<String, Integer> result = underTest.getAttachedVolumeCountPerInstance(authenticatedContext, List.of("instanceId1", "instanceId2"));
+
+        assertThat(describeInstancesRequestCaptor.getValue().instanceIds()).containsExactlyInAnyOrder("instanceId1", "instanceId2");
+        DescribeVolumesRequest describeVolumesRequest = describeVolumesRequestCaptor.getValue();
+        assertThat(describeVolumesRequest.filters()).hasSize(1);
+        Filter filter = describeVolumesRequest.filters().getFirst();
+        assertEquals("attachment.instance-id", filter.name());
+        assertThat(filter.values()).containsExactlyInAnyOrder("instanceId1", "instanceId2");
+        assertThat(result).containsExactlyInAnyOrderEntriesOf(expected);
     }
 
     @Test

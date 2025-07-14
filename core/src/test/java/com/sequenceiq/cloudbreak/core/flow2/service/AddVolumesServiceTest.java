@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doReturn;
@@ -11,6 +12,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -51,8 +53,12 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceR
 import com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesService;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -60,6 +66,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.ConfigUpdateUtilService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
@@ -87,6 +94,9 @@ class AddVolumesServiceTest {
 
     @Mock
     private StackDtoService stackDtoService;
+
+    @Mock
+    private InstanceGroupService instanceGroupService;
 
     @Mock
     private StackService stackService;
@@ -199,7 +209,7 @@ class AddVolumesServiceTest {
     }
 
     @Test
-    void testRedeployStatesAndMountDisksThrowsException() throws Exception  {
+    void testRedeployStatesAndMountDisksThrowsException() throws Exception {
         doReturn(Map.of("test", Set.of(ServiceComponent.of("TEST", "TEST")))).when(processor).getServiceComponentsByHostGroup();
         doThrow(new CloudbreakOrchestratorFailedException("test")).when(hostOrchestrator).formatAndMountDisksAfterModifyingVolumesOnNodes(any(), any(),
                 any(), any());
@@ -207,6 +217,28 @@ class AddVolumesServiceTest {
                 () -> underTest.redeployStatesAndMountDisks(stack, "test"));
         verify(hostOrchestrator).formatAndMountDisksAfterModifyingVolumesOnNodes(eq(gatewayConfigs), eq(nodes), eq(nodes), any());
         assertEquals("test", exception.getMessage());
+    }
+
+    @Test
+    void testValidateVolumeAddition() {
+        InstanceGroup instanceGroup = mock(InstanceGroup.class);
+        InstanceMetaData instanceMetaData1 = mock(InstanceMetaData.class);
+        InstanceMetaData instanceMetaData2 = mock(InstanceMetaData.class);
+        Template template = mock(Template.class);
+        VolumeTemplate volumeTemplate1 = mock(VolumeTemplate.class);
+        VolumeTemplate volumeTemplate2 = mock(VolumeTemplate.class);
+        when(instanceMetaData1.getInstanceId()).thenReturn("instanceId1");
+        when(instanceMetaData2.getInstanceId()).thenReturn("instanceId2");
+        when(instanceGroup.getNotDeletedInstanceMetaDataSet()).thenReturn(Set.of(instanceMetaData1, instanceMetaData2));
+        when(instanceGroupService.getInstanceGroupWithTemplateAndInstancesByGroupNameInStack(1L, "test")).thenReturn(Optional.of(instanceGroup));
+        when(instanceGroup.getTemplate()).thenReturn(template);
+        when(template.getVolumeTemplates()).thenReturn(Set.of(volumeTemplate1, volumeTemplate2));
+        when(volumeTemplate1.getVolumeCount()).thenReturn(1);
+        when(volumeTemplate2.getVolumeCount()).thenReturn(2);
+        when(awsResourceVolumeConnector.getAttachedVolumeCountPerInstance(eq(authenticatedContext), eq(cloudStack), anyList()))
+                .thenReturn(Map.of("instanceId1", 3, "instanceId2", 4));
+
+        assertThrows(CloudbreakServiceException.class, () -> underTest.validateVolumeAddition(1L, "test"));
     }
 
     @Test
@@ -222,7 +254,7 @@ class AddVolumesServiceTest {
     }
 
     @Test
-    void testCreateAndAttachVolumesThrowsException() throws CloudbreakServiceException  {
+    void testCreateAndAttachVolumesThrowsException() throws CloudbreakServiceException {
         doThrow(new CloudbreakServiceException("test")).when(awsResourceVolumeConnector).createVolumes(any(), any(), any(), any(), eq(2), any());
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.createVolumes(Set.of(resource),
                 volume, 2, "test", 1L));

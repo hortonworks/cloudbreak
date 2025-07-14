@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumes
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.ADD_VOLUMES_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.ADD_VOLUMES_ORCHESTRATION_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.ADD_VOLUMES_TRIGGER_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.ADD_VOLUMES_VALIDATION_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.ATTACH_VOLUMES_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.FAILURE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.FINALIZED_EVENT;
@@ -13,6 +14,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumes
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesState.ADD_VOLUMES_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesState.ADD_VOLUMES_ORCHESTRATION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesState.ADD_VOLUMES_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesState.ADD_VOLUMES_VALIDATE_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesState.ATTACH_VOLUMES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesState.INIT_STATE;
@@ -33,8 +35,13 @@ public class AddVolumesFlowConfig extends StackStatusFinalizerAbstractFlowConfig
             new Builder<AddVolumesState, AddVolumesEvent>()
 
                     .from(INIT_STATE)
-                    .to(ADD_VOLUMES_STATE)
+                    .to(ADD_VOLUMES_VALIDATE_STATE)
                     .event(ADD_VOLUMES_TRIGGER_EVENT)
+                    .failureEvent(FAILURE_EVENT)
+
+                    .from(ADD_VOLUMES_VALIDATE_STATE)
+                    .to(ADD_VOLUMES_STATE)
+                    .event(ADD_VOLUMES_VALIDATION_FINISHED_EVENT)
                     .failureEvent(FAILURE_EVENT)
 
                     .from(ADD_VOLUMES_STATE)
@@ -91,7 +98,7 @@ public class AddVolumesFlowConfig extends StackStatusFinalizerAbstractFlowConfig
 
     @Override
     public AddVolumesEvent[] getInitEvents() {
-        return new AddVolumesEvent[] {
+        return new AddVolumesEvent[]{
                 ADD_VOLUMES_TRIGGER_EVENT
         };
     }
