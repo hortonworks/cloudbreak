@@ -180,7 +180,7 @@ public class EnvironmentApiConverter {
                 .withProxyConfigName(request.getProxyConfigName())
                 .withDataServices(dataServicesConverter.convertToDto(request.getDataServices()))
                 .withCreatorClient(getHeaderOrItsFallbackValueOrDefault(USER_AGENT_HEADER, CDP_CALLER_ID_HEADER, CALLER_ID_NOT_FOUND))
-                .withEnvironmentType(environmentType);
+                .withEnvironmentType(environmentType == null ? EnvironmentType.PUBLIC_CLOUD : environmentType);
 
         NullUtil.doIfNotNull(request.getNetwork(), network -> {
             NetworkDto networkDto = networkRequestToDto(network);
