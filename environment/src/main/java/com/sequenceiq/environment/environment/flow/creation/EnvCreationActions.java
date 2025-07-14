@@ -332,7 +332,8 @@ public class EnvCreationActions {
                 environmentService
                         .findEnvironmentById(payload.getResourceId())
                         .ifPresentOrElse(environment -> {
-                            environment.setStatus(environment.getEnvironmentType().isHybrid() ? TRUST_SETUP_REQUIRED : AVAILABLE);
+                            environment.setStatus(environment.getEnvironmentType() != null && environment.getEnvironmentType().isHybrid() ?
+                                    TRUST_SETUP_REQUIRED : AVAILABLE);
                             environment.setStatusReason(null);
                             Environment result = environmentService.save(environment);
                             structuredSynchronizerJobService.schedule(environment.getId(), StructuredSynchronizerJobAdapter.class, false);
