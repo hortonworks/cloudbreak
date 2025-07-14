@@ -73,6 +73,13 @@ copy_krb5_keytab:
       - file: {{ kerberosConfigPath }}/krb5.keytab
     {% endif %}
 
+{% if pillar['trust'] is defined and pillar['trust']['realm'] is defined %}
+/etc/krb5.conf.d/trust.conf:
+  file.managed:
+    - source: salt://kerberos/config/trust.conf.j2
+    - template: jinja
+{% endif %}
+
 {%- if "manager_server" in grains.get('roles', []) %}
 
 add_default_realm_to_cm:

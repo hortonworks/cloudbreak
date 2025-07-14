@@ -1,0 +1,14 @@
+{%- set trust_realm = salt['pillar.get']('trust:realm') %}
+{%- set trust_domain = salt['pillar.get']('trust:domain') %}
+{%- set kerberos_realm = salt['pillar.get']('kerberos:realm')|upper %}
+[domain_realm]
+.{{ trust_domain }} = {{ trust_realm }}
+{{ trust_domain }} = {{ trust_realm }}
+
+[capaths]
+{{ trust_realm }} = {
+  {{ kerberos_realm }} = {{ trust_realm }}
+}
+{{ kerberos_realm }} = {
+  {{ trust_realm }} = {{ trust_realm }}
+}

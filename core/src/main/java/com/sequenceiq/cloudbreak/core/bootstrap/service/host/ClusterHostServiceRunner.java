@@ -96,6 +96,7 @@ import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
+import com.sequenceiq.cloudbreak.kerberos.KerberosPillarConfigGenerator;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
@@ -132,7 +133,6 @@ import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MountDisks;
 import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetrySaltPillarDecorator;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.template.views.provider.RdsViewProvider;
 import com.sequenceiq.cloudbreak.tls.TlsSpecificationsHelper;
@@ -169,15 +169,6 @@ public class ClusterHostServiceRunner {
     @Value("${cb.cm.missed.heartbeat.interval}")
     private String cmMissedHeartbeatInterval;
 
-    @Value("${cb.kerberos.secret.cCache.location}")
-    private String defaultKerberosCcacheSecretLocation;
-
-    @Value("${cb.cm.kerberos.encryption.type}")
-    private String defaultKerberosEncryptionType;
-
-    @Value("${cb.kerberos.secret.location}")
-    private String kerberosSecretLocation;
-
     @Value("${cb.ccmRevertJob.activationInMinutes}")
     private Integer activationInMinutes;
 
@@ -204,9 +195,6 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private ComponentLocatorService componentLocator;
-
-    @Inject
-    private KerberosDetailService kerberosDetailService;
 
     @Inject
     private PostgresConfigService postgresConfigService;
@@ -315,6 +303,9 @@ public class ClusterHostServiceRunner {
 
     @Autowired
     private EnvironmentService environmentService;
+
+    @Inject
+    private KerberosPillarConfigGenerator kerberosPillarConfigGenerator;
 
     public NodeReachabilityResult runClusterServices(@Nonnull StackDto stackDto,
             Map<String, String> candidateAddresses, boolean runPreServiceDeploymentRecipe) {
@@ -531,7 +522,7 @@ public class ClusterHostServiceRunner {
         servicePillar.putAll(nameserverPillarDecorator.createPillarForNameservers(kerberosConfig, stack.getEnvironmentCrn(),
                 detailedEnvironmentResponse.getEnvironmentType()));
         servicePillar.putAll(createUnboundEliminationPillar(stack.getDomainDnsResolver()));
-        addKerberosConfig(servicePillar, kerberosConfig);
+        servicePillar.putAll(kerberosPillarConfigGenerator.createKerberosPillar(kerberosConfig, detailedEnvironmentResponse));
         servicePillar.putAll(hostAttributeDecorator.createHostAttributePillars(stackDto));
         servicePillar.put("discovery", new SaltPillarProperties("/discovery/init.sls", singletonMap("platform", stack.getCloudPlatform())));
         String virtualGroupsEnvironmentCrn = environmentConfigProvider.getParentEnvironmentCrn(stack.getEnvironmentCrn());
@@ -667,34 +658,6 @@ public class ClusterHostServiceRunner {
             return "ephfs";
         }
         return "fs";
-    }
-
-    private void addKerberosConfig(Map<String, SaltPillarProperties> servicePillar, KerberosConfig kerberosConfig) throws IOException {
-        if (isKerberosNeeded(kerberosConfig)) {
-            Map<String, String> kerberosPillarConf = new HashMap<>();
-            if (isEmpty(kerberosConfig.getDescriptor())) {
-                putIfNotNull(kerberosPillarConf, kerberosConfig.getUrl(), "url");
-                putIfNotNull(kerberosPillarConf, kerberosDetailService.resolveHostForKdcAdmin(kerberosConfig, kerberosConfig.getUrl()), "adminUrl");
-                putIfNotNull(kerberosPillarConf, kerberosConfig.getRealm(), "realm");
-            } else {
-                Map<String, Object> properties = kerberosDetailService.getKerberosEnvProperties(kerberosConfig);
-                putIfNotNull(kerberosPillarConf, properties.get("kdc_hosts"), "url");
-                putIfNotNull(kerberosPillarConf, properties.get("admin_server_host"), "adminUrl");
-                putIfNotNull(kerberosPillarConf, properties.get("realm"), "realm");
-            }
-            putIfNotNull(kerberosPillarConf, defaultKerberosEncryptionType, "encryptionType");
-            putIfNotNull(kerberosPillarConf, defaultKerberosCcacheSecretLocation, "cCacheSecretLocation");
-            putIfNotNull(kerberosPillarConf, kerberosSecretLocation, "kerberosSecretLocation");
-            putIfNotNull(kerberosPillarConf, kerberosConfig.getVerifyKdcTrust().toString(), "verifyKdcTrust");
-            putIfNotNull(kerberosPillarConf, kerberosConfig.getContainerDn(), "container-dn");
-            servicePillar.put("kerberos", new SaltPillarProperties("/kerberos/init.sls", singletonMap("kerberos", kerberosPillarConf)));
-        }
-    }
-
-    private boolean isKerberosNeeded(KerberosConfig kerberosConfig) throws IOException {
-        return kerberosConfig != null
-                && kerberosDetailService.areClusterManagerManagedKerberosPackages(kerberosConfig)
-                && !kerberosDetailService.isClusterManagerManagedKrb5Config(kerberosConfig);
     }
 
     private void addClouderaManagerConfig(StackDto stackDto, Map<String, SaltPillarProperties> servicePillar,
@@ -1131,12 +1094,6 @@ public class ClusterHostServiceRunner {
 
     public Map<String, String> collectUpscaleCandidates(StackDto stackDto, Map<String, Integer> hostGroupWithAdjustment) {
         return collectUpscaleCandidates(stackDto, hostGroupWithAdjustment, true);
-    }
-
-    private void putIfNotNull(Map<String, String> context, Object variable, String key) {
-        if (variable != null) {
-            context.put(key, variable.toString());
-        }
     }
 
     private void decoratePillarWithJdbcConnectors(ClusterView cluster, Map<String, SaltPillarProperties> servicePillar) {

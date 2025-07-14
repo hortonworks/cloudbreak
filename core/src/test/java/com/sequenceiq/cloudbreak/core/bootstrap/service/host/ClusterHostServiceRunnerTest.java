@@ -94,6 +94,7 @@ import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
+import com.sequenceiq.cloudbreak.kerberos.KerberosPillarConfigGenerator;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
@@ -321,6 +322,9 @@ class ClusterHostServiceRunnerTest {
     @Mock
     private BackUpDecorator backUpDecorator;
 
+    @Spy
+    private KerberosPillarConfigGenerator kerberosPillarConfigGenerator;
+
     @BeforeEach
     void setUp() {
         lenient().when(stack.getCluster()).thenReturn(cluster);
@@ -337,6 +341,7 @@ class ClusterHostServiceRunnerTest {
         lenient().when(environmentConfigProvider.getEnvironmentByCrn(ENV_CRN)).thenReturn(environmentResponse);
         lenient().when(stack.getStack().getResourceCrn()).thenReturn(TEST_CLUSTER_CRN);
         lenient().when(stack.getStackVersion()).thenReturn("7.3.1");
+        ReflectionTestUtils.setField(kerberosPillarConfigGenerator, "kerberosDetailService", kerberosDetailService);
     }
 
     @Test
@@ -1095,8 +1100,8 @@ class ClusterHostServiceRunnerTest {
         ReflectionTestUtils.setField(underTest, "cmMissedHeartbeatInterval", "1");
         ReflectionTestUtils.setField(underTest, "knoxGatewaySecurityDir", KNOX_GATEWAY_SECURITY_DIR);
         ReflectionTestUtils.setField(underTest, "knoxIdBrokerSecurityDir", KNOX_IDBROKER_SECURITY_DIR);
-        ReflectionTestUtils.setField(underTest, "defaultKerberosCcacheSecretLocation", DEFAULT_KERBEROS_CCACHE_SECRET_STORAGE);
-        ReflectionTestUtils.setField(underTest, "kerberosSecretLocation", KERBEROS_SECRET_LOCATION);
+        ReflectionTestUtils.setField(kerberosPillarConfigGenerator, "defaultKerberosCcacheSecretLocation", DEFAULT_KERBEROS_CCACHE_SECRET_STORAGE);
+        ReflectionTestUtils.setField(kerberosPillarConfigGenerator, "kerberosSecretLocation", KERBEROS_SECRET_LOCATION);
 
         TemplatePreparationObject templatePreparationObject = TemplatePreparationObject.Builder.builder()
                 .withBlueprintView(new BlueprintView())
