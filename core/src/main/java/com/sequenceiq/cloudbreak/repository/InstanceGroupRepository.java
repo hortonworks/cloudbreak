@@ -74,7 +74,7 @@ public interface InstanceGroupRepository extends CrudRepository<InstanceGroup, L
 
     @EntityGraph(value = "InstanceGroup.instanceMetaData", type = EntityGraphType.LOAD)
     @Query("SELECT ig from InstanceGroup ig " +
-            "LEFT JOIN ig.template t " +
+            "LEFT JOIN FETCH ig.template t " +
             "WHERE ig.stack.id = :stackId AND ig.groupName = :groupName")
     Optional<InstanceGroup> getInstanceGroupWithTemplateAndInstancesByGroupNameInStack(@Param("stackId") Long stackId, @Param("groupName") String groupName);
 

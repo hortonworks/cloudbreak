@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumes
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.ADD_VOLUMES_FAILURE_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.ADD_VOLUMES_HANDLER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.ADD_VOLUMES_ORCHESTRATION_HANDLER_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.ADD_VOLUMES_VALIDATE_HANDLER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.ATTACH_VOLUMES_HANDLER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.FINALIZED_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ADDING_VOLUMES_FAILED;
@@ -15,6 +16,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CONFIG_CH
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MOUNTING_VOLUMES;
 import static java.lang.String.format;
 
+import java.util.List;
 import java.util.Map;
 
 import jakarta.inject.Inject;
@@ -26,6 +28,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.converter.AddVolumesRequestToAddVolumesValidationFinishedEventConverter;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesCMConfigFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesCMConfigHandlerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesFailedEvent;
@@ -35,11 +38,14 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesH
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesOrchestrationFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesOrchestrationHandlerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesRequest;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesValidateEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesValidationFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AttachVolumesFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AttachVolumesHandlerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.flow.core.CommonContext;
+import com.sequenceiq.flow.core.PayloadConverter;
 
 @Configuration
 public class AddVolumesActions {
@@ -52,11 +58,30 @@ public class AddVolumesActions {
     @Inject
     private StackUpdater stackUpdater;
 
-    @Bean(name = "ADD_VOLUMES_STATE")
-    public Action<?, ?> addVolumesAction() {
+    @Bean(name = "ADD_VOLUMES_VALIDATE_STATE")
+    public Action<?, ?> addVolumesValidateAction() {
         return new AbstractAddVolumesAction<>(AddVolumesRequest.class) {
             @Override
             protected void doExecute(CommonContext ctx, AddVolumesRequest payload, Map<Object, Object> variables) {
+                Long stackId = payload.getResourceId();
+                String instanceGroup = payload.getInstanceGroup();
+                AddVolumesValidateEvent handlerRequest = new AddVolumesValidateEvent(stackId, payload.getNumberOfDisks(), payload.getType(),
+                        payload.getSize(), payload.getCloudVolumeUsageType(), payload.getInstanceGroup());
+                sendEvent(ctx, ADD_VOLUMES_VALIDATE_HANDLER_EVENT.event(), handlerRequest);
+            }
+        };
+    }
+
+    @Bean(name = "ADD_VOLUMES_STATE")
+    public Action<?, ?> addVolumesAction() {
+        return new AbstractAddVolumesAction<>(AddVolumesValidationFinishedEvent.class) {
+            @Override
+            protected void initPayloadConverterMap(List<PayloadConverter<AddVolumesValidationFinishedEvent>> payloadConverters) {
+                payloadConverters.add(new AddVolumesRequestToAddVolumesValidationFinishedEventConverter());
+            }
+
+            @Override
+            protected void doExecute(CommonContext ctx, AddVolumesValidationFinishedEvent payload, Map<Object, Object> variables) {
                 Long stackId = payload.getResourceId();
                 LOGGER.debug("Starting to add volumes for stack: {}", stackId);
                 stackUpdater.updateStackStatus(stackId, DetailedStackStatus.ADD_ADDITIONAL_BLOCK_STORAGES,

@@ -1,13 +1,16 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -135,5 +138,16 @@ public class AwsNativeResourceVolumeConnectorTest {
 
         assertEquals(cloudResourceList, result);
         verify(awsCommonDiskUpdateService).getRootVolumes(authenticatedContext, group);
+    }
+
+    @Test
+    void testGetAttachedVolumeCountPerInstance() {
+        Map<String, Integer> expected = Map.of("instance1", 2, "instance2", 3);
+        CloudStack cloudStack = mock(CloudStack.class);
+        when(awsAdditionalDiskAttachmentService.getAttachedVolumeCountPerInstance(authenticatedContext, List.of("i1", "i2"))).thenReturn(expected);
+
+        Map<String, Integer> result = underTest.getAttachedVolumeCountPerInstance(authenticatedContext, cloudStack, List.of("i1", "i2"));
+
+        assertThat(result).containsExactlyInAnyOrderEntriesOf(expected);
     }
 }

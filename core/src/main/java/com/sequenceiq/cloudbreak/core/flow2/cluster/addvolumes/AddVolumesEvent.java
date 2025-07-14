@@ -8,6 +8,8 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesF
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesHandlerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesOrchestrationFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesOrchestrationHandlerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesValidateEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesValidationFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AttachVolumesFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AttachVolumesHandlerEvent;
 import com.sequenceiq.flow.core.FlowEvent;
@@ -15,6 +17,8 @@ import com.sequenceiq.flow.event.EventSelectorUtil;
 
 public enum AddVolumesEvent implements FlowEvent {
     ADD_VOLUMES_TRIGGER_EVENT("ADD_VOLUMES_TRIGGER_EVENT"),
+    ADD_VOLUMES_VALIDATE_HANDLER_EVENT(EventSelectorUtil.selector(AddVolumesValidateEvent.class)),
+    ADD_VOLUMES_VALIDATION_FINISHED_EVENT(EventSelectorUtil.selector(AddVolumesValidationFinishedEvent.class)),
     ADD_VOLUMES_HANDLER_EVENT(EventSelectorUtil.selector(AddVolumesHandlerEvent.class)),
     ADD_VOLUMES_FINISHED_EVENT(EventSelectorUtil.selector(AddVolumesFinishedEvent.class)),
     ATTACH_VOLUMES_HANDLER_EVENT(EventSelectorUtil.selector(AttachVolumesHandlerEvent.class)),

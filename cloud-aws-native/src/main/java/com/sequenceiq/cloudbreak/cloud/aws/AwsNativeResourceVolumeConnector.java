@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import jakarta.inject.Inject;
 
@@ -64,5 +66,11 @@ public class AwsNativeResourceVolumeConnector implements ResourceVolumeConnector
     @Override
     public List<CloudResource> getRootVolumes(RootVolumeFetchDto rootVolumeFetchDto) {
         return awsCommonDiskUpdateService.getRootVolumes(rootVolumeFetchDto.getAuthenticatedContext(), rootVolumeFetchDto.getGroup());
+    }
+
+    @Override
+    public Map<String, Integer> getAttachedVolumeCountPerInstance(AuthenticatedContext authenticatedContext, CloudStack cloudStack,
+            Collection<String> instanceIds) {
+        return awsAdditionalDiskAttachmentService.getAttachedVolumeCountPerInstance(authenticatedContext, instanceIds);
     }
 }

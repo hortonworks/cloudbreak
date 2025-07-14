@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.ADD_VOLUMES_CM_CONFIGURATION_HANDLER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.ADD_VOLUMES_HANDLER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.ADD_VOLUMES_ORCHESTRATION_HANDLER_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.ADD_VOLUMES_VALIDATE_HANDLER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.ATTACH_VOLUMES_HANDLER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.FINALIZED_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_ADDING_VOLUMES;
@@ -16,6 +17,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,6 +42,8 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesH
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesOrchestrationFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesOrchestrationHandlerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesRequest;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesValidateEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesValidationFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AttachVolumesFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.eventbus.Event;
@@ -88,15 +92,36 @@ class AddVolumesActionsTest {
     }
 
     @Test
-    void testAddVolumesAction() throws Exception {
+    void testAddVolumesValidateAction() throws Exception {
         AddVolumesRequest addVolumesRequest = AddVolumesRequest.Builder.builder().withCloudVolumeUsageType(CloudVolumeUsageType.GENERAL)
                 .withInstanceGroup("test").withSize(400L).withStackId(1L).withNumberOfDisks(2L).withType("gp2").build();
+        AddVolumesValidateEvent event = new AddVolumesValidateEvent(1L, 2L, "gp2", 400L,
+                CloudVolumeUsageType.GENERAL, "test");
+        when(reactorEventFactory.createEvent(any(), any())).thenReturn(new Event<>(new Event.Headers(new HashMap<>()), event));
+
+        AbstractAddVolumesAction<AddVolumesRequest> action = (AbstractAddVolumesAction<AddVolumesRequest>) underTest.addVolumesValidateAction();
+        initActionPrivateFields(action);
+        new AbstractActionTestSupport<>(action).doExecute(context, addVolumesRequest, variables);
+
+        ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+        verify(eventBus).notify(captor.capture(), eventCaptor.capture());
+        assertEquals(ADD_VOLUMES_VALIDATE_HANDLER_EVENT.event(), captor.getValue());
+        assertEvent(eventCaptor);
+    }
+
+    @Test
+    void testAddVolumesAction() throws Exception {
+        AddVolumesValidationFinishedEvent addVolumesValidationFinishedEvent =
+                new AddVolumesValidationFinishedEvent(1L, 2L, "gp2", 400L, CloudVolumeUsageType.GENERAL, "test");
         AddVolumesHandlerEvent event = new AddVolumesHandlerEvent(1L, 2L, "gp2", 400L,
                 CloudVolumeUsageType.GENERAL, "test");
         doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), any());
-        AbstractAddVolumesAction<AddVolumesRequest> action = (AbstractAddVolumesAction<AddVolumesRequest>) underTest.addVolumesAction();
+
+        AbstractAddVolumesAction<AddVolumesValidationFinishedEvent> action =
+                (AbstractAddVolumesAction<AddVolumesValidationFinishedEvent>) underTest.addVolumesAction();
         initActionPrivateFields(action);
-        new AbstractActionTestSupport<>(action).doExecute(context, addVolumesRequest, variables);
+        new AbstractActionTestSupport<>(action).doExecute(context, addVolumesValidationFinishedEvent, variables);
+
         verify(flowMessageService).fireEventAndLog(anyLong(), captor.capture(), any(), anyString(), anyString(), anyString());
         assertEquals(CLUSTER_ADDING_VOLUMES.name(), captor.getValue());
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);

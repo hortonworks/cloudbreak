@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -33,6 +34,7 @@ import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
@@ -42,7 +44,10 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesService;
 import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -51,6 +56,7 @@ import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.service.ConfigUpdateUtilService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
@@ -81,6 +87,9 @@ public class AddVolumesService {
 
     @Inject
     private StackDtoService stackDtoService;
+
+    @Inject
+    private InstanceGroupService instanceGroupService;
 
     @Inject
     private ClusterBootstrapper clusterBootstrapper;
@@ -158,6 +167,33 @@ public class AddVolumesService {
             LOGGER.warn("Exception while trying to stop cloudera manager services for group: {}", requestGroup);
             throw new CloudbreakServiceException(ex.getMessage());
         }
+    }
+
+    public void validateVolumeAddition(Long stackId, String instanceGroupName) {
+        StackDto stackDto = stackDtoService.getById(stackId);
+        CloudConnectResources cloudConnectResources = cloudConnectorHelper.getCloudConnectorResources(stackDto);
+        CloudConnector cloudConnector = cloudConnectResources.getCloudConnector();
+        CloudStack cloudStack = cloudConnectResources.getCloudStack();
+        AuthenticatedContext ac = cloudConnectResources.getAuthenticatedContext();
+        InstanceGroup instanceGroup = instanceGroupService.getInstanceGroupWithTemplateAndInstancesByGroupNameInStack(stackId, instanceGroupName)
+                .orElseThrow(() -> new NotFoundException("Instance group with name " + instanceGroupName + " not found in stack " + stackId));
+        List<String> instanceIds = instanceGroup.getNotDeletedInstanceMetaDataSet().stream().map(InstanceMetaData::getInstanceId).toList();
+
+        Integer expectedVolumeCount = instanceGroup.getTemplate().getVolumeTemplates().stream()
+                .map(VolumeTemplate::getVolumeCount)
+                .reduce(Integer::sum).orElse(0);
+        Map<String, Integer> actualVolumeCounts = cloudConnector.volumeConnector().getAttachedVolumeCountPerInstance(ac, cloudStack, instanceIds);
+
+        if (anyInstanceHasDifferentAttachedVolumeCount(actualVolumeCounts, expectedVolumeCount)) {
+            String errorMessage = String.format("Expected %d volumes per instance in group '%s', but found different counts on the provider: %s",
+                    expectedVolumeCount, instanceGroupName, actualVolumeCounts);
+            LOGGER.error(errorMessage);
+            throw new CloudbreakServiceException(errorMessage);
+        }
+    }
+
+    private boolean anyInstanceHasDifferentAttachedVolumeCount(Map<String, Integer> actualVolumeCounts, Integer expectedVolumeCount) {
+        return actualVolumeCounts.values().stream().anyMatch(Predicate.not(expectedVolumeCount::equals));
     }
 
     public List<Resource> createVolumes(Set<Resource> resources, VolumeSetAttributes.Volume volume, int volToAddPerInstance,
@@ -242,7 +278,7 @@ public class AddVolumesService {
                 List<VolumeSetAttributes.Volume> deleteVolumeList = new ArrayList<>();
                 for (VolumeSetAttributes.Volume volume : volumes) {
                     if (null != volume.getCloudVolumeStatus() && (CloudVolumeStatus.CREATED.equals(volume.getCloudVolumeStatus())
-                        || CloudVolumeStatus.REQUESTED.equals(volume.getCloudVolumeStatus()))) {
+                            || CloudVolumeStatus.REQUESTED.equals(volume.getCloudVolumeStatus()))) {
                         deleteVolumeList.add(volume);
                     } else {
                         volumeList.add(volume);

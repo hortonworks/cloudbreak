@@ -7,8 +7,10 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -27,10 +29,15 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
 import software.amazon.awssdk.services.ec2.model.AttachVolumeRequest;
 import software.amazon.awssdk.services.ec2.model.AttachVolumeResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeVolumesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeVolumesResponse;
 import software.amazon.awssdk.services.ec2.model.Filter;
+import software.amazon.awssdk.services.ec2.model.Instance;
+import software.amazon.awssdk.services.ec2.model.Reservation;
 import software.amazon.awssdk.services.ec2.model.Volume;
+import software.amazon.awssdk.services.ec2.model.VolumeAttachment;
 import software.amazon.awssdk.services.ec2.model.VolumeState;
 
 @Component
@@ -48,6 +55,33 @@ public class AwsAdditionalDiskAttachmentService {
     @Qualifier("intermediateBuilderExecutor")
     private AsyncTaskExecutor intermediateBuilderExecutor;
 
+    public Map<String, Integer> getAttachedVolumeCountPerInstance(AuthenticatedContext authenticatedContext, Collection<String> instanceIds) {
+        AmazonEc2Client client = commonAwsClient.createEc2Client(authenticatedContext);
+        DescribeInstancesResponse describeInstancesResponse = client.describeInstances(DescribeInstancesRequest.builder()
+                .instanceIds(instanceIds)
+                .build());
+        Map<String, String> instanceRootDeviceNames = describeInstancesResponse.reservations().stream()
+                .map(Reservation::instances)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toMap(Instance::instanceId, Instance::rootDeviceName));
+        DescribeVolumesResponse describeVolumesResponse = client.describeVolumes(DescribeVolumesRequest.builder()
+                .filters(Filter.builder()
+                        .name("attachment.instance-id")
+                        .values(instanceIds)
+                        .build())
+                .build());
+        Map<String, Integer> result = describeVolumesResponse.volumes().stream()
+                .filter(v -> {
+                    // Filter root volumes
+                    VolumeAttachment volumeAttachment = v.attachments().getFirst();
+                    String rootDeviceNameOfInstance = instanceRootDeviceNames.get(volumeAttachment.instanceId());
+                    return !Objects.equals(rootDeviceNameOfInstance, volumeAttachment.device());
+                })
+                .collect(Collectors.groupingBy(v -> v.attachments().getFirst().instanceId(), Collectors.reducing(0, v -> 1, Integer::sum)));
+        instanceIds.forEach(i -> result.computeIfAbsent(i, k -> 0));
+        return result;
+    }
+
     public void attachAllVolumes(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources) {
         AmazonEc2Client client = commonAwsClient.createEc2Client(authenticatedContext);
         Map<String, List<VolumeSetAttributes.Volume>> volumeSetMap = getInstanceVolumeIdsMap(cloudResources);
@@ -58,7 +92,7 @@ public class AwsAdditionalDiskAttachmentService {
         List<AttachVolumeRequest> attachVolumeRequests = new ArrayList<>();
         Set<String> volumeIdsToAttach = new HashSet<>();
         List<String> instanceIds = new ArrayList<>();
-        for (CloudResource resource: cloudResources) {
+        for (CloudResource resource : cloudResources) {
             List<VolumeSetAttributes.Volume> createdVolumes = volumeSetMap.get(resource.getInstanceId());
             createdVolumes.forEach(volume -> {
                 if (VolumeState.AVAILABLE.equals(volumeStates.get(volume.getId()))) {
@@ -99,9 +133,9 @@ public class AwsAdditionalDiskAttachmentService {
             Set<String> volumeIdsToAttach, Throwable throwable) {
         DescribeVolumesResponse describeVolumesResponse = client.describeVolumes(DescribeVolumesRequest.builder()
                 .filters(Filter.builder()
-                    .name("attachment.instance-id")
-                    .values(instanceIds)
-                    .build())
+                        .name("attachment.instance-id")
+                        .values(instanceIds)
+                        .build())
                 .build());
         LOGGER.info("Describe volume result :{}", describeVolumesResponse);
         List<Volume> volumes = describeVolumesResponse.volumes();
