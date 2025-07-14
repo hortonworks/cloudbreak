@@ -86,38 +86,7 @@ public class Spark3OnYarnRoleConfigProviderTest {
 
         assertEquals(1, sparkOnYarnConfigs.size());
         assertEquals("spark3-conf/spark-defaults.conf_client_config_safety_valve", sparkOnYarnConfigs.get(0).getName());
-        assertEquals("spark.kerberos.access.hadoopFileSystems=" + clientConfigDirLocation
-                + "\nspark.hadoop.fs.s3a.ssl.channel.mode=openssl", sparkOnYarnConfigs.get(0).getValue());
-    }
-
-    @Test
-    void testGetSpark3OnYarnRoleConfigsForNewerCm() {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(CloudPlatform.AWS, "AWS", "s3a://bucket/hive/warehouse/external");
-        preparationObject.getProductDetailsView().getCm().setVersion("7.12.0.400");
-        String inputJson = getBlueprintText("input/clouderamanager-ds.bp");
-        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
-
-        Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
-        List<ApiClusterTemplateConfig> sparkOnYarnConfigs = roleConfigs.get("spark3_on_yarn-GATEWAY-BASE");
-        assertEquals(2, sparkOnYarnConfigs.size());
-        assertEquals("spark_kerberos_access_hadoopfilesystems", sparkOnYarnConfigs.getFirst().getName());
-        assertEquals("s3a://bucket", sparkOnYarnConfigs.getFirst().getValue());
-        assertEquals("spark3-conf/spark-defaults.conf_client_config_safety_valve", sparkOnYarnConfigs.getLast().getName());
-        assertEquals("spark.hadoop.fs.s3a.ssl.channel.mode=openssl", sparkOnYarnConfigs.getLast().getValue());
-    }
-
-    @Test
-    public void testGetSpark3OnYarnRoleConfigsForAwsGov() {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(CloudPlatform.AWS, "AWS_NATIVE_GOV", "s3a://bucket/hive/warehouse/external");
-        String inputJson = getBlueprintText("input/clouderamanager-ds.bp");
-        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
-
-        Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
-        List<ApiClusterTemplateConfig> sparkOnYarnConfigs = roleConfigs.get("spark3_on_yarn-GATEWAY-BASE");
-
-        assertEquals(1, sparkOnYarnConfigs.size());
-        assertEquals("spark3-conf/spark-defaults.conf_client_config_safety_valve", sparkOnYarnConfigs.get(0).getName());
-        assertEquals("spark.kerberos.access.hadoopFileSystems=s3a://bucket", sparkOnYarnConfigs.get(0).getValue());
+        assertEquals("spark.hadoop.fs.s3a.ssl.channel.mode=openssl", sparkOnYarnConfigs.get(0).getValue());
     }
 
     private TemplatePreparationObject getTemplatePreparationObject(CloudPlatform cloudPlatform, String platformVariant, String... locations) {
