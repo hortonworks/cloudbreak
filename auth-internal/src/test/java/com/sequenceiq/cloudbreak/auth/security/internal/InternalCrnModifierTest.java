@@ -9,6 +9,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -74,6 +75,7 @@ class InternalCrnModifierTest {
 
         verify(reflectionUtil, times(0)).getParameter(any(), any(), any());
         assertTrue(assertationHappened.get());
+        verifyNoInteractions(internalUserModifier);
     }
 
     @Test
@@ -91,6 +93,7 @@ class InternalCrnModifierTest {
 
         verify(reflectionUtil, times(0)).getParameter(any(), any(), any());
         assertTrue(assertationHappened.get());
+        verifyNoInteractions(internalUserModifier);
     }
 
     @Test
@@ -112,6 +115,7 @@ class InternalCrnModifierTest {
 
         verify(reflectionUtil, times(1)).proceed(any());
         assertTrue(assertationHappened.get());
+        verifyNoInteractions(internalUserModifier);
     }
 
     @Test
@@ -133,6 +137,7 @@ class InternalCrnModifierTest {
 
         verify(reflectionUtil, times(1)).proceed(any());
         assertTrue(assertationHappened.get());
+        verifyNoInteractions(internalUserModifier);
     }
 
     @Test
@@ -154,6 +159,7 @@ class InternalCrnModifierTest {
 
         verify(reflectionUtil, times(1)).proceed(any());
         assertTrue(assertationHappened.get());
+        verifyNoInteractions(internalUserModifier);
     }
 
     @Test
@@ -206,6 +212,54 @@ class InternalCrnModifierTest {
     }
 
     @Test
+    void testModificationIfUserCrnIsInternalAndTenantAwareObjectPresentWithParent() {
+        when(reflectionUtil.getParameter(any(), any(), eq(AccountId.class))).thenReturn(Optional.empty());
+        when(reflectionUtil.getParameter(any(), any(), eq(ResourceCrn.class))).thenReturn(Optional.empty());
+        when(reflectionUtil.getParameter(any(), any(), eq(RequestObject.class))).thenReturn(Optional.of(new SampleTenantAwareObjectWithParent(STACK_CRN)));
+        doNothing().when(internalUserModifier).persistModifiedInternalUser(any());
+
+        AtomicBoolean assertationHappened = new AtomicBoolean(false);
+        when(reflectionUtil.proceed(any())).thenAnswer(invocation -> {
+            assertEquals(EXPECTED_INTERNAL_CRN, ThreadBasedUserCrnProvider.getUserCrn());
+            assertationHappened.set(true);
+            return null;
+        });
+
+        ThreadBasedUserCrnProvider.doAs(INTERNAL_CRN, () -> {
+            underTest.changeInternalCrn(proceedingJoinPoint);
+        });
+
+        ArgumentCaptor<CrnUser> newUserCaptor = ArgumentCaptor.forClass(CrnUser.class);
+        verify(internalUserModifier, times(1)).persistModifiedInternalUser(newUserCaptor.capture());
+        assertEquals("1234", newUserCaptor.getValue().getTenant());
+        verify(reflectionUtil, times(1)).proceed(any());
+        assertTrue(assertationHappened.get());
+    }
+
+    @Test
+    void testModificationIfUserCrnIsInternalAndTenantAwareObjectPresentWithIncorrectParent() {
+        when(reflectionUtil.getParameter(any(), any(), eq(AccountId.class))).thenReturn(Optional.empty());
+        when(reflectionUtil.getParameter(any(), any(), eq(ResourceCrn.class))).thenReturn(Optional.empty());
+        when(reflectionUtil.getParameter(any(), any(), eq(RequestObject.class))).thenReturn(
+                Optional.of(new SampleTenantAwareObjecWithIncorrectParent(STACK_CRN)));
+
+        AtomicBoolean assertationHappened = new AtomicBoolean(false);
+        when(reflectionUtil.proceed(any())).thenAnswer(invocation -> {
+            assertEquals(INTERNAL_CRN, ThreadBasedUserCrnProvider.getUserCrn());
+            assertationHappened.set(true);
+            return null;
+        });
+
+        ThreadBasedUserCrnProvider.doAs(INTERNAL_CRN, () -> {
+            underTest.changeInternalCrn(proceedingJoinPoint);
+        });
+
+        verify(reflectionUtil, times(1)).proceed(any());
+        assertTrue(assertationHappened.get());
+        verifyNoInteractions(internalUserModifier);
+    }
+
+    @Test
     void testModificationIfUserCrnIsInternalAndTenantAwareObjectPresentButCrnIsNull() {
         when(reflectionUtil.getParameter(any(), any(), eq(AccountId.class))).thenReturn(Optional.empty());
         when(reflectionUtil.getParameter(any(), any(), eq(ResourceCrn.class))).thenReturn(Optional.empty());
@@ -238,6 +292,49 @@ class InternalCrnModifierTest {
         }
 
         public String getCrn() {
+            return crn;
+        }
+
+    }
+
+    public class SampleTenantAwareObjectWithParent extends ParentSampleTenantAwareObject {
+
+        SampleTenantAwareObjectWithParent(String crn) {
+            super(crn);
+        }
+    }
+
+    public abstract class ParentSampleTenantAwareObject {
+
+        private final String crn;
+
+        ParentSampleTenantAwareObject(String crn) {
+            this.crn = crn;
+        }
+
+        @ResourceCrn
+        public String getCrn() {
+            return crn;
+        }
+    }
+
+    public class SampleTenantAwareObjecWithIncorrectParent extends IncorrectParentSampleTenantAwareObject {
+
+        SampleTenantAwareObjecWithIncorrectParent(String crn) {
+            super(crn);
+        }
+    }
+
+    public abstract class IncorrectParentSampleTenantAwareObject {
+
+        private final String crn;
+
+        IncorrectParentSampleTenantAwareObject(String crn) {
+            this.crn = crn;
+        }
+
+        @ResourceCrn
+        public String getCrn(Object unused) {
             return crn;
         }
     }

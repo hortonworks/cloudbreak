@@ -84,7 +84,7 @@ Lower layers often use the account id, but the internal crn doesn't contain that
 You should use one of the following annotations on parameter of controller's method to make an API internally callable:
 
 - `@ResourceCrn` - on resource crn parameter,
-- `@RequestObject` - on request object parameter where the proper crn field of the object also annotated with `@ResourceCrn`,
+- `@RequestObject` - on request object parameter where the proper crn field or crn getter method of the object also annotated with `@ResourceCrn`,
 - `@AccountId` - on an account id 
 - `@InitiatorUserCrn` - on an initiator user crn parameter, and the service operations will be done in the name of the given user.
 
@@ -221,7 +221,7 @@ public class MyResourceController {
     public void doSomethingThatRequiresComplicatedAuthorization(@ResourceCrn String crn, @RequestObject MyRequest request) {}
 
     @InternalOnly
-    public void doSomethingInternalStaffThatNormalUsersShouldNotBeAbleToDo(String crn) {}
+    public void doSomethingInternalStaffThatNormalUsersShouldNotBeAbleToDo(@ResourceCrn String crn) {}
 
     @CustomPermissionCheck
     public void doSomethingThatIsComplicatedAndWeCanAuthorizeItInTheServiceLayer(String crn) {}

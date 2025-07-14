@@ -202,8 +202,11 @@ public class EnforceAuthorizationAnnotationTestUtil {
                 .findAny();
         if (requestObjectParam.isPresent()) {
             Class<?> requestObjectType = requestObjectParam.get().getType();
-            return Arrays.stream(requestObjectType.getDeclaredFields())
+            boolean hasFieldWithResourceCrn = Arrays.stream(requestObjectType.getDeclaredFields())
                     .anyMatch(field -> field.isAnnotationPresent(ResourceCrn.class) && String.class.equals(field.getType()));
+            boolean hasProperMethodWithResourceCrn = Arrays.stream(requestObjectType.getMethods()).anyMatch(aMethod ->
+                    aMethod.isAnnotationPresent(ResourceCrn.class) && aMethod.getParameterCount() == 0 && String.class.equals(aMethod.getReturnType()));
+            return hasFieldWithResourceCrn || hasProperMethodWithResourceCrn;
         }
         return false;
     }

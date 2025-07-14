@@ -1,11 +1,13 @@
 package com.sequenceiq.cloudbreak.auth.security.internal;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Optional;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.beanutils.MethodUtils;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
@@ -69,8 +71,8 @@ public class InternalCrnModifier {
         Optional<Object> requestObjectOptional = reflectionUtil.getParameter(proceedingJoinPoint, methodSignature, RequestObject.class);
         if (requestObjectOptional.isPresent()) {
             Object requestObject = requestObjectOptional.get();
-            if (Arrays.stream(requestObject.getClass().getDeclaredFields()).
-                    anyMatch(aField -> aField.isAnnotationPresent(ResourceCrn.class))) {
+            if (Arrays.stream(requestObject.getClass().getDeclaredFields()).anyMatch(aField -> aField.isAnnotationPresent(ResourceCrn.class)) ||
+                    Arrays.stream(requestObject.getClass().getMethods()).anyMatch(aMethod -> aMethod.isAnnotationPresent(ResourceCrn.class))) {
                 return getAccountModifiedUserCrnByResourceCrnField(userCrnString, requestObject);
             }
         }
@@ -82,9 +84,20 @@ public class InternalCrnModifier {
             Optional<Field> resourceCrnField = Arrays.stream(requestObject.getClass().getDeclaredFields())
                     .filter(aField -> aField.isAnnotationPresent(ResourceCrn.class))
                     .findFirst();
-            Object resourceCrnFieldObject = PropertyUtils.getProperty(requestObject, resourceCrnField.get().getName());
-            if (resourceCrnFieldObject instanceof String && Crn.isCrn((String) resourceCrnFieldObject)) {
-                return getAccountModifiedUserCrnByResourceCrnObject(userCrnString, resourceCrnFieldObject);
+            if (resourceCrnField.isPresent()) {
+                Object resourceCrnFieldObject = PropertyUtils.getProperty(requestObject, resourceCrnField.get().getName());
+                if (resourceCrnFieldObject instanceof String && Crn.isCrn((String) resourceCrnFieldObject)) {
+                    return getAccountModifiedUserCrnByResourceCrnObject(userCrnString, resourceCrnFieldObject);
+                }
+            }
+            Optional<Method> resourceCrnMethod = Arrays.stream(requestObject.getClass().getMethods())
+                    .filter(aMethod -> aMethod.isAnnotationPresent(ResourceCrn.class))
+                    .findFirst();
+            if (resourceCrnMethod.isPresent()) {
+                Object resourceCrnMethodObject = MethodUtils.invokeMethod(requestObject, resourceCrnMethod.get().getName(), null);
+                if (resourceCrnMethodObject instanceof String && Crn.isCrn((String) resourceCrnMethodObject)) {
+                    return getAccountModifiedUserCrnByResourceCrnObject(userCrnString, resourceCrnMethodObject);
+                }
             }
         } catch (Exception e) {
             return Optional.empty();
