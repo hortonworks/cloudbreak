@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.service.publicendpoint.dns;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
@@ -95,8 +97,15 @@ public abstract class BaseDnsEntryService extends BasePublicEndpointManagementSe
             List<String> ecsMasterHostnames = componentLocation.get("ecs_master");
             if (ecsMasterHostnames != null && !ecsMasterHostnames.isEmpty()) {
                 String firstEcsMasterHostname = ecsMasterHostnames.getFirst();
-                String firstEcsMasterIp = candidateIpsByHostname.get(firstEcsMasterHostname);
-                ipsByHostname.put(CONSOLE_CDP_APPS, firstEcsMasterIp);
+                Optional<Entry<String, String>> ecsMasterIpOpt = candidateIpsByHostname.entrySet().stream()
+                        .filter(entry -> firstEcsMasterHostname.startsWith(entry.getKey())).findFirst();
+                if (ecsMasterIpOpt.isPresent()) {
+                    String firstEcsMasterIp = ecsMasterIpOpt.get().getValue();
+                    LOGGER.info("Found ECS Master IP for environment '{}'", firstEcsMasterIp);
+                    ipsByHostname.put(CONSOLE_CDP_APPS, firstEcsMasterIp);
+                } else {
+                    LOGGER.info("ECS Master IP not found for environment");
+                }
             }
         }
         return ipsByHostname;
