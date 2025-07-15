@@ -40,7 +40,8 @@ jobs:
             cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
             cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
             cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
-            cb/data/SONAR_TOKEN SONAR_TOKEN | SONAR_TOKEN;
+            cb/data/SONARQUBE SONAR_HOST | SONAR_HOST;
+            cb/data/SONARQUBE SONAR_TOKEN | SONAR_TOKEN;
       - name: install_tools
         run: |-
           #!/bin/bash -x
@@ -74,7 +75,7 @@ jobs:
         run: |-
           #!/bin/bash -x
           export SONAR_TOKEN=$(echo "${{ steps.build_secrets.outputs.SONAR_TOKEN}}")
-          export SONAR_URL=https://sonarqube.infra.cloudera.com
+          export SONAR_HOST=$(echo "${{ steps.build_secrets.outputs.SONAR_HOST}}")
           export SONAR_COVERAGE_EXCLUSION_COMMON="**/proto/**,**/generated/**,**/flow/**/*State.java,**/flow/**/event/*Event.java,**/flow/**/event/**/*Event.java,**/flow*/**/*Config.java,**/*Repository.java,**/configuration/*Properties.java,**/configuration/**/*Config.java,**/domain/**,**/Aspects/**"
           export CORE_SONAR_COVERAGE_EXCLUSION="${SONAR_COVERAGE_EXCLUSION_COMMON},**/reactor/api/event/**,**/flow2/**/*Config.java,**/flow2/**/*State.java,**/flow2/**/*Event.java"
           export DL_SONAR_COVERAGE_EXCLUSION="${SONAR_COVERAGE_EXCLUSION_COMMON},**/datalake/configuration/**"
@@ -95,13 +96,14 @@ jobs:
           -Dsonar.java.libraries=$SONAR_JAVA_BINARIES \
           -Dsonar.verbose=true \
           -Dsonar.sources=$SONAR_SOURCES \
-          -Dsonar.projectKey=CloudbreakCore_Service_IT_master \
+          -Dsonar.branch.name=it_master \
+          -Dsonar.projectKey=cloudbreak:cloudbreak:cloudbreak_core_service \
           -Dsonar.coverage.exclusions=$CORE_SONAR_COVERAGE_EXCLUSION \
           -Dsonar.exclusions=$SONAR_EXCLUSION \
           -Dsonar.issue.ignore.multicriteria=e1 \
           -Dsonar.issue.ignore.multicriteria.e1.ruleKey=$E1_IGNORE_RULE_KEY \
           -Dsonar.issue.ignore.multicriteria.e1.resourceKey=$E1_IGNORE_RESOURCE \
-          -Dsonar.host.url=$SONAR_URL
+          -Dsonar.host.url=$SONAR_HOST
           
           cd .. && cd datalake && sonar-scanner -X \
           -Dsonar.token=$SONAR_TOKEN \
@@ -111,13 +113,14 @@ jobs:
           -Dsonar.java.libraries=$SONAR_JAVA_BINARIES \
           -Dsonar.verbose=true \
           -Dsonar.sources=$SONAR_SOURCES \
-          -Dsonar.projectKey=Datalake_Service_IT_master \
+          -Dsonar.branch.name=it_master \
+          -Dsonar.projectKey=cloudbreak:cloudbreak:datalake_service \
           -Dsonar.coverage.exclusions=$DL_SONAR_COVERAGE_EXCLUSION\
           -Dsonar.exclusions=$SONAR_EXCLUSION \
           -Dsonar.issue.ignore.multicriteria=e1 \
           -Dsonar.issue.ignore.multicriteria.e1.ruleKey=$E1_IGNORE_RULE_KEY \
           -Dsonar.issue.ignore.multicriteria.e1.resourceKey=$E1_IGNORE_RESOURCE \
-          -Dsonar.host.url=$SONAR_URL
+          -Dsonar.host.url=$SONAR_HOST
           
           cd .. && cd environment && sonar-scanner -X \
           -Dsonar.token=$SONAR_TOKEN \
@@ -127,13 +130,14 @@ jobs:
           -Dsonar.java.libraries=$SONAR_JAVA_BINARIES \
           -Dsonar.verbose=true \
           -Dsonar.sources=$SONAR_SOURCES \
-          -Dsonar.projectKey=Environment_Service_IT_master \
+          -Dsonar.branch.name=it_master \
+          -Dsonar.projectKey=cloudbreak:cloudbreak:environment_service \
           -Dsonar.coverage.exclusions=$ENV_SONAR_COVERAGE_EXCLUSION \
           -Dsonar.exclusions=$SONAR_EXCLUSION \
           -Dsonar.issue.ignore.multicriteria=e1 \
           -Dsonar.issue.ignore.multicriteria.e1.ruleKey=$E1_IGNORE_RULE_KEY \
           -Dsonar.issue.ignore.multicriteria.e1.resourceKey=$E1_IGNORE_RESOURCE \
-          -Dsonar.host.url=$SONAR_URL
+          -Dsonar.host.url=$SONAR_HOST
           
           cd .. && cd externalized-compute && sonar-scanner -X \
           -Dsonar.token=$SONAR_TOKEN \
@@ -143,13 +147,14 @@ jobs:
           -Dsonar.java.libraries=$SONAR_JAVA_BINARIES \
           -Dsonar.verbose=true \
           -Dsonar.sources=$SONAR_SOURCES \
-          -Dsonar.projectKey=Externalized_Compute_Service_IT_master \
+          -Dsonar.branch.name=it_master \
+          -Dsonar.projectKey=cloudbreak:cloudbreak:externalized_compute_service \
           -Dsonar.coverage.exclusions=$SONAR_COVERAGE_EXCLUSION_COMMON \
           -Dsonar.exclusions=$SONAR_EXCLUSION \
           -Dsonar.issue.ignore.multicriteria=e1 \
           -Dsonar.issue.ignore.multicriteria.e1.ruleKey=$E1_IGNORE_RULE_KEY \
           -Dsonar.issue.ignore.multicriteria.e1.resourceKey=$E1_IGNORE_RESOURCE \
-          -Dsonar.host.url=$SONAR_URL
+          -Dsonar.host.url=$SONAR_HOST
           
           cd .. && cd freeipa && sonar-scanner -X \
           -Dsonar.token=$SONAR_TOKEN \
@@ -159,13 +164,14 @@ jobs:
           -Dsonar.java.libraries=$SONAR_JAVA_BINARIES \
           -Dsonar.verbose=true \
           -Dsonar.sources=$SONAR_SOURCES \
-          -Dsonar.projectKey=Freeipa_Service_IT_master \
+          -Dsonar.branch.name=it_master \
+          -Dsonar.projectKey=cloudbreak:cloudbreak:freeipa_service \
           -Dsonar.coverage.exclusions=$FREEIPA_SONAR_COVERAGE_EXCLUSION \
           -Dsonar.exclusions=$SONAR_EXCLUSION \
           -Dsonar.issue.ignore.multicriteria=e1 \
           -Dsonar.issue.ignore.multicriteria.e1.ruleKey=$E1_IGNORE_RULE_KEY \
           -Dsonar.issue.ignore.multicriteria.e1.resourceKey=$E1_IGNORE_RESOURCE \
-          -Dsonar.host.url=$SONAR_URL
+          -Dsonar.host.url=$SONAR_HOST
           
           cd .. && cd redbeams && sonar-scanner -X \
           -Dsonar.token=$SONAR_TOKEN \
@@ -175,13 +181,14 @@ jobs:
           -Dsonar.java.libraries=$SONAR_JAVA_BINARIES \
           -Dsonar.verbose=true \
           -Dsonar.sources=$SONAR_SOURCES \
-          -Dsonar.projectKey=Redbeams_Service_IT_master \
+          -Dsonar.branch.name=it_master \
+          -Dsonar.projectKey=cloudbreak:cloudbreak:redbeams_service \
           -Dsonar.coverage.exclusions=$SONAR_COVERAGE_EXCLUSION_COMMON \
           -Dsonar.exclusions=$SONAR_EXCLUSION \
           -Dsonar.issue.ignore.multicriteria=e1 \
           -Dsonar.issue.ignore.multicriteria.e1.ruleKey=$E1_IGNORE_RULE_KEY \
           -Dsonar.issue.ignore.multicriteria.e1.resourceKey=$E1_IGNORE_RESOURCE \
-          -Dsonar.host.url=$SONAR_URL
+          -Dsonar.host.url=$SONAR_HOST
           
           cd .. && cd environment-remote && sonar-scanner -X \
           -Dsonar.token=$SONAR_TOKEN \
@@ -191,13 +198,14 @@ jobs:
           -Dsonar.java.libraries=$SONAR_JAVA_BINARIES \
           -Dsonar.verbose=true \
           -Dsonar.sources=$SONAR_SOURCES \
-          -Dsonar.projectKey=Remote_Environment_Service_IT_master \
+          -Dsonar.branch.name=it_master \
+          -Dsonar.projectKey=cloudbreak:cloudbreak:remote_environment_service \
           -Dsonar.coverage.exclusions=$REMOTE_ENV_SONAR_COVERAGE_EXCLUSION \
           -Dsonar.exclusions=$SONAR_EXCLUSION \
           -Dsonar.issue.ignore.multicriteria=e1 \
           -Dsonar.issue.ignore.multicriteria.e1.ruleKey=$E1_IGNORE_RULE_KEY \
           -Dsonar.issue.ignore.multicriteria.e1.resourceKey=$E1_IGNORE_RESOURCE \
-          -Dsonar.host.url=$SONAR_URL
+          -Dsonar.host.url=$SONAR_HOST
                
           cd .. && cd autoscale && sonar-scanner -X \
           -Dsonar.token=$SONAR_TOKEN \
@@ -207,10 +215,11 @@ jobs:
           -Dsonar.java.libraries=$SONAR_JAVA_BINARIES \
           -Dsonar.verbose=true \
           -Dsonar.sources=$SONAR_SOURCES \
-          -Dsonar.projectKey=Periscope_Service_IT_master \
+          -Dsonar.branch.name=it_master \
+          -Dsonar.projectKey=cloudbreak:cloudbreak:autoscale_service \
           -Dsonar.coverage.exclusions=$SONAR_COVERAGE_EXCLUSION_COMMON \
           -Dsonar.exclusions=$SONAR_EXCLUSION \
           -Dsonar.issue.ignore.multicriteria=e1 \
           -Dsonar.issue.ignore.multicriteria.e1.ruleKey=$E1_IGNORE_RULE_KEY \
           -Dsonar.issue.ignore.multicriteria.e1.resourceKey=$E1_IGNORE_RESOURCE \
-          -Dsonar.host.url=$SONAR_URL
+          -Dsonar.host.url=$SONAR_HOST
