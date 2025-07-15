@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.metrics.status.StackCountByStatusView;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.repository.StackStatusRepository;
 
@@ -29,6 +30,10 @@ public class StackStatusService {
 
     public List<StackCountByStatusView> countStacksByStatusAndTunnel(Tunnel tunnel) {
         return repository.countStacksByStatusAndTunnel(tunnel);
+    }
+
+    public void cleanupStatus(long stackId, Status preservedStatus) {
+        repository.deleteAllByStackIdAndStatusNot(stackId, preservedStatus);
     }
 
 }

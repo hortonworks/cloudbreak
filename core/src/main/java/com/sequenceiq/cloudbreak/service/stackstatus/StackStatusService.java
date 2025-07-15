@@ -7,6 +7,7 @@ import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.common.metrics.status.StackCountByStatusView;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.repository.StackStatusRepository;
@@ -36,6 +37,10 @@ public class StackStatusService {
 
     public List<StackCountByStatusView> countStacksByStatusAndTunnel(Tunnel tunnel) {
         return repository.countStacksByStatusAndTunnel(tunnel);
+    }
+
+    public void cleanupStatus(long stackId, Status preservedStatus) {
+        repository.deleteAllByStackIdAndStatusNot(stackId, preservedStatus);
     }
 
 }

@@ -1,7 +1,11 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -29,6 +33,7 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackEncryptionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
 
 @ExtendWith(MockitoExtension.class)
 class TerminationServiceTest {
@@ -65,6 +70,9 @@ class TerminationServiceTest {
     @Mock
     private StackUpdater stackUpdater;
 
+    @Mock
+    private StackStatusService stackStatusService;
+
     @InjectMocks
     private TerminationService underTest;
 
@@ -94,6 +102,7 @@ class TerminationServiceTest {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         when(stackService.get(STACK_ID)).thenReturn(stack);
         when(stackService.save(stack)).thenReturn(stack);
+        doNothing().when(stackStatusService).cleanupStatus(anyLong(), any());
         doAnswer(invocation -> invocation.getArgument(0, Supplier.class).get()).when(transactionService).required(any(Supplier.class));
 
 
@@ -104,6 +113,7 @@ class TerminationServiceTest {
         verify(cleanUpService).cleanUpStructuredEventsForStack(STACK_ID);
         verify(cleanUpService).detachClusterComponentRelatedAuditEntries(STACK_ID);
         verify(stackService).save(stack);
+        verify(stackStatusService).cleanupStatus(anyLong(), eq(DELETE_COMPLETED));
 
     }
 

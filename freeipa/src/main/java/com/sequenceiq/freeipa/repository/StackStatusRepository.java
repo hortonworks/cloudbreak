@@ -13,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 import com.sequenceiq.cloudbreak.common.metrics.status.StackCountByStatusView;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.entity.StackStatus;
 
 @EntityType(entityClass = StackStatus.class)
@@ -32,6 +33,8 @@ public interface StackStatusRepository extends CrudRepository<StackStatus, Long>
             "WHERE st.id IN (SELECT s.stackStatus.id FROM Stack s WHERE s.terminated < 0 AND s.tunnel = :tunnel) " +
             "GROUP BY (st.status)")
     List<StackCountByStatusView> countStacksByStatusAndTunnel(@Param("tunnel") Tunnel tunnel);
+
+    void deleteAllByStackIdAndStatusNot(long stackId, Status status);
 }
 
 

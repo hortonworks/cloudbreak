@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -34,6 +35,7 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackEncryptionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Service
@@ -84,6 +86,9 @@ public class TerminationService {
 
     @Inject
     private StackEncryptionService stackEncryptionService;
+
+    @Inject
+    private StackStatusService stackStatusService;
 
     public void finalizeTermination(Long stackId, boolean force) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
@@ -158,6 +163,7 @@ public class TerminationService {
                 updatedStack.setTerminated(clock.getCurrentTimeMillis());
                 updatedStack = stackService.save(updatedStack);
                 stackUpdater.updateStackStatus(updatedStack.getId(), DetailedStackStatus.DELETE_COMPLETED, statusReason);
+                stackStatusService.cleanupStatus(updatedStack.getId(), Status.DELETE_COMPLETED);
                 return updatedStack;
             });
             if (stack.getType().equals(StackType.WORKLOAD)) {

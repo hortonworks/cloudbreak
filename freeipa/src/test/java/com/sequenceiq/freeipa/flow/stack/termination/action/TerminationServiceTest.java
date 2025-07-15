@@ -1,7 +1,10 @@
 package com.sequenceiq.freeipa.flow.stack.termination.action;
 
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_COMPLETED;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -28,6 +31,7 @@ import com.sequenceiq.freeipa.service.freeipa.cleanup.StructuredEventCleanupServ
 import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerService;
 import com.sequenceiq.freeipa.service.recipe.FreeIpaRecipeService;
 import com.sequenceiq.freeipa.service.stack.StackService;
+import com.sequenceiq.freeipa.service.stack.StackStatusService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
@@ -67,6 +71,9 @@ class TerminationServiceTest {
 
     @Mock
     private FreeIpaLoadBalancerService freeIpaLoadBalancerService;
+
+    @Mock
+    private StackStatusService stackStatusService;
 
     @InjectMocks
     private TerminationService underTest;
@@ -132,6 +139,7 @@ class TerminationServiceTest {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         when(stack.getName()).thenReturn(STACK_NAME);
         when(stack.getId()).thenReturn(STACK_ID);
+        doNothing().when(stackStatusService).cleanupStatus(anyLong(), any());
 
         underTest.finalizeTerminationTransaction(STACK_ID);
 
@@ -146,6 +154,7 @@ class TerminationServiceTest {
         verify(freeIpaRecipeService).deleteRecipes(STACK_ID);
         verify(stackEncryptionService).deleteStackEncryption(STACK_ID);
         verify(freeIpaLoadBalancerService).delete(STACK_ID);
+        verify(stackStatusService).cleanupStatus(anyLong(), eq(DELETE_COMPLETED));
     }
 
 }

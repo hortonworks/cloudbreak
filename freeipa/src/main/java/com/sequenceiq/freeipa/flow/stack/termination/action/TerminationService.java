@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -27,6 +28,7 @@ import com.sequenceiq.freeipa.service.freeipa.cleanup.StructuredEventCleanupServ
 import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerService;
 import com.sequenceiq.freeipa.service.recipe.FreeIpaRecipeService;
 import com.sequenceiq.freeipa.service.stack.StackService;
+import com.sequenceiq.freeipa.service.stack.StackStatusService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
@@ -67,6 +69,9 @@ public class TerminationService {
     @Inject
     private FreeIpaLoadBalancerService freeIpaLoadBalancerService;
 
+    @Inject
+    private StackStatusService stackStatusService;
+
     public void finalizeTermination(Long stackId) {
         try {
             transactionService.required(() -> {
@@ -91,6 +96,7 @@ public class TerminationService {
         freeIpaRecipeService.deleteRecipes(stack.getId());
         stackEncryptionService.deleteStackEncryption(stack.getId());
         stackUpdater.updateStackStatus(stack, DetailedStackStatus.DELETE_COMPLETED, "Stack was terminated successfully.");
+        stackStatusService.cleanupStatus(stackId, Status.DELETE_COMPLETED);
         stackService.save(stack);
         freeIpaLoadBalancerService.delete(stackId);
     }
