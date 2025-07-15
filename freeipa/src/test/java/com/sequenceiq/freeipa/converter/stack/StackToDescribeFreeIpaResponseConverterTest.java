@@ -175,6 +175,7 @@ class StackToDescribeFreeIpaResponseConverterTest {
         environmentResponse.setEnvironmentType(EnvironmentType.HYBRID.name());
         CrossRealmTrust crossRealmTrust = new CrossRealmTrust();
         crossRealmTrust.setFqdn("fqdn");
+        crossRealmTrust.setIp("10.0.0.16");
         crossRealmTrust.setOperationId("operationid");
         crossRealmTrust.setTrustStatus(TrustStatus.TRUST_ACTIVE);
         ImageEntity image = new ImageEntity();
@@ -232,7 +233,8 @@ class StackToDescribeFreeIpaResponseConverterTest {
                 .isNotNull()
                 .returns(TrustStatus.TRUST_ACTIVE.name(), TrustResponse::getTrustStatus)
                 .returns("operationid", TrustResponse::getOperationId)
-                .returns("fqdn", TrustResponse::getFqdn);
+                .returns("fqdn", TrustResponse::getFqdn)
+                .returns("10.0.0.16", TrustResponse::getIp);
     }
 
     private void setupLoadBalancerMock(Long id) {
