@@ -7,6 +7,7 @@ import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.eve
 
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -22,6 +23,7 @@ import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupCrossRealmTrustRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustStatus;
 
 @Component
 public class EnvironmentCrossRealmTrustSetupFinishHandler extends ExceptionCatcherEventHandler<EnvironmentCrossRealmTrustSetupFinishEvent> {
@@ -57,7 +59,7 @@ public class EnvironmentCrossRealmTrustSetupFinishHandler extends ExceptionCatch
                 DescribeFreeIpaResponse freeIpa = freeIpaResponseOptional.get();
                 if (freeIpa.getStatus() == null || freeIpa.getAvailabilityStatus() == null) {
                     throw new FreeIpaOperationFailedException("FreeIPA status is unpredictable, Setup finish interrupted.");
-                } else if (!freeIpa.getStatus().isCrossRealmFinishable()) {
+                } else if (!crossRealmTrustSetupFinishCanBeTriggered(freeIpa)) {
                     throw new FreeIpaOperationFailedException("FreeIPA is not in a valid state to Finish Cross Realm setup. Current state is: " +
                             freeIpa.getStatus().name());
                 } else {
@@ -81,6 +83,16 @@ public class EnvironmentCrossRealmTrustSetupFinishHandler extends ExceptionCatch
             LOGGER.debug("FINISH_FAILED event sent");
             return new EnvironmentCrossRealmTrustSetupFinishFailedEvent(data, e, TRUST_SETUP_FINISH_FAILED);
         }
+    }
+
+    private boolean crossRealmTrustSetupFinishCanBeTriggered(DescribeFreeIpaResponse freeIpa) {
+        if (freeIpa.getTrust() != null && StringUtils.isNotBlank(freeIpa.getTrust().getTrustStatus())) {
+            TrustStatus trustStatus = TrustStatus.valueOf(freeIpa.getTrust().getTrustStatus());
+            if (trustStatus.isCrossRealmFinishable()) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

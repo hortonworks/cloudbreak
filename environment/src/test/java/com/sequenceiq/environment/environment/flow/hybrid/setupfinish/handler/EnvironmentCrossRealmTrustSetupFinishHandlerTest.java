@@ -29,6 +29,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityStat
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupCrossRealmTrustRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustResponse;
 
 @ExtendWith(MockitoExtension.class)
 class EnvironmentCrossRealmTrustSetupFinishHandlerTest {
@@ -47,6 +48,9 @@ class EnvironmentCrossRealmTrustSetupFinishHandlerTest {
 
     @Mock
     private DescribeFreeIpaResponse freeIpa;
+
+    @Mock
+    private TrustResponse trustResponse;
 
     @Mock
     private Status freeIpaStatus;
@@ -69,8 +73,9 @@ class EnvironmentCrossRealmTrustSetupFinishHandlerTest {
         when(event.getData()).thenReturn(eventData);
         when(freeIpaService.describe(RESOURCE_CRN)).thenReturn(Optional.of(freeIpa));
         when(freeIpa.getStatus()).thenReturn(freeIpaStatus);
+        when(trustResponse.getTrustStatus()).thenReturn("TRUST_SETUP_FINISH_REQUIRED");
+        when(freeIpa.getTrust()).thenReturn(trustResponse);
         when(freeIpa.getAvailabilityStatus()).thenReturn(AvailabilityStatus.AVAILABLE);
-        when(freeIpaStatus.isCrossRealmFinishable()).thenReturn(true);
 
         handler.accept(event);
 
@@ -86,8 +91,9 @@ class EnvironmentCrossRealmTrustSetupFinishHandlerTest {
         when(event.getData()).thenReturn(eventData);
         when(freeIpaService.describe(RESOURCE_CRN)).thenReturn(Optional.of(freeIpa));
         when(freeIpa.getStatus()).thenReturn(freeIpaStatus);
+        when(trustResponse.getTrustStatus()).thenReturn("TRUST_ACTIVE");
+        when(freeIpa.getTrust()).thenReturn(trustResponse);
         when(freeIpa.getAvailabilityStatus()).thenReturn(AvailabilityStatus.AVAILABLE);
-        when(freeIpaStatus.isCrossRealmFinishable()).thenReturn(false);
 
         handler.accept(event);
     }

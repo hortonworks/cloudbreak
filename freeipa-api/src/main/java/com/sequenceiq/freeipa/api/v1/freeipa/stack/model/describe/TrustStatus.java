@@ -1,5 +1,8 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe;
 
+import java.util.Collection;
+import java.util.List;
+
 public enum TrustStatus {
     UNKNOWN,
     TRUST_SETUP_REQUIRED,
@@ -9,5 +12,13 @@ public enum TrustStatus {
     TRUST_SETUP_FINISH_IN_PROGRESS,
     TRUST_SETUP_FINISH_FAILED,
     TRUST_ACTIVE,
-    TRUST_BROKEN
+    TRUST_BROKEN;
+
+    public static final Collection<TrustStatus> FREEIPA_CROSS_REALM_SETUP_FINISH_ENABLE_STATUSES = List.of(
+            TRUST_SETUP_FINISH_REQUIRED,
+            TRUST_SETUP_FINISH_FAILED);
+
+    public boolean isCrossRealmFinishable() {
+        return FREEIPA_CROSS_REALM_SETUP_FINISH_ENABLE_STATUSES.contains(this);
+    }
 }
