@@ -303,6 +303,14 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public String getDefaultInstanceType(Architecture architecture) {
+        if (Architecture.ARM64.equals(architecture)) {
+            return awsProperties.getArm64Instance().getType();
+        }
+        return awsProperties.getInstance().getType();
+    }
+
+    @Override
     public String verticalScaleVolumeType() {
         return awsProperties.getVerticalScale().getVolumeType();
     }

@@ -200,6 +200,14 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public String getDefaultInstanceType(Architecture architecture) {
+        if (Architecture.ARM64.equals(architecture)) {
+            throw new NotImplementedException("Arm64 instance is not configured for Azure.");
+        }
+        return azureProperties.getInstance().getType();
+    }
+
+    @Override
     public InstanceTemplateV4TestDto template(InstanceTemplateV4TestDto template) {
         return template.withInstanceType(azureProperties.getInstance().getType());
     }

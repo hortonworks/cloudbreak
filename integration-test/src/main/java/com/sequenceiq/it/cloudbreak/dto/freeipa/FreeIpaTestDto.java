@@ -469,7 +469,8 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
     }
 
     public FreeIpaTestDto withUpgradeCatalogAndImage() {
-        return withImage(getCloudProvider().getFreeIpaUpgradeImageCatalog(), getCloudProvider().getFreeIpaUpgradeImageId());
+        return withImage(getCloudProvider().getFreeIpaUpgradeImageCatalog(), getCloudProvider()
+                .getFreeIpaUpgradeImageId());
     }
 
     public FreeIpaTestDto withMarketplaceUpgradeCatalogAndImage() {
@@ -646,6 +647,11 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         SecurityRequest securityRequest = new SecurityRequest();
         securityRequest.setSeLinux(seLinux);
         getRequest().setSecurity(securityRequest);
+        return this;
+    }
+
+    public FreeIpaTestDto withInstanceType(String instanceType) {
+        getRequest().getInstanceGroups().forEach(group -> group.getInstanceTemplate().setInstanceType(instanceType));
         return this;
     }
 }

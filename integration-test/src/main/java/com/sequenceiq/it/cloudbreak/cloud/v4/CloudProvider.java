@@ -60,6 +60,8 @@ public interface CloudProvider {
 
     String location();
 
+    String getDefaultInstanceType(Architecture architecture);
+
     ImageCatalogTestDto imageCatalog(ImageCatalogTestDto imageCatalog);
 
     ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings);

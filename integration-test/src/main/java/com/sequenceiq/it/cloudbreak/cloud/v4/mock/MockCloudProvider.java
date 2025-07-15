@@ -176,6 +176,11 @@ public class MockCloudProvider extends AbstractCloudProvider {
         return mockProperties.getLocation();
     }
 
+    @Override
+    public String getDefaultInstanceType(Architecture architecture) {
+        return mockProperties.getInstance().getType();
+    }
+
     public String getVpcId() {
         return mockProperties.getVpcId();
     }

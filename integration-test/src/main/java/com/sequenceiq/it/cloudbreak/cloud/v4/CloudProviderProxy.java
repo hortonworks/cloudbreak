@@ -126,6 +126,11 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
+    public String getDefaultInstanceType(Architecture architecture) {
+        return delegate.getDefaultInstanceType(architecture);
+    }
+
+    @Override
     public ImageCatalogTestDto imageCatalog(ImageCatalogTestDto imageCatalog) {
         return getDelegate(imageCatalog).imageCatalog(imageCatalog);
     }

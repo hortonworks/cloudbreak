@@ -135,6 +135,11 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public String getDefaultInstanceType(Architecture architecture) {
+        throw new NotImplementedException("Default instance type is not configured for Yarn.");
+    }
+
+    @Override
     public InstanceTemplateV4TestDto template(InstanceTemplateV4TestDto template) {
         return template.withYarn(instanceParameters());
     }
