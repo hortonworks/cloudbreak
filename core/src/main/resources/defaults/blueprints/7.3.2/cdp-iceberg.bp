@@ -1,0 +1,261 @@
+{
+  "description": "7.3.2 - Iceberg Replication Service",
+  "blueprint": {
+    "cdhVersion": "7.3.2",
+    "displayName": "iceberg_replication",
+    "blueprintUpgradeOption": "GA",
+    "services": [
+      {
+        "refName": "zookeeper",
+        "serviceType": "ZOOKEEPER",
+        "serviceConfigs": [
+          {
+            "name": "service_config_suppression_server_count_validator",
+            "value": "true"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "zookeeper-SERVER-BASE",
+            "roleType": "SERVER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "hdfs",
+        "serviceType": "HDFS",
+        "serviceConfigs": [
+          {
+            "name": "hdfs_verify_ec_with_topology_enabled",
+            "value": false
+          },
+          {
+            "name": "core_site_safety_valve",
+            "value": "<property><name>fs.s3a.buffer.dir</name><value>${env.LOCAL_DIRS:-${hadoop.tmp.dir}}/s3a</value></property><property><name>fs.s3a.committer.name</name><value>directory</value></property><property><name>fs.azure.buffer.dir</name><value>${env.LOCAL_DIRS:-${hadoop.tmp.dir}}/abfs</value></property><property><name>hadoop.mapreduce.fileoutputcommitter.algorithm.version.v1.experimental.parallel.rename.recovery</name><value>true</value></property><property><name>hadoop.mapreduce.fileoutputcommitter.algorithm.version.v1.experimental.parallel.task.commit</name><value>true</value></property><property><name>hadoop.mapreduce.fileoutputcommitter.algorithm.version.v1.experimental.mv.threads</name><value>16</value></property>"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "hdfs-NAMENODE-BASE",
+            "roleType": "NAMENODE",
+            "base": true,
+            "configs": [
+              {
+                "name": "role_config_suppression_namenode_java_heapsize_minimum_validator",
+                "value": "true"
+              },
+              {
+                "name": "role_config_suppression_fs_trash_interval_minimum_validator",
+                "value": "true"
+              },
+              {
+                "name": "fs_trash_interval",
+                "value": "0"
+              },
+              {
+                "name": "fs_trash_checkpoint_interval",
+                "value": "0"
+              },
+              {
+                "name": "erasure_coding_default_policy",
+                "value": " "
+              }
+            ]
+          },
+          {
+            "refName": "hdfs-SECONDARYNAMENODE-BASE",
+            "roleType": "SECONDARYNAMENODE",
+            "base": true
+          },
+          {
+            "refName": "hdfs-DATANODE-BASE",
+            "roleType": "DATANODE",
+            "base": true
+          },
+          {
+            "refName": "hdfs-BALANCER-BASE",
+            "roleType": "BALANCER",
+            "base": true
+          },
+          {
+            "refName": "hdfs-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true,
+            "configs": [
+              {
+                "name": "dfs_client_use_trash",
+                "value": false
+              },
+              {
+                "name": "role_config_suppression_hdfs_trash_disabled_validator",
+                "value": "true"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "refName": "yarn",
+        "serviceType": "YARN",
+        "serviceConfigs": [
+          {
+            "name": "yarn_admin_acl",
+            "value": "yarn,hive,hdfs,mapred"
+          },
+          {
+            "name": "yarn_service_mapred_safety_valve",
+            "value": "<property><name>mapreduce.fileoutputcommitter.algorithm.version</name><value>1</value></property><property><name>mapreduce.input.fileinputformat.list-status.num-threads</name><value>100</value></property>"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "yarn-RESOURCEMANAGER-BASE",
+            "roleType": "RESOURCEMANAGER",
+            "base": true,
+            "configs": [
+              {
+                "name": "resourcemanager_config_safety_valve",
+                "value": "<property><name>yarn.scheduler.configuration.store.class</name><value>zk</value></property>"
+              },
+              {
+                "name": "yarn_resourcemanager_scheduler_class",
+                "value": "org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler"
+              },
+              {
+                "name": "resourcemanager_capacity_scheduler_configuration",
+                "value": "<configuration><property><name>yarn.scheduler.capacity.root.queues</name><value>default</value></property><property><name>yarn.scheduler.capacity.root.capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.default.capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.acl_submit_applications</name><value> </value></property><property><name>yarn.scheduler.capacity.root.acl_administer_queue</name><value> </value></property><property><name>yarn.scheduler.capacity.root.default.acl_submit_applications</name><value>*</value></property><property><name>yarn.scheduler.capacity.root.default.minimum-user-limit-percent</name><value>100</value></property><property><name>yarn.scheduler.capacity.maximum-am-resource-percent</name><value>0.33</value></property><property><name>yarn.scheduler.capacity.node-locality-delay</name><value>0</value></property><property><name>yarn.scheduler.capacity.schedule-asynchronously.maximum-threads</name><value>1</value></property><property><name>yarn.scheduler.capacity.schedule-asynchronously.scheduling-interval-ms</name><value>10</value></property></configuration>"
+              }
+            ]
+          },
+          {
+            "refName": "yarn-NODEMANAGER-WORKER",
+            "roleType": "NODEMANAGER",
+            "base": false
+          },
+          {
+            "refName": "yarn-NODEMANAGER-COMPUTE",
+            "roleType": "NODEMANAGER",
+            "base": false
+          },
+          {
+            "refName": "yarn-JOBHISTORY-BASE",
+            "roleType": "JOBHISTORY",
+            "base": true
+          },
+          {
+            "refName": "yarn-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "hms",
+        "serviceType": "HIVE",
+        "displayName": "Hive Metastore",
+        "roleConfigGroups": [
+          {
+            "refName": "hms-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          },
+          {
+            "refName": "hms-HIVEMETASTORE-BASE",
+            "roleType": "HIVEMETASTORE",
+            "base": true,
+            "configs": [
+              {
+                "name": "hive_metastore_config_safety_valve",
+                "value": "<property><name>hive.metastore.try.direct.sql.ddl</name><value>true</value></property>"
+              },
+              {
+                "name": "hive_compactor_initiator_on",
+                "value": "false"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "refName": "iceberg-replication",
+        "serviceType": "ICEBERG_REPLICATION",
+        "serviceConfigs": [
+          {
+            "name": "hdfs_service",
+            "value": "hdfs"
+          },
+          {
+            "name": "hms_service",
+            "value": "hms"
+          },
+          {
+            "name": "yarn_service",
+            "value": "yarn"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "iceberg_replication-ICEBERG_REPLICATION_ADMINSERVER-BASE",
+            "roleType": "ICEBERG_REPLICATION_ADMINSERVER",
+            "base": true,
+            "configs": [
+              {
+                "name": "role_jceks_password",
+                "value": "REDACTED"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "hostTemplates": [
+      {
+        "refName": "master",
+        "cardinality": 1,
+        "roleConfigGroupsRefNames": [
+          "hdfs-BALANCER-BASE",
+          "hdfs-NAMENODE-BASE",
+          "hdfs-SECONDARYNAMENODE-BASE",
+          "hdfs-GATEWAY-BASE",
+          "hms-GATEWAY-BASE",
+          "hms-HIVEMETASTORE-BASE",
+          "yarn-JOBHISTORY-BASE",
+          "yarn-RESOURCEMANAGER-BASE",
+          "zookeeper-SERVER-BASE",
+          "yarn-GATEWAY-BASE",
+          "iceberg_replication-ICEBERG_REPLICATION_ADMINSERVER-BASE"
+        ]
+      },
+      {
+        "refName": "worker",
+        "cardinality": 3,
+        "roleConfigGroupsRefNames": [
+          "hdfs-DATANODE-BASE",
+          "hdfs-GATEWAY-BASE",
+          "hms-GATEWAY-BASE",
+          "yarn-NODEMANAGER-WORKER",
+          "yarn-GATEWAY-BASE"
+        ]
+      },
+      {
+        "refName": "compute",
+        "cardinality": 0,
+        "roleConfigGroupsRefNames": [
+          "hdfs-GATEWAY-BASE",
+          "hms-GATEWAY-BASE",
+          "yarn-NODEMANAGER-COMPUTE",
+          "yarn-GATEWAY-BASE"
+        ]
+      },
+      {
+        "refName": "gateway",
+        "cardinality": 0,
+        "roleConfigGroupsRefNames": [
+          "hdfs-GATEWAY-BASE",
+          "hms-GATEWAY-BASE"
+        ]
+      }
+    ]
+  }
+}

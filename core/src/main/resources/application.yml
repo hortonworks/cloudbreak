@@ -554,7 +554,8 @@ cb:
           7.3.2 - Streaming Analytics Heavy Duty High Availability with Apache Flink=cdp-flink-heavy-ha;
           7.3.2 - COD Edge Node=cdp-cod-edge-node;
           7.3.2 - Edge Flow Management Light Duty=cdp-edge-flow-management-small;
-          7.3.2 - Lakehouse Optimizer=cdp-lakehouse-optimizer
+          7.3.2 - Lakehouse Optimizer=cdp-lakehouse-optimizer;
+          7.3.2 - Iceberg Replication Service=cdp-iceberg
 
   clustertemplate.defaults:
   template.defaults: minviable-gcp,minviable-azure-managed-disks,minviable-aws
