@@ -26,12 +26,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataContextResponse;
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesResponse;
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
+import com.cloudera.thunderhead.service.environments2api.model.Environment;
 import com.cloudera.thunderhead.service.environments2api.model.EnvironmentSummary;
 import com.cloudera.thunderhead.service.environments2api.model.GetRootCertificateResponse;
 import com.cloudera.thunderhead.service.environments2api.model.ListEnvironmentsResponse;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyHybridClient;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
+import com.sequenceiq.remoteenvironment.api.v1.environment.model.DescribeRemoteEnvironment;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.RemoteEnvironmentBase;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponse;
 import com.sequenceiq.remoteenvironment.controller.v1.converter.PrivateControlPlaneEnvironmentToRemoteEnvironmentConverter;
@@ -138,16 +141,6 @@ class RemoteEnvironmentServiceTest {
 
     @Test
     public void testListRemoteEnvironmentWhenEntitlementGrantedAndEnvAccountIdMismatchWithCPShouldReturnEmptyList() {
-        PrivateControlPlane privateControlPlane1 = new PrivateControlPlane();
-        privateControlPlane1.setResourceCrn("CRN1");
-        privateControlPlane1.setName("NAME1");
-        privateControlPlane1.setUrl("URL1");
-        privateControlPlane1.setAccountId("ACCOUNT1");
-        privateControlPlane1.setId(1L);
-        privateControlPlane1.setPrivateCloudAccountId("privateAccountId");
-        when(privateControlPlaneServiceMock.listByAccountId(anyString()))
-                .thenReturn(new HashSet<>(List.of(privateControlPlane1)));
-
         EnvironmentSummary environment1 = new EnvironmentSummary();
         environment1.setEnvironmentName("NAME1");
         environment1.setCrn("crn:cdp:hybrid:us-west-1:suspiciousAccountId:environment:b24");
@@ -155,7 +148,6 @@ class RemoteEnvironmentServiceTest {
         environment1.setCloudPlatform("HYBRID");
         ListEnvironmentsResponse environmentResponses1 = new ListEnvironmentsResponse();
         environmentResponses1.setEnvironments(List.of(environment1));
-        when(clusterProxyHybridClientMock.listEnvironments(eq("CRN1"), any())).thenReturn(environmentResponses1);
         when(entitlementService.hybridCloudEnabled(anyString())).thenReturn(true);
 
         Set<SimpleRemoteEnvironmentResponse> result = remoteEnvironmentService.listRemoteEnvironments("sampleAccountId");
@@ -176,11 +168,11 @@ class RemoteEnvironmentServiceTest {
     @Test
     public void testGetRemoteEnvironmentWhenEntitlementGrantedButCrnIsInvalid() {
         when(entitlementService.hybridCloudEnabled(anyString())).thenReturn(true);
+        DescribeRemoteEnvironment describeRemoteEnvironment = new DescribeRemoteEnvironment();
+        describeRemoteEnvironment.setCrn("crn:altus:us-west-1:5abe6882-ff63:environment:test-hybrid-1/06533e78-b2bd");
 
         BadRequestException ex = assertThrows(BadRequestException.class, () -> remoteEnvironmentService
-                .getRemoteEnvironment(
-                        PUBLIC_CLOUD_ACCOUNT_ID,
-                        "crn:altus:us-west-1:5abe6882-ff63:environment:test-hybrid-1/06533e78-b2bd"));
+                .getDescribeEnvironmentResponse(PUBLIC_CLOUD_ACCOUNT_ID, describeRemoteEnvironment));
 
         assertEquals("The provided environment CRN('crn:altus:us-west-1:5abe6882-ff63:environment:test-hybrid-1/06533e78-b2bd') is invalid",
                 ex.getMessage());
@@ -197,7 +189,10 @@ class RemoteEnvironmentServiceTest {
         privateControlPlane.setId(1L);
         privateControlPlane.setPrivateCloudAccountId("5abe6882-ff63-4ad2-af86-a5582872a9cd");
 
-        DescribeEnvironmentResponse describeEnvironmentResponse = new DescribeEnvironmentResponse();
+        DescribeRemoteEnvironment describeRemoteEnvironment = new DescribeRemoteEnvironment();
+        describeRemoteEnvironment.setCrn(ENV_CRN);
+
+        DescribeEnvironmentV2Response describeEnvironmentResponse = new DescribeEnvironmentV2Response();
 
         when(entitlementService.hybridCloudEnabled(anyString())).thenReturn(true);
         when(privateControlPlaneServiceMock.getByPrivateCloudAccountIdAndPublicCloudAccountId(anyString(), anyString()))
@@ -206,23 +201,58 @@ class RemoteEnvironmentServiceTest {
                 .thenReturn(describeEnvironmentResponse);
 
         DescribeEnvironmentResponse result = remoteEnvironmentService
-                .getRemoteEnvironment(
-                        PUBLIC_CLOUD_ACCOUNT_ID, ENV_CRN
+                .getDescribeEnvironmentResponse(
+                        PUBLIC_CLOUD_ACCOUNT_ID, describeRemoteEnvironment
                         );
 
         assertEquals(describeEnvironmentResponse, result);
     }
 
     @Test
+    public void testGetDescribeRemoteEnvironmentWhenEntitlementGrantedAndPrivateControlPlanePresentedShouldReturnEnv() {
+        PrivateControlPlane privateControlPlane = new PrivateControlPlane();
+        privateControlPlane.setPrivateCloudAccountId("accountId");
+        privateControlPlane.setUrl("url");
+        privateControlPlane.setResourceCrn("crn");
+        privateControlPlane.setId(1L);
+        privateControlPlane.setPrivateCloudAccountId("5abe6882-ff63-4ad2-af86-a5582872a9cd");
+
+        DescribeRemoteEnvironment describeRemoteEnvironment = new DescribeRemoteEnvironment();
+        describeRemoteEnvironment.setCrn(ENV_CRN);
+
+        DescribeEnvironmentV2Response describeEnvironmentResponse = new DescribeEnvironmentV2Response();
+        Environment environment = new Environment();
+        environment.setEnvironmentName("env1");
+        describeEnvironmentResponse.setEnvironment(environment);
+
+        when(entitlementService.hybridCloudEnabled(anyString())).thenReturn(true);
+        when(clusterProxyHybridClientMock.getEnvironment(anyString(), any(), anyString()))
+                .thenReturn(describeEnvironmentResponse);
+        when(privateControlPlaneServiceMock.getByPrivateCloudAccountIdAndPublicCloudAccountId(any(), any()))
+                .thenReturn(Optional.of(privateControlPlane));
+
+        DescribeEnvironmentV2Response result = remoteEnvironmentService
+                .getDescribeRemoteEnvironmentResponse(
+                        PUBLIC_CLOUD_ACCOUNT_ID, describeRemoteEnvironment
+                );
+
+        assertEquals(describeEnvironmentResponse, result);
+
+    }
+
+    @Test
     public void testGetRemoteEnvironmentWhenEntitlementGrantedAndPrivateControlPlaneNotPresented() {
+        DescribeRemoteEnvironment describeRemoteEnvironment = new DescribeRemoteEnvironment();
+        describeRemoteEnvironment.setCrn(ENV_CRN);
+
         when(entitlementService.hybridCloudEnabled(anyString())).thenReturn(true);
         when(privateControlPlaneServiceMock.getByPrivateCloudAccountIdAndPublicCloudAccountId(anyString(), anyString()))
                 .thenReturn(Optional.empty());
 
         BadRequestException ex = assertThrows(BadRequestException.class, () -> remoteEnvironmentService
-                .getRemoteEnvironment(
+                .getDescribeEnvironmentResponse(
                         PUBLIC_CLOUD_ACCOUNT_ID,
-                        ENV_CRN));
+                        describeRemoteEnvironment));
 
         assertEquals("There is no control plane for this account with account id 5abe6882-ff63-4ad2-af86-a5582872a9cd.",
                 ex.getMessage());
@@ -230,16 +260,22 @@ class RemoteEnvironmentServiceTest {
 
     @Test
     public void testGetRemoteEnvironmentWhenEntitlementNotAssigned() {
+        DescribeRemoteEnvironment describeRemoteEnvironment = new DescribeRemoteEnvironment();
+        describeRemoteEnvironment.setCrn(ENV_CRN);
+
         when(entitlementService.hybridCloudEnabled(anyString())).thenReturn(false);
         BadRequestException ex = assertThrows(BadRequestException.class, () -> remoteEnvironmentService
-                .getRemoteEnvironment(
+                .getDescribeEnvironmentResponse(
                         PUBLIC_CLOUD_ACCOUNT_ID,
-                        ENV_CRN));
+                        describeRemoteEnvironment));
         assertEquals("Unable to fetch from remote environment since entitlement CDP_HYBRID_CLOUD is not assigned", ex.getMessage());
     }
 
     @Test
     public void testGetRemoteEnvironmentThrowsExceptionWhenClusterProxyFails() {
+        DescribeRemoteEnvironment describeRemoteEnvironment = new DescribeRemoteEnvironment();
+        describeRemoteEnvironment.setCrn(ENV_CRN);
+
         when(entitlementService.hybridCloudEnabled(PUBLIC_CLOUD_ACCOUNT_ID)).thenReturn(true);
         PrivateControlPlane privateControlPlane = mock(PrivateControlPlane.class);
         when(privateControlPlane.getResourceCrn()).thenReturn(CONTROL_PLANE);
@@ -249,7 +285,7 @@ class RemoteEnvironmentServiceTest {
                 .thenThrow(new RuntimeException());
 
         RuntimeException runtimeException = assertThrows(RuntimeException.class,
-                () -> remoteEnvironmentService.getRemoteEnvironment(PUBLIC_CLOUD_ACCOUNT_ID, ENV_CRN));
+                () -> remoteEnvironmentService.getDescribeEnvironmentResponse(PUBLIC_CLOUD_ACCOUNT_ID, describeRemoteEnvironment));
         assertEquals(String.format(String.format("Unable to fetch environment for crn %s", ENV_CRN)), runtimeException.getMessage());
     }
 
@@ -350,8 +386,6 @@ class RemoteEnvironmentServiceTest {
     @Test
     public void testGetDatalakeServicesForEnvironmentThrowsBadRequestExceptionControlPlaneDoesNotExist() {
         when(entitlementService.hybridCloudEnabled(PUBLIC_CLOUD_ACCOUNT_ID)).thenReturn(true);
-        when(privateControlPlaneServiceMock.getByPrivateCloudAccountIdAndPublicCloudAccountId(TENANT, PUBLIC_CLOUD_ACCOUNT_ID))
-                .thenReturn(Optional.empty());
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> remoteEnvironmentService.getDatalakeServicesForEnvironment(PUBLIC_CLOUD_ACCOUNT_ID, ENV_CRN));

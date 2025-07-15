@@ -19,12 +19,12 @@ import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataCo
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesRequest;
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesResponse;
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentRequest;
-import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
 import com.cloudera.thunderhead.service.environments2api.model.GetRootCertificateRequest;
 import com.cloudera.thunderhead.service.environments2api.model.GetRootCertificateResponse;
 import com.cloudera.thunderhead.service.environments2api.model.ListEnvironmentsResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
 
 @Component
 public class ClusterProxyHybridClient {
@@ -55,7 +55,7 @@ public class ClusterProxyHybridClient {
         return callClusterProxy(clusterIdentifier, readConfigUrl, userCrn, null, this::listEnvironmentsFromUrl);
     }
 
-    public DescribeEnvironmentResponse getEnvironment(String clusterIdentifier, String userCrn, String environmentCrn) {
+    public DescribeEnvironmentV2Response getEnvironment(String clusterIdentifier, String userCrn, String environmentCrn) {
         String getConfigUrl = String.format(clusterProxyConfiguration.getClusterProxyUrl() + REMOTE_CLUSTER_GET_ENVIRONMENT_CONFIG_PATH,
                 clusterIdentifier);
         LOGGER.info("Reading remote cluster with cluster proxy configuration for cluster identifer: {}", clusterIdentifier);
@@ -102,16 +102,16 @@ public class ClusterProxyHybridClient {
         }
     }
 
-    private DescribeEnvironmentResponse getEnvironmentsFromUrl(String readConfigUrl, String userCrn, String environment) {
+    private DescribeEnvironmentV2Response getEnvironmentsFromUrl(String readConfigUrl, String userCrn, String environment) {
         try {
             DescribeEnvironmentRequest postRequest = new DescribeEnvironmentRequest();
             postRequest.setEnvironmentName(environment);
             postRequest.setOutputView(DescribeEnvironmentRequest.OutputViewEnum.FULL);
 
-            return hybridRestTemplate.postForEntity(readConfigUrl, requestEntity(postRequest, userCrn), DescribeEnvironmentResponse.class).getBody();
+            return hybridRestTemplate.postForEntity(readConfigUrl, requestEntity(postRequest, userCrn), DescribeEnvironmentV2Response.class).getBody();
         } catch (JsonProcessingException e) {
             LOGGER.warn("Error occurred when tried to parse the response json.", e);
-            return new DescribeEnvironmentResponse();
+            return new DescribeEnvironmentV2Response();
         }
     }
 

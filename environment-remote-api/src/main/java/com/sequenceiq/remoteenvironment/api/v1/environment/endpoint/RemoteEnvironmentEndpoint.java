@@ -2,6 +2,7 @@ package com.sequenceiq.remoteenvironment.api.v1.environment.endpoint;
 
 import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.ENVIRONMENT;
 import static com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentOpDescription.DATALAKE_SERVICES_NOTES;
+import static com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentOpDescription.DESCRIBE_BY_CRN;
 import static com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentOpDescription.ENVIRONMENT_NOTES;
 import static com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentOpDescription.LIST;
 import static com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentOpDescription.POST_BY_CRN;
@@ -48,7 +49,7 @@ public interface RemoteEnvironmentEndpoint {
     @POST
     @Path("/crn")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = POST_BY_CRN, description = ENVIRONMENT_NOTES, operationId = "getRemoteEnvironmentV1ByCrn",
+    @Operation(summary = DESCRIBE_BY_CRN, description = ENVIRONMENT_NOTES, operationId = "getRemoteEnvironmentV1ByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DescribeEnvironmentResponse getByCrn(@Valid DescribeRemoteEnvironment request);
 

@@ -30,6 +30,9 @@ import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyHybridClient;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.flow.core.PayloadContextProvider;
+import com.sequenceiq.remoteenvironment.DescribeEnvironmentPropertiesV2Response;
+import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
+import com.sequenceiq.remoteenvironment.api.v1.environment.model.DescribeRemoteEnvironment;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponse;
 import com.sequenceiq.remoteenvironment.controller.v1.converter.PrivateControlPlaneEnvironmentToRemoteEnvironmentConverter;
 import com.sequenceiq.remoteenvironment.domain.PrivateControlPlane;
@@ -68,8 +71,49 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
         return responses;
     }
 
-    public DescribeEnvironmentResponse getRemoteEnvironment(String publicCloudAccountId, String environmentCrn) {
-        return callRemoteEnvironment(publicCloudAccountId, environmentCrn, this::describeRemoteEnvironmentWithActor);
+    public DescribeEnvironmentV2Response getDescribeEnvironmentResponse(String publicCloudAccountId, DescribeRemoteEnvironment environment) {
+        DescribeEnvironmentV2Response describeEnvironmentResponse = callRemoteEnvironment(
+                publicCloudAccountId,
+                environment.getCrn(),
+                this::describeRemoteEnvironmentWithActor);
+
+        return describeEnvironmentResponse;
+    }
+
+    public DescribeEnvironmentV2Response getDescribeRemoteEnvironmentResponse(String publicCloudAccountId, DescribeRemoteEnvironment environment) {
+        String privateCloudAccountId = Crn.safeFromString(environment.getCrn()).getAccountId();
+        DescribeEnvironmentV2Response describeEnvironmentResponse = callRemoteEnvironment(
+                publicCloudAccountId,
+                environment.getCrn(),
+                this::describeRemoteEnvironmentWithActor);
+
+        Optional<PrivateControlPlane> privateControlPlane =
+                privateControlPlaneService.getByPrivateCloudAccountIdAndPublicCloudAccountId(
+                        privateCloudAccountId,
+                        publicCloudAccountId);
+
+        DescribeEnvironmentV2Response describeEnvironmentV2Response =
+                getDescribeRemoteEnvironmentResponse(
+                        describeEnvironmentResponse,
+                        privateControlPlane);
+
+        return describeEnvironmentV2Response;
+    }
+
+    private DescribeEnvironmentV2Response getDescribeRemoteEnvironmentResponse(
+            DescribeEnvironmentV2Response describeEnvironmentResponse,
+            Optional<PrivateControlPlane> privateControlPlane) {
+
+        DescribeEnvironmentPropertiesV2Response describeEnvironmentPropertiesV2Response =
+                new DescribeEnvironmentPropertiesV2Response();
+        if (privateControlPlane.isPresent()) {
+            describeEnvironmentPropertiesV2Response.setRemoteEnvironmentUrl(
+                    String.format("%s/environments/#/environments/%s",
+                            privateControlPlane.get().getUrl(),
+                            describeEnvironmentResponse.getEnvironment().getEnvironmentName()));
+        }
+        describeEnvironmentResponse.setAdditionalProperties(describeEnvironmentPropertiesV2Response);
+        return describeEnvironmentResponse;
     }
 
     public List<SimpleRemoteEnvironmentResponse> listRemoteEnvironmentsInternal(PrivateControlPlane controlPlane) {
@@ -143,7 +187,7 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
         return responses;
     }
 
-    private DescribeEnvironmentResponse describeRemoteEnvironmentWithActor(PrivateControlPlane controlPlane, String environmentCrn, String actorCrn) {
+    private DescribeEnvironmentV2Response describeRemoteEnvironmentWithActor(PrivateControlPlane controlPlane, String environmentCrn, String actorCrn) {
         LOGGER.debug("The describe of remote environment('{}') with actor('{}') is executed by thread: {}", environmentCrn, actorCrn,
                 Thread.currentThread().getName());
         try {

@@ -35,7 +35,7 @@ public class RemoteEnvironmentController implements RemoteEnvironmentEndpoint {
     public DescribeEnvironmentResponse getByCrn(DescribeRemoteEnvironment request) {
         MDCBuilder.buildMdcContext();
         return remoteEnvironmentService
-                .getRemoteEnvironment(ThreadBasedUserCrnProvider.getAccountId(), request.getCrn());
+                .getDescribeEnvironmentResponse(ThreadBasedUserCrnProvider.getAccountId(), request);
     }
 
     @Override

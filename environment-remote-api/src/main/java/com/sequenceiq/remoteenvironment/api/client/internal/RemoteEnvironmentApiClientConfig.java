@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.client.ThreadLocalUserCrnWebTargetBuilder;
 import com.sequenceiq.cloudbreak.client.WebTargetEndpointFactory;
 import com.sequenceiq.remoteenvironment.api.RemoteEnvironmentApi;
 import com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentEndpoint;
+import com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentV2Endpoint;
 
 @Configuration
 public class RemoteEnvironmentApiClientConfig {
@@ -35,5 +36,11 @@ public class RemoteEnvironmentApiClientConfig {
     @ConditionalOnBean(name = "remoteEnvironmentApiClientWebTarget")
     RemoteEnvironmentEndpoint remoteEnvironmentEndpoint(WebTarget remoteEnvironmentApiClientWebTarget) {
         return new WebTargetEndpointFactory().createEndpoint(remoteEnvironmentApiClientWebTarget, RemoteEnvironmentEndpoint.class);
+    }
+
+    @Bean
+    @ConditionalOnBean(name = "remoteEnvironmentV2ApiClientWebTarget")
+    RemoteEnvironmentV2Endpoint remoteEnvironmentV2Endpoint(WebTarget remoteEnvironmentV2ApiClientWebTarget) {
+        return new WebTargetEndpointFactory().createEndpoint(remoteEnvironmentV2ApiClientWebTarget, RemoteEnvironmentV2Endpoint.class);
     }
 }

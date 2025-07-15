@@ -11,6 +11,8 @@ public class RemoteEnvironmentOpDescription {
 
     public static final String POST_BY_CRN = "POST an environment by CRN.";
 
+    public static final String DESCRIBE_BY_CRN = "Describe an environment by CRN.";
+
     private RemoteEnvironmentOpDescription() {
 
     }
