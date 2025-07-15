@@ -87,11 +87,11 @@ public class PlatformAwareSdxConnector {
     }
 
     public AttemptResult<Object> getAttemptResultForDeletion(String environmentCrn) {
-        Map<String, PollingResult> pollingResultForDeletion = platformDependentSdxDeleteServices.values().stream()
+        Map<PollingResult, String> sdxCrnsByPollingResult = platformDependentSdxDeleteServices.values().stream()
                 .map(deleteService -> deleteService.getPollingResultForDeletion(environmentCrn).entrySet())
                 .flatMap(Collection::stream)
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        return getAttemptResultForPolling(pollingResultForDeletion, "SDX deletion is failed for these: %s");
+                .collect(Collectors.groupingBy(Map.Entry::getValue, Collectors.mapping(Map.Entry::getKey, Collectors.joining(","))));
+        return getAttemptResultForPolling(sdxCrnsByPollingResult);
     }
 
     public void startByEnvironment(String environmentCrn) {
@@ -165,19 +165,17 @@ public class PlatformAwareSdxConnector {
         throw new IllegalStateException("Invalid Data Lake CRN has been found, please contact Cloudera support!");
     }
 
-    private AttemptResult<Object> getAttemptResultForPolling(Map<String, PollingResult> pollingResult, String failedPollingErrorMessageTemplate) {
-        if (!pollingResult.isEmpty()) {
-            Set<String> failedSdxCrns = pollingResult.entrySet().stream()
-                    .filter(entry -> PollingResult.FAILED.equals(entry.getValue()))
-                    .map(Map.Entry::getKey)
-                    .collect(Collectors.toSet());
-            if (!failedSdxCrns.isEmpty()) {
-                String errorMessage = String.format(failedPollingErrorMessageTemplate, Joiner.on(",").join(failedSdxCrns));
-                LOGGER.error(errorMessage);
-                return AttemptResults.breakFor(new IllegalStateException(errorMessage));
-            }
+    private AttemptResult<Object> getAttemptResultForPolling(Map<PollingResult, String> sdxCrnsByPollingResult) {
+        if (sdxCrnsByPollingResult.containsKey(PollingResult.FAILED)) {
+            String errorMessage = String.format("Data Lake delete failed for %s", sdxCrnsByPollingResult.get(PollingResult.FAILED));
+            LOGGER.error(errorMessage);
+            return AttemptResults.breakFor(new IllegalStateException(errorMessage));
+        }
+        if (sdxCrnsByPollingResult.containsKey(PollingResult.IN_PROGRESS)) {
+            LOGGER.debug("Data Lake delete is in progress for {}", sdxCrnsByPollingResult.get(PollingResult.IN_PROGRESS));
             return AttemptResults.justContinue();
         }
+        LOGGER.debug("Data Lake delete finished for {}", sdxCrnsByPollingResult.get(PollingResult.COMPLETED));
         return AttemptResults.finishWith(null);
     }
 }

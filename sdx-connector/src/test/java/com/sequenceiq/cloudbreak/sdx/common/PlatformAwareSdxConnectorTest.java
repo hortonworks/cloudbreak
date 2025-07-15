@@ -24,6 +24,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.dyngr.core.AttemptResult;
+import com.dyngr.core.AttemptState;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
@@ -186,11 +188,37 @@ class PlatformAwareSdxConnectorTest {
     }
 
     @Test
-    public void testGetAttemptResult() {
+    public void testGetAttemptResultInProgress() {
         when(cdlSdxDeleteService.getPollingResultForDeletion(ENV_CRN)).thenReturn(Map.of(SAAS_CRN, PollingResult.IN_PROGRESS));
         when(paasSdxDeleteService.getPollingResultForDeletion(ENV_CRN)).thenReturn(Map.of(PAAS_CRN, PollingResult.IN_PROGRESS));
         when(pdlSdxDeleteService.getPollingResultForDeletion(ENV_CRN)).thenReturn(Map.of(PDL_CRN, PollingResult.IN_PROGRESS));
-        underTest.getAttemptResultForDeletion(ENV_CRN);
+        AttemptResult<Object> result = underTest.getAttemptResultForDeletion(ENV_CRN);
+        assertEquals(AttemptState.CONTINUE, result.getState());
+        verify(paasSdxDeleteService).getPollingResultForDeletion(ENV_CRN);
+        verify(cdlSdxDeleteService).getPollingResultForDeletion(ENV_CRN);
+        verify(pdlSdxDeleteService).getPollingResultForDeletion(ENV_CRN);
+    }
+
+    @Test
+    public void testGetAttemptResultFailed() {
+        when(cdlSdxDeleteService.getPollingResultForDeletion(ENV_CRN)).thenReturn(Map.of(SAAS_CRN, PollingResult.FAILED));
+        when(paasSdxDeleteService.getPollingResultForDeletion(ENV_CRN)).thenReturn(Map.of(PAAS_CRN, PollingResult.IN_PROGRESS));
+        when(pdlSdxDeleteService.getPollingResultForDeletion(ENV_CRN)).thenReturn(Map.of(PDL_CRN, PollingResult.COMPLETED));
+        AttemptResult<Object> result = underTest.getAttemptResultForDeletion(ENV_CRN);
+        assertEquals(AttemptState.BREAK, result.getState());
+        assertEquals("Data Lake delete failed for " + SAAS_CRN, result.getCause().getMessage());
+        verify(paasSdxDeleteService).getPollingResultForDeletion(ENV_CRN);
+        verify(cdlSdxDeleteService).getPollingResultForDeletion(ENV_CRN);
+        verify(pdlSdxDeleteService).getPollingResultForDeletion(ENV_CRN);
+    }
+
+    @Test
+    public void testGetAttemptResultCompleted() {
+        when(cdlSdxDeleteService.getPollingResultForDeletion(ENV_CRN)).thenReturn(Map.of(SAAS_CRN, PollingResult.COMPLETED));
+        when(paasSdxDeleteService.getPollingResultForDeletion(ENV_CRN)).thenReturn(Map.of(PAAS_CRN, PollingResult.COMPLETED));
+        when(pdlSdxDeleteService.getPollingResultForDeletion(ENV_CRN)).thenReturn(Map.of(PDL_CRN, PollingResult.COMPLETED));
+        AttemptResult<Object> result = underTest.getAttemptResultForDeletion(ENV_CRN);
+        assertEquals(AttemptState.FINISH, result.getState());
         verify(paasSdxDeleteService).getPollingResultForDeletion(ENV_CRN);
         verify(cdlSdxDeleteService).getPollingResultForDeletion(ENV_CRN);
         verify(pdlSdxDeleteService).getPollingResultForDeletion(ENV_CRN);
