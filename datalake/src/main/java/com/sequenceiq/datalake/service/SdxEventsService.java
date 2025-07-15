@@ -128,7 +128,7 @@ public class SdxEventsService {
             List<CloudbreakEventV4Response> cloudbreakEventV4Responses = ThreadBasedUserCrnProvider.doAsInternalActor(
                     () -> eventV4Endpoint.getPagedCloudbreakEventListByCrn(getCloudbreakCrn(sdxCluster), page, size, false));
             return cloudbreakEventV4Responses.stream().map(entry -> convert(entry, sdxCluster.getCrn())).collect(toList());
-        } catch (NotFoundException notFoundException) {
+        } catch (NotFoundException | jakarta.ws.rs.NotFoundException notFoundException) {
             LOGGER.error("Failed to retrieve paged cloudbreak service events due to not found exception!", notFoundException);
             return Collections.emptyList();
         } catch (Exception exception) {
@@ -226,7 +226,7 @@ public class SdxEventsService {
      * Converts a collection of {@code StructuredNotificationEvent} to {@code CDPStructuredEvent}.
      *
      * @param structuredNotificationEvent Event response from cloudbreak.
-     * @param datalakeCrn               Crn of data lake.
+     * @param datalakeCrn                 Crn of data lake.
      * @return CDP structured Event
      */
     private CDPStructuredEvent convert(StructuredNotificationEvent structuredNotificationEvent, String datalakeCrn) {
