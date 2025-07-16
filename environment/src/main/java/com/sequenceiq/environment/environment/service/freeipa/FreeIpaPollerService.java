@@ -60,7 +60,7 @@ public class FreeIpaPollerService {
     @Value("${env.verticalscale.freeipa.polling.sleeptime:30}")
     private Integer verticalscaleSleeptime;
 
-    @Value("${env.crossrealm.freeipa.polling.sleeptime:30}")
+    @Value("${env.crossrealm.freeipa.polling.sleeptime:10}")
     private Integer crossRealmSleeptime;
 
     private final FreeIpaService freeIpaService;
