@@ -163,7 +163,7 @@ public class TerminationService {
                 updatedStack.setTerminated(clock.getCurrentTimeMillis());
                 updatedStack = stackService.save(updatedStack);
                 stackUpdater.updateStackStatus(updatedStack.getId(), DetailedStackStatus.DELETE_COMPLETED, statusReason);
-                stackStatusService.cleanupStatus(updatedStack.getId(), Status.DELETE_COMPLETED);
+                stackStatusService.cleanupByPreservedStatus(updatedStack.getId(), Status.DELETE_COMPLETED);
                 return updatedStack;
             });
             if (stack.getType().equals(StackType.WORKLOAD)) {

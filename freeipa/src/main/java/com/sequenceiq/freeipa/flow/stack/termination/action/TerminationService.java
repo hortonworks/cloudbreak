@@ -96,7 +96,7 @@ public class TerminationService {
         freeIpaRecipeService.deleteRecipes(stack.getId());
         stackEncryptionService.deleteStackEncryption(stack.getId());
         stackUpdater.updateStackStatus(stack, DetailedStackStatus.DELETE_COMPLETED, "Stack was terminated successfully.");
-        stackStatusService.cleanupStatus(stackId, Status.DELETE_COMPLETED);
+        stackStatusService.cleanupByPreservedStatus(stackId, Status.DELETE_COMPLETED);
         stackService.save(stack);
         freeIpaLoadBalancerService.delete(stackId);
     }

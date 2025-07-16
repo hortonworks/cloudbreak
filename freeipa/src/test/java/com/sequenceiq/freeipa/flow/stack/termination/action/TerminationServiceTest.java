@@ -139,7 +139,7 @@ class TerminationServiceTest {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         when(stack.getName()).thenReturn(STACK_NAME);
         when(stack.getId()).thenReturn(STACK_ID);
-        doNothing().when(stackStatusService).cleanupStatus(anyLong(), any());
+        doNothing().when(stackStatusService).cleanupByPreservedStatus(anyLong(), any());
 
         underTest.finalizeTerminationTransaction(STACK_ID);
 
@@ -154,7 +154,7 @@ class TerminationServiceTest {
         verify(freeIpaRecipeService).deleteRecipes(STACK_ID);
         verify(stackEncryptionService).deleteStackEncryption(STACK_ID);
         verify(freeIpaLoadBalancerService).delete(STACK_ID);
-        verify(stackStatusService).cleanupStatus(anyLong(), eq(DELETE_COMPLETED));
+        verify(stackStatusService).cleanupByPreservedStatus(anyLong(), eq(DELETE_COMPLETED));
     }
 
 }

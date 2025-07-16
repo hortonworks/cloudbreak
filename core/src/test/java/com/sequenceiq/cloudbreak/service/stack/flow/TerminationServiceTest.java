@@ -102,7 +102,7 @@ class TerminationServiceTest {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         when(stackService.get(STACK_ID)).thenReturn(stack);
         when(stackService.save(stack)).thenReturn(stack);
-        doNothing().when(stackStatusService).cleanupStatus(anyLong(), any());
+        doNothing().when(stackStatusService).cleanupByPreservedStatus(anyLong(), any());
         doAnswer(invocation -> invocation.getArgument(0, Supplier.class).get()).when(transactionService).required(any(Supplier.class));
 
 
@@ -113,7 +113,7 @@ class TerminationServiceTest {
         verify(cleanUpService).cleanUpStructuredEventsForStack(STACK_ID);
         verify(cleanUpService).detachClusterComponentRelatedAuditEntries(STACK_ID);
         verify(stackService).save(stack);
-        verify(stackStatusService).cleanupStatus(anyLong(), eq(DELETE_COMPLETED));
+        verify(stackStatusService).cleanupByPreservedStatus(anyLong(), eq(DELETE_COMPLETED));
 
     }
 
