@@ -24,8 +24,10 @@ format_disks_if_unformatted() {
     local iter=$2
     log $LOG_FILE "format disk arguments: ${device_name}"
     local return_value=0
-    log $LOG_FILE device: device_name
-    if [ -z "$(blkid device_name)" ]; then
+    log $LOG_FILE "device: ${device_name}"
+    BLKID_OUTPUT=$(blkid "$device_name" 2>&1)
+    log $LOG_FILE "blkid output: ${BLKID_OUTPUT}"
+    if [ -z "$BLKID_OUTPUT" ]; then
         if [[ "$CLOUD_PLATFORM" == "GCP" ]]; then
           device_name=/dev/disk/by-id/google-local-nvme-ssd-${iter}
         fi
