@@ -15,6 +15,8 @@ public class EncryptionProfileOpDescription {
 
     public static final String DELETE_BY_CRN = "delete encryption profile by crn";
 
+    public static final String LIST_CIPHERS_BY_TLS = "list cipher suits available by TLS version";
+
     private EncryptionProfileOpDescription() {
     }
 }

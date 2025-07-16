@@ -3,6 +3,9 @@ package com.sequenceiq.environment.encryptionprofile.service;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
@@ -19,6 +22,8 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.tls.TlsSpecificationsHelper;
+import com.sequenceiq.environment.api.v1.encryptionprofile.model.TlsVersionResponse;
 import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
 import com.sequenceiq.environment.encryptionprofile.respository.EncryptionProfileRepository;
 
@@ -132,5 +137,15 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
     @Override
     public AuthorizationResourceType getSupportedAuthorizationResourceType() {
         return AuthorizationResourceType.ENCRYPTION_PROFILE;
+    }
+
+    public Set<TlsVersionResponse> listCiphersByTlsVersion() {
+        Map<String, Set<String>> ciphersByTls = TlsSpecificationsHelper.getAllCipherSuitesAvailableByTlsVersion();
+        Map<String, Set<String>> recommendedCipherSuites = TlsSpecificationsHelper.getRecommendedCipherSuites();
+
+        return ciphersByTls.entrySet()
+                .stream()
+                .map(entry -> new TlsVersionResponse(entry.getKey(), entry.getValue(), recommendedCipherSuites.get(entry.getKey())))
+                .collect(Collectors.toSet());
     }
 }

@@ -13,6 +13,8 @@ public class EncryptionProfileModelDescription {
 
     public static final String STATUS = "Status of the encryption profile, represented as a string (e.g. 'DEFAULT', 'USER_MANAGED')";
 
+    public static final String RECOMMENDED_CIPHER_SUITES = "The cipher suites recommended to use, represented as a set of strings";
+
     private EncryptionProfileModelDescription() {
     }
 }

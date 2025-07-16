@@ -15,6 +15,7 @@ import jakarta.ws.rs.core.MediaType;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.environment.api.doc.encryptionprofile.EncryptionProfileDescriptor;
 import com.sequenceiq.environment.api.doc.encryptionprofile.EncryptionProfileOpDescription;
+import com.sequenceiq.environment.api.v1.encryptionprofile.model.CipherSuitesByTlsVersionResponse;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileRequest;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponses;
@@ -76,4 +77,12 @@ public interface EncryptionProfileEndpoint {
             description = EncryptionProfileDescriptor.ENCRYPTION_PROFILE_NOTES, operationId = "deleteEncryptionProfileByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     EncryptionProfileResponse deleteByCrn(@PathParam("crn") String crn);
+
+    @GET
+    @Path("list_ciphers_by_tls")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = EncryptionProfileOpDescription.LIST_CIPHERS_BY_TLS, description = EncryptionProfileDescriptor.ENCRYPTION_PROFILE_NOTES,
+            operationId = "listCiphersByTls",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    CipherSuitesByTlsVersionResponse listCiphersByTlsVersion();
 }

@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.encryptionprofile.v1.controller;
 
 import java.util.Collections;
+import java.util.Set;
 
 import jakarta.ws.rs.ForbiddenException;
 
@@ -18,9 +19,11 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.environment.api.v1.encryptionprofile.endpoint.EncryptionProfileEndpoint;
+import com.sequenceiq.environment.api.v1.encryptionprofile.model.CipherSuitesByTlsVersionResponse;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileRequest;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponses;
+import com.sequenceiq.environment.api.v1.encryptionprofile.model.TlsVersionResponse;
 import com.sequenceiq.environment.authorization.EncryptionProfileFiltering;
 import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
 import com.sequenceiq.environment.encryptionprofile.service.EncryptionProfileService;
@@ -116,6 +119,17 @@ public class EncryptionProfileController extends NotificationController implemen
         EncryptionProfile deletedEncryptionProfile = encryptionProfileService.deleteByResourceCrn(crn);
         notify(ResourceEvent.ENCRYPTION_PROFILE_DELETED);
         return encryptionProfileResponseConverter.convert(deletedEncryptionProfile, false);
+    }
+
+    @Override
+    @FilterListBasedOnPermissions
+    public CipherSuitesByTlsVersionResponse listCiphersByTlsVersion() {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        verifyEncryptionProfileEntitlement(accountId);
+
+        Set<TlsVersionResponse> tlsVersions = encryptionProfileService.listCiphersByTlsVersion();
+
+        return new CipherSuitesByTlsVersionResponse(tlsVersions);
     }
 
     private void verifyEncryptionProfileEntitlement(String accountId) {

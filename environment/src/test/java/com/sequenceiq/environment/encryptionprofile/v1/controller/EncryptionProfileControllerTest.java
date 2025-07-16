@@ -6,6 +6,7 @@ import static com.sequenceiq.environment.encryptionprofile.EncryptionProfileTest
 import static com.sequenceiq.environment.encryptionprofile.EncryptionProfileTestConstants.USER_CRN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -16,7 +17,10 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.ws.rs.ForbiddenException;
 
@@ -31,9 +35,12 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
+import com.sequenceiq.environment.api.v1.encryptionprofile.model.CipherSuitesByTlsVersionResponse;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileRequest;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponses;
+import com.sequenceiq.environment.api.v1.encryptionprofile.model.TlsVersionResponse;
 import com.sequenceiq.environment.authorization.EncryptionProfileFiltering;
 import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
 import com.sequenceiq.environment.encryptionprofile.service.EncryptionProfileService;
@@ -208,5 +215,32 @@ public class EncryptionProfileControllerTest {
                 ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> controller.deleteByCrn("test-crn")))
                 .isInstanceOf(ForbiddenException.class)
                 .hasMessageContaining("Encryption profile operations are not enabled for account: cloudbreak");
+    }
+
+    @Test
+    public void testListCiphersByTlsVersion() {
+        when(entitlementService.isConfigureEncryptionProfileEnabled(anyString())).thenReturn(true);
+        when(encryptionProfileService.listCiphersByTlsVersion()).thenCallRealMethod();
+
+        CipherSuitesByTlsVersionResponse result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> controller.listCiphersByTlsVersion());
+
+        Set<TlsVersionResponse> tlsVersions = result.getTlsVersions();
+        Set<String> versions = tlsVersions.stream().map(TlsVersionResponse::getTlsVersion).collect(Collectors.toSet());
+        Set<String> ciphers = tlsVersions.stream()
+                .flatMap(version -> version.getCipherSuites().stream())
+                .collect(Collectors.toSet());
+        Set<String> recommended = tlsVersions.stream()
+                .flatMap(version -> version.getRecommended().stream())
+                .collect(Collectors.toSet());
+
+        assertTrue(versions.containsAll(List.of(TlsVersion.TLS_1_2.getVersion(), TlsVersion.TLS_1_3.getVersion())), result.toString());
+        assertTrue(ciphers.containsAll(List.of("TLS_ECDHE_PSK_WITH_AES_128_CCM_8_SHA256", "TLS_ECCPWD_WITH_AES_128_CCM_SHA256",
+                "TLS_ECDHE_RSA_WITH_CAMELLIA_128_GCM_SHA256", "TLS_ECDHE_PSK_WITH_AES_128_CCM_SHA256", "TLS_AES_128_CCM_8_SHA256", "TLS_AES_128_CCM_SHA256")));
+        assertTrue(recommended.containsAll(List.of("TLS_AES_256_GCM_SHA384", "TLS_AES_128_GCM_SHA256",
+                "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_PSK_WITH_CHACHA20_POLY1305_SHA256", "TLS_ECDHE_PSK_WITH_AES_256_GCM_SHA384",
+                "TLS_ECDHE_ECDSA_WITH_CAMELLIA_128_GCM_SHA256", "TLS_ECDHE_ECDSA_WITH_ARIA_256_GCM_SHA384", "TLS_ECDHE_ECDSA_WITH_ARIA_128_GCM_SHA256",
+                "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_PSK_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256",
+                "TLS_ECDHE_ECDSA_WITH_CAMELLIA_256_GCM_SHA384", "TLS_ECCPWD_WITH_AES_128_GCM_SHA256", "TLS_ECCPWD_WITH_AES_256_GCM_SHA384",
+                "TLS_CHACHA20_POLY1305_SHA256")));
     }
 }
