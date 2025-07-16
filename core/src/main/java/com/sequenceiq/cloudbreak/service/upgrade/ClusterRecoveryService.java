@@ -55,7 +55,7 @@ public class ClusterRecoveryService {
 
     public RecoveryValidationV4Response validateRecovery(Long workspaceId, NameOrCrn stackNameOrCrn) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(stackNameOrCrn, workspaceId);
-        return validateFreeIpaStatus(stack.getEnvironmentCrn()).merge(validateStackStatus(stack));
+        return validateFreeIpaStatus(stack.getEnvironmentCrn(), stack.getName()).merge(validateStackStatus(stack));
     }
 
     private RecoveryValidationV4Response validateStackStatus(Stack stack) {
@@ -98,8 +98,8 @@ public class ClusterRecoveryService {
         return new RecoveryValidationV4Response(reason, status);
     }
 
-    private RecoveryValidationV4Response validateFreeIpaStatus(String envCrn) {
-        boolean freeIpaAvailable = freeipaService.checkFreeipaRunning(envCrn);
+    private RecoveryValidationV4Response validateFreeIpaStatus(String envCrn, String stackName) {
+        boolean freeIpaAvailable = freeipaService.checkFreeipaRunning(envCrn, stackName);
         String reason = "";
         RecoveryStatus status;
         if (!freeIpaAvailable) {

@@ -5,6 +5,7 @@ import static java.lang.String.format;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import jakarta.inject.Inject;
@@ -24,9 +25,12 @@ import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.dto.KerberosConfig;
+import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
+import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
@@ -48,24 +52,38 @@ public class FreeipaService {
     @Inject
     private FreeipaClientService freeipaClientService;
 
+    @Inject
+    private KerberosConfigService kerberosConfigService;
+
+    @Inject
+    private KerberosDetailService kerberosDetailService;
+
     @Retryable(value = CloudbreakServiceException.class, maxAttempts = 3, backoff = @Backoff(delay = 200))
-    public boolean checkFreeipaRunning(String envCrn) {
-        DescribeFreeIpaResponse freeipa = freeipaClientService.getByEnvironmentCrn(envCrn);
-        if (freeipa == null || freeipa.getAvailabilityStatus() == null || freeipa.getAvailabilityStatus() == AvailabilityStatus.UNKNOWN) {
-            String message = "Freeipa availability cannot be determined currently.";
-            LOGGER.info(message);
-            throw new CloudbreakServiceException(message);
-        } else if (!freeipa.getAvailabilityStatus().isAvailable()) {
-            String message = "Freeipa should be in Available state but currently is " + freeipa.getStatus().name();
-            LOGGER.info(message);
-            return false;
+    public boolean checkFreeipaRunning(String envCrn, String stackName) {
+        Optional<KerberosConfig> kerberosConfig = kerberosConfigService.get(envCrn, stackName);
+        boolean freeIpaConfiguredForEnv = kerberosConfig.map(kerberosDetailService::isIpaJoinable).orElse(false);
+        if (freeIpaConfiguredForEnv) {
+            Optional<DescribeFreeIpaResponse> freeipa = freeipaClientService.findByEnvironmentCrn(envCrn);
+            if (freeipa.isEmpty() || freeipa.map(DescribeFreeIpaResponse::getAvailabilityStatus).isEmpty()
+                    || freeipa.get().getAvailabilityStatus() == AvailabilityStatus.UNKNOWN) {
+                String message = "Freeipa availability cannot be determined currently.";
+                LOGGER.info(message);
+                throw new CloudbreakServiceException(message);
+            } else if (!freeipa.get().getAvailabilityStatus().isAvailable()) {
+                String message = "Freeipa should be in Available state but currently is " + freeipa.get().getStatus();
+                LOGGER.info(message);
+                return false;
+            } else {
+                return true;
+            }
         } else {
+            LOGGER.info("FreeIPA is not configured for the environment [{}], reporting healthy state for stack [{}]", envCrn, stackName);
             return true;
         }
     }
 
     @Recover
-    public boolean recoverCheckFreeipaRunning(CloudbreakServiceException e, String envCrn) {
+    public boolean recoverCheckFreeipaRunning(CloudbreakServiceException e, String envCrn, String stackName) {
         String message = format("Freeipa availability trials exhausted for %s, defaulting to FreeIPA non-available", envCrn);
         LOGGER.warn(message, e);
         return false;

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
+import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -20,6 +21,7 @@ import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsARecordRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsCnameRecordRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 @Service
 public class FreeIPAEndpointManagementService extends BasePublicEndpointManagementService {
@@ -37,20 +39,28 @@ public class FreeIPAEndpointManagementService extends BasePublicEndpointManageme
     @Inject
     private LoadBalancerConfigService loadBalancerConfigService;
 
+    @Inject
+    private FreeipaClientService freeipaClientService;
+
     public void registerLoadBalancerDomainWithFreeIPA(StackView stack) {
         Optional<LoadBalancer> loadBalancerOptional = getLoadBalancer(stack.getId());
         if (loadBalancerOptional.isPresent()) {
-            LoadBalancer loadBalancer = loadBalancerOptional.get();
-            try {
-                if (StringUtils.isNotEmpty(loadBalancer.getDns())) {
-                    sendAddDnsCnameRecordRequest(stack, loadBalancer, true);
-                } else if (StringUtils.isNotEmpty(loadBalancer.getIp())) {
-                    sendAddDnsARecordRequest(stack, loadBalancer, true);
-                } else {
-                    LOGGER.error("Unable to find DNS or IP for load balancer. Load balancer will not be registered with FreeIPA.");
+            Optional<DescribeFreeIpaResponse> freeIpaResponse = freeipaClientService.findByEnvironmentCrn(stack.getEnvironmentCrn());
+            if (freeIpaResponse.isPresent()) {
+                LoadBalancer loadBalancer = loadBalancerOptional.get();
+                try {
+                    if (StringUtils.isNotEmpty(loadBalancer.getDns())) {
+                        sendAddDnsCnameRecordRequest(stack, loadBalancer, true);
+                    } else if (StringUtils.isNotEmpty(loadBalancer.getIp())) {
+                        sendAddDnsARecordRequest(stack, loadBalancer, true);
+                    } else {
+                        LOGGER.error("Unable to find DNS or IP for load balancer. Load balancer will not be registered with FreeIPA.");
+                    }
+                } catch (Exception e) {
+                    LOGGER.error("Unable to register load balancer with FreeIPA", e);
                 }
-            } catch (Exception e) {
-                LOGGER.error("Unable to register load balancer with FreeIPA", e);
+            } else {
+                LOGGER.info("FreeIPA is missing for environment. Skipping DNS registration for Load balancer.");
             }
         } else {
             LOGGER.debug("No load balancer found that needs to be registered with FreeIPA");
@@ -93,17 +103,22 @@ public class FreeIPAEndpointManagementService extends BasePublicEndpointManageme
     public void deleteLoadBalancerDomainFromFreeIPA(StackDtoDelegate stack) {
         Optional<LoadBalancer> loadBalancerOptional = getLoadBalancer(stack.getId());
         if (loadBalancerOptional.isPresent()) {
-            try {
-                LoadBalancer loadBalancer = loadBalancerOptional.get();
-                if (StringUtils.isNotEmpty(loadBalancer.getDns())) {
-                    sendDeleteDnsCnameRecordRequest(stack, loadBalancer);
-                } else if (StringUtils.isNotEmpty(loadBalancer.getIp())) {
-                    sendDeleteDnsARecordRequest(stack, loadBalancer);
-                } else {
-                    LOGGER.debug("Unable to find DNS or IP for load balancer. Load balancer will not be deleted from FreeIPA.");
+            Optional<DescribeFreeIpaResponse> freeIpaResponse = freeipaClientService.findByEnvironmentCrn(stack.getEnvironmentCrn());
+            if (freeIpaResponse.isPresent()) {
+                try {
+                    LoadBalancer loadBalancer = loadBalancerOptional.get();
+                    if (StringUtils.isNotEmpty(loadBalancer.getDns())) {
+                        sendDeleteDnsCnameRecordRequest(stack, loadBalancer);
+                    } else if (StringUtils.isNotEmpty(loadBalancer.getIp())) {
+                        sendDeleteDnsARecordRequest(stack, loadBalancer);
+                    } else {
+                        LOGGER.debug("Unable to find DNS or IP for load balancer. Load balancer will not be deleted from FreeIPA.");
+                    }
+                } catch (Exception e) {
+                    LOGGER.error("Unable to delete load balancer domain from FreeIPA", e);
                 }
-            } catch (Exception e) {
-                LOGGER.error("Unable to delete load balancer domain from FreeIPA", e);
+            } else {
+                LOGGER.info("FreeIPA is missing for environment. Skipping DNS registration for Load balancer.");
             }
         } else {
             LOGGER.debug("No load balancer found that needs to be deleted from FreeIPA");

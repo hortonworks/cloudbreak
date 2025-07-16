@@ -215,7 +215,7 @@ public class ClusterRepairService {
     }
 
     public Optional<RepairValidation> validateRepairConditions(ManualClusterRepairMode repairMode, StackDto stack, Set<String> selectedParts) {
-        if (!freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())) {
+        if (!freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn(), stack.getName())) {
             return Optional.of(RepairValidation.of("Action cannot be performed because the FreeIPA isn't available. Please check the FreeIPA state."));
         } else if (!environmentService.environmentStatusInDesiredState(stack.getStack(), Set.of(EnvironmentStatus.AVAILABLE))) {
             return Optional.of(RepairValidation.of("Action cannot be performed because the Environment isn't available. Please check the Environment state."));

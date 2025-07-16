@@ -28,6 +28,8 @@ public class ClusterUpgradeFreeIpaStatusValidationHandlerTest {
 
     private static final String ENV_CRN = "ENV_CRN";
 
+    private static final String STACK_NAME = "STACK_NAME";
+
     @InjectMocks
     private ClusterUpgradeFreeIpaStatusValidationHandler underTest;
 
@@ -44,29 +46,30 @@ public class ClusterUpgradeFreeIpaStatusValidationHandlerTest {
     public void setup() {
         when(stackService.getViewByIdWithoutAuth(STACK_ID)).thenReturn(stackView);
         when(stackView.getEnvironmentCrn()).thenReturn(ENV_CRN);
+        when(stackView.getName()).thenReturn(STACK_NAME);
     }
 
     @Test
     public void testFreeIpaValidationReturnsNotAvailableThenThrowError() {
 
-        when(freeipaService.checkFreeipaRunning(ENV_CRN)).thenReturn(false);
+        when(freeipaService.checkFreeipaRunning(ENV_CRN, STACK_NAME)).thenReturn(false);
 
         Selectable nextFlowStepSelector = underTest.doAccept(getHandlerEvent());
 
         assertEquals(FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT.selector(), nextFlowStepSelector.selector());
-        verify(freeipaService).checkFreeipaRunning(ENV_CRN);
+        verify(freeipaService).checkFreeipaRunning(ENV_CRN, STACK_NAME);
         verify(stackService).getViewByIdWithoutAuth(STACK_ID);
     }
 
     @Test
     public void testFreeIpaValidationReturnsAvailableThenPass() {
 
-        when(freeipaService.checkFreeipaRunning(ENV_CRN)).thenReturn(true);
+        when(freeipaService.checkFreeipaRunning(ENV_CRN, STACK_NAME)).thenReturn(true);
 
         Selectable nextFlowStepSelector = underTest.doAccept(getHandlerEvent());
 
         assertEquals(FINISH_CLUSTER_UPGRADE_FREEIPA_STATUS_VALIDATION_EVENT.selector(), nextFlowStepSelector.selector());
-        verify(freeipaService).checkFreeipaRunning(ENV_CRN);
+        verify(freeipaService).checkFreeipaRunning(ENV_CRN, STACK_NAME);
         verify(stackService).getViewByIdWithoutAuth(STACK_ID);
     }
 

@@ -29,11 +29,11 @@ import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
 @RunWith(Parameterized.class)
 public class ClusterRecoveryServiceTest {
 
-    private static final String STACK_NAME = "STACK_NAME";
+    private static final Stack STACK = TestUtil.stack();
 
     private static final long WORKSPACE_ID = 0L;
 
-    private static final Stack STACK = TestUtil.stack();
+    private static final String STACK_NAME = STACK.getName();
 
     @Parameterized.Parameter
     public List<StackStatus> stackStatusList;
@@ -70,7 +70,7 @@ public class ClusterRecoveryServiceTest {
 
         when(stackService.getByNameOrCrnInWorkspace(stackNameOrCrn, WORKSPACE_ID)).thenReturn(STACK);
         when(stackStatusService.findAllStackStatusesById(STACK.getId())).thenReturn(stackStatusList);
-        when(freeipaService.checkFreeipaRunning(STACK.getEnvironmentCrn())).thenReturn(freeIpaStatus);
+        when(freeipaService.checkFreeipaRunning(STACK.getEnvironmentCrn(), STACK_NAME)).thenReturn(freeIpaStatus);
 
         RecoveryValidationV4Response response = underTest.validateRecovery(WORKSPACE_ID, stackNameOrCrn);
 

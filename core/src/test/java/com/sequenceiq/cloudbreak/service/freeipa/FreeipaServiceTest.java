@@ -13,6 +13,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.dto.KerberosConfig;
+import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
+import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
@@ -50,8 +54,16 @@ class FreeipaServiceTest {
 
     private static final String CURRENT_STATE = "currentState";
 
+    private static final String STACK_NAME = "stackName";
+
     @Mock
     private FreeipaClientService freeipaClientService;
+
+    @Mock
+    private KerberosConfigService kerberosConfigService;
+
+    @Mock
+    private KerberosDetailService kerberosDetailService;
 
     @InjectMocks
     private FreeipaService underTest;
@@ -62,10 +74,13 @@ class FreeipaServiceTest {
         DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
         freeipa.setStatus(status);
         freeipa.setAvailabilityStatus(AvailabilityStatus.UNAVAILABLE);
+        KerberosConfig kerberosConfig = new KerberosConfig();
+        when(kerberosConfigService.get(ENV_CRN, STACK_NAME)).thenReturn(Optional.of(kerberosConfig));
+        when(kerberosDetailService.isIpaJoinable(kerberosConfig)).thenReturn(true);
+        when(freeipaClientService.findByEnvironmentCrn(ENV_CRN)).thenReturn(Optional.of(freeipa));
 
-        when(freeipaClientService.getByEnvironmentCrn(ENV_CRN)).thenReturn(freeipa);
+        boolean freeipaRunning = underTest.checkFreeipaRunning(ENV_CRN, STACK_NAME);
 
-        boolean freeipaRunning = underTest.checkFreeipaRunning(ENV_CRN);
         assertFalse(freeipaRunning);
     }
 
@@ -75,27 +90,38 @@ class FreeipaServiceTest {
         DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
         freeipa.setStatus(status);
         freeipa.setAvailabilityStatus(AvailabilityStatus.UNKNOWN);
+        KerberosConfig kerberosConfig = new KerberosConfig();
+        when(kerberosConfigService.get(ENV_CRN, STACK_NAME)).thenReturn(Optional.of(kerberosConfig));
+        when(kerberosDetailService.isIpaJoinable(kerberosConfig)).thenReturn(true);
+        when(freeipaClientService.findByEnvironmentCrn(ENV_CRN)).thenReturn(Optional.of(freeipa));
 
-        when(freeipaClientService.getByEnvironmentCrn(ENV_CRN)).thenReturn(freeipa);
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.checkFreeipaRunning(ENV_CRN, STACK_NAME));
 
-        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.checkFreeipaRunning(ENV_CRN));
         assertEquals("Freeipa availability cannot be determined currently.", exception.getMessage());
     }
 
     @Test
     void testCheckFreeipaRunningWhenFreeIpaIsNullThenThrowsException() {
-        when(freeipaClientService.getByEnvironmentCrn(ENV_CRN)).thenReturn(null);
+        when(freeipaClientService.findByEnvironmentCrn(ENV_CRN)).thenReturn(Optional.empty());
+        KerberosConfig kerberosConfig = new KerberosConfig();
+        when(kerberosConfigService.get(ENV_CRN, STACK_NAME)).thenReturn(Optional.of(kerberosConfig));
+        when(kerberosDetailService.isIpaJoinable(kerberosConfig)).thenReturn(true);
 
-        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.checkFreeipaRunning(ENV_CRN));
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.checkFreeipaRunning(ENV_CRN, STACK_NAME));
+
         assertEquals("Freeipa availability cannot be determined currently.", exception.getMessage());
     }
 
     @Test
     void testCheckFreeipaRunningWhenFreeIpaStatusIsNullThenThrowsException() {
         DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
-        when(freeipaClientService.getByEnvironmentCrn(ENV_CRN)).thenReturn(freeipa);
+        when(freeipaClientService.findByEnvironmentCrn(ENV_CRN)).thenReturn(Optional.of(freeipa));
+        KerberosConfig kerberosConfig = new KerberosConfig();
+        when(kerberosConfigService.get(ENV_CRN, STACK_NAME)).thenReturn(Optional.of(kerberosConfig));
+        when(kerberosDetailService.isIpaJoinable(kerberosConfig)).thenReturn(true);
 
-        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.checkFreeipaRunning(ENV_CRN));
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.checkFreeipaRunning(ENV_CRN, STACK_NAME));
+
         assertEquals("Freeipa availability cannot be determined currently.", exception.getMessage());
     }
 
@@ -105,17 +131,21 @@ class FreeipaServiceTest {
         DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
         freeipa.setStatus(status);
         freeipa.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
+        KerberosConfig kerberosConfig = new KerberosConfig();
+        when(kerberosConfigService.get(ENV_CRN, STACK_NAME)).thenReturn(Optional.of(kerberosConfig));
+        when(kerberosDetailService.isIpaJoinable(kerberosConfig)).thenReturn(true);
+        when(freeipaClientService.findByEnvironmentCrn(ENV_CRN)).thenReturn(Optional.of(freeipa));
 
-        when(freeipaClientService.getByEnvironmentCrn(ENV_CRN)).thenReturn(freeipa);
-
-        Assertions.assertDoesNotThrow(() -> underTest.checkFreeipaRunning(ENV_CRN));
+        Assertions.assertDoesNotThrow(() -> underTest.checkFreeipaRunning(ENV_CRN, STACK_NAME));
     }
 
     @Test
     void rotateFreeIpaSecretsShouldFailIfRedbeamsFlowChainIsNotTriggered() {
         when(freeipaClientService.rotateSecret(any(), any())).thenReturn(new FlowIdentifier(FlowType.NOT_TRIGGERED, null));
+
         CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
                 () -> underTest.rotateFreeIpaSecret(ENV_CRN, FREEIPA_LDAP_BIND_PASSWORD, ROTATE, Map.of()));
+
         String expected = String.format("FreeIpa flow failed with error: 'Flow null not triggered'. "
                         + "Environment crn: %s, flow: FlowIdentifier{type=%s, pollableId='%s'}",
                 ENV_CRN, FlowType.NOT_TRIGGERED, null);
@@ -125,8 +155,10 @@ class FreeipaServiceTest {
     @Test
     void rotateFreeIpaSecretsShouldFailIfReturnedFlowInformationIsNull() {
         when(freeipaClientService.rotateSecret(any(), any())).thenReturn(null);
+
         CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
                 () -> underTest.rotateFreeIpaSecret(ENV_CRN, FREEIPA_LDAP_BIND_PASSWORD, ROTATE, Map.of()));
+
         String expected = String.format("FreeIpa flow failed with error: 'unknown'. Environment crn: %s, flow: null", ENV_CRN);
         assertEquals(expected, cloudbreakServiceException.getMessage());
     }
@@ -178,8 +210,10 @@ class FreeipaServiceTest {
         lastFlow.setStateStatus(StateStatus.PENDING);
         lastFlow.setCurrentState(CURRENT_STATE);
         when(freeipaClientService.getLastFlowId(eq(ENV_CRN))).thenReturn(lastFlow);
+
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
                 () -> underTest.preValidateFreeIpaSecretRotation(ENV_CRN));
+
         assertEquals(String.format("Polling in FreeIpa is not possible since last known state of flow for the FreeIpa is %s", CURRENT_STATE),
                 secretRotationException.getMessage());
         verify(freeipaClientService, times(1)).getLastFlowId(eq(ENV_CRN));
@@ -190,14 +224,18 @@ class FreeipaServiceTest {
         FlowLogResponse lastFlow = new FlowLogResponse();
         lastFlow.setStateStatus(StateStatus.SUCCESSFUL);
         when(freeipaClientService.getLastFlowId(eq(ENV_CRN))).thenReturn(lastFlow);
+
         underTest.preValidateFreeIpaSecretRotation(ENV_CRN);
+
         verify(freeipaClientService, times(1)).getLastFlowId(eq(ENV_CRN));
     }
 
     @Test
     void preValidateShouldSucceedIfLastFlowIsMissingInRedbeams() {
         when(freeipaClientService.getLastFlowId(eq(ENV_CRN))).thenReturn(null);
+
         underTest.preValidateFreeIpaSecretRotation(ENV_CRN);
+
         verify(freeipaClientService, times(1)).getLastFlowId(eq(ENV_CRN));
     }
 

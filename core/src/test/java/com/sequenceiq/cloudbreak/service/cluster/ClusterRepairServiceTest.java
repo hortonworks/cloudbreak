@@ -110,6 +110,8 @@ class ClusterRepairServiceTest {
 
     private static final String STACK_CRN = "STACK_CRN";
 
+    private static final String STACK_NAME = "STACK_NAME";
+
     private static final String ENV_CRN = "ENV_CRN";
 
     private static final long CLUSTER_ID = 1;
@@ -201,6 +203,7 @@ class ClusterRepairServiceTest {
         stackStatus.setStatus(Status.AVAILABLE);
         stack.setStackStatus(stackStatus);
         stack.setInstanceGroups(Set.of());
+        stack.setName(STACK_NAME);
         cluster.setStack(stack);
 
         Workspace workspace = new Workspace();
@@ -225,7 +228,7 @@ class ClusterRepairServiceTest {
         when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
         when(stackUpdater.updateStackStatus(1L, DetailedStackStatus.REPAIR_IN_PROGRESS)).thenReturn(stack);
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
-        when(freeipaService.checkFreeipaRunning(stackDto.getEnvironmentCrn())).thenReturn(true);
+        when(freeipaService.checkFreeipaRunning(stackDto.getEnvironmentCrn(), STACK_NAME)).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
         when(stackStopRestrictionService.isInfrastructureStoppable(stackDto)).thenReturn(StopRestrictionReason.NONE);
 
@@ -252,7 +255,7 @@ class ClusterRepairServiceTest {
 
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
         when(stackDto.getNotTerminatedInstanceMetaData()).thenReturn(List.of(host1, host2));
-        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn(), STACK_NAME)).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 
         BadRequestException exception = assertThrows(BadRequestException.class, () -> {
@@ -278,7 +281,7 @@ class ClusterRepairServiceTest {
 
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
         when(stackDto.getInstanceGroupDtos()).thenReturn(List.of(new InstanceGroupDto(host1.getInstanceGroup(), List.of(host1, host2))));
-        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn(), STACK_NAME)).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 
         BadRequestException exception = assertThrows(BadRequestException.class,
@@ -299,7 +302,7 @@ class ClusterRepairServiceTest {
 
         when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
-        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn(), STACK_NAME)).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
         databaseServerV4Response.setStatus(AVAILABLE);
@@ -327,7 +330,7 @@ class ClusterRepairServiceTest {
         when(image.isPrewarmed()).thenReturn(true);
         when(imageCatalogService.getImage(any(), any(), any(), any())).thenReturn(StatedImage.statedImage(image, "catalogUrl", "catalogName"));
         when(clusterDBValidationService.isGatewayRepairEnabled(cluster)).thenReturn(true);
-        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn(), STACK_NAME)).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
         when(stackStopRestrictionService.isInfrastructureStoppable(stackDto)).thenReturn(StopRestrictionReason.NONE);
 
@@ -352,7 +355,7 @@ class ClusterRepairServiceTest {
         when(image.isPrewarmed()).thenReturn(false);
         when(imageCatalogService.getImage(any(), any(), any(), any())).thenReturn(StatedImage.statedImage(image, "catalogUrl", "catalogName"));
         when(clusterDBValidationService.isGatewayRepairEnabled(cluster)).thenReturn(true);
-        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn(), STACK_NAME)).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 
         Result result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairWithDryRun(stack.getId()));
@@ -376,7 +379,7 @@ class ClusterRepairServiceTest {
         when(image.isPrewarmed()).thenReturn(true);
         when(imageCatalogService.getImage(any(), any(), any(), any())).thenReturn(StatedImage.statedImage(image, "catalogUrl", "catalogName"));
         when(clusterDBValidationService.isGatewayRepairEnabled(cluster)).thenReturn(false);
-        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn(), STACK_NAME)).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 
         Result result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairWithDryRun(stack.getId()));
@@ -396,7 +399,7 @@ class ClusterRepairServiceTest {
         hostGroup1.setInstanceGroup(instanceGroup);
 
         when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
-        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn(), STACK_NAME)).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 
         InstanceMetaData instance1md = new InstanceMetaData();
@@ -438,7 +441,7 @@ class ClusterRepairServiceTest {
 
         when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
-        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn(), STACK_NAME)).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 
         BadRequestException exception = assertThrows(BadRequestException.class, () -> {
@@ -458,7 +461,7 @@ class ClusterRepairServiceTest {
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
         databaseServerV4Response.setStatus(STOPPED);
         when(redbeamsClientService.getByCrn(eq("dbCrn"))).thenReturn(databaseServerV4Response);
-        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn(), STACK_NAME)).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 
         BadRequestException exception = assertThrows(BadRequestException.class, () -> {
@@ -473,7 +476,7 @@ class ClusterRepairServiceTest {
     @Test
     void testValidateRepairWhenFreeIpaNotAvailable() {
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
-        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(false);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn(), STACK_NAME)).thenReturn(false);
 
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> actual =
                 underTest.validateRepair(ManualClusterRepairMode.ALL, STACK_ID, Collections.emptySet(), false);
@@ -486,7 +489,7 @@ class ClusterRepairServiceTest {
     @Test
     void testValidateRepairWhenEnvNotAvailable() {
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
-        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn(), STACK_NAME))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(false);
 
@@ -501,7 +504,7 @@ class ClusterRepairServiceTest {
     @Test
     void testValidateRepairWhenOneGWUnhealthyAndNotSelected() {
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
-        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn(), STACK_NAME)).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 
         InstanceMetaData primaryGW = new InstanceMetaData();
@@ -535,7 +538,7 @@ class ClusterRepairServiceTest {
     @Test
     void testValidateRepairWhenTwoGWUnhealthyAndNotSelected() {
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
-        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn(), STACK_NAME)).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 
         InstanceMetaData primaryGW = new InstanceMetaData();
@@ -568,7 +571,7 @@ class ClusterRepairServiceTest {
     @Test
     void testValidateRepairWhenNoUnhealthyGWAndNotSelected() {
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
-        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn(), STACK_NAME)).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
         when(stackStopRestrictionService.isInfrastructureStoppable(stackDto)).thenReturn(StopRestrictionReason.NONE);
         HostGroup hostGroup1 = new HostGroup();
@@ -604,7 +607,7 @@ class ClusterRepairServiceTest {
     @Test
     void testValidateRepairWhenReattachSupported() {
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
-        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn(), STACK_NAME)).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
         when(stackStopRestrictionService.isInfrastructureStoppable(stackDto)).thenReturn(StopRestrictionReason.NONE);
 
@@ -629,7 +632,7 @@ class ClusterRepairServiceTest {
     @Test
     void testValidateRepairWhenReattachNotSupported() {
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
-        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn(), STACK_NAME)).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
         when(stackStopRestrictionService.isInfrastructureStoppable(stackDto)).thenReturn(StopRestrictionReason.EPHEMERAL_VOLUMES);
 
@@ -652,7 +655,7 @@ class ClusterRepairServiceTest {
     @Test
     void testValidateRepairWhenSaltVersionOutdatedRepairModeAll() {
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
-        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn(), STACK_NAME)).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
         when(stackStopRestrictionService.isInfrastructureStoppable(stackDto)).thenReturn(StopRestrictionReason.NONE);
         when(saltVersionUpgradeService.getGatewayInstancesWithOutdatedSaltVersion(eq(stackDto))).thenReturn(Set.of("instance1"));
@@ -675,7 +678,7 @@ class ClusterRepairServiceTest {
     @Test
     void testValidateRepairWhenSaltVersionOutdatedRepairModeNodeId() {
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
-        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn(), STACK_NAME)).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
         when(saltVersionUpgradeService.getGatewayInstancesWithOutdatedSaltVersion(eq(stackDto))).thenReturn(Set.of("instance1"));
 
@@ -690,7 +693,7 @@ class ClusterRepairServiceTest {
     @Test
     void testValidateRepairWhenSaltVersionOutdatedRepairModeHostGroup() {
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
-        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn(), STACK_NAME)).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
         when(saltVersionUpgradeService.getGatewayInstancesWithOutdatedSaltVersion(eq(stackDto))).thenReturn(Set.of("instance1"));
         InstanceGroupView gatewayGroup = mock(InstanceGroupView.class);
@@ -794,7 +797,7 @@ class ClusterRepairServiceTest {
         InstanceMetaData host2 = getHost("host2", hostGroup2.getName(), InstanceStatus.SERVICES_UNHEALTHY, InstanceGroupType.CORE);
         hostGroup2.setInstanceGroup(host2.getInstanceGroup());
 
-        when(freeipaService.checkFreeipaRunning(stackDto.getEnvironmentCrn())).thenReturn(true);
+        when(freeipaService.checkFreeipaRunning(stackDto.getEnvironmentCrn(), STACK_NAME)).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
         when(stackStopRestrictionService.isInfrastructureStoppable(stackDto)).thenReturn(StopRestrictionReason.NONE);
         when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1, hostGroup2));

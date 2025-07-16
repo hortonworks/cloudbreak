@@ -36,8 +36,9 @@ public class ClusterUpgradeFreeIpaStatusValidationHandler extends ExceptionCatch
         LOGGER.debug("Accepting Cluster upgrade FreeIPA status validation event.");
         ClusterUpgradeFreeIpaStatusValidationEvent request = event.getData();
         Long stackId = request.getResourceId();
-        String environmentCrn = getStack(stackId).getEnvironmentCrn();
-        if (!freeipaService.checkFreeipaRunning(environmentCrn)) {
+        StackView stack = getStack(stackId);
+        String environmentCrn = stack.getEnvironmentCrn();
+        if (!freeipaService.checkFreeipaRunning(environmentCrn, stack.getName())) {
             String message = "Upgrade cannot be performed because the FreeIPA isn't available. Please check the FreeIPA state and try again.";
             LOGGER.info("FreeIPA status validation failed with: {}", message);
             return new ClusterUpgradeValidationFailureEvent(stackId, new UpgradeValidationFailedException(message));

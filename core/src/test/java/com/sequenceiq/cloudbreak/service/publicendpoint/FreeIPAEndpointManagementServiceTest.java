@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
+import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.common.api.type.LoadBalancerType;
@@ -34,6 +35,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsARecordRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsCnameRecordRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 public class FreeIPAEndpointManagementServiceTest {
 
@@ -74,6 +76,9 @@ public class FreeIPAEndpointManagementServiceTest {
     @Mock
     private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
+    @Mock
+    private FreeipaClientService freeipaClientService;
+
     @InjectMocks
     private FreeIPAEndpointManagementService underTest;
 
@@ -111,6 +116,8 @@ public class FreeIPAEndpointManagementServiceTest {
         when(loadBalancerConfigService.selectLoadBalancerForFrontend(any(), any())).thenReturn(Optional.of(loadBalancer));
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(freeipaClientService.findByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(Optional.of(new DescribeFreeIpaResponse()));
+
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.registerLoadBalancerDomainWithFreeIPA(stack));
 
         ArgumentCaptor<AddDnsCnameRecordRequest> requestCaptor = ArgumentCaptor.forClass(AddDnsCnameRecordRequest.class);
@@ -129,6 +136,8 @@ public class FreeIPAEndpointManagementServiceTest {
         when(loadBalancerConfigService.selectLoadBalancerForFrontend(any(), any())).thenReturn(Optional.of(loadBalancer));
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(freeipaClientService.findByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(Optional.of(new DescribeFreeIpaResponse()));
+
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.registerLoadBalancerDomainWithFreeIPA(stack));
 
         ArgumentCaptor<AddDnsARecordRequest> requestCaptor = ArgumentCaptor.forClass(AddDnsARecordRequest.class);
@@ -147,6 +156,8 @@ public class FreeIPAEndpointManagementServiceTest {
         when(loadBalancerConfigService.selectLoadBalancerForFrontend(any(), any())).thenReturn(Optional.of(loadBalancer));
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(freeipaClientService.findByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(Optional.of(new DescribeFreeIpaResponse()));
+
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.deleteLoadBalancerDomainFromFreeIPA(stack));
 
         verify(dnsV1Endpoint, times(1)).deleteDnsCnameRecord(any(), any(), eq(loadBalancer.getEndpoint()));
@@ -162,6 +173,8 @@ public class FreeIPAEndpointManagementServiceTest {
         when(loadBalancerConfigService.selectLoadBalancerForFrontend(any(), any())).thenReturn(Optional.of(loadBalancer));
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(freeipaClientService.findByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(Optional.of(new DescribeFreeIpaResponse()));
+
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.deleteLoadBalancerDomainFromFreeIPA(stack));
 
         verify(dnsV1Endpoint, times(1)).deleteDnsARecord(any(), any(), eq(loadBalancer.getEndpoint()));
