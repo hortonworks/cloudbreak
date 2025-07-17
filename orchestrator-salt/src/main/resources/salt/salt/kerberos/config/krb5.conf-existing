@@ -1,7 +1,7 @@
 {%- set secretEncryptionEnabled = True if salt['pillar.get']('cluster:secretEncryptionEnabled', False) == True else False %}
 {%- set cCacheStoragePath = salt['pillar.get']('kerberos:cCacheSecretLocation') if secretEncryptionEnabled == True else '/tmp' %}
 {%- set kerberosConfigPath = salt['pillar.get']('kerberos:kerberosSecretLocation') if secretEncryptionEnabled == True else '/etc' %}
-{%- if "ipa_member" in grains.get('roles', []) -%}
+{%- if "ipa_member" in grains.get('roles', []) or "ad_member" in grains.get('roles', []) -%}
 includedir /etc/krb5.conf.d/
 includedir /var/lib/sss/pubconf/krb5.include.d/
 {%- endif %}
