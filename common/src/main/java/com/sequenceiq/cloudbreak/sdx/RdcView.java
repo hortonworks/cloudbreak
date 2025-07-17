@@ -48,6 +48,7 @@ public class RdcView {
         return endpoints.stream()
                 .filter(endpoint -> Objects.equals(endpoint.service(), service) && Objects.equals(endpoint.type(), type))
                 .map(TemplateEndpoint::endpoint)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
     }
 
