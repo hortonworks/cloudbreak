@@ -32,7 +32,9 @@ import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
 import com.sequenceiq.common.api.telemetry.response.MonitoringResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.telemetry.response.WorkloadAnalyticsResponse;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.api.type.FeatureSetting;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @Component
@@ -127,8 +129,8 @@ public class TelemetryConverter {
         return telemetry;
     }
 
-    public TelemetryRequest convert(TelemetryResponse response,
-                                    SdxClusterResponse sdxClusterResponse) {
+    public TelemetryRequest convert(DetailedEnvironmentResponse environment, TelemetryResponse response,
+            SdxClusterResponse sdxClusterResponse) {
         LOGGER.debug("Creating telemetry request based on datalake and environment responses.");
         TelemetryRequest telemetryRequest = new TelemetryRequest();
         FeaturesRequest featuresRequest = new FeaturesRequest();
@@ -150,10 +152,12 @@ public class TelemetryConverter {
             }
             telemetryRequest.setFluentAttributes(response.getFluentAttributes());
         }
-        telemetryRequest.setWorkloadAnalytics(
-                createWorkloadAnalyticsRequest(response, sdxClusterResponse));
-        Optional<FeatureSetting> waFeature = createWorkloadAnalyticsFeature(telemetryRequest.getWorkloadAnalytics());
-        featuresRequest.setWorkloadAnalytics(waFeature.orElse(null));
+        if (!EnvironmentType.isHybridFromEnvironmentTypeString(environment.getEnvironmentType())) {
+            telemetryRequest.setWorkloadAnalytics(
+                    createWorkloadAnalyticsRequest(response, sdxClusterResponse));
+            Optional<FeatureSetting> waFeature = createWorkloadAnalyticsFeature(telemetryRequest.getWorkloadAnalytics());
+            featuresRequest.setWorkloadAnalytics(waFeature.orElse(null));
+        }
         telemetryRequest.setFeatures(featuresRequest);
         return telemetryRequest;
     }

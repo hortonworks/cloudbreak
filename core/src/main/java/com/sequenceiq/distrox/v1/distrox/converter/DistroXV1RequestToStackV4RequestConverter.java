@@ -194,7 +194,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
 
     private TelemetryRequest getTelemetryRequest(DetailedEnvironmentResponse environment, SdxClusterResponse sdxClusterResponse) {
         TelemetryResponse envTelemetryResp = environment != null ? environment.getTelemetry() : null;
-        return telemetryConverter.convert(envTelemetryResp, sdxClusterResponse);
+        return telemetryConverter.convert(environment, envTelemetryResp, sdxClusterResponse);
     }
 
     NetworkV4Request getNetwork(NetworkV1Request networkRequest, DetailedEnvironmentResponse environment,

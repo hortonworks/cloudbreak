@@ -38,6 +38,7 @@ import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
 import com.sequenceiq.common.api.telemetry.response.MonitoringResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.FeatureSetting;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 public class TelemetryConverterTest {
@@ -198,7 +199,7 @@ public class TelemetryConverterTest {
         // GIVEN
         SdxClusterResponse sdxClusterResponse = null;
         // WHEN
-        TelemetryRequest result = underTest.convert(null, sdxClusterResponse);
+        TelemetryRequest result = underTest.convert(new DetailedEnvironmentResponse(), null, sdxClusterResponse);
         // THEN
         assertNotNull(result.getWorkloadAnalytics());
         assertNotNull(result.getFeatures());
@@ -217,7 +218,7 @@ public class TelemetryConverterTest {
                 new TelemetryConfiguration(altusDatabusConfiguration, monitoringConfig, null);
         TelemetryConverter converter = new TelemetryConverter(telemetryConfiguration, entitlementService, true, false, monitoringUrlResolver);
         // WHEN
-        TelemetryRequest result = converter.convert(null, sdxClusterResponse);
+        TelemetryRequest result = converter.convert(new DetailedEnvironmentResponse(), null, sdxClusterResponse);
         // THEN
         assertNull(result.getWorkloadAnalytics());
         assertNull(result.getFeatures().getMonitoring());
@@ -241,7 +242,7 @@ public class TelemetryConverterTest {
         sdxClusterResponse.setEnvironmentCrn("envCrn");
         sdxClusterResponse.setEnvironmentName("envName");
         // WHEN
-        TelemetryRequest result = underTest.convert(response, sdxClusterResponse);
+        TelemetryRequest result = underTest.convert(new DetailedEnvironmentResponse(), response, sdxClusterResponse);
         // THEN
         assertTrue(result.getFeatures().getWorkloadAnalytics().getEnabled());
         assertEquals(INSTANCE_PROFILE_VALUE, result.getLogging().getS3().getInstanceProfile());
@@ -264,7 +265,7 @@ public class TelemetryConverterTest {
         sdxClusterResponse.setEnvironmentCrn("envCrn");
         sdxClusterResponse.setEnvironmentName("envName");
         // WHEN
-        TelemetryRequest result = underTest.convert(response, sdxClusterResponse);
+        TelemetryRequest result = underTest.convert(new DetailedEnvironmentResponse(), response, sdxClusterResponse);
         // THEN
         assertTrue(result.getFeatures().getWorkloadAnalytics().getEnabled());
         assertEquals("sdxId", result.getWorkloadAnalytics().getAttributes().get("databus.header.sdx.id").toString());
@@ -288,7 +289,7 @@ public class TelemetryConverterTest {
         featuresResponse.addWorkloadAnalytics(false);
         response.setFeatures(featuresResponse);
         // WHEN
-        TelemetryRequest result = underTest.convert(response, sdxClusterResponse);
+        TelemetryRequest result = underTest.convert(new DetailedEnvironmentResponse(), response, sdxClusterResponse);
         // THEN
         assertNull(result.getWorkloadAnalytics());
         assertFalse(result.getFeatures().getWorkloadAnalytics().getEnabled());
@@ -310,7 +311,7 @@ public class TelemetryConverterTest {
                 new TelemetryConfiguration(altusDatabusConfiguration, monitoringConfig, null);
         TelemetryConverter converter = new TelemetryConverter(telemetryConfiguration, entitlementService, false, true, monitoringUrlResolver);
         // WHEN
-        TelemetryRequest result = converter.convert(response, sdxClusterResponse);
+        TelemetryRequest result = converter.convert(new DetailedEnvironmentResponse(), response, sdxClusterResponse);
         // THEN
         assertNull(result.getWorkloadAnalytics());
     }
@@ -326,7 +327,7 @@ public class TelemetryConverterTest {
         monitoringResponse.setRemoteWriteUrl(MONITORING_REMOTE_WRITE_URL);
         response.setMonitoring(monitoringResponse);
         // WHEN
-        TelemetryRequest result = underTest.convert(response, null);
+        TelemetryRequest result = underTest.convert(new DetailedEnvironmentResponse(), response, null);
         // THEN
         assertTrue(result.getFeatures().getMonitoring().getEnabled());
         assertEquals(MONITORING_REMOTE_WRITE_URL, result.getMonitoring().getRemoteWriteUrl());
@@ -342,7 +343,7 @@ public class TelemetryConverterTest {
         featuresResponse.setCloudStorageLogging(fs);
         response.setFeatures(featuresResponse);
         // WHEN
-        TelemetryRequest result = underTest.convert(response, null);
+        TelemetryRequest result = underTest.convert(new DetailedEnvironmentResponse(), response, null);
         // THEN
         assertFalse(result.getFeatures().getCloudStorageLogging().getEnabled());
     }
