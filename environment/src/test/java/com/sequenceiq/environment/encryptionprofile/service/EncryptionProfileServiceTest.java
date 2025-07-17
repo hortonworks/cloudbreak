@@ -32,6 +32,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.authorization.service.list.ResourceWithId;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -170,6 +171,7 @@ public class EncryptionProfileServiceTest {
     @Test
     void testDeleteByNameAndAccountId() {
         when(repository.findByNameAndAccountId(NAME, ACCOUNT_ID)).thenReturn(Optional.of(ENCRYPTION_PROFILE));
+        when(repository.findAllEnvNamesByEncrytionProfileNameAndAccountId(NAME, ACCOUNT_ID)).thenReturn(List.of());
 
         EncryptionProfile result = underTest.deleteByNameAndAccountId(NAME, ACCOUNT_ID);
 
@@ -287,5 +289,32 @@ public class EncryptionProfileServiceTest {
         assertThat(result).isEqualTo(ENCRYPTION_PROFILE_CRN);
 
         verify(repository).findResourceCrnByNameAndAccountId(NAME, ACCOUNT_ID);
+    }
+
+    @Test
+    void testDeleteByNameWhenDefaultProfile() {
+        EncryptionProfile defaultProfile = EncryptionProfileTestConstants.getTestEncryptionProfile("cdp-default", ResourceStatus.DEFAULT);
+
+        when(repository.findByNameAndAccountId(NAME, ACCOUNT_ID)).thenReturn(Optional.of(defaultProfile));
+
+        assertThatThrownBy(() -> underTest.deleteByNameAndAccountId(NAME, ACCOUNT_ID))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("The default encryption profile cannot be deleted.");
+
+        verify(repository, never()).delete(any());
+        verify(ownerAssignmentService, never()).notifyResourceDeleted(any());
+    }
+
+    @Test
+    void testDeleteByNameWhenProfileStillInUse() {
+        when(repository.findByNameAndAccountId(NAME, ACCOUNT_ID)).thenReturn(Optional.of(ENCRYPTION_PROFILE));
+        when(repository.findAllEnvNamesByEncrytionProfileNameAndAccountId(NAME, ACCOUNT_ID)).thenReturn(List.of("env1", "env2"));
+
+        assertThatThrownBy(() -> underTest.deleteByNameAndAccountId(NAME, ACCOUNT_ID))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("Encryption Profile cannot be deleted. It is still used by the environment(s): env1,env2");
+
+        verify(repository, never()).delete(any());
+        verify(ownerAssignmentService, never()).notifyResourceDeleted(any());
     }
 }

@@ -40,15 +40,19 @@ public class EncryptionProfileTestConstants {
     }
 
     public static EncryptionProfile getTestEncryptionProfile() {
+        return getTestEncryptionProfile(NAME, ResourceStatus.USER_MANAGED);
+    }
+
+    public static EncryptionProfile getTestEncryptionProfile(String name, ResourceStatus resourceStatus) {
         EncryptionProfile profile = new EncryptionProfile();
         profile.setId(1L);
-        profile.setName(NAME);
+        profile.setName(name);
         profile.setAccountId(ACCOUNT_ID);
         profile.setDescription(DESCRIPTION);
         profile.setResourceCrn(ENCRYPTION_PROFILE_CRN);
         profile.setCipherSuites(CIPHER_SUITES);
         profile.setTlsVersions(TLS_VERSIONS);
-        profile.setResourceStatus(ResourceStatus.USER_MANAGED);
+        profile.setResourceStatus(resourceStatus);
         return profile;
     }
 }

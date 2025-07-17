@@ -18,6 +18,7 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.CompositeAuthResourcePropertyProvider;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.authorization.service.list.ResourceWithId;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
@@ -93,7 +94,11 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
                 .findByNameAndAccountId(encryptionProfileName, accountId)
                 .orElseThrow(notFound("Encryption profile", encryptionProfileName));
 
-        checkForEncryptionProfileIfUsedByAnyEnvironment(encryptionProfile);
+        checkEncryptionProfileCanBeDeleted(encryptionProfile, encryptionProfile.getAccountId());
+
+        repository.delete(encryptionProfile);
+        ownerAssignmentService.notifyResourceDeleted(encryptionProfile.getResourceCrn());
+
         return encryptionProfile;
     }
 
@@ -103,7 +108,10 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
         EncryptionProfile encryptionProfile = repository.findByResourceCrn(crn)
                 .orElseThrow(notFound("Encryption profile with crn", crn));
 
-        checkForEncryptionProfileIfUsedByAnyEnvironment(encryptionProfile);
+        checkEncryptionProfileCanBeDeleted(encryptionProfile, encryptionProfile.getAccountId());
+
+        repository.delete(encryptionProfile);
+        ownerAssignmentService.notifyResourceDeleted(encryptionProfile.getResourceCrn());
         return encryptionProfile;
     }
 
@@ -123,10 +131,16 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
         return regionAwareCrnGenerator.generateCrnStringWithUuid(CrnResourceDescriptor.ENCYRPTION_PROFILE, accountId);
     }
 
-    private void checkForEncryptionProfileIfUsedByAnyEnvironment(EncryptionProfile encryptionProfile) {
-        // TODO: Implement logic to check if the encryption profile is used by any environment.
-        repository.delete(encryptionProfile);
-        ownerAssignmentService.notifyResourceDeleted(encryptionProfile.getResourceCrn());
+    private void checkEncryptionProfileCanBeDeleted(EncryptionProfile encryptionProfile, String accountId) {
+        if (ResourceStatus.DEFAULT.equals(encryptionProfile.getResourceStatus())) {
+            throw new BadRequestException("The default encryption profile cannot be deleted.");
+        }
+
+        List<String> names = repository.findAllEnvNamesByEncrytionProfileNameAndAccountId(encryptionProfile.getName(), accountId);
+
+        if (!names.isEmpty()) {
+            throw new BadRequestException("Encryption Profile cannot be deleted. It is still used by the environment(s): " + String.join(",", names));
+        }
     }
 
     @Override
