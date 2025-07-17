@@ -90,6 +90,8 @@ public class EnvironmentApiConverter {
 
     private static final String DEFAULT_CIDR = "0.0.0.0/0";
 
+    private static final String DEFAULT_ENCRYPTION_PROFILE = "cdp-default";
+
     private final CredentialService credentialService;
 
     private final TelemetryApiConverter telemetryApiConverter;
@@ -180,7 +182,10 @@ public class EnvironmentApiConverter {
                 .withProxyConfigName(request.getProxyConfigName())
                 .withDataServices(dataServicesConverter.convertToDto(request.getDataServices()))
                 .withCreatorClient(getHeaderOrItsFallbackValueOrDefault(USER_AGENT_HEADER, CDP_CALLER_ID_HEADER, CALLER_ID_NOT_FOUND))
-                .withEnvironmentType(environmentType == null ? EnvironmentType.PUBLIC_CLOUD : environmentType);
+                .withEnvironmentType(environmentType == null ? EnvironmentType.PUBLIC_CLOUD : environmentType)
+                .withEncryptionProfileName(request.getEncryptionProfileName() != null && !request.getEncryptionProfileName().isEmpty()
+                        ? request.getEncryptionProfileName()
+                        : DEFAULT_ENCRYPTION_PROFILE);
 
         NullUtil.doIfNotNull(request.getNetwork(), network -> {
             NetworkDto networkDto = networkRequestToDto(network);

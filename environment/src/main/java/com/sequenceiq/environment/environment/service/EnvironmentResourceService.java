@@ -30,6 +30,8 @@ import com.sequenceiq.environment.api.v1.environment.model.request.CredentialAwa
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
+import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
+import com.sequenceiq.environment.encryptionprofile.service.EncryptionProfileService;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
@@ -60,10 +62,13 @@ public class EnvironmentResourceService {
 
     private ProxyConfigService proxyConfigService;
 
+    private EncryptionProfileService encryptionProfileService;
+
     public EnvironmentResourceService(CredentialService credentialService, NetworkService networkService, CloudPlatformConnectors cloudPlatformConnectors,
             CredentialToCloudCredentialConverter credentialToCloudCredentialConverter, Clock clock, ProxyConfigService proxyConfigService,
             @Value("${environment.existing.ssh.key.update.support:}") Set<String> supportedExistingSshKeyUpdateProviders,
-            @Value("${environment.raw.ssh.key.update.support:}") Set<String> supportedRawSshKeyUpdateProviders) {
+            @Value("${environment.raw.ssh.key.update.support:}") Set<String> supportedRawSshKeyUpdateProviders,
+            EncryptionProfileService encryptionProfileService) {
         this.credentialService = credentialService;
         this.networkService = networkService;
         this.cloudPlatformConnectors = cloudPlatformConnectors;
@@ -72,6 +77,7 @@ public class EnvironmentResourceService {
         this.proxyConfigService = proxyConfigService;
         this.supportedExistingSshKeyUpdateProviders = supportedExistingSshKeyUpdateProviders;
         this.supportedRawSshKeyUpdateProviders = supportedRawSshKeyUpdateProviders;
+        this.encryptionProfileService = encryptionProfileService;
     }
 
     public Credential getCredentialFromRequest(CredentialAwareEnvRequest request, String accountId) {
@@ -221,5 +227,18 @@ public class EnvironmentResourceService {
 
     public boolean isRawSshKeyUpdateSupported(Environment environment) {
         return supportedRawSshKeyUpdateProviders.stream().anyMatch(s -> s.equalsIgnoreCase(environment.getCloudPlatform()));
+    }
+
+    // TODO: If the default encryption profile with name cdp-default is not found, create and assign the default encryption profile.
+    public Optional<EncryptionProfile> getEncryptionProfile(String encryptionProfileName, String accountId) {
+        EncryptionProfile encryptionProfile = null;
+        if (StringUtils.isNotEmpty(encryptionProfileName)) {
+            try {
+                encryptionProfile = encryptionProfileService.getByNameAndAccountId(encryptionProfileName, accountId);
+            } catch (NotFoundException e) {
+                LOGGER.error("No EncryptionProfile found with name {} in the account {}.", encryptionProfileName, accountId);
+            }
+        }
+        return Optional.ofNullable(encryptionProfile);
     }
 }

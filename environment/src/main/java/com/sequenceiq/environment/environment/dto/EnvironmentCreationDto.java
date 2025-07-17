@@ -77,6 +77,8 @@ public class EnvironmentCreationDto {
 
     private final EnvironmentType environmentType;
 
+    private final String encryptionProfileName;
+
     private EnvironmentCreationDto(Builder builder) {
         name = builder.name;
         description = builder.description;
@@ -108,6 +110,7 @@ public class EnvironmentCreationDto {
         dataServices = builder.dataServices;
         creatorClient = builder.creatorClient;
         environmentType = builder.environmentType;
+        encryptionProfileName = builder.encryptionProfileName;
     }
 
     public static Builder builder() {
@@ -223,6 +226,10 @@ public class EnvironmentCreationDto {
         return environmentType;
     }
 
+    public String getEncryptionProfileName() {
+        return encryptionProfileName;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentCreationDto{" +
@@ -293,6 +300,8 @@ public class EnvironmentCreationDto {
         private String creatorClient;
 
         private EnvironmentType environmentType;
+
+        private String encryptionProfileName;
 
         private Builder() {
         }
@@ -429,6 +438,11 @@ public class EnvironmentCreationDto {
 
         public Builder withEnvironmentType(EnvironmentType environmentType) {
             this.environmentType = environmentType;
+            return this;
+        }
+
+        public Builder withEncryptionProfileName(String encryptionProfileName) {
+            this.encryptionProfileName = encryptionProfileName;
             return this;
         }
 

@@ -25,6 +25,7 @@ import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.credential.domain.Credential;
+import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
@@ -176,6 +177,9 @@ public class EnvironmentCreationService {
         environment.setCredential(credential);
         Optional<ProxyConfig> proxyConfig = environmentResourceService.getProxyConfig(creationDto.getProxyConfigName(), creationDto.getAccountId());
         proxyConfig.ifPresent(environment::setProxyConfig);
+        Optional<EncryptionProfile> encryptionProfile = environmentResourceService
+                .getEncryptionProfile(creationDto.getEncryptionProfileName(), creationDto.getAccountId());
+        encryptionProfile.ifPresent(environment::setEncryptionProfile);
         environment.setCloudPlatform(credential.getCloudPlatform());
         environment.setAuthentication(authenticationDtoConverter.dtoToAuthentication(creationDto.getAuthentication()));
         environment.setEnvironmentServiceVersion(environmentServiceVersion);

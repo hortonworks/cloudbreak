@@ -11,7 +11,7 @@ public class EncryptionProfileModelDescription {
 
     public static final String TLS_CIPHER_SUITES = "A map of TLS versions to their corresponding sets of cipher suites.";
 
-    public static final String STATUS = "Status of the encryption profile, represented as a string (e.g. 'DEFAULT', 'CUSTOM')";
+    public static final String STATUS = "Status of the encryption profile, represented as a string (e.g. 'DEFAULT', 'USER_MANAGED')";
 
     private EncryptionProfileModelDescription() {
     }

@@ -38,6 +38,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRe
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
+import com.sequenceiq.environment.encryptionprofile.service.EncryptionProfileService;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentAuthentication;
 import com.sequenceiq.environment.network.NetworkService;
@@ -66,6 +67,9 @@ class EnvironmentResourceServiceTest {
 
     @MockBean
     private ProxyConfigService proxyConfigService;
+
+    @MockBean
+    private EncryptionProfileService encryptionProfileService;
 
     @Inject
     private EnvironmentResourceService environmentResourceServiceUnderTest;

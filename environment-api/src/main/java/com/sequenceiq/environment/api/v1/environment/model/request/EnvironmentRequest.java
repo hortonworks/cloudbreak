@@ -134,6 +134,9 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     @Schema(description = EnvironmentModelDescription.ENVIRONMENT_TYPE)
     private String environmentType;
 
+    @Schema(description = EnvironmentModelDescription.ENCRYPTION_PROFILE_NAME)
+    private String encryptionProfileName;
+
     public AttachedFreeIpaRequest getFreeIpa() {
         return freeIpa;
     }
@@ -355,6 +358,14 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     public void setEnvironmentType(String environmentType) {
         this.environmentType = environmentType;
+    }
+
+    public String getEncryptionProfileName() {
+        return encryptionProfileName;
+    }
+
+    public void setEncryptionProfileName(String encryptionProfileName) {
+        this.encryptionProfileName = encryptionProfileName;
     }
 
     @Override
