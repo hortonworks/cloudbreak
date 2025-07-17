@@ -20,6 +20,12 @@ public class OpenSshPublicKeyValidator {
         } catch (Exception e) {
             String errorMessage = String.format("Could not validate publickey certificate [certificate: '%s'], detailed message: %s",
                     publicKey, e.getMessage());
+            if (e.getCause() instanceof IllegalArgumentException) {
+                errorMessage = String.format("The provided public key ['%s'] is not valid, possibly due to insufficient strength. Cause: %s. " +
+                                "Please create new SSH keys for the environment by editing 'Root SSH' on the environment's Summary page " +
+                                "or with this command: 'cdp environments update-ssh-key'",
+                        publicKey, e.getCause().getMessage());
+            }
             LOGGER.info(errorMessage, e);
             throw new BadRequestException(errorMessage, e);
         }
