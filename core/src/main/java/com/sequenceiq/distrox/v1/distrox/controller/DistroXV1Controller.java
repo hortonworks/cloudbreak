@@ -833,6 +833,12 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DATAHUB_VERTICAL_SCALING)
+    public FlowIdentifier diskUpdateByCrn(@ResourceCrn String crn, DiskUpdateRequest updateRequest) {
+        return stackOperationService.stackUpdateDisks(NameOrCrn.ofCrn(crn), updateRequest, ThreadBasedUserCrnProvider.getAccountId());
+    }
+
+    @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DATAHUB_VERTICAL_SCALING)
     public FlowIdentifier addVolumesByStackName(@ResourceName String name, StackAddVolumesRequest addVolumesRequest) {
         return stackOperations.putAddVolumes(NameOrCrn.ofName(name), addVolumesRequest, ThreadBasedUserCrnProvider.getAccountId());
@@ -840,14 +846,19 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DATAHUB_VERTICAL_SCALING)
-    public FlowIdentifier diskUpdateByCrn(@ResourceCrn String crn, DiskUpdateRequest updateRequest) {
-        return stackOperationService.stackUpdateDisks(NameOrCrn.ofCrn(crn), updateRequest, ThreadBasedUserCrnProvider.getAccountId());
+    public FlowIdentifier addVolumesByStackCrn(@ResourceCrn String crn, StackAddVolumesRequest addVolumesRequest) {
+        return stackOperations.putAddVolumes(NameOrCrn.ofCrn(crn), addVolumesRequest, ThreadBasedUserCrnProvider.getAccountId());
+    }
+
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DATAHUB_VERTICAL_SCALING)
+    public FlowIdentifier updateRootVolumeByDatahubName(@ResourceName String name, DiskUpdateRequest rootDiskVolumesRequest) throws Exception {
+        return stackOperationService.rootVolumeDiskUpdate(NameOrCrn.ofName(name), rootDiskVolumesRequest, ThreadBasedUserCrnProvider.getAccountId());
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DATAHUB_VERTICAL_SCALING)
-    public FlowIdentifier addVolumesByStackCrn(@ResourceCrn String crn, StackAddVolumesRequest addVolumesRequest) {
-        return stackOperations.putAddVolumes(NameOrCrn.ofCrn(crn), addVolumesRequest, ThreadBasedUserCrnProvider.getAccountId());
+    public FlowIdentifier updateRootVolumeByDatahubCrn(@ResourceCrn String crn, DiskUpdateRequest rootDiskVolumesRequest) throws Exception {
+        return stackOperationService.rootVolumeDiskUpdate(NameOrCrn.ofCrn(crn), rootDiskVolumesRequest, ThreadBasedUserCrnProvider.getAccountId());
     }
 
     @Override
@@ -865,17 +876,6 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
         StackDatabaseServerCertificateStatusV4Request stackDatabaseServerCertificateStatusV4Request = new StackDatabaseServerCertificateStatusV4Request();
         stackDatabaseServerCertificateStatusV4Request.setCrns(request.getCrns());
         return stackOperationService.listDatabaseServersCertificateStatus(stackDatabaseServerCertificateStatusV4Request, userCrn);
-    }
-
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DATAHUB_VERTICAL_SCALING)
-    public FlowIdentifier updateRootVolumeByDatahubName(@ResourceName String name, DiskUpdateRequest rootDiskVolumesRequest) throws Exception {
-        return stackOperationService.rootVolumeDiskUpdate(NameOrCrn.ofName(name), rootDiskVolumesRequest, ThreadBasedUserCrnProvider.getAccountId());
-    }
-
-    @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DATAHUB_VERTICAL_SCALING)
-    public FlowIdentifier updateRootVolumeByDatahubCrn(@ResourceCrn String crn, DiskUpdateRequest rootDiskVolumesRequest) throws Exception {
-        return stackOperationService.rootVolumeDiskUpdate(NameOrCrn.ofCrn(crn), rootDiskVolumesRequest, ThreadBasedUserCrnProvider.getAccountId());
     }
 
     @Override

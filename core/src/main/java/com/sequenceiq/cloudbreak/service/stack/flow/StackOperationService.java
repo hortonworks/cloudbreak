@@ -593,12 +593,19 @@ public class StackOperationService {
         if (repairValidationResult.isError()) {
             throw new BadRequestException(String.join(" ", repairValidationResult.getError().getValidationErrors()));
         }
-        rootDiskValidationService.validateRootDiskResourcesForGroupAndUpdateStackTemplate(stack, updateRequest);
-        List<String> discoveryFqdnList = stack.getAllAvailableInstances().stream()
+        rootDiskValidationService.validateRootDiskResourcesForGroup(
+                stack,
+                updateRequest.getGroup(),
+                updateRequest.getVolumeType(),
+                updateRequest.getSize()
+        );
+        List<String> discoveryFqdnList = stack.getAllAvailableAndProviderDeletedInstances()
+                .stream()
                 .filter(instanceMetadataView -> instanceMetadataView.getInstanceGroupName().equals(updateRequest.getGroup()))
-                .map(InstanceMetadataView::getDiscoveryFQDN).toList();
+                .map(InstanceMetadataView::getDiscoveryFQDN)
+                .toList();
         Map<String, List<String>> updatedNodesMap = Map.of(updateRequest.getGroup(), discoveryFqdnList);
-        return flowManager.triggerRootVolumeUpdateFlow(stack.getId(), updatedNodesMap);
+        return flowManager.triggerRootVolumeUpdateFlow(stack.getId(), updatedNodesMap, updateRequest);
     }
 
     public FlowIdentifier triggerSetDefaultJavaVersion(NameOrCrn nameOrCrn, String accountId, SetDefaultJavaVersionRequest request) {

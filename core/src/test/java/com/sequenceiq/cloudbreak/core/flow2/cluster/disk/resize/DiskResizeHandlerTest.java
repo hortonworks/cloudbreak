@@ -21,7 +21,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -81,12 +80,14 @@ public class DiskResizeHandlerTest {
         Cluster cluster = mock(Cluster.class);
         doReturn(cluster).when(stack).getCluster();
         String selector = DISK_RESIZE_HANDLER_EVENT.selector();
-        DiskUpdateRequest diskUpdateRequest = mock(DiskUpdateRequest.class);
-        diskUpdateRequest.setVolumeType("GP3");
-        diskUpdateRequest.setGroup("compute");
-        diskUpdateRequest.setSize(500);
         List<Volume> volumesToUpdate = List.of(mock(Volume.class));
-        handlerRequest = new DiskResizeHandlerRequest(selector, STACK_ID, "compute", diskUpdateRequest, volumesToUpdate);
+        handlerRequest = new DiskResizeHandlerRequest(
+                selector,
+                STACK_ID,
+                "compute",
+                "GP3",
+                500,
+                volumesToUpdate);
     }
 
     @Test
@@ -94,7 +95,13 @@ public class DiskResizeHandlerTest {
         Selectable response = underTest.doAccept(new HandlerEvent<>(new Event<>(handlerRequest)));
         assertEquals(DiskResizeEvent.DISK_RESIZE_FINISHED_EVENT.event(), response.getSelector());
         assertEquals(STACK_ID, response.getResourceId());
-        verify(diskUpdateService, times(1)).updateDiskTypeAndSize(handlerRequest.getDiskUpdateRequest(), handlerRequest.getVolumesToUpdate(), STACK_ID);
+        verify(diskUpdateService, times(1)).updateDiskTypeAndSize(
+                handlerRequest.getInstanceGroup(),
+                handlerRequest.getVolumeType(),
+                handlerRequest.getSize(),
+                handlerRequest.getVolumesToUpdate(),
+                STACK_ID
+        );
     }
 
     @Test

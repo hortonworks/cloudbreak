@@ -33,7 +33,13 @@ public class DiskUpdateController implements DiskUpdateEndpoint {
     public FlowIdentifier updateDiskTypeAndSize(DiskModificationRequest diskModificationRequest) throws Exception {
         DiskUpdateRequest diskUpdateRequest = diskModificationRequest.getDiskUpdateRequest();
         List<Volume> volumesToUpdate = diskModificationRequest.getVolumesToUpdate();
-        return diskUpdateService.resizeDisks(diskModificationRequest.getStackId(), diskUpdateRequest.getGroup(), diskUpdateRequest, volumesToUpdate);
+        return diskUpdateService.resizeDisks(
+                diskModificationRequest.getStackId(),
+                diskUpdateRequest.getGroup(),
+                diskUpdateRequest.getVolumeType(),
+                diskUpdateRequest.getSize(),
+                volumesToUpdate
+        );
     }
 
     @Override

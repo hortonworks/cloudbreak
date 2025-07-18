@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes;
+package com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.actions;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.ADD_VOLUMES_CM_CONFIGURATION_HANDLER_EVENT;
@@ -64,7 +64,6 @@ public class AddVolumesActions {
             @Override
             protected void doExecute(CommonContext ctx, AddVolumesRequest payload, Map<Object, Object> variables) {
                 Long stackId = payload.getResourceId();
-                String instanceGroup = payload.getInstanceGroup();
                 AddVolumesValidateEvent handlerRequest = new AddVolumesValidateEvent(stackId, payload.getNumberOfDisks(), payload.getType(),
                         payload.getSize(), payload.getCloudVolumeUsageType(), payload.getInstanceGroup());
                 sendEvent(ctx, ADD_VOLUMES_VALIDATE_HANDLER_EVENT.event(), handlerRequest);
@@ -163,7 +162,7 @@ public class AddVolumesActions {
                 Long stackId = payload.getResourceId();
                 LOGGER.debug("Adding volumes for stack {} successfully done!", stackId);
                 stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE,
-                        "Finished adding additional block storages in stack " + stackId);
+                        "Finished adding additional block storages");
                 flowMessageService.fireEventAndLog(stackId,
                         AVAILABLE.name(),
                         CLUSTER_ADDED_VOLUMES,

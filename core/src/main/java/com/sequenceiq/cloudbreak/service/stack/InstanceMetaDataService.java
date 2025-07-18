@@ -515,6 +515,10 @@ public class InstanceMetaDataService {
         return repository.countStoppedForStack(stackId) > 0;
     }
 
+    public boolean anyInvalidMetadataForVerticalScaleInGroup(Long stackId, String group) {
+        return repository.countInvalidMetadataForVerticalScaleInGroup(stackId, group) > 0;
+    }
+
     public Optional<InstanceMetaData> findByHostname(Long stackId, String hostName) {
         return repository.findHostInStack(stackId, hostName);
     }

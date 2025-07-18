@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
@@ -204,6 +205,7 @@ class ReactorFlowManagerTest {
         underTest.triggerDeleteVolumes(STACK_ID, new StackDeleteVolumesRequest());
         DiskUpdateRequest diskUpdateRequest = new DiskUpdateRequest();
         diskUpdateRequest.setGroup("test");
+        diskUpdateRequest.setDiskType(DiskType.ADDITIONAL_DISK);
         underTest.triggerStackUpdateDisks(stackDto, diskUpdateRequest);
         underTest.triggerSecretRotation(STACK_ID, "CRN", Lists.newArrayList(), RotationFlowExecutionType.ROTATE, null);
         underTest.triggerInstanceMetadataUpdate(stackDto, InstanceMetadataUpdateType.IMDS_HTTP_TOKEN_REQUIRED);
@@ -372,6 +374,7 @@ class ReactorFlowManagerTest {
         doReturn(1L).when(stackDto).getId();
         DiskUpdateRequest diskUpdateRequest = mock(DiskUpdateRequest.class);
         doReturn("TEST").when(diskUpdateRequest).getGroup();
+        doReturn(DiskType.ADDITIONAL_DISK).when(diskUpdateRequest).getDiskType();
         ClusterView clusterView = mock(ClusterView.class);
         doReturn(clusterView).when(stackDto).getCluster();
         underTest.triggerStackUpdateDisks(stackDto, diskUpdateRequest);
@@ -410,8 +413,13 @@ class ReactorFlowManagerTest {
 
     @Test
     void testTriggerRootVolumeUpdateFlow() {
+        DiskUpdateRequest diskUpdateRequest = new DiskUpdateRequest();
+        diskUpdateRequest.setDiskType(DiskType.ADDITIONAL_DISK);
+        diskUpdateRequest.setGroup("executor");
+        diskUpdateRequest.setVolumeType("gp2");
+        diskUpdateRequest.setSize(100);
         Map<String, List<String>> updatedNodesMap = Map.of();
-        underTest.triggerRootVolumeUpdateFlow(1L, updatedNodesMap);
+        underTest.triggerRootVolumeUpdateFlow(1L, updatedNodesMap, diskUpdateRequest);
         ArgumentCaptor<CoreRootVolumeUpdateTriggerEvent> eventCaptor = ArgumentCaptor.forClass(CoreRootVolumeUpdateTriggerEvent.class);
         verify(reactorNotifier).notify(eq(1L), eq(FlowChainTriggers.CORE_ROOT_VOLUME_UPDATE_TRIGGER_EVENT), eventCaptor.capture());
         assertEquals(1L, eventCaptor.getValue().getResourceId());

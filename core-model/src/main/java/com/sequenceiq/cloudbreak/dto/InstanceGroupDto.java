@@ -35,6 +35,12 @@ public class InstanceGroupDto {
                 .collect(Collectors.toList());
     }
 
+    public List<InstanceMetadataView> getNotTerminateAndNotZombieInstanceMetaData() {
+        return instanceMetadataViews.stream()
+                .filter(metaData -> !metaData.isTerminated() && !metaData.isZombie())
+                .collect(Collectors.toList());
+    }
+
     public List<InstanceMetadataView> getNotDeletedInstanceMetaData() {
         return instanceMetadataViews.stream()
                 .filter(metaData -> !metaData.isTerminated() && !metaData.isDeletedOnProvider())

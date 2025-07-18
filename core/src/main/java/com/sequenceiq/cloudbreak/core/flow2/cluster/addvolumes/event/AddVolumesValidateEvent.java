@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.ADD_VOLUMES_VALIDATE_HANDLER_EVENT;
 
+import java.util.Objects;
+
 import jakarta.annotation.Nonnull;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -57,5 +59,26 @@ public class AddVolumesValidateEvent extends StackEvent {
 
     public CloudVolumeUsageType getCloudVolumeUsageType() {
         return cloudVolumeUsageType;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        AddVolumesValidateEvent that = (AddVolumesValidateEvent) o;
+        return Objects.equals(instanceGroup, that.instanceGroup)
+                && Objects.equals(numberOfDisks, that.numberOfDisks)
+                && Objects.equals(type, that.type)
+                && Objects.equals(size, that.size)
+                && cloudVolumeUsageType == that.cloudVolumeUsageType;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(instanceGroup, numberOfDisks, type, size, cloudVolumeUsageType);
     }
 }
