@@ -3,6 +3,9 @@ package com.sequenceiq.cloudbreak.service.environment.credential;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.security.Security;
+
+import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -126,6 +129,25 @@ class OpenSshPublicKeyValidatorTest {
                         ---- END SSH2 PUBLIC KEY ----""", false
         ));
         assertThat(badRequestException).hasMessageEndingWith("detailed message: Corrupt or unknown public key file format");
+    }
+
+    @Test
+    public void rsaPublicKeyWithInsufficientStrengthWillFailWithBcFipsProvider() {
+        Security.removeProvider("SunRsaSign");
+        Security.addProvider(new BouncyCastleFipsProvider());
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> underTest.validate(
+                "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC1jlaUF4QDFeB5iOmla9f53gJawrhLgB4" +
+                        "UuGJMwbDOoqBpIHDq2L3Muf9vCAz18LjvDiBt1NvbqK8w1ZJYcUh4IS+grwCs439wy3aIfs" +
+                        "5Lgm29/NVyM4QrJFoyySf2lMTnymVxkzYS1X6Fd47nJnDJvF4RRZmzzUvVb9+pAjnk8Q/Ux" +
+                        "B9lqBwKsg6w0GJ9i2XfLMpRMxdE5HTRmE9X+3v0vjw0M1FnEBBZB5gj7pS8irUUVrfawBE" +
+                        "SepzeDrytiaPvB5EZmfIFd5Xb0UltAPPvRoGSqnNfnc/z71hYveAUwf4926H2lposa7Q4RQ" +
+                        "unQPFNGnhzq5yZZIZFiiVu7K5VWmNt4xwMACvKL1YLHKbd7ps+hfDZ/p7Xw7IhKhKoj+21l" +
+                        "leH3//i/xXe4Ft8rAFMTksHAacpapXrkQLfeDUcIHt374J4j1BzSvK04rwSOQA3wLrLfWXb" +
+                        "LZhDPcYVbTZRZvWHvJDDa+u5xEKqLgssCpmRqUTKsJ7zmYxJKZfxCk= cloudbreak", false
+        ));
+        assertThat(badRequestException).hasMessageEndingWith("is not valid, possibly due to insufficient strength. " +
+                "Cause: RSA modulus has a small prime factor. Please create new SSH keys for the environment by editing 'Root SSH' on the " +
+                "environment's Summary page or with this command: 'cdp environments update-ssh-key'");
     }
 
 }
