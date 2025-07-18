@@ -394,6 +394,13 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
         environmentRepository.updateRemoteEnvironmentCrn(accountId, environmentCrn, remoteEnvironmentCrn);
     }
 
+    public void validateCancelCrossRealmSetup() {
+    }
+
+    public void removeRemoteEnvironmentCrn(String environmentCrn) {
+        environmentRepository.removeRemoteEnvironmentCrn(environmentCrn);
+    }
+
     public void assignEnvironmentAdminRole(String userCrn, String environmentCrn) {
         try {
             grpcUmsClient.assignResourceRole(userCrn,

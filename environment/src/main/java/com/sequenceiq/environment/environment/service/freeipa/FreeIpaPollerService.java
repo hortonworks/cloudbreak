@@ -145,6 +145,10 @@ public class FreeIpaPollerService {
         }
     }
 
+    public void waitForCrossRealmTrustCancel() {
+        // freeipa cancel flow call comes here
+    }
+
     public void waitForCrossRealmFinish(Long envId, String envCrn, FinishSetupCrossRealmTrustRequest finishCrossRealmTrustRequest) {
         FinishSetupCrossRealmTrustResponse response = freeIpaService.crossRealmFinish(envCrn, finishCrossRealmTrustRequest);
         if (response.getFlowIdentifier() != null) {

@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.environment.api.v1.environment.model.response.SetupCrossRealmTrustResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.CancelCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupCrossRealmTrustResponse;
 
 @Component
@@ -17,6 +18,12 @@ public class EnvironmentHybridConverter {
 
     public FinishSetupCrossRealmTrustResponse convertToFinishCrossRealmTrustResponse(FlowIdentifier source) {
         FinishSetupCrossRealmTrustResponse response = new FinishSetupCrossRealmTrustResponse();
+        response.setFlowIdentifier(source);
+        return response;
+    }
+
+    public CancelCrossRealmTrustResponse convertToCancelCrossRealmTrustResponse(FlowIdentifier source) {
+        CancelCrossRealmTrustResponse response = new CancelCrossRealmTrustResponse();
         response.setFlowIdentifier(source);
         return response;
     }

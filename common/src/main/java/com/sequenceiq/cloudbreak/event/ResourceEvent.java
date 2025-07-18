@@ -803,6 +803,12 @@ public enum ResourceEvent {
     ENVIRONMENT_SETUP_TRUST_VALIDATION_FAILED("environment.setup.cross.realm.trust.validation.failed"),
     ENVIRONMENT_SETUP_TRUST_FAILED("environment.setup.cross.realm.trust.failed"),
 
+    ENVIRONMENT_CANCEL_TRUST_VALIDATION_STARTED("environment.cancel.cross.realm.trust.validation.started"),
+    ENVIRONMENT_CANCEL_TRUST_STARTED("environment.cancel.cross.realm.trust.started"),
+    ENVIRONMENT_CANCEL_TRUST_FINISHED("environment.cancel.cross.realm.trust.finished"),
+    ENVIRONMENT_CANCEL_TRUST_VALIDATION_FAILED("environment.cancel.cross.realm.trust.validation.failed"),
+    ENVIRONMENT_CANCEL_TRUST_FAILED("environment.cancel.cross.realm.trust.failed"),
+
     ENVIRONMENT_SETUP_FINISH_TRUST_VALIDATION_STARTED("environment.setup.finish.cross.realm.trust.validation.started"),
     ENVIRONMENT_SETUP_FINISH_TRUST_VALIDATION_FAILED("environment.setup.finish.cross.realm.trust.validation.failed"),
     ENVIRONMENT_SETUP_FINISH_TRUST_STARTED("environment.setup.finish.cross.realm.trust.started"),

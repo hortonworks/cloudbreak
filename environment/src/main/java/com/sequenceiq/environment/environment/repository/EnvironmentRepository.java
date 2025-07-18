@@ -193,4 +193,9 @@ public interface EnvironmentRepository extends AccountAwareResourceRepository<En
             @Param("accountId") String accountId,
             @Param("environmentCrn") String environmentCrn,
             @Param("remoteEnvironmentCrn") String remoteEnvironmentCrn);
+
+    @Modifying
+    @Query("UPDATE Environment e SET e.remoteEnvironmentCrn = null " +
+            "WHERE e.resourceCrn = :environmentCrn AND e.archived = false")
+    void removeRemoteEnvironmentCrn(@Param("environmentCrn") String environmentCrn);
 }

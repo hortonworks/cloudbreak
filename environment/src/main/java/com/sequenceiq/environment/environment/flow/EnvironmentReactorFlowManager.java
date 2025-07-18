@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_ENVIRONMENT_INITIALIZATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.chain.FlowChainTriggers.ENV_DELETE_CLUSTERS_TRIGGER_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_FREEIPA_DELETE_EVENT;
+import static com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelStateSelectors.TRUST_CANCEL_VALIDATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupStateSelectors.TRUST_SETUP_VALIDATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishStateSelectors.TRUST_SETUP_FINISH_VALIDATION_EVENT;
 
@@ -34,6 +35,7 @@ import com.sequenceiq.environment.environment.flow.externalizedcluster.create.ev
 import com.sequenceiq.environment.environment.flow.externalizedcluster.create.event.ExternalizedComputeClusterCreationStateSelectors;
 import com.sequenceiq.environment.environment.flow.externalizedcluster.reinitialization.event.ExternalizedComputeClusterReInitializationEvent;
 import com.sequenceiq.environment.environment.flow.externalizedcluster.reinitialization.event.ExternalizedComputeClusterReInitializationStateSelectors;
+import com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelEvent;
 import com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupEvent;
 import com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishEvent;
 import com.sequenceiq.environment.environment.flow.loadbalancer.event.LoadBalancerUpdateEvent;
@@ -96,7 +98,7 @@ public class EnvironmentReactorFlowManager {
 
     public FlowIdentifier triggerSetupCrossRealmTrust(long envId, String accountId, String envName, String userCrn, String envCrn,
         SetupCrossRealmTrustRequest request) {
-        LOGGER.info("Environment cross realm prepare flow triggered.");
+        LOGGER.info("Environment cross realm setup flow triggered.");
         EnvironmentCrossRealmTrustSetupEvent environmentCrossRealmTrustSetupEvent =
                 EnvironmentCrossRealmTrustSetupEvent.builder()
                         .withAccepted(new Promise<>())
@@ -115,8 +117,22 @@ public class EnvironmentReactorFlowManager {
         return sendEvent(environmentCrossRealmTrustSetupEvent, userCrn);
     }
 
+    public FlowIdentifier triggerCancelCrossRealmTrust(long envId, String envName, String userCrn, String envCrn) {
+        LOGGER.info("Environment cross realm cancel flow triggered.");
+        EnvironmentCrossRealmTrustCancelEvent environmentCrossRealmTrustCancelEvent =
+                EnvironmentCrossRealmTrustCancelEvent.builder()
+                        .withAccepted(new Promise<>())
+                        .withSelector(TRUST_CANCEL_VALIDATION_EVENT.selector())
+                        .withResourceId(envId)
+                        .withResourceName(envName)
+                        .withResourceCrn(envCrn)
+                        .build();
+
+        return sendEvent(environmentCrossRealmTrustCancelEvent, userCrn);
+    }
+
     public FlowIdentifier triggerSetupFinishCrossRealmTrust(long envId, String envName, String userCrn, String envCrn) {
-        LOGGER.info("Environment cross realm finish flow triggered.");
+        LOGGER.info("Environment cross realm setup finish flow triggered.");
         EnvironmentCrossRealmTrustSetupFinishEvent environmentCrossRealmTrustSetupFinishEvent =
                 EnvironmentCrossRealmTrustSetupFinishEvent.builder()
                         .withAccepted(new Promise<>())

@@ -13,10 +13,12 @@ import jakarta.ws.rs.core.MediaType;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
+import com.sequenceiq.environment.api.v1.environment.model.request.CancelCrossRealmTrustRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.FinishSetupCrossRealmTrustRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.SetupCrossRealmTrustRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.SetupCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.CancelCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupCrossRealmTrustResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -68,4 +70,24 @@ public interface EnvironmentHybridEndpoint {
     FinishSetupCrossRealmTrustResponse finishSetupByCrn(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
             @Valid FinishSetupCrossRealmTrustRequest request);
+
+    @POST
+    @Path("/cross_realm_trust/name/{name}/cancel")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = FreeIpaOperationDescriptions.CANCEL_CROSS_REALM_TRUST, description = ENVIRONMENT_NOTES,
+            operationId = "cancelCrossRealmTrustV1ByName", responses = @ApiResponse(responseCode = "200", description = "successful operation",
+            useReturnTypeSchema = true))
+    CancelCrossRealmTrustResponse cancelByName(
+            @PathParam("name") String environmentName,
+            @Valid CancelCrossRealmTrustRequest request);
+
+    @POST
+    @Path("/cross_realm_trust/crn/{crn}/cancel")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = FreeIpaOperationDescriptions.CANCEL_CROSS_REALM_TRUST, description = ENVIRONMENT_NOTES,
+            operationId = "cancelCrossRealmTrustV1ByCrn", responses = @ApiResponse(responseCode = "200", description = "successful operation",
+            useReturnTypeSchema = true))
+    CancelCrossRealmTrustResponse cancelByCrn(
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
+            @Valid CancelCrossRealmTrustRequest request);
 }

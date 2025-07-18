@@ -121,6 +121,11 @@ public enum EnvironmentStatus {
     TRUST_SETUP_FAILED("Cross Realm Trust setup failed"),
     TRUST_SETUP_FINISH_REQUIRED("Cross Realm Trust setup finish required"),
 
+    TRUST_CANCEL_VALIDATION_IN_PROGRESS("Cross Realm Trust cancel validation in progress"),
+    TRUST_CANCEL_VALIDATION_FAILED("Cross Realm Trust cancel validation failed"),
+    TRUST_CANCEL_IN_PROGRESS("Cross Realm Trust cancel in progress"),
+    TRUST_CANCEL_FAILED("Cross Realm Trust cancel failed"),
+
     TRUST_SETUP_FINISH_VALIDATION_IN_PROGRESS("Cross Realm Trust setup finish validation in progress"),
     TRUST_SETUP_FINISH_VALIDATION_FAILED("Cross Realm Trust setup finish validation failed"),
     TRUST_SETUP_FINISH_IN_PROGRESS("Cross Realm Trust setup finish in progress"),

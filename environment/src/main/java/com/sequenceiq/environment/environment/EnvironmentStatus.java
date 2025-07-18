@@ -195,6 +195,17 @@ public enum EnvironmentStatus {
     TRUST_SETUP_FINISH_REQUIRED(
             com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.TRUST_SETUP_FINISH_REQUIRED),
 
+    // Cross Realm Trust cancel FreeIPA
+    TRUST_CANCEL_VALIDATION_IN_PROGRESS(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.TRUST_CANCEL_VALIDATION_IN_PROGRESS),
+    TRUST_CANCEL_VALIDATION_FAILED(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.TRUST_CANCEL_VALIDATION_FAILED),
+    TRUST_CANCEL_IN_PROGRESS(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.TRUST_CANCEL_IN_PROGRESS),
+    TRUST_CANCEL_FAILED(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.TRUST_CANCEL_FAILED),
+
+    // Cross Realm Trust status
     TRUST_SETUP_REQUIRED(
             com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.TRUST_SETUP_REQUIRED),
     TRUST_BROKEN(
